@@ -86,6 +86,16 @@ export const IDS = [
   'text.title.apply-layout-after-format',
   'text.fontsize.type-one-undo',
   'text.format-options.field-one-undo',
+  /* the product round (docs/PRODUCT.md 8.1) */
+  'text.link.detect-url',
+  'text.link.detect-email',
+  'text.select.double-click-address',
+  'text.select.shift-home-line',
+  'text.link.popover-apply-remove',
+  'text.format-options.padding-grid',
+  'text.format-options.remembers-section',
+  'text.autofit.shrink-on-overflow',
+  'text.find-replace.count-while-typing',
 ];
 
 const MARK_SEL = 'b, strong, i, em, u, s, [data-mark], a, span[style]';
@@ -1293,8 +1303,12 @@ export async function run(t) {
         await t.openRun(run);
         const before = await text(run);
         const sel = await t.selectWord(run, 1);
+        /* the link popover of the product round (docs/PRODUCT.md section 2 rank 19; build/b2.md R6):
+           its URL field is popover.link.url; the older ids stay for a build before it */
         const field = page
-          .locator('[data-control="run.link.href"], [data-control="dialog.link.url"]')
+          .locator(
+            '[data-control="popover.link.url"], [data-control="run.link.href"], [data-control="dialog.link.url"]',
+          )
           .first();
         if (useButton) await t.tailControl('toolbar.insertLink');
         else await t.press('Meta+k');
@@ -1827,7 +1841,9 @@ export async function run(t) {
       await t.typeHuman('Onboarding');
       const result = await t.pollUntil(
         async () =>
-          (await t.textOf('dialog.findReplace.result')) ?? (await t.textOf('dialog.findReplace')),
+          (await t.textOf('dialog.findReplace.count')) ??
+          (await t.textOf('dialog.findReplace.result')) ??
+          (await t.textOf('dialog.findReplace')),
         (r) => /[1-9]/.test(r ?? ''),
         6000,
       );
@@ -1853,11 +1869,16 @@ export async function run(t) {
       await t.press('Meta+Shift+h');
       await t.waitControl('dialog.findReplace.find', 6000);
       await t.clickControl('dialog.findReplace.find');
+      /* the dialog remembers the last query (the row before typed Onboarding): the field is
+         cleared before the new one, as a person does */
+      await t.press('Meta+a');
       await t.typeHuman('Kickoff');
       await t.press('Enter');
       const result = await t.pollUntil(
         async () =>
-          (await t.textOf('dialog.findReplace.result')) ?? (await t.textOf('dialog.findReplace')),
+          (await t.textOf('dialog.findReplace.count')) ??
+          (await t.textOf('dialog.findReplace.result')) ??
+          (await t.textOf('dialog.findReplace')),
         (r) => /[1-9]/.test(r ?? ''),
         6000,
       );
@@ -2001,7 +2022,7 @@ export async function run(t) {
         await t.clickAt(empty.x, empty.y);
         await t.tailControl('toolbar.layout');
         await t.waitControl('layout.apply.plate', 8000);
-        await t.clickControl(`layout.apply.${layout}`);
+        await t.pickLayout(`layout.apply.${layout}`);
         await t.pollUntil(
           async () => (await t.slideJson(L)).template,
           (l) => l === layout,
@@ -2353,4 +2374,613 @@ export async function run(t) {
     },
   );
   t.deck.textBoxes = [boxA.id, boxB.id];
+  await productRound(t);
+}
+
+/**
+ * The product round's rows (docs/PRODUCT.md section 2 ranks 9, 18 and 19, section 3.2, section 5,
+ * 8.1): link detection on a space and on Enter, the double click on an address, Shift+Home on a
+ * line, the link popover with Apply and Remove, the Format options padding grid and the remembered
+ * section, Shrink text on overflow and Find and replace counting while typing. B2 owns the text
+ * session, the popover and the panel; the rows read the marks, the stored block and the panel.
+ */
+async function productRound(t) {
+  const { page } = t;
+  const X = t.deck.textSlide ?? t.deck.titleSlide;
+  const MARKS = 'b, strong, i, em, u, s, [data-mark], a, span[style]';
+  const marksOf = (run) =>
+    page.evaluate(
+      ([r, sel]) => {
+        const el = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`);
+        if (!el) return [];
+        return [...el.querySelectorAll(sel)].map((m) => ({
+          tag: m.tagName.toLowerCase(),
+          mark: m.getAttribute('data-mark'),
+          text: m.textContent ?? '',
+          href: m.getAttribute('href') ?? m.getAttribute('data-href') ?? null,
+        }));
+      },
+      [run, MARKS],
+    );
+  const linkOf = (marks, host) =>
+    marks.find(
+      (m) => (m.tag === 'a' || m.mark === 'link' || m.href) && (m.href ?? '').includes(host),
+    ) ?? null;
+  const textOf = async (run) => ((await t.runInfo(run))?.text ?? '').replace(/ /g, ' ');
+  await t.clickCard(X);
+  await t.clearAll();
+  const LINK = await t
+    .setup('a text box for the link rows', 'block.insert through the window API', async () => {
+      const obj = await t.placeBlock(X, {
+        id: 'link-box',
+        type: 'text',
+        text: 'Visit the site for the terms',
+        pos: { x: 160, y: 640, w: 1100, h: 100 },
+      });
+      return { ok: Boolean(obj), observed: obj ? obj.id : 'none' };
+    })
+    .then(() => 'link-box');
+  const linkRun = async () => (await t.runsOfBlock(LINK))[0];
+
+  await t.step(
+    'text.link.detect-url',
+    'type generaltranslation.com then a space at the end of the box; Cmd+Z',
+    'the token is wrapped as a link to https://generaltranslation.com; one Cmd+Z removes the link and keeps the text',
+    async () => {
+      await t.clearAll();
+      const run = await linkRun();
+      await t.openRun(run);
+      await t.press('End');
+      await t.typeHuman(' generaltranslation.com');
+      await t.typeHuman(' ');
+      const marks = await t
+        .pollUntil(
+          () => marksOf(run),
+          (m) => linkOf(m, 'generaltranslation.com') !== null,
+          3000,
+        )
+        .catch(() => marksOf(run));
+      const link = linkOf(marks, 'generaltranslation.com');
+      const textAfter = await textOf(run);
+      await t.press('Meta+z');
+      await t.sleep(400);
+      const marksUndone = await marksOf(run);
+      const textUndone = await textOf(run);
+      await t.press('Escape');
+      await t.settled();
+      return {
+        ok:
+          link !== null &&
+          link.href === 'https://generaltranslation.com' &&
+          linkOf(marksUndone, 'generaltranslation.com') === null &&
+          textUndone.includes('generaltranslation.com'),
+        observed: `text "${textAfter.trim()}"; link ${link ? `"${link.text.trim()}" -> ${link.href}` : 'none'}; after Cmd+Z link ${linkOf(marksUndone, 'generaltranslation.com') ? 'still there' : 'gone'}, text "${textUndone.trim()}"`,
+      };
+    },
+  );
+  await t.step(
+    'text.link.detect-email',
+    'type an email address then Enter',
+    'the address is wrapped as a mailto: link',
+    async () => {
+      await t.clearAll();
+      const run = await linkRun();
+      await t.openRun(run);
+      await t.press('End');
+      await t.typeHuman(' kevin@generaltranslation.com');
+      await t.press('Enter');
+      const marks = await t
+        .pollUntil(
+          () => marksOf(run),
+          (m) => m.some((x) => (x.href ?? '').startsWith('mailto:')),
+          3000,
+        )
+        .catch(() => marksOf(run));
+      const link = marks.find((x) => (x.href ?? '').startsWith('mailto:')) ?? null;
+      /* the address and the line break leave with one Cmd+Z each, then Escape */
+      await t.press('Meta+z');
+      await t.press('Meta+z');
+      await t.press('Escape');
+      await t.settled();
+      return {
+        ok: link !== null && link.href === 'mailto:kevin@generaltranslation.com',
+        observed: `link ${link ? `"${link.text.trim()}" -> ${link.href}` : 'none'}; marks ${marks.map((m) => `${m.tag}:${m.text.trim()}`).join(', ') || 'none'}`,
+      };
+    },
+  );
+  await t.step(
+    'text.select.double-click-address',
+    'double click generaltranslation.com in the box',
+    'the whole address is selected',
+    async () => {
+      await t.clearAll();
+      const run = await linkRun();
+      const words = (await textOf(run)).trim().split(/\s+/);
+      let at = words.findIndex((w) => w.includes('generaltranslation.com'));
+      if (at < 0) {
+        await t.openRun(run);
+        await t.press('End');
+        await t.typeHuman(' generaltranslation.com');
+        await t.press('Escape');
+        await t.settled();
+        at = (await textOf(run))
+          .trim()
+          .split(/\s+/)
+          .findIndex((w) => w.includes('generaltranslation.com'));
+      }
+      await t.openRun(run);
+      const sel = await t.selectWord(run, at);
+      await t.press('Escape');
+      return {
+        ok: sel.trim() === 'generaltranslation.com',
+        observed: `word ${at}; selected "${sel}"`,
+      };
+    },
+  );
+  await t.step(
+    'text.select.shift-home-line',
+    'a three line paragraph in a narrow box; End; Shift+Home',
+    'the third line alone is selected',
+    async () => {
+      await t.clearAll();
+      const obj = await t.placeBlock(X, {
+        id: 'line-box',
+        type: 'text',
+        text: 'The renewal covers the three regions and the two new products for the whole of next year',
+        pos: { x: 1200, y: 120, w: 300, h: 160 },
+      });
+      if (!obj) return { ok: false, observed: 'the narrow box was not placed' };
+      const run = (await t.runsOfBlock('line-box'))[0];
+      const info = await t.runInfo(run);
+      await t.openRun(run);
+      /* End reaches the end of the visual line since the product round (docs/PRODUCT.md section 2
+         rank 18), so the caret goes to the end of the text first (Cmd+Down on macOS) */
+      await t.press('Meta+ArrowDown');
+      await t.press('End');
+      await t.press('Shift+Home');
+      const sel = (await t.selectionText()).replace(/ /g, ' ').trim();
+      const lastLine = await page.evaluate((r) => {
+        const el = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`);
+        if (!el) return null;
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        const chars = [];
+        let node;
+        while ((node = walker.nextNode())) {
+          if (node.parentElement?.closest('[data-prompt]')) continue;
+          const text = node.textContent ?? '';
+          for (let i = 0; i < text.length; i += 1) {
+            const range = document.createRange();
+            range.setStart(node, i);
+            range.setEnd(node, i + 1);
+            chars.push({ ch: text[i], top: Math.round(range.getBoundingClientRect().top) });
+          }
+        }
+        const tops = [...new Set(chars.map((c) => c.top))].sort((a, b) => a - b);
+        const last = tops[tops.length - 1];
+        return {
+          lines: tops.length,
+          text: chars
+            .filter((c) => c.top === last)
+            .map((c) => c.ch)
+            .join('')
+            .trim(),
+        };
+      }, run);
+      await t.press('Escape');
+      const s = await t.settled();
+      await t
+        .invoke('block.remove', { baseRevision: s.revision, slideId: X, blockId: 'line-box' })
+        .catch(() => undefined);
+      await t.settled();
+      return {
+        ok: (lastLine?.lines ?? 0) >= 3 && sel.length > 0 && sel === lastLine?.text,
+        observed: `${info?.lines ?? '?'} lines; Shift+Home selected "${sel}"; the last line reads "${lastLine?.text ?? '?'}"`,
+      };
+    },
+  );
+  await t.step(
+    'text.link.popover-apply-remove',
+    'select a word, Cmd+K; read the popover; type an address, Enter; click the linked word; Remove',
+    'the popover has the Link label, the URL field, Slides in this presentation, Apply and Remove; Enter applies; the chip has Change and Remove; Remove takes the link off',
+    async () => {
+      await t.clearAll();
+      const run = await linkRun();
+      await t.openRun(run);
+      const sel = await t.selectWord(run, 1);
+      await t.press('Meta+k');
+      const field = page
+        .locator(
+          '[data-control="popover.link.url"], [data-control="run.link.href"], [data-control="dialog.link.url"]',
+        )
+        .first();
+      await field.waitFor({ timeout: 6000 }).catch(() => undefined);
+      const facts = await page.evaluate(() => {
+        const q = (c) => document.querySelector(`[data-control="${c}"]`);
+        const popover = q('popover.link');
+        return {
+          popover: Boolean(popover),
+          label: /Link/.test(popover?.textContent ?? ''),
+          url: Boolean(q('popover.link.url')),
+          slide: Boolean(q('popover.link.slide')),
+          apply: Boolean(q('popover.link.apply')),
+          remove: Boolean(q('popover.link.remove')),
+          bare: Boolean(q('run.link.href')),
+          selectedShown: (popover?.textContent ?? '').includes('the'),
+        };
+      });
+      if (!facts.popover) {
+        await t.press('Escape');
+        await t.press('Escape');
+        return {
+          ok: false,
+          observed: `no popover.link; the bare field run.link.href ${facts.bare ? 'opened alone (audit-seller 19)' : 'did not open either'}`,
+        };
+      }
+      await field.click();
+      await t.typeHuman('https://example.com/terms');
+      await t.press('Enter');
+      const marks = await t
+        .pollUntil(
+          () => marksOf(run),
+          (m) => linkOf(m, 'example.com/terms') !== null,
+          4000,
+        )
+        .catch(() => marksOf(run));
+      const linked = linkOf(marks, 'example.com/terms');
+      let chip = { change: false, remove: false };
+      let removed = null;
+      if (linked) {
+        const word = await page.evaluate(
+          ([r, text]) => {
+            const el = document.querySelector(
+              `.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"] a`,
+            );
+            if (!el) return null;
+            const rect = el.getBoundingClientRect();
+            return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2, text };
+          },
+          [run, sel],
+        );
+        if (word) {
+          await t.clickAt(word.x, word.y);
+          await t.sleep(400);
+          chip = {
+            change: await t.visible('chip.link.change'),
+            remove: await t.visible('chip.link.remove'),
+          };
+          if (chip.remove) {
+            await t.clickControl('chip.link.remove');
+            removed = await t
+              .pollUntil(
+                () => marksOf(run),
+                (m) => linkOf(m, 'example.com/terms') === null,
+                4000,
+              )
+              .then(() => true)
+              .catch(() => false);
+          }
+        }
+      }
+      await t.press('Escape');
+      await t.clearAll();
+      await t.settled();
+      return {
+        ok:
+          facts.label &&
+          facts.url &&
+          facts.slide &&
+          facts.apply &&
+          facts.remove &&
+          linked !== null &&
+          chip.change &&
+          chip.remove &&
+          removed === true,
+        observed: `popover ${JSON.stringify(facts)}; selected "${sel}"; link ${linked ? linked.href : 'none'}; chip Change ${chip.change}, Remove ${chip.remove}; removed ${removed}`,
+      };
+    },
+  );
+
+  const FIT = await t
+    .setup('a text box for the fitting rows', 'block.insert through the window API', async () => {
+      const obj = await t.placeBlock(X, {
+        id: 'fit-box',
+        type: 'text',
+        text: 'Short',
+        pos: { x: 1200, y: 320, w: 360, h: 90 },
+      });
+      return { ok: Boolean(obj), observed: obj ? obj.id : 'none' };
+    })
+    .then(() => 'fit-box');
+  const closePanel = async () => {
+    if (await t.visible('panel.formatOptions.close'))
+      await t.clickControl('panel.formatOptions.close');
+    await t.sleep(200);
+  };
+  const sectionsState = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('[data-control="panel.formatOptions"] [data-section]')].map(
+        (el) => ({
+          id: el.getAttribute('data-section'),
+          open: !el.classList.contains('is-closed'),
+        }),
+      ),
+    );
+  await t.step(
+    'text.format-options.padding-grid',
+    'select the box, Format > Text fitting; read the Padding fields',
+    'one Padding head, Top, Bottom, Left, Right in two by two, the unit inside the field, labels at 12.5 px in ink-2',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(FIT);
+      await t.menuPath('format', 'format.textFitting');
+      await t.waitControl('panel.formatOptions', 6000);
+      await page
+        .locator('[data-control="panel.formatOptions"] [data-section="textFitting"]')
+        .waitFor({ timeout: 6000 })
+        .catch(() => undefined);
+      const facts = await page.evaluate(() => {
+        const section = document.querySelector(
+          '[data-control="panel.formatOptions"] [data-section="textFitting"]',
+        );
+        const sides = ['top', 'bottom', 'left', 'right'];
+        const fields = sides.map(
+          (s) =>
+            document.querySelector(`[data-control="formatOptions.padding.${s}"]`) ??
+            document.querySelector(`[data-control="formatOptions.textFitting.padding.${s}"]`),
+        );
+        const rects = fields.map((f) => (f ? f.getBoundingClientRect() : null));
+        const xs = [...new Set(rects.filter(Boolean).map((r) => Math.round(r.x / 8)))];
+        const ys = [...new Set(rects.filter(Boolean).map((r) => Math.round(r.y / 8)))];
+        const heads = [
+          ...(section?.querySelectorAll('.ts-fo-field-label, .ts-panel-head, label') ?? []),
+        ].map((el) => el.textContent?.trim() ?? '');
+        const paddingHeads = heads.filter((h) => /^Padding$/.test(h)).length;
+        const labels = [...(section?.querySelectorAll('.ts-fo-field-label') ?? [])].map((el) => {
+          const cs = getComputedStyle(el);
+          return { text: el.textContent?.trim(), size: parseFloat(cs.fontSize), color: cs.color };
+        });
+        const ink2 = (() => {
+          const probe = document.createElement('span');
+          probe.style.color = 'var(--pt-ink-2)';
+          document.body.appendChild(probe);
+          const c = getComputedStyle(probe).color;
+          probe.remove();
+          return c;
+        })();
+        const unitInside = fields
+          .filter(Boolean)
+          .some(
+            (f) =>
+              /px/.test(f.parentElement?.textContent ?? '') || f.getAttribute('data-unit') !== null,
+          );
+        const newIds = sides.filter((s) =>
+          document.querySelector(`[data-control="formatOptions.padding.${s}"]`),
+        ).length;
+        return {
+          present: fields.filter(Boolean).length,
+          newIds,
+          grid: xs.length === 2 && ys.length === 2,
+          paddingHeads,
+          labels,
+          ink2,
+          unitInside,
+        };
+      });
+      await closePanel();
+      const labelsOk =
+        facts.labels.length > 0 &&
+        facts.labels.every((l) => Math.abs(l.size - 12.5) < 0.3 && l.color === facts.ink2);
+      return {
+        ok:
+          facts.present === 4 &&
+          facts.newIds === 4 &&
+          facts.grid &&
+          facts.paddingHeads === 1 &&
+          facts.unitInside &&
+          labelsOk,
+        observed: `fields ${facts.present} (formatOptions.padding.* ${facts.newIds}); two by two ${facts.grid}; Padding heads ${facts.paddingHeads}; unit inside ${facts.unitInside}; labels ${facts.labels
+          .map((l) => `"${l.text}" ${l.size}px ${l.color}`)
+          .slice(0, 5)
+          .join(', ')} (ink-2 ${facts.ink2})`,
+      };
+    },
+  );
+  await t.step(
+    'text.format-options.remembers-section',
+    'collapse Text fitting, close the panel, reopen from the toolbar; then Format > Text fitting',
+    'Size & rotation is open and Text fitting stays collapsed; Format > Text fitting opens the panel with Text fitting alone',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(FIT);
+      await t.menuPath('format', 'format.textFitting');
+      await t.waitControl('panel.formatOptions', 6000);
+      const head = page
+        .locator(
+          '[data-control="panel.formatOptions"] [data-section="textFitting"] .ts-panel-section-head',
+        )
+        .first();
+      await head.waitFor({ timeout: 6000 });
+      const open0 = await page.evaluate(
+        () =>
+          !document
+            .querySelector('[data-control="panel.formatOptions"] [data-section="textFitting"]')
+            ?.classList.contains('is-closed'),
+      );
+      if (open0) await head.click();
+      await t.sleep(300);
+      await closePanel();
+      await t.selectObject(FIT);
+      await t.tailControl('toolbar.formatOptions');
+      await t.waitControl('panel.formatOptions', 6000);
+      await t.sleep(400);
+      const reopened = await sectionsState();
+      await closePanel();
+      await t.selectObject(FIT);
+      await t.menuPath('format', 'format.textFitting');
+      await t.waitControl('panel.formatOptions', 6000);
+      await t.sleep(400);
+      const fromMenu = await sectionsState();
+      /* the section open again for the rows after */
+      const closedHead = page
+        .locator(
+          '[data-control="panel.formatOptions"] [data-section="textFitting"].is-closed .ts-panel-section-head',
+        )
+        .first();
+      if ((await closedHead.count()) > 0) await closedHead.click();
+      await closePanel();
+      const byId = (list, id) => list.find((s) => s.id === id)?.open ?? null;
+      const fromMenuAlone =
+        fromMenu.length > 0 && fromMenu.every((s) => (s.id === 'textFitting' ? s.open : !s.open));
+      return {
+        ok:
+          byId(reopened, 'size') === true &&
+          byId(reopened, 'textFitting') === false &&
+          fromMenuAlone,
+        observed: `reopened from the toolbar: ${reopened.map((s) => `${s.id} ${s.open ? 'open' : 'closed'}`).join(', ')}; Format > Text fitting: ${fromMenu.map((s) => `${s.id} ${s.open ? 'open' : 'closed'}`).join(', ')}`,
+      };
+    },
+  );
+  await t.step(
+    'text.autofit.shrink-on-overflow',
+    'set Shrink text on overflow, type 230 characters into the small box',
+    'the size steps down the ladder until the text fits inside the box',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(FIT);
+      await t.menuPath('format', 'format.textFitting');
+      await t.waitControl('panel.formatOptions', 6000);
+      const shrink = page
+        .locator(
+          '[data-control="formatOptions.textFitting.autofit.shrink"], [data-control="formatOptions.textFitting.autofit"] [role="radio"]:has-text("Shrink"), [data-control="formatOptions.textFitting.autofit"] button:has-text("Shrink")',
+        )
+        .first();
+      if ((await shrink.count()) === 0) {
+        await closePanel();
+        return { ok: false, observed: 'no Shrink option in the Text fitting section' };
+      }
+      await shrink.click();
+      await t.settled();
+      /* the radio's write lands through the panel's dispatch after the click: read until it has */
+      const modeOf = async () => (await t.blockOf(X, FIT))?.block?.autofit ?? null;
+      const mode = await t.pollUntil(modeOf, (m) => m === 'shrink', 6000).catch(modeOf);
+      await closePanel();
+      const sizeOf = async () => (await t.blockOf(X, FIT))?.block?.typography?.size ?? null;
+      const size0 = await sizeOf();
+      const run = (await t.runsOfBlock(FIT))[0];
+      await t.openRun(run);
+      await t.press('Meta+a');
+      const long =
+        'The renewal covers the three regions, the two new products and the services team for the whole of next year, with a review each quarter and a fixed price for the first two years of the term. ';
+      await t.typeHuman(long.slice(0, 230));
+      await t.press('Escape');
+      await t.settled();
+      const live = await t
+        .pollUntil(
+          () =>
+            page.evaluate((id) => {
+              const inner = document.querySelector(
+                `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`,
+              );
+              const box = inner?.closest('.free') ?? inner;
+              if (!inner || !box) return null;
+              const sheet = document.querySelector(
+                '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)',
+              );
+              const k = sheet ? sheet.getBoundingClientRect().width / 1600 : 1;
+              return {
+                content: inner.scrollHeight,
+                box: box.getBoundingClientRect().height / k,
+                font: parseFloat(getComputedStyle(inner).fontSize),
+              };
+            }, FIT),
+          (l) => l !== null && l.content <= l.box + 2,
+          8000,
+        )
+        .catch(() =>
+          page.evaluate((id) => {
+            const inner = document.querySelector(
+              `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`,
+            );
+            const box = inner?.closest('.free') ?? inner;
+            if (!inner || !box) return null;
+            const sheet = document.querySelector(
+              '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)',
+            );
+            const k = sheet ? sheet.getBoundingClientRect().width / 1600 : 1;
+            return {
+              content: inner.scrollHeight,
+              box: box.getBoundingClientRect().height / k,
+              font: parseFloat(getComputedStyle(inner).fontSize),
+            };
+          }, FIT),
+        );
+      const size1 = await sizeOf();
+      const stepped =
+        size1 !== null && (size0 === null || size1 < size0) && live !== null && live.font < 22;
+      return {
+        ok: mode === 'shrink' && stepped && live !== null && live.content <= live.box + 2,
+        observed: `autofit ${mode}; size ${size0 ?? 'theme'} -> ${size1 ?? 'theme'}; drawn ${live ? `${live.font} px, content ${t.fmt(live.content)} in a ${t.fmt(live.box)} sheet px box` : 'not read'}`,
+      };
+    },
+  );
+  await t.step(
+    'text.find-replace.count-while-typing',
+    'two boxes naming Acme (setup writes); Edit > Find and replace; type Acme; Next',
+    'the dialog reads 1 of 2 as the query is typed; Next reads 2 of 2',
+    async () => {
+      await t.clearAll();
+      const a = await t.placeBlock(X, {
+        id: 'count-a',
+        type: 'text',
+        text: 'Acme alpha',
+        pos: { x: 160, y: 760, w: 400, h: 60 },
+      });
+      const b = await t.placeBlock(X, {
+        id: 'count-b',
+        type: 'text',
+        text: 'Acme beta',
+        pos: { x: 600, y: 760, w: 400, h: 60 },
+      });
+      if (!a || !b) return { ok: false, observed: 'the two Acme boxes were not placed' };
+      await t.menuPath('edit', 'edit.findReplace');
+      await t.waitControl('dialog.findReplace.find', 6000);
+      await t.clickControl('dialog.findReplace.find');
+      /* the dialog remembers the last query: cleared before this one */
+      await t.press('Meta+a');
+      await t.typeHuman('Acme');
+      /* the count line of the product round is dialog.findReplace.count (build/b2.md 1.7); the older result line stays as the fallback */
+      const result = async () =>
+        (await t.textOf('dialog.findReplace.count').catch(() => null)) ??
+        (await t.textOf('dialog.findReplace.result').catch(() => null));
+      /* the deck holds the Acme of every row that ran before this one, so the count is read as
+         1 of N while typing and 2 of the same N after Next (the two boxes make N at least 2) */
+      const first = await t
+        .pollUntil(result, (r) => /^1 of \d+$/.test((r ?? '').trim()), 3000)
+        .catch(result);
+      const total = Number(/1 of (\d+)/.exec(first ?? '')?.[1] ?? 0);
+      await t.clickControl('dialog.findReplace.next');
+      const second = await t
+        .pollUntil(result, (r) => new RegExp(`^2 of ${total}$`).test((r ?? '').trim()), 3000)
+        .catch(result);
+      await t.press('Escape');
+      await t.waitGone('[data-control="dialog.findReplace.find"]', 4000);
+      const s = await t.settled();
+      for (const id of ['count-a', 'count-b']) {
+        const st = await t.state();
+        await t
+          .invoke('block.remove', { baseRevision: st.revision, slideId: X, blockId: id })
+          .catch(() => undefined);
+      }
+      void s;
+      await t.settled();
+      return {
+        ok:
+          total >= 2 &&
+          /^1 of \d+$/.test((first ?? '').trim()) &&
+          (second ?? '').trim() === `2 of ${total}`,
+        observed: `while typing "${first ?? 'none'}"; after Next "${second ?? 'none'}" (the deck holds ${total} Acme)`,
+      };
+    },
+  );
+  await t.clearAll();
 }

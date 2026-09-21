@@ -8,6 +8,8 @@ import { annotate } from './annotate.ts';
 import type { Asset } from './assets.ts';
 import { assetSchema } from './assets.ts';
 import type { Block } from './blocks.ts';
+import type { BrandKit, CounterFormat } from './brand.ts';
+import { brandKitSchema } from './brand.ts';
 import { blockSchema, extSchema } from './blocks.ts';
 import type { Color } from './color.ts';
 import { colorSchema } from './color.ts';
@@ -19,6 +21,9 @@ import type { Text } from './text.ts';
 import { multilineTextSchema, plainText, textSchema } from './text.ts';
 
 export const SCHEMA_VERSION = 1;
+
+/** The appearance a new deck opens in when the deployment's kit is silent (docs/PRODUCT.md section 1, question 1): one line to flip. */
+export { DEFAULT_APPEARANCE } from './brand.ts';
 
 /** The one theme; a second theme is additive (SPEC 2.1, open question 6). */
 export const THEMES = ['gt-ink-paper'] as const;
@@ -42,6 +47,9 @@ export const LAYOUT_IDS = [
   'mood',
   'big-number',
   'blank',
+  /* the product round (docs/PRODUCT.md section 2 rank 2): the 4/8 head kept as its own layout,
+     the first GT layout after Blank (build/b3.md R1) */
+  'subtitle-body',
   'rows',
   'plain',
   'table',
@@ -93,6 +101,14 @@ export type Deck = {
    * duplicates, inside the sheet.
    */
   guides?: DeckGuides;
+  /**
+   * The brand kit (docs/PRODUCT.md 4.1): the six colour roles, the two faces, the logo and footer
+   * slots, the counter, the frame toggles and the words that never translate, every field optional
+   * with a defined meaning when absent. Written by `brand.set` and `brand.reset` alone (the
+   * `deck.set` action's pointer regex stays closed to it); a deck without a record reads the
+   * deployment's default kit, so nothing changes on a deck that carries none.
+   */
+  brand?: BrandKit;
   /** increments on every committed write */
   revision: number;
   createdAt: string;
@@ -595,20 +611,45 @@ export const deckSchema = z.strictObject({
     group: 'Slide',
     help: 'Vertical (x) and horizontal (y) guide lines in sheet px, the same on every slide; drawn in the editor only (gslides-parity SPEC-2 2.10).',
   }),
+  brand: annotate(brandKitSchema.optional(), {
+    label: 'Brand kit',
+    control: 'json',
+    group: 'Slide',
+    help: 'The colours, faces, logo, footer, slide numbers and frame of this presentation; the Brand kit panel and brand.set write it (docs/PRODUCT.md 4.1). The default kit when absent.',
+  }),
   revision: z.number().int().nonnegative(),
   createdAt: isoDateSchema,
   updatedAt: isoDateSchema,
   trashedAt: isoDateSchema.optional(),
 }) satisfies z.ZodType<Deck>;
 
-/** The appearance a deck defaults to (gslides-parity SPEC 7.2.3): dark when absent. */
+/**
+ * The appearance a deck defaults to (gslides-parity SPEC 7.2.3): the Themes tiles' choice, else
+ * the kit's default appearance (docs/PRODUCT.md 4.1, the appearance a deck created from a template
+ * opens in), else dark, the value every deck stored before the kit existed opens in. A new deck
+ * takes the deployment kit's appearance (DEFAULT_APPEARANCE when the kit is silent) at creation.
+ */
 export function deckAppearance(deck: Deck): Appearance {
-  return deck.defaults?.appearance ?? 'dark';
+  return deck.defaults?.appearance ?? deck.brand?.appearance ?? 'dark';
 }
 
-/** The counter mode a deck defaults to (gslides-parity SPEC 7.2.4): on when absent. */
+/**
+ * The counter mode a deck defaults to (gslides-parity SPEC 7.2.4): the kit's Slide numbers
+ * (docs/PRODUCT.md 4.1: `show` and `skipTitle`) when the record names either, else the
+ * `defaults.counter` the Slide numbers dialog wrote before the kit, else on.
+ */
 export function deckCounter(deck: Deck): CounterMode {
+  const kit = deck.brand?.counter;
+  if (kit !== undefined && (kit.show !== undefined || kit.skipTitle !== undefined)) {
+    if (kit.show === false) return 'off';
+    return kit.skipTitle === true ? 'skip-title' : 'on';
+  }
   return deck.defaults?.counter ?? 'on';
+}
+
+/** The counter's format (docs/PRODUCT.md 4.1): `n / N` when the kit names none, today's `01 / 85`. */
+export function deckCounterFormat(deck: Pick<Deck, 'brand'>): CounterFormat {
+  return deck.brand?.counter?.format ?? 'n / N';
 }
 
 /** True when the deck is in the trash. */

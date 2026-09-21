@@ -644,6 +644,7 @@ Later than that, each with its reason:
 - The icon column policy of the menus (audit-interface 28) and the corner radius (17): with the kit's `corner` field and forty glyphs.
 - The assist's P1 (6.6): translate, a slide from pasted lines, Tidy this slide, the outline from a brief, streaming, the kit's voice.
 - The Grid view and its tile drag (RETURN.md section 8), the account rows and Follow, the inbox, Live pointers, Show changes, the roster's Go to slide word: their return rows stand as the return round left them.
+- The templates across instances (4.3), parked at the ship by 8.2 (`docs/gslides-parity/product/build/ship.md` section 7): the folder and index sync lands, and `templates.card.rename-and-delete` and `templates.default.use-for-new` read red twice on the enforce preview of record because the public store's edge answers 403 on a just written pathname for a while, so a pull on another instance is skipped and its gallery keeps the old card, name or default for the rows' bounds. The round after gives the index a version named path (`templates/index/<stamp>.json`, found through `list`, never overwritten in place) or a room style head poll, and brings File > From template gallery and Save as template back when the two rows pass twice on a preview and once on production.
 
 ## 10. Open questions for Kevin
 

@@ -134,6 +134,67 @@ function routeSlide(spec: ControlSpec): FormatSectionId | null {
   return formatSectionOfSlideControl(spec);
 }
 
+/**
+ * The collapsed sections this browser remembers (docs/PRODUCT.md 3.2; audit-interface 15): the
+ * panel reopens with the set a seller left, beside the shell's own `ts-editor-settings` key,
+ * which keeps a fixed list of settings (editor-shell.ts readStoredSettings). A read that throws
+ * (a private window, no storage) answers an empty set.
+ */
+export const FORMAT_OPTIONS_STORAGE = 'ts-editor-settings:formatOptions';
+
+/** The remembered collapsed set from a stored value: a JSON array of section ids; anything else is none. */
+export function readCollapsedSections(saved: string | null): Set<FormatSectionId> {
+  if (saved === null) return new Set();
+  try {
+    const parsed: unknown = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return new Set();
+    return new Set(
+      parsed.filter(
+        (id): id is FormatSectionId => typeof id === 'string' && id in FORMAT_SECTION_BY_ID,
+      ),
+    );
+  } catch {
+    return new Set();
+  }
+}
+
+/** The stored form of the collapsed set. */
+export function writeCollapsedSections(closed: ReadonlySet<FormatSectionId>): string {
+  return JSON.stringify([...closed]);
+}
+
+function loadCollapsed(): Set<FormatSectionId> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    return readCollapsedSections(window.localStorage.getItem(FORMAT_OPTIONS_STORAGE));
+  } catch {
+    return new Set();
+  }
+}
+
+function storeCollapsed(closed: ReadonlySet<FormatSectionId>): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(FORMAT_OPTIONS_STORAGE, writeCollapsedSections(closed));
+  } catch {
+    // no storage: the set lives for this panel alone
+  }
+}
+
+/**
+ * The sections shown collapsed when the panel opens (docs/PRODUCT.md 3.2): from a menu row that
+ * names a section (Format > Text fitting) that section alone is open; from the toolbar and on a
+ * reopen the remembered set stands. Pure over the ids the panel draws.
+ */
+export function openingCollapsed(
+  shown: ReadonlyArray<FormatSectionId>,
+  remembered: ReadonlySet<FormatSectionId>,
+  openSection: FormatSectionId | null,
+): Set<FormatSectionId> {
+  if (openSection === null) return new Set([...remembered].filter((id) => shown.includes(id)));
+  return new Set(shown.filter((id) => id !== openSection));
+}
+
 function Section({
   id,
   title,
@@ -160,6 +221,7 @@ function Section({
         aria-expanded={disabled ? undefined : open}
         aria-disabled={disabled ? true : undefined}
         data-control={`formatOptions.${id}`}
+        data-section-toggle={`formatOptions.section.${id}.toggle`}
         data-status={disabled ? 'later' : 'now'}
         onClick={disabled ? undefined : onToggle}
         {...tipProps({ name, doc: meta.doc })}
@@ -208,7 +270,18 @@ export function FormatOptions({
   slots,
   advancedTools = false,
 }: FormatOptionsProps) {
-  const [closed, setClosed] = useState<ReadonlySet<FormatSectionId>>(() => new Set());
+  /* the remembered collapsed set (this browser's) and the set shown now: a menu row that opens
+     the panel at one section closes the others for this opening without touching the memory */
+  const remembered = useRef<Set<FormatSectionId>>(loadCollapsed());
+  const [closed, setClosed] = useState<ReadonlySet<FormatSectionId>>(() =>
+    openSection === null
+      ? new Set(remembered.current)
+      : openingCollapsed(
+          FORMAT_SECTIONS.map((section) => section.id),
+          remembered.current,
+          openSection,
+        ),
+  );
   const [notice, setNotice] = useState<string | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const toggle = (id: FormatSectionId) => {
@@ -216,18 +289,24 @@ export function FormatOptions({
     if (next.has(id)) next.delete(id);
     else next.add(id);
     setClosed(next);
+    const memory = new Set(remembered.current);
+    if (next.has(id)) memory.add(id);
+    else memory.delete(id);
+    remembered.current = memory;
+    storeCollapsed(memory);
   };
   const isOpen = (id: FormatSectionId) => !closed.has(id);
 
-  /* a menu row opened the panel at a section: open it and bring it into view */
+  /* a menu row opened the panel at a section: that section alone is open, and it comes into view */
   useEffect(() => {
     if (openSection === null) return;
-    setClosed((prev) => {
-      if (!prev.has(openSection)) return prev;
-      const next = new Set(prev);
-      next.delete(openSection);
-      return next;
-    });
+    setClosed(
+      openingCollapsed(
+        FORMAT_SECTIONS.map((section) => section.id),
+        remembered.current,
+        openSection,
+      ),
+    );
     const el = root.current
       ?.closest('.ts-panel')
       ?.querySelector<HTMLElement>(`[data-section="${openSection}"]`);
@@ -569,8 +648,9 @@ export function FormatOptions({
           </p>
         ) : null}
         {sectionsShown.map((section) => {
+          /* the key is passed on its own: a key inside a spread props object is a React warning
+             the console read on every open (the pictures drive of the product round) */
           const common = {
-            key: section.id,
             id: section.id,
             open: isOpen(section.id),
             onToggle: () => toggle(section.id),
@@ -578,7 +658,7 @@ export function FormatOptions({
           switch (section.id) {
             case 'size':
               return (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   <SizeRotationSection
                     blocks={blocks}
                     measured={measuredBoxes}
@@ -590,7 +670,7 @@ export function FormatOptions({
               );
             case 'position':
               return (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   <PositionSection
                     blocks={blocks}
                     measured={measuredBoxes}
@@ -601,7 +681,7 @@ export function FormatOptions({
               );
             case 'layout':
               return (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   <div className="ts-fo-layout">
                     <span className="ts-fo-layout-name">{layoutName}</span>
                     <ToolButton
@@ -627,13 +707,13 @@ export function FormatOptions({
               );
             case 'textFitting':
               return selected === undefined ? null : (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   <TextFittingSection block={selected} write={write} />
                 </Section>
               );
             case 'text':
               return (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   {renderGenerated('text')}
                   {selected !== undefined && !many && textish ? (
                     <TextMarksSection block={selected} selection={selection} write={write} />
@@ -645,7 +725,7 @@ export function FormatOptions({
               );
             case 'colour':
               return (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   {renderGenerated('colour')}
                   {selected?.type === 'text' && selected.outline !== undefined ? (
                     <OutlineRows block={selected} write={write} />
@@ -654,7 +734,7 @@ export function FormatOptions({
               );
             case 'picture':
               return (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   {renderGenerated('picture')}
                   {selected !== undefined && !many && hasPicture(selected) ? (
                     <PictureSection
@@ -676,19 +756,19 @@ export function FormatOptions({
               );
             case 'dither':
               return selected === undefined ? null : (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   <DitherFormatSection block={selected} write={write} assets={deck.assets} />
                 </Section>
               );
             case 'adjustments':
               return selected === undefined ? null : (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   <AdjustmentsSection block={selected} write={write} />
                 </Section>
               );
             case 'shadow':
               return (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   <ShadowSection
                     blocks={
                       many ? blocks.filter(hasShadow) : selected === undefined ? [] : [selected]
@@ -699,7 +779,7 @@ export function FormatOptions({
               );
             case 'table':
               return selected?.type !== 'table' ? null : (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   {renderGenerated('table')}
                   {slots?.table?.({
                     block: selected as TableBlock,
@@ -714,7 +794,7 @@ export function FormatOptions({
               );
             case 'chart':
               return selected?.type !== 'chart' ? null : (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   {slots?.chart?.({
                     block: selected as ChartBlock,
                     slideId: slide.id,
@@ -728,19 +808,19 @@ export function FormatOptions({
               );
             case 'line':
               return selected?.type !== 'shape' ? null : (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   <LineSection block={selected as ShapeBlock} write={write} />
                 </Section>
               );
             case 'shape':
               return selected?.type !== 'shape' ? null : (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   <ShapeSection block={selected as ShapeBlock} write={write} />
                 </Section>
               );
             case 'list':
               return (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   {selected?.type === 'plain' ? (
                     <ListSection block={selected as PlainBlock} write={write} />
                   ) : null}
@@ -749,13 +829,14 @@ export function FormatOptions({
               );
             case 'altText':
               return selected === undefined ? null : (
-                <Section {...common}>
+                <Section key={section.id} {...common}>
                   <AltTextSection block={selected} asset={altAsset} write={write} />
                 </Section>
               );
             case 'block':
               return (
                 <Section
+                  key={section.id}
                   {...common}
                   title={selected === undefined ? undefined : CATALOG[selected.type].label}
                 >

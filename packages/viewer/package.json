@@ -39,6 +39,7 @@
     "./present/presentModel": "./src/present/presentModel.ts",
     "./present/presentKeys": "./src/present/presentKeys.ts",
     "./present/presentSync": "./src/present/presentSync.ts",
+    "./present/slideLinks": "./src/present/slideLinks.ts",
     "./present/strings": "./src/present/strings.ts",
     "./present/ui": "./src/present/ui.tsx",
     "./present/PresentToolbar": "./src/present/PresentToolbar.tsx",

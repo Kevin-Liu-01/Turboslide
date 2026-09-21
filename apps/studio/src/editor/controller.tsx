@@ -3,6 +3,7 @@ import { createDispatcher } from '@turboslide/agent/dispatch';
 import type { StudioAdapter } from '@turboslide/agent/window/adapter';
 import { createEditHistory } from '@turboslide/agent/window/history';
 import type { HistoryEntry, HistoryStep } from '@turboslide/agent/window/history';
+import { planAcceptedCard, withAssistClear } from './assist-accept';
 import { autoTitleMutations } from './auto-title';
 import type { AutoTitleMemory } from './auto-title';
 import { awaitAcknowledged } from './ack-wait';
@@ -10,7 +11,9 @@ import { slideToConvertFor } from './convert-first';
 import { createExportModeGate } from './export-mode';
 import { refusalSentence } from './refusal';
 import { resyncBroughtUnseen } from './resync-history';
-import { keepsPlace } from './select-after-write';
+import { placeInsert, wantsPlacement } from './place-insert';
+import { SELECT_OBJECTS_EVENT, keepsPlace, originOf } from './select-after-write';
+import type { SelectObjectsDetail, StudioActionContext } from './select-after-write';
 import { typingKeyOf } from './typing-key';
 import { stepBursts } from './undo-bursts';
 import type { Burst } from './undo-bursts';
@@ -41,6 +44,7 @@ import {
   chartSetKind,
   deckGuides,
   deckSetBackground,
+  deckTailor,
   deckText,
   diagramInsert,
   lineSet,
@@ -97,6 +101,7 @@ import type {
   ChartSetKindInput,
   DeckGuidesInput,
   DeckSetBackgroundInput,
+  DeckTailorInput,
   DiagramInsertInput,
   ExportTextInput,
   LineSetInput,
@@ -127,6 +132,8 @@ import type {
   TextSpacingInput,
   TextStyleInput,
 } from '@turboslide/cli/store-actions';
+import { brandGet, brandResetPlan, brandSetPlan, fontList } from '@turboslide/cli/brand-actions';
+import type { BrandResetInput, BrandSetInput } from '@turboslide/cli/brand-actions';
 import type { ExportMenuInput, ExportProgress } from '@turboslide/chrome/ExportMenu';
 import { downloadFromPage } from '@turboslide/chrome/download';
 import type {
@@ -167,9 +174,10 @@ import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
 import { lintStatic } from '@turboslide/lint/lint-static';
 import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
+import { bandAssetResolver, frameBandOf } from '@turboslide/render/stage';
 import type { AccessRecord, Capability, Role, Via } from '@turboslide/schema/access';
 import { ACTIONS, isActionId } from '@turboslide/schema/actions';
-import type { ActionId, DeckTemplateId } from '@turboslide/schema/actions';
+import type { ActionId, AssistProposeInput, DeckTemplateId } from '@turboslide/schema/actions';
 import { anchorSlideId, resolveAnchor, threadIsFor } from '@turboslide/schema/comments';
 import type { Comment as ThreadComment, Thread } from '@turboslide/schema/comments';
 import type { Notification } from '@turboslide/store/inbox';
@@ -178,6 +186,7 @@ import { makeDiagram } from '@turboslide/schema/diagrams';
 import { canvasObjects, isCanvasSlide, slideBlocks, slideTitle } from '@turboslide/schema/deck';
 import type { Asset } from '@turboslide/schema/assets';
 import { blockAssetRefs } from '@turboslide/schema/catalog';
+import type { Block } from '@turboslide/schema/blocks';
 import type { DeckDocument, Section, Slide } from '@turboslide/schema/deck';
 import { ConflictError } from '@turboslide/schema/errors';
 import type { Finding } from '@turboslide/schema/findings';
@@ -187,7 +196,7 @@ import type { Author, Lease, Mutation, Version, Write } from '@turboslide/schema
 import { applyMutations, applyWrite } from '@turboslide/schema/reduce';
 import { validateSlide } from '@turboslide/schema/validate';
 import type { Issue } from '@turboslide/schema/validate';
-import { authorLabel, sameAuthor, touchedSlides } from '@turboslide/store/store';
+import { authorDisplay, authorLabel, sameAuthor, touchedSlides } from '@turboslide/store/store';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 import { PRODUCT_TOKENS, PROPER_NOUNS } from '@turboslide/theme/copy';
 import { measureForCanvas, measureForFit } from '@turboslide/viewer/canvas-measure';
@@ -203,6 +212,7 @@ import type { Theme } from '@turboslide/viewer/theme';
 
 import {
   SERVER_SIDE_WINDOW_ACTIONS_GS3,
+  SERVER_SIDE_WINDOW_ACTIONS_P1,
   runDeckAction,
   runDeckActionDetailed,
 } from '../server/agent-actions';
@@ -780,12 +790,33 @@ export type EditorSnapshot = {
   artifact: ArtifactState;
 };
 
+/** The shell's snackbar with one action, as EditorShellState.say offers it. */
+export type EditorShellSnack = {
+  say: (text: string, action?: { label: string; run: () => void }) => void;
+};
+
 export type EditorController = {
   subscribe: (listener: () => void) => () => void;
   getSnapshot: () => EditorSnapshot;
   start: () => void;
   stop: () => void;
   attachShell: (shell: ShellState) => void;
+  /**
+   * The editor shell's snackbar with one action (docs/PRODUCT.md 6.1): the outside write's Undo
+   * and the accept's; ShellBridge hands it over (build/b6.md R10); without it the sentences
+   * reach the plain snackbar with no action
+   */
+  attachEditorShell: (api: EditorShellSnack | null) => void;
+  /**
+   * Accept a card of the assist (6.1, 6.2): the card re based on the document as it stands,
+   * written as one commit labelled "Assist: <sentence>" with the `ext.assist` marks, so Cmd+Z is
+   * the step back and Change history lists it once
+   */
+  acceptAssist: (
+    card: unknown,
+  ) => Promise<{ revision: number; slideIds: string[]; sentence: string }>;
+  /** re-posts this tab's presence now, so a typed display name reaches the other browsers' chips ahead of the heartbeat (b1.md R18) */
+  refreshPresence: () => void;
   setActiveSlide: (slideId: string) => void;
   select: (selection: Selection | null) => void;
   /** one Write: applied locally now, sent through the room; resolves when the room admitted it */
@@ -934,6 +965,21 @@ export async function triggerDownload(url: string): Promise<void> {
   await downloadFromPage(url);
 }
 
+/**
+ * The cadence of the progress poll beside a sync export: twice the queued path's, because a six
+ * slide PowerPoint file on a checkout is done inside a few seconds and the words should still
+ * move slide by slide (the row export.download.progress-per-slide); a poll is one small read.
+ */
+const SYNC_PROGRESS_POLL_MS = 500;
+
+/** A fresh sync progress id, `sync-<base36 time>-<8 hex>` (server/export-jobs.ts `SYNC_PROGRESS_JOB_PATTERN`), minted on the page. */
+function newSyncProgressJobId(): string {
+  const bytes = new Uint8Array(4);
+  crypto.getRandomValues(bytes);
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return `sync-${Date.now().toString(36)}-${hex}`;
+}
+
 /** A stored copy is asked for as an attachment (Vercel Blob honours `download=1`); a route of ours already is one. */
 function downloadUrlOf(url: string): string {
   if (url.startsWith('/')) return url;
@@ -952,8 +998,41 @@ function downloadUrlOf(url: string): string {
 async function runSyncExport(
   deckId: string,
   input: ExportRunInput,
+  onLine?: (line: string) => void,
 ): Promise<Extract<ArtifactRun, { kind: 'export' }>> {
-  const body: SyncExportAnswer = await syncExport({ deckId, input });
+  /* the per slide progress beside the call (b7.md FR4; the row export.download.progress-per-slide):
+     the page mints the progress record's id, the server writes "slide k of n" under it while the
+     export runs, and a poll every EXPORT_POLL_MS reads it until the call settles; a poll that
+     fails is skipped, never the export */
+  const progressJobId = onLine === undefined ? undefined : newSyncProgressJobId();
+  const call = syncExport({
+    deckId,
+    input,
+    ...(progressJobId === undefined ? {} : { progressJobId }),
+  });
+  let settled = false;
+  const poll = async (): Promise<void> => {
+    if (progressJobId === undefined || onLine === undefined) return;
+    await sleep(SYNC_PROGRESS_POLL_MS);
+    while (!settled) {
+      try {
+        const answer = await pollExport({ jobId: progressJobId });
+        if (settled) break;
+        if (answer.line) onLine(answer.line);
+      } catch {
+        // a poll that fails is skipped; the export goes on
+      }
+      await sleep(SYNC_PROGRESS_POLL_MS);
+    }
+  };
+  const polling = poll();
+  let body: SyncExportAnswer;
+  try {
+    body = await call;
+  } finally {
+    settled = true;
+  }
+  await polling.catch(() => undefined);
   return {
     kind: 'export',
     input: menuInputOf(input),
@@ -1021,6 +1100,10 @@ export function createEditorController(init: {
   const listeners = new Set<() => void>();
   let alive = false;
   let shell: ShellState | null = null;
+  /* the editor shell's snackbar with an action (docs/PRODUCT.md 6.1), from ShellBridge */
+  let editorShell: EditorShellSnack | null = null;
+  /* the document before the last remote op applied, for the inverse of an outside write (6.1) */
+  let beforeRemote: DeckDocument | null = null;
   /** told once with the mutations of the next write the store shim applies locally (select-after-write.ts) */
   let onLocalApply: ((mutations: readonly Mutation[]) => void) | null = null;
   /* the editor shell's stored settings, for describe().state.settings (docs/FOCUS.md 3.1) */
@@ -1341,6 +1424,98 @@ export function createEditorController(init: {
    * one paragraph converge without a lost keystroke. Own entries are skipped: the editable already
    * holds them.
    */
+  /** The shell's snackbar with an action when ShellBridge handed it over, the plain one otherwise. */
+  const sayWithAction = (text: string, action?: { label: string; run: () => void }): void => {
+    if (editorShell !== null) editorShell.say(text, action);
+    else say(text);
+  };
+
+  /**
+   * An outside write by an agent author that arrived live (docs/PRODUCT.md 6.1 "Outside writes";
+   * audit-assist 1, 7): the snackbar names the slide and the change with Undo for the snackbar's
+   * hold, the Undo writes the inverse as this seller (one commit, on this seller's stack, so the
+   * seller's own last edit stays), and the auto title rule follows a write to the first title
+   * whoever wrote it, so the deck's name and the tab no longer diverge from the slide. Before this
+   * the slide changed with no banner and Cmd+Z took the seller's own last edit back instead.
+   */
+  const announceAgentWrite = (entries: ReadonlyArray<Entry>): void => {
+    if (room === null) return;
+    const client = room;
+    const mine = entries.filter(
+      (entry) =>
+        !(entry.note !== undefined && ownAssistNotes.delete(entry.note)) &&
+        entry.author.kind === 'agent' &&
+        entry.clientId !== client.clientId() &&
+        !latest().ownClientIds.includes(entry.clientId) &&
+        entry.mutations !== undefined &&
+        entry.mutations.length > 0,
+    );
+    if (mine.length === 0) return;
+    const mutations: Mutation[] = mine.flatMap((entry) => entry.mutations ?? []);
+    const before = beforeRemote;
+    const after = client.document();
+    const first = mine[0];
+    const who = first === undefined ? 'Assistant' : authorDisplay(first.author);
+    const order = slideOrder(after);
+    const slideId = mutations
+      .map((mutation) => ('slideId' in mutation ? mutation.slideId : undefined))
+      .find((id): id is string => id !== undefined && order.includes(id));
+    const n = slideId === undefined ? 0 : order.indexOf(slideId) + 1;
+    let change = '';
+    if (before !== null && slideId !== undefined) {
+      for (const mutation of mutations) {
+        if (
+          (mutation.op === 'text.replace' ||
+            mutation.op === 'block.set' ||
+            mutation.op === 'text.splice') &&
+          mutation.slideId === slideId
+        ) {
+          const pointer = mutation.path.replace(/^\//, '');
+          const was = before.slides[slideId];
+          const now = after.slides[slideId];
+          const from = was === undefined ? undefined : readRunText(was, mutation.blockId, pointer);
+          const to = now === undefined ? undefined : readRunText(now, mutation.blockId, pointer);
+          if (from !== undefined && to !== undefined && from !== to) {
+            const cut = (text: string): string =>
+              text.length > 40 ? `${text.slice(0, 39).trimEnd()}…` : text;
+            change = `: ${cut(from)} became ${cut(to)}`;
+            break;
+          }
+        }
+      }
+    }
+    const sentence =
+      slideId === undefined
+        ? `${who} changed this presentation`
+        : `${who} changed slide ${n}${change}`;
+    let inverse: Mutation[] | null = null;
+    if (before !== null) {
+      try {
+        inverse = applyMutations(before, mutations).inverse;
+      } catch {
+        inverse = null;
+      }
+    }
+    const steps = inverse;
+    sayWithAction(
+      sentence,
+      steps === null || steps.length === 0
+        ? undefined
+        : {
+            label: 'Undo',
+            run: () => {
+              commit(steps, `undo ${who}`).catch((error: unknown) =>
+                say(`Undo failed: ${errorMessage(error)}`),
+              );
+            },
+          },
+    );
+    if (before !== null) {
+      const rename = autoTitleMutations(before, mutations, autoTitle);
+      if (rename.length > 0) commit(rename, 'rename').catch(() => undefined);
+    }
+  };
+
   const announceRemoteText = (entry: Entry): void => {
     if (
       room === null ||
@@ -1549,6 +1724,7 @@ export function createEditorController(init: {
           if (wroteInSession) warmHomeCard();
           return;
         }
+        if (reason === 'remote') beforeRemote = latest().document;
         setDocument(next, changed);
         // the document's revision moves with a checkpoint the fold already carries (a remote op
         // after it): describe().state.revision and sync.status follow it, so a chrome or agent
@@ -1568,10 +1744,12 @@ export function createEditorController(init: {
         switch (event.type) {
           case 'op':
             announceRemoteText(event.entry);
+            announceAgentWrite([event.entry]);
             if (event.entry.kind === 'comment') scheduleCommentsRefresh();
             return;
           case 'ops':
             for (const entry of event.entries) announceRemoteText(entry);
+            announceAgentWrite(event.entries);
             if (event.entries.some((entry) => entry.kind === 'comment')) scheduleCommentsRefresh();
             return;
           case 'hello':
@@ -1781,7 +1959,14 @@ export function createEditorController(init: {
       }
       let applied: ReturnType<RoomClient['apply']>;
       try {
-        applied = client.apply(item.mutations, item.label);
+        /* the kit's and the assist's labels ride as the entry's note here too (FR3) */
+        const note = item.kind === 'edit' ? historyNoteOf(item.label) : undefined;
+        applied = client.apply(
+          item.mutations,
+          item.label,
+          undefined,
+          note === undefined ? undefined : { note },
+        );
       } catch (error) {
         publish({ error: errorMessage(error) });
         item.reject(error instanceof Error ? error : new TypeError(String(error)));
@@ -1846,7 +2031,13 @@ export function createEditorController(init: {
     kind: 'edit' | 'undo' | 'redo',
   ): Promise<Committed> => {
     const base = snapshot.document.deck.revision;
-    const write: Write = { baseRevision: base, author, mutations };
+    const note = kind === 'edit' ? historyNoteOf(label) : undefined;
+    const write: Write = {
+      baseRevision: base,
+      author,
+      mutations,
+      ...(note === undefined ? {} : { note }),
+    };
     const result = applyWrite(snapshot.document, write);
     if (!result.ok) {
       const error =
@@ -1944,7 +2135,8 @@ export function createEditorController(init: {
     const base = latest().serverRevision;
     let applied;
     try {
-      applied = room.apply(mutations, label);
+      const note = kind === 'edit' ? historyNoteOf(label) : undefined;
+      applied = room.apply(mutations, label, undefined, note === undefined ? undefined : { note });
     } catch (error) {
       publish({ error: errorMessage(error) });
       return Promise.reject(error instanceof Error ? error : new TypeError(String(error)));
@@ -2018,6 +2210,16 @@ export function createEditorController(init: {
     publish({ namePrompt: true });
   };
 
+  /*
+   * The history label a write carries into Version history (b7.md FR3; docs/PRODUCT.md 4.1, 6.1):
+   * the brand kit's writes ("Brand kit: Primary", from the panel, the dialogs and `brand.set`) and
+   * the assist's accept ("Assist: <sentence>") are their own named rows in the panel, so Restore
+   * of the row before takes the colour back and the assistant's change reads by its sentence. An
+   * ordinary edit carries none, because a noted record is a named version in the panel's filter.
+   */
+  const historyNoteOf = (label: string): string | undefined =>
+    /^(Brand kit|Assist):/.test(label) ? label : undefined;
+
   /* the auto-title (gslides-parity SPEC 6.3; docs/RETURN.md 2.18): a write that changes the title
      slide's heading renames the deck in the same write while the name still follows the heading
      (Untitled, or the name this rule gave it), so one undo removes both and a slow typist's deck
@@ -2053,10 +2255,114 @@ export function createEditorController(init: {
     }
     return commitAs(withAutoTitle([...canvas.prefix, ...mutations]), label, 'edit');
   };
-  const commit = (mutations: Mutation[], label: string): Promise<Committed> => {
+  const commit = (rawMutations: Mutation[], label: string): Promise<Committed> => {
+    /* the seller's edit of an assisted block clears its mark (docs/PRODUCT.md 6.1) */
+    const mutations = withAssistClear(snapshot.document, rawMutations);
     const convert = slideToConvertFor(snapshot.document, mutations);
     if (convert !== null) return convertThenCommit(convert, mutations, label);
     return commitAs(withAutoTitle(mutations), label, 'edit');
+  };
+
+  /**
+   * Accept a card of the assist (docs/PRODUCT.md 6.1, 6.2): the shared plan re bases the card on
+   * the document as it stands (the stale sentence otherwise) and adds the `ext.assist` marks; the
+   * write is one commit labelled "Assist: <sentence>" under this tab's session, so Cmd+Z is the
+   * step back and Change history lists it once. The marks are the card's own, so the commit's
+   * clearing pass is skipped here.
+   */
+  /* the notes of the accepts this page posted to the route, so the follower's outside write
+     banner skips the assistant's own entry when the stream brings it back (6.1) */
+  const ownAssistNotes = new Set<string>();
+  const acceptAssist = async (
+    rawCard: unknown,
+  ): Promise<{ revision: number; slideIds: string[]; sentence: string }> => {
+    const plan = planAcceptedCard(snapshot.document, rawCard, { now: new Date() });
+    const label = `Assist: ${plan.sentence}`;
+    if (room === null) {
+      /* a draft has no room yet: the write is this tab's, labelled and noted as the assist's */
+      const committed = await commitAs(withAutoTitle(plan.mutations), label, 'edit');
+      return { revision: committed.revision, slideIds: plan.slideIds, sentence: plan.sentence };
+    }
+    /* the route writes as the assistant (b7.md FR3; docs/PRODUCT.md 6.1): Version history lists
+       the revision as the assistant's own row with the agent mark and the note, the audit trail
+       names who wrote; the page keeps Undo by holding the plan's inverse, measured on the
+       document the write applied to, on its own stack, and the room brings the entry back */
+    await idle();
+    const client = room;
+    const base = latest().serverRevision;
+    const before = client.document();
+    let inverse: Mutation[] = [];
+    try {
+      inverse = applyMutations(before, plan.mutations).inverse;
+    } catch {
+      inverse = [];
+    }
+    ownAssistNotes.add(label);
+    let answer: { revision?: unknown };
+    try {
+      answer = (await assistPost('assist.accept', { card: rawCard, baseRevision: base })) as {
+        revision?: unknown;
+      };
+    } catch (error) {
+      ownAssistNotes.delete(label);
+      throw error;
+    }
+    const revision = typeof answer.revision === 'number' ? answer.revision : base + 1;
+    /* the stream brings the entry back within a moment: the history takes it once the local
+       document carries the write (so Cmd+Z right after applies against the written document),
+       and before the answer, so the panel's snackbar and the seller's Cmd+Z find the entry (the
+       acknowledgement alone trails the reported revision on the memory tier) */
+    const until = Date.now() + 5000;
+    while (client.document() === before && Date.now() < until) await sleep(20);
+    lastTyping = null;
+    const entry = history.push({ mutations: plan.mutations, inverse, label });
+    revisionOf.set(entry.id, revision);
+    publish({ serverRevision: Math.max(latest().serverRevision, revision) });
+    return { revision, slideIds: plan.slideIds, sentence: plan.sentence };
+  };
+
+  /**
+   * `assist.propose` on the window transport (6.2, 6.3): the page posts to the assist's own route
+   * with its session, never to a server function, so the WAF rule and the duration of 6.3 name
+   * it; the answer is the action's output (the signed cards) or the route's error body, whose
+   * status the panel reads (503 the switch, 429 the quota, 403 a viewer).
+   */
+  const assistPropose = (input: AssistProposeInput): Promise<unknown> =>
+    assistPost('assist.propose', input);
+
+  /** One post to the assist's route (`assist.propose`, `assist.accept`) with the page's session. */
+  const assistPost = async (
+    action: 'assist.propose' | 'assist.accept',
+    input: unknown,
+  ): Promise<unknown> => {
+    const response = await fetch(`/api/assist?deck=${encodeURIComponent(deckId)}`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action, input }),
+    });
+    const text = await response.text();
+    let payload: unknown = null;
+    try {
+      payload = text === '' ? null : (JSON.parse(text) as unknown);
+    } catch {
+      payload = null;
+    }
+    if (!response.ok) {
+      const body = payload as { error?: { message?: unknown } | string; message?: unknown } | null;
+      const message =
+        typeof body?.error === 'object' &&
+        body.error !== null &&
+        typeof body.error.message === 'string'
+          ? body.error.message
+          : typeof body?.message === 'string'
+            ? body.message
+            : `The assistant answered ${response.status}`;
+      const error = new Error(message) as Error & { status: number };
+      error.status = response.status;
+      throw error;
+    }
+    return payload;
   };
 
   /**
@@ -2100,7 +2406,13 @@ export function createEditorController(init: {
     const forward = stepMutations(entry, entry.mutations, 'forward');
     if (forward.length === 0) return;
     try {
-      await commitAs(forward, `redo ${entry.label}`, 'redo');
+      // a restore is a server first write (the reducer needs the version log): its redo goes the
+      // same way, and the entry keeps its place with the inverse the answer carries; through the
+      // room the client's reducer threw "No version n to restore" and the entry sat on the undo
+      // stack with nothing applied (the product round fix round, beside finding 4)
+      if (forward.some((mutation) => mutation.op === 'version.restore'))
+        await commitServerFirst(forward, `redo ${entry.label}`, entry);
+      else await commitAs(forward, `redo ${entry.label}`, 'redo');
     } catch (error) {
       say(`Redo failed: ${errorMessage(error)}`);
     }
@@ -2146,8 +2458,17 @@ export function createEditorController(init: {
     publish({ rejects: latest().rejects.filter((row) => row.opId !== opId), error: null });
   };
 
-  /** A write the server applies first (version.restore needs the version log); the room announces it. */
-  const commitServerFirst = async (mutations: Mutation[], label: string): Promise<Committed> => {
+  /**
+   * A write the server applies first (version.restore needs the version log); the room announces
+   * it. `redoOf` is the history entry a redo brings back: it keeps its place on the undo stack and
+   * takes the inverse this write's answer carries, since a restore's inverse is the diff from the
+   * document it applied to and the deck may have moved since the entry was recorded.
+   */
+  const commitServerFirst = async (
+    mutations: Mutation[],
+    label: string,
+    redoOf?: HistoryEntry,
+  ): Promise<Committed> => {
     await idle();
     const write: Write = { baseRevision: latest().serverRevision, author, mutations };
     const result = await writeDeck({ deckId, write, returnDocument: true });
@@ -2162,7 +2483,13 @@ export function createEditorController(init: {
       publish({ error: result.message });
       throw new TypeError(result.message);
     }
-    const entry = history.push({ mutations, inverse: result.entry.inverse, label });
+    let entry: HistoryEntry;
+    if (redoOf === undefined) {
+      entry = history.push({ mutations, inverse: result.entry.inverse, label });
+    } else {
+      redoOf.inverse = result.entry.inverse;
+      entry = redoOf;
+    }
     revisionOf.set(entry.id, result.revision);
     const { baseRevision: _base, inverse: _inverse, ...version } = result.entry;
     publish({ serverRevision: result.revision, versions: [...snapshot.versions, version] });
@@ -2185,7 +2512,7 @@ export function createEditorController(init: {
     await idle();
     const version = await saveVersion({ deckId, author, note });
     publish({ versions: [...snapshot.versions, version], versionPrompt: false });
-    say(`Version ${version.n} saved at r${version.revision}`);
+    say(`Version ${version.n} saved`);
     return version;
   };
 
@@ -2250,8 +2577,54 @@ export function createEditorController(init: {
   // The dispatcher: the same ACTIONS table and validation the CLI and MCP run (SPEC 7.1).
   const dispatcher: Dispatcher = createDispatcher();
   const context: ActionContext = { author };
+  /*
+   * The origin of a dispatch (docs/PRODUCT.md section 2 rank 1; build/b3.md): the chrome's own
+   * dispatch (`invoke`: the menus, the toolbar, the pickers, the sidebar) and the window API's
+   * (`invokeAsAgent`: the two owners' adapters, which an agent or a driver runs) reach the same
+   * handlers with the same author; a handler that places an object for a person or selects it
+   * afterwards reads which one called (select-after-write.ts `originOf`). An agent's write keeps
+   * the strict contract of SPEC-3 3.10: the box it names, no selection taken from the person.
+   */
+  const chromeContext: StudioActionContext = { author, origin: 'chrome' };
+  const agentContext: StudioActionContext = { author, origin: 'agent' };
   const on = <T,>(id: ActionId, run: (input: T) => Promise<unknown> | unknown): void => {
     dispatcher.register(id, (input) => run(input as T));
+  };
+  /** Tells the stage to select the objects a chrome insert made, once they are on the sheet. */
+  const announceSelection = (slideId: string, blockIds: string[]): void => {
+    if (typeof window === 'undefined' || blockIds.length === 0) return;
+    const detail: SelectObjectsDetail = { deckId, slideId, blockIds };
+    window.dispatchEvent(new CustomEvent(SELECT_OBJECTS_EVENT, { detail }));
+  };
+  /**
+   * Arms the selection of what a chrome insert is about to write: the store's `write` tells
+   * `onLocalApply` the mutations the moment the local document carries them (before the room's
+   * acknowledgement, which the memory tier gives at its checkpoint idle), and the inserted block
+   * ids are announced then; `settle` announces the ids the action answered when the hook did not
+   * fire (a write that inserted through another path), `disarm` clears a hook a refused write
+   * left behind so it never fires on the next unrelated write.
+   */
+  const armInsertSelection = (
+    slideId: string,
+  ): { settle: (blockIds: string[]) => void; disarm: () => void } => {
+    let announced = false;
+    const hook = (mutations: readonly Mutation[]): void => {
+      const inserted = mutations.flatMap((mutation) =>
+        mutation.op === 'block.insert' && mutation.slideId === slideId ? [mutation.block.id] : [],
+      );
+      if (inserted.length === 0) return;
+      announced = true;
+      announceSelection(slideId, inserted);
+    };
+    onLocalApply = hook;
+    return {
+      settle: (blockIds) => {
+        if (!announced) announceSelection(slideId, blockIds);
+      },
+      disarm: () => {
+        if (onLocalApply === hook) onLocalApply = null;
+      },
+    };
   };
   /**
    * The revision every surface reports and every base check uses (SPEC-3 3.10): the largest of
@@ -2424,7 +2797,9 @@ export function createEditorController(init: {
   });
   on<{ name: string; from: DeckTemplateId; id?: string }>('deck.create', async (input) => {
     const created = await createNewDeck(input);
-    say(`Created ${created.deckId} from ${created.from}: ${created.counts.slides} slides`);
+    // the seller's words, never an id (docs/PRODUCT.md section 2 rank 14)
+    const count = created.counts.slides;
+    say(`Created ${created.title}, ${count} slide${count === 1 ? '' : 's'}`);
     init.onDeckCreated?.(created.deckId);
     return created;
   });
@@ -2491,7 +2866,7 @@ export function createEditorController(init: {
      capture browser, the catalog); the write they end in comes back over the watch channel, and
      the handler waits for that revision before it answers */
   const serverSide = (id: ServerSideWindowAction, options: { announce?: boolean } = {}): void => {
-    on<unknown>(id, async (input) => {
+    dispatcher.register(id, async (input, ctx) => {
       const before = latest().document.deck.revision;
       const writesDeck = options.announce === true;
       let request = input;
@@ -2531,11 +2906,14 @@ export function createEditorController(init: {
             rejectDraftQueue(error instanceof Error ? error : new TypeError(String(error)));
           }
         }
-        // a refusal is shown, never swallowed (rank 5: "the seller sees nothing")
+        // a refusal is shown, never swallowed (rank 5: "the seller sees nothing"), as a sentence
+        // with its reason and never an action id (docs/PRODUCT.md section 2 rank 14). The chrome's
+        // own route says its own sentence from the rejection (EditorRoot.tsx uploadPicture), so
+        // the snackbar here is the agent's (the window API), and the error word is everyone's.
         if (writesDeck) {
-          const message = `${id}: ${errorMessage(error)}`;
+          const message = failureSentence(id, errorMessage(error));
           publish({ error: message });
-          say(message);
+          if (originOf(ctx) === 'agent') say(message);
         }
         throw error;
       }
@@ -2574,10 +2952,24 @@ export function createEditorController(init: {
         }
         const until = Date.now() + 15_000;
         while (!landed() && Date.now() < until) await sleep(40);
-        if (ids.length > 0) say(`${id}: ${ids.join(', ')}`);
+        // no snackbar on success (rank 14): the picture is on the sheet and selected; the ids
+        // are in the answer for the agent transports
       }
       return output;
     });
+  };
+  /** The sentence a failed server side write shows, by what the person was doing. */
+  const failureSentence = (id: ServerSideWindowAction, reason: string): string => {
+    switch (id) {
+      case 'asset.add':
+        return `The picture could not be uploaded: ${reason}`;
+      case 'asset.dither':
+        return `The dither could not be made: ${reason}`;
+      case 'material.capture':
+        return `The capture did not finish: ${reason}`;
+      default:
+        return `The change did not go through: ${reason}`;
+    }
   };
   serverSide('asset.add', { announce: true });
   serverSide('asset.dither', { announce: true });
@@ -2626,7 +3018,11 @@ export function createEditorController(init: {
           if (first?.url !== undefined) await triggerDownload(downloadUrlOf(first.url));
           return run.report;
         }
-        const run = await runSyncExport(deckId, input);
+        const run = await runSyncExport(deckId, input, (line) =>
+          publish({
+            artifact: { progress: { label: `Exporting ${label}`, line }, run: null },
+          }),
+        );
         publish({ artifact: { progress: null, run } });
         const first = run.downloads[0];
         if (first?.url !== undefined) await triggerDownload(downloadUrlOf(first.url));
@@ -2724,6 +3120,8 @@ export function createEditorController(init: {
       },
       // the parity round's manifest facts (gslides-parity SPEC 7.2.3 to 7.2.5), only when written
       ...(document.deck.defaults !== undefined ? { defaults: document.deck.defaults } : {}),
+      /* the brand kit record (docs/PRODUCT.md 4.1), only when the deck carries one */
+      ...(document.deck.brand !== undefined ? { brand: document.deck.brand } : {}),
       ...(document.deck.guides !== undefined ? { guides: document.deck.guides } : {}),
       ...(document.deck.trashedAt !== undefined ? { trashedAt: document.deck.trashedAt } : {}),
     };
@@ -2860,9 +3258,51 @@ export function createEditorController(init: {
     return slideResult(committed, input.slideId);
   });
   on<BlockSetInput>('block.set', (input) => blockSet(storeDeps('block.set'), context, input));
-  on<BlockInsertInput>('block.insert', (input) =>
-    blockInsert(storeDeps('block.insert'), context, input),
-  );
+  /*
+   * block.insert (docs/PRODUCT.md section 2 rank 1; audit-seller 1; build/b3.md): a table or a
+   * chart the chrome inserts from a menu, the toolbar or the table grid arrives with the centred
+   * default box of editor-shell.ts insertBlockPlan, which landed a chart over the table a seller
+   * had typed. Here it lands in the largest free rectangle of the body slot, 40 sheet px from
+   * what is there, shrunk to the room when the room is smaller, and cascades 40 by 40 from the
+   * last object when the slot is taken (place-insert.ts); the slide is measured and converted
+   * first when it is not a canvas yet, the same conversion the store action makes. Once the
+   * write is in, the stage selects the new object (SELECT_OBJECTS_EVENT), so a drag or Delete
+   * works at once, as Google does. A window API insert (an agent, a driver's setup write) keeps
+   * the box it named and selects nothing: its contract is exact.
+   */
+  dispatcher.register('block.insert', async (raw, ctx) => {
+    const input = raw as BlockInsertInput;
+    const origin = originOf(ctx);
+    let request = input;
+    if (origin === 'chrome' && wantsPlacement(input)) {
+      const current = snapshot.document;
+      const slide = current.slides[input.slideId];
+      if (slide !== undefined) {
+        const canvas = (await withCanvas(storeDeps('block.insert'), current, slide)).slide;
+        const placed = placeInsert(canvas, input.block.type, [
+          input.block.pos.w,
+          input.block.pos.h,
+        ]);
+        request = {
+          ...input,
+          block: { ...input.block, pos: { ...input.block.pos, ...placed.pos } } as Block,
+        };
+      }
+    }
+    /* the selection is told at the local apply, not at the acknowledgement: the editor's commit
+       resolves when the room has confirmed the write, on the memory tier the checkpoint's idle of
+       about two seconds after the last write (select-after-write.ts keepsPlace, C2-F21), and a
+       table selected two seconds after the click reads as not selected (B3's walk run 1: the
+       walk read no handles right after the insert and the table's ring a step later) */
+    const announced = origin === 'chrome' ? armInsertSelection(input.slideId) : null;
+    try {
+      const result = await blockInsert(storeDeps('block.insert'), context, request);
+      announced?.settle([request.block.id]);
+      return result;
+    } finally {
+      announced?.disarm();
+    }
+  });
   on<BlockRemoveInput>('block.remove', (input) =>
     blockRemove(storeDeps('block.remove'), context, input),
   );
@@ -3055,6 +3495,9 @@ export function createEditorController(init: {
     }
     serverSide(id as ServerSideWindowAction);
   }
+  /* the template ids of the product round (docs/PRODUCT.md 4.3): each is a read or a write of the
+     collection's templates folder, so every one runs on the server through runDeckAction */
+  for (const id of SERVER_SIDE_WINDOW_ACTIONS_P1) serverSide(id);
   /* Forget this browser (SPEC-3 7.4; VERIFICATION-3 finding 12): the server mints the new
      anonymous principal and its cookie (the response's Set-Cookie replaces the old one), then
      this page clears the localStorage and IndexedDB mirrors together and reloads as the new
@@ -3198,6 +3641,26 @@ export function createEditorController(init: {
   on<TextReplaceAllInput>('text.replaceAll', (input) =>
     textReplaceAll(storeDeps('text.replaceAll'), context, input),
   );
+  /* the tailoring pass (docs/PRODUCT.md section 5): one commit labelled "Tailor for <name>", the
+     snackbar with Undo */
+  on<DeckTailorInput>('deck.tailor', async (input) => {
+    const to = input.replacements?.find((pair) => pair.to.trim() !== '')?.to.trim();
+    const label = to === undefined ? 'Tailor for a customer' : `Tailor for ${to}`;
+    const result = await deckTailor(storeDeps(label), context, input);
+    if (result.replacements > 0 || result.pictures > 0 || result.skipped.length > 0) {
+      sayWithAction(to === undefined ? 'Tailored' : `Tailored for ${to}`, {
+        label: 'Undo',
+        run: () => {
+          undo().catch(() => undefined);
+        },
+      });
+    }
+    return result;
+  });
+  on<AssistProposeInput>('assist.propose', (input) => assistPropose(input));
+  on<{ card: unknown; baseRevision?: number }>('assist.accept', (input) =>
+    acceptAssist(input.card),
+  );
   on<ExportTextInput>('export.text', (input) => deckText(snapshot.document, input));
   /*
    * The thirty six actions of the Google Slides parity round two (gslides-parity SPEC-2 section 3)
@@ -3220,6 +3683,38 @@ export function createEditorController(init: {
   on<DeckSetBackgroundInput>('deck.setBackground', (input) =>
     deckSetBackground(storeDeps('deck.setBackground'), context, input),
   );
+  /* the brand kit on the window transport (docs/PRODUCT.md 4.1; build/b5.md R2): the reads over
+     the page's document, the writes as one commit with the kit's history label, so Cmd+Z takes
+     one field back as the panel's own writes do */
+  on<Record<string, never>>('brand.get', () => brandGet(snapshot.document.deck));
+  on<BrandSetInput>('brand.set', async (input) => {
+    checkBase(input.baseRevision);
+    const plan = brandSetPlan(snapshot.document.deck, input);
+    const committed = await commit(plan.mutations as Mutation[], plan.label);
+    return {
+      path: input.path,
+      ...(input.value !== undefined ? { value: input.value } : {}),
+      brand: snapshot.document.deck.brand ?? {},
+      revision: committed.revision,
+    };
+  });
+  on<BrandResetInput>('brand.reset', async (input) => {
+    checkBase(input.baseRevision);
+    const plan = brandResetPlan(snapshot.document.deck, input);
+    if (plan.mutations.length === 0)
+      return {
+        brand: snapshot.document.deck.brand ?? {},
+        revision: reportedRevision(),
+        changed: false,
+      };
+    const committed = await commit(plan.mutations as Mutation[], plan.label);
+    return {
+      brand: snapshot.document.deck.brand ?? {},
+      revision: committed.revision,
+      changed: true,
+    };
+  });
+  on<Record<string, never>>('font.list', () => fontList());
   on<BlockGroupInput>('block.group', (input) =>
     blockGroup(storeDeps('block.group'), context, input),
   );
@@ -3303,9 +3798,19 @@ export function createEditorController(init: {
   );
   on<ShapeSetInput>('shape.set', (input) => shapeSet(storeDeps('shape.set'), context, input));
   on<LineSetInput>('line.set', (input) => lineSet(storeDeps('line.set'), context, input));
-  on<DiagramInsertInput>('diagram.insert', (input) =>
-    diagramInsert(storeDeps('diagram.insert'), context, input),
-  );
+  /* the diagram a chrome insert makes is selected as a table or a chart is (rank 1: after an
+     insert from a menu the new object is selected); an agent's stays unselected */
+  dispatcher.register('diagram.insert', async (raw, ctx) => {
+    const input = raw as DiagramInsertInput;
+    const announced = originOf(ctx) === 'chrome' ? armInsertSelection(input.slideId) : null;
+    try {
+      const result = await diagramInsert(storeDeps('diagram.insert'), context, input);
+      announced?.settle(result.blockIds);
+      return result;
+    } finally {
+      announced?.disarm();
+    }
+  });
   /* slide.import reads another deck, so it runs on the server (server/actions.ts) and its write
      comes back over the watch channel; the handler waits for that revision so a caller can address
      the imported slides at once, then selects the first of them */
@@ -3330,7 +3835,10 @@ export function createEditorController(init: {
   });
 
   const invoke = (action: string, input?: unknown): Promise<unknown> =>
-    dispatcher.dispatch(action, input ?? {}, context);
+    dispatcher.dispatch(action, input ?? {}, chromeContext);
+  /** The window API's dispatch: an agent's or a driver's run, with the strict contract (build/b3.md). */
+  const invokeAsAgent = (action: string, input?: unknown): Promise<unknown> =>
+    dispatcher.dispatch(action, input ?? {}, agentContext);
 
   /**
    * The chrome's own dispatch (EditorRoot's shellDispatch, the sidebar, the notes pane, the
@@ -3473,7 +3981,7 @@ export function createEditorController(init: {
     actions: windowActionIds(),
     getSource: readSource,
     applySource,
-    invoke,
+    invoke: invokeAsAgent,
     state: stateOf,
   });
 
@@ -3512,7 +4020,7 @@ export function createEditorController(init: {
             : `${REFUSALS.viewOnly}. ${REFUSALS.requestEditAccess} to change it.`,
         );
       }
-      return invoke(action, input);
+      return invokeAsAgent(action, input);
     },
     state: stateOf,
   });
@@ -3546,6 +4054,13 @@ export function createEditorController(init: {
     },
     attachShell(next) {
       shell = next;
+    },
+    attachEditorShell(api) {
+      editorShell = api;
+    },
+    acceptAssist,
+    refreshPresence() {
+      room?.refreshPresence();
     },
     setActiveSlide(slideId) {
       if (slideId === snapshot.activeSlide) return;
@@ -3671,7 +4186,7 @@ export function createEditorController(init: {
       const slideIds = slideOrder(latest().document).slice(0, GRID_WARM_TILES);
       warmThumbnails({ data: { deckId, theme, slideIds } }).catch((error: unknown) => {
         warmed.delete(theme);
-        say(`Thumbnails: ${errorMessage(error)}`);
+        say(`The thumbnails could not be drawn: ${errorMessage(error)}`);
       });
     },
     async downloadArtifact(run, file) {
@@ -3696,7 +4211,7 @@ export function createEditorController(init: {
         );
         await triggerDownload(url);
       } catch (error) {
-        say(`Download: ${errorMessage(error)}`);
+        say(`The download did not start: ${errorMessage(error)}`);
       }
     },
     clearArtifact() {
@@ -3735,8 +4250,15 @@ export function slideStamp(slide: Slide): string {
  * frame's word is the GT mark, not the title.
  */
 function renderDeckStamp(deck: DeckDocument['deck'], theme: Theme, assetBase: string): string {
+  /* the brand kit is a render input too (docs/PRODUCT.md 4.1; build/b5.md R12): the kit's
+     stylesheet rides inside every slide, so a kit change re renders the memoized slides the show
+     and the filmstrip read */
   return fnv1a(
-    `${theme}|${assetBase}|${canonicalJson({ assets: deck.assets, defaults: deck.defaults ?? null })}`,
+    `${theme}|${assetBase}|${canonicalJson({
+      assets: deck.assets,
+      defaults: deck.defaults ?? null,
+      brand: deck.brand ?? null,
+    })}`,
   );
 }
 
@@ -3802,5 +4324,11 @@ export function toViewerDeck(snap: EditorSnapshot, _draft: boolean): ViewerDeck 
       slideIds: section.slideIds.filter((id) => slides[id]),
     })),
     slides: out,
+    /* the brand kit's frame band for the show's Frame (docs/PRODUCT.md 4.1; build/b5.md R5) */
+    band: frameBandOf(
+      deck,
+      readTheme(),
+      bandAssetResolver(deck, (_id, _theme, path) => assetBase + path),
+    ),
   };
 }

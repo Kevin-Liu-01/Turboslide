@@ -23,6 +23,7 @@ import {
 import type { SyncExportInput } from '../../server/export-sync';
 import {
   batchedJobFile,
+  isProducedFileName,
   cancelBatchedExport,
   exportBatch,
   isJobId,
@@ -112,11 +113,21 @@ function worker(): WorkerClient {
   return client;
 }
 
-/** GET ?job=<id>&file=<name>: a produced file from the batched job's store, else this instance's job folder. */
-async function jobFile(deckId: string, jobId: string, name: string): Promise<Response> {
+/**
+ * GET ?job=<id>&file=<name>[&as=<name>]: a produced file from the batched job's store, else this
+ * instance's job folder, saved as `as` when given (the deck's title, the product round's rank 7;
+ * the store holds a batched job's files under their display names already, a sync job's folder
+ * holds the exporter's names).
+ */
+async function jobFile(
+  deckId: string,
+  jobId: string,
+  name: string,
+  saveAs: string | null,
+): Promise<Response> {
   if (!/^[a-z0-9-]+$/.test(jobId)) return badRequest('job must be a job id');
-  if (!/^[A-Za-z0-9._-]+$/.test(name) || name.startsWith('.'))
-    return badRequest('file must be a name');
+  if (!isProducedFileName(name)) return badRequest('file must be a name');
+  if (saveAs !== null && !isProducedFileName(saveAs)) return badRequest('as must be a name');
   try {
     const batched = await batchedJobFile(deckId, jobId, name);
     const data = batched?.data ?? (await worker().readJobFile(jobId, `export/${name}`));
@@ -125,7 +136,7 @@ async function jobFile(deckId: string, jobId: string, name: string): Promise<Res
         'cache-control': 'no-store',
         'content-type': contentTypeOf(name),
         'content-length': String(data.byteLength),
-        'content-disposition': contentDisposition(name),
+        'content-disposition': contentDisposition(saveAs ?? name),
         'x-content-type-options': 'nosniff',
       },
     });
@@ -461,7 +472,7 @@ export const Route = createFileRoute('/api/export/$deckId')({
         const url = new URL(request.url);
         const jobId = url.searchParams.get('job');
         const file = url.searchParams.get('file');
-        if (jobId && file) return jobFile(params.deckId, jobId, file);
+        if (jobId && file) return jobFile(params.deckId, jobId, file, url.searchParams.get('as'));
         try {
           if (jobId) {
             const job = await worker().job(jobId);

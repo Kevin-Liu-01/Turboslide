@@ -6,7 +6,10 @@
 import { createHash } from 'node:crypto';
 
 import type { BlobCallOptions, BlobClient, BlobEntry, BlobPutOptions } from './blob-store.ts';
-import { BlobExistsError, BlobPreconditionError } from './blob-store.ts';
+import { BlobExistsError, BlobPreconditionError, BlobStaleReadError } from './blob-store.ts';
+
+/** How long the fake's get waits for releaseGet() when the caller named a version the held copy lacks. */
+const FAKE_CDN_LAG_MS = 2000;
 
 /** One recorded call; `aborted` when the caller's signal ended it while the fake held it. */
 export type FakeBlobCall = { op: keyof BlobClient; pathname: string; aborted?: true };
@@ -19,6 +22,8 @@ export type FakeBlobClient = BlobClient & {
   readonly base: string;
   /** injects a failure for the next put of a pathname (a network fault) */
   failNextPut: (pathname: string, error: Error) => void;
+  /** injects a failure for the next get of a pathname (the public store's edge answering 403 on a just written file) */
+  failNextGet: (pathname: string, error: Error) => void;
   /** freezes what list() answers at this moment until releaseList(): Vercel Blob's listing lags */
   holdList: () => void;
   releaseList: () => void;
@@ -60,6 +65,7 @@ export function memoryBlobClient(
   const blobs = new Map<string, { bytes: Uint8Array; version: string; uploadedAt: string }>();
   const calls: FakeBlobCall[] = [];
   const failures = new Map<string, Error>();
+  const getFailures = new Map<string, Error>();
   const now = options.now ?? (() => new Date().toISOString());
   let heldList: BlobEntry[] | null = null;
   let heldBodies: Map<string, { bytes: Uint8Array; version: string }> | null = null;
@@ -114,6 +120,9 @@ export function memoryBlobClient(
     failNextPut(pathname, error) {
       failures.set(pathname, error);
     },
+    failNextGet(pathname, error) {
+      getFailures.set(pathname, error);
+    },
     holdList() {
       heldList = listing();
     },
@@ -142,13 +151,27 @@ export function memoryBlobClient(
       await whileHeld(call, options?.signal);
       return entryOf(pathname);
     },
-    async get(pathname) {
+    async get(pathname, options?: BlobCallOptions) {
       calls.push({ op: 'get', pathname });
-      const held = heldBodies?.get(pathname);
-      const stored = held ?? blobs.get(pathname);
-      const entry = held ? { ...entryOf(pathname), version: held.version } : entryOf(pathname);
-      if (stored === undefined || entry === null || entry.pathname === undefined) return null;
-      return { entry: entry as BlobEntry, bytes: new Uint8Array(stored.bytes) };
+      const failure = getFailures.get(pathname);
+      if (failure !== undefined) {
+        getFailures.delete(pathname);
+        throw failure;
+      }
+      // a caller naming the version it expects reads until the held (lagging) copy is released,
+      // the way blob-vercel.ts reads the CDN again, and gives up the way it does
+      const started = Date.now();
+      for (;;) {
+        const held = heldBodies?.get(pathname);
+        const stored = held ?? blobs.get(pathname);
+        const entry = held ? { ...entryOf(pathname), version: held.version } : entryOf(pathname);
+        if (stored === undefined || entry === null || entry.pathname === undefined) return null;
+        if (options?.version === undefined || entry.version === options.version)
+          return { entry: entry as BlobEntry, bytes: new Uint8Array(stored.bytes) };
+        if (Date.now() - started >= FAKE_CDN_LAG_MS)
+          throw new BlobStaleReadError(pathname, options.version);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
     },
     async list(prefix) {
       calls.push({ op: 'list', pathname: prefix });

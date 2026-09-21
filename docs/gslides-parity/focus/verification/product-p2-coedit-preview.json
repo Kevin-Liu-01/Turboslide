@@ -1,0 +1,25 @@
+{
+  "base": "https://turboslide-d0zxgtfia-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-21T08:40:35.304Z",
+  "rows": [
+    {
+      "n": 1,
+      "name": "Share > Copy link fills the field with the general link and the clipboard equals it",
+      "ok": true,
+      "observed": "field before \"\"; after Copy link \"https://turboslide-d0zxgtfia-kl01s-projects.vercel.app/s/1csU1cXVmizsG5ZvTCd7hr\"; clipboard equals the field; {\"mode\":\"link\",\"role\":null}; share.get links \"[object O record {\"record\":{\"schemaVersion\":1,\"deckId\":\"untitled-20260921-0kxo\",\"owner\":\"anon_d2bb75dd-2415-4371-9c69-baeeb2492c56\",\"pendingOwner\":null,\"createdAt\":\"2026-09-21T08:40:12.848Z\",\"createdBy\":\"anon_d2bb75dd-2415-4371-9c69-baeeb2492c56\",\"assetKey\":\"untitled-20260921-"
+    },
+    {
+      "n": 2,
+      "name": "the copied address opens in a second browser as an editor",
+      "ok": true,
+      "observed": "attempts [{\"afterMs\":0,\"status\":200,\"url\":\"/edit/untitled-20260921-0kxo\"}]; edit mode \"editing\"; toolbar {\"newSlide\":true,\"bold\":false,\"controls\":27}"
+    },
+    {
+      "n": 3,
+      "name": "the first browser reads the six words on the slide within 5 s",
+      "ok": true,
+      "observed": "first browser slide text \"Six words typed by the colleague | Click to add text\" after 4351 ms (the typing included)"
+    }
+  ],
+  "teardown": "deleted untitled-20260921-0kxo; /edit answers 404"
+}

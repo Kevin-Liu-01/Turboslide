@@ -46,3 +46,55 @@ export function withImportResidual(
   const current = importResidual(ext) ?? {};
   return { ...ext, import: { ...current, ...patch } };
 }
+
+// ---------------------------------------------------------------------------------------------
+// The assistant's mark (docs/PRODUCT.md 6.1 "The mark"; audit-assist 3, 15)
+
+/**
+ * `ext.assist` on a block or a slide the assistant wrote: when, under which run and from which
+ * card. The stage draws the chip word "Assistant" while it is set; the seller's next edit of the
+ * block clears it (the editor's commit does that), so the mark says "not yet read by a person"
+ * and nothing else. The exports, the standalone HTML and the published player carry it as plain
+ * `ext` data and draw nothing from it.
+ */
+export type AssistMark = {
+  /** ISO 8601, the Accept */
+  at: string;
+  /** the assistant's run id, the same the write's author carries */
+  runId: string;
+  /** the card id the write came from */
+  card: string;
+};
+
+export const assistMarkSchema = z.strictObject({
+  at: z.string(),
+  runId: z.string().min(1),
+  card: z.string().min(1),
+}) satisfies z.ZodType<AssistMark>;
+
+/** Reads `ext.assist`; undefined when absent or malformed, so a hand edited record draws nothing. */
+export function assistMark(ext: Record<string, unknown> | undefined): AssistMark | undefined {
+  if (ext === undefined) return undefined;
+  const parsed = assistMarkSchema.safeParse(ext['assist']);
+  return parsed.success ? parsed.data : undefined;
+}
+
+/** Returns `ext` with the assistant's mark set. */
+export function withAssistMark(
+  ext: Record<string, unknown> | undefined,
+  mark: AssistMark,
+): Record<string, unknown> {
+  return { ...ext, assist: mark };
+}
+
+/**
+ * Returns `ext` without the assistant's mark: undefined when nothing else was there (so the
+ * block loses the `ext` key altogether), the rest of the record otherwise.
+ */
+export function withoutAssistMark(
+  ext: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined {
+  if (ext === undefined || !('assist' in ext)) return ext;
+  const { assist: _dropped, ...rest } = ext;
+  return Object.keys(rest).length === 0 ? undefined : rest;
+}

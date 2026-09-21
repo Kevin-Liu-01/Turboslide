@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import type { FormEvent } from 'react';
+import { useMemo, useState } from 'react';
 
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideOrder, slideTitle } from '@turboslide/schema/deck';
@@ -9,8 +10,10 @@ import type { EditorDispatch } from './dispatch';
 import { KIND_ICONS } from './inspector/sections';
 import { finderRows } from './menus/finder';
 import type { MenuContext, MenuItem } from './menus/model';
+import { findItem, isPresent } from './menus/model';
 import { Palette } from './Palette';
 import type { PaletteEntry } from './palette-data';
+import { filterPalette } from './palette-data';
 
 /**
  * Search the menus (gslides-parity SPEC 2.10, 3.1 row 1; Option+/): the command palette in menu
@@ -19,6 +22,12 @@ import type { PaletteEntry } from './palette-data';
  * stay"); the Actions group moves to Tools > Advanced > Run an action…, which opens the full
  * palette. Enter runs the item's effect through the shell. The rows' tooltips carry the label,
  * the sentence and the key, never an action id or a pointer (SPEC 12).
+ *
+ * The product round (docs/PRODUCT.md 6.1; audit-assist 8): the empty state gains the row "Ask the
+ * assistant: <phrase>" (`finder.assist.ask`, drawn as `palette.finder.assist.ask`) when a phrase
+ * matches nothing; Enter opens the Assist panel with the phrase in the box through `onAsk`. The
+ * row is present while the Assist entry is (`title.assist` in the model and drawn for the
+ * context), so parking the assist parks the row with it (8.1).
  */
 export type ToolFinderProps = {
   open: boolean;
@@ -30,7 +39,24 @@ export type ToolFinderProps = {
   onPickLayout: (layout: LayoutId) => void;
   onClose: () => void;
   onNotice?: (message: string) => void;
+  /** opens the Assist panel with the phrase; without it the empty state stays "Nothing matches" */
+  onAsk?: (phrase: string) => void;
 };
+
+/** The Ask row's entry id; the palette draws it as `palette.finder.assist.ask`. */
+export const ASK_ENTRY_ID = 'finder.assist.ask';
+
+/** The Ask row's words. */
+export const ASK_ROW = {
+  title: (phrase: string) => `Ask the assistant: ${phrase}`,
+  doc: 'Opens Assist with these words in the box; nothing changes until you accept a card',
+} as const;
+
+/** True while the Assist entry exists in the model and the context draws it (the parks rule). */
+export function assistPresent(ctx: MenuContext): boolean {
+  const item = findItem('title.assist');
+  return item !== undefined && isPresent(item, ctx);
+}
 
 /** The rows of the finder for a document: the menu items, the slides, the layouts. */
 export function toolFinderEntries(
@@ -88,6 +114,31 @@ export function toolFinderEntries(
   return [...menus, ...slides, ...layouts];
 }
 
+/**
+ * The Ask row for a phrase that matches nothing (docs/PRODUCT.md 6.1): one entry whose words are
+ * the phrase itself, so the filter keeps it while every other row is gone; null while the phrase
+ * matches a row, is empty, or the assist is absent.
+ */
+export function askEntry(
+  entries: ReadonlyArray<PaletteEntry>,
+  phrase: string,
+  ctx: MenuContext,
+  ask: ((phrase: string) => void) | undefined,
+): PaletteEntry | null {
+  const trimmed = phrase.trim();
+  if (ask === undefined || trimmed === '' || !assistPresent(ctx)) return null;
+  if (filterPalette(entries, phrase).some((group) => group.rows.length > 0)) return null;
+  return {
+    id: ASK_ENTRY_ID,
+    group: 'menus',
+    title: ASK_ROW.title(trimmed),
+    hint: ASK_ROW.doc,
+    icon: 'sparkles',
+    terms: trimmed.toLowerCase(),
+    run: { kind: 'call', call: () => ask(trimmed) },
+  };
+}
+
 export function ToolFinder({
   open,
   document,
@@ -98,23 +149,44 @@ export function ToolFinder({
   onPickLayout,
   onClose,
   onNotice,
+  onAsk,
 }: ToolFinderProps) {
-  const entries = useMemo(
+  const [phrase, setPhrase] = useState('');
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setPhrase('');
+  }
+  const base = useMemo(
     () => (open ? toolFinderEntries(document, slideId, menuContext, onRunItem, onPickLayout) : []),
     [open, document, slideId, menuContext, onRunItem, onPickLayout],
   );
+  const ask = useMemo(
+    () => (open ? askEntry(base, phrase, menuContext, onAsk) : null),
+    [open, base, phrase, menuContext, onAsk],
+  );
+  const entries = useMemo(() => (ask === null ? base : [...base, ask]), [base, ask]);
+  /* the palette owns the query; the finder reads it as it is typed, from the input's own event,
+     so the Ask row can join the list when nothing else matches (React's onInput bubbles) */
+  const onInput = (event: FormEvent<HTMLDivElement>) => {
+    const target = event.target;
+    if (target instanceof HTMLInputElement && target.dataset['control'] === 'palette.query')
+      setPhrase(target.value);
+  };
   return (
-    <Palette
-      open={open}
-      entries={entries}
-      dispatch={dispatch}
-      onClose={onClose}
-      onNotice={onNotice}
-      placeholder="Search the menus"
-      label="Search the menus"
-      groups={['menus', 'slides', 'layouts']}
-      shortcutKey="Option /"
-      className="ts-toolfinder"
-    />
+    <div onInput={onInput} data-control="toolFinder.frame">
+      <Palette
+        open={open}
+        entries={entries}
+        dispatch={dispatch}
+        onClose={onClose}
+        onNotice={onNotice}
+        placeholder="Search the menus"
+        label="Search the menus"
+        groups={['menus', 'slides', 'layouts']}
+        shortcutKey="Option /"
+        className="ts-toolfinder"
+      />
+    </div>
   );
 }

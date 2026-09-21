@@ -9,6 +9,9 @@ export const IDS = [
   'help.keyboard-shortcuts',
   'help.search-the-menus',
   'help.check-slides',
+  /* the product round (docs/PRODUCT.md 8.1) */
+  'help.shortcuts.no-duplicates',
+  'help.shortcuts.question-key',
 ];
 
 export async function run(t) {
@@ -205,6 +208,94 @@ export async function run(t) {
            (the ladder row's Fix left the size at 27 on two follow-up runs: section 3 of the note) */
         ok: open && facts.rows >= 1 && facts.fixes >= 1,
         observed: `${r.switched ? 'with the switch on; ' : ''}setup block ${lint ? `size ${size0}` : 'not placed'}; panel ${open}; ${facts.rows} suggestion rows, ${facts.fixes} Fix buttons; first "${facts.first}"${fixed !== null ? `; Fix snapped the size ${size0} -> ${fixed}` : ''}`,
+      };
+    },
+  );
+  await productRound(t);
+}
+
+/**
+ * The product round's rows (docs/PRODUCT.md section 2 rank 31, 3.1.1, 8.1): the Keyboard shortcuts
+ * dialog lists Redo once and its Common actions begin with New slide; Shift+/ opens it with no
+ * snackbar. B1 owns the dialog and the key.
+ */
+async function productRound(t) {
+  const { page } = t;
+  await t.clickCard(t.deck.titleSlide);
+  await t.clearAll();
+  const readDialog = () =>
+    page.evaluate(() => {
+      const dialog = document.querySelector('[data-control="dialog.keyboardShortcuts"]');
+      const rows = [...(dialog?.querySelectorAll('tr') ?? [])]
+        .map((tr) => tr.querySelector('td, th')?.textContent?.trim() ?? '')
+        .filter(Boolean);
+      const redo = rows.filter((r) => /^Redo$/.test(r)).length;
+      const heads = [...(dialog?.querySelectorAll('h2, h3, h4, caption, thead th') ?? [])].map(
+        (h) => h.textContent?.trim() ?? '',
+      );
+      const common = [...(dialog?.querySelectorAll('h2, h3, h4, caption') ?? [])].find((h) =>
+        /Common actions/.test(h.textContent ?? ''),
+      );
+      let firstCommon = null;
+      if (common) {
+        const table =
+          common.closest('section, table')?.querySelector('tbody tr, tr') ??
+          common.parentElement?.querySelector('tbody tr, tr') ??
+          null;
+        firstCommon = table?.querySelector('td, th')?.textContent?.trim() ?? null;
+        if (firstCommon === null) {
+          let el = common.nextElementSibling;
+          while (el && !el.querySelector('tr') && !el.matches('tr')) el = el.nextElementSibling;
+          firstCommon =
+            (el?.matches('tr') ? el : el?.querySelector('tr'))
+              ?.querySelector('td, th')
+              ?.textContent?.trim() ?? null;
+        }
+      }
+      return { rows: rows.length, redo, heads: heads.slice(0, 6), firstCommon };
+    });
+  await t.step(
+    'help.shortcuts.no-duplicates',
+    'Help > Keyboard shortcuts; read the rows',
+    'Redo is listed once; Common actions begin with New slide',
+    async () => {
+      await t.menuPath('help', 'help.keyboardShortcuts');
+      await t.waitControl('dialog.keyboardShortcuts', 8000);
+      await t.sleep(300);
+      const facts = await readDialog();
+      await t.press('Escape');
+      await t.waitGone('[data-control="dialog.keyboardShortcuts"]', 4000);
+      return {
+        ok: facts.redo === 1 && facts.firstCommon === 'New slide',
+        observed: `${facts.rows} rows; Redo listed ${facts.redo} time(s); Common actions begin with "${facts.firstCommon ?? 'not read'}" (heads ${facts.heads.join(' | ')})`,
+      };
+    },
+  );
+  await t.step(
+    'help.shortcuts.question-key',
+    'focus the stage, press Shift+/',
+    'Keyboard shortcuts opens within 1 s and no snackbar shows',
+    async () => {
+      await t.clearAll();
+      const p = await t.emptySheetPoint();
+      await t.clickAt(p.x, p.y);
+      await t.sleep(200);
+      const t0 = Date.now();
+      await t.press('Shift+Slash');
+      const open = await t
+        .pollUntil(
+          () => t.visible('dialog.keyboardShortcuts'),
+          (x) => x,
+          1000,
+        )
+        .catch(() => false);
+      const ms = Date.now() - t0;
+      const said = await t.snackbar();
+      if (open) await t.press('Escape');
+      await t.waitGone('[data-control="dialog.keyboardShortcuts"]', 4000);
+      return {
+        ok: open && said === null,
+        observed: `dialog open ${open} after ${ms} ms; snackbar ${said ?? 'none'}`,
       };
     },
   );

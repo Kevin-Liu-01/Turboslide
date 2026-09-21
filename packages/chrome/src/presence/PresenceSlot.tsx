@@ -22,8 +22,20 @@ import { canFollow, chipTipOf, slideNumberOf, slotChips, viewerFactsOf } from '.
  * 7 px gap and the own chip with a 1 px ink border. A chip appears and leaves by opacity; a
  * click follows the person (4.4) or, where Follow is refused, jumps once to their slide; the
  * `+N` chip opens the roster menu (4.5); the own chip opens the own chip's menu (7.5). The row's
- * width never changes when a person joins or leaves.
+ * width never changes when a person joins or leaves. The slot itself carries a tooltip naming
+ * who is in the presentation now (docs/PRODUCT.md section 2 rank 30; audit-seller 32).
  */
+
+/** The slot's tooltip (rank 30): the name and one sentence, with the count while others are present. */
+export function presenceSlotTip(others: number): { name: string; doc: string } {
+  return {
+    name: PRESENCE.collaborators,
+    doc:
+      others === 0
+        ? 'Who is in this presentation now. Nobody else has it open'
+        : `Who is in this presentation now. ${others === 1 ? 'One other person has' : `${others} other people have`} it open`,
+  };
+}
 const EMPTY: EditorPresence = { others: [] };
 
 /** The identity the own chip shows when the route passed no account: a label from the presence self, else nothing. */
@@ -68,6 +80,7 @@ export function PresenceSlot() {
       data-count={presence.others.length}
       role="group"
       aria-label={PRESENCE.collaborators}
+      {...tipProps(presenceSlotTip(presence.others.length))}
     >
       {Array.from({ length: 4 }, (_slot, i) => {
         const participant = shown[i];

@@ -1,0 +1,36 @@
+{
+  "name": "drive-fix-links",
+  "base": "http://localhost:4412",
+  "ok": 4,
+  "failed": 0,
+  "rows": [
+    {
+      "n": 1,
+      "step": "text.link.detect-email, text.link.popover-apply-remove (a heading block): address, Enter, a word, Cmd+K",
+      "expected": "the stored text and the sheet agree after the word; the link apply writes [Renewal](https://acme.com/renewal) and nothing leaks",
+      "observed": "heading block: selected \"Renewal\"; Cmd+K field \"\"; trace [{\"at\":\"typed the address\",\"editing\":true,\"anchors\":[],\"text\":\"sales@acme.com\",\"stored\":\"sales@acme.com\"},{\"at\":\"after Enter\",\"editing\":false,\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"text\":\"sales@acme.com\",\"stored\":\"[sales@acme.com](mailto:sales@acme.com)\"},{\"at\":\"typed Renewal\",\"editing\":true,\"anchors\":[],\"text\":\"Renewal\",\"stored\":\"Renewal\"},{\"at\":\"after the Cmd+K link\",\"editing\":true,\"anchors\":[{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"text\":\"Renewal\",\"stored\":\"[Renewal](https://acme.com/renewal)\"},{\"at\":\"after Escape\",\"editing\":false,\"anchors\":[{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"text\":\"Renewal\",\"stored\":\"[Renewal](https://acme.com/renewal)\"}]",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "the same keys in a body paragraph",
+      "expected": "the address on one line, the linked word on the next, nothing leaks",
+      "observed": "body paragraph: selected \"Renewal\"; Cmd+K field \"\"; trace [{\"at\":\"typed the address\",\"editing\":true,\"anchors\":[],\"text\":\"sales@acme.com\",\"stored\":\"sales@acme.com\"},{\"at\":\"after Enter\",\"editing\":true,\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"text\":\"sales@acme.com\",\"stored\":\"[sales@acme.com](mailto:sales@acme.com)\"},{\"at\":\"typed Renewal\",\"editing\":true,\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"text\":\"sales@acme.comRenewal\",\"stored\":\"[sales@acme.com](mailto:sales@acme.com)\\nRenewal\"},{\"at\":\"after the Cmd+K link\",\"editing\":true,\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"},{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"text\":\"sales@acme.comRenewal\",\"stored\":\"[sales@acme.com](mailto:sales@acme.com)\\n[Renewal](https://acme.com/renewal)\"},{\"at\":\"after Escape\",\"editing\":false,\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"},{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"text\":\"sales@acme.comRenewal\",\"stored\":\"[sales@acme.com](mailto:sales@acme.com)\\n[Renewal](https://acme.com/renewal)\"}]; final stored \"[sales@acme.com](mailto:sales@acme.com)\\n[Renewal](https://acme.com/renewal)\"",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "the title slide heading (a slide field): address, Enter, a word, Cmd+K",
+      "expected": "the stored heading and the sheet agree; the link apply writes the linked word and nothing leaks",
+      "observed": "title heading: selected \"Renewal\"; Cmd+K field \"\"; trace [{\"at\":\"typed the address\",\"editing\":true,\"anchors\":[],\"text\":\"sales@acme.com\",\"stored\":\"sales@acme.com\"},{\"at\":\"after Enter\",\"editing\":false,\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"text\":\"sales@acme.com\",\"stored\":\"[sales@acme.com](mailto:sales@acme.com)\"},{\"at\":\"typed Renewal\",\"editing\":true,\"anchors\":[],\"text\":\"Renewal\",\"stored\":\"Renewal\"},{\"at\":\"after the Cmd+K link\",\"editing\":true,\"anchors\":[{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"text\":\"Renewal\",\"stored\":\"[Renewal](https://acme.com/renewal)\"},{\"at\":\"after Escape\",\"editing\":false,\"anchors\":[{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"text\":\"Renewal\",\"stored\":\"[Renewal](https://acme.com/renewal)\"}]",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "console errors during the drive",
+      "expected": "none",
+      "observed": "none",
+      "ok": true
+    }
+  ]
+}

@@ -380,7 +380,7 @@
       "post": {
         "operationId": "deck.create",
         "summary": "New deck",
-        "description": "Creates a deck under decks/ from the GT brand template or as one title slide, and returns its id, revision and counts.",
+        "description": "Creates a deck under decks/ from a template of the index (template.list), the GT brand template or one title slide, and returns its id, revision and counts.",
         "tags": [
           "deck"
         ],
@@ -1745,6 +1745,948 @@
           },
           "501": {
             "description": "Declared, lands in GS2 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/template.list": {
+      "post": {
+        "operationId": "template.list",
+        "summary": "Templates",
+        "description": "The template index: every template with its name, category, cover, sentence, slide count, theme and appearance, the organisation flag of a template saved on this deployment and its brand kit, plus the id of the template new presentations start from.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": false,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeckInfoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateListOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/template.slides": {
+      "post": {
+        "operationId": "template.slides",
+        "summary": "Template slides",
+        "description": "The slides of one template in order with their titles and kinds, the rows the gallery and Import slides read.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": false,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateSlidesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateSlidesOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/template.create": {
+      "post": {
+        "operationId": "template.create",
+        "summary": "Save as template",
+        "description": "Saves a deck as a template of this deployment: decks/templates/<slug of the name> with the deck manifest, its slides, its assets and its brand kit, listed under Your organisation in the gallery; a name an organisation template already carries replaces that template and keeps its slug (the dialog says so first).",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateCreateOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/template.update": {
+      "post": {
+        "operationId": "template.update",
+        "summary": "Replace a template",
+        "description": "Replaces the slides, assets and brand kit of an organisation template from a deck and keeps its id, name and sentence; the templates Turboslide ships are refused.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateCreateOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/template.rename": {
+      "post": {
+        "operationId": "template.rename",
+        "summary": "Rename a template",
+        "description": "Renames an organisation template; its id and its folder stay, so every link and every default record still name it. The templates Turboslide ships are refused.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateRenameInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateCreateOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/template.delete": {
+      "post": {
+        "operationId": "template.delete",
+        "summary": "Delete a template",
+        "description": "Deletes an organisation template folder and its index row; presentations made from it are not changed. The template new presentations start from is refused until another is chosen, and so are the templates Turboslide ships. Irreversible; `confirm` must be true.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateDeleteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateDeleteOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/template.setDefault": {
+      "post": {
+        "operationId": "template.setDefault",
+        "summary": "Use for new presentations",
+        "description": "Makes a template the one /new and the Blank card start from on this deployment (decks/templates/default.json), whose name, logo and appearance every Reset and every default logo read; `blank` restores the blank deck Turboslide ships. An agent token needs the admin scope.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateSetDefaultInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateSetDefaultOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
             "content": {
               "application/json": {
                 "schema": {
@@ -12027,6 +12969,929 @@
         }
       }
     },
+    "/api/actions/deck.tailor": {
+      "post": {
+        "operationId": "deck.tailor",
+        "summary": "Tailor for a customer",
+        "description": "The tailoring pass as one write: replaces the customer name in every visible text and the notes, swaps the pictures whose alt text names the old customer for one asset, and skips the named slides; answers the counts per step and the slides that changed.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeckTailorInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeckTailorOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/assist.propose": {
+      "post": {
+        "operationId": "assist.propose",
+        "summary": "Ask the assistant",
+        "description": "Asks the assistant for a proposal over the named slides: a shorter rewrite or speaker notes, or a free ask that resolves to one of the two; answers signed cards a caller accepts with assist.accept. A read: nothing is written until a card is accepted.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": false,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistProposeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistProposeOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/assist.accept": {
+      "post": {
+        "operationId": "assist.accept",
+        "summary": "Accept a proposal",
+        "description": "Writes one card assist.propose returned, as one write by the assistant: the signature, the expiry and the deck are verified, a card behind the deck is re based when its blocks are unchanged and refused otherwise.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistAcceptInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistAcceptOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/brand.get": {
+      "post": {
+        "operationId": "brand.get",
+        "summary": "Brand kit",
+        "description": "The brand kit record of the deck: the colour roles, the faces, the logo and footer slots, the slide numbers, the frame toggles and the words that never translate; an empty object for a deck that reads the deployment’s default kit.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": false,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeckInfoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandGetOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/brand.set": {
+      "post": {
+        "operationId": "brand.set",
+        "summary": "Set a brand kit field",
+        "description": "Writes one value of the brand kit by JSON pointer (/colors/light/primary, /fonts/display, /mark, /footer/logo, /footer/text, /counter/format, /frame/rails, /positions/mark, /lexicon, /appearance, /name) as one deck.set mutation under /brand, the write every Brand kit panel control makes; an absent value removes the field. The record is validated before the commit.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandSetInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandSetOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/brand.reset": {
+      "post": {
+        "operationId": "brand.reset",
+        "summary": "Reset the brand kit",
+        "description": "Removes the brand kit record, so the deck reads the deployment’s default kit, or one field of it when a pointer is given; a deck with nothing to remove writes no revision.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandResetInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandResetOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/font.list": {
+      "post": {
+        "operationId": "font.list",
+        "summary": "Fonts",
+        "description": "The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2).",
+        "tags": [
+          "render"
+        ],
+        "x-mutates": false,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeckInfoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FontListOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/actions/presence.list": {
       "post": {
         "operationId": "presence.list",
@@ -20524,7 +22389,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -20574,6 +22440,299 @@
               "x",
               "y"
             ],
+            "additionalProperties": false
+          },
+          "brand": {
+            "title": "Brand kit",
+            "x-inspector": {
+              "label": "Brand kit",
+              "control": "json",
+              "group": "Slide",
+              "help": "The colours, faces, logo, footer, slide numbers and frame of this presentation; the Brand kit panel and brand.set write it (docs/PRODUCT.md 4.1). The default kit when absent."
+            },
+            "description": "The colours, faces, logo, footer, slide numbers and frame of this presentation; the Brand kit panel and brand.set write it (docs/PRODUCT.md 4.1). The default kit when absent.",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "appearance": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ]
+              },
+              "colors": {
+                "type": "object",
+                "properties": {
+                  "light": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "background": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "caption": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "hint": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "primary": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "accent": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "dark": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "background": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "caption": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "hint": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "primary": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "accent": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "fonts": {
+                "type": "object",
+                "properties": {
+                  "display": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "mark": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "picture"
+                    ]
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "box": {
+                    "type": "object",
+                    "properties": {
+                      "w": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 1600
+                      },
+                      "h": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 900
+                      }
+                    },
+                    "required": [
+                      "w",
+                      "h"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              "footer": {
+                "type": "object",
+                "properties": {
+                  "logo": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "picture"
+                    ]
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                },
+                "additionalProperties": false
+              },
+              "counter": {
+                "type": "object",
+                "properties": {
+                  "show": {
+                    "type": "boolean"
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "n / N",
+                      "n",
+                      "Slide n"
+                    ]
+                  },
+                  "skipTitle": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "frame": {
+                "type": "object",
+                "properties": {
+                  "rails": {
+                    "type": "boolean"
+                  },
+                  "rules": {
+                    "type": "boolean"
+                  },
+                  "crosses": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "positions": {
+                "type": "object",
+                "properties": {
+                  "mark": {
+                    "type": "string",
+                    "enum": [
+                      "top-left",
+                      "top-right",
+                      "bottom-left",
+                      "bottom-right",
+                      "hidden"
+                    ]
+                  },
+                  "footerLogo": {
+                    "type": "string",
+                    "enum": [
+                      "top-left",
+                      "top-right",
+                      "bottom-left",
+                      "bottom-right",
+                      "hidden"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "lexicon": {
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              }
+            },
             "additionalProperties": false
           },
           "revision": {
@@ -20734,6 +22893,7 @@
                     "mood",
                     "big-number",
                     "blank",
+                    "subtitle-body",
                     "rows",
                     "plain",
                     "table",
@@ -20762,6 +22922,7 @@
                   "mood",
                   "big-number",
                   "blank",
+                  "subtitle-body",
                   "rows",
                   "plain",
                   "table",
@@ -20801,7 +22962,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -21059,6 +23221,7 @@
                           "mood",
                           "big-number",
                           "blank",
+                          "subtitle-body",
                           "rows",
                           "plain",
                           "table",
@@ -21229,6 +23392,7 @@
                     "mood",
                     "big-number",
                     "blank",
+                    "subtitle-body",
                     "rows",
                     "plain",
                     "table",
@@ -21257,6 +23421,7 @@
                   "mood",
                   "big-number",
                   "blank",
+                  "subtitle-body",
                   "rows",
                   "plain",
                   "table",
@@ -21296,7 +23461,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -21554,6 +23720,7 @@
                           "mood",
                           "big-number",
                           "blank",
+                          "subtitle-body",
                           "rows",
                           "plain",
                           "table",
@@ -21717,6 +23884,7 @@
                     "mood",
                     "big-number",
                     "blank",
+                    "subtitle-body",
                     "rows",
                     "plain",
                     "table",
@@ -21745,6 +23913,7 @@
                   "mood",
                   "big-number",
                   "blank",
+                  "subtitle-body",
                   "rows",
                   "plain",
                   "table",
@@ -21784,7 +23953,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -22042,6 +24212,7 @@
                           "mood",
                           "big-number",
                           "blank",
+                          "subtitle-body",
                           "rows",
                           "plain",
                           "table",
@@ -22194,6 +24365,7 @@
                     "mood",
                     "big-number",
                     "blank",
+                    "subtitle-body",
                     "rows",
                     "plain",
                     "table",
@@ -22222,6 +24394,7 @@
                   "mood",
                   "big-number",
                   "blank",
+                  "subtitle-body",
                   "rows",
                   "plain",
                   "table",
@@ -22261,7 +24434,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -22519,6 +24693,7 @@
                           "mood",
                           "big-number",
                           "blank",
+                          "subtitle-body",
                           "rows",
                           "plain",
                           "table",
@@ -22701,6 +24876,7 @@
                     "mood",
                     "big-number",
                     "blank",
+                    "subtitle-body",
                     "rows",
                     "plain",
                     "table",
@@ -22729,6 +24905,7 @@
                   "mood",
                   "big-number",
                   "blank",
+                  "subtitle-body",
                   "rows",
                   "plain",
                   "table",
@@ -22768,7 +24945,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -23026,6 +25204,7 @@
                           "mood",
                           "big-number",
                           "blank",
+                          "subtitle-body",
                           "rows",
                           "plain",
                           "table",
@@ -23221,6 +25400,7 @@
                     "mood",
                     "big-number",
                     "blank",
+                    "subtitle-body",
                     "rows",
                     "plain",
                     "table",
@@ -23249,6 +25429,7 @@
                   "mood",
                   "big-number",
                   "blank",
+                  "subtitle-body",
                   "rows",
                   "plain",
                   "table",
@@ -23288,7 +25469,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -23546,6 +25728,7 @@
                           "mood",
                           "big-number",
                           "blank",
+                          "subtitle-body",
                           "rows",
                           "plain",
                           "table",
@@ -24473,6 +26656,73 @@
                     "description": "The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11).",
                     "type": "number",
                     "minimum": 0
+                  },
+                  "family": {
+                    "title": "Font",
+                    "x-inspector": {
+                      "label": "Font",
+                      "control": "select",
+                      "snap": [
+                        "inter",
+                        "roboto",
+                        "open-sans",
+                        "lato",
+                        "montserrat",
+                        "poppins",
+                        "source-sans-3",
+                        "source-serif-4",
+                        "merriweather",
+                        "playfair-display",
+                        "lora",
+                        "pt-serif",
+                        "libre-baskerville",
+                        "eb-garamond",
+                        "nunito",
+                        "raleway",
+                        "work-sans",
+                        "dm-sans",
+                        "space-grotesk",
+                        "oswald",
+                        "bebas-neue",
+                        "roboto-mono",
+                        "jetbrains-mono",
+                        "ibm-plex-sans",
+                        "ibm-plex-mono",
+                        "fira-code"
+                      ],
+                      "group": "Text",
+                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                    },
+                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
                   }
                 },
                 "additionalProperties": false
@@ -24496,6 +26746,55 @@
                   "none",
                   "shrink",
                   "grow"
+                ]
+              },
+              "color": {
+                "title": "Color",
+                "x-inspector": {
+                  "label": "Color",
+                  "control": "color",
+                  "snap": [
+                    "ink",
+                    "paper",
+                    "ink-2",
+                    "titanium",
+                    "hair",
+                    "hair-soft",
+                    "plate",
+                    "edge",
+                    "green",
+                    "amber",
+                    "red",
+                    "blue",
+                    "accent"
+                  ],
+                  "group": "Text",
+                  "help": "The text colour; the ink unless set."
+                },
+                "description": "The text colour; the ink unless set.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "ink",
+                      "paper",
+                      "ink-2",
+                      "titanium",
+                      "hair",
+                      "hair-soft",
+                      "plate",
+                      "edge",
+                      "green",
+                      "amber",
+                      "red",
+                      "blue",
+                      "accent"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
                 ]
               }
             },
@@ -24990,6 +27289,73 @@
                     "description": "The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11).",
                     "type": "number",
                     "minimum": 0
+                  },
+                  "family": {
+                    "title": "Font",
+                    "x-inspector": {
+                      "label": "Font",
+                      "control": "select",
+                      "snap": [
+                        "inter",
+                        "roboto",
+                        "open-sans",
+                        "lato",
+                        "montserrat",
+                        "poppins",
+                        "source-sans-3",
+                        "source-serif-4",
+                        "merriweather",
+                        "playfair-display",
+                        "lora",
+                        "pt-serif",
+                        "libre-baskerville",
+                        "eb-garamond",
+                        "nunito",
+                        "raleway",
+                        "work-sans",
+                        "dm-sans",
+                        "space-grotesk",
+                        "oswald",
+                        "bebas-neue",
+                        "roboto-mono",
+                        "jetbrains-mono",
+                        "ibm-plex-sans",
+                        "ibm-plex-mono",
+                        "fira-code"
+                      ],
+                      "group": "Text",
+                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                    },
+                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
                   }
                 },
                 "additionalProperties": false
@@ -25013,6 +27379,55 @@
                   "none",
                   "shrink",
                   "grow"
+                ]
+              },
+              "color": {
+                "title": "Color",
+                "x-inspector": {
+                  "label": "Color",
+                  "control": "color",
+                  "snap": [
+                    "ink",
+                    "paper",
+                    "ink-2",
+                    "titanium",
+                    "hair",
+                    "hair-soft",
+                    "plate",
+                    "edge",
+                    "green",
+                    "amber",
+                    "red",
+                    "blue",
+                    "accent"
+                  ],
+                  "group": "Text",
+                  "help": "The text colour; the role’s ink unless set."
+                },
+                "description": "The text colour; the role’s ink unless set.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "ink",
+                      "paper",
+                      "ink-2",
+                      "titanium",
+                      "hair",
+                      "hair-soft",
+                      "plate",
+                      "edge",
+                      "green",
+                      "amber",
+                      "red",
+                      "blue",
+                      "accent"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
                 ]
               }
             },
@@ -28304,7 +30719,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The frame colour; the hairline token unless set."
@@ -28325,7 +30741,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -28392,7 +30809,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The shadow’s colour; the ink unless set."
@@ -28413,7 +30831,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -33011,7 +35430,8 @@
                     "green",
                     "amber",
                     "red",
-                    "blue"
+                    "blue",
+                    "accent"
                   ],
                   "group": "Block",
                   "help": "The box ground; none unless set. Tokens follow the theme (docs/freeform.md)."
@@ -33032,7 +35452,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -33058,7 +35479,8 @@
                     "green",
                     "amber",
                     "red",
-                    "blue"
+                    "blue",
+                    "accent"
                   ],
                   "group": "Block",
                   "help": "The border color; the hairline token unless set."
@@ -33079,7 +35501,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -33412,6 +35835,73 @@
                     "description": "The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11).",
                     "type": "number",
                     "minimum": 0
+                  },
+                  "family": {
+                    "title": "Font",
+                    "x-inspector": {
+                      "label": "Font",
+                      "control": "select",
+                      "snap": [
+                        "inter",
+                        "roboto",
+                        "open-sans",
+                        "lato",
+                        "montserrat",
+                        "poppins",
+                        "source-sans-3",
+                        "source-serif-4",
+                        "merriweather",
+                        "playfair-display",
+                        "lora",
+                        "pt-serif",
+                        "libre-baskerville",
+                        "eb-garamond",
+                        "nunito",
+                        "raleway",
+                        "work-sans",
+                        "dm-sans",
+                        "space-grotesk",
+                        "oswald",
+                        "bebas-neue",
+                        "roboto-mono",
+                        "jetbrains-mono",
+                        "ibm-plex-sans",
+                        "ibm-plex-mono",
+                        "fira-code"
+                      ],
+                      "group": "Text",
+                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                    },
+                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
                   }
                 },
                 "additionalProperties": false
@@ -33433,7 +35923,8 @@
                     "green",
                     "amber",
                     "red",
-                    "blue"
+                    "blue",
+                    "accent"
                   ],
                   "group": "Text",
                   "help": "The color of the text inside the box; the ink unless set."
@@ -33454,7 +35945,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -33539,7 +36031,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The shadow’s colour; the ink unless set."
@@ -33560,7 +36053,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -34174,7 +36668,8 @@
                     "green",
                     "amber",
                     "red",
-                    "blue"
+                    "blue",
+                    "accent"
                   ],
                   "group": "Block",
                   "help": "The inside of a closed shape; none unless set."
@@ -34195,7 +36690,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -34221,7 +36717,8 @@
                     "green",
                     "amber",
                     "red",
-                    "blue"
+                    "blue",
+                    "accent"
                   ],
                   "group": "Block",
                   "help": "The outline or the line color; hair for closed shapes, ink for lines unless set."
@@ -34242,7 +36739,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -34571,6 +37069,73 @@
                     "description": "The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11).",
                     "type": "number",
                     "minimum": 0
+                  },
+                  "family": {
+                    "title": "Font",
+                    "x-inspector": {
+                      "label": "Font",
+                      "control": "select",
+                      "snap": [
+                        "inter",
+                        "roboto",
+                        "open-sans",
+                        "lato",
+                        "montserrat",
+                        "poppins",
+                        "source-sans-3",
+                        "source-serif-4",
+                        "merriweather",
+                        "playfair-display",
+                        "lora",
+                        "pt-serif",
+                        "libre-baskerville",
+                        "eb-garamond",
+                        "nunito",
+                        "raleway",
+                        "work-sans",
+                        "dm-sans",
+                        "space-grotesk",
+                        "oswald",
+                        "bebas-neue",
+                        "roboto-mono",
+                        "jetbrains-mono",
+                        "ibm-plex-sans",
+                        "ibm-plex-mono",
+                        "fira-code"
+                      ],
+                      "group": "Text",
+                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                    },
+                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
                   }
                 },
                 "additionalProperties": false
@@ -34592,7 +37157,8 @@
                     "green",
                     "amber",
                     "red",
-                    "blue"
+                    "blue",
+                    "accent"
                   ],
                   "group": "Text",
                   "help": "The color of the text inside the shape; the ink unless set."
@@ -34613,7 +37179,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -34785,7 +37352,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The shadow’s colour; the ink unless set."
@@ -34806,7 +37374,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -35328,7 +37897,8 @@
                     "green",
                     "amber",
                     "red",
-                    "blue"
+                    "blue",
+                    "accent"
                   ],
                   "group": "Block",
                   "help": "The rule color; the hairline token unless set."
@@ -35349,7 +37919,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -35813,6 +38384,73 @@
                     "description": "The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11).",
                     "type": "number",
                     "minimum": 0
+                  },
+                  "family": {
+                    "title": "Font",
+                    "x-inspector": {
+                      "label": "Font",
+                      "control": "select",
+                      "snap": [
+                        "inter",
+                        "roboto",
+                        "open-sans",
+                        "lato",
+                        "montserrat",
+                        "poppins",
+                        "source-sans-3",
+                        "source-serif-4",
+                        "merriweather",
+                        "playfair-display",
+                        "lora",
+                        "pt-serif",
+                        "libre-baskerville",
+                        "eb-garamond",
+                        "nunito",
+                        "raleway",
+                        "work-sans",
+                        "dm-sans",
+                        "space-grotesk",
+                        "oswald",
+                        "bebas-neue",
+                        "roboto-mono",
+                        "jetbrains-mono",
+                        "ibm-plex-sans",
+                        "ibm-plex-mono",
+                        "fira-code"
+                      ],
+                      "group": "Text",
+                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                    },
+                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
                   }
                 },
                 "additionalProperties": false
@@ -35834,7 +38472,8 @@
                     "green",
                     "amber",
                     "red",
-                    "blue"
+                    "blue",
+                    "accent"
                   ],
                   "group": "Text",
                   "help": "The text color; the ink unless set."
@@ -35855,7 +38494,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -35892,7 +38532,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The stroke around the letters."
@@ -35913,7 +38554,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -36038,7 +38680,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The shadow’s colour; the ink unless set."
@@ -36059,7 +38702,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -36480,7 +39124,8 @@
                     "green",
                     "amber",
                     "red",
-                    "blue"
+                    "blue",
+                    "accent"
                   ],
                   "group": "Block",
                   "help": "The glyph color; the ink unless set. Green, amber, red and blue are the semantic hues."
@@ -36501,7 +39146,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -36538,7 +39184,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The shadow’s colour; the ink unless set."
@@ -36559,7 +39206,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -36886,7 +39534,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ],
                         "group": "Block",
                         "help": "A plate fill behind the column; none unless set."
@@ -36907,7 +39556,8 @@
                             "green",
                             "amber",
                             "red",
-                            "blue"
+                            "blue",
+                            "accent"
                           ]
                         },
                         {
@@ -37048,7 +39698,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The rule color; the hairline token unless set."
@@ -37069,7 +39720,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -37217,7 +39869,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ],
                         "group": "Block",
                         "help": "A plate fill behind the cell; none unless set."
@@ -37238,7 +39891,8 @@
                             "green",
                             "amber",
                             "red",
-                            "blue"
+                            "blue",
+                            "accent"
                           ]
                         },
                         {
@@ -37267,7 +39921,8 @@
                               "green",
                               "amber",
                               "red",
-                              "blue"
+                              "blue",
+                              "accent"
                             ],
                             "group": "Block",
                             "help": "The rule color; the hairline token unless set."
@@ -37288,7 +39943,8 @@
                                 "green",
                                 "amber",
                                 "red",
-                                "blue"
+                                "blue",
+                                "accent"
                               ]
                             },
                             {
@@ -37384,7 +40040,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The shadow’s colour; the ink unless set."
@@ -37405,7 +40062,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -37763,7 +40421,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ],
                         "group": "Block",
                         "help": "The bars, line or slices of the series; the palette order when absent."
@@ -37784,7 +40443,8 @@
                             "green",
                             "amber",
                             "red",
-                            "blue"
+                            "blue",
+                            "accent"
                           ]
                         },
                         {
@@ -37916,7 +40576,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The shadow’s colour; the ink unless set."
@@ -37937,7 +40598,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -38504,7 +41166,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The frame colour; the hairline token unless set."
@@ -38525,7 +41188,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -38592,7 +41256,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The shadow’s colour; the ink unless set."
@@ -38613,7 +41278,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -40522,7 +43188,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -40547,7 +43214,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -40664,7 +43332,8 @@
                                   "green",
                                   "amber",
                                   "red",
-                                  "blue"
+                                  "blue",
+                                  "accent"
                                 ]
                               },
                               {
@@ -40689,7 +43358,8 @@
                                   "green",
                                   "amber",
                                   "red",
-                                  "blue"
+                                  "blue",
+                                  "accent"
                                 ]
                               },
                               {
@@ -41869,6 +44539,291 @@
               "additionalProperties": false
             }
           },
+          "brand": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "appearance": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ]
+              },
+              "colors": {
+                "type": "object",
+                "properties": {
+                  "light": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "background": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "caption": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "hint": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "primary": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "accent": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "dark": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "background": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "caption": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "hint": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "primary": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "accent": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "fonts": {
+                "type": "object",
+                "properties": {
+                  "display": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "mark": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "picture"
+                    ]
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "box": {
+                    "type": "object",
+                    "properties": {
+                      "w": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 1600
+                      },
+                      "h": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 900
+                      }
+                    },
+                    "required": [
+                      "w",
+                      "h"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              "footer": {
+                "type": "object",
+                "properties": {
+                  "logo": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "picture"
+                    ]
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                },
+                "additionalProperties": false
+              },
+              "counter": {
+                "type": "object",
+                "properties": {
+                  "show": {
+                    "type": "boolean"
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "n / N",
+                      "n",
+                      "Slide n"
+                    ]
+                  },
+                  "skipTitle": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "frame": {
+                "type": "object",
+                "properties": {
+                  "rails": {
+                    "type": "boolean"
+                  },
+                  "rules": {
+                    "type": "boolean"
+                  },
+                  "crosses": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "positions": {
+                "type": "object",
+                "properties": {
+                  "mark": {
+                    "type": "string",
+                    "enum": [
+                      "top-left",
+                      "top-right",
+                      "bottom-left",
+                      "bottom-right",
+                      "hidden"
+                    ]
+                  },
+                  "footerLogo": {
+                    "type": "string",
+                    "enum": [
+                      "top-left",
+                      "top-right",
+                      "bottom-left",
+                      "bottom-right",
+                      "hidden"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "lexicon": {
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              }
+            },
+            "additionalProperties": false
+          },
           "counts": {
             "type": "object",
             "properties": {
@@ -41966,7 +44921,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -42035,11 +44991,8 @@
           },
           "from": {
             "type": "string",
-            "enum": [
-              "gt-brand",
-              "blank"
-            ],
-            "description": "'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide"
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "A template id of the index (template.list): 'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide; a saved template copies its folder"
           },
           "id": {
             "description": "The deck id under decks/; derived from the name when absent",
@@ -42066,10 +45019,7 @@
           },
           "from": {
             "type": "string",
-            "enum": [
-              "gt-brand",
-              "blank"
-            ]
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
           "revision": {
             "type": "integer",
@@ -42880,7 +45830,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -42939,7 +45890,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -43144,6 +46096,639 @@
         ],
         "additionalProperties": false
       },
+      "TemplateListOutput": {
+        "$id": "#/components/schemas/TemplateListOutput",
+        "type": "object",
+        "properties": {
+          "templates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "category": {
+                  "type": "string",
+                  "enum": [
+                    "personal",
+                    "work",
+                    "education"
+                  ]
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 400
+                },
+                "cover": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "useCases": {
+                  "maxItems": 8,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "slides": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "theme": {
+                  "type": "string",
+                  "enum": [
+                    "gt-ink-paper"
+                  ]
+                },
+                "appearance": {
+                  "type": "string",
+                  "enum": [
+                    "light",
+                    "dark"
+                  ]
+                },
+                "organisation": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "brand": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "appearance": {
+                      "type": "string",
+                      "enum": [
+                        "light",
+                        "dark"
+                      ]
+                    },
+                    "colors": {
+                      "type": "object",
+                      "properties": {
+                        "light": {
+                          "type": "object",
+                          "properties": {
+                            "text": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            },
+                            "background": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            },
+                            "caption": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            },
+                            "hint": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            },
+                            "primary": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            },
+                            "accent": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "dark": {
+                          "type": "object",
+                          "properties": {
+                            "text": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            },
+                            "background": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            },
+                            "caption": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            },
+                            "hint": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            },
+                            "primary": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            },
+                            "accent": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "fonts": {
+                      "type": "object",
+                      "properties": {
+                        "display": {
+                          "type": "string",
+                          "enum": [
+                            "inter",
+                            "roboto",
+                            "open-sans",
+                            "lato",
+                            "montserrat",
+                            "poppins",
+                            "source-sans-3",
+                            "source-serif-4",
+                            "merriweather",
+                            "playfair-display",
+                            "lora",
+                            "pt-serif",
+                            "libre-baskerville",
+                            "eb-garamond",
+                            "nunito",
+                            "raleway",
+                            "work-sans",
+                            "dm-sans",
+                            "space-grotesk",
+                            "oswald",
+                            "bebas-neue",
+                            "roboto-mono",
+                            "jetbrains-mono",
+                            "ibm-plex-sans",
+                            "ibm-plex-mono",
+                            "fira-code"
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "enum": [
+                            "inter",
+                            "roboto",
+                            "open-sans",
+                            "lato",
+                            "montserrat",
+                            "poppins",
+                            "source-sans-3",
+                            "source-serif-4",
+                            "merriweather",
+                            "playfair-display",
+                            "lora",
+                            "pt-serif",
+                            "libre-baskerville",
+                            "eb-garamond",
+                            "nunito",
+                            "raleway",
+                            "work-sans",
+                            "dm-sans",
+                            "space-grotesk",
+                            "oswald",
+                            "bebas-neue",
+                            "roboto-mono",
+                            "jetbrains-mono",
+                            "ibm-plex-sans",
+                            "ibm-plex-mono",
+                            "fira-code"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "mark": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "default",
+                            "none",
+                            "picture"
+                          ]
+                        },
+                        "assetId": {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        "box": {
+                          "type": "object",
+                          "properties": {
+                            "w": {
+                              "type": "number",
+                              "exclusiveMinimum": 0,
+                              "maximum": 1600
+                            },
+                            "h": {
+                              "type": "number",
+                              "exclusiveMinimum": 0,
+                              "maximum": 900
+                            }
+                          },
+                          "required": [
+                            "w",
+                            "h"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "kind"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "footer": {
+                      "type": "object",
+                      "properties": {
+                        "logo": {
+                          "type": "string",
+                          "enum": [
+                            "default",
+                            "none",
+                            "picture"
+                          ]
+                        },
+                        "assetId": {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        "text": {
+                          "type": "string",
+                          "maxLength": 200
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "counter": {
+                      "type": "object",
+                      "properties": {
+                        "show": {
+                          "type": "boolean"
+                        },
+                        "format": {
+                          "type": "string",
+                          "enum": [
+                            "n / N",
+                            "n",
+                            "Slide n"
+                          ]
+                        },
+                        "skipTitle": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "frame": {
+                      "type": "object",
+                      "properties": {
+                        "rails": {
+                          "type": "boolean"
+                        },
+                        "rules": {
+                          "type": "boolean"
+                        },
+                        "crosses": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "positions": {
+                      "type": "object",
+                      "properties": {
+                        "mark": {
+                          "type": "string",
+                          "enum": [
+                            "top-left",
+                            "top-right",
+                            "bottom-left",
+                            "bottom-right",
+                            "hidden"
+                          ]
+                        },
+                        "footerLogo": {
+                          "type": "string",
+                          "enum": [
+                            "top-left",
+                            "top-right",
+                            "bottom-left",
+                            "bottom-right",
+                            "hidden"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "lexicon": {
+                      "maxItems": 200,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "category",
+                "slides",
+                "theme"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "default": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "required": [
+          "templates",
+          "default"
+        ],
+        "additionalProperties": false
+      },
+      "TemplateSlidesInput": {
+        "$id": "#/components/schemas/TemplateSlidesInput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The template id"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "TemplateSlidesOutput": {
+        "$id": "#/components/schemas/TemplateSlidesOutput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "slideId": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "content",
+                    "opener",
+                    "mood",
+                    "closing",
+                    "title",
+                    "statement"
+                  ]
+                }
+              },
+              "required": [
+                "index",
+                "slideId",
+                "title",
+                "kind"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slides"
+        ],
+        "additionalProperties": false
+      },
+      "TemplateCreateInput": {
+        "$id": "#/components/schemas/TemplateCreateInput",
+        "type": "object",
+        "properties": {
+          "deckId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The deck to save"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "The template name; its slug is the template id"
+          },
+          "sentence": {
+            "description": "One sentence the gallery card shows; \"Saved from <deck title>\" when absent",
+            "type": "string",
+            "maxLength": 400
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision of the deck the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "deckId",
+          "name",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "TemplateCreateOutput": {
+        "$id": "#/components/schemas/TemplateCreateOutput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slides": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "replaced": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slides"
+        ],
+        "additionalProperties": false
+      },
+      "TemplateUpdateInput": {
+        "$id": "#/components/schemas/TemplateUpdateInput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The template to replace"
+          },
+          "deckId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The deck whose slides replace it"
+          },
+          "sentence": {
+            "description": "A new sentence; the old one when absent",
+            "type": "string",
+            "maxLength": 400
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision of the deck the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "id",
+          "deckId",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "TemplateRenameInput": {
+        "$id": "#/components/schemas/TemplateRenameInput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The template to rename"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "The new name"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "TemplateDeleteInput": {
+        "$id": "#/components/schemas/TemplateDeleteInput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The template to delete"
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "The caller has confirmed the deletion"
+          }
+        },
+        "required": [
+          "id",
+          "confirm"
+        ],
+        "additionalProperties": false
+      },
+      "TemplateDeleteOutput": {
+        "$id": "#/components/schemas/TemplateDeleteOutput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "removed": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "id",
+          "removed"
+        ],
+        "additionalProperties": false
+      },
+      "TemplateSetDefaultInput": {
+        "$id": "#/components/schemas/TemplateSetDefaultInput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The template new presentations start from"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "TemplateSetDefaultOutput": {
+        "$id": "#/components/schemas/TemplateSetDefaultOutput",
+        "type": "object",
+        "properties": {
+          "default": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "default",
+          "name"
+        ],
+        "additionalProperties": false
+      },
       "SlideListInput": {
         "$id": "#/components/schemas/SlideListInput",
         "type": "object",
@@ -43225,6 +46810,7 @@
                 "mood",
                 "big-number",
                 "blank",
+                "subtitle-body",
                 "rows",
                 "plain",
                 "table",
@@ -43698,6 +47284,7 @@
               "mood",
               "big-number",
               "blank",
+              "subtitle-body",
               "rows",
               "plain",
               "table",
@@ -44011,6 +47598,7 @@
               "mood",
               "big-number",
               "blank",
+              "subtitle-body",
               "rows",
               "plain",
               "table",
@@ -44311,6 +47899,7 @@
                     "mood",
                     "big-number",
                     "blank",
+                    "subtitle-body",
                     "rows",
                     "plain",
                     "table",
@@ -44525,7 +48114,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -45555,7 +49145,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The shadow’s colour; the ink unless set."
@@ -45576,7 +49167,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -45802,7 +49394,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -45834,7 +49427,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -46354,7 +49948,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ],
                     "group": "Block",
                     "help": "The bars, line or slices of the series; the palette order when absent."
@@ -46375,7 +49970,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ]
                     },
                     {
@@ -46860,7 +50456,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -46896,7 +50493,8 @@
                         "green",
                         "amber",
                         "red",
-                        "blue"
+                        "blue",
+                        "accent"
                       ],
                       "group": "Block",
                       "help": "The rule color; the hairline token unless set."
@@ -46917,7 +50515,8 @@
                           "green",
                           "amber",
                           "red",
-                          "blue"
+                          "blue",
+                          "accent"
                         ]
                       },
                       {
@@ -47047,7 +50646,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -47079,7 +50679,8 @@
                       "green",
                       "amber",
                       "red",
-                      "blue"
+                      "blue",
+                      "accent"
                     ]
                   },
                   {
@@ -50956,6 +54557,1457 @@
       "ArtifactDownloadOutput": {
         "$id": "#/components/schemas/ArtifactDownloadOutput",
         "type": "null"
+      },
+      "DeckTailorInput": {
+        "$id": "#/components/schemas/DeckTailorInput",
+        "type": "object",
+        "properties": {
+          "replacements": {
+            "description": "Case insensitive, over every visible text and the notes, as Find and replace runs",
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The customer name as the deck spells it"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "The name that takes its place"
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "logo": {
+            "type": "object",
+            "properties": {
+              "assetId": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                "description": "An asset of this deck (asset.add first)"
+              },
+              "replaceAlt": {
+                "description": "Swap every picture whose alt text names this word for the asset; without it the kit’s logo slot takes the asset once the brand kit exists on this deck",
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "assetId"
+            ],
+            "additionalProperties": false
+          },
+          "skip": {
+            "description": "The slides to skip",
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "DeckTailorOutput": {
+        "$id": "#/components/schemas/DeckTailorOutput",
+        "type": "object",
+        "properties": {
+          "replacements": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "slideIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The slides whose text changed"
+          },
+          "pictures": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The pictures swapped"
+          },
+          "skipped": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "replacements",
+          "slideIds",
+          "pictures",
+          "skipped",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "AssistProposeInput": {
+        "$id": "#/components/schemas/AssistProposeInput",
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string",
+            "enum": [
+              "shorter",
+              "notes",
+              "ask"
+            ],
+            "description": "'shorter' rewrites the slide’s text shorter, 'notes' writes speaker notes, 'ask' resolves the prompt to one of the two"
+          },
+          "prompt": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "The seller’s ask, in their words; empty for a starter card"
+          },
+          "slideIds": {
+            "description": "The slides the ask is about; the deck’s first slides when absent",
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "intent",
+          "prompt",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "AssistProposeOutput": {
+        "$id": "#/components/schemas/AssistProposeOutput",
+        "type": "object",
+        "properties": {
+          "cards": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "intent": {
+                  "type": "string",
+                  "enum": [
+                    "shorter",
+                    "notes",
+                    "ask"
+                  ]
+                },
+                "sentence": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "rows": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "slideId": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                      },
+                      "blockId": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9][a-z0-9-]*$"
+                      },
+                      "path": {
+                        "type": "string"
+                      },
+                      "before": {
+                        "type": "string"
+                      },
+                      "after": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "slideId",
+                      "path",
+                      "before",
+                      "after"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "mutations": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Mutation"
+                  }
+                },
+                "deckId": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "baseRevision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "The revision the caller read; a stale value is rejected with 409"
+                },
+                "expiresAt": {
+                  "type": "string",
+                  "description": "ISO 8601; a card is valid for ten minutes"
+                },
+                "signature": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "id",
+                "intent",
+                "sentence",
+                "rows",
+                "mutations",
+                "deckId",
+                "baseRevision",
+                "expiresAt",
+                "signature"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "sentence": {
+            "type": "string"
+          },
+          "readSlides": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "cards"
+        ],
+        "additionalProperties": false
+      },
+      "AssistAcceptInput": {
+        "$id": "#/components/schemas/AssistAcceptInput",
+        "type": "object",
+        "properties": {
+          "card": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "intent": {
+                "type": "string",
+                "enum": [
+                  "shorter",
+                  "notes",
+                  "ask"
+                ]
+              },
+              "sentence": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rows": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "slideId": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "blockId": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]*$"
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "before": {
+                      "type": "string"
+                    },
+                    "after": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "slideId",
+                    "path",
+                    "before",
+                    "after"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "mutations": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Mutation"
+                }
+              },
+              "deckId": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "baseRevision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "The revision the caller read; a stale value is rejected with 409"
+              },
+              "expiresAt": {
+                "type": "string",
+                "description": "ISO 8601; a card is valid for ten minutes"
+              },
+              "signature": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "id",
+              "intent",
+              "sentence",
+              "rows",
+              "mutations",
+              "deckId",
+              "baseRevision",
+              "expiresAt",
+              "signature"
+            ],
+            "additionalProperties": false
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "card",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "AssistAcceptOutput": {
+        "$id": "#/components/schemas/AssistAcceptOutput",
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "slideIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "sentence": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "revision",
+          "slideIds",
+          "sentence"
+        ],
+        "additionalProperties": false
+      },
+      "BrandGetOutput": {
+        "$id": "#/components/schemas/BrandGetOutput",
+        "type": "object",
+        "properties": {
+          "brand": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "appearance": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ]
+              },
+              "colors": {
+                "type": "object",
+                "properties": {
+                  "light": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "background": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "caption": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "hint": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "primary": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "accent": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "dark": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "background": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "caption": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "hint": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "primary": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "accent": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "fonts": {
+                "type": "object",
+                "properties": {
+                  "display": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "mark": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "picture"
+                    ]
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "box": {
+                    "type": "object",
+                    "properties": {
+                      "w": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 1600
+                      },
+                      "h": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 900
+                      }
+                    },
+                    "required": [
+                      "w",
+                      "h"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              "footer": {
+                "type": "object",
+                "properties": {
+                  "logo": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "picture"
+                    ]
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                },
+                "additionalProperties": false
+              },
+              "counter": {
+                "type": "object",
+                "properties": {
+                  "show": {
+                    "type": "boolean"
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "n / N",
+                      "n",
+                      "Slide n"
+                    ]
+                  },
+                  "skipTitle": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "frame": {
+                "type": "object",
+                "properties": {
+                  "rails": {
+                    "type": "boolean"
+                  },
+                  "rules": {
+                    "type": "boolean"
+                  },
+                  "crosses": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "positions": {
+                "type": "object",
+                "properties": {
+                  "mark": {
+                    "type": "string",
+                    "enum": [
+                      "top-left",
+                      "top-right",
+                      "bottom-left",
+                      "bottom-right",
+                      "hidden"
+                    ]
+                  },
+                  "footerLogo": {
+                    "type": "string",
+                    "enum": [
+                      "top-left",
+                      "top-right",
+                      "bottom-left",
+                      "bottom-right",
+                      "hidden"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "lexicon": {
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "own": {
+            "type": "boolean"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "brand",
+          "own",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "BrandSetInput": {
+        "$id": "#/components/schemas/BrandSetInput",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^\\/(name|appearance|colors|fonts|mark|footer|counter|frame|positions|lexicon)(\\/[A-Za-z0-9_-]+){0,2}$",
+            "description": "A JSON pointer into the kit: /colors/<light|dark>/<text|background|caption|hint|primary|accent>, /fonts/<display|text>, /mark, /footer/<logo|assetId|text>, /counter/<show|format|skipTitle>, /frame/<rails|rules|crosses>, /positions/<mark|footerLogo>, /lexicon, /appearance, /name"
+          },
+          "value": {
+            "description": "The new value; omit it to remove the field"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "path",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "BrandSetOutput": {
+        "$id": "#/components/schemas/BrandSetOutput",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "value": {},
+          "brand": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "appearance": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ]
+              },
+              "colors": {
+                "type": "object",
+                "properties": {
+                  "light": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "background": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "caption": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "hint": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "primary": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "accent": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "dark": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "background": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "caption": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "hint": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "primary": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "accent": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "fonts": {
+                "type": "object",
+                "properties": {
+                  "display": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "mark": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "picture"
+                    ]
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "box": {
+                    "type": "object",
+                    "properties": {
+                      "w": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 1600
+                      },
+                      "h": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 900
+                      }
+                    },
+                    "required": [
+                      "w",
+                      "h"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              "footer": {
+                "type": "object",
+                "properties": {
+                  "logo": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "picture"
+                    ]
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                },
+                "additionalProperties": false
+              },
+              "counter": {
+                "type": "object",
+                "properties": {
+                  "show": {
+                    "type": "boolean"
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "n / N",
+                      "n",
+                      "Slide n"
+                    ]
+                  },
+                  "skipTitle": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "frame": {
+                "type": "object",
+                "properties": {
+                  "rails": {
+                    "type": "boolean"
+                  },
+                  "rules": {
+                    "type": "boolean"
+                  },
+                  "crosses": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "positions": {
+                "type": "object",
+                "properties": {
+                  "mark": {
+                    "type": "string",
+                    "enum": [
+                      "top-left",
+                      "top-right",
+                      "bottom-left",
+                      "bottom-right",
+                      "hidden"
+                    ]
+                  },
+                  "footerLogo": {
+                    "type": "string",
+                    "enum": [
+                      "top-left",
+                      "top-right",
+                      "bottom-left",
+                      "bottom-right",
+                      "hidden"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "lexicon": {
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "path",
+          "brand",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "BrandResetInput": {
+        "$id": "#/components/schemas/BrandResetInput",
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "One field to remove; the whole record when omitted",
+            "type": "string",
+            "pattern": "^\\/(name|appearance|colors|fonts|mark|footer|counter|frame|positions|lexicon)(\\/[A-Za-z0-9_-]+){0,2}$"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "BrandResetOutput": {
+        "$id": "#/components/schemas/BrandResetOutput",
+        "type": "object",
+        "properties": {
+          "brand": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "appearance": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ]
+              },
+              "colors": {
+                "type": "object",
+                "properties": {
+                  "light": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "background": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "caption": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "hint": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "primary": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "accent": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "dark": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "background": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "caption": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "hint": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "primary": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "accent": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "fonts": {
+                "type": "object",
+                "properties": {
+                  "display": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "mark": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "picture"
+                    ]
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "box": {
+                    "type": "object",
+                    "properties": {
+                      "w": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 1600
+                      },
+                      "h": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 900
+                      }
+                    },
+                    "required": [
+                      "w",
+                      "h"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              "footer": {
+                "type": "object",
+                "properties": {
+                  "logo": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "none",
+                      "picture"
+                    ]
+                  },
+                  "assetId": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                },
+                "additionalProperties": false
+              },
+              "counter": {
+                "type": "object",
+                "properties": {
+                  "show": {
+                    "type": "boolean"
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "n / N",
+                      "n",
+                      "Slide n"
+                    ]
+                  },
+                  "skipTitle": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "frame": {
+                "type": "object",
+                "properties": {
+                  "rails": {
+                    "type": "boolean"
+                  },
+                  "rules": {
+                    "type": "boolean"
+                  },
+                  "crosses": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "positions": {
+                "type": "object",
+                "properties": {
+                  "mark": {
+                    "type": "string",
+                    "enum": [
+                      "top-left",
+                      "top-right",
+                      "bottom-left",
+                      "bottom-right",
+                      "hidden"
+                    ]
+                  },
+                  "footerLogo": {
+                    "type": "string",
+                    "enum": [
+                      "top-left",
+                      "top-right",
+                      "bottom-left",
+                      "bottom-right",
+                      "hidden"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "lexicon": {
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "brand",
+          "revision",
+          "changed"
+        ],
+        "additionalProperties": false
+      },
+      "FontListOutput": {
+        "$id": "#/components/schemas/FontListOutput",
+        "type": "object",
+        "properties": {
+          "fonts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "enum": [
+                    "inter",
+                    "roboto",
+                    "open-sans",
+                    "lato",
+                    "montserrat",
+                    "poppins",
+                    "source-sans-3",
+                    "source-serif-4",
+                    "merriweather",
+                    "playfair-display",
+                    "lora",
+                    "pt-serif",
+                    "libre-baskerville",
+                    "eb-garamond",
+                    "nunito",
+                    "raleway",
+                    "work-sans",
+                    "dm-sans",
+                    "space-grotesk",
+                    "oswald",
+                    "bebas-neue",
+                    "roboto-mono",
+                    "jetbrains-mono",
+                    "ibm-plex-sans",
+                    "ibm-plex-mono",
+                    "fira-code"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string",
+                  "enum": [
+                    "sans",
+                    "serif",
+                    "display",
+                    "mono"
+                  ]
+                },
+                "weights": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 100,
+                    "maximum": 900
+                  }
+                },
+                "italic": {
+                  "type": "boolean"
+                },
+                "licence": {
+                  "type": "string",
+                  "enum": [
+                    "OFL 1.1",
+                    "Apache 2.0"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "category",
+                "weights",
+                "italic",
+                "licence"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "fonts"
+        ],
+        "additionalProperties": false
       },
       "PresenceListOutput": {
         "$id": "#/components/schemas/PresenceListOutput",
@@ -61536,7 +66588,8 @@
               "materialize",
               "htmlBlocks",
               "signup",
-              "readOnly"
+              "readOnly",
+              "assist"
             ]
           },
           "on": {
@@ -61567,7 +66620,8 @@
               "materialize",
               "htmlBlocks",
               "signup",
-              "readOnly"
+              "readOnly",
+              "assist"
             ]
           },
           "on": {

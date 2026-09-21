@@ -53,3 +53,15 @@ describe('text markup', () => {
     expect(renderText('a < b & "c"', { gtWord: true })).toBe('a &lt; b &amp; &quot;c&quot;');
   });
 });
+
+describe('run links in the rendered HTML (docs/PRODUCT.md section 2 rank 19)', () => {
+  it('opens an external address in a new tab and keeps a slide link in the page', () => {
+    expect(renderText('[site](https://acme.com)', { gtWord: false })).toBe(
+      '<a href="https://acme.com" target="_blank" rel="noreferrer">site</a>',
+    );
+    expect(renderText('[agenda](#s/pricing)', { gtWord: false })).toBe(
+      '<a href="#s/pricing">agenda</a>',
+    );
+    expect(renderText('[on](#next)', { gtWord: false })).toBe('<a href="#next">on</a>');
+  });
+});

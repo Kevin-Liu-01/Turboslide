@@ -134,7 +134,6 @@ function EDITOR_ANCHORS() {
     '.ts-title-clock',
     '.ts-rpanel',
     '.ts-notes',
-    '.ts-bottombar',
   ];
 }
 function VIEWER_ANCHORS() {

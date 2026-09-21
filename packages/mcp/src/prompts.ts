@@ -166,3 +166,65 @@ export function deckReviewPrompt(
     messages: [{ role: 'user', content: { type: 'text', text: lines.join('\n') } }],
   };
 }
+
+// ---------------------------------------------------------------------------------------------
+// The deck_assist prompt (docs/PRODUCT.md 6.2, section 5): how an agent uses the assist's two
+// actions and the tailoring pass over MCP, with the guardrails an agent must expect.
+
+export const DECK_ASSIST_PROMPT: Prompt = {
+  name: 'deck_assist',
+  title: 'Deck assist',
+  description:
+    'How to use the assistant’s actions over this deck: deck_assist_propose reads and answers signed cards, deck_assist_accept writes one, deck_tailor runs the deterministic tailoring pass. Nothing is written without an accepted card.',
+  arguments: [
+    {
+      name: 'intent',
+      description: "'shorter', 'notes' or 'ask' (default 'ask')",
+      required: false,
+    },
+    {
+      name: 'slideIds',
+      description: 'Comma-separated slide ids the ask is about; default the current first slide',
+      required: false,
+    },
+  ],
+};
+
+export type DeckAssistArgs = { intent?: string; slideIds?: string };
+
+/** The prompt text for the assist over a deck; the messages of GetPromptResult. */
+export function deckAssistPrompt(
+  args: DeckAssistArgs,
+  deck: { id: string; revision: number },
+): GetPromptResult {
+  const intent = args.intent === undefined || args.intent === '' ? 'ask' : args.intent;
+  if (intent !== 'shorter' && intent !== 'notes' && intent !== 'ask')
+    throw new RangeError(`Unknown intent "${intent}"; one of shorter, notes or ask`);
+  const slides = selectedSlides(args.slideIds);
+  const scope =
+    slides.length === 0
+      ? 'the first slide'
+      : `the slides ${slides.map((id) => `\`${id}\``).join(', ')}`;
+  const lines: string[] = [
+    `Use the assistant over deck \`${deck.id}\` at revision ${deck.revision}, ${scope}, intent \`${intent}\`.`,
+    '',
+    '## The two actions',
+    '',
+    '1. `deck_assist_propose` with `{ intent, prompt, slideIds, baseRevision }` reads the slides and answers `{ cards, sentence?, readSlides? }`. It writes nothing. A card carries `id`, `intent`, `sentence`, `rows` (the before and after per text), `mutations`, `deckId`, `baseRevision`, `expiresAt` and a `signature` the server made; a card is valid for ten minutes. When no card fits, `sentence` says so and `cards` is empty.',
+    '2. `deck_assist_accept` with `{ card, baseRevision }` writes one card as one revision by the author Assistant. The server verifies the signature, the expiry and the deck; a card whose texts changed since is refused with "The slide changed while this was written; ask again", so read the card to the person, then accept the card exactly as it came.',
+    '',
+    '## The tailoring pass',
+    '',
+    '`deck_tailor` with `{ replacements: [{ from, to }], skip: [slideId], logo?: { assetId, replaceAlt }, baseRevision }` renames the customer in every visible text and the notes, skips the named slides and swaps the pictures whose alt text names the old customer, as one write with no model call. Add the logo picture with `deck_asset_add` first.',
+    '',
+    '## Rules',
+    '',
+    '- Never write slide text from a model answer through `deck_update_slide` or `deck_replace_text` to imitate the assistant; the card is the gate a person reads before a write.',
+    '- Read `describe` or `deck_get_info` for the current revision and pass it as `baseRevision`; a stale one answers 409 with the current document.',
+    '- The sentences a person reads come from the product; the card’s `sentence` is the model’s. Show it as it is.',
+  ];
+  return {
+    description: `Assist instructions for ${deck.id} at revision ${deck.revision}: ${intent}`,
+    messages: [{ role: 'user', content: { type: 'text', text: lines.join('\n') } }],
+  };
+}

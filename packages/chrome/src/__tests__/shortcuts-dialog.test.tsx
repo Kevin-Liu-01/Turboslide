@@ -66,10 +66,10 @@ describe('ShortcutsDialog', () => {
     expect(dialog.querySelector('tr[data-binding="format.text.italic"]')).not.toBeNull();
     expect(dialog.querySelector('tr[data-binding="insert.comment"]')).not.toBeNull();
     expect(dialog.querySelector('tr[data-binding="edit.undo"]')).not.toBeNull();
-    /* a parked row's chord leaves the list (Alt text, docs/RETURN.md section 9 question 6), and so
-       does a Later stub's greyed row; the chords of the rows the return round brought back (Group,
-       Superscript, Full screen; RETURN.md 2.11, 2.12, 2.16) are listed with the switch off */
-    expect(dialog.querySelector('tr[data-binding="format.altText"]')).toBeNull();
+    /* a Later stub's greyed row leaves the list; the chords of the rows the return round brought
+       back (Group, Superscript, Full screen; RETURN.md 2.11, 2.12, 2.16) and Alt text, returned in
+       the product round (docs/PRODUCT.md section 5), are listed with the switch off */
+    expect(dialog.querySelector('tr[data-binding="format.altText"]')).not.toBeNull();
     expect(dialog.querySelector('tr[data-binding="arrange.group"]')).not.toBeNull();
     expect(dialog.querySelector('tr[data-binding="format.text.superscript"]')).not.toBeNull();
     expect(dialog.querySelector('tr[data-binding="view.fullScreen"]')).not.toBeNull();
@@ -84,7 +84,7 @@ describe('ShortcutsDialog', () => {
     expect(on).toEqual(all);
     expect(off.length).toBeLessThan(on.length);
     for (const id of off) expect(on).toContain(id);
-    expect(on.filter((id) => !off.includes(id))).toContain('format.altText');
+    expect(off).toContain('format.altText');
     expect(off).toContain('arrange.group');
   });
 

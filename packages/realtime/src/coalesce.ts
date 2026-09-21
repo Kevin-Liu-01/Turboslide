@@ -5,7 +5,10 @@
 // `pos` sets become the final box and a typing burst becomes one insert. Each group is one
 // `Write` whose inverse the reducer computes; because a group holds one author's consecutive
 // work only, undoing the record undoes that author's work and nothing else (the two author test
-// in coalesce.test.ts). Comment entries are never coalesced; the checkpointer writes them to the
+// in coalesce.test.ts). An entry carrying a note (channel.ts `Entry.note`, the brand kit's or
+// the assist's history label) is its own Write, closed before and after, so Version history
+// lists it as one row under that name and never folds a seller's typing into it (the product
+// round fix round). Comment entries are never coalesced; the checkpointer writes them to the
 // sidecar in order (SPEC-3 5.2). No `node:`.
 import type { Author } from '@turboslide/schema/mutations';
 
@@ -20,6 +23,8 @@ export type CoalescedWrite = {
   /** the op ids the write covers, for the two level acknowledgement */
   opIds: string[];
   mutations: RoomMutation[];
+  /** the history label the record takes, when the run is one noted entry */
+  note?: string;
 };
 
 /** Two authors are one when kind, name, runId and principalId agree (SPEC-3 2.4). */
@@ -110,7 +115,8 @@ export function foldMutation(list: RoomMutation[], mutation: RoomMutation): void
 
 /**
  * Groups edit entries into one Write per author per contiguous run and folds each run's
- * mutations. Entries arrive in stream order; a change of author or client starts a new run.
+ * mutations. Entries arrive in stream order; a change of author or client starts a new run, and
+ * so does a noted entry on either side (a labelled write is one record of its own).
  * Comment entries are skipped (the checkpointer writes them separately).
  */
 export function coalesceEntries(entries: ReadonlyArray<Entry>): CoalescedWrite[] {
@@ -121,7 +127,9 @@ export function coalesceEntries(entries: ReadonlyArray<Entry>): CoalescedWrite[]
     if (
       current === undefined ||
       current.clientId !== entry.clientId ||
-      !sameWriter(current.author, entry.author)
+      !sameWriter(current.author, entry.author) ||
+      current.note !== undefined ||
+      entry.note !== undefined
     ) {
       current = {
         author: entry.author,
@@ -130,6 +138,7 @@ export function coalesceEntries(entries: ReadonlyArray<Entry>): CoalescedWrite[]
         toSeq: entry.seq,
         opIds: [],
         mutations: [],
+        ...(entry.note === undefined ? {} : { note: entry.note }),
       };
       out.push(current);
     }

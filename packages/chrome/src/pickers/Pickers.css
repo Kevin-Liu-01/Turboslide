@@ -190,3 +190,17 @@
   outline: 1px solid var(--pt-ink);
   outline-offset: -1px;
 }
+
+/* the brand kit's row at the top of the colour plate (docs/PRODUCT.md 4.1): six swatches over a hairline */
+.ts-color-kit {
+  grid-template-columns: repeat(6, 22px);
+  gap: 4px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-color-kit .ts-color-swatch {
+  width: 22px;
+  height: 22px;
+}

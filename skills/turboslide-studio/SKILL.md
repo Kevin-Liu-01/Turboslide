@@ -14,7 +14,7 @@ Use the supported `window.turboslide.studio` adapter, never private component st
 2. Wait for `window.turboslide.studio` or the `turboslide:studio-api-ready` event; its detail is `describe()`.
 3. Call `describe()` and `controls()` before relying on actions or labels. Re-read the global after changing owner: the editor, the viewer per mode, the source drawer and the presenter each install an adapter. `describe().owner` says which one is active and `describe().state` carries the deck id, the revision, the slide and the theme.
 
-Read [references/browser-api.md](references/browser-api.md) for the methods, the owners, the window actions and the error classes.
+Read [references/browser-api.md](references/browser-api.md) for the methods, the owners, the window actions and the error classes, and [references/assist.md](references/assist.md) for the Assist panel, the tailoring pass and the two assist actions (`assist.propose`, `assist.accept`) with their guardrails.
 
 ## Operations
 

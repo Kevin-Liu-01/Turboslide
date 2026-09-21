@@ -456,6 +456,8 @@ export const FLAG_NAMES = [
   'htmlBlocks',
   'signup',
   'readOnly',
+  /* the product round (docs/PRODUCT.md 6.3, 6.4): the assistant's kill switch */
+  'assist',
 ] as const;
 export type FlagName = (typeof FLAG_NAMES)[number];
 export const flagNameSchema = z.enum(FLAG_NAMES);
@@ -474,4 +476,5 @@ export const FLAG_DEFAULTS: Readonly<Record<FlagName, boolean>> = {
   htmlBlocks: true,
   signup: true,
   readOnly: true,
+  assist: true,
 };

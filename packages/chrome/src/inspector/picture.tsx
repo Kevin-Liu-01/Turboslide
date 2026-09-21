@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import type { Block, ShotFrame } from '@turboslide/schema/blocks';
 import type { Color } from '@turboslide/schema/color';
 import { DASHES, DASH_LABELS, presetOf } from '@turboslide/schema/shapes';
 import type { Dash } from '@turboslide/schema/shapes';
 
+import { UseOnEverySlideButton } from '../brand/UseOnEverySlide';
 import type { PictureTarget } from '../editor-shell';
-import { FORMAT } from '../menus/strings';
+import { FORMAT, PROMPTS } from '../menus/strings';
 import { ShapePicker } from '../pickers/ShapePicker';
+import { tipProps } from '../Tooltip';
 import { ColorRow, Note, PanelButton, SelectField, SliderField, ToggleRow } from './fields';
 import type { SectionWrite } from './fields';
 
@@ -21,6 +23,79 @@ import type { SectionWrite } from './fields';
  * `block.resetImage`, `block.set /frame`, `block.set /crop`, `block.adjust`. The generated rows of
  * round one (asset, caption, fit) stay above.
  */
+/**
+ * The caption of a shot (docs/PRODUCT.md section 2 rank 10; the right click row Add a caption
+ * writes the same field): a text field with the prompt "Add a caption", committed on Enter and on
+ * blur as one `block.set /caption`; an emptied field removes the caption, so the figure draws no
+ * figcaption. A picture object (the covering `picture` block) carries no caption.
+ */
+function CaptionField({
+  value,
+  disabled,
+  onCommit,
+}: {
+  value: string | undefined;
+  disabled: boolean;
+  onCommit: (caption: string | undefined) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  /* the draft as the handlers read it: Enter commits and blurs in one event, and the blur's
+     commit would read the draft of the render its handler was bound in and write the caption a
+     second time (the fields.tsx NumberField rule, docs/RETURN.md 2.14 item 3) */
+  const draftRef = useRef<string | null>(null);
+  const tip = tipProps({
+    name: 'Caption',
+    doc: 'One line under the picture; empty removes it',
+    key: 'Enter',
+  });
+  const commit = () => {
+    const typed = draftRef.current;
+    if (typed === null) return;
+    draftRef.current = null;
+    const next = typed.trim();
+    setDraft(null);
+    if (next === (value ?? '')) return;
+    onCommit(next === '' ? undefined : next);
+  };
+  return (
+    <label className="ts-fo-field ts-fo-caption">
+      <span className="ts-fo-field-label">Caption</span>
+      <input
+        type="text"
+        value={draft ?? value ?? ''}
+        placeholder={PROMPTS.caption}
+        aria-label="Caption"
+        data-control="formatOptions.picture.caption"
+        disabled={disabled}
+        autoComplete="off"
+        {...tip}
+        onChange={(event) => {
+          draftRef.current = event.target.value;
+          setDraft(event.target.value);
+        }}
+        onKeyDown={(event) => {
+          tip.onKeyDown(event);
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            commit();
+            event.currentTarget.blur();
+          } else if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            draftRef.current = null;
+            setDraft(null);
+            event.currentTarget.blur();
+          }
+        }}
+        onBlur={(event) => {
+          tip.onBlur(event);
+          commit();
+        }}
+      />
+    </label>
+  );
+}
+
 export type PictureSectionProps = {
   block: Block;
   write: SectionWrite;
@@ -78,6 +153,13 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
 
   return (
     <>
+      {block.type === 'shot' ? (
+        <CaptionField
+          value={block.caption}
+          disabled={write.busy}
+          onCommit={(caption) => set('/caption', caption)}
+        />
+      ) : null}
       <div className="ts-fo-buttons">
         <PanelButton
           label={words.replace}
@@ -96,6 +178,8 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
           disabled={write.busy}
           doc="Another picture in the same box"
         />
+        {/* the picture as the kit's logo on every slide (docs/PRODUCT.md 4.4; build/b5.md 0.4) */}
+        <UseOnEverySlideButton block={block} />
         <PanelButton
           label={words.crop}
           icon="viewfinder-circle"

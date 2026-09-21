@@ -1,0 +1,179 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "id": "b7-measure-mu99hr3v",
+  "startedAt": "2026-09-20T03:33:40.603Z",
+  "copy": {
+    "status": 200,
+    "ms": 4641,
+    "json": {
+      "deckId": "b7-measure-mu99hr3v",
+      "sourceDeckId": "gt-brand",
+      "title": "B7 export measurement mu99hr3v",
+      "revision": 0,
+      "dir": "/tmp/turboslide/decks/b7-measure-mu99hr3v",
+      "counts": {
+        "slides": 85,
+        "sections": 8,
+        "assets": 115
+      }
+    },
+    "text": null,
+    "headers": {
+      "cache-control": "no-store",
+      "content-encoding": "br",
+      "content-type": "application/json; charset=utf-8",
+      "cross-origin-opener-policy": "same-origin",
+      "date": "Sun, 20 Sep 2026 03:33:45 GMT",
+      "permissions-policy": "geolocation=(), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "server": "Vercel",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-request-id": "sfo1::jsmf5-1789875221123-d4f13e6c4e66",
+      "x-vercel-cache": "MISS",
+      "x-vercel-id": "sfo1::iad1::jsmf5-1789875221123-d4f13e6c4e66"
+    }
+  },
+  "pdf": {
+    "status": 200,
+    "wallMs": 11126,
+    "error": null,
+    "pages": 85,
+    "exportMs": 10209,
+    "files": [
+      {
+        "name": "b7-measure-mu99hr3v-dark.pdf",
+        "bytes": 19028822,
+        "stored": true
+      }
+    ],
+    "secondsPerSlide": 0.13,
+    "exec": "inprocess",
+    "worker": "local",
+    "text": null,
+    "logTail": [
+      "export: /tmp/turboslide/.turboslide/worker/jobs/mu99hvaw-86fd21/export/b7-measure-mu99hr3v-dark.pdf (18.15 MiB), 85 page(s) at 960 by 540 pt, gate pages, passed true, 10.0 s",
+      "  residual: renderer: chrome-headless-shell 147.0.7727.0, SwiftShader, Google",
+      "  residual: pdf: 85 page(s) at 960 by 540 pt (13.333 by 7.5 in), 19028822 bytes, dark; the text is vector and searchable; notes never travel",
+      "  residual: pdf gate: the file holds 85 page(s) for 85 slide(s)",
+      "  residual: pdf: the first page measures 960 by 540 pt",
+      "  residual: skipped: none; every slide of the deck is in the file"
+    ]
+  },
+  "pptx": {
+    "status": 200,
+    "wallMs": 289684,
+    "error": null,
+    "pages": 170,
+    "exportMs": 285191,
+    "files": [
+      {
+        "name": "b7-measure-mu99hr3v-light.pptx",
+        "bytes": 28729721,
+        "stored": true
+      },
+      {
+        "name": "b7-measure-mu99hr3v-dark.pptx",
+        "bytes": 20696763,
+        "stored": true
+      },
+      {
+        "name": "b7-measure-mu99hr3v-both.zip",
+        "bytes": 49426776,
+        "stored": true
+      }
+    ],
+    "secondsPerSlide": 1.7,
+    "exec": "inprocess",
+    "worker": "local",
+    "text": null,
+    "logTail": [
+      "  residual: package: 84 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)",
+      "  residual: package: 367 kern=\"0\" attribute(s) and 0 empty ext list(s) removed; 0 custGeom",
+      "  residual: links: 16 hyperlink(s) written (a URL as is, a slide link as a jump to its number in this file; SPEC 7.2.7, 7.2.8)",
+      "  residual: notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)",
+      "  residual: fonts not embedded: DejaVu Sans Mono; a viewer without them installed substitutes (SPEC 8.4); --embed-fonts embeds them",
+      "  residual: both: b7-measure-mu99hr3v-both.zip holds the light and dark files"
+    ]
+  },
+  "trash": {
+    "status": 400,
+    "ms": 173,
+    "json": {
+      "error": {
+        "name": "TypeError",
+        "status": 400,
+        "message": "deck.trash: invalid input at /baseRevision: Invalid input: expected number, received undefined",
+        "action": "deck.trash",
+        "code": "invalid_input",
+        "pointer": "/baseRevision"
+      }
+    },
+    "text": null,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+      "cross-origin-opener-policy": "same-origin",
+      "date": "Sun, 20 Sep 2026 03:38:46 GMT",
+      "permissions-policy": "geolocation=(), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "server": "Vercel",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-request-id": "sfo1::9xp9f-1789875526545-b3c56a4e7547",
+      "x-vercel-cache": "MISS",
+      "x-vercel-id": "sfo1::iad1::9xp9f-1789875526545-b3c56a4e7547"
+    }
+  },
+  "remove": {
+    "status": 400,
+    "ms": 180,
+    "json": {
+      "error": {
+        "name": "TypeError",
+        "status": 400,
+        "message": "deck.remove: invalid input at /baseRevision: Invalid input: expected number, received undefined",
+        "action": "deck.remove",
+        "code": "invalid_input",
+        "pointer": "/baseRevision"
+      }
+    },
+    "text": null,
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+      "cross-origin-opener-policy": "same-origin",
+      "date": "Sun, 20 Sep 2026 03:38:46 GMT",
+      "permissions-policy": "geolocation=(), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "server": "Vercel",
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-request-id": "sfo1::87nqk-1789875526754-afadac144234",
+      "x-vercel-cache": "MISS",
+      "x-vercel-id": "sfo1::iad1::87nqk-1789875526754-afadac144234"
+    }
+  },
+  "gone": 200,
+  "finishedAt": "2026-09-20T03:38:47.686Z",
+  "log": [
+    "2026-09-20T03:33:40.605Z copy gt-brand -> b7-measure-mu99hr3v",
+    "2026-09-20T03:33:41.038Z deck.info 200 revision 26",
+    "2026-09-20T03:33:45.679Z copy 200 in 4641 ms ",
+    "2026-09-20T03:33:45.680Z copy answered slides=null",
+    "2026-09-20T03:33:45.680Z export pdf start",
+    "2026-09-20T03:33:56.806Z export pdf 200 in 11126 ms, pages 85, 0.13 s per slide ",
+    "2026-09-20T03:33:56.807Z export pptx start",
+    "2026-09-20T03:38:46.491Z export pptx 200 in 289684 ms, pages 170, 1.7 s per slide ",
+    "2026-09-20T03:38:46.492Z trash and delete forever",
+    "2026-09-20T03:38:46.665Z trash 400 ",
+    "2026-09-20T03:38:46.845Z remove 400 ",
+    "2026-09-20T03:38:47.686Z GET /edit/b7-measure-mu99hr3v -> 200"
+  ]
+}

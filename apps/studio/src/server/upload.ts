@@ -41,6 +41,35 @@ import { downloadSecret } from './tokens';
 /** Above this a hosted picture takes the presigned path (SPEC-3 8.5). */
 export const PRESIGN_THRESHOLD_BYTES = 3 * 1024 * 1024;
 
+/**
+ * The reason a refused upload carries for the seller (the product round, docs/PRODUCT.md section
+ * 2 rank 10; research 07 rule 22: a sentence, never a code or an action id). The chrome reads
+ * `reason` off the route's JSON and shows "The picture could not be uploaded: <reason>"; `message`
+ * stays the API's own line. Three sentences cover every refusal: the file is not a picture (the
+ * declared type is not one of the four, or the bytes are not what was declared), the file is over
+ * the tier's cap, the upload did not finish (a missing body, an expired token, a stream that
+ * broke or overran its declared size, a second PUT of one token).
+ */
+export const UPLOAD_REASONS = {
+  notPicture: 'the file is not a picture',
+  tooLarge: (maxBytes: number): string => `the file is over ${Math.round(maxBytes / MB)} MB`,
+  unfinished: 'the upload did not finish',
+} as const;
+
+const MB = 1024 * 1024;
+
+/** The seller's reason for a refusal the route answers, from its code and status. */
+export function uploadFailureReason(refusal: {
+  code: string;
+  status: number;
+  maxBytes?: number;
+}): string {
+  if (refusal.code === 'payload_too_large' && refusal.maxBytes !== undefined)
+    return UPLOAD_REASONS.tooLarge(refusal.maxBytes);
+  if (refusal.code === 'not_picture') return UPLOAD_REASONS.notPicture;
+  return UPLOAD_REASONS.unfinished;
+}
+
 /** How long an upload token is good for. */
 export const UPLOAD_TOKEN_TTL_MS = 10 * 60 * 1000;
 
@@ -161,7 +190,11 @@ export async function issueUploadGrant(
   if (!UPLOAD_CONTENT_TYPES.includes(input.contentType))
     return {
       refused: Response.json(
-        { error: 'invalid_input', message: 'send a png, jpeg, webp or gif' },
+        {
+          error: 'invalid_input',
+          message: 'send a png, jpeg, webp or gif',
+          reason: UPLOAD_REASONS.notPicture,
+        },
         { status: 400 },
       ),
     };
@@ -216,6 +249,7 @@ export async function issueUploadGrant(
           error: 'payload_too_large',
           message: 'This picture is too large',
           maxBytes: largestPictureBytes(tier),
+          reason: UPLOAD_REASONS.tooLarge(largestPictureBytes(tier)),
         },
         { status: 413 },
       ),
@@ -281,7 +315,14 @@ const SNIFF_BY_TYPE: Readonly<Record<string, SniffedFormat>> = {
 
 export type PutResult =
   | { ok: true; key: string; bytes: number; sniffedType: SniffedFormat }
-  | { ok: false; status: number; reason: string };
+  | {
+      ok: false;
+      status: number;
+      /** the API's line */
+      reason: string;
+      /** the seller's sentence (UPLOAD_REASONS) */
+      sellerReason: string;
+    };
 
 /**
  * `PUT /api/x/upload/put/<token>`: the body streamed to the local folder and counted, aborted the
@@ -296,13 +337,29 @@ export async function receiveUpload(
 ): Promise<PutResult> {
   const payload = verifyUploadToken(token, now);
   if (payload === null)
-    return { ok: false, status: 403, reason: 'the upload token is invalid or expired' };
+    return {
+      ok: false,
+      status: 403,
+      reason: 'the upload token is invalid or expired',
+      sellerReason: UPLOAD_REASONS.unfinished,
+    };
   // the PUT ends the in flight window whatever its outcome; the next grant may be issued
   inFlight.delete(payload.slot);
-  if (body === null) return { ok: false, status: 400, reason: 'the body is empty' };
+  if (body === null)
+    return {
+      ok: false,
+      status: 400,
+      reason: 'the body is empty',
+      sellerReason: UPLOAD_REASONS.unfinished,
+    };
   const path = uploadPath(payload.key);
   if (existsSync(path))
-    return { ok: false, status: 409, reason: 'the upload was received already' };
+    return {
+      ok: false,
+      status: 409,
+      reason: 'the upload was received already',
+      sellerReason: UPLOAD_REASONS.unfinished,
+    };
   mkdirSync(join(path, '..'), { recursive: true });
   const reader = body.getReader();
   const stream = createWriteStream(`${path}.part`);
@@ -329,7 +386,7 @@ export async function receiveUpload(
     const reason =
       error instanceof RangeError ? 'the body is over the declared size' : 'the upload failed';
     logSecurityEvent({ event: 'upload.rejected', reason, uploadBytes: total, status: 413 });
-    return { ok: false, status: 413, reason };
+    return { ok: false, status: 413, reason, sellerReason: UPLOAD_REASONS.unfinished };
   }
   const sniffed = head === null ? null : sniffImage(head);
   if (sniffed === null || sniffed !== SNIFF_BY_TYPE[payload.type]) {
@@ -345,6 +402,7 @@ export async function receiveUpload(
       ok: false,
       status: 400,
       reason: 'the bytes are not the picture type the upload declared',
+      sellerReason: UPLOAD_REASONS.notPicture,
     };
   }
   const { renameSync } = await import('node:fs');

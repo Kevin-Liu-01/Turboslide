@@ -68,6 +68,14 @@ export type Entry = {
   comment?: CommentOp;
   /** the admission time, ISO 8601 */
   at: string;
+  /**
+   * The history label an edit carries into Version history (the product round fix round;
+   * docs/PRODUCT.md 4.1 "Brand kit: Primary", 6.1 "Assist: <sentence>"): the checkpointer
+   * commits a noted entry as its own version record with this note, so the panel lists the row
+   * by name. Absent on an ordinary edit, whose record's note stays '' (a named version is one
+   * whose note is not empty, `@turboslide/store/store`).
+   */
+  note?: string;
 };
 
 /** What a writer hands `append`: everything but the seq the stream assigns. */

@@ -434,6 +434,9 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
           const mutations: RoomMutation[] = [];
           for (const entry of edits)
             for (const mutation of entry.mutations ?? []) foldMutation(mutations, mutation);
+          // the history label of the batch: a noted entry's (channel.ts Entry.note); the room
+          // client posts a labelled write on its own, so one note names the record
+          const note = edits.find((entry) => entry.note !== undefined)?.note;
           const state = stateOf(deckId);
           const wait = state.lastWriteAt + spacing - now();
           if (wait > 0) await sleep(wait);
@@ -445,6 +448,7 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
               baseRevision: head,
               author: first.author,
               mutations: mutations as VersionRecord['mutations'],
+              ...(note === undefined ? {} : { note }),
             });
           } catch (error) {
             state.lastWriteAt = now();

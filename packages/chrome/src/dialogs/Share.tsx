@@ -1,8 +1,10 @@
+import { pruneLinkUrls, rememberLinkUrl, rememberedGeneralUrl } from './share-links';
 import { useEffect, useState } from 'react';
 
 import { labelFor } from '@turboslide/identity/labels';
 
 import { Dialog, DialogCheck } from '../Dialog';
+import { NamePromptDialog, SHARE_NAME_PROMPT_TITLE } from './NamePrompt';
 import { useEditorShell } from '../editor-shell-context';
 import type {
   AccessGrantView,
@@ -23,21 +25,27 @@ import './share.css';
 
 /**
  * The Share dialog (gslides-parity SPEC-3 0.16, 6.5, 9.3; research 09 3.6, 8.5; docs/FOCUS.md 2.7
- * and section 5 rank 1): Google's two halves in Turboslide's words at a fixed width of 520 with
- * rows of fixed height inside scroll regions. "Share <title>"; the Review banner slot at the top,
- * present at every moment; "Add people by email" with the role dropdown (Viewer selected), Notify
- * people on by default, the message field and Send; the people list (the owner first, then each
- * grant with its mark, name or email, Pending or Expired in fixed width chips, and a per row
- * dropdown with the roles, Transfer ownership, Add expiration and Remove access); the three link
- * rows of the focus round, View link, Present link and Edit link, each a share link that grants
- * its role (viewer, viewer opening as a show, editor; the orchestrator's ruling 2), minted on the
- * first Copy link and remembered on this browser so a second copy sends the same address; General
- * access, Restricted by default, Anyone with the link with its role, the legacy sentence with
- * Switch to a link, the links list with Rotate and Revoke; the gear's five switches for the owner;
- * the footer with Copy link, Done, Publish to the web, the sentence about notes and skipped slides
- * and the sentence naming the deployment's mode, so the dialog never promises what shadow mode
- * does not enforce. Every write is one `share.*` action based on the freshest revision the dialog
- * knows and retried once on a conflict after a re-read (SPEC-3 6.4 "re-read and retry").
+ * and section 5 rank 1; docs/PRODUCT.md section 2 rank 3): two stages at a fixed width of 520.
+ *
+ * The seller's stage first: the General access select (Restricted, Anyone with the link) with the
+ * role select beside it (Viewer, Commenter, Editor), one sentence under them that states what the
+ * chosen access does on this deployment, the address in a read only field with the one Copy link
+ * beside it, a checkbox that swaps the address for the present link, the people rows when any
+ * exist, Done. The address is the link for the selected access: under Anyone with the link the
+ * tokenized general link `share.setGeneralAccess` answers, minted by the first Copy link and
+ * remembered on this browser (`linkUrl`), and Copy link copies that field; under Restricted the
+ * deck's own `/edit/<id>` address with the sentence that only you can open it. Behind one row,
+ * More (Settings while open): Add people by email with the role dropdown, Notify people and the
+ * message; the requests band; the people list (the owner first, then each grant with its chip,
+ * a per row dropdown with the roles, Transfer ownership, Add expiration and Remove access); the
+ * three link rows of the focus round (View link, Present link, Edit link) with their Created dates,
+ * each minted on the first Copy link and remembered so a second copy sends the same address; the
+ * links list with Rotate and Revoke; Stop sharing; the gear's five switches for the owner; Publish
+ * to the web. The two footer sentences of the parity rounds left: the sentence under the select
+ * carries the deployment's mode. The own row reads You (rank 4). The first Share on a browser with
+ * no display name asks for one first ("Your name, shown to collaborators"), once per browser.
+ * Every write is one `share.*` action based on the freshest revision the dialog knows and retried
+ * once on a conflict after a re-read (SPEC-3 6.4 "re-read and retry").
  *
  * The record the dialog reads. The shell's `input.access` when the page carries it; else, on a
  * saved deck, the dialog reads `GET /api/access/<deckId>` itself, which is how the page of `/new`
@@ -134,79 +142,9 @@ export function liveLinksFor(
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-/**
- * The addresses this browser minted, by deck and link id (`localStorage`). A share token is
- * stored hashed on the record (SPEC-3 6.4), so the address exists only where it was minted; keeping
- * it here lets Copy link send the same address twice instead of rotating the link, which would
- * stop the address the seller already sent. A browser that never minted the link mints another
- * one with the same label; the earlier address keeps opening until it is revoked.
- */
-export const LINK_URLS_KEY = 'ts-share-links';
-
-type LinkUrlStore = Pick<Storage, 'getItem' | 'setItem'>;
-
-function defaultStorage(): LinkUrlStore | null {
-  try {
-    return typeof localStorage === 'undefined' ? null : localStorage;
-  } catch {
-    return null;
-  }
-}
-
-export function readLinkUrls(
-  deckId: string,
-  storage: LinkUrlStore | null = defaultStorage(),
-): Record<string, string> {
-  if (storage === null) return {};
-  try {
-    const raw = storage.getItem(LINK_URLS_KEY);
-    if (raw === null) return {};
-    const parsed = JSON.parse(raw) as Record<string, Record<string, string>>;
-    const mine = parsed[deckId];
-    return mine !== null && typeof mine === 'object' ? { ...mine } : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeLinkUrls(
-  deckId: string,
-  urls: Record<string, string>,
-  storage: LinkUrlStore | null,
-): void {
-  if (storage === null) return;
-  try {
-    const raw = storage.getItem(LINK_URLS_KEY);
-    const parsed = (raw === null ? {} : JSON.parse(raw)) as Record<string, Record<string, string>>;
-    if (Object.keys(urls).length === 0) delete parsed[deckId];
-    else parsed[deckId] = urls;
-    storage.setItem(LINK_URLS_KEY, JSON.stringify(parsed));
-  } catch {
-    // a full or refused storage forgets the address; the next Copy link mints another link
-  }
-}
-
-export function rememberLinkUrl(
-  deckId: string,
-  linkId: string,
-  url: string,
-  storage: LinkUrlStore | null = defaultStorage(),
-): void {
-  writeLinkUrls(deckId, { ...readLinkUrls(deckId, storage), [linkId]: url }, storage);
-}
-
-/** Keeps the addresses of the live links alone (a revoked or rotated link's address is dead). */
-export function pruneLinkUrls(
-  deckId: string,
-  liveIds: ReadonlyArray<string>,
-  storage: LinkUrlStore | null = defaultStorage(),
-): Record<string, string> {
-  const kept: Record<string, string> = {};
-  const known = readLinkUrls(deckId, storage);
-  for (const id of liveIds) if (known[id] !== undefined) kept[id] = known[id];
-  if (Object.keys(kept).length !== Object.keys(known).length) writeLinkUrls(deckId, kept, storage);
-  return kept;
-}
+/* the addresses this browser minted, by deck and link id (share-links.ts); re exported for the
+   dialog's tests and the callers that reached them here */
+export { LINK_URLS_KEY, pruneLinkUrls, readLinkUrls, rememberLinkUrl } from './share-links';
 
 /** The 409 a share write meets when the record moved under it (SPEC-3 6.4; server/access.ts). */
 export function isShareConflict(error: unknown): boolean {
@@ -242,6 +180,47 @@ export function authorizeSentence(mode: AuthorizeMode | undefined): string | nul
   if (mode === 'enforce')
     return 'Sharing is enforced on this deployment: only people with access or a link can open the presentation.';
   return null;
+}
+
+/**
+ * The sentence under the access select (rank 3): what the chosen access does on this deployment,
+ * in one line. The mode's words replace the footer paragraph of the parity rounds.
+ */
+export function accessSentence(
+  mode: 'restricted' | 'link' | 'open',
+  role: EditorRole,
+  authorize: AuthorizeMode | undefined,
+): string {
+  if (mode === 'open') return LEGACY_SENTENCE;
+  if (mode === 'link') {
+    if (role === 'editor')
+      return 'Anyone with this link can open and edit this presentation. Pick Viewer before you send it to a customer';
+    if (role === 'commenter') return 'Anyone with this link can open it and leave comments';
+    return 'Anyone with this link can open it and cannot change it';
+  }
+  if (authorize === 'enforce') return DIALOGS.share.restrictedDoc;
+  return 'Only you can open this address on this Turboslide until sign in arrives; pick Anyone with the link to share it';
+}
+
+/** The browser's memory that the first Share already asked for a name (rank 4). */
+export const SHARE_NAME_ASKED_KEY = 'ts-share-name-asked';
+
+function nameAskedBefore(): boolean {
+  try {
+    return (
+      typeof localStorage !== 'undefined' && localStorage.getItem(SHARE_NAME_ASKED_KEY) === '1'
+    );
+  } catch {
+    return true;
+  }
+}
+
+function rememberNameAsked(): void {
+  try {
+    localStorage.setItem(SHARE_NAME_ASKED_KEY, '1');
+  } catch {
+    // private mode: the prompt returns on the next open
+  }
 }
 
 /** What `GET /api/access/<deckId>` answers (routes/api/access.$.ts): the record shaped for the caller, the standing, the mode. */
@@ -551,8 +530,33 @@ export function ShareDialog() {
   const [message, setMessage] = useState('');
   const [review, setReview] = useState(false);
   const [gear, setGear] = useState(false);
-  const [linkUrl, setLinkUrl] = useState<string | null>(access?.linkUrl ?? null);
+  /* the general link's address: the page's, else the one this browser remembers for a live
+     general link (the creation handed the token, or an earlier Copy link minted it; FR1), so the
+     field holds the address at the first open and Copy link copies it without rotating it */
+  const [linkUrl, setLinkUrl] = useState<string | null>(
+    () => access?.linkUrl ?? rememberedGeneralUrl(input.deckId, access?.links ?? []),
+  );
   const [expiring, setExpiring] = useState<string | null>(null);
+  /* the second stage (rank 3): Add people, the requests, the link rows, the links, the gear */
+  const [more, setMore] = useState(false);
+  /* Open as a slideshow: the address field reads the present link */
+  const [asShow, setAsShow] = useState(false);
+  /* the first Share on a browser with no display name asks for one (rank 4), once per browser;
+     a signed in account already has its name */
+  const account = input.account;
+  const [naming, setNaming] = useState<boolean>(
+    () =>
+      account !== undefined &&
+      account.setName !== undefined &&
+      !account.signedIn &&
+      account.principal.kind === 'anonymous' &&
+      account.principal.name === undefined &&
+      !nameAskedBefore(),
+  );
+  const me = account?.principal ?? input.presence?.self;
+  /** The name a row shows (rank 4): You for this browser's own principal. */
+  const personName = (identity: IdentityView): string =>
+    me !== undefined && identity.principalId === me.principalId ? 'You' : nameOf(identity);
 
   /* after the copy the focus goes to Done, so Escape still closes the dialog: the Copy link
      button re-renders through the busy state and the focus fell to the body, where the card's key
@@ -655,6 +659,20 @@ export function ShareDialog() {
     doc: 'Closes the dialog',
   };
 
+  /* the first Share asks for a display name (rank 4): the prompt stands where the dialog will */
+  if (naming) {
+    return (
+      <NamePromptDialog
+        modal
+        title={SHARE_NAME_PROMPT_TITLE}
+        onDone={() => {
+          rememberNameAsked();
+          setNaming(false);
+        }}
+      />
+    );
+  }
+
   /* the draft of /new before its first write: nothing exists in the store to share yet */
   if (draft && access === undefined) {
     return (
@@ -668,9 +686,6 @@ export function ShareDialog() {
       >
         <p className="ts-share-draft" data-control="dialog.share.draft">
           {DRAFT_SENTENCE}
-        </p>
-        <p className="ts-share-footer-sentence" data-control="dialog.share.footer">
-          {DIALOGS.share.footer}
         </p>
       </Dialog>
     );
@@ -732,9 +747,6 @@ export function ShareDialog() {
             <span className="ts-share-quiet">Reading who has access</span>
           </div>
         )}
-        <p className="ts-share-footer-sentence" data-control="dialog.share.footer">
-          {DIALOGS.share.footer}
-        </p>
       </Dialog>
     );
   }
@@ -747,27 +759,69 @@ export function ShareDialog() {
   const mode = access.generalAccess.mode;
   const legacy = mode === 'open';
   const canShare = may('share');
+  const plain = shareLinks(origin, input.deckId);
+  const editAddress =
+    plain.find((link) => link.id === 'edit')?.url ?? `${origin}/edit/${input.deckId}`;
+  const viewAddress =
+    plain.find((link) => link.id === 'view')?.url ?? `${origin}/deck/${input.deckId}`;
+
+  /**
+   * The address of the first stage (rank 3): the tokenized general link under Anyone with the
+   * link (empty until this browser has minted or received it), the deck's own edit address under
+   * Restricted and for a legacy deck; the present link with Open as a slideshow.
+   */
+  const generalAddress = (): string => {
+    if (mode === 'link')
+      return linkUrl === null ? '' : asShow ? rowAddress('present', linkUrl) : linkUrl;
+    if (asShow) return `${viewAddress}?present=1`;
+    return editAddress;
+  };
+  const address = generalAddress();
+
+  /** Copy link (rank 3): the field's address; under a link mode with no address yet it mints one. */
   const generalCopy = () => {
-    if (mode === 'link' && linkUrl !== null) copy(linkUrl);
-    else if (mode === 'link' && links[0] !== undefined) {
-      /* the token is never shown twice: rotate to mint a fresh one and copy it */
+    if (address !== '') {
+      copy(address);
+      return;
+    }
+    if (mode === 'link' && links[0] !== undefined) {
+      /* the token is never shown twice: rotate to mint a fresh one, fill the field and copy it */
       write('share.rotateLink', { linkId: links[0].id }, (result) => {
-        const url = (result as { url?: string }).url;
-        if (url !== undefined) {
-          setLinkUrl(url);
-          copy(url);
+        const answer = result as { url?: string; link?: { id?: string } };
+        if (answer.url !== undefined) {
+          if (answer.link?.id !== undefined)
+            rememberLinkUrl(input.deckId, answer.link.id, answer.url);
+          setLinkUrl(answer.url);
+          copy(asShow ? rowAddress('present', answer.url) : answer.url);
         }
       });
-    } else copy(`${origin}/deck/${encodeURIComponent(input.deckId)}`);
+      return;
+    }
+    if (mode === 'link') {
+      write(
+        'share.setGeneralAccess',
+        { mode: 'link', role: access.generalAccess.role },
+        (result) => {
+          const answer = result as { url?: string; link?: { id?: string } };
+          if (answer.url !== undefined) {
+            if (answer.link?.id !== undefined)
+              rememberLinkUrl(input.deckId, answer.link.id, answer.url);
+            setLinkUrl(answer.url);
+            copy(asShow ? rowAddress('present', answer.url) : answer.url);
+          }
+        },
+      );
+      return;
+    }
+    copy(editAddress);
   };
 
-  /* the link rows: the plain addresses of a legacy deck, else the row's live link this browser
-     minted, else a new link with the row's role and label (docs/FOCUS.md 2.7; ruling 2) */
-  const plain = shareLinks(origin, input.deckId);
+  /* the link rows of the second stage: the plain addresses of a legacy deck, else the row's live
+     link this browser minted, else a new link with the row's role and label (docs/FOCUS.md 2.7) */
   const copyRow = (row: (typeof LINK_ROWS)[number]) => {
     if (legacy) {
-      const address = plain.find((link) => link.id === row.id);
-      if (address !== undefined) copy(address.url);
+      const found = plain.find((link) => link.id === row.id);
+      if (found !== undefined) copy(found.url);
       return;
     }
     const mine = liveLinksFor(access.links, row.label);
@@ -788,7 +842,27 @@ export function ShareDialog() {
     });
   };
   const showRows = legacy || canShare;
-  const modeSentence = authorizeSentence(authorize);
+  const sentence = accessSentence(mode, access.generalAccess.role, authorize);
+  /* the people rows of the first stage (rank 3, rank 4): the owner's row reading You, then the
+     pending owner and each grant; drawn whenever the record names an owner */
+  const peopleRows = access.owner !== null || grants.length > 0 || access.pendingOwner !== null;
+  const createdOf = (row: (typeof LINK_ROWS)[number]): string | null => {
+    if (legacy) return null;
+    const newest = liveLinksFor(access.links, row.label)[0];
+    return newest === undefined ? null : new Date(newest.createdAt).toLocaleDateString();
+  };
+  const addressTip = tipProps({
+    name: 'Link',
+    doc:
+      address === ''
+        ? 'Copy link creates the address for the chosen access'
+        : 'The address Copy link copies; click to select it',
+  });
+  const moreLabel = more
+    ? 'Settings'
+    : requests.length === 0
+      ? 'More'
+      : `More · ${requests.length === 1 ? 'one request' : `${requests.length} requests`}`;
 
   return (
     <Dialog
@@ -797,67 +871,8 @@ export function ShareDialog() {
       width={520}
       control="dialog.share"
       className="ts-share"
-      actions={[
-        {
-          label: DIALOGS.share.copyLink,
-          onClick: generalCopy,
-          control: 'dialog.share.copyLink',
-          doc:
-            mode === 'link'
-              ? 'The address of the link; it carries no notes and no skipped slides'
-              : authorize === 'shadow'
-                ? 'The address; sharing is not enforced on this deployment'
-                : 'The address; only people with access can open it',
-        },
-        doneAction,
-      ]}
+      actions={[doneAction]}
     >
-      {/* the Review banner slot, present at every moment (9.3) */}
-      <div
-        className={cn('ts-share-review', requests.length > 0 && 'has-requests')}
-        data-control="dialog.share.review"
-        data-count={requests.length}
-      >
-        {requests.length === 0 ? (
-          <span className="ts-share-quiet">{DIALOGS.share.noPendingRequests}</span>
-        ) : (
-          <>
-            <span>
-              {requests.length === 1
-                ? 'One person asked for access'
-                : `${requests.length} people asked for access`}
-            </span>
-            <button
-              type="button"
-              className="pt-ib is-text"
-              aria-expanded={review}
-              data-control="dialog.share.review.toggle"
-              onClick={() => setReview((on) => !on)}
-              {...tipProps({
-                name: DIALOGS.share.review,
-                doc: 'Who asked, for what, and your answer',
-              })}
-            >
-              <span className="pt-lb">{DIALOGS.share.review}</span>
-            </button>
-          </>
-        )}
-      </div>
-      {review && requests.length > 0 ? (
-        <ul className="ts-share-requests pt-scroll" data-control="dialog.share.requests">
-          {requests.map((request) => (
-            <RequestRow
-              key={request.id}
-              request={request}
-              busy={busy}
-              onRespond={(grant, notifyThem) =>
-                write('share.respond', { requestId: request.id, grant, notify: notifyThem })
-              }
-            />
-          ))}
-        </ul>
-      ) : null}
-
       {access.claimable === true ? (
         <div className="ts-share-claim" data-control="dialog.share.claim">
           <span>{DIALOGS.share.claim}</span>
@@ -881,204 +896,19 @@ export function ShareDialog() {
         </div>
       ) : null}
 
-      {/* the people half */}
-      {canShare ? (
-        <section className="ts-share-people" aria-label={DIALOGS.share.addPeople}>
-          <div className="ts-share-invite">
-            <input
-              type="text"
-              className="ts-share-emails"
-              value={emails}
-              placeholder={DIALOGS.share.addPeople}
-              aria-label={DIALOGS.share.addPeople}
-              data-control="dialog.share.emails"
-              autoComplete="off"
-              {...tipProps({
-                name: DIALOGS.share.addPeople,
-                doc: 'Addresses separated by commas; Enter sends',
-              })}
-              onChange={(event) => setEmails(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  invite();
-                }
-              }}
-            />
-            <select
-              className="ts-share-role"
-              value={inviteRole}
-              aria-label="Role"
-              data-control="dialog.share.inviteRole"
-              onChange={(event) => setInviteRole(event.target.value as EditorRole)}
-              {...tipProps({ name: 'Role', doc: 'Viewer, Commenter or Editor' })}
-            >
-              {ROLES.map((each) => (
-                <option key={each.value} value={each.value}>
-                  {each.label}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className="pt-ib is-solid"
-              disabled={busy || emails.trim() === ''}
-              data-control="dialog.share.send"
-              onClick={invite}
-              {...tipProps({
-                name: DIALOGS.share.send,
-                doc: 'One invitation per address; the mail carries your message',
-              })}
-            >
-              <span className="pt-lb">{DIALOGS.share.send}</span>
-            </button>
-          </div>
-          <div className="ts-share-notify">
-            <DialogCheck
-              label={DIALOGS.share.notifyPeople}
-              checked={notify}
-              onChange={setNotify}
-              control="dialog.share.notify"
-              doc="A mail with the link and your message"
-            />
-            {notify ? (
-              <input
-                type="text"
-                className="ts-share-message"
-                value={message}
-                placeholder={DIALOGS.share.message}
-                aria-label={DIALOGS.share.message}
-                data-control="dialog.share.message"
-                onChange={(event) => setMessage(event.target.value)}
-                {...tipProps({ name: DIALOGS.share.message, doc: 'Goes in the invitation mail' })}
-              />
-            ) : (
-              <span className="ts-share-message is-empty" aria-hidden="true" />
-            )}
-          </div>
-        </section>
-      ) : null}
-
-      <ul
-        className="ts-share-list pt-scroll"
-        data-control="dialog.share.people"
-        aria-label="People with access"
-      >
-        {access.owner ? (
-          <li className="ts-share-row is-owner" data-control="dialog.share.owner">
-            <IdentityChip identity={access.owner} size={24} />
-            <span className="ts-share-row-name">{nameOf(access.owner)}</span>
-            <span className="ts-share-row-chip" aria-hidden="true" />
-            <span className="ts-share-row-role">{DIALOGS.share.roles.owner}</span>
-          </li>
-        ) : null}
-        {access.pendingOwner ? (
-          <li className="ts-share-row is-pending-owner" data-control="dialog.share.pendingOwner">
-            <IdentityChip identity={access.pendingOwner} size={24} />
-            <span className="ts-share-row-name">{nameOf(access.pendingOwner)}</span>
-            <span className="ts-share-row-chip">{DIALOGS.share.pending}</span>
-            <span className="ts-share-row-role">{DIALOGS.share.pendingOwnership}</span>
-          </li>
-        ) : null}
-        {grants.map((grant) => (
-          <GrantRow
-            key={whoKey(grant)}
-            grant={grant}
-            canShare={canShare}
-            canTransfer={owner && may('transfer')}
-            busy={busy}
-            expiring={expiring === whoKey(grant)}
-            onExpiring={(on) => setExpiring(on ? whoKey(grant) : null)}
-            onRole={(next) => write('share.setRole', { who: whoKey(grant), role: next })}
-            onRemove={() => write('share.remove', { who: whoKey(grant) })}
-            onExpiry={(at) => write('share.setExpiry', { who: whoKey(grant), expiresAt: at })}
-            onTransfer={() =>
-              write('share.transferOwnership', { to: whoKey(grant) }, () =>
-                shell.say('The transfer is waiting for their answer'),
-              )
-            }
-          />
-        ))}
-      </ul>
-
-      {/* the three link rows (docs/FOCUS.md 2.7) */}
-      {showRows ? (
-        <section className="ts-share-rows" aria-labelledby="ts-share-links">
-          <h3 id="ts-share-links" className="ts-dialog-field-label">
-            Links
-          </h3>
-          <ul className="ts-dialog-list" data-control="dialog.share.rows">
-            {LINK_ROWS.map((row) => {
-              const address = plain.find((link) => link.id === row.id);
-              const note = legacy ? address?.note : row.note;
-              const minted = legacy ? 0 : liveLinksFor(access.links, row.label).length;
-              return (
-                <li
-                  key={row.id}
-                  className="ts-dialog-row"
-                  data-control={`dialog.share.${row.id}`}
-                  data-minted={minted}
-                >
-                  <span className="ts-dialog-row-title">
-                    <b>{row.label}</b>
-                    {note !== undefined ? <span className="ts-dialog-hint"> · {note}</span> : null}
-                  </span>
-                  <button
-                    type="button"
-                    className="pt-ib is-text"
-                    disabled={busy}
-                    data-control={`dialog.share.${row.id}.copy`}
-                    onClick={() => copyRow(row)}
-                    {...tipProps({
-                      name: DIALOGS.share.copyLink,
-                      doc: legacy
-                        ? (address?.url ?? '')
-                        : `A link that opens the presentation as ${row.note.toLowerCase()}; it can be revoked below`,
-                    })}
-                  >
-                    <span className="pt-lb">{DIALOGS.share.copyLink}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-          {legacy ? (
-            <p className="ts-share-quiet ts-share-legacy-sentence" data-control="dialog.share.open">
-              {LEGACY_SENTENCE}
-            </p>
-          ) : null}
-        </section>
-      ) : null}
-
-      {/* the general access half */}
+      {/* the first stage (rank 3): the access, its sentence, the address, the show checkbox */}
       <section className="ts-share-general" aria-label={DIALOGS.share.generalAccess}>
         <h3 className="ts-dialog-field-label">{DIALOGS.share.generalAccess}</h3>
-        {mode === 'open' ? (
-          <div className="ts-share-general-row" data-control="dialog.share.legacy">
+        {legacy ? (
+          <div className="ts-share-access is-restricted" data-control="dialog.share.legacy">
             <Icon name="link" />
             <span className="ts-share-general-words">{DIALOGS.share.legacy}</span>
-            {canShare ? (
-              <button
-                type="button"
-                className="pt-ib is-text"
-                disabled={busy}
-                data-control="dialog.share.switchToLink"
-                onClick={() =>
-                  write('share.setGeneralAccess', { mode: 'link', role: 'viewer' }, (result) =>
-                    setLinkUrl((result as { url?: string }).url ?? null),
-                  )
-                }
-                {...tipProps({
-                  name: DIALOGS.share.switchToLink,
-                  doc: 'A link that can be revoked; the address alone stops opening the presentation',
-                })}
-              >
-                <span className="pt-lb">{DIALOGS.share.switchToLink}</span>
-              </button>
-            ) : null}
           </div>
         ) : (
-          <div className="ts-share-general-row" data-control="dialog.share.general">
+          <div
+            className={cn('ts-share-access', mode === 'restricted' && 'is-restricted')}
+            data-control="dialog.share.general"
+          >
             <Icon name={mode === 'restricted' ? 'lock-closed' : 'link'} />
             <select
               className="ts-share-mode"
@@ -1099,7 +929,7 @@ export function ShareDialog() {
                 name: DIALOGS.share.generalAccess,
                 doc:
                   mode === 'restricted'
-                    ? DIALOGS.share.restrictedDoc
+                    ? 'Only you, until you pick Anyone with the link'
                     : 'No sign in needed; the link can be revoked',
               })}
             >
@@ -1128,171 +958,505 @@ export function ShareDialog() {
                   </option>
                 ))}
               </select>
-            ) : (
-              <span className="ts-share-quiet">{DIALOGS.share.restrictedDoc}</span>
-            )}
+            ) : null}
           </div>
         )}
-        {links.length > 1 || (links.length === 1 && canShare) ? (
-          <ul className="ts-share-links pt-scroll" data-control="dialog.share.links">
-            {links.map((link) => (
-              <li
-                key={link.id}
-                className="ts-share-row is-link"
-                data-control={`dialog.share.link.${link.id}`}
-              >
-                <span className="ts-share-row-name">
-                  {link.label ?? DIALOGS.share.anyoneWithLink}
-                </span>
-                <span className="ts-share-row-role">
-                  {ROLES.find((each) => each.value === link.role)?.label ?? link.role}
-                </span>
-                <span className="ts-share-row-meta">
-                  {new Date(link.createdAt).toLocaleDateString()}
-                  {link.expiresAt
-                    ? ` · ${DIALOGS.share.links.expires} ${new Date(link.expiresAt).toLocaleDateString()}`
-                    : ''}
-                </span>
-                {canShare ? (
-                  <span className="ts-share-row-acts">
-                    <button
-                      type="button"
-                      className="pt-ib is-text"
-                      disabled={busy}
-                      data-control={`dialog.share.link.${link.id}.rotate`}
-                      onClick={() =>
-                        write('share.rotateLink', { linkId: link.id }, (result) => {
-                          const answer = result as { url?: string; link?: { id?: string } };
-                          if (answer.url) {
-                            if (answer.link?.id !== undefined)
-                              rememberLinkUrl(input.deckId, answer.link.id, answer.url);
-                            setLinkUrl(answer.url);
-                            copy(answer.url);
-                          }
-                        })
-                      }
-                      {...tipProps({
-                        name: DIALOGS.share.rotate,
-                        doc: 'A new address; the old one stops working',
-                      })}
-                    >
-                      <span className="pt-lb">{DIALOGS.share.rotate}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="pt-ib is-text"
-                      disabled={busy}
-                      data-control={`dialog.share.link.${link.id}.revoke`}
-                      onClick={() => write('share.revokeLink', { linkId: link.id })}
-                      {...tipProps({
-                        name: DIALOGS.share.revoke,
-                        doc: 'The address stops working for everyone who has it',
-                      })}
-                    >
-                      <span className="pt-lb">{DIALOGS.share.revoke}</span>
-                    </button>
-                  </span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        {mode !== 'restricted' && canShare ? (
-          <button
-            type="button"
-            className="pt-ib is-text ts-share-stop"
-            disabled={busy}
-            data-control="dialog.share.stop"
-            onClick={() =>
-              write('share.stop', {}, () => {
-                setLinkUrl(null);
-                pruneLinkUrls(input.deckId, []);
-              })
-            }
-            {...tipProps({
-              name: DIALOGS.share.stopSharing,
-              doc: 'Restricted, with every link revoked',
-            })}
-          >
-            <span className="pt-lb">{DIALOGS.share.stopSharing}</span>
-          </button>
-        ) : null}
-      </section>
-
-      {/* the gear: owner only (6.5) */}
-      {owner && may('settings') ? (
-        <section className="ts-share-gear" aria-label="Settings">
-          <button
-            type="button"
-            className="pt-ib pt-icon ts-share-gear-btn"
-            aria-expanded={gear}
-            aria-label="Settings"
-            data-control="dialog.share.gear"
-            onClick={() => setGear((on) => !on)}
-            {...tipProps({ name: 'Settings', doc: 'What editors, viewers and commenters may do' })}
-          >
-            <Icon name="adjustments" />
-          </button>
-          {gear ? (
-            <div className="ts-share-switches" data-control="dialog.share.settings">
-              {(
-                [
-                  ['editorsCanShare', DIALOGS.share.settings.editorsCanShare, true],
-                  ['viewersCanDownload', DIALOGS.share.settings.viewersCanDownload, true],
-                  ['viewersCanSeeComments', DIALOGS.share.settings.viewersCanSeeComments, false],
-                  [
-                    'showNamesToLinkVisitors',
-                    DIALOGS.share.settings.showNamesToLinkVisitors,
-                    false,
-                  ],
-                  ['allowHtmlBlocks', DIALOGS.share.settings.allowHtmlBlocks, false],
-                ] as const
-              ).map(([key, label, fallback]) => (
-                <DialogCheck
-                  key={key}
-                  label={label}
-                  checked={access.settings?.[key] ?? fallback}
-                  disabled={busy}
-                  onChange={(on) => write('share.settings', { [key]: on })}
-                  control={`dialog.share.settings.${key}`}
-                  doc={
-                    key === 'viewersCanDownload' ? DIALOGS.share.settings.downloadNote : undefined
-                  }
-                />
-              ))}
-            </div>
-          ) : null}
-        </section>
-      ) : null}
-
-      <div className="ts-share-foot">
-        {may('publish') ? (
+        <p
+          className="ts-dialog-sentence"
+          data-control="dialog.share.accessSentence"
+          data-mode={authorize}
+        >
+          {sentence}
+        </p>
+        <div className="ts-share-address" data-control="dialog.share.addressRow">
+          <input
+            type="text"
+            readOnly
+            value={address}
+            placeholder={mode === 'link' ? 'Copy link creates the address' : ''}
+            aria-label="Link"
+            data-control="dialog.share.address"
+            {...addressTip}
+            onFocus={(event) => {
+              addressTip.onFocus(event);
+              event.currentTarget.select();
+            }}
+          />
           <button
             type="button"
             className="pt-ib is-text"
-            data-control="dialog.share.publish"
-            onClick={() => shell.openDialog('publish')}
+            disabled={busy || (mode === 'link' && !canShare && address === '')}
+            data-control="dialog.share.copy"
+            onClick={generalCopy}
             {...tipProps({
-              name: DIALOGS.share.publishToWeb,
-              doc: 'A player link and an embed code; Stop publishing lives there too',
+              name: DIALOGS.share.copyLink,
+              doc:
+                mode === 'link'
+                  ? 'Copies the link; it carries no notes and no skipped slides'
+                  : 'Copies the address of this presentation',
             })}
           >
-            <span className="pt-lb">{DIALOGS.share.publishToWeb}</span>
+            <span className="pt-lb">{DIALOGS.share.copyLink}</span>
           </button>
-        ) : null}
-        <p className="ts-share-footer-sentence" data-control="dialog.share.footer">
-          {DIALOGS.share.footer}
-        </p>
-        {modeSentence !== null ? (
-          <p
-            className="ts-share-footer-sentence ts-share-mode-sentence"
-            data-control="dialog.share.authorize"
-            data-mode={authorize}
-          >
-            {modeSentence}
-          </p>
-        ) : null}
+        </div>
+        <DialogCheck
+          label="Open as a slideshow"
+          checked={asShow}
+          onChange={setAsShow}
+          control="dialog.share.slideshow"
+          doc="The address opens the presentation as a show, on slide 1"
+        />
+      </section>
+
+      {/* the people rows, when any exist (rank 3): the owner first, then each grant */}
+      {peopleRows ? (
+        <ul
+          className="ts-share-list pt-scroll"
+          data-control="dialog.share.people"
+          aria-label="People with access"
+        >
+          {access.owner ? (
+            <li className="ts-share-row is-owner" data-control="dialog.share.owner">
+              <IdentityChip identity={access.owner} size={24} />
+              <span className="ts-share-row-name">{personName(access.owner)}</span>
+              <span className="ts-share-row-chip" aria-hidden="true" />
+              <span className="ts-share-row-role">{DIALOGS.share.roles.owner}</span>
+            </li>
+          ) : null}
+          {access.pendingOwner ? (
+            <li className="ts-share-row is-pending-owner" data-control="dialog.share.pendingOwner">
+              <IdentityChip identity={access.pendingOwner} size={24} />
+              <span className="ts-share-row-name">{personName(access.pendingOwner)}</span>
+              <span className="ts-share-row-chip">{DIALOGS.share.pending}</span>
+              <span className="ts-share-row-role">{DIALOGS.share.pendingOwnership}</span>
+            </li>
+          ) : null}
+          {grants.map((grant) => (
+            <GrantRow
+              key={whoKey(grant)}
+              grant={grant}
+              name={grant.principal === undefined ? who(grant) : personName(grant.principal)}
+              canShare={canShare}
+              canTransfer={owner && may('transfer')}
+              busy={busy}
+              expiring={expiring === whoKey(grant)}
+              onExpiring={(on) => setExpiring(on ? whoKey(grant) : null)}
+              onRole={(next) => write('share.setRole', { who: whoKey(grant), role: next })}
+              onRemove={() => write('share.remove', { who: whoKey(grant) })}
+              onExpiry={(at) => write('share.setExpiry', { who: whoKey(grant), expiresAt: at })}
+              onTransfer={() =>
+                write('share.transferOwnership', { to: whoKey(grant) }, () =>
+                  shell.say('The transfer is waiting for their answer'),
+                )
+              }
+            />
+          ))}
+        </ul>
+      ) : null}
+
+      {/* the More row (rank 3): the second stage opens under it and the row reads Settings */}
+      <div className="ts-share-more">
+        <button
+          type="button"
+          className="ts-dialog-row is-button is-more"
+          aria-expanded={more}
+          aria-controls="ts-share-settings"
+          data-control="dialog.share.more"
+          onClick={() => setMore((on) => !on)}
+          {...tipProps({
+            name: more ? 'Settings' : 'More',
+            doc: 'Add people by email, the requests, the view and present links and the settings',
+          })}
+        >
+          <span className="ts-dialog-row-title">{moreLabel}</span>
+          <Icon name="chevron-down" />
+        </button>
       </div>
+
+      {more ? (
+        <div
+          className="ts-share-settings"
+          id="ts-share-settings"
+          data-control="dialog.share.settings"
+        >
+          {/* the Review banner slot (9.3), present while the stage is open */}
+          <div
+            className={cn('ts-share-review', requests.length > 0 && 'has-requests')}
+            data-control="dialog.share.review"
+            data-count={requests.length}
+          >
+            {requests.length === 0 ? (
+              <span className="ts-share-quiet">{DIALOGS.share.noPendingRequests}</span>
+            ) : (
+              <>
+                <span>
+                  {requests.length === 1
+                    ? 'One person asked for access'
+                    : `${requests.length} people asked for access`}
+                </span>
+                <button
+                  type="button"
+                  className="pt-ib is-text"
+                  aria-expanded={review}
+                  data-control="dialog.share.review.toggle"
+                  onClick={() => setReview((on) => !on)}
+                  {...tipProps({
+                    name: DIALOGS.share.review,
+                    doc: 'Who asked, for what, and your answer',
+                  })}
+                >
+                  <span className="pt-lb">{DIALOGS.share.review}</span>
+                </button>
+              </>
+            )}
+          </div>
+          {review && requests.length > 0 ? (
+            <ul className="ts-share-requests pt-scroll" data-control="dialog.share.requests">
+              {requests.map((request) => (
+                <RequestRow
+                  key={request.id}
+                  request={request}
+                  busy={busy}
+                  onRespond={(grant, notifyThem) =>
+                    write('share.respond', { requestId: request.id, grant, notify: notifyThem })
+                  }
+                />
+              ))}
+            </ul>
+          ) : null}
+
+          {/* Add people by email */}
+          {canShare ? (
+            <section className="ts-share-people" aria-label={DIALOGS.share.addPeople}>
+              <div className="ts-share-invite">
+                <input
+                  type="text"
+                  className="ts-share-emails"
+                  value={emails}
+                  placeholder={DIALOGS.share.addPeople}
+                  aria-label={DIALOGS.share.addPeople}
+                  data-control="dialog.share.emails"
+                  autoComplete="off"
+                  {...tipProps({
+                    name: DIALOGS.share.addPeople,
+                    doc: 'Addresses separated by commas; Enter sends',
+                  })}
+                  onChange={(event) => setEmails(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      invite();
+                    }
+                  }}
+                />
+                <select
+                  className="ts-share-role"
+                  value={inviteRole}
+                  aria-label="Role"
+                  data-control="dialog.share.inviteRole"
+                  onChange={(event) => setInviteRole(event.target.value as EditorRole)}
+                  {...tipProps({ name: 'Role', doc: 'Viewer, Commenter or Editor' })}
+                >
+                  {ROLES.map((each) => (
+                    <option key={each.value} value={each.value}>
+                      {each.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="pt-ib is-solid"
+                  disabled={busy || emails.trim() === ''}
+                  data-control="dialog.share.send"
+                  onClick={invite}
+                  {...tipProps({
+                    name: DIALOGS.share.send,
+                    doc: 'One invitation per address; the mail carries your message',
+                  })}
+                >
+                  <span className="pt-lb">{DIALOGS.share.send}</span>
+                </button>
+              </div>
+              <div className="ts-share-notify">
+                <DialogCheck
+                  label={DIALOGS.share.notifyPeople}
+                  checked={notify}
+                  onChange={setNotify}
+                  control="dialog.share.notify"
+                  doc="A mail with the link and your message"
+                />
+                {notify ? (
+                  <input
+                    type="text"
+                    className="ts-share-message"
+                    value={message}
+                    placeholder={DIALOGS.share.message}
+                    aria-label={DIALOGS.share.message}
+                    data-control="dialog.share.message"
+                    onChange={(event) => setMessage(event.target.value)}
+                    {...tipProps({
+                      name: DIALOGS.share.message,
+                      doc: 'Goes in the invitation mail',
+                    })}
+                  />
+                ) : (
+                  <span className="ts-share-message is-empty" aria-hidden="true" />
+                )}
+              </div>
+            </section>
+          ) : null}
+
+          {/* the three link rows (docs/FOCUS.md 2.7) with their Created dates (rank 3) */}
+          {showRows ? (
+            <section className="ts-share-rows" aria-labelledby="ts-share-links">
+              <h3 id="ts-share-links" className="ts-dialog-field-label">
+                Links
+              </h3>
+              <ul className="ts-dialog-list" data-control="dialog.share.rows">
+                {LINK_ROWS.map((row) => {
+                  const found = plain.find((link) => link.id === row.id);
+                  const note = legacy ? found?.note : row.note;
+                  const minted = legacy ? 0 : liveLinksFor(access.links, row.label).length;
+                  const created = createdOf(row);
+                  return (
+                    <li
+                      key={row.id}
+                      className="ts-dialog-row"
+                      data-control={`dialog.share.${row.id}`}
+                      data-minted={minted}
+                    >
+                      <span className="ts-dialog-row-title">
+                        <b>{row.label}</b>
+                        {note !== undefined ? (
+                          <span className="ts-dialog-hint"> · {note}</span>
+                        ) : null}
+                        {created !== null ? (
+                          <span className="ts-dialog-hint">
+                            {' '}
+                            · {DIALOGS.share.links.created} {created}
+                          </span>
+                        ) : null}
+                      </span>
+                      <button
+                        type="button"
+                        className="pt-ib is-text"
+                        disabled={busy}
+                        data-control={`dialog.share.${row.id}.copy`}
+                        onClick={() => copyRow(row)}
+                        {...tipProps({
+                          name: DIALOGS.share.copyLink,
+                          doc: legacy
+                            ? (found?.url ?? '')
+                            : `A link that opens the presentation as ${row.note.toLowerCase()}; it can be revoked below`,
+                        })}
+                      >
+                        <span className="pt-lb">{DIALOGS.share.copyLink}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              {legacy ? (
+                <p
+                  className="ts-share-quiet ts-share-legacy-sentence"
+                  data-control="dialog.share.open"
+                >
+                  {LEGACY_SENTENCE}
+                </p>
+              ) : null}
+            </section>
+          ) : null}
+
+          {/* the general access links with Rotate and Revoke, Switch to a link for a legacy deck, Stop sharing */}
+          {legacy && canShare ? (
+            <button
+              type="button"
+              className="pt-ib is-text ts-share-stop"
+              disabled={busy}
+              data-control="dialog.share.switchToLink"
+              onClick={() =>
+                write('share.setGeneralAccess', { mode: 'link', role: 'viewer' }, (result) =>
+                  setLinkUrl((result as { url?: string }).url ?? null),
+                )
+              }
+              {...tipProps({
+                name: DIALOGS.share.switchToLink,
+                doc: 'A link that can be revoked; the address alone stops opening the presentation',
+              })}
+            >
+              <span className="pt-lb">{DIALOGS.share.switchToLink}</span>
+            </button>
+          ) : null}
+          {links.length > 1 || (links.length === 1 && canShare) ? (
+            <ul className="ts-share-links pt-scroll" data-control="dialog.share.links">
+              {links.map((link) => (
+                <li
+                  key={link.id}
+                  className="ts-share-row is-link"
+                  data-control={`dialog.share.link.${link.id}`}
+                >
+                  <span className="ts-share-row-name">
+                    {link.label ?? DIALOGS.share.anyoneWithLink}
+                  </span>
+                  <span className="ts-share-row-role">
+                    {ROLES.find((each) => each.value === link.role)?.label ?? link.role}
+                  </span>
+                  <span className="ts-share-row-meta">
+                    {DIALOGS.share.links.created} {new Date(link.createdAt).toLocaleDateString()}
+                    {link.expiresAt
+                      ? ` · ${DIALOGS.share.links.expires} ${new Date(link.expiresAt).toLocaleDateString()}`
+                      : ''}
+                  </span>
+                  {canShare ? (
+                    <span className="ts-share-row-acts">
+                      <button
+                        type="button"
+                        className="pt-ib is-text"
+                        disabled={busy}
+                        data-control={`dialog.share.link.${link.id}.rotate`}
+                        onClick={() =>
+                          write('share.rotateLink', { linkId: link.id }, (result) => {
+                            const answer = result as { url?: string; link?: { id?: string } };
+                            if (answer.url) {
+                              if (answer.link?.id !== undefined)
+                                rememberLinkUrl(input.deckId, answer.link.id, answer.url);
+                              setLinkUrl(answer.url);
+                              copy(answer.url);
+                            }
+                          })
+                        }
+                        {...tipProps({
+                          name: DIALOGS.share.rotate,
+                          doc: 'A new address; the old one stops working',
+                        })}
+                      >
+                        <span className="pt-lb">{DIALOGS.share.rotate}</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="pt-ib is-text"
+                        disabled={busy}
+                        data-control={`dialog.share.link.${link.id}.revoke`}
+                        onClick={() => write('share.revokeLink', { linkId: link.id })}
+                        {...tipProps({
+                          name: DIALOGS.share.revoke,
+                          doc: 'The address stops working for everyone who has it',
+                        })}
+                      >
+                        <span className="pt-lb">{DIALOGS.share.revoke}</span>
+                      </button>
+                    </span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {mode !== 'restricted' && !legacy && canShare ? (
+            <button
+              type="button"
+              className="pt-ib is-text ts-share-stop"
+              disabled={busy}
+              data-control="dialog.share.stop"
+              onClick={() =>
+                write('share.stop', {}, () => {
+                  setLinkUrl(null);
+                  pruneLinkUrls(input.deckId, []);
+                })
+              }
+              {...tipProps({
+                name: DIALOGS.share.stopSharing,
+                doc: 'Restricted, with every link revoked',
+              })}
+            >
+              <span className="pt-lb">{DIALOGS.share.stopSharing}</span>
+            </button>
+          ) : null}
+
+          {/* the gear: owner only (6.5) */}
+          {owner && may('settings') ? (
+            <section className="ts-share-gear" aria-label="Settings">
+              <button
+                type="button"
+                className="pt-ib is-text ts-share-gear-btn"
+                aria-expanded={gear}
+                data-control="dialog.share.gear"
+                onClick={() => setGear((on) => !on)}
+                {...tipProps({
+                  name: 'Permissions',
+                  doc: 'What editors, viewers and commenters may do',
+                })}
+              >
+                <Icon name="adjustments" />
+                <span className="pt-lb">Permissions</span>
+              </button>
+              {gear ? (
+                <div className="ts-share-switches" data-control="dialog.share.permissions">
+                  {(
+                    [
+                      ['editorsCanShare', DIALOGS.share.settings.editorsCanShare, true],
+                      ['viewersCanDownload', DIALOGS.share.settings.viewersCanDownload, true],
+                      [
+                        'viewersCanSeeComments',
+                        DIALOGS.share.settings.viewersCanSeeComments,
+                        false,
+                      ],
+                      [
+                        'showNamesToLinkVisitors',
+                        DIALOGS.share.settings.showNamesToLinkVisitors,
+                        false,
+                      ],
+                      ['allowHtmlBlocks', DIALOGS.share.settings.allowHtmlBlocks, false],
+                    ] as const
+                  ).map(([key, label, fallback]) => (
+                    <DialogCheck
+                      key={key}
+                      label={label}
+                      checked={access.settings?.[key] ?? fallback}
+                      disabled={busy}
+                      onChange={(on) => write('share.settings', { [key]: on })}
+                      control={`dialog.share.settings.${key}`}
+                      doc={
+                        key === 'viewersCanDownload'
+                          ? DIALOGS.share.settings.downloadNote
+                          : undefined
+                      }
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </section>
+          ) : null}
+
+          <div className="ts-share-foot">
+            {may('publish') ? (
+              <button
+                type="button"
+                className="pt-ib is-text"
+                data-control="dialog.share.publish"
+                onClick={() => shell.openDialog('publish')}
+                {...tipProps({
+                  name: DIALOGS.share.publishToWeb,
+                  doc: 'A player link and an embed code; Stop publishing lives there too',
+                })}
+              >
+                <span className="pt-lb">{DIALOGS.share.publishToWeb}</span>
+              </button>
+            ) : null}
+            <p className="ts-share-footer-sentence" data-control="dialog.share.footer">
+              {DIALOGS.share.footer}
+            </p>
+            {authorize !== undefined ? (
+              <p
+                className="ts-share-footer-sentence ts-share-mode-sentence"
+                data-control="dialog.share.authorize"
+                data-mode={authorize}
+              >
+                {authorizeSentence(authorize)}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
       <p className="ts-dialog-error-row" role="alert" data-control="dialog.share.error">
         {error ?? ''}
       </p>
@@ -1374,6 +1538,7 @@ function RequestRow({
 
 function GrantRow({
   grant,
+  name,
   canShare,
   canTransfer,
   busy,
@@ -1385,6 +1550,8 @@ function GrantRow({
   onTransfer,
 }: {
   grant: AccessGrantView;
+  /** the name the row shows: You for this browser (rank 4), else the person's name or address */
+  name?: string;
   canShare: boolean;
   canTransfer: boolean;
   busy: boolean;
@@ -1410,7 +1577,7 @@ function GrantRow({
         <span className="ts-chip is-blank" />
       )}
       <span className="ts-share-row-name" title={grant.email}>
-        {who(grant)}
+        {name ?? who(grant)}
       </span>
       <span className="ts-share-row-chip">
         {status === 'pending'

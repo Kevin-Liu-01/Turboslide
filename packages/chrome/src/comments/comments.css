@@ -3,6 +3,27 @@
    fixed height rows with tabular times, the reply box and its autocomplete. Monochrome
    throughout: no hue reaches a comment. Every box is square; motion is opacity only. */
 
+/* ---- the empty panel (docs/PRODUCT.md 3.2; audit-interface 20): the sentence, then the one line
+   that names the gesture; the tabs, the search and the filter arrive with the first comment ---- */
+.ts-comments-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 16px 0;
+}
+
+.ts-comments-empty-title {
+  color: var(--pt-ink-2);
+  font: 500 13px/1.4 var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+.ts-comments-empty-gesture {
+  color: var(--pt-titanium);
+  font: 12.5px/1.5 var(--pt-text);
+}
+
 /* ---- the card: a paper plate with an edge frame beside the anchored object ---- */
 .ts-comment-card {
   position: absolute;
@@ -424,7 +445,7 @@
   width: 100%;
   height: 30px;
   padding: 0 10px;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-field);
   border-radius: var(--pt-radius, 6px);
   background: var(--pt-paper);
   color: var(--pt-ink);
@@ -443,12 +464,10 @@
   gap: 8px;
 }
 
+/* the filter is the one select of tokens.css (.pt-select: 32 px, the field boundary, the chrome's
+   chevron; docs/PRODUCT.md 3.1, the select row) */
 .ts-comments-filter {
-  height: 28px;
-  border: 1px solid var(--pt-hair);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  font: 13px/1 var(--pt-text);
+  flex: 0 0 auto;
 }
 
 .ts-comments-list {

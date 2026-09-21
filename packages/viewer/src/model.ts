@@ -6,6 +6,8 @@
  * kinds and the HTML string it sets as innerHTML (SPEC 5.3).
  */
 
+import type { FrameBand } from '@turboslide/render/stage';
+
 /** The sheet (SPEC 2.1): 1600 by 900 sheet pixels. */
 export const SHEET_W = 1600;
 export const SHEET_H = 900;
@@ -57,6 +59,8 @@ export type ViewerDeck = {
   slides: readonly ViewerSlide[];
   /** the deck id that was actually served when the requested one was missing (the studio's fixture fallback) */
   fallback?: string;
+  /** the brand kit's frame band (docs/PRODUCT.md 4.1): the footer logo, the footer text and the counter's format; the GT band when absent */
+  band?: FrameBand;
 };
 
 /** The deck's title trim for rows and captions (tail.html titleOf): 72 characters, cut at a word. */

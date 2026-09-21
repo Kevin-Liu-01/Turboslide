@@ -30,6 +30,7 @@ import type {
 import { foldMutation } from '../src/coalesce.ts';
 import {
   CLIENT_ID_PATTERN,
+  ENTRY_NOTE_MAX,
   OPS_POST_MAX_BYTES,
   OPS_POST_MAX_ENTRIES,
   PRESENCE_BATCH_MS,
@@ -174,6 +175,14 @@ export type FlushClass = 'now' | 'pos' | 'text';
 
 /** The flush cadence (SPEC-3 3.9): structural ops at once, pos sets 50 ms, typing 100 ms. */
 export const FLUSH_MS: Readonly<Record<FlushClass, number>> = { now: 0, pos: 50, text: 100 };
+/**
+ * The sentence of a pending change the document no longer takes after another change landed
+ * (the product round fix round, pass 1 finding 9: a paste that vanished on the blob tier read
+ * as nothing; the controller shows a reject notice's message).
+ */
+export const UNPLACEABLE_SENTENCE =
+  'This change no longer fits the slide after another change landed; make it again';
+
 /** The reconnect and resend backoff cap (SPEC-3 3.6). */
 export const BACKOFF_MAX_MS = 8000;
 /** The longest wait a server's `retry-after` or `retry:` is honoured for before the next open. */
@@ -203,6 +212,12 @@ export type PendingOp = {
   mutations?: Mutation[];
   comment?: CommentOp;
   label: string;
+  /**
+   * The history label the edit carries into Version history (channel.ts `Entry.note`): set on
+   * the brand kit's writes and the assist's accept alone, since a noted record is a named version
+   * in the panel's filter; an ordinary edit carries none and its label stays Change history's.
+   */
+  note?: string;
   /** sent in the POST in flight */
   inflight: boolean;
   /** the local clock the op was recorded at, for `transformSince` */
@@ -291,6 +306,16 @@ export type RoomClientOptions = {
   onUnplaceable?: (op: PendingOp) => void;
 };
 
+/** What a write may carry beside its mutations and its Change history label. */
+export type ApplyOptions = {
+  /**
+   * The history label Version history lists the write under (the product round fix round; pass 1
+   * finding 3): "Brand kit: Primary", "Assist: <sentence>". The server folds it into the record
+   * the checkpointer commits (channel.ts `Entry.note`, at most ENTRY_NOTE_MAX characters).
+   */
+  note?: string;
+};
+
 export type RoomClient = {
   start: () => void;
   stop: () => Promise<void>;
@@ -303,6 +328,7 @@ export type RoomClient = {
     mutations: Mutation[],
     label: string,
     flush?: FlushClass,
+    options?: ApplyOptions,
   ) => { document: DeckDocument; inverse: Mutation[]; at: number; settled: Promise<Settled> };
   /** reloads the server document at a revision (the controller's reload) and rebases the pending ops */
   resync: (revision?: number) => Promise<void>;
@@ -313,6 +339,8 @@ export type RoomClient = {
   /** flushes every unsent op now and waits for the POST */
   flush: () => Promise<void>;
   setPresence: (state: Partial<Omit<PresencePost, 'clientId' | 'clock'>>) => void;
+  /** re-posts the presence now (a display name typed, b1.md R18), ahead of the heartbeat */
+  refreshPresence: () => void;
   status: () => SyncStatus;
   document: () => DeckDocument;
   /** the roster as the stream told it: hello's clients, then presence and leave events */
@@ -555,6 +583,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         ...(op.comment === undefined
           ? {}
           : { comment: op.comment as unknown as Record<string, unknown> }),
+        ...(op.note === undefined ? {} : { note: op.note }),
       })),
     ];
     const queue: PersistedQueue = {
@@ -586,7 +615,11 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       const moved = transformPast(op.mutations, refused.inverse, transform);
       if (moved === null) {
         options.onUnplaceable?.(op);
-        const rejected: Rejected = { opId: op.opId, reason: 'stale' };
+        const rejected: Rejected = {
+          opId: op.opId,
+          reason: 'stale',
+          message: UNPLACEABLE_SENTENCE,
+        };
         rejects.push({ ...rejected, mutations: op.mutations });
         op.settle?.({ rejected });
         continue;
@@ -617,7 +650,11 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         else for (const id of slides) touched.add(id);
       } catch {
         options.onUnplaceable?.(op);
-        const rejected: Rejected = { opId: op.opId, reason: 'stale' };
+        const rejected: Rejected = {
+          opId: op.opId,
+          reason: 'stale',
+          message: UNPLACEABLE_SENTENCE,
+        };
         rejects.push({ ...rejected, mutations: op.mutations });
         op.settle?.({ rejected });
         changed = 'all';
@@ -1121,7 +1158,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       base: { seq },
       entries: batch.map((op) =>
         op.kind === 'edit'
-          ? { opId: op.opId, kind: 'edit' as const, mutations: op.mutations ?? [] }
+          ? {
+              opId: op.opId,
+              kind: 'edit' as const,
+              mutations: op.mutations ?? [],
+              ...(op.note === undefined ? {} : { note: op.note }),
+            }
           : {
               opId: op.opId,
               kind: 'comment' as const,
@@ -1394,7 +1436,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
           for (const op of queue.entries) {
             if (op.seq !== undefined || op.kind !== 'edit' || op.mutations === undefined) continue;
             try {
-              client.apply(op.mutations, 'persisted', 'now');
+              client.apply(
+                op.mutations,
+                'persisted',
+                'now',
+                op.note === undefined ? {} : { note: op.note },
+              );
             } catch {
               // an op the document no longer takes is dropped with the queue
             }
@@ -1439,9 +1486,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       await leaving;
       persist();
     },
-    apply(mutations, label, flush) {
+    apply(mutations, label, flush, applyOptions) {
       const result = applyMutations(local, mutations);
       clock += 1;
+      const note = applyOptions?.note?.trim();
       let settle: ((outcome: Settled) => void) | undefined;
       const settled = new Promise<Settled>((resolve) => {
         settle = resolve;
@@ -1458,6 +1506,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         inflight: false,
         at: clock,
         inverse: result.inverse,
+        ...(note === undefined || note === '' ? {} : { note: note.slice(0, ENTRY_NOTE_MAX) }),
         ...(settle === undefined ? {} : { settle }),
       });
       emitChange(result.document, changedSlides(mutations), 'local');
@@ -1499,6 +1548,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       presenceDirty = true;
       schedulePresence(PRESENCE_BATCH_MS);
     },
+    refreshPresence() {
+      presenceDirty = true;
+      schedulePresence(0);
+    },
     status,
     document: () => local,
     roster: () => roster,
@@ -1513,8 +1566,11 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   /** The stream seq at each local clock, so `transformSince` knows which entries came after. */
   const recentMarkers = new Map<number, number>();
   const originalApply = client.apply;
-  client.apply = (mutations, label, flush) => {
-    const result = originalApply(mutations, label, flush);
+  client.apply = (mutations, label, flush, applyOptions) => {
+    /* the fourth argument rides through: the history note of a kit write or an assist accept
+       (ApplyOptions) died here before, so no noted record ever left the page (the product round's
+       ship step; b7.md FR3) */
+    const result = originalApply(mutations, label, flush, applyOptions);
     recentMarkers.set(result.at, seq);
     if (recentMarkers.size > RECENT_ENTRIES) {
       const oldest = recentMarkers.keys().next().value;

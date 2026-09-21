@@ -31,11 +31,14 @@ import {
 } from '../core-matrix.mjs';
 import { createToolkit } from './toolkit.mjs';
 import * as arrange from './areas/arrange.mjs';
+import * as assist from './areas/assist.mjs';
+import * as brand from './areas/brand.mjs';
 import * as charts from './areas/charts.mjs';
 import * as chrome from './areas/chrome.mjs';
 import * as decks from './areas/decks.mjs';
 import * as diagrams from './areas/diagrams.mjs';
 import * as exportArea from './areas/export.mjs';
+import * as fonts from './areas/fonts.mjs';
 import * as formatting from './areas/formatting.mjs';
 import * as help from './areas/help.mjs';
 import * as images from './areas/images.mjs';
@@ -54,7 +57,9 @@ import * as wordart from './areas/wordart.mjs';
  * The areas in the order the walk runs them; each declares the rows it drives. The return round
  * (docs/RETURN.md section 5) added the documents (tables, charts, diagrams, word art), the
  * formatting rows, the chrome, the View rows and the inbox; the chrome area runs last among the
- * editor areas because its 900 px reads resize the viewport and put it back.
+ * editor areas because its 900 px reads resize the viewport and put it back. The product round
+ * (docs/PRODUCT.md 8.1) added the brand kit, the fonts and the assist after the View rows; a row
+ * whose control a lane has not landed reads not driven with the control's id.
  */
 export const AREAS = [
   decks,
@@ -73,6 +78,9 @@ export const AREAS = [
   exportArea,
   help,
   view,
+  brand,
+  fonts,
+  assist,
   inbox,
   chrome,
   surface,

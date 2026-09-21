@@ -24,6 +24,7 @@ import {
   BlobExistsError,
   BlobTimeoutError,
   DOCUMENT_PUT_MAX_BYTES,
+  FRESH_DECKS_PATH,
   HOSTED_POLL_MS,
   boundedBlobClient,
   isMirroredDocument,
@@ -863,8 +864,10 @@ describe('hosted stores', () => {
         updatedAt: WORKED_DECK.updatedAt,
         createdAt: WORKED_DECK.createdAt,
       });
-      // one folders call, one head and one origin read per deck (the focus round added the head,
-      // docs/FOCUS.md rank 7: the body is proven against it); no list of a deck prefix
+      // one folders call, one read of the fresh deck index (the product round; the listing on
+      // another instance shows a deck made a moment ago), one head and one origin read per deck
+      // (the focus round added the head, docs/FOCUS.md rank 7: the body is proven against it);
+      // no list of a deck prefix
       const ops = fake.calls.map((call) => call.op);
       expect(ops.filter((op) => op === 'folders')).toHaveLength(1);
       expect(
@@ -872,7 +875,7 @@ describe('hosted stores', () => {
           .filter((call) => call.op === 'get')
           .map((call) => call.pathname)
           .sort(),
-      ).toEqual(['decks/gt-brand/deck.json', 'decks/second-deck/deck.json']);
+      ).toEqual(['decks/gt-brand/deck.json', 'decks/second-deck/deck.json', FRESH_DECKS_PATH]);
       expect(
         fake.calls
           .filter((call) => call.op === 'head')
@@ -1878,6 +1881,38 @@ describe('hosted stores', () => {
       // mirror folder this instance still holds
       await fake.del([`decks/${created.deckId}/deck.json`]);
       expect((await first.list()).map((head) => head.id)).not.toContain(created.deckId);
+    });
+
+    it('lists a deck made on another instance while the folder listing of the store lags, through the fresh deck index (the product round; R2-F2)', async () => {
+      const fake = memoryBlobClient();
+      let hidden = '';
+      const lagging = {
+        ...fake,
+        folders: async (prefix: string) =>
+          (await fake.folders(prefix)).filter((folder) => !folder.includes(hidden)),
+      };
+      const maker = collection('blob', join(root, 'overlay-fresh-a'), lagging);
+      const reader = collection('blob', join(root, 'overlay-fresh-b'), lagging);
+      await maker.ready();
+      await reader.ready();
+      clock = '2026-09-16T12:00:00.000Z';
+      const created = await maker.create({ name: 'Fresh copy', from: 'blank' });
+      hidden = created.deckId;
+      expect(await lagging.folders('decks/')).not.toContain(`decks/${created.deckId}/`);
+      // the other instance holds no mirror and the folder listing lags: the record names the deck
+      expect((await reader.list()).map((head) => head.id)).toContain(created.deckId);
+      // the record is one get per listing and the deck's manifest one head, as for every deck
+      const reads = fake.calls.filter(
+        (call) => call.pathname === FRESH_DECKS_PATH && call.op === 'get',
+      );
+      expect(reads.length).toBeGreaterThanOrEqual(1);
+      // a copy is noted too
+      const copied = await maker.copy({ id: created.deckId, name: 'Fresh copy again' });
+      hidden = copied.deckId;
+      expect((await reader.list()).map((head) => head.id)).toContain(copied.deckId);
+      // deleted forever elsewhere: its manifest is gone, so the fresh id makes no card
+      await maker.remove(copied.deckId);
+      expect((await reader.list()).map((head) => head.id)).not.toContain(copied.deckId);
     });
 
     it('answers a call the store never answers with a BlobTimeoutError inside the deadline and moves on (cycle 2, VERIFICATION F-stall)', async () => {

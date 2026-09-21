@@ -282,6 +282,8 @@ export type HeadingBlock = BlockBase & {
   typography?: Typography;
   /** Text fitting; the content layouts write shrink on their placeholders (gslides-parity SPEC-2 0.41). */
   autofit?: Autofit;
+  /** The text colour; the ink unless set (docs/PRODUCT.md 4.1: a heading painted with the kit's Primary). */
+  color?: Color;
 };
 export type ParagraphBlock = BlockBase & {
   type: 'paragraph';
@@ -292,6 +294,8 @@ export type ParagraphBlock = BlockBase & {
   marginTop?: number;
   typography?: Typography;
   autofit?: Autofit;
+  /** The text colour; the role's ink unless set (docs/PRODUCT.md 4.1). */
+  color?: Color;
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -964,6 +968,7 @@ export const headingBlockSchema = z.strictObject({
   }),
   typography: typographySchema,
   autofit: autofitField,
+  color: colorField('Color', 'The text colour; the ink unless set.', 'Text'),
 }) satisfies z.ZodType<HeadingBlock>;
 
 export const paragraphBlockSchema = z.strictObject({
@@ -1003,6 +1008,7 @@ export const paragraphBlockSchema = z.strictObject({
   }),
   typography: typographySchema,
   autofit: autofitField,
+  color: colorField('Color', 'The text colour; the role’s ink unless set.', 'Text'),
 }) satisfies z.ZodType<ParagraphBlock>;
 
 export const creditBlockSchema = z.strictObject({

@@ -241,7 +241,8 @@ body {
 .pt-viewer.is-editor.ts-skeleton {
   --pt-sb-w: 256px;
   grid-template-columns: 256px minmax(0, 1fr) 0;
-  grid-template-rows: 44px 28px 40px minmax(0, 1fr) 32px;
+  /* four rows: the bottom bar left in the product round (docs/PRODUCT.md section 2 rank 25) */
+  grid-template-rows: 44px 28px 40px minmax(0, 1fr);
 }
 
 .ts-presenter.ts-skeleton {

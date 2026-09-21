@@ -479,10 +479,17 @@ export async function newDeck(
     await ctl(page, 'dialog.namePrompt')
       .isVisible()
       .catch(() => false)
-  )
-    await ctl(page, 'dialog.namePrompt.close')
-      .click()
-      .catch(() => undefined);
+  ) {
+    /* the floating card has an X; the Share dialog's modal prompt has Skip (docs/PRODUCT.md section 2 rank 4) */
+    if ((await ctl(page, 'dialog.namePrompt.close').count()) > 0)
+      await ctl(page, 'dialog.namePrompt.close')
+        .click()
+        .catch(() => undefined);
+    else
+      await ctl(page, 'dialog.namePrompt.skip')
+        .click()
+        .catch(() => undefined);
+  }
   return scratch.add(info.id);
 }
 

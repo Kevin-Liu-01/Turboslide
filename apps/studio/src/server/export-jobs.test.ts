@@ -4,10 +4,20 @@ import type { PublicJob, WorkerClient } from '@turboslide/render-worker/client';
 import type { ExportReport } from '@turboslide/schema/export';
 import { memoryBlobClient } from '@turboslide/store/blob-fake';
 
-import { followExportJob, pollExportJob, storeFinishedExportJob } from './export-batch';
+import {
+  EXPORT_POLL_CACHE_MS,
+  followExportJob,
+  followExportProgress,
+  forgetExportPollCache,
+  pollExportJob,
+  readExportJobCached,
+  storeFinishedExportJob,
+} from './export-batch';
 import type { PartStore } from './export-batch';
 import {
   EXPORT_JOBS_PREFIX,
+  progressOfLog,
+  runningExportJob,
   EXPORT_JOB_FILES_GONE,
   EXPORT_JOB_LOST,
   EXPORT_JOB_MISSING,
@@ -17,9 +27,12 @@ import {
   exportJobStartedAt,
   finishedExportJob,
   isExportJobId,
+  isSyncProgressJobId,
   missingExportJobPoll,
+  newSyncProgressJobId,
   parseExportJob,
   pollOfExportJob,
+  progressLine,
   pruneExportJobs,
   queuedExportJob,
   readExportJob,
@@ -116,7 +129,9 @@ const checkout = (): PartStore & { fake: ReturnType<typeof memoryBlobClient> } =
 
 const noAuth = {
   authorize: async () => undefined,
-  sign: (id: string, name: string) => `/api/download/${id}/${name}`,
+  // the file by the exporter's name, saved as the display name when the poll hands one
+  sign: (id: string, name: string, saveAs?: string) =>
+    `/api/download/${id}/${name}${saveAs !== undefined ? `/${saveAs}` : ''}`,
 };
 
 describe('the export job record', () => {
@@ -316,21 +331,21 @@ describe('the finished job across instances (storeFinishedExportJob, pollExportJ
     expect(done.status).toBe('done');
     expect(done.downloads).toEqual([
       {
-        name: 'q4-review-r12-dark.pptx',
+        name: 'q4-review (dark).pptx',
         bytes: 4,
-        url: `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review-r12-dark.pptx')}?download=1`,
+        url: `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review (dark).pptx')}?download=1`,
       },
       {
-        name: 'q4-review-r12-light.pptx',
+        name: 'q4-review (light).pptx',
         bytes: 4,
-        url: `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review-r12-light.pptx')}?download=1`,
+        url: `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review (light).pptx')}?download=1`,
       },
     ]);
     expect(done.line).toBe('done in 912 ms');
     expect(done.ms).toBe(912);
-    expect(
-      store.fake.blobs.has(storedExportPath('q4-review', JOB, 'q4-review-r12-dark.pptx')),
-    ).toBe(true);
+    expect(store.fake.blobs.has(storedExportPath('q4-review', JOB, 'q4-review (dark).pptx'))).toBe(
+      true,
+    );
     expect(await readExportJob(store.client, JOB)).toEqual(done);
     expect(worker.pruned).toEqual([JOB]);
     // a second run (the poll on the same instance beside the follow) answers the record and stores nothing again
@@ -392,6 +407,8 @@ describe('the finished job across instances (storeFinishedExportJob, pollExportJ
       jobId: JOB,
       status: 'running',
       line: 'done in 912 ms',
+      // the head line names two slides and no slide line has arrived yet
+      progress: { slide: 0, total: 2 },
     });
     const seen: string[] = [];
     const deps = { ...noAuth, authorize: async (deckId: string) => void seen.push(deckId) };
@@ -403,14 +420,14 @@ describe('the finished job across instances (storeFinishedExportJob, pollExportJ
       report,
       downloads: [
         {
-          name: 'q4-review-r12-dark.pptx',
+          name: 'q4-review (dark).pptx',
           bytes: 4,
-          url: `/api/download/${JOB}/q4-review-r12-dark.pptx`,
+          url: `/api/download/${JOB}/q4-review-r12-dark.pptx/q4-review (dark).pptx`,
         },
         {
-          name: 'q4-review-r12-light.pptx',
+          name: 'q4-review (light).pptx',
           bytes: 5,
-          url: `/api/download/${JOB}/q4-review-r12-light.pptx`,
+          url: `/api/download/${JOB}/q4-review-r12-light.pptx/q4-review (light).pptx`,
         },
       ],
     });
@@ -468,8 +485,8 @@ describe('the finished job across instances (storeFinishedExportJob, pollExportJ
     const poll = await pollExportJob(worker, JOB, noAuth, store);
     expect(poll.status).toBe('done');
     expect(poll.downloads?.map((file) => file.url)).toEqual([
-      `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review-r12-dark.pptx')}?download=1`,
-      `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review-r12-light.pptx')}?download=1`,
+      `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review (dark).pptx')}?download=1`,
+      `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review (light).pptx')}?download=1`,
     ]);
     expect((await readExportJob(store.client, JOB))?.status).toBe('done');
     expect(worker.pruned).toEqual([JOB]);
@@ -511,5 +528,303 @@ describe('the finished job across instances (storeFinishedExportJob, pollExportJ
     }
     expect(record.error).toBe('no job lost-000001');
     expect(record.format).toBe('pdf');
+  });
+});
+
+describe('the file names and the progress of the product round (docs/PRODUCT.md section 2 ranks 7, 8 and 21)', () => {
+  it('reads where a PowerPoint export is off the worker’s own log lines, and the PDF’s count alone', () => {
+    expect(progressOfLog([])).toBeNull();
+    expect(progressOfLog(['turboslide export pptx --deck x'])).toBeNull();
+    const head =
+      'export: pptx native (editable text), 6 slide(s) x light, fonts exact embedded -> /tmp/j/export';
+    expect(progressOfLog([head])).toEqual({ slide: 0, total: 6 });
+    expect(
+      progressOfLog([
+        head,
+        '   1 title light 812 ms, 2 text(s), 0 raster(s)',
+        '   2 agenda light 402 ms, 4 text(s), 1 raster(s)',
+        '   3 pricing-internal light 388 ms, 4 text(s), 0 raster(s)',
+      ]),
+    ).toEqual({ slide: 3, total: 6, theme: 'light' });
+    // a two appearance run counts once per appearance and names which
+    expect(
+      progressOfLog([
+        'export: pptx flatten (perfect), 2 slide(s) x light,dark, fonts exact -> out',
+        '   1 title light 812 ms, 2 text(s), 0 raster(s)',
+        '   2 agenda light 402 ms, 4 text(s), 1 raster(s)',
+        '   1 title dark 700 ms, 2 text(s), 0 raster(s)',
+      ]),
+    ).toEqual({ slide: 1, total: 2, theme: 'dark' });
+    // the PDF is one print: the count and the appearance, no slide moves
+    expect(progressOfLog(['export: pdf dark, 85 slide(s) -> /tmp/j/export'])).toEqual({
+      slide: 0,
+      total: 85,
+      theme: 'dark',
+    });
+    // a slide line before any head line is not progress
+    expect(progressOfLog(['   1 title light 812 ms, 2 text(s), 0 raster(s)'])).toBeNull();
+  });
+
+  it('carries the title and the progress on the record, round trips them, and drops the progress once the job ended', () => {
+    const queued = queuedExportJob(JOB, 'q4-review', 'pptx', NOW, 'GT pitch for Acme');
+    expect(queued.title).toBe('GT pitch for Acme');
+    expect(queuedExportJob(JOB, 'q4-review', 'pptx', NOW, '').title).toBeUndefined();
+    const running = runningExportJob(queued, LATER, {
+      line: '   3 pricing light 388 ms, 4 text(s), 0 raster(s)',
+      progress: { slide: 3, total: 6, theme: 'light' },
+    });
+    expect(running.status).toBe('running');
+    expect(parseExportJob(JSON.parse(JSON.stringify(running)))).toEqual(running);
+    // the poll's line reads the snackbar's words while the worker renders (the fix round)
+    expect(pollOfExportJob(running, { stored: true })).toEqual({
+      jobId: JOB,
+      status: 'running',
+      line: 'slide 3 of 6',
+      progress: { slide: 3, total: 6, theme: 'light' },
+    });
+    const done = finishedExportJob(running, { status: 'done', report, downloads: [] }, LATER);
+    expect(done.title).toBe('GT pitch for Acme');
+    expect(pollOfExportJob(done, { stored: true }).progress).toBeUndefined();
+    // a progress that is not two counts is not read back
+    expect(
+      parseExportJob({ ...queued, progress: { slide: 'three', total: 6 } })?.progress,
+    ).toBeUndefined();
+  });
+
+  it('stores a finished job’s files under the deck’s title, with the appearance mark when both left one run', async () => {
+    const store = stored();
+    const worker = fakeWorker([doneJob()]);
+    const queued = queuedExportJob(JOB, 'q4-review', 'pptx', NOW, 'GT pitch for Acme');
+    await writeExportJob(store.client, queued);
+    const done = await storeFinishedExportJob(worker, store, queued, doneJob(), () => LATER);
+    expect(done.downloads?.map((file) => file.name)).toEqual([
+      'GT pitch for Acme (dark).pptx',
+      'GT pitch for Acme (light).pptx',
+    ]);
+    expect(
+      store.fake.blobs.has(storedExportPath('q4-review', JOB, 'GT pitch for Acme (dark).pptx')),
+    ).toBe(true);
+    // read by the exporter's own names from the job folder
+    expect(worker.reads).toEqual([
+      `${JOB}:export/q4-review-r12-dark.pptx`,
+      `${JOB}:export/q4-review-r12-light.pptx`,
+    ]);
+    // one file of one appearance carries no mark
+    const one = { ...report, files: [report.files[0]!] };
+    const store2 = stored();
+    const queued2 = queuedExportJob(JOB, 'q4-review', 'pptx', NOW, 'GT pitch for Acme');
+    await writeExportJob(store2.client, queued2);
+    const done2 = await storeFinishedExportJob(
+      fakeWorker([doneJob({ result: { report: one } })]),
+      store2,
+      queued2,
+      doneJob({ result: { report: one } }),
+      () => LATER,
+    );
+    expect(done2.downloads?.map((file) => file.name)).toEqual(['GT pitch for Acme.pptx']);
+  });
+});
+
+describe('the snackbar’s words and the sync export’s progress record (the product round fix round, the row export.download.progress-per-slide)', () => {
+  it('words a running PowerPoint export as "slide k of n", and nothing before the first slide or for a PDF', () => {
+    expect(progressLine({ slide: 3, total: 6, theme: 'light' })).toBe('slide 3 of 6');
+    expect(progressLine({ slide: 9, total: 6 })).toBe('slide 6 of 6');
+    expect(progressLine({ slide: 0, total: 6 })).toBeNull();
+    expect(progressLine({ slide: 0, total: 6, theme: 'dark' })).toBeNull();
+    expect(progressLine(null)).toBeNull();
+    expect(progressLine(undefined)).toBeNull();
+  });
+
+  it('answers a running record’s line as the words while it renders, and the worker’s line otherwise', () => {
+    const queued = queuedExportJob(JOB, 'q4-review', 'pptx', NOW);
+    const running = runningExportJob(queued, LATER, {
+      line: '   3 content-x light 812 ms, 4 text(s), 1 raster(s)',
+      progress: { slide: 3, total: 6, theme: 'light' },
+    });
+    expect(pollOfExportJob(running, { stored: true })).toMatchObject({
+      status: 'running',
+      line: 'slide 3 of 6',
+      progress: { slide: 3, total: 6, theme: 'light' },
+    });
+    const early = runningExportJob(queued, LATER, {
+      line: 'export: pptx flatten (perfect), 6 slide(s) x light',
+      progress: { slide: 0, total: 6 },
+    });
+    expect(pollOfExportJob(early, { stored: true }).line).toBe(
+      'export: pptx flatten (perfect), 6 slide(s) x light',
+    );
+    const done = finishedExportJob(
+      running,
+      { status: 'done', report, downloads: [], line: 'done in 912 ms' },
+      LATER,
+    );
+    expect(pollOfExportJob(done, { stored: true }).line).toBe('done in 912 ms');
+  });
+
+  it('mints and recognises the page’s sync progress id, and never the worker queue’s', () => {
+    const id = newSyncProgressJobId(Date.parse(NOW));
+    expect(isSyncProgressJobId(id)).toBe(true);
+    expect(isExportJobId(id)).toBe(true);
+    expect(isSyncProgressJobId(JOB)).toBe(false);
+    expect(isSyncProgressJobId('sync-')).toBe(false);
+    expect(newSyncProgressJobId()).not.toBe(newSyncProgressJobId());
+  });
+
+  it('round trips the worker job behind a page named record, and keeps it through the running and finished shapes', () => {
+    const queued = queuedExportJob('sync-abc123-0f0f0f0f', 'q4-review', 'pptx', NOW, 'GT pitch');
+    const running = runningExportJob(queued, LATER, { workerJobId: JOB });
+    expect(running.workerJobId).toBe(JOB);
+    expect(parseExportJob(JSON.parse(JSON.stringify(running)))).toEqual(running);
+    const done = finishedExportJob(running, { status: 'done', report, downloads: [] }, LATER);
+    expect(done.workerJobId).toBe(JOB);
+    expect(
+      parseExportJob({ ...JSON.parse(JSON.stringify(queued)), workerJobId: 'not a job id!' })
+        ?.workerJobId,
+    ).toBeUndefined();
+  });
+
+  it('follows the worker’s job under the record’s own id, and the poll on the worker’s instance reads the live job by it', async () => {
+    const store = stored();
+    const job = doneJob({
+      status: 'running',
+      result: undefined,
+      ms: undefined,
+      finishedAt: undefined,
+      log: ['export: pptx flatten (perfect), 3 slide(s) x light, fonts exact -> out'],
+    });
+    const worker = fakeWorker([job]);
+    const queued = queuedExportJob('sync-abc123-0f0f0f0f', 'q4-review', 'pptx', NOW, 'GT pitch');
+    const running = runningExportJob(queued, NOW, { workerJobId: JOB });
+    await writeExportJob(store.client, running);
+    // the poll by the page's id, on the instance that runs the job: the live log's words
+    expect(await pollExportJob(worker, 'sync-abc123-0f0f0f0f', noAuth, store)).toMatchObject({
+      jobId: 'sync-abc123-0f0f0f0f',
+      status: 'running',
+    });
+    job.log.push('   2 agenda light 402 ms, 4 text(s), 1 raster(s)');
+    forgetExportPollCache(store.client);
+    expect(await pollExportJob(worker, 'sync-abc123-0f0f0f0f', noAuth, store)).toMatchObject({
+      jobId: 'sync-abc123-0f0f0f0f',
+      status: 'running',
+      line: 'slide 2 of 3',
+      progress: { slide: 2, total: 3, theme: 'light' },
+    });
+    // the follow writes the record under the page's id from the worker's job
+    let end: () => void = () => undefined;
+    const done = new Promise<void>((resolve) => {
+      end = resolve;
+    });
+    const following = followExportProgress(worker, store, running, done, 5, JOB);
+    await new Promise((resolve) => setTimeout(resolve, 12));
+    end();
+    await following;
+    const record = await readExportJob(store.client, 'sync-abc123-0f0f0f0f');
+    expect(record?.progress).toEqual({ slide: 2, total: 3, theme: 'light' });
+    expect(record?.workerJobId).toBe(JOB);
+    // another instance, which does not hold the job, reads the words off the record
+    forgetExportPollCache(store.client);
+    expect(
+      await pollExportJob(fakeWorker([]), 'sync-abc123-0f0f0f0f', noAuth, store),
+    ).toMatchObject({
+      status: 'running',
+      line: 'slide 2 of 3',
+    });
+    // the job done and the sync call about to finish the record: still running, never lost
+    job.status = 'done';
+    forgetExportPollCache(store.client);
+    expect((await pollExportJob(worker, 'sync-abc123-0f0f0f0f', noAuth, store)).status).toBe(
+      'running',
+    );
+  });
+});
+
+describe('the progress on the record while the job runs, and the poll cache (the product round)', () => {
+  it('writes the record’s progress from the worker’s log once per tick when the slide moved, and stops when the job ends', async () => {
+    const store = stored();
+    const job = doneJob({
+      status: 'running',
+      result: undefined,
+      ms: undefined,
+      finishedAt: undefined,
+      log: ['export: pptx flatten (perfect), 3 slide(s) x light, fonts exact -> out'],
+    });
+    const worker = fakeWorker([job]);
+    const queued = queuedExportJob(JOB, 'q4-review', 'pptx', NOW, 'GT pitch for Acme');
+    await writeExportJob(store.client, queued);
+    let end: () => void = () => undefined;
+    const done = new Promise<void>((resolve) => {
+      end = resolve;
+    });
+    const following = followExportProgress(worker, store, queued, done, 5);
+    await new Promise((resolve) => setTimeout(resolve, 12));
+    job.log.push('   1 title light 812 ms, 2 text(s), 0 raster(s)');
+    await new Promise((resolve) => setTimeout(resolve, 12));
+    job.log.push('   2 agenda light 402 ms, 4 text(s), 1 raster(s)');
+    await new Promise((resolve) => setTimeout(resolve, 12));
+    end();
+    await following;
+    const record = await readExportJob(store.client, JOB);
+    expect(record?.status).toBe('running');
+    expect(record?.progress).toEqual({ slide: 2, total: 3, theme: 'light' });
+    expect(record?.title).toBe('GT pitch for Acme');
+    // one put per change of the slide: the queue write, then 0 of 3, 1 of 3, 2 of 3
+    const puts = store.fake.calls.filter(
+      (call) => call.op === 'put' && call.pathname === exportJobKey(JOB),
+    );
+    expect(puts.length).toBeLessThanOrEqual(4);
+    expect(puts.length).toBeGreaterThanOrEqual(3);
+    // a poll elsewhere reads the slide off the record
+    expect(pollOfExportJob(record!, { stored: true }).progress).toEqual({
+      slide: 2,
+      total: 3,
+      theme: 'light',
+    });
+    // a checkout's folder store is not written to: the one process that runs the job answers live
+    const folder = checkout();
+    await followExportProgress(fakeWorker([job]), folder, queued, Promise.resolve(), 1);
+    expect(folder.fake.calls.filter((call) => call.op === 'put')).toHaveLength(0);
+  });
+
+  it('reads a running record from the store at most once per two seconds per job on this instance, a queued one each time, and a settled one once', async () => {
+    const store = stored();
+    forgetExportPollCache(store.client);
+    const queued = queuedExportJob(JOB, 'q4-review', 'pptx', NOW);
+    await writeExportJob(store.client, queued);
+    let t = 0;
+    const now = () => t;
+    const gets = () =>
+      store.fake.calls.filter((call) => call.op === 'get' && call.pathname === exportJobKey(JOB))
+        .length;
+    // queued: read each time, so the move to running or done is seen within the poll
+    await readExportJobCached(store.client, JOB, now);
+    await readExportJobCached(store.client, JOB, now);
+    expect(gets()).toBe(2);
+    await writeExportJob(
+      store.client,
+      runningExportJob(queued, NOW, { progress: { slide: 1, total: 3, theme: 'light' } }),
+    );
+    store.fake.calls.length = 0;
+    await readExportJobCached(store.client, JOB, now);
+    await readExportJobCached(store.client, JOB, now);
+    t = 1_000;
+    await readExportJobCached(store.client, JOB, now);
+    expect(gets()).toBe(1);
+    t = EXPORT_POLL_CACHE_MS;
+    await readExportJobCached(store.client, JOB, now);
+    expect(gets()).toBe(2);
+    // a missing record is asked again each time: the job may have been queued elsewhere a moment ago
+    expect(await readExportJobCached(store.client, 'no-such-job-0922ac', now)).toBeNull();
+    expect(await readExportJobCached(store.client, 'no-such-job-0922ac', now)).toBeNull();
+    // a settled record is kept for the process
+    await writeExportJob(
+      store.client,
+      finishedExportJob(queued, { status: 'failed', error: 'x' }, LATER),
+    );
+    t = 2 * EXPORT_POLL_CACHE_MS;
+    expect((await readExportJobCached(store.client, JOB, now))?.status).toBe('failed');
+    t = 10 * EXPORT_POLL_CACHE_MS;
+    await readExportJobCached(store.client, JOB, now);
+    expect(gets()).toBe(3);
+    forgetExportPollCache(store.client);
   });
 });

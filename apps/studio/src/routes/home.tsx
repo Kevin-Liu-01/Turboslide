@@ -78,9 +78,11 @@ function HomePage() {
       </script>
       <HomeNav />
       <HomeHero />
-      <HomeFacts facts={HOME_FACTS} />
       <HomeEditor />
       <HomeCards facts={HOME_FACTS} />
+      {/* the facts band and For agents sit below the fold (docs/PRODUCT.md section 2 rank 22):
+          a seller reads the pitch, the editor and the cards first */}
+      <HomeFacts facts={HOME_FACTS} />
       <HomePipeline facts={HOME_FACTS} />
       <HomeSpeed facts={HOME_FACTS} />
       <HomeAgents facts={HOME_FACTS} />

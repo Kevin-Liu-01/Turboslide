@@ -15,6 +15,7 @@ import type {
   StartBatchedExportResult,
 } from './export-batch';
 import type { ExportJobDownload, ExportJobPoll } from './export-jobs';
+import { SYNC_PROGRESS_JOB_PATTERN } from './export-jobs';
 import type { jsonBody } from './export-sync';
 import type { QuotaContext } from './ratelimit';
 import { deckDir, ensureDeckAssets, exportBlobClient, isHosted, workerClientOptions } from './root';
@@ -160,7 +161,18 @@ export type ExportRunInput = {
   includeNotes?: boolean;
 };
 
-export type StartExportInput = { deckId: string; input: ExportRunInput };
+export type StartExportInput = {
+  deckId: string;
+  input: ExportRunInput;
+  /**
+   * The id the page minted for the sync export's progress record (export-jobs.ts
+   * `newSyncProgressJobId`; the row `export.download.progress-per-slide`): `syncExport` writes
+   * the running record under it while the export runs and the page polls `pollExport` with it
+   * beside the call, so the snackbar reads "slide k of n" on a hosted studio too. Read by
+   * `syncExport` alone; the queued path has the worker's own id.
+   */
+  progressJobId?: string;
+};
 export type StartExportResult = { jobId: string; status: string };
 
 /** The deck id as a slug and the input through export.run's schema, with `out` removed. */
@@ -174,9 +186,15 @@ export function validateExportRun(raw: StartExportInput): StartExportInput {
       `export.run: invalid input at /${first?.path.map(String).join('/') ?? ''}: ${first?.message ?? 'invalid'}`,
     );
   }
+  if (raw.progressJobId !== undefined && !SYNC_PROGRESS_JOB_PATTERN.test(raw.progressJobId))
+    throw new TypeError('progressJobId must be a sync progress id (sync-<time>-<hex>)');
   // the output directory is the worker's job directory, never a caller-chosen path
   const { out: _out, ...input } = parsed.data as ExportRunInput & { out?: string };
-  return { deckId: raw.deckId, input };
+  return {
+    deckId: raw.deckId,
+    input,
+    ...(raw.progressJobId === undefined ? {} : { progressJobId: raw.progressJobId }),
+  };
 }
 
 const startExportFn = createServerFn({ method: 'POST' })
@@ -185,11 +203,23 @@ const startExportFn = createServerFn({ method: 'POST' })
     await authorizeExport(data.deckId, data.input, 'export.run');
     await requireDeck(data.deckId);
     const client = await worker();
+    // the room's pending entries into the store before the worker reads the folder (R-F1)
+    const { flushRoom } = await import('./room');
+    await flushRoom(data.deckId).catch(() => undefined);
     const job = await client.submit('export', { deckId: data.deckId, ...data.input });
-    // the job's record at queue time, and the job followed to its end after the response, so a
-    // poll on any instance reads the outcome (C3S-F7; loaded here for the reason worker() gives)
+    // the job's record at queue time, with the deck's title for the file names (the product
+    // round, rank 7), and the job followed to its end after the response, so a poll on any
+    // instance reads the outcome (C3S-F7; loaded here for the reason worker() gives)
     const { followExportJob } = await import('./export-batch');
-    await followExportJob(client, job, data.deckId, data.input.format);
+    const { deckTitleOf } = await import('./export-sync');
+    await followExportJob(
+      client,
+      job,
+      data.deckId,
+      data.input.format,
+      undefined,
+      await deckTitleOf(data.deckId),
+    );
     return { jobId: job.id, status: job.status };
   });
 
@@ -212,7 +242,15 @@ const syncExportFn = createServerFn({ method: 'POST' })
     try {
       // loaded here for the same reason worker() is: export-sync imports the worker client statically
       const { jsonBody: body, runSyncExport } = await import('./export-sync');
-      return body(await runSyncExport(data.deckId, data.input));
+      const client = await worker();
+      if (data.progressJobId === undefined)
+        return body(await runSyncExport(data.deckId, data.input, { client }));
+      // the progress record beside the call (export-batch.ts): the page polls it by the id it
+      // minted while this call runs, the row export.download.progress-per-slide
+      const { runSyncExportWithProgress } = await import('./export-batch');
+      return body(
+        await runSyncExportWithProgress(client, data.progressJobId, data.deckId, data.input),
+      );
     } finally {
       await releaseQuota('exportConcurrency', quota);
     }
@@ -481,7 +519,15 @@ const pollExportFn = createServerFn({ method: 'POST' })
       authorize: async (deckId) => {
         await authorizeRequest(deckId, 'export', { action: 'export.poll' });
       },
-      sign: (jobId, name) => downloadUrl(signDownloadToken({ k: 'job', j: jobId, n: name })),
+      sign: (jobId, name, saveAs) =>
+        downloadUrl(
+          signDownloadToken({
+            k: 'job',
+            j: jobId,
+            n: name,
+            ...(saveAs !== undefined && saveAs !== name ? { f: saveAs } : {}),
+          }),
+        ),
     });
   });
 
@@ -528,10 +574,19 @@ const signDownloadFn = createServerFn({ method: 'POST' })
     }
     if ((await worker()).mode !== 'local')
       throw new RangeError('The render worker runs elsewhere; its files are not served from here');
-    const token =
-      data.kind === 'job'
-        ? signDownloadToken({ k: 'job', j: data.jobId, n: data.name })
-        : signDownloadToken({ k: 'build', d: data.deckId, n: data.name });
+    if (data.kind === 'build') {
+      return { url: downloadUrl(signDownloadToken({ k: 'build', d: data.deckId, n: data.name })) };
+    }
+    // the card asks by the name the file was saved as (the deck's title); the token opens the
+    // file by the exporter's name the report lists and saves it as the name asked for
+    const { jobFileSource } = await import('./export-batch');
+    const source = await jobFileSource(await worker(), data.jobId, data.name);
+    const token = signDownloadToken({
+      k: 'job',
+      j: data.jobId,
+      n: source ?? data.name,
+      ...(source !== null && source !== data.name ? { f: data.name } : {}),
+    });
     return { url: downloadUrl(token) };
   });
 

@@ -8,11 +8,11 @@ import { renderSlides, slideCounter } from './deck.ts';
 import type { RenderedDeck, ThemeBundle } from './deck.ts';
 import { escapeText } from './html.ts';
 import { STANDALONE_RUNTIME_PLACEHOLDER } from './runtime.ts';
-import { counterText, renderStage } from './stage.ts';
+import { bandAssetResolver, counterText, frameBandOf, renderStage } from './stage.ts';
 import { slideOrder } from './slide.ts';
 import type { AssetId, SlideId } from '@turboslide/schema/ids';
 import type { Deck, Slide } from '@turboslide/schema/deck';
-import { deckAppearance, unskippedSlideOrder } from '@turboslide/schema/deck';
+import { deckAppearance, deckCounterFormat, unskippedSlideOrder } from '@turboslide/schema/deck';
 import type { Asset } from '@turboslide/schema/assets';
 import type { Theme } from '@turboslide/schema/render';
 
@@ -148,9 +148,14 @@ export function renderStandalone(
   const firstSlide = byId.get(rendered[0]?.slideId ?? '');
   const stage = renderStage(rendered.map((entry) => entry.rendered.html).join('\n'), {
     theme,
-    counter: firstSlide ? slideCounter(deck, firstSlide, 1, total) : counterText(1, total),
+    counter: firstSlide
+      ? slideCounter(deck, firstSlide, 1, total)
+      : counterText(1, total, deckCounterFormat(deck)),
     sprite: build.bundle.sprite,
     stageId: 'stage',
+    /* the brand kit's frame band (docs/PRODUCT.md 4.1, 4.5): the footer logo travels inline as its twin's data URI */
+    titleSlide: firstSlide?.kind === 'title',
+    band: frameBandOf(deck, theme, bandAssetResolver(deck, assetSrc)),
   });
   // a script element's content is raw text (no entity decoding), so the JSON is not HTML
   // escaped; a `<` inside a note is written as \u003c so `</script>` can never appear

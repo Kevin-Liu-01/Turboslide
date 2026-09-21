@@ -109,8 +109,11 @@ export function downloadSecretStatus(env: Env = process.env): {
   };
 }
 export type DownloadTarget =
-  /** a file the export job wrote: its report lists the file */
-  | { k: 'job'; j: string; n: string }
+  /**
+   * a file the export job wrote: its report lists the file under `n`; `f` is the name the download
+   * saves as when it differs (the deck's title, the product round's rank 7; plan.ts displayNameOf)
+   */
+  | { k: 'job'; j: string; n: string; f?: string }
   /** the standalone file build.run wrote under the worker's builds folder */
   | { k: 'build'; d: string; n: string };
 
@@ -201,6 +204,8 @@ export function isFileName(name: string): boolean {
 /** The URL path of a fresh token for a target. */
 export function signDownloadToken(target: DownloadTarget, now: number = Date.now()): string {
   if (!isFileName(target.n)) throw new TypeError(`"${target.n}" is not a file name`);
+  if (target.k === 'job' && target.f !== undefined && !isFileName(target.f))
+    throw new TypeError(`"${target.f}" is not a file name`);
   if (target.k === 'build' && !SLUG_PATTERN.test(target.d))
     throw new TypeError('the deck id must be a slug');
   const payload: Payload = {
@@ -222,7 +227,10 @@ function isPayload(value: unknown): value is Payload {
   const v = value as Record<string, unknown>;
   if (typeof v.exp !== 'number' || typeof v.nonce !== 'string' || typeof v.n !== 'string')
     return false;
-  if (v.k === 'job') return typeof v.j === 'string';
+  if (v.k === 'job')
+    return (
+      typeof v.j === 'string' && (v.f === undefined || (typeof v.f === 'string' && isFileName(v.f)))
+    );
   if (v.k === 'build') return typeof v.d === 'string';
   return false;
 }
@@ -324,7 +332,9 @@ export async function resolveDownload(
   }
   if (!existsSync(path) || !statSync(path).isFile()) return null;
   await spent.add(payload.nonce, payload.exp);
-  return { path, name: payload.n, bytes: statSync(path).size, type: contentType(payload.n) };
+  // the file is opened by the name the report lists; it is saved as the name the token carries
+  const name = payload.k === 'job' && payload.f !== undefined ? payload.f : payload.n;
+  return { path, name, bytes: statSync(path).size, type: contentType(payload.n) };
 }
 
 // ---------------------------------------------------------------------------------------------

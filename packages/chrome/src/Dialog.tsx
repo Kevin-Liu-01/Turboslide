@@ -41,6 +41,11 @@ export type DialogAction = {
   /** one sentence for the tooltip */
   doc?: string;
   control?: string;
+  /**
+   * The button takes the focus on open instead of the first field (docs/FOCUS.md rank 29: a
+   * confirm whose one act is the button, Delete forever, so Enter runs it and Esc keeps).
+   */
+  autoFocus?: boolean;
 };
 
 export type DialogProps = {
@@ -99,7 +104,13 @@ export function Dialog({
   const primary = actions.find((action) => action.primary);
   const rows: DialogAction[] = cancel
     ? [
-        { label: cancelLabel, onClick: onClose, doc: 'Closes the dialog without a change' },
+        {
+          label: cancelLabel,
+          onClick: onClose,
+          doc: 'Closes the dialog without a change',
+          /* a dialog with a control id names its Cancel `<control>.cancel`, so a driver can read it */
+          ...(control === undefined ? {} : { control: `${control}.cancel` }),
+        },
         ...actions,
       ]
     : [...actions];
@@ -116,8 +127,11 @@ export function Dialog({
     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const el = card.current;
     if (el) {
-      const first = focusableIn(el).find((each) => !each.closest('.ts-dialog-x'));
+      /* the marked control first (an action with `autoFocus`), else the first field or button */
+      const marked = el.querySelector<HTMLElement>('[data-autofocus]');
+      const first = marked ?? focusableIn(el).find((each) => !each.closest('.ts-dialog-x'));
       (first ?? el).focus();
+      if (first instanceof HTMLInputElement && first.dataset.select === 'all') first.select();
     }
     return () => {
       const back = opener.current;
@@ -263,6 +277,7 @@ export function Dialog({
                 className={cn('pt-ib', action.primary ? 'is-solid' : 'is-text', 'ts-dialog-btn')}
                 disabled={action.disabled}
                 data-control={action.control}
+                data-autofocus={action.autoFocus ? '' : undefined}
                 onClick={action.onClick}
                 {...tipProps({
                   name: action.label,

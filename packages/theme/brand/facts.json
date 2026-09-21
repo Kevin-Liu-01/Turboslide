@@ -1,20 +1,20 @@
 {
   "generator": "scripts/build-brand.ts --facts",
-  "writtenAt": "2026-09-16",
+  "writtenAt": "2026-09-20",
   "actions": {
-    "count": 169,
+    "count": 183,
     "source": "packages/schema/src/actions.ts ACTION_IDS; packages/agent/generated/manifest.json actionCount"
   },
   "mcpTools": {
-    "count": 146,
+    "count": 160,
     "source": "packages/agent/generated/mcp-tools.json tools"
   },
   "httpPaths": {
-    "count": 153,
+    "count": 167,
     "source": "packages/agent/generated/openapi.json paths"
   },
   "layouts": {
-    "count": 21,
+    "count": 22,
     "source": "packages/schema/src/layouts.ts LAYOUTS"
   },
   "shapePresets": {

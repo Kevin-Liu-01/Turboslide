@@ -1,0 +1,29 @@
+{
+  "name": "drive-fix-pictures",
+  "base": "http://localhost:4412",
+  "ok": 3,
+  "failed": 0,
+  "rows": [
+    {
+      "n": 1,
+      "step": "images.insert.centred-in-body, images.insert.instant-preview: Insert > Image > Upload from computer on a Title and body slide",
+      "expected": "the picture is centred in the body paragraph column under the head band at the largest size with the 40 px margin, drawn within 500 ms, a progress bar, selected, no snackbar",
+      "observed": "layout blocks {\"h\":{\"type\":\"heading\",\"x\":137,\"y\":129,\"w\":1326,\"h\":48},\"p1\":{\"type\":\"paragraph\",\"x\":137,\"y\":495,\"w\":768,\"h\":33}}; body slot column x 137 w 768, y 217 to 771; picture {\"x\":177,\"y\":266,\"w\":688,\"h\":458,\"z\":1} (centre 521, 495 against 521, 494); fits the margin true; first img 2 ms after the chooser; progress bar true; selected true; snackbar null; prompts left 1; blocks after {\"h\":{\"type\":\"heading\",\"x\":137,\"y\":129,\"w\":1326,\"h\":49},\"shot\":{\"type\":\"shot\",\"x\":177,\"y\":266,\"w\":688,\"h\":458}}",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "images.insert.by-url: Insert > Image > By URL with a same origin address, then Replace image > By URL",
+      "expected": "a picture lands within 20 s, selected, at a real size; Replace image > By URL swaps the asset and keeps the box",
+      "observed": "fetches while typing 0 (3 in all); picture {\"x\":948,\"y\":258,\"w\":473,\"h\":473,\"z\":2} after 513 ms, dialog closed true (514 ms after Insert), selected true, asset apple-touch-icon; Replace image > By URL row true; replaced {\"asset\":\"icon-192\",\"pos\":{\"x\":948,\"y\":258,\"w\":473,\"h\":473,\"z\":2},\"sameBox\":true}",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "console errors during the drive",
+      "expected": "none",
+      "observed": "none",
+      "ok": true
+    }
+  ]
+}

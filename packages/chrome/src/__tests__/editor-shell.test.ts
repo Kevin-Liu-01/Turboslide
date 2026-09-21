@@ -518,17 +518,21 @@ describe('menuActionPlan', () => {
     expect(plan.selectSlide).toBe('result');
   });
 
-  it('New slide after a Title slide is Title and body, and the last picked layout wins', () => {
+  it('New slide after a Title slide is Title and body, and after any other slide it inherits that slide; the arrow’s last pick never wins (docs/PRODUCT.md section 2 rank 2)', () => {
     const title = Object.values(document.slides).find((slide) => slide.kind === 'title');
     if (title !== undefined) {
       const plan = menuActionPlan(itemById('insert.newSlide'), facts(title.id));
       if (!('refused' in plan)) expect(plan.input.layout).toBe('split');
     }
+    const inherited = menuActionPlan(itemById('slide.newSlide'), facts(RULE));
     const remembered = menuActionPlan(
       itemById('slide.newSlide'),
       facts(RULE, undefined, { lastLayout: 'big-number' }),
     );
-    if (!('refused' in remembered)) expect(remembered.input.layout).toBe('big-number');
+    if (!('refused' in remembered) && !('refused' in inherited)) {
+      expect(remembered.input.layout).toBe(inherited.input.layout);
+      expect(remembered.input.layout).not.toBe('big-number');
+    }
   });
 
   it('Duplicate and Skip act on the selected slides in one write; Skip reads Unskip on a skipped slide', () => {

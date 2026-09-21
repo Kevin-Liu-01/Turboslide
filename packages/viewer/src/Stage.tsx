@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
 
+import type { FrameBand } from '@turboslide/render/stage';
+import { bandForSlide } from '@turboslide/render/stage';
+
 import { Frame } from './Frame';
 import { isPictureKind } from './model';
 import type { ViewerSlide } from './model';
@@ -24,6 +27,8 @@ export type StageProps = {
   theme: Theme;
   dir: 'next' | 'prev';
   onStep?: (delta: number) => void;
+  /** the brand kit's frame band (docs/PRODUCT.md 4.1): the footer logo, the footer text and the counter's format */
+  band?: FrameBand;
 };
 
 /**
@@ -45,6 +50,7 @@ export function Stage({
   theme,
   dir,
   onStep,
+  band,
 }: StageProps) {
   const picture = slide && isPictureKind(slide.kind) ? slide.picture : undefined;
   const isPicture = Boolean(picture) && mode === 'slide';
@@ -71,7 +77,12 @@ export function Stage({
       >
         {/* the counter follows Insert > Slide numbers through the slide's `counter` (the viewer
             deck builder reads render/deck.ts slideCounter), as the editor stage does */}
-        <Frame index={index} total={total} counter={slide?.counter ?? true} />
+        <Frame
+          index={index}
+          total={total}
+          counter={slide?.counter ?? true}
+          {...(band === undefined ? {} : { band: bandForSlide(band, slide) })}
+        />
         {slide ? <SlideView slideId={slide.id} html={slide.html} theme={theme} /> : null}
       </Sheet>
     </div>

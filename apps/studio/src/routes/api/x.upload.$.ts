@@ -60,8 +60,13 @@ export const Route = createFileRoute('/api/x/upload/$')({
         const match = /^put\/([A-Za-z0-9_.-]{20,2048})$/.exec(splat);
         if (match === null) return json({ error: 'not_found' }, 404);
         const result = await receiveUpload(match[1] ?? '', request.body);
+        // `reason` is the seller's sentence (server/upload.ts UPLOAD_REASONS): the chrome shows
+        // "The picture could not be uploaded: <reason>" and never the API's line or a code
         if (!result.ok)
-          return json({ error: 'upload_refused', message: result.reason }, result.status);
+          return json(
+            { error: 'upload_refused', message: result.reason, reason: result.sellerReason },
+            result.status,
+          );
         return json({ key: result.key, bytes: result.bytes, sniffedType: result.sniffedType }, 201);
       },
     },

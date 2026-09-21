@@ -192,8 +192,14 @@ export function createCheckpointer(deps: CheckpointerDeps): Checkpointer {
   ): Promise<{ ok: true; record: VersionRecord } | { ok: false; message: string }> => {
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const baseRevision = await store.revision();
+      // a noted run is one record under its history label (coalesce.ts; channel.ts Entry.note)
       const outcome = await store.write(
-        { baseRevision, author: write.author, mutations: write.mutations },
+        {
+          baseRevision,
+          author: write.author,
+          mutations: write.mutations,
+          ...(write.note === undefined ? {} : { note: write.note }),
+        },
         { ops: { fromSeq: write.fromSeq, toSeq: write.toSeq }, force: true },
       );
       if (outcome.ok) return { ok: true, record: outcome.entry };

@@ -8,6 +8,12 @@ import { allItems, isEnabled, isPresent, itemPath, resolveLabel, tooltipDoc } fr
  * Pure, so `tool-finder.test.ts` runs in Node; ToolFinder.tsx draws the rows through the Palette
  * component and runs the chosen item's effect. Relative imports carry the `.ts` extension so the
  * parity audit script can load this module under Node.
+ *
+ * The product round (docs/PRODUCT.md 6.1 "Search the menus"; audit-assist 8): a row's words are
+ * its menu path, Google's label, its doc sentence and the seller's words of `SELLER_TERMS`, so
+ * "hide slide" lists Skip slide, "rename the customer" lists Find and replace and Tailor for a
+ * customer, "logo" lists Replace image, and "bigger text" lists Increase font size. A row may
+ * also carry its own `terms` array when the model gives it one.
  */
 export type FinderRow = {
   /** `menu:<item id>` */
@@ -30,12 +36,75 @@ export type FinderRow = {
 /** The separator between the menu titles of a path. */
 export const PATH_SEPARATOR = ' › ';
 
+/**
+ * The seller's words per row id (docs/PRODUCT.md 6.1): what the seller audit typed and got
+ * "Nothing matches" for, in the seller's vocabulary, never the product's internal nouns.
+ */
+export const SELLER_TERMS: Readonly<Record<string, ReadonlyArray<string>>> = {
+  'slide.skipSlide': ['hide', 'hide slide', 'skip', 'leave out'],
+  'edit.findReplace': [
+    'rename',
+    'customer',
+    'name',
+    'rename the customer',
+    'change the customer name',
+    'swap words',
+  ],
+  'tools.tailor': ['tailor', 'customer', 'prospect', 'rename the customer', 'logo', 'personalize'],
+  'tools.assist': [
+    'assistant',
+    'ask',
+    'help me write',
+    'shorter',
+    'summarize',
+    'speaker notes',
+    'talk track',
+  ],
+  'title.assist': [
+    'assistant',
+    'ask',
+    'help me write',
+    'shorter',
+    'summarize',
+    'speaker notes',
+    'talk track',
+  ],
+  'format.text.size.increase': ['bigger', 'larger text', 'bigger text', 'larger'],
+  'format.text.size.decrease': ['smaller', 'smaller text'],
+  'view.showSpeakerNotes': ['talk track', 'notes', 'speaker notes', 'what to say'],
+  'format.image.replaceImage': ['logo', 'picture', 'swap', 'swap the logo', 'replace the logo'],
+  'format.image.replaceImage.upload': ['logo', 'picture', 'swap', 'upload'],
+  'insert.image.upload': ['logo', 'picture', 'photo', 'upload'],
+  'file.download.pdf': ['send', 'pdf', 'send a pdf', 'email', 'attach'],
+  'file.download.pptx': ['powerpoint', 'send', 'export'],
+  'title.share': ['send', 'link', 'share a link', 'invite'],
+  'file.share': ['send', 'link', 'share a link', 'invite'],
+  'title.slideshow': ['present', 'play', 'full screen', 'show'],
+  'slide.newSlide': ['add a slide', 'new page'],
+  'slide.duplicateSlide': ['copy slide', 'clone'],
+  'slide.deleteSlide': ['remove slide'],
+  'file.rename': ['rename', 'name', 'title'],
+  'file.moveToTrash': ['delete', 'remove', 'trash'],
+  'insert.textBox': ['text', 'add text', 'write'],
+  'insert.link': ['link', 'url', 'web address'],
+  'file.print': ['print', 'paper'],
+};
+
 /** True for an item the finder lists: drawn in a menu, or context-only (Alt text), never omitted. */
 export function isFinderItem(item: MenuItem): boolean {
   if (item.status === 'omit') return false;
   /* a container that only opens a submenu is not a command */
   if (item.effect?.kind === 'submenu' && item.effect.dynamic === undefined) return false;
   return item.effect !== undefined || item.status === 'later';
+}
+
+/** The seller's words of a row: the table's, and the item's own `terms` when the model carries one. */
+export function sellerTermsOf(item: MenuItem): string[] {
+  const own = (item as { terms?: unknown }).terms;
+  const list = Array.isArray(own)
+    ? own.filter((word): word is string => typeof word === 'string')
+    : [];
+  return [...(SELLER_TERMS[item.id] ?? []), ...list];
 }
 
 /**
@@ -62,7 +131,14 @@ export function finderRows(ctx: MenuContext): FinderRow[] {
       ...(doc === undefined ? {} : { doc }),
       enabled: isEnabled(item, ctx),
       later: item.status === 'later',
-      terms: `${path.join(' ')} ${item.google ?? ''}`.toLowerCase(),
+      terms: [
+        ...path,
+        item.google ?? '',
+        item.status === 'later' ? '' : (item.doc ?? ''),
+        ...sellerTermsOf(item),
+      ]
+        .join(' ')
+        .toLowerCase(),
     });
   };
   for (const item of allItems()) push(item);

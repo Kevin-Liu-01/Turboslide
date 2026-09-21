@@ -22,13 +22,24 @@ import './comments.css';
  * pass. Rows are a fixed height with tabular relative times: the author's 24 px chip, the name
  * and trust word, the slide number, the first line, the reply count; an orphaned thread lists
  * under its slide with its quoted text; a resolved thread offers "Re-open". A click opens the
- * thread's card on its slide. The foot links to Notification settings, Google's position.
+ * thread's card on its slide. The foot links to Notification settings, Google's position. With no
+ * comment at all the panel shows the sentence and one line that names the gesture, and the tabs,
+ * the search field and the filter arrive with the first comment (docs/PRODUCT.md 3.2;
+ * audit-interface 20: seven controls stood around one sentence).
  */
+
+/** The gesture line of the empty panel (3.2): the words of the Insert menu and its chord. */
+export const COMMENTS_EMPTY_GESTURE =
+  'Select something on a slide, then Insert > Comment (Cmd+Option+M)';
+export const COMMENTS_EMPTY_GESTURE_WIN =
+  'Select something on a slide, then Insert > Comment (Ctrl+Alt+M)';
 export type CommentsPanelProps = {
   comments: EditorComments;
   document: DeckDocument;
   me?: IdentityView;
   canComment: boolean;
+  /** the keyboard's platform, for the chord in the empty panel's gesture line */
+  platform?: 'mac' | 'win';
   onOpen: (thread: CommentThreadView) => void;
   onNotificationSettings?: () => void;
   onClose: () => void;
@@ -40,6 +51,7 @@ export function CommentsPanel({
   document,
   me,
   canComment,
+  platform = 'mac',
   onOpen,
   onNotificationSettings,
   onClose,
@@ -60,6 +72,7 @@ export function CommentsPanel({
     comments
       .reopen?.(thread.id)
       .catch((error: unknown) => say(error instanceof Error ? error.message : String(error)));
+  const none = comments.threads.length === 0;
 
   return (
     <Panel
@@ -69,68 +82,79 @@ export function CommentsPanel({
       control="panel.comments"
       className="ts-comments-panel"
     >
-      <div className="ts-comments-head">
-        <div className="ts-comments-tabs" role="tablist" aria-label={COMMENTS.panel}>
-          {(['all', 'forYou'] as const).map((value) => (
+      {none ? (
+        <p className="ts-comments-empty" data-control="panel.comments.empty">
+          <span className="ts-comments-empty-title">{COMMENTS.empty}</span>
+          {canComment ? (
+            <span className="ts-comments-empty-gesture" data-control="panel.comments.gesture">
+              {platform === 'mac' ? COMMENTS_EMPTY_GESTURE : COMMENTS_EMPTY_GESTURE_WIN}
+            </span>
+          ) : null}
+        </p>
+      ) : (
+        <div className="ts-comments-head">
+          <div className="ts-comments-tabs" role="tablist" aria-label={COMMENTS.panel}>
+            {(['all', 'forYou'] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={tab === value}
+                className={cn('ts-dialog-tab', tab === value && 'is-on')}
+                data-control={`panel.comments.tab.${value}`}
+                onClick={() => setTab(value)}
+                {...tipProps({
+                  name: value === 'all' ? COMMENTS.all : COMMENTS.forYou,
+                  doc:
+                    value === 'all'
+                      ? 'Every thread on this presentation'
+                      : 'Threads that name you, that are yours, or that are assigned to you',
+                })}
+              >
+                {value === 'all' ? COMMENTS.all : COMMENTS.forYou}
+              </button>
+            ))}
+          </div>
+          <input
+            type="search"
+            className="ts-comments-search"
+            value={search}
+            placeholder={COMMENTS.search}
+            aria-label={COMMENTS.search}
+            data-control="panel.comments.search"
+            onChange={(event) => setSearch(event.target.value)}
+            {...tipProps({ name: COMMENTS.search, doc: 'By words or by who wrote them' })}
+          />
+          <div className="ts-comments-filters">
+            <select
+              className="pt-select ts-comments-filter"
+              value={filter}
+              aria-label="Filter"
+              data-control="panel.comments.filter"
+              onChange={(event) => setFilter(event.target.value as CommentsFilter)}
+              {...tipProps({ name: 'Filter', doc: 'All, Open or Resolved threads' })}
+            >
+              <option value="all">{COMMENTS.all}</option>
+              <option value="open">{COMMENTS.open}</option>
+              <option value="resolved">{COMMENTS.resolved}</option>
+            </select>
             <button
-              key={value}
               type="button"
-              role="tab"
-              aria-selected={tab === value}
-              className={cn('ts-dialog-tab', tab === value && 'is-on')}
-              data-control={`panel.comments.tab.${value}`}
-              onClick={() => setTab(value)}
+              className={cn('pt-ib is-text ts-comments-order', order === 'slide' && 'is-on')}
+              aria-pressed={order === 'slide'}
+              data-control="panel.comments.slideOrder"
+              onClick={() => setOrder((o) => (o === 'slide' ? 'activity' : 'slide'))}
               {...tipProps({
-                name: value === 'all' ? COMMENTS.all : COMMENTS.forYou,
-                doc:
-                  value === 'all'
-                    ? 'Every thread on this presentation'
-                    : 'Threads that name you, that are yours, or that are assigned to you',
+                name: COMMENTS.slideOrder,
+                doc: 'Open threads in the order of the slides, for a review pass',
               })}
             >
-              {value === 'all' ? COMMENTS.all : COMMENTS.forYou}
+              <span className="pt-lb">{COMMENTS.slideOrder}</span>
             </button>
-          ))}
+          </div>
         </div>
-        <input
-          type="search"
-          className="ts-comments-search"
-          value={search}
-          placeholder={COMMENTS.search}
-          aria-label={COMMENTS.search}
-          data-control="panel.comments.search"
-          onChange={(event) => setSearch(event.target.value)}
-          {...tipProps({ name: COMMENTS.search, doc: 'By words or by who wrote them' })}
-        />
-        <div className="ts-comments-filters">
-          <select
-            className="ts-comments-filter"
-            value={filter}
-            aria-label="Filter"
-            data-control="panel.comments.filter"
-            onChange={(event) => setFilter(event.target.value as CommentsFilter)}
-            {...tipProps({ name: 'Filter', doc: 'All, Open or Resolved threads' })}
-          >
-            <option value="all">{COMMENTS.all}</option>
-            <option value="open">{COMMENTS.open}</option>
-            <option value="resolved">{COMMENTS.resolved}</option>
-          </select>
-          <button
-            type="button"
-            className={cn('pt-ib is-text ts-comments-order', order === 'slide' && 'is-on')}
-            aria-pressed={order === 'slide'}
-            data-control="panel.comments.slideOrder"
-            onClick={() => setOrder((o) => (o === 'slide' ? 'activity' : 'slide'))}
-            {...tipProps({
-              name: COMMENTS.slideOrder,
-              doc: 'Open threads in the order of the slides, for a review pass',
-            })}
-          >
-            <span className="pt-lb">{COMMENTS.slideOrder}</span>
-          </button>
-        </div>
-      </div>
-      {rows.length === 0 ? (
+      )}
+      {none ? null : rows.length === 0 ? (
         <p className="ts-panel-empty">{tab === 'forYou' ? COMMENTS.emptyForYou : COMMENTS.empty}</p>
       ) : (
         <ul

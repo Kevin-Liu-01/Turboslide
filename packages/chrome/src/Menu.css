@@ -1,10 +1,15 @@
-/* Menu (Menu.tsx): the one menu plate of the chrome (SPEC 2.11). Paper, one --pt-hair frame,
-   220 px wide (--pt-menu-w), 4 px of padding top and bottom, 13 px Inter; rows 28 px tall with a
-   16 px icon slot on the left, the label, and the key in titanium on the right (or a chevron for a
+/* Menu (Menu.tsx): the one menu plate of the chrome (SPEC 2.11). Paper in the frame weight
+   (--pt-edge: a plate that floats over the stage or the sheet takes the line law's frame, where
+   the hairline read 1.51:1; docs/PRODUCT.md 3.1, the floating plate row), as wide as its longest
+   label between 220 px (--pt-menu-w) and 320 px so no label is cut (3.1.1; File's "Print settings
+   and preview" was), 4 px of padding top and bottom, 13 px Inter; rows 28 px tall with a 16 px
+   icon slot on the left, the label, and the key in titanium on the right (or a chevron for a
    submenu); dividers 1 px --pt-hair-soft between groups; hover and focus draw the plate ground
-   and ink text; disabled rows read in titanium and take no pointer. The check of a check row is
-   drawn with borders, so no artwork is copied. Radius 0, no shadow, the fade over the fast
-   duration; reduced motion drops it. Colors are tokens only. */
+   and ink text; disabled rows read --pt-disabled and take no pointer. The check of a check row is
+   drawn with borders, so no artwork is copied. The access key underline draws on Windows and
+   Linux while Alt is held (`.is-alt`, Menu.tsx) and never on macOS, where the platform has no Alt
+   mnemonics (3.1.1). Radius 0, no shadow, the fade over the fast duration; reduced motion drops
+   it. Colors are tokens only. */
 .ts-menu-root {
   display: contents;
 }
@@ -12,13 +17,15 @@
 .ts-menu {
   position: fixed;
   box-sizing: border-box;
-  width: var(--pt-menu-w, 220px);
+  width: max-content;
+  min-width: var(--pt-menu-w, 220px);
+  max-width: 320px;
   padding: 4px 0;
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--pt-paper);
   color: var(--pt-ink);
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-edge);
   border-radius: 0;
   font: 13px/1.3 var(--pt-text);
   outline: none;
@@ -67,7 +74,7 @@
 }
 
 .ts-menu-item.is-disabled {
-  color: var(--pt-titanium);
+  color: var(--pt-disabled);
   cursor: default;
 }
 
@@ -90,7 +97,7 @@
 }
 
 .ts-menu-item.is-disabled .ts-menu-ic {
-  color: var(--pt-titanium);
+  color: var(--pt-disabled);
 }
 
 .ts-menu-ic svg {
@@ -120,6 +127,12 @@
 }
 
 .ts-menu-ak {
+  text-decoration: none;
+}
+
+/* the mnemonic underline: Windows and Linux while Alt is held (Menu.tsx stamps `.is-alt` on the
+   plate); Menu.tsx draws no `.ts-menu-ak` on macOS at all */
+.ts-menu.is-alt .ts-menu-ak {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;

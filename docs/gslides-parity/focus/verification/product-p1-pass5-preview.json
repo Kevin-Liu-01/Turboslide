@@ -1,0 +1,30 @@
+{
+  "base": "https://turboslide-o6u6te5bj-kl01s-projects.vercel.app",
+  "rows": [
+    {
+      "name": "a deck naming Acme twice with a Pricing slide",
+      "ok": true,
+      "observed": "deck untitled-20260920-g9u5; slides title, split-1, split-2; {\"acme\":3,\"globex\":0,\"skipped\":{\"title\":false,\"split-1\":false,\"split-2\":false}}"
+    },
+    {
+      "name": "the six swatch tooltips of the Brand kit panel under a real pointer move",
+      "ok": true,
+      "observed": "{\"text\":\"Textheadings and body text. #070707\",\"background\":\"Backgroundthe slide’s ground. #ffffff\",\"caption\":\"Captionscaptions, labels and the footer text. #3a3d44\",\"hint\":\"Hintsslide numbers, placeholder prompts and the wordmark. #8a8f98\",\"primary\":\"Primarylinks and the key colour of charts and highlights. #2f5ce0\",\"accent\":\"Accentthe second colour of charts and highlights. #2f5ce0\"}"
+    },
+    {
+      "name": "Tools > Tailor for a customer: Acme to Globex, the count, skip Pricing, Apply, Undo in the snackbar, one Cmd+Z",
+      "ok": false,
+      "observed": "error: locator.click: Timeout 30000ms exceeded."
+    },
+    {
+      "name": "the Assist button's tooltip: the name, the key and one sentence",
+      "ok": false,
+      "observed": "Assist tooltip []; for comparison New slide's tooltip []"
+    },
+    {
+      "name": "the Assistant chip on a block after Make it shorter is accepted",
+      "ok": true,
+      "observed": "chip {\"chip\":\"Assistant\",\"handles\":10}; the slide json names ext.assist true"
+    }
+  ]
+}

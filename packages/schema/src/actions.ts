@@ -46,7 +46,11 @@ import {
 import { CHART_KINDS, chartSeriesSchema } from './blocks/chart.ts';
 import { materialCatalogEntrySchema, materialUniformsSchema } from './blocks/material.ts';
 import { cellBorderSchema } from './blocks/table.ts';
+import type { BrandKit } from './brand.ts';
+import { brandKitSchema } from './brand.ts';
 import { colorSchema } from './color.ts';
+import { BRAND_POINTER } from './brand.ts';
+import { FONT_CATEGORIES, FONT_IDS, FONT_LICENCES } from './fonts.ts';
 import {
   APPEARANCES,
   COUNTER_MODES,
@@ -59,6 +63,7 @@ import {
   slideSchema,
   SLIDE_KINDS,
   SLOT_NAMES,
+  THEMES,
 } from './deck.ts';
 import { exportCheckSchema, exportReportSchema } from './export.ts';
 import { findingSchema } from './findings.ts';
@@ -89,10 +94,10 @@ export const TRANSPORTS = ['cli', 'mcp', 'http', 'window'] as const;
 export const ALL_TRANSPORTS: ReadonlyArray<Transport> = TRANSPORTS;
 
 /** M1 to M6 are the first six milestones; GS1, GS2 and GS3 are the Google Slides parity rounds (docs/gslides-parity). */
-export type Milestone = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1' | 'GS2' | 'GS3';
+export type Milestone = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1' | 'GS2' | 'GS3' | 'P1';
 
 /** The milestones in landing order, for the manifest's "expected here" answer. */
-export const MILESTONES = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'GS1', 'GS2', 'GS3'] as const;
+export const MILESTONES = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'GS1', 'GS2', 'GS3', 'P1'] as const;
 
 /**
  * The palette groups (SPEC 6.1) and the docs sections; presence, sync, comment, share, account and
@@ -178,6 +183,16 @@ export const ACTION_IDS = [
   'deck.remove',
   'deck.setBackground',
   'deck.guides',
+  /* the product round's templates (docs/PRODUCT.md 4.3; B5b): the index reads and the writes of
+     Save as template and the gallery's card menu; before the slide group so GS3_ACTION_IDS,
+     the slice from presence.list, keeps its 64 */
+  'template.list',
+  'template.slides',
+  'template.create',
+  'template.update',
+  'template.rename',
+  'template.delete',
+  'template.setDefault',
   'slide.list',
   'slide.get',
   'slide.insert',
@@ -268,6 +283,17 @@ export const ACTION_IDS = [
   'control.activate',
   'control.set',
   'artifact.download',
+  // the product round (docs/PRODUCT.md 5, 6.2): the tailoring pass and the assist's two actions,
+  // before the round three block so GS3_ACTION_IDS keeps its slice
+  'deck.tailor',
+  'assist.propose',
+  'assist.accept',
+  // the product round's brand kit and font catalog (docs/PRODUCT.md 4.1, 4.2; B5a), before the
+  // round three block for the same reason
+  'brand.get',
+  'brand.set',
+  'brand.reset',
+  'font.list',
   // the Google Slides parity round three (gslides-parity SPEC-3 12): 64 actions, counted once here
   'presence.list',
   'presence.follow',
@@ -348,6 +374,10 @@ export const GS3_ACTION_IDS = ACTION_IDS.slice(ACTION_IDS.indexOf('presence.list
  * the document's, the comments' or the access record's revision.
  */
 export const NO_REVISION_WRITES: ReadonlySet<ActionId> = new Set<ActionId>([
+  /* the product round (docs/PRODUCT.md 4.3): a template folder has no revision a caller reads */
+  'template.rename',
+  'template.delete',
+  'template.setDefault',
   'presence.follow',
   'presence.unfollow',
   'presence.pointer',
@@ -561,11 +591,76 @@ export const ditherResultSchema = z.strictObject({
 });
 
 /**
- * What deck.create starts from: the GT brand template record under decks/templates/gt-brand
- * (the deck's manifest and slides with a template.json naming it), or one title slide.
+ * The two built in templates: the GT brand template record under decks/templates/gt-brand (the
+ * deck's manifest and slides with a template.json naming it) and the blank deck. Since the
+ * product round (docs/PRODUCT.md 4.3) deck.create `from` takes any id of the template index
+ * (`decks/templates/templates.json`, read by `template.list`); these two are the ids a decks folder
+ * without an index still answers, and `blank` is the deployment default when `default.json` is
+ * absent.
  */
 export const DECK_TEMPLATES = ['gt-brand', 'blank'] as const;
 export type DeckTemplateId = (typeof DECK_TEMPLATES)[number];
+
+/**
+ * The gallery categories a template record may carry (gslides-parity SPEC-5 4.1, Google's three
+ * headings; the round after's Templates pane groups by them). The gallery page of the product
+ * round groups by `organisation` instead: the templates saved on this deployment first, then
+ * Turboslide's (docs/PRODUCT.md 4.3).
+ */
+export const TEMPLATE_CATEGORIES = ['personal', 'work', 'education'] as const;
+export type TemplateCategory = (typeof TEMPLATE_CATEGORIES)[number];
+
+/** One row of `decks/templates/templates.json`, what `template.list` answers (docs/PRODUCT.md 4.3). */
+export type TemplateIndexEntry = {
+  /** the template id, the folder under decks/templates and the `deck.create --from` value */
+  id: string;
+  name: string;
+  category: TemplateCategory;
+  /** the one sentence the gallery card shows */
+  description?: string;
+  /** the slide the card renders as the cover; the first slide when absent */
+  cover?: string;
+  useCases?: string[];
+  slides: number;
+  theme: (typeof THEMES)[number];
+  /** the appearance a deck created from the template opens in; the theme's default when absent */
+  appearance?: (typeof APPEARANCES)[number];
+  /** set on a template saved on this deployment (Your organisation); absent on Turboslide's */
+  organisation?: true;
+  /** the brand kit record the template carries (docs/PRODUCT.md 4.1 `Deck.brand`, B5a's `BrandKit`), as saved */
+  brand?: BrandKit;
+};
+
+export const templateIndexEntrySchema = z.strictObject({
+  id: slugSchema,
+  name: z.string().min(1).max(120),
+  category: z.enum(TEMPLATE_CATEGORIES),
+  description: z.string().max(400).optional(),
+  cover: z.string().min(1).optional(),
+  useCases: z.array(z.string().min(1).max(80)).max(8).optional(),
+  slides: z.number().int().nonnegative(),
+  theme: z.enum(THEMES),
+  appearance: z.enum(APPEARANCES).optional(),
+  organisation: z.literal(true).optional(),
+  brand: brandKitSchema.optional(),
+}) satisfies z.ZodType<TemplateIndexEntry>;
+
+/** One slide of a template, what `template.slides` answers. */
+const templateSlideRowSchema = z.strictObject({
+  index: z.number().int().positive(),
+  slideId: slugSchema,
+  title: z.string(),
+  kind: z.enum(SLIDE_KINDS),
+});
+
+/** The answer of every template write: the template's row after the write. */
+const templateWriteOutput = z.strictObject({
+  id: slugSchema,
+  name: z.string(),
+  slides: z.number().int().nonnegative(),
+  /** true when the write replaced a template of the same id (template.update, template.create over the same name) */
+  replaced: z.boolean().optional(),
+});
 
 /**
  * The deck bundle shapes (docs/deck-transfer.md): what deck.pack reports, what deck.unpack and
@@ -872,6 +967,90 @@ const studioUrl = z
   .url()
   .describe('The studio to talk to; the hosts.json default otherwise');
 
+// ---------------------------------------------------------------------------------------------
+// The product round's pieces (docs/PRODUCT.md 5, 6.2)
+
+/** The tailoring pass's input (PRODUCT.md section 5): the replacements, the logo, the slides to skip. */
+export const tailorInputSchema = z.strictObject({
+  replacements: z
+    .array(
+      z.strictObject({
+        from: z.string().min(1).describe('The customer name as the deck spells it'),
+        to: z.string().describe('The name that takes its place'),
+      }),
+    )
+    .max(20)
+    .optional()
+    .describe('Case insensitive, over every visible text and the notes, as Find and replace runs'),
+  logo: z
+    .strictObject({
+      assetId: slugSchema.describe('An asset of this deck (asset.add first)'),
+      replaceAlt: z
+        .string()
+        .min(1)
+        .optional()
+        .describe(
+          'Swap every picture whose alt text names this word for the asset; without it the kit’s logo slot takes the asset once the brand kit exists on this deck',
+        ),
+    })
+    .optional(),
+  skip: z.array(slugSchema).max(200).optional().describe('The slides to skip'),
+  baseRevision,
+});
+
+export const ASSIST_INTENTS = ['shorter', 'notes', 'ask'] as const;
+export type AssistIntent = (typeof ASSIST_INTENTS)[number];
+
+/** One before and after of a card, addressed like a Text (PRODUCT.md 6.1 "The cards"). */
+export const assistRowSchema = z.strictObject({
+  slideId: slugSchema,
+  /** absent for a slide field (a title slide’s heading, the notes) */
+  blockId: blockIdSchema.optional(),
+  path: z.string(),
+  before: z.string(),
+  after: z.string(),
+});
+
+/**
+ * A card `assist.propose` answers and `assist.accept` writes (PRODUCT.md 6.2): the sentence in
+ * the seller’s words, the rows, the mutations, the base revision, the expiry and an HMAC the
+ * server verifies, so nothing is stored between the two calls (judge-design rejection 10).
+ */
+export const assistCardSchema = z.strictObject({
+  id: z.string().min(1),
+  intent: z.enum(ASSIST_INTENTS),
+  sentence: z.string().min(1),
+  rows: z.array(assistRowSchema),
+  mutations: z.array(mutationSchema).min(1),
+  deckId: slugSchema,
+  baseRevision,
+  expiresAt: z.string().describe('ISO 8601; a card is valid for ten minutes'),
+  signature: z.string().regex(/^[0-9a-f]{64}$/, 'a hex HMAC'),
+});
+export type AssistCard = z.infer<typeof assistCardSchema>;
+export type AssistRow = z.infer<typeof assistRowSchema>;
+
+export const assistProposeInputSchema = z.strictObject({
+  intent: z
+    .enum(ASSIST_INTENTS)
+    .describe(
+      "'shorter' rewrites the slide’s text shorter, 'notes' writes speaker notes, 'ask' resolves the prompt to one of the two",
+    ),
+  prompt: z
+    .string()
+    .max(2000)
+    .describe('The seller’s ask, in their words; empty for a starter card'),
+  slideIds: z
+    .array(slugSchema)
+    .min(1)
+    .max(20)
+    .optional()
+    .describe('The slides the ask is about; the deck’s first slides when absent'),
+  baseRevision,
+});
+export type AssistProposeInput = z.infer<typeof assistProposeInputSchema>;
+export type TailorInput = z.infer<typeof tailorInputSchema>;
+
 const A = ALL_TRANSPORTS;
 const noWindow: ReadonlyArray<Transport> = ['cli', 'mcp', 'http'];
 
@@ -898,6 +1077,8 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       theme: z.string(),
       revision,
       sections: outlineSchema,
+      /** the brand kit record when the deck carries one (docs/PRODUCT.md 4.1); brand.get answers it alone */
+      brand: brandKitSchema.optional(),
       counts: z.strictObject({
         slides: z.number().int(),
         sections: z.number().int(),
@@ -934,18 +1115,16 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'deck.create': action({
     id: 'deck.create',
     label: 'New deck',
-    doc: 'Creates a deck under decks/ from the GT brand template or as one title slide, and returns its id, revision and counts.',
+    doc: 'Creates a deck under decks/ from a template of the index (template.list), the GT brand template or one title slide, and returns its id, revision and counts.',
     group: 'deck',
     mutates: true,
     transports: A,
     milestone: 'M4',
     input: z.strictObject({
       name: z.string().min(1).describe('The deck title; the id is its slug unless `id` is given'),
-      from: z
-        .enum(DECK_TEMPLATES)
-        .describe(
-          "'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide",
-        ),
+      from: slugSchema.describe(
+        "A template id of the index (template.list): 'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide; a saved template copies its folder",
+      ),
       id: slugSchema
         .optional()
         .describe('The deck id under decks/; derived from the name when absent'),
@@ -953,7 +1132,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     output: z.strictObject({
       deckId: slugSchema,
       title: z.string(),
-      from: z.enum(DECK_TEMPLATES),
+      from: slugSchema,
       revision,
       dir: z.string().describe('The deck directory'),
       counts: z.strictObject({
@@ -1229,6 +1408,145 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     output: z.strictObject({ id: slugSchema, removed: z.literal(true) }),
     cli: { usage: 'turboslide deck remove <id> --confirm' },
     example: { id: 'q4-review', confirm: true, baseRevision: 3 },
+  }),
+  // The templates of the product round (docs/PRODUCT.md 4.3; gslides-parity SPEC-5 4.1): the
+  // index reads, Save as template, and the gallery card's Rename, Delete and Use for new
+  // presentations. A template is a read only deck folder under decks/templates/<id>; the writes
+  // below are the only writes that touch one, and every mutating action on a template's own
+  // document is refused with the sentence `TEMPLATE_READ_ONLY` of @turboslide/store/templates.
+  'template.list': action({
+    id: 'template.list',
+    label: 'Templates',
+    doc: 'The template index: every template with its name, category, cover, sentence, slide count, theme and appearance, the organisation flag of a template saved on this deployment and its brand kit, plus the id of the template new presentations start from.',
+    group: 'deck',
+    mutates: false,
+    transports: A,
+    milestone: 'P1',
+    input: empty,
+    output: z.strictObject({
+      templates: z.array(templateIndexEntrySchema),
+      /** the deployment default (decks/templates/default.json), `blank` when none is set */
+      default: slugSchema,
+    }),
+    cli: { usage: 'turboslide template list' },
+    mcp: 'deck_list_templates',
+    example: {},
+  }),
+  'template.slides': action({
+    id: 'template.slides',
+    label: 'Template slides',
+    doc: 'The slides of one template in order with their titles and kinds, the rows the gallery and Import slides read.',
+    group: 'deck',
+    mutates: false,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({ id: slugSchema.describe('The template id') }),
+    output: z.strictObject({
+      id: slugSchema,
+      name: z.string(),
+      slides: z.array(templateSlideRowSchema),
+    }),
+    cli: { usage: 'turboslide template slides <id>' },
+    mcp: 'deck_template_slides',
+    example: { id: 'gt-brand' },
+  }),
+  'template.create': action({
+    id: 'template.create',
+    label: 'Save as template',
+    doc: 'Saves a deck as a template of this deployment: decks/templates/<slug of the name> with the deck manifest, its slides, its assets and its brand kit, listed under Your organisation in the gallery; a name an organisation template already carries replaces that template and keeps its slug (the dialog says so first).',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      deckId: slugSchema.describe('The deck to save'),
+      name: z.string().min(1).max(120).describe('The template name; its slug is the template id'),
+      sentence: z
+        .string()
+        .max(400)
+        .optional()
+        .describe('One sentence the gallery card shows; "Saved from <deck title>" when absent'),
+      baseRevision: baseRevision.describe(
+        'The revision of the deck the caller read; a stale value is rejected with 409',
+      ),
+    }),
+    output: templateWriteOutput,
+    cli: { usage: 'turboslide template create <deckId> <name> --sentence <sentence>' },
+    mcp: 'deck_create_template',
+    example: { deckId: 'acme-sales-2026', name: 'Acme sales 2026', baseRevision: 12 },
+  }),
+  'template.update': action({
+    id: 'template.update',
+    label: 'Replace a template',
+    doc: 'Replaces the slides, assets and brand kit of an organisation template from a deck and keeps its id, name and sentence; the templates Turboslide ships are refused.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      id: slugSchema.describe('The template to replace'),
+      deckId: slugSchema.describe('The deck whose slides replace it'),
+      sentence: z.string().max(400).optional().describe('A new sentence; the old one when absent'),
+      baseRevision: baseRevision.describe(
+        'The revision of the deck the caller read; a stale value is rejected with 409',
+      ),
+    }),
+    output: templateWriteOutput,
+    cli: { usage: 'turboslide template update <id> <deckId>' },
+    mcp: 'deck_update_template',
+    example: { id: 'acme-sales-2026', deckId: 'acme-sales-2026', baseRevision: 14 },
+  }),
+  'template.rename': action({
+    id: 'template.rename',
+    label: 'Rename a template',
+    doc: 'Renames an organisation template; its id and its folder stay, so every link and every default record still name it. The templates Turboslide ships are refused.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      id: slugSchema.describe('The template to rename'),
+      name: z.string().min(1).max(120).describe('The new name'),
+    }),
+    output: templateWriteOutput,
+    cli: { usage: 'turboslide template rename <id> <name>' },
+    mcp: 'deck_rename_template',
+    example: { id: 'acme-sales-2026', name: 'Acme sales, Q4 2026' },
+  }),
+  'template.delete': action({
+    id: 'template.delete',
+    label: 'Delete a template',
+    doc: 'Deletes an organisation template folder and its index row; presentations made from it are not changed. The template new presentations start from is refused until another is chosen, and so are the templates Turboslide ships. Irreversible; `confirm` must be true.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      id: slugSchema.describe('The template to delete'),
+      confirm: z.literal(true).describe('The caller has confirmed the deletion'),
+    }),
+    output: z.strictObject({ id: slugSchema, removed: z.literal(true) }),
+    cli: { usage: 'turboslide template delete <id> --confirm' },
+    mcp: 'deck_delete_template',
+    example: { id: 'acme-sales-2026', confirm: true },
+  }),
+  'template.setDefault': action({
+    id: 'template.setDefault',
+    label: 'Use for new presentations',
+    doc: 'Makes a template the one /new and the Blank card start from on this deployment (decks/templates/default.json), whose name, logo and appearance every Reset and every default logo read; `blank` restores the blank deck Turboslide ships. An agent token needs the admin scope.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({ id: slugSchema.describe('The template new presentations start from') }),
+    output: z.strictObject({
+      /** the template new presentations now start from */
+      default: slugSchema,
+      name: z.string(),
+    }),
+    cli: { usage: 'turboslide template default <id>' },
+    mcp: 'deck_set_default_template',
+    example: { id: 'acme-sales-2026' },
   }),
   'slide.list': action({
     id: 'slide.list',
@@ -3581,6 +3899,108 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   // apps/cli/src/store-actions.ts; the author comes from the session or the token on the server.
   // "Server side" means the window handler joins SERVER_SIDE_WINDOW_ACTIONS.
 
+  // ---------------------------------------------------------------------------------------------
+  // The brand kit and the font catalog (docs/PRODUCT.md 4.1, 4.2; B5a)
+
+  'brand.get': action({
+    id: 'brand.get',
+    label: 'Brand kit',
+    doc: 'The brand kit record of the deck: the colour roles, the faces, the logo and footer slots, the slide numbers, the frame toggles and the words that never translate; an empty object for a deck that reads the deployment’s default kit.',
+    group: 'deck',
+    mutates: false,
+    transports: A,
+    milestone: 'P1',
+    input: empty,
+    output: z.strictObject({
+      brand: brandKitSchema,
+      /** true when the deck carries a record of its own; false when every slot reads the default kit */
+      own: z.boolean(),
+      revision,
+    }),
+    cli: { usage: 'turboslide brand get' },
+    mcp: 'deck_brand_get',
+    example: {},
+  }),
+  'brand.set': action({
+    id: 'brand.set',
+    label: 'Set a brand kit field',
+    doc: 'Writes one value of the brand kit by JSON pointer (/colors/light/primary, /fonts/display, /mark, /footer/logo, /footer/text, /counter/format, /frame/rails, /positions/mark, /lexicon, /appearance, /name) as one deck.set mutation under /brand, the write every Brand kit panel control makes; an absent value removes the field. The record is validated before the commit.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      path: z
+        .string()
+        .regex(BRAND_POINTER)
+        .describe(
+          'A JSON pointer into the kit: /colors/<light|dark>/<text|background|caption|hint|primary|accent>, /fonts/<display|text>, /mark, /footer/<logo|assetId|text>, /counter/<show|format|skipTitle>, /frame/<rails|rules|crosses>, /positions/<mark|footerLogo>, /lexicon, /appearance, /name',
+        ),
+      value: z.unknown().optional().describe('The new value; omit it to remove the field'),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      path: z.string(),
+      value: z.unknown().optional(),
+      brand: brandKitSchema,
+      revision,
+    }),
+    cli: { usage: 'turboslide brand set <path> <value>' },
+    mcp: 'deck_brand_set',
+    example: { path: '/colors/light/primary', value: '#0b3d91', baseRevision: 412 },
+  }),
+  'brand.reset': action({
+    id: 'brand.reset',
+    label: 'Reset the brand kit',
+    doc: 'Removes the brand kit record, so the deck reads the deployment’s default kit, or one field of it when a pointer is given; a deck with nothing to remove writes no revision.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      path: z
+        .string()
+        .regex(BRAND_POINTER)
+        .optional()
+        .describe('One field to remove; the whole record when omitted'),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      brand: brandKitSchema,
+      revision,
+      /** false when there was nothing to remove and no revision was written */
+      changed: z.boolean(),
+    }),
+    cli: { usage: 'turboslide brand reset [path]' },
+    mcp: 'deck_brand_reset',
+    example: { baseRevision: 412 },
+  }),
+  'font.list': action({
+    id: 'font.list',
+    label: 'Fonts',
+    doc: 'The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2).',
+    group: 'render',
+    mutates: false,
+    transports: A,
+    milestone: 'P1',
+    input: empty,
+    output: z.strictObject({
+      fonts: z.array(
+        z.strictObject({
+          id: z.enum(FONT_IDS),
+          name: z.string(),
+          category: z.enum(FONT_CATEGORIES),
+          weights: z.array(z.number().int().min(100).max(900)).min(1),
+          italic: z.boolean(),
+          licence: z.enum(FONT_LICENCES),
+        }),
+      ),
+    }),
+    cli: { usage: 'turboslide fonts list' },
+    mcp: 'deck_fonts_list',
+    example: {},
+  }),
+
   'presence.list': action({
     id: 'presence.list',
     label: 'Collaborators',
@@ -4876,6 +5296,105 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       preset: 'diamond',
       anchor: 5500,
       dither: { pattern: 'bayer8' },
+      baseRevision: 412,
+    },
+  }),
+  // -------------------------------------------------------------------------------------------
+  // The product round (docs/PRODUCT.md section 5, 6.2): the tailoring pass and the assist
+
+  'deck.tailor': action({
+    id: 'deck.tailor',
+    label: 'Tailor for a customer',
+    doc: 'The tailoring pass as one write: replaces the customer name in every visible text and the notes, swaps the pictures whose alt text names the old customer for one asset, and skips the named slides; answers the counts per step and the slides that changed.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: tailorInputSchema,
+    output: z.strictObject({
+      replacements: z.number().int().nonnegative(),
+      slideIds: z.array(slugSchema).describe('The slides whose text changed'),
+      pictures: z.number().int().nonnegative().describe('The pictures swapped'),
+      skipped: z.array(slugSchema),
+      revision,
+    }),
+    cli: {
+      usage:
+        'turboslide tailor --replace <from>=<to> --skip <skip> --logo <assetId> --logo-alt <replaceAlt>',
+    },
+    mcp: 'deck_tailor',
+    example: {
+      replacements: [{ from: 'Acme', to: 'Globex' }],
+      skip: ['pricing-internal'],
+      baseRevision: 412,
+    },
+  }),
+  'assist.propose': action({
+    id: 'assist.propose',
+    label: 'Ask the assistant',
+    doc: 'Asks the assistant for a proposal over the named slides: a shorter rewrite or speaker notes, or a free ask that resolves to one of the two; answers signed cards a caller accepts with assist.accept. A read: nothing is written until a card is accepted.',
+    group: 'deck',
+    mutates: false,
+    transports: A,
+    milestone: 'P1',
+    input: assistProposeInputSchema,
+    output: z.strictObject({
+      cards: z.array(assistCardSchema),
+      /** the sentence the panel draws when no card was made: the fallback, a decline, a cut answer */
+      sentence: z.string().optional(),
+      /** how many slides the model read when the deck was cut at the input budget */
+      readSlides: z.number().int().nonnegative().optional(),
+    }),
+    cli: { usage: 'turboslide assist propose <prompt> --intent <intent> --slides <slideIds>' },
+    mcp: 'deck_assist_propose',
+    example: { intent: 'shorter', prompt: '', slideIds: ['content-rule'], baseRevision: 412 },
+  }),
+  'assist.accept': action({
+    id: 'assist.accept',
+    label: 'Accept a proposal',
+    doc: 'Writes one card assist.propose returned, as one write by the assistant: the signature, the expiry and the deck are verified, a card behind the deck is re based when its blocks are unchanged and refused otherwise.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({ card: assistCardSchema, baseRevision }),
+    output: z.strictObject({
+      revision,
+      slideIds: z.array(slugSchema),
+      /** the card's sentence, for the snackbar */
+      sentence: z.string(),
+    }),
+    cli: { usage: 'turboslide assist accept < card.json', stdin: 'card' },
+    mcp: 'deck_assist_accept',
+    example: {
+      card: {
+        id: 'card-1',
+        intent: 'shorter',
+        sentence: 'Slide 2: the body is 12 words shorter',
+        rows: [
+          {
+            slideId: 'content-rule',
+            blockId: 'intro',
+            path: '/text',
+            before: 'The content rule of the deck, in one sentence for the reader.',
+            after: 'The content rule, in one sentence.',
+          },
+        ],
+        mutations: [
+          {
+            op: 'text.replace',
+            slideId: 'content-rule',
+            blockId: 'intro',
+            path: '/text',
+            range: [0, 62],
+            text: 'The content rule, in one sentence.',
+          },
+        ],
+        deckId: 'gt-brand',
+        baseRevision: 412,
+        expiresAt: '2026-09-19T20:10:00.000Z',
+        signature: '0000000000000000000000000000000000000000000000000000000000000000',
+      },
       baseRevision: 412,
     },
   }),

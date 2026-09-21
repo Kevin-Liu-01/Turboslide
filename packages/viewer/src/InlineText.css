@@ -40,3 +40,128 @@
   outline: 1px solid var(--pt-ink);
   outline-offset: -1px;
 }
+
+/* The two row popover of docs/PRODUCT.md section 2 rank 19: the Link label with the linked words,
+   then the address field, Slides in this presentation, Apply and Remove. Line law: one hairline
+   ring on the plate and one on each field; nothing else draws a line. */
+.ts-link-pop {
+  flex-direction: column;
+  align-items: stretch;
+  height: auto;
+  min-width: 420px;
+  padding: 6px 8px 8px;
+  gap: 6px;
+}
+
+.ts-link-pop-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 16px;
+  color: var(--pt-ink-2);
+  font: 12.5px/1.2 var(--pt-text);
+}
+
+.ts-link-pop-label {
+  color: var(--pt-ink);
+  font-weight: 500;
+}
+
+.ts-link-pop-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 320px;
+  color: var(--pt-ink-2);
+}
+
+.ts-link-pop-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ts-link-pop .ts-run-link {
+  width: 200px;
+  height: 32px;
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-run-link-slide {
+  appearance: none;
+  height: 32px;
+  max-width: 160px;
+  padding: 0 24px 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.2'/%3E%3C/svg%3E")
+    no-repeat right 8px center;
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+  text-overflow: ellipsis;
+}
+
+.ts-run-link-slide:focus-visible,
+.ts-run-link-btn:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-run-link-btn {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+  cursor: pointer;
+}
+
+.ts-run-link-btn:hover {
+  background: var(--pt-plate);
+}
+
+.ts-run-link-btn.is-primary {
+  background: var(--pt-ink);
+  border-color: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+/* The chip under a linked word the caret sits in: the address, Change and Remove. */
+.ts-link-chip {
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 4px 0 10px;
+  max-width: 520px;
+  background: var(--pt-paper);
+  border: 1px solid var(--pt-hair);
+  color: var(--pt-ink-2);
+  font: 13px/1 var(--pt-text);
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+.ts-link-chip .ts-run-link-btn {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12.5px;
+}
+
+.ts-link-chip-href {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+  color: var(--pt-ink);
+}
+
+.ts-run-link-btn:disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+  background: var(--pt-paper);
+}

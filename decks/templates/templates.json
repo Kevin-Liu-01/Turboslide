@@ -1,0 +1,27 @@
+[
+  {
+    "id": "blank",
+    "name": "Blank",
+    "category": "personal",
+    "description": "One title slide with empty placeholders and the theme's four starter pictures, so Section header, Caption and Closing work on a new presentation.",
+    "cover": "title",
+    "slides": 1,
+    "theme": "gt-ink-paper",
+    "appearance": "light",
+    "brand": {
+      "name": "General Translation",
+      "appearance": "light"
+    }
+  },
+  {
+    "id": "gt-brand",
+    "name": "General Translation brand deck",
+    "category": "work",
+    "description": "The General Translation brand deck as a template: 85 slides in 8 sections in the gt-ink-paper theme, cut from decks/gt-brand at revision 24. deck.create copies deck.json, slides/ and the assets folder named below into decks/<id> with a new id, title and revision 0. The archetypes are the layouts the editor inserts (the New slide arrow, the Layout button, Slide > Apply layout); their documents l...",
+    "cover": "opener-brand",
+    "slides": 85,
+    "theme": "gt-ink-paper",
+    "appearance": "dark",
+    "organisation": true
+  }
+]

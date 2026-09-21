@@ -59,6 +59,25 @@ export type HostingFacts = {
   decksDir: string;
 };
 
+/**
+ * The saved templates across instances (the product round fix round; docs/PRODUCT.md 4.3;
+ * blob-templates.ts): `pull` brings the store's saved templates and the deployment default into
+ * this instance's folder before a read of the index (one head when nothing moved), `push` sends
+ * one saved template folder, or its removal, and the index after a write on this instance
+ * (`change` absent: the index alone, for Use for new presentations). The file and tmp backends
+ * hold their templates in one place and do nothing.
+ */
+export type HostedTemplates = {
+  pull: () => Promise<void>;
+  push: (change?: { id: string; removed?: boolean }) => Promise<void>;
+};
+
+/** The facet of a backend whose folder is the one copy: nothing to move. */
+export const LOCAL_TEMPLATES: HostedTemplates = {
+  async pull() {},
+  async push() {},
+};
+
 export type HostedDecks = {
   readonly kind: StoreKind;
   readonly persistent: boolean;
@@ -88,6 +107,8 @@ export type HostedDecks = {
   assetFile: (deckId: string, relative: string) => Promise<string | null>;
   /** a URL the twin is served from when it is not on this instance; null when there is none */
   assetUrl: (deckId: string, relative: string) => Promise<string | null>;
+  /** the saved templates across instances (HostedTemplates) */
+  readonly templates: HostedTemplates;
   facts: () => HostingFacts;
 };
 
@@ -219,6 +240,7 @@ export function fileDecks(
     async assetUrl() {
       return null;
     },
+    templates: LOCAL_TEMPLATES,
     facts() {
       return factsFor(selection, decksDir, null);
     },

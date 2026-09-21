@@ -150,6 +150,14 @@ const SLIDE_SKIP = new Set(['id', 'schemaVersion', 'kind', 'slots', 'plate']);
 
 function diffSlide(a: Slide, b: Slide): Mutation[] {
   if (a.kind !== b.kind) return [{ op: 'slide.replace', slideId: a.id, slide: cloneJson(b) }];
+  // A content slide whose layout type changed (a split layout converted to a freeform canvas since
+  // the version, or the way back) is replaced whole too: the slot names follow the layout, so a
+  // field by field diff cannot be applied in both directions (its inverse re inserts the canvas's
+  // blocks into `main` while the layout is still `split`, the mechanism the product round's ship
+  // step read on `versions.undo-restore`: "Slot main is not in layout split"); a slide.replace
+  // inverts to a slide.replace with the old slide, valid in either order.
+  if (a.kind === 'content' && b.kind === 'content' && a.layout.type !== b.layout.type)
+    return [{ op: 'slide.replace', slideId: a.id, slide: cloneJson(b) }];
   const out: Mutation[] = fieldDiffs(fields(a), fields(b), SLIDE_SKIP, (path, value, present) => ({
     op: 'slide.set',
     slideId: a.id,
@@ -189,11 +197,14 @@ function sectionsShape(sections: ReadonlyArray<Section>): string {
 export function diffDecks(a: DeckDocument, b: DeckDocument): Mutation[] {
   const out: Mutation[] = [];
 
-  // Manifest fields other than sections, assets, revision and timestamps.
+  // Manifest fields other than sections, assets, revision and timestamps. The brand kit record
+  // is one of them (docs/PRODUCT.md 4.1): a restore of an earlier version takes the kit back
+  // with it, so Version history's row before a kit change restores the colour (the row
+  // brand.colors.version-history-entry; before this the record stayed as it was).
   out.push(
     ...fieldDiffs(
-      { title: a.deck.title, theme: a.deck.theme, defaults: a.deck.defaults },
-      { title: b.deck.title, theme: b.deck.theme, defaults: b.deck.defaults },
+      { title: a.deck.title, theme: a.deck.theme, defaults: a.deck.defaults, brand: a.deck.brand },
+      { title: b.deck.title, theme: b.deck.theme, defaults: b.deck.defaults, brand: b.deck.brand },
       new Set(),
       (path, value, present) => ({ op: 'deck.set', path, ...(present ? { value } : {}) }),
     ),

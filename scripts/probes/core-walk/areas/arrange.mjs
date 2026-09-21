@@ -83,6 +83,9 @@ export const IDS = [
   'arrange.guides.context',
   'arrange.guides.clear',
   'arrange.select-none.menu',
+  /* the product round (docs/PRODUCT.md 8.1) */
+  'arrange.insert.selected-after-menu',
+  'arrange.insert.free-rectangle',
 ];
 
 const HOMES = {
@@ -358,10 +361,18 @@ export async function run(t) {
          `selection.order.front`, model.ts): a row drawn disabled takes no click, which is what
          the 22:01Z run's unchanged z with no snackbar and no reject looks like */
       await t.openMenu('arrange');
-      await t.hoverRow('arrange.order', '[data-control="menu.arrange.order.bringToFront"]');
-      const rows = (await t.menuRows('arrange'))
-        .filter((r) => r.id.startsWith('arrange.order.'))
-        .map((r) => `${r.id.replace('arrange.order.', '')}${r.disabled ? ' (disabled)' : ''}`);
+      /* the rows' enabled state is a reading beside the action: a submenu that shows to neither
+         hover nor click (the product round's gate, both sides) leaves the reading unread and the
+         action below still judges the row */
+      const opened = await t
+        .hoverRow('arrange.order', '[data-control="menu.arrange.order.bringToFront"]')
+        .then(() => true)
+        .catch(() => false);
+      const rows = opened
+        ? (await t.menuRows('arrange'))
+            .filter((r) => r.id.startsWith('arrange.order.'))
+            .map((r) => `${r.id.replace('arrange.order.', '')}${r.disabled ? ' (disabled)' : ''}`)
+        : ['not read: the Order submenu did not open to the hover'];
       await t.closeMenus();
       await t.menuPath('arrange', 'arrange.order', 'arrange.order.bringToFront');
       const z1 = await t.pollUntil(zs, (z) => !same(z, z0), 8000);
@@ -1515,9 +1526,12 @@ export async function run(t) {
     'select a1: Rotate clockwise 90, Cmd+Z; Rotate counter clockwise 90, Cmd+Z',
     'the rotation writes and each Cmd+Z takes it back',
     async () => {
+      /* the Rotate rows are enabled with an object selected: a1 is selected before the rows are
+         looked for (the gate's first runs read them as unreachable with nothing selected) */
+      await rehome();
+      await t.selectObject('a1');
       const r = await t.reachRow('arrange', 'arrange.rotate', 'arrange.rotate.clockwise');
       if (!r.present) return { ok: false, observed: 'Arrange > Rotate is not reachable' };
-      await rehome();
       await t.selectObject('a1');
       await t.menuPath('arrange', 'arrange.rotate', 'arrange.rotate.clockwise');
       const cw = await t
@@ -2232,6 +2246,129 @@ export async function run(t) {
       return {
         ok: chipBefore !== null && handles === 0 && selected >= 2 && after.length === 1,
         observed: `chip "${chipBefore}" -> handles ${handles}; cards selected ${selected} -> ${after.length} (${after.map((x) => x.id).join(',')})`,
+      };
+    },
+  );
+  await t.clearAll();
+  await productRound(t);
+}
+
+/**
+ * The product round's rows (docs/PRODUCT.md section 2 rank 1, 8.1): a new table or chart from a
+ * menu is selected and lands in the free rectangle of the body slot, cascading 40 by 40 sheet px
+ * when the slot is taken. B3 owns the placement (`block.insert` in controller.tsx,
+ * select-after-write.ts); the rows read the selection facts and the stored positions.
+ */
+async function productRound(t) {
+  const overlap = (a, b) =>
+    !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
+  const S = await t
+    .setup('a slide for the insert rows', 'slide.new through the window API', async () => {
+      const id = await t.setupSlide(t.deck.arrangeSlide ?? t.deck.titleSlide, 'blank');
+      t.deck.insertSlide = id;
+      return { ok: Boolean(id), observed: `slide ${id}` };
+    })
+    .then(() => t.deck.insertSlide);
+  await t.clickCard(S);
+  await t.clearAll();
+  await t.step(
+    'arrange.insert.selected-after-menu',
+    'Insert > Table 3 by 3 and type a cell; Insert > Chart > Column; read the selections and the boxes',
+    'the table is selected with its handles; the chart is selected (chip Chart, eight handles) and its box does not overlap the table',
+    async () => {
+      const r = await t.reachRow('insert', 'insert.table');
+      if (!r.present) return { ok: false, observed: 'Insert > Table is not reachable' };
+      const before = await t.objectIds(S);
+      await t.openMenu('insert');
+      await t.hoverRow('insert.table', '[data-control="insert.table.plate"]');
+      const cell = await t.rectOf('[data-control="insert.table.pick.3x3"]');
+      if (!cell) {
+        await t.closeMenus();
+        return { ok: false, observed: 'no 3 by 3 cell in the grid picker' };
+      }
+      const c = t.center(cell);
+      await t.clickAt(c.x, c.y);
+      const table = await t.newObjectAfter(S, before);
+      await t.settled();
+      const tableFacts = table ? await t.selectionFacts(table.id) : null;
+      /* a typed cell, so the table is a seller's and not an empty grid */
+      if (table) {
+        const run = (await t.runsOfBlock(table.id))[0];
+        if (run) {
+          await t.openRun(run).catch(() => undefined);
+          await t.typeHuman('Q3');
+          await t.press('Escape');
+          await t.settled();
+        }
+      }
+      const r2 = await t.reachRow('insert', 'insert.chart', 'insert.chart.column');
+      if (!r2.present) {
+        await t.advancedBack('the insert rows');
+        return { ok: false, observed: 'Insert > Chart > Column is not reachable' };
+      }
+      const before2 = await t.objectIds(S);
+      await t.menuPath('insert', 'insert.chart', 'insert.chart.column');
+      const chart = await t.newObjectAfter(S, before2);
+      await t.settled();
+      const chartFacts = chart ? await t.selectionFacts(chart.id) : null;
+      const tablePos = table ? (await t.blockOf(S, table.id))?.pos : null;
+      const chartPos = chart ? (await t.blockOf(S, chart.id))?.pos : null;
+      const apart = Boolean(tablePos && chartPos && !overlap(tablePos, chartPos));
+      t.deck.insertObjects = [table?.id ?? null, chart?.id ?? null];
+      await t.advancedBack('the insert rows');
+      return {
+        ok:
+          Boolean(table) &&
+          tableFacts.selected &&
+          tableFacts.resize === 8 &&
+          Boolean(chart) &&
+          chartFacts.selected &&
+          chartFacts.resize === 8 &&
+          /chart/i.test(chartFacts.chip ?? '') &&
+          apart,
+        observed: `table ${table ? `${table.id} ${t.posStr(tablePos)} ${t.describeSelection(tableFacts)}` : 'none'}; chart ${chart ? `${chart.id} ${t.posStr(chartPos)} ${t.describeSelection(chartFacts)}` : 'none'}; boxes apart ${apart}`,
+      };
+    },
+  );
+  await t.step(
+    'arrange.insert.free-rectangle',
+    'two blocks fill the body slot (setup writes); Insert > Chart > Bar',
+    'the third insert lands 40 by 40 sheet px from the last object and inside the sheet',
+    async () => {
+      const F = await t.setupSlide(S, 'blank');
+      await t.clickCard(F);
+      await t.clearAll();
+      const first = await t.placeBlock(F, {
+        id: 'fill-a',
+        type: 'shape',
+        shape: 'rectangle',
+        fill: 'plate',
+        pos: { x: 120, y: 120, w: 1360, h: 320 },
+      });
+      const last = await t.placeBlock(F, {
+        id: 'fill-b',
+        type: 'shape',
+        shape: 'rectangle',
+        fill: 'plate',
+        pos: { x: 120, y: 480, w: 1360, h: 320 },
+      });
+      if (!first || !last) return { ok: false, observed: 'the two filling blocks were not placed' };
+      const r = await t.reachRow('insert', 'insert.chart', 'insert.chart.bar');
+      if (!r.present) return { ok: false, observed: 'Insert > Chart > Bar is not reachable' };
+      const before = await t.objectIds(F);
+      await t.menuPath('insert', 'insert.chart', 'insert.chart.bar');
+      const chart = await t.newObjectAfter(F, before);
+      await t.settled();
+      await t.advancedBack('the insert rows');
+      if (!chart) return { ok: false, observed: 'nothing inserted within 20 s' };
+      const p = (await t.blockOf(F, chart.id))?.pos ?? chart.pos;
+      const lastPos = (await t.blockOf(F, 'fill-b'))?.pos ?? last.pos;
+      const dx = p.x - lastPos.x;
+      const dy = p.y - lastPos.y;
+      const inside = p.x >= 0 && p.y >= 0 && p.x + p.w <= 1600 && p.y + p.h <= 900;
+      return {
+        ok: t.near(dx, 40, 2) && t.near(dy, 40, 2) && inside,
+        observed: `the last object at ${t.posStr(lastPos)}; the chart at ${t.posStr(p)} (dx ${t.fmt(dx)}, dy ${t.fmt(dy)}); inside the sheet ${inside}`,
       };
     },
   );

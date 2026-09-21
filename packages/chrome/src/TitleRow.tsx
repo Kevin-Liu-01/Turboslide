@@ -35,6 +35,12 @@ import './TitleRow.css';
  * pending. No star, folder, Meet, Record or Gemini (SPEC 2.0). In compact mode a Show the menus
  * chevron sits at the far right. The row's width never changes when a person joins or a count
  * moves (05 rule 4). New in Turboslide (no Prototemplate source).
+ *
+ * The product round (docs/PRODUCT.md section 2 ranks 25 and 30, section 3.6): the side panel
+ * toggle the bottom bar held sits beside the comments glyph (`title.sidePanel`, the bar itself
+ * left and the stage gained its 32 px); the save words stay hidden on a fresh draft until the
+ * first edit, so a seller never reads Not saved yet before typing; the presence slot carries a
+ * tooltip (PresenceSlot.tsx).
  */
 
 /** "2 minutes ago" from an ISO time and now. */
@@ -229,6 +235,9 @@ function SaveState() {
   if (!isPresent(item, shell.menuContext)) return null;
   const busy = save.state === 'saving' || save.state === 'unsaved';
   const icon = busy ? 'cloud-arrow-up' : 'cloud';
+  /* a fresh draft that nothing has written yet (docs/PRODUCT.md section 2 rank 30; audit-seller
+     32): the cell keeps its width so the clock never moves, and its words wait for the first edit */
+  const untouched = save.draft === true && save.state === 'saved' && !offline && !reconnecting;
   return (
     <button
       type="button"
@@ -237,19 +246,22 @@ function SaveState() {
         save.state !== 'saved' && 'is-busy',
         offline && 'is-offline',
         words === TITLE_ROW.reconnecting && 'is-reconnecting',
+        untouched && 'is-untouched',
       )}
       data-control="deck.saveState"
       data-menu-item={item.id}
       data-state={
         offline ? 'offline' : words === TITLE_ROW.reconnecting ? 'reconnecting' : save.state
       }
+      aria-hidden={untouched ? true : undefined}
+      tabIndex={untouched ? -1 : undefined}
       onClick={() => shell.runItem(item)}
       {...tipProps({ name: words, doc: item.doc })}
     >
       <Icon name={icon} />
       <span className="ts-title-save-words" data-longest={LONGEST_SAVE_WORDS}>
         <span className="ts-title-save-live" aria-live="polite">
-          {words}
+          {untouched ? '' : words}
         </span>
       </span>
     </button>
@@ -466,6 +478,12 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
   const homePath = home.effect?.kind === 'route' ? home.effect.path : '/decks';
   const pending = shell.input.access?.requests?.length ?? 0;
   const commentsPresent = isPresent(comments, shell.menuContext);
+  /* the assistant's entry (docs/PRODUCT.md 6.1): drawn for a writer, where Google draws Ask Gemini */
+  const assist = itemById('title.assist');
+  const assistPresent = isPresent(assist, shell.menuContext);
+  /* the tooltip names the key as the toolbar's do ("Assist, Cmd J"; docs/PRODUCT.md 6.1; pass 2
+     finding 13): tipOf reads the parenthesised chord off the title */
+  const assistKey = tooltipKey(assist.key, shell.platform);
   return (
     <header className="ts-title-row" data-control="title.row">
       <div className="ts-title-l">
@@ -483,6 +501,26 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
       <div className="ts-title-r">
         {/* SPEC-3 0.43: five fixed slots from the first paint, left to right */}
         <PresenceSlot />
+        {/* the Assist button (docs/PRODUCT.md 6.1): the sparkle glyph with the word, a toggle of the
+            Assist panel like the comments glyph; absent for a reader */}
+        <span className="ts-title-slot ts-title-assist-slot" data-control="title.assist.slot">
+          {assistPresent ? (
+            <ToolButton
+              icon="sparkles"
+              title={assistKey === undefined ? assist.label : `${assist.label} (${assistKey})`}
+              label={assist.label}
+              doc={assist.doc ?? ''}
+              pressed={shell.panel === 'assist'}
+              quiet
+              className="ts-title-assist"
+              control="title.assist"
+              menuItem={assist.id}
+              onClick={() =>
+                shell.panel === 'assist' ? shell.closePanel() : shell.runItem(assist)
+              }
+            />
+          ) : null}
+        </span>
         <span className="ts-title-slot ts-title-comments-slot" data-control="title.comments.slot">
           {/* the glyph is a toggle (docs/RETURN.md 4.3; audit-chrome row 24): the first click opens
               the Comments panel with aria-pressed true, the second closes it, as Google's icon does */}
@@ -501,6 +539,24 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
               }
             />
           ) : null}
+        </span>
+        {/* the side panel toggle (docs/PRODUCT.md section 2 rank 25): reopens the last right
+            panel or closes the open one; the bottom bar that held it left */}
+        <span className="ts-title-slot ts-title-panel-slot" data-control="title.sidePanel.slot">
+          <ToolButton
+            icon={shell.panel === null ? 'sidebar' : 'next'}
+            title={shell.panel === null ? 'Show side panel' : 'Hide side panel'}
+            doc={
+              shell.panel === null
+                ? 'Reopens the last panel: Format options, Themes, Comments or Version history'
+                : 'Closes the panel'
+            }
+            pressed={shell.panel !== null}
+            quiet
+            className="ts-title-panel"
+            control="title.sidePanel"
+            onClick={() => (shell.panel === null ? shell.reopenPanel() : shell.closePanel())}
+          />
         </span>
         {/* docs/FOCUS.md 3.2 parks title.inbox: the plate is drawn only while Tools > Advanced tools
             is on. The slot carries `is-empty` while the plate is absent and TitleRow.css collapses

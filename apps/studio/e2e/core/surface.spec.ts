@@ -54,7 +54,8 @@ const PARKED_MENU_ROWS = [
 ];
 /* no toolbar button keeps the switch after the return round (RETURN.md 3.2) */
 const PARKED_TOOLBAR: string[] = [];
-const PARKED_CONTEXT_ROWS = ['format.dropShadow', 'format.altText'];
+/* Alt text returned to the default view in the product round (docs/PRODUCT.md section 5, b2 R1 b) */
+const PARKED_CONTEXT_ROWS = ['format.dropShadow'];
 
 test.beforeAll(async ({ browser }) => {
   ({ context, page } = await ownerContext(browser));
@@ -319,9 +320,11 @@ test(title('surface.parked-blocks-render'), async () => {
   );
   await viewer.close();
   expect(inViewer.every(Boolean), 'every parked block draws in the viewer').toBe(true);
+  /* the PDF row starts its download at once since the product round (section 2 rank 8) */
   const pdf = await download(page, async () => {
     await menuPath(page, 'file', 'file.download', 'file.download.pdf');
-    await ctl(page, 'dialog.download.ok').click();
+    const ok = ctl(page, 'dialog.download.ok');
+    if (await ok.isVisible({ timeout: 1500 }).catch(() => false)) await ok.click();
   });
   expect(pdf.ms).toBeLessThan(30_000);
   expect(pdf.bytes.subarray(0, 5).toString('latin1')).toBe('%PDF-');
@@ -385,11 +388,18 @@ test(title('surface.parked-shortcut-unbound'), async () => {
     }
   };
   await closePanel();
-  /* off: the chord matches nothing */
+  /* Alt text returned to the default view in the product round (docs/PRODUCT.md section 5, b2
+     R1 b): the chord opens Format options with the switch off as well */
   await selectBlock(page, 'g1');
   await page.keyboard.press('Meta+Alt+y');
-  await page.waitForTimeout(1500);
-  expect(await panelOpen(), 'Cmd+Option+Y opens nothing with the switch off').toBe(false);
+  await expect
+    .poll(panelOpen, {
+      timeout: 8000,
+      message:
+        'Cmd+Option+Y opens Format options with the switch off (Alt text is in the default view)',
+    })
+    .toBe(true);
+  await closePanel();
   /* on: the chord runs the row */
   await setAdvanced(page, true);
   await selectBlock(page, 'g1');

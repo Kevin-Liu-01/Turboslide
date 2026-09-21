@@ -4,12 +4,13 @@ import {
   accessRecordSchema,
   capabilitiesForRole,
   legacyAssetKey,
-  newDeckRecord,
   synthesizeLegacyRecord,
 } from '@turboslide/schema/access';
 import type { Capability, Role, Via } from '@turboslide/schema/access';
 import { ConflictError } from '@turboslide/schema/errors';
 import { canonicalJson } from '@turboslide/schema/json';
+import { newHostedDeckRecordWithToken } from '@turboslide/store/access-store';
+import type { MintedGeneralLink } from '@turboslide/store/access-store';
 import {
   blobAccessStore,
   blobIndexStore,
@@ -163,7 +164,8 @@ export async function readStoredAccessFresh(deckId: string): Promise<StoredAcces
 /** How long an instance trusts the index's grants it read for a principal. */
 export const LINK_GRANT_TTL_MS = 5_000;
 
-const grantCache = new Map<string, { grants: LinkGrant[]; at: number }>();
+/* the index's link grants and its display name (b1.md R17), one read per principal per 5 s */
+const grantCache = new Map<string, { grants: LinkGrant[]; name?: string; at: number }>();
 
 /**
  * Records a link grant on the principal's deck index (`users/<principalId>/decks.json`, a `shared`
@@ -190,16 +192,44 @@ export async function linkGrantsFromIndex(
   principalId: string,
   now: number = Date.now(),
 ): Promise<LinkGrant[]> {
+  return (await indexFactsFor(principalId, now)).grants;
+}
+
+/** The index's link grants and display name, read once per principal per 5 s (the grant cache). */
+async function indexFactsFor(
+  principalId: string,
+  now: number = Date.now(),
+): Promise<{ grants: LinkGrant[]; name?: string }> {
   const cached = grantCache.get(principalId);
-  if (cached !== undefined && now - cached.at < LINK_GRANT_TTL_MS) return cached.grants;
+  if (cached !== undefined && now - cached.at < LINK_GRANT_TTL_MS) return cached;
   const index = await (await indexStore()).read(principalId);
   const grants: LinkGrant[] = [];
   for (const row of index.shared) {
     if (row.via !== 'link' || row.linkId === undefined) continue;
     grants.push({ linkId: row.linkId, deckId: row.deckId, role: row.role });
   }
-  grantCache.set(principalId, { grants, at: now });
-  return grants;
+  const facts = { grants, ...(index.name === undefined ? {} : { name: index.name }), at: now };
+  grantCache.set(principalId, facts);
+  return facts;
+}
+
+/**
+ * The display name the principal's deck index carries (b1.md R17): `account.setName` writes the
+ * typed name there beside the record, because the principal store of the blob tier is a file
+ * store per instance and the instance that serves the next presence post has not seen the
+ * record; the index lives on the Blob store every instance reads. Undefined when none was typed.
+ */
+export async function displayNameFromIndex(
+  principalId: string,
+  now: number = Date.now(),
+): Promise<string | undefined> {
+  return (await indexFactsFor(principalId, now)).name;
+}
+
+/** Writes the typed display name onto the principal's deck index (R17) and forgets the cached row. */
+export async function noteDisplayName(principalId: string, name: string): Promise<void> {
+  grantCache.delete(principalId);
+  await (await indexStore()).update(principalId, indexUpdates.name(name));
 }
 
 /** Forgets the cached grants (a test, a hook that knows the index moved). */
@@ -276,14 +306,27 @@ export async function recordNewDeck(
   deckId: string,
   ctx: AuthContext,
   options: { now?: string; store?: AccessStore } = {},
-): Promise<StoredAccess | null> {
+): Promise<(StoredAccess & { general?: MintedGeneralLink }) | null> {
   const owner = creatorOf(ctx);
   if (owner === null) return null;
   const now = options.now ?? new Date().toISOString();
-  const record = newDeckRecord(deckId, owner, legacyAssetKey(deckId), now);
+  /* the deployment's default general access (docs/PRODUCT.md section 1, question 10; build/b7.md
+     R1): a deck an anonymous principal creates starts as Anyone with the link, Editor, with the
+     general link minted in the record (the word is `link`; `open` is the dialog's legacy row,
+     pass 1 finding 1), so Copy link is the co edit path in one click; a signed in account's deck
+     stays restricted. The minted link's token rides the answer once (b7.md FR1), so the page that
+     created the deck can hold the address in the Share dialog's field; the record keeps the hash */
+  const { record, general } = newHostedDeckRecordWithToken(
+    deckId,
+    owner,
+    legacyAssetKey(deckId),
+    now,
+    { anonymousPrincipals: ctx.principal?.kind !== 'account' },
+  );
   const store = options.store ?? (await accessStore());
   try {
-    return await store.write(deckId, record, { ifMatch: null });
+    const stored = await store.write(deckId, record, { ifMatch: null });
+    return general === null ? stored : { ...stored, general };
   } catch (error) {
     if (isAccessPrecondition(error)) return error.current;
     throw error;

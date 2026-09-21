@@ -1514,9 +1514,16 @@ export async function blockDuplicate(
 }
 
 /** Every Text of a slide with the write that changes it: the slide fields, every block's texts (nested included) and the notes. */
-type TextTarget = { text: string; write: (value: string) => Mutation };
+/** One visible text of a slide with the mutation that rewrites it (the notes included). */
+export type TextTarget = { text: string; write: (value: string) => Mutation };
 
-function textTargets(slide: Slide): TextTarget[] {
+/**
+ * Every text Find and replace, the tailoring pass and the assist read on a slide, in document
+ * order: the fixed kinds' fields, every block text (nested blocks addressed through their top
+ * level block), then the notes. Exported for the assist's server module, which addresses the
+ * same texts the product's own replace does (docs/PRODUCT.md 6.2).
+ */
+export function textTargets(slide: Slide): TextTarget[] {
   const out: TextTarget[] = [];
   for (const ref of slideTexts(slide)) {
     out.push({
@@ -1645,6 +1652,225 @@ export async function textReplaceAll(
   }
   const committed = await commit(deps, ctx, input.baseRevision, mutations);
   return { replacements, slideIds: changed, revision: committed.revision };
+}
+
+// ---------------------------------------------------------------------------------------------
+// The tailoring pass (docs/PRODUCT.md section 5; audit-gaps 16; research 07): rename the customer,
+// swap the logo, skip the internal slides, as one write and one undo step, deterministic and
+// without a model call. The Tailor dialog, the CLI (`turboslide tailor`), MCP (`deck_tailor`) and
+// HTTP run this one function; the Assist panel's first starter card opens the dialog.
+
+export type TailorReplacement = { from: string; to: string };
+export type TailorLogo = { assetId: string; replaceAlt?: string };
+export type DeckTailorInput = Rev & {
+  replacements?: TailorReplacement[];
+  logo?: TailorLogo;
+  skip?: string[];
+};
+
+export type TailorPlan = {
+  mutations: Mutation[];
+  /** the text replacements made, over every visible text and the notes */
+  replacements: number;
+  /** the slides whose text changed */
+  slideIds: string[];
+  /** the pictures swapped for the logo */
+  pictures: number;
+  /** the slides skipped by this pass (the ones not skipped already) */
+  skipped: string[];
+  /** how many places each replacement touched, in the input's order, for the dialog's count */
+  counts: { from: string; places: number; slides: number }[];
+};
+
+/** How many times `from` occurs in a slide's texts, case insensitive; the dialog's live count. */
+export function tailorCount(
+  document: DeckDocument,
+  from: string,
+): { places: number; slides: number } {
+  if (from === '') return { places: 0, slides: 0 };
+  let places = 0;
+  let slides = 0;
+  for (const id of slideOrder(document.deck)) {
+    const slide = document.slides[id];
+    if (slide === undefined) continue;
+    let here = 0;
+    for (const target of textTargets(slide)) {
+      const isNotes = target.text === slide.notes && slide.notes !== undefined;
+      here += (
+        isNotes
+          ? replaceInPlain(target.text, from, '', false)
+          : replaceInText(target.text, from, '', false)
+      ).count;
+    }
+    if (here > 0) {
+      places += here;
+      slides += 1;
+    }
+  }
+  return { places, slides };
+}
+
+/** The assets a slide's pictures reference, with the mutation that swaps each one. */
+function pictureTargets(slide: Slide): { assetId: string; write: (assetId: string) => Mutation }[] {
+  const out: { assetId: string; write: (assetId: string) => Mutation }[] = [];
+  if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') {
+    out.push({
+      assetId: slide.picture.asset,
+      write: (assetId) => ({
+        op: 'slide.set',
+        slideId: slide.id,
+        path: '/picture/asset',
+        value: assetId,
+      }),
+    });
+  }
+  const lists: { blocks: Block[] }[] =
+    slide.kind === 'content'
+      ? Object.values(slide.slots).map((blocks) => ({ blocks }))
+      : slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing'
+        ? [{ blocks: slide.plate.blocks }]
+        : [];
+  for (const list of lists) {
+    for (const block of list.blocks) {
+      if ((block.type === 'shot' || block.type === 'picture') && typeof block.asset === 'string') {
+        out.push({
+          assetId: block.asset,
+          write: (assetId) => ({
+            op: 'block.set',
+            slideId: slide.id,
+            blockId: block.id,
+            path: '/asset',
+            value: assetId,
+          }),
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * The pass as mutations over a document, pure (unit tested without a store): the replacements in
+ * order through the same replace Find and replace runs (never inside a link URL or the GT mark),
+ * the logo over every picture whose asset's alt text names the old customer, and a skip on each
+ * named slide that is not skipped yet. A logo without `replaceAlt` is refused until the brand kit
+ * gives the deck a logo slot (docs/PRODUCT.md 4.1, B5a), with the reason in the sentence.
+ */
+export function tailorPlan(document: DeckDocument, input: DeckTailorInput): TailorPlan {
+  const mutations: Mutation[] = [];
+  const changed = new Set<string>();
+  let replacements = 0;
+  const counts: TailorPlan['counts'] = [];
+  const slides = slideOrder(document.deck).map((id) => requireSlide(document, id));
+  // the replacements run over a working copy so a second pair sees the first one's result
+  const working: Record<string, string[]> = {};
+  for (const slide of slides) working[slide.id] = textTargets(slide).map((target) => target.text);
+  for (const pair of input.replacements ?? []) {
+    if (pair.from === '') continue;
+    let places = 0;
+    const touched = new Set<string>();
+    for (const slide of slides) {
+      const targets = textTargets(slide);
+      const texts = working[slide.id] ?? [];
+      targets.forEach((target, i) => {
+        const current = texts[i] ?? target.text;
+        const isNotes = target.text === slide.notes && slide.notes !== undefined;
+        const result = isNotes
+          ? replaceInPlain(current, pair.from, pair.to, false)
+          : replaceInText(current, pair.from, pair.to, false);
+        if (result.count === 0) return;
+        places += result.count;
+        touched.add(slide.id);
+        texts[i] = result.text;
+      });
+    }
+    replacements += places;
+    counts.push({ from: pair.from, places, slides: touched.size });
+    for (const id of touched) changed.add(id);
+  }
+  for (const slide of slides) {
+    const targets = textTargets(slide);
+    const texts = working[slide.id] ?? [];
+    targets.forEach((target, i) => {
+      const next = texts[i];
+      if (next !== undefined && next !== target.text) mutations.push(target.write(next));
+    });
+  }
+  let pictures = 0;
+  if (input.logo !== undefined) {
+    if (input.logo.replaceAlt === undefined) {
+      throw new TypeError(
+        'deck.tailor: the logo on every slide needs the brand kit’s logo slot, which this presentation does not have yet; pass replaceAlt to swap the pictures named after the old customer instead',
+      );
+    }
+    if (document.deck.assets[input.logo.assetId] === undefined) {
+      throw new RangeError(`deck.tailor: no asset "${input.logo.assetId}" in this presentation`);
+    }
+    const needle = input.logo.replaceAlt.toLowerCase();
+    for (const slide of slides) {
+      for (const target of pictureTargets(slide)) {
+        if (target.assetId === input.logo.assetId) continue;
+        const alt = document.deck.assets[target.assetId]?.alt ?? '';
+        if (!alt.toLowerCase().includes(needle)) continue;
+        mutations.push(target.write(input.logo.assetId));
+        pictures += 1;
+        changed.add(slide.id);
+      }
+    }
+  }
+  const skipped: string[] = [];
+  for (const id of input.skip ?? []) {
+    const slide = requireSlide(document, id);
+    if (slide.skip === true) continue;
+    mutations.push({ op: 'slide.set', slideId: slide.id, path: '/skip', value: true });
+    skipped.push(slide.id);
+  }
+  return {
+    mutations,
+    replacements,
+    slideIds: slideOrder(document.deck).filter((id) => changed.has(id)),
+    pictures,
+    skipped,
+    counts,
+  };
+}
+
+export async function deckTailor(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: DeckTailorInput,
+): Promise<{
+  replacements: number;
+  slideIds: string[];
+  pictures: number;
+  skipped: string[];
+  revision: number;
+}> {
+  const current = (await deps.store.read()).document;
+  const plan = tailorPlan(current, input);
+  if (plan.mutations.length === 0) {
+    if (input.baseRevision !== current.deck.revision) {
+      throw new ConflictError(
+        `baseRevision ${input.baseRevision} is stale; the document is at revision ${current.deck.revision}`,
+        { currentRevision: current.deck.revision, current },
+      );
+    }
+    return {
+      replacements: 0,
+      slideIds: [],
+      pictures: 0,
+      skipped: [],
+      revision: current.deck.revision,
+    };
+  }
+  const committed = await commit(deps, ctx, input.baseRevision, plan.mutations);
+  return {
+    replacements: plan.replacements,
+    slideIds: plan.slideIds,
+    pictures: plan.pictures,
+    skipped: plan.skipped,
+    revision: committed.revision,
+  };
 }
 
 /**
@@ -3533,6 +3759,10 @@ export function registerStoreActions(dispatcher: Dispatcher, deps: StoreActionDe
   dispatcher.register(
     'text.replaceAll',
     on<TextReplaceAllInput>((i, c) => textReplaceAll(deps, c, i)),
+  );
+  dispatcher.register(
+    'deck.tailor',
+    on<DeckTailorInput>((i, c) => deckTailor(deps, c, i)),
   );
   dispatcher.register(
     'export.text',

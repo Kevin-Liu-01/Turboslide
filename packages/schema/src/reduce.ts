@@ -166,7 +166,10 @@ function flagRestores(
 
 const FORBIDDEN_SLIDE_PATHS = new Set(['', '/id', '/schemaVersion']);
 const FORBIDDEN_BLOCK_PATHS = new Set(['', '/id']);
-const DECK_SET_ROOTS = new Set(['title', 'theme', 'defaults', 'guides']);
+/* `brand` is the brand kit record (docs/PRODUCT.md 4.1): written by the brand.set and brand.reset
+   handlers alone, whose pointer writes land at the shallowest missing ancestor so one Undo takes
+   one field back; the `deck.set` action's own pointer regex stays closed to it */
+const DECK_SET_ROOTS = new Set(['title', 'theme', 'defaults', 'guides', 'brand']);
 
 /**
  * Applies one mutation in place and returns its inverse. Throws RangeError for an unknown id or
@@ -343,7 +346,25 @@ export function applyMutation(
         throw new TypeError(`block.set cannot write ${mutation.path || 'the block root'}`);
       const existed = hasAt(block, mutation.path);
       const old = existed ? cloneJson(getAt(block, mutation.path)) : undefined;
+      // A field under an object the block does not carry yet (`/typography/family` on a heading
+      // with no typography, the font rows' agent write; docs/PRODUCT.md 4.2) creates the object
+      // the way `deck.set` creates `/defaults`; the inverse then removes the object whole, so undo
+      // returns the block exactly. The rule is one level: a deeper pointer still needs its parents.
+      const segments = mutation.path.split('/').slice(1);
+      const parentPath = segments.length === 2 ? `/${segments[0]}` : null;
+      const createsParent =
+        parentPath !== null && mutation.value !== undefined && !hasAt(block, parentPath);
+      if (createsParent) setAt(block, parentPath, {});
       setAt(block, mutation.path, cloneJson(mutation.value));
+      if (createsParent)
+        return [
+          {
+            op: 'block.set',
+            slideId: mutation.slideId,
+            blockId: mutation.blockId,
+            path: parentPath,
+          },
+        ];
       return [
         {
           op: 'block.set',
@@ -471,7 +492,7 @@ export function applyMutation(
       }
       if (!DECK_SET_ROOTS.has(root)) {
         throw new TypeError(
-          `deck.set writes title, theme, defaults (/defaults/appearance, /defaults/counter, /defaults/notes, /defaults/background) or guides; sections and assets have their own mutations`,
+          `deck.set writes title, theme, defaults (/defaults/appearance, /defaults/counter, /defaults/notes, /defaults/background), guides or brand; sections and assets have their own mutations`,
         );
       }
       const existed = hasAt(document.deck, mutation.path);

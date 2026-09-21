@@ -222,7 +222,125 @@ export function recordDeckOpened(
   }
 }
 
-/** Forgets a deck this browser opened (Delete forever), in both copies. */
+/**
+ * The trashed marker (docs/PRODUCT.md section 2 ranks 15 and 16; audit-seller 15, 16): File >
+ * Move to trash in the editor writes the deck's id and title here before it leaves for /decks, so
+ * the home page drops the deck from its Opened on this device row, shows "Moved to trash" with
+ * Undo within its first seconds, and restores the deck when Undo is pressed. sessionStorage, so
+ * the marker follows one tab and dies with it; the entry leaves the Recent record as well, and
+ * comes back with the facts it had when Undo restores the deck.
+ */
+export const TRASHED_KEY = 'turboslide:trashed';
+
+/** a marker older than this is stale and is removed unread */
+export const TRASHED_MAX_AGE_MS = 15_000;
+
+export type TrashedMarker = { id: string; title: string; at: number; facts?: DeckOpenFacts };
+
+type MarkerStorage = {
+  getItem: (key: string) => string | null;
+  setItem: (key: string, value: string) => void;
+  removeItem: (key: string) => void;
+};
+
+function sessionStore(): MarkerStorage | null {
+  try {
+    return typeof window === 'undefined' ? null : window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+/** Marks a deck as moved to the trash from the editor: the Recent entry leaves and the marker is written. */
+export function markDeckTrashed(
+  deckId: string,
+  title: string,
+  now: number = Date.now(),
+  storage: MarkerStorage | null = sessionStore(),
+): void {
+  let facts: DeckOpenFacts | undefined;
+  try {
+    const entry = readStored()[deckId];
+    if (entry !== undefined && typeof entry !== 'string') {
+      const { at: _at, ...rest } = entry;
+      facts = rest;
+    }
+  } catch {
+    // no record to keep
+  }
+  forgetDeckOpened(deckId);
+  if (storage === null) return;
+  try {
+    const marker: TrashedMarker = { id: deckId, title, at: now, ...(facts ? { facts } : {}) };
+    storage.setItem(TRASHED_KEY, JSON.stringify(marker));
+  } catch {
+    // a refused write: the deck still left the Recent row
+  }
+}
+
+/** The marker when it is young and well formed, removed as it is read; null otherwise. */
+export function takeTrashedMarker(
+  now: number = Date.now(),
+  storage: MarkerStorage | null = sessionStore(),
+): TrashedMarker | null {
+  if (storage === null) return null;
+  try {
+    const raw = storage.getItem(TRASHED_KEY);
+    storage.removeItem(TRASHED_KEY);
+    if (raw === null) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null) return null;
+    const marker = parsed as Record<string, unknown>;
+    if (typeof marker.id !== 'string' || typeof marker.title !== 'string') return null;
+    if (typeof marker.at !== 'number' || now - marker.at > TRASHED_MAX_AGE_MS) return null;
+    /* the facts ride the marker as a stored entry without its time; the same reader checks them */
+    const facts =
+      typeof marker.facts === 'object' && marker.facts !== null
+        ? storedEntryOf({ ...(marker.facts as Record<string, unknown>), at: 'marker' })
+        : null;
+    return {
+      id: marker.id,
+      title: marker.title,
+      at: marker.at,
+      ...(facts !== null && typeof facts !== 'string'
+        ? {
+            facts: {
+              title: facts.title,
+              appearance: facts.appearance,
+              firstSlide: facts.firstSlide,
+              revision: facts.revision,
+            },
+          }
+        : {}),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Forgets a deck this browser opened (Delete forever, Move to trash), in both copies. */
+/**
+ * Drops the trashed marker when it names a deck restored from the trash page: the marker waits
+ * for the home page to read it for up to 15 s, and a restore inside that window would hide the
+ * restored deck on the next visit and offer an Undo for a trash that is no more (the product
+ * round's gate, the two restore rows).
+ */
+export function forgetTrashedMarker(
+  deckId: string,
+  storage: MarkerStorage | null = sessionStore(),
+): void {
+  if (storage === null) return;
+  try {
+    const raw = storage.getItem(TRASHED_KEY);
+    if (raw === null) return;
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed === 'object' && parsed !== null && (parsed as { id?: unknown }).id === deckId)
+      storage.removeItem(TRASHED_KEY);
+  } catch {
+    // an unreadable marker is left for the home page's own reader, which drops it
+  }
+}
+
 export function forgetDeckOpened(deckId: string): void {
   try {
     const map = readStored();

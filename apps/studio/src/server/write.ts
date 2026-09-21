@@ -9,7 +9,12 @@ import type { Issue } from '@turboslide/schema/validate';
 import { loadDeckDir } from '@turboslide/store/file-store';
 import type { HostingFacts } from '@turboslide/store/hosted';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
-import { DEFAULT_BLANK_TITLE } from '@turboslide/store/templates';
+import {
+  DEFAULT_BLANK_TITLE,
+  readDefaultKit,
+  readDefaultTemplateId,
+} from '@turboslide/store/templates';
+import type { DefaultKit } from '@turboslide/store/templates';
 import { toVersion } from '@turboslide/store/versions';
 import { spriteMarkup } from '@turboslide/theme/sprite';
 
@@ -18,6 +23,7 @@ import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
 import {
   createStoredDeck,
+  ensureDecks,
   hasStoredDeck,
   hostingFacts,
   isUnsavedDraft,
@@ -130,6 +136,12 @@ export type EditorDeck = {
   leases: Lease[];
   /** the store this studio runs on, for the banner over a store whose edits do not persist */
   hosting: HostingFacts;
+  /**
+   * The deployment's default kit (docs/PRODUCT.md 4.1, 4.3): the template new presentations start
+   * from, its name for "Reset to <name>", the appearance a new presentation opens in and the kit
+   * record; the Brand kit panel reads it through the shell's input
+   */
+  defaultKit?: DefaultKit;
   /**
    * set on the document /new edits (SPEC 6.1): the store holds nothing under `deckId` until the
    * first write; the title row reads "Not saved yet" and the address moves to /edit/<deckId> once
@@ -297,6 +309,9 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       versions,
       leases,
       hosting: hostingFacts(),
+      /* the deployment's default kit (docs/PRODUCT.md 4.1): the name Reset reads, the default logo;
+         the store's template index is pulled first so a default set on another instance holds */
+      defaultKit: await defaultKitOfCollection(),
       room: { seq: live.seq, tier: selection.tier, notice: selection.notice },
       identity: {
         principalId: resolved.principalId,
@@ -344,20 +359,52 @@ export async function readEditorDeck(input: {
   return JSON.parse(await readEditorDeckFn({ data: JSON.stringify(input) })) as EditorDeck | null;
 }
 
-/** The template a draft is cut from (SPEC 6.1); `deck.create --from blank` copies the same folder. */
-const DRAFT_TEMPLATE = 'blank';
+/**
+ * The template a draft is cut from (SPEC 6.1; docs/PRODUCT.md 4.3): the deployment's default
+ * (decks/templates/default.json, written by Use for new presentations), `blank` when none is set;
+ * the first write's `createStoredDeck` copies the same folder.
+ */
+async function draftTemplateId(): Promise<string> {
+  const decks = await ensureDecks();
+  // the default set on another instance (Use for new presentations) is in the store's templates
+  // index; one head brings it and the template's folder here (blob-templates.ts)
+  await decks.templates.pull();
+  return readDefaultTemplateId(decks.decksDir);
+}
+
+/**
+ * The deployment's default kit for the editor payload (docs/PRODUCT.md 4.1): the store's template
+ * index is pulled first so a default template set on another instance of the deployment (Use for
+ * new presentations, b7.md FR2) names the kit the Reset row and the default logo read.
+ */
+async function defaultKitOfCollection(): Promise<DefaultKit> {
+  const decks = await ensureDecks();
+  await decks.templates.pull();
+  return readDefaultKit(decks.decksDir);
+}
 
 /** A draft's first save at or over this many milliseconds is logged with its phases (C2-F9). */
 const FIRST_SAVE_LOG_MS = 1000;
 
 const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Promise<string> => {
-  const dir = await templateDir(DRAFT_TEMPLATE);
+  const decks = await ensureDecks();
+  await decks.templates.pull();
+  const from = readDefaultTemplateId(decks.decksDir);
+  const dir = await templateDir(from);
   const { document } = loadDeckDir(dir);
   const now = new Date();
   let deckId = newDraftDeckId(now);
   // the four characters make a collision unlikely; a saved deck under the id is skipped anyway
   while (await hasStoredDeck(deckId)) deckId = newDraftDeckId(now);
   const stamp = now.toISOString();
+  const defaultKit = readDefaultKit(decks.decksDir);
+  /* the appearance a new presentation opens in (docs/PRODUCT.md 4.1, section 1's decision;
+     build/b5.md R8): the template's own when its manifest names one, else its kit's, light on
+     General Translation's deployment; a stored deck keeps whatever it has */
+  const defaults =
+    document.deck.defaults?.appearance === undefined
+      ? { ...document.deck.defaults, appearance: defaultKit.appearance }
+      : document.deck.defaults;
   const result: EditorDeck = {
     deckId,
     document: {
@@ -368,6 +415,7 @@ const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Prom
         revision: 0,
         createdAt: stamp,
         updatedAt: stamp,
+        defaults,
       },
       slides: document.slides,
     },
@@ -377,6 +425,7 @@ const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Prom
     versions: [],
     leases: [],
     hosting: hostingFacts(),
+    defaultKit,
     draft: true,
   };
   return JSON.stringify(result);
@@ -436,6 +485,12 @@ export type WriteDeckResult =
       document?: DeckDocument;
       /** this write created the deck in the store: the first save of a draft (SPEC 6.1) */
       created?: true;
+      /**
+       * The general link the new record was minted with, in the clear for this one answer (b7.md
+       * FR1): the page remembers `<origin>/s/<token>` under the link's id, so the Share dialog's
+       * field holds the address at its first open and Copy link copies it without rotating it.
+       */
+      link?: { id: string; token: string };
       /** the stream position of the entry the room admitted (SPEC-3 3.7 c); the revision on the blob tier */
       seq?: number;
     }
@@ -481,6 +536,7 @@ const writeDeckFn = createServerFn({ method: 'POST' })
     const identity = await room.requestIdentity(getRequest());
     sendMintedCookie(identity.setCookie);
     let created = false;
+    let minted: { id: string; token: string } | undefined;
     // the phases of a draft's first save, timed for the server log (the focus round, cycle 2;
     // VERIFICATION C2-F9: a second tab's first write on /new did not move the address within
     // 30 s on the blob tier and nothing named which of the create, the record, the room's open
@@ -494,13 +550,19 @@ const writeDeckFn = createServerFn({ method: 'POST' })
     };
     if (data.write.baseRevision === 0 && (await isUnsavedDraft(data.deckId))) {
       phase('draft check');
-      await createStoredDeck({ name: DEFAULT_BLANK_TITLE, from: DRAFT_TEMPLATE, id: data.deckId });
+      await createStoredDeck({
+        name: DEFAULT_BLANK_TITLE,
+        from: await draftTemplateId(),
+        id: data.deckId,
+      });
       created = true;
       phase('create');
       // the new deck's record (SPEC-3 6.1): restricted, this session its owner, written before
       // the decision below reads it (VERIFICATION-3 finding 4)
       const { recordNewDeck } = await import('./access');
-      await recordNewDeck(data.deckId, identity.ctx);
+      const recorded = await recordNewDeck(data.deckId, identity.ctx);
+      if (recorded?.general !== undefined)
+        minted = { id: recorded.general.linkId, token: recorded.general.token };
       phase('record');
     }
     const decision = await room.decideFor(identity, data.deckId, 'write', 'writeDeck');
@@ -531,6 +593,11 @@ const writeDeckFn = createServerFn({ method: 'POST' })
         );
       }
     }
+    if (admitted.ok) {
+      // the card's capture on save (card-thumb.ts): slide 1 renders once the writes settle
+      const { scheduleCardThumb } = await import('./card-thumb');
+      scheduleCardThumb(data.deckId);
+    }
     let result: WriteDeckResult;
     if (!admitted.ok) {
       // the refusal in the server log with the ops and both revisions (the focus round, cycle 2):
@@ -554,6 +621,7 @@ const writeDeckFn = createServerFn({ method: 'POST' })
         issues: [],
         ...(document === undefined ? {} : { document }),
         ...(created ? { created: true } : {}),
+        ...(created && minted !== undefined ? { link: minted } : {}),
         seq: admitted.seq,
       };
     } else if (admitted.code === 'conflict') {
@@ -577,13 +645,22 @@ const writeDeckFn = createServerFn({ method: 'POST' })
  */
 export const DECK_CREATED_EVENT = 'turboslide:deck-created';
 
-export type DeckCreatedDetail = { deckId: string; revision: number };
+export type DeckCreatedDetail = {
+  deckId: string;
+  revision: number;
+  /** the minted general link, once (FR1); the listener remembers its address for the Share dialog */
+  link?: { id: string; token: string };
+};
 
 /** One Write through the store: the authority behind every editor gesture and window action. */
 export async function writeDeck(input: WriteDeckInput): Promise<WriteDeckResult> {
   const result = JSON.parse(await writeDeckFn({ data: JSON.stringify(input) })) as WriteDeckResult;
   if (result.ok && result.created === true && typeof window !== 'undefined') {
-    const detail: DeckCreatedDetail = { deckId: input.deckId, revision: result.revision };
+    const detail: DeckCreatedDetail = {
+      deckId: input.deckId,
+      revision: result.revision,
+      ...(result.link === undefined ? {} : { link: result.link }),
+    };
     window.dispatchEvent(new CustomEvent(DECK_CREATED_EVENT, { detail }));
   }
   return result;

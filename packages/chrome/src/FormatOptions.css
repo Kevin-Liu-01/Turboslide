@@ -95,3 +95,62 @@
   color: var(--pt-titanium);
   font-size: 12px;
 }
+
+/* The product round (docs/PRODUCT.md 3.2; audit-interface 15): the panel's labels read at 12.5 px
+   in ink-2, and the unit of a number field sits inside the field as a suffix: one hairline box
+   holds the input and the unit, the input itself draws no border. */
+.ts-fo .ts-fo-field-label {
+  font-size: 12.5px;
+  color: var(--pt-ink-2);
+}
+
+.ts-fo .ts-fo-field-box {
+  gap: 0;
+  height: 30px;
+  padding-right: 8px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+}
+
+.ts-fo .ts-fo-field-box input {
+  height: 28px;
+  border: 0;
+  background: none;
+}
+
+.ts-fo .ts-fo-field-box input:focus-visible {
+  outline: none;
+}
+
+.ts-fo .ts-fo-field-box:focus-within {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-fo .ts-fo-field.is-disabled .ts-fo-field-box {
+  border-color: var(--pt-hair-soft);
+}
+
+.ts-fo .ts-fo-field-unit {
+  font-size: 11px;
+  color: var(--pt-ink-2);
+}
+
+/* Padding: one head over the two by two grid */
+.ts-fo-padding {
+  margin: 8px 0;
+}
+
+.ts-fo-padding .ts-fo-head {
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* the caption field of a shot leads the Image options section */
+.ts-fo-caption {
+  margin-bottom: 8px;
+}
+
+.ts-fo-caption input::placeholder {
+  color: var(--pt-titanium);
+}

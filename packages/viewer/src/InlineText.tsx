@@ -13,7 +13,7 @@
 // helpers) runs over a structural node type so inline-text.test.ts pins the round trip in Node;
 // the component owns the DOM. The run toolbar of the editor depth round is gone: Google's text
 // controls sit on the toolbar tail (SPEC 3.2), and the link popover stays on Cmd K.
-import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
+import type { FocusEvent as ReactFocusEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useLayoutEffect, useRef, useState } from 'react';
 
 import { renderParagraphs } from '@turboslide/render/blocks/prompt';
@@ -27,17 +27,23 @@ import { getAt } from '@turboslide/schema/pointer';
 import type { Box } from '@turboslide/schema/render';
 import {
   canonicalText,
+  flagDiffs,
   mergeRuns,
   parseText,
   plainLength,
   serializeRuns,
+  SLIDE_LINK_KEYWORDS,
+  slideLinkTarget,
+  slideLinkUrl,
   spliceText,
 } from '@turboslide/schema/text';
-import type { Run, RunMarks, Text as Markup } from '@turboslide/schema/text';
+import type { Run, RunMarks, SlideLinkKeyword, Text as Markup } from '@turboslide/schema/text';
 
 import {
+  addressRangeAt,
   colorFromCss,
   colorRange,
+  detectLinkBefore,
   linkExtentAt,
   linkOfRange,
   linkRange,
@@ -345,12 +351,18 @@ export function textDiff(from: string, to: string): { start: number; end: number
 }
 
 /**
- * One burst of typing as a write (gslides-parity SPEC 7.2.15; SPEC-3 3.1): `text.splice` of the
+ * One burst of typing as writes (gslides-parity SPEC 7.2.15; SPEC-3 3.1): `text.splice` of the
  * changed plain span at the run's pointer, in plain text offsets with one character per paragraph
  * break, so the admission transforms it against a collaborator's concurrent typing and no
  * character is lost (SPEC-3 3.5). A change of marks alone (the plain text equal, the markup not)
- * is `text.replace` of the markup span, the whole value write of 0.4; the text of a title or
- * statement slide is a field and travels as `slide.set`. Null when nothing changed.
+ * is one `text.mark` per segment whose flags changed, in the same plain offsets, so the store
+ * resolves the range against the marks it holds and the write is transformed like a splice; it
+ * was a `text.replace` of the markup span at raw offsets, which spliced the address of a run the
+ * session did not draw into the middle of the stored link when the document and the editable
+ * disagreed in their marks (VERIFICATION.md "Product round, pass 1" finding 5). A markup change
+ * with no flag behind it (a canonical form the reducer will settle) is the whole value write of
+ * 0.4. The text of a title or statement slide is a field and travels as `slide.set`. Empty when
+ * nothing changed.
  */
 export function textBurstMutation(
   slide: Slide,
@@ -358,7 +370,7 @@ export function textBurstMutation(
   pointer: string,
   from: Markup,
   to: Markup,
-): Mutation | null {
+): Mutation[] {
   // the base is the markup the session last absorbed from a collaborator when one landed since
   // the last burst (SPEC-3 3.5; `absorbedText` put it into the editable together with the
   // unflushed keystrokes), else the Editor's remembered markup; never the slide prop, which lags
@@ -368,38 +380,49 @@ export function textBurstMutation(
   // the old offsets (VERIFICATION.md C3-F8, b7.md FR3.8)
   const key = runKey(slide.id, blockId, pointer);
   const absorbed = takeAbsorbed(key);
-  if (from === to) return null;
+  if (from === to) return [];
   // the document holds `to` once this write lands, or holds it already when nothing is sent:
   // the session's next absorb diffs against it (handedText)
   noteHanded(key, to);
   if (isSlideField(slide, blockId) || blockById(slide, blockId) === undefined) {
-    return textCommitMutation(slide, blockId, pointer, to);
+    const whole = textCommitMutation(slide, blockId, pointer, to);
+    return whole === null ? [] : [whole];
   }
   const base = absorbed ?? from;
-  if (base === to) return null;
+  if (base === to) return [];
   const plainFrom = plainOf(base);
   const plainTo = plainOf(to);
   if (plainFrom !== plainTo) {
     const diff = textDiff(plainFrom, plainTo);
-    return {
-      op: 'text.splice',
-      slideId: slide.id,
-      blockId,
-      path: `/${pointer}`,
-      at: diff.start,
-      remove: diff.end - diff.start,
-      insert: diff.text,
-    };
+    return [
+      {
+        op: 'text.splice',
+        slideId: slide.id,
+        blockId,
+        path: `/${pointer}`,
+        at: diff.start,
+        remove: diff.end - diff.start,
+        insert: diff.text,
+      },
+    ];
   }
-  const diff = textDiff(base, to);
-  return {
-    op: 'text.replace',
+  const edits = flagDiffs(base, to, [0, plainFrom.length]);
+  if (edits.length === 0) {
+    const whole = textCommitMutation(slide, blockId, pointer, to);
+    return whole === null ? [] : [whole];
+  }
+  return edits.map((edit) => ({
+    op: 'text.mark',
     slideId: slide.id,
     blockId,
     path: `/${pointer}`,
-    range: [diff.start, diff.end],
-    text: diff.text,
-  };
+    range: edit.range,
+    edit: {
+      kind: 'marks',
+      ...(edit.set !== undefined ? { set: edit.set } : {}),
+      ...(edit.clear !== undefined ? { clear: [...edit.clear] } : {}),
+    },
+  }));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1216,6 +1239,56 @@ export type InlineTextEndReason =
 /** What the toolbar reads about the caret: the plain range and the marks of the run it sits in (SPEC-2 6.2). */
 export type CaretInfo = { range: [number, number]; marks: RunMarks & { b?: true } };
 
+/** A slide the link popover can point at: its id and the title the filmstrip shows. */
+export type SlideTarget = { id: string; title: string };
+
+/** The four positions of Slides in this presentation, in Google's order, with their labels. */
+export const SLIDE_LINK_POSITIONS: ReadonlyArray<{ value: SlideLinkKeyword; label: string }> = [
+  { value: 'next', label: 'Next slide' },
+  { value: 'previous', label: 'Previous slide' },
+  { value: 'first', label: 'First slide' },
+  { value: 'last', label: 'Last slide' },
+];
+
+/**
+ * The link the popover writes from its two controls (docs/PRODUCT.md section 2 rank 19): a slide
+ * picked in Slides in this presentation wins as a slide link (`#s/<id>`, `#next`); else the URL
+ * field's address completed the way `normalizeLinkInput` does; an empty field with no slide is no
+ * link (null), which the Apply button reads as Remove. Pure, so link-popover.test.ts pins it.
+ */
+export function popoverLink(url: string, slide: string): string | null {
+  if (slide !== '') {
+    return (SLIDE_LINK_KEYWORDS as ReadonlyArray<string>).includes(slide)
+      ? slideLinkUrl({ slide: slide as SlideLinkKeyword })
+      : slideLinkUrl({ slide });
+  }
+  return normalizeLinkInput(url);
+}
+
+/** The select's value for a link the range carries: the slide id or keyword of a slide link, else none. */
+export function popoverSlideOf(link: string | null): string {
+  if (link === null) return '';
+  return slideLinkTarget(link)?.slide ?? '';
+}
+
+/**
+ * True when the extended selection of a Home or End key should stop at the visual line and not
+ * the document (docs/PRODUCT.md section 2 rank 18; audit-seller 18): on macOS the browser reads
+ * Home as the start of the whole editable, so Shift+Home took three lines where Google Slides and
+ * every text field take the line. The session moves the selection to the line boundary itself
+ * through `Selection.modify` for the four keys.
+ */
+export function lineBoundaryKey(
+  key: string,
+  meta: boolean,
+  alt: boolean,
+): { direction: 'backward' | 'forward' } | null {
+  if (meta || alt) return null;
+  if (key === 'Home') return { direction: 'backward' };
+  if (key === 'End') return { direction: 'forward' };
+  return null;
+}
+
 export type InlineTextProps = {
   /** the run element inside the rendered slide; the component makes it editable for its lifetime */
   element: HTMLElement;
@@ -1229,6 +1302,13 @@ export type InlineTextProps = {
   caret?: CaretPlacement;
   /** open the link popover once the session is up (Cmd K on a selected block) */
   autoLink?: boolean;
+  /**
+   * the deck's slides in order, for the popover's Slides in this presentation select (docs/PRODUCT.md
+   * section 2 rank 19); the popover offers the four positions alone when absent
+   */
+  slideTargets?: ReadonlyArray<SlideTarget>;
+  /** link detection on typing (rank 9): on unless the preference turns it off */
+  detectLinks?: boolean;
   /** one burst: the canonical markup after a 400 ms pause since the last keystroke, when it changed */
   onBurst?: (text: Markup) => void;
   /** the session ended with the final markup (unchanged included) and the key that ended it */
@@ -1265,8 +1345,8 @@ export type InlineTextHandle = {
   end: (reason: InlineTextEndReason) => void;
 };
 
-/** The link popover sits this many CSS pixels above the run; below it when the run is at the sheet's top. */
-const POPOVER_H = 32;
+/** The link popover (two rows) sits this many CSS pixels above the run; below it when the run is at the sheet's top. */
+const POPOVER_H = 72;
 const POPOVER_GAP = 6;
 
 /**
@@ -1286,6 +1366,8 @@ export function InlineText({
   multiline = false,
   caret = 'end',
   autoLink = false,
+  slideTargets = [],
+  detectLinks = true,
   onBurst,
   onEnd,
   onListEnter,
@@ -1308,6 +1390,15 @@ export function InlineText({
   const linkField = useRef<HTMLInputElement>(null);
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkValue, setLinkValue] = useState('');
+  /* the popover's Slides in this presentation pick: a keyword, a slide id or none */
+  const [linkSlide, setLinkSlide] = useState('');
+  /* the words the popover links, shown under the Link label so the seller sees the target */
+  const [linkText, setLinkText] = useState('');
+  /* the range carries a link already: the popover shows Remove */
+  const [linkExisting, setLinkExisting] = useState(false);
+  /* the chip under a linked word the caret sits in: its address, with Change and Remove
+     (docs/PRODUCT.md section 2 rank 19) */
+  const [chipHref, setChipHref] = useState<string | null>(null);
   const linkOpenRef = useRef(false);
   linkOpenRef.current = linkOpen;
   /* the plain range the link popover writes on: captured before the field takes the focus and
@@ -1346,8 +1437,8 @@ export function InlineText({
     onListLeave,
     onHandle,
   };
-  const options = useRef({ multiline, caret, autoLink });
-  options.current = { multiline, caret, autoLink };
+  const options = useRef({ multiline, caret, autoLink, detectLinks });
+  options.current = { multiline, caret, autoLink, detectLinks };
 
   const readText = (): Markup => textFromNode(element, { multiline: options.current.multiline });
 
@@ -1385,6 +1476,54 @@ export function InlineText({
     const length = plainLength(text);
     const clamped: [number, number] = [Math.min(range[0], length), Math.min(range[1], length)];
     callbacks.current.onCaret?.({ range: clamped, marks: marksOf(text, clamped) });
+    /* the chip follows a collapsed caret into a linked word and leaves with it; a selection or an
+       open popover shows none */
+    const href =
+      range[0] === range[1] && !linkOpenRef.current
+        ? (linkAtCaret(element)?.getAttribute('href') ?? null)
+        : null;
+    setChipHref((prev) => (prev === href ? prev : href));
+  };
+
+  /** The editable's markup with the white space at the paragraph ends kept (the burst's raw form), for a rewrite that must keep a typed space. */
+  const rawText = (): Markup =>
+    options.current.multiline
+      ? paragraphsFromNode(element)
+          .map((runs) => serializeRuns(runs))
+          .join(BREAK)
+      : serializeRuns(runsFromNode(element));
+
+  /** Rewrites the editable from a markup and puts the selection back at plain offsets. */
+  const rewriteTo = (next: Markup, selection: readonly [number, number] | null) => {
+    element.innerHTML = editableHtml(next, options.current.multiline);
+    element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((mark) => {
+      mark.contentEditable = 'false';
+    });
+    if (selection !== null) restoreSelection(element, options.current.multiline, selection);
+  };
+
+  /**
+   * A collapsed caret at the end of a linked span moves just past the anchor, so the next typed
+   * character, break or space belongs to the sentence and not to the link (the browser continues
+   * an inline element from a caret inside it).
+   */
+  const nudgeCaretOutOfLink = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || !selection.isCollapsed) return;
+    const range = selection.getRangeAt(0);
+    const node = range.startContainer;
+    const el = node instanceof Element ? node : node.parentElement;
+    const link = el?.closest('a') ?? null;
+    if (link === null || !element.contains(link)) return;
+    const probe = document.createRange();
+    probe.setStart(range.startContainer, range.startOffset);
+    probe.setEndAfter(link);
+    if (probe.toString() !== '') return;
+    const after = document.createRange();
+    after.setStartAfter(link);
+    after.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(after);
   };
 
   /**
@@ -1562,6 +1701,7 @@ export function InlineText({
     element.removeAttribute('contenteditable');
     element.removeAttribute('spellcheck');
     element.classList.remove('ts-editing');
+    delete element.dataset.placeholder;
     /* nothing changed since the render: the rendered markup comes back, browser artifacts gone;
        the prompt of an empty placeholder comes back the same way */
     if (text === originalText.current) element.innerHTML = originalHtml.current;
@@ -1589,10 +1729,99 @@ export function InlineText({
     }
     linkTarget.current = range;
     const existing =
-      range === null ? linkAtCaret(element)?.getAttribute('href') : linkOfRange(text, range);
-    setLinkValue(existing ?? '');
+      (range === null ? linkAtCaret(element)?.getAttribute('href') : linkOfRange(text, range)) ??
+      null;
+    const slide = popoverSlideOf(existing);
+    setLinkValue(existing !== null && slide === '' ? existing : '');
+    setLinkSlide(slide);
+    setLinkText(range === null ? '' : plainOf(text).slice(range[0], range[1]));
+    setLinkExisting(existing !== null);
+    setChipHref(null);
     setLinkOpen(true);
     window.setTimeout(() => linkField.current?.focus(), 0);
+  };
+
+  /**
+   * Link detection (docs/PRODUCT.md section 2 rank 9; Google's Tools > Preferences > Link
+   * detection): the token typed before the caret becomes a link as the space or the Enter lands,
+   * when it reads as a web or mail address (marks.ts detectLinkBefore) and carries no link yet.
+   * The typed letters go first as their own burst, then the link travels as a marks only write
+   * (a `text.mark` of the span in plain offsets, textBurstMutation), which the controller's
+   * typing group never joins (typing-key.ts), so one Cmd+Z removes the link and keeps the text.
+   * `afterSpace` reads
+   * the token before the space that has just landed; the caret keeps its place.
+   */
+  const autoLinkBeforeCaret = (afterSpace: boolean): boolean => {
+    if (done.current || !options.current.detectLinks) return false;
+    const selected = selectionOffsets(element, options.current.multiline);
+    if (selected === null || selected[0] !== selected[1]) return false;
+    const raw = rawText();
+    const plain = plainOf(raw);
+    const found = detectLinkBefore(plain, afterSpace ? selected[0] - 1 : selected[0]);
+    if (found === null) return false;
+    const runs = parseText(raw.split(BREAK).join(' '));
+    let offset = 0;
+    for (const run of runs) {
+      const end = offset + run.t.length;
+      if (run.link !== undefined && end > found.range[0] && offset < found.range[1]) return false;
+      offset = end;
+    }
+    flushBurst();
+    const next = canonicalText(linkRange(raw, found.range, found.url));
+    if (next === raw) return false;
+    rewriteTo(next, selected);
+    /* the space the seller typed sits at the end of its line, collapsed by layout, and Chromium
+       drops collapsed white space as insignificant on the next keystroke: it is kept as the
+       no break space Chromium itself writes for a trailing space (runsFromNode reads it back
+       as a space) */
+    if (afterSpace) keepTrailingSpace();
+    flushBurst();
+    callbacks.current.onInput?.();
+    reportCaret();
+    return true;
+  };
+
+  /** The last text node before the caret ends in a space: it becomes a no break space so layout keeps it. */
+  const keepTrailingSpace = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    const range = selection.getRangeAt(0);
+    const node = range.startContainer;
+    if (node.nodeType !== TEXT_NODE) return;
+    const value = node.nodeValue ?? '';
+    if (range.startOffset !== value.length || !value.endsWith(' ')) return;
+    node.nodeValue = `${value.slice(0, -1)}\u00a0`;
+    const after = document.createRange();
+    after.setStart(node, value.length);
+    after.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(after);
+  };
+
+  /** Removes the link of the whole linked span around a range or the caret (the chip's Remove, the popover's Remove). */
+  const removeLinkAt = (range: [number, number] | null) => {
+    if (done.current) return;
+    const text = readText();
+    const selected = range ?? currentRange();
+    if (selected === null) return;
+    /* the whole linked span around the caret or the selection's start; a selection with no link
+       around its start clears the range itself */
+    const extent = linkExtentAt(text, selected[0]);
+    const target: [number, number] | null =
+      extent ??
+      (selected[0] < selected[1] ? [selected[0], Math.min(selected[1], plainLength(text))] : null);
+    if (target === null) return;
+    const next = canonicalText(linkRange(text, target, null));
+    if (next === text) return;
+    rewriteTo(next, selected);
+    parked.current = false;
+    parkedRange.current = null;
+    element.focus({ preventScroll: true });
+    restoreSelection(element, options.current.multiline, selected);
+    setChipHref(null);
+    callbacks.current.onInput?.();
+    reportCaret();
+    scheduleBurst();
   };
 
   /* the deferred teardown (see below) and the listener removal it runs */
@@ -1621,8 +1850,13 @@ export function InlineText({
     originalHtml.current = element.innerHTML;
     originalText.current = readText();
     setHanded(originalText.current);
-    // the prompt of an empty placeholder is not content: it leaves for the session (SPEC 5.4)
-    element.querySelectorAll('[data-prompt]').forEach((prompt) => prompt.remove());
+    // the prompt of an empty placeholder is not content: it leaves for the session (SPEC 5.4); a
+    // caption keeps its wording as the open field's placeholder while the field is empty, since
+    // Add a caption opens the field at once (docs/PRODUCT.md section 2 rank 10; Editor.css)
+    const prompts = [...element.querySelectorAll<HTMLElement>('[data-prompt]')];
+    if (element.tagName === 'FIGCAPTION' && prompts[0] !== undefined)
+      element.dataset.placeholder = prompts[0].textContent ?? '';
+    prompts.forEach((prompt) => prompt.remove());
     element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((mark) => {
       mark.contentEditable = 'false';
     });
@@ -1635,9 +1869,23 @@ export function InlineText({
     if (options.current.autoLink) openLink();
     const onKey = (e: KeyboardEvent) => {
       const meta = e.metaKey || e.ctrlKey;
+      const boundary = lineBoundaryKey(e.key, meta, e.altKey);
+      if (boundary !== null) {
+        /* Home and End, with or without Shift, reach the visual line's ends (rank 18) */
+        const selection = window.getSelection();
+        if (selection && typeof selection.modify === 'function') {
+          e.preventDefault();
+          e.stopPropagation();
+          selection.modify(e.shiftKey ? 'extend' : 'move', boundary.direction, 'lineboundary');
+          reportCaret();
+          return;
+        }
+      }
       if (e.key === 'Enter') {
         e.preventDefault();
         if (meta) return;
+        /* the address typed before the caret becomes a link as Enter lands (rank 9) */
+        if (autoLinkBeforeCaret(false)) nudgeCaretOutOfLink();
         // Shift Enter is the same break as Enter (gslides-parity SPEC 0.10)
         if (options.current.multiline) {
           document.execCommand('insertLineBreak');
@@ -1724,16 +1972,40 @@ export function InlineText({
         e.stopPropagation();
         openLink();
       }
+      /* a printable key at the very end of a linked span lands after the link, as the store's
+         splice places it (schema/text.ts insertPlain; Google Slides): the browser would continue
+         the anchor from a caret inside its last text node */
+      if (!meta && !e.altKey && e.key.length === 1) nudgeCaretOutOfLink();
       /* every key without Cmd, Ctrl or Alt is the run's own (a letter, Backspace, Delete, the
          arrows, Home, End): the browser edits the text and the page's key owners never see it
          (measured on the dev server: the shell's document listener prevented Backspace) */
       if (!meta && !e.altKey) e.stopPropagation();
     };
-    const onInputEvent = () => {
+    const onInputEvent = (e: Event) => {
       markGtInEditable(element);
       callbacks.current.onInput?.();
       scheduleBurst();
       reportCaret();
+      /* a space that has just landed closes the address before it (rank 9) */
+      const input = e as InputEvent;
+      if (input.inputType === 'insertText' && input.data !== null && /\s$/.test(input.data ?? ''))
+        autoLinkBeforeCaret(true);
+    };
+    /* a double click inside the session is the browser's word selection (A1 rule 3); on a dotted
+       address the browser stops at the dot, so the selection is widened to the address (rank 9) */
+    const onDoubleClick = () => {
+      if (done.current) return;
+      window.setTimeout(() => {
+        const selected = selectionOffsets(element, options.current.multiline);
+        if (selected === null) return;
+        const plain = plainOf(rawText());
+        const at =
+          selected[0] === selected[1] ? selected[0] : Math.floor((selected[0] + selected[1]) / 2);
+        const range = addressRangeAt(plain, at);
+        if (range === null || (range[0] === selected[0] && range[1] === selected[1])) return;
+        restoreSelection(element, options.current.multiline, range);
+        reportCaret();
+      }, 0);
     };
     const onSelectionChange = () => {
       if (document.activeElement !== element) return;
@@ -1897,6 +2169,7 @@ export function InlineText({
     };
     element.addEventListener('keydown', onKey);
     element.addEventListener('input', onInputEvent);
+    element.addEventListener('dblclick', onDoubleClick);
     element.addEventListener('blur', onBlur);
     element.addEventListener('focus', onFocus);
     element.addEventListener('paste', onPaste);
@@ -1910,6 +2183,7 @@ export function InlineText({
     listeners.current = () => {
       element.removeEventListener('keydown', onKey);
       element.removeEventListener('input', onInputEvent);
+      element.removeEventListener('dblclick', onDoubleClick);
       element.removeEventListener('blur', onBlur);
       element.removeEventListener('focus', onFocus);
       element.removeEventListener('paste', onPaste);
@@ -1928,28 +2202,34 @@ export function InlineText({
   }, [element]);
 
   /**
-   * The popover's write (docs/FOCUS.md rank 2): the link goes on the run model over the range
-   * `openLink` captured (a link mark through `linkRange`), the editable is rewritten from the
-   * canonical runs with that range selected again, and the next burst carries it as one
-   * `text.replace` of the markup span. An empty field removes the range's link. Never
-   * execCommand('createLink'), which wrote the address as text at the collapsed caret.
+   * The popover's write (docs/FOCUS.md rank 2; docs/PRODUCT.md section 2 rank 19): the link goes
+   * on the run model over the range `openLink` captured (a link mark through `linkRange`), the
+   * editable is rewritten from the canonical runs with that range selected again, and the next
+   * burst carries it as `text.mark` of the range in plain offsets, which the store resolves
+   * against the marks it holds (never a splice of raw markup at the offsets of the editable's
+   * own base: VERIFICATION.md "Product round, pass 1" finding 5). A slide picked in Slides in this
+   * presentation writes the slide link form (`#s/<id>`, `#next`); an empty field with no slide
+   * removes the range's link. Never execCommand('createLink'), which wrote the address as text at
+   * the collapsed caret.
    */
-  const applyLink = () => {
+  const closePopover = () => {
+    setLinkOpen(false);
+    linkTarget.current = null;
+    parked.current = false;
+    parkedRange.current = null;
+  };
+
+  const applyLink = (link?: string | null) => {
     if (!linkOpenRef.current) return;
     setLinkOpen(false);
     if (done.current) return;
-    const url = normalizeLinkInput(linkValue);
+    const url = link === undefined ? popoverLink(linkValue, linkSlide) : link;
     const range = linkTarget.current;
     linkTarget.current = null;
     if (range !== null) {
       const text = readText();
       const next = canonicalText(linkRange(text, range, url));
-      if (next !== text) {
-        element.innerHTML = editableHtml(next, options.current.multiline);
-        element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((m) => {
-          m.contentEditable = 'false';
-        });
-      }
+      if (next !== text) rewriteTo(next, null);
     }
     parked.current = false;
     parkedRange.current = null;
@@ -1960,44 +2240,171 @@ export function InlineText({
     scheduleBurst();
   };
 
-  const onLinkKey = (e: ReactKeyboardEvent<HTMLInputElement>) => {
+  const cancelLink = () => {
+    const range = linkTarget.current;
+    closePopover();
+    element.focus({ preventScroll: true });
+    if (range !== null) restoreSelection(element, options.current.multiline, range);
+    reportCaret();
+  };
+
+  const onLinkKey = (e: ReactKeyboardEvent<HTMLElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       applyLink();
     } else if (e.key === 'Escape') {
       e.preventDefault();
       e.stopPropagation();
-      const range = linkTarget.current;
-      linkTarget.current = null;
-      setLinkOpen(false);
-      parked.current = false;
-      parkedRange.current = null;
-      element.focus({ preventScroll: true });
-      if (range !== null) restoreSelection(element, options.current.multiline, range);
+      cancelLink();
     }
   };
 
-  if (!linkOpen) return null;
-  const above = box[1] * k - POPOVER_H - POPOVER_GAP;
-  const style = {
-    left: Math.max(0, box[0] * k),
-    top: above >= 0 ? above : (box[1] + box[3]) * k + POPOVER_GAP,
+  /* the focus leaving the popover for anything but its own controls applies the field, as the
+     one field popover did (docs/FOCUS.md rank 2); a click on Apply or Remove runs its own handler */
+  const onPopoverBlur = (e: ReactFocusEvent<HTMLDivElement>) => {
+    const to = e.relatedTarget;
+    if (to instanceof Node && popover.current?.contains(to)) return;
+    window.setTimeout(() => {
+      if (!linkOpenRef.current) return;
+      const active = document.activeElement;
+      if (active instanceof Node && popover.current?.contains(active)) return;
+      applyLink();
+    }, 0);
   };
-  return (
-    <div ref={popover} className="ts-link-pop" role="dialog" aria-label="Link" style={style}>
-      <input
-        ref={linkField}
-        className="ts-run-link"
-        type="url"
-        value={linkValue}
-        placeholder="https://"
+
+  const place = (height: number) => {
+    const above = box[1] * k - height - POPOVER_GAP;
+    return {
+      left: Math.max(0, box[0] * k),
+      top: above >= 0 ? above : (box[1] + box[3]) * k + POPOVER_GAP,
+    };
+  };
+
+  if (linkOpen) {
+    const shownText = linkText.length > 48 ? `${linkText.slice(0, 47)}\u2026` : linkText;
+    return (
+      <div
+        ref={popover}
+        className="ts-link-pop"
+        role="dialog"
         aria-label="Link"
-        data-tip="Link"
-        data-control="run.link.href"
-        onChange={(e) => setLinkValue(e.target.value)}
+        data-control="popover.link"
+        style={place(POPOVER_H)}
+        onBlur={onPopoverBlur}
         onKeyDown={onLinkKey}
-        onBlur={applyLink}
-      />
-    </div>
-  );
+      >
+        <div className="ts-link-pop-head">
+          <span className="ts-link-pop-label">Link</span>
+          {shownText !== '' ? (
+            <span className="ts-link-pop-text" data-control="popover.link.text">
+              {shownText}
+            </span>
+          ) : null}
+        </div>
+        <div className="ts-link-pop-row">
+          <input
+            ref={linkField}
+            className="ts-run-link"
+            type="url"
+            value={linkValue}
+            placeholder="https://"
+            aria-label="Link"
+            data-tip="Link"
+            data-control="popover.link.url"
+            autoComplete="off"
+            spellCheck={false}
+            onChange={(e) => {
+              setLinkValue(e.target.value);
+              if (e.target.value !== '') setLinkSlide('');
+            }}
+          />
+          <select
+            className="ts-run-link-slide"
+            value={linkSlide}
+            aria-label="Slides in this presentation"
+            data-tip="Slides in this presentation"
+            data-control="popover.link.slide"
+            onChange={(e) => {
+              setLinkSlide(e.target.value);
+              if (e.target.value !== '') setLinkValue('');
+            }}
+          >
+            <option value="">Slides in this presentation</option>
+            {SLIDE_LINK_POSITIONS.map((position) => (
+              <option key={position.value} value={position.value}>
+                {position.label}
+              </option>
+            ))}
+            {slideTargets.map((slide, index) => (
+              <option key={slide.id} value={slide.id}>
+                {index + 1}. {slide.title}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="ts-run-link-btn is-primary"
+            data-control="popover.link.apply"
+            data-tip="Apply"
+            onClick={() => applyLink()}
+          >
+            Apply
+          </button>
+          <button
+            type="button"
+            className="ts-run-link-btn"
+            data-control="popover.link.remove"
+            data-tip="Remove"
+            aria-disabled={linkExisting ? undefined : true}
+            disabled={!linkExisting}
+            onClick={() => applyLink(null)}
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (chipHref !== null) {
+    const shownHref = chipHref.length > 56 ? `${chipHref.slice(0, 55)}\u2026` : chipHref;
+    const style = {
+      left: Math.max(0, box[0] * k),
+      top: (box[1] + box[3]) * k + POPOVER_GAP,
+    };
+    return (
+      <div
+        className="ts-link-chip"
+        role="group"
+        aria-label="Link"
+        data-control="chip.link"
+        style={style}
+        onMouseDown={(e) => e.preventDefault()}
+      >
+        <span className="ts-link-chip-href" data-control="chip.link.href" title={chipHref}>
+          {shownHref}
+        </span>
+        <button
+          type="button"
+          className="ts-run-link-btn"
+          data-control="chip.link.change"
+          data-tip="Change"
+          onClick={() => openLink()}
+        >
+          Change
+        </button>
+        <button
+          type="button"
+          className="ts-run-link-btn"
+          data-control="chip.link.remove"
+          data-tip="Remove"
+          onClick={() => removeLinkAt(null)}
+        >
+          Remove
+        </button>
+      </div>
+    );
+  }
+
+  return null;
 }

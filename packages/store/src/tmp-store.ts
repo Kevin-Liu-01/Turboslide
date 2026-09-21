@@ -11,7 +11,7 @@ import { dirname, join } from 'node:path';
 
 import { loadDeckDir, openFileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
-import { assetPathWithin, checkRevision, factsFor } from './hosted.ts';
+import { LOCAL_TEMPLATES, assetPathWithin, checkRevision, factsFor } from './hosted.ts';
 import type { SeedSource } from './seed.ts';
 import { eachLimit, isAssetKey, isSafeKey, materializeSeed, seedDeckIds } from './seed.ts';
 import {
@@ -239,6 +239,7 @@ export function tmpDecks(options: HostedOptions): HostedDecks {
     async assetUrl() {
       return null;
     },
+    templates: LOCAL_TEMPLATES,
     facts() {
       return factsFor(options.selection, decksDir, options.seed);
     },

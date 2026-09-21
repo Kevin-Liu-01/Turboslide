@@ -65,9 +65,19 @@ export type TailControl = ToolbarControl & {
   op?: TailOp;
   /** a chevron follows the glyph: a dropdown */
   dropdown?: true;
+  /** the control draws its value and takes no click (the Font control with the catalog parked, PRODUCT.md 3.4) */
+  readOnly?: true;
 };
 
-const FONT_DOC = 'The GT theme sets Inter';
+/**
+ * The Font dropdown (docs/PRODUCT.md 3.4, 4.2): the catalog behind the control. `FONTS_PARKED`
+ * is the ship's switch for the `fonts` feature (8.2, the parks rule): with it false the control is
+ * the dropdown; with it true the tail draws the family as a read only value with the same
+ * tooltip and no chevron, and `chrome.toolbar.fold-any-width` accepts either drawing.
+ */
+export const FONTS_PARKED = false;
+const FONT_DOC = 'The face of the selected text; More fonts lists every face with its licence';
+const FONT_PARKED_DOC = 'The face of the selected text; the font catalog returns in a later ship';
 const NO_FILL_DOC = 'Headings, paragraphs and text boxes have no fill';
 const NO_BORDER_DOC = 'Headings, paragraphs and text boxes have no border; word art has an outline';
 const SELECT_CELLS_DOC = 'Select two or more cells first';
@@ -166,19 +176,40 @@ const MERGE_CONTROLS: TailControl[] = [
   },
 ];
 
+/**
+ * The Font control of the text, shape and table tails (PRODUCT.md 3.4, 4.2): the first control of
+ * each, the dropdown while `fonts` is in the default view and the read only family when parked;
+ * `menu-model.test.ts` asserts both states through the `parked` argument.
+ */
+export function fontControl(parked: boolean = FONTS_PARKED): TailControl {
+  return parked
+    ? {
+        control: 'toolbar.font',
+        label: 'Font',
+        text: true,
+        status: 'now',
+        op: 'font',
+        enabled: 'never',
+        disabledReason: FONT_PARKED_DOC,
+        readOnly: true,
+        dividerBefore: true,
+      }
+    : {
+        control: 'toolbar.font',
+        label: 'Font',
+        text: true,
+        status: 'now',
+        op: 'font',
+        dropdown: true,
+        doc: FONT_DOC,
+        dividerBefore: true,
+      };
+}
+
 /** The text controls of SPEC 3.2 rows 12 to 27 with the round two flips (SPEC-2 4.2). */
 function textControls(options: { table?: boolean } = {}): TailControl[] {
   return [
-    {
-      control: 'toolbar.font',
-      label: 'Font',
-      text: true,
-      status: 'now',
-      op: 'font',
-      enabled: 'never',
-      disabledReason: FONT_DOC,
-      dividerBefore: true,
-    },
+    fontControl(),
     {
       control: 'toolbar.fontSize',
       label: 'Font size',
@@ -367,8 +398,10 @@ const SHAPE_TAIL: TailControl[] = [
 ];
 
 /**
- * 3.4 with SPEC-2 4.2: an image selected; Border weight, Border dash and Reset image apply. The
- * frame controls and Dither are parked (docs/FOCUS.md 3.3); Crop image keeps its button and loses
+ * 3.4 with SPEC-2 4.2: an image selected; Border color, Border weight, Border dash and Reset image
+ * apply. The frame controls returned to the default view in the product round (docs/PRODUCT.md
+ * section 5, the row images.border.drawn: a seller sets a picture border from the tail, where
+ * Google keeps it); Dither stays parked (docs/FOCUS.md 3.3); Crop image keeps its button and loses
  * its Mask arrow with the parked row.
  */
 const IMAGE_TAIL: TailControl[] = [
@@ -377,7 +410,6 @@ const IMAGE_TAIL: TailControl[] = [
     label: 'Border color',
     icon: 'pencil',
     status: 'now',
-    advanced: true,
     op: 'imageBorder',
     dropdown: true,
     dividerBefore: true,
@@ -388,7 +420,6 @@ const IMAGE_TAIL: TailControl[] = [
     label: 'Border weight',
     icon: 'bars-3',
     status: 'now',
-    advanced: true,
     op: 'borderWeight',
     dropdown: true,
     doc: '1, 1.5 or 2',
@@ -398,7 +429,6 @@ const IMAGE_TAIL: TailControl[] = [
     label: 'Border dash',
     icon: 'minus',
     status: 'now',
-    advanced: true,
     op: 'borderDash',
     dropdown: true,
     doc: 'Solid, dot, dash, dash dot, long dash or long dash dot',

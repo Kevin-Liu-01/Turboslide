@@ -1,0 +1,92 @@
+{
+  "name": "drive-pictures",
+  "base": "http://localhost:4412",
+  "ok": 11,
+  "failed": 1,
+  "rows": [
+    {
+      "n": 1,
+      "step": "images.insert.centred-in-body and images.insert.instant-preview: Insert > Image > Upload lands the picture centred in the body slot at the largest size with the 40 px margin, selected; the preview draws within 500 ms with a progress bar",
+      "expected": "centred box, selected, preview",
+      "observed": "shot at {\"x\":426,\"y\":169,\"w\":749,\"h\":562,\"z\":1} (want [426,169,749,562]) landed in 179 ms; preview {\"w\":528.03125,\"h\":396.203125,\"img\":true,\"bar\":true} after 23 ms, gone after landing true; chip Image; snackbar null (the controller's, B3's rank 14)",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "images.upload.failure-snackbar: a text file renamed .png shows the sentence and leaves no placeholder",
+      "expected": "the sentence, nothing drawn",
+      "observed": "snackbar \"The picture could not be uploaded: the file is not a picture\"; placeholder false; objects 1 -> 1",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "the audit’s broken PNG (a valid signature, a damaged chunk) shows the sentence too",
+      "expected": "the server refusal as the sentence",
+      "observed": "snackbar \"The picture could not be uploaded: the file is not a picture\"; placeholder false; objects 1 -> 1",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "images.replace.upload: the toolbar Replace image > Upload swaps the asset, keeps the box and says Picture replaced with Undo; Cmd+Z restores",
+      "expected": "swap, snackbar, undo",
+      "observed": "asset product -> logo; pos kept true; snackbar \"Picture replacedUndo\" action Undo; after Cmd+Z product",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "images.options.picture-sections-only: Format options for a picture lists Size & rotation, Position, Image options (and Adjustments, Alt text) and no text section",
+      "expected": "no text section",
+      "observed": "[{\"id\":\"size\",\"title\":\"Size & rotation\",\"closed\":true},{\"id\":\"position\",\"title\":\"Position\",\"closed\":true},{\"id\":\"picture\",\"title\":\"Image options\",\"closed\":false},{\"id\":\"adjustments\",\"title\":\"Adjustments\",\"closed\":true},{\"id\":\"altText\",\"title\":\"Alt text\",\"closed\":true}]",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "images.caption.add (the panel field): Caption in Image options prompts Add a caption; typing stores the shot’s caption and the figure draws it; Cmd+Z removes it",
+      "expected": "caption stored and drawn",
+      "observed": "placeholder Add a caption; stored \"Team photo, Q3\"; drawn \"Team photo, Q3\"; focus before undo BODY.; revision 6 -> 6; after Undo undefined",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "formatting.alt-text.write-undo: Alt text is in the default view; a description, Tab; the asset carries it; Cmd+Z",
+      "expected": "alt stored and undone",
+      "observed": "drawn alt after Tab \"The Acme team on stage\"; revision 7 -> 7; after Undo \"product\"",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "text.format-options.padding-grid: Text fitting shows one Padding head with Top, Bottom, Left, Right in two by two, the unit inside the field, labels at 12.5 px in ink-2",
+      "expected": "the grid",
+      "observed": "{\"head\":\"Padding\",\"fields\":[\"formatOptions.padding.top\",\"formatOptions.padding.bottom\",\"formatOptions.padding.left\",\"formatOptions.padding.right\"],\"labels\":[{\"text\":\"Top\",\"size\":\"12.5px\",\"color\":\"rgb(185, 188, 195)\"},{\"text\":\"Bottom\",\"size\":\"12.5px\",\"color\":\"rgb(185, 188, 195)\"},{\"text\":\"Left\",\"size\":\"12.5px\",\"color\":\"rgb(185, 188, 195)\"},{\"text\":\"Right\",\"size\":\"12.5px\",\"color\":\"rgb(185, 188, 195)\"}],\"grid\":2,\"unitInside\":true,\"unitText\":\"px\",\"ink2\":\"#b9bcc3\"}",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "text.format-options.remembers-section: collapse Text fitting, close the panel, reopen from the toolbar; Size & rotation open, Text fitting collapsed; Format > Text fitting opens Text fitting alone",
+      "expected": "remembered and alone",
+      "observed": "after collapse [\"size:open\",\"position:open\",\"textFitting:closed\",\"text:open\",\"colour:open\",\"altText:open\"]; reopened [\"size:open\",\"position:open\",\"textFitting:closed\",\"text:open\",\"colour:open\",\"altText:open\"]; from the menu [\"size:closed\",\"position:closed\",\"textFitting:open\",\"text:closed\",\"colour:closed\",\"altText:closed\"]",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "images.transparency.slider: Adjustments > Transparency is a slider with the field beside it; dragging to 40 writes 0.4",
+      "expected": "a range input and 0.4",
+      "observed": "slider 203 by 20 px, field 51 px beside it; transparency 0.39; drawn opacity 0.61",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "images.insert.by-url: an address typed at human speed fetches nothing until a 600 ms pause; Insert centres the picture in the body slot, selected",
+      "expected": "no partial fetch, a centred picture",
+      "observed": "error: locator.waitFor: Timeout 8000ms exceeded.",
+      "ok": false
+    },
+    {
+      "n": 12,
+      "step": "console errors during the pictures drive",
+      "expected": "none",
+      "observed": "none",
+      "ok": true
+    }
+  ]
+}

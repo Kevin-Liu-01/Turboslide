@@ -51,13 +51,9 @@
         {
           "key": "from",
           "flag": "--from",
-          "type": "\"gt-brand\" | \"blank\"",
+          "type": "string",
           "required": true,
-          "description": "'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide",
-          "enum": [
-            "gt-brand",
-            "blank"
-          ]
+          "description": "A template id of the index (template.list): 'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide; a saved template copies its folder"
         },
         {
           "key": "id",
@@ -559,6 +555,154 @@
       "milestone": "GS2"
     },
     {
+      "action": "template.list",
+      "usage": "turboslide template list",
+      "command": [
+        "template",
+        "list"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "P1"
+    },
+    {
+      "action": "template.slides",
+      "usage": "turboslide template slides <id>",
+      "command": [
+        "template",
+        "slides"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "P1"
+    },
+    {
+      "action": "template.create",
+      "usage": "turboslide template create <deckId> <name> --sentence <sentence>",
+      "command": [
+        "template",
+        "create"
+      ],
+      "positionals": [
+        "deckId",
+        "name"
+      ],
+      "options": [
+        {
+          "key": "sentence",
+          "flag": "--sentence",
+          "type": "string",
+          "required": false,
+          "description": "One sentence the gallery card shows; \"Saved from <deck title>\" when absent"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision of the deck the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "template.update",
+      "usage": "turboslide template update <id> <deckId>",
+      "command": [
+        "template",
+        "update"
+      ],
+      "positionals": [
+        "id",
+        "deckId"
+      ],
+      "options": [
+        {
+          "key": "sentence",
+          "flag": "--sentence",
+          "type": "string",
+          "required": false,
+          "description": "A new sentence; the old one when absent"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision of the deck the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "template.rename",
+      "usage": "turboslide template rename <id> <name>",
+      "command": [
+        "template",
+        "rename"
+      ],
+      "positionals": [
+        "id",
+        "name"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "template.delete",
+      "usage": "turboslide template delete <id> --confirm",
+      "command": [
+        "template",
+        "delete"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "confirm",
+          "flag": "--confirm",
+          "type": "true",
+          "required": true,
+          "description": "The caller has confirmed the deletion"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--confirm"
+        }
+      ],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "template.setDefault",
+      "usage": "turboslide template default <id>",
+      "command": [
+        "template",
+        "default"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
       "action": "slide.list",
       "usage": "turboslide slides",
       "command": [
@@ -797,7 +941,7 @@
         {
           "key": "layout",
           "flag": "--layout",
-          "type": "\"title\" | \"opener\" | \"split\" | \"cols\" | \"title-only\" | \"one-column\" | \"statement\" | \"section-description\" | \"mood\" | \"big-number\" | \"blank\" | \"rows\" | \"plain\" | \"table\" | \"figure\" | \"pair\" | \"tiles\" | \"details\" | \"board\" | \"matrix\" | \"closing\"",
+          "type": "\"title\" | \"opener\" | \"split\" | \"cols\" | \"title-only\" | \"one-column\" | \"statement\" | \"section-description\" | \"mood\" | \"big-number\" | \"blank\" | \"subtitle-body\" | \"rows\" | \"plain\" | \"table\" | \"figure\" | \"pair\" | \"tiles\" | \"details\" | \"board\" | \"matrix\" | \"closing\"",
           "required": true,
           "description": "One of the layout list (gslides-parity SPEC 5.2)",
           "enum": [
@@ -812,6 +956,7 @@
             "mood",
             "big-number",
             "blank",
+            "subtitle-body",
             "rows",
             "plain",
             "table",
@@ -2550,7 +2695,7 @@
         {
           "key": "fill",
           "flag": "--fill",
-          "type": "\"ink\" | \"paper\" | \"ink-2\" | \"titanium\" | \"hair\" | \"hair-soft\" | \"plate\" | \"edge\" | \"green\" | \"amber\" | \"red\" | \"blue\" | string | null",
+          "type": "\"ink\" | \"paper\" | \"ink-2\" | \"titanium\" | \"hair\" | \"hair-soft\" | \"plate\" | \"edge\" | \"green\" | \"amber\" | \"red\" | \"blue\" | \"accent\" | string | null",
           "required": false
         },
         {
@@ -2616,13 +2761,13 @@
         {
           "key": "fill",
           "flag": "--fill",
-          "type": "\"ink\" | \"paper\" | \"ink-2\" | \"titanium\" | \"hair\" | \"hair-soft\" | \"plate\" | \"edge\" | \"green\" | \"amber\" | \"red\" | \"blue\" | string | null",
+          "type": "\"ink\" | \"paper\" | \"ink-2\" | \"titanium\" | \"hair\" | \"hair-soft\" | \"plate\" | \"edge\" | \"green\" | \"amber\" | \"red\" | \"blue\" | \"accent\" | string | null",
           "required": false
         },
         {
           "key": "stroke",
           "flag": "--stroke",
-          "type": "\"ink\" | \"paper\" | \"ink-2\" | \"titanium\" | \"hair\" | \"hair-soft\" | \"plate\" | \"edge\" | \"green\" | \"amber\" | \"red\" | \"blue\" | string | null",
+          "type": "\"ink\" | \"paper\" | \"ink-2\" | \"titanium\" | \"hair\" | \"hair-soft\" | \"plate\" | \"edge\" | \"green\" | \"amber\" | \"red\" | \"blue\" | \"accent\" | string | null",
           "required": false
         },
         {
@@ -4186,6 +4331,202 @@
       "custom": [],
       "mutates": false,
       "milestone": "M1"
+    },
+    {
+      "action": "deck.tailor",
+      "usage": "turboslide tailor --replace <from>=<to> --skip <skip> --logo <assetId> --logo-alt <replaceAlt>",
+      "command": [
+        "tailor"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "replacements",
+          "flag": "--replacements",
+          "type": "object[]",
+          "required": false,
+          "description": "Case insensitive, over every visible text and the notes, as Find and replace runs"
+        },
+        {
+          "key": "logo",
+          "flag": "--logo",
+          "type": "object",
+          "required": false
+        },
+        {
+          "key": "skip",
+          "flag": "--skip",
+          "type": "string[]",
+          "required": false,
+          "description": "The slides to skip"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--replace",
+          "template": "<from>=<to>"
+        },
+        {
+          "flag": "--logo",
+          "template": "<assetId>"
+        },
+        {
+          "flag": "--logo-alt",
+          "template": "<replaceAlt>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "assist.propose",
+      "usage": "turboslide assist propose <prompt> --intent <intent> --slides <slideIds>",
+      "command": [
+        "assist",
+        "propose"
+      ],
+      "positionals": [
+        "prompt"
+      ],
+      "options": [
+        {
+          "key": "intent",
+          "flag": "--intent",
+          "type": "\"shorter\" | \"notes\" | \"ask\"",
+          "required": true,
+          "description": "'shorter' rewrites the slide’s text shorter, 'notes' writes speaker notes, 'ask' resolves the prompt to one of the two",
+          "enum": [
+            "shorter",
+            "notes",
+            "ask"
+          ]
+        },
+        {
+          "key": "slideIds",
+          "flag": "--slides",
+          "type": "string[]",
+          "required": false,
+          "description": "The slides the ask is about; the deck’s first slides when absent"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "P1"
+    },
+    {
+      "action": "assist.accept",
+      "usage": "turboslide assist accept < card.json",
+      "command": [
+        "assist",
+        "accept"
+      ],
+      "positionals": [],
+      "stdin": "card",
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "brand.get",
+      "usage": "turboslide brand get",
+      "command": [
+        "brand",
+        "get"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "P1"
+    },
+    {
+      "action": "brand.set",
+      "usage": "turboslide brand set <path> <value>",
+      "command": [
+        "brand",
+        "set"
+      ],
+      "positionals": [
+        "path",
+        "value"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "brand.reset",
+      "usage": "turboslide brand reset [path]",
+      "command": [
+        "brand",
+        "reset",
+        "[path]"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "path",
+          "flag": "--path",
+          "type": "string",
+          "required": false,
+          "description": "One field to remove; the whole record when omitted"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "font.list",
+      "usage": "turboslide fonts list",
+      "command": [
+        "fonts",
+        "list"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "P1"
     },
     {
       "action": "presence.list",

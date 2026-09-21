@@ -1,10 +1,13 @@
 /* The home page (/decks) and the trash (/decks/trash), gslides-parity SPEC 6.2 and 6.4. The page
    grammar (.ts-home, .ts-home-empty) comes from styles.css; this sheet holds Google's three bands
    in the chrome's tokens: the app bar, the template strip, the recent list as cards or rows, the
-   card menu button, the in place rename, the dialog primitive and the trash cards. Lines are 1px
-   and drawn once (SPEC 2.2 line law): the app bar draws --pt-hair under itself, a card draws its
-   own --pt-hair frame, a row --pt-hair-soft under itself. Buttons are the shell's .pt-ib; the one
-   solid button is a dialog's confirming action. Colors are tokens only, radius 0, Inter at 13px. */
+   card menu button, the in place rename and the trash cards; the confirm dialogs are the chrome's
+   one Dialog since the product round (docs/PRODUCT.md 3.3). Lines are 1px and drawn once (SPEC 2.2
+   line law): the app bar draws --pt-hair under itself, a card draws its own --pt-hair frame, a
+   row --pt-hair-soft under itself. Fields are ruled in --pt-field, the focus ring is the one inset
+   ring of tokens.css, a card's plate is the deck's paper with the title in its ink (3.1, 3.6).
+   Buttons are the shell's .pt-ib; the one solid button of a page is its own act: New presentation
+   on the empty list, Empty trash on the trash. Colors are tokens only, radius 0, Inter at 13px. */
 .ts-home-page {
   max-width: 1120px;
   padding-top: 24px;
@@ -120,7 +123,7 @@ html:has(.ts-home-page) {
   width: 100%;
   height: 40px;
   padding: 0 12px 0 38px;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-field);
   border-radius: var(--pt-radius);
   background: var(--pt-plate);
   color: var(--pt-ink);
@@ -176,7 +179,7 @@ html:has(.ts-home-page) {
 .ts-hm-card-open:focus-visible,
 .ts-hm-card-title:focus-visible {
   outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
+  outline-offset: -1px;
 }
 
 .ts-strip-cards {
@@ -273,31 +276,9 @@ html:has(.ts-home-page) {
   width: 30px;
 }
 
+/* the sort select is the one select of tokens.css (.pt-select), with the strip's corner */
 .ts-sort select {
-  height: 32px;
-  padding: 0 28px 0 10px;
-  border: 1px solid var(--pt-hair);
   border-radius: var(--pt-radius);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  font: 13px var(--pt-text);
-  appearance: none;
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--pt-ink-2) 50%),
-    linear-gradient(135deg, var(--pt-ink-2) 50%, transparent 50%);
-  background-position:
-    calc(100% - 15px) 13px,
-    calc(100% - 10px) 13px;
-  background-size:
-    5px 5px,
-    5px 5px;
-  background-repeat: no-repeat;
-  cursor: pointer;
-}
-
-.ts-sort select:focus-visible {
-  outline: 1px solid var(--pt-ink);
-  outline-offset: -1px;
 }
 
 /* cards: 4 up at 1120px, the thumbnail's 16:9 plate, the title row with the menu button */
@@ -344,7 +325,9 @@ html:has(.ts-home-page) {
   object-fit: cover;
 }
 
-/* the plate while the capture has not arrived (or the render failed): the title in the deck's appearance */
+/* the plate while the capture has not arrived (or the render failed): the deck's own paper with
+   the title in its ink (docs/PRODUCT.md 3.6; audit-interface 2), the sheet's two pairs (the GT
+   theme's paper and ink in each appearance), never black on a light page */
 .ts-hm-card-plate {
   display: grid;
   place-items: center;
@@ -355,12 +338,13 @@ html:has(.ts-home-page) {
   font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 14px;
-  color: var(--pt-ink-2);
+  background: #ffffff;
+  color: #070707;
 }
 
 .ts-hm-card-thumb[data-theme='dark'] .ts-hm-card-plate {
-  background: #000;
-  color: #fff;
+  background: #070707;
+  color: #f2f2f0;
 }
 
 .ts-hm-card-body {
@@ -421,11 +405,6 @@ html:has(.ts-home-page) {
   align-self: center;
 }
 
-.ts-hm-card-dots {
-  font-size: 18px;
-  line-height: 1;
-}
-
 /* the in place rename: the title's box becomes the field */
 .ts-hm-card-rename {
   grid-column: 1;
@@ -438,7 +417,7 @@ html:has(.ts-home-page) {
   height: 26px;
   padding: 0 6px;
   border: 1px solid var(--pt-ink);
-  border-radius: var(--pt-radius);
+  border-radius: 0;
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13.5px var(--pt-display);
@@ -464,12 +443,26 @@ html:has(.ts-home-page) {
   border-bottom: 1px solid var(--pt-hair);
 }
 
+/* 32 px rows (docs/PRODUCT.md 3.6; audit-interface 27): the row's 32 px include its hair rule.
+   Chromium sizes a collapsed border cell's `height` as the content box, so `height: 32px` alone
+   measured the row at 33 (VERIFICATION.md product pass 1 finding 10); `border-box` puts the rule
+   inside the 32, and the more button below is 28 px because the 32 px `.pt-ib` base filled the
+   cell and forced the 33 on its own */
 .ts-rows td {
-  padding: 6px 12px;
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 12px;
   border-bottom: 1px solid var(--pt-hair-soft);
   color: var(--pt-ink-2);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* the row's more button inside the 32 px row: 28 px, the 16 px glyph centred as on the card
+   (the selector outranks `.pt-ib.pt-icon`'s 32 px whatever order the sheets load in) */
+.ts-rows .pt-ib.ts-hm-card-more {
+  height: 28px;
+  width: 28px;
 }
 
 .ts-row-title {
@@ -506,134 +499,16 @@ html:has(.ts-home-page) {
   border-color: var(--pt-ink-2);
 }
 
-/* ---- the dialog primitive (SPEC 13.3): one ink frame on paper over a scrim ---- */
-.ts-hm-dialog-scrim {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: var(--pt-scrim);
-  z-index: 30;
-}
-
-.ts-hm-dialog {
-  width: min(480px, calc(100vw - 48px));
-  max-height: calc(100vh - 48px);
-  overflow: auto;
-  padding: 20px;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-ink);
-  font: 13px/1.5 var(--pt-text);
-}
-
-.ts-hm-dialog-title {
-  margin: 0 0 14px;
-  font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
-  font-weight: 500;
-  font-size: 17px;
-  letter-spacing: -0.01em;
-}
-
-.ts-hm-dialog p {
-  margin: 0 0 12px;
-  color: var(--pt-ink-2);
-}
-
-.ts-hm-dialog-field {
+/* the Make a copy dialog's field on /decks: the chrome Dialog's field grammar (Dialog.css) */
+.ts-hm-copy-name {
   display: grid;
   gap: 6px;
-  margin-bottom: 12px;
-  font-size: 12.5px;
-  color: var(--pt-ink-2);
-}
-
-.ts-hm-dialog-field input {
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid var(--pt-hair);
-  border-radius: var(--pt-radius);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  font: 13.5px var(--pt-text);
-  outline: none;
-}
-
-.ts-hm-dialog-field input:focus {
-  border-color: var(--pt-ink);
-}
-
-.ts-hm-dialog-check {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 28px;
-  font-size: 13px;
-  color: var(--pt-ink);
-  cursor: pointer;
-}
-
-.ts-hm-dialog-check input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-}
-
-.ts-hm-dialog-box {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  box-sizing: border-box;
-  border: 1px solid var(--pt-hair);
-  background: var(--pt-paper);
-  flex: none;
-}
-
-.ts-hm-dialog-check:hover .ts-hm-dialog-box {
-  border-color: var(--pt-ink-2);
-}
-
-.ts-hm-dialog-check input:checked ~ .ts-hm-dialog-box {
-  background: var(--pt-ink);
-  border-color: var(--pt-ink);
-}
-
-.ts-hm-dialog-check input:focus-visible ~ .ts-hm-dialog-box {
-  outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
-}
-
-.ts-hm-dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 20px;
-}
-
-.ts-hm-dialog-actions .pt-ib:not(.is-solid) {
-  border-color: var(--pt-hair);
-}
-
-.ts-hm-dialog-actions .pt-ib:disabled {
+  font-size: 12px;
   color: var(--pt-titanium);
-  border-color: var(--pt-hair-soft);
-  cursor: default;
 }
 
-.ts-hm-dialog-actions .pt-ib.is-solid:disabled {
-  background: var(--pt-hair);
-  border-color: transparent;
-  color: var(--pt-paper);
-}
-
-/* ---- the trash (SPEC 6.4): the same cards, two buttons under each ---- */
+/* ---- the trash (SPEC 6.4; docs/PRODUCT.md 3.6): the same cards, two 32 px buttons under each,
+   Delete forever in ink with its glyph, Empty trash the page's one solid button ---- */
 .ts-trash-head {
   display: flex;
   align-items: baseline;
@@ -662,21 +537,15 @@ html:has(.ts-home-page) {
   gap: 8px;
 }
 
-.ts-trash-actions .pt-ib,
+.ts-trash-actions .pt-ib:not(.is-solid),
 .ts-trash-card-actions .pt-ib {
   border-color: var(--pt-hair);
   text-decoration: none;
 }
 
-.ts-trash-actions .pt-ib:hover,
+.ts-trash-actions .pt-ib:not(.is-solid):hover,
 .ts-trash-card-actions .pt-ib:hover {
   border-color: var(--pt-ink-2);
-}
-
-.ts-trash-actions .pt-ib:disabled {
-  color: var(--pt-titanium);
-  border-color: var(--pt-hair-soft);
-  cursor: default;
 }
 
 .ts-trash-card-actions {
@@ -686,7 +555,12 @@ html:has(.ts-home-page) {
 }
 
 .ts-trash-card-actions .pt-ib {
-  height: 28px;
+  height: 32px;
+}
+
+/* the one irreversible act on a card reads in ink with its glyph */
+.ts-trash-card-actions .ts-trash-delete {
+  color: var(--pt-ink);
 }
 
 @media (max-width: 720px) {

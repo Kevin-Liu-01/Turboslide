@@ -60,7 +60,9 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
     expect(byId('toolbar.bulletedList')?.arrow).toBe('format.bulletsNumbering.bulleted');
     expect(byId('toolbar.numberedList')?.arrow).toBe('format.bulletsNumbering.numbered');
     expect(byId('toolbar.borderDash')?.op).toBe('borderDash');
-    expect(byId('toolbar.font')?.enabled).toBe('never');
+    /* the Font dropdown (docs/PRODUCT.md 4.2): live, in Google's position, no longer disabled */
+    expect(byId('toolbar.font')?.dropdown).toBe(true);
+    expect(byId('toolbar.font')?.enabled).toBeUndefined();
   });
 
   it('a shape: Change shape, then the text tail with the text controls enabled (3.3, SPEC-2 0.11)', () => {

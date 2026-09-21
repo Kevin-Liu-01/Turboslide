@@ -10,7 +10,8 @@
 //      most of their run, both visible;
 //   2. junctions: two owners drawing the same seam (gap under 1 px), reported apart because the
 //      fix is different (one owner keeps the line, the other drops its side);
-//   3. border roles: every visible border in chrome draws --pt-hair, --pt-hair-soft or --pt-edge;
+//   3. border roles: every visible border in chrome draws --pt-hair, --pt-hair-soft, --pt-edge or,
+//      since the product round (docs/PRODUCT.md 3.1), --pt-field, the boundary of a field;
 //      --pt-ink only on an element in an active state, and since the return round (docs/RETURN.md
 //      4.1 rule 3) --pt-hair-on-ink, the hairline over a solid ink ground, there too; outlines are
 //      rings in the three roles, ink or paper; since round four (gslides-parity round four, the orchestrator's ruling 1)
@@ -21,7 +22,16 @@
 // A state that did not apply is an infrastructure failure, never a pass (lint-lines.mjs line 113).
 
 export type ChromeRoles =
-  'hair' | 'soft' | 'edge' | 'ink' | 'paper' | 'titanium' | 'select' | 'guide' | 'hairOnInk';
+  | 'hair'
+  | 'soft'
+  | 'edge'
+  | 'ink'
+  | 'paper'
+  | 'titanium'
+  | 'select'
+  | 'guide'
+  | 'hairOnInk'
+  | 'field';
 
 export type ChromeScope = {
   /** Selectors of the shell roots that make an element chrome. */
@@ -155,6 +165,9 @@ export const SHELL_CHROME: ChromeScope = {
        since a role reads one value and --pt-hair already fills `hair`; accepted as a border on
        an element near an active state, the rule --pt-ink has */
     hairOnInk: ['--pt-hair-on-ink'],
+    /* the product round (docs/PRODUCT.md 3.1, the field row): the boundary of a field, a select
+       and a textarea at 3:1 or better, a border role beside the three hairlines */
+    field: ['--pt-field'],
   },
   active:
     '.is-on, .is-active, .is-editing, .is-solid, [aria-pressed="true"], [aria-current], [aria-selected="true"], [aria-expanded="true"]',
@@ -419,7 +432,7 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
       return h !== null && h[0] === c[0] && h[1] === c[1] && h[2] === c[2];
     });
   };
-  const SEAM_ROLES = ['hair', 'soft', 'edge'];
+  const SEAM_ROLES = ['hair', 'soft', 'edge', 'field'];
   const RING_ROLES = ['hair', 'soft', 'edge', 'ink', 'paper'];
   const SIDES = ['Top', 'Bottom', 'Left', 'Right'] as const;
   const prop = (cs: CSSStyleDeclaration, name: string): string => cs.getPropertyValue(name);

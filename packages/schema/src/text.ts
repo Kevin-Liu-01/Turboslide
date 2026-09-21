@@ -685,6 +685,16 @@ export function insertAt(text: Text, at: number, insert: string): Text {
   };
   const template: Run = host === undefined ? { t: '' } : { ...host.run, t: '' };
   delete template.gt;
+  /* typing at the end of a link continues the sentence and not the link (docs/PRODUCT.md section
+     2 rank 9; Google Slides): the letters keep the run's other marks and drop the address unless
+     the run that starts there carries the same link (the caret is inside the link) */
+  if (
+    before !== undefined &&
+    host === before &&
+    before.run.link !== undefined &&
+    (after === undefined || after.run.link !== before.run.link)
+  )
+    delete template.link;
   const pieces = insert.split('\n');
   const paragraph = paragraphOf(at);
   const list = paragraphs[paragraph] ?? [];
@@ -881,6 +891,17 @@ function insertPlain(paragraphs: Run[][], at: number, insert: string, template?:
     const after = runs[index];
     const host = template ?? (before !== undefined && !before.gt ? before : after);
     const flags: Run = host === undefined ? { t: '' } : { ...host, t: '' };
+    /* a pure insertion at the end of a linked run leaves the link (docs/PRODUCT.md section 2 rank
+       9): "acme.com today" keeps "today" plain, as Google does; inside the link (the run that
+       starts at the offset carries the same address) the letters stay linked */
+    if (
+      template === undefined &&
+      before !== undefined &&
+      host === before &&
+      before.link !== undefined &&
+      (after === undefined || after.link !== before.link)
+    )
+      delete flags.link;
     delete flags.gt;
     const pieces = insert.split('\n');
     const head = runs.slice(0, index);
@@ -900,13 +921,44 @@ function insertPlain(paragraphs: Run[][], at: number, insert: string, template?:
 }
 
 /**
+ * The run whose flags a replacement inherits: the run of the first replaced character, its link
+ * dropped when the removal covers the whole linked span around that character (the contiguous
+ * runs of its paragraph that carry the same address). A replacement that starts or ends inside
+ * the span keeps the link, as a caret inside an anchor does; undefined when the text holds no run
+ * at the offset.
+ */
+function replacedRun(text: Text, at: number, remove: number): Run | undefined {
+  const placed = placeRuns(text);
+  const host = placed.find((row) => row.start <= at && at < row.end);
+  if (host === undefined) return undefined;
+  const link = host.run.link;
+  if (link === undefined) return host.run;
+  let start = host.start;
+  let end = host.end;
+  for (const row of [...placed].reverse()) {
+    if (row.paragraph !== host.paragraph || row.run.link !== link) continue;
+    if (row.end === start) start = row.start;
+  }
+  for (const row of placed) {
+    if (row.paragraph !== host.paragraph || row.run.link !== link) continue;
+    if (row.start === end) end = row.end;
+  }
+  if (at > start || at + remove < end) return host.run;
+  const rest: Run = { ...host.run };
+  delete rest.link;
+  return rest;
+}
+
+/**
  * What text.splice writes (SPEC-3 3.1): `remove` plain characters at `at` leave and `insert`
  * lands in their place. A pure insertion takes the flags of the run it continues (the run that
  * ends at the offset, else the one that starts there, the rule of insertAt); a replacement takes
  * the flags of the first character it replaces, as typing over a selection does in an editor, so
- * retyping a bold word keeps it bold. A break inside the removed range joins its two paragraphs
- * and a `\n` in the insertion starts one. Throws RangeError outside the text. The result is
- * canonical.
+ * retyping a bold word keeps it bold; when the removed range covers the whole linked span that
+ * character sits in, the letters drop the link (the editable's anchor leaves with its last
+ * character, so the document and the editor agree; Google's rule too: typing over a selected
+ * link replaces the link). A break inside the removed range joins its two paragraphs and a `\n`
+ * in the insertion starts one. Throws RangeError outside the text. The result is canonical.
  */
 export function spliceText(
   text: Text,
@@ -934,7 +986,7 @@ export function spliceText(
     flags !== undefined
       ? runOfFlags(flags)
       : remove > 0
-        ? placeRuns(text).find((row) => row.start <= at && at < row.end)?.run
+        ? replacedRun(text, at, remove)
         : undefined;
   let paragraphs = remove === 0 ? splitRunsAt(text, []) : deleteRange(text, at, at + remove);
   if (insert !== '') paragraphs = insertPlain(paragraphs, at, insert, replaced);

@@ -1,0 +1,287 @@
+{
+  "base": "https://turboslide-d0zxgtfia-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-21T07:00:29.132Z",
+  "seconds": 139,
+  "counts": {
+    "fixed": 30,
+    "open": 7,
+    "notDriven": 1
+  },
+  "rows": [
+    {
+      "n": 1,
+      "item": 22,
+      "interaction": "/home leads with the seller sentence and Start from a template",
+      "result": "fixed",
+      "observed": "h1 \"Build the pitch, present it and send the link, in one place\"; button {\"text\":\"Start from a template\",\"href\":\"/decks/templates\",\"y\":520}; For agents band top 8257.703125"
+    },
+    {
+      "n": 2,
+      "item": 12,
+      "interaction": "Start from a template opens the gallery page with Your organisation and Blank",
+      "result": "fixed",
+      "observed": "{\"url\":\"/decks/templates\",\"heading\":\"Template gallery\",\"groups\":[{\"id\":\"templates.group.organisation\",\"head\":\"Your organisation\",\"cards\":[{\"id\":\"templates.card.gt-brand\",\"name\":\"General Translation brand deck\",\"cover\":true,\"text\":\"id, title and revision 0. The archetypes are the layouts the editor inserts (the New slide arrow, the Layout button, Slide > Apply layout); their documents l...\"}]},{\"id\":\"templates.group.turboslide\",\"head\":\"Turboslide\",\"cards\":[{\"id\":\"templates.card.blank\",\"name\":\"Blank\",\"cover\":true,\"text\":\"onsBlank1 slideOne title slide with empty placeholders and the theme's four starter pictures, so Section header, Caption and Closing work on a new presentation.\"}]}],\"marked\":[\"templates.card.blank.default\"]}"
+    },
+    {
+      "n": 3,
+      "item": 20,
+      "interaction": "the Blank card opens a light deck; the chrome follows the operating system on a first visit",
+      "result": "fixed",
+      "observed": "chrome data-theme light; sheet data-theme null; deck.info appearance light; url /new"
+    },
+    {
+      "n": 4,
+      "item": 30,
+      "interaction": "no save words before the first edit; the presence slot carries a tooltip",
+      "result": "fixed",
+      "observed": "save words \"\" saveState \"\"; presence tooltip \"CollaboratorsWho is in this presentation now. Nobody else has it open\""
+    },
+    {
+      "n": 5,
+      "item": 25,
+      "interaction": "no bottom bar; the side panel toggle sits in the title row; the stage height",
+      "result": "fixed",
+      "observed": "bottom bar elements 0; title.sidePanel {\"x\":1169.46875,\"y\":5.5,\"w\":32,\"h\":32}; stage {\"x\":38,\"y\":128,\"w\":199,\"h\":111.9375}"
+    },
+    {
+      "n": 6,
+      "item": 0,
+      "interaction": "the title typed at human speed creates the deck",
+      "result": "fixed",
+      "observed": "one click: {\"handles\":10,\"editing\":0}; deck untitled-20260921-ud5f"
+    },
+    {
+      "n": 7,
+      "item": 2,
+      "interaction": "New slide after the title slide is Title and body: one title prompt over one body prompt",
+      "result": "fixed",
+      "observed": "prompts [\"Click to add title\",\"Click to add text\"]; layout split"
+    },
+    {
+      "n": 8,
+      "item": 2,
+      "interaction": "four typed lines land in the body at the body size",
+      "result": "open",
+      "observed": "entered h/text; {\"head\":\"44px\",\"body\":\"22px\",\"bodyText\":\"Click to add text\",\"types\":[\"heading:h/text\",\"paragraph:p1/text\"]}"
+    },
+    {
+      "n": 9,
+      "item": 1,
+      "interaction": "Insert > Table 3 by 3 lands selected",
+      "result": "fixed",
+      "observed": "chip Table; handles 12"
+    },
+    {
+      "n": 10,
+      "item": 1,
+      "interaction": "Insert > Chart > Column lands selected beside the table, not on it",
+      "result": "fixed",
+      "observed": "chip Chart; handles 10; table {\"x\":320,\"y\":218,\"w\":960,\"h\":320,\"z\":2}; chart {\"x\":480,\"y\":578,\"w\":640,\"h\":193,\"z\":3}; overlap false"
+    },
+    {
+      "n": 11,
+      "item": 10,
+      "interaction": "Upload from computer: the picture draws at once, centred in the body slot, selected, no snackbar",
+      "result": "open",
+      "observed": "drawn after 10 ms; progress bar seen true; snackbar null; body slot {\"x\":136.99998787954345,\"y\":129.00001038896278,\"w\":1325.9999376662236,\"h\":48.39061980551862}; picture {\"x\":177,\"y\":301,\"w\":688,\"h\":387,\"z\":1}; centred false; selected 1"
+    },
+    {
+      "n": 12,
+      "item": 10,
+      "interaction": "right click a picture > Add a caption prompts a caption field",
+      "result": "fixed",
+      "observed": "rows [\"Cut⌘X\",\"Copy⌘C\",\"Paste⌘V\",\"Delete⌫\",\"Duplicate⌘D\",\"Order\",\"Rotate\",\"Group⌥⌘G\",\"Center on page\",\"Align\",\"Replace image\",\"Crop image\",\"Add a caption\",\"Reset image\",\"Use on every slide\",\"Image options\",\"Format options\",\"Alt text⌥⌘Y\",\"Comment⌥⌘M\"]; row present true; caption field {\"editing\":\"true\",\"placeholder\":\"Add a caption\",\"text\":\"\"}; stored caption \"Acme product shot\""
+    },
+    {
+      "n": 13,
+      "item": 21,
+      "interaction": "Format options for a picture lists Size & rotation, Position, Image options and no text section",
+      "result": "fixed",
+      "observed": "sections [\"Size & rotation\",\"Position\",\"Image options\",\"Adjustments\",\"Alt text\"]"
+    },
+    {
+      "n": 14,
+      "item": 9,
+      "interaction": "a typed web address becomes a link on the space; one Cmd+Z removes the link and keeps the text",
+      "result": "fixed",
+      "observed": "links [\"https://generaltranslation.com\"]; after Cmd+Z {\"links\":0,\"text\":\"See generaltranslation.com Click to add text\"}"
+    },
+    {
+      "n": 15,
+      "item": 9,
+      "interaction": "a typed email address followed by Enter becomes a mailto link",
+      "result": "fixed",
+      "observed": "links [\"mailto:sales@acme.com\"]"
+    },
+    {
+      "n": 16,
+      "item": 18,
+      "interaction": "Shift+Home selects the current line alone",
+      "result": "fixed",
+      "observed": "selection \"third line of the paragraph\""
+    },
+    {
+      "n": 17,
+      "item": 9,
+      "interaction": "a double click on the address selects the whole address",
+      "result": "not driven",
+      "observed": "no mailto anchor on the sheet"
+    },
+    {
+      "n": 18,
+      "item": 19,
+      "interaction": "Cmd+K on selected text opens the link popover with Link, the URL field, Slides in this presentation, Apply and Remove; Enter applies; the chip",
+      "result": "open",
+      "observed": "popover {\"selectedBefore\":\"Renewal\",\"fieldValueOnOpen\":\"\",\"label\":[],\"url\":true,\"slide\":true,\"options\":[\"Slides in this presentation\",\"Next slide\",\"Previous slide\",\"First slide\",\"Last slide\",\"1. GT pitch for Acme\",\"2. Next steps\",\"3. Slide 3\"],\"apply\":true,\"remove\":true,\"text\":\"LinkRenewalSlides in this presentationNext slidePrevious slideFirst slideLast slide1. GT pitch for Acme2. Next steps3. Slide 34. Slide 45. RenewalApplyRemove\"}; applied https://acme.com/renewal; chip after a click on the word {\"change\":0,\"remove\":0}"
+    },
+    {
+      "n": 19,
+      "item": 4,
+      "interaction": "the first Share asks for a display name",
+      "result": "fixed",
+      "observed": "{\"text\":\"Your name, shown to collaboratorsSkipContinue\",\"field\":true}"
+    },
+    {
+      "n": 20,
+      "item": 3,
+      "interaction": "Share: the access select, the role, one read only address with one Copy link, the sentence, More; the own row reads You",
+      "result": "open",
+      "observed": "dialog {\"mode\":\"link\",\"role\":\"editor\",\"address\":\"\",\"addressReadOnly\":true,\"copies\":1,\"copyWords\":1,\"sentence\":\"Anyone with this link can open and edit this presentation. Pick Viewer before you send it to a customer\",\"more\":true,\"slideshow\":true,\"owner\":null,\"legacy\":false,\"legacyWords\":null,\"height\":414.078125,\"scrolls\":false,\"footer\":[\"Anyone with this link can open and edit this presentation. Pick Viewer before yo\",\"\"]}; share.get at open {\"error\":\"page.evaluate: TypeError: share.get: invalid input at /id: Invalid input: expected string, received undefined\\n    at Obj\"}"
+    },
+    {
+      "n": 21,
+      "item": 3,
+      "interaction": "Copy link copies the field; Open as a slideshow swaps the field to the present link; More opens Settings",
+      "result": "fixed",
+      "observed": "clipboard not readable headless; field https://turboslide-d0zxgtfia-kl01s-projects.vercel.app/s/9CK93F_GrbrKsY6kXkN3dF -> slideshow https://turboslide-d0zxgtfia-kl01s-projects.vercel.app/s/9CK93F_GrbrKsY6kXkN3dF?present=1; more {\"settings\":true,\"people\":true,\"height\":868,\"moreLabel\":\"Settings\"}"
+    },
+    {
+      "n": 22,
+      "item": 8,
+      "interaction": "File > Download > PDF Document starts the download at once; the snackbar reads the progress and the saved name",
+      "result": "fixed",
+      "observed": "dialog shown false; snackbar [\"https://turboslide-d0zxgtfia-kl01s-projects.vercel.app/s/9CK93F_GrbrKsY6kXkN3dF\",\"Preparing your PDF, about 10 seconds for 5 slides\",\"Saved GT pitch for Acme.pdfDetails\"]; suggested GT pitch for Acme.pdf; fetched {\"status\":200,\"name\":\"GT pitch for Acme.pdf\",\"bytes\":178989,\"type\":\"application/pdf\"}"
+    },
+    {
+      "n": 23,
+      "item": 11,
+      "interaction": "with a table on the deck, Microsoft PowerPoint opens Download options with Editable text preselected and the table sentence; the file is named after the title",
+      "result": "fixed",
+      "observed": "dialog {\"native\":\"true\",\"flatten\":\"false\",\"tableSentence\":\"This presentation has a table or a chart. Editable text keeps them editable in PowerPoint\",\"modeSentence\":null,\"estimate\":null,\"dialogText\":\"DownloadThis presentation has a table or a chart. Editable text keeps them editable in PowerPointPerfectEvery slide as a picture with a text layer you can search. Tables and charts are pictures in this modeEditable textText boxes you can edit in PowerPoint; layout within a few pixelsInclude speaker notesInclude skipped slidesMore optionsAppearanceLightDarkBothFontsExactStandardEmbed fontsHeadings as picturesCancelDownload\"}; snackbar after the click [\"Saved GT pitch for Acme (editable).pptxDetails\"]; fetched {\"status\":200,\"name\":\"GT pitch for Acme (editable).pptx\",\"bytes\":377331,\"type\":\"application/vnd.openxmlformats-officedocument.presentationml.presentation\"}; dialog closed after save true"
+    },
+    {
+      "n": 24,
+      "item": 8,
+      "interaction": "File > Download > Download options opens the dialog with the file type, the modes, Include skipped slides and Include speaker notes",
+      "result": "fixed",
+      "observed": "{\"type\":true,\"skipped\":true,\"notes\":true,\"modes\":2}"
+    },
+    {
+      "n": 25,
+      "item": 17,
+      "interaction": "Insert > Image holds Upload from computer and By URL",
+      "result": "fixed",
+      "observed": "[\"Upload from computer\",\"By URL\"]"
+    },
+    {
+      "n": 26,
+      "item": 28,
+      "interaction": "Insert > Table's grid open shows no tooltip plate",
+      "result": "fixed",
+      "observed": "tooltips while the grid is open []"
+    },
+    {
+      "n": 27,
+      "item": 29,
+      "interaction": "Escape on the Help menu returns focus to the stage and leaves no ring on the button",
+      "result": "fixed",
+      "observed": "{\"active\":\"body.\",\"helpFocused\":false,\"helpVisibleRing\":false}"
+    },
+    {
+      "n": 28,
+      "item": 31,
+      "interaction": "Keyboard shortcuts opens on ? without a snackbar, lists Redo once and Common actions begin with New slide",
+      "result": "open",
+      "observed": "error: locator.waitFor: Timeout 3000ms exceeded."
+    },
+    {
+      "n": 29,
+      "item": 24,
+      "interaction": "the Title slide tile shows its sentence in the plate caption row, with your logo, and no floating plate",
+      "result": "fixed",
+      "observed": "caption \"Title slide: your logo, a title and a subtitle\"; floating tooltips 0; {\"tiles\":11,\"firstRow\":4,\"plate\":{\"w\":578,\"h\":414}}"
+    },
+    {
+      "n": 30,
+      "item": 5,
+      "interaction": "the Font dropdown opens on a selected text with search, Brand and the catalog; Roboto applies; Cmd+Z",
+      "result": "fixed",
+      "observed": "disabled false; groups [\"brand\",\"sans\",\"serif\",\"display\",\"mono\"]; rows 27; \"rob\" -> [\"Roboto\",\"Roboto Mono\"]; family after pick Roboto, sans-serif; after Cmd+Z Inter, \"Helvetica Neue\", Arial, sans-serif"
+    },
+    {
+      "n": 31,
+      "item": 6,
+      "interaction": "the toolbar Theme button opens the Brand kit panel with its sections and Reset to General Translation",
+      "result": "fixed",
+      "observed": "opened through toolbar.theme; {\"heads\":[\"Brand kit\",\"Appearance\",\"Logo\",\"Colors\",\"Fonts\",\"Footer\",\"Slide numbers\",\"Frame\",\"Words that never translate\"],\"reset\":\"Reset to General Translation\",\"frameSentences\":[\"Rails: the margins at the sides of every slide\",\"Rules: the thin lines that frame the slide\",\"Crosses: the small marks at the frame’s corners\"]}"
+    },
+    {
+      "n": 32,
+      "item": 0,
+      "interaction": "Version history names You and carries Name this version in its head; the name field is square",
+      "result": "open",
+      "observed": "{\"author\":null,\"authorSize\":null,\"authorColor\":null,\"nameButtons\":[],\"rows\":2,\"fieldRadius\":\"no field drawn\",\"nameButton\":false}"
+    },
+    {
+      "n": 33,
+      "item": 0,
+      "interaction": "the empty Comments panel shows the sentence and the gesture line and no tabs, search or filter",
+      "result": "fixed",
+      "observed": "{\"empty\":\"No comments yetSelect something on a slide, then Insert > Comment (Cmd+Option+M)\",\"gesture\":\"Select something on a slide, then Insert > Comment (Cmd+Option+M)\",\"tabs\":0,\"search\":0,\"filter\":0}"
+    },
+    {
+      "n": 34,
+      "item": 23,
+      "interaction": "the show: the bar up on entry, no white block at the bottom left, the bar fades after about 3 s",
+      "result": "open",
+      "observed": "paper pixels in the bottom left 400 by 120: 27161 (the bar's box covers 12698.125 px of it, bar {\"x\":12,\"y\":848,\"width\":317.453125,\"height\":40,\"top\":848,\"right\":329.453125,\"bottom\":888,\"left\":12}); bar opacity after 3.6 s 0; product-p2-seller-show-entry.png, product-p2-seller-show-after-3s.png"
+    },
+    {
+      "n": 35,
+      "item": 26,
+      "interaction": "the deck's card renders slide 1 within 10 s of the edits, reads Edited today at a locale time and by the display name",
+      "result": "fixed",
+      "observed": "own card (the Opened row) {\"found\":true,\"img\":{\"src\":\"/api/render/title?deck=untitled-20260921-ud5f&theme=light&w=320&r=1\",\"w\":320,\"complete\":true},\"plate\":false,\"when\":\"Opened 1 minute ago\",\"text\":\"GT pitch for AcmeOpened 1 minute ago\"}; grid cards' when lines [\"Opened 1 minute ago\",\"Edited today at 12:02 AM\",\"Edited yesterday at 1:09 PM\"]; list rows heights (grid view now) []; recent sentence \"Presentations this browser opened. On another computer, open a presentation from its link\""
+    },
+    {
+      "n": 36,
+      "item": 16,
+      "interaction": "File > Move to trash shows Moved to trash with Undo on /decks within 3 s; Undo brings the card back",
+      "result": "fixed",
+      "observed": "snackbar \"Moved to trashUndo\" after 21 ms; actions [\"Undo\",\"\"]; card back true"
+    },
+    {
+      "n": 37,
+      "item": 15,
+      "interaction": "after Move to trash the Opened on this device row no longer lists the deck",
+      "result": "fixed",
+      "observed": "listed after trash 0; after a reload 0"
+    },
+    {
+      "n": 38,
+      "item": 0,
+      "interaction": "the trash page: Delete forever confirms in the chrome dialog and the deck is gone",
+      "result": "fixed",
+      "observed": "buttons {\"delete\":32,\"restore\":32,\"deleteColor\":\"rgb(7, 7, 7)\",\"emptyBg\":\"rgb(7, 7, 7)\"}; dialog {\"title\":\"Delete GT pitch for Acme forever?\",\"titleSize\":\"18px\",\"lead\":\"This cannot be undone.\",\"chrome\":true}; /edit answers 404"
+    }
+  ],
+  "consoleErrors": [
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

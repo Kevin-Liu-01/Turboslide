@@ -117,3 +117,63 @@
 .ts-editor .pt-slide [data-slot='plate'] {
   cursor: default;
 }
+
+/* The picture being uploaded (docs/PRODUCT.md section 2 rank 10): the local file drawn at its
+   final box inside the sheet (`.pt-slide`, sheet px; Editor.tsx appends it beside the rendered
+   slide), with a thin progress bar along its bottom edge until the asset lands and the block takes
+   its place. Above the slide's own stacking context so the frame never covers it; one hairline
+   ring; ink over paper for the bar. */
+.ts-editor .pt-slide > .ts-upload-preview {
+  position: absolute;
+  z-index: 3;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  pointer-events: none;
+}
+
+.ts-upload-preview > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ts-upload-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--pt-plate);
+  overflow: hidden;
+}
+
+.ts-upload-progress > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  background: var(--pt-ink);
+  animation: ts-upload-sweep 1.1s linear infinite;
+}
+
+@keyframes ts-upload-sweep {
+  from {
+    left: -40%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+/* the caption field's placeholder while the session is open on an empty caption (Add a caption
+   from the picture's menu opens the field at once, InlineText.tsx): the prompt's wording in the
+   prompt's colour, as a block so the caret sits at the start of the line in Chromium */
+.ts-editor .pt-slide figcaption.ts-editing[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  display: block;
+  color: var(--titanium);
+  pointer-events: none;
+}

@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ExportMenu } from '../ExportMenu';
 import type { ExportMenuProps } from '../ExportMenu';
-import { TIP_ID, hideTooltip } from '../Tooltip';
+import { TIP_DELAY_MS, TIP_ID, hideTooltip } from '../Tooltip';
 
 // The Export menu's focus (this round): opened from the keyboard the dialog focuses its first
 // control, opened with the pointer it takes focus itself so Tab walks its controls next; Escape
@@ -69,7 +69,17 @@ describe('ExportMenu focus', () => {
     if (!bundle) throw new Error('no bundle button');
     expect(bundle.getAttribute('data-tip')).toBe('Download deck bundle');
     expect(bundle.hasAttribute('title')).toBe(false);
+    /* inside a dialog a tooltip shows on hover alone, never on keyboard focus (docs/PRODUCT.md
+       3.1.1; audit-interface 4): the focus shows nothing, the pointer shows the sentence */
+    hideTooltip();
     fireEvent.focus(bundle);
+    expect(document.getElementById(TIP_ID)?.hidden ?? true).toBe(true);
+    vi.useFakeTimers();
+    fireEvent.mouseEnter(bundle);
+    act(() => {
+      vi.advanceTimersByTime(TIP_DELAY_MS);
+    });
+    vi.useRealTimers();
     expect(document.getElementById(TIP_ID)?.querySelector('.pt-tip-doc')?.textContent).toMatch(
       /^Runs deck\.pack/,
     );

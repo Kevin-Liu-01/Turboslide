@@ -1,5 +1,5 @@
 {
-  "$comment": "Vercel WAF custom rules of the third Google Slides parity round (docs/gslides-parity/SPEC-3.md 0.25, 8.3, 11.5 R0 and R8; research-3/04 7.4, research-3/10 3.3). One entry per rule R1 to R21 plus R16b and the CLI bypass. `value` is the rule as PATCH /v1/security/firewall/config `rules.insert` takes it (name, description, active, conditionGroup, action), in log mode: a rate limit rule counts and logs (`rateLimit.action: log`), a challenge or deny rule logs (`mitigate.action: log`). `enforce` is the `action` object the R8 flip writes after the log week. Counters are per IP and per region (about a third under the intended global number, counted again in the application, SPEC-3 8.3). The integrator applies this file to the project `turboslide` through the API in log mode; nothing here is applied by a builder. Field spelling follows the vercel CLI 58 `firewall rules add --json` form (build-3/b4.md records the check). On a deployment without REDIS_URL and without the Upstash pair the application quotas of apps/studio/src/server/ratelimit.ts count per function instance and never reach a limit (VERIFICATION-3 finding 17), so these rules are the only limits that hold across instances, and only after their flip from log mode to their action; a rule whose action is 429 (R1, R2, R5, R6, R10, R12 to R15, R16b, R17, R18, R20) may be flipped before the deny and challenge rules finish the log week.",
+  "$comment": "Vercel WAF custom rules of the third Google Slides parity round (docs/gslides-parity/SPEC-3.md 0.25, 8.3, 11.5 R0 and R8; research-3/04 7.4, research-3/10 3.3). One entry per rule R1 to R22 plus R16b and the CLI bypass (R22 is the product round’s assist route, docs/PRODUCT.md 6.3, not yet applied to the project: the integrator applies it in log mode at the ship as the others were). `value` is the rule as PATCH /v1/security/firewall/config `rules.insert` takes it (name, description, active, conditionGroup, action), in log mode: a rate limit rule counts and logs (`rateLimit.action: log`), a challenge or deny rule logs (`mitigate.action: log`). `enforce` is the `action` object the R8 flip writes after the log week. Counters are per IP and per region (about a third under the intended global number, counted again in the application, SPEC-3 8.3). The integrator applies this file to the project `turboslide` through the API in log mode; nothing here is applied by a builder. Field spelling follows the vercel CLI 58 `firewall rules add --json` form (build-3/b4.md records the check). On a deployment without REDIS_URL and without the Upstash pair the application quotas of apps/studio/src/server/ratelimit.ts count per function instance and never reach a limit (VERIFICATION-3 finding 17), so these rules are the only limits that hold across instances, and only after their flip from log mode to their action; a rule whose action is 429 (R1, R2, R5, R6, R10, R12 to R15, R16b, R17, R18, R20, R22) may be flipped before the deny and challenge rules finish the log week.",
   "version": 1,
   "project": "turboslide",
   "mode": "log",
@@ -1211,6 +1211,53 @@
       "id": "rule_r21_stream_opens_per_client_fingerprint_kINVgf"
     },
     {
+      "key": "R22",
+      "value": {
+        "name": "R22 assist per IP",
+        "description": "docs/PRODUCT.md 6.3 R22: /api/assist 30 per 60 s per IP; a seller asks a few times a minute, a script does not. The application rows (6 a minute per deck, 20 a day anonymous) hold across instances only with Upstash; until then this rule is the limit",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/assist"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 30,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 30,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
       "key": "bypass-cli",
       "value": {
         "name": "Bypass managed rules for the CLI and MCP clients on the agent routes",
@@ -1306,6 +1353,7 @@
     "R15",
     "R20",
     "R21",
+    "R22",
     "R10",
     "R1",
     "R16b",

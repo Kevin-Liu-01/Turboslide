@@ -84,6 +84,12 @@ export const IDS = [
   'slides.notes.view-menu-toggle',
   'slides.context.empty-canvas',
   'slides.numbers.apply',
+  /* the product round (docs/PRODUCT.md 8.1) */
+  'slides.layout.title-and-body-single',
+  'slides.layout.subtitle-prompt',
+  'slides.layout.new-slide-inherits',
+  'slides.layout.tile-sentences',
+  'slides.import.none-preselected',
 ];
 
 const LAYOUTS = [
@@ -1021,7 +1027,7 @@ export async function run(t) {
         if ((await t.activeSlide()) !== L) await t.clickCard(L);
         await t.tailControl('toolbar.layout');
         await t.waitControl('layout.apply.plate', 8000);
-        await t.clickControl(`layout.apply.${layout}`);
+        await t.pickLayout(`layout.apply.${layout}`);
         const got = await t.pollUntil(
           () => layoutOf(L),
           (l) => l === layout,
@@ -1111,7 +1117,7 @@ export async function run(t) {
         await t.clearAll();
         await t.tailControl('toolbar.layout');
         await t.waitControl('layout.apply.plate', 8000);
-        await t.clickControl(`layout.apply.${layout}`);
+        await t.pickLayout(`layout.apply.${layout}`);
         await t.pollUntil(
           () => layoutOf(fresh),
           (l) => l === layout,
@@ -1147,7 +1153,7 @@ export async function run(t) {
         await t.clearAll();
         await t.tailControl('toolbar.layout');
         await t.waitControl('layout.apply.plate', 8000);
-        await t.clickControl(`layout.apply.${layout}`);
+        await t.pickLayout(`layout.apply.${layout}`);
         await t.pollUntil(
           () => layoutOf(fresh),
           (l) => l === layout,
@@ -1481,8 +1487,17 @@ export async function run(t) {
         await t.sleep(250);
         return counter();
       };
-      const storedMode = async () =>
-        (await t.invoke('deck.info').catch(() => null))?.defaults?.counter ?? 'absent (on)';
+      /* the dialog writes the brand kit's Slide numbers since the product round (docs/PRODUCT.md
+         4.1; the older defaults.counter is the fallback the schema still reads) */
+      const storedMode = async () => {
+        const info = await t.invoke('deck.info').catch(() => null);
+        const kit = info?.brand?.counter;
+        if (kit !== undefined && (kit.show !== undefined || kit.skipTitle !== undefined)) {
+          if (kit.show === false) return 'off';
+          return kit.skipTitle === true ? 'skip-title' : 'on';
+        }
+        return info?.defaults?.counter ?? 'absent (on)';
+      };
       const storedSlideCounter = async (id) => (await t.slideJson(id)).counter ?? null;
       const inShow = async () => {
         await t.clickControl('present.open');
@@ -1619,4 +1634,572 @@ export async function run(t) {
     },
   );
   t.deck.layoutSlide = L;
+  await productRound(t);
+}
+
+/**
+ * The product round's rows (docs/PRODUCT.md section 2 ranks 2 and 24, 4.3, 8.1): the Title and
+ * body layout with one title over one body, the subtitle prompt of the 4/8 split, New slide
+ * inheriting the current layout, the layout plate's caption row, and Import slides with nothing
+ * preselected. B3 owns the layouts and the dialog, B1 the plate's caption.
+ */
+async function productRound(t) {
+  const { page, BASE } = t;
+  const T = t.deck.titleSlide;
+  const layoutOf = async (id) => {
+    const s = await t.slideJson(id);
+    return s.template ?? s.kind ?? s.layout ?? null;
+  };
+  const prompts = () =>
+    page.evaluate(() =>
+      [
+        ...document.querySelectorAll(
+          '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-prompt]',
+        ),
+      ]
+        .filter((el) => el.getClientRects().length > 0)
+        .map((el) => el.textContent?.trim() ?? ''),
+    );
+  const orderOf = (n) => t.pollUntil(t.slideOrder, (o) => o.length === n, 20_000);
+  const newSlideFrom = async (card) => {
+    await t.clearAll();
+    await t.clickCard(card);
+    const before = await t.slideOrder();
+    await t.clickControl('toolbar.newSlide');
+    const order = await orderOf(before.length + 1);
+    const id = order.find((x) => !before.includes(x)) ?? null;
+    if (id) await t.pollUntil(t.activeSlide, (a) => a === id, 6000).catch(() => undefined);
+    await t.settled();
+    return id;
+  };
+  /** Removes a slide the rows added, through the window API (a setup write). */
+  const dropSlide = async (id) => {
+    if (!id) return;
+    const s = await t.state();
+    await t
+      .invoke('slide.remove', { baseRevision: s.revision, slideId: id })
+      .catch(() => undefined);
+    await t.settled();
+  };
+  /** Clicks the layout tile with the given name in the open Apply layout plate; null when absent. */
+  const tileNamed = (name) =>
+    page.evaluate((n) => {
+      const plate = document.querySelector('[data-control="layout.apply.plate"]');
+      const tiles = [...(plate?.querySelectorAll('.ts-layout-tile') ?? [])];
+      const tile = tiles.find(
+        (el) => el.querySelector('.ts-layout-name')?.textContent?.trim() === n,
+      );
+      return tile ? (tile.getAttribute('data-control') ?? tile.getAttribute('data-layout')) : null;
+    }, name);
+
+  let N = null;
+  await t.step(
+    'slides.layout.title-and-body-single',
+    'New slide on the title slide; read the layout and the prompts; type four lines into the body',
+    'Title and body: one title prompt over one body prompt; the four lines land in the body at the body size',
+    async () => {
+      N = await newSlideFrom(T);
+      if (!N) return { ok: false, observed: 'New slide added nothing within 20 s' };
+      const layout = await layoutOf(N);
+      const shown = await prompts();
+      const runs = await t.runs();
+      const head = runs.find((r) => /heading/.test(r)) ?? runs[0] ?? null;
+      const body = runs.find((r) => r !== head) ?? null;
+      const headInfo = head ? await t.runInfo(head) : null;
+      const bodyInfo = body ? await t.runInfo(body) : null;
+      let stored = '';
+      let bodyAfter = null;
+      if (body) {
+        await t.openRun(body);
+        await t.press('Meta+a');
+        for (const [i, line] of ['One', 'Two', 'Three', 'Four'].entries()) {
+          if (i > 0) await t.press('Enter');
+          await t.typeHuman(line);
+        }
+        await t.press('Escape');
+        await t.settled();
+        stored = JSON.stringify(await t.slideJson(N));
+        bodyAfter = await t.runInfo(body);
+      }
+      return {
+        ok:
+          layout === 'split' &&
+          shown.length === 2 &&
+          new Set(shown).size === 2 &&
+          shown.includes('Click to add title') &&
+          shown.includes('Click to add text') &&
+          Boolean(headInfo && bodyInfo) &&
+          bodyInfo.font < headInfo.font &&
+          ['One', 'Two', 'Three', 'Four'].every((w) => stored.includes(w)) &&
+          Boolean(bodyAfter) &&
+          bodyAfter.font === bodyInfo.font &&
+          bodyAfter.lines >= 4,
+        observed: `layout ${layout}; prompts ${JSON.stringify(shown)}; runs ${runs.join(', ')}; head ${headInfo?.font ?? '?'} px, body ${bodyInfo?.font ?? '?'} px${bodyAfter ? `; after typing ${bodyAfter.lines} lines at ${bodyAfter.font} px` : ''}`,
+      };
+    },
+  );
+  await t.step(
+    'slides.layout.subtitle-prompt',
+    'Apply layout > Title, subtitle and body on the new slide; read the prompts',
+    'the head paragraph prompts Click to add subtitle and the body Click to add text',
+    async () => {
+      const slide = N ?? (await newSlideFrom(T));
+      await t.clearAll();
+      await t.clickCard(slide);
+      /* an empty slide, so the prompts draw */
+      const s = await t.slideJson(slide);
+      const objs = await t.objectsOf(slide);
+      for (const o of objs) {
+        const st = await t.state();
+        await t
+          .invoke('block.remove', { baseRevision: st.revision, slideId: slide, blockId: o.id })
+          .catch(() => undefined);
+      }
+      /* the slot blocks keep their text through block.remove (they are placeholders, not
+         objects): a body typed by an earlier row would fill the new body placeholder and hide
+         its prompt (the product round's extra reading), so every slot text is emptied too */
+      const slots = s?.slots ?? {};
+      for (const list of Object.values(slots)) {
+        for (const block of list ?? []) {
+          if (
+            (block.type === 'paragraph' || block.type === 'heading' || block.type === 'text') &&
+            block.text
+          )
+            await t.setBlock(slide, block.id, '/text', '').catch(() => undefined);
+        }
+      }
+      await t.tailControl('toolbar.layout');
+      await t.waitControl('layout.apply.plate', 8000);
+      const tile = await tileNamed('Title, subtitle and body');
+      if (!tile) {
+        const names = await page.evaluate(() =>
+          [...document.querySelectorAll('[data-control="layout.apply.plate"] .ts-layout-name')].map(
+            (el) => el.textContent?.trim(),
+          ),
+        );
+        await t.press('Escape');
+        return t.notBuilt(
+          'the layout tile "Title, subtitle and body"',
+          'B3',
+          `the tiles read ${names.join(', ')}`,
+        );
+      }
+      await t.pickLayout(tile.startsWith('layout.') ? tile : `layout.apply.${tile}`);
+      await t.waitGone('[data-control="layout.apply.plate"]');
+      await t.settled();
+      /* the layout draws three placeholders (the title, the subtitle beside it, the body); the read
+         waits for the applied slide's paint, not the first two prompts of it */
+      const shown = await t.pollUntil(prompts, (p) => p.length >= 3, 6000).catch(prompts);
+      return {
+        ok:
+          shown.includes('Click to add subtitle') &&
+          shown.includes('Click to add text') &&
+          !shown.some((p, i) => shown.indexOf(p) !== i),
+        observed: `tile ${tile}; layout ${await layoutOf(slide)}; prompts ${JSON.stringify(shown)}`,
+      };
+    },
+  );
+  await t.step(
+    'slides.layout.new-slide-inherits',
+    'Apply Title and two columns to a slide, New slide; then New slide on the title slide',
+    'the first new slide is Title and two columns, the second Title and body',
+    async () => {
+      const slide = N ?? (await newSlideFrom(T));
+      await t.clearAll();
+      await t.clickCard(slide);
+      await t.tailControl('toolbar.layout');
+      await t.waitControl('layout.apply.plate', 8000);
+      await t.clickControl('layout.apply.cols');
+      await t.waitGone('[data-control="layout.apply.plate"]');
+      await t.settled();
+      const base = await layoutOf(slide);
+      const fromCols = await newSlideFrom(slide);
+      const inherited = fromCols ? await layoutOf(fromCols) : null;
+      const fromTitle = await newSlideFrom(T);
+      const afterTitle = fromTitle ? await layoutOf(fromTitle) : null;
+      await dropSlide(fromCols);
+      await dropSlide(fromTitle);
+      return {
+        ok: base === 'cols' && inherited === 'cols' && afterTitle === 'split',
+        observed: `the slide's layout ${base}; New slide after it ${inherited ?? 'none'}; New slide after the title slide ${afterTitle ?? 'none'}`,
+      };
+    },
+  );
+  await t.step(
+    'slides.layout.tile-sentences',
+    'open Apply layout, hover the Title slide tile, read the caption row and the tooltip',
+    "the caption row reads the layout's sentence with 'your logo'; no floating plate covers a neighbouring tile",
+    async () => {
+      await t.clearAll();
+      await t.clickCard(N ?? T);
+      await t.tailControl('toolbar.layout');
+      await t.waitControl('layout.apply.plate', 8000);
+      const tile = await t.rectOf('[data-control="layout.apply.title"]');
+      if (!tile) {
+        await t.press('Escape');
+        return { ok: false, observed: 'no Title slide tile in the plate' };
+      }
+      await t.moveHuman({ x: tile.x - 40, y: tile.y + tile.h / 2 }, t.center(tile), 8);
+      await t.sleep(700);
+      const facts = await page.evaluate(() => {
+        const plate = document.querySelector('[data-control="layout.apply.plate"]');
+        const caption = plate?.querySelector(
+          '[data-control="layout.apply.caption"], .ts-layout-caption',
+        );
+        const tip = document.querySelector('.pt-tip');
+        const tipRect = tip && tip.getClientRects().length > 0 ? tip.getBoundingClientRect() : null;
+        const tiles = [...(plate?.querySelectorAll('.ts-layout-tile') ?? [])];
+        const hovered = plate?.querySelector('[data-control="layout.apply.title"]');
+        const covered = tipRect
+          ? tiles.filter((el) => {
+              if (el === hovered) return false;
+              const r = el.getBoundingClientRect();
+              return !(
+                r.right <= tipRect.left ||
+                tipRect.right <= r.left ||
+                r.bottom <= tipRect.top ||
+                tipRect.bottom <= r.top
+              );
+            }).length
+          : 0;
+        return {
+          caption: caption?.textContent?.trim() ?? null,
+          tooltip: tip?.textContent?.trim() ?? null,
+          tipShown: tipRect !== null,
+          covered,
+        };
+      });
+      await t.press('Escape');
+      await t.waitGone('[data-control="layout.apply.plate"]');
+      return {
+        ok:
+          /your logo/.test(facts.caption ?? '') &&
+          /^Title slide/.test(facts.caption ?? '') &&
+          facts.covered === 0,
+        observed: `caption "${facts.caption ?? 'none'}"; tooltip plate ${facts.tipShown ? `"${facts.tooltip}" covering ${facts.covered} neighbouring tile(s)` : 'none'}`,
+      };
+    },
+  );
+  await t.step(
+    'slides.import.none-preselected',
+    'File > Import slides, the General Translation brand deck; click three; Shift click a range; None, three, Import',
+    'no tile is selected on open, the button counts the picks, Shift click selects a range, three slides land',
+    async () => {
+      await t.clearAll();
+      await t.clickCard(N ?? T);
+      const r = await t.reachRow('file', 'file.importSlides');
+      if (!r.present) return { ok: false, observed: 'File > Import slides is not reachable' };
+      const before = await t.slideOrder();
+      const DIALOG = '[data-control="dialog.importSlides"]';
+      const TILES = '[data-control^="dialog.importSlides.slide."]';
+      const rowOf = (id) => `[data-control="dialog.importSlides.deck.${id}"]`;
+      /**
+       * What the open dialog's Presentations tab shows: the listed deck ids, whether the list is
+       * still loading ("Loading…" stands while the store's deck.list is out), whether it settled
+       * on the empty sentence, and the alert when a read was refused.
+       */
+      const listing = () =>
+        page.evaluate(() => {
+          const dialog = document.querySelector('[data-control="dialog.importSlides"]');
+          if (!dialog) return { open: false, rows: [], loading: false, empty: false, error: null };
+          const rows = [
+            ...dialog.querySelectorAll('[data-control^="dialog.importSlides.deck."]'),
+          ].map((el) => el.getAttribute('data-control').replace('dialog.importSlides.deck.', ''));
+          const words = [...dialog.querySelectorAll('.ts-dialog-empty')].map(
+            (el) => el.textContent?.trim() ?? '',
+          );
+          return {
+            open: true,
+            rows,
+            loading: words.some((w) => /^Loading/.test(w)),
+            empty: words.some((w) => /^No other presentations/.test(w)),
+            error: dialog.querySelector('.ts-dialog-error')?.textContent?.trim() ?? null,
+          };
+        });
+      const isSettled = (l) => l.open && (l.rows.length > 0 || l.empty || l.error !== null);
+      const closeDialog = async () => {
+        await t.press('Escape');
+        await t.waitGone(DIALOG, 4000).catch(() => undefined);
+      };
+      /**
+       * Opens File > Import slides and waits for its list to settle on a row, the empty sentence
+       * or an alert, never on the loading words: the pass 1 run of the product round read a dialog
+       * still loading as one listing nothing (VERIFICATION.md finding 13). The blob tier's
+       * deck.list takes seconds (R1-F4), so the dialog is given `ms` and opened once more when it
+       * is still loading at the bound.
+       */
+      const openSettled = async (ms) => {
+        let l = null;
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          await t.menuPath('file', 'file.importSlides');
+          await t.waitControl('dialog.importSlides', 8000);
+          l = await t.pollUntil(listing, isSettled, ms, 250);
+          if (isSettled(l)) return l;
+          await closeDialog();
+          await t.sleep(2000);
+        }
+        return l;
+      };
+      /** Picks a listed deck; answers its tile count, or the alert of a refused read. */
+      const pick = async (id) => {
+        await page.locator(rowOf(id)).first().click();
+        return t.pollUntil(
+          async () => ({
+            tiles: await t.count(TILES),
+            error: await page.evaluate(
+              () =>
+                document
+                  .querySelector('[data-control="dialog.importSlides"] .ts-dialog-error')
+                  ?.textContent?.trim() ?? null,
+            ),
+          }),
+          (x) => x.tiles > 0 || x.error !== null,
+          30_000,
+          250,
+        );
+      };
+      const selectedCount = () =>
+        page.evaluate(
+          () =>
+            [...document.querySelectorAll('[data-control^="dialog.importSlides.slide."]')].filter(
+              (el) => el.getAttribute('aria-selected') === 'true' || el.classList.contains('is-on'),
+            ).length,
+        );
+      const t0 = Date.now();
+      let sourceName = 'the General Translation brand deck';
+      /* a copy of the brand deck this principal makes when the brand deck is not listed for it or refuses the read */
+      let importSource = null;
+      let listMs = null;
+      let offeredMs = null;
+      let refused = null;
+      let picked = false;
+      let total = 0;
+      let preselected = null;
+      let afterThree = null;
+      let label = null;
+      let afterRange = null;
+      let afterNone = null;
+      let landed = [];
+      let gone = null;
+      let fault = null;
+      /* TURBOSLIDE_WALK_IMPORT_COPY=1 skips the brand deck and drives the copy path on a store
+         where the brand deck is listed and readable (a dev server's tmp store), the way
+         TURBOSLIDE_WALK_FAKE_STALL drives the stall path of the toolkit */
+      const forceCopy = process.env.TURBOSLIDE_WALK_IMPORT_COPY === '1';
+      try {
+        const l = await openSettled(15_000);
+        listMs = Date.now() - t0;
+        if (forceCopy) refused = 'TURBOSLIDE_WALK_IMPORT_COPY=1 skips the brand deck';
+        else if (l.rows.includes('gt-brand')) {
+          const p = await pick('gt-brand');
+          if (p.tiles > 0) picked = true;
+          else refused = p.error ?? 'no tiles and no alert within 30 s';
+        }
+        if (!picked) {
+          /* the brand deck is not listed for this principal or refused the read (under enforce
+             authorization a fresh anonymous principal is not among its readers): the row makes a
+             deck it owns from the gt-brand template through the window API and imports from that.
+             deck.create answers `deckId` and the editor's onDeckCreated moves the tab to the new
+             deck, so the walk goes back to its own deck before the dialog opens again (the pass 1
+             run left the tab on the copy and text.subtitle.double-click-type read the brand deck) */
+          await closeDialog();
+          const made = await t
+            .invoke('deck.create', {
+              name: `Import source ${Date.now().toString(36)}`,
+              from: 'gt-brand',
+            })
+            .catch((error) => ({ __error: String(error?.message ?? error).slice(0, 200) }));
+          const id = made?.deckId ?? made?.id ?? null;
+          if (typeof id !== 'string') {
+            fault = `deck.create answered ${made?.__error ?? JSON.stringify(made ?? null).slice(0, 160)}`;
+          } else {
+            importSource = id;
+            sourceName = `${id}, a copy of the brand deck this principal made (${
+              forceCopy
+                ? refused
+                : refused === null
+                  ? l.loading
+                    ? 'the list was still loading at 15 s twice'
+                    : 'the brand deck is not listed for it'
+                  : `the brand deck refused: ${refused}`
+            })`;
+            await page
+              .waitForURL(new RegExp(`/edit/${id}`), { timeout: 15_000 })
+              .catch(() => undefined);
+            await page.goto(`${BASE}/edit/${t.deck.id}`, { waitUntil: 'domcontentloaded' });
+            await t.editorReady();
+            await t.settled();
+            await t.clickCard(N ?? T);
+            /* the listing first: deck.list through the page until it carries the copy (the store's
+               fresh deck index; one call every 2 s, at most 20 s), then the dialog, asked for the
+               copy's row for 10 s per open and reopened, to 65 s in all, as the decks area's
+               import row does */
+            const t1 = Date.now();
+            await t.pollUntil(
+              async () => {
+                const list = await t.invoke('deck.list', {}).catch(() => []);
+                const arr = Array.isArray(list) ? list : (list?.decks ?? list?.items ?? []);
+                return arr.some((row) => (row?.id ?? row) === id);
+              },
+              (yes) => yes === true,
+              20_000,
+              2000,
+            );
+            for (;;) {
+              await t.menuPath('file', 'file.importSlides');
+              await t.waitControl('dialog.importSlides', 8000);
+              const present = await t
+                .waitControl(`dialog.importSlides.deck.${id}`, 10_000)
+                .then(() => true)
+                .catch(() => false);
+              if (present) {
+                offeredMs = Date.now() - t1;
+                break;
+              }
+              if (Date.now() - t1 > 65_000) break;
+              await closeDialog();
+              await t.sleep(3000);
+            }
+            if (offeredMs === null) {
+              fault = `the copy ${id} was not offered by the Import slides picker within 65 s (the store's deck.list)`;
+            } else {
+              const p = await pick(id);
+              if (p.tiles > 0) picked = true;
+              else fault = `the copy ${id} refused the pick: ${p.error ?? 'no tiles within 30 s'}`;
+            }
+          }
+        }
+        if (picked) {
+          const tiles = page.locator(TILES);
+          await t.sleep(500);
+          total = await tiles.count();
+          preselected = await selectedCount();
+          /* the tiles sit in a scrolling list: a tile past its visible area has a box the list
+             clips, and a click at that box lands on nothing pickable (the enforce preview read 4
+             after the Shift click on the eighth of 85 tiles), so a tile is scrolled into view
+             before its centre is read */
+          const centreOf = async (i) => {
+            await tiles.nth(i).scrollIntoViewIfNeeded();
+            await t.sleep(150);
+            const b = await tiles.nth(i).boundingBox();
+            return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+          };
+          const clickTile = async (i) => {
+            const c = await centreOf(i);
+            await t.clickAt(c.x, c.y);
+          };
+          await clickTile(0);
+          await clickTile(1);
+          await clickTile(2);
+          afterThree = await selectedCount();
+          label = await t.textOf('dialog.importSlides.ok');
+          /* a range: a plain click on the fourth tile sets the anchor and a Shift click on the
+             eighth (or the last) adds every tile between, so min(8, total) tiles are picked */
+          await clickTile(3);
+          const c8 = await centreOf(Math.min(7, total - 1));
+          await t.shiftClickAt(c8.x, c8.y);
+          afterRange = await selectedCount();
+          await t.clickControl('dialog.importSlides.none');
+          afterNone = await selectedCount();
+          await clickTile(0);
+          await clickTile(1);
+          await clickTile(2);
+          await t.clickControl('dialog.importSlides.ok');
+          const order = await t.pollUntil(
+            t.slideOrder,
+            (o) => o.length === before.length + 3,
+            30_000,
+          );
+          await t.settled();
+          landed = order.filter((x) => !before.includes(x));
+        }
+      } catch (error) {
+        fault = fault ?? String(error).split('\n')[0];
+      } finally {
+        /* whatever happened above: the dialog closes, the imported slides leave again, the copy is
+           trashed and removed through the window API from its own page (the page transport
+           authorizes the page's deck) and its 404 read, and the walk ends on its own deck. Each
+           phase runs on its own: a throw in one (the first run of this driver threw a
+           ReferenceError here) would skip the return to the walk's deck and leave the tab on the
+           copy, where the text area then read the brand deck's subtitle (VERIFICATION.md
+           "Product round, pass 1" finding 13). A phase that fails is recorded in the observation */
+        const cleanup = [];
+        const phase = async (name, fn) => {
+          try {
+            await fn();
+          } catch (error) {
+            cleanup.push(`${name}: ${String(error).split('\n')[0].slice(0, 160)}`);
+          }
+        };
+        await phase('closing the dialog', async () => {
+          if ((await page.locator(DIALOG).count()) > 0) await closeDialog();
+        });
+        await phase('removing the imported slides', async () => {
+          for (const x of landed) await dropSlide(x);
+        });
+        if (importSource !== null) {
+          await phase('trashing and removing the copy', async () => {
+            await page.goto(`${BASE}/edit/${importSource}`, { waitUntil: 'domcontentloaded' });
+            await t.editorReady();
+            const info = await t.invoke('deck.info');
+            await t
+              .invoke('deck.trash', { id: importSource, baseRevision: info.revision })
+              .catch(() => undefined);
+            const again = await t.invoke('deck.info').catch(() => info);
+            await t
+              .invoke('deck.remove', {
+                id: importSource,
+                baseRevision: again.revision,
+                confirm: true,
+              })
+              .catch(() => undefined);
+          });
+        }
+        await phase('returning to the walk deck', async () => {
+          if (!page.url().includes(`/edit/${t.deck.id}`)) {
+            await page.goto(`${BASE}/edit/${t.deck.id}`, { waitUntil: 'domcontentloaded' });
+            await t.editorReady();
+            await t.settled().catch(() => undefined);
+          }
+        });
+        if (importSource !== null) {
+          await phase('reading the copy for 404', async () => {
+            const until = Date.now() + 20_000;
+            for (;;) {
+              gone = (
+                await page.request.get(`${BASE}/edit/${importSource}`, {
+                  headers: t.headers,
+                  maxRedirects: 0,
+                })
+              ).status();
+              if (gone === 404 || Date.now() > until) break;
+              await t.sleep(2000);
+            }
+          });
+        }
+        await phase('the switch', () => t.advancedBack('Import slides'));
+        if (cleanup.length > 0) fault = fault ?? `the cleanup failed: ${cleanup.join('; ')}`;
+      }
+      const copyWords = importSource === null ? '' : `; the copy answers ${gone}`;
+      const listWords = `list settled after ${listMs ?? 'n/a'} ms${offeredMs === null ? '' : `, the copy offered after ${offeredMs} ms`}`;
+      if (fault !== null)
+        return {
+          ok: false,
+          observed: `source ${sourceName}; ${listWords}; ${fault}${copyWords}`,
+        };
+      const expectedRange = Math.min(8, total);
+      return {
+        ok:
+          preselected === 0 &&
+          afterThree === 3 &&
+          /Import 3 slides/.test(label ?? '') &&
+          afterRange === expectedRange &&
+          afterNone === 0 &&
+          landed.length === 3 &&
+          (importSource === null || gone === 404),
+        observed: `source ${sourceName}; ${listWords}; ${total} tiles; preselected ${preselected}; after three clicks ${afterThree}, button "${label ?? 'none'}"; after the Shift click ${afterRange} (${expectedRange} expected); after None ${afterNone}; landed ${landed.length}${copyWords}`,
+      };
+    },
+  );
+  await dropSlide(N);
 }

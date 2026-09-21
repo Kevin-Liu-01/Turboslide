@@ -20,6 +20,8 @@ export type PersistedOp = {
   kind: 'edit' | 'comment';
   mutations?: Mutation[];
   comment?: Record<string, unknown>;
+  /** the history label the edit carries into Version history (room-client.ts `apply` options) */
+  note?: string;
   /** the stream seq once admitted (a retained op), absent while pending */
   seq?: number;
 };

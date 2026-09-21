@@ -17,6 +17,7 @@ import type { CommandContext } from './context.ts';
 import { UsageError } from './exit.ts';
 import { registerRecordActions } from './record-actions.ts';
 import { remoteAction } from './remote.ts';
+import { registerBrandActions } from './brand-actions.ts';
 import { registerStoreActions } from './store-actions.ts';
 import { openStore, recordDeps, runAction, storeDeps } from './write.ts';
 
@@ -25,6 +26,8 @@ export function localDispatcher(ctx: CommandContext, store: FileStore): Dispatch
   const dispatcher = createDispatcher();
   const deps = storeDeps(ctx, store);
   registerStoreActions(dispatcher, deps);
+  // the brand kit's four ids (docs/PRODUCT.md 4.1): brand.get, brand.set, brand.reset, font.list
+  registerBrandActions(dispatcher, deps);
   registerRecordActions(dispatcher, recordDeps(ctx, store));
   registerDeckActions(dispatcher, { ...deps, decksDir: recordDeps(ctx, store).decksDir ?? '' });
   // picture.materialize runs the materials package's implementation (integrator, merge 2; b5.md

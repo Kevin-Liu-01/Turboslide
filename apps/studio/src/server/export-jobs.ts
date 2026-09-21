@@ -32,6 +32,16 @@ export type ExportJobStatus = 'queued' | 'running' | 'done' | 'failed';
 
 export type ExportJobDownload = { name: string; bytes: number; url: string };
 
+/**
+ * Where a running export is (the product round, docs/PRODUCT.md section 2 ranks 8 and 21; the
+ * row `export.download.progress-per-slide`): the play list number of the slide the worker
+ * rendered last and the slides the file holds, read off the worker's own log lines
+ * (`progressOfLog`), so the snackbar reads "slide k of n" with k moving. A two appearance
+ * PowerPoint runs the count once per appearance; `theme` names which. The PDF is one print of the
+ * whole document and has no per slide line, so its progress is the count alone.
+ */
+export type ExportProgress = { slide: number; total: number; theme?: 'light' | 'dark' };
+
 export type ExportJobRecord = {
   v: 1;
   jobId: string;
@@ -40,8 +50,17 @@ export type ExportJobRecord = {
   status: ExportJobStatus;
   createdAt: string;
   updatedAt: string;
+  /** the deck's title at queue time, for the file names the downloads take (plan.ts displayNameOf) */
+  title?: string;
+  /**
+   * The worker's own job behind a record the page named (the sync export's progress record,
+   * `syncProgressJobId`): a poll on the worker's instance reads that job live, off its log.
+   */
+  workerJobId?: string;
   /** the worker's last log line */
   line?: string;
+  /** where the worker is, while the job runs */
+  progress?: ExportProgress;
   ms?: number;
   report?: ExportReport;
   /** one address per produced file, a stored copy any instance can serve */
@@ -53,14 +72,57 @@ export type ExportJobRecord = {
 export type ExportJobPoll = {
   jobId: string;
   status: ExportJobStatus;
-  /** the worker's last log line */
+  /** "slide k of n" while the worker renders (progressLine), else the worker's last log line */
   line?: string;
+  /** the slide the worker is on and the slides the file holds, while the job runs */
+  progress?: ExportProgress;
   ms?: number;
   report?: ExportReport;
   error?: string;
   /** one download address per produced file; empty when the worker is remote */
   downloads?: ExportJobDownload[];
 };
+
+/** The head line of a PowerPoint export in the worker's log (apps/cli/src/commands/export.ts): "export: pptx flatten (perfect), 6 slide(s) x light, fonts exact -> ..." */
+const PPTX_HEAD = /^export: pptx \w+.*?, (\d+) slide\(s\) x ([a-z,]+)/;
+/** The head line of a PDF export: "export: pdf light, 6 slide(s) -> ..." */
+const PDF_HEAD = /^export: pdf (light|dark), (\d+) slide\(s\)/;
+/** One rendered slide of a PowerPoint export: "  03 content-x light 812 ms, 4 text(s), 1 raster(s)" */
+const SLIDE_LINE = /^\s*(\d+) [a-z0-9-]+ (light|dark) \d+ ms,/;
+
+/**
+ * Where an export is, from the worker's log so far: null before the head line, the count with
+ * no slide before the first slide line, then the last slide line's number and appearance. Pure,
+ * so the poll on the worker's own instance and the record another instance reads agree.
+ */
+export function progressOfLog(log: readonly string[]): ExportProgress | null {
+  let total: number | null = null;
+  let progress: ExportProgress | null = null;
+  for (const line of log) {
+    const pptx = PPTX_HEAD.exec(line);
+    if (pptx !== null) {
+      total = Number(pptx[1]);
+      progress = { slide: 0, total };
+      continue;
+    }
+    const pdf = PDF_HEAD.exec(line);
+    if (pdf !== null) {
+      total = Number(pdf[2]);
+      progress = { slide: 0, total, theme: pdf[1] as 'light' | 'dark' };
+      continue;
+    }
+    if (total === null) continue;
+    const slide = SLIDE_LINE.exec(line);
+    if (slide !== null) {
+      progress = {
+        slide: Math.min(total, Number(slide[1])),
+        total,
+        theme: slide[2] as 'light' | 'dark',
+      };
+    }
+  }
+  return progress;
+}
 
 // The refusals the page shows, in the product's words (the dialog's error line, kept open with
 // its controls; the core specs' download helper reads "could not be made" as a refusal)
@@ -75,6 +137,39 @@ export const EXPORT_JOB_NO_REPORT = 'the export job finished without an export r
 /** A job id: the worker queue's `<base36 time>-<6 hex>` or the batched form; both are slugs of this shape. */
 export function isExportJobId(value: unknown): value is string {
   return typeof value === 'string' && /^[a-z0-9-]{1,80}$/.test(value);
+}
+
+/**
+ * The id the page mints for a synchronous export's progress record (the product round fix
+ * round, the row `export.download.progress-per-slide`; build/b7.md R4's second choice): the
+ * editor passes it to `syncExport` and polls `pollExport` with it beside the call, and the
+ * server writes the running record under it while the export runs. Its own prefix keeps it
+ * apart from the worker queue's ids.
+ */
+export const SYNC_PROGRESS_JOB_PATTERN = /^sync-[a-z0-9]{4,24}-[a-z0-9]{4,24}$/;
+
+export function isSyncProgressJobId(value: unknown): value is string {
+  return typeof value === 'string' && SYNC_PROGRESS_JOB_PATTERN.test(value);
+}
+
+/** A fresh sync progress id: `sync-<base36 time>-<8 hex>`; the page mints one per export. */
+export function newSyncProgressJobId(now: number = Date.now()): string {
+  const hex = Array.from(crypto.getRandomValues(new Uint8Array(4)), (byte) =>
+    byte.toString(16).padStart(2, '0'),
+  ).join('');
+  return `sync-${now.toString(36)}-${hex}`;
+}
+
+/**
+ * The words of a running export for the snackbar, "slide k of n" (the row
+ * `export.download.progress-per-slide`; the Download dialog's `progressSentence` reads them off
+ * the poll's `line`): once the worker has rendered a slide; null before the first slide and for
+ * a PDF, which is one print with no per slide line, so the estimate sentence stands there.
+ */
+export function progressLine(progress: ExportProgress | null | undefined): string | null {
+  if (progress === undefined || progress === null) return null;
+  if (progress.slide < 1 || progress.total < 1) return null;
+  return `slide ${Math.min(progress.slide, progress.total)} of ${progress.total}`;
 }
 
 export function exportJobKey(jobId: string): string {
@@ -103,10 +198,36 @@ export function queuedExportJob(
   deckId: string,
   format: 'pptx' | 'pdf',
   now: string,
+  title?: string | null,
 ): ExportJobRecord {
   if (!isExportJobId(jobId)) throw new TypeError('jobId must be a job id');
   if (!SLUG_PATTERN.test(deckId)) throw new TypeError('deckId must be a slug');
-  return { v: 1, jobId, deckId, format, status: 'queued', createdAt: now, updatedAt: now };
+  return {
+    v: 1,
+    jobId,
+    deckId,
+    format,
+    status: 'queued',
+    createdAt: now,
+    updatedAt: now,
+    ...(typeof title === 'string' && title !== '' ? { title } : {}),
+  };
+}
+
+/** The record while the job runs: the worker's last line and where it is; the rest as queued. */
+export function runningExportJob(
+  record: ExportJobRecord,
+  now: string,
+  progress: { line?: string; progress?: ExportProgress; workerJobId?: string },
+): ExportJobRecord {
+  return {
+    ...record,
+    status: 'running',
+    updatedAt: now,
+    ...(progress.line !== undefined ? { line: progress.line } : {}),
+    ...(progress.progress !== undefined ? { progress: progress.progress } : {}),
+    ...(progress.workerJobId !== undefined ? { workerJobId: progress.workerJobId } : {}),
+  };
 }
 
 export type ExportJobOutcome =
@@ -133,6 +254,8 @@ export function finishedExportJob(
     status: outcome.status,
     createdAt: record.createdAt,
     updatedAt: now,
+    ...(record.title !== undefined ? { title: record.title } : {}),
+    ...(record.workerJobId !== undefined ? { workerJobId: record.workerJobId } : {}),
     ...(outcome.line !== undefined ? { line: outcome.line } : {}),
     ...(outcome.ms !== undefined ? { ms: outcome.ms } : {}),
   };
@@ -142,6 +265,18 @@ export function finishedExportJob(
     report: outcome.report,
     ...(outcome.downloads !== undefined ? { downloads: outcome.downloads } : {}),
   };
+}
+
+function isProgress(value: unknown): value is ExportProgress {
+  if (typeof value !== 'object' || value === null) return false;
+  const row = value as Record<string, unknown>;
+  return (
+    Number.isInteger(row.slide) &&
+    (row.slide as number) >= 0 &&
+    Number.isInteger(row.total) &&
+    (row.total as number) >= 0 &&
+    (row.theme === undefined || row.theme === 'light' || row.theme === 'dark')
+  );
 }
 
 function isDownload(value: unknown): value is ExportJobDownload {
@@ -175,7 +310,10 @@ export function parseExportJob(raw: unknown): ExportJobRecord | null {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
+  if (typeof row.title === 'string' && row.title !== '') record.title = row.title;
+  if (isExportJobId(row.workerJobId)) record.workerJobId = row.workerJobId;
   if (typeof row.line === 'string') record.line = row.line;
+  if (isProgress(row.progress)) record.progress = row.progress;
   if (typeof row.ms === 'number') record.ms = row.ms;
   if (typeof row.error === 'string') record.error = row.error;
   if (row.report !== undefined) {
@@ -284,10 +422,15 @@ export function pollOfExportJob(
   record: ExportJobRecord,
   options: { stored: boolean },
 ): ExportJobPoll {
+  const running = record.status !== 'done' && record.status !== 'failed';
+  // the poll's line reads "slide k of n" while the worker renders (the snackbar's sentence),
+  // else the worker's last log line
+  const line = (running ? progressLine(record.progress) : null) ?? record.line;
   const poll: ExportJobPoll = {
     jobId: record.jobId,
     status: record.status,
-    ...(record.line !== undefined ? { line: record.line } : {}),
+    ...(line !== undefined ? { line } : {}),
+    ...(record.progress !== undefined && running ? { progress: record.progress } : {}),
     ...(record.ms !== undefined ? { ms: record.ms } : {}),
   };
   switch (record.status) {

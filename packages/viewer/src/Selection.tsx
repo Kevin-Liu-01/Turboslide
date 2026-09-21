@@ -7,6 +7,7 @@
 import type { Block } from '@turboslide/schema/blocks';
 import type { Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
+import { assistMark } from '@turboslide/schema/ext';
 import { isLineKind } from '@turboslide/schema/shapes';
 
 export type Selection =
@@ -380,6 +381,9 @@ const DISPLAY_NAMES: Readonly<Partial<Record<string, string>>> = {
 
 /** The name the chip and the accessible label use for a block: its type in Google's words (SPEC 13.7), never its id. */
 export function blockDisplayName(slide: Slide, blockId: string): string {
+  /* a block the assistant wrote reads Assistant until the seller edits it (docs/PRODUCT.md 6.1; build/b6.md R6) */
+  const marked = blockById(slide, blockId);
+  if (marked !== undefined && assistMark(marked.ext) !== undefined) return 'Assistant';
   if (slide.kind === 'title' && blockId === 'lead') return 'Subtitle';
   if (slide.kind === 'title' && blockId === 'heading') return 'Title';
   if (

@@ -20,7 +20,10 @@ import './ShortcutsDialog.css';
  * so the dialog is always true for the editor. Replaces HelpCard.tsx for the editor; the view
  * route keeps the card. Since the focus round (docs/FOCUS.md 3.1) the dialog takes the menu
  * context and lists a binding only while its row is present: a parked row and a Later stub leave
- * the list with Tools > Advanced tools off and return with it on.
+ * the list with Tools > Advanced tools off and return with it on. The product round
+ * (docs/PRODUCT.md section 2 rank 31; audit-seller 33): one row per action, its chords joined
+ * (Redo listed once), and Common actions lead with New slide, Undo, Redo, Copy, Paste, Slideshow
+ * and Search the menus, in that order. The `?` key opens the dialog as Cmd+/ does (useEditorKeys).
  */
 export type ShortcutsDialogProps = {
   platform: Platform;
@@ -51,6 +54,28 @@ export type ShortcutRow = {
   reason?: string;
 };
 
+/** The head of Common actions (rank 31): the seller's first seven, in order; the rest follow as listed. */
+export const COMMON_ACTIONS_FIRST: ReadonlyArray<string> = [
+  'slide.newSlide',
+  'edit.undo',
+  'edit.redo',
+  'edit.copy',
+  'edit.paste',
+  'view.slideshow',
+  'title.slideshow',
+  'help.searchMenus',
+];
+
+/** Common actions with the seller's seven first; every other group keeps the table's order. */
+function orderRows(group: ShortcutGroup, rows: ShortcutRow[]): ShortcutRow[] {
+  if (group !== 'Common actions') return rows;
+  const rank = (row: ShortcutRow): number => {
+    const at = COMMON_ACTIONS_FIRST.indexOf(row.id);
+    return at < 0 ? COMMON_ACTIONS_FIRST.length : at;
+  };
+  return [...rows].sort((a, b) => rank(a) - rank(b));
+}
+
 /**
  * The rows of a group for a platform, one per binding, menu access keys included. With a menu
  * context a binding whose menu row exists and is not present (parked or Later with the switch
@@ -63,7 +88,9 @@ export function shortcutRows(
   context?: MenuContext,
 ): Map<ShortcutGroup, ShortcutRow[]> {
   const out = new Map<ShortcutGroup, ShortcutRow[]>();
-  const seen = new Set<string>();
+  /* one row per action and group (rank 31): a second binding of the same id joins the row's keys,
+     so Redo reads once with both its chords */
+  const byId = new Map<string, ShortcutRow>();
   for (const binding of table) {
     if (context !== undefined) {
       const item = findItem(binding.id);
@@ -73,18 +100,32 @@ export function shortcutRows(
     }
     const keys = shortcutLabels(binding.key, platform, 'words');
     if (keys.length === 0) continue;
-    const dedupe = `${binding.group}|${binding.label}|${keys.join(',')}`;
-    if (seen.has(dedupe)) continue;
-    seen.add(dedupe);
+    const rowKey = `${binding.group}|${binding.id}`;
+    /* a toolbar control that mirrors a menu row (the toolbar's Redo with Cmd+Y beside Edit >
+       Redo) joins the row by its label in the group, so Redo reads once with both chords */
+    const labelKey = `${binding.group}|${binding.label}`;
+    const existing = byId.get(rowKey) ?? byId.get(labelKey);
+    if (existing !== undefined) {
+      for (const key of keys) if (!existing.keys.includes(key)) existing.keys.push(key);
+      /* the row keeps the id the seller's order names (New slide is Slide > New slide, not the
+         Insert row or the toolbar button that share its chord) */
+      if (COMMON_ACTIONS_FIRST.includes(binding.id) && !COMMON_ACTIONS_FIRST.includes(existing.id))
+        existing.id = binding.id;
+      byId.set(rowKey, existing);
+      continue;
+    }
     const row: ShortcutRow = {
       id: binding.id,
       label: binding.label,
-      keys,
+      keys: [...keys],
       later: binding.status === 'later',
       ...(binding.reason === undefined ? {} : { reason: binding.reason }),
     };
+    byId.set(rowKey, row);
+    byId.set(labelKey, row);
     out.set(binding.group, [...(out.get(binding.group) ?? []), row]);
   }
+  for (const [group, rows] of out) out.set(group, orderRows(group, rows));
   return out;
 }
 

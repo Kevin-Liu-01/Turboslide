@@ -216,8 +216,10 @@ describe('turboslide mcp serves the parity actions over the deck folder', () => 
       });
       expect(missing.isError).toBe(true);
 
-      // the blank template has no `defaults`; the first write under it creates the object
-      expect(manifest().defaults).toBeUndefined();
+      // a deck from the blank template opens in the deployment kit's appearance (docs/PRODUCT.md
+      // 4.1; the store's createDeck writes defaults.appearance from the template's kit, light on
+      // General Translation's deployment), so the manifest carries that one field before any write
+      expect(manifest().defaults).toEqual({ appearance: 'light' });
       const light = await client.callTool({
         name: 'deck_set',
         arguments: { path: '/defaults/appearance', value: 'light', baseRevision: body.revision },

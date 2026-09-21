@@ -159,6 +159,8 @@ export type CspOptions = {
   reportUri?: string;
   pathname?: string;
   env?: Env;
+  /** the policy goes out as `Content-Security-Policy-Report-Only`; the directives a report only policy cannot carry are left out */
+  reportOnly?: boolean;
 };
 
 /** The variable that names the public store's host (the twins' origin), for the policy. */
@@ -187,7 +189,10 @@ export const CSP_REPORT_PATH = '/api/x/csp/report';
  * the hosted smoke row); `frame-src 'self'` covers the sandboxed `srcdoc` frames of the `html`
  * block (an `about:srcdoc` document inherits the host's policy and matches `'self'`);
  * `frame-ancestors` is `'none'` except on `/embed`. `upgrade-insecure-requests` is left off a
- * plain http dev server, where it would break the page's own requests.
+ * plain http dev server, where it would break the page's own requests, and off a report only
+ * policy, where a browser ignores it and Chromium logs one console error per page load for the
+ * ignored directive (VERIFICATION-5 finding 16: fifteen console errors in one preview walk); it
+ * ships when the policy is enforced (`TURBOSLIDE_CSP=enforce`).
  */
 export function buildCsp(options: CspOptions): string {
   const env = options.env ?? process.env;
@@ -210,7 +215,8 @@ export function buildCsp(options: CspOptions): string {
     "form-action 'self'",
     embed ? `frame-ancestors ${embedAncestors(env).join(' ')}` : "frame-ancestors 'none'",
   ];
-  if (env.VERCEL !== undefined && env.VERCEL !== '') directives.push('upgrade-insecure-requests');
+  if (env.VERCEL !== undefined && env.VERCEL !== '' && options.reportOnly !== true)
+    directives.push('upgrade-insecure-requests');
   if (options.reportUri !== undefined) directives.push(`report-uri ${options.reportUri}`);
   return directives.join('; ');
 }
@@ -255,6 +261,7 @@ export function securityHeadersFor(
       pathname,
       reportUri: CSP_REPORT_PATH,
       env,
+      reportOnly: mode !== 'enforce',
     });
   }
   return headers;
@@ -326,6 +333,9 @@ export const CSRF_ROUTE_PATTERNS: ReadonlyArray<RegExp> = [
   /^\/api\/notify(?:\/|$)/,
   /^\/api\/auth(?:\/|$)/,
   /^\/device(?:\/|$)/,
+  // the assist route (docs/PRODUCT.md 6.3): the seller's page posts with its cookies; an agent
+  // with the bearer is exempt below as on the room routes
+  /^\/api\/assist(?:\/|$)/,
 ];
 
 /**
@@ -347,7 +357,11 @@ export function csrfFilter(ctx: {
   // a bearer or API key agent on the room routes (curl, the CLI's follow, an MCP client) sends no
   // Sec-Fetch-Site; the bearer is its proof and the agent surface's own rule applies (SPEC-3 8.7;
   // b2.md R14, the integrator at merge 2)
-  if (ROOM_ROUTE_PATTERN.test(path) && ctx.request.headers.has('authorization')) return false;
+  if (
+    (ROOM_ROUTE_PATTERN.test(path) || ASSIST_ROUTE_PATTERN.test(path)) &&
+    ctx.request.headers.has('authorization')
+  )
+    return false;
   // a top level navigation typed into the address bar or clicked in a mail (Sec-Fetch-Site none
   // or cross-site) is how a person reaches /device and the magic link's verify URL; the library
   // runs its own origin and state checks there (SPEC-3 7.3, 7.5; b3.md R11)
@@ -358,6 +372,8 @@ export function csrfFilter(ctx: {
 
 /** The three room routes of SPEC-3 3.3 (the stream, the ops, the presence). */
 const ROOM_ROUTE_PATTERN = /^\/api\/decks\/[^/]+\/(?:stream|ops|presence)$/;
+/** The assist route (docs/PRODUCT.md 6.3): a bearer is its proof as on the room routes. */
+const ASSIST_ROUTE_PATTERN = /^\/api\/assist(?:\/|$)/;
 
 /** The GET pages a person reaches by a typed or mailed address (b3.md R11). */
 const NAVIGATION_GET_PATTERNS: ReadonlyArray<RegExp> = [
@@ -391,6 +407,7 @@ export const JSON_ROUTE_PATTERNS: ReadonlyArray<RegExp> = [
   // the CSP report endpoint parses `application/csp-report` itself
   /^\/api\/x\/(?:export|render)(?:\/|$)/,
   /^\/api\/export\//,
+  /^\/api\/assist(?:\/|$)/,
 ];
 
 /**

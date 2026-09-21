@@ -6,6 +6,8 @@ import { PRESENT, SNACKBARS, STUB_PREFIX } from '@turboslide/chrome/menus/string
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 import { TurboslideMark } from '@turboslide/chrome/TurboslideMark';
+import type { FrameBand } from '@turboslide/render/stage';
+import { bandForSlide } from '@turboslide/render/stage';
 import { Frame } from '@turboslide/viewer/Frame';
 import { SHEET_H, SHEET_W } from '@turboslide/viewer/model';
 import type { ViewerSlide } from '@turboslide/viewer/model';
@@ -274,6 +276,7 @@ function PrintPage() {
             theme={theme}
             withNotes={layout === 'notes'}
             skipped={skipped.has(slide.id)}
+            {...(payload.deck.band === undefined ? {} : { band: payload.deck.band })}
           />
         ))}
         {/* the fit before first paint (gslides-parity SPEC-3 9.2 R1): every sheet's --k from its own
@@ -293,11 +296,14 @@ function PrintPage1({
   theme,
   withNotes,
   skipped,
+  band,
 }: {
   slide: ViewerSlide;
   index: number;
   total: number;
   theme: Theme;
+  /** the brand kit's frame band (docs/PRODUCT.md 4.1) */
+  band?: FrameBand;
   withNotes: boolean;
   skipped: boolean;
 }) {
@@ -334,7 +340,12 @@ function PrintPage1({
       <div ref={sheet} className="ts-print-sheet" suppressHydrationWarning>
         <div className="ts-sheet sheet" data-theme={theme}>
           <div className="ts-stage stage">
-            <Frame index={index} total={total} counter={slide.counter ?? true} />
+            <Frame
+              index={index}
+              total={total}
+              counter={slide.counter ?? true}
+              {...(band === undefined ? {} : { band: bandForSlide(band, slide) })}
+            />
             <div ref={body} className="pt-slide" dangerouslySetInnerHTML={{ __html: slide.html }} />
           </div>
         </div>

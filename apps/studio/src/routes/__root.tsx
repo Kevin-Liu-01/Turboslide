@@ -15,18 +15,19 @@ import { BLOCK_CSS } from '@turboslide/render/block-css';
 import { SITE } from '@turboslide/theme/brand/site';
 import sheetCss from '@turboslide/theme/gt-ink-paper/sheet.css?url';
 import stageCss from '@turboslide/theme/gt-ink-paper/stage.css?url';
-import { THEME_BOOT_SCRIPT } from '@turboslide/viewer/theme';
 
 import { useMountEffect } from '../components/useMountEffect';
 import appCss from '../styles.css?url';
 
-// The document shell (SPEC 3.4): the theme boot script (gt-theme then
-// gt-deck-theme, default dark, never prefers-color-scheme) runs in the head
-// before first paint; the chrome tokens (--pt-), the identity tokens (--ts-,
-// gslides-parity SPEC-4 0.8), the sheet theme (.ts-sheet), the stage rules,
-// the renderer's block CSS and the one face (Inter) load once for every
-// route. The head carries the icon set, the manifest and the site card of
-// SPEC-4 1.6 (research-4 report 02 section 4.1) from packages/theme/brand/site.ts.
+// The document shell (SPEC 3.4): the theme boot script runs in the head before
+// first paint (gt-theme then gt-deck-theme; since the product round a first
+// visit with neither key follows the operating system's prefers-color-scheme,
+// docs/PRODUCT.md 3.1.1, and the stored choice wins afterwards); the chrome
+// tokens (--pt-), the identity tokens (--ts-, gslides-parity SPEC-4 0.8), the
+// sheet theme (.ts-sheet), the stage rules, the renderer's block CSS and the
+// one face (Inter) load once for every route. The head carries the icon set,
+// the manifest and the site card of SPEC-4 1.6 (research-4 report 02 section
+// 4.1) from packages/theme/brand/site.ts.
 
 /**
  * The routes a crawler is told to leave alone (gslides-parity SPEC 6.1, 6.8, 13.4; SPEC-4 0.34):
@@ -41,6 +42,19 @@ const NOINDEX_ROUTES: ReadonlySet<string> = new Set([
   '/print/$deckId',
   '/edit/$deckId',
 ]);
+
+/**
+ * The theme boot script of the product round (docs/PRODUCT.md 3.1.1; audit-interface 12): the
+ * stored `gt-theme`, then the deck's older `gt-deck-theme`, then on a first visit the operating
+ * system's appearance through `prefers-color-scheme`, dark only when the system says dark, so a
+ * seller on a light office display opens a light home page and a light editor the way Google
+ * Slides, Keynote and Pitch open. The stored choice wins on every visit after the first (View >
+ * Appearance and the Light and Dark buttons of /home write the key). The viewer package's
+ * `THEME_BOOT_SCRIPT`, which defaulted to dark, stays for the deck document (deck/parts/head.html
+ * carries its own copy); the studio's document uses this one.
+ */
+export const APPEARANCE_BOOT_SCRIPT =
+  "try{var t=localStorage.getItem('gt-theme');if(t!=='light'&&t!=='dark')t=localStorage.getItem('gt-deck-theme');if(t!=='light'&&t!=='dark')t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','light')}";
 
 /**
  * The `theme-color` statement (SPEC-4 1.6; R02 2.4): the meta carries the dark paper in the
@@ -136,9 +150,10 @@ export const Route = createRootRoute({
 });
 
 /**
- * Not found (gslides-parity SPEC-4 1.10): the 64 px mark over the notfound twin's crop, the
- * heading, one sentence and three `.pt-ib` buttons, all router links now that the /home route is
- * in the route tree (the About Turboslide button was a plain anchor until B2's route landed).
+ * Not found (gslides-parity SPEC-4 1.10; docs/PRODUCT.md 3.6): the 64 px mark over the notfound
+ * twin's crop, the heading, one sentence and three `.pt-ib` buttons in sentence case at the hero's
+ * 40 px (audit-interface 37; Title Case is the one Present call to action's), all router links now
+ * that the /home route is in the route tree.
  */
 function NotFound() {
   return (
@@ -155,20 +170,20 @@ function NotFound() {
               to="/new"
               className="pt-ib is-solid"
               data-control="notfound.new"
-              {...tipProps({ name: 'New Presentation', doc: 'Starts a blank presentation.' })}
+              {...tipProps({ name: 'New presentation', doc: 'Starts a blank presentation' })}
             >
-              New Presentation
+              New presentation
             </Link>
             <Link
               to="/decks"
               className="pt-ib"
               data-control="notfound.decks"
               {...tipProps({
-                name: 'Your Presentations',
-                doc: 'Every presentation on this Turboslide.',
+                name: 'Your presentations',
+                doc: 'Every presentation on this Turboslide',
               })}
             >
-              Your Presentations
+              Your presentations
             </Link>
             <Link
               to="/home"
@@ -176,7 +191,7 @@ function NotFound() {
               data-control="notfound.about"
               {...tipProps({
                 name: 'About Turboslide',
-                doc: 'What Turboslide is and how fast it runs.',
+                doc: 'What Turboslide is and how fast it runs',
               })}
             >
               About Turboslide
@@ -224,7 +239,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         <script
           nonce={nonce}
           suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }}
+          dangerouslySetInnerHTML={{ __html: APPEARANCE_BOOT_SCRIPT }}
         />
         {/* the saved shell geometry stamped before first paint (SPEC-3 9.2 D1, D4), beside the theme */}
         <script

@@ -72,7 +72,8 @@ the rows).
 
 ## 3. The WAF rules
 
-`firewall/rules.json`: R1 to R21 and R16b of 8.3 plus the CLI and MCP bypass, in the shape the
+`firewall/rules.json`: R1 to R21 and R16b of 8.3, R22 of the product round (`/api/assist` 30 per
+60 s per IP, log mode first, docs/PRODUCT.md 6.3) plus the CLI and MCP bypass, in the shape the
 firewall API's `rules.insert` takes, every applied action `log`, and the `enforce` object per rule
 holding the action of the R8 flip (429, deny 15 minutes or 1 hour, challenge). Counters are per IP
 and per region, so each number sits about a third under the intended global one and is counted
@@ -136,6 +137,13 @@ next deploy) and, for the `upstash` backend, set `UPSTASH_REDIS_REST_URL` and
 the 401st anonymous render of an hour answers 429 with `Retry-After` and "Too many slide renders
 this hour. Try again later" from any instance.
 
+The assistant's two rows (docs/PRODUCT.md 6.3): `assistCallsPerMinutePerDeck` (anonymous 6,
+account 20, agent 60, per deck) and `assistCallsPerDay` (anonymous `TURBOSLIDE_ASSIST_DAY_CAP`,
+default 20; account 300; agent 1000), refused with 429, `Retry-After` and "Too many assistant
+requests. Try again in a minute" or "You have reached today's limit for the assistant"; counted on
+a propose alone, on `/api/assist` and on the agent path. On the memory backend they count per
+instance like every row above, so R22 is the limit that holds across instances until Upstash.
+
 Where the quotas are counted: writes per minute per deck on every mutating window and HTTP
 action; renders per hour on `render.slide` and `/api/x/render`; exports per day, the export
 concurrency slot and standalone builds per day on every export path; deck creates per day on
@@ -144,9 +152,11 @@ pictures per day, bytes per day and the largest picture on the presigned route.
 
 ## 5. The kill switches
 
-`apps/studio/src/server/flags.ts`. Twelve flags (8.12) read per request with a 5 second in
-process cache: `realtime`, `presence`, `comments`, `invites`, `email`, `exports`, `uploads`,
-`renderThumbs`, `materialize`, `htmlBlocks`, `signup`, `readOnly`. Hosted, a flag lives at
+`apps/studio/src/server/flags.ts`. Thirteen flags (8.12; docs/PRODUCT.md 6.3, 6.4) read per request
+with a 5 second in process cache: `realtime`, `presence`, `comments`, `invites`, `email`, `exports`,
+`uploads`, `renderThumbs`, `materialize`, `htmlBlocks`, `signup`, `readOnly`, `assist` (the
+assistant's kill switch: off answers 503 with "The assistant is off on this Turboslide" on
+`/api/assist` and the panel shows the sentence). Hosted, a flag lives at
 `flag:<name>` in Redis and is read through the realtime channel's `flag()`; on a checkout and the
 `tmp` store in `.turboslide/flags.json`. When the reader fails (Redis unreachable) the flag takes
 the default of the table: `realtime` off (the `blob` tier), every other on, and the failure is one
@@ -361,21 +371,24 @@ runtime logs alone are one day.
 
 ## 12. The variables per environment
 
-| Variable                                                                                                                 | Where                                               | Note                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TURBOSLIDE_TOKEN`                                                                                                       | preview, production                                 | the bootstrap bearer; a different value per environment; per checkout token in `.turboslide/token`                                                      |
-| `TURBOSLIDE_DOWNLOAD_SECRET`                                                                                             | every hosted environment, 16 bytes or more          | required on a `tmp` or `blob` store (a token minted on one instance verifies on another); a builder's dev server on the tmp store sets any 16 byte fake |
-| `TURBOSLIDE_SESSION_SECRET`                                                                                              | every hosted environment, 32 characters or more     | the identity cookie's seal; a checkout keeps a generated one under `.turboslide/session-secret`                                                         |
-| `BETTER_AUTH_SECRET`                                                                                                     | every hosted environment                            | the account sessions (B3)                                                                                                                               |
-| `TURBOSLIDE_AUTHORIZE`                                                                                                   | production `shadow` for the R3 week, then `enforce` | section 2                                                                                                                                               |
-| `TURBOSLIDE_MISSING_RECORD`                                                                                              | after R8                                            | `notFound`                                                                                                                                              |
-| `TURBOSLIDE_CSP`                                                                                                         | unset for the report weeks, then `enforce`          | section 8                                                                                                                                               |
-| `TURBOSLIDE_TRUST_PROXY`                                                                                                 | a `node-server` deployment behind a proxy           | never on Vercel                                                                                                                                         |
-| `TURBOSLIDE_EGRESS`                                                                                                      | unset                                               | `open` only for a measurement                                                                                                                           |
-| `TURBOSLIDE_WEB_SECURITY`                                                                                                | `strict` once the fixture renders                   | section 7                                                                                                                                               |
-| `TURBOSLIDE_PUBLIC_STORE_HOST`, `TURBOSLIDE_PRESIGN_HOST`, `TURBOSLIDE_EMBED_ANCESTORS`                                  | when the stores and the customers exist             | section 8                                                                                                                                               |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                                                                     | when the Upstash database exists                    | section 4                                                                                                                                               |
-| `REDIS_URL`, `TURBOSLIDE_REALTIME`, `DATABASE_URL`, `RESEND_API_KEY`, `TURBOSLIDE_MAIL`, `TURBOSLIDE_BLOB_PRIVATE_TOKEN` | see docs/hosting.md                                 | B2's and B3's tiers                                                                                                                                     |
+| Variable                                                                                                                 | Where                                                 | Note                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TURBOSLIDE_TOKEN`                                                                                                       | preview, production                                   | the bootstrap bearer; a different value per environment; per checkout token in `.turboslide/token`                                                      |
+| `TURBOSLIDE_DOWNLOAD_SECRET`                                                                                             | every hosted environment, 16 bytes or more            | required on a `tmp` or `blob` store (a token minted on one instance verifies on another); a builder's dev server on the tmp store sets any 16 byte fake |
+| `TURBOSLIDE_SESSION_SECRET`                                                                                              | every hosted environment, 32 characters or more       | the identity cookie's seal; a checkout keeps a generated one under `.turboslide/session-secret`                                                         |
+| `BETTER_AUTH_SECRET`                                                                                                     | every hosted environment                              | the account sessions (B3)                                                                                                                               |
+| `TURBOSLIDE_AUTHORIZE`                                                                                                   | production `shadow` for the R3 week, then `enforce`   | section 2                                                                                                                                               |
+| `TURBOSLIDE_MISSING_RECORD`                                                                                              | after R8                                              | `notFound`                                                                                                                                              |
+| `TURBOSLIDE_CSP`                                                                                                         | unset for the report weeks, then `enforce`            | section 8                                                                                                                                               |
+| `TURBOSLIDE_TRUST_PROXY`                                                                                                 | a `node-server` deployment behind a proxy             | never on Vercel                                                                                                                                         |
+| `TURBOSLIDE_EGRESS`                                                                                                      | unset                                                 | `open` only for a measurement                                                                                                                           |
+| `TURBOSLIDE_WEB_SECURITY`                                                                                                | `strict` once the fixture renders                     | section 7                                                                                                                                               |
+| `TURBOSLIDE_PUBLIC_STORE_HOST`, `TURBOSLIDE_PRESIGN_HOST`, `TURBOSLIDE_EMBED_ANCESTORS`                                  | when the stores and the customers exist               | section 8                                                                                                                                               |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                                                                     | when the Upstash database exists                      | section 4                                                                                                                                               |
+| `TURBOSLIDE_ASSIST`                                                                                                      | `fixture` on the enforce preview; unset in production | docs/PRODUCT.md 6.3: `fixture` answers every propose with a canned card, `off` refuses, unset runs the model when the key is set                        |
+| `ANTHROPIC_API_KEY`                                                                                                      | production, set by Kevin on the Vercel project        | the assistant's model key (`ASSIST_KEY_ENV`); never on a preview, never printed; without it a propose answers 503 with the unavailable sentence         |
+| `TURBOSLIDE_ASSIST_DAY_CAP`                                                                                              | production (GT sets 60); default 20                   | the anonymous tier's assistant calls per day (section 4)                                                                                                |
+| `REDIS_URL`, `TURBOSLIDE_REALTIME`, `DATABASE_URL`, `RESEND_API_KEY`, `TURBOSLIDE_MAIL`, `TURBOSLIDE_BLOB_PRIVATE_TOKEN` | see docs/hosting.md                                   | B2's and B3's tiers                                                                                                                                     |
 
 ## 13. The check chain and the smoke
 

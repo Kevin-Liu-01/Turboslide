@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   AREA_FEATURE,
   CORE_DRIVERS,
+  DECLARED_CONTROL_IDS,
   CORE_FEATURES,
   CORE_IDS,
   CORE_ID_PATTERN,
@@ -21,6 +22,7 @@ import {
   isCoreId,
   isKnownControl,
   isManualRow,
+  isMeasureRow,
   isParkable,
   parkedFeaturesOf,
   probeRows,
@@ -80,6 +82,11 @@ describe('the committed matrix', () => {
       'formatting',
       'view',
       'inbox',
+      /* the product round's four features (docs/PRODUCT.md 8.1), each parkable */
+      'brand',
+      'fonts',
+      'templates',
+      'assist',
     ])
       expect(isParkable(feature), feature).toBe(true);
     for (const feature of UNPARKABLE_FEATURES) expect(isParkable(feature), feature).toBe(false);
@@ -209,13 +216,14 @@ describe('the ship helpers of 6.2', () => {
     expect(parkedFeaturesOf(partial).blocking.length).toBe(
       CORE_MATRIX.filter((row) => !isParkable(row.feature) && row.parks === undefined).length -
         1 -
-        CORE_MATRIX.filter((row) => isManualRow(row) && !isParkable(row.feature)).length,
+        CORE_MATRIX.filter((row) => isManualRow(row) && !isParkable(row.feature)).length -
+        CORE_MATRIX.filter((row) => isMeasureRow(row) && !isParkable(row.feature)).length,
     );
     expect(() => parkedFeaturesOf(results({ [text]: 'green' }))).toThrow(/unknown result green/);
   });
 
   it('exits clean only when every row outside the committed parked list passed', () => {
-    expect(shipVerdict(results())).toEqual({ ok: true, failures: [] });
+    expect(shipVerdict(results())).toEqual({ ok: true, failures: [], measured: [] });
     const shapes = rowsForFeature('shapes')[0].id;
     const decks = rowsForFeature('decks')[0].id;
     const red = results({ [shapes]: 'not driven', [decks]: 'failed' });
@@ -250,7 +258,7 @@ describe('the ship helpers of 6.2', () => {
           { id: zip.id, parks: [...zip.parks] },
         ],
       }),
-    ).toEqual({ ok: true, failures: [] });
+    ).toEqual({ ok: true, failures: [], measured: [] });
     expect(() =>
       shipVerdict(both, { parkedFeatures: [], parkedRows: [{ id: decks, parks: [] }] }),
     ).toThrow(/carries no parks/);
@@ -267,7 +275,7 @@ describe('the ship helpers of 6.2', () => {
     const own = {};
     for (const row of probe) own[row.id] = 'passed';
     /* every spec row is unrecorded, and the narrowed reading does not count it */
-    expect(shipVerdict(own, [], probe)).toEqual({ ok: true, failures: [] });
+    expect(shipVerdict(own, [], probe)).toEqual({ ok: true, failures: [], measured: [] });
     expect(parkedFeaturesOf(own, probe).parked).toEqual([]);
     const red = probe.find((row) => row.feature === 'text').id;
     const narrowed = shipVerdict({ ...own, [red]: 'failed' }, [], probe);
@@ -291,7 +299,7 @@ describe('the ship helpers of 6.2', () => {
     for (const row of CORE_MATRIX) everything[row.id] = 'passed';
     const paste = 'text.clipboard.paste-without-formatting';
     const notDriven = { ...everything, [paste]: 'not driven' };
-    expect(shipVerdict(notDriven)).toEqual({ ok: true, failures: [] });
+    expect(shipVerdict(notDriven)).toEqual({ ok: true, failures: [], measured: [] });
     expect(parkedFeaturesOf(notDriven).parked).toEqual([]);
     const failed = { ...everything, [paste]: 'failed' };
     expect(shipVerdict(failed).failures).toEqual([
@@ -357,5 +365,64 @@ describe('the ship helpers of 6.2', () => {
     const noList = join(dir, 'ship-nolist.json');
     writeFileSync(noList, JSON.stringify({ commit: 'x' }));
     expect(() => readParkedList(noList)).toThrow(/no parkedFeatures list/);
+  });
+});
+
+describe('the product round (docs/PRODUCT.md section 8)', () => {
+  const good = {
+    id: 'export.download.large-deck-pdf',
+    feature: 'export',
+    interaction: 'x',
+    driver: 'core/export.spec.ts',
+    today: 'broken',
+    severity: 2,
+    evidence: 'e',
+  };
+
+  it('holds the four features, the three specs and the 133 added rows', () => {
+    for (const feature of ['brand', 'fonts', 'templates', 'assist'])
+      expect(rowsForFeature(feature).length, feature).toBeGreaterThan(0);
+    for (const driver of ['core/chrome.spec.ts', 'core/brand.spec.ts', 'core/assist.spec.ts'])
+      expect(rowsForDriver(driver).length, driver).toBeGreaterThan(0);
+    expect(CORE_MATRIX.length).toBe(565 + 133);
+    expect(CORE_MATRIX.filter(isMeasureRow).map((r) => r.id)).toEqual([
+      'export.download.large-deck-pdf',
+      'export.download.large-deck-pptx',
+    ]);
+  });
+
+  it('validates the measure field as true or absent, never on a manual row', () => {
+    expect(() => validateCoreMatrix([{ ...good, measure: true }])).not.toThrow();
+    expect(() => validateCoreMatrix([{ ...good, measure: false }])).toThrow(/measure is true/);
+    expect(() => validateCoreMatrix([{ ...good, measure: true, manual: 'the OS dialog' }])).toThrow(
+      /never manual/,
+    );
+  });
+
+  it('records a red measurement row and never parks or blocks on it', () => {
+    const results = {};
+    for (const id of CORE_IDS) results[id] = 'passed';
+    const pdf = 'export.download.large-deck-pdf';
+    const pptx = 'export.download.large-deck-pptx';
+    const run = parkedFeaturesOf({ ...results, [pdf]: 'failed', [pptx]: 'not driven' });
+    expect(run.parked).toEqual([]);
+    expect(run.blocking).toEqual([]);
+    expect(run.measured).toEqual([
+      { id: pdf, feature: 'export', result: 'failed' },
+      { id: pptx, feature: 'export', result: 'not driven' },
+    ]);
+    expect(run.red.export).toBeUndefined();
+    const verdict = shipVerdict({ ...results, [pdf]: 'failed' });
+    expect(verdict.ok).toBe(true);
+    expect(verdict.failures).toEqual([]);
+    expect(verdict.measured).toEqual([{ id: pdf, feature: 'export', result: 'failed' }]);
+  });
+
+  it('knows the declared ids of PRODUCT.md 7.1 before the lanes land their files', () => {
+    for (const id of DECLARED_CONTROL_IDS) expect(isKnownControl(id), id).toBe(true);
+    expect(isKnownControl('panel.assist.noSuchControl')).toBe(false);
+    /* every parks id of the added rows is a declared id or a literal of a control source */
+    for (const row of CORE_MATRIX)
+      for (const control of row.parks ?? []) expect(isKnownControl(control), control).toBe(true);
   });
 });

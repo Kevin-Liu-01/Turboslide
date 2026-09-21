@@ -320,6 +320,91 @@ export function staleJobPaths(
 }
 
 // ---------------------------------------------------------------------------------------------
+// The file names a download saves as (the product round, docs/PRODUCT.md section 2 rank 7;
+// audit-seller 7, audit-brand 18): the deck's title, never its id and never the appearance or
+// the mode a seller did not choose. Google saves `<presentation title>.pdf`.
+
+/** The characters a file name never carries: the ones a file system refuses, and control characters. */
+const FILE_NAME_REFUSED = /["\\/:*?<>|\u0000-\u001f\u007f]/g;
+
+/** The longest base name a download takes, before its extension. */
+export const FILE_NAME_MAX = 120;
+
+/** The title of a deck nobody named: the blank template's, or nothing (store/templates.ts DEFAULT_BLANK_TITLE, spelled here because the store imports node). */
+export function isUntitled(title: string | null | undefined): boolean {
+  const clean = fileNameBase(title ?? '');
+  return clean === '' || /^untitled(?: presentation)?$/i.test(clean);
+}
+
+/**
+ * A title as a file name's base: the refused characters removed, whitespace collapsed, the
+ * edges trimmed, at most FILE_NAME_MAX characters, and no trailing dot (Windows drops it).
+ */
+export function fileNameBase(title: string): string {
+  return title
+    .replace(FILE_NAME_REFUSED, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, FILE_NAME_MAX)
+    .replace(/[\s.]+$/g, '');
+}
+
+export type ExportFileNameInput = {
+  /** the deck's title; an Untitled deck keeps its id */
+  title: string | null | undefined;
+  deckId: string;
+  format: 'pptx' | 'pdf' | 'zip';
+  /** the file's appearance; named in the file only when both appearances left one run */
+  theme?: Theme;
+  /** the run exported both appearances, so each file names its own */
+  bothThemes?: boolean;
+  /** the export mode; `native` (Editable text) is named, the Perfect default is not */
+  mode?: ExportMode;
+};
+
+/**
+ * `GT pitch for Acme.pdf`, `GT pitch for Acme.pptx`; the appearance joins the name only when
+ * both appearances were exported in one run (`GT pitch for Acme (dark).pptx`), the mode only for
+ * the second PowerPoint mode (`GT pitch for Acme (editable).pptx`), both as
+ * `GT pitch for Acme (dark, editable).pptx`; an Untitled deck keeps the id (`untitled-20260920-peg8.pdf`).
+ */
+export function exportFileName(input: ExportFileNameInput): string {
+  const base = isUntitled(input.title) ? input.deckId : fileNameBase(input.title ?? '');
+  const marks: string[] = [];
+  if (input.bothThemes === true && input.theme !== undefined) marks.push(input.theme);
+  if (input.format === 'pptx' && input.mode === 'native') marks.push('editable');
+  const suffix = marks.length > 0 ? ` (${marks.join(', ')})` : '';
+  return `${base}${suffix}.${input.format}`;
+}
+
+/**
+ * The display name of one produced file from the name the exporter wrote (`<deckId>-r<rev>-<theme>.pptx`,
+ * `<deckId>-<theme>.pptx`, `<deckId>.pdf`, the zip of both): the theme is read off the produced
+ * name when the run made both, so the caller needs no per file bookkeeping. A name the exporter
+ * did not shape (no deck id prefix, another extension) is kept as it is.
+ */
+export function displayNameOf(
+  producedName: string,
+  input: { title: string | null | undefined; deckId: string; mode?: ExportMode },
+  produced: readonly string[] = [producedName],
+): string {
+  const match = /\.(pptx|pdf|zip)$/i.exec(producedName);
+  if (match === null) return producedName;
+  const format = match[1]!.toLowerCase() as 'pptx' | 'pdf' | 'zip';
+  const themeOf = (name: string): Theme | undefined =>
+    /-dark(?:\.|$)/i.test(name) ? 'dark' : /-light(?:\.|$)/i.test(name) ? 'light' : undefined;
+  const themes = new Set(produced.map(themeOf).filter((t): t is Theme => t !== undefined));
+  return exportFileName({
+    title: input.title,
+    deckId: input.deckId,
+    format,
+    theme: themeOf(producedName),
+    bothThemes: themes.size > 1,
+    mode: input.mode,
+  });
+}
+
+// ---------------------------------------------------------------------------------------------
 // The dialog's estimate
 
 /**

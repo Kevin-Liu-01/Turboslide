@@ -68,6 +68,7 @@ ${DITHER_SCRIPT}
     current = i;
     document.documentElement.removeAttribute('data-ts-ready');
     slides.forEach(function (s, k) { s.classList.toggle('is-on', k === i); });
+    stage.classList.toggle('is-title-slide', !!slides[i] && slides[i].getAttribute('data-kind') === 'title');
     if (counter) counter.textContent = counterFor(i);
     Array.prototype.forEach.call(stage.querySelectorAll('img[data-light], img[data-dark]'), function (img) {
       if (!img.getAttribute('data-light')) img.setAttribute('data-light', img.getAttribute('src'));
@@ -128,6 +129,7 @@ ${DITHER_SCRIPT}
     opts = opts || {};
     n = Math.max(0, Math.min(slides.length - 1, n));
     slides.forEach(function (s, k) { s.classList.toggle('is-on', k === n); });
+    stage.classList.toggle('is-title-slide', !!slides[n] && slides[n].getAttribute('data-kind') === 'title');
     i = n;
     if (counter) { var own = slides[n] ? slides[n].getAttribute('data-counter') : null; counter.textContent = own !== null ? own : pad(n + 1) + ' / ' + pad(slides.length); }
     document.title = 'GT Brand deck, ' + (n + 1) + ' of ' + slides.length;

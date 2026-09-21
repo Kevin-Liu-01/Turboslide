@@ -13,6 +13,7 @@ import {
   CORE_MATRIX,
   CORE_IDS,
   isManualRow,
+  isMeasureRow,
   tally,
 } from '../../scripts/probes/core-matrix.mjs';
 import { FEATURES, LEAD, OUTPUTS_SENTENCE } from './what-works-data.mjs';
@@ -70,9 +71,13 @@ describe('renderSection', () => {
     const section = renderSection({ results, date: matrixDate(), fromToday: true });
     for (const f of FEATURES) {
       const rows = CORE_MATRIX.filter((r) => r.feature === f.key);
-      /* a manual row (ruling (3)) left not driven holds nothing; it is listed as walked by hand */
+      /* a manual row (ruling (3)) left not driven holds nothing; it is listed as walked by hand.
+         A measurement row (PRODUCT.md 8.2) holds nothing either; it is listed as measured */
       const red = rows.filter(
-        (r) => results[r.id] !== 'passed' && !(results[r.id] === 'not driven' && isManualRow(r)),
+        (r) =>
+          results[r.id] !== 'passed' &&
+          !(results[r.id] === 'not driven' && isManualRow(r)) &&
+          !isMeasureRow(r),
       );
       if (red.length === 0) {
         expect(section).toContain(f.paragraph);
@@ -90,9 +95,17 @@ describe('renderSection', () => {
     const manualNotDriven = CORE_MATRIX.filter(
       (r) => isManualRow(r) && results[r.id] === 'not driven',
     );
-    expect(holding).toBe(t.broken + t.flaky + t['not driven'] - manualNotDriven.length);
+    /* the measurement rows of PRODUCT.md 8.2 hold nothing; a red one is listed as measured */
+    const measuredRed = CORE_MATRIX.filter((r) => isMeasureRow(r) && results[r.id] !== 'passed');
+    expect(holding).toBe(
+      t.broken + t.flaky + t['not driven'] - manualNotDriven.length - measuredRed.length,
+    );
     expect(section).toContain('Walked by hand, never counted as passed by a run');
     for (const r of manualNotDriven) expect(section).toContain(`\`${r.id}\``);
+    if (measuredRed.length > 0) {
+      expect(section).toContain('Measured and recorded, never holding a release');
+      for (const r of measuredRed) expect(section).toContain(`\`${r.id}\` (${r.today})`);
+    }
   });
 
   it('prints every paragraph, no held list and the outputs sentence when every row passed', () => {

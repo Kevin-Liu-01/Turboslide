@@ -162,8 +162,11 @@ export const NAV = {
 
 export const HERO = {
   word: 'Turboslide',
-  sentence:
-    "A slides editor with Google Slides' menus, toolbar and shortcuts, a canvas on every slide, and a PowerPoint export that matches the screen pixel for pixel.",
+  /* the seller's sentence is the page's heading (docs/PRODUCT.md section 2 rank 22; audit-seller
+     24; the row decks.home.seller-lead reads it as the hero's h1): what the page does for the
+     person who makes the pitch, in one line, no trailing period as the grammar's headings; the
+     lockup stands above it and the facts follow under it */
+  sentence: 'Build the pitch, present it and send the link, in one place',
   buttons: {
     newPresentation: {
       label: 'New Presentation',
@@ -171,6 +174,15 @@ export const HERO = {
       tip: {
         name: 'New Presentation',
         doc: 'Opens a fresh presentation; the first edit saves it.',
+      },
+    },
+    /* the template gallery page (docs/PRODUCT.md 4.3): Blank and the deployment's saved templates */
+    templates: {
+      label: 'Start from a template',
+      href: '/decks/templates',
+      tip: {
+        name: 'Start from a template',
+        doc: 'Blank, the templates saved on this Turboslide and the General Translation brand deck.',
       },
     },
     openDeck: {
@@ -185,7 +197,7 @@ export const HERO = {
     },
   },
   facts:
-    'No account needed to start. Free under the MIT licence, with the code on GitHub. Hosted at turboslide.vercel.app.',
+    "Google Slides' menus, toolbar and shortcuts, a canvas on every slide, and a PowerPoint export that matches the screen pixel for pixel. No account needed to start; free under the MIT licence.",
   /** the material credit under the band (0.22), on the page's ground where no cell sits behind it */
   credit: 'Material: liquid metal, Paper Shaders, one frame through the two tone screen',
   /** the decorative twin's sentence, for the record; the element itself is aria-hidden (1.12) */

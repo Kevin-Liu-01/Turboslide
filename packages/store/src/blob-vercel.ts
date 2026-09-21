@@ -16,7 +16,15 @@ import {
 } from '@vercel/blob';
 
 import type { BlobClient, BlobEntry } from './blob-store.ts';
-import { BlobExistsError, BlobPreconditionError } from './blob-store.ts';
+import {
+  BlobExistsError,
+  BlobPreconditionError,
+  BlobStaleReadError,
+  CDN_LAG_MS,
+} from './blob-store.ts';
+
+/** How often a body read asks the CDN again while its copy lags the version the caller named. */
+const CDN_LAG_STEP_MS = 250;
 import { splitBlobClient } from './migrate.ts';
 import type { Env } from './select.ts';
 import { BLOB_TOKEN_VARIABLE } from './select.ts';
@@ -155,20 +163,34 @@ export function vercelBlobClient(
       }
     },
     async get(pathname, options) {
-      let result;
-      try {
-        result = await get(pathname, {
-          access,
-          token,
-          useCache: false,
-          abortSignal: options?.signal,
-        });
-      } catch (error) {
-        if (isNotFound(error)) return null;
-        throw error;
+      // `useCache: false` reaches the SDK's uncached path for private stores alone; a public
+      // store's body comes from the CDN, whose copy lags an overwrite at the same pathname, so a
+      // caller that names the version it expects (BlobCallOptions.version) is answered only by a
+      // copy carrying it, read again every CDN_LAG_STEP_MS until CDN_LAG_MS has passed
+      const started = Date.now();
+      for (;;) {
+        let result;
+        try {
+          result = await get(pathname, {
+            access,
+            token,
+            useCache: false,
+            abortSignal: options?.signal,
+          });
+        } catch (error) {
+          if (isNotFound(error)) return null;
+          throw error;
+        }
+        if (result === null) return null;
+        const entry = entryOf(result.blob);
+        if (options?.version === undefined || entry.version === options.version)
+          return { entry, bytes: await bytesOf(result.stream) };
+        await result.stream?.cancel().catch(() => undefined);
+        if (Date.now() - started >= CDN_LAG_MS)
+          throw new BlobStaleReadError(pathname, options.version);
+        await new Promise((resolve) => setTimeout(resolve, CDN_LAG_STEP_MS));
+        if (options?.signal?.aborted) throw options.signal.reason ?? new Error('aborted');
       }
-      if (result === null) return null;
-      return { entry: entryOf(result.blob), bytes: await bytesOf(result.stream) };
     },
     async list(prefix, options) {
       const out: BlobEntry[] = [];

@@ -12,7 +12,7 @@ import { BLOCK_CSS } from './block-css.ts';
 import { renderSlides, slideCounter } from './deck.ts';
 import type { RenderedDeck, ThemeBundle } from './deck.ts';
 import { escapeText } from './html.ts';
-import { renderStage } from './stage.ts';
+import { bandAssetResolver, frameBandOf, renderStage } from './stage.ts';
 import { slideOrder } from './slide.ts';
 import type { RenderOptions } from './slide.ts';
 import type { AssetId, SlideId } from '@turboslide/schema/ids';
@@ -68,6 +68,10 @@ export type PrintDocumentOptions = {
   title?: string;
   /** Extra CSS appended after the print stylesheet. */
   extraCss?: string;
+  /** the catalog faces' source, for a self contained document (the PDF's headless page); the fonts route when absent */
+  fontSrc?: RenderOptions['fontSrc'];
+  /** every slide of the deck, for the @font-face rules of every face the deck uses */
+  deckSlides?: RenderOptions['deckSlides'];
 };
 
 export type PrintDocument = {
@@ -104,6 +108,8 @@ export function renderPrintDocument(
       assetSrc: options.assetSrc,
       blockAttrs: true,
       gtWord: options.gtWord ?? true,
+      ...(options.fontSrc === undefined ? {} : { fontSrc: options.fontSrc }),
+      ...(options.deckSlides === undefined ? {} : { deckSlides: options.deckSlides }),
     },
     wanted,
     play,
@@ -115,6 +121,14 @@ export function renderPrintDocument(
       html: entry.rendered.html.replace(/^<section class="slide/, '<section class="slide is-on'),
     },
   }));
+  /* the brand kit's frame band on every page (docs/PRODUCT.md 4.1, 4.5) */
+  const band = frameBandOf(
+    deck,
+    theme,
+    bandAssetResolver(deck, (id, bandTheme, path) =>
+      options.assetSrc ? options.assetSrc(id, bandTheme, path) : `${options.assetBase}${path}`,
+    ),
+  );
   const pages = rendered.map((entry, index) => {
     const slide = byId.get(entry.slideId);
     const stage = renderStage(entry.rendered.html, {
@@ -122,6 +136,8 @@ export function renderPrintDocument(
       counter: slide ? slideCounter(deck, slide, entry.n, play.length) : undefined,
       sprite: index === 0 ? options.bundle.sprite : undefined,
       present: true,
+      band,
+      titleSlide: slide?.kind === 'title',
     });
     return `<div class="ts-page" data-page="${index + 1}" data-slide="${escapeText(entry.slideId)}">${stage}</div>`;
   });

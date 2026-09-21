@@ -6,7 +6,7 @@ import type { Deck, DeckDocument } from '@turboslide/schema/deck';
 import { workedDocument } from '@turboslide/schema/fixtures';
 import { GOOGLE_LAYOUT_COUNT, LAYOUTS, LAYOUT_RULE_LABEL } from '@turboslide/schema/layouts';
 
-import { LayoutGrid, layoutTiles } from '../LayoutGrid';
+import { GT_GROUP_KEY, LayoutGrid, layoutTiles } from '../LayoutGrid';
 import { hideTooltip } from '../Tooltip';
 
 // The layout grid (gslides-parity SPEC 5.2, 5.3): 21 tiles in the one order, Google's eleven
@@ -17,6 +17,7 @@ const document_ = workedDocument();
 afterEach(() => {
   hideTooltip();
   cleanup();
+  localStorage.removeItem(GT_GROUP_KEY);
 });
 
 describe('LayoutGrid', () => {
@@ -31,13 +32,28 @@ describe('LayoutGrid', () => {
         render={() => '<section class="slide"></section>'}
       />,
     );
+    /* the GT layouts sit behind the disclosure row (docs/PRODUCT.md 3.4), which names the group
+       and its count; the group opens on its own when the current layout is one of GT's (the rule
+       slide's is), and the row collapses and reopens it */
+    const rule = container.querySelector<HTMLElement>('.ts-layout-rule');
+    expect(rule?.textContent).toContain(LAYOUT_RULE_LABEL);
+    expect(rule?.getAttribute('aria-expanded')).toBe('true');
+    fireEvent.click(rule as HTMLElement);
+    expect(rule?.getAttribute('aria-expanded')).toBe('false');
+    expect(container.querySelectorAll('.ts-layout-tile')).toHaveLength(GOOGLE_LAYOUT_COUNT);
+    fireEvent.click(rule as HTMLElement);
+    expect(rule?.getAttribute('aria-expanded')).toBe('true');
     const tiles = [...container.querySelectorAll<HTMLElement>('.ts-layout-tile')];
     expect(tiles).toHaveLength(LAYOUTS.length);
     expect(tiles.map((tile) => tile.dataset.layout)).toEqual(LAYOUTS.map((entry) => entry.id));
-    const rule = container.querySelector('.ts-layout-rule');
-    expect(rule?.textContent).toBe(LAYOUT_RULE_LABEL);
     const firstGroup = container.querySelectorAll('.ts-layout-tiles')[0];
     expect(firstGroup?.querySelectorAll('.ts-layout-tile')).toHaveLength(GOOGLE_LAYOUT_COUNT);
+    /* the caption row reads the hovered tile's sentence, and no tile carries a floating plate
+       (section 2 rank 24): the tiles keep data-tip for the audit and attach no handlers */
+    const caption = container.querySelector('[data-control="layout.caption"]');
+    fireEvent.pointerEnter(tiles[0] as HTMLElement);
+    expect(caption?.textContent).toBe(LAYOUTS[0]?.sentence);
+    expect(tiles[0]?.getAttribute('data-tip')).toBe(LAYOUTS[0]?.label);
     /* the current layout is ringed: the worked slide is a Ruled statement list */
     const current = container.querySelector<HTMLElement>('.ts-layout-tile.is-current');
     expect(current?.getAttribute('aria-selected')).toBe('true');
@@ -82,6 +98,10 @@ describe('LayoutGrid', () => {
     expect(document.activeElement?.getAttribute('data-layout')).toBe('opener');
     fireEvent.keyDown(grid, { key: 'ArrowDown' });
     expect(document.activeElement?.getAttribute('data-layout')).toBe(LAYOUTS[4]?.id);
+    /* End reaches the last of Google's eleven while the GT group is closed, closing once open */
+    fireEvent.keyDown(grid, { key: 'End' });
+    expect(document.activeElement?.getAttribute('data-layout')).toBe(LAYOUTS[10]?.id);
+    fireEvent.click(container.querySelector('.ts-layout-rule') as HTMLElement);
     fireEvent.keyDown(grid, { key: 'End' });
     expect(document.activeElement?.getAttribute('data-layout')).toBe('closing');
   });

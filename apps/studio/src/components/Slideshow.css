@@ -27,7 +27,23 @@
   cursor: none;
 }
 
+/* the snackbar inside the show takes the bar's tokens (PresentToolbar.css): the surround of a
+   show is the same near black in both appearances, and the chrome's ink plate is paper in dark
+   chrome, which painted a light block above the bar (docs/PRODUCT.md section 2 rank 23;
+   audit-seller 25); an off snackbar paints nothing at all */
 .ts-slideshow .ts-snackbar {
   bottom: 64px;
   left: 12px;
+  background: var(--pt-panel-ink, #101010);
+  color: var(--pt-panel-text, rgba(255, 255, 255, 0.87));
+  outline-color: color-mix(in srgb, var(--pt-panel-text, #fff) 28%, transparent);
+}
+
+.ts-slideshow .ts-snackbar:not(.is-on) {
+  visibility: hidden;
+}
+
+.ts-slideshow .ts-snackbar-action,
+.ts-slideshow .ts-snackbar-x {
+  color: inherit;
 }

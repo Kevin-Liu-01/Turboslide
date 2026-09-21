@@ -5,6 +5,7 @@ import { opsPostSchema } from '@turboslide/realtime/protocol';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
 import { denialBody } from '../../server/authorize';
+import { scheduleCardThumb } from '../../server/card-thumb';
 import {
   OPS_BODY_MAX_BYTES,
   admitOps,
@@ -132,6 +133,8 @@ async function serve(request: Request, deckId: string): Promise<Response> {
       },
     );
   }
+  // the card's capture on save (server/card-thumb.ts): slide 1 renders once the edits settle
+  if (hasEdits && result.entries.length > 0) scheduleCardThumb(deckId);
   return jsonResponse(
     {
       ok: true,

@@ -1,3 +1,4 @@
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import { useEffect, useState } from 'react';
 
 import { sectionOfSlide } from '@turboslide/schema/deck';
@@ -11,10 +12,48 @@ import { tipProps } from '../Tooltip';
 import { formatWhen } from '../VersionsPanel';
 
 /**
+ * The words on the Import button: the count of the picked slides, as Google's "Import slides"
+ * reads its count (docs/PRODUCT.md section 8.1 `slides.import.none-preselected`; audit-brand 19).
+ */
+export function importButtonLabel(picked: number, fallback: string): string {
+  if (picked === 0) return fallback;
+  return `Import ${picked} slide${picked === 1 ? '' : 's'}`;
+}
+
+/**
+ * The next selection after a click on a tile (`slides.import.none-preselected`): a plain click
+ * toggles the tile and becomes the anchor of a range; a Shift click adds every tile between the
+ * anchor and the clicked tile, as Google's grid does. `order` is every slide id of the source in
+ * order; a Shift click with no anchor is a plain click.
+ */
+export function togglePick(
+  picked: ReadonlySet<string>,
+  order: ReadonlyArray<string>,
+  id: string,
+  anchor: string | null,
+  shift: boolean,
+): { picked: Set<string>; anchor: string | null } {
+  const next = new Set(picked);
+  const at = order.indexOf(id);
+  const from = anchor === null ? -1 : order.indexOf(anchor);
+  if (shift && at >= 0 && from >= 0) {
+    const [lo, hi] = from < at ? [from, at] : [at, from];
+    for (const each of order.slice(lo, hi + 1)) next.add(each);
+    return { picked: next, anchor };
+  }
+  if (next.has(id)) next.delete(id);
+  else next.add(id);
+  return { picked: next, anchor: id };
+}
+
+/**
  * File > Import slides (gslides-parity SPEC 2.1, 6.5, 12 "Dialogs"): step 1 picks a presentation
  * of this studio (deck.list) or a bundle upload; step 2 lists its slides with All, None, Back and
  * Import slides. One `slide.import` copies the chosen slides with fresh ids and their assets
- * after the current slide. Keep original theme is omitted: one theme.
+ * after the current slide. Keep original theme is omitted: one theme. Nothing is picked when the
+ * list opens (the product round, docs/PRODUCT.md `slides.import.none-preselected`; audit-brand 19
+ * measured 84 slides coming over after one click on a tile meant to pick one); the button counts
+ * the picks and a Shift click picks a range.
  */
 export function ImportSlidesDialog() {
   const shell = useEditorShell();
@@ -23,6 +62,8 @@ export function ImportSlidesDialog() {
   const [decks, setDecks] = useState<ReadonlyArray<DeckHeadRow> | null>(null);
   const [source, setSource] = useState<SourceDeckSlides | null>(null);
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
+  /** the tile of the last plain click, the start of a Shift click's range */
+  const [anchor, setAnchor] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -58,7 +99,9 @@ export function ImportSlidesDialog() {
       .readDeck(deckId)
       .then((read) => {
         setSource(read);
-        setPicked(new Set(read.slides.map((slide) => slide.id)));
+        // nothing preselected: a person picks the slides they want (audit-brand 19)
+        setPicked(new Set());
+        setAnchor(null);
       })
       .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
       .finally(() => setBusy(false));
@@ -85,12 +128,19 @@ export function ImportSlidesDialog() {
       .finally(() => setBusy(false));
   };
 
-  const toggle = (id: string) => {
-    const next = new Set(picked);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setPicked(next);
+  const toggle = (id: string, event?: ReactMouseEvent<HTMLButtonElement>) => {
+    if (source === null) return;
+    const next = togglePick(
+      picked,
+      source.slides.map((slide) => slide.id),
+      id,
+      anchor,
+      event?.shiftKey === true,
+    );
+    setPicked(next.picked);
+    setAnchor(next.anchor);
   };
+  const okLabel = importButtonLabel(picked.size, DIALOGS.importSlides.ok);
 
   const step2 = source !== null;
   return (
@@ -109,12 +159,15 @@ export function ImportSlidesDialog() {
                 doc: 'Back to the list of presentations',
               },
               {
-                label: DIALOGS.importSlides.ok,
+                label: okLabel,
                 primary: true,
                 disabled: busy || picked.size === 0,
                 onClick: importSlides,
                 control: 'dialog.importSlides.ok',
-                doc: 'Copies the selected slides after the current slide',
+                doc:
+                  picked.size === 0
+                    ? 'Pick the slides to copy first; a click picks a slide and a Shift click a range'
+                    : 'Copies the picked slides after the current slide',
               },
             ]
           : []
@@ -241,10 +294,12 @@ export function ImportSlidesDialog() {
                 aria-selected={picked.has(slide.id)}
                 className={cn('ts-dialog-slide', picked.has(slide.id) && 'is-on')}
                 data-control={`dialog.importSlides.slide.${slide.id}`}
-                onClick={() => toggle(slide.id)}
+                onClick={(event) => toggle(slide.id, event)}
                 {...tipProps({
                   name: slide.title,
-                  doc: picked.has(slide.id) ? 'Selected; click to leave it out' : 'Click to select',
+                  doc: picked.has(slide.id)
+                    ? 'Picked; click to leave it out'
+                    : 'Click to pick it; Shift and click to pick every slide up to here',
                 })}
               >
                 <span className="ts-dialog-slide-frame">

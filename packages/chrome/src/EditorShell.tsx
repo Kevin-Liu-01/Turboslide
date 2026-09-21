@@ -9,7 +9,7 @@ import { applyTheme, readTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { ActivityPanel } from './activity/ActivityPanel';
-import { BottomBar } from './BottomBar';
+import { useOnEverySlidePlan } from './brand/UseOnEverySlide';
 import { anchorAtSelection, canvasOrder, stepThread } from './comments/comments-model';
 import { CommentsPanel } from './comments/CommentsPanel';
 import { NamePromptDialog } from './dialogs/NamePrompt';
@@ -80,6 +80,7 @@ import { CANVAS_NOTICES, PANELS, REFUSALS, SNACKBARS } from './menus/strings';
 import type { TailControl } from './menus/toolbar-tails';
 import { Palette } from './Palette';
 import { Panel } from './Panel';
+import { AssistPanel } from './panels/Assist';
 import { ColorPlate } from './pickers/ColorPlate';
 import { DashList } from './pickers/DashList';
 import { LineEndPicker } from './pickers/LineEndPicker';
@@ -216,6 +217,11 @@ const EditHtmlPanel = lazyDialog(() => import('./EditHtmlPanel').then((m) => m.E
 const ShortcutsDialog = lazyDialog(() =>
   import('./ShortcutsDialog').then((m) => m.ShortcutsDialog),
 );
+/* the product round (docs/PRODUCT.md 4.3, section 5): Save as template and Tailor for a customer */
+const SaveAsTemplateDialog = lazyDialog(() =>
+  import('./dialogs/SaveAsTemplate').then((m) => m.SaveAsTemplateDialog),
+);
+const TailorDialog = lazyDialog(() => import('./dialogs/Tailor').then((m) => m.TailorDialog));
 
 const LAZY_DIALOGS = [
   AgentAccessDialog,
@@ -247,6 +253,8 @@ const LAZY_DIALOGS = [
   DiagramPanel,
   EditHtmlPanel,
   ShortcutsDialog,
+  SaveAsTemplateDialog,
+  TailorDialog,
 ] as const;
 
 /** A colour or weight plate anchored to a menu row (SPEC-2 0.27). */
@@ -276,6 +284,49 @@ function readAppearance(): 'light' | 'dark' | 'match' {
   const theme = load('gt-theme');
   return theme === 'light' || theme === 'dark' ? theme : 'match';
 }
+
+/** The sessionStorage key the home page reads for the editor's Move to trash (-recent.ts TRASHED_KEY). */
+const TRASHED_MARKER_KEY = 'turboslide:trashed';
+
+/**
+ * Writes the trashed marker for /decks (docs/PRODUCT.md section 2 ranks 15 and 16): the deck's id
+ * and title with the facts its card draws, so the Undo on the home page restores the deck and its
+ * Recent entry. A refused storage leaves the seller with the listing, which no longer holds the
+ * deck.
+ */
+function writeTrashedMarker(input: EditorShellInput): void {
+  try {
+    const deck = input.document.deck;
+    const firstSlide = deck.sections[0]?.slideIds[0] ?? null;
+    const marker = {
+      id: input.deckId,
+      title: deck.title,
+      at: Date.now(),
+      facts: {
+        title: deck.title,
+        appearance: appearanceOf(deck),
+        firstSlide,
+        revision: input.revision,
+      },
+    };
+    window.sessionStorage.setItem(TRASHED_MARKER_KEY, JSON.stringify(marker));
+  } catch {
+    // private mode: the listing alone carries the change
+  }
+}
+
+/** The block types whose Insert > Link goes to the text popover; every other block takes the whole block Link dialog (docs/PRODUCT.md section 2 rank 19). */
+const TEXT_LINK_TYPES: ReadonlySet<string> = new Set([
+  'heading',
+  'paragraph',
+  'text',
+  'box',
+  'plain',
+  'rows',
+  'refs',
+  'say',
+  'table',
+]);
 
 function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -312,6 +363,8 @@ export function EditorShell({
   }, [menuOpen]);
   const [compact, setCompactState] = useState(false);
   const [toolFinderOpen, setToolFinderOpen] = useState(false);
+  /* the phrase Search the menus hands the Assist panel ("Ask the assistant: <phrase>", docs/PRODUCT.md 6.1) */
+  const [assistPrompt, setAssistPrompt] = useState<string | undefined>(undefined);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [wordArtOpen, setWordArtOpen] = useState(false);
   const [anchoredPicker, setAnchoredPicker] = useState<AnchoredPicker | null>(null);
@@ -643,16 +696,11 @@ export function EditorShell({
             setSetting('zoom', zoom === 'fit' ? 'fit' : String(Math.round(zoom * 100)));
           }
           if (plan.action === 'deck.trash') {
-            say(SNACKBARS.movedToTrash, {
-              label: SNACKBARS.undo,
-              run: () => {
-                void current.dispatch('deck.restore', {
-                  id: current.deckId,
-                  baseRevision: current.revision,
-                });
-                current.onTrashed?.();
-              },
-            });
+            /* the marker /decks reads on landing (docs/PRODUCT.md section 2 ranks 15 and 16;
+               apps/studio/src/routes/-recent.ts takeTrashedMarker): the home page drops the deck
+               from its Opened on this device row and shows Moved to trash with Undo there, since
+               this page leaves before its own snackbar can be read */
+            writeTrashedMarker(current);
             navigate('/decks');
             return;
           }
@@ -789,10 +837,82 @@ export function EditorShell({
           }
           runPlan(item);
           return;
-        case 'link':
-          if (current.onLink) current.onLink();
+        case 'link': {
+          /* one link popover for the text case (docs/PRODUCT.md section 2 rank 19): a run being
+             edited or a selected block that carries text opens the stage's popover; a block with
+             no text (a picture, a shape with none) takes the Link dialog for the whole block */
+          const slideNow = current.document.slides[current.slideId];
+          const block = slideNow ? selectedBlock(slideNow, current.selection) : undefined;
+          const textual =
+            current.selection?.text === true ||
+            (block !== undefined && TEXT_LINK_TYPES.has(block.type)) ||
+            (block === undefined && current.selection?.blockId !== undefined);
+          if (textual && current.onLink) current.onLink();
           else openDialog('link');
           return;
+        }
+        case 'addCaption': {
+          /* Add a caption on a picture (rank 10): the stage writes the caption field and opens it */
+          if (current.editor?.addCaption?.() !== true) say('Select a picture first');
+          return;
+        }
+        case 'toggleSidePanel':
+          /* the title row's toggle (docs/PRODUCT.md section 2 rank 25): the last panel back, or the open one closed */
+          if (panel === null) reopenPanel();
+          else closePanel();
+          return;
+        case 'useOnEverySlide': {
+          /* the picture as the kit's logo on the title slide and in every footer (docs/PRODUCT.md 4.4) */
+          const slideNow = current.document.slides[current.slideId];
+          const block = slideNow ? selectedBlock(slideNow, current.selection) : undefined;
+          if (block === undefined) {
+            say('Select a picture first');
+            return;
+          }
+          const plan = useOnEverySlidePlan(current.document, block);
+          if ('refused' in plan) {
+            say(plan.refused);
+            return;
+          }
+          if (current.commit === undefined) {
+            say(PANELS.brand.noKitYet);
+            return;
+          }
+          const undo = current.history?.undo;
+          current
+            .commit(plan.mutations, plan.label)
+            .then(() =>
+              say(
+                PANELS.brand.logoEverySlide,
+                undo === undefined ? undefined : { label: SNACKBARS.undo, run: () => undo() },
+              ),
+            )
+            .catch((error: unknown) => say(errorText(error)));
+          return;
+        }
+        case 'fontPicker': {
+          /* Format > Text > Font opens the toolbar's dropdown (docs/PRODUCT.md 4.2); a control
+             folded into More opens More first */
+          const control = document.querySelector<HTMLElement>('[data-control="toolbar.font"]');
+          if (control !== null && control.offsetParent !== null) {
+            /* once the menu has closed: a click from inside the row's own select handler opened
+               the dropdown under the closing menu, which took it down with itself */
+            window.setTimeout(() => control.click(), 0);
+            return;
+          }
+          const more = document.querySelector<HTMLElement>('[data-control="toolbar.more"]');
+          if (more === null) {
+            say('Select some text first');
+            return;
+          }
+          more.click();
+          window.setTimeout(() => {
+            document
+              .querySelector<HTMLElement>('[data-control="toolbar.more.toolbar.font"]')
+              ?.click();
+          }, 0);
+          return;
+        }
         case 'zoomIn':
           zoomStep(1);
           return;
@@ -898,7 +1018,7 @@ export function EditorShell({
           say(`${item.label} is not available for the current selection`);
       }
     },
-    [openDialog, runPlan, say, zoomStep],
+    [closePanel, openDialog, panel, reopenPanel, runPlan, say, zoomStep],
   );
 
   const runToggle = useCallback(
@@ -1765,6 +1885,10 @@ export function EditorShell({
               dispatch={input.dispatch}
               history
               identities={input.identities}
+              /* this browser's own principal: the account when signed in, else the anonymous
+                 principal the room knows this tab by (the account record carries a null principal
+                 id while anonymous, and the rows then never read You) */
+              me={input.account?.signedIn ? input.account.principal : input.presence?.self}
               showChanges={effectiveSettings.showChanges === true}
               selected={selectedVersion}
               menuContext={menuContext}
@@ -1912,6 +2036,24 @@ export function EditorShell({
             onClose={closePanel}
           />
         );
+      /* the product round (docs/PRODUCT.md 6.1): the assistant's panel; Accept commits through the
+         editor's own dispatch, one undo step */
+      case 'assist':
+        return (
+          <AssistPanel
+            document={input.document}
+            slideId={input.slideId}
+            revision={input.revision}
+            dispatch={input.dispatch}
+            canWrite={input.capabilities === undefined || input.capabilities.includes('write')}
+            restricted={input.access?.generalAccess.mode === 'restricted'}
+            {...(assistPrompt === undefined ? {} : { initialPrompt: assistPrompt })}
+            onTailor={() => openDialog('tailor')}
+            say={say}
+            {...(input.history?.undo === undefined ? {} : { onUndo: () => input.history?.undo() })}
+            onClose={closePanel}
+          />
+        );
       default:
         return null;
     }
@@ -1934,6 +2076,13 @@ export function EditorShell({
         return <DownloadDialog.Component format="pptx" />;
       case 'downloadPdf':
         return <DownloadDialog.Component format="pdf" />;
+      /* the product round (docs/PRODUCT.md section 2 rank 8, 4.3, section 5) */
+      case 'downloadOptions':
+        return <DownloadDialog.Component format="pptx" options />;
+      case 'saveAsTemplate':
+        return <SaveAsTemplateDialog.Component />;
+      case 'tailor':
+        return <TailorDialog.Component />;
       case 'slideNumbers':
         return <SlideNumbersDialog.Component />;
       case 'details':
@@ -2178,7 +2327,8 @@ export function EditorShell({
       <div className="ts-rpanel">
         <Suspense fallback={null}>{panelNode}</Suspense>
       </div>
-      <BottomBar />
+      {/* the bottom bar left in the product round (docs/PRODUCT.md section 2 rank 25): its side
+          panel toggle sits in the title row's right cluster (TitleRow.tsx `title.sidePanel`) */}
       {layoutPlate}
       {anchoredNode}
       <Suspense fallback={null}>{dialogNode}</Suspense>
@@ -2196,6 +2346,12 @@ export function EditorShell({
         onPickLayout={(layout) => {
           setToolFinderOpen(false);
           pickLayout(layout, 'new');
+        }}
+        onAsk={(phrase) => {
+          /* "Ask the assistant: <phrase>" opens the panel with the words in the box (docs/PRODUCT.md 6.1) */
+          setAssistPrompt(phrase);
+          setToolFinderOpen(false);
+          openPanel('assist');
         }}
         onClose={() => setToolFinderOpen(false)}
         onNotice={say}

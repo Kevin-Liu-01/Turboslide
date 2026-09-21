@@ -13,6 +13,12 @@
 // write starts from (the name this function gave it), or the last name this function wrote in
 // this session. A name typed by hand differs from all three, so it stays; Google Docs names an
 // untitled document from its first line the same way and stops once the name is edited.
+//
+// The product round (docs/PRODUCT.md 6.1 "Outside writes"; audit-assist 7): the rule follows a
+// write to the first title whoever wrote it. The controller runs this same function over the
+// document before a remote agent's op and commits the rename it answers (controller.tsx
+// `announceAgentWrite`), so the deck's name and the tab title no longer diverge from the slide
+// after an assistant or an agent over HTTP renamed the customer on the cover.
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { applyMutation } from '@turboslide/schema/reduce';

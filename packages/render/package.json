@@ -6,6 +6,8 @@
   "description": "One framework-free string renderer: renderSlide, renderDeck, renderStandalone, renderThumb, renderStage, slot geometry, the GT word transform, RasterRef emission.",
   "exports": {
     "./slide": "./src/slide.ts",
+    "./fonts": "./src/fonts.ts",
+    "./theme-css": "./src/theme-css.ts",
     "./deck": "./src/deck.ts",
     "./standalone": "./src/standalone.ts",
     "./thumb": "./src/thumb.ts",

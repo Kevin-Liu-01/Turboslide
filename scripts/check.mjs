@@ -180,6 +180,8 @@ const INNER_HTML_ALLOW = [
   'apps/studio/src/components/PresenterPage.tsx',
   'apps/studio/src/routes/print.$deckId.tsx',
   'apps/studio/src/components/DeckViewer.tsx',
+  // the template gallery mounts the theme's sprite once, as DeckViewer does (docs/PRODUCT.md 4.3)
+  'apps/studio/src/routes/decks.templates.tsx',
   'packages/viewer/src/SlideView.tsx',
   'packages/viewer/src/LiveClone.tsx',
   'packages/viewer/src/Editor.tsx',
@@ -226,6 +228,13 @@ const OVERWRITE_ALLOW = [
   // by the instance that ran the job, idempotently, so a poll on any instance answers from it; a
   // state record beside the export prefixes, never a public asset (the seam step of the round)
   'apps/studio/src/server/export-jobs.ts',
+  // the saved templates across instances (the product round fix round, b7 F2; docs/PRODUCT.md
+  // 4.3): `templates/<id>/<file>` are one saved template folder's files, rewritten whole by the
+  // instance that saved or replaced the template (the store's extras removed after), and
+  // `templates/index.json` is the index of them, put under `ifMatch` on the version it was read
+  // at; a template file is served through the studio's own routes, never as a public asset the
+  // assets route hands out (the ship step of the product round; check step 6 named the two sites)
+  'packages/store/src/blob-templates.ts',
 ];
 
 // MILESTONES.md, M1 acceptance, in order. `needs` marks the environment a step depends on.

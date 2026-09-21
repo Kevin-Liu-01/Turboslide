@@ -33,6 +33,8 @@ export const IDS = [
   'formatting.theme.toolbar-button',
   'formatting.theme.import-hidden',
   'formatting.persistence',
+  /* the product round (docs/PRODUCT.md 8.1) */
+  'formatting.alt-text.write-undo',
 ];
 
 const A_TEXT = 'Alpha beta gamma delta';
@@ -861,4 +863,93 @@ export async function run(t) {
   );
   t.deck.formatBoxes = ['fmt-a', 'fmt-b'];
   await t.advancedBack('the formatting rows');
+  await productRound(t);
+}
+
+/**
+ * The product round's row (docs/PRODUCT.md section 5, RETURN.md question 6, 8.1): Alt text in
+ * Format options returns to the default view; the description is written, undone and carried into
+ * the Editable text PowerPoint's `descr`. The row carries `parks: ['format.altText']`, so a red
+ * reading parks the section alone.
+ */
+async function productRound(t) {
+  const { page } = t;
+  const F = t.deck.formatSlide ?? t.deck.titleSlide;
+  const A = (t.deck.formatBoxes ?? ['fmt-a'])[0];
+  await t.clickCard(F);
+  await t.clearAll();
+  await t.step(
+    'formatting.alt-text.write-undo',
+    'Format options > Alt text: type a description, Tab; Cmd+Z; then the Editable text PowerPoint',
+    "the block carries the description, Cmd+Z removes it, and the PowerPoint's descr carries it",
+    async () => {
+      await t.selectObject(A);
+      await t.tailControl('toolbar.formatOptions');
+      await t.waitControl('panel.formatOptions', 6000);
+      let section = await t.has('[data-control="panel.formatOptions"] [data-section="altText"]');
+      let switched = false;
+      if (!section) {
+        /* the section is behind the switch on this build (RETURN.md question 6) */
+        if (await t.visible('panel.formatOptions.close'))
+          await t.clickControl('panel.formatOptions.close');
+        switched = await t.setAdvanced(true);
+        if (switched) t.deck.advanced = true;
+        await t.selectObject(A);
+        await t.tailControl('toolbar.formatOptions');
+        await t.waitControl('panel.formatOptions', 6000);
+        section = await t.has('[data-control="panel.formatOptions"] [data-section="altText"]');
+      }
+      if (!section) {
+        await t.advancedBack('Alt text');
+        return {
+          ok: false,
+          observed: `no Alt text section in Format options (switch on ${switched})`,
+        };
+      }
+      const sec = page.locator('[data-control="panel.formatOptions"] [data-section="altText"]');
+      if (await sec.evaluate((el) => el.classList.contains('is-closed')).catch(() => false))
+        await sec.locator('.ts-panel-section-head').click();
+      const field = page.locator('[data-control="formatOptions.altText.description"]').first();
+      await field.scrollIntoViewIfNeeded().catch(() => undefined);
+      await field.click();
+      await t.press('Meta+a');
+      await t.typeHuman('A renewal chart');
+      await t.press('Tab');
+      const altOf = async () => (await t.blockOf(F, A))?.block?.alt ?? null;
+      const written = await t.pollUntil(altOf, (v) => v === 'A renewal chart', 8000).catch(altOf);
+      await t.settled();
+      /* the PowerPoint's descr, from the export route in one request */
+      const pptx = await t.exportPptx();
+      let descr = null;
+      if (pptx.bytes) {
+        let entries = t.zipEntries(pptx.bytes);
+        /* the export answers a bundle since the product round (docs/PRODUCT.md section 2 rank 7:
+           the light and the dark Editable text files and the report zip); the light file is read */
+        const inner =
+          [...entries.keys()].find((n) => /\(light, editable\)\.pptx$/.test(n)) ??
+          [...entries.keys()].find((n) => /\.pptx$/.test(n));
+        if (inner !== undefined) entries = t.zipEntries(entries.get(inner)(true));
+        descr = [...entries.keys()]
+          .filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+          .some((n) => /descr="A renewal chart"/.test(entries.get(n)()));
+      }
+      if (await t.visible('panel.formatOptions.close'))
+        await t.clickControl('panel.formatOptions.close');
+      await t.clearAll();
+      await t.selectObject(A);
+      await t.press('Meta+z');
+      const undone = await t.pollUntil(altOf, (v) => v !== 'A renewal chart', 8000).catch(altOf);
+      await t.settled();
+      await t.advancedBack('Alt text');
+      if (pptx.noBearer)
+        return {
+          ok: null,
+          observed: `written ${written === 'A renewal chart'}, undone ${undone !== 'A renewal chart'}; the PowerPoint's descr was not read: no bearer for this origin (TURBOSLIDE_TOKEN or ~/.config/turboslide/hosts.json)`,
+        };
+      return {
+        ok: written === 'A renewal chart' && undone !== 'A renewal chart' && descr === true,
+        observed: `${switched ? 'with the switch on; ' : ''}alt after Tab ${JSON.stringify(written)}; after Cmd+Z ${JSON.stringify(undone)}; the Editable text export answered ${pptx.status}${pptx.bytes ? `, descr carried ${descr} in the light file of the bundle` : ''}`,
+      };
+    },
+  );
 }

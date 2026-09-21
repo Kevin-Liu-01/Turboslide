@@ -199,7 +199,7 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
       apply: true,
       baseRevision: 7,
     });
-    commitField('formatOptions.textFitting.padding.left', '24');
+    commitField('formatOptions.padding.left', '24');
     expect(dispatch).toHaveBeenLastCalledWith(
       'block.set',
       expect.objectContaining({
@@ -308,7 +308,7 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
 
   it('Drop shadow enables with the defaults, Adjustments write block.adjust, Alt text writes block.setAlt on every block, behind Tools > Advanced tools', () => {
     dispatch.mockClear();
-    /* Drop shadow and Alt text are parked sections (docs/FOCUS.md 3.2 Format), drawn with the switch on */
+    /* Drop shadow is a parked section (docs/FOCUS.md 3.2 Format), drawn with the switch on; Alt text is in the default view since the product round */
     panel('s', { advancedTools: true });
     fireEvent.click(control('formatOptions.shadow.enable'));
     expect(dispatch).toHaveBeenLastCalledWith('block.shadow', {
@@ -341,13 +341,14 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
     expect(control('formatOptions.picture.reset').getAttribute('aria-disabled')).toBe('true');
   });
 
-  it('draws no parked section with the switch off: Drop shadow, Alt text and Dither leave; Shape returned with the shapes (docs/FOCUS.md 3.2; docs/RETURN.md 2.2, 2.15)', () => {
+  it('draws no parked section with the switch off: Drop shadow and Dither leave; Shape returned with the shapes and Alt text in the product round (docs/FOCUS.md 3.2; docs/RETURN.md 2.2, 2.15; PRODUCT.md section 5)', () => {
     panel('s');
     const sections = [...document.querySelectorAll('[data-section]')].map((el) =>
       el.getAttribute('data-section'),
     );
-    for (const parked of ['shadow', 'altText', 'dither'])
-      expect(sections, parked).not.toContain(parked);
+    for (const parked of ['shadow', 'dither']) expect(sections, parked).not.toContain(parked);
+    /* Alt text returned to the default view (PRODUCT.md section 5; RETURN.md question 6) */
+    expect(sections).toContain('altText');
     expect(sections).toContain('size');
     expect(sections).toContain('position');
     /* the Shape section returned with Insert > Shape (RETURN.md 2.2); Table and Chart data return

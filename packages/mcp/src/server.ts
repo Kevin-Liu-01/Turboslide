@@ -22,7 +22,12 @@ import {
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
 import type { Author } from '@turboslide/schema/mutations';
-import { DECK_REVIEW_PROMPT, deckReviewPrompt } from './prompts.ts';
+import {
+  DECK_ASSIST_PROMPT,
+  DECK_REVIEW_PROMPT,
+  deckAssistPrompt,
+  deckReviewPrompt,
+} from './prompts.ts';
 import {
   INBOX_URI,
   RESOURCE_TEMPLATES,
@@ -254,14 +259,21 @@ export function createMcpServer(options: McpServerOptions): CreatedServer {
     }
   });
 
-  server.setRequestHandler(ListPromptsRequestSchema, () => ({ prompts: [DECK_REVIEW_PROMPT] }));
+  server.setRequestHandler(ListPromptsRequestSchema, () => ({
+    prompts: [DECK_REVIEW_PROMPT, DECK_ASSIST_PROMPT],
+  }));
 
   server.setRequestHandler(GetPromptRequestSchema, async (request) => {
-    if (request.params.name !== DECK_REVIEW_PROMPT.name)
+    if (
+      request.params.name !== DECK_REVIEW_PROMPT.name &&
+      request.params.name !== DECK_ASSIST_PROMPT.name
+    )
       throw new McpError(ErrorCode.InvalidParams, `Unknown prompt "${request.params.name}"`);
     const manifest = (await source.manifest()) as { id?: unknown; revision?: unknown } | null;
     const revision = typeof manifest?.revision === 'number' ? manifest.revision : 0;
     try {
+      if (request.params.name === DECK_ASSIST_PROMPT.name)
+        return deckAssistPrompt(request.params.arguments ?? {}, { id: source.deckId, revision });
       return deckReviewPrompt(request.params.arguments ?? {}, { id: source.deckId, revision });
     } catch (error) {
       if (error instanceof RangeError) throw new McpError(ErrorCode.InvalidParams, error.message);

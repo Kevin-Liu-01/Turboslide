@@ -22,7 +22,22 @@ import './accounts.css';
  * Opened on purpose from the own chip's Change name row it is the shell's dialog (`modal`): the
  * scrim, the focus trap and Esc, as SPEC-3 15 asks of a dialog a person opened (finding 36).
  */
-export function NamePromptDialog({ modal = false }: { modal?: boolean } = {}) {
+export type NamePromptDialogProps = {
+  modal?: boolean;
+  /**
+   * The words of the prompt when another surface opens it: the first Share on a browser with no
+   * name asks "Your name, shown to collaborators" (docs/PRODUCT.md section 2 rank 4), and hands
+   * the result to `onDone` instead of closing the shell's dialog, since the Share dialog stands
+   * behind it.
+   */
+  title?: string;
+  onDone?: (named: boolean) => void;
+};
+
+/** The title of the prompt the first Share raises (rank 4). */
+export const SHARE_NAME_PROMPT_TITLE = 'Your name, shown to collaborators';
+
+export function NamePromptDialog({ modal = false, title, onDone }: NamePromptDialogProps = {}) {
   const shell = useEditorShell();
   const account = shell.input.account;
   const prefilled =
@@ -31,9 +46,10 @@ export function NamePromptDialog({ modal = false }: { modal?: boolean } = {}) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const close = () => {
+  const close = (named = false) => {
     account?.onNamePrompt?.(false);
-    shell.closeDialog();
+    if (onDone !== undefined) onDone(named);
+    else shell.closeDialog();
   };
 
   const submit = () => {
@@ -46,7 +62,7 @@ export function NamePromptDialog({ modal = false }: { modal?: boolean } = {}) {
     setBusy(true);
     account
       .setName(trimmed)
-      .then(() => close())
+      .then(() => close(true))
       .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
       .finally(() => setBusy(false));
   };
@@ -59,13 +75,23 @@ export function NamePromptDialog({ modal = false }: { modal?: boolean } = {}) {
 
   return (
     <Dialog
-      title={ACCOUNT.namePrompt.title}
-      onClose={close}
+      title={title ?? ACCOUNT.namePrompt.title}
+      onClose={() => close(false)}
       width={360}
       control="dialog.namePrompt"
       className="ts-name-prompt"
       modal={modal}
       actions={[
+        ...(onDone === undefined
+          ? []
+          : [
+              {
+                label: 'Skip',
+                onClick: () => close(false),
+                control: 'dialog.namePrompt.skip',
+                doc: 'Keeps the generated label for now',
+              },
+            ]),
         {
           label: ACCOUNT.namePrompt.continue,
           primary: true,

@@ -1,0 +1,30 @@
+{
+  "base": "https://turboslide-o6u6te5bj-kl01s-projects.vercel.app",
+  "rows": [
+    {
+      "name": "a deck from /new",
+      "ok": true,
+      "observed": "deck untitled-20260920-fu1q"
+    },
+    {
+      "name": "the access record of the fresh deck: share.get on the window API and over HTTP at 0, 5 and 20 s; the Share dialog",
+      "ok": false,
+      "observed": "reads [{\"at\":\"0s\",\"window\":{\"mode\":\"open\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_3b5b3e3d-e5f2-4c78-9cb7-7e4733f4cd5b\"},\"http\":{\"status\":200,\"mode\":\"open\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_3b5b3e3d-e5f2-4c78-9cb7-7e4733f4cd5b\"}},{\"at\":\"5s\",\"window\":{\"mode\":\"open\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_3b5b3e3d-e5f2-4c78-9cb7-7e4733f4cd5b\"},\"http\":{\"status\":200,\"mode\":\"open\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_3b5b3e3d-e5f2-4c78-9cb7-7e4733f4cd5b\"}},{\"at\":\"20s\",\"window\":{\"mode\":\"open\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_3b5b3e3d-e5f2-4c78-9cb7-7e4733f4cd5b\"},\"http\":{\"status\":200,\"mode\":\"open\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_3b5b3e3d-e5f2-4c78-9cb7-7e4733f4cd5b\"}}]; dialog {\"legacy\":true,\"mode\":null,\"role\":null,\"sentence\":\"Anyone with the address can open and edit this presentation.\",\"address\":\"https://turboslide-o6u6te5bj-kl01s-projects.vercel.app/edit/untitled-20260920-fu1q\",\"owner\":null}"
+    },
+    {
+      "name": "an email address then Enter then a line, in a body paragraph; a Cmd+K link on a later word; the chip",
+      "ok": true,
+      "observed": "after Enter {\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"visible\":\"Click to add title || Write to sales@acme.com\"}; after the second line {\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"visible\":\"Click to add title || Write to sales@acme.comsecond line here\"}; stored [\"\\\"text\\\":\\\"\\\"\",\"\\\"text\\\":\\\"Write to [sales@acme.com](mailto:sales@acme.com)\\\\nsecond line here\\\"\"]; after a Cmd+K link on Renewal {\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"},{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"visible\":\"Click to add title || Write to sales@acme.comsecond line hereRenewal\"}; stored [\"\\\"text\\\":\\\"\\\"\",\"\\\"text\\\":\\\"Write to [sales@acme.com](mailto:sales@acme.com)\\\\nsecond line here\\\\n[Renewal](https://acme.com/renewal)\\\"\"]; chip after a click on the anchor {\"change\":true,\"remove\":true,\"any\":[\"chip.link\",\"chip.link.href\",\"chip.link.change\",\"chip.link.remove\"]}; leak of link syntax into the visible text false; product-p1-pass3-body-links.png"
+    },
+    {
+      "name": "the same in a heading (the split layout's h/text run)",
+      "ok": true,
+      "observed": "after Enter {\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"visible\":\"Write to sales@acme.com || Click to add text\"}; after the second line {\"anchors\":[],\"visible\":\"second line here || Click to add text\"}; stored [\"\\\"text\\\":\\\"second line here\\\"\",\"\\\"text\\\":\\\"\\\"\"]; after a Cmd+K link on Renewal {\"anchors\":[{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"visible\":\"Renewal || Click to add text\"}; stored [\"\\\"text\\\":\\\"[Renewal](https://acme.com/renewal)\\\"\",\"\\\"text\\\":\\\"\\\"\"]; chip after a click on the anchor {\"change\":true,\"remove\":true,\"any\":[\"chip.link\",\"chip.link.href\",\"chip.link.change\",\"chip.link.remove\"]}; leak of link syntax into the visible text false; product-p1-pass3-heading-links.png"
+    },
+    {
+      "name": "the ? key typed on the stage opens Keyboard shortcuts within 1 s and shows no snackbar",
+      "ok": true,
+      "observed": "opened in 785 ms; snackbar \"\"; {\"redo\":1,\"groups\":[{\"head\":\"Common actions\",\"first\":\"New slide\"},{\"head\":\"Film strip actions\",\"first\":\"Duplicate slide\"},{\"head\":\"Navigation\",\"first\":\"Slideshow\"}],\"first\":[\"New slide\",\"Undo\",\"Redo\",\"Copy\",\"Paste\",\"Slideshow\",\"Search the menus\"]}"
+    }
+  ]
+}

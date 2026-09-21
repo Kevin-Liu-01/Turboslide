@@ -89,9 +89,12 @@ describe('the kept shape presets in the renderer (FOCUS.md section 4)', () => {
        stage (server/decks.ts buildViewerDeck), the editor with `live: true`; a semantic token
        lands as its hex and a custom hex as itself on both, so a viewer that paints the default
        where the editor holds a colour reads a document behind the editor's, not a render */
+    /* GT blue is the brand kit's Primary role since the product round (docs/PRODUCT.md 4.1;
+       schema color.ts colorCss): it reads the sheet's --blue with its hex as the fallback on both
+       roots, so a kit's primary recolours a blue shape everywhere */
     for (const [fill, css] of [
       ['green', '#12a37a'],
-      ['blue', '#2f5ce0'],
+      ['blue', 'var(--blue, #2f5ce0)'],
       ['#aa3366', '#aa3366'],
       ['plate', 'var(--plate)'],
     ] as const) {

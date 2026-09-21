@@ -20,6 +20,7 @@ import {
 } from '@turboslide/viewer/present/presentModel';
 import type { BlankSlide } from '@turboslide/viewer/present/presentModel';
 import { PresentShortcuts } from '@turboslide/viewer/present/PresentShortcuts';
+import { mountSlideLinkClicks } from '@turboslide/viewer/present/slideLinks';
 import { openPresentChannel } from '@turboslide/viewer/present/presentSync';
 import type { PresentChannel, PresentMessage } from '@turboslide/viewer/present/presentSync';
 import { PresentToolbar } from '@turboslide/viewer/present/PresentToolbar';
@@ -75,6 +76,13 @@ type Popover = 'list' | 'options' | 'shortcuts' | null;
 
 /** How long the toolbar stays after the pointer leaves its corner (SPEC 9.2). */
 const BAR_FADE_MS = 2000;
+/**
+ * How long the bar shows on entry and after a pointer move anywhere over the show (docs/PRODUCT.md
+ * 3.1.1; audit-interface 13): about three seconds, as Google's does, so a presenter who has never
+ * used the show learns where the controls are; the corner below keeps it up while the pointer is
+ * there.
+ */
+export const BAR_ENTRY_MS = 3000;
 /** The corner of the stage that shows the toolbar: this far up from the bottom and in from the left. */
 const BAR_ZONE = { height: 120, width: 560 };
 /** How long typed digits wait for Enter. */
@@ -259,12 +267,21 @@ export function Slideshow({
     window.clearTimeout(barTimer.current);
     setBarShown(true);
   }, []);
-  const fadeBar = useCallback(() => {
+  const fadeBar = useCallback((after: number = BAR_FADE_MS) => {
     window.clearTimeout(barTimer.current);
     barTimer.current = window.setTimeout(() => {
       if (!barHover.current && live.current.popover === null) setBarShown(false);
-    }, BAR_FADE_MS);
+    }, after);
   }, []);
+  /* the bar for about three seconds: on entry and after every pointer move over the show (3.1.1) */
+  const glanceBar = useCallback(() => {
+    setBarShown(true);
+    fadeBar(BAR_ENTRY_MS);
+  }, [fadeBar]);
+
+  useMountEffect(() => {
+    glanceBar();
+  });
 
   /* a show that opens on a skipped slide moves to the next unskipped one */
   useEffect(() => {
@@ -275,6 +292,21 @@ export function Slideshow({
   useEffect(() => {
     onState?.({ blank, laser, fullscreen });
   }, [blank, laser, fullscreen, onState]);
+
+  /* a slide link on a slide moves the show (docs/PRODUCT.md section 2 rank 19; build/b2.md R5):
+     #next, #previous, #first and #last resolve against the play list here, #s/<id> too */
+  useEffect(() => {
+    const el = root.current;
+    if (el === null) return undefined;
+    return mountSlideLinkClicks(
+      el,
+      () => ({ play: live.current.play, index: live.current.index }),
+      (slideId) => {
+        const at = live.current.play.findIndex((slide) => slide.id === slideId);
+        if (at >= 0) goto(at);
+      },
+    );
+  }, [goto]);
 
   /* the keys, on the document ahead of the reading surface's listener (SPEC 10.2: Google's
      presenting letters win while presenting) */
@@ -373,7 +405,7 @@ export function Slideshow({
       const inZone =
         event.clientY >= box.bottom - BAR_ZONE.height && event.clientX <= box.left + BAR_ZONE.width;
       if (inZone) showBar();
-      else if (!barHover.current) fadeBar();
+      else if (!barHover.current) glanceBar();
     };
     document.addEventListener('keydown', onKeyDown, true);
     document.addEventListener('fullscreenchange', onFullscreen);

@@ -25,14 +25,23 @@ import { BUNDLE_MAX_BYTES, BUNDLE_MEDIA_TYPE, sha256Hex } from '@turboslide/stor
 import { loadDeckDir } from '@turboslide/store/file-store';
 import { packDeckDir } from '@turboslide/store/pack';
 import type { PackResult } from '@turboslide/store/pack';
+import { checkRevision } from '@turboslide/store/hosted';
 import {
   StaleRevisionError,
   copyDeck,
   createDeck,
+  deleteTemplate,
   listDeckHeads,
+  readDefaultTemplateId,
+  readTemplateIndex,
   removeDeck,
+  renameTemplate,
   restoreDeck,
+  saveTemplate,
+  setDefaultTemplate,
+  templateSlides,
   trashDeck,
+  updateTemplate,
 } from '@turboslide/store/templates';
 import type {
   CopyDeckInput,
@@ -245,6 +254,55 @@ export function registerDeckActions(
   dispatcher.register('deck.restore', (input) => deckRestore(deps.decksDir, input as DeckIdInput));
   dispatcher.register('deck.remove', (input) =>
     deckRemove(deps.decksDir, input as DeckIdInput & { confirm: true }),
+  );
+  /* the templates of the product round over the same folder (docs/PRODUCT.md 4.3; build/b5b.md
+     R3): the two reads, Save as template and Replace with the source deck's revision checked, and
+     the three deckless writes; a checkout's holder is its owner, so no scope check here */
+  dispatcher.register('template.list', () => ({
+    templates: readTemplateIndex(deps.decksDir),
+    default: readDefaultTemplateId(deps.decksDir),
+  }));
+  dispatcher.register('template.slides', (input) =>
+    templateSlides(deps.decksDir, (input as { id: string }).id),
+  );
+  dispatcher.register('template.create', (input) => {
+    const { deckId, name, sentence, baseRevision } = input as {
+      deckId: string;
+      name: string;
+      sentence?: string;
+      baseRevision: number;
+    };
+    checkRevision(deps.decksDir, deckId, baseRevision);
+    return saveTemplate(deps.decksDir, {
+      deckId,
+      name,
+      ...(sentence === undefined ? {} : { sentence }),
+    });
+  });
+  dispatcher.register('template.update', (input) => {
+    const { id, deckId, sentence, baseRevision } = input as {
+      id: string;
+      deckId: string;
+      sentence?: string;
+      baseRevision: number;
+    };
+    checkRevision(deps.decksDir, deckId, baseRevision);
+    return updateTemplate(deps.decksDir, {
+      id,
+      deckId,
+      ...(sentence === undefined ? {} : { sentence }),
+    });
+  });
+  dispatcher.register('template.rename', (input) =>
+    renameTemplate(deps.decksDir, input as { id: string; name: string }),
+  );
+  dispatcher.register('template.delete', (input) => {
+    const { id, confirm } = input as { id: string; confirm?: boolean };
+    if (confirm !== true) throw new TypeError('template.delete needs confirm: true');
+    return deleteTemplate(deps.decksDir, { id });
+  });
+  dispatcher.register('template.setDefault', (input) =>
+    setDefaultTemplate(deps.decksDir, (input as { id: string }).id),
   );
 }
 

@@ -96,3 +96,238 @@
 .ts-themes-tile.is-current .ts-themes-name {
   color: var(--pt-ink);
 }
+
+/* The Brand kit panel (ThemesPanel.tsx; docs/PRODUCT.md 4.1): nine sections under 12 px titanium
+   heads, the logo preview at 132 by 84 on the deck's appearance, six colour rows of a swatch,
+   the role and a hex field, the Font dropdowns, the footer and counter fields, the frame checks
+   with one sentence each, the lexicon and the Reset button at the foot. Tokens only; radius 0. */
+.ts-brand-section {
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-brand-head {
+  margin: 0 0 8px;
+  font: 12px/1 var(--pt-text);
+  color: var(--pt-titanium);
+}
+
+.ts-brand-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ts-brand-head-row .ts-brand-head {
+  margin: 0;
+}
+
+.ts-brand-switch {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.ts-brand .ts-fo-button.is-small {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.ts-brand-logo-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ts-brand-logo-preview {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 132px;
+  height: 84px;
+  flex: 0 0 auto;
+  border: 1px solid var(--pt-hair);
+  color: #8a8f98;
+}
+
+.ts-brand-logo-preview[data-theme='light'] {
+  background: #ffffff;
+}
+
+.ts-brand-logo-preview[data-theme='dark'] {
+  background: #070707;
+}
+
+.ts-brand-logo-preview.is-empty {
+  background:
+    linear-gradient(
+      to top right,
+      transparent calc(50% - 1px),
+      var(--pt-hair) 50%,
+      transparent calc(50% + 1px)
+    ),
+    var(--pt-paper);
+}
+
+.ts-brand-logo-preview img {
+  display: block;
+  max-width: 116px;
+  max-height: 68px;
+  object-fit: contain;
+}
+
+.ts-brand-logo-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ts-brand-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ts-brand-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  margin: 6px 0;
+}
+
+.ts-brand-label {
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-brand-field select,
+.ts-brand-input,
+.ts-brand-textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.4 var(--pt-text);
+}
+
+.ts-brand-textarea {
+  padding: 6px 8px;
+  resize: vertical;
+}
+
+.ts-brand-field select:focus-visible,
+.ts-brand-input:focus-visible,
+.ts-brand-textarea:focus-visible,
+.ts-brand-hex:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-brand-line {
+  margin: 4px 0 6px;
+  font: 12px/1.4 var(--pt-text);
+  color: var(--pt-titanium);
+}
+
+.ts-brand-colors {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ts-brand-color {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 96px;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-brand-swatch {
+  position: relative;
+  box-sizing: border-box;
+  display: block;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--pt-hair);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.ts-brand-swatch.is-own {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-brand-swatch input[type='color'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ts-brand-swatch:focus-within {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-brand-role {
+  font: 13px/1.2 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-brand-hex {
+  box-sizing: border-box;
+  width: 96px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px/1 var(--pt-mono);
+}
+
+.ts-brand-font .ts-font-control {
+  width: 100%;
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-brand .ts-brand-font {
+  display: flex;
+  width: 100%;
+}
+
+.ts-brand-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 2px;
+  color: var(--pt-ink);
+  font: 13px/1.3 var(--pt-text);
+}
+
+.ts-brand-check input {
+  margin: 0;
+  accent-color: var(--pt-ink);
+}
+
+.ts-brand-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 16px 16px;
+}
+
+.ts-brand-reset {
+  height: 28px;
+}

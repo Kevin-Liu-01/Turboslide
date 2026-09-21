@@ -22,6 +22,11 @@
   /* --edge and --thumb are viewer chrome tokens (head:178-179); the sheet mat and the frames use them */
   --edge: rgba(7, 7, 7, 0.62);
   --thumb: rgba(7, 7, 7, 0.32);
+  /* the brand kit's key colours (docs/PRODUCT.md 4.1): --blue is GT blue, the Primary role
+     (links, the key colour of charts and highlights; the schema's `blue` colour reads it),
+     --accent the second colour, the same value until a kit sets it apart */
+  --blue: #2f5ce0;
+  --accent: #2f5ce0;
   --display: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --text: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
@@ -44,6 +49,8 @@
   /* head:179 */
   --edge: rgba(242, 242, 240, 0.55);
   --thumb: rgba(242, 242, 240, 0.32);
+  --blue: #2f5ce0;
+  --accent: #2f5ce0;
 }
 
 .ts-sheet,
@@ -132,6 +139,106 @@
 }
 .ts-sheet .wordmark svg {
   display: block;
+}
+
+/* the brand kit's layer (docs/PRODUCT.md 4.1, 4.4; render slide.ts renderKitLayer): the frame
+   band's logo and text and a corner logo, drawn from the kit record inside every slide in sheet
+   coordinates (the layer sits at the sheet origin the way .freeform-sheet does), so every surface
+   that renders slides carries them and nothing on the sheet selects or drags them; the stage's
+   own .wordmark is hidden by the override stylesheet when the kit draws the footer slot */
+.ts-sheet .ts-kit {
+  position: absolute;
+  left: -137px;
+  top: -129px;
+  width: 1600px;
+  height: 900px;
+  pointer-events: none;
+  z-index: 3;
+}
+.ts-sheet .ts-kit-logo {
+  position: absolute;
+  display: flex;
+  align-items: flex-end;
+  color: var(--titanium);
+}
+.ts-sheet .ts-kit-logo svg,
+.ts-sheet .ts-kit-logo img {
+  display: block;
+  object-fit: contain;
+}
+.ts-sheet .ts-kit-logo.pos-bottom-left {
+  left: 72px;
+  bottom: 18px;
+}
+.ts-sheet .ts-kit-logo.pos-bottom-right {
+  right: 72px;
+  bottom: 18px;
+}
+.ts-sheet .ts-kit-logo.pos-top-left {
+  left: 72px;
+  top: 22px;
+}
+.ts-sheet .ts-kit-logo.pos-top-right {
+  right: 72px;
+  top: 22px;
+}
+/* the stage's wordmark moved by the kit (stage.ts frameBandHtml, the viewer's Frame): the corner
+   classes over the sheet's bottom left default, a picture logo fitted to 18 px tall */
+.ts-sheet .wordmark.pos-bottom-right {
+  left: auto;
+  right: 72px;
+}
+.ts-sheet .wordmark.pos-top-left {
+  bottom: auto;
+  top: 22px;
+}
+.ts-sheet .wordmark.pos-top-right {
+  left: auto;
+  bottom: auto;
+  right: 72px;
+  top: 22px;
+}
+.ts-sheet .wordmark.is-picture img {
+  display: block;
+  height: 18px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+}
+/* the footer text draws on every slide but the title (docs/PRODUCT.md 4.4): the stage carries
+   is-title-slide while a title slide is on (render/stage.ts renderStage, runtime.ts) */
+.ts-sheet .ts-stage.is-title-slide .ts-kit-footer {
+  display: none;
+}
+.ts-sheet .ts-kit-footer {
+  position: absolute;
+  left: 200px;
+  right: 200px;
+  bottom: 19px;
+  text-align: center;
+  font-family: var(--text);
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ts-sheet .ts-kit-counter {
+  position: absolute;
+  right: 72px;
+  bottom: 22px;
+  font-family: var(--display);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--titanium);
+  font-variant-numeric: tabular-nums;
+}
+.ts-sheet .mark-picture {
+  display: block;
+  object-fit: contain;
+  object-position: left bottom;
 }
 
 .ts-sheet .slide > .in {
@@ -403,7 +510,7 @@
   color: #e5484d;
 }
 .ts-sheet .ic.info {
-  color: #2f5ce0;
+  color: var(--blue, #2f5ce0);
 }
 .ts-sheet .rows > div > b .ic {
   margin-right: 10px;

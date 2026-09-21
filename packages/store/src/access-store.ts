@@ -19,12 +19,12 @@
 // up with an immutable copy under its md5 first (`putWithCopy`, `immutableCopyPath`) and every
 // read is proven against `head()` with that copy as the read that holds when the document's own
 // url serves a stale body (`provenGet`). Framework free; the studio's server/access.ts wires it.
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import type { AccessRecord, ShareLink } from '@turboslide/schema/access';
-import { accessRecordSchema } from '@turboslide/schema/access';
+import type { AccessRecord, GeneralAccess, ShareLink } from '@turboslide/schema/access';
+import { accessRecordSchema, newDeckRecord } from '@turboslide/schema/access';
 import { canonicalJson } from '@turboslide/schema/json';
 import { z } from 'zod';
 
@@ -38,6 +38,112 @@ import type { DeckHead } from './templates.ts';
 
 /** A record with the etag its bytes carry; `ifMatch` on the next write. */
 export type StoredAccess = { record: AccessRecord; etag: string };
+
+/**
+ * The general access a deck created from `/new` starts with (the product round, docs/PRODUCT.md
+ * section 1's decision and question 10; section 2 rank 3; the row
+ * `share.dialog.co-edit-from-copied-link`): on a deployment with anonymous principals (no sign in
+ * provider, production today) a colleague who opens the copied address must edit at once, so the
+ * record starts as Anyone with the link, Editor, and the Share dialog's sentence asks the seller
+ * to pick Viewer before sending it to a customer. On a deployment whose principals sign in the
+ * record starts restricted, as SPEC-3 6.1 says. The studio's `recordNewDeck` (server/access.ts)
+ * takes the deployment's answer from here; a checkout's synthesized record stays restricted
+ * (apps/cli/src/records/access.ts loadRecord: the folder's holder is its owner).
+ *
+ * The word is `link`, never `open` (the product round fix round; VERIFICATION.md "Product round,
+ * pass 1" finding 1): the Share dialog reads `open` as the legacy row of a deck with no record
+ * (the plain address, no access select, no owner row), so a new deck under `open` showed a seller
+ * "Anyone with the address can view (legacy)" and Copy link copied the plain `/edit/<id>`
+ * address, and the 28 rows of core/share.spec.ts cascaded on both tiers.
+ */
+export function defaultGeneralAccessFor(deployment: {
+  anonymousPrincipals: boolean;
+}): GeneralAccess {
+  return deployment.anonymousPrincipals
+    ? { mode: 'link', role: 'editor' }
+    : { mode: 'restricted', role: 'viewer' };
+}
+
+/** The label of the general access link, the one `share.setGeneralAccess` mints and rotates (apps/cli/src/records/access.ts). */
+export const GENERAL_LINK_LABEL = 'Anyone with the link';
+
+/**
+ * A general access link record minted with the deck (`mode: 'link'` names one live link, the
+ * invariant `share.setGeneralAccess` keeps): the token is drawn, hashed into the record and
+ * forgotten here, since a record holds hashes alone (SPEC-3 0.15). The first Copy link of the
+ * dialog rotates the link (`share.rotateLink`) and hands the seller the fresh token once, the
+ * same path a rotated link takes on a deck shared before; nobody can open the address this
+ * record was minted with, because the token never left this function.
+ */
+export function mintedGeneralLink(
+  role: GeneralAccess['role'],
+  createdBy: string,
+  now: string,
+): ShareLink {
+  return mintedGeneralLinkWithToken(role, createdBy, now).link;
+}
+
+/**
+ * The same minting with the token beside the link, for the one moment the plaintext exists: the
+ * creation of a deck hands it to the page that created it, so the Share dialog's field holds the
+ * address at its first open instead of a placeholder (b7.md FR1; docs/PRODUCT.md section 2 rank
+ * 3). The record keeps the hash alone.
+ */
+export function mintedGeneralLinkWithToken(
+  role: GeneralAccess['role'],
+  createdBy: string,
+  now: string,
+): { link: ShareLink; token: string } {
+  const token = randomBytes(17).toString('base64url').slice(0, 22);
+  return {
+    token,
+    link: {
+      id: `lnk_${randomBytes(12).toString('base64url')}`,
+      hash: `sha256:${createHash('sha256').update(token).digest('hex')}`,
+      role,
+      createdAt: now,
+      createdBy,
+      revokedAt: null,
+      expiresAt: null,
+      label: GENERAL_LINK_LABEL,
+      useCount: 0,
+    },
+  };
+}
+
+/**
+ * `newDeckRecord` with the deployment's default general access (defaultGeneralAccessFor), and
+ * under Anyone with the link the general link minted with the record, so the dialog's first
+ * stage reads a link that exists (its created date, its role) and Copy link rotates it.
+ */
+export function newHostedDeckRecord(
+  deckId: string,
+  owner: string,
+  assetKey: string,
+  now: string,
+  deployment: { anonymousPrincipals: boolean },
+): AccessRecord {
+  return newHostedDeckRecordWithToken(deckId, owner, assetKey, now, deployment).record;
+}
+
+/** The general link the record was minted with, in the clear: handed once to the creating page (FR1). */
+export type MintedGeneralLink = { linkId: string; token: string };
+
+/** `newHostedDeckRecord` with the minted general link's token beside the record, when one was minted. */
+export function newHostedDeckRecordWithToken(
+  deckId: string,
+  owner: string,
+  assetKey: string,
+  now: string,
+  deployment: { anonymousPrincipals: boolean },
+): { record: AccessRecord; general: MintedGeneralLink | null } {
+  const generalAccess = defaultGeneralAccessFor(deployment);
+  const record = { ...newDeckRecord(deckId, owner, assetKey, now), generalAccess };
+  if (generalAccess.mode !== 'link') return { record, general: null };
+  const minted = mintedGeneralLinkWithToken(generalAccess.role, owner, now);
+  record.links = [...record.links, minted.link];
+  return { record, general: { linkId: minted.link.id, token: minted.token } };
+}
 
 export type AccessWriteOptions = {
   /** the etag the caller read; null for a record that must not exist yet; absent skips the check */
@@ -493,6 +599,12 @@ export type DeckIndex = {
   recent: { deckId: string; at: string }[];
   /** a deck whose owner asked this principal to take it over (SPEC-3 6.5) */
   pendingOwnership?: string[];
+  /**
+   * The display name the principal typed (docs/PRODUCT.md section 2 rank 4; b1.md R17): the
+   * principal record of the blob tier lives in one instance's file store, so the name rides the
+   * index every instance reads, the way the link grants do.
+   */
+  name?: string;
 };
 
 export const deckIndexSchema = z.strictObject({
@@ -509,6 +621,7 @@ export const deckIndexSchema = z.strictObject({
   trashed: z.array(z.strictObject({ deckId: z.string().min(1), at: z.string() })),
   recent: z.array(z.strictObject({ deckId: z.string().min(1), at: z.string() })),
   pendingOwnership: z.array(z.string().min(1)).optional(),
+  name: z.string().min(1).max(120).optional(),
 }) satisfies z.ZodType<DeckIndex>;
 
 export function emptyDeckIndex(): DeckIndex {
@@ -630,6 +743,10 @@ export function memoryIndexStore(): IndexStore & { readonly indexes: Map<string,
 
 /** The pure updates the actions apply to an index. */
 export const indexUpdates = {
+  /** the typed display name (R17); null when the index carries it already */
+  name(name: string): (index: DeckIndex) => DeckIndex | null {
+    return (index) => (index.name === name ? null : { ...index, name });
+  },
   owned(deckId: string): (index: DeckIndex) => DeckIndex | null {
     return (index) =>
       index.owned.includes(deckId) ? null : { ...index, owned: [...index.owned, deckId] };

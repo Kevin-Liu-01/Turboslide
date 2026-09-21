@@ -3,7 +3,10 @@
    would vanish (SPEC 2.2, the help card's rule); rows inside it are ruled in --pt-hair-soft and
    the actions row draws --pt-hair above itself. 13 px Inter, 24 px padding, radius 0, no shadow;
    the scrim fades over the toast duration and the card rises 8 px over the enter duration; off
-   under reduced motion. Colors are tokens only. */
+   under reduced motion. The product round (docs/PRODUCT.md 3.1): every field is ruled in
+   --pt-field (3:1), every control's focus ring is the one inset ring of tokens.css, the X takes
+   the plate ground on hover, a checked box draws a check and not a dash, and every select is the
+   one select of tokens.css. Colors are tokens only. */
 .ts-dialog-scrim {
   position: fixed;
   inset: 0;
@@ -94,14 +97,16 @@
 
 .ts-dialog-x:hover {
   color: var(--pt-ink);
+  background: var(--pt-plate);
   border-color: var(--pt-hair);
 }
 
+/* the one focus rule (3.1; audit-interface 38): 1 px ink, inset, as on every control with a box */
 .ts-dialog-x:focus-visible,
 .ts-dialog-btn:focus-visible,
 .ts-dialog-tab:focus-visible {
   outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
+  outline-offset: -1px;
 }
 
 .ts-dialog-lead {
@@ -156,18 +161,35 @@
 .ts-dialog input[type='text'],
 .ts-dialog input[type='search'],
 .ts-dialog input[type='url'],
+.ts-dialog input[type='email'],
 .ts-dialog input[type='number'],
-.ts-dialog select,
 .ts-dialog textarea {
   box-sizing: border-box;
   width: 100%;
   min-height: 32px;
   padding: 0 10px;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-field);
   border-radius: 0;
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1.4 var(--pt-text);
+}
+
+/* a select fills its field row; the drawing is tokens.css's one select rule */
+.ts-dialog select {
+  width: 100%;
+}
+
+.ts-dialog input:disabled,
+.ts-dialog textarea:disabled {
+  color: var(--pt-disabled);
+  border-color: var(--pt-hair-soft);
+}
+
+/* a read only field (the Share dialog's address): the field's boundary, the text in ink-2, no caret */
+.ts-dialog input[readonly] {
+  color: var(--pt-ink-2);
+  cursor: default;
 }
 
 .ts-dialog textarea {
@@ -195,7 +217,7 @@
 }
 
 .ts-dialog-check.is-disabled {
-  color: var(--pt-titanium);
+  color: var(--pt-disabled);
   cursor: default;
 }
 
@@ -228,13 +250,27 @@
   border-radius: 50%;
 }
 
+/* the checked box (3.1, the check row; audit-interface 23): an ink fill with the check the menus
+   draw, a 5 by 9 corner turned 45 degrees in paper; the 6 by 2 px bar read as indeterminate */
+.ts-dialog-check-box {
+  position: relative;
+}
+
 .ts-dialog-check input:checked + .ts-dialog-check-box {
   background: var(--pt-ink);
   border-color: var(--pt-ink);
-  background-image: linear-gradient(var(--pt-paper), var(--pt-paper));
-  background-size: 6px 2px;
-  background-repeat: no-repeat;
-  background-position: center;
+}
+
+.ts-dialog-check input:checked + .ts-dialog-check-box::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 0.5px;
+  width: 4px;
+  height: 9px;
+  border-right: 1.5px solid var(--pt-paper);
+  border-bottom: 1.5px solid var(--pt-paper);
+  transform: rotate(45deg);
 }
 
 .ts-dialog-radio input:checked + .ts-dialog-radio-dot {
@@ -245,7 +281,7 @@
 .ts-dialog-check input:focus-visible + .ts-dialog-check-box,
 .ts-dialog-radio input:focus-visible + .ts-dialog-radio-dot {
   outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
+  outline-offset: -1px;
 }
 
 .ts-dialog-radios {
@@ -325,6 +361,23 @@
   outline-offset: -1px;
 }
 
+/* a row that opens a second stage (the Share dialog's More row): the label, then a chevron */
+.ts-dialog-row.is-more {
+  justify-content: space-between;
+  color: var(--pt-ink-2);
+}
+
+.ts-dialog-row.is-more svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  transition: transform var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-dialog-row.is-more[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
 .ts-dialog-row-title {
   flex: 1 1 auto;
   min-width: 0;
@@ -355,7 +408,7 @@
   flex: 1 1 auto;
   min-width: 0;
   padding: 6px 10px;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-field);
   font: 12px/1.5 var(--pt-mono);
   color: var(--pt-ink-2);
   overflow: hidden;
@@ -420,7 +473,7 @@
   appearance: none;
   text-align: left;
   padding: 10px 12px;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-field);
   border-radius: 0;
   background: var(--pt-paper);
   color: var(--pt-ink-2);
@@ -441,7 +494,7 @@
 
 .ts-dialog-mode:focus-visible {
   outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
+  outline-offset: -1px;
 }
 
 /* the ten how-tos of Help */
@@ -504,7 +557,7 @@
 
 .ts-dialog-slide:focus-visible {
   outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
+  outline-offset: -1px;
 }
 
 .ts-dialog-slide-frame {
@@ -532,6 +585,14 @@
   white-space: nowrap;
 }
 
+/* one sentence under a control that states what the chosen value does (the Share dialog's access
+   sentence, the Download dialog's table sentence): ink-2, the body size */
+.ts-dialog-sentence {
+  margin: 0;
+  color: var(--pt-ink-2);
+  font: 13px/1.45 var(--pt-text);
+}
+
 /* the sentence a dialog shows when its write is refused (Slide numbers, the Insert pickers) */
 .ts-dialog-error {
   margin: 8px 0 0;
@@ -553,4 +614,11 @@
   .ts-dialog {
     animation: none;
   }
+}
+
+/* the Find and replace count line ("1 of 2", docs/PRODUCT.md section 5): a status line in ink-2 */
+.ts-dialog-count {
+  margin: -4px 0 8px;
+  color: var(--pt-ink-2);
+  font-size: 12.5px;
 }

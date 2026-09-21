@@ -1,0 +1,94 @@
+{
+  "base": "https://turboslide-d0zxgtfia-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-21T07:05:13.228Z",
+  "seconds": 149,
+  "counts": {
+    "works": 9,
+    "broken": 2,
+    "notDriven": 0
+  },
+  "rows": [
+    {
+      "n": 1,
+      "area": "setup",
+      "interaction": "a deck naming Acme on two slides with a 60 word body and a Pricing slide",
+      "result": "works",
+      "observed": "deck untitled-20260921-f6wy; slides title, split-1, split-2; {\"acme\":3,\"globex\":0,\"skipped\":{\"title\":false,\"split-1\":false,\"split-2\":false}}"
+    },
+    {
+      "n": 2,
+      "area": "assist.entry.title-row",
+      "interaction": "the Assist button sits between the presence chips and the comments glyph; its tooltip; Cmd+J opens the panel; Tools > Assist opens it",
+      "result": "broken",
+      "observed": "order [{\"id\":\"title.presence\",\"x\":847,\"text\":\"\"},{\"id\":\"title.assist\",\"x\":1039,\"text\":\"Assist\"},{\"id\":\"title.comments\",\"x\":1129,\"text\":\"\"}]; tooltip \"AssistTailor the deck for a customer, ask for a shorter slide or for speaker notes; nothing changes until you accept\"; Cmd+J opened true; Tools > Assist opened true"
+    },
+    {
+      "n": 3,
+      "area": "assist.panel.first-line-and-cards",
+      "interaction": "the panel's first line names where the text goes; with a slide selected three starter cards show",
+      "result": "works",
+      "observed": "first line \"Your slide text is sent to the assistant’s model provider under General Translation’s account to write these suggestions. Nothing is written to your slides until you accept.\"; starters [\"Tailor for a customerReplace the customer name, swap the logo and skip slides, as one change you can undo\",\"Make it shorterAsks for a shorter reading of this slide’s text; you read the change before it lands\",\"Write speaker notesAsks for a talk track for this slide, under 120 words\"]"
+    },
+    {
+      "n": 4,
+      "area": "assist.rewrite.card-accept-undo",
+      "interaction": "Make it shorter; the card arrives within 20 s; Accept writes one revision; the snackbar carries Undo; the Assistant chip; Version history; Cmd+Z restores",
+      "result": "works",
+      "observed": "card after 1043 ms \"Slide 2: the text is 58 words shorterSlide 2: Acme pricingAcme renews its enterprise plan every quarter after a review o\"; revision 24 -> 25; body changed true; snackbar \"Slide 2: the text is 58 words shorterUndo\" action \"Undo\"; chip on the block null (Assistant expected); Version history latest \"12:05 AM to 12:06 AMYou · 27 changes\" (an Assist: label expected); Cmd+Z restored true"
+    },
+    {
+      "n": 5,
+      "area": "assist.notes.draft",
+      "interaction": "Write speaker notes for this slide; Accept writes the notes and the pane shows them; Cmd+Z",
+      "result": "works",
+      "observed": "notes 212 chars \"Start with the point of slide 2, Acme pricing. Say Acme pricing. Say Acme renews\"; pane shows true; Cmd+Z restored true"
+    },
+    {
+      "n": 6,
+      "area": "assist.free-ask.fallback-sentence",
+      "interaction": "typing \"add a video\" draws the fallback sentence and no write",
+      "result": "works",
+      "observed": "last line \"I can make this slide shorter or write its speaker notes. Tailor for a customer is under Tools\"; revision 28 -> 28; Accept buttons drawn 0"
+    },
+    {
+      "n": 7,
+      "area": "assist.tailor.dialog-one-undo",
+      "interaction": "Tools > Tailor for a customer: Acme to Globex, the count, skip the Pricing slide, Apply; the snackbar with Undo; one Cmd+Z restores both",
+      "result": "broken",
+      "observed": "error: locator.click: Timeout 30000ms exceeded."
+    },
+    {
+      "n": 8,
+      "area": "assist.finder.terms",
+      "interaction": "Search the menus: \"hide slide\" lists Skip slide first; \"rename the customer\" lists Find and replace and Tailor for a customer; \"logo\" lists Replace image; a phrase that matches nothing shows the Ask row, and Enter opens the panel with the phrase",
+      "result": "works",
+      "observed": "\"hide slide\" [\"Skip slideSlideA skipped slide stays in the filmst\"]; \"rename the customer\" [\"Find and replaceCmd Shift HEdit\",\"Tailor for a customerToolsReplaces the customer na\"]; \"logo\" [\"Upload from computerInsert › ImagePictures up to 2\",\"Upload from computerFormat › Image › Replace image\",\"Use on every slideFormat › ImageMakes this picture\",\"Edit themeSlideThe colours, faces, logo, footer, s\",\"Tailor for a customerToolsReplaces the customer na\"]; \"zzqx plover\" [\"Ask the assistant: zzqx ploverOpens Assist with th\"] (ask row palette.finder.assist.ask); Enter opened the panel {\"opened\":true,\"promptValue\":\"zzqx plover\"}"
+    },
+    {
+      "n": 9,
+      "area": "assist.agent.propose-accept",
+      "interaction": "assist.propose over HTTP with the bearer returns a signed card; assist.accept writes and the revision moves; the card with one byte changed is refused",
+      "result": "works",
+      "observed": "propose 200 card \"Slide 2: the text is 58 words shorter\" signed true; tampered accept 403 {\"error\":{\"name\":\"ForbiddenError\",\"status\":403,\"message\":\"This proposal is not o; accept 200; revision 28 -> 29; the open editor's snackbar \"Assistant changed slide 2: Acme renews its enterprise plan every q… became Acme renews its enterprise plan every q…Undo\" action \"Undo\"; after Undo revision 30"
+    },
+    {
+      "n": 10,
+      "area": "assist.tailor.agent-deck-tailor",
+      "interaction": "deck.tailor over HTTP with one replacement and one skipped slide: the count answered, one revision, the open editor names the change with Undo",
+      "result": "works",
+      "observed": "HTTP 200 {\"replacements\":3,\"slideIds\":[\"title\",\"split-1\"],\"pictures\":0,\"skipped\":[\"split-2\"],\"revision\":31}; revision 30 -> 31; deck {\"acme\":3,\"globex\":0,\"skipped\":{\"title\":false,\"split-1\":false,\"split-2\":false}} -> {\"acme\":0,\"globex\":3,\"skipped\":{\"title\":false,\"split-1\":false,\"split-2\":true}}; snackbar \"Assistant changed slide 1Undo\" action \"Undo\"; after Undo {\"acme\":3,\"globex\":0,\"skipped\":{\"title\":false,\"split-1\":false,\"split-2\":false}}"
+    },
+    {
+      "n": 11,
+      "area": "assist.outside-write.snackbar",
+      "interaction": "text.replaceAll with the bearer while the editor is open: the snackbar names the change with Undo; Undo reverts the slide",
+      "result": "works",
+      "observed": "HTTP 200; snackbar \"Assistant changed slide 1Undo\" after 2985 ms, action \"Undo\"; Acme 3 -> after Undo 3"
+    }
+  ],
+  "cleanup": "untitled-20260921-f6wy: /edit answers 404",
+  "consoleErrors": [
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

@@ -8,9 +8,18 @@ import {
   ditherPresetOf,
 } from '@turboslide/schema/blocks/dither';
 import type { PictureDither } from '@turboslide/schema/blocks/dither';
-import { COLOR_LABELS, COLOR_TOKENS, isColorToken, isHexColor } from '@turboslide/schema/color';
+import { brandWriteMutation } from '@turboslide/schema/brand';
+import type { HexColor } from '@turboslide/schema/color';
+import {
+  COLOR_LABELS,
+  COLOR_TOKENS,
+  colorCss,
+  isColorToken,
+  isHexColor,
+} from '@turboslide/schema/color';
 import type { Color } from '@turboslide/schema/color';
-import { isCanvasSlide, slideBlocks } from '@turboslide/schema/deck';
+import { deckAppearance, isCanvasSlide, slideBlocks } from '@turboslide/schema/deck';
+import type { Mutation } from '@turboslide/schema/mutations';
 import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 import { MATERIAL_ANCHORS } from '@turboslide/schema/blocks/material';
 
@@ -34,7 +43,12 @@ import '../inspector/dither.css';
  * dialogs, or a picture of this presentation from the list here), converting the slide to the
  * canvas first; a covering picture already there shows as a fixed 96 by 54 thumbnail with its
  * alt, Remove and a Format options link that opens the panel at Dither; Reset to theme removes the
- * slide's colour; Add to theme writes the deck default (`deck.setBackground`).
+ * slide's colour; Add to theme writes the brand kit's Background role for the deck's appearance
+ * (`brand.set /colors/<appearance>/background`, docs/PRODUCT.md 4.1; audit-brand 17), so every
+ * slide follows and the wordmark and counter recompute against the coloured ground. Enter in the
+ * hex field previews on the sheet and keeps the dialog open, as Google's field does; Done applies
+ * (the row `brand.background.enter-keeps-open`). The preview is the editor handle's when it
+ * offers one, else one transient rule on the editor's slide box.
  *
  * Round three adds two rows Google does not have. On the Image row a Dither toggle labelled Dither
  * with the help of SPEC-3 15: on writes the Photograph preset (bayer8, ink point 120, paper point
@@ -104,16 +118,39 @@ export function BackgroundDialog() {
   const rememberedDither = (): PictureDither =>
     rememberedPreset === 'photograph' ? DITHER_PHOTOGRAPH_VALUE : DITHER_TOGGLE_VALUE;
 
-  /* the preview follows the picked colour and is dropped when the dialog closes without Done */
+  /* the preview follows the picked colour and is dropped when the dialog closes without Done:
+     the editor handle's preview when it offers one, else one transient rule on the editor's
+     slide box (the stage draws the slide's own colour as `.slide-bg` under the content) */
+  const previewOn = (value: Color | undefined) => {
+    if (input.editor?.previewBackground !== undefined) {
+      input.editor.previewBackground(value === undefined ? null : { color: value });
+      return;
+    }
+    if (typeof document === 'undefined') return;
+    const id = 'ts-background-preview';
+    let style = document.getElementById(id) as HTMLStyleElement | null;
+    if (value === undefined) {
+      style?.remove();
+      return;
+    }
+    if (style === null) {
+      style = document.createElement('style');
+      style.id = id;
+      document.body.appendChild(style);
+    }
+    style.textContent = `.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) { background: ${colorCss(value)}; }`;
+  };
   useEffect(() => {
     if (color === current && !previewed.current) return;
     previewed.current = true;
-    input.editor?.previewBackground?.(color === undefined ? null : { color });
+    previewOn(color);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- previewOn reads the handle alone
   }, [color, current, input.editor]);
   useEffect(
     () => () => {
-      if (previewed.current) input.editor?.previewBackground?.(null);
+      if (previewed.current) previewOn(undefined);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the cleanup runs once
     [input.editor],
   );
 
@@ -137,9 +174,37 @@ export function BackgroundDialog() {
   };
   const done = () => apply(color);
 
+  /**
+   * Add to theme (docs/PRODUCT.md 4.1; audit-brand 17): the brand kit's Background role for the
+   * deck's appearance, one commit, so every slide follows and Version history lists "Brand kit:
+   * Background"; a theme token becomes its hex for the kit. Without the editor's commit the older
+   * deck default (`deck.setBackground`) is written.
+   */
   const addToTheme = () => {
     if (color === undefined) {
       setError('Pick a colour first');
+      return;
+    }
+    const appearance = deckAppearance(input.document.deck);
+    const hex: HexColor | null = isHexColor(color)
+      ? color
+      : isColorToken(color)
+        ? tokenHex(color, appearance)
+        : null;
+    if (input.commit !== undefined && hex !== null) {
+      input
+        .commit(
+          [
+            brandWriteMutation(
+              input.document.deck,
+              `/colors/${appearance}/background`,
+              hex,
+            ) as Mutation,
+          ],
+          'Brand kit: Background',
+        )
+        .then(() => shell.say('The colour is now the background of every slide'))
+        .catch(fail);
       return;
     }
     input
@@ -384,13 +449,12 @@ export function BackgroundDialog() {
               if (event.key !== 'Enter') return;
               event.preventDefault();
               const value = hex.trim().startsWith('#') ? hex.trim() : `#${hex.trim()}`;
-              /* Enter writes the typed colour and closes, as Google's field does (docs/FOCUS.md
-                 `images.background.hex-field`; b1 R21): before, the key set the state alone and
-                 the Dialog's Enter ran Done from the render that had not seen the colour */
-              if (isHexColor(value)) {
-                setColor(value);
-                apply(value);
-              }
+              /* Enter previews the typed colour on the sheet and keeps the dialog open; Done
+                 applies it (docs/PRODUCT.md 4.1 and 8.1 `brand.background.enter-keeps-open`;
+                 audit-brand 17: Enter applied and closed before, so a seller could not judge the
+                 ground before it landed). The key stops here so the Dialog's Enter does not run Done */
+              event.stopPropagation();
+              if (isHexColor(value)) setColor(value);
             }}
           />
         </label>
@@ -653,4 +717,30 @@ export function BackgroundDialog() {
       ) : null}
     </Dialog>
   );
+}
+
+/** A theme token's hex in an appearance, for the kit's Background role; null for a token with no solid value. */
+function tokenHex(token: Color, appearance: 'light' | 'dark'): HexColor | null {
+  const css = colorCss(token);
+  if (isHexColor(css)) return css;
+  const base: Readonly<Record<string, string>> =
+    appearance === 'dark'
+      ? {
+          paper: '#070707',
+          ink: '#f2f2f0',
+          'ink-2': '#b9bcc3',
+          titanium: '#8a8f98',
+          blue: '#2f5ce0',
+          accent: '#2f5ce0',
+        }
+      : {
+          paper: '#ffffff',
+          ink: '#070707',
+          'ink-2': '#3a3d44',
+          titanium: '#8a8f98',
+          blue: '#2f5ce0',
+          accent: '#2f5ce0',
+        };
+  const value = base[token];
+  return value !== undefined && isHexColor(value) ? value : null;
 }

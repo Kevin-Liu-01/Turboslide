@@ -102,7 +102,10 @@ const SPEC_ROWS: Row[] = [
     'title.presence.me',
   ]),
   row('title', 'later', ['title.presence.joinChat']),
+  /* the product round (docs/PRODUCT.md 6.1, section 2 rank 25): the assistant's entry and the side panel toggle */
+  row('title', 'now', ['title.assist']),
   row('title', 'now', ['title.comments'], { was3: 'later' }),
+  row('title', 'now', ['title.sidePanel']),
   row('title', 'now', ['title.inbox']),
   row('title', 'omit', ['title.meet', 'title.record']),
   row('title', 'now', ['title.slideshow']),
@@ -129,6 +132,8 @@ const SPEC_ROWS: Row[] = [
   row('file', 'now', ['file.importSlides']),
   row('file', 'now', ['file.makeCopy.entire']),
   row('file', 'now', ['file.makeCopy.selected']),
+  /* the product round (docs/PRODUCT.md 4.3): the deck as a template of this deployment */
+  row('file', 'now', ['file.saveAsTemplate']),
   row('file', 'now', ['file.share.withOthers']),
   row('file', 'now', ['file.share.publish']),
   /* SPEC-3 0.16, 13.2: the address without a token */
@@ -140,6 +145,8 @@ const SPEC_ROWS: Row[] = [
   /* SPEC-2 12: ODP and SVG are present in Google's position with the download clause */
   row('file', 'later', ['file.download.odp'], { was: 'omit' }),
   row('file', 'now', ['file.download.pdf']),
+  /* the product round (docs/PRODUCT.md section 2 rank 8): the whole dialog behind one row */
+  row('file', 'now', ['file.download.options']),
   row('file', 'now', ['file.download.txt']),
   row('file', 'now', ['file.download.jpg']),
   row('file', 'now', ['file.download.png']),
@@ -308,6 +315,8 @@ const SPEC_ROWS: Row[] = [
   row('format', 'now', ['format.text.underline'], { was: 'later' }),
   row('format', 'now', ['format.text.strikethrough']),
   row('format', 'now', ['format.text.superscript', 'format.text.subscript'], { was: 'omit' }),
+  /* the product round (docs/PRODUCT.md 4.2): the Font row opens the toolbar's dropdown */
+  row('format', 'now', ['format.text.font']),
   row('format', 'now', [
     'format.text.size',
     'format.text.size.increase',
@@ -384,6 +393,9 @@ const SPEC_ROWS: Row[] = [
     'format.image.replaceImage.fromThisPresentation',
   ]),
   row('format', 'now', ['format.image.resetImage'], { was: 'later' }),
+  /* the product round (docs/PRODUCT.md section 2 rank 10, 4.4): the caption and the kit's logo */
+  row('format', 'now', ['format.image.addCaption']),
+  row('format', 'now', ['format.image.useOnEverySlide']),
   /* SPEC-3 10.5, 13.2: the picture's Dither toggle */
   row('format', 'now', ['format.image.dither']),
   row('format', 'now', ['format.image.imageOptions']),
@@ -426,7 +438,8 @@ const SPEC_ROWS: Row[] = [
   row('slide', 'now', ['slide.changeBackground']),
   row('slide', 'now', ['slide.applyLayout']),
   row('slide', 'later', ['slide.transition']),
-  row('slide', 'later', ['slide.editTheme']),
+  /* the product round (docs/PRODUCT.md 4.1): Edit theme opens the Brand kit panel */
+  row('slide', 'now', ['slide.editTheme']),
   row('slide', 'now', ['slide.changeTheme']),
   /* 2.7 Arrange */
   row('arrange', 'now', [
@@ -481,7 +494,8 @@ const SPEC_ROWS: Row[] = [
   ]),
   /* SPEC-3 5.5, 13.2: Google's per file row */
   row('tools', 'now', ['tools.notificationSettings']),
-  row('tools', 'later', ['tools.preferences']),
+  /* the product round (docs/PRODUCT.md section 2 rank 9): the one preference, Link detection */
+  row('tools', 'now', ['tools.preferences', 'tools.preferences.linkDetection']),
   /* SPEC-3 0.42, 13.1: the submenu with the one row Turboslide can honour */
   row(
     'tools',
@@ -496,6 +510,9 @@ const SPEC_ROWS: Row[] = [
   /* SPEC-3 5.7, 13.1, 13.3: the Activity panel and its one Later tab */
   row('tools', 'now', ['tools.activityDashboard'], { was3: 'omit' }),
   row('tools', 'later', ['tools.activityDashboard.viewers']),
+  /* the product round (docs/PRODUCT.md sections 5 and 6): Tailor for a customer and Assist */
+  row('tools', 'now', ['tools.tailor']),
+  row('tools', 'now', ['tools.assist']),
   row('tools', 'now', ['tools.checkSlides']),
   row('tools', 'now', ['tools.advanced.showSource']),
   row('tools', 'now', ['tools.advanced.sideBySide']),
@@ -588,16 +605,21 @@ const OTHER_ROWS: Row[] = [
  * [146, 17, 24] over 187 rows (build-3/b6.md section 2 has the arithmetic per menu).
  */
 const COUNTS: Record<string, Counts> = {
-  title: [10, 1, 4],
-  file: [24, 5, 5],
+  /* twelve since the product round: Assist and the side panel toggle (docs/PRODUCT.md 6.1, section 2 rank 25) */
+  title: [12, 1, 4],
+  /* the product round adds Save as template and Download options (docs/PRODUCT.md 4.3, section 2 rank 8) */
+  file: [26, 5, 5],
   edit: [11, 0, 0],
   view: [16, 1, 2],
   /* 22 with the Shapes gallery as its own row, All shapes (docs/FOCUS.md section 4, cycle 2) */
   insert: [22, 3, 5],
-  format: [28, 2, 0],
-  slide: [8, 2, 0],
+  /* the product round adds Font, Add a caption and Use on every slide (docs/PRODUCT.md 4.2, section 2 rank 10, 4.4) */
+  format: [31, 2, 0],
+  /* Edit theme opens the Brand kit panel since the product round (docs/PRODUCT.md 4.1) */
+  slide: [9, 1, 0],
   arrange: [7, 0, 0],
-  tools: [15, 3, 4],
+  /* the product round: Preferences with Link detection, Tailor for a customer and Assist (docs/PRODUCT.md section 2 rank 9, 5, 6) */
+  tools: [18, 2, 4],
   extensions: [2, 0, 2],
   help: [4, 0, 2],
 };
@@ -741,9 +763,10 @@ describe('the SPEC rows', () => {
     const zero: Counts = [0, 0, 0];
     const total = Object.values(derived).reduce(add, zero);
     /* 147 with the Shapes gallery row, All shapes (docs/FOCUS.md section 4, cycle 2) */
-    expect(total).toEqual([147, 17, 24]);
-    /* 188 with the Shapes gallery row (docs/FOCUS.md section 4, cycle 2) */
-    expect(total[0] + total[1] + total[2]).toBe(188);
+    expect(total).toEqual([158, 15, 24]);
+    /* 188 with the Shapes gallery row (docs/FOCUS.md section 4, cycle 2); 197 with the product
+       round's nine rows (docs/PRODUCT.md sections 2, 4, 5 and 6) */
+    expect(total[0] + total[1] + total[2]).toBe(197);
   });
 
   it('flips the nine rows of SPEC-3 section 13 away from their round two status, each Now row with a live effect', () => {
@@ -1557,7 +1580,10 @@ describe('statuses and effects', () => {
         'title.lastEdit',
         /* the right group, left to right: the presence slot, the comments glyph, the inbox plate, Slideshow, Share, then the own chip */
         'title.presence',
+        /* the product round (docs/PRODUCT.md 6.1, section 2 rank 25): Assist, then the side panel toggle after the comments glyph */
+        'title.assist',
         'title.comments',
+        'title.sidePanel',
         'title.inbox',
         'title.slideshow',
         'title.share',
@@ -1945,7 +1971,8 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
     const textOff = contextMenuItems('textBlock', DEFAULT_MENU_CONTEXT).map((entry) =>
       entry === DIVIDER ? '-' : entry.id,
     );
-    expect(textOff).not.toContain('format.altText');
+    /* Alt text returned to the default view in the product round (docs/PRODUCT.md section 5) */
+    expect(textOff).toContain('format.altText');
     expect(textOff).not.toContain('format.dropShadow');
     expect(textOff).toContain('arrange.rotate');
     expect(textOff).toContain('arrange.group');
@@ -2433,7 +2460,6 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       'insert.specialCharacters',
       'insert.icon',
       'insert.material',
-      'insert.image.byUrl',
       'insert.image.fromThisPresentation',
     ]) {
       expect(insertOff, `${id} parked`).not.toContain(id);
@@ -2516,7 +2542,6 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       'format.bulletsNumbering.listOptions',
       'format.image.maskImage',
       'format.image.dither',
-      'format.altText',
       'format.dropShadow',
       'format.changeShape',
       'format.editHtml',
@@ -2532,7 +2557,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       .map((entry) => (entry as MenuItem).id);
     expect(chartOff).toContain('format.editData');
     expect(chartOff).toContain('format.chartType');
-    expect(chartOff).not.toContain('format.altText');
+    expect(chartOff).toContain('format.altText');
     /* the line target's two rows returned with the submenu; the object rows of 3.1 stay */
     const lineOff = resolveContextEntries(CONTEXT_MENUS.line, OFF)
       .filter((entry) => entry !== DIVIDER)
@@ -2552,7 +2577,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
     ])
       expect(lineOff, id).toContain(id);
     expect(lineOff).not.toContain('format.dropShadow');
-    expect(lineOff).not.toContain('format.altText');
+    expect(lineOff).toContain('format.altText');
   });
 
   it('returns the two toolbar buttons and the shape, line, table, chart and group tails; Change shape and the other tail stay parked', () => {
@@ -2654,7 +2679,6 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       'tools.notificationSettings',
       'view.gridView',
       'view.showSections',
-      'format.altText',
       'format.dropShadow',
       'extensions.agentAccess',
     ]) {
@@ -2686,9 +2710,11 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       'file.open',
     ])
       expect(isPresent(itemById(id), OFF), id).toBe(true);
-    /* a parked row's chord stays unbound (Alt text, question 6 of RETURN.md section 9) */
-    expect(isPresent(itemById('format.altText'), OFF)).toBe(false);
-    expect(present.some((binding) => binding.id === 'format.altText')).toBe(false);
+    /* Alt text returned to the default view with its chord (docs/PRODUCT.md section 5); a parked
+       row's chord stays unbound (Drop shadow, RETURN.md section 9 question 7) */
+    expect(isPresent(itemById('format.altText'), OFF)).toBe(true);
+    expect(present.some((binding) => binding.id === 'format.altText')).toBe(true);
+    expect(isPresent(itemById('format.dropShadow'), OFF)).toBe(false);
   });
 });
 
@@ -2699,8 +2725,9 @@ describe('the return round: the flags of the returned and the parked rows (docs/
   const OFF: MenuContext = DEFAULT_MENU_CONTEXT;
 
   it('draws every returned row in the default view', () => {
+    /* file.new.templateGallery came back in the return round and left again with the templates
+       feature at the product round's ship (the parked list below) */
     for (const id of [
-      'file.new.templateGallery',
       'file.open',
       'file.importSlides',
       'file.download.jpg',
@@ -2785,7 +2812,6 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       'file.download.txt',
       'view.gridView',
       'view.showSections',
-      'insert.image.byUrl',
       'insert.image.fromThisPresentation',
       'insert.shape.gallery',
       'insert.shape.arrows',
@@ -2801,7 +2827,6 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       'format.bulletsNumbering.listOptions',
       'format.image.maskImage',
       'format.image.dither',
-      'format.altText',
       'format.dropShadow',
       'format.changeShape',
       'format.editHtml',
@@ -2811,17 +2836,22 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       'extensions.agentAccess',
       'extensions.embedInSite',
       'tools.spelling',
+      /* the templates feature, parked at the product round's ship (docs/PRODUCT.md 8.2;
+         product/build/ship.md section 7): templates.card.rename-and-delete and
+         templates.default.use-for-new read red twice on the enforce preview of record, the
+         gallery on another instance keeping the old card, name or default while the public
+         store's edge refused the just written index */
+      'file.new.templateGallery',
+      'file.saveAsTemplate',
     ]) {
       const item = itemById(id);
       expect(item.advanced, `${id} keeps the flag`).toBe(true);
       expect(isPresent(item, OFF), `${id} absent in the default view`).toBe(false);
     }
-    /* the replaced picture rows follow the parked Insert rows */
-    for (const id of [
-      'format.image.replaceImage.byUrl',
-      'format.image.replaceImage.fromThisPresentation',
-    ])
-      expect(isPresent(itemById(id), OFF), id).toBe(false);
+    /* the replaced picture rows follow the Insert rows: By URL returned in the product round
+       (docs/PRODUCT.md section 5), From this presentation stays parked */
+    expect(isPresent(itemById('format.image.replaceImage.byUrl'), OFF)).toBe(true);
+    expect(isPresent(itemById('format.image.replaceImage.fromThisPresentation'), OFF)).toBe(false);
   });
 
   it('keeps the Later stubs Later: Transition, Indentation options, Edit guides, Email collaborators', () => {

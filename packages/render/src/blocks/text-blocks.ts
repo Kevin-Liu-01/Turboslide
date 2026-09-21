@@ -3,6 +3,7 @@
 // inline after the margins, so an absent record leaves the grammar's step untouched.
 import { el, px, style } from '../html.ts';
 import type { BlockOf } from '@turboslide/schema/blocks';
+import { colorCss } from '@turboslide/schema/color';
 import type { Typography } from '@turboslide/schema/typography';
 import { typographyDeclarations } from '@turboslide/schema/typography';
 import { rootAttrs, runAttr } from './context.ts';
@@ -31,6 +32,8 @@ export function renderHeading(block: BlockOf<'heading'>, ctx: BlockContext): str
     block.marginTop !== undefined && `margin-top:${block.marginTop}px`,
     block.marginBottom !== undefined && `margin-bottom:${block.marginBottom}px`,
     ...typographyDeclarations(block.typography),
+    /* the kit's colour on a heading (docs/PRODUCT.md 4.1; build/b5.md R9) */
+    block.color !== undefined && `color:${colorCss(block.color)}`,
   );
   const run = runAttr(ctx, block.id, 'text');
   switch (block.level) {
@@ -77,6 +80,7 @@ export function renderParagraph(block: BlockOf<'paragraph'>, ctx: BlockContext):
     block.marginTop !== undefined && `margin-top:${block.marginTop}px`,
     ...typographyDeclarations(block.typography),
     ...paraSpacingDeclarations(block.typography),
+    block.color !== undefined && `color:${colorCss(block.color)}`,
   );
   return el(
     'p',

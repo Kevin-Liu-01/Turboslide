@@ -14,6 +14,7 @@ import {
 import { assertFlag } from '../../server/flags';
 import { refuseForeignOrigin } from '../../server/headers';
 import { RateLimitedError, checkQuota, rateLimitedResponse } from '../../server/ratelimit';
+import { flushRoom } from '../../server/room';
 import { deckDir } from '../../server/root';
 
 // /api/actions/:action (SPEC 3.4, 7.1, 11; MILESTONES M4 item 1): POST runs one action of the
@@ -95,6 +96,20 @@ async function serve(request: Request, action: string): Promise<Response> {
     if (error instanceof RangeError) return refuse(404, 'unknown_deck', error.message, { action });
     return errorResponse(error, action);
   }
+  // what the open editor wrote a moment ago reaches the store before an agent reads it (room.ts
+  // flushRoom; the product round fix round, pass 1 finding 12: deck.tailor planned over a store
+  // without the texts the tab had typed and answered zero replacements), so the revision and
+  // the texts `deck.info` answers are the ones the write that follows is judged against. A
+  // write is not flushed ahead of: a writer that took its base from the tab's own revision (the
+  // core walk's rows) would meet the flush's commit as a stale base, where before it landed
+  // (the drive of build/b7.md "Product round fix round" F6); the durable seam is
+  // `roomBackedStore` (FR6)
+  const reads = capabilityForAction(action);
+  if (
+    request.method !== 'GET' &&
+    (reads === 'read' || reads === 'readComments' || reads === 'history')
+  )
+    await flushRoom(deckId);
   return handleActionRequest(request, action, {
     dispatcher,
     defaultDeck: deckId,

@@ -1,9 +1,9 @@
-/* Tooltip (Tooltip.tsx): one paper plate on the hair edge, fixed, 6px from its control, at
-   12.5px in the text face; the name in the display face at weight 500, the key as an 18px kbd
-   chip on --pt-hair-soft at the shell corner (--pt-radius, the one corner chrome draws; SPEC
-   2.2), the sentence in ink-2 under them. Radius 0 and no shadow on the plate, as every plate in
-   chrome; the plate's
-   --pt-hair border is the one line it draws. z-index 40 sits over the menus (30) and under the
+/* Tooltip (Tooltip.tsx): one paper plate in the frame weight (--pt-edge, the line law's rule for
+   a box that floats; the hairline read 1.51:1 over the stage, docs/PRODUCT.md 3.1), fixed, 6px
+   from its control, at 12.5px in the text face; the name in the display face at weight 500, the
+   key as an 18px kbd chip on --pt-hair-soft at the shell corner (--pt-radius, the one corner
+   chrome draws; SPEC 2.2), the sentence in ink-2 under them. Radius 0 and no shadow on the plate,
+   as every plate in chrome; the plate's border is the one line it draws. z-index 40 sits over the menus (30) and under the
    hover preview layer (120). Motion: the fade over the fast duration when data-motion is fade;
    Tooltip.tsx writes none under reduced motion and tokens.css zeroes the duration as well.
    pointer-events none, so the plate never takes the hover that made it. */
@@ -18,7 +18,7 @@
   padding: 6px 8px 7px;
   background: var(--pt-paper);
   color: var(--pt-ink);
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-edge);
   border-radius: 0;
   font: 12.5px/1.4 var(--pt-text);
   pointer-events: none;

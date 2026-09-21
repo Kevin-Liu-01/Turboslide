@@ -128,3 +128,37 @@ export function growMutation(
     value: Math.ceil(contentHeight),
   };
 }
+
+/**
+ * The `typography.size` write that steps a `shrink` text box down the ladder when its text needs
+ * more than the box (docs/PRODUCT.md section 5 "Autofit"; Google's Shrink text on overflow):
+ * `fontSize` is the size the text draws at now (the block's own, else the computed size the live
+ * stage reads), `stepDown` the ladder's next smaller size or undefined at the bottom. Null when
+ * the text fits, when the block is not a shrink block, or when the ladder has no smaller step.
+ * Each burst steps once, so a long paste settles over a few bursts and never below the floor.
+ */
+export function shrinkMutation(
+  slideId: string,
+  block: Block,
+  contentHeight: number | null,
+  fontSize: number | undefined,
+  stepDown: (size: number) => number | undefined,
+): Mutation | null {
+  if (contentHeight === null || fontSize === undefined) return null;
+  if (!('autofit' in block) || block.autofit !== 'shrink') return null;
+  const pos = block.pos;
+  if (pos === undefined || contentHeight <= pos.h + 1) return null;
+  const next = stepDown(fontSize);
+  if (next === undefined || next >= fontSize) return null;
+  const typography =
+    'typography' in block && typeof block.typography === 'object' && block.typography !== null
+      ? { ...(block.typography as Record<string, unknown>) }
+      : {};
+  return {
+    op: 'block.set',
+    slideId,
+    blockId: block.id,
+    path: '/typography',
+    value: { ...typography, size: next },
+  };
+}

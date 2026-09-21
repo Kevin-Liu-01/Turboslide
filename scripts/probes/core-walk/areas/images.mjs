@@ -37,6 +37,11 @@ export const IDS = [
   'images.context.image',
   'images.options.menu-row',
   'images.background.hex-field',
+  /* the product round (docs/PRODUCT.md 8.1) */
+  'images.caption.add',
+  'images.options.picture-sections-only',
+  'images.transparency.slider',
+  'images.border.drawn',
 ];
 
 const DIRS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
@@ -59,7 +64,10 @@ export async function run(t) {
     'click the toolbar Image button',
     'the menu lists Upload from computer',
     async () => {
-      await t.clickControl('toolbar.insertImage');
+      /* the button itself opens the file chooser since the product round (docs/PRODUCT.md section
+         2 rank 17, b2 R4); the sources sit under its arrow */
+      const arrow = await t.has('[data-control="toolbar.insertImage.arrow"]');
+      await t.clickControl(arrow ? 'toolbar.insertImage.arrow' : 'toolbar.insertImage');
       await page
         .locator('[data-control="menu.insert.image.upload"]')
         .first()
@@ -72,7 +80,7 @@ export async function run(t) {
           .map((el) => el.getAttribute('data-control')),
       );
       await t.press('Escape', 2);
-      return { ok: upload, observed: `rows ${rows.join(', ')}` };
+      return { ok: upload, observed: `${arrow ? 'the arrow; ' : ''}rows ${rows.join(', ')}` };
     },
   );
 
@@ -1036,4 +1044,272 @@ export async function run(t) {
     },
   );
   t.deck.picture = id;
+  await productRound(t);
+}
+
+/**
+ * The product round's rows (docs/PRODUCT.md section 2 rank 10, section 5, 8.1): Add a caption from
+ * the picture's menu, Format options scoped to a picture, the Transparency slider and the picture
+ * border read from a 2x screenshot. B2 owns the picture routes and the panel.
+ */
+async function productRound(t) {
+  const { page } = t;
+  const P = t.deck.pictureSlide ?? t.deck.titleSlide;
+  const id = t.deck.picture;
+  if (!id)
+    throw new (await import('../toolkit.mjs')).SetupFailed('the pictures area left no picture');
+  await t.clickCard(P);
+  await t.clearAll();
+  const closePanel = async () => {
+    if (await t.visible('panel.formatOptions.close'))
+      await t.clickControl('panel.formatOptions.close');
+    await t.sleep(200);
+  };
+  const block = async () => (await t.blockOf(P, id))?.block ?? null;
+
+  await t.step(
+    'images.caption.add',
+    'right click the picture > Add a caption; type; Cmd+Z',
+    "the caption field prompts; typing stores the shot's caption; Cmd+Z removes it",
+    async () => {
+      await t.clearAll();
+      await t.selectObject(id);
+      const b = await t.boxOf(id);
+      const c = t.center(b.free);
+      await t.rightClickAt(c.x, c.y);
+      const rows = (await t.contextRows()).map((r) => r.id);
+      if (!rows.includes('format.image.addCaption')) {
+        await t.press('Escape');
+        return t.notBuilt(
+          'format.image.addCaption',
+          'B2',
+          `the picture's menu lists ${rows.join(', ')}`,
+        );
+      }
+      await t.clickContextRow('format.image.addCaption');
+      await t.sleep(500);
+      const prompt = await page.evaluate(
+        () =>
+          [
+            ...document.querySelectorAll(
+              '.ts-stagewrap.ts-editor .pt-slide [data-prompt], .ts-stagewrap.ts-editor .pt-slide [data-placeholder], [data-control="formatOptions.picture.caption"]',
+            ),
+          ]
+            /* the prompt span of an empty caption, or the placeholder the open caption field
+               keeps while it is empty (the row opens the field at once) */
+            .map(
+              (el) =>
+                (el.matches('input, textarea')
+                  ? el.getAttribute('placeholder')
+                  : (el.getAttribute('data-placeholder') ?? el.textContent?.trim())) ?? '',
+            )
+            .find((s) => /Add a caption/.test(s)) ?? null,
+      );
+      const field = page.locator('[data-control="formatOptions.picture.caption"]').first();
+      if ((await field.count()) > 0) {
+        await field.click();
+        await t.typeHuman('Q3 pipeline');
+        await t.press('Tab');
+      } else {
+        await t.typeHuman('Q3 pipeline');
+        await t.press('Escape');
+      }
+      const stored = await t
+        .pollUntil(block, (b0) => /Q3 pipeline/.test(b0?.caption ?? ''), 8000)
+        .then(() => true)
+        .catch(() => false);
+      await t.settled();
+      await t.clearAll();
+      await t.press('Meta+z');
+      const undone = await t
+        .pollUntil(block, (b0) => !/Q3 pipeline/.test(b0?.caption ?? ''), 8000)
+        .then(() => true)
+        .catch(() => false);
+      await t.settled();
+      return {
+        ok: prompt !== null && stored && undone,
+        observed: `prompt "${prompt ?? 'none'}"; caption stored ${stored}; removed by Cmd+Z ${undone}; caption now ${JSON.stringify((await block())?.caption ?? null)}`,
+      };
+    },
+  );
+  await t.step(
+    'images.options.picture-sections-only',
+    'the toolbar Image options with the picture selected; read the sections',
+    'Size & rotation, Position and Image options, and no text section',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(id);
+      await t.tailControl('toolbar.imageOptions');
+      await t.waitControl('panel.formatOptions', 6000);
+      await t.sleep(300);
+      const sections = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-control="panel.formatOptions"] [data-section]')].map(
+          (el) => ({
+            id: el.getAttribute('data-section'),
+            head: el.querySelector('.ts-panel-section-head')?.textContent?.trim() ?? '',
+          }),
+        ),
+      );
+      await closePanel();
+      const ids = sections.map((s) => s.id);
+      const textSection = ids.filter((s) => s === 'text' || s === 'textFitting');
+      const imageOptions = sections.find((s) => s.id === 'picture' || s.id === 'adjustments');
+      return {
+        ok:
+          ids.includes('size') &&
+          ids.includes('position') &&
+          Boolean(imageOptions) &&
+          textSection.length === 0 &&
+          sections.some((s) => /Image options/.test(s.head)),
+        observed: `sections ${sections.map((s) => `${s.id} "${s.head}"`).join(', ')}; text sections ${textSection.join(', ') || 'none'}`,
+      };
+    },
+  );
+  await t.step(
+    'images.transparency.slider',
+    'Adjustments > Transparency: drag the slider to 40',
+    'a slider with the field beside it; the block reads adjust.transparency 0.4',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(id);
+      await t.tailControl('toolbar.imageOptions');
+      await t.waitControl('panel.formatOptions', 6000);
+      const section = page.locator(
+        '[data-control="panel.formatOptions"] [data-section="adjustments"]',
+      );
+      if (await section.evaluate((el) => el.classList.contains('is-closed')).catch(() => false))
+        await section.locator('.ts-panel-section-head').click();
+      const facts = await page.evaluate(() => {
+        const control = document.querySelector(
+          '[data-control="formatOptions.adjustments.transparency"]',
+        );
+        const row =
+          control?.closest('.ts-fo-field, .ts-fo-row, label, div') ??
+          control?.parentElement ??
+          null;
+        const range = control?.matches('input[type="range"]')
+          ? control
+          : (row?.querySelector('input[type="range"]') ??
+            document.querySelector(
+              '[data-control="formatOptions.adjustments.transparency.slider"]',
+            ));
+        const field =
+          row?.querySelector('input[type="number"], input[type="text"], input[inputmode]') ?? null;
+        return {
+          range: Boolean(range),
+          field: Boolean(field && field !== range),
+          controlTag: control?.tagName.toLowerCase() ?? null,
+          controlType: control?.getAttribute('type') ?? null,
+        };
+      });
+      if (!facts.range) {
+        await closePanel();
+        return {
+          ok: false,
+          observed: `Transparency is not a slider: the control is ${facts.controlTag ?? 'absent'}${facts.controlType ? `[type=${facts.controlType}]` : ''} (audit-gaps 20)`,
+        };
+      }
+      const slider = page
+        .locator(
+          '[data-control="formatOptions.adjustments.transparency.slider"], [data-control="formatOptions.adjustments.transparency"] input[type="range"], input[type="range"][data-control="formatOptions.adjustments.transparency"]',
+        )
+        .first();
+      await slider.scrollIntoViewIfNeeded().catch(() => undefined);
+      await t.settled();
+      await t.sleep(200);
+      const r = await slider.boundingBox();
+      const min = Number((await slider.getAttribute('min')) ?? 0);
+      const max = Number((await slider.getAttribute('max')) ?? 100);
+      const want = min + (max - min) * 0.4;
+      const from = { x: r.x + 8, y: r.y + r.height / 2 };
+      const to = { x: r.x + 8 + (r.width - 16) * 0.4, y: r.y + r.height / 2 };
+      await t.drag(from, to, { steps: 16 });
+      await t.settled();
+      const value = Number(await slider.inputValue().catch(() => NaN));
+      const stored = await t
+        .pollUntil(
+          async () => (await block())?.adjust?.transparency ?? null,
+          (v) => v !== null && Math.abs(v - 0.4) <= 0.06,
+          8000,
+        )
+        .catch(async () => (await block())?.adjust?.transparency ?? null);
+      if (await t.visible('formatOptions.adjustments.reset'))
+        await t.clickControl('formatOptions.adjustments.reset');
+      await t.settled();
+      await closePanel();
+      return {
+        ok: facts.field && stored !== null && Math.abs(stored - 0.4) <= 0.06,
+        observed: `slider ${facts.range}, field beside it ${facts.field}; dragged to ${t.fmt(value)} of ${max} (wanted ${t.fmt(want)}); adjust.transparency ${stored ?? 'none'}`,
+      };
+    },
+  );
+  await t.step(
+    'images.border.drawn',
+    'Border color > ink on the picture; read the frame at 2x',
+    'frame.color is ink and a 1 px ring draws along the picture edge',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(id);
+      const control = await t.tailControl('toolbar.borderColor').catch(() => null);
+      if (!control) return { ok: false, observed: 'no Border color control on the picture tail' };
+      await t.waitControl('toolbar.borderColor.plate', 6000).catch(() => undefined);
+      const ink = page.locator('[data-control="toolbar.borderColor.ink"]').first();
+      if ((await ink.count()) === 0) {
+        await t.press('Escape');
+        return { ok: false, observed: 'no ink swatch in the Border color plate' };
+      }
+      await ink.click();
+      const stored = await t
+        .pollUntil(
+          async () => (await block())?.frame?.color ?? null,
+          (v) => v === 'ink',
+          8000,
+        )
+        .catch(async () => (await block())?.frame?.color ?? null);
+      await t.settled();
+      await t.press('Escape');
+      await t.clearAll();
+      const b = await t.boxOf(id);
+      const free = b.free;
+      const clip = {
+        x: Math.max(0, free.x - 6),
+        y: Math.max(0, free.y - 6),
+        width: free.w + 12,
+        height: free.h + 12,
+      };
+      const img = await t.shotPixels2x(clip);
+      /* a row across the left edge at mid height, in device pixels: the shot's own scale is read
+         from its width against the clip (a shot that came back at 1x read an empty row before,
+         the y past the image's height, and the step said "ring none read" for a ring it never
+         looked at) */
+      const scale = img.width / clip.width;
+      const y = Math.min(img.height - 1, Math.round((free.h / 2 + 6) * scale));
+      const runs = t.runsAlongRow(img, y, 0, Math.min(img.width - 1, Math.round(20 * scale)));
+      const paper = img.pixel(1, y);
+      /* the ring: a thin run (1 to 6 device px) that reads at 3:1 or better against the paper
+         beside the picture; the picture's own body is the long run after it (the earlier clause
+         compared a hex string with an rgb triple and read NaN, so a drawn ring read as none) */
+      const ring =
+        runs.find(
+          (r0) =>
+            r0.thickness >= 1 &&
+            r0.thickness <= 6 &&
+            t.contrastOf(
+              `rgb(${[1, 3, 5].map((i) => parseInt(r0.color.slice(i, i + 2), 16)).join(',')})`,
+              `rgb(${paper.join(',')})`,
+            ) >= 3,
+        ) ?? null;
+      /* the frame off again through the window API */
+      const s = await t.settled();
+      await t
+        .invoke('block.set', { baseRevision: s.revision, slideId: P, blockId: id, path: '/frame' })
+        .catch(() => undefined);
+      await t.settled();
+      return {
+        ok: stored === 'ink' && ring !== null,
+        observed: `frame.color ${stored ?? 'none'}; shot at ${scale.toFixed(1)}x (${img.width} by ${img.height} device px); across the left edge at y ${y}: ${runs.map((r0) => `${r0.color} x${r0.thickness}`).join(', ') || 'no run'}; ring ${ring ? `${ring.color} ${ring.thickness} device px` : 'none read'}`,
+      };
+    },
+  );
+  await t.clearAll();
 }

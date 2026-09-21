@@ -54,6 +54,7 @@ import { ViewerShell } from '@turboslide/chrome/ViewerShell';
 import { labelFor } from '@turboslide/identity/labels';
 import { lintStatic } from '@turboslide/lint/lint-static';
 import { renderSlide } from '@turboslide/render/slide';
+import { bandAssetResolver, frameBandOf } from '@turboslide/render/stage';
 import { PRINCIPAL_ID_PATTERN } from '@turboslide/schema/comments';
 import type { CommentAnchor, CommentBody } from '@turboslide/schema/comments';
 import { SHAPE_KINDS } from '@turboslide/schema/blocks';
@@ -65,7 +66,7 @@ import type { Finding } from '@turboslide/schema/findings';
 import { parseAuthor } from '@turboslide/schema/mutations';
 import type { Author, Lease } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
-import { authorLabel, sameAuthor } from '@turboslide/store/store';
+import { authorDisplay, sameAuthor } from '@turboslide/store/store';
 import { SHEET } from '@turboslide/theme/tokens';
 import { BookView } from '@turboslide/viewer/BookView';
 import { clipboardStore, pastedSlideInserts } from '@turboslide/viewer/clipboard';
@@ -99,6 +100,7 @@ import { useMountEffect } from '../components/useMountEffect';
 import { bundleDownloadTicket, bundleUploadTicket, connectFacts } from '../server/bundle';
 import { listDecks, readSourceDeckSlides, restoreStoredDeck } from '../server/decks';
 import { exportCapabilities } from '../server/download';
+import { rememberLinkUrl } from '@turboslide/chrome/dialogs/share-links';
 import { DECK_CREATED_EVENT, holdDraft } from '../server/write';
 import type { DeckCreatedDetail, EditorDeck, EditorIdentity } from '../server/write';
 import { RouterLinkSlot } from '../routes/-link-slot';
@@ -579,6 +581,14 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       const detail = (event as CustomEvent<DeckCreatedDetail>).detail;
       if (detail.deckId !== payload.deckId) return;
       setDraft(false);
+      /* the general link minted with the record, remembered under its id (b7.md FR1), so the
+         Share dialog's field holds the address at its first open and Copy link copies it */
+      if (detail.link !== undefined)
+        rememberLinkUrl(
+          detail.deckId,
+          detail.link.id,
+          `${window.location.origin}/s/${detail.link.token}`,
+        );
       recordDeckOpened(detail.deckId, {
         ...openFactsOf(controller.getSnapshot().document),
         revision: detail.revision,
@@ -780,7 +790,12 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       prefilled: payload.identity?.name ?? payload.identity?.label ?? author.name,
     },
     onNamePrompt: (open) => controller.promptName(open),
-    setName: (name) => controller.invoke('account.setName', { name }),
+    setName: (name) =>
+      controller.invoke('account.setName', { name }).then((answer) => {
+        /* the chip in the other browsers inside the matrix's 5 s (b1.md R18) */
+        controller.refreshPresence();
+        return answer;
+      }),
     setAvatar: (choice) =>
       controller.invoke('account.setAvatar', {
         variant: choice.variant,
@@ -1389,10 +1404,13 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       state: status,
       draft,
       lastEditAt: deck.updatedAt,
+      /* an agent's write reads Assistant on the title row (docs/PRODUCT.md 6.1; build/b6.md R8) */
       ...(snap.versions.length > 0
-        ? { lastEditBy: authorLabel(snap.versions[snap.versions.length - 1]?.author ?? author) }
+        ? { lastEditBy: authorDisplay(snap.versions[snap.versions.length - 1]?.author ?? author) }
         : {}),
     },
+    /* the deployment's default kit for the Brand kit panel (docs/PRODUCT.md 4.1; build/b5.md R4) */
+    ...(payload.defaultKit === undefined ? {} : { defaultKit: payload.defaultKit }),
     clipboard,
     toggles: {
       viewing: !editing,
@@ -1492,7 +1510,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
                 snap.external
                   ? {
                       revision: snap.external.revision,
-                      author: snap.external.author ? authorLabel(snap.external.author) : 'outside',
+                      author: snap.external.author
+                        ? authorDisplay(snap.external.author)
+                        : 'outside',
                     }
                   : null
               }
@@ -1861,6 +1881,14 @@ function EditorStage({
           theme={theme}
           dir={shell.dir ?? 'next'}
           onStep={onStep}
+          band={frameBandOf(
+            snap.document.deck,
+            theme,
+            bandAssetResolver(
+              snap.document.deck,
+              (_id, _theme, path) => ASSET_BASE(snap.deckId) + path,
+            ),
+          )}
         />
       )}
       {shell.present ? (
@@ -2181,7 +2209,7 @@ function ExternalRevisionBanner({
   return (
     <div className="ts-banner ts-chrome" role="status" data-state="external">
       <span>
-        {`Revision r${external.revision}${external.author ? ` by ${authorLabel(external.author)}` : ''} arrived from outside this editor and is shown${external.note ? `: ${external.note}` : ''}.`}
+        {`Revision r${external.revision}${external.author ? ` by ${authorDisplay(external.author)}` : ''} arrived from outside this editor and is shown${external.note ? `: ${external.note}` : ''}.`}
       </span>
       <button
         type="button"

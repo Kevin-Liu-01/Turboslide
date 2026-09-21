@@ -59,6 +59,7 @@
 }
 
 .ts-title-home:hover {
+  background: var(--pt-plate);
   border-color: var(--pt-hair);
 }
 
@@ -148,6 +149,11 @@
   color: var(--pt-ink-2);
 }
 
+/* a fresh draft before its first edit: the cell holds its width and shows nothing (rank 30) */
+.ts-title-save.is-untouched {
+  visibility: hidden;
+}
+
 .ts-title-save:focus-visible {
   outline: 1px solid var(--pt-ink);
   outline-offset: -1px;
@@ -157,8 +163,14 @@
   color: var(--pt-titanium);
 }
 
-.ts-title-comments {
+.ts-title-comments,
+.ts-title-panel {
   color: var(--pt-titanium);
+}
+
+.ts-title-comments[aria-pressed='true'],
+.ts-title-panel[aria-pressed='true'] {
+  color: var(--pt-ink);
 }
 
 /* The Slideshow split button as one control (docs/RETURN.md 4.1; return/audit-chrome.md 5a): the
@@ -427,4 +439,25 @@
   .ts-title-dot {
     transition: none;
   }
+}
+
+/* The Assist button (docs/PRODUCT.md 6.1): the sparkle glyph with the word in one quiet button
+   between the presence slot and the comments glyph, where Google draws Ask Gemini; its slot is
+   as wide as the word, titanium at rest and ink while the panel is open like the comments glyph;
+   the slot collapses when the entry is absent (a reader). */
+.ts-title-assist-slot {
+  flex-basis: auto;
+  width: auto;
+}
+
+.ts-title-assist-slot:empty {
+  display: none;
+}
+
+.ts-title-assist {
+  color: var(--pt-titanium);
+}
+
+.ts-title-assist[aria-pressed='true'] {
+  color: var(--pt-ink);
 }

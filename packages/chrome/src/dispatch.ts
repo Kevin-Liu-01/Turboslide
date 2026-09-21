@@ -15,7 +15,20 @@ export type EditorWriter = {
   dispatch: EditorDispatch;
 };
 
-/** The label a component shows for an author: `agent:<runId>` for agents, the name for humans. */
+/**
+ * The label a component shows for an author: "Assistant" for an agent (docs/PRODUCT.md 6.1; the
+ * run id stays in a tooltip through `authorRunId`), the name for a person. Before the product
+ * round this read `agent:<runId>`, the developer's word, on every seller surface (audit-assist 15).
+ */
 export function authorName(author: { kind: 'human' | 'agent'; name: string; runId?: string }) {
-  return author.kind === 'agent' ? `agent:${author.runId ?? author.name}` : author.name;
+  return author.kind === 'agent' ? 'Assistant' : author.name;
+}
+
+/** The developer's word for an agent author, for a tooltip: `agent:<runId>`; undefined for a person. */
+export function authorRunId(author: {
+  kind: 'human' | 'agent';
+  name: string;
+  runId?: string;
+}): string | undefined {
+  return author.kind === 'agent' ? `agent:${author.runId ?? author.name}` : undefined;
 }

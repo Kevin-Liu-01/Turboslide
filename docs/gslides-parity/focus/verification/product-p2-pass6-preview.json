@@ -1,0 +1,20 @@
+{
+  "base": "https://turboslide-d0zxgtfia-kl01s-projects.vercel.app",
+  "rows": [
+    {
+      "name": "a deck naming Acme twice with a Pricing slide",
+      "ok": true,
+      "observed": "deck untitled-20260921-cs53; slides title, split-1, split-2; {\"acme\":2,\"globex\":0,\"skipped\":{\"title\":false,\"split-1\":false,\"split-2\":false}}"
+    },
+    {
+      "name": "Tools > Tailor for a customer: Acme to Globex, the count, skip Pricing, Apply; the snackbar with Undo; one Cmd+Z restores both",
+      "ok": true,
+      "observed": "count \"2 places on 2 slides\"; skip controls [\"dialog.tailor.skip.title:input\",\"dialog.tailor.skip.split-1:input\",\"dialog.tailor.skip.split-2:input\"]; skip box clicked true, checked true; before {\"acme\":2,\"globex\":0,\"skipped\":{\"title\":false,\"split-1\":false,\"split-2\":false}}; after {\"acme\":0,\"globex\":2,\"skipped\":{\"title\":false,\"split-1\":false,\"split-2\":true}} (revision 7 -> 8); snackbar \"Tailored for GlobexUndo\" action \"Undo\"; after one Cmd+Z {\"acme\":2,\"globex\":0,\"skipped\":{\"title\":false,\"split-1\":false,\"split-2\":false}} (revision 9)"
+    },
+    {
+      "name": "the Assist button's tooltip and, for comparison, New slide's, under a settled hover",
+      "ok": false,
+      "observed": "Assist [{\"text\":\"AssistTailor the deck for a customer, ask for a shorter slide or for speaker notes; nothing changes until you accept\",\"kbd\":[],\"html\":\"<span class=\\\"pt-tip-head\\\"><b class=\\\"pt-tip-name\\\">Assist</b></span><span class=\\\"pt-tip-doc\\\">Tailor the deck for a customer, ask for a shorter slide or for speaker notes; nothing changes until you accept</span>\"}]; New slide [{\"text\":\"New slideCtrl MThe arrow picks a layout for the new slide.\",\"kbd\":[\"Ctrl M\"],\"html\":\"<span class=\\\"pt-tip-head\\\"><b class=\\\"pt-tip-name\\\">New slide</b><kbd class=\\\"pt-tip-key\\\">Ctrl M</kbd></span><span class=\\\"pt-tip-doc\\\">The arrow picks a layout for the new slide.</span>\"}]"
+    }
+  ]
+}

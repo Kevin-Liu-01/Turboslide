@@ -1,9 +1,13 @@
 import { Link } from '@tanstack/react-router';
+import { useState } from 'react';
 
 import { tipProps } from '@turboslide/chrome/Tooltip';
 // the chrome package's `./YouNeedAccess` export landed at merge 2 (build-4/b3.md R6, applied by
 // the integrator with the one line change B3 named)
 import { YouNeedAccess } from '@turboslide/chrome/YouNeedAccess';
+
+import { useMountEffect } from '../components/useMountEffect';
+import { RouterLinkSlot } from './-link-slot';
 
 /**
  * The You need access page as the `notFoundComponent` of the deck, edit and present routes
@@ -19,8 +23,32 @@ import { YouNeedAccess } from '@turboslide/chrome/YouNeedAccess';
  * and a link to the files page, where the account chip's Sign in row lives (the chrome's
  * SignInDialog reads the editor shell's context and cannot mount outside an editor). A dash
  * prefixed file under routes/ is not a route (the convention of -edit-search.ts).
+ *
+ * The product round (docs/PRODUCT.md 3.3; audit-interface 33): the page leads with the links a
+ * stranger can use and hides the request form while the deployment has no sign in provider,
+ * which it learns from the access route's `authorize` field after hydration (`GET
+ * /api/access/<id>` names the mode whatever the deck's state); the server's HTML keeps the form,
+ * so a browser without scripts still has a way to ask.
  */
 export function AccessPage({ deckId }: { deckId: string }) {
+  /* the deployment's mode: undefined until read, then whether the form has someone to reach */
+  const [requestForm, setRequestForm] = useState<boolean | undefined>(undefined);
+  useMountEffect(() => {
+    let live = true;
+    fetch(`/api/access/${encodeURIComponent(deckId)}`, {
+      credentials: 'same-origin',
+      headers: { accept: 'application/json' },
+    })
+      .then(async (response) => {
+        const body = (await response.json().catch(() => null)) as { authorize?: string } | null;
+        if (!live) return;
+        setRequestForm(body?.authorize !== 'shadow');
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  });
   const onRequest = async (input: { role: string; message: string; email?: string }) => {
     const response = await fetch(`/api/share/${encodeURIComponent(deckId)}/requestAccess`, {
       method: 'POST',
@@ -42,6 +70,8 @@ export function AccessPage({ deckId }: { deckId: string }) {
       anonymous
       action={`/api/share/${encodeURIComponent(deckId)}/requestAccess`}
       onRequest={onRequest}
+      requestForm={requestForm ?? true}
+      linkComponent={RouterLinkSlot}
       signIn={
         <p className="ts-access-signin-line" data-control="access.signin.line">
           <Link
@@ -49,7 +79,7 @@ export function AccessPage({ deckId }: { deckId: string }) {
             data-control="access.signin.decks"
             {...tipProps({
               name: 'Your presentations',
-              doc: 'Sign in from the account chip on your presentations, then open the link again.',
+              doc: 'Sign in from the account chip on your presentations, then open the link again',
             })}
           >
             Sign in from your presentations

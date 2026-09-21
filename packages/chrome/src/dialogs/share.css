@@ -1,7 +1,12 @@
-/* The Share dialog (gslides-parity SPEC-3 6.5, 9.3; research 09 3.6, 8.5): a fixed width of 520,
-   rows of a fixed 40 px inside scroll regions of a fixed maximum height with the gutter reserved,
-   the Review banner slot present at every moment at its final height, Pending and Expired in a
-   fixed width chip, the footer sentence. Monochrome; every box square. */
+/* The Share dialog (gslides-parity SPEC-3 6.5, 9.3; research 09 3.6, 8.5; docs/PRODUCT.md section
+   2 rank 3): two stages at a fixed width of 520. The seller's stage first: the General access
+   select with the role select beside it, one sentence under them naming what the chosen access
+   does on this deployment, the address in a read only field with the one Copy link, the Open as
+   a slideshow checkbox, the people rows when any exist, Done. Behind the More row (Settings once
+   open): Add people, the requests band, the three link rows with their dates, the links list, the
+   gear. Rows of a fixed 40 px inside scroll regions of a fixed maximum height with the gutter
+   reserved, Pending and Expired in a fixed width chip. Every field is ruled in --pt-field, every
+   select is the one select of tokens.css. Monochrome; every box square. */
 .ts-share .ts-dialog-body {
   display: flex;
   flex-direction: column;
@@ -107,7 +112,7 @@
   box-sizing: border-box;
   height: 32px;
   padding: 0 9px;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-field);
   border-radius: 0;
   background: var(--pt-paper);
   color: var(--pt-ink);
@@ -133,15 +138,15 @@
   border-color: transparent;
 }
 
-.ts-share-role,
-.ts-share-mode,
-.ts-share-expiry {
+/* the selects take the one select rule of tokens.css (32 px, the field boundary, the chrome's
+   chevron); a select inside a 40 px people row keeps 28 px so the row holds its height */
+.ts-share-row .ts-share-role,
+.ts-share-row .ts-share-expiry {
   height: 28px;
-  border: 1px solid var(--pt-hair);
-  border-radius: 0;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  font: 13px/1 var(--pt-text);
+  min-height: 28px;
+  background-position:
+    calc(100% - 15px) 11px,
+    calc(100% - 10px) 11px;
 }
 
 .ts-share-list,
@@ -278,6 +283,56 @@
 /* the sentence naming the deployment's mode (docs/FOCUS.md rank 1): the same quiet colour */
 .ts-share-mode-sentence {
   max-width: 62ch;
+}
+
+/* ---- the first stage (rank 3) ---- */
+
+/* the access row: the glyph, the General access select, the role select while a link is on */
+.ts-share-access {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 120px;
+  gap: 8px;
+  align-items: center;
+}
+
+.ts-share-access.is-restricted {
+  grid-template-columns: 16px minmax(0, 1fr);
+}
+
+.ts-share-access svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* the address row: the read only field, then the one Copy link */
+.ts-share-address {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.ts-share-address input[readonly] {
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+}
+
+/* the More row opens the second stage: a dialog list row that reads Settings while open */
+.ts-share-more {
+  border: 1px solid var(--pt-hair-soft);
+}
+
+.ts-share-more .ts-dialog-row.is-button {
+  border-bottom: 0;
+}
+
+/* the second stage: the same blocks as before, under the More row */
+.ts-share-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 2px;
 }
 
 /* the three link rows of the focus round (docs/FOCUS.md 2.7), the plain addresses of a legacy

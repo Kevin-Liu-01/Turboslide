@@ -36,11 +36,15 @@ function plate(onClose: () => void, onPick: (value: string) => void = () => unde
 }
 
 describe('ColorPlate', () => {
-  it('focuses the first swatch on mount', () => {
+  it('focuses the first swatch on mount, the brand kit’s Text swatch (docs/PRODUCT.md 4.1)', () => {
     const first = plate(() => undefined);
     const { container } = render(first.node);
-    const none = container.querySelector('[data-control="toolbar.fillColor.none"]');
-    expect(document.activeElement).toBe(none);
+    const text = container.querySelector('[data-control="toolbar.fillColor.kit.text"]');
+    expect(document.activeElement).toBe(text);
+    /* the container is the menu id, the plate token's swatch keeps `.plate` (brand.colors.control-ids-unique) */
+    expect(container.querySelectorAll('[data-control="toolbar.fillColor.plate"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-control="toolbar.fillColor.menu"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-control^="toolbar.fillColor.kit."]')).toHaveLength(6);
     first.anchor.remove();
   });
 

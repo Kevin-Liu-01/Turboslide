@@ -2,9 +2,11 @@
    40 px (--pt-tool-h), 32 px controls in the shell's .pt-ib grammar, 4 px gaps, two 1 px
    --pt-hair dividers 20 px tall (after Zoom and after Insert comment), the bottom edge in
    --pt-hair (the seam with the canvas and the filmstrip, SPEC 1.2). The head never collapses;
-   the tail becomes the More button at or below 1100 px (SPEC 0.6, 1.3); nothing wraps
-   (overflow hidden, white-space nowrap). Text buttons (Background, Layout, Theme, Transition,
-   Format options) keep their words at every width. Radius 0; colors are tokens only. */
+   the tail measures itself against the bar on every selection change and folds the controls
+   that do not fit into the More button, at any window width (docs/PRODUCT.md 3.4; the fixed
+   fold at 1100 px left with the product round), so nothing is ever cut at the bar's edge and
+   nothing wraps (overflow hidden, white-space nowrap). Text buttons (Background, Layout, Theme,
+   Transition, Format options) keep their words at every width. Radius 0; colors are tokens only. */
 .ts-toolbar {
   grid-column: 1 / -1;
   grid-row: 3;
@@ -79,6 +81,12 @@
   height: 12px;
 }
 
+/* a tail control the fold put into More (docs/PRODUCT.md 3.4): out of the layout and out of the
+   accessibility tree; the More button lists it with its label */
+.ts-tb-slot.is-folded {
+  display: none;
+}
+
 /* the New slide split button: the plus and its arrow share one frame on hover */
 .ts-tb-split {
   display: inline-flex;
@@ -106,7 +114,7 @@
 
 .ts-tb-zoom:hover,
 .ts-tb-zoom:focus-within {
-  border-color: var(--pt-hair);
+  border-color: var(--pt-field);
 }
 
 .ts-tb-zoom-field {
@@ -169,7 +177,7 @@
   width: 36px;
   height: 30px;
   padding: 0 4px;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-field);
   border-radius: 0;
   background: var(--pt-paper);
   color: var(--pt-ink);
@@ -179,7 +187,7 @@
 }
 
 .ts-tb-size.is-disabled .ts-tb-size-field {
-  color: var(--pt-titanium);
+  color: var(--pt-disabled);
   border-color: var(--pt-hair-soft);
 }
 
@@ -197,7 +205,8 @@
   padding: 10px;
   background: var(--pt-paper);
   color: var(--pt-ink);
-  border: 1px solid var(--pt-hair);
+  /* a plate that floats takes the frame weight (docs/PRODUCT.md 3.1) */
+  border: 1px solid var(--pt-edge);
   font: 12px/1.3 var(--pt-text);
   animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
 }
@@ -254,7 +263,7 @@
   box-sizing: border-box;
   height: 26px;
   padding: 0 6px;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-field);
   border-radius: 0;
   background: var(--pt-paper);
   color: var(--pt-ink);

@@ -127,10 +127,9 @@ describe('BackgroundDialog', () => {
     noTitles();
   });
 
-  it('Enter in the hex field writes the typed colour at once, as Google’s field does (F-hex-field, b1 R21)', async () => {
-    /* before, the key set the state alone and the Dialog's Enter ran Done from the render that
-       had not seen the colour, so the dialog closed with no write (docs/FOCUS.md
-       `images.background.hex-field`) */
+  it('Enter in the hex field previews the typed colour and keeps the dialog open; Done writes it (docs/PRODUCT.md 4.1, brand.background.enter-keeps-open)', async () => {
+    /* the focus round wrote and closed on Enter (F-hex-field, b1 R21); the product round makes
+       Enter the preview so a seller judges the ground before it lands (audit-brand 17) */
     dispatch.mockClear();
     render(
       <Host input={input()}>
@@ -142,6 +141,12 @@ describe('BackgroundDialog', () => {
     ) as HTMLInputElement;
     fireEvent.change(field, { target: { value: '336699' } });
     fireEvent.keyDown(field, { key: 'Enter' });
+    await flush();
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(document.querySelector('[data-control="dialog.background.done"]')).not.toBeNull();
+    fireEvent.click(
+      document.querySelector('[data-control="dialog.background.done"]') as HTMLElement,
+    );
     await flush();
     expect(dispatch).toHaveBeenCalledWith('slide.setBackground', {
       slideIds: [SLIDE],

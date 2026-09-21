@@ -25,7 +25,13 @@ import { firstBaselineShiftPx } from './baseline.ts';
 import type { BaselineTarget } from './baseline.ts';
 import { faceAdvanceExcess } from './face-advance.ts';
 import type { FontSet } from './fonts-map.ts';
-import { MONO_FAMILY, pickFamily, weightSubstitution } from './fonts-map.ts';
+import {
+  BOLD_FROM,
+  MONO_FAMILY,
+  catalogFamilyName,
+  pickFamily,
+  weightSubstitution,
+} from './fonts-map.ts';
 import { fillProps, rectLine, rectShape } from './lines.ts';
 import { isSlideLink } from './links.ts';
 import type { LinkResolver } from './links.ts';
@@ -60,9 +66,34 @@ export type TextEmitOptions = {
   paperHex?: string;
 };
 
-/** The family for a style: the mono stack for the code panel, else the set's pick. */
+/** The families the sheet's own theme draws, whose export names come from the font set (fonts-map.ts). */
+const SHEET_FAMILIES = new Set(['Inter', 'GT Inter', 'DejaVu Sans Mono', 'Menlo', 'monospace']);
+
+/**
+ * A catalog face (gslides-parity SPEC-5-amendments A5 item 5; docs/PRODUCT.md 4.2, 4.5): the
+ * computed family of a run whose typography or brand kit names a `FONT_IDS` face is that face's
+ * name (the renderer's `--ts-font-<id>` variable or the kit's `--display` and `--text` stacks
+ * resolve to it), so the file names it in `a:latin typeface` as is and the residual line says
+ * PowerPoint may substitute it on a machine without the face. The sheet's own families (Inter
+ * and the mono stack) keep the set's pick.
+ */
+export function catalogFace(style: SceneStyle): string | null {
+  if (style.mono) return null;
+  const family = catalogFamilyName(style.family);
+  if (family === null || SHEET_FAMILIES.has(family)) return null;
+  return family;
+}
+
+/** The residual line a catalog face adds once per family (A5 item 5). */
+export function catalogFaceResidual(family: string): string {
+  return `font: ${family} travels by name; PowerPoint substitutes it on a machine without the face (the catalog's licence allows embedding, which the export does not do)`;
+}
+
+/** The family for a style: the mono stack for the code panel, a catalog face by name, else the set's pick. */
 export function familyFor(style: SceneStyle, set: FontSet): string {
   if (style.mono) return MONO_FAMILY;
+  const face = catalogFace(style);
+  if (face !== null) return face;
   return pickFamily(style.size, style.weight, set).family;
 }
 
@@ -112,7 +143,13 @@ function runOptions(
     fontSize: pxToPt(run.style.size),
     color: color.hex,
   };
-  if (!run.style.mono) {
+  const face = catalogFace(run.style);
+  if (face !== null) {
+    // a catalog face travels by name with the bold flag from 600 up (its own cuts carry the
+    // weight on a machine that has the face); the residual names the substitution risk once
+    if (run.style.weight >= BOLD_FROM) out.bold = true;
+    options.residual?.add(catalogFaceResidual(face));
+  } else if (!run.style.mono) {
     // a weight the set has no cut for: 600 and 700 travel as Medium plus bold, 300 as Regular
     const pick = pickFamily(run.style.size, run.style.weight, options.fontSet);
     if (pick.bold) out.bold = true;
@@ -122,7 +159,7 @@ function runOptions(
   if (run.style.letterSpacing !== 0) out.charSpacing = pxToPt(run.style.letterSpacing);
   // A text face used off its cut size renders wider in LibreOffice (calibration.json faceAdvance):
   // the measured excess of the run's width is taken back across its characters.
-  const excess = run.style.mono ? 0 : faceAdvanceExcess(family, run.style.size);
+  const excess = run.style.mono || face !== null ? 0 : faceAdvanceExcess(family, run.style.size);
   if (excess > 0 && run.text.length > 0 && !run.gt) {
     const perChar = (excess * run.box[2]) / run.text.length;
     out.charSpacing = Math.round(pxToPt(run.style.letterSpacing - perChar) * 100) / 100;

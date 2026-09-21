@@ -7,7 +7,8 @@ import { PATH_SEPARATOR, finderRows, isFinderItem } from '../menus/finder';
 import type { MenuContext } from '../menus/model';
 import { DEFAULT_MENU_CONTEXT, allItems, isPresent } from '../menus/model';
 import { forbiddenWordsIn } from '../menus/strings';
-import { toolFinderEntries } from '../ToolFinder';
+import { filterPalette } from '../palette-data';
+import { ASK_ENTRY_ID, askEntry, assistPresent, toolFinderEntries } from '../ToolFinder';
 
 // Search the menus (gslides-parity SPEC 2.10): every menu item of the model that is not omitted
 // and is a command is a row with its menu path and its key; the slides and the layouts stay as
@@ -128,5 +129,66 @@ describe('toolFinderEntries', () => {
     expect(rename?.meta).toBe('File');
     if (rename?.run.kind === 'call') rename.run.call();
     expect(ranOff).toBe('file.rename');
+  });
+});
+
+describe('the seller’s words and the Ask row (docs/PRODUCT.md 6.1; audit-assist 8)', () => {
+  it('lists Skip slide for "hide slide", Find and replace for "rename the customer" and Replace image for "logo"', () => {
+    const entries = toolFinderEntries(
+      document,
+      'content-rule',
+      DEFAULT_MENU_CONTEXT,
+      () => undefined,
+      () => undefined,
+    );
+    const titles = (query: string) =>
+      filterPalette(entries, query)
+        .flatMap((group) => group.rows)
+        .map((row) => row.title);
+    expect(titles('hide slide')[0]).toBe('Skip slide');
+    expect(titles('rename the customer')).toContain('Find and replace');
+    /* Replace image is a submenu; the finder lists its rows, whose path names it */
+    const logo = filterPalette(entries, 'logo').flatMap((group) => group.rows);
+    expect(logo.some((row) => row.meta?.includes('Replace image'))).toBe(true);
+    expect(titles('logo')).toContain('Upload from computer');
+    expect(titles('logo')).not.toContain('Long dash dot');
+    expect(titles('bigger text')).toContain('Increase font size');
+    expect(titles('talk track')).toContain('Show speaker notes');
+    expect(titles('send a pdf')).toContain('PDF Document (.pdf)');
+  });
+
+  it('adds the Ask row only when nothing matches, the assist is present and an onAsk exists', () => {
+    const entries = toolFinderEntries(
+      document,
+      'content-rule',
+      DEFAULT_MENU_CONTEXT,
+      () => undefined,
+      () => undefined,
+    );
+    const present = assistPresent(DEFAULT_MENU_CONTEXT);
+    let asked: string | null = null;
+    const ask = (phrase: string) => {
+      asked = phrase;
+    };
+    /* a phrase that matches a row never gets the Ask row */
+    expect(askEntry(entries, 'skip slide', DEFAULT_MENU_CONTEXT, ask)).toBeNull();
+    /* an empty phrase or no handler never does */
+    expect(askEntry(entries, '', DEFAULT_MENU_CONTEXT, ask)).toBeNull();
+    expect(askEntry(entries, 'add a video', DEFAULT_MENU_CONTEXT, undefined)).toBeNull();
+    const row = askEntry(entries, 'add a video', DEFAULT_MENU_CONTEXT, ask);
+    if (present) {
+      expect(row?.id).toBe(ASK_ENTRY_ID);
+      expect(row?.title).toBe('Ask the assistant: add a video');
+      if (row?.run.kind === 'call') row.run.call();
+      expect(asked).toBe('add a video');
+      /* the row survives its own filter */
+      const withAsk = filterPalette([...entries, ...(row === null ? [] : [row])], 'add a video');
+      expect(withAsk.flatMap((group) => group.rows).map((entry) => entry.id)).toEqual([
+        ASK_ENTRY_ID,
+      ]);
+    } else {
+      /* until the model carries title.assist (build/b6.md R1) the row is absent, never a stale title */
+      expect(row).toBeNull();
+    }
   });
 });

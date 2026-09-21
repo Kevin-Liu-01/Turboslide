@@ -62,7 +62,9 @@ export type QuotaName =
   | 'accessRequestsPerDay'
   | 'linkCreatesPerDeckPerDay'
   | 'mentionMailsPerDay'
-  | 'redisCommandsPerDay';
+  | 'redisCommandsPerDay'
+  | 'assistCallsPerMinutePerDeck'
+  | 'assistCallsPerDay';
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
@@ -84,6 +86,10 @@ export type Quota = {
 
 const TOO_MANY = 'Too many changes at once. Try again in a minute';
 const EXPORT_LIMIT = 'You have reached today’s export limit';
+/** The assist's refusal sentence (docs/PRODUCT.md 6.3). */
+export const ASSIST_TOO_MANY = 'Too many assistant requests. Try again in a minute';
+/** The anonymous day cap of the assist without `TURBOSLIDE_ASSIST_DAY_CAP` (docs/PRODUCT.md 6.3). */
+export const ASSIST_DAY_CAP_DEFAULT = 20;
 
 /** SPEC-3 8.3, the "Application quota beside it" column and the three rows without a WAF rule. */
 export const QUOTAS: Readonly<Record<QuotaName, Quota>> = {
@@ -252,7 +258,43 @@ export const QUOTAS: Readonly<Record<QuotaName, Quota>> = {
     limits: { anonymous: 500_000, account: 2_000_000, agent: 2_000_000 },
     sentence: TOO_MANY,
   },
+  /* The assist's two rows (docs/PRODUCT.md 6.3; audit-assist 5): a model call is the costliest
+     request the product makes, so it is counted per deck per minute and per identity per day.
+     On a deployment with anonymous principals every seller is anonymous, so the caps that apply
+     are 6 a minute and 20 a day; `TURBOSLIDE_ASSIST_DAY_CAP` raises the anonymous day cap for a
+     deployment whose sellers are known (General Translation's sets 60), read at check time by
+     `checkAssistQuotas`, so the table's value stays the documented default. */
+  assistCallsPerMinutePerDeck: {
+    name: 'assistCallsPerMinutePerDeck',
+    windowMs: MINUTE,
+    limits: { anonymous: 6, account: 20, agent: 60 },
+    sentence: ASSIST_TOO_MANY,
+    perDeck: true,
+  },
+  assistCallsPerDay: {
+    name: 'assistCallsPerDay',
+    windowMs: DAY,
+    limits: { anonymous: ASSIST_DAY_CAP_DEFAULT, account: 300, agent: 1_000 },
+    sentence: 'You have reached today’s limit for the assistant',
+  },
 };
+
+/** The variable that raises the anonymous day cap of `assistCallsPerDay` (docs/PRODUCT.md 6.3). */
+export const ASSIST_DAY_CAP_ENV = 'TURBOSLIDE_ASSIST_DAY_CAP';
+
+/**
+ * The anonymous tier's assist calls per day: the variable when it is a positive integer, else
+ * the table's 20. The account and agent tiers keep the table's values.
+ */
+export function assistDayCap(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): number {
+  const raw = env[ASSIST_DAY_CAP_ENV];
+  if (raw === undefined || raw.trim() === '') return ASSIST_DAY_CAP_DEFAULT;
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value < 1) return ASSIST_DAY_CAP_DEFAULT;
+  return value;
+}
 
 export const QUOTA_NAMES: readonly QuotaName[] = Object.keys(QUOTAS) as QuotaName[];
 
@@ -541,9 +583,10 @@ export async function checkQuota(
   name: QuotaName,
   ctx: QuotaContext,
   cost = 1,
+  options: { limit?: number } = {},
 ): Promise<RateLimitedError | null> {
   const quota = QUOTAS[name];
-  const limit = quota.limits[ctx.tier];
+  const limit = options.limit ?? quota.limits[ctx.tier];
   const key = quotaKey(name, ctx.identity, ctx.deckId);
   const result =
     limit <= 0
@@ -563,6 +606,27 @@ export async function checkQuota(
     ...(cost !== 1 ? { bytes: cost } : {}),
   });
   return new RateLimitedError(name, retryAfter);
+}
+
+/**
+ * The assist's two rows in one call (docs/PRODUCT.md 6.3, 8.3): the per deck minute first, then
+ * the day, whose anonymous cap reads `TURBOSLIDE_ASSIST_DAY_CAP`. A refusal names the row that
+ * refused; the route and the agent action's handler both call this, so one table holds on every
+ * transport. The minute row is counted before the day row so a refused minute never spends a
+ * day's unit.
+ */
+export async function checkAssistQuotas(
+  ctx: QuotaContext,
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): Promise<RateLimitedError | null> {
+  const minute = await checkQuota('assistCallsPerMinutePerDeck', ctx);
+  if (minute !== null) return minute;
+  return checkQuota(
+    'assistCallsPerDay',
+    ctx,
+    1,
+    ctx.tier === 'anonymous' ? { limit: assistDayCap(env) } : {},
+  );
 }
 
 /** `checkQuota` for a server function: throws the RateLimitedError. */

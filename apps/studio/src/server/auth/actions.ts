@@ -319,6 +319,15 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
     const result = normalizeName(name, { taken });
     if (!result.ok) throw new TypeError(result.message);
     await rt.principals.put({ ...record, name: result.name, lastSeenAt: now().toISOString() });
+    if (facts.identity.principalId !== null) {
+      /* the name onto the principal's deck index, the carrier every instance reads (b1.md R17),
+         and out of this instance's identity cache, so the next presence post resolves the new
+         record at once (R18); a refused index write leaves the record's name standing */
+      const principalId = facts.identity.principalId;
+      const [access, room] = await Promise.all([import('../access'), import('../room')]);
+      await access.noteDisplayName(principalId, result.name).catch(() => undefined);
+      room.forgetIdentity(principalId);
+    }
     if (facts.identity.kind === 'account' && facts.identity.account !== null && rt.db !== null)
       await rt.db.db
         .updateTable('user')

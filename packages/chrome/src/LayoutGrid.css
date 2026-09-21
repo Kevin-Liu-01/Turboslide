@@ -1,9 +1,13 @@
-/* LayoutGrid (LayoutGrid.tsx): 21 tiles at 128 by 72 in three columns with the name under each
-   (gslides-parity SPEC 5.2); Google's eleven, the rule reading "GT layouts" in titanium, then the
-   GT layouts. A tile is a --pt-edge frame around the live clone of the layout's slide; the
-   current one draws the ink ring at 2 px offset (the frame law's active state). 12 px Inter
-   names; 8 px gaps; radius 0; colors are tokens only. The plate this grid sits in is the menu
-   primitive's dynamic submenu or the toolbar's dropdown (EditorShell.css .ts-layout-plate). */
+/* LayoutGrid (LayoutGrid.tsx): 21 tiles at 128 by 72 with the name under each (gslides-parity
+   SPEC 5.2); three columns, four at 1280 px and up so Google's eleven show without scrolling
+   (docs/PRODUCT.md 3.4; audit-interface 34); Google's eleven, then the GT layouts as a collapsed
+   group under a disclosure row, then the caption row that reads the hovered or focused tile's
+   sentence (section 2 rank 24: no floating plate over the neighbouring tiles). A tile is a
+   --pt-edge frame around the live clone of the layout's slide; the current one draws one 2 px ink
+   border and no second outline (3.1, the tile row; audit-interface 19); the focus ring is the one
+   inset ring. 12 px Inter names; 8 px gaps; radius 0; colors are tokens only. The plate this grid
+   sits in is the menu primitive's dynamic submenu or the toolbar's dropdown (EditorShell.css
+   .ts-layout-plate). */
 .ts-layout-grid {
   box-sizing: border-box;
   width: 424px;
@@ -17,6 +21,16 @@
   display: grid;
   grid-template-columns: repeat(3, 128px);
   gap: 10px 8px;
+}
+
+@media (min-width: 1280px) {
+  .ts-layout-grid {
+    width: 560px;
+  }
+
+  .ts-layout-tiles {
+    grid-template-columns: repeat(4, 128px);
+  }
 }
 
 .ts-layout-tile {
@@ -58,10 +72,9 @@
   border-color: var(--pt-ink);
 }
 
+/* one ring: the current tile's frame is a 2 px ink border, no outline (3.1) */
 .ts-layout-tile.is-current .ts-layout-frame {
-  border-color: var(--pt-ink);
-  outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
+  border: 2px solid var(--pt-ink);
 }
 
 .ts-layout-tile:focus-visible {
@@ -70,11 +83,7 @@
 
 .ts-layout-tile:focus-visible .ts-layout-frame {
   outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
-}
-
-.ts-layout-tile.is-current:hover .ts-layout-frame {
-  outline-color: var(--pt-ink);
+  outline-offset: -1px;
 }
 
 .ts-layout-missing {
@@ -103,15 +112,26 @@
   color: var(--pt-ink);
 }
 
-/* the rule between Google's eleven and the GT layouts: a hairline with the label on it */
+/* the disclosure row between Google's eleven and the GT layouts: a hairline with the group's
+   name and count on it, a chevron at the right; a button, so the group opens from the keyboard */
 .ts-layout-rule {
   position: relative;
   display: flex;
   align-items: center;
-  height: 24px;
+  justify-content: space-between;
+  box-sizing: border-box;
+  width: 100%;
+  height: 28px;
   margin: 6px 0 4px;
+  padding: 0;
+  appearance: none;
+  background: none;
+  border: 0;
+  border-radius: 0;
   color: var(--pt-titanium);
-  font-size: 11.5px;
+  font: 500 11.5px/1 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
 }
 
 .ts-layout-rule::before {
@@ -128,4 +148,48 @@
   position: relative;
   padding: 0 8px 0 0;
   background: var(--pt-paper);
+}
+
+.ts-layout-rule svg {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  background: var(--pt-paper);
+  transition: transform var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-layout-rule[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+.ts-layout-rule:hover {
+  color: var(--pt-ink);
+}
+
+.ts-layout-rule:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+/* the caption row (rank 24): one sentence for the hovered or focused tile, in ink-2, one line
+   tall whether or not a tile is under the pointer, so the plate never moves */
+.ts-layout-caption {
+  box-sizing: border-box;
+  min-height: 20px;
+  margin: 8px 0 0;
+  padding: 6px 0 0;
+  border-top: 1px solid var(--pt-hair-soft);
+  color: var(--pt-ink-2);
+  font: 12.5px/1.4 var(--pt-text);
+}
+
+.ts-layout-caption:empty::before {
+  content: '\00a0';
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-layout-rule svg {
+    transition: none;
+  }
 }

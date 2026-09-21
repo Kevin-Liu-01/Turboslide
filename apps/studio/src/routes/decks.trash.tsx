@@ -3,9 +3,10 @@ import { Suspense, useCallback, useRef, useState } from 'react';
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router';
 
 import { AppBarBrand } from '@turboslide/chrome/AppBarBrand';
+import { DeleteForeverDialog } from '@turboslide/chrome/dialogs/DeleteForever';
 import { EmptyFigure } from '@turboslide/chrome/EmptyFigure';
 import { Icon } from '@turboslide/chrome/icons';
-import { DIALOGS, HOME } from '@turboslide/chrome/menus/strings';
+import { HOME } from '@turboslide/chrome/menus/strings';
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 
@@ -13,9 +14,9 @@ import { useMountEffect } from '../components/useMountEffect';
 import { listTrashedDecks, removeStoredDeck, restoreStoredDeck } from '../server/decks';
 import { clearRestoringMarker, sessionMarkerStorage, writeRestoringMarker } from './-restoring';
 import type { DeckCard } from '../server/decks';
-import { Dialog, cardThumbUrl, shortDate, useStreamedList } from './decks.index';
+import { Thumb, shortDate, useStreamedList } from './decks.index';
 import { RouterLinkSlot } from './-link-slot';
-import { forgetDeckOpened } from './-recent';
+import { forgetDeckOpened, forgetTrashedMarker } from './-recent';
 
 import './decks.css';
 
@@ -37,6 +38,11 @@ import './decks.css';
  * and a refused removal (a stale revision, a right the caller lacks, a store that fails) brings
  * the card back with the error sentence in the snackbar. Before this round the page awaited the
  * invalidation under a busy state, which was the list call's 1 to 8 s (R04 section 8).
+ *
+ * The product round (docs/PRODUCT.md 3.3, 3.6; audit-interface 21, 29): the confirm is the chrome's
+ * one Dialog (DeleteForeverDialog: the 18 px title, the lead "This cannot be undone.", Delete
+ * forever focused), the card's Restore and Delete forever are 32 px with Delete forever in ink and
+ * its glyph, and Empty trash is the page's one solid button, since it is the page's act.
  */
 export const Route = createFileRoute('/decks/trash')({
   loader: () => ({ decks: listTrashedDecks() }),
@@ -104,6 +110,9 @@ function TrashPage() {
        restore's flight time (rank 7; build/b7.md R9, routes/-restoring.ts): written before the
        request, removed when the restore is refused, retired by the home page or its age */
     writeRestoringMarker(sessionMarkerStorage(), card.id);
+    /* the editor's Move to trash left a marker for the home page (rank 16): a restore here within
+       its 15 s would otherwise hide the deck again on the next visit */
+    forgetTrashedMarker(card.id);
     try {
       /* no revision from the listing, which lags the store (docs/FOCUS.md rank 7); Delete forever
          below keeps its revision, since an irreversible action on a stale card should stop */
@@ -184,57 +193,15 @@ function TrashPage() {
       </Suspense>
 
       {confirm !== null ? (
-        <Dialog
-          title={
-            confirm.kind === 'one'
-              ? DIALOGS.deleteForever.title(confirm.card.title)
-              : `Delete ${confirm.cards.length} presentation${confirm.cards.length === 1 ? '' : 's'} forever? This cannot be undone`
-          }
-          control="trash.confirm"
+        <DeleteForeverDialog
+          title={confirm.kind === 'one' ? confirm.card.title : HOME.trash}
+          {...(confirm.kind === 'one'
+            ? { slides: confirm.card.slides }
+            : { count: confirm.cards.length })}
+          busy={busy.size > 0}
           onClose={() => setConfirm(null)}
-          onSubmit={() => void remove(confirm.kind === 'one' ? [confirm.card] : confirm.cards)}
-          actions={
-            <>
-              <button
-                type="button"
-                className="pt-ib is-text"
-                data-control="trash.confirm.cancel"
-                onClick={() => setConfirm(null)}
-                {...tipProps({
-                  name: DIALOGS.deleteForever.cancel,
-                  doc: 'Keeps the presentation in the trash.',
-                  key: 'Esc',
-                })}
-              >
-                <span className="pt-lb">{DIALOGS.deleteForever.cancel}</span>
-              </button>
-              {/* the initial focus sits on the button whose tooltip names Enter, as Google's Delete
-                  forever dialog does, so Enter deletes and Esc keeps (docs/FOCUS.md rank 29,
-                  `decks.trash.delete-forever-enter`; audit-decks row 53a saw Enter cancel while
-                  Cancel held the focus) */}
-              <button
-                type="button"
-                className="pt-ib is-text is-solid"
-                data-control="trash.confirm.ok"
-                data-autofocus
-                onClick={() => void remove(confirm.kind === 'one' ? [confirm.card] : confirm.cards)}
-                {...tipProps({
-                  name: DIALOGS.deleteForever.ok,
-                  doc: 'Deletes the files; nothing brings them back.',
-                  key: 'Enter',
-                })}
-              >
-                <span className="pt-lb">{DIALOGS.deleteForever.ok}</span>
-              </button>
-            </>
-          }
-        >
-          <p>
-            {confirm.kind === 'one'
-              ? `${confirm.card.slides} slide${confirm.card.slides === 1 ? '' : 's'} and every version of ${confirm.card.title} are deleted.`
-              : 'Every presentation in the trash, with its slides and versions, is deleted.'}
-          </p>
-        </Dialog>
+          onConfirm={() => void remove(confirm.kind === 'one' ? [confirm.card] : confirm.cards)}
+        />
       ) : null}
 
       <Snackbar message={snackbar.message} onDismiss={snackbar.dismiss} />
@@ -299,7 +266,7 @@ function TrashBody({
           </Link>
           <button
             type="button"
-            className="pt-ib is-text"
+            className="pt-ib is-text is-solid"
             data-control="trash.empty"
             disabled={shown === null || shown.length === 0 || busy.size > 0}
             onClick={() => (shown === null ? undefined : onEmpty(shown))}
@@ -369,8 +336,6 @@ function TrashCard({
   onRestore: () => void;
   onDelete: () => void;
 }) {
-  const [failed, setFailed] = useState(false);
-  const url = cardThumbUrl(card);
   const trashed = card.trashedAt ?? card.updatedAt;
   return (
     <li
@@ -378,21 +343,7 @@ function TrashCard({
       data-deck={card.id}
       data-control={`trash.card.${card.id}`}
     >
-      <span className="ts-hm-card-thumb" data-theme={card.appearance} aria-hidden="true">
-        {url !== null && !failed ? (
-          <img
-            src={url}
-            width={320}
-            height={180}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            onError={() => setFailed(true)}
-          />
-        ) : (
-          <span className="ts-hm-card-plate">{card.title}</span>
-        )}
-      </span>
+      <Thumb card={card} />
       <div className="ts-hm-card-body">
         <span className="ts-hm-card-title">{card.title}</span>
         <span className="ts-hm-card-when" suppressHydrationWarning>
@@ -413,7 +364,7 @@ function TrashCard({
         </button>
         <button
           type="button"
-          className="pt-ib is-text"
+          className="pt-ib is-text ts-trash-delete"
           data-control={`trash.delete.${card.id}`}
           disabled={busy}
           onClick={onDelete}
@@ -422,6 +373,7 @@ function TrashCard({
             doc: 'Deletes the presentation after asking; nothing brings it back.',
           })}
         >
+          <Icon name="trash" />
           <span className="pt-lb">{HOME.deleteForever}</span>
         </button>
       </div>

@@ -160,7 +160,8 @@ describe('buildPaletteEntries', () => {
     const rows = entries.filter((entry) => entry.group === 'versions');
     expect(rows).toHaveLength(10);
     expect(rows[0]?.title).toBe('Before the copy pass');
-    expect(rows[0]?.meta).toBe('agent:run-11 · r411');
+    /* an agent author reads Assistant on every seller surface (docs/PRODUCT.md 6.1; audit-assist 15) */
+    expect(rows[0]?.meta).toBe('Assistant · r411');
     expect(rows[1]?.title).toBe('Version 11');
     expect(rows[0]?.run).toEqual({
       kind: 'dispatch',
@@ -276,8 +277,16 @@ describe('parsePaletteQuery and matchScore', () => {
     expect(matchScore('con', 'content-rule')).toBe(4);
     expect(matchScore('rule', 'content-rule')).toBe(3);
     expect(matchScore('ent', 'content-rule')).toBe(2);
-    expect(matchScore('cntrl', 'content-rule')).toBe(1);
+    expect(matchScore('ctr', 'content-rule')).toBe(1);
     expect(matchScore('xyz', 'content-rule')).toBe(0);
+  });
+
+  it('drops the subsequence score for a needle of four characters or more (docs/PRODUCT.md 6.1)', () => {
+    /* "logo" answered "Long dash dot" on production through the subsequence (audit-assist 8) */
+    expect(matchScore('cntrl', 'content-rule')).toBe(0);
+    expect(matchScore('logo', 'long dash dot')).toBe(0);
+    expect(matchScore('logo', 'replace image logo picture swap')).toBe(3);
+    expect(matchScore('ldd', 'long dash dot')).toBe(1);
   });
 });
 
@@ -314,7 +323,9 @@ describe('filterPalette', () => {
   });
 
   it('matches fuzzily over titles and ids and orders the best match first', () => {
-    const groups = filterPalette(entries, 'cntrl');
+    /* a three character needle still matches as a subsequence; longer ones need the words
+       themselves (docs/PRODUCT.md 6.1; audit-assist 8) */
+    const groups = filterPalette(entries, 'ctr');
     const slides = groups.find((group) => group.group.id === 'slides');
     expect(slides?.rows.some((row) => row.preview === 'content-rule')).toBe(true);
     const lint = filterPalette(entries, 'lint');

@@ -251,6 +251,20 @@ describe('inverse mutations', () => {
       ],
     },
     {
+      /* a field under an object the block does not carry yet creates the object (the font rows'
+         agent write, docs/PRODUCT.md 4.2); the inverse removes it whole */
+      name: 'block.set creates the parent object',
+      mutations: [
+        {
+          op: 'block.set',
+          slideId: 'content-rule',
+          blockId: 'h',
+          path: '/typography/family',
+          value: 'roboto',
+        },
+      ],
+    },
+    {
       name: 'text.replace',
       mutations: [
         {

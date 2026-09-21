@@ -14,6 +14,7 @@
   "exports": {
     "./cli": "./src/cli.ts",
     "./store-actions": "./src/store-actions.ts",
+    "./brand-actions": "./src/brand-actions.ts",
     "./record-actions": "./src/record-actions.ts",
     "./records/*": "./src/records/*.ts",
     "./commands/deck": "./src/commands/deck.ts",

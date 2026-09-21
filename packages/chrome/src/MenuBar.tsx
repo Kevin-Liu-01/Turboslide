@@ -116,6 +116,13 @@ export function MenuBar({ className }: MenuBarProps) {
       /* Tab closes everything and leaves the bar */
       titles.current.get(focusId)?.blur();
     }
+    /* Escape on a menu the pointer opened returns focus to the stage, not to the title, so no
+       ring stays on the menu bar (docs/PRODUCT.md section 2 rank 29; audit-seller 31); a menu the
+       keyboard opened keeps the ARIA pattern and returns to its title */
+    if (reason === 'escape' && !viaKeyboard.current) {
+      titles.current.get(focusId)?.blur();
+      document.querySelector<HTMLElement>('.ts-stage, .pt-stagewrap')?.focus();
+    }
   };
 
   const onSelect = (item: MenuItem, anchor: HTMLElement | null) => {

@@ -1,0 +1,123 @@
+{
+  "base": "https://turboslide-o6u6te5bj-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-20T14:50:15.853Z",
+  "seconds": 109,
+  "counts": {
+    "works": 10,
+    "broken": 3,
+    "notDriven": 2
+  },
+  "rows": [
+    {
+      "n": 1,
+      "area": "setup",
+      "interaction": "a deck from /new with a title, a Title and body slide with a heading and a body",
+      "result": "works",
+      "observed": "deck untitled-20260920-60a4; title slide title; body slide split-1; base --blue #2f5ce0"
+    },
+    {
+      "n": 2,
+      "area": "brand.panel.opens",
+      "interaction": "the Theme button opens the Brand kit panel; Slide > Change theme opens the same",
+      "result": "works",
+      "observed": "via toolbar.theme; heads [\"Brand kit\",\"Appearance\",\"Logo\",\"Colors\",\"Fonts\",\"Footer\",\"Slide numbers\",\"Frame\",\"Words that never translate\"]; reset \"Reset to General Translation\"; Slide > Change theme opened it true"
+    },
+    {
+      "n": 3,
+      "area": "brand.colors.primary-live",
+      "interaction": "Colors > Primary typed as #0b3d91 previews on the sheet while typing; Enter commits one revision; Version history",
+      "result": "works",
+      "observed": "while typing {\"blue\":\"#0b3d91\",\"revision\":4} (revision unchanged from 4); after Enter {\"blue\":\"#0b3d91\",\"revision\":5}; body slide --blue #0b3d91; Version history latest row \"07:50 AM to 07:50 AMYou · 6 changes\" (the row should read Brand kit: Primary)"
+    },
+    {
+      "n": 4,
+      "area": "brand.fonts.roles",
+      "interaction": "Fonts > Display: Playfair Display; Text: Source Sans 3; the heading and the body redraw",
+      "result": "works",
+      "observed": "before {\"head\":\"Inter, \\\"Helvetica Neue\\\", Arial, sans-serif\",\"body\":\"Inter, \\\"Helvetica Neue\\\", Arial, sans-serif\"}; heading now \"Playfair Display\", Georgia, \"Times New Roman\", serif; body now \"Source Sans 3\", \"Helvetica Neue\", Arial, sans-serif; last font files loaded [\"space-grotesk/space-grotesk.woff2\",\"ibm-plex-mono/ibm-plex-mono-400.woff2\",\"ibm-plex-sans/ibm-plex-sans.woff2\",\"playfair-display/playfair-display.woff2\",\"pt-serif/pt-serif-400.woff2\",\"source-serif-4/source-serif-4.woff2\"]"
+    },
+    {
+      "n": 5,
+      "area": "brand.logo.replace-every-slide",
+      "interaction": "Logo > Replace with a PNG; the title slide slot and the footer draw it within 5 s; Position > Top right moves it",
+      "result": "broken",
+      "observed": "title slide mark img after 12130 ms: null; body slide footer img: /decks/untitled-20260920-60a4/assets/acme-mark.png; position {\"options\":[\"top-left\",\"top-right\",\"bottom-left\",\"bottom-right\",\"hidden\"],\"target\":\"top-right\",\"before\":null,\"after\":{\"x\":989,\"y\":258,\"w\":67}}"
+    },
+    {
+      "n": 6,
+      "area": "brand.footer.text",
+      "interaction": "Footer > Text \"Confidential\" draws in the band on the body slide and not on the title slide",
+      "result": "works",
+      "observed": "body slide footer \"Confidential\"; title slide footer \"null\""
+    },
+    {
+      "n": 7,
+      "area": "brand.counter.format",
+      "interaction": "Slide numbers > Format \"Slide n\"; the frame follows",
+      "result": "works",
+      "observed": "options [{\"value\":\"n / N\",\"label\":\"n / N\"},{\"value\":\"n\",\"label\":\"n\"},{\"value\":\"Slide n\",\"label\":\"Slide n\"}]; counter before \"02 / 02\" after \"Slide 2\""
+    },
+    {
+      "n": 8,
+      "area": "brand.frame.toggles",
+      "interaction": "Frame > Crosses off; the sheet draws no crosses; each row carries its sentence",
+      "result": "broken",
+      "observed": "sentences [\"Rails: the margins at the sides of every slide\",\"Rules: the thin lines that frame the slide\",\"Crosses: the small marks at the frame’s corners\"]; cross elements 4 -> 4; --frame-crosses \"\""
+    },
+    {
+      "n": 9,
+      "area": "brand.colors.palette-row",
+      "interaction": "the text colour plate lists the kit's six colours first with the role and hex in the tooltip; the kit primary writes on a selected heading",
+      "result": "works",
+      "observed": "kit swatches 6; toolbar.textColor.menu 1, .plate 1; first ids [\"toolbar.textColor.kit.text\",\"toolbar.textColor.kit.background\",\"toolbar.textColor.kit.caption\",\"toolbar.textColor.kit.hint\",\"toolbar.textColor.kit.primary\",\"toolbar.textColor.kit.accent\",\"toolbar.textColor.ink\",\"toolbar.textColor.paper\"]; primary tooltip \"Primary #0b3d91links and the key colour of charts and highlights; the token blue\"; heading color after the click rgb(11, 61, 145)"
+    },
+    {
+      "n": 10,
+      "area": "templates.save.as-template",
+      "interaction": "File > Save as template with a name and a sentence; the gallery lists it under Your organisation",
+      "result": "broken",
+      "observed": "cover in the dialog 1; snackbar \"Saved the template Verifier kit mu9xnui4Open gallery\"; the gallery lists the template as null"
+    },
+    {
+      "n": 11,
+      "area": "templates.default.use-for-new",
+      "interaction": "a deck created from the saved template carries the kit (the primary, the logo, the faces)",
+      "result": "not driven",
+      "observed": "no template saved"
+    },
+    {
+      "n": 12,
+      "area": "fonts.export.editable-names-face",
+      "interaction": "the Editable text PowerPoint names the kit faces in a:latin typeface and carries the logo picture",
+      "result": "works",
+      "observed": "file Acme renewal kit (editable).pptx 19040 B; typefaces in the slides: 14 \"Playfair Display\" 3 \"Source Sans 3\"; media: slide1 carries no picture 0"
+    },
+    {
+      "n": 13,
+      "area": "brand.export.pdf-logo",
+      "interaction": "the PDF embeds the kit faces and its first page carries the picture logo",
+      "result": "works",
+      "observed": "file Acme renewal kit.pdf 132337 B; Pages:           2; fonts: AAAAAA+PlayfairDisplay-Regular, AAAAAA+PlayfairDisplay-Regular, AAAAAA+PlayfairDisplay-Regular, BAAAAA+PlayfairDisplay-Regular, BAAAAA+PlayfairDisplay-Regular, BAAAAA+PlayfairDisplay-Regular, CAAAAA+PlayfairDisplay-Regular, CAAAAA+PlayfairDisplay-Regular, CAAAAA+PlayfairDisplay-Regular, DAAAAA+SourceSans3-Roman, DAAAAA+SourceSans3-Roman, EAAAAA+SourceSans3-Roman; page 1 images 1"
+    },
+    {
+      "n": 14,
+      "area": "brand.reset.default-kit",
+      "interaction": "Reset to General Translation clears the record; the sheet reads the default kit; the snackbar carries Undo",
+      "result": "works",
+      "observed": "--blue #2f5ce0 (base #2f5ce0); mark img null; heading family Inter, \"Helvetica Neue\", Arial, sans-serif; snackbar \"Reset to General TranslationUndo\" action \"Undo\""
+    },
+    {
+      "n": 15,
+      "area": "templates.card.rename-and-delete",
+      "interaction": "the card menu under Your organisation deletes the template after a confirm; the gallery drops it",
+      "result": "not driven",
+      "observed": "no template saved"
+    }
+  ],
+  "cleanup": [
+    "untitled-20260920-60a4: /edit answers 404"
+  ],
+  "consoleErrors": [
+    "console: Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

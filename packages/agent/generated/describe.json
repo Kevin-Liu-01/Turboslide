@@ -18,6 +18,13 @@
         "deck.remove",
         "deck.setBackground",
         "deck.guides",
+        "template.list",
+        "template.slides",
+        "template.create",
+        "template.update",
+        "template.rename",
+        "template.delete",
+        "template.setDefault",
         "slide.list",
         "slide.get",
         "slide.insert",
@@ -97,6 +104,13 @@
         "export.text",
         "build.run",
         "validate.run",
+        "deck.tailor",
+        "assist.propose",
+        "assist.accept",
+        "brand.get",
+        "brand.set",
+        "brand.reset",
+        "font.list",
         "presence.list",
         "presence.follow",
         "presence.unfollow",
@@ -209,6 +223,13 @@
     "deck.remove",
     "deck.setBackground",
     "deck.guides",
+    "template.list",
+    "template.slides",
+    "template.create",
+    "template.update",
+    "template.rename",
+    "template.delete",
+    "template.setDefault",
     "slide.list",
     "slide.get",
     "slide.insert",
@@ -294,6 +315,13 @@
     "control.activate",
     "control.set",
     "artifact.download",
+    "deck.tailor",
+    "assist.propose",
+    "assist.accept",
+    "brand.get",
+    "brand.set",
+    "brand.reset",
+    "font.list",
     "presence.list",
     "presence.follow",
     "presence.unfollow",
@@ -365,7 +393,7 @@
     },
     "deck.create": {
       "label": "New deck",
-      "doc": "Creates a deck under decks/ from the GT brand template or as one title slide, and returns its id, revision and counts.",
+      "doc": "Creates a deck under decks/ from a template of the index (template.list), the GT brand template or one title slide, and returns its id, revision and counts.",
       "mutates": true,
       "milestone": "M4",
       "group": "deck"
@@ -431,6 +459,55 @@
       "doc": "Adds, removes, moves, sets or clears the deck’s guide lines, sheet pixels the same on every slide; the result is sorted and inside the sheet, and an empty result removes the field.",
       "mutates": true,
       "milestone": "GS2",
+      "group": "deck"
+    },
+    "template.list": {
+      "label": "Templates",
+      "doc": "The template index: every template with its name, category, cover, sentence, slide count, theme and appearance, the organisation flag of a template saved on this deployment and its brand kit, plus the id of the template new presentations start from.",
+      "mutates": false,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "template.slides": {
+      "label": "Template slides",
+      "doc": "The slides of one template in order with their titles and kinds, the rows the gallery and Import slides read.",
+      "mutates": false,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "template.create": {
+      "label": "Save as template",
+      "doc": "Saves a deck as a template of this deployment: decks/templates/<slug of the name> with the deck manifest, its slides, its assets and its brand kit, listed under Your organisation in the gallery; a name an organisation template already carries replaces that template and keeps its slug (the dialog says so first).",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "template.update": {
+      "label": "Replace a template",
+      "doc": "Replaces the slides, assets and brand kit of an organisation template from a deck and keeps its id, name and sentence; the templates Turboslide ships are refused.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "template.rename": {
+      "label": "Rename a template",
+      "doc": "Renames an organisation template; its id and its folder stay, so every link and every default record still name it. The templates Turboslide ships are refused.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "template.delete": {
+      "label": "Delete a template",
+      "doc": "Deletes an organisation template folder and its index row; presentations made from it are not changed. The template new presentations start from is refused until another is chosen, and so are the templates Turboslide ships. Irreversible; `confirm` must be true.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "template.setDefault": {
+      "label": "Use for new presentations",
+      "doc": "Makes a template the one /new and the Blank card start from on this deployment (decks/templates/default.json), whose name, logo and appearance every Reset and every default logo read; `blank` restores the blank deck Turboslide ships. An agent token needs the admin scope.",
+      "mutates": true,
+      "milestone": "P1",
       "group": "deck"
     },
     "slide.list": {
@@ -1027,6 +1104,55 @@
       "mutates": false,
       "milestone": "M3",
       "group": "studio"
+    },
+    "deck.tailor": {
+      "label": "Tailor for a customer",
+      "doc": "The tailoring pass as one write: replaces the customer name in every visible text and the notes, swaps the pictures whose alt text names the old customer for one asset, and skips the named slides; answers the counts per step and the slides that changed.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "assist.propose": {
+      "label": "Ask the assistant",
+      "doc": "Asks the assistant for a proposal over the named slides: a shorter rewrite or speaker notes, or a free ask that resolves to one of the two; answers signed cards a caller accepts with assist.accept. A read: nothing is written until a card is accepted.",
+      "mutates": false,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "assist.accept": {
+      "label": "Accept a proposal",
+      "doc": "Writes one card assist.propose returned, as one write by the assistant: the signature, the expiry and the deck are verified, a card behind the deck is re based when its blocks are unchanged and refused otherwise.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "brand.get": {
+      "label": "Brand kit",
+      "doc": "The brand kit record of the deck: the colour roles, the faces, the logo and footer slots, the slide numbers, the frame toggles and the words that never translate; an empty object for a deck that reads the deployment’s default kit.",
+      "mutates": false,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "brand.set": {
+      "label": "Set a brand kit field",
+      "doc": "Writes one value of the brand kit by JSON pointer (/colors/light/primary, /fonts/display, /mark, /footer/logo, /footer/text, /counter/format, /frame/rails, /positions/mark, /lexicon, /appearance, /name) as one deck.set mutation under /brand, the write every Brand kit panel control makes; an absent value removes the field. The record is validated before the commit.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "brand.reset": {
+      "label": "Reset the brand kit",
+      "doc": "Removes the brand kit record, so the deck reads the deployment’s default kit, or one field of it when a pointer is given; a deck with nothing to remove writes no revision.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "deck"
+    },
+    "font.list": {
+      "label": "Fonts",
+      "doc": "The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2).",
+      "mutates": false,
+      "milestone": "P1",
+      "group": "render"
     },
     "presence.list": {
       "label": "Collaborators",

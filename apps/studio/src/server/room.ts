@@ -59,7 +59,7 @@ import { headPulse, isStoreBusy, storeRetryAfterMs } from '@turboslide/store/pul
 import { touchedSlides } from '@turboslide/store/store';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
-import { capabilitiesOf, effectiveAccess, readAccess } from './access';
+import { capabilitiesOf, displayNameFromIndex, effectiveAccess, readAccess } from './access';
 import { agentAuth } from './auth';
 import { authorize, bootstrapAgentContext, denialBody, linkGrantsFor } from './authorize';
 import type { Capability, ShadowedDecision } from './authorize';
@@ -347,9 +347,19 @@ export async function requestIdentity(request: Request): Promise<RequestIdentity
       record: null,
     };
   }
-  const record = await principalStore()
+  const touched = await principalStore()
     .touch(principal.id, new Date(), true)
     .catch(() => null);
+  /* the display name typed on another instance (b1.md R17): the principal store of the blob tier
+     is a file store per instance, so the name `account.setName` wrote elsewhere rides the
+     principal's deck index on the Blob store (access.ts displayNameFromIndex, the carrier the
+     link grants use), read past the same 5 s cache; a record that carries a name keeps it */
+  const record =
+    touched !== null && touched.name === undefined
+      ? await displayNameFromIndex(principal.id)
+          .then((name) => (name === undefined ? touched : { ...touched, name }))
+          .catch(() => touched)
+      : touched;
   return {
     /* the link grants are the union of the principal record's and the deck index's, so a grant
        exchanged on another instance admits the visitor on the ops, stream, presence and comments
@@ -758,6 +768,116 @@ export async function liveIfOpen(deckId: string): Promise<LiveDocument | null> {
   }
 }
 
+/** How many times `flushRoom` waits behind another run of the checkpointer, and the pause between. */
+export const FLUSH_ROOM_ATTEMPTS = 10;
+export const FLUSH_ROOM_PAUSE_MS = 100;
+
+/**
+ * Commits what the room admitted and the store does not hold yet, before an agent reads the
+ * deck (the product round fix round; VERIFICATION.md "Product round, pass 1" finding 12). On the
+ * memory and redis tiers a tab's edits sit in the stream until the checkpointer's idle timer
+ * (2 s, 10 s under a burst) writes them, while the HTTP, MCP and window dispatchers read the
+ * store: `deck.tailor` over HTTP right after the editor typed five Acme found none and answered
+ * `replacements: 0`, where the blob tier, whose every append is a commit, answered 3 of 3. One
+ * forced run of this instance's checkpointer when the live seq is past what a checkpoint
+ * covered; nothing when no room is open here, when the tier is blob, or when the store is
+ * current. A run another writer holds the lock of is waited for, briefly; a failure is logged
+ * and never fails the read, which then answers the store as it stands.
+ */
+export async function flushRoom(deckId: string): Promise<void> {
+  const s = shared.__turboslideRoom;
+  const pending = s?.rooms.get(deckId);
+  if (pending === undefined) return;
+  let room: Room;
+  try {
+    room = await pending;
+  } catch {
+    return;
+  }
+  if (room.tier === 'blob') return;
+  try {
+    const live = await room.live();
+    if (live.seq <= room.covered()) return;
+    for (let attempt = 0; attempt < FLUSH_ROOM_ATTEMPTS; attempt += 1) {
+      const result = await room.checkpointer.run({ force: true });
+      if (result.ok || result.reason !== 'locked') return;
+      await new Promise((resolve) => setTimeout(resolve, FLUSH_ROOM_PAUSE_MS));
+    }
+  } catch (error) {
+    log(
+      `${deckId}: the room did not flush before the read: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
+/**
+ * A store for the dispatchers over a deck this instance holds a room for (the product round fix
+ * round, pass 1 finding 12; the seam `flushRoom` papers over): the reads answer the room's live
+ * document, so `deck.info`'s revision and the texts an agent plans over are the tab's as it
+ * stands, and a write goes through `admitServerWrite` with the exact revision check, so the base
+ * an agent read is the base the write is judged against, the entry lands in the stream (every tab
+ * receives it, transformed past what is pending) and the checkpointer commits it at once. The
+ * store's other methods (the versions, the leases, the assets) are the store's. A deck with no
+ * room on this instance, and the blob tier, whose store is the live document, answer the store
+ * itself. Wired by `deckDispatcher` (server/actions.ts) as its `storeDeps.store`; with it in
+ * place the flush before an agent action is not needed.
+ */
+export async function roomBackedStore(deckId: string, store: DeckStore): Promise<DeckStore> {
+  const s = shared.__turboslideRoom;
+  const pending = s?.rooms.get(deckId);
+  if (pending === undefined) return store;
+  let room: Room;
+  try {
+    room = await pending;
+  } catch {
+    return store;
+  }
+  if (room.tier === 'blob') return store;
+  return {
+    ...store,
+    async read() {
+      const live = await room.live();
+      return { document: live.document, issues: [], ok: true };
+    },
+    async revision() {
+      return (await room.live()).document.deck.revision;
+    },
+    async write(write) {
+      const admitted = await admitServerWrite(room, {
+        author: write.author,
+        mutations: write.mutations,
+        baseRevision: write.baseRevision,
+        strict: true,
+        ...(write.note === undefined ? {} : { note: write.note }),
+      });
+      if (!admitted.ok) {
+        if (admitted.code === 'conflict') {
+          return {
+            ok: false,
+            code: 'conflict',
+            message: admitted.message,
+            current: admitted.current,
+            currentRevision: admitted.currentRevision,
+          };
+        }
+        return { ok: false, code: 'invalid', message: admitted.message, issues: [] };
+      }
+      const live = await room.live();
+      return {
+        ok: true,
+        document: live.document,
+        revision: admitted.revision,
+        entry: admitted.record,
+        changed: [
+          ...new Set(admitted.record.mutations.flatMap((m) => ('slideId' in m ? [m.slideId] : []))),
+        ],
+        issues: [],
+        warnings: [],
+      };
+    },
+  };
+}
+
 /**
  * Forgets one deck's room on this instance and stops its checkpointer (the focus round, cycle 2;
  * VERIFICATION C2-F19). Delete forever removes the deck's folder without the store's write lock
@@ -1048,6 +1168,35 @@ export function reanchor(document: DeckDocument, mutation: Mutation): Mutation {
   }
 }
 
+/**
+ * Re-anchors and applies an entry's mutations in order, each against the document the mutations
+ * before it made. An anchor a mutation of the same entry introduces stays: the undo of a
+ * `version.restore` inserts the slides the restore removed, the second after the first, and a
+ * paste of several slides anchors each on the one before. Before this every mutation was checked
+ * against the document from before the entry, so the second insert's anchor read as gone and it
+ * was sent to the end of the section: the undo of a restore wrote and the slide order came back
+ * wrong on both tiers (VERIFICATION.md "Product round, pass 1" finding 4, `versions.undo-restore`;
+ * the product round fix round). One mutation is placed and applied as before. Throws what the
+ * reducer throws; the caller answers the reject.
+ */
+export function reanchorAll(
+  document: DeckDocument,
+  mutations: readonly Mutation[],
+): { mutations: Mutation[]; document: DeckDocument } {
+  if (mutations.length <= 1) {
+    const placed = mutations.map((mutation) => reanchor(document, mutation));
+    return { mutations: placed, document: applyMutations(document, placed).document };
+  }
+  const placed: Mutation[] = [];
+  let running = document;
+  for (const mutation of mutations) {
+    const next = reanchor(running, mutation);
+    placed.push(next);
+    running = applyMutations(running, [next]).document;
+  }
+  return { mutations: placed, document: running };
+}
+
 type Candidate = {
   opId: string;
   kind: 'edit' | 'comment';
@@ -1084,12 +1233,11 @@ function landCandidate(
   if (candidate.kind !== 'edit' || candidate.mutations === undefined) {
     return { ok: true, document, mutations: [] };
   }
-  const mutations = candidate.mutations.map((mutation) => reanchor(document, mutation));
-  let next: DeckDocument;
+  let placed: { mutations: Mutation[]; document: DeckDocument };
   try {
-    next = applyMutations(document, mutations).document;
+    placed = reanchorAll(document, candidate.mutations);
   } catch (error) {
-    const touched = touchedSlides(mutations);
+    const touched = touchedSlides(candidate.mutations);
     const readable = touched.every(canReadSlide);
     return {
       ok: false,
@@ -1100,6 +1248,7 @@ function landCandidate(
       },
     };
   }
+  const { mutations, document: next } = placed;
   for (const slideId of touchedSlides(mutations)) {
     const slide = next.slides[slideId];
     if (slide !== undefined && slideBytes(slide) > CAPS.slideMaxBytes) {
@@ -1322,6 +1471,8 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
       opId: entry.opId,
       mutations: placed.mutations,
       at: stamp,
+      // the history label rides the entry to the checkpointer (channel.ts Entry.note)
+      ...(entry.note === undefined ? {} : { note: entry.note }),
     });
   }
   if (candidates.length === 0) {
@@ -1430,10 +1581,23 @@ async function liveForBase(room: Room, baseSeq: number): Promise<LiveDocument> {
  * (VERIFICATION F-versions). On the other tiers the live document is the stream's and is
  * answered as it stands.
  */
+/**
+ * How many forced syncs a resync that names a revision makes, and the pause between them: up to
+ * about three seconds in all (the product round, docs/PRODUCT.md 8.2 the recorded classes;
+ * RETURN ship.md section 5 `versions.undo-restore`: the restore's resync on the blob tier landed
+ * after the revision on another instance inside the row's bound, so the tab kept the document
+ * from before the restore and Cmd+Z had nothing to bring back; three tries 250 ms apart were
+ * under a second). Each sync is one head and, when the head moved, the reads it names; the
+ * request pays for them and no timer runs, so the blob tier budget stands.
+ */
+export const LIVE_AT_LEAST_ATTEMPTS = 6;
+export const LIVE_AT_LEAST_PAUSE_MS = 500;
+
 export async function liveAtLeast(
   room: Room,
   revision: number | undefined,
-  attempts = 3,
+  attempts = LIVE_AT_LEAST_ATTEMPTS,
+  pauseMs = LIVE_AT_LEAST_PAUSE_MS,
 ): Promise<LiveDocument> {
   let live = await room.live();
   if (room.tier !== 'blob') return live;
@@ -1456,9 +1620,15 @@ export async function liveAtLeast(
     return room.live();
   }
   for (let attempt = 0; attempt < attempts && revision > live.document.deck.revision; attempt++) {
-    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 250));
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, pauseMs));
     await syncOrKeep();
     live = await room.live();
+  }
+  if (revision > live.document.deck.revision) {
+    // the reader learns the document is behind the revision it asked for: one line names it
+    console.error(
+      `turboslide room: ${room.deckId} read at revision ${live.document.deck.revision} after ${attempts} syncs; the caller asked for ${revision}`,
+    );
   }
   return live;
 }
@@ -1537,6 +1707,10 @@ export function namesUnknownAsset(rejected: Rejected): boolean {
 /** How many times the blob admission places and appends again after the store moved under its write. */
 export const BLOB_APPEND_RETRIES = 1;
 
+/** The sentence of an entry refused because an earlier entry of its batch was (SPEC-3 3.4 step 3): shown, never silent. */
+export const STALE_AFTER_REFUSAL =
+  'This change was not applied because a change before it was refused; make it again';
+
 /** The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. Exported for its test. */
 export async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResult> {
   const { post, identity } = input;
@@ -1606,7 +1780,9 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
           ? (entry.mutations ?? [])
           : transformEntry(entry.mutations ?? [], refusedUndo);
       if (mutations === null) {
-        rejected.push({ opId: entry.opId, reason: 'stale' });
+        // a refusal the tab can show (the product round fix round, pass 1 finding 9: a paste
+        // that vanished on the blob tier left no sentence anywhere); the reason stays `stale`
+        rejected.push({ opId: entry.opId, reason: 'stale', message: STALE_AFTER_REFUSAL });
         continue;
       }
       let placed = landCandidate(
@@ -1633,6 +1809,8 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
         opId: entry.opId,
         mutations: placed.mutations,
         at: stamp,
+        // the history label rides the entry into the record the append commits (blob.ts)
+        ...(entry.note === undefined ? {} : { note: entry.note }),
       });
     }
     return { kind: 'placed', candidates, rejected };
@@ -1733,6 +1911,11 @@ type IdentityCacheRow = { at: number; identity: ResolvedIdentity };
 const identityCache = new Map<string, IdentityCacheRow>();
 const IDENTITY_CACHE_MS = 5000;
 
+/** Drops the cached resolution of one identity (a rename on this instance, b1.md R18), so the next presence post reads the new record. */
+export function forgetIdentity(identity: string): void {
+  identityCache.delete(identity);
+}
+
 async function cachedIdentity(identity: RequestIdentity): Promise<ResolvedIdentity> {
   const key = identity.identity;
   const hit = identityCache.get(key);
@@ -1832,7 +2015,11 @@ export type ViewerFacts = {
 export function rosterEntryForReader(entry: RosterEntry, reader: ViewerFacts): RosterEntry {
   const byLink = reader.via === 'link' || reader.via === 'open';
   if (!byLink || reader.showNames) return entry;
-  if (entry.trust === 'label' || entry.trust === 'agent') return entry;
+  /* a generated label, a typed name and an agent's name pass through (b1.md R16; docs/PRODUCT.md
+     section 2 rank 4: the typed name is what the presence chips show to collaborators, and the
+     prompt's own words are "Your name, shown to collaborators"); the role word stays for a
+     verified account's name while the owner's switch is off (SPEC-3 0.12) */
+  if (entry.trust === 'label' || entry.trust === 'guest' || entry.trust === 'agent') return entry;
   const word = roleWord(entry.role);
   const mark = {
     ...entry.mark,
@@ -2694,6 +2881,8 @@ export async function admitServerWrite(
     opId,
     mutations: placed.mutations,
     at: new Date().toISOString(),
+    // the write's note reaches the record the checkpointer commits, as it does on the blob path
+    ...(input.note === undefined ? {} : { note: input.note }),
   };
   const result = await appendWithRetry(channel, deckId, live.seq, [entry], (entries, more) => {
     const moreMutations = more.flatMap((row) => row.mutations ?? []);

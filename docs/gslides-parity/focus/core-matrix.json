@@ -1,5 +1,5 @@
 {
-  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable.",
+  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship.",
   "rows": [
     {
       "id": "decks.home.new-presentation",
@@ -28,7 +28,7 @@
     {
       "id": "decks.new.draft",
       "feature": "decks",
-      "interaction": "/new before any write: revision 0, Not saved yet, the title placeholder prompts",
+      "interaction": "/new before any write: revision 0, the save words empty until the first edit (docs/PRODUCT.md section 2 rank 30), the title placeholder prompts",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-decks row 11"
@@ -215,7 +215,8 @@
       "driver": "core/decks.spec.ts",
       "today": "flaky",
       "severity": 2,
-      "evidence": "audit-decks row 37"
+      "evidence": "audit-decks row 37",
+      "note": "The listing bound is 65 s (PRODUCT.md 8.2, the blob tier's folder listing); the row records the time the card took."
     },
     {
       "id": "decks.card.open-in-new-tab",
@@ -1373,7 +1374,7 @@
       "driver": "probe --core",
       "today": "broken",
       "severity": 3,
-      "evidence": "audit-text row 43"
+      "evidence": "audit-text row 43; audit-seller 19 (PRODUCT.md section 2 rank 19: one link popover with Apply and Remove this round; Enter applies)"
     },
     {
       "id": "text.link.present-click",
@@ -1447,7 +1448,7 @@
       "driver": "probe --core",
       "today": "broken",
       "severity": 2,
-      "evidence": "audit-text row 54"
+      "evidence": "audit-text row 54; audit-gaps 5 (PRODUCT.md section 5: the burst end writes the measured content height to pos.h this round)"
     },
     {
       "id": "text.clipboard.within-box",
@@ -1472,7 +1473,7 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-text row 57",
-      "note": "Manual under ruling (3): the row's only obstacle is the headless browser, so it does not park the text feature; a run records it as not driven with the manual reason and never as passed.",
+      "note": "Manual under ruling (3): the row's only obstacle is the headless browser, so it does not park the text feature; a run records it as not driven with the manual reason and never as passed. PRODUCT.md section 5 lands the fix this round (EditorShell.tsx pasteWithoutFormatting reads the paste event's plain text); the row stays manual because the chord is the obstacle, and Kevin walks it at the ship.",
       "manual": "headless Chromium does not synthesize Cmd+Shift+V as a paste (twelve runs: the chord pasted nothing while Cmd+V right after pasted the same clipboard); the step is docs/gslides-parity/focus/manual-checklist.md's"
     },
     {
@@ -1645,7 +1646,7 @@
     {
       "id": "images.insert.toolbar-sources",
       "feature": "images",
-      "interaction": "The toolbar Image button lists Upload from computer",
+      "interaction": "The toolbar Image button's arrow lists Upload from computer, By URL and From this presentation; the button itself opens the file chooser (section 2 rank 17)",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-images row 9"
@@ -1852,7 +1853,7 @@
       "driver": "core/images.spec.ts",
       "today": "broken",
       "severity": 3,
-      "evidence": "audit-images row 57"
+      "evidence": "audit-images row 57; audit-gaps 1 (broken since 2026-09-15; PRODUCT.md section 5 routes format.image.replaceImage.upload through insertPicture(file, { blockId, replace: true }) this round)"
     },
     {
       "id": "images.background.colour",
@@ -2866,11 +2867,12 @@
     {
       "id": "collab.presence-chips",
       "feature": "share",
-      "interaction": "Presence chips show the other person in both tabs within 10 s, and a chip leaves within 30 s of its tab closing",
+      "interaction": "Presence chips show the other person in both tabs within 10 s, and a chip leaves within 35 s of its tab closing (the second browser bound of PRODUCT.md 8.2)",
       "driver": "core/share.spec.ts",
       "today": "broken",
       "severity": 1,
-      "evidence": "audit-present row 34: the owner tab showed one chip; the third browser showed four chips for two other tabs, and chips of closed tabs stayed"
+      "evidence": "audit-present row 34: the owner tab showed one chip; the third browser showed four chips for two other tabs, and chips of closed tabs stayed",
+      "note": "The leave bound was 30 s until the product round (ship.md section 5, R2-F10: the leave beacon never passes Vercel Authentication on a preview, so the row measured the roster record's expiry). What the row asserts is unchanged."
     },
     {
       "id": "collab.rename-reaches-second-browser",
@@ -2998,19 +3000,21 @@
     {
       "id": "versions.restore",
       "feature": "versions",
-      "interaction": "Restore this version returns the deck to that version within 5 s, on a deck a second browser has also written into",
+      "interaction": "Restore this version returns the deck to that version within 35 s (the second browser bound of PRODUCT.md 8.2; the time it took is recorded), on a deck a second browser has also written into",
       "driver": "core/share.spec.ts",
       "today": "flaky",
       "severity": 2,
-      "evidence": "audit-present row 44"
+      "evidence": "audit-present row 44",
+      "note": "The bound was 5 s until the product round; the return round read one red of four on the blob tier (VERIFICATION.md R2-F3: two instances, the blob channel's one second head poll). What the row asserts is unchanged: the restored document carries the second browser's text."
     },
     {
       "id": "versions.undo-restore",
       "feature": "versions",
-      "interaction": "Cmd+Z after a restore brings the current version back",
+      "interaction": "Cmd+Z after a restore brings the current version back; the restored document is read with a 35 s bound before the undo (the restore's resync across instances, PRODUCT.md 8.2)",
       "driver": "probe --core",
       "today": "not driven",
-      "evidence": "audit-present row 45"
+      "evidence": "audit-present row 45",
+      "note": "The return round's ship read the fingerprint at once after the revision moved (no bound) and twice met the resync landing later (VERIFICATION.md S.3, ship.md section 10 item 2); the product round waits for the restored document to change or the notice to name the restore before Cmd+Z. What the row asserts is unchanged."
     },
     {
       "id": "export.download-submenu",
@@ -3023,7 +3027,7 @@
     {
       "id": "export.pdf.dialog",
       "feature": "export",
-      "interaction": "File > Download > PDF Document opens the dialog with its sentence, the skipped slides checkbox off, Cancel and Download",
+      "interaction": "File > Download > Download options with PDF Document as the file type opens the dialog with its sentence, the skipped slides checkbox off, Cancel and Download (the PDF row itself starts the download at once, docs/PRODUCT.md section 2 rank 8)",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-export row 8"
@@ -3072,7 +3076,7 @@
     {
       "id": "export.pptx.dialog",
       "feature": "export",
-      "interaction": "File > Download > Microsoft PowerPoint opens with Perfect selected and Editable text as the other radio",
+      "interaction": "File > Download > Download options opens the dialog with both modes as radios: Perfect selected on a deck without a table or a chart, Editable text preselected when the deck holds either (the PowerPoint row itself starts the Perfect download at once on a deck without a table or a chart, docs/PRODUCT.md section 2 rank 8)",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-export row 16"
@@ -3123,7 +3127,8 @@
       "interaction": "Include skipped slides adds the page and marks it",
       "driver": "probe --core",
       "today": "works",
-      "evidence": "audit-export row 30"
+      "evidence": "audit-export row 30",
+      "setup": "a slide beside the title through slide.new when the deck has none to skip (the return round's production run lost the row to a cascade on a deck the restore left with one card, VERIFICATION.md S.3), then Slide > Skip slide on it; never a driven step"
     },
     {
       "id": "export.print.download-pdf-follows-preview",
@@ -4371,7 +4376,7 @@
     {
       "id": "chrome.separators.once",
       "feature": "chrome",
-      "interaction": "Read from a 1x screenshot at the eleven seams of seamsFromShot (title to menu bar, menu bar to toolbar, toolbar to sheet, toolbar to filmstrip, filmstrip head to cards, stage to notes pane, notes pane to bottom bar, filmstrip to bottom bar, filmstrip to sheet mid and upper, sheet to right panel with the Comments panel open): each holds one 1 px run in --pt-hair, or none where the rule says none, in both appearances at 1440 and at 900",
+      "interaction": "Read from a 1x screenshot at the nine seams of seamsFromShot (title to menu bar, menu bar to toolbar, toolbar to sheet, toolbar to filmstrip, filmstrip head to cards, stage to notes pane, filmstrip to sheet mid and upper, sheet to right panel with the Comments panel open; the two seams along the bottom bar left with the bar, docs/PRODUCT.md section 2 rank 25; the filmstrip head seam draws in the overlay strip alone, so eight read in the editor): each holds one 1 px run in --pt-hair, or none where the rule says none, in both appearances at 1440 and at 900",
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-chrome rows 4, 5, 7",
@@ -4388,7 +4393,7 @@
     {
       "id": "chrome.cluster.gaps-heights",
       "feature": "chrome",
-      "interaction": "Gaps 8 px, inset 12 px, Share, the split button and the comments glyph 32 px tall, Share and the split button share the 8 px corner, no empty +N box is drawn while nobody else is present, no inbox slot is drawn while the plate is parked; note: if question 1 picks 6 px the corner read is --pt-radius on both",
+      "interaction": "Gaps 8 px, inset 12 px, Share, the split button and the comments glyph 32 px tall, Share and the split button share the 8 px corner, no empty +N box is drawn while nobody else is present, no inbox slot is drawn while the plate is parked; note: if question 1 picks 6 px the corner read is --pt-radius on both; the side panel toggle (title.sidePanel) sits in the cluster at 32 px once the bottom bar leaves (PRODUCT.md section 2 rank 25), and is not required while the bottom bar is still drawn",
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-chrome rows 22, 25, 30",
@@ -4526,7 +4531,7 @@
     {
       "id": "decks.file.template-gallery",
       "feature": "decks",
-      "interaction": "File > New > From template gallery opens /decks#templates in a new tab with the Blank presentation and GT brand deck cards",
+      "interaction": "File > New > From template gallery opens /decks/templates in a new tab with the Blank card and the General Translation brand deck card (the old /decks#templates address redirects there)",
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 17",
@@ -4566,7 +4571,8 @@
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 21",
-      "parks": ["file.importSlides"]
+      "parks": ["file.importSlides"],
+      "note": "Since the product round the row uploads a bundle of its own copy of the deck (File > Make a copy through the card menu), so the upload's name is fresh and never the one the row before it removed (ship.md section 10 item 3, R2-F6); the copy leaves with the row. The listing of the upload waits up to 65 s where the row reads it (PRODUCT.md 8.2)."
     },
     {
       "id": "decks.file.details",
@@ -4695,6 +4701,1174 @@
       "today": "works",
       "evidence": "audit-surface row 16",
       "parks": ["title.presence.goTo"]
+    },
+    {
+      "id": "arrange.insert.selected-after-menu",
+      "feature": "arrange",
+      "interaction": "On a slide with a typed 3 by 3 table, Insert > Chart > Column; the chart is selected (chip Chart, eight handles) and its box does not overlap the table's; Insert > Table selects the table with its handles",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 1",
+      "severity": 3
+    },
+    {
+      "id": "arrange.insert.free-rectangle",
+      "feature": "arrange",
+      "interaction": "With the body slot taken by two objects, a third insert lands 40 by 40 sheet px from the last object and inside the sheet",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-seller 1 (the cascade is not built)"
+    },
+    {
+      "id": "slides.layout.title-and-body-single",
+      "feature": "slides",
+      "interaction": "New slide after the title slide; the slide is Title and body with one title prompt over one body prompt; four typed lines land in the body at the body size",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 2",
+      "severity": 3
+    },
+    {
+      "id": "slides.layout.subtitle-prompt",
+      "feature": "slides",
+      "interaction": "Apply layout > Title, subtitle and body; the head paragraph prompts \"Click to add subtitle\" and the body \"Click to add text\"",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-seller 2"
+    },
+    {
+      "id": "slides.layout.new-slide-inherits",
+      "feature": "slides",
+      "interaction": "On a Title and two columns slide, New slide gives Title and two columns; on the title slide it gives Title and body",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "research 07 rule 12; audit-seller 2"
+    },
+    {
+      "id": "slides.layout.tile-sentences",
+      "feature": "slides",
+      "interaction": "Hover the Title slide tile; the plate's caption row reads the layout's sentence with \"your logo\" and no floating plate covers a neighbouring tile",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 26; audit-interface 24",
+      "severity": 1
+    },
+    {
+      "id": "slides.layout.plate-four-columns",
+      "feature": "slides",
+      "interaction": "At 1280 by 800 the Apply layout plate shows four columns, Google's eleven layouts without scrolling, and the GT layouts as a collapsed group",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 34",
+      "severity": 1
+    },
+    {
+      "id": "slides.import.none-preselected",
+      "feature": "slides",
+      "interaction": "File > Import slides, the General Translation brand deck; no tile is selected, three clicks read \"Import 3 slides\", a Shift click selects a range, Import brings three",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-brand 19",
+      "severity": 2
+    },
+    {
+      "id": "share.dialog.one-link",
+      "feature": "share",
+      "interaction": "Share opens with the General access select, the role select, the address in a read only field and one Copy link; the clipboard equals the field; no Copy link row elsewhere in the first stage; the sentence under the select reads the selected access",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 3; audit-interface 16",
+      "severity": 3
+    },
+    {
+      "id": "share.dialog.slideshow-checkbox",
+      "feature": "share",
+      "interaction": "Open as a slideshow swaps the field to the present link and back",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-seller 3"
+    },
+    {
+      "id": "share.dialog.more-row",
+      "feature": "share",
+      "interaction": "Add people, the requests band and Settings sit behind More; the dialog is under 520 px tall at 900 and does not scroll at 800",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 16 (765 px)",
+      "severity": 2
+    },
+    {
+      "id": "share.dialog.you-label",
+      "feature": "share",
+      "interaction": "The owner row reads You; a second browser with a display name reads that name in the roster",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 4 (Copper 859)",
+      "severity": 3
+    },
+    {
+      "id": "share.name-prompt.first-share",
+      "feature": "share",
+      "interaction": "The first Share on a browser with no name asks \"Your name, shown to collaborators\"; the name shows on the presence chip in a second browser within 5 s",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-seller 4"
+    },
+    {
+      "id": "share.dialog.co-edit-from-copied-link",
+      "feature": "share",
+      "interaction": "On a deck created from /new, Share shows Anyone with the link, Editor; Copy link; a second browser context opens the copied address, gets the full toolbar, double clicks the body and types six words; the first browser reads them on the slide within 5 s",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 4 (p1280-editor.png: View only; authorize.ts 188 to 193, the viewer floor)",
+      "severity": 3
+    },
+    {
+      "id": "decks.recent.drops-trashed",
+      "feature": "decks",
+      "interaction": "After File > Move to trash the Opened on this device row no longer lists the deck",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 15",
+      "severity": 2
+    },
+    {
+      "id": "decks.trash.editor-undo-snackbar",
+      "feature": "decks",
+      "interaction": "After File > Move to trash the /decks page shows Moved to trash with Undo within 3 s; Undo restores the deck and its card returns",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 16",
+      "severity": 2
+    },
+    {
+      "id": "decks.recent.this-browser-sentence",
+      "feature": "decks",
+      "interaction": "The Opened on this device head carries the sentence that the list is this browser's",
+      "driver": "core/decks.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-seller 4"
+    },
+    {
+      "id": "decks.home.seller-lead",
+      "feature": "decks",
+      "interaction": "/home's hero sentence names the deck a seller makes; the first band's button reads Start from a template and opens the gallery page",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 24",
+      "severity": 1
+    },
+    {
+      "id": "decks.card.thumbnail-slide-1",
+      "feature": "decks",
+      "interaction": "A card shows slide 1's render within 10 s of the first edit; until then a plate in the deck's paper colour with the title in ink",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 2; audit-seller 28",
+      "severity": 3,
+      "note": "A render worker capture past its bound is a recorded class of PRODUCT.md 8.2, written into the ship note by id with the capture's timing and not chased in this round."
+    },
+    {
+      "id": "decks.card.edited-relative-time",
+      "feature": "decks",
+      "interaction": "A card reads \"Edited <relative day> at <locale time>\" and \"Edited by <name>\" when the author is known, or \"Opened <ago>\" for a presentation this browser opened (3.6); the list view's rows are 32 px",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 27",
+      "severity": 1
+    },
+    {
+      "id": "decks.card.more-glyph",
+      "feature": "decks",
+      "interaction": "The card's more button is an svg glyph of the icon set",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 40",
+      "severity": 1
+    },
+    {
+      "id": "decks.trash.button-heights",
+      "feature": "decks",
+      "interaction": "Restore and Delete forever are 32 px; Delete forever is in ink with its glyph; Empty trash is the page's one solid button",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 21",
+      "severity": 1
+    },
+    {
+      "id": "decks.trash.confirm-dialog-chrome",
+      "feature": "decks",
+      "interaction": "Delete forever's confirm is the chrome Dialog with an 18 px title and a lead line; Escape and a click outside close it",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 29",
+      "severity": 1
+    },
+    {
+      "id": "decks.new.skeleton-one-frame",
+      "feature": "decks",
+      "interaction": "/new's skeleton draws one filmstrip frame and a paper plate, and is not drawn when the editor is ready inside 300 ms",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 30",
+      "severity": 1
+    },
+    {
+      "id": "decks.access.stranger-links",
+      "feature": "decks",
+      "interaction": "/deck/<unknown id> leads with Your presentations and New presentation and shows no request form under shadow authorization",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 33",
+      "severity": 1
+    },
+    {
+      "id": "decks.notfound.sentence-case",
+      "feature": "decks",
+      "interaction": "Not found's three buttons read in sentence case at 40 px",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 37",
+      "severity": 1
+    },
+    {
+      "id": "templates.gallery.page",
+      "feature": "templates",
+      "interaction": "/decks/templates lists Your organisation (on this deployment the General Translation brand deck, marked as used for new presentations when it is) and Turboslide's Blank, each with a cover, a slide count and one sentence; the /decks link and File > New > From template gallery open it; /decks#templates redirects to it",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 12; audit-brand 3",
+      "severity": 3,
+      "parks": ["home.gallery", "file.new.templateGallery"]
+    },
+    {
+      "id": "templates.gallery.strip-and-link",
+      "feature": "templates",
+      "interaction": "The /decks strip reads Blank, then the organisation's templates in the index's order, and the Template gallery link",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-brand 3 (t-01)",
+      "severity": 3,
+      "parks": ["home.gallery"]
+    },
+    {
+      "id": "templates.save.as-template",
+      "feature": "templates",
+      "interaction": "File > Save as template with a name and a sentence; the gallery lists it under Your organisation with its cover; a deck created from it carries the kit",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-brand 13",
+      "parks": ["file.saveAsTemplate"]
+    },
+    {
+      "id": "templates.save.same-name-replaces",
+      "feature": "templates",
+      "interaction": "Save as template again with the same name; the dialog reads the replace sentence; the template's slug is unchanged and the gallery lists one card with the new cover",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "judge-seller addition 4; audit-brand 13",
+      "parks": ["file.saveAsTemplate"]
+    },
+    {
+      "id": "templates.card.rename-and-delete",
+      "feature": "templates",
+      "interaction": "The card's menu under Your organisation renames the template and, after a confirm, deletes it; the gallery and the strip drop it",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "judge-seller addition 4",
+      "parks": ["templates.card.menu"],
+      "note": "The parks id names the card menu family templates.card.<id>.menu of PRODUCT.md 7.1, one control per template card on the gallery page."
+    },
+    {
+      "id": "templates.default.use-for-new",
+      "feature": "templates",
+      "interaction": "Use for new presentations on a saved template with a kit; /new and the Blank card open a deck carrying that kit's logo, primary colour and appearance; Use for new presentations on Blank restores today's draft",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "judge-seller addition 3; audit-brand section 3",
+      "parks": ["panel.brand.template.useForNew"]
+    },
+    {
+      "id": "templates.deck.read-only",
+      "feature": "templates",
+      "interaction": "deck.set on a template through the window API is refused with the sentence",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "SPEC-5 4.1"
+    },
+    {
+      "id": "export.download.named-after-title",
+      "feature": "export",
+      "interaction": "On a deck named \"GT pitch for Acme\" File > Download > PDF Document saves GT pitch for Acme.pdf and Microsoft PowerPoint saves GT pitch for Acme.pptx",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 7; audit-brand 18",
+      "severity": 3
+    },
+    {
+      "id": "export.download.pdf-direct",
+      "feature": "export",
+      "interaction": "File > Download > PDF Document starts the download with no dialog; the snackbar reads the progress and then the saved name with Details; the file arrives within 30 s",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 8",
+      "severity": 3
+    },
+    {
+      "id": "export.download.pptx-direct",
+      "feature": "export",
+      "interaction": "On a deck with no table or chart, File > Download > Microsoft PowerPoint (.pptx) starts the Perfect download with no dialog; on a deck with a typed table the same row opens Download options with Editable text preselected and the table sentence showing, and Download saves a file whose slide carries a:tbl",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 8, 11 (slide5.xml with no a:tbl)",
+      "severity": 3
+    },
+    {
+      "id": "export.download.options-dialog",
+      "feature": "export",
+      "interaction": "File > Download > Download options opens the dialog with the modes, Include skipped slides and Include speaker notes; the dialog closes when the file is saved",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-seller 8"
+    },
+    {
+      "id": "export.download.progress-per-slide",
+      "feature": "export",
+      "interaction": "During a six slide PowerPoint export the snackbar reads \"slide k of 6\" with k moving",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 23",
+      "severity": 2
+    },
+    {
+      "id": "export.download.mode-sentence",
+      "feature": "export",
+      "interaction": "Download options' Perfect mode sentence names tables and charts as pictures; with a table on the deck Editable text is preselected",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-seller 11"
+    },
+    {
+      "id": "export.download.large-deck-pdf",
+      "feature": "export",
+      "interaction": "On a copy of the General Translation brand deck (85 slides, 115 assets) File > Download > PDF Document saves a file of 85 pages within 600 s; the seconds per slide are recorded; a measurement row (8.2)",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "evidence": "audit-brand 25 (brand-walk-2.json row 17, c-17-download-pdf-dialog.png: no file within 180 s)",
+      "severity": 2,
+      "note": "A measurement row (PRODUCT.md 8.2): the seconds per slide are written into the run as the test's measure annotation; a red run never holds the ship and is written into the ship note by id with its mechanism (the export route's log, the render worker's timing or the blob write).",
+      "measure": true
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "feature": "export",
+      "interaction": "On the same copy, Download options > Editable text with Embed fonts checked saves a file of 85 slides within 600 s; the seconds per slide are recorded; a measurement row (8.2)",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "evidence": "audit-brand 25 (brand-walk-2.json row 16, c-16-download-native-embed-dialog.png: none within 240 s)",
+      "severity": 2,
+      "note": "A measurement row (PRODUCT.md 8.2), as export.download.large-deck-pdf.",
+      "measure": true
+    },
+    {
+      "id": "text.link.detect-url",
+      "feature": "text",
+      "interaction": "Typing generaltranslation.com then a space wraps a link to https://generaltranslation.com; one Cmd+Z removes the link and keeps the text",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 9",
+      "severity": 3
+    },
+    {
+      "id": "text.link.detect-email",
+      "feature": "text",
+      "interaction": "Typing an email address then Enter wraps a mailto: link",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 9",
+      "severity": 3
+    },
+    {
+      "id": "text.select.double-click-address",
+      "feature": "text",
+      "interaction": "A double click on generaltranslation.com selects the whole address",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 9",
+      "severity": 3
+    },
+    {
+      "id": "text.select.shift-home-line",
+      "feature": "text",
+      "interaction": "With the caret at the end of the third line of a three line paragraph, Shift+Home selects the third line alone",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 18",
+      "severity": 2
+    },
+    {
+      "id": "text.link.popover-apply-remove",
+      "feature": "text",
+      "interaction": "Cmd+K on selected text shows the popover with the Link label, the selected text, the URL field, Slides in this presentation, Apply and Remove; Enter applies; a click on the linked word shows the chip with Change and Remove; Remove takes the link off",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 19; audit-gaps 4",
+      "severity": 2
+    },
+    {
+      "id": "text.link.slide-target",
+      "feature": "text",
+      "interaction": "Slides in this presentation > Slide 3 writes link.slide; in the show a click on the word jumps to slide 3",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "evidence": "audit-gaps 4 (fourth row 5), audit-gaps surface2 row 6",
+      "severity": 3
+    },
+    {
+      "id": "text.format-options.padding-grid",
+      "feature": "text",
+      "interaction": "Text fitting shows one Padding head with Top, Bottom, Left, Right in two by two, the unit inside the field and labels at 12.5 px in ink-2",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 15",
+      "severity": 2
+    },
+    {
+      "id": "text.format-options.remembers-section",
+      "feature": "text",
+      "interaction": "Collapse Text fitting, close the panel, reopen it from the toolbar; Size & rotation is open and Text fitting stays collapsed; Format > Text fitting opens the panel with Text fitting alone",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-interface 15"
+    },
+    {
+      "id": "text.autofit.shrink-on-overflow",
+      "feature": "text",
+      "interaction": "With Shrink text on overflow set and 230 characters typed into a small text box, the size steps down the ladder until the text fits inside the box",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-gaps 5"
+    },
+    {
+      "id": "text.find-replace.count-while-typing",
+      "feature": "text",
+      "interaction": "Typing Acme into Find reads \"1 of 2\"; Next moves the selection to the second",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-gaps 21",
+      "severity": 1
+    },
+    {
+      "id": "images.insert.centred-in-body",
+      "feature": "images",
+      "interaction": "Upload from computer lands the picture centred in the body slot at the largest size with a 40 px margin, selected, over no prompt",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 10",
+      "severity": 3
+    },
+    {
+      "id": "images.insert.instant-preview",
+      "feature": "images",
+      "interaction": "The picture draws within 500 ms of the chooser closing, with a progress bar until the asset lands, and no snackbar on success",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 14, 22; audit-brand 12",
+      "severity": 2
+    },
+    {
+      "id": "images.caption.add",
+      "feature": "images",
+      "interaction": "Right click a picture > Add a caption; the caption field prompts; typing stores the shot's caption; Cmd+Z",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-seller 10"
+    },
+    {
+      "id": "images.options.picture-sections-only",
+      "feature": "images",
+      "interaction": "Format options for a picture lists Size & rotation, Position and Image options and no text section",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 21",
+      "severity": 2
+    },
+    {
+      "id": "images.insert.menu-direct",
+      "feature": "images",
+      "interaction": "The toolbar Image button opens the file chooser on click and the submenu on its arrow",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 17",
+      "severity": 2
+    },
+    {
+      "id": "images.upload.failure-snackbar",
+      "feature": "images",
+      "interaction": "A file the upload refuses (a text file renamed .png) shows \"The picture could not be uploaded: the file is not a picture\" and leaves no placeholder",
+      "driver": "core/images.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-brand 12"
+    },
+    {
+      "id": "images.transparency.slider",
+      "feature": "images",
+      "interaction": "Adjustments > Transparency is a slider with the field beside it; dragging to 40 writes 0.4",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-gaps 20",
+      "severity": 1
+    },
+    {
+      "id": "images.border.drawn",
+      "feature": "images",
+      "interaction": "Border color > ink on a picture draws a 1 px ring read at 2x",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-gaps 23",
+      "severity": 1
+    },
+    {
+      "id": "images.insert.by-url",
+      "feature": "images",
+      "interaction": "Insert > Image > By URL, an address typed at human speed; no fetch until a 600 ms pause or blur; Insert places the picture centred in the body slot, selected; Replace image > By URL swaps a picture and keeps its box",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "evidence": "audit-gaps 13 (pictures row 13); FOCUS.md 3.2",
+      "severity": 2,
+      "parks": ["insert.image.byUrl", "format.image.replaceImage.byUrl"]
+    },
+    {
+      "id": "formatting.alt-text.write-undo",
+      "feature": "formatting",
+      "interaction": "Format options > Alt text, type a description, Tab; the block carries it; Cmd+Z; the PowerPoint's descr carries it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "RETURN.md question 6 (audit-formatting row 70); audit-gaps 10",
+      "parks": ["format.altText"]
+    },
+    {
+      "id": "comments.panel.empty-gesture",
+      "feature": "comments",
+      "interaction": "With no comments the panel shows the sentence and the gesture line and no tabs, search or filter",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 20",
+      "severity": 1
+    },
+    {
+      "id": "versions.panel.author-you",
+      "feature": "versions",
+      "interaction": "A version row names You at 12 px in ink-2; Name this version sits in the panel head",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 31",
+      "severity": 1
+    },
+    {
+      "id": "versions.field.square",
+      "feature": "versions",
+      "interaction": "The version name field is square",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 39",
+      "severity": 1
+    },
+    {
+      "id": "help.shortcuts.no-duplicates",
+      "feature": "help",
+      "interaction": "Keyboard shortcuts lists Redo once; Common actions begin with New slide",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 33",
+      "severity": 1
+    },
+    {
+      "id": "help.shortcuts.question-key",
+      "feature": "help",
+      "interaction": "Shift+/ opens Keyboard shortcuts within 1 s and shows no snackbar",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 25",
+      "severity": 1
+    },
+    {
+      "id": "present.show.no-white-block",
+      "feature": "present",
+      "interaction": "With the show's bar up, no element but the bar is painted paper in the bottom left 400 by 120 px",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 25",
+      "severity": 1
+    },
+    {
+      "id": "present.show.bar-on-entry",
+      "feature": "present",
+      "interaction": "The bar is visible on entry and after a pointer move and fades after about 3 s",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 13",
+      "severity": 2
+    },
+    {
+      "id": "present.presenter.sentence-case",
+      "feature": "present",
+      "interaction": "The presenter's labels read Timer, Time, Previous slide, Next slide in ink-2 at 12.5 px; the arrows are ink-2",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 26",
+      "severity": 1
+    },
+    {
+      "id": "chrome.bottom-bar.removed",
+      "feature": "chrome",
+      "interaction": "The editor has no bottom bar; the side panel toggle sits in the title row's right cluster; the stage is 724 px tall at 900",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 27; audit-interface 35",
+      "severity": 1
+    },
+    {
+      "id": "chrome.menu.no-tooltip-with-submenu",
+      "feature": "chrome",
+      "interaction": "With Insert > Table's grid open, no tooltip plate is shown",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 30",
+      "severity": 1
+    },
+    {
+      "id": "chrome.menu.escape-focus-stage",
+      "feature": "chrome",
+      "interaction": "Escape on the Help menu returns focus to the stage; the Help button carries no ring",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 31",
+      "severity": 1
+    },
+    {
+      "id": "chrome.presence.tooltip",
+      "feature": "chrome",
+      "interaction": "The presence slot shows its tooltip on hover; a fresh /new shows no save words before the first edit",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-seller 32",
+      "severity": 1
+    },
+    {
+      "id": "chrome.contrast.titanium-light",
+      "feature": "chrome",
+      "interaction": "On light chrome the save words, the menu keys, the filmstrip numbers and the panel labels composite at 4.5:1 or better on their ground",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 3",
+      "severity": 3
+    },
+    {
+      "id": "chrome.disabled.token-both-appearances",
+      "feature": "chrome",
+      "interaction": "Redo with nothing to redo reads the --pt-disabled composite (#8a8f98 light, #6b6e73 dark) and never the enabled ink-2",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-interface section 2 (the disabled state differs from rest by shade alone)"
+    },
+    {
+      "id": "chrome.field.boundary-3-1",
+      "feature": "chrome",
+      "interaction": "The zoom field, the size field, the Share dialog's fields and the /decks search field carry a border at 3:1 or better in both appearances",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 7",
+      "severity": 2
+    },
+    {
+      "id": "chrome.hover.ground",
+      "feature": "chrome",
+      "interaction": "Hovering Undo paints a plate ground under the hairline; hovering a menu title paints the plate at 1.14:1 or better",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 8",
+      "severity": 2
+    },
+    {
+      "id": "chrome.floating.edge-frame",
+      "feature": "chrome",
+      "interaction": "The File menu, a tooltip and the layout plate carry a frame at 4.5:1 or better",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 9",
+      "severity": 2
+    },
+    {
+      "id": "chrome.focus.one-ring-rule",
+      "feature": "chrome",
+      "interaction": "Tab to a toolbar button and to a dialog's X: both rings are 1 px ink inset",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 38",
+      "severity": 1
+    },
+    {
+      "id": "chrome.filmstrip.one-ring",
+      "feature": "chrome",
+      "interaction": "The current card carries one 2 px ring and no second outline",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 19",
+      "severity": 1
+    },
+    {
+      "id": "chrome.appearance.first-visit-follows-os",
+      "feature": "chrome",
+      "interaction": "A fresh context with prefers-color-scheme: light opens /home and /new light; a stored gt-theme wins on the next visit",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 12",
+      "severity": 2
+    },
+    {
+      "id": "chrome.tooltip.none-on-focus-in-menus",
+      "feature": "chrome",
+      "interaction": "Share opens with no tooltip plate over the card; the first row of the object menu shows no plate on open",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 4",
+      "severity": 3
+    },
+    {
+      "id": "chrome.menu.plate-fits-labels",
+      "feature": "chrome",
+      "interaction": "File's \"Print settings and preview\" is not truncated; no label of the nine menus is cut",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 11",
+      "severity": 2
+    },
+    {
+      "id": "chrome.menu.no-mnemonics-mac",
+      "feature": "chrome",
+      "interaction": "On macOS, the platform the gate runs on, no menu row underlines an access key",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 18",
+      "severity": 1
+    },
+    {
+      "id": "chrome.select.one-rule",
+      "feature": "chrome",
+      "interaction": "The Share dialog's selects and the Comments filter are 32 px with the chrome's chevron",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 22",
+      "severity": 1
+    },
+    {
+      "id": "chrome.check.draws-check",
+      "feature": "chrome",
+      "interaction": "The checked Notify people box draws the check glyph",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 23",
+      "severity": 1
+    },
+    {
+      "id": "chrome.toolbar.fold-any-width",
+      "feature": "chrome",
+      "interaction": "With a table selected at 1440 by 900 and at 1280 by 800, every tail control is inside the bar or in More, and Format options, the pointer and Hide the menus are visible; with text selected the first control is the Font dropdown or, with fonts parked, the read only family",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "evidence": "audit-interface 1 and section 6",
+      "severity": 3
+    },
+    {
+      "id": "chrome.toolbar.bold-follows-selection",
+      "feature": "chrome",
+      "interaction": "Select a word, Cmd+B; toolbar.bold reads aria-pressed true; move the caret to plain text; it reads false",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-interface 14",
+      "severity": 2
+    },
+    {
+      "id": "brand.panel.opens",
+      "feature": "brand",
+      "interaction": "Slide > Change theme, the toolbar Theme button and Slide > Edit theme open the Brand kit panel with Appearance, Logo, Colors, Fonts, Footer, Slide numbers, Frame (each row with its sentence), Words that never translate and Reset to General Translation",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-brand 4, 8; audit-seller 6",
+      "parks": ["slide.editTheme"]
+    },
+    {
+      "id": "brand.logo.replace-every-slide",
+      "feature": "brand",
+      "interaction": "Logo > Replace with a PNG; the title slide's logo slot and every slide's footer draw the picture within 5 s; a new slide carries it; Position > Top right moves the title slide's logo",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-brand 2"
+    },
+    {
+      "id": "brand.logo.use-on-every-slide",
+      "feature": "brand",
+      "interaction": "Right click a picture > Use on every slide; every slide's footer draws it; the snackbar carries Undo; Cmd+Z removes it from every slide",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-brand 2 (b-12, b-13)",
+      "parks": ["format.image.useOnEverySlide"]
+    },
+    {
+      "id": "brand.logo.remove",
+      "feature": "brand",
+      "interaction": "Logo > Remove; no logo on the title slide and no wordmark on any slide; Slideshow draws none",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-brand 1"
+    },
+    {
+      "id": "brand.colors.primary-live",
+      "feature": "brand",
+      "interaction": "Colors > Primary: typing #0b3d91 previews on the sheet as typed; Enter commits one revision; every slide's primary follows; Cmd+Z reverts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-brand 4, 17"
+    },
+    {
+      "id": "brand.colors.palette-row",
+      "feature": "brand",
+      "interaction": "The text colour plate lists the kit's six colours first with the role's name and hex in the tooltip, the tokens second, Custom third; on a selected heading a kit colour writes and the heading draws in it",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-brand 11, 26",
+      "severity": 3
+    },
+    {
+      "id": "brand.colors.control-ids-unique",
+      "feature": "brand",
+      "interaction": "toolbar.textColor.plate matches one element; the container is toolbar.textColor.menu",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-brand 11",
+      "severity": 3
+    },
+    {
+      "id": "brand.colors.collab-rerender",
+      "feature": "brand",
+      "interaction": "A second browser on the same deck sees the new primary colour on its sheet within 5 s of the first browser's Enter",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-brand 4; judge-design addition 9"
+    },
+    {
+      "id": "brand.colors.version-history-entry",
+      "feature": "brand",
+      "interaction": "After a Primary change, File > Version history lists a row for it and Restore of the row before takes the colour back",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-brand 4; judge-design rejection 15"
+    },
+    {
+      "id": "brand.colors.role-tooltips",
+      "feature": "brand",
+      "interaction": "Hovering each of the six swatches in the panel reads the role's name, its one line and the hex; no tooltip reads Titanium or Ink 2",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-brand 26"
+    },
+    {
+      "id": "brand.background.enter-keeps-open",
+      "feature": "brand",
+      "interaction": "Change background, #0b3d91, Enter previews and the dialog stays; Done applies; Add to theme writes the kit's background and every slide follows; the wordmark and counter read on the new ground",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-brand 17",
+      "severity": 2
+    },
+    {
+      "id": "brand.fonts.roles",
+      "feature": "brand",
+      "interaction": "Fonts > Display: Playfair Display; every heading redraws in it; Text: Source Sans 3; the body follows; Cmd+Z each",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-brand 5"
+    },
+    {
+      "id": "brand.footer.text",
+      "feature": "brand",
+      "interaction": "Footer > Text \"Confidential\" draws in the frame band on every slide but the title; the PDF's text carries it",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-brand 20; audit-gaps 12"
+    },
+    {
+      "id": "brand.counter.format",
+      "feature": "brand",
+      "interaction": "Slide numbers > Format \"Slide n\" and \"n / N\"; the frame follows each; Insert > Slide numbers writes the same fields",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-brand 20"
+    },
+    {
+      "id": "brand.frame.toggles",
+      "feature": "brand",
+      "interaction": "Frame > Rails, Rules, Crosses off, each row carrying its sentence; the sheet draws none in the editor, the show and the presenter's current slide",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-interface 32"
+    },
+    {
+      "id": "brand.appearance.default",
+      "feature": "brand",
+      "interaction": "/new opens in the deployment kit's default appearance (light on this deployment); a deck from a template whose kit says dark opens dark",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "evidence": "audit-seller 20",
+      "severity": 2
+    },
+    {
+      "id": "brand.reset.default-kit",
+      "feature": "brand",
+      "interaction": "The foot button reads \"Reset to General Translation\" on this deployment; pressing it clears the record; the sheet reads the deployment's default kit; the snackbar carries Undo",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-brand 4"
+    },
+    {
+      "id": "brand.export.pdf-logo",
+      "feature": "brand",
+      "interaction": "With a picture logo, the PDF's first page carries it and no GT wordmark",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-brand 1 (pdf-walk1-page-1.png)"
+    },
+    {
+      "id": "brand.surfaces.viewer-and-show",
+      "feature": "brand",
+      "interaction": "The view link and the show draw the kit's logo, primary colour and faces",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-brand 1 (b-26)"
+    },
+    {
+      "id": "brand.layout.tiles-in-kit",
+      "feature": "brand",
+      "interaction": "With a kit set, the Apply layout tiles render the kit's colours and logo",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-brand 27",
+      "severity": 1
+    },
+    {
+      "id": "brand.agent.set-get",
+      "feature": "brand",
+      "interaction": "Through the window API brand.set /colors/light/primary writes and brand.get reads it; the sheet re renders within 5 s; through HTTP with the bearer the same",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-brand 4"
+    },
+    {
+      "id": "fonts.dropdown.opens",
+      "feature": "fonts",
+      "interaction": "With text selected the Font dropdown opens with the search field, the kit's faces under Brand, the used families, then the catalog by category, each label in its face",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-seller 5; audit-gaps 3; audit-brand 5 (the control is drawn disabled on purpose)",
+      "parks": ["toolbar.font"]
+    },
+    {
+      "id": "fonts.dropdown.apply-selection",
+      "feature": "fonts",
+      "interaction": "Pick Roboto; the run's typography.family is roboto and its computed family is Roboto; Cmd+Z",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-seller 5 (no control to drive)"
+    },
+    {
+      "id": "fonts.dropdown.search",
+      "feature": "fonts",
+      "interaction": "Typing \"mer\" lists Merriweather alone",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "SPEC-5-amendments A5 item 4"
+    },
+    {
+      "id": "fonts.format-menu.row",
+      "feature": "fonts",
+      "interaction": "Format > Text > Font opens the same dropdown",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-seller 5 (no row today); audit-brand 5 (b-09)",
+      "parks": ["format.text.font"]
+    },
+    {
+      "id": "fonts.more-fonts.licence",
+      "feature": "fonts",
+      "interaction": "More fonts lists the 26 families with a licence line each and a link to the licence",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "SPEC-5-amendments A5 item 4"
+    },
+    {
+      "id": "fonts.budget.no-load-before-ready",
+      "feature": "fonts",
+      "interaction": "On a deck that uses Inter alone no catalog woff2 request is made before the ready mark",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "SPEC-5-amendments A5 item 3"
+    },
+    {
+      "id": "fonts.export.editable-names-face",
+      "feature": "fonts",
+      "interaction": "With a heading in Roboto the Editable text PowerPoint names Roboto in a:latin typeface",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "VERIFICATION-5 finding 5 (measured on the branch's preview; no catalog face exists on production)"
+    },
+    {
+      "id": "fonts.export.pdf-face",
+      "feature": "fonts",
+      "interaction": "The PDF embeds a Roboto subset (pdffonts)",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "VERIFICATION-5 finding 5 (the same)"
+    },
+    {
+      "id": "fonts.face.reload-and-show",
+      "feature": "fonts",
+      "interaction": "The face survives a reload and draws in the show",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-gaps 3"
+    },
+    {
+      "id": "fonts.agent.font-list",
+      "feature": "fonts",
+      "interaction": "font.list through the window API answers 26 rows with licence; through HTTP with the bearer the same",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "SPEC-5-amendments A5 item 6"
+    },
+    {
+      "id": "assist.entry.title-row",
+      "feature": "assist",
+      "interaction": "The Assist button sits between the presence chips and the comments glyph; Cmd+J opens the panel; Tools > Assist opens it",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-assist 2; audit-interface 6",
+      "parks": ["title.assist", "tools.assist"]
+    },
+    {
+      "id": "assist.panel.first-line-and-cards",
+      "feature": "assist",
+      "interaction": "The panel's first line names where the text goes; with a slide selected three starter cards show: Tailor for a customer, Make it shorter, Write speaker notes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-assist 2",
+      "parks": ["title.assist", "tools.assist"]
+    },
+    {
+      "id": "assist.tailor.dialog-one-undo",
+      "feature": "assist",
+      "interaction": "Tools > Tailor for a customer on a deck naming Acme twice with a pricing slide: Replace Acme with Globex reads \"2 places on 2 slides\", the pricing slide is ticked under Skip, Apply; every Acme reads Globex, the slide is skipped, one Cmd+Z restores both; the snackbar carried Undo",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-gaps 16 (surface-01-insert-menu-default.png, no assist row)",
+      "parks": ["tools.tailor"]
+    },
+    {
+      "id": "assist.tailor.agent-deck-tailor",
+      "feature": "assist",
+      "interaction": "deck.tailor over HTTP with the bearer, one replacement and one skipped slide; one revision moves and the open editor's snackbar names the change with Undo",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-gaps 16"
+    },
+    {
+      "id": "assist.rewrite.card-accept-undo",
+      "feature": "assist",
+      "interaction": "Make it shorter on a slide with a 60 word body; a card with before and after arrives within 20 s; Accept writes one revision labelled \"Assist: …\"; the snackbar carries Undo; Cmd+Z restores the text",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-assist 1, 3, 4",
+      "parks": ["panel.assist.starter.shorter"],
+      "note": "On the preview the spec drives the panel against TURBOSLIDE_ASSIST=fixture; on production the card is one real model call. A model call past its 20 s bound or a provider 5xx is a recorded class of PRODUCT.md 8.2, written into the ship note by id with the provider's status and latency."
+    },
+    {
+      "id": "assist.notes.draft",
+      "feature": "assist",
+      "interaction": "Write speaker notes for this slide; Accept writes /notes and the pane shows it; Cmd+Z",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-assist 10",
+      "parks": ["panel.assist.starter.notes"]
+    },
+    {
+      "id": "assist.free-ask.fallback-sentence",
+      "feature": "assist",
+      "interaction": "Typing \"add a video\" in the box draws the fallback sentence (no card, no Accept) and no write; the revision does not move",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "evidence": "judge-design rejection 15; audit-assist section \"The proposal\"",
+      "parks": ["panel.assist.prompt"]
+    },
+    {
+      "id": "assist.mark.chip-and-history",
+      "feature": "assist",
+      "interaction": "The written block shows the Assistant chip until it is edited; Version history lists the revision as its own row named Assistant with the agent mark",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-assist 3, 15 (09-version-history-agent-row.png measured an HTTP agent write; no assistant on production)"
+    },
+    {
+      "id": "assist.outside-write.snackbar",
+      "feature": "assist",
+      "interaction": "POST /api/actions/text.replaceAll with the bearer and an agent author while the editor is open; the snackbar names the change with Undo within the poll; Undo reverts the slide and keeps the seller's own last edit",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-assist 1, 7",
+      "severity": 3,
+      "note": "The HTTP half runs where the walk holds the deployment's bearer (the agent bearer of ~/.config/turboslide/hosts.json, never printed) or on a localhost server, whose agent surface is open to the checkout holder; without either the row is not driven with the reason."
+    },
+    {
+      "id": "assist.finder.terms",
+      "feature": "assist",
+      "interaction": "Search the menus \"hide slide\" lists Skip slide first; \"rename the customer\" lists Find and replace and Tailor for a customer; \"logo\" lists Replace image",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "audit-assist 8",
+      "severity": 3
+    },
+    {
+      "id": "assist.finder.ask-row",
+      "feature": "assist",
+      "interaction": "A phrase that matches nothing shows \"Ask the assistant: <phrase>\"; Enter opens the panel with the phrase in the box",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-assist 8",
+      "parks": ["finder.assist.ask"]
+    },
+    {
+      "id": "assist.quota.429",
+      "feature": "assist",
+      "interaction": "Seven asks within a minute on an anonymous principal; the seventh shows \"Too many assistant requests. Try again in a minute\"; driven on a preview with Upstash, otherwise recorded not driven and covered by the unit test of 8.3",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-assist 5; ratelimit.ts 456 to 468 (the memory counter counts per instance)",
+      "note": "Not driven by design on a base without Upstash (the memory limiter counts per instance under Fluid compute); the spec reads the deployment's facts and records the reason, and the unit test apps/studio/src/server/ratelimit.test.ts of PRODUCT.md 8.3 covers the rows."
+    },
+    {
+      "id": "assist.viewer.disabled",
+      "feature": "assist",
+      "interaction": "A view link visitor sees the panel disabled with \"Commenters and editors can use the assistant\"",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-assist 5"
+    },
+    {
+      "id": "assist.agent.propose-accept",
+      "feature": "assist",
+      "interaction": "assist.propose over HTTP with the bearer returns a signed card; assist.accept with that card writes and the revision moves; the same card with one byte changed is refused",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-assist, the capabilities table; judge-design rejection 10"
     }
   ]
 }

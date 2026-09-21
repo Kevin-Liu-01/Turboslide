@@ -577,6 +577,14 @@ const openMenu = async (page, id) => {
   if (!r) throw new Error(`no menubar button ${id}`);
   await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
   await page.locator(menuRoot(id)).waitFor({ timeout: 8000 });
+  /* the rows are read once one is drawn: a read right after the plate mounted has found no rows
+     (the group row's first drive, return/build/integrator.md; the product round's plate measures
+     its width from its labels before it settles, Menu.css) */
+  await page
+    .locator(`${menuRoot(id)} [data-control^="menu."]`)
+    .first()
+    .waitFor({ timeout: 4000 })
+    .catch(() => undefined);
   await sleep(rand(150, 300));
 };
 /** Hovers a menu row so its submenu opens (Menu.tsx: 120 ms), then waits for a child. */
@@ -591,7 +599,38 @@ const hoverRow = async (page, rowId, waitFor) => {
     6,
   );
   await sleep(rand(250, 400));
-  if (waitFor) await page.locator(waitFor).first().waitFor({ timeout: 6000 });
+  if (!waitFor) return;
+  try {
+    await page.locator(waitFor).first().waitFor({ timeout: 6000 });
+  } catch (error) {
+    /* the hover from outside the plate showed nothing (Order under Arrange in the product round's
+       two gate runs, both sides): a person moves the pointer again from the row's own left edge,
+       then clicks the row, which opens a submenu too (Menu.tsx `activate`) */
+    await moveHuman(
+      page,
+      { x: r.x + 6, y: r.y + r.height / 2 },
+      { x: r.x + r.width / 2, y: r.y + r.height / 2 },
+      6,
+    );
+    await sleep(rand(300, 450));
+    if (
+      await page
+        .locator(waitFor)
+        .first()
+        .isVisible()
+        .catch(() => false)
+    )
+      return;
+    await page.mouse.click(r.x + r.width / 2, r.y + r.height / 2);
+    await sleep(rand(300, 450));
+    await page
+      .locator(waitFor)
+      .first()
+      .waitFor({ timeout: 4000 })
+      .catch(() => {
+        throw error;
+      });
+  }
 };
 const clickRow = async (page, rowId) => {
   const row = ctl(page, `menu.${rowId}`);
@@ -617,8 +656,14 @@ const has = (page, selector) =>
     .isVisible()
     .catch(() => false);
 const closeMenus = async (page) => {
-  await press(page, 'Escape', 2);
+  /* one Escape closes the menu; a second lands on the stage and clears the selection (the
+     product round's editor), so it is pressed only while a menu is still open */
+  await press(page, 'Escape');
   await sleep(150);
+  if ((await page.locator('[id^="ts-menu-"]:visible, .ts-context-menu:visible').count()) > 0) {
+    await press(page, 'Escape');
+    await sleep(150);
+  }
 };
 /** Escapes out of any editing session and clears the selection. */
 const clearAll = async (page) => {

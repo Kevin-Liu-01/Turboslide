@@ -6,10 +6,10 @@ import { escapeText } from './html.ts';
 import { RENDER_SURFACE_SCRIPT } from './runtime.ts';
 import { renderSlide, slideMap, slideOrder } from './slide.ts';
 import type { RenderOptions, RenderedSlide } from './slide.ts';
-import { counterText, renderStage } from './stage.ts';
+import { bandAssetResolver, counterText, frameBandOf, renderStage } from './stage.ts';
 import type { SlideId } from '@turboslide/schema/ids';
 import type { Deck, Slide } from '@turboslide/schema/deck';
-import { deckCounter } from '@turboslide/schema/deck';
+import { deckCounter, deckCounterFormat } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
 
 /**
@@ -64,11 +64,13 @@ export function slideCounter(deck: Deck, slide: Slide, n: number, total: number)
   /* the slide's own word first (Slide numbers > Apply to selected, SPEC 7.2.4; docs/RETURN.md
      section 5 slides.numbers.apply): on numbers it under an off deck, off blanks it under an on one */
   if (slide.counter === 'off') return '';
-  if (slide.counter === 'on') return counterText(n, total);
+  /* the kit's format (docs/PRODUCT.md 4.1 Slide numbers): `01 / 85`, `01` or `Slide 1` */
+  const format = deckCounterFormat(deck);
+  if (slide.counter === 'on') return counterText(n, total, format);
   const mode = deckCounter(deck);
   if (mode === 'off') return '';
   if (mode === 'skip-title' && slide.kind === 'title') return '';
-  return counterText(n, total);
+  return counterText(n, total, format);
 }
 
 /**
@@ -130,10 +132,21 @@ export function renderDeck(deck: Deck, slides: Slide[], options: RenderDeckOptio
     theme: options.theme,
     counter: firstSlide
       ? slideCounter(deck, firstSlide, first?.n ?? 1, total)
-      : counterText(first?.n ?? 1, total),
+      : counterText(first?.n ?? 1, total, deckCounterFormat(deck)),
     sprite: bundle.sprite,
     present: present !== false,
     stageId: 'stage',
+    /* the brand kit's frame band (docs/PRODUCT.md 4.1, 4.4): the footer logo, text and format */
+    titleSlide: firstSlide?.kind === 'title',
+    band: frameBandOf(
+      deck,
+      options.theme,
+      bandAssetResolver(deck, (id, theme, path) =>
+        slideOptions.assetSrc
+          ? slideOptions.assetSrc(id, theme, path)
+          : `${slideOptions.assetBase}${path}`,
+      ),
+    ),
   });
   const head =
     `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +

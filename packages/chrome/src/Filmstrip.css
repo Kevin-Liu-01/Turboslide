@@ -74,17 +74,16 @@
   border-color: var(--pt-ink);
 }
 
-/* a selected card rings in ink; the current card's ring is 2px */
+/* One ring (docs/PRODUCT.md 3.1, the filmstrip card row; audit-interface 19): a selected card's
+   frame turns ink at 1 px, the current card's frame is one 2 px ink border and no second outline
+   (the parity rounds drew a 1 px border, a gap and a 2 px outline, three rings). The frame keeps
+   its outer box (border-box), so the cards do not move. */
 .ts-card.is-selected .ts-card-frame {
   border-color: var(--pt-ink);
-  outline: 1px solid var(--pt-ink);
-  outline-offset: 1px;
 }
 
 .ts-card.is-current .ts-card-frame {
-  border-color: var(--pt-ink);
-  outline: 2px solid var(--pt-ink);
-  outline-offset: 1px;
+  border: 2px solid var(--pt-ink);
 }
 
 /* a skipped slide: the thumbnail at 40 percent, the glyph at the top right (SPEC 4.1) */

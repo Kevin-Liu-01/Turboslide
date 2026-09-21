@@ -1,0 +1,66 @@
+{
+  "base": "http://localhost:4410",
+  "at": "2026-09-20T04:47:51.861Z",
+  "rows": [
+    {
+      "id": "seed.saveTemplate",
+      "ok": true,
+      "note": "{\"id\":\"acme-sales-2026\",\"name\":\"Acme sales 2026\",\"slides\":1,\"replaced\":false}"
+    },
+    {
+      "id": "templates.gallery.page (the page half)",
+      "ok": true,
+      "note": "organisation=[gt-brand,acme-sales-2026] turboslide=[blank] gt=\"General Translation brand deck\" 85 slides cover=1 blankDefault=1 acme=1 slide acmeTheme=light"
+    },
+    {
+      "id": "templates.gallery.page (title)",
+      "ok": true,
+      "note": "Template gallery, Turboslide"
+    },
+    {
+      "id": "templates.card.rename-and-delete (rename)",
+      "ok": true,
+      "note": "record name=\"Acme sales, Q4 2026\" id=acme-sales-2026"
+    },
+    {
+      "id": "templates.default.use-for-new (the gallery half)",
+      "ok": true,
+      "note": "default.json={\"template\":\"acme-sales-2026\"} order=[acme-sales-2026,gt-brand] blankMarkGone=true"
+    },
+    {
+      "id": "templates.default.use-for-new (the kit the default names)",
+      "ok": true,
+      "note": "{\"name\":\"Acme\",\"appearance\":\"light\",\"template\":\"acme-sales-2026\",\"templateName\":\"Acme sales, Q4 2026\",\"brand\":{\"name\":\"Acme\",\"appearance\":\"light\",\"colors\":{\"light\":{\"primary\":\"#0b3d91\"}}}}"
+    },
+    {
+      "id": "templates.card.rename-and-delete (delete refused for the default)",
+      "ok": true,
+      "note": "snackbar=\"Delete: Acme sales, Q4 2026 is used for new presentations. Choose another template for new presentations first\" folder=true"
+    },
+    {
+      "id": "templates.default.use-for-new (Blank restores today's draft)",
+      "ok": true,
+      "note": "default.json absent=true"
+    },
+    {
+      "id": "templates.card.rename-and-delete (delete)",
+      "ok": true,
+      "note": "folder gone=true index=[blank,gt-brand]"
+    },
+    {
+      "id": "templates.gallery.page (Blank opens /new)",
+      "ok": true,
+      "note": "http://localhost:4410/new"
+    },
+    {
+      "id": "templates.gallery.page (a card creates a deck)",
+      "ok": true,
+      "note": "deck=general-translation-brand-deck-mu9c54stdjz0 slides=85 title=\"General Translation brand deck\""
+    },
+    {
+      "id": "teardown",
+      "ok": true,
+      "note": "deck general-translation-brand-deck-mu9c54stdjz0 /edit status=404 folder=false"
+    }
+  ]
+}

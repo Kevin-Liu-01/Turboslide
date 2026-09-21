@@ -242,37 +242,23 @@ test('a banner stands in the status row and covers neither the toolbar, nor the 
         banner.left >= r.right ||
         banner.bottom <= r.top ||
         banner.top >= r.bottom;
-      /* the centre of a bottom bar control answers to the control itself, not to the banner (the
-         menu bar's View items share the control ids, so the bar's own buttons are named) */
-      const hits = (selector: string) => {
-        const el = document.querySelector(selector);
-        if (!el) throw new Error(`no ${selector}`);
-        const r = el.getBoundingClientRect();
-        const target = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
-        return target !== null && el.contains(target);
-      };
-      const bar = rect('.ts-bottombar');
+      /* the bottom bar left in the product round (docs/PRODUCT.md section 2 rank 25; b1 R6): the
+         banner sits along the window's bottom edge on its own */
       return {
         bannerTop: banner.top,
         bannerBottom: banner.bottom,
-        barTop: bar.top,
         viewportHeight: window.innerHeight,
         offToolbar: apart(rect('.ts-toolbar')),
         offSheet: apart(rect('.pt-sheet-stage')),
-        gridView: hits('.ts-bottombar [data-control="view.gridView"]'),
-        filmstripView: hits('.ts-bottombar [data-control="view.filmstripView"]'),
-        panelToggle: hits('.ts-bottombar [data-control="panel.toggle"]'),
+        bottomBars: document.querySelectorAll('.ts-bottombar').length,
       };
     });
     console.log(`banner: ${JSON.stringify(facts)}`);
     expect(facts.offToolbar).toBe(true);
     expect(facts.offSheet).toBe(true);
-    /* in the status row: its bottom is the viewport's, its top the bar's rule (one line of text) */
+    /* along the window's bottom edge: one line of text, nothing under it */
     expect(Math.abs(facts.bannerBottom - facts.viewportHeight)).toBeLessThanOrEqual(1);
-    expect(Math.abs(facts.bannerTop - facts.barTop)).toBeLessThanOrEqual(1);
-    expect(facts.gridView).toBe(true);
-    expect(facts.filmstripView).toBe(true);
-    expect(facts.panelToggle).toBe(true);
+    expect(facts.bottomBars).toBe(0);
     /* the banner's control keeps its tooltip (AGENTS.md) */
     await expect(banner.locator('[data-control="deck.restore"]')).toHaveAttribute('data-tip', /.+/);
   } finally {

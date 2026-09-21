@@ -1,0 +1,33 @@
+{
+  "started": "2026-09-20T03:53:35.800Z",
+  "ended": "2026-09-20T03:54:12.110Z",
+  "base": "http://localhost:4413",
+  "decks": [
+    "untitled-20260920-6h70",
+    "untitled-20260920-1m0w"
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "id": null,
+      "step": "the source deck",
+      "expected": "four slides",
+      "observed": "untitled-20260920-6h70: 4 slides",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "id": "slides.layout.title-and-body-single",
+      "step": "New slide (the toolbar button) after the title slide, then four lines typed into the body",
+      "expected": "the slide is Title and body with one title prompt over one body prompt; the four lines land in the body at the body size",
+      "observed": "no slide added",
+      "ok": false
+    }
+  ],
+  "consoleErrors": [],
+  "counts": {
+    "ok": 1,
+    "failed": 1,
+    "notDriven": 0
+  }
+}

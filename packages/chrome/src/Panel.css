@@ -69,6 +69,8 @@
 .ts-panel-x:hover {
   color: var(--pt-ink);
   border-color: var(--pt-hair);
+  /* the state law (docs/PRODUCT.md 3.1): every shell button takes the plate ground on hover */
+  background: var(--pt-plate);
 }
 
 .ts-panel-x:focus-visible {

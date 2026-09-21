@@ -875,9 +875,15 @@ export function parsePaletteQuery(query: string): PaletteQuery {
   return { group: null, needle: trimmed.trim().toLowerCase() };
 }
 
+/** A needle this long or longer never matches as a subsequence (docs/PRODUCT.md 6.1). */
+export const SUBSEQUENCE_MAX_NEEDLE = 3;
+
 /**
  * How well a needle matches a haystack: 4 for a prefix of the whole text, 3 for a prefix of a
- * word, 2 for a substring, 1 for a subsequence in order (`cntrl` in `content-rule`), 0 for none.
+ * word, 2 for a substring, 1 for a subsequence in order (`ctr` in `content-rule`), 0 for none.
+ * The subsequence score holds for needles of three characters or fewer: a seller's "logo"
+ * answered "Long dash dot" through it (audit-assist 8; docs/PRODUCT.md 6.1), so a needle of four
+ * characters or more matches only as a prefix or a substring of the row's words.
  */
 export function matchScore(needle: string, haystack: string): number {
   if (needle === '') return 1;
@@ -885,6 +891,7 @@ export function matchScore(needle: string, haystack: string): number {
   if (text.startsWith(needle)) return 4;
   const at = text.indexOf(needle);
   if (at >= 0) return /[\s\-:./]/.test(text.charAt(at - 1)) ? 3 : 2;
+  if (needle.replace(/\s+/g, '').length > SUBSEQUENCE_MAX_NEEDLE) return 0;
   let from = 0;
   for (const char of needle) {
     if (char === ' ') continue;

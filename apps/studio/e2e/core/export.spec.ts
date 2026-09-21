@@ -29,6 +29,9 @@ import {
   typeInto,
   typeNote,
   zipEntries,
+  pngDataUrl,
+  headingRun,
+  waitEditor,
 } from './lib';
 
 // Download and print, the file rows (docs/FOCUS.md 2.8, 6.4 `export.*`, `images.export.*` and
@@ -226,7 +229,9 @@ async function makeOwner(browser: Browser): Promise<Owner> {
  * fails mid way never leaves the count wrong for the next.
  */
 async function withBudget(n: number): Promise<Owner> {
-  let owner = owners[owners.length - 1];
+  /* the newest owner whose deck carries the documents slide: `plainDeck` pushes its table free
+     deck onto the list too, and the table rows read the dialog a plain deck never opens */
+  let owner = [...owners].reverse().find((o) => o.docsSlide !== undefined);
   if (!owner || owner.downloads + n > QUOTA) owner = await makeOwner(browserRef);
   owner.downloads += n;
   return owner;
@@ -256,12 +261,21 @@ test.afterAll(async () => {
   expect(failures, 'every owner tore its deck down').toEqual([]);
 });
 
+/**
+ * The download dialog with the PDF type picked (docs/PRODUCT.md section 2 rank 8): the PDF row
+ * starts its download at once, so the dialog's way in is File > Download > Download options and its
+ * File type choice; the dialog's control then reads `dialog.download.pdf`.
+ */
 async function openPdf(page: Page): Promise<void> {
-  await menuPath(page, 'file', 'file.download', 'file.download.pdf');
+  await menuPath(page, 'file', 'file.download', 'file.download.options');
+  const type = ctl(page, 'dialog.download.type.pdf');
+  await type.waitFor({ timeout: 8000 });
+  await type.click();
   await ctl(page, 'dialog.download.pdf').waitFor({ timeout: 8000 });
 }
+/** The download dialog with PowerPoint picked (the default of Download options). */
 async function openPptx(page: Page): Promise<void> {
-  await menuPath(page, 'file', 'file.download', 'file.download.pptx');
+  await menuPath(page, 'file', 'file.download', 'file.download.options');
   await ctl(page, 'dialog.download.pptx').waitFor({ timeout: 8000 });
 }
 async function check(page: Page, control: string): Promise<void> {
@@ -837,6 +851,631 @@ test(title('lines.connector.export-pptx'), async () => {
   expect(xml, 'the curved connector').toContain('prst="curvedConnector3"');
 });
 
+// ---------------------------------------------------------------------------------------------
+// the product round's rows (docs/PRODUCT.md section 2 ranks 7, 8, 11 and 21, 4.2, 4.5, 8.1): the
+// file named after the title, the direct PDF and PowerPoint rows with the snackbar's progress and
+// the Download options dialog, the mode sentence, the two large deck measurement rows, the kit's
+// footer text and logo in the PDF, and the catalog face named in the Editable text PowerPoint and
+// embedded in the PDF. B1 owns the rows and the dialog, B7 the file name and the per slide
+// progress, B5a the kit and the fonts. The export quota (five downloads a day per identity) holds
+// here too: the rows reserve their downloads through `withBudget`, and a plain deck (no table, no
+// chart) is built for the direct rows since the file's decks carry both.
+
+/** A snackbar or dialog progress sentence read while an export runs, every 150 ms until `until`. */
+async function progressWords(p: Page, until: () => boolean): Promise<string[]> {
+  const seen: string[] = [];
+  while (!until()) {
+    const text = await p
+      .evaluate(() =>
+        [
+          ...document.querySelectorAll(
+            '[data-control="snackbar"], [data-control="dialog.download.progress"]',
+          ),
+        ]
+          .map((el) => el.textContent?.trim() ?? '')
+          .filter(Boolean)
+          .join(' | '),
+      )
+      .catch(() => '');
+    if (text && seen[seen.length - 1] !== text) seen.push(text);
+    await p.waitForTimeout(150);
+  }
+  return seen;
+}
+/** A download started by `start`, with the words the snackbar showed while it ran. */
+async function downloadWithWords(p: Page, start: () => Promise<void>, timeout = 60_000) {
+  let done = false;
+  const words = progressWords(p, () => done);
+  try {
+    const file = await download(p, start, timeout);
+    done = true;
+    return { ...file, words: await words };
+  } catch (error) {
+    done = true;
+    await words;
+    throw error;
+  }
+}
+/** Whether the Download submenu has the Download options row on this build (B1, by request in model.ts). */
+async function hasOptionsRow(p: Page): Promise<boolean> {
+  await ctl(p, 'menubar.file').click();
+  await p.locator('#ts-menu-file').waitFor({ timeout: 8000 });
+  await ctl(p, 'menu.file.download').hover();
+  await p.waitForTimeout(400);
+  const there = await ctl(p, 'menu.file.download.options')
+    .isVisible()
+    .catch(() => false);
+  await p.keyboard.press('Escape');
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(150);
+  return there;
+}
+/** A plain deck (a title and five more slides, no table, no chart) for the direct rows, on a fresh identity. */
+type Plain = {
+  context: BrowserContext;
+  page: Page;
+  scratch: Scratch;
+  deck: string;
+  downloads: number;
+};
+let plain: Plain | null = null;
+async function plainDeck(n: number): Promise<Plain> {
+  if (plain === null || plain.downloads + n > QUOTA) {
+    const { context, page } = await ownerContext(browserRef);
+    const scratch = new Scratch();
+    const deck = await newDeck(page, scratch, 'GT pitch for Acme');
+    for (let i = 0; i < 5; i += 1) await addSlide(page);
+    plain = { context, page, scratch, deck, downloads: 0 };
+    owners.push({ context, page, scratch, deck, unskipped: 6, downloads: 0, n: owners.length + 1 });
+  }
+  plain.downloads += n;
+  return plain;
+}
+
+test(title('export.download.named-after-title'), async () => {
+  test.setTimeout(180_000);
+  const { page, deck } = await plainDeck(2);
+  await openEditor(page, deck);
+  const direct = !(await page.locator('[data-control="dialog.download.pdf"]').count());
+  void direct;
+  const pdf = await download(page, async () => {
+    await menuPath(page, 'file', 'file.download', 'file.download.pdf');
+    const ok = ctl(page, 'dialog.download.ok');
+    if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
+  });
+  await closeDialogs(page);
+  const pptx = await download(
+    page,
+    async () => {
+      await menuPath(page, 'file', 'file.download', 'file.download.pptx');
+      const ok = ctl(page, 'dialog.download.ok');
+      if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
+    },
+    60_000,
+  );
+  await closeDialogs(page);
+  test.info().annotations.push({ type: 'names', description: `${pdf.name}; ${pptx.name}` });
+  expect(pdf.name, 'the PDF is named after the title').toBe('GT pitch for Acme.pdf');
+  expect(pptx.name, 'the PowerPoint file too').toBe('GT pitch for Acme.pptx');
+});
+
+test(title('export.download.pdf-direct'), async () => {
+  test.setTimeout(150_000);
+  const { page, deck } = await plainDeck(1);
+  await openEditor(page, deck);
+  let dialogShown = false;
+  const file = await downloadWithWords(page, async () => {
+    await menuPath(page, 'file', 'file.download', 'file.download.pdf');
+    dialogShown = await ctl(page, 'dialog.download.pdf')
+      .isVisible({ timeout: 1500 })
+      .catch(() => false);
+    if (dialogShown)
+      await ctl(page, 'dialog.download.ok')
+        .click()
+        .catch(() => undefined);
+  });
+  await page.waitForTimeout(800);
+  const saved = await ctl(page, 'snackbar')
+    .textContent({ timeout: 2000 })
+    .catch(() => null);
+  const details = await page
+    .locator('[data-control="snackbar.download.details"], [data-control="snackbar.action"]')
+    .first()
+    .textContent({ timeout: 1000 })
+    .catch(() => null);
+  await closeDialogs(page).catch(() => undefined);
+  test.info().annotations.push({
+    type: 'direct pdf',
+    description: `dialog shown ${dialogShown}; ${file.ms} ms; words ${file.words.join(' > ')}; after: "${saved ?? 'none'}" action "${details ?? 'none'}"`,
+  });
+  expect(dialogShown, 'the row starts the download with no dialog').toBe(false);
+  expect(file.ms, 'the file arrives within 30 s').toBeLessThan(30_000);
+  expect(
+    file.words.some((w) => /Preparing your PDF/.test(w)),
+    'the snackbar reads the progress',
+  ).toBe(true);
+  expect(saved ?? '', 'then the saved name').toMatch(/Saved .*\.pdf/);
+  expect(details ?? '', 'with Details').toMatch(/Details/);
+});
+
+test(title('export.download.pptx-direct'), async () => {
+  test.setTimeout(240_000);
+  /* a deck with no table or chart: the Perfect download with no dialog */
+  const own = await plainDeck(1);
+  await openEditor(own.page, own.deck);
+  let dialogShown = false;
+  const perfect = await download(
+    own.page,
+    async () => {
+      await menuPath(own.page, 'file', 'file.download', 'file.download.pptx');
+      dialogShown = await ctl(own.page, 'dialog.download.pptx')
+        .isVisible({ timeout: 1500 })
+        .catch(() => false);
+      if (dialogShown)
+        await ctl(own.page, 'dialog.download.ok')
+          .click()
+          .catch(() => undefined);
+    },
+    60_000,
+  );
+  await closeDialogs(own.page).catch(() => undefined);
+  expect(
+    dialogShown,
+    'on a deck with no table or chart the row starts the Perfect download with no dialog',
+  ).toBe(false);
+  expect(pptxSlides(perfect.bytes).length, 'the file carries the slides').toBeGreaterThan(0);
+  /* a deck with a typed table: the same row opens Download options with Editable text preselected */
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  await menuPath(page, 'file', 'file.download', 'file.download.pptx');
+  await ctl(page, 'dialog.download.pptx').waitFor({ timeout: 8000 });
+  const facts = await page.evaluate(() => ({
+    native: document
+      .querySelector('[data-control="dialog.download.mode.native"]')
+      ?.getAttribute('aria-checked'),
+    sentence:
+      document
+        .querySelector('[data-control="dialog.download.tableSentence"]')
+        ?.textContent?.trim() ?? null,
+  }));
+  const file = await download(page, () => ctl(page, 'dialog.download.ok').click(), 90_000);
+  await closeDialogs(page);
+  const entries = zipEntries(file.bytes);
+  const withTable = [...entries.keys()]
+    .filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+    .some((n) => /<a:tbl>/.test(entries.get(n)!()));
+  test.info().annotations.push({
+    type: 'table deck',
+    description: `Editable text preselected ${facts.native}; sentence "${facts.sentence ?? 'none'}"; a:tbl ${withTable}`,
+  });
+  expect(facts.native, 'Editable text is preselected').toBe('true');
+  expect(facts.sentence ?? '', 'the table sentence shows').toMatch(
+    /This presentation has a table or a chart/,
+  );
+  expect(withTable, 'the saved file carries the table as a:tbl').toBe(true);
+});
+
+test(title('export.download.options-dialog'), async () => {
+  test.setTimeout(150_000);
+  const { page, deck } = await plainDeck(1);
+  await openEditor(page, deck);
+  if (!(await hasOptionsRow(page)))
+    test.skip(
+      true,
+      'not on this build: file.download.options (docs/PRODUCT.md 7.1, B1 by request in model.ts)',
+    );
+  await menuPath(page, 'file', 'file.download', 'file.download.options');
+  const dialog = page
+    .locator(
+      '[data-control="dialog.download.pptx"], [data-control="dialog.download.pdf"], [data-control="dialog.download"]',
+    )
+    .first();
+  await dialog.waitFor({ timeout: 8000 });
+  const facts = await page.evaluate(() => ({
+    modes: document.querySelectorAll('[data-control^="dialog.download.mode."]').length,
+    skipped: Boolean(document.querySelector('[data-control="dialog.download.includeSkipped"]')),
+    notes: Boolean(document.querySelector('[data-control="dialog.download.includeNotes"]')),
+  }));
+  const file = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
+  const closed = await expect
+    .poll(async () => page.locator('.ts-dialog-scrim [role="dialog"]').count(), { timeout: 8000 })
+    .toBe(0)
+    .then(() => true)
+    .catch(() => false);
+  await closeDialogs(page).catch(() => undefined);
+  test.info().annotations.push({
+    type: 'options',
+    description: `${JSON.stringify(facts)}; ${file.name} in ${file.ms} ms; closed itself ${closed}`,
+  });
+  expect(facts.modes, 'the modes').toBe(2);
+  expect(facts.skipped && facts.notes, 'Include skipped slides and Include speaker notes').toBe(
+    true,
+  );
+  expect(closed, 'the dialog closes itself when the file is saved').toBe(true);
+});
+
+test(title('export.download.progress-per-slide'), async () => {
+  test.setTimeout(180_000);
+  const { page, deck } = await plainDeck(1);
+  await openEditor(page, deck);
+  const total = (await slideOrder(page)).length;
+  const file = await downloadWithWords(
+    page,
+    async () => {
+      await menuPath(page, 'file', 'file.download', 'file.download.pptx');
+      const ok = ctl(page, 'dialog.download.ok');
+      if (await ok.isVisible({ timeout: 1500 }).catch(() => false)) await ok.click();
+    },
+    90_000,
+  );
+  await closeDialogs(page).catch(() => undefined);
+  const ks = new Set<number>();
+  for (const w of file.words)
+    for (const m of w.matchAll(/slide (\d+) of (\d+)/g))
+      if (Number(m[2]) === total) ks.add(Number(m[1]));
+  test.info().annotations.push({
+    type: 'progress',
+    description: `${total} slides; words ${file.words.join(' > ')}; k read ${[...ks].join(', ') || 'none'}`,
+  });
+  expect(total, 'a six slide deck').toBe(6);
+  expect(ks.size, 'the snackbar reads slide k of 6 with k moving').toBeGreaterThanOrEqual(2);
+});
+
+test(title('export.download.mode-sentence'), async () => {
+  test.setTimeout(120_000);
+  /* a deck with a table: the file's owner deck carries one */
+  const { page, deck } = await withBudget(0);
+  await openEditor(page, deck);
+  if (await hasOptionsRow(page))
+    await menuPath(page, 'file', 'file.download', 'file.download.options');
+  else await menuPath(page, 'file', 'file.download', 'file.download.pptx');
+  await ctl(page, 'dialog.download.pptx').waitFor({ timeout: 8000 });
+  const facts = await page.evaluate(() => ({
+    perfect:
+      document
+        .querySelector('[data-control="dialog.download.mode.flatten"]')
+        ?.textContent?.trim() ?? '',
+    native: document
+      .querySelector('[data-control="dialog.download.mode.native"]')
+      ?.getAttribute('aria-checked'),
+  }));
+  await closeDialogs(page);
+  test.info().annotations.push({ type: 'sentence', description: JSON.stringify(facts) });
+  expect(facts.perfect, "the Perfect mode's sentence names tables and charts as pictures").toMatch(
+    /Tables and charts are pictures in this mode/,
+  );
+  expect(facts.native, 'with a table on the deck Editable text is preselected').toBe('true');
+});
+
+/** A copy of the General Translation brand deck (85 slides, 115 assets) on a fresh identity, for the two measurement rows. */
+let large: {
+  context: BrowserContext;
+  page: Page;
+  scratch: Scratch;
+  deck: string;
+  slides: number;
+} | null = null;
+async function largeDeck() {
+  if (large) return large;
+  const { context, page } = await ownerContext(browserRef);
+  const scratch = new Scratch();
+  await page.goto('/decks');
+  await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
+  await page
+    .locator('[data-control="home.template.gt-brand"], [data-control="home.gt-brand"]')
+    .first()
+    .click();
+  await page.waitForURL(/\/edit\//, { timeout: 90_000 });
+  const deck = page.url().match(/\/edit\/([^/?#]+)/)?.[1] ?? '';
+  scratch.add(deck);
+  await waitEditor(page);
+  const slides = (await slideOrder(page)).length;
+  large = { context, page, scratch, deck, slides };
+  owners.push({
+    context,
+    page,
+    scratch,
+    deck,
+    unskipped: slides,
+    downloads: 0,
+    n: owners.length + 1,
+  });
+  return large;
+}
+/** Runs a measurement row: records the seconds per slide as a `measure` annotation for the gate (PRODUCT.md 8.2). */
+async function measured(
+  label: string,
+  slides: number,
+  run: () => Promise<{ ms: number; bytes: Buffer; name: string }>,
+) {
+  const t0 = Date.now();
+  try {
+    const file = await run();
+    const perSlide = file.ms / slides / 1000;
+    test.info().annotations.push({
+      type: 'measure',
+      description: `${label}: ${file.name}, ${slides} slides in ${(file.ms / 1000).toFixed(1)} s, ${perSlide.toFixed(2)} s per slide`,
+    });
+    return file;
+  } catch (error) {
+    test.info().annotations.push({
+      type: 'measure',
+      description: `${label}: no file after ${((Date.now() - t0) / 1000).toFixed(1)} s (${error instanceof Error ? error.message.split('\n')[0] : String(error)})`,
+    });
+    throw error;
+  }
+}
+
+test(title('export.download.large-deck-pdf'), async () => {
+  test.setTimeout(660_000);
+  const { page, deck, slides } = await largeDeck();
+  await openEditor(page, deck);
+  const file = await measured('PDF', slides, () =>
+    download(
+      page,
+      async () => {
+        await menuPath(page, 'file', 'file.download', 'file.download.pdf');
+        const ok = ctl(page, 'dialog.download.ok');
+        if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
+      },
+      600_000,
+    ),
+  );
+  await closeDialogs(page).catch(() => undefined);
+  expect(file.ms, 'within 600 s').toBeLessThan(600_000);
+  expect(pdfPages(file.bytes), 'a page per slide').toBe(slides);
+});
+
+test(title('export.download.large-deck-pptx'), async () => {
+  test.setTimeout(660_000);
+  const { page, deck, slides } = await largeDeck();
+  await openEditor(page, deck);
+  const file = await measured('Editable text PowerPoint with Embed fonts', slides, () =>
+    download(
+      page,
+      async () => {
+        if (await hasOptionsRow(page))
+          await menuPath(page, 'file', 'file.download', 'file.download.options');
+        else await menuPath(page, 'file', 'file.download', 'file.download.pptx');
+        await ctl(page, 'dialog.download.pptx').waitFor({ timeout: 8000 });
+        await ctl(page, 'dialog.download.mode.native').click({ force: true });
+        const more = ctl(page, 'dialog.download.more');
+        if (
+          (await more.count()) > 0 &&
+          !(await ctl(page, 'dialog.download.fonts')
+            .isVisible()
+            .catch(() => false))
+        )
+          await more.click();
+        await check(page, 'dialog.download.fonts');
+        await ctl(page, 'dialog.download.ok').click();
+      },
+      600_000,
+    ),
+  );
+  await closeDialogs(page).catch(() => undefined);
+  expect(file.ms, 'within 600 s').toBeLessThan(600_000);
+  expect(pptxSlides(file.bytes).length, 'a slide part per slide').toBe(slides);
+});
+
+/** The window API's action ids on a page. */
+async function actionIds(p: Page): Promise<string[]> {
+  return p.evaluate(() =>
+    (window.turboslide?.studio.describe().actions ?? []).map((a: { id: string } | string) =>
+      typeof a === 'string' ? a : a.id,
+    ),
+  );
+}
+
+test(title('brand.footer.text'), async () => {
+  test.setTimeout(180_000);
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  if (!(await actionIds(page)).includes('brand.set'))
+    test.skip(true, 'not on this build: brand.set (docs/PRODUCT.md 4.1, B5a)');
+  const s = await settled(page);
+  await invoke(page, 'brand.set', {
+    path: '/footer/text',
+    value: 'Confidential',
+    baseRevision: s.revision,
+  });
+  await settled(page);
+  const order = await slideOrder(page);
+  const footerOn = async (id: string) => {
+    await clickCard(page, id);
+    /* the slide before leaves the stage with its transition; the read is the current sheet alone
+       (a `.ts-stage` wide read took the leaving slide's band for the title slide's) */
+    await expect(page.locator('.ts-stagewrap.ts-editor .pt-slide.is-leaving')).toHaveCount(0, {
+      timeout: 5000,
+    });
+    await expect(
+      page.locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)[data-slide-id="${id}"]`),
+    ).toHaveCount(1, { timeout: 5000 });
+    /* the kit's footer text is the frame's `.ts-kit-footer`, a sibling of the sheet in the stage
+       (viewer/Frame.tsx), drawn on every slide but the title, whose frame carries no wordmark */
+    return page.evaluate((slideId) => {
+      const stage = document.querySelector('.ts-stagewrap.ts-editor .ts-stage');
+      const sheet = stage?.querySelector(`.pt-slide:not(.is-leaving)[data-slide-id="${slideId}"]`);
+      const visible = (el: Element | null) =>
+        el !== null &&
+        el.getClientRects().length > 0 &&
+        getComputedStyle(el).visibility !== 'hidden' &&
+        getComputedStyle(el).opacity !== '0';
+      const footers = [...(stage?.querySelectorAll('.ts-kit-footer') ?? [])].filter(visible);
+      const inBand = footers.some((el) => /Confidential/.test(el.textContent ?? ''));
+      const inSheet = /Confidential/.test(sheet?.textContent ?? '');
+      return { drawn: inBand || inSheet };
+    }, id);
+  };
+  const onTitle = await footerOn(order[0]!);
+  const onSecond = await footerOn(order[1]!);
+  const pdf = await download(page, async () => {
+    await menuPath(page, 'file', 'file.download', 'file.download.pdf');
+    const ok = ctl(page, 'dialog.download.ok');
+    if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
+  });
+  await closeDialogs(page).catch(() => undefined);
+  /* Chromium prints the band's text as CID glyph ids: the reading is pdfText's (pdftotext, else
+     the streams' literal strings), the way the docs rows read their PDFs */
+  const inPdf = /Confidential/.test(pdfText(pdf.bytes));
+  const s2 = await settled(page);
+  await invoke(page, 'brand.reset', { path: '/footer/text', baseRevision: s2.revision }).catch(
+    () => undefined,
+  );
+  test.info().annotations.push({
+    type: 'footer',
+    description: `title slide ${onTitle.drawn}; second slide ${onSecond.drawn}; PDF text ${inPdf}`,
+  });
+  expect(onSecond.drawn, 'the footer text draws on a slide after the title').toBe(true);
+  expect(onTitle.drawn, 'and not on the title').toBe(false);
+  expect(inPdf, "the PDF's text carries it").toBe(true);
+});
+
+test(title('brand.export.pdf-logo'), async () => {
+  test.setTimeout(180_000);
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  if (!(await actionIds(page)).includes('brand.set'))
+    test.skip(true, 'not on this build: brand.set (docs/PRODUCT.md 4.1, B5a)');
+  const s = await settled(page);
+  const asset = await invoke<{ id: string }>(page, 'asset.add', {
+    id: `pdf-logo-${Date.now().toString(36)}`,
+    url: await pngDataUrl(page, 132, 84),
+    role: 'capture',
+    alt: 'the kit logo',
+    baseRevision: s.revision,
+  });
+  const s1 = await settled(page);
+  await invoke(page, 'brand.set', {
+    path: '/mark',
+    value: { kind: 'picture', assetId: asset.id },
+    baseRevision: s1.revision,
+  });
+  const s2 = await settled(page);
+  await invoke(page, 'brand.set', {
+    path: '/footer/logo',
+    value: 'picture',
+    baseRevision: s2.revision,
+  }).catch(() => undefined);
+  const s3 = await settled(page);
+  await invoke(page, 'brand.set', {
+    path: '/footer/assetId',
+    value: asset.id,
+    baseRevision: s3.revision,
+  }).catch(() => undefined);
+  await settled(page);
+  const wordmark = await page.evaluate(() =>
+    Boolean(document.querySelector('.ts-stagewrap.ts-editor .wordmark svg use[href="#gt-mark"]')),
+  );
+  const pdf = await download(page, async () => {
+    await menuPath(page, 'file', 'file.download', 'file.download.pdf');
+    const ok = ctl(page, 'dialog.download.ok');
+    if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
+  });
+  await closeDialogs(page).catch(() => undefined);
+  const images = pdfImages(pdf.bytes);
+  const s4 = await settled(page);
+  await invoke(page, 'brand.reset', { baseRevision: s4.revision }).catch(() => undefined);
+  test.info().annotations.push({
+    type: 'logo',
+    description: `GT wordmark drawn on the stage ${wordmark}; image objects in the PDF ${images}`,
+  });
+  expect(wordmark, 'no GT wordmark with a picture logo').toBe(false);
+  expect(
+    images,
+    "the PDF carries the logo picture (an image object beyond the deck's own picture)",
+  ).toBeGreaterThanOrEqual(2);
+});
+
+test(title('fonts.export.editable-names-face'), async () => {
+  test.setTimeout(180_000);
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  const first = (await slideOrder(page))[0]!;
+  await clickCard(page, first);
+  const run = await headingRun(page);
+  const blockId = await page.evaluate(
+    (r) =>
+      document
+        .querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`)
+        ?.closest('[data-block]')
+        ?.getAttribute('data-block') ?? null,
+    run,
+  );
+  const s = await settled(page);
+  const wrote = await invoke(page, 'block.set', {
+    baseRevision: s.revision,
+    slideId: first,
+    blockId: blockId ?? 'lead',
+    path: '/typography/family',
+    value: 'roboto',
+  })
+    .then(() => true)
+    .catch((error: unknown) => (error instanceof Error ? error.message : String(error)));
+  if (wrote !== true)
+    test.skip(
+      true,
+      `not on this build: typography.family (docs/PRODUCT.md 4.2, B5a): ${String(wrote).slice(0, 120)}`,
+    );
+  await settled(page);
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 90_000);
+  await closeDialogs(page);
+  const entries = zipEntries(pptx.bytes);
+  const slide1 = entries.get('ppt/slides/slide1.xml')?.() ?? '';
+  const faces = [...slide1.matchAll(/<a:latin typeface="([^"]+)"/g)].map((m) => m[1]);
+  test.info().annotations.push({ type: 'faces', description: faces.join(', ') || 'no a:latin' });
+  expect(faces, 'the Editable text PowerPoint names Roboto').toContain('Roboto');
+});
+
+test(title('fonts.export.pdf-face'), async () => {
+  test.setTimeout(180_000);
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  const first = (await slideOrder(page))[0]!;
+  await clickCard(page, first);
+  const run = await headingRun(page);
+  const blockId = await page.evaluate(
+    (r) =>
+      document
+        .querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`)
+        ?.closest('[data-block]')
+        ?.getAttribute('data-block') ?? null,
+    run,
+  );
+  const s = await settled(page);
+  const wrote = await invoke(page, 'block.set', {
+    baseRevision: s.revision,
+    slideId: first,
+    blockId: blockId ?? 'lead',
+    path: '/typography/family',
+    value: 'roboto',
+  })
+    .then(() => true)
+    .catch((error: unknown) => (error instanceof Error ? error.message : String(error)));
+  if (wrote !== true)
+    test.skip(
+      true,
+      `not on this build: typography.family (docs/PRODUCT.md 4.2, B5a): ${String(wrote).slice(0, 120)}`,
+    );
+  await settled(page);
+  await openPdf(page);
+  const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
+  await closeDialogs(page);
+  const fonts = [
+    ...pdf.bytes.toString('latin1').matchAll(/\/(?:BaseFont|FontName)\s*\/([A-Za-z0-9+_-]+)/g),
+  ].map((m) => m[1]);
+  test.info().annotations.push({
+    type: 'pdffonts',
+    description: [...new Set(fonts)].join(', ') || 'no font descriptor',
+  });
+  expect(
+    fonts.some((f) => /Roboto/.test(f ?? '')),
+    'the PDF embeds a Roboto subset',
+  ).toBe(true);
+});
+
 coverage(import.meta.filename, [
   'export.zip.bundle',
   'export.html.web-page',
@@ -858,4 +1497,17 @@ coverage(import.meta.filename, [
   'shapes.export.pdf',
   'shapes.export.pptx',
   'export.print.download-pdf-follows-preview',
+  /* the product round (docs/PRODUCT.md 8.1) */
+  'export.download.named-after-title',
+  'export.download.pdf-direct',
+  'export.download.pptx-direct',
+  'export.download.options-dialog',
+  'export.download.progress-per-slide',
+  'export.download.mode-sentence',
+  'export.download.large-deck-pdf',
+  'export.download.large-deck-pptx',
+  'brand.footer.text',
+  'brand.export.pdf-logo',
+  'fonts.export.editable-names-face',
+  'fonts.export.pdf-face',
 ]);

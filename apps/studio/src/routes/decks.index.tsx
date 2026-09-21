@@ -1,11 +1,19 @@
-import type { ChangeEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
-import { Suspense, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Link, createFileRoute, useAwaited, useNavigate, useRouter } from '@tanstack/react-router';
+import {
+  Link,
+  createFileRoute,
+  redirect,
+  useAwaited,
+  useNavigate,
+  useRouter,
+} from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 
 import { AppBarBrand } from '@turboslide/chrome/AppBarBrand';
+import { Dialog, DialogCheck } from '@turboslide/chrome/Dialog';
 import { EmptyFigure } from '@turboslide/chrome/EmptyFigure';
 import { GtMark } from '@turboslide/chrome/GtMark';
 import { Icon } from '@turboslide/chrome/icons';
@@ -37,7 +45,13 @@ import {
 import type { DeckCard } from '../server/decks';
 import { getServerHealth } from '../server/health';
 import { RouterLinkSlot } from './-link-slot';
-import { parseRecentCookie, readOpened, readRecent, recordDeckOpened } from './-recent';
+import {
+  parseRecentCookie,
+  readOpened,
+  readRecent,
+  recordDeckOpened,
+  takeTrashedMarker,
+} from './-recent';
 import type { DeckOpenFacts, RecentEntry } from './-recent';
 
 import './decks.css';
@@ -73,8 +87,22 @@ import './decks.css';
  * route of decks.$deckId.assets.$ and run this loader for every asset request. The health call
  * stays so every build carries the server-only marker scripts/check-client-bundle.mjs looks for
  * (AGENTS.md).
+ *
+ * The product round (docs/PRODUCT.md section 2 ranks 4, 15, 16 and 26, section 3.6): the Opened on
+ * this device head carries the sentence that the list is this browser's; the row drops a deck the
+ * editor moved to the trash (its marker, ./-recent.ts) and any deck the listing no longer holds,
+ * and the page shows Moved to trash with Undo when it lands from the editor's File > Move to
+ * trash; a card reads "Edited yesterday at 2:02 PM" in the browser's locale and the list rows are
+ * 32 px; the card's more button is the icon set's glyph; the card's plate is the deck's own paper
+ * with the title in its ink until the capture lands, and a failed capture is asked for again
+ * within the first seconds; the Make a copy dialog is the chrome's one Dialog.
  */
 export const Route = createFileRoute('/decks/')({
+  /* the old Template gallery anchor (/decks#templates) lands on the gallery page (docs/PRODUCT.md 4.3) */
+  beforeLoad: ({ location }) => {
+    if (location.hash === 'templates' || location.hash === '#templates')
+      throw redirect({ to: '/decks/templates' });
+  },
   loader: async () => {
     const [health, cookies] = await Promise.all([getServerHealth(), readHomeCookies()]);
     // the store listing is not awaited: the router streams it behind the shell (SPEC-4 0.29)
@@ -212,6 +240,30 @@ export function shortDate(iso: string, now: Date = new Date()): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+/**
+ * `Edited today at 2:02 PM`, `Edited yesterday at 2:02 PM`, else `Edited Sep 12, 2026`, the time in
+ * the browser's locale (docs/PRODUCT.md 3.6; audit-interface 27: the card read a calendar date
+ * alone). With `by` the author's name follows: `Edited yesterday at 2:02 PM by Kevin`.
+ */
+export function editedLine(iso: string, now: Date = new Date(), by?: string): string {
+  const date = new Date(iso);
+  if (iso === '' || Number.isNaN(date.getTime())) return HOME.edited(iso);
+  const sameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const time = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(date);
+  const when = sameDay(date, now)
+    ? `today at ${time}`
+    : sameDay(date, yesterday)
+      ? `yesterday at ${time}`
+      : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(date);
+  const line = HOME.edited(when);
+  return by === undefined || by === '' ? line : `${line} by ${by}`;
+}
+
 /** `just now`, `5 minutes ago`, `2 hours ago`, `3 days ago`, else the short date. */
 export function timeAgo(iso: string, now: Date = new Date()): string {
   const date = new Date(iso);
@@ -306,106 +358,6 @@ function openedOf(recent: ReadonlyArray<RecentEntry>): Record<string, string> {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The dialog primitive of the home page and the trash (SPEC 13.3)
-
-export type DialogProps = {
-  title: string;
-  /** the id the audit and the specs address, `home.copy` */
-  control: string;
-  children?: ReactNode;
-  /** the dismissive button first, the confirming button last */
-  actions: ReactNode;
-  onClose: () => void;
-  /** Enter outside a textarea runs the default button */
-  onSubmit?: () => void;
-  className?: string;
-};
-
-const FOCUSABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-/**
- * `role="dialog"` with `aria-labelledby`, a focus trap, Esc to cancel, Enter to run the default
- * button, and focus returned to the opener on close (SPEC 13.3; R08 B9). The scrim closes it.
- */
-export function Dialog({
-  title,
-  control,
-  children,
-  actions,
-  onClose,
-  onSubmit,
-  className,
-}: DialogProps) {
-  const titleId = useId();
-  const root = useRef<HTMLDivElement>(null);
-
-  useMountEffect(() => {
-    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    /* the marked control first, wherever it sits, else the first focusable: a selector list
-       answers in document order, so the trash dialog's Delete forever button (docs/FOCUS.md rank
-       29) would lose the initial focus to the Cancel button before it */
-    const first =
-      root.current?.querySelector<HTMLElement>('[data-autofocus]') ??
-      root.current?.querySelector<HTMLElement>(FOCUSABLE);
-    first?.focus();
-    if (first instanceof HTMLInputElement && first.dataset.select === 'all') first.select();
-    return () => opener?.focus();
-  });
-
-  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      event.stopPropagation();
-      onClose();
-      return;
-    }
-    if (event.key === 'Enter' && onSubmit !== undefined) {
-      const target = event.target;
-      if (target instanceof HTMLTextAreaElement) return;
-      if (target instanceof HTMLButtonElement || target instanceof HTMLAnchorElement) return;
-      event.preventDefault();
-      onSubmit();
-      return;
-    }
-    if (event.key === 'Tab' && root.current) {
-      const items = Array.from(root.current.querySelectorAll<HTMLElement>(FOCUSABLE));
-      if (items.length === 0) return;
-      const first = items[0];
-      const last = items[items.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first?.focus();
-      }
-    }
-  };
-
-  return (
-    <div className="ts-hm-dialog-scrim" onMouseDown={onClose} data-control={`${control}.scrim`}>
-      <div
-        ref={root}
-        className={className === undefined ? 'ts-hm-dialog' : `ts-hm-dialog ${className}`}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        data-control={control}
-        onKeyDown={onKeyDown}
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        <h2 id={titleId} className="ts-hm-dialog-title">
-          {title}
-        </h2>
-        {children}
-        <div className="ts-hm-dialog-actions">{actions}</div>
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------
 // The card menu (SPEC 6.2): Google's per item menu, in the words of the File menu
 
 /** The rows of a card's menu: Google's Open, Open in new tab, Rename and Remove, plus ours. */
@@ -432,7 +384,7 @@ function gtBrandDeckId(now: Date = new Date()): string {
 /** The empty states of the band (SPEC-4 1.10): the figure, a title, one sentence, one action at most. */
 export const HOME_EMPTY = {
   title: 'No presentations yet',
-  sentence: 'Start one with the Blank presentation card above, or copy the GT brand deck.',
+  sentence: 'Start one with the Blank presentation card above, or start from a template.',
   action: 'New Presentation',
   noMatch: (query: string) => `No presentation matches "${query}"`,
   noMatchSentence: 'Clear the search to see every presentation again.',
@@ -442,6 +394,13 @@ function HomePage() {
   const { decks, node, prefs: cookiePrefs, recent } = Route.useLoaderData();
   const router = useRouter();
   const navigate = useNavigate();
+  /* the old Template gallery anchor on a full load (docs/PRODUCT.md 4.3): the hash never reaches
+     the server and the route's beforeLoad does not run again on hydration, so the page sends the
+     reader on itself */
+  useEffect(() => {
+    if (window.location.hash === '#templates')
+      void navigate({ to: '/decks/templates', replace: true });
+  }, [navigate]);
   const page = useRef<HTMLElement>(null);
   const snackbar = useSnackbar();
   const [query, setQuery] = useState('');
@@ -461,6 +420,8 @@ function HomePage() {
      (docs/FOCUS.md rank 7: the /decks listing lags the store by up to a minute on the blob tier) */
   const [renamed, setRenamed] = useState<Readonly<Record<string, RenamedCard>>>({});
   const [creating, setCreating] = useState(false);
+  /* the ids the store's listing holds once it has landed: the Recent row drops the rest (rank 15) */
+  const [listedIds, setListedIds] = useState<ReadonlySet<string> | null>(null);
 
   useMountEffect(() => {
     /* this browser's history is read after hydration, so the server's HTML and the first client
@@ -470,8 +431,37 @@ function HomePage() {
     setOpened((current) => ({ ...current, ...readOpened() }));
     const stored = readRecent();
     if (stored.length > 0) setRecentRow(stored);
+    else setRecentRow((current) => current);
     setMounted(true);
     page.current?.setAttribute('data-hydrated', '');
+    /* the editor's File > Move to trash (rank 16): the card is hidden, the row drops it, and the
+       snackbar offers Undo, which restores the deck and its Recent entry */
+    const trashed = takeTrashedMarker();
+    if (trashed !== null) {
+      setHidden((current) => new Set([...current, trashed.id]));
+      setRecentRow((current) => current.filter((entry) => entry.id !== trashed.id));
+      snackbar.show(SNACKBARS.movedToTrash, {
+        label: SNACKBARS.undo,
+        run: () => {
+          void (async () => {
+            try {
+              await restoreStoredDeck({ deckId: trashed.id });
+              if (trashed.facts !== undefined) recordDeckOpened(trashed.id, trashed.facts);
+              else recordDeckOpened(trashed.id);
+              setHidden((current) => {
+                const next = new Set(current);
+                next.delete(trashed.id);
+                return next;
+              });
+              setRecentRow(readRecent());
+              await router.invalidate();
+            } catch (error) {
+              snackbar.show(`Restore: ${errorMessage(error)}`);
+            }
+          })();
+        },
+      });
+    }
   });
 
   /* a restore the trash page requested moments ago (docs/FOCUS.md rank 7; build/b7.md R9,
@@ -637,6 +627,7 @@ function HomePage() {
     onRename: (card, name) => void rename(card, name),
     onCopied: () => void refresh(),
     onError: (message) => snackbar.show(message),
+    onListed: (ids) => setListedIds(new Set(ids)),
   };
 
   return (
@@ -662,17 +653,18 @@ function HomePage() {
       <section className="ts-strip" id="templates" aria-labelledby="ts-strip-heading">
         <div className="ts-strip-head">
           <h2 id="ts-strip-heading">{HOME.startNew}</h2>
-          <a
+          {/* the gallery page (docs/PRODUCT.md 4.3): Your organisation's templates and Turboslide's */}
+          <Link
+            to="/decks/templates"
             className="ts-strip-gallery"
-            href="#templates"
             data-control="home.gallery"
             {...tipProps({
               name: HOME.gallery,
-              doc: 'The templates a presentation can start from.',
+              doc: 'Every template a presentation can start from, the ones saved here included.',
             })}
           >
             {HOME.gallery}
-          </a>
+          </Link>
         </div>
         <ul className="ts-strip-cards">
           <li>
@@ -692,7 +684,7 @@ function HomePage() {
             <button
               type="button"
               className="ts-template"
-              data-control="home.gt-brand"
+              data-control="home.template.gt-brand"
               disabled={creating}
               onClick={() => void createGtBrandDeck()}
               {...tipProps({
@@ -756,6 +748,7 @@ function HomePage() {
             <label className="ts-sort">
               <span className="ts-visually-hidden">Sort by</span>
               <select
+                className="pt-select"
                 value={settings.sort}
                 data-control="home.sort"
                 onChange={(event) => choose({ sort: event.target.value as HomeSort })}
@@ -775,6 +768,7 @@ function HomePage() {
           entries={recentRow.filter(
             (entry) =>
               !hidden.has(entry.id) &&
+              (listedIds === null || listedIds.has(entry.id)) &&
               (query.trim() === '' ||
                 entry.title.toLowerCase().includes(query.trim().toLowerCase())),
           )}
@@ -822,6 +816,10 @@ const FRAME_COLUMNS = 4;
 /** The Recent row's caption (sentence case, no period): this browser's own decks, not the store's. */
 export const RECENT_ROW_LABEL = 'Opened on this device';
 
+/** The sentence under the caption (docs/PRODUCT.md section 2 rank 4): the list is this browser's. */
+export const RECENT_ROW_SENTENCE =
+  'Presentations this browser opened. On another computer, open a presentation from its link';
+
 /**
  * This browser's Recent row (SPEC-4 0.29): one row of the newest decks this browser opened, drawn
  * whole from the record of ./-recent.ts (the cookie on the server, localStorage after hydration),
@@ -846,6 +844,9 @@ function RecentRow({
   return (
     <div className="ts-recent-row" data-control="home.recent">
       <h3 className="ts-recent-row-title">{RECENT_ROW_LABEL}</h3>
+      <p className="ts-recent-row-sentence" data-control="home.recent.sentence">
+        {RECENT_ROW_SENTENCE}
+      </p>
       <ul className="ts-cards ts-cards-recent" aria-label={RECENT_ROW_LABEL}>
         {row.map((entry, index) => (
           <RecentCard
@@ -876,8 +877,6 @@ function RecentCard({
   now: Date;
   onOpen: () => void;
 }) {
-  const [failed, setFailed] = useState(false);
-  const url = cardThumbUrl(entry);
   return (
     <li
       className="ts-hm-card ts-hm-card-recent"
@@ -893,21 +892,7 @@ function RecentCard({
         onClick={onOpen}
         {...tipProps({ name: entry.title, doc: 'Opens the presentation.' })}
       >
-        <span className="ts-hm-card-thumb" data-theme={entry.appearance} aria-hidden="true">
-          {url !== null && !failed ? (
-            <img
-              src={url}
-              width={320}
-              height={180}
-              alt=""
-              loading="eager"
-              decoding="async"
-              onError={() => setFailed(true)}
-            />
-          ) : (
-            <span className="ts-hm-card-plate">{entry.title}</span>
-          )}
-        </span>
+        <Thumb card={entry} eager />
       </Link>
       <div className="ts-hm-card-body">
         <span className="ts-hm-card-title">{entry.title}</span>
@@ -1047,6 +1032,8 @@ type ListProps = {
   onRename: (card: DeckCard, name: string) => void;
   onCopied: (deckId: string) => void;
   onError: (message: string) => void;
+  /** the ids the listing holds, each time it lands: the Recent row drops the rest (rank 15) */
+  onListed?: (ids: ReadonlyArray<string>) => void;
 };
 
 function DeckList({
@@ -1065,8 +1052,15 @@ function DeckList({
   onRename,
   onCopied,
   onError,
+  onListed,
 }: ListProps & { list: ReadonlyArray<DeckCard> }) {
   const list = useMemo(() => applyRenames(listed, renamed), [listed, renamed]);
+  const listedKey = listed.map((card) => card.id).join('|');
+  const onListedRef = useRef(onListed);
+  onListedRef.current = onListed;
+  useEffect(() => {
+    onListedRef.current?.(listedKey === '' ? [] : listedKey.split('|'));
+  }, [listedKey]);
   const [menu, setMenu] = useState<CardMenuState | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [copying, setCopying] = useState<DeckCard | null>(null);
@@ -1253,11 +1247,15 @@ type CardViewProps = {
   onCancelRename: () => void;
 };
 
-/** "Opened 2 hours ago" from this browser, else "Edited <date>" from the store (SPEC 6.2). */
+/** A card's author when the listing carries one (B7's `updatedBy`, the display name of rank 4). */
+type CardWithAuthor = DeckCard & { updatedBy?: string };
+
+/** "Opened 2 hours ago" from this browser, else "Edited yesterday at 2:02 PM" from the store (3.6). */
 function whenLine(card: DeckCard, mounted: boolean, now: Date, openedAt?: string): string {
   if (openedAt !== undefined) return HOME.opened(timeAgo(openedAt, now));
   // the server renders the ISO date; the reader's zone and form take over after hydration
-  return HOME.edited(mounted ? shortDate(card.updatedAt, now) : card.updatedAt.slice(0, 10));
+  if (!mounted) return HOME.edited(card.updatedAt.slice(0, 10));
+  return editedLine(card.updatedAt, now, (card as CardWithAuthor).updatedBy);
 }
 
 /** The first screen's cards run the editor's loader as they scroll into view; the rest on intent. */
@@ -1288,9 +1286,7 @@ function MoreButton({
         doc: `Open, present, rename, copy, download or trash ${card.title}.`,
       })}
     >
-      <span aria-hidden="true" className="ts-hm-card-dots">
-        ⋮
-      </span>
+      <Icon name="ellipsis-vertical" />
     </button>
   );
 }
@@ -1338,18 +1334,52 @@ function RenameField({
   );
 }
 
-function Thumb({ card }: { card: DeckCard }) {
+/** How long the card waits before asking for a failed capture again, per try (3.6: within 10 s). */
+export const THUMB_RETRY_MS: ReadonlyArray<number> = [3000, 6000];
+
+/**
+ * A card's thumbnail (docs/PRODUCT.md 3.6): the render route's capture of slide 1, and until it
+ * lands a plate in the deck's paper with the title in its ink (decks.css). A capture that fails is
+ * asked for again after 3 s and after 6 more, because a fresh deck's first render is on its way for
+ * the first seconds (the render worker's capture on save, B7's `thumbs.ts`); after that the plate
+ * stands. Exported for the trash page.
+ */
+export function Thumb({
+  card,
+  eager = false,
+}: {
+  card: Pick<DeckCard, 'id' | 'title' | 'firstSlide' | 'appearance' | 'revision'>;
+  eager?: boolean;
+}) {
+  const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
-  const url = cardThumbUrl(card);
+  const base = cardThumbUrl(card);
+  const url = base === null ? null : attempt === 0 ? base : `${base}&retry=${attempt}`;
+  useEffect(() => {
+    if (!failed) return undefined;
+    const wait = THUMB_RETRY_MS[attempt];
+    if (wait === undefined) return undefined;
+    const timer = window.setTimeout(() => {
+      setFailed(false);
+      setAttempt((n) => n + 1);
+    }, wait);
+    return () => window.clearTimeout(timer);
+  }, [failed, attempt]);
   return (
-    <span className="ts-hm-card-thumb" data-theme={card.appearance} aria-hidden="true">
+    <span
+      className="ts-hm-card-thumb"
+      data-theme={card.appearance}
+      data-thumb={url !== null && !failed ? 'capture' : 'plate'}
+      aria-hidden="true"
+    >
       {url !== null && !failed ? (
         <img
+          key={url}
           src={url}
           width={320}
           height={180}
           alt=""
-          loading="lazy"
+          loading={eager ? 'eager' : 'lazy'}
           decoding="async"
           onError={() => setFailed(true)}
         />
@@ -1516,59 +1546,41 @@ function CopyDialog({
       title={DIALOGS.makeCopy.title}
       control="home.copy"
       onClose={onClose}
-      onSubmit={() => void submit()}
-      actions={
-        <>
-          <button
-            type="button"
-            className="pt-ib is-text"
-            data-control="home.copy.cancel"
-            onClick={onClose}
-            {...tipProps({ name: DIALOGS.makeCopy.cancel, doc: 'Closes without copying.' })}
-          >
-            <span className="pt-lb">{DIALOGS.makeCopy.cancel}</span>
-          </button>
-          <button
-            type="button"
-            className="pt-ib is-text is-solid"
-            data-control="home.copy.ok"
-            disabled={busy || name.trim() === ''}
-            onClick={() => void submit()}
-            {...tipProps({
-              name: DIALOGS.makeCopy.ok,
-              doc: 'Copies the presentation and opens the copy in a new tab.',
-              key: 'Enter',
-            })}
-          >
-            <span className="pt-lb">{busy ? 'Copying' : DIALOGS.makeCopy.ok}</span>
-          </button>
-        </>
-      }
+      width={480}
+      cancel
+      cancelLabel={DIALOGS.makeCopy.cancel}
+      actions={[
+        {
+          label: busy ? 'Copying' : DIALOGS.makeCopy.ok,
+          primary: true,
+          disabled: busy || name.trim() === '',
+          onClick: () => void submit(),
+          control: 'home.copy.ok',
+          doc: 'Copies the presentation and opens the copy in a new tab',
+        },
+      ]}
     >
-      <label className="ts-hm-dialog-field">
-        <span>{DIALOGS.makeCopy.name}</span>
+      <label className="ts-dialog-field">
+        <span className="ts-dialog-field-label">{DIALOGS.makeCopy.name}</span>
         <input
           type="text"
           value={name}
-          data-autofocus
           data-select="all"
           data-control="home.copy.name"
           aria-label={DIALOGS.makeCopy.name}
           spellCheck={false}
           autoComplete="off"
           onChange={(event) => setName(event.target.value)}
+          {...tipProps({ name: DIALOGS.makeCopy.name, doc: 'The title of the copy' })}
         />
       </label>
-      <label className="ts-hm-dialog-check">
-        <input
-          type="checkbox"
-          checked={removeNotes}
-          data-control="home.copy.remove-notes"
-          onChange={(event) => setRemoveNotes(event.target.checked)}
-        />
-        <span className="ts-hm-dialog-box" aria-hidden="true" />
-        <span>{DIALOGS.makeCopy.removeNotes}</span>
-      </label>
+      <DialogCheck
+        label={DIALOGS.makeCopy.removeNotes}
+        checked={removeNotes}
+        onChange={setRemoveNotes}
+        control="home.copy.remove-notes"
+        doc="The copy carries no speaker notes"
+      />
     </Dialog>
   );
 }

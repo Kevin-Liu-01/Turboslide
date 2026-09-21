@@ -13,9 +13,79 @@ import { tipProps } from '../Tooltip';
 /**
  * Edit > Find and replace (gslides-parity SPEC 2.2, 12 "Dialogs"; Cmd+Shift+H): Find, Replace
  * with, Match case, Prev, Next, Replace, Replace all. The matches are counted over every visible
- * text of the deck; Prev and Next step through the slides that carry one (view.goto); Replace
- * runs `text.replaceAll` on the current slide alone, Replace all over the deck, each one write.
+ * text of the deck and the count line reads "k of n" as the query is typed (docs/PRODUCT.md
+ * section 5; audit-gaps 21); Prev and Next step match by match, moving to its slide (view.goto)
+ * and selecting the block that holds it; Replace runs `text.replaceAll` on the current slide
+ * alone, Replace all over the deck, each one write.
  */
+
+/** One match of the query: the slide, the block that holds it (a slide field's pseudo block on a title or statement slide, none for the notes) and its occurrence in that block. */
+export type FindMatch = { slideId: string; blockId: string | null; index: number };
+
+/**
+ * Every match of the query over the deck in reading order (docs/PRODUCT.md section 5 "Find and
+ * replace"; audit-gaps 21): the count line reads "k of n" from it and Prev and Next step through
+ * it, selecting the block that holds the match on its slide. A block's texts are read the way
+ * `slideStrings` reads them; a notes match names no block.
+ */
+export function deckMatches(
+  document: DeckDocument,
+  order: ReadonlyArray<string>,
+  find: string,
+  matchCase: boolean,
+): FindMatch[] {
+  if (find === '') return [];
+  const out: FindMatch[] = [];
+  for (const slideId of order) {
+    const slide = document.slides[slideId];
+    if (slide === undefined) continue;
+    const push = (blockId: string | null, strings: string[]) => {
+      const count = countMatches(strings, find, matchCase);
+      for (let index = 0; index < count; index += 1) out.push({ slideId, blockId, index });
+    };
+    if (slide.kind === 'title') {
+      push('heading', [slide.heading]);
+      push('lead', [slide.lead]);
+    }
+    if (slide.kind === 'statement') push('big', [slide.big]);
+    for (const { block } of slideBlocks(slide)) push(block.id, blockStrings(block));
+    if (slide.notes !== undefined) push(null, [slide.notes]);
+  }
+  return out;
+}
+
+/** The plain strings inside one block, in the walk's order (every Text field, ids and assets left out). */
+function blockStrings(block: unknown): string[] {
+  const out: string[] = [];
+  const walk = (value: unknown): void => {
+    if (typeof value === 'string') {
+      out.push(plainText(value));
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach(walk);
+      return;
+    }
+    if (value !== null && typeof value === 'object') {
+      for (const [key, each] of Object.entries(value as Record<string, unknown>)) {
+        if (
+          key === 'id' ||
+          key === 'type' ||
+          key === 'asset' ||
+          key === 'assets' ||
+          key === 'pos' ||
+          key === 'ext' ||
+          key === 'link' ||
+          key === 'name'
+        )
+          continue;
+        walk(each);
+      }
+    }
+  };
+  walk(block);
+  return out;
+}
 
 /** The texts a slide shows, as plain strings: block texts, the title slide's fields, the notes. */
 export function slideStrings(document: DeckDocument, slideId: string): string[] {
@@ -116,19 +186,46 @@ export function FindReplaceDialog() {
     [order, input.document, find, matchCase],
   );
   const total = counts.reduce((sum, row) => sum + row.count, 0);
-  const withMatches = counts.filter((row) => row.count > 0).map((row) => row.id);
-  const at = withMatches.indexOf(input.slideId);
+  const matches = useMemo(
+    () => deckMatches(input.document, order, find, matchCase),
+    [input.document, order, find, matchCase],
+  );
+  /* the match the seller stands on: the first one on the current slide as the query is typed,
+     then the one Prev and Next step to (docs/PRODUCT.md section 5: "1 of 2"; audit-gaps 21) */
+  const [stepped, setStepped] = useState<number | null>(null);
+  const firstOnSlide = matches.findIndex((match) => match.slideId === input.slideId);
+  const current =
+    matches.length === 0
+      ? -1
+      : stepped !== null && stepped < matches.length
+        ? stepped
+        : firstOnSlide >= 0
+          ? firstOnSlide
+          : 0;
 
+  /* the shell's input as it is now: a step selects the block once the stage stands on its slide,
+     and the selection callback of the render that started the step names the slide before */
+  const inputRef = useRef(input);
+  inputRef.current = input;
   const go = (delta: 1 | -1) => {
-    if (withMatches.length === 0) return;
-    const next =
-      at < 0
-        ? delta > 0
-          ? 0
-          : withMatches.length - 1
-        : (at + delta + withMatches.length) % withMatches.length;
-    const target = withMatches[next];
-    if (target !== undefined) void input.dispatch('view.goto', { slideId: target });
+    if (matches.length === 0) return;
+    const next = (Math.max(0, current) + delta + matches.length) % matches.length;
+    setStepped(next);
+    const match = matches[next];
+    if (match === undefined) return;
+    void input.dispatch('view.goto', { slideId: match.slideId });
+    /* the block that holds the match takes the selection, so the seller sees where it is */
+    if (match.blockId === null) return;
+    const blockId = match.blockId;
+    const until = Date.now() + 1500;
+    const select = () => {
+      if (inputRef.current.slideId === match.slideId) {
+        inputRef.current.onSelectBlock?.(blockId);
+        return;
+      }
+      if (Date.now() < until) window.setTimeout(select, 60);
+    };
+    window.setTimeout(select, 60);
   };
 
   const run = (slideIds?: string[]) => {
@@ -164,16 +261,16 @@ export function FindReplaceDialog() {
         {
           label: DIALOGS.findReplace.prev,
           onClick: () => go(-1),
-          disabled: withMatches.length === 0,
+          disabled: matches.length === 0,
           control: 'dialog.findReplace.prev',
-          doc: 'The previous slide with a match',
+          doc: 'The previous match',
         },
         {
           label: DIALOGS.findReplace.next,
           onClick: () => go(1),
-          disabled: withMatches.length === 0,
+          disabled: matches.length === 0,
           control: 'dialog.findReplace.next',
-          doc: 'The next slide with a match',
+          doc: 'The next match',
         },
         {
           label: DIALOGS.findReplace.replace,
@@ -198,7 +295,7 @@ export function FindReplaceDialog() {
         hint={
           find === ''
             ? undefined
-            : `${total} match${total === 1 ? '' : 'es'} on ${withMatches.length} slide${withMatches.length === 1 ? '' : 's'}`
+            : `${total} match${total === 1 ? '' : 'es'} on ${counts.filter((row) => row.count > 0).length} slide${counts.filter((row) => row.count > 0).length === 1 ? '' : 's'}`
         }
       >
         <input
@@ -213,9 +310,24 @@ export function FindReplaceDialog() {
           onChange={(event) => {
             setFind(event.target.value);
             setDone(null);
+            setStepped(null);
+          }}
+          /* Enter in the query steps to the next match, as Google's dialog does; the Dialog's own
+             Enter ran the primary action, Replace all, and an empty Replace field then erased every
+             match (the product round's probe on the shortcut row) */
+          onKeyDown={(event) => {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            event.stopPropagation();
+            go(1);
           }}
         />
       </DialogField>
+      {find !== '' ? (
+        <p className="ts-dialog-count" role="status" data-control="dialog.findReplace.count">
+          {matches.length === 0 ? 'No matches' : `${current + 1} of ${matches.length}`}
+        </p>
+      ) : null}
       <DialogField label={DIALOGS.findReplace.replaceWith}>
         <input
           type="text"

@@ -6,6 +6,7 @@ import { flagBoolean, flagString, parseArgs } from './args.ts';
 import { asset } from './commands/asset.ts';
 import { banner } from './commands/banner.ts';
 import { block } from './commands/block.ts';
+import { brand } from './commands/brand.ts';
 import { build } from './commands/build.ts';
 import { chart } from './commands/chart.ts';
 import { deck } from './commands/deck.ts';
@@ -30,6 +31,7 @@ import { sheet } from './commands/sheet.ts';
 import { slide } from './commands/slide.ts';
 import { slides } from './commands/slides.ts';
 import { table } from './commands/table.ts';
+import { template } from './commands/template.ts';
 import { text } from './commands/text.ts';
 import { validate } from './commands/validate.ts';
 import { version } from './commands/version.ts';
@@ -96,6 +98,19 @@ Commands
                                     the guide lines the editor shows on every slide (deck.guides)
   deck background --color <color> | --off
                                     the theme background colour (deck.setBackground)
+  brand get                         the deck's brand kit record: colours, faces, logo, footer, slide numbers, frame (brand.get)
+  brand set <path> <value> [--unset]
+                                    one field of the kit, /colors/light/primary #0b3d91 or /fonts/display roboto (brand.set)
+  brand reset [path]                the whole kit or one field back to the deployment's default (brand.reset)
+  template list                     every template of this deployment with the one new presentations start from (template.list)
+  template slides <id>              a template's slides in order (template.slides)
+  template create <deckId> <name> [--sentence <sentence>]
+                                    saves a deck as a template of this deployment; the same name replaces (template.create)
+  template update <id> <deckId> [--sentence <sentence>]
+                                    replaces a template's slides from a deck, the id and name kept (template.update)
+  template rename <id> <name>       renames a template; its id stays (template.rename)
+  template delete <id> --confirm    deletes a template; the default and Turboslide's own are refused (template.delete)
+  template default <id>             the template new presentations start from; blank restores the default (template.setDefault)
   text replace <find> <replace> [--match-case] [--slides <id,...>]
                                     find and replace across the deck's text and notes in one write (text.replaceAll)
   text style <slide>#<block> <pointer> --range a:b [--italic] [--underline] [--strike] [--superscript] [--subscript] [--color <c>] [--highlight <c>]
@@ -257,6 +272,8 @@ const COMMANDS: Record<string, Command> = {
   validate,
   info,
   deck,
+  brand,
+  template,
   slides,
   slide,
   block,

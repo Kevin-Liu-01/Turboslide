@@ -11,10 +11,17 @@
 // at the end (the context menu, the snackbar, the sheet points, the insert tools, the object
 // selection, the window API setup writes) are shared by the area modules under ./areas/. The
 // return round (docs/RETURN.md 4.4, section 5) added the pixel reader of audit-chrome.mjs (the PNG
-// decoder, the runs along a column or a row, the eleven seams and the split button's seam), the
+// decoder, the runs along a column or a row, the nine seams and the split button's seam), the
 // Advanced tools switch helpers (a parked row is reached with the switch on and the switch is put
-// back), the appearance reads and the screenshot as bytes.
-import { inflateSync } from 'node:zlib';
+// back), the appearance reads and the screenshot as bytes. The product round (docs/PRODUCT.md
+// section 8) added the not built reading (a row of a control a lane has not landed is not driven
+// with the control's id, never failed and never passed), the agent surface calls (the actions
+// API with the deployment's bearer read from ~/.config/turboslide/hosts.json or TURBOSLIDE_TOKEN,
+// never printed; none on localhost, whose surface is open to the checkout holder), the tooltip
+// read, the sheet's custom properties and a zip reader for the export rows.
+import { existsSync, readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { inflateRawSync, inflateSync } from 'node:zlib';
 
 /** Thrown by `setup()` on a failed setup step; `section()` turns it into the not driven cascade. */
 export class SetupFailed extends Error {
@@ -80,6 +87,25 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     t[name] = PAGE_FIRST.includes(name) ? (...args) => fn(page, ...args) : fn;
   }
   const { sleep, rand } = lib;
+  /* the first Share on a browser with no display name asks for one once (docs/PRODUCT.md section
+     2 rank 4; build/b1.md R5): a click on share.open passes the prompt with Skip, so every share
+     row reads the dialog it asked for */
+  const clickControlBase = t.clickControl;
+  t.clickControl = async (control, ...rest) => {
+    const out = await clickControlBase(control, ...rest);
+    if (control === 'share.open') {
+      const skip = page.locator('[data-control="dialog.namePrompt.skip"]').first();
+      const there = await skip
+        .waitFor({ timeout: 1500 })
+        .then(() => true)
+        .catch(() => false);
+      if (there) {
+        await skip.click({ timeout: 2000 }).catch(() => undefined);
+        await sleep(300);
+      }
+    }
+    return out;
+  };
   /**
    * A window API call bounded in time (VERIFICATION.md pass 2 F-stall, F-asset-add-intermittent):
    * `page.evaluate` has no timeout, and an `asset.add` that never answered on the enforce preview
@@ -307,7 +333,9 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
          active slide is read before and put back after (the integrator, for b4) */
       const before = await t.activeSlide().catch(() => null);
       const close = page.locator('[data-control="dialog.namePrompt.close"]').first();
+      const skip = page.locator('[data-control="dialog.namePrompt.skip"]').first();
       if ((await close.count()) > 0) await close.click({ timeout: 2000 }).catch(() => undefined);
+      else if ((await skip.count()) > 0) await skip.click({ timeout: 2000 }).catch(() => undefined);
       else await t.press('Escape').catch(() => undefined);
       await sleep(200);
       console.log('       prompt: the name prompt was closed before the step');
@@ -615,6 +643,26 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     await page.locator('#ts-menu-toolbar-more').waitFor({ timeout: 5000 });
     await t.clickControl(`toolbar.more.${control}`);
     return `toolbar.more.${control}`;
+  };
+  /**
+   * Clicks a layout tile of the open plate (`layout.<purpose>.<layout>`), opening the GT layouts
+   * disclosure row first when the tile sits behind it (docs/PRODUCT.md 3.4, section 2 rank 24: the
+   * ten GT layouts are a collapsed group under Google's eleven, remembered per browser).
+   */
+  t.pickLayout = async (control) => {
+    if (!(await t.visible(control))) {
+      const gt = `${control.replace(/\.[^.]+$/, '')}.gt`;
+      const row = page.locator(`[data-control="${gt}"]`).first();
+      if ((await row.count()) > 0 && (await row.getAttribute('aria-expanded')) !== 'true') {
+        await t.clickControl(gt);
+        await page
+          .locator(`[data-control="${control}"]`)
+          .first()
+          .waitFor({ timeout: 4000 })
+          .catch(() => undefined);
+      }
+    }
+    await t.clickControl(control);
   };
 
   // ---------------------------------------------------------------------------------------------
@@ -1627,7 +1675,32 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     const buf = await page.screenshot({ ...(clip ? { clip } : {}), scale: 'css' });
     return decodePng(buf);
   };
-  /** The boundary points of the eleven seams (audit-chrome.mjs `boundaryPoints`). */
+  /**
+   * A 2x screenshot of a viewport clip, decoded: the device scale is raised to 2 through CDP for
+   * the shot and cleared after (the walk's context is 1x), so a 1 px ring reads as two device
+   * pixels (PRODUCT.md section 5: "read back at 2x before the row is called broken"). The pixel
+   * coordinates of the answer are viewport px times 2.
+   */
+  t.shotPixels2x = async (clip) => {
+    const cdp = await context.newCDPSession(page);
+    try {
+      const size = page.viewportSize() ?? { width: 1440, height: 900 };
+      await cdp.send('Emulation.setDeviceMetricsOverride', {
+        width: size.width,
+        height: size.height,
+        deviceScaleFactor: 2,
+        mobile: false,
+      });
+      await sleep(250);
+      const buf = await page.screenshot({ ...(clip ? { clip } : {}), scale: 'device' });
+      return decodePng(buf);
+    } finally {
+      await cdp.send('Emulation.clearDeviceMetricsOverride').catch(() => undefined);
+      await cdp.detach().catch(() => undefined);
+      await sleep(250);
+    }
+  };
+  /** The boundary points of the nine seams (audit-chrome.mjs `boundaryPoints`). */
   t.boundaryPoints = () => boundaryPoints(page);
   t.seamsFromShot = seamsFromShot;
   t.splitSeamFromShot = splitSeamFromShot;
@@ -1635,6 +1708,196 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   t.runsAlongColumn = runsAlongColumn;
   t.contrastRgb = contrast;
   t.hexOf = hex;
+
+  // ---------------------------------------------------------------------------------------------
+  // the product round (docs/PRODUCT.md section 8): the not built reading, the agent surface, the
+  // tooltips, the sheet's tokens and the zip reader
+
+  /**
+   * A row of a control a lane has not landed on this build (PRODUCT.md 8.1: "a row of a control
+   * that does not exist is not driven"): the step answers not driven, naming the control's id and
+   * the lane that owns it (7.1), so the ledger reads what is missing and never a false failure.
+   */
+  t.notBuilt = (control, lane, more = '') => ({
+    ok: null,
+    observed: `not on this build: ${control} (docs/PRODUCT.md 7.1, ${lane})${more ? `; ${more}` : ''}`,
+  });
+  /** True when the control is drawn on the page now. */
+  t.onBuild = (control) => t.visible(control);
+  /**
+   * The ids the window transport answers (`describe().actions`), so a row that drives a new
+   * action (`brand.set`, `font.list`, `assist.propose`, `deck.tailor`) reads not built while the
+   * action is absent from the table instead of failing on an unknown action.
+   */
+  t.windowActions = async () => {
+    const list = await page
+      .evaluate(() => {
+        const d = window.turboslide?.studio?.describe?.();
+        const actions = d?.actions ?? [];
+        return actions.map((a) => (typeof a === 'string' ? a : a.id));
+      })
+      .catch(() => []);
+    return new Set(list);
+  };
+  /**
+   * The headers of a call to the agent surface (`POST /api/actions/<id>?deck=<id>`): the preview
+   * header, and on a deployment the bearer from TURBOSLIDE_TOKEN or the origin's row of
+   * ~/.config/turboslide/hosts.json (the agent bearer the ship notes name; read, never printed).
+   * A localhost server's surface is open to the checkout holder (TURBOSLIDE_LOCAL_OPEN=1), so no
+   * bearer is sent there. Answers null when a deployment run has no bearer to send.
+   */
+  t.agentHeaders = (author = null) => {
+    const out = { ...(headers ?? {}), 'content-type': 'application/json' };
+    if (author) out['x-turboslide-author'] = author;
+    const local = /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(BASE);
+    if (local) return out;
+    let token = process.env.TURBOSLIDE_TOKEN ?? '';
+    if (token === '') {
+      const file = `${homedir()}/.config/turboslide/hosts.json`;
+      if (existsSync(file)) {
+        try {
+          const hosts = JSON.parse(readFileSync(file, 'utf8')).hosts ?? {};
+          const row = hosts[BASE] ?? hosts[BASE.replace(/\/$/, '')] ?? null;
+          if (row && typeof row.token === 'string') token = row.token;
+        } catch {
+          token = '';
+        }
+      }
+    }
+    if (token === '') return null;
+    out.authorization = `Bearer ${token}`;
+    return out;
+  };
+  /**
+   * One action over HTTP with the bearer (the agent's route of the assist and brand rows); answers
+   * `{ status, body }`, or `{ status: 0, body: null, noBearer: true }` when a deployment run holds
+   * no bearer, which the row records as not driven with that reason.
+   */
+  t.httpAction = async (action, input = {}, { author = null, deck = t.deck?.id } = {}) => {
+    const h = t.agentHeaders(author);
+    if (h === null) return { status: 0, body: null, noBearer: true };
+    const res = await page.request.post(
+      `${BASE}/api/actions/${action}?deck=${encodeURIComponent(deck ?? '')}`,
+      { headers: h, data: input, timeout: 60_000, maxRedirects: 0 },
+    );
+    let body = null;
+    const text = await res.text().catch(() => '');
+    try {
+      body = text ? JSON.parse(text) : null;
+    } catch {
+      body = { text: text.slice(0, 300) };
+    }
+    return { status: res.status(), body };
+  };
+  /** Hovers a control from the left and waits for its tooltip; answers the tooltip's text or null. */
+  t.hoverControl = async (control, ms = 600) => {
+    const r = await t.rectOf(`[data-control="${control}"]`);
+    if (!r) return null;
+    /* the pointer leaves the last anchor first: the tooltip manager shows one plate and re-arms
+       on a fresh enter, so a hover that slides from one swatch to the next read no plate (the
+       first product round smoke, the six role tooltips) */
+    const size = page.viewportSize() ?? { width: 1440, height: 900 };
+    const away = { x: Math.round(size.width / 2), y: Math.round(size.height * 0.55) };
+    await page.mouse.move(away.x, away.y);
+    await sleep(450);
+    await t.moveHuman({ x: r.x - 30, y: r.y + r.h / 2 }, t.center(r), 6);
+    await sleep(ms);
+    const stepped = await t.tooltipText();
+    if (stepped !== null) return stepped;
+    /* a swatch whose centre is a colour input showed no plate to the stepped move on the brand
+       panel while Playwright's own hover showed it (the product round's probe): the browser's
+       hover is the second try a person makes */
+    await page
+      .locator(`[data-control=${control}]`)
+      .first()
+      .hover({ timeout: 4000 })
+      .catch(() => undefined);
+    await sleep(ms);
+    return t.tooltipText();
+  };
+  /**
+   * True for the answer of an action whose handler has not landed: the studio's dispatcher answers
+   * NotImplementedError 501 for an id the table declares without a handler (AGENTS.md, the agent
+   * surface), which a row reads as not built rather than failed.
+   */
+  t.notImplemented = (error) =>
+    /NotImplementedError|lands in P1|not implemented/i.test(
+      error instanceof Error ? error.message : JSON.stringify(error ?? ''),
+    );
+  /** The text of the one tooltip plate (`div.pt-tip`, Tooltip.tsx) when it is shown, else null. */
+  t.tooltipText = () =>
+    page.evaluate(() => {
+      const tip = document.querySelector('.pt-tip');
+      if (!tip || tip.getClientRects().length === 0) return null;
+      const cs = getComputedStyle(tip);
+      if (cs.visibility === 'hidden' || cs.opacity === '0' || cs.display === 'none') return null;
+      return tip.textContent?.trim() ?? null;
+    });
+  /** True while a tooltip plate is drawn. */
+  t.tooltipShown = async () => (await t.tooltipText()) !== null;
+  /** A custom property of the first element matching a selector, trimmed, or null. */
+  t.cssVar = (selector, name) =>
+    page.evaluate(
+      ([s, n]) => {
+        const el = document.querySelector(s);
+        return el ? getComputedStyle(el).getPropertyValue(n).trim() || null : null;
+      },
+      [selector, name],
+    );
+  /** A token of the editor's sheet root (`--blue`, `--ink`, `--paper`), or null. */
+  t.sheetVar = (name) =>
+    t.cssVar(
+      '.ts-stagewrap.ts-editor .ts-sheet, .ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)',
+      name,
+    );
+  /**
+   * The entries of a zip (a PPTX, or the export's bundle) by name, each a function reading its
+   * text, or its bytes with `raw` true (lib.ts zipEntries); the bundle's inner .pptx is read by
+   * passing those bytes back in.
+   */
+  t.zipEntries = (bytes) => {
+    const out = new Map();
+    const eocd = bytes.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+    if (eocd < 0) return out;
+    const count = bytes.readUInt16LE(eocd + 10);
+    let offset = bytes.readUInt32LE(eocd + 16);
+    for (let i = 0; i < count; i += 1) {
+      if (bytes.readUInt32LE(offset) !== 0x02014b50) break;
+      const method = bytes.readUInt16LE(offset + 10);
+      const compressed = bytes.readUInt32LE(offset + 20);
+      const nameLength = bytes.readUInt16LE(offset + 28);
+      const extraLength = bytes.readUInt16LE(offset + 30);
+      const commentLength = bytes.readUInt16LE(offset + 32);
+      const local = bytes.readUInt32LE(offset + 42);
+      const name = bytes.subarray(offset + 46, offset + 46 + nameLength).toString('utf8');
+      out.set(name, (raw = false) => {
+        const localName = bytes.readUInt16LE(local + 26);
+        const localExtra = bytes.readUInt16LE(local + 28);
+        const start = local + 30 + localName + localExtra;
+        const data = bytes.subarray(start, start + compressed);
+        const inflated = method === 8 ? inflateRawSync(data) : data;
+        return raw ? inflated : inflated.toString('utf8');
+      });
+      offset += 46 + nameLength + extraLength + commentLength;
+    }
+    return out;
+  };
+  /**
+   * The Editable text PowerPoint of the walk's deck, fetched from the export route in one request
+   * (`POST /api/export/<id>?sync=1` with the export.run input; the route takes the bearer where
+   * the deployment sets one). Answers `{ status, bytes }`, or `{ status: 0, noBearer: true }`.
+   */
+  t.exportPptx = async (input = {}) => {
+    const h = t.agentHeaders();
+    if (h === null) return { status: 0, bytes: null, noBearer: true };
+    const res = await page.request.post(`${BASE}/api/export/${t.deck.id}?sync=1`, {
+      headers: h,
+      data: { format: 'pptx', mode: 'native', ...input },
+      timeout: 240_000,
+      maxRedirects: 0,
+    });
+    return { status: res.status(), bytes: res.status() === 200 ? await res.body() : null };
+  };
 
   return t;
 }
@@ -1799,7 +2062,9 @@ export const boundaryPoints = (page) =>
     const menubar = rect('.ts-menubar');
     const toolbar = rect('.ts-toolbar');
     const sb = rect('.pt-viewer.is-editor > .pt-sb');
-    const sbHead = rect('.pt-viewer.is-editor > .pt-sb > .pt-sb-head');
+    /* the head anywhere under the filmstrip column: the product round's overlay filmstrip
+       wraps it (docs/PRODUCT.md section 2 rank 25) */
+    const sbHead = rect('.pt-viewer.is-editor > .pt-sb .pt-sb-head');
     const notesSlot = rect('.pt-viewer.is-editor > .pt-main > .ts-notes-slot');
     const notes = rect('.pt-viewer.is-editor > .pt-main > .ts-notes-slot > .ts-notes');
     const bottom = rect('.ts-bottombar');
@@ -1889,7 +2154,10 @@ export const boundaryPoints = (page) =>
     };
   });
 
-/** The eleven seams of docs/RETURN.md 4.4 in the order the row reads them. */
+/**
+ * The nine seams of docs/RETURN.md 4.4 in the order the row reads them: the two seams along the
+ * bottom bar left with the bar in the product round (docs/PRODUCT.md section 2 rank 25; b1 R6).
+ */
 export const SEAM_NAMES = Object.freeze([
   'title -> menu bar',
   'menu bar -> toolbar',
@@ -1897,8 +2165,6 @@ export const SEAM_NAMES = Object.freeze([
   'toolbar -> filmstrip',
   'filmstrip head -> cards',
   'stage -> notes pane',
-  'notes pane -> bottom bar',
-  'filmstrip -> bottom bar',
   'filmstrip -> sheet (vertical)',
   'filmstrip -> sheet, upper (vertical)',
   'sheet -> right panel (vertical)',
@@ -1937,8 +2203,6 @@ export const seamsFromShot = (img, pts, scale = 1) => {
   col('toolbar -> filmstrip', pts.toolbarFilmstrip);
   col('filmstrip head -> cards', pts.filmstripHead);
   col('stage -> notes pane', pts.notesDivider);
-  col('notes pane -> bottom bar', pts.notesBottom);
-  col('filmstrip -> bottom bar', pts.filmstripBottom);
   rowScan('filmstrip -> sheet (vertical)', pts.filmstripEdge);
   rowScan('filmstrip -> sheet, upper (vertical)', pts.filmstripEdgeUpper);
   rowScan('sheet -> right panel (vertical)', pts.rpanelEdge);

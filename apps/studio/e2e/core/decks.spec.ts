@@ -170,7 +170,7 @@ test(title('decks.root.redirect'), async () => {
 test(title('decks.list.read'), async () => {
   await gotoDecks();
   await expect(ctl(page, 'home.blank')).toContainText('Blank presentation');
-  await expect(ctl(page, 'home.gt-brand')).toContainText('GT brand deck');
+  await expect(ctl(page, 'home.template.gt-brand')).toContainText('GT brand deck');
   await expect(ctl(page, 'home.recent')).toBeVisible();
   await expect(ctl(page, 'home.cards')).toBeVisible();
   await expect(ctl(page, `home.card.${deck}`)).toBeVisible();
@@ -366,7 +366,7 @@ test(title('decks.list.gt-brand-deck'), async () => {
   test.setTimeout(120_000);
   await gotoDecks();
   const t = Date.now();
-  await ctl(page, 'home.gt-brand').click();
+  await ctl(page, 'home.template.gt-brand').click();
   await page.waitForURL(/\/edit\//, { timeout: 30_000 });
   await waitEditor(page);
   const id = page.url().match(/\/edit\/([^/?#]+)/)?.[1] ?? '';
@@ -782,11 +782,13 @@ test(title('decks.file.template-gallery'), async () => {
   const opened = context.waitForEvent('page', { timeout: 20_000 });
   await menuPath(page, 'file', 'file.new', 'file.new.templateGallery');
   const tab = await opened;
-  await tab.waitForURL(/\/decks#templates/, { timeout: 20_000 });
-  await tab.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
-  await expect(ctl(tab, 'home.blank')).toContainText('Blank presentation');
-  await expect(ctl(tab, 'home.gt-brand')).toContainText('GT brand deck');
-  expect(new URL(tab.url()).hash).toBe('#templates');
+  /* the product round's gallery page (docs/PRODUCT.md section 5, B5b): /decks/templates with
+     the Blank card and the organisation's brand deck; the old /decks#templates address redirects */
+  await tab.waitForURL(/\/decks\/templates/, { timeout: 20_000 });
+  await tab.waitForSelector('[data-control="templates.page"]', { timeout: 30_000 });
+  await expect(ctl(tab, 'templates.card.blank')).toContainText('Blank');
+  await expect(ctl(tab, 'templates.card.gt-brand')).toContainText('General Translation brand deck');
+  expect(new URL(tab.url()).pathname).toBe('/decks/templates');
   await tab.close();
   if (switched) await switchOff(page);
 });
@@ -888,8 +890,46 @@ test(title('decks.file.open-upload-bundle'), async () => {
 });
 
 test(title('decks.file.import-slides-bundle'), async () => {
-  test.setTimeout(150_000);
-  const bytes = await bundleBytes(page, deck);
+  test.setTimeout(180_000);
+  /* the row's own copy of the deck, so the bundle it uploads carries a fresh id and the upload's
+     name (`<id>-2`) is never the one the row before it (`decks.file.open-upload-bundle`) uploaded
+     and removed: on the blob tier an instance can still hold a removed copy inside the removal's
+     propagation window and refuse the same name (the return round's ship, ship.md section 10
+     item 3, R2-F6; PRODUCT.md 8.2). The copy is a setup write through the window API and leaves
+     with the file's teardown */
+  await openEditor(page, deck);
+  const sCopy = await state(page);
+  const copyAnswer = await invoke<{ deckId?: string; id?: string; deck?: { id?: string } }>(
+    page,
+    'deck.copy',
+    {
+      id: deck,
+      name: `Import bundle source ${Date.now().toString(36)}`,
+      baseRevision: sCopy.revision,
+    },
+  );
+  const source = copyAnswer.deckId ?? copyAnswer.id ?? copyAnswer.deck?.id ?? '';
+  expect(source, 'the row has its own copy to bundle').not.toBe('');
+  scratch.add(source);
+  /* the copy's card on /decks: the listing on the blob tier lags a fresh deck by up to a minute
+     on an instance that did not make it (PRODUCT.md 8.2: a listing waits up to 65 s) */
+  const tList = Date.now();
+  for (;;) {
+    await gotoDecks();
+    if (
+      await ctl(page, `home.card.${source}`)
+        .isVisible()
+        .catch(() => false)
+    )
+      break;
+    if (Date.now() - tList > 65_000) break;
+    await page.waitForTimeout(3000);
+  }
+  test.info().annotations.push({
+    type: 'listing',
+    description: `the copy ${source} was listed after ${Date.now() - tList} ms`,
+  });
+  const bytes = await bundleBytes(page, source);
   test.info().annotations.push({ type: 'step', description: 'bundle downloaded' });
   await openEditor(page, deck);
   const first = (await slideOrder(page))[0]!;
@@ -912,7 +952,7 @@ test(title('decks.file.import-slides-bundle'), async () => {
      the POST fires on the pick */
   const answer = uploadAnswer(page);
   await ctl(page, 'dialog.importSlides.file').setInputFiles(
-    { name: `${deck}.zip`, mimeType: 'application/zip', buffer: bytes },
+    { name: `${source}.zip`, mimeType: 'application/zip', buffer: bytes },
     { timeout: 8000 },
   );
   const upload = await answer;
@@ -1000,7 +1040,13 @@ test(title('decks.trash.restore'), async () => {
   await gotoTrash();
   await restoreFromTrash(deck);
   await gotoDecks();
-  await expect(ctl(page, `home.card.${deck}`)).toBeVisible({ timeout: 10_000 });
+  /* a presentation this browser opened sits in the Opened on this device row and leaves the
+     grid (decks.index.tsx `hidden`), so its card is either control */
+  await expect(
+    page
+      .locator(`[data-control="home.card.${deck}"], [data-control="home.recent.${deck}"]`)
+      .first(),
+  ).toBeVisible({ timeout: 10_000 });
 });
 
 test(title('decks.trash.lists-after-restore'), async () => {
@@ -1009,9 +1055,12 @@ test(title('decks.trash.lists-after-restore'), async () => {
   await gotoTrash();
   await restoreFromTrash(deck);
   await gotoDecks();
-  await expect(ctl(page, `home.card.${deck}`), 'on /decks within 5 s').toBeVisible({
-    timeout: 5000,
-  });
+  await expect(
+    page
+      .locator(`[data-control="home.card.${deck}"], [data-control="home.recent.${deck}"]`)
+      .first(),
+    'on /decks within 5 s',
+  ).toBeVisible({ timeout: 5000 });
   await gotoTrash();
   await expect(ctl(page, `trash.card.${deck}`), 'not in the trash').toHaveCount(0, {
     timeout: 5000,
@@ -1197,6 +1246,599 @@ test(title('decks.trash.delete-forever-button'), async () => {
   scratch.ids.delete(deck);
 });
 
+// ---------------------------------------------------------------------------------------------
+// the product round's rows (docs/PRODUCT.md section 2 ranks 4, 15, 16, 20, 22 and 26, sections
+// 3.3, 3.5, 3.6 and 4.3, 8.1): the Recent row and the trash snackbar, the /home lead, the cards,
+// the trash page, the skeleton, the access and Not found pages, the template gallery and the
+// strip, the chrome's first visit appearance and the deck's default appearance. B1 owns the pages,
+// B5b the gallery, B7 the thumbnail capture; a row of a page or control not on the build is
+// skipped with its id, which the gate reads as not driven with that reason.
+
+/** The token a css custom property resolves to on this page. */
+async function tokenValue(p: Page, name: string): Promise<string> {
+  return p.evaluate((n) => {
+    const probe = document.createElement('span');
+    probe.style.color = `var(${n})`;
+    document.body.appendChild(probe);
+    const c = getComputedStyle(probe).color;
+    probe.remove();
+    return c;
+  }, name);
+}
+/** Whether the snackbar shows the words within `ms`, and whether its action reads Undo. */
+async function snackbarWithin(
+  p: Page,
+  words: RegExp,
+  ms: number,
+): Promise<{ said: string | null; undo: boolean }> {
+  const t0 = Date.now();
+  let said: string | null = null;
+  while (Date.now() - t0 < ms) {
+    said = await ctl(p, 'snackbar')
+      .textContent({ timeout: 500 })
+      .catch(() => null);
+    if (said && words.test(said)) break;
+    await p.waitForTimeout(150);
+  }
+  const action = await ctl(p, 'snackbar.action')
+    .textContent({ timeout: 500 })
+    .catch(() => null);
+  return { said, undo: /undo/i.test(action ?? '') };
+}
+
+test(title('decks.recent.drops-trashed'), async () => {
+  test.setTimeout(150_000);
+  /* the row before (decks.trash.delete-forever-button) deleted the file's deck forever, so this
+     row and the rows after take a fresh one; the afterAll tears it down */
+  deck = await newDeck(page, scratch, 'Northwind renewal');
+  await openEditor(page, deck);
+  await gotoDecks();
+  const listedBefore = await ctl(page, `home.recent.${deck}`).count();
+  await trashFromEditor(deck);
+  await gotoDecks();
+  const listedAfter = await ctl(page, `home.recent.${deck}`).count();
+  test.info().annotations.push({
+    type: 'recent',
+    description: `listed before ${listedBefore}, after the trash ${listedAfter}`,
+  });
+  await gotoTrash();
+  await restoreFromTrash(deck);
+  expect(listedBefore, 'the opened deck is in the Opened on this device row').toBeGreaterThan(0);
+  expect(listedAfter, 'the trashed deck leaves the row').toBe(0);
+});
+
+test(title('decks.trash.editor-undo-snackbar'), async () => {
+  test.setTimeout(120_000);
+  await trashFromEditor(deck);
+  const t0 = Date.now();
+  const { said, undo } = await snackbarWithin(page, /Moved to trash/, 3000);
+  const ms = Date.now() - t0;
+  test.info().annotations.push({
+    type: 'snackbar',
+    description: `"${said ?? 'none'}" after ${ms} ms, Undo ${undo}`,
+  });
+  expect(said ?? '', 'the /decks page shows Moved to trash within 3 s').toMatch(/Moved to trash/);
+  expect(undo, 'with Undo').toBe(true);
+  await ctl(page, 'snackbar.action').click();
+  await expect(ctl(page, `home.card.${deck}`), 'the card returns').toBeVisible({ timeout: 10_000 });
+  expect(await statusOf(page, `/edit/${deck}`), 'the deck is restored').not.toBe(404);
+});
+
+test(title('decks.recent.this-browser-sentence'), async () => {
+  await gotoDecks();
+  const sentence = ctl(page, 'home.recent.sentence');
+  if ((await sentence.count()) === 0)
+    test.skip(true, 'not on this build: home.recent.sentence (docs/PRODUCT.md 7.1, B1)');
+  await expect(sentence).toContainText(/this browser/);
+  await expect(sentence).toContainText(/On another computer/);
+});
+
+test(title('decks.home.seller-lead'), async () => {
+  test.setTimeout(90_000);
+  await page.goto('/home');
+  if (OIDC)
+    await page.evaluate(() => {
+      for (const rules of document.querySelectorAll('script[type="speculationrules"]'))
+        rules.remove();
+    });
+  const hero = await page.locator('main h1').first().textContent();
+  expect(hero?.trim(), "the hero leads with the seller's sentence").toBe(
+    'Build the pitch, present it and send the link, in one place',
+  );
+  const start = page.locator('main a, main button', { hasText: /^Start from a template$/ }).first();
+  await expect(start, "the first band's button reads Start from a template").toBeVisible();
+  await start.click();
+  await page.waitForURL(/\/decks\/templates/, { timeout: 20_000 });
+});
+
+test(title('decks.card.thumbnail-slide-1'), async () => {
+  test.setTimeout(120_000);
+  const fresh = await newDeck(page, scratch, 'Thumbnail deck');
+  const t0 = Date.now();
+  await gotoDecks();
+  const plate = await page.evaluate((id) => {
+    const card = document.querySelector(`[data-control="home.card.${id}"]`);
+    const el = card?.querySelector('.ts-hm-card-plate');
+    if (!el) return null;
+    const cs = getComputedStyle(el);
+    const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(cs.backgroundColor);
+    const lum = m ? (Number(m[1]) + Number(m[2]) + Number(m[3])) / 3 : null;
+    return {
+      background: cs.backgroundColor,
+      color: cs.color,
+      lum,
+      text: el.textContent?.trim() ?? '',
+    };
+  }, fresh);
+  let rendered: number | null = null;
+  for (;;) {
+    const img = await page.evaluate((id) => {
+      const card = document.querySelector(`[data-control="home.card.${id}"]`);
+      const image = card?.querySelector('.ts-hm-card-thumb img') as HTMLImageElement | null;
+      return image ? { complete: image.complete, natural: image.naturalWidth } : null;
+    }, fresh);
+    if (img && img.complete && img.natural > 0) {
+      rendered = Date.now() - t0;
+      break;
+    }
+    if (Date.now() - t0 > 10_000) break;
+    await page.waitForTimeout(1000);
+    await gotoDecks();
+  }
+  test.info().annotations.push({
+    type: 'thumbnail',
+    description: `plate ${JSON.stringify(plate)}; slide 1 rendered after ${rendered ?? 'more than 10000'} ms`,
+  });
+  if (plate !== null) {
+    /* a fresh deck is light on this deployment (PRODUCT.md section 1): the plate is paper, never black */
+    expect(
+      plate.lum ?? 0,
+      `the plate is the deck's paper colour, not black (${plate.background})`,
+    ).toBeGreaterThan(160);
+  }
+  expect(rendered, "the card shows slide 1's render within 10 s of the first edit").not.toBeNull();
+});
+
+test(title('decks.card.edited-relative-time'), async () => {
+  test.setTimeout(90_000);
+  await gotoDecks();
+  const facts = await page.evaluate((id) => {
+    const card = document.querySelector(`[data-control="home.card.${id}"]`);
+    const lines = [...(card?.querySelectorAll('span, p, small, time') ?? [])].map(
+      (el) => el.textContent?.trim() ?? '',
+    );
+    const when = lines.find((l) => /^(Edited|Opened)/.test(l)) ?? null;
+    return { when };
+  }, deck);
+  expect(facts.when, 'the card carries a when line').not.toBeNull();
+  /* "Edited yesterday at 14:02" or "2:02 PM" in the browser's locale from the store; a deck this
+     browser opened reads "Opened 2 hours ago" instead (docs/PRODUCT.md 3.6, decks.index.tsx
+     whenLine), and this file's browser opened the deck */
+  expect(facts.when!, 'reads Edited <relative day> at <locale time>, or Opened <ago>').toMatch(
+    /^(Edited .+ at \d{1,2}:\d{2}( ?[AP]M)?|Opened .+)/,
+  );
+  await ctl(page, 'home.view.list').click();
+  await page.waitForTimeout(400);
+  const rowHeight = await page.evaluate((id) => {
+    const row = document.querySelector(`[data-control="home.card.${id}"]`);
+    return row ? Math.round(row.getBoundingClientRect().height) : null;
+  }, deck);
+  await ctl(page, 'home.view.grid').click();
+  test.info().annotations.push({
+    type: 'card',
+    description: `when "${facts.when}"; list row ${rowHeight} px`,
+  });
+  expect(rowHeight, "the list view's rows are 32 px").toBe(32);
+});
+
+test(title('decks.card.more-glyph'), async () => {
+  await gotoDecks();
+  const facts = await page.evaluate((id) => {
+    const more = document.querySelector(`[data-control="home.more.${id}"]`);
+    const svg = more?.querySelector('svg');
+    return {
+      svg: Boolean(svg),
+      size: svg ? Math.round(svg.getBoundingClientRect().width) : null,
+      text: more?.textContent?.trim() ?? '',
+    };
+  }, deck);
+  expect(facts.svg, 'the more button draws an svg glyph').toBe(true);
+  expect(facts.text, 'no text glyph').not.toMatch(/[⋯…•]/);
+});
+
+test(title('decks.trash.button-heights'), async () => {
+  test.setTimeout(120_000);
+  await trashFromEditor(deck);
+  await gotoTrash();
+  const ink = await tokenValue(page, '--pt-ink');
+  const facts = await page.evaluate((id) => {
+    const h = (c: string) => {
+      const el = document.querySelector(`[data-control="${c}"]`);
+      return el ? Math.round(el.getBoundingClientRect().height) : null;
+    };
+    const del = document.querySelector(`[data-control="trash.delete.${id}"]`);
+    const solid = [...document.querySelectorAll('.is-solid, .pt-ib.is-solid')].filter(
+      (el) => el.getClientRects().length > 0,
+    );
+    return {
+      restore: h(`trash.restore.${id}`),
+      remove: h(`trash.delete.${id}`),
+      removeColor: del ? getComputedStyle(del).color : null,
+      removeGlyph: Boolean(del?.querySelector('svg')),
+      solid: solid.map((el) => el.getAttribute('data-control') ?? el.className),
+    };
+  }, deck);
+  await restoreFromTrash(deck);
+  test.info().annotations.push({ type: 'trash', description: JSON.stringify(facts) });
+  expect(facts.restore, 'Restore is 32 px').toBe(32);
+  expect(facts.remove, 'Delete forever is 32 px').toBe(32);
+  expect(facts.removeColor, 'Delete forever is in ink').toBe(ink);
+  expect(facts.removeGlyph, 'with its glyph').toBe(true);
+  expect(facts.solid, "Empty trash is the page's one solid button").toEqual(['trash.empty']);
+});
+
+test(title('decks.trash.confirm-dialog-chrome'), async () => {
+  test.setTimeout(120_000);
+  await trashFromEditor(deck);
+  await gotoTrash();
+  await ctl(page, `trash.delete.${deck}`).click();
+  const dialog = page.locator('.ts-dialog-scrim [role="dialog"]').first();
+  await dialog.waitFor({ timeout: 8000 });
+  const facts = await dialog.evaluate((el) => {
+    const titleEl = el.querySelector('h2, .ts-dialog-title, [id$="-title"]');
+    const lead = [...el.querySelectorAll('p')].map((p) => p.textContent?.trim() ?? '');
+    return {
+      title: titleEl?.textContent?.trim() ?? null,
+      titleSize: titleEl ? parseFloat(getComputedStyle(titleEl).fontSize) : null,
+      lead,
+    };
+  });
+  await page.keyboard.press('Escape');
+  await expect(dialog, 'Escape closes it').toHaveCount(0, { timeout: 5000 });
+  await ctl(page, `trash.delete.${deck}`).click();
+  await dialog.waitFor({ timeout: 8000 });
+  await page.mouse.click(8, 8);
+  await expect(dialog, 'a click outside closes it').toHaveCount(0, { timeout: 5000 });
+  await restoreFromTrash(deck);
+  test.info().annotations.push({ type: 'dialog', description: JSON.stringify(facts) });
+  expect(facts.title ?? '', 'the title names the delete').toMatch(/^Delete .* forever\?$/);
+  expect(facts.titleSize, 'the title is 18 px').toBe(18);
+  expect(facts.lead.join(' '), 'the lead line').toMatch(/This cannot be undone/);
+});
+
+test(title('decks.new.skeleton-one-frame'), async ({ browser }) => {
+  test.setTimeout(90_000);
+  const fresh = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+  });
+  const p = await fresh.newPage();
+  try {
+    await p.addInitScript(() => {
+      const w = window as unknown as {
+        __skeleton: {
+          first: number | null;
+          frames: number | null;
+          canvases: number | null;
+          gone: number | null;
+        };
+      };
+      w.__skeleton = { first: null, frames: null, canvases: null, gone: null };
+      const read = () => {
+        const sk = document.querySelector('.ts-skeleton');
+        if (sk && w.__skeleton.first === null) {
+          w.__skeleton.first = performance.now();
+          w.__skeleton.frames = sk.querySelectorAll('.ts-skeleton-card').length;
+          w.__skeleton.canvases = sk.querySelectorAll('canvas, img').length;
+        }
+        if (!sk && w.__skeleton.first !== null && w.__skeleton.gone === null) {
+          w.__skeleton.gone = performance.now();
+        }
+        const ready = document.querySelector('.pt-viewer:not(.ts-skeleton)[data-settled]');
+        if (ready && w.__skeleton.gone === null && w.__skeleton.first === null)
+          w.__skeleton.gone = performance.now();
+      };
+      new MutationObserver(read).observe(document, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+      });
+    });
+    await p.goto('/new');
+    await waitEditor(p);
+    const facts = (await p.evaluate(
+      () => (window as unknown as { __skeleton: unknown }).__skeleton,
+    )) as {
+      first: number | null;
+      frames: number | null;
+      canvases: number | null;
+      gone: number | null;
+    };
+    const ready = await p.evaluate(() => performance.now());
+    test.info().annotations.push({
+      type: 'skeleton',
+      description: `${JSON.stringify(facts)}; ready at ${Math.round(ready)} ms`,
+    });
+    if (facts.first === null) {
+      /* the editor was ready without a skeleton: allowed when it stood inside 300 ms */
+      expect(ready, 'no skeleton was drawn; the editor was ready inside 300 ms').toBeLessThan(
+        300 + 100,
+      );
+    } else {
+      expect(facts.frames, 'one filmstrip frame for a one slide draft').toBe(1);
+      expect(facts.canvases, 'a quiet paper plate, no figure').toBe(0);
+    }
+  } finally {
+    await fresh.close();
+  }
+});
+
+test(title('decks.access.stranger-links'), async ({ browser }) => {
+  test.setTimeout(90_000);
+  const stranger = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+  });
+  const p = await stranger.newPage();
+  try {
+    await p.goto('/deck/no-such-deck-core-spec');
+    await ctl(p, 'access.page').waitFor({ timeout: 60_000 });
+    await p.waitForTimeout(800);
+    const modeRes = await p.request.get('/api/access/no-such-deck-core-spec', {
+      headers: extraHTTPHeaders,
+    });
+    const mode =
+      ((await modeRes.json().catch(() => ({}))) as { authorize?: string }).authorize ?? 'unknown';
+    const facts = await p.evaluate(() => {
+      const y = (c: string) => {
+        const el = document.querySelector(`[data-control="${c}"]`);
+        return el && el.getClientRects().length > 0 ? el.getBoundingClientRect().y : null;
+      };
+      const links = document.querySelector('[data-control="access.links"]');
+      return {
+        decks: y('access.link.decks'),
+        newLink: y('access.link.new'),
+        form: y('access.form'),
+        linksText: links?.textContent?.trim() ?? '',
+      };
+    });
+    test
+      .info()
+      .annotations.push({ type: 'access', description: `${mode} mode; ${JSON.stringify(facts)}` });
+    expect(
+      facts.decks !== null && facts.newLink !== null,
+      'Your presentations and New presentation are drawn',
+    ).toBe(true);
+    expect(facts.linksText, 'the links read Your presentations and New presentation').toMatch(
+      /Your presentations/,
+    );
+    expect(facts.linksText).toMatch(/New presentation/);
+    if (facts.form !== null)
+      expect(facts.decks!, 'the links lead the form').toBeLessThan(facts.form);
+    if (mode === 'shadow')
+      expect(facts.form, 'no request form under shadow authorization').toBeNull();
+  } finally {
+    await stranger.close();
+  }
+});
+
+test(title('decks.notfound.sentence-case'), async () => {
+  await page.goto('/no-such-page-core-spec');
+  await ctl(page, 'notfound').waitFor({ timeout: 30_000 });
+  const facts = await page.evaluate(() =>
+    ['notfound.new', 'notfound.decks', 'notfound.about'].map((c) => {
+      const el = document.querySelector(`[data-control="${c}"]`);
+      return {
+        c,
+        text: el?.textContent?.trim() ?? null,
+        h: el ? Math.round(el.getBoundingClientRect().height) : null,
+      };
+    }),
+  );
+  test.info().annotations.push({ type: 'notfound', description: JSON.stringify(facts) });
+  expect(facts.map((f) => f.text)).toEqual([
+    'New presentation',
+    'Your presentations',
+    'About Turboslide',
+  ]);
+  for (const f of facts) expect(f.h, `${f.c} is 40 px`).toBe(40);
+});
+
+test(title('templates.gallery.page'), async () => {
+  test.setTimeout(120_000);
+  const res = await page.goto('/decks/templates');
+  const pageCtl = ctl(page, 'templates.page');
+  if (!res || res.status() >= 400 || (await pageCtl.count()) === 0)
+    test.skip(
+      true,
+      `not on this build: templates.page (docs/PRODUCT.md 7.1, B5b); /decks/templates answered ${res?.status() ?? 'nothing'}`,
+    );
+  await page.waitForTimeout(600);
+  const facts = await page.evaluate(() => {
+    const group = (c: string) => document.querySelector(`[data-control="${c}"]`);
+    const cardsOf = (g: Element | null) =>
+      [...(g?.querySelectorAll('[data-control^="templates.card."]') ?? [])]
+        .filter((el) => /^templates\.card\.[^.]+$/.test(el.getAttribute('data-control') ?? ''))
+        .map((el) => ({
+          slug: (el.getAttribute('data-control') ?? '').replace('templates.card.', ''),
+          name:
+            el
+              .querySelector('h3, .ts-hm-card-title, [data-control$=".name"]')
+              ?.textContent?.trim() ??
+            el.textContent?.trim().slice(0, 60) ??
+            '',
+          /* a cover is the slide's live clone (decks.templates.tsx `.ts-gallery-cover`), a
+             picture or the card thumb */
+          cover: Boolean(
+            el.querySelector('img, .ts-hm-card-thumb') ||
+            (el.querySelector('.ts-gallery-cover')?.childElementCount ?? 0) > 0,
+          ),
+          count: /\d+ slides?/.test(el.textContent ?? ''),
+          sentence: (el.querySelector('p')?.textContent?.trim().length ?? 0) > 10,
+          isDefault: Boolean(el.querySelector('[data-control$=".default"]')),
+        }));
+    return {
+      organisation: cardsOf(group('templates.group.organisation')),
+      turboslide: cardsOf(group('templates.group.turboslide')),
+      heading: document.querySelector('h1')?.textContent?.trim() ?? null,
+    };
+  });
+  test.info().annotations.push({ type: 'gallery', description: JSON.stringify(facts) });
+  expect(facts.heading, 'the heading').toBe('Template gallery');
+  const blank = facts.turboslide.find((c) => c.slug === 'blank');
+  expect(blank, "Turboslide's Blank is listed").toBeTruthy();
+  const gt = facts.organisation.find((c) => c.slug === 'gt-brand');
+  expect(gt, 'the General Translation brand deck is listed under Your organisation').toBeTruthy();
+  expect(gt!.name, 'under its own name').toMatch(/General Translation brand deck/);
+  for (const c of [...facts.organisation, ...facts.turboslide]) {
+    expect(c.cover, `${c.slug} has a cover`).toBe(true);
+    expect(c.count, `${c.slug} names its slide count`).toBe(true);
+    expect(c.sentence, `${c.slug} has one sentence`).toBe(true);
+  }
+  expect(
+    [...facts.organisation, ...facts.turboslide].filter((c) => c.isDefault).length,
+    'one card is marked as used for new presentations',
+  ).toBe(1);
+  /* the /decks link and File > New > From template gallery open it; /decks#templates redirects */
+  await gotoDecks();
+  await ctl(page, 'home.gallery').click();
+  await page.waitForURL(/\/decks\/templates/, { timeout: 20_000 });
+  await openEditor(page, deck);
+  /* the row opens the gallery in a new tab since the product round (decks.file.template-gallery) */
+  const opened = context.waitForEvent('page', { timeout: 20_000 });
+  await menuPath(page, 'file', 'file.new', 'file.new.templateGallery');
+  const tab = await opened;
+  await tab.waitForURL(/\/decks\/templates/, { timeout: 20_000 });
+  await tab.close();
+  await page.goto('/decks#templates');
+  await page.waitForURL(/\/decks\/templates/, { timeout: 20_000 });
+});
+
+test(title('templates.gallery.strip-and-link'), async () => {
+  await gotoDecks();
+  const facts = await page.evaluate(() => {
+    /* the strip is a list: Blank's card sits in its own item (decks.index.tsx) */
+    const blank = document.querySelector('[data-control="home.blank"]');
+    const strip = blank?.closest('ul') ?? blank?.parentElement ?? null;
+    const cards = [...(strip?.querySelectorAll('[data-control^="home."]') ?? [])]
+      .filter((el) =>
+        /^home\.(blank|template\.[^.]+|gt-brand)$/.test(el.getAttribute('data-control') ?? ''),
+      )
+      .map((el) => el.getAttribute('data-control') ?? '');
+    const link = document.querySelector('[data-control="home.gallery"]');
+    return { cards, link: link?.getAttribute('href') ?? null };
+  });
+  test.info().annotations.push({ type: 'strip', description: JSON.stringify(facts) });
+  expect(facts.cards[0], 'Blank comes first').toBe('home.blank');
+  expect(
+    facts.cards.slice(1).every((c) => c.startsWith('home.template.')),
+    "then the organisation's templates as home.template.<id>",
+  ).toBe(true);
+  expect(facts.cards.length, 'at least one template after Blank').toBeGreaterThan(1);
+  expect(facts.link, 'the Template gallery link points at the page').toMatch(/\/decks\/templates$/);
+});
+
+test(title('chrome.appearance.first-visit-follows-os'), async ({ browser }) => {
+  test.setTimeout(120_000);
+  const light = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+    colorScheme: 'light',
+  });
+  const p = await light.newPage();
+  const theme = () => p.evaluate(() => document.documentElement.getAttribute('data-theme'));
+  try {
+    await p.goto('/home');
+    await p.waitForSelector('.ts-product, main', { timeout: 30_000 });
+    const home = await theme();
+    await p.goto('/new');
+    await waitEditor(p);
+    const fresh = await theme();
+    await p.evaluate(() => localStorage.setItem('gt-theme', 'dark'));
+    await p.goto('/home');
+    await p.waitForSelector('.ts-product, main', { timeout: 30_000 });
+    const stored = await theme();
+    test.info().annotations.push({
+      type: 'appearance',
+      description: `light scheme: /home ${home}, /new ${fresh}; with gt-theme dark stored ${stored}`,
+    });
+    expect(home, 'a light system opens /home light').toBe('light');
+    expect(fresh, 'and /new light').toBe('light');
+    expect(stored, 'a stored gt-theme wins on the next visit').toBe('dark');
+  } finally {
+    await light.close();
+  }
+  const dark = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+    colorScheme: 'dark',
+  });
+  const q = await dark.newPage();
+  try {
+    await q.goto('/home');
+    await q.waitForSelector('.ts-product, main', { timeout: 30_000 });
+    expect(
+      await q.evaluate(() => document.documentElement.getAttribute('data-theme')),
+      'a dark system opens dark',
+    ).toBe('dark');
+  } finally {
+    await dark.close();
+  }
+});
+
+test(title('brand.appearance.default'), async () => {
+  test.setTimeout(150_000);
+  await page.goto('/new');
+  await waitEditor(page);
+  const s = await state(page);
+  const info = await invoke<{
+    defaults?: { appearance?: string };
+    brand?: { appearance?: string };
+  }>(page, 'deck.info');
+  const draft = info.defaults?.appearance ?? info.brand?.appearance ?? s.theme;
+  const ground = await page.evaluate(() => {
+    const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+    for (let node = sheet; node; node = node.parentElement) {
+      const bg = getComputedStyle(node).backgroundColor;
+      if (bg && bg !== 'transparent' && !/rgba\(\s*\d+,\s*\d+,\s*\d+,\s*0\)/.test(bg)) return bg;
+    }
+    return null;
+  });
+  const lum = (() => {
+    const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(ground ?? '');
+    return m ? (Number(m[1]) + Number(m[2]) + Number(m[3])) / 3 : null;
+  })();
+  test.info().annotations.push({
+    type: 'new',
+    description: `appearance ${draft} (state ${s.theme}); ground ${ground}`,
+  });
+  expect(
+    draft,
+    "/new opens in the deployment kit's default appearance, light on this deployment",
+  ).toBe('light');
+  expect(lum ?? 0, 'and the sheet paints light').toBeGreaterThan(160);
+  /* a deck from a template whose kit says dark: the General Translation brand deck */
+  await gotoDecks();
+  const gtCard = page
+    .locator('[data-control="home.template.gt-brand"], [data-control="home.template.gt-brand"]')
+    .first();
+  await gtCard.click();
+  await page.waitForURL(/\/edit\//, { timeout: 60_000 });
+  const copy = page.url().match(/\/edit\/([^/?#]+)/)?.[1] ?? '';
+  scratch.add(copy);
+  await waitEditor(page);
+  const gt = await invoke<{ defaults?: { appearance?: string }; brand?: { appearance?: string } }>(
+    page,
+    'deck.info',
+  );
+  const gtAppearance = gt.brand?.appearance ?? gt.defaults?.appearance ?? (await state(page)).theme;
+  test.info().annotations.push({
+    type: 'template',
+    description: `the General Translation brand deck copy ${copy} opens ${gtAppearance}`,
+  });
+  expect(gtAppearance, 'a deck from a template whose kit says dark opens dark').toBe('dark');
+});
+
 coverage(import.meta.filename, [
   'decks.home.new-presentation',
   'decks.home.your-presentations',
@@ -1233,4 +1875,21 @@ coverage(import.meta.filename, [
   'decks.file.open-upload-bundle',
   'decks.file.import-slides-bundle',
   'help.improve-link',
+  /* the product round (docs/PRODUCT.md 8.1) */
+  'decks.recent.drops-trashed',
+  'decks.trash.editor-undo-snackbar',
+  'decks.recent.this-browser-sentence',
+  'decks.home.seller-lead',
+  'decks.card.thumbnail-slide-1',
+  'decks.card.edited-relative-time',
+  'decks.card.more-glyph',
+  'decks.trash.button-heights',
+  'decks.trash.confirm-dialog-chrome',
+  'decks.new.skeleton-one-frame',
+  'decks.access.stranger-links',
+  'decks.notfound.sentence-case',
+  'templates.gallery.page',
+  'templates.gallery.strip-and-link',
+  'chrome.appearance.first-visit-follows-os',
+  'brand.appearance.default',
 ]);

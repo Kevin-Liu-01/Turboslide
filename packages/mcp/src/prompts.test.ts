@@ -1,6 +1,13 @@
 // The deck_review prompt: the six lenses of SPEC 7.6, one or all, with the evidence resources named.
 import { describe, expect, it } from 'vitest';
-import { DECK_REVIEW_PROMPT, JUDGE_LENSES, deckReviewPrompt, lensById } from './prompts.ts';
+import {
+  DECK_ASSIST_PROMPT,
+  DECK_REVIEW_PROMPT,
+  JUDGE_LENSES,
+  deckAssistPrompt,
+  deckReviewPrompt,
+  lensById,
+} from './prompts.ts';
 
 const deck = { id: 'gt-brand', revision: 12 };
 
@@ -55,5 +62,26 @@ describe('deck_review', () => {
 
   it('rejects an unknown lens with RangeError', () => {
     expect(() => deckReviewPrompt({ lens: 'vibes' }, deck)).toThrow(RangeError);
+  });
+});
+
+describe('deck_assist', () => {
+  it('names the two actions, the tailoring pass and the card rule', () => {
+    expect(DECK_ASSIST_PROMPT.name).toBe('deck_assist');
+    const result = deckAssistPrompt({}, deck);
+    const text = textOf(result);
+    expect(text).toContain('deck_assist_propose');
+    expect(text).toContain('deck_assist_accept');
+    expect(text).toContain('deck_tailor');
+    expect(text).toContain('the first slide');
+    expect(text).toContain('revision 12');
+    expect(result.description).toBe('Assist instructions for gt-brand at revision 12: ask');
+    expect(textOf(deckAssistPrompt({ intent: 'notes', slideIds: 'thesis' }, deck))).toContain(
+      '`thesis`',
+    );
+  });
+
+  it('rejects an unknown intent with RangeError', () => {
+    expect(() => deckAssistPrompt({ intent: 'louder' }, deck)).toThrow(RangeError);
   });
 });

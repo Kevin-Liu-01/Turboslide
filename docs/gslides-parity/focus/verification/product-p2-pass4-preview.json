@@ -1,0 +1,20 @@
+{
+  "base": "https://turboslide-d0zxgtfia-kl01s-projects.vercel.app",
+  "rows": [
+    {
+      "name": "a deck from /new",
+      "ok": true,
+      "observed": "deck untitled-20260921-4hmw"
+    },
+    {
+      "name": "in a heading: address, Enter, a word, Cmd+K on the word",
+      "ok": true,
+      "observed": "trace [{\"at\":\"typed the address\",\"editing\":1,\"handles\":0,\"anchors\":[],\"text\":\"sales@acme.com\"},{\"at\":\"after Enter\",\"editing\":0,\"handles\":10,\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"text\":\"sales@acme.com\"},{\"at\":\"typed Renewal\",\"editing\":1,\"handles\":0,\"anchors\":[],\"text\":\"Renewal\"},{\"at\":\"after the Cmd+K link\",\"editing\":1,\"handles\":0,\"anchors\":[{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"text\":\"Renewal\"}]; stored after Renewal [\"\\\"text\\\":\\\"Renewal\\\"\",\"\\\"text\\\":\\\"\\\"\"]; Cmd+K {\"selected\":\"Renewal\",\"opened\":true,\"value\":\"\"}; stored after the link [\"\\\"text\\\":\\\"[Renewal](https://acme.com/renewal)\\\"\",\"\\\"text\\\":\\\"\\\"\"]; rendered text now \"Renewal\"; leak false; product-p2-pass4-heading-after.png"
+    },
+    {
+      "name": "in a body paragraph: the same sequence",
+      "ok": true,
+      "observed": "trace [{\"at\":\"typed the address\",\"editing\":1,\"handles\":0,\"anchors\":[],\"text\":\"sales@acme.com\"},{\"at\":\"after Enter\",\"editing\":1,\"handles\":0,\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"text\":\"sales@acme.com\"},{\"at\":\"typed Renewal\",\"editing\":1,\"handles\":0,\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"text\":\"sales@acme.comRenewal\"},{\"at\":\"after the Cmd+K link\",\"editing\":1,\"handles\":0,\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"},{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"text\":\"sales@acme.comRenewal\"}]; stored after Renewal [\"\\\"text\\\":\\\"\\\"\",\"\\\"text\\\":\\\"[sales@acme.com](mailto:sales@acme.com)\\\\nRenewal\\\"\"]; Cmd+K {\"selected\":\"Renewal\",\"opened\":true,\"value\":\"\"}; stored after the link [\"\\\"text\\\":\\\"\\\"\",\"\\\"text\\\":\\\"[sales@acme.com](mailto:sales@acme.com)\\\\n[Renewal](https://acme.com/renewal)\\\"\"]; rendered text now \"sales@acme.comRenewal\"; leak false; product-p2-pass4-body-after.png"
+    }
+  ]
+}

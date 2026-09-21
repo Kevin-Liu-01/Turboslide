@@ -1,7 +1,9 @@
-// The access record a new deck gets (gslides-parity SPEC-3 6.1; VERIFICATION-3 finding 4): the
-// studio writes it at creation (the draft's first save, deck.create, deck.copy) with the creator
-// as owner and general access restricted, keeps a record that exists, and writes none for a
-// caller with no identity.
+// The access record a new deck gets (gslides-parity SPEC-3 6.1; VERIFICATION-3 finding 4; the
+// product round's default, docs/PRODUCT.md question 10): the studio writes it at creation (the
+// draft's first save, deck.create, deck.copy) with the creator as owner and the deployment's
+// default general access (Anyone with the link, Editor, with the general link minted, for an
+// anonymous creator; restricted for a signed in account), keeps a record that exists, and writes
+// none for a caller with no identity.
 import { describe, expect, it } from 'vitest';
 
 import { memoryAccessStore } from '@turboslide/store/access-store';
@@ -26,7 +28,7 @@ describe('creatorOf', () => {
 });
 
 describe('recordNewDeck', () => {
-  it('writes a restricted record owned by the creator at revision 0', async () => {
+  it('writes a record owned by the creator at revision 0 with the deployment default access: Anyone with the link, Editor, for an anonymous creator (docs/PRODUCT.md section 1, question 10)', async () => {
     const store = memoryAccessStore();
     const ctx: AuthContext = contextForIdentity('anon_7e2f0000-0000-4000-8000-000000000000');
     const stored = await recordNewDeck('q4-review', ctx, { now: NOW, store });
@@ -37,11 +39,20 @@ describe('recordNewDeck', () => {
       owner: 'anon_7e2f0000-0000-4000-8000-000000000000',
       createdBy: 'anon_7e2f0000-0000-4000-8000-000000000000',
       createdAt: NOW,
-      generalAccess: { mode: 'restricted', role: 'viewer' },
-      links: [],
+      generalAccess: { mode: 'link', role: 'editor' },
       grants: [],
       revision: 0,
     });
+    // the general link is minted with the record (pass 1 finding 1): one live editor link under
+    // the dialog's label, a hash and no token
+    expect(stored?.record.links).toHaveLength(1);
+    expect(stored?.record.links[0]).toMatchObject({
+      role: 'editor',
+      label: 'Anyone with the link',
+      revokedAt: null,
+      createdBy: 'anon_7e2f0000-0000-4000-8000-000000000000',
+    });
+    expect(stored?.record.links[0]?.hash).toMatch(/^sha256:[0-9a-f]{64}$/);
     expect(stored?.record.assetKey).toHaveLength(22);
     expect((await store.read('q4-review'))?.record).toEqual(stored?.record);
   });

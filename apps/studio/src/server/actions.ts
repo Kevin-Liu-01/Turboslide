@@ -13,6 +13,7 @@ import type { DeckCopyInput, DeckIdInput, DeckListInput } from '@turboslide/cli/
 import { registerRecordActions } from '@turboslide/cli/record-actions';
 import type { RecordDeps } from '@turboslide/cli/record-actions';
 import type { Caller } from '@turboslide/cli/records/access';
+import { registerBrandActions } from '@turboslide/cli/brand-actions';
 import { registerStoreActions, slideImport } from '@turboslide/cli/store-actions';
 import type { SlideImportInput, StoreActionDeps } from '@turboslide/cli/store-actions';
 import { labelFor } from '@turboslide/identity/labels';
@@ -35,10 +36,21 @@ import { THEME_NAMES } from '@turboslide/schema/render';
 import type { RenderRecord, Theme } from '@turboslide/schema/render';
 import { loadDeckDir, openFileStore } from '@turboslide/store/file-store';
 import type { FileStore } from '@turboslide/store/file-store';
+import { checkRevision } from '@turboslide/store/hosted';
 import type { HostedDecks } from '@turboslide/store/hosted';
 import { AssetExistsError } from '@turboslide/store/store';
 import type { DeckStore } from '@turboslide/store/store';
-import { StaleRevisionError } from '@turboslide/store/templates';
+import {
+  StaleRevisionError,
+  deleteTemplate,
+  readDefaultTemplateId,
+  readTemplateIndex,
+  renameTemplate,
+  saveTemplate,
+  setDefaultTemplate,
+  templateSlides,
+  updateTemplate,
+} from '@turboslide/store/templates';
 import type { CreateDeckInput } from '@turboslide/store/templates';
 import {
   COMPOSITE,
@@ -54,8 +66,9 @@ import {
 } from '@turboslide/theme/tokens';
 
 import { hostedAccessHooks } from './access';
+import { registerAssistActions } from './assist';
 import { agentAuth } from './auth';
-import { bootstrapAgentContext } from './authorize';
+import { authorize, bootstrapAgentContext, denialBody, identityLabel } from './authorize';
 import type { AuthContext } from './authorize';
 import {
   registerAccountActions,
@@ -73,7 +86,7 @@ import {
   runCommentAction,
 } from './comments';
 import type { NotificationCaller } from './comments';
-import { FLAG_DEFAULTS, flagOn, setFlag } from './flags';
+import { FLAG_DEFAULTS, assertFlag, flagOn, setFlag } from './flags';
 import type { FlagName } from './flags';
 import { lintLists } from './lint';
 import { logSecurityEvent } from './log';
@@ -775,6 +788,124 @@ function registerHostedDeckActions(
   });
 }
 
+/**
+ * The template actions of the product round (docs/PRODUCT.md 4.3; build/b5b.md R3) over the
+ * collection's decks folder: the two reads, Save as template and Replace under the deck's copy
+ * right with its revision checked, and the three deckless writes (Rename, Delete, Use for new
+ * presentations), which an agent token reaches with the admin scope alone; a person's session is
+ * this deployment's (anonymous principals this round) and passes. `readOnly` refuses every write.
+ * A template saved on the blob tier travels through the collection's `templates` facet: every
+ * read pulls the store's index first and every write pushes the folder and the index after
+ * (b7.md FR2, blob-templates.ts), so a template saved on one instance lists on every other.
+ */
+function registerTemplateActions(
+  dispatcher: Dispatcher,
+  decks: HostedDecks,
+  caller: AuthContext | null,
+): void {
+  const decksDir = decks.decksDir;
+  const identity = caller === null ? 'anonymous' : (identityLabel(caller) ?? 'anonymous');
+  const writer = async (action: string): Promise<void> => {
+    await assertFlag('readOnly', { identity, action });
+    if (caller?.agent !== undefined && !caller.agent.scopes.includes('admin'))
+      throw new ForbiddenError(
+        'Renaming, deleting and choosing the default template need an agent token with the admin scope',
+      );
+  };
+  const copier = async (action: string, deckId: string, baseRevision: number): Promise<void> => {
+    await assertFlag('readOnly', { identity, action, deckId });
+    if (caller !== null) {
+      const decision = await authorize(caller, deckId, 'copy', { action, transport: 'http' });
+      if (!decision.ok) {
+        const body = denialBody(decision, 'copy');
+        throw new ForbiddenError(
+          body.error === 'unauthorized'
+            ? 'Sign in or send the bearer to save this presentation as a template'
+            : 'You cannot save this presentation as a template',
+        );
+      }
+    }
+    // the store syncs the deck's folder first, so the blob tier saves the deck at its head
+    await decks.open(deckId);
+    await decks.ensureAssets(deckId);
+    checkRevision(decksDir, deckId, baseRevision);
+  };
+  // the saved templates of the other instances first, on every read and before every write
+  // (b7.md FR2; blob-templates.ts: one head when nothing moved); the file and tmp backends do
+  // nothing here
+  dispatcher.register('template.list', async () => {
+    await decks.templates.pull();
+    return {
+      templates: readTemplateIndex(decksDir),
+      default: readDefaultTemplateId(decksDir),
+    };
+  });
+  dispatcher.register('template.slides', async (input) => {
+    const { id } = input as { id: string };
+    await decks.templates.pull();
+    return templateSlides(decksDir, id);
+  });
+  dispatcher.register('template.create', async (input) => {
+    const { deckId, name, sentence, baseRevision } = input as {
+      deckId: string;
+      name: string;
+      sentence?: string;
+      baseRevision: number;
+    };
+    await copier('template.create', deckId, baseRevision);
+    await decks.templates.pull();
+    const result = await saveTemplate(decksDir, {
+      deckId,
+      name,
+      ...(sentence !== undefined ? { sentence } : {}),
+    });
+    await decks.templates.push({ id: result.id });
+    return result;
+  });
+  dispatcher.register('template.update', async (input) => {
+    const { id, deckId, sentence, baseRevision } = input as {
+      id: string;
+      deckId: string;
+      sentence?: string;
+      baseRevision: number;
+    };
+    await copier('template.update', deckId, baseRevision);
+    await decks.templates.pull();
+    const result = await updateTemplate(decksDir, {
+      id,
+      deckId,
+      ...(sentence !== undefined ? { sentence } : {}),
+    });
+    await decks.templates.push({ id: result.id });
+    return result;
+  });
+  dispatcher.register('template.rename', async (input) => {
+    const { id, name } = input as { id: string; name: string };
+    await writer('template.rename');
+    await decks.templates.pull();
+    const result = await renameTemplate(decksDir, { id, name });
+    await decks.templates.push({ id });
+    return result;
+  });
+  dispatcher.register('template.delete', async (input) => {
+    const { id, confirm } = input as { id: string; confirm?: boolean };
+    if (confirm !== true) throw new TypeError('template.delete needs confirm: true');
+    await writer('template.delete');
+    await decks.templates.pull();
+    const result = await deleteTemplate(decksDir, { id });
+    await decks.templates.push({ id, removed: true });
+    return result;
+  });
+  dispatcher.register('template.setDefault', async (input) => {
+    const { id } = input as { id: string };
+    await writer('template.setDefault');
+    await decks.templates.pull();
+    const result = await setDefaultTemplate(decksDir, id);
+    await decks.templates.push();
+    return result;
+  });
+}
+
 /** An asset file path a deck record may name: under assets/, no traversal (SPEC 4.1, 4.3). */
 function isAssetRelative(relative: string): boolean {
   return (
@@ -946,6 +1077,8 @@ export async function deckDispatcher(
     diagrams: makeDiagram,
   };
   registerStoreActions(dispatcher, storeDeps);
+  // the brand kit's four ids over the same store (docs/PRODUCT.md 4.1; build/b5.md R3)
+  registerBrandActions(dispatcher, storeDeps);
   // deck.create makes a sibling under decks/; deck.rename writes this deck's title
   registerDeckActions(dispatcher, { ...storeDeps, decksDir: join(repoRoot(), 'decks') });
   // the collection actions over the hosted backend (they replace the folder handlers
@@ -960,6 +1093,11 @@ export async function deckDispatcher(
   const request = currentRequest(options.request);
   const facts = await callerFactsFor(request);
   registerHostedDeckActions(dispatcher, decks, creatorContextOf(request, facts));
+  // the templates of the product round over the collection's folder (docs/PRODUCT.md 4.3)
+  registerTemplateActions(dispatcher, decks, creatorContextOf(request, facts));
+  // the assistant's two actions on this deck (docs/PRODUCT.md 6.2; build/b6.md R3): the route
+  // /api/assist registers the same handlers on demand; here they answer /api/actions and MCP
+  registerAssistActions(dispatcher, { store: deckStore, deckId });
   registerSlideImport(dispatcher, deckId, storeDeps, store.dir, deckStore, decks);
   const assets = assetDispatcherLoader(dispatcher, deckId, store, deckStore);
   registerRecordActionsFor(dispatcher, deckId, store, deckStore, storeDeps, facts, assets);

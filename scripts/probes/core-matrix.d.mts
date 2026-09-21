@@ -1,4 +1,5 @@
-// Type declarations for core-matrix.mjs (docs/FOCUS.md section 6; docs/RETURN.md section 5), for
+// Type declarations for core-matrix.mjs (docs/FOCUS.md section 6; docs/RETURN.md section 5;
+// docs/PRODUCT.md section 8), for
 // the TypeScript callers: the core specs under apps/studio/e2e/core/ through
 // apps/studio/e2e/core/matrix.ts. The module itself is plain Node; the declarations describe what
 // it exports and nothing more.
@@ -25,6 +26,10 @@ export type CoreFeature =
   | 'chrome'
   | 'view'
   | 'inbox'
+  | 'brand'
+  | 'fonts'
+  | 'templates'
+  | 'assist'
   | 'surface';
 
 /** The four words of the audits for what production did on the day the matrix was written. */
@@ -41,7 +46,10 @@ export type CoreSpecDriver =
   | 'core/share.spec.ts'
   | 'core/export.spec.ts'
   | 'core/surface.spec.ts'
-  | 'core/documents.spec.ts';
+  | 'core/documents.spec.ts'
+  | 'core/chrome.spec.ts'
+  | 'core/brand.spec.ts'
+  | 'core/assist.spec.ts';
 
 export type CoreDriver = 'probe --core' | CoreSpecDriver;
 
@@ -71,6 +79,12 @@ export type CoreRow = {
    * feature nor blocks the ship.
    */
   readonly parks?: readonly string[];
+  /**
+   * docs/PRODUCT.md 8.2: a measurement row records its number (the seconds per slide of a large
+   * deck export) in the run and never holds the ship; a red one is written into the ship note by
+   * id with its mechanism.
+   */
+  readonly measure?: true;
 };
 
 export type Tally = { rows: number } & Record<CoreState, number>;
@@ -95,8 +109,10 @@ export const CORE_SPEC_DRIVERS: readonly CoreSpecDriver[];
 export const CORE_DRIVERS: readonly CoreDriver[];
 export const CORE_ID_PATTERN: RegExp;
 export const CONTROL_ID_PATTERN: RegExp;
-/** The sources `parks` ids are validated against (model.ts, toolbar-tails.ts, TitleRow.tsx). */
+/** The sources `parks` ids are validated against (model.ts, toolbar-tails.ts, TitleRow.tsx, the panels and pages of PRODUCT.md 7.1). */
 export const CONTROL_SOURCE_PATHS: readonly string[];
+/** The control ids docs/PRODUCT.md 7.1 declares before the lanes' files exist; a `parks` id here is known. */
+export const DECLARED_CONTROL_IDS: readonly string[];
 /** The features a red row cannot park: a red row of one blocks the ship unless it carries `parks`. */
 export const UNPARKABLE_FEATURES: readonly CoreFeature[];
 /** The focus round's one unparkable feature, kept for the callers that named it. */
@@ -110,6 +126,8 @@ export function loadCoreMatrix(path?: string): readonly CoreRow[];
 export function isCoreId(id: string): boolean;
 /** True for a manual row of ruling (3): not driven parks nothing and fails no ship; failed still does. */
 export function isManualRow(row: CoreRow | undefined): boolean;
+/** True for a measurement row (PRODUCT.md 8.2): red parks nothing and fails no ship; the ship note carries it. */
+export function isMeasureRow(row: CoreRow | undefined): boolean;
 /** True for a feature a red row can park. */
 export function isParkable(feature: string): boolean;
 /** True when the id appears as a string literal in one of the control sources. */
@@ -129,12 +147,19 @@ export function parkedFeaturesOf(
   parked: CoreFeature[];
   parkedRows: Array<ParkedRow & { result: RunResult }>;
   blocking: Array<{ id: string; feature: CoreFeature; result: RunResult }>;
+  /** the red measurement rows, recorded and not counted (PRODUCT.md 8.2) */
+  measured: Array<{ id: string; feature: CoreFeature; result: RunResult }>;
   red: Record<string, Array<{ id: string; result: RunResult }>>;
 };
 export function shipVerdict(
   results: Readonly<Record<string, RunResult>>,
   parked?: readonly CoreFeature[] | Partial<ParkedList>,
   rows?: readonly CoreRow[],
-): { ok: boolean; failures: Array<{ id: string; feature: CoreFeature; result: RunResult }> };
+): {
+  ok: boolean;
+  failures: Array<{ id: string; feature: CoreFeature; result: RunResult }>;
+  /** the red measurement rows the verdict recorded and did not count */
+  measured: Array<{ id: string; feature: CoreFeature; result: RunResult }>;
+};
 /** The committed parked list of a ship, `ship-<commit>.json` (6.2); an unparkable feature is refused. */
 export function readParkedList(path: string): ParkedList;

@@ -304,22 +304,24 @@ describe('textDiff and textBurstMutation', () => {
     if (from === undefined) throw new Error('no paragraph text');
     const to = `${from.slice(0, 5)}brave ${from.slice(5)}`;
     const mutation = textBurstMutation(slide, 'p1', 'text', from, to);
-    expect(mutation).toEqual({
-      op: 'text.splice',
-      slideId: 'content-rule',
-      blockId: 'p1',
-      path: '/text',
-      at: 5,
-      remove: 0,
-      insert: 'brave ',
-    });
-    const after = applyMutations(document, [mutation!]).document.slides['content-rule'];
+    expect(mutation).toEqual([
+      {
+        op: 'text.splice',
+        slideId: 'content-rule',
+        blockId: 'p1',
+        path: '/text',
+        at: 5,
+        remove: 0,
+        insert: 'brave ',
+      },
+    ]);
+    const after = applyMutations(document, mutation).document.slides['content-rule'];
     expect(after && readRunText(after, 'p1', 'text')).toBe(to);
     if (after === undefined) throw new Error('no slide after the write');
-    expect(textBurstMutation(after, 'p1', 'text', to, to)).toBeNull();
+    expect(textBurstMutation(after, 'p1', 'text', to, to)).toEqual([]);
     // a deletion and a replacement travel as plain offsets too
     const deleted = textBurstMutation(after, 'p1', 'text', to, from);
-    expect(deleted).toMatchObject({ op: 'text.splice', at: 5, remove: 6, insert: '' });
+    expect(deleted).toMatchObject([{ op: 'text.splice', at: 5, remove: 6, insert: '' }]);
     const replaced = textBurstMutation(
       slide,
       'p1',
@@ -327,36 +329,102 @@ describe('textDiff and textBurstMutation', () => {
       from,
       `${from.slice(0, 5)}bold${from.slice(6)}`,
     );
-    expect(replaced).toMatchObject({ op: 'text.splice', at: 5, remove: 1, insert: 'bold' });
+    expect(replaced).toMatchObject([{ op: 'text.splice', at: 5, remove: 1, insert: 'bold' }]);
   });
 
-  it('keeps text.replace of the markup span when only the marks changed', () => {
+  it('writes text.mark in plain offsets when only the marks changed (product pass 1 finding 5)', () => {
     const from = readRunText(slide, 'p1', 'text');
     if (from === undefined) throw new Error('no paragraph text');
     const to = `*${from.slice(0, 5)}*${from.slice(5)}`;
     const mutation = textBurstMutation(slide, 'p1', 'text', from, to);
-    expect(mutation?.op).toBe('text.replace');
-    const after = applyMutations(document, [mutation!]).document.slides['content-rule'];
+    expect(mutation).toEqual([
+      {
+        op: 'text.mark',
+        slideId: 'content-rule',
+        blockId: 'p1',
+        path: '/text',
+        range: [0, 5],
+        edit: { kind: 'marks', set: { b: true } },
+      },
+    ]);
+    const after = applyMutations(document, mutation).document.slides['content-rule'];
     expect(after && readRunText(after, 'p1', 'text')).toBe(to);
+    /* a link written over a word whose stored run carries another address the session did not
+       draw: the plain range resolves against the document's marks and replaces the address, where
+       the raw markup splice of the old text.replace left `)l](mailto:...)` standing */
+    const linked = textBurstMutation(
+      slide,
+      'p1',
+      'text',
+      'Renewal',
+      '[Renewal](https://acme.com/renewal)',
+    );
+    expect(linked).toEqual([
+      {
+        op: 'text.mark',
+        slideId: 'content-rule',
+        blockId: 'p1',
+        path: '/text',
+        range: [0, 7],
+        edit: { kind: 'marks', set: { link: 'https://acme.com/renewal' } },
+      },
+    ]);
+    const stale = structuredClone(document);
+    const staleSlide = stale.slides['content-rule']!;
+    const block = Object.values(
+      (staleSlide as unknown as { slots: Record<string, { id: string; text?: string }[]> }).slots,
+    )
+      .flat()
+      .find((b) => b.id === 'p1')!;
+    block.text = '[Renewal](mailto:sales@acme.com)';
+    const written = applyMutations(stale, linked).document.slides['content-rule'];
+    expect(written && readRunText(written, 'p1', 'text')).toBe(
+      '[Renewal](https://acme.com/renewal)',
+    );
+    /* a removal clears the flag; a mixed range writes one edit per segment */
+    expect(textBurstMutation(slide, 'p1', 'text', to, from)).toEqual([
+      expect.objectContaining({
+        op: 'text.mark',
+        range: [0, 5],
+        edit: { kind: 'marks', clear: ['b'] },
+      }),
+    ]);
+    const mixed = textBurstMutation(
+      slide,
+      'p1',
+      'text',
+      `*${from.slice(0, 2)}*${from.slice(2)}`,
+      `*${from}*`,
+    );
+    expect(mixed).toEqual([
+      expect.objectContaining({
+        op: 'text.mark',
+        range: [2, from.length],
+        edit: { kind: 'marks', set: { b: true } },
+      }),
+    ]);
   });
 
   it('falls back to slide.set for the fields of a title slide', () => {
     const title = document.slides['title'];
     if (!title) throw new Error('no title slide');
-    expect(textBurstMutation(title, 'heading', 'text', 'Old', 'New')).toEqual({
-      op: 'slide.set',
-      slideId: 'title',
-      path: '/heading',
-      value: 'New',
-    });
+    expect(textBurstMutation(title, 'heading', 'text', 'Old', 'New')).toEqual([
+      {
+        op: 'slide.set',
+        slideId: 'title',
+        path: '/heading',
+        value: 'New',
+      },
+    ]);
   });
 
   it('carries a paragraph break as a character (SPEC 7.4)', () => {
     const from = readRunText(slide, 'p1', 'text') ?? '';
     const mutation = textBurstMutation(slide, 'p1', 'text', from, `${from}\nSecond.`);
-    expect(mutation?.op).toBe('text.splice');
-    if (mutation?.op === 'text.splice') expect(mutation.insert).toBe('\nSecond.');
-    const after = applyMutations(document, [mutation!]).document.slides['content-rule'];
+    const first = mutation[0];
+    expect(first?.op).toBe('text.splice');
+    if (first?.op === 'text.splice') expect(first.insert).toBe('\nSecond.');
+    const after = applyMutations(document, mutation).document.slides['content-rule'];
     expect(after && readRunText(after, 'p1', 'text')).toBe(`${from}\nSecond.`);
   });
 });
@@ -492,19 +560,21 @@ describe('textBurstMutation diffs against the document when a collaborator moved
     // the session absorbed the collaborator's insert; the slide prop may still lag behind it
     noteAbsorbed(runKey('content-rule', 'p1', 'text'), `AAA${before}`);
     const mutation = textBurstMutation(slide, 'p1', 'text', before, `AAA${before}BB`);
-    expect(mutation).toEqual({
-      op: 'text.splice',
-      slideId: 'content-rule',
-      blockId: 'p1',
-      path: '/text',
-      at: 3 + before.length,
-      remove: 0,
-      insert: 'BB',
-    });
+    expect(mutation).toEqual([
+      {
+        op: 'text.splice',
+        slideId: 'content-rule',
+        blockId: 'p1',
+        path: '/text',
+        at: 3 + before.length,
+        remove: 0,
+        insert: 'BB',
+      },
+    ]);
     // the marker is consumed by one burst; the next diffs against the Editor's markup again
-    expect(textBurstMutation(slide, 'p1', 'text', `AAA${before}BB`, `AAA${before}BB`)).toBeNull();
+    expect(textBurstMutation(slide, 'p1', 'text', `AAA${before}BB`, `AAA${before}BB`)).toEqual([]);
     noteAbsorbed(runKey('content-rule', 'p1', 'text'), `AAA${before}`);
-    expect(textBurstMutation(slide, 'p1', 'text', before, `AAA${before}`)).toBeNull();
+    expect(textBurstMutation(slide, 'p1', 'text', before, `AAA${before}`)).toEqual([]);
   });
 });
 
@@ -525,18 +595,20 @@ describe('the absorbed marker lives as long as its session (VERIFICATION.md C3-F
     // B's session absorbed A's characters after its own last burst; the editable equals the
     // document, so the final write of the session has nothing to send
     noteAbsorbed(key, `AAA${before}`);
-    expect(textBurstMutation(slide, 'p1', 'text', `AAA${before}`, `AAA${before}`)).toBeNull();
+    expect(textBurstMutation(slide, 'p1', 'text', `AAA${before}`, `AAA${before}`)).toEqual([]);
     // the next burst on this run is a new session's first: its base is the Editor's markup, never
     // the marker the last session left
-    expect(textBurstMutation(slide, 'p1', 'text', `U${before}`, `VVU${before}`)).toEqual({
-      op: 'text.splice',
-      slideId: 'content-rule',
-      blockId: 'p1',
-      path: '/text',
-      at: 0,
-      remove: 0,
-      insert: 'VV',
-    });
+    expect(textBurstMutation(slide, 'p1', 'text', `U${before}`, `VVU${before}`)).toEqual([
+      {
+        op: 'text.splice',
+        slideId: 'content-rule',
+        blockId: 'p1',
+        path: '/text',
+        at: 0,
+        remove: 0,
+        insert: 'VV',
+      },
+    ]);
   });
 
   it('forgetAbsorbed drops a marker the session never reached, so a later session is not based on it', () => {
@@ -546,30 +618,34 @@ describe('the absorbed marker lives as long as its session (VERIFICATION.md C3-F
     // longer document left its tail standing twice
     noteAbsorbed(key, before);
     const stale = textBurstMutation(slide, 'p1', 'text', `U${before} drag`, `VVU${before} drag`);
-    expect(stale).toEqual({
-      op: 'text.splice',
-      slideId: 'content-rule',
-      blockId: 'p1',
-      path: '/text',
-      at: 0,
-      remove: before.length,
-      insert: `VVU${before} drag`,
-    });
+    expect(stale).toEqual([
+      {
+        op: 'text.splice',
+        slideId: 'content-rule',
+        blockId: 'p1',
+        path: '/text',
+        at: 0,
+        remove: before.length,
+        insert: `VVU${before} drag`,
+      },
+    ]);
     // startEdit and endEdit forget the run's marker: the same burst then travels as its two characters
     noteAbsorbed(key, before);
     forgetAbsorbed(key);
-    expect(textBurstMutation(slide, 'p1', 'text', `U${before} drag`, `VVU${before} drag`)).toEqual({
-      op: 'text.splice',
-      slideId: 'content-rule',
-      blockId: 'p1',
-      path: '/text',
-      at: 0,
-      remove: 0,
-      insert: 'VV',
-    });
+    expect(textBurstMutation(slide, 'p1', 'text', `U${before} drag`, `VVU${before} drag`)).toEqual([
+      {
+        op: 'text.splice',
+        slideId: 'content-rule',
+        blockId: 'p1',
+        path: '/text',
+        at: 0,
+        remove: 0,
+        insert: 'VV',
+      },
+    ]);
     // forgetting a run with no marker is nothing
     forgetAbsorbed(key);
-    expect(textBurstMutation(slide, 'p1', 'text', before, before)).toBeNull();
+    expect(textBurstMutation(slide, 'p1', 'text', before, before)).toEqual([]);
   });
 });
 
@@ -589,19 +665,21 @@ describe('the handed text is the base of the next absorb (VERIFICATION.md C3S-F1
     const { slide, before } = p1();
     forgetAbsorbed(key);
     expect(handedText(key)).toBeUndefined();
-    expect(textBurstMutation(slide, 'p1', 'text', before, `A${before}`)).toMatchObject({
-      op: 'text.splice',
-      at: 0,
-      remove: 0,
-      insert: 'A',
-    });
+    expect(textBurstMutation(slide, 'p1', 'text', before, `A${before}`)).toMatchObject([
+      {
+        op: 'text.splice',
+        at: 0,
+        remove: 0,
+        insert: 'A',
+      },
+    ]);
     expect(handedText(key)).toBe(`A${before}`);
     // a burst with nothing to send leaves the record where the document is
-    expect(textBurstMutation(slide, 'p1', 'text', `A${before}`, `A${before}`)).toBeNull();
+    expect(textBurstMutation(slide, 'p1', 'text', `A${before}`, `A${before}`)).toEqual([]);
     expect(handedText(key)).toBe(`A${before}`);
     // the marker names the document's text: a burst equal to it sends nothing and records it
     noteAbsorbed(key, `A${before}Z`);
-    expect(textBurstMutation(slide, 'p1', 'text', `A${before}`, `A${before}Z`)).toBeNull();
+    expect(textBurstMutation(slide, 'p1', 'text', `A${before}`, `A${before}Z`)).toEqual([]);
     expect(handedText(key)).toBe(`A${before}Z`);
     forgetAbsorbed(key);
     expect(handedText(key)).toBeUndefined();
@@ -612,11 +690,13 @@ describe('the handed text is the base of the next absorb (VERIFICATION.md C3S-F1
     forgetAbsorbed(key);
     // the session's burst: three characters at the start of the paragraph
     const burst = `AAA${before}`;
-    expect(textBurstMutation(slide, 'p1', 'text', before, burst)).toMatchObject({
-      at: 0,
-      remove: 0,
-      insert: 'AAA',
-    });
+    expect(textBurstMutation(slide, 'p1', 'text', before, burst)).toMatchObject([
+      {
+        at: 0,
+        remove: 0,
+        insert: 'AAA',
+      },
+    ]);
     // the collaborator's two characters at the end, absorbed: the session notes the document's
     // text and the marker
     const absorbed = `${burst}BB`;
@@ -625,11 +705,13 @@ describe('the handed text is the base of the next absorb (VERIFICATION.md C3S-F1
     // the Editor's re-send (text-fit.ts sessionReconcile 'resend'): five characters the burst
     // timer had not flushed travel as one splice and the record follows them
     const resent = `AAAAAAAA${before}BB`;
-    expect(textBurstMutation(slide, 'p1', 'text', absorbed, resent)).toMatchObject({
-      at: 3,
-      remove: 0,
-      insert: 'AAAAA',
-    });
+    expect(textBurstMutation(slide, 'p1', 'text', absorbed, resent)).toMatchObject([
+      {
+        at: 3,
+        remove: 0,
+        insert: 'AAAAA',
+      },
+    ]);
     expect(handedText(key)).toBe(resent);
     // four more of the collaborator's land while two newer characters wait in the editable: the
     // absorb bases on the re-sent text, so the two land after the eight and the caret stays there

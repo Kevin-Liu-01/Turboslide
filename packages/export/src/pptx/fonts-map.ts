@@ -16,6 +16,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { FONT_NAMES } from '@turboslide/fonts/names';
+
 export type FontSet = 'exact' | 'standard';
 
 /** Set when Inter's license declares a Reserved Font Name; the family prefix then stays 'Inter'. */
@@ -200,4 +202,31 @@ export const MONO_FAMILY = 'DejaVu Sans Mono';
 /** The catalog entry for a picked family, when the set has been built. */
 export function entryFor(catalog: FontsCatalog, pick: FamilyPick): FontEntry | undefined {
   return catalog.entries.find((e) => e.family === pick.family);
+}
+
+/** The catalog's family names (docs/PRODUCT.md 4.2), the words PowerPoint and Google Slides use. */
+const CATALOG_NAMES: ReadonlySet<string> = new Set(Object.values(FONT_NAMES));
+
+/**
+ * The first family of a computed `font-family` value, unquoted: `'Playfair Display', Georgia,
+ * serif` answers `Playfair Display`. Empty for an empty value.
+ */
+export function firstFamily(computed: string): string {
+  const first = computed.split(',')[0] ?? '';
+  return first
+    .trim()
+    .replace(/^['"]|['"]$/g, '')
+    .trim();
+}
+
+/**
+ * The catalog face a computed family names (docs/PRODUCT.md 4.2, 4.5): the family name when the
+ * first family of the stack is one of the catalog's, else null, so a run set in a catalog face
+ * or drawn by the brand kit's Display or Text role travels under that name in `a:latin typeface`
+ * and Inter keeps the export set's picks (`GT Inter Display`, `GT Inter Text 22`).
+ */
+export function catalogFamilyName(computed: string): string | null {
+  const first = firstFamily(computed);
+  if (first === '' || first === 'Inter') return null;
+  return CATALOG_NAMES.has(first) ? first : null;
 }

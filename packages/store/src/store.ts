@@ -205,6 +205,19 @@ export function authorLabel(author: Author): string {
   return author.kind === 'agent' ? `agent:${author.runId ?? author.name}` : author.name;
 }
 
+/**
+ * The assistant's author name (docs/PRODUCT.md 6.1 "The mark"; audit-assist 15): every write the
+ * assist makes carries `{ kind: 'agent', name: 'Assistant', runId }`, and every seller surface
+ * reads an agent author as "Assistant" through `authorDisplay`; the run id stays for the
+ * developer surfaces (`authorLabel`: the CLI, the lease notices, Change history's tooltip).
+ */
+export const ASSISTANT_NAME = 'Assistant';
+
+/** The word a seller reads for an author: "Assistant" for every agent, the name for a person. */
+export function authorDisplay(author: Author): string {
+  return author.kind === 'agent' ? ASSISTANT_NAME : author.name;
+}
+
 /** The slide ids a mutation list touches, for lease checks; whole-deck writes touch none. */
 export function touchedSlides(mutations: ReadonlyArray<Mutation>): SlideId[] {
   const ids = new Set<SlideId>();

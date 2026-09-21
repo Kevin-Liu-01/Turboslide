@@ -21,6 +21,7 @@ import { isPictureKind } from '@turboslide/viewer/model';
 
 import { htmlFrameFor } from '@turboslide/render/blocks/html-escape';
 import { slideCounter } from '@turboslide/render/deck';
+import { bandAssetResolver, frameBandOf } from '@turboslide/render/stage';
 
 import type { AuthContext } from './authorize';
 import { renderSlide } from './render';
@@ -231,6 +232,12 @@ function buildViewerDeck(
         .filter((section) => section.slideIds.length > 0),
       slides: out,
       fallback: servedId === requestedId ? undefined : servedId,
+      /* the brand kit's frame band for the viewer's and the print page's Frame (docs/PRODUCT.md 4.1) */
+      band: frameBandOf(
+        deck,
+        options.theme,
+        bandAssetResolver(deck, (_id, _theme, path) => assetBase + path),
+      ),
     },
     skipped,
   };
@@ -276,10 +283,11 @@ export const getHostingFacts = createServerFn({ method: 'GET' }).handler(
   async (): Promise<HostingFacts> => hostingFacts(),
 );
 
-export type CreateDeckInput = { name: string; from: DeckTemplateId; id?: string };
+/** `from` is a built in id or any id of the template index (docs/PRODUCT.md 4.3); createDeck refuses an unknown one naming the index. */
+export type CreateDeckInput = { name: string; from: DeckTemplateId | string; id?: string };
 
-function isTemplateId(value: unknown): value is DeckTemplateId {
-  return typeof value === 'string' && (DECK_TEMPLATES as ReadonlyArray<string>).includes(value);
+function isTemplateId(value: unknown): value is string {
+  return typeof value === 'string' && SLUG_PATTERN.test(value);
 }
 
 function requireSlug(value: unknown, name: string): string {
@@ -317,7 +325,9 @@ const createDeckFn = createServerFn({ method: 'POST' })
     if (typeof input.name !== 'string' || input.name.trim() === '')
       throw new TypeError('name must be a non-empty string');
     if (!isTemplateId(input.from))
-      throw new TypeError(`from must be one of ${DECK_TEMPLATES.join(', ')}`);
+      throw new TypeError(
+        `from must be a template id of the index (${DECK_TEMPLATES.join(', ')} or a saved template)`,
+      );
     if (input.id !== undefined && (typeof input.id !== 'string' || !SLUG_PATTERN.test(input.id)))
       throw new TypeError('id must be a slug');
     return {

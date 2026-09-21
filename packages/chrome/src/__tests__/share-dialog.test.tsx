@@ -25,6 +25,8 @@ import {
   rememberLinkUrl,
   rowAddress,
   shareLinks,
+  accessSentence,
+  SHARE_NAME_ASKED_KEY,
 } from '../dialogs/Share';
 import type { AccessRecordJson } from '../dialogs/Share';
 import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
@@ -146,6 +148,13 @@ async function flush(): Promise<void> {
     await Promise.resolve();
     await Promise.resolve();
   });
+}
+
+/** Opens the second stage of the dialog (docs/PRODUCT.md section 2 rank 3): the More row. */
+function openMore(): void {
+  const more = document.querySelector('[data-control="dialog.share.more"]');
+  if (more === null) throw new Error('no More row');
+  fireEvent.click(more);
 }
 
 function clipboard(): { texts: string[] } {
@@ -457,6 +466,10 @@ describe('ShareDialog', () => {
       </Host>,
     );
     await flush();
+    /* the link rows live behind More (rank 3): the first stage holds the one address field */
+    expect(document.querySelector('[data-control="dialog.share.rows"]')).toBeNull();
+    expect(document.querySelector('[data-control="dialog.share.address"]')).not.toBeNull();
+    openMore();
     /* the three rows in order, with their role words */
     const rows = [...document.querySelectorAll('[data-control="dialog.share.rows"] > li')];
     expect(rows.map((row) => row.getAttribute('data-control'))).toEqual([
@@ -544,6 +557,7 @@ describe('ShareDialog', () => {
       </Host>,
     );
     await flush();
+    openMore();
     expect(
       document.querySelector('[data-control="dialog.share.view"]')?.getAttribute('data-minted'),
     ).toBe('1');
@@ -590,10 +604,15 @@ describe('ShareDialog', () => {
       </Host>,
     );
     await flush();
+    /* the first stage names the legacy access and its sentence; the rows sit behind More */
+    expect(document.querySelector('[data-control="dialog.share.legacy"]')).not.toBeNull();
+    expect(
+      document.querySelector('[data-control="dialog.share.accessSentence"]')?.textContent,
+    ).toBe(LEGACY_SENTENCE);
+    openMore();
     expect(document.querySelector('[data-control="dialog.share.open"]')?.textContent).toBe(
       LEGACY_SENTENCE,
     );
-    expect(document.querySelector('[data-control="dialog.share.legacy"]')).not.toBeNull();
     fireEvent.click(document.querySelector('[data-control="dialog.share.view.copy"]')!);
     fireEvent.click(document.querySelector('[data-control="dialog.share.present.copy"]')!);
     fireEvent.click(document.querySelector('[data-control="dialog.share.edit.copy"]')!);
@@ -662,6 +681,7 @@ describe('ShareDialog', () => {
     expect(
       (document.querySelector('[data-control="dialog.share.mode"]') as HTMLSelectElement).value,
     ).toBe('restricted');
+    openMore();
     expect(document.querySelector('[data-control="dialog.share.owner"]')).not.toBeNull();
     fireEvent.click(document.querySelector('[data-control="dialog.share.edit.copy"]')!);
     await flush();
@@ -729,6 +749,7 @@ describe('ShareDialog', () => {
       </Host>,
     );
     await flush();
+    openMore();
     fireEvent.click(document.querySelector('[data-control="dialog.share.view.copy"]')!);
     await flush();
     await flush();
@@ -745,6 +766,7 @@ describe('ShareDialog', () => {
       </Host>,
     );
     await flush();
+    openMore();
     /* the View row finds the link the last open minted and copies the same address, no write */
     fireEvent.click(document.querySelector('[data-control="dialog.share.view.copy"]')!);
     await flush();
@@ -844,6 +866,163 @@ describe('ShareDialog', () => {
       (document.querySelector('[data-control="dialog.share.claim.button"]') as HTMLButtonElement)
         .disabled,
     ).toBe(false);
+    vi.unstubAllGlobals();
+  });
+});
+
+// The product round (docs/PRODUCT.md section 2 ranks 3 and 4; the rows share.dialog.one-link,
+// share.dialog.slideshow-checkbox, share.dialog.more-row and share.dialog.you-label): the first
+// stage holds the access select, its sentence, one address field with one Copy link and the show
+// checkbox; the rest sits behind More; the own row reads You.
+describe('the two stages of the Share dialog (product round)', () => {
+  const baseInput = (extra: Partial<EditorShellInput> = {}): EditorShellInput => ({
+    deckId: DECK,
+    document: doc,
+    slideId: 'content-rule',
+    revision: 3,
+    origin: 'https://x.test',
+    dispatch: vi.fn(() => Promise.resolve({})),
+    save: { state: 'saved' },
+    ...extra,
+  });
+  const restricted = (extra: Partial<EditorAccess> = {}): EditorAccess => ({
+    ...accessViewOfRecord(record({ revision: 3 }), { signedIn: false, via: 'owner' }),
+    ...extra,
+  });
+
+  it('names what each access does in one sentence', () => {
+    expect(accessSentence('link', 'editor', 'shadow')).toContain('Pick Viewer');
+    expect(accessSentence('link', 'viewer', 'shadow')).toBe(
+      'Anyone with this link can open it and cannot change it',
+    );
+    expect(accessSentence('restricted', 'viewer', 'shadow')).toContain('Only you can open');
+    expect(accessSentence('restricted', 'viewer', 'enforce')).toBe(
+      'Only people with access can open it',
+    );
+    expect(accessSentence('open', 'editor', undefined)).toBe(LEGACY_SENTENCE);
+  });
+
+  it('shows the address for the selected access, copies the field, swaps it for the present link and keeps the rest behind More', async () => {
+    const { texts } = clipboard();
+    const dispatch = vi.fn(() => Promise.resolve({}));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('{"error":"not_found"}', { status: 404 }))),
+    );
+    const owner = 'anon_11111111-1111-4111-8111-111111111111';
+    const { state } = host(
+      baseInput({
+        dispatch: dispatch as unknown as EditorShellInput['dispatch'],
+        access: restricted({
+          generalAccess: { mode: 'link', role: 'editor' },
+          linkUrl: 'https://x.test/s/generaltokentokentokentok',
+        }),
+        role: 'owner',
+        capabilities: ['read', 'share', 'settings'],
+        account: {
+          principal: { principalId: owner, label: 'Ink 100', trust: 'label', kind: 'anonymous' },
+          signedIn: false,
+          signInAvailable: false,
+        },
+      }),
+    );
+    render(
+      <Host state={state}>
+        <ShareDialog />
+      </Host>,
+    );
+    await flush();
+    const address = document.querySelector<HTMLInputElement>(
+      '[data-control="dialog.share.address"]',
+    );
+    expect(address?.readOnly).toBe(true);
+    expect(address?.value).toBe('https://x.test/s/generaltokentokentokentok');
+    expect(
+      (document.querySelector('[data-control="dialog.share.linkRole"]') as HTMLSelectElement).value,
+    ).toBe('editor');
+    expect(
+      document.querySelector('[data-control="dialog.share.accessSentence"]')?.textContent,
+    ).toContain('Pick Viewer before you send it to a customer');
+    /* one Copy link in the first stage, and it copies the field */
+    expect(document.querySelectorAll('[data-control$=".copy"]')).toHaveLength(1);
+    fireEvent.click(document.querySelector('[data-control="dialog.share.copy"]')!);
+    await flush();
+    expect(texts).toEqual(['https://x.test/s/generaltokentokentokentok']);
+    expect(dispatch).not.toHaveBeenCalled();
+    /* Open as a slideshow swaps the field for the present link and back */
+    fireEvent.click(document.querySelector('[data-control="dialog.share.slideshow"]')!);
+    expect(address?.value).toBe('https://x.test/s/generaltokentokentokentok?present=1');
+    fireEvent.click(document.querySelector('[data-control="dialog.share.slideshow"]')!);
+    expect(address?.value).toBe('https://x.test/s/generaltokentokentokentok');
+    /* the invite row, the link rows and the gear wait behind More, which reads Settings once open */
+    expect(document.querySelector('[data-control="dialog.share.emails"]')).toBeNull();
+    expect(document.querySelector('[data-control="dialog.share.rows"]')).toBeNull();
+    expect(document.querySelector('[data-control="dialog.share.footer"]')).toBeNull();
+    const more = document.querySelector('[data-control="dialog.share.more"]');
+    expect(more?.textContent).toContain('More');
+    openMore();
+    expect(more?.textContent).toContain('Settings');
+    expect(document.querySelector('[data-control="dialog.share.emails"]')).not.toBeNull();
+    expect(document.querySelector('[data-control="dialog.share.rows"]')).not.toBeNull();
+    expect(document.querySelector('[data-control="dialog.share.gear"]')).not.toBeNull();
+    /* the own row reads You (rank 4) */
+    expect(document.querySelector('[data-control="dialog.share.owner"]')?.textContent).toContain(
+      'You',
+    );
+    vi.unstubAllGlobals();
+  });
+
+  it('asks a browser with no display name for one on the first Share, once, and never a signed in account', async () => {
+    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
+    const setName = vi.fn(() => Promise.resolve(undefined));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('{"error":"not_found"}', { status: 404 }))),
+    );
+    const { state } = host(
+      baseInput({
+        access: restricted(),
+        role: 'owner',
+        capabilities: ['read', 'share'],
+        account: {
+          principal: {
+            principalId: 'anon_11111111-1111-4111-8111-111111111111',
+            label: 'Ink 100',
+            trust: 'label',
+            kind: 'anonymous',
+          },
+          signedIn: false,
+          signInAvailable: false,
+          setName,
+        },
+      }),
+    );
+    const first = render(
+      <Host state={state}>
+        <ShareDialog />
+      </Host>,
+    );
+    await flush();
+    expect(document.querySelector('[data-control="dialog.namePrompt"]')).not.toBeNull();
+    expect(document.querySelector('[data-control="dialog.share"]')).toBeNull();
+    expect(document.querySelector('.ts-dialog-title')?.textContent).toBe(
+      'Your name, shown to collaborators',
+    );
+    fireEvent.click(document.querySelector('[data-control="dialog.namePrompt.skip"]')!);
+    await flush();
+    expect(document.querySelector('[data-control="dialog.share"]')).not.toBeNull();
+    expect(setName).not.toHaveBeenCalled();
+    first.unmount();
+    /* the second open asks nothing */
+    render(
+      <Host state={state}>
+        <ShareDialog />
+      </Host>,
+    );
+    await flush();
+    expect(document.querySelector('[data-control="dialog.namePrompt"]')).toBeNull();
+    expect(document.querySelector('[data-control="dialog.share"]')).not.toBeNull();
+    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
     vi.unstubAllGlobals();
   });
 });

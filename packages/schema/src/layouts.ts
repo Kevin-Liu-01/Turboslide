@@ -37,8 +37,15 @@ export type LayoutEntry = {
   google: boolean;
   kind: SlideKind;
   layout?: LayoutType;
-  /** one sentence: what the layout is for, in the grammar's terms */
+  /** one sentence: what the layout is for, in the grammar's terms (for agents and the docs) */
   doc: string;
+  /**
+   * The seller's sentence (docs/PRODUCT.md section 2 rank 24; audit-seller 26): the layout's name,
+   * a colon and what a person gets, in the words a seller reads ("your logo", never "your mark").
+   * The layout plate's caption row shows it for the hovered or focused tile; `doc` keeps the
+   * geometry for agents.
+   */
+  sentence: string;
   /** a sprite id from the theme sprite (icons.ts), not a chrome IconName */
   icon: IconName;
   /** the layout takes a background picture from the deck's starter set (opener, mood, closing) */
@@ -66,7 +73,14 @@ export const PROMPTS = {
 } as const;
 
 export type PromptContext = {
-  slide: Pick<Slide, 'kind'> & { template?: LayoutId | undefined };
+  /**
+   * The slide the Text sits on: its kind, its `template` when written, and its slots when the
+   * caller has the whole slide (the renderer passes the kind and the template alone).
+   */
+  slide: Pick<Slide, 'kind'> & {
+    template?: LayoutId | undefined;
+    slots?: ContentSlide['slots'] | undefined;
+  };
   /** the block the Text sits in; absent for a slide field (the title slide's heading and lead, the statement's big) */
   block?: Block;
   /** the JSON pointer of the Text inside the block or the slide */
@@ -76,8 +90,10 @@ export type PromptContext = {
 /**
  * The prompt for an empty Text (SPEC 5.4): "Click to add title" for a heading at level h1, h2 or
  * title and for the opener, mood and closing headings; "Click to add subtitle" for the title
- * slide's lead; "Click to add a number" for the Big number heading; "Add a caption" for an empty
- * caption; "Click to add text" for everything else.
+ * slide's lead and for the head paragraph beside the title of a two column head (Title, subtitle
+ * and body, Tile grid, Detail grid, Status board; docs/PRODUCT.md section 2 rank 2, so two boxes
+ * on one slide never read the same); "Click to add a number" for the Big number heading; "Add a
+ * caption" for an empty caption; "Click to add text" for everything else.
  */
 export function promptFor(context: PromptContext): string {
   const { slide, block, path } = context;
@@ -86,6 +102,8 @@ export function promptFor(context: PromptContext): string {
     if (slide.kind === 'statement') return PROMPTS.text;
     return PROMPTS.text;
   }
+  if (block.type === 'paragraph' && path === '/text' && isHeadParagraph(slide, block.id))
+    return PROMPTS.subtitle;
   if (block.type === 'heading') {
     if (block.level === 'big' && slide.template === 'big-number') return PROMPTS.number;
     if (block.level === 'big' && (slide.kind === 'opener' || slide.kind === 'closing'))
@@ -96,6 +114,40 @@ export function promptFor(context: PromptContext): string {
   if (/caption$/.test(path) || (block.type === 'matrix' && path === '/caption'))
     return PROMPTS.caption;
   return PROMPTS.text;
+}
+
+/**
+ * True for the paragraph that sits beside the title in a two column head: the block in the
+ * `headRight` slot when the caller passed the slots, else (the renderer passes the kind and the
+ * template alone, and a converted canvas has no slots) the block whose id the slide's template
+ * gives its head paragraph (`subtitleParagraphId`).
+ */
+function isHeadParagraph(slide: PromptContext['slide'], blockId: string): boolean {
+  const slots = slide.slots;
+  if (slots !== undefined) {
+    const right = slots.headRight;
+    if (right !== undefined) return right.some((block) => block.id === blockId);
+  }
+  return slide.template !== undefined && subtitleParagraphId(slide.template) === blockId;
+}
+
+let headParagraphs: Map<LayoutId, string> | undefined;
+
+/**
+ * The id of the paragraph a layout's `make` puts beside the title (its `headRight` slot), or
+ * undefined for a layout with a single head or no head; read once from the entries.
+ */
+export function subtitleParagraphId(layout: LayoutId): string | undefined {
+  if (headParagraphs === undefined) {
+    headParagraphs = new Map();
+    for (const entry of LAYOUTS) {
+      const made = entry.make('probe', PROBE_DECK, 'probe');
+      if (made === null || made.kind !== 'content') continue;
+      const right = made.slots.headRight?.find((block) => block.type === 'paragraph');
+      if (right !== undefined) headParagraphs.set(entry.id, right.id);
+    }
+  }
+  return headParagraphs.get(layout);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -242,13 +294,14 @@ export function emptyLayoutTable(id = 'table'): TableBlock {
 // ---------------------------------------------------------------------------------------------
 // The table
 
-export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
+const ENTRIES: ReadonlyArray<LayoutEntry> = [
   {
     id: 'title',
     label: 'Title slide',
     google: true,
     kind: 'title',
     doc: 'The mark at 132 by 84, the h1 and a muted lead, left and vertically centered.',
+    sentence: 'Title slide: your logo, a title and a subtitle',
     icon: 'sparkles',
     needsPicture: false,
     make: (id) => ({ ...base(id), kind: 'title', mark: { w: 132, h: 84 }, heading: '', lead: '' }),
@@ -259,6 +312,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     google: true,
     kind: 'opener',
     doc: 'A full-bleed two-tone picture with the plate lower left at 740 px: the section title, one sentence, the credit.',
+    sentence: 'Section header: a full picture with the section title, one sentence and the credit',
     icon: 'rectangle-stack',
     needsPicture: true,
     make: (id, deck, sectionId) => {
@@ -287,11 +341,12 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     google: true,
     kind: 'content',
     layout: 'split',
-    doc: 'A two-column head (the heading at 4, the paragraph at 8) over a body.',
+    doc: 'A single head (the heading across the slot) over one body paragraph at measure 56.',
+    sentence: 'Title and body: a title over one body',
     icon: 'document-text',
     needsPicture: false,
     make: (id) =>
-      content(id, SPLIT_4_8, { ...splitHead(), body: [paragraph('p2', { measure: 56 })] }),
+      content(id, SPLIT_SINGLE, { head: [heading()], body: [paragraph('p1', { measure: 56 })] }),
   },
   {
     id: 'cols',
@@ -300,6 +355,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'cols',
     doc: 'Two equal columns: the heading and a paragraph on the left, a paragraph on the right.',
+    sentence: 'Title and two columns: a title over two columns of text',
     icon: 'view-columns',
     needsPicture: false,
     make: (id) =>
@@ -315,6 +371,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'stack',
     doc: 'One heading in a stack and nothing else, so the sheet stays open below it.',
+    sentence: 'Title only: a title, with the rest of the slide open',
     icon: 'bars-3-bottom-left',
     needsPicture: false,
     make: (id) => content(id, STACK, { main: [heading()] }),
@@ -326,6 +383,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'stack',
     doc: 'A heading over one paragraph at measure 56 in a stack.',
+    sentence: 'One column text: a title over one column of text',
     icon: 'bars-3',
     needsPicture: false,
     make: (id) => content(id, STACK, { main: [heading(), paragraph('p1', { measure: 56 })] }),
@@ -336,6 +394,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     google: true,
     kind: 'statement',
     doc: 'One centered big line at 72 px with a 22ch measure.',
+    sentence: 'Main point: one large line in the middle of the slide',
     icon: 'bolt',
     needsPicture: false,
     make: (id) => ({ ...base(id), kind: 'statement', big: '', measure: 22 }),
@@ -347,6 +406,8 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'cols',
     doc: 'Two columns at 5/7: the heading and a short note on the left, a lead paragraph on the right.',
+    sentence:
+      'Section title and description: a title with a note on the left and a description on the right',
     icon: 'bars-3-center-left',
     needsPicture: false,
     make: (id) =>
@@ -361,6 +422,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     google: true,
     kind: 'mood',
     doc: 'A full-bleed dithered photograph with the plate lower right at 560 px: the title at 44 px, one or two sentences, the credit.',
+    sentence: 'Caption: a full picture with a title, a caption and the credit',
     icon: 'photo',
     needsPicture: true,
     make: (id, deck) => {
@@ -385,6 +447,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'center',
     doc: 'One number as a big heading over a short note, centered.',
+    sentence: 'Big number: one number over a short note in the middle of the slide',
     icon: 'presentation-chart-bar',
     needsPicture: false,
     make: (id) =>
@@ -401,9 +464,25 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'freeform',
     doc: 'The freeform layout with no blocks; everything placed on it carries a position box.',
+    sentence: 'Blank: an empty slide, place anything on it',
     icon: 'squares-2x2',
     needsPicture: false,
     make: (id) => content(id, { type: 'freeform' }, {}),
+  },
+  {
+    // the 4/8 split that was Title and body until the product round (docs/PRODUCT.md section 2
+    // rank 2): the heading at column 4, the subtitle paragraph at column 8, one body under them
+    id: 'subtitle-body' as LayoutId,
+    label: 'Title, subtitle and body',
+    google: false,
+    kind: 'content',
+    layout: 'split',
+    doc: 'A two-column head (the heading at 4, the subtitle paragraph at 8) over a body.',
+    sentence: 'Title, subtitle and body: a title, a subtitle beside it and a body',
+    icon: 'document-text',
+    needsPicture: false,
+    make: (id) =>
+      content(id, SPLIT_4_8, { ...splitHead(), body: [paragraph('p2', { measure: 56 })] }),
   },
   {
     id: 'rows',
@@ -412,6 +491,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'cols',
     doc: 'The heading and the body on the left, a ruled key and value table at 20 px on the right (key column 220).',
+    sentence: 'Ruled rows: a title and text on the left, a key and value list on the right',
     icon: 'list-bullet',
     needsPicture: false,
     make: (id) =>
@@ -439,6 +519,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'cols',
     doc: 'The heading and the body on the left, statements as ruled rows at 24 px display weight on the right, never bullets.',
+    sentence: 'Ruled statement list: a title and text on the left, ruled statements on the right',
     icon: 'list-bullet',
     needsPicture: false,
     make: (id) =>
@@ -460,6 +541,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'split',
     doc: 'A heading over a 3 by 4 table with a header row.',
+    sentence: 'Title and table: a title over a table with a header row',
     icon: 'table-cells',
     needsPicture: false,
     make: (id) => content(id, SPLIT_4_8, { headLeft: [heading()], body: [emptyLayoutTable()] }),
@@ -471,6 +553,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'cols',
     doc: 'The heading and the body at 4, one bordered capture with a caption at 8.',
+    sentence: 'Figure: a title and text on the left, one picture with a caption on the right',
     icon: 'photo',
     needsPicture: false,
     make: (id) =>
@@ -495,6 +578,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'split',
     doc: 'A single head over two figures side by side with captions.',
+    sentence: 'Pair of figures: a title over two pictures with captions',
     icon: 'photo',
     needsPicture: false,
     make: (id) =>
@@ -519,6 +603,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'split',
     doc: 'A two-column head over a grid of four captured tiles at 16/9 with 20 px labels.',
+    sentence: 'Tile grid: a title and a subtitle over four tiles with labels',
     icon: 'squares-2x2',
     needsPicture: false,
     make: (id) =>
@@ -552,6 +637,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'split',
     doc: 'A two-column head over three 425 px columns of 2x crops with 15 px captions.',
+    sentence: 'Detail grid: a title and a subtitle over three pictures with captions',
     icon: 'squares-2x2',
     needsPicture: false,
     make: (id) =>
@@ -579,6 +665,8 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'split',
     doc: 'A two-column head over one ruled row per surface: a 128 by 72 capture, the name and address, the state with its icon, a note.',
+    sentence:
+      'Status board: a title and a subtitle over one row per item, each with a picture, a name, a state and a note',
     icon: 'clipboard-document-check',
     needsPicture: false,
     make: (id) =>
@@ -609,6 +697,8 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     kind: 'content',
     layout: 'cols',
     doc: 'The heading and the body on the left, a ruled table of numerals at 22 px tabular with a caption on the right.',
+    sentence:
+      'Matrix: a title and text on the left, a table of numbers with a caption on the right',
     icon: 'table-cells',
     needsPicture: false,
     make: (id) =>
@@ -635,6 +725,7 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     google: false,
     kind: 'closing',
     doc: 'A two-tone render behind a plate upper left at 720 px carrying the mark, the thesis and the addresses.',
+    sentence: 'Closing: a picture behind your logo, a closing line and your addresses',
     icon: 'check-badge',
     needsPicture: true,
     make: (id, deck) => {
@@ -658,6 +749,14 @@ export const LAYOUTS: ReadonlyArray<LayoutEntry> = [
     },
   },
 ];
+
+/**
+ * The entries in the order of `LAYOUT_IDS`, which is the source of the ids (deck.ts): an entry
+ * whose id the list does not carry yet is left out, so the two never disagree while an id lands
+ * (the product round's `subtitle-body`, build/b3.md R1); every entry above joins the list once
+ * its id does.
+ */
+export const LAYOUTS: ReadonlyArray<LayoutEntry> = ENTRIES.filter((entry) => isLayoutId(entry.id));
 
 /** The entry for an id; a RangeError for an id outside the list. */
 export function layoutEntry(id: string): LayoutEntry {

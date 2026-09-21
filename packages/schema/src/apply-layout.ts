@@ -54,7 +54,8 @@ type Picture = { asset: AssetId; caption?: Text; from: BlockId };
 type Extracted = {
   title?: Text;
   titleFrom?: BlockId;
-  body: { text: Text; from: BlockId }[];
+  /** the body texts in reading order; `head` marks a subtitle (the title slide's lead, a two column head's paragraph beside the title) */
+  body: { text: Text; from: BlockId; head?: boolean }[];
   lists: Block[];
   tables: TableBlock[];
   pictures: Picture[];
@@ -228,7 +229,7 @@ export function extractContent(slide: Slide, untouched: Untouched = NOTHING_UNTO
   const out: Extracted = { body: [], lists: [], tables: [], pictures: [], rest: [] };
   if (slide.kind === 'title') {
     if (!isEmptyText(slide.heading)) out.title = slide.heading;
-    if (!isEmptyText(slide.lead)) out.body.push({ text: slide.lead, from: 'lead' });
+    if (!isEmptyText(slide.lead)) out.body.push({ text: slide.lead, from: 'lead', head: true });
     return out;
   }
   if (slide.kind === 'statement') {
@@ -238,6 +239,11 @@ export function extractContent(slide: Slide, untouched: Untouched = NOTHING_UNTO
   if (isPictureSlide(slide) && !untouched.picture) {
     out.pictures.push({ asset: slide.picture.asset, from: 'picture' });
   }
+  /* the paragraph beside the title of a two column head is the slide's subtitle (docs/PRODUCT.md
+     section 2 rank 2), and stays one when the next layout has a head paragraph */
+  const headParagraphs = new Set(
+    slide.kind === 'content' ? (slide.slots.headRight ?? []).map((block) => block.id) : [],
+  );
   for (const block of orderedBlocks(slide)) {
     if (isPlateBox(block)) continue;
     if (untouched.blocks.has(block.id)) continue;
@@ -248,7 +254,12 @@ export function extractContent(slide: Slide, untouched: Untouched = NOTHING_UNTO
       continue;
     }
     if (block.type === 'paragraph' || block.type === 'text') {
-      if (!isEmptyText(block.text)) out.body.push({ text: block.text, from: block.id });
+      if (!isEmptyText(block.text))
+        out.body.push({
+          text: block.text,
+          from: block.id,
+          ...(headParagraphs.has(block.id) ? { head: true } : {}),
+        });
       continue;
     }
     if (block.type === 'credit') {
@@ -474,11 +485,29 @@ function fillContent(
     extracted.body.unshift({ text: extracted.title, from: extracted.titleFrom ?? 'h' });
   }
 
-  // the body placeholders: paragraphs and text boxes in slot order
-  const bodySlots = placed.filter(
-    ({ list, index }) => list[index]?.type === 'paragraph' || list[index]?.type === 'text',
+  // the head paragraph beside the title (a two column head's headRight, the subtitle of
+  // docs/PRODUCT.md section 2 rank 2) takes a subtitle alone: the source's lead or its own head
+  // paragraph, never a body paragraph, so Title and body's text lands in the body of Title,
+  // subtitle and body and the subtitle keeps its prompt (the product round's gate, slide 102)
+  const headParagraphIds = new Set((target.slots.headRight ?? []).map((block) => block.id));
+  const isText = ({ list, index }: Placed) =>
+    list[index]?.type === 'paragraph' || list[index]?.type === 'text';
+  const headSlots = placed.filter(
+    (slot) => isText(slot) && headParagraphIds.has(slot.list[slot.index]?.id ?? ''),
   );
   const bodyTexts = [...extracted.body];
+  for (const slot of headSlots) {
+    const at = bodyTexts.findIndex((row) => row.head === true);
+    if (at < 0) break;
+    const [next] = bodyTexts.splice(at, 1);
+    const block = slot.list[slot.index];
+    if (next !== undefined && (block?.type === 'paragraph' || block?.type === 'text'))
+      block.text = next.text;
+  }
+  // the body placeholders: paragraphs and text boxes in slot order
+  const bodySlots = placed.filter(
+    (slot) => isText(slot) && !headParagraphIds.has(slot.list[slot.index]?.id ?? ''),
+  );
   for (const slot of bodySlots) {
     const next = bodyTexts.shift();
     if (next === undefined) break;

@@ -72,15 +72,23 @@ describe('tokens agree with sheet.css', () => {
     expect(light.indic).toBe(FONTS.indic);
   });
 
-  it('puts the semantic hues on icons only', () => {
+  it('puts the semantic hues on icons only, the info hue through the kit’s primary token', () => {
     expect(declarationsOf(sheet, '.ts-sheet .ic.ok').color).toBe(SEMANTIC.ok);
     expect(declarationsOf(sheet, '.ts-sheet .ic.warn').color).toBe(SEMANTIC.warn);
     expect(declarationsOf(sheet, '.ts-sheet .ic.no').color).toBe(SEMANTIC.no);
-    expect(declarationsOf(sheet, '.ts-sheet .ic.info').color).toBe(SEMANTIC.info);
-    const hueRules = all.filter((rule) =>
-      Object.values(rule.declarations).some((v) =>
-        Object.values(SEMANTIC).some((hue) => v.includes(hue)),
-      ),
+    /* the info hue is the brand kit's Primary (docs/PRODUCT.md 4.1): the icon reads --blue,
+       whose value on both roots is GT blue, with the hue itself as the fallback */
+    expect(declarationsOf(sheet, '.ts-sheet .ic.info').color).toBe(`var(--blue, ${SEMANTIC.info})`);
+    expect(TOKENS.light.blue).toBe(SEMANTIC.info);
+    expect(TOKENS.dark.blue).toBe(SEMANTIC.info);
+    expect(TOKENS.light.accent).toBe(TOKENS.light.blue);
+    const roots = new Set(['.ts-sheet', ".ts-sheet[data-theme='dark']"]);
+    const hueRules = all.filter(
+      (rule) =>
+        !roots.has(rule.selector) &&
+        Object.values(rule.declarations).some((v) =>
+          Object.values(SEMANTIC).some((hue) => v.includes(hue)),
+        ),
     );
     expect(hueRules.every((rule) => rule.selector.startsWith('.ts-sheet .ic.'))).toBe(true);
   });
@@ -228,11 +236,15 @@ describe('the type ladder agrees with the CSS', () => {
       return match === null ? [] : [{ selector: rule.selector, size: Number(match[1]) }];
     });
     const under = sizes.filter((row) => row.size < FLOOR);
-    // head:137 and head:144 set 14 px labels that the slides raise to 15; the counter is chrome at 13 px.
+    // head:137 and head:144 set 14 px labels that the slides raise to 15; the counter is chrome at
+    // 13 px, and the brand kit's frame band (the footer text and the counter the kit draws) keeps
+    // the counter's 13 px (docs/PRODUCT.md 4.1)
     expect(under.map((row) => row.selector).sort()).toEqual([
       '.ts-sheet .counter',
       '.ts-sheet .ladder > div > small',
       '.ts-sheet .lang div small',
+      '.ts-sheet .ts-kit-counter',
+      '.ts-sheet .ts-kit-footer',
     ]);
     expect(
       sizes

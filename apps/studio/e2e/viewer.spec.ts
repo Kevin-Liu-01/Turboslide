@@ -30,9 +30,13 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('the deck opens dark on its first slide with the sheet fitted', async ({ page }) => {
+test('the deck opens in the system appearance on its first slide with the sheet fitted', async ({
+  page,
+}) => {
   await openDeck(page);
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  /* a fresh context follows the system's appearance since the product round (docs/PRODUCT.md
+     3.1, chrome.appearance.first-visit-follows-os); the headless browser's is light */
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   const shell = page.locator('.pt-viewer:not(.ts-skeleton)');
   await expect(shell).toHaveAttribute('data-mode', 'slide');
   await expect(shell).toHaveAttribute('data-index', '0');
@@ -57,11 +61,12 @@ test('g, b, d and p change the mode, the theme and the present state', async ({ 
   await expect(shell).toHaveAttribute('data-mode', 'book');
   await expect(page.locator('.pt-book .pt-page').first()).toBeVisible();
 
-  await body.press('d');
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await expect(page.locator('.pt-book .ts-sheet').first()).toHaveAttribute('data-theme', 'light');
+  /* the fresh context opened light (the system's appearance): d turns it dark, then back */
   await body.press('d');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.locator('.pt-book .ts-sheet').first()).toHaveAttribute('data-theme', 'dark');
+  await body.press('d');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
   // presenting from the book opens the slide first (SPEC 6.9)
   await body.press('p');

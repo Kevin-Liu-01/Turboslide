@@ -78,6 +78,7 @@ import type {
 import { AssetExistsError } from './store.ts';
 import { byNewest, copyDeck, createDeck, deckIdFor, restoreDeck, trashDeck } from './templates.ts';
 import type { DeckHead, TrashState } from './templates.ts';
+import { blobTemplates } from './blob-templates.ts';
 import { createOverlay } from './tmp-store.ts';
 import type { Overlay } from './tmp-store.ts';
 import { readRevision } from './watch.ts';
@@ -120,7 +121,18 @@ export type BlobPutOptions = {
  */
 export type BlobCallOptions = {
   signal?: AbortSignal;
+  /**
+   * The version (etag) the caller knows the body has now, from a `head` or from a manifest that
+   * names it: a client whose body reads go through a CDN (Vercel Blob's public stores) reads until
+   * the copy carries this version, since an overwrite at the same pathname leaves the edge's copy
+   * behind for a few seconds (the product round's ship step: the templates index read stale 1 s
+   * after a delete on another instance). A BlobStaleReadError ends the wait after CDN_LAG_MS.
+   */
+  version?: string;
 };
+
+/** How long a body read waits for the CDN copy to carry the version the caller named. */
+export const CDN_LAG_MS = 6000;
 
 export type BlobClient = {
   /** the entry, or null when the pathname is not stored */
@@ -155,6 +167,27 @@ export class BlobPreconditionError extends Error {
     this.name = 'BlobPreconditionError';
     this.pathname = pathname;
   }
+}
+
+/** A body read that never caught up with the version the caller named (BlobCallOptions.version). */
+export class BlobStaleReadError extends Error {
+  readonly pathname: string;
+  readonly version: string;
+  constructor(pathname: string, version: string) {
+    super(`${pathname} still reads an older copy than ${version} in the Blob store's CDN`);
+    this.name = 'BlobStaleReadError';
+    this.pathname = pathname;
+    this.version = version;
+  }
+}
+
+/** True for a BlobStaleReadError from any copy of this module (see isBlobExistsError). */
+export function isBlobStaleReadError(error: unknown): error is BlobStaleReadError {
+  if (error instanceof BlobStaleReadError) return true;
+  return (
+    error instanceof Error &&
+    (error.name === 'BlobStaleReadError' || / in the Blob store's CDN$/.test(error.message))
+  );
 }
 
 /**
@@ -610,6 +643,118 @@ export const BLOB_LISTING_READ_TIMEOUT_MS = 4_000;
  * other within this time.
  */
 export const LISTING_PHANTOM_TTL_MS = 5 * 60_000;
+
+// ---------------------------------------------------------------------------------------------
+// The fresh deck index (the product round, docs/PRODUCT.md 8.2 the recorded classes; RETURN
+// VERIFICATION R2-F2, ship.md section 5 `decks.card.make-a-copy`): a deck made or copied on one
+// instance listed on another only once `folders('decks/')` showed its folder, up to a minute,
+// so a `/decks` load inside that minute on another instance showed no card for the copy a
+// seller had just made. One record at a fixed pathname, which a `get` reads at the store's head
+// (a pathname read is consistent where the folder listing is not), names the decks made in the
+// last FRESH_DECK_TTL_MS: the create and the copy append the id after their push (one get and
+// one put, event driven), the listing reads it once (one get) and heads the manifests the folder
+// listing lacks (one head each, as for every listed deck). Best effort on both sides: a lost
+// race on the put leaves the old lag for that one deck and never fails the create; a record
+// that cannot be read leaves the listing as it was. Nothing here is a timer.
+
+/** Where the record lives: outside `decks/`, so the folder listing never reads it as a deck. */
+export const FRESH_DECKS_PATH = 'index/fresh-decks.json';
+/** How long a deck stays in the record: past the folder listing's lag with a margin. */
+export const FRESH_DECK_TTL_MS = 2 * 60_000;
+/** The most ids the record holds, newest kept. */
+export const FRESH_DECKS_MAX = 200;
+
+export type FreshDeck = { id: string; at: string };
+
+/** The rows of a stored record; anything malformed reads as no rows. */
+export function parseFreshDecks(bytes: Uint8Array | null | undefined): FreshDeck[] {
+  if (bytes === null || bytes === undefined) return [];
+  try {
+    const raw = JSON.parse(new TextDecoder().decode(bytes)) as { v?: unknown; decks?: unknown };
+    if (raw.v !== 1 || !Array.isArray(raw.decks)) return [];
+    return raw.decks.filter(
+      (row): row is FreshDeck =>
+        typeof row === 'object' &&
+        row !== null &&
+        typeof (row as FreshDeck).id === 'string' &&
+        isSafeKey((row as FreshDeck).id) &&
+        typeof (row as FreshDeck).at === 'string' &&
+        Number.isFinite(Date.parse((row as FreshDeck).at)),
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function freshDecksBytes(rows: readonly FreshDeck[]): Uint8Array {
+  return new TextEncoder().encode(JSON.stringify({ v: 1, decks: rows }));
+}
+
+/** The rows with `id` noted at `at`, the stale rows dropped, newest first, at most FRESH_DECKS_MAX. */
+export function withFreshDeck(
+  rows: readonly FreshDeck[],
+  id: string,
+  at: string,
+  ttlMs: number = FRESH_DECK_TTL_MS,
+): FreshDeck[] {
+  const now = Date.parse(at);
+  const kept = rows.filter((row) => row.id !== id && now - Date.parse(row.at) <= ttlMs);
+  return [{ id, at }, ...kept]
+    .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))
+    .slice(0, FRESH_DECKS_MAX);
+}
+
+/** The ids the record names that are younger than the ttl at `now`. */
+export function freshDeckIdsOf(
+  rows: readonly FreshDeck[],
+  now: number,
+  ttlMs: number = FRESH_DECK_TTL_MS,
+): string[] {
+  return rows.filter((row) => now - Date.parse(row.at) <= ttlMs).map((row) => row.id);
+}
+
+/**
+ * Notes a deck made or copied a moment ago: one get, one put under the record's version (a lost
+ * race is tried once more, then left; the folder listing catches the deck up within its minute).
+ * Never throws: the create it follows has landed already.
+ */
+export async function noteFreshDeck(
+  client: BlobClient,
+  deckId: string,
+  at: string,
+  log: (line: string) => void = () => undefined,
+): Promise<boolean> {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const current = await client.get(FRESH_DECKS_PATH);
+      const rows = withFreshDeck(parseFreshDecks(current?.bytes), deckId, at);
+      await client.put(FRESH_DECKS_PATH, freshDecksBytes(rows), {
+        overwrite: true,
+        contentType: 'application/json',
+        ...(current !== null ? { ifMatch: current.entry.version } : {}),
+      });
+      return true;
+    } catch (error) {
+      if (attempt === 1 || !isBlobPreconditionError(error)) {
+        log(
+          `blob: the fresh deck index was not written for ${deckId}: ${error instanceof Error ? error.message : String(error)}; the folder listing catches it up`,
+        );
+        return false;
+      }
+    }
+  }
+  return false;
+}
+
+/** The decks the record names as fresh at `now`; nothing when the record cannot be read. */
+export async function freshDeckIds(client: BlobClient, now: number): Promise<string[]> {
+  try {
+    const current = await client.get(FRESH_DECKS_PATH);
+    return freshDeckIdsOf(parseFreshDecks(current?.bytes), now);
+  } catch {
+    return [];
+  }
+}
 /** The turn after the deadline in which an answer that arrived during a stall still counts. */
 export const TIMEOUT_GRACE_MS = 250;
 export const BLOB_WRITE_TIMEOUT_MS = 90_000;
@@ -1790,6 +1935,13 @@ export function blobDecks(options: HostedOptions): HostedDecks {
   };
   const stores = new Map<string, BlobStore>();
   const urls = new Map<string, string | null>();
+  // the saved templates across instances (blob-templates.ts; the product round fix round)
+  const templates = blobTemplates({
+    client,
+    decksDir,
+    log,
+    ...(options.now === undefined ? {} : { now: options.now }),
+  });
   /**
    * One listing in flight per shape (by whether the trash is included): the listing is one
    * head per deck the store holds, so a burst of home page loads on one instance (the drivers'
@@ -1920,10 +2072,16 @@ export function blobDecks(options: HostedOptions): HostedDecks {
    * deleted forever elsewhere) answers null at `cardOf` and is left out.
    */
   const deckIds = async (): Promise<string[]> => {
-    const folders = await (await client()).folders('decks/');
+    const c = await client();
+    const folders = await c.folders('decks/');
     const listed = folders
       .map((folder) => folder.slice('decks/'.length).replace(/\/$/, ''))
       .filter((id) => id !== '' && !id.includes('/'));
+    // the decks made anywhere in the last two minutes, whose folders the listing may lag (the
+    // fresh deck index above); each is headed like every listed deck, so a removed one drops out
+    const fresh = (
+      await freshDeckIds(c, Date.parse((options.now ?? (() => new Date().toISOString()))()))
+    ).filter((id) => isSafeKey(id));
     const mirrored = existsSync(decksDir)
       ? readdirSync(decksDir, { withFileTypes: true })
           .filter(
@@ -1935,7 +2093,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
           )
           .map((entry) => entry.name)
       : [];
-    return [...new Set([...listed, ...mirrored])].sort();
+    return [...new Set([...listed, ...fresh, ...mirrored])].sort();
   };
 
   /**
@@ -2168,6 +2326,9 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         throw new TypeError(`decks/${deckId} exists already; pick another name`);
       }
       if (input.from !== 'blank') {
+        // a template saved on another instance is in the store: its folder is pulled first (one
+        // head when nothing moved), so a deck made from it here starts from the saved slides
+        await templates.pull();
         // the GT template's assets folder is the seed deck's (`../../gt-brand/assets`), so every
         // twin of every seed deck is on disk before createDeck copies the folder whole: from the
         // bundle, from the store, else from the static source (SPEC-4 0.35, 3.6)
@@ -2199,6 +2360,8 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       listed.delete(deckId);
       listingInFlight.clear();
       await putPulse(c, deckId, 'deck', options.now === undefined ? {} : { now: options.now });
+      // the listing on another instance shows the deck before the folder listing does
+      await noteFreshDeck(c, deckId, (options.now ?? (() => new Date().toISOString()))(), log);
       return result;
     },
     async copy(input, baseRevision) {
@@ -2240,6 +2403,8 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       listed.delete(deckId);
       listingInFlight.clear();
       await putPulse(c, deckId, 'deck', options.now === undefined ? {} : { now: options.now });
+      // the listing on another instance shows the deck before the folder listing does
+      await noteFreshDeck(c, deckId, (options.now ?? (() => new Date().toISOString()))(), log);
       return result;
     },
     async trash(deckId, baseRevision) {
@@ -2321,6 +2486,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       if (url !== null) urls.set(pathname, url);
       return url;
     },
+    templates,
     facts() {
       return factsFor(options.selection, decksDir, options.seed);
     },

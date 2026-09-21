@@ -222,6 +222,29 @@ describe('the checkpointer', () => {
     expect(events[0]).toMatchObject({ fromSeq: 1, toSeq: 4, revision: 415 });
   });
 
+  it('commits a noted entry as its own record under its history label, the typing around it apart (the product round fix round)', async () => {
+    const before = entryOf(CLIENT_A, kevin, 1, [splice(0, 0, 'A')]);
+    const kit: NewEntry = {
+      ...entryOf(CLIENT_A, kevin, 2, [
+        { op: 'block.set', slideId: SLIDE, blockId: 'list', path: '/size', value: 22 },
+      ]),
+      note: 'Brand kit: Primary',
+    };
+    const after = entryOf(CLIENT_A, kevin, 3, [splice(1, 0, 'a')]);
+    await channel.append('gt-brand', 0, [before, kit, after]);
+    const result = await checkpointer().run({ force: true });
+    expect(result.ok && result.committed.length).toBe(3);
+    const records = await store.records();
+    expect(records.map((r) => [r.note, r.ops?.fromSeq, r.ops?.toSeq])).toEqual([
+      ['', 1, 1],
+      ['Brand kit: Primary', 2, 2],
+      ['', 3, 3],
+    ]);
+    // the checkpoint event names the last record's note, as before
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ fromSeq: 1, toSeq: 3, note: '' });
+  });
+
   it('fires 2 s after the last operation, and at 10 s under continuous typing', async () => {
     const cp = checkpointer();
     await channel.append('gt-brand', 0, [entryOf(CLIENT_A, kevin, 1, [splice(0, 0, 'x')])]);

@@ -373,7 +373,9 @@ test(title('text.link.present-click'), async () => {
   /* the link popover's field is run.link.href (the probe's row text.link.cmd-k-enter reads the
      same id); dialog.link.url is the Insert > Link dialog's field on a block */
   const field = page
-    .locator('[data-control="run.link.href"], [data-control="dialog.link.url"]')
+    .locator(
+      '[data-control="popover.link.url"], [data-control="run.link.href"], [data-control="dialog.link.url"]',
+    )
     .first();
   await field.waitFor({ timeout: 6000 });
   await field.click();
@@ -604,6 +606,401 @@ test(title('comments.toolbar-and-menu-routes'), async () => {
   await page.keyboard.press('Escape');
 });
 
+// ---------------------------------------------------------------------------------------------
+// the product round's rows (docs/PRODUCT.md section 2 ranks 19 and 23, 3.1.1, 3.6, 4.1, 8.1): a
+// slide as a link's target followed in the show, no paper block under the show's bar, the bar on
+// entry and after a pointer move, the presenter's labels in sentence case, and the frame toggles
+// of the kit read in the editor, the show and the presenter. B2 owns the popover and the click in
+// the show, B1 the show's bar and the presenter, B5a the kit; a control not on the build is skipped
+// with its id.
+
+test(title('text.link.slide-target'), async () => {
+  test.setTimeout(150_000);
+  await openEditor(page, deck);
+  await clickCard(page, slides[0]!);
+  const slideId = slides[0]!;
+  await placeBlock(page, slideId, {
+    id: 'slide-link',
+    type: 'text',
+    text: 'Jump to the pricing slide',
+    pos: { x: 300, y: 640, w: 700, h: 100 },
+  });
+  const run = (await runsOfBlock(page, 'slide-link'))[0]!;
+  const el = page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-run="${run}"]`).first();
+  await el.dblclick();
+  await page.waitForTimeout(200);
+  const word = await page.evaluate((r) => {
+    const node = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`);
+    const walker = document.createTreeWalker(node!, NodeFilter.SHOW_TEXT);
+    let text: Text | null;
+    while ((text = walker.nextNode() as Text | null)) {
+      const at = text.textContent?.indexOf('pricing') ?? -1;
+      if (at >= 0) {
+        const range = document.createRange();
+        range.setStart(text, at);
+        range.setEnd(text, at + 'pricing'.length);
+        const rect = range.getBoundingClientRect();
+        return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+      }
+    }
+    return null;
+  }, run);
+  expect(word).not.toBeNull();
+  await page.mouse.dblclick(word!.x, word!.y);
+  await page.waitForTimeout(200);
+  await page.keyboard.press('Meta+k');
+  const slideSelect = page.locator('[data-control="popover.link.slide"]').first();
+  const shown = await slideSelect
+    .waitFor({ timeout: 6000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!shown) {
+    const bare = await ctl(page, 'run.link.href')
+      .isVisible()
+      .catch(() => false);
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    expect(
+      shown,
+      `Cmd+K shows the popover's Slides in this presentation select (the bare field run.link.href ${bare ? 'opened alone' : 'did not open either'}; audit-gaps 4)`,
+    ).toBe(true);
+  }
+  const tag = await slideSelect.evaluate((e) => e.tagName.toLowerCase());
+  /* the options read "<n>. <title>" since the product round (docs/PRODUCT.md section 2 rank 19,
+     InlineText.tsx slideTargets): the third slide is picked by its id, the option's value */
+  if (tag === 'select')
+    await slideSelect
+      .selectOption({ value: slides[2]! }, { timeout: 8000 })
+      .catch(() => slideSelect.selectOption({ label: 'Slide 3' }, { timeout: 8000 }));
+  else {
+    await slideSelect.click();
+    await page
+      .locator('[data-control^="popover.link.slide."], [role="option"]', { hasText: /^Slide 3$/ })
+      .first()
+      .click();
+  }
+  const apply = ctl(page, 'popover.link.apply');
+  if ((await apply.count()) > 0) await apply.click();
+  else await page.keyboard.press('Enter');
+  await page.waitForTimeout(600);
+  await page.keyboard.press('Escape');
+  await settled(page);
+  const stored = JSON.stringify(await objectsOf(page, slideId));
+  /* the product writes a slide link inline as [word](#s/<slideId>) (InlineText.tsx, the show's
+     mountSlideLinkClicks); the field form stays accepted */
+  expect(stored, 'the word carries a slide link').toMatch(/"slide":\s*"[^"]+"|\]\(#s\/[^)]+\)/);
+  await startShow();
+  const linked = page
+    .locator(
+      '.ts-stagewrap.is-present .pt-slide:not(.is-leaving) a, .ts-stagewrap.is-present .pt-slide:not(.is-leaving) [data-link-slide]',
+    )
+    .first();
+  await expect(linked, 'the show draws the linked word').toBeAttached({ timeout: 10_000 });
+  await linked.click();
+  await expect(show(), 'the show jumps to slide 3').toHaveAttribute('data-index', '2', {
+    timeout: 8000,
+  });
+  await leaveShow();
+});
+
+/** The show's bar and what paints paper in the bottom left 400 by 120 px. */
+async function showPaint(): Promise<{
+  barShown: boolean;
+  barOpacity: number | null;
+  paperOutsideBar: number;
+  barRect: { x: number; y: number; w: number; h: number } | null;
+}> {
+  return page.evaluate(() => {
+    const overlay = document.querySelector('[data-control="present.show"]');
+    const bar =
+      overlay?.querySelector('[role="toolbar"], .ts-present-bar, .pt-present-bar, .ts-pbar') ??
+      null;
+    const barRect = bar ? bar.getBoundingClientRect() : null;
+    const cs = bar ? getComputedStyle(bar) : null;
+    const barShown = Boolean(
+      bar &&
+      bar.getClientRects().length > 0 &&
+      cs &&
+      cs.visibility !== 'hidden' &&
+      parseFloat(cs.opacity) > 0.5,
+    );
+    /* every element painted paper in the region, outside the bar */
+    const region = { x: 0, y: window.innerHeight - 120, w: 400, h: 120 };
+    const paper = (c: string) => {
+      const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/.exec(c);
+      if (!m) return false;
+      const a = m[4] === undefined ? 1 : Number(m[4]);
+      return a > 0.5 && Number(m[1]) > 225 && Number(m[2]) > 225 && Number(m[3]) > 225;
+    };
+    let count = 0;
+    for (const el of document.querySelectorAll('body *')) {
+      if (bar && (bar === el || bar.contains(el))) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      const inside =
+        r.left < region.x + region.w &&
+        r.right > region.x &&
+        r.top < region.y + region.h &&
+        r.bottom > region.y;
+      if (!inside) continue;
+      const s = getComputedStyle(el);
+      if (s.visibility === 'hidden' || s.display === 'none' || parseFloat(s.opacity) === 0)
+        continue;
+      if (el.closest('.pt-slide, .ts-sheet')) continue;
+      /* a ground that spans the viewport (the viewer's own region, the stage wrap, the show's
+         letterbox) is the page's paper and not a block in the corner; the checkout's hosting
+         notice (a fixed status strip a deployment with a Blob store never draws) is not the
+         show's either */
+      if (r.width >= window.innerWidth * 0.98 && r.height >= window.innerHeight * 0.98) continue;
+      if (el.matches('.ts-banner[data-state="hosting"], .ts-banner[data-state="hosting"] *'))
+        continue;
+      if (
+        paper(s.backgroundColor) && s.clipPath === 'none' && s.position !== 'static'
+          ? true
+          : paper(s.backgroundColor) && el.getClientRects().length > 0 && !el.closest('.pt-slide')
+      )
+        count += 1;
+    }
+    return {
+      barShown,
+      barOpacity: cs ? parseFloat(cs.opacity) : null,
+      paperOutsideBar: count,
+      barRect: barRect ? { x: barRect.x, y: barRect.y, w: barRect.width, h: barRect.height } : null,
+    };
+  });
+}
+
+test(title('present.show.no-white-block'), async () => {
+  test.setTimeout(120_000);
+  await openEditor(page, deck);
+  await clickCard(page, slides[0]!);
+  await startShow();
+  await page.mouse.move(700, 450);
+  await page.mouse.move(720, 460);
+  await page.waitForTimeout(500);
+  const facts = await showPaint();
+  test.info().annotations.push({ type: 'paint', description: JSON.stringify(facts) });
+  await leaveShow();
+  expect(facts.barShown, 'the bar is up').toBe(true);
+  expect(facts.paperOutsideBar, 'no element but the bar is painted paper in the bottom left').toBe(
+    0,
+  );
+});
+
+test(title('present.show.bar-on-entry'), async () => {
+  test.setTimeout(120_000);
+  await openEditor(page, deck);
+  await clickCard(page, slides[0]!);
+  await startShow();
+  const onEntry = await showPaint();
+  await page.waitForTimeout(4500);
+  const afterWait = await showPaint();
+  await page.mouse.move(700, 450);
+  await page.mouse.move(740, 470);
+  await page.waitForTimeout(400);
+  const afterMove = await showPaint();
+  test.info().annotations.push({
+    type: 'bar',
+    description: `on entry ${onEntry.barShown} (opacity ${onEntry.barOpacity}); after 4.5 s ${afterWait.barShown} (${afterWait.barOpacity}); after a move ${afterMove.barShown} (${afterMove.barOpacity})`,
+  });
+  await leaveShow();
+  expect(onEntry.barShown, 'the bar is visible on entry').toBe(true);
+  expect(afterWait.barShown, 'the bar fades after about 3 s').toBe(false);
+  expect(afterMove.barShown, 'a pointer move brings it back').toBe(true);
+});
+
+test(title('present.presenter.sentence-case'), async () => {
+  test.setTimeout(120_000);
+  await openEditor(page, deck);
+  await clickCard(page, slides[0]!);
+  const opened = context.waitForEvent('page', { timeout: 10_000 });
+  await ctl(page, 'present.arrow').click();
+  await page.locator('#ts-menu-slideshow').waitFor({ timeout: 6000 });
+  await ctl(page, 'menu.title.slideshow.presenterView').click();
+  const presenter = await opened;
+  await presenter.waitForURL(/\/present\//, { timeout: 10_000 });
+  await ctl(presenter, 'presenter').waitFor({ timeout: 20_000 });
+  await presenter.waitForTimeout(500);
+  const facts = await presenter.evaluate(() => {
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--pt-ink-2)';
+    document.body.appendChild(probe);
+    const ink2 = getComputedStyle(probe).color;
+    probe.remove();
+    const root = document.querySelector('[data-control="presenter"]') ?? document.body;
+    const labels = [...root.querySelectorAll('*')]
+      .filter(
+        (el) =>
+          el.children.length === 0 &&
+          /^(Timer|Time|Previous slide|Next slide|TIMER|TIME|PREVIOUS|NEXT|Prev|Elapsed|Clock)$/i.test(
+            el.textContent?.trim() ?? '',
+          ),
+      )
+      .map((el) => {
+        const cs = getComputedStyle(el);
+        return {
+          text: el.textContent?.trim() ?? '',
+          size: parseFloat(cs.fontSize),
+          color: cs.color,
+          transform: cs.textTransform,
+        };
+      });
+    const arrows = ['presenter.previous', 'presenter.next'].map((c) => {
+      const el = document.querySelector(`[data-control="${c}"]`);
+      if (!el) return null;
+      const cs = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return {
+        c,
+        label:
+          el.getAttribute('aria-label') ??
+          el.getAttribute('data-tip') ??
+          el.textContent?.trim() ??
+          '',
+        color: cs.color,
+        size: Math.round(r.height),
+        /* on the first slide Previous is disabled and reads the disabled token on purpose
+           (chrome.disabled.token-both-appearances); the row's ink-2 is the enabled arrow's */
+        disabled: el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true',
+      };
+    });
+    return { ink2, labels, arrows };
+  });
+  await presenter.close();
+  await leaveShow().catch(() => undefined);
+  test.info().annotations.push({ type: 'presenter', description: JSON.stringify(facts) });
+  const words = facts.labels.map((l) => l.text);
+  expect(words, 'the labels read Timer and Time').toEqual(
+    expect.arrayContaining(['Timer', 'Time']),
+  );
+  for (const l of facts.labels) {
+    expect(l.text, 'sentence case, no capitals').toMatch(/^[A-Z][a-z]+( [a-z]+)*$/);
+    expect(l.transform, 'no text-transform').not.toBe('uppercase');
+    expect(Math.abs(l.size - 12.5) < 0.3, `${l.text} at 12.5 px (${l.size})`).toBe(true);
+    expect(l.color, `${l.text} in ink-2`).toBe(facts.ink2);
+  }
+  for (const a of facts.arrows) {
+    expect(a, 'the arrow is drawn').not.toBeNull();
+    expect(a!.label, 'named Previous slide or Next slide').toMatch(/^(Previous slide|Next slide)/);
+    if (!a!.disabled) expect(a!.color, 'in ink-2').toBe(facts.ink2);
+    expect(a!.size, 'at 32 px').toBe(32);
+  }
+  expect(
+    facts.arrows.some((a) => a !== null && !a.disabled),
+    'at least one arrow is enabled and read in ink-2',
+  ).toBe(true);
+});
+
+test(title('brand.frame.toggles'), async () => {
+  test.setTimeout(150_000);
+  await openEditor(page, deck);
+  await clickCard(page, slides[1]!);
+  const actions = await page.evaluate(() =>
+    (window.turboslide?.studio.describe().actions ?? []).map((a: { id: string } | string) =>
+      typeof a === 'string' ? a : a.id,
+    ),
+  );
+  if (!actions.includes('brand.set'))
+    test.skip(true, 'not on this build: brand.set (docs/PRODUCT.md 4.1, B5a)');
+  /* the three toggles through the panel where it is on the build, each row with its sentence */
+  await menuPath(page, 'slide', 'slide.changeTheme');
+  const panel = await ctl(page, 'panel.brand')
+    .waitFor({ timeout: 6000 })
+    .then(() => true)
+    .catch(() => false);
+  let sentences: string[] = [];
+  if (panel) {
+    sentences = await page.evaluate(() =>
+      ['rails', 'rules', 'crosses'].map((k) => {
+        /* the check row, then its sentence under it (ThemesPanel.tsx `.ts-brand-line`, the
+           product's "each with one sentence under it", docs/PRODUCT.md 4.4) */
+        const row = document
+          .querySelector(`[data-control="panel.brand.frame.${k}"]`)
+          ?.closest('label, div, li');
+        const line = row?.nextElementSibling;
+        return `${row?.textContent?.trim() ?? ''} ${line?.classList.contains('ts-brand-line') ? (line.textContent?.trim() ?? '') : ''}`.trim();
+      }),
+    );
+    for (const k of ['rails', 'rules', 'crosses']) {
+      const box = ctl(page, `panel.brand.frame.${k}`);
+      const input = box.locator('input').first();
+      const target = (await input.count()) > 0 ? input : box;
+      if (await target.isChecked().catch(() => true)) await target.click({ force: true });
+      await settled(page);
+    }
+    await ctl(page, 'panel.brand.close')
+      .click()
+      .catch(() => undefined);
+  } else {
+    const s = await settled(page);
+    await invoke(page, 'brand.set', {
+      path: '/frame',
+      value: { rails: false, rules: false, crosses: false },
+      baseRevision: s.revision,
+    });
+    await settled(page);
+  }
+  const frameDrawn = (p: Page, root: string) =>
+    p.evaluate((r) => {
+      const stage = document.querySelector(`${r} .ts-stage`) ?? document.querySelector('.ts-stage');
+      const drawn = (sel: string) =>
+        [...(stage?.querySelectorAll(sel) ?? [])].filter((el) => {
+          const cs = getComputedStyle(el);
+          const box = el.getBoundingClientRect();
+          return (
+            cs.display !== 'none' &&
+            cs.visibility !== 'hidden' &&
+            parseFloat(cs.opacity) > 0 &&
+            box.width > 0 &&
+            box.height > 0
+          );
+        }).length;
+      return {
+        rules: drawn('.frame .rule'),
+        crosses: drawn('.frame .cross'),
+        rails: drawn('.rail, .frame .rail, [data-rail]'),
+      };
+    }, root);
+  const editor = await frameDrawn(page, '.ts-stagewrap.ts-editor');
+  await startShow();
+  const inShow = await frameDrawn(page, '.ts-stagewrap.is-present');
+  await leaveShow();
+  const opened = context.waitForEvent('page', { timeout: 10_000 });
+  await ctl(page, 'present.arrow').click();
+  await page.locator('#ts-menu-slideshow').waitFor({ timeout: 6000 });
+  await ctl(page, 'menu.title.slideshow.presenterView').click();
+  const presenter = await opened;
+  await ctl(presenter, 'presenter').waitFor({ timeout: 20_000 });
+  await presenter.waitForTimeout(500);
+  const inPresenter = await frameDrawn(presenter, '[data-control="presenter"]');
+  await presenter.close();
+  await leaveShow().catch(() => undefined);
+  const s2 = await settled(page);
+  await invoke(page, 'brand.reset', { path: '/frame', baseRevision: s2.revision }).catch(
+    () => undefined,
+  );
+  await settled(page);
+  test.info().annotations.push({
+    type: 'frame',
+    description: `sentences ${JSON.stringify(sentences)}; editor ${JSON.stringify(editor)}; show ${JSON.stringify(inShow)}; presenter ${JSON.stringify(inPresenter)}`,
+  });
+  if (panel) {
+    expect(sentences[0], 'the Rails row carries its sentence').toMatch(
+      /Rails: the margins at the sides of every slide/,
+    );
+    expect(sentences[1], 'the Rules row').toMatch(/Rules: the thin lines that frame the slide/);
+    expect(sentences[2], 'the Crosses row').toMatch(/Crosses: the small marks at the frame/);
+  }
+  for (const [name, f] of [
+    ['the editor', editor],
+    ['the show', inShow],
+    ['the presenter', inPresenter],
+  ] as const)
+    expect([f.rules, f.crosses, f.rails], `${name} draws no rule, cross or rail`).toEqual([
+      0, 0, 0,
+    ]);
+});
+
 coverage(import.meta.filename, [
   'present.slideshow.button',
   'present.slideshow.cmd-enter',
@@ -630,4 +1027,10 @@ coverage(import.meta.filename, [
   'comments.reply',
   'comments.resolve',
   'comments.toolbar-and-menu-routes',
+  /* the product round (docs/PRODUCT.md 8.1) */
+  'text.link.slide-target',
+  'present.show.no-white-block',
+  'present.show.bar-on-entry',
+  'present.presenter.sentence-case',
+  'brand.frame.toggles',
 ]);

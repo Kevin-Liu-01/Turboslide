@@ -1,8 +1,12 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
+import type { BrandKit, KitColor } from '@turboslide/schema/brand';
+import { KIT_COLORS, KIT_COLOR_TOKENS, KIT_COLOR_WORDS } from '@turboslide/schema/brand';
 import { COLOR_LABELS, COLOR_TOKENS, isHexColor } from '@turboslide/schema/color';
-import type { Color } from '@turboslide/schema/color';
+import type { Color, ColorToken } from '@turboslide/schema/color';
+import type { Appearance } from '@turboslide/schema/deck';
+import { TOKENS } from '@turboslide/theme/tokens';
 
 import { swatchPaint } from '../inspector/palette';
 import { cn } from '../lib/cn';
@@ -13,11 +17,16 @@ import { tipProps } from '../Tooltip';
 import './Pickers.css';
 
 /**
- * The colour plate (gslides-parity SPEC 3.2 rows 8, 9, 17; SPEC-2 0.27, 4.2): the twelve palette
- * swatches, None and a hex field, anchored under a toolbar button or a menu row (Format > Borders
- * & lines > Border color). `tones` is the heading and paragraph form: Ink and Muted only. The
- * plate is a dialog that closes on Esc (focus returns to the anchor) and on a click outside; the
- * caller writes the field the plate stands for.
+ * The colour plate (gslides-parity SPEC 3.2 rows 8, 9, 17; SPEC-2 0.27, 4.2; docs/PRODUCT.md
+ * 4.1): the brand kit's six colours first (Text, Background, Captions, Hints, Primary, Accent,
+ * each writing its token so the colour follows the kit; the role's name and hex in the tooltip,
+ * the token id on its second line for agents), the theme tokens second, then None and the Custom
+ * hex field, anchored under a toolbar button or a menu row (Format > Borders & lines > Border
+ * color). `tones` is the older heading and paragraph form: Ink and Muted only, kept for a block
+ * whose schema takes a tone and no colour. The plate is a dialog that closes on Esc (focus
+ * returns to the anchor) and on a click outside; the caller writes the field the plate stands
+ * for. The container is `<control>.menu` (audit-brand 11: it shared `.plate` with the plate
+ * token's swatch).
  */
 export type ColorPlateProps = {
   anchor: HTMLElement;
@@ -26,10 +35,26 @@ export type ColorPlateProps = {
   current: Color | 'none' | undefined;
   /** Ink and Muted only (a heading or paragraph tone) */
   tones?: boolean;
+  /** the deck's brand kit and appearance, for the kit row's hexes; the theme's values when absent */
+  kit?: BrandKit | undefined;
+  appearance?: Appearance;
   onPick: (value: Color | 'none') => void;
   onClose: () => void;
   control: string;
 };
+
+/** The hex a kit role shows in an appearance: the kit's own value, else the theme token's. */
+export function kitRoleHex(
+  kit: BrandKit | undefined,
+  appearance: Appearance,
+  role: KitColor,
+): string {
+  const own = kit?.colors?.[appearance]?.[role];
+  if (own !== undefined) return own;
+  const token = KIT_COLOR_TOKENS[role] as keyof (typeof TOKENS)['light'];
+  const value = TOKENS[appearance][token];
+  return typeof value === 'string' ? value : '';
+}
 
 /** Where an anchored plate opens: under the anchor, kept inside the viewport. */
 export function anchoredAt(
@@ -50,6 +75,8 @@ export function ColorPlate({
   label,
   current,
   tones = false,
+  kit,
+  appearance = 'light',
   onPick,
   onClose,
   control,
@@ -89,14 +116,23 @@ export function ColorPlate({
     }
   };
 
+  /* the kit's six colours first: each swatch writes its token (KIT_COLOR_TOKENS), so a heading
+     painted Primary follows the kit when the kit changes; the swatch paints the kit's hex */
+  const kitOptions: ReadonlyArray<{ value: ColorToken; role: KitColor; hex: string }> = tones
+    ? []
+    : KIT_COLORS.map((role) => ({
+        value: KIT_COLOR_TOKENS[role] as ColorToken,
+        role,
+        hex: kitRoleHex(kit, appearance, role),
+      }));
   const options: ReadonlyArray<{ value: Color | 'none'; label: string }> = tones
     ? [
         { value: 'ink', label: 'Ink' },
         { value: 'titanium', label: 'Muted' },
       ]
     : [
-        { value: 'none', label: words.none },
         ...COLOR_TOKENS.map((token) => ({ value: token, label: COLOR_LABELS[token] })),
+        { value: 'none', label: words.none },
       ];
   const shown: Color | 'none' = current ?? (tones ? 'ink' : 'none');
   const hexTip = tipProps({ name: words.custom, doc: words.hex, key: 'Enter' });
@@ -108,9 +144,30 @@ export function ColorPlate({
       role="dialog"
       aria-label={label}
       style={{ left: at.left, top: at.top }}
-      data-control={`${control}.plate`}
+      data-control={`${control}.menu`}
       onKeyDown={onKey}
     >
+      {kitOptions.length > 0 ? (
+        <div className="ts-color-grid ts-color-kit" role="group" aria-label="Brand kit colours">
+          {kitOptions.map((option) => (
+            <button
+              key={option.role}
+              type="button"
+              className={cn('ts-color-swatch', shown === option.value && 'is-on')}
+              aria-label={KIT_COLOR_WORDS[option.role].name}
+              aria-pressed={shown === option.value}
+              data-control={`${control}.kit.${option.role}`}
+              data-token={option.value}
+              style={{ background: option.hex }}
+              onClick={() => onPick(option.value)}
+              {...tipProps({
+                name: `${KIT_COLOR_WORDS[option.role].name} ${option.hex}`,
+                doc: `${KIT_COLOR_WORDS[option.role].line}; the token ${option.value}`,
+              })}
+            />
+          ))}
+        </div>
+      ) : null}
       <div className="ts-color-grid">
         {options.map((option) => (
           <button

@@ -16,6 +16,12 @@ import './Tooltip.css';
  * component, ported or new, attaches it through `tipProps` without a provider, and the text is
  * written with textContent, never markup.
  *
+ * Where a tooltip does not fire (docs/PRODUCT.md 3.1.1; audit-interface 4): on keyboard focus
+ * inside a menu, a right click menu or a dialog, because the first row of every menu and the
+ * autofocused control of every dialog took focus on open and drew a plate over the rows and the
+ * card under them; hover alone shows a tooltip there. The toolbar and the title row keep their
+ * focus tooltips, where a keyboard user needs the name.
+ *
  * Contract for every control surface: the anchor carries `data-tip` (the name), which
  * scripts/tooltip-audit.mjs reads to find interactive elements that have none; the anchor also
  * carries `aria-describedby="pt-tip"` while its tooltip is up. New in Turboslide (no Prototemplate
@@ -47,6 +53,14 @@ const VIEWPORT_MARGIN = 8;
 
 /** A press on the anchor within this window keeps the focus that follows it from showing the tip. */
 const PRESS_GRACE_MS = 400;
+
+/** Inside these surfaces a tooltip shows on hover alone, never on keyboard focus (3.1.1). */
+export const QUIET_FOCUS_SURFACES = '.ts-menu, .ts-context-menu, [role="dialog"]';
+
+/** True when a focus on the anchor must not show its tooltip: the anchor sits in a menu or a dialog. */
+export function quietOnFocus(anchor: HTMLElement): boolean {
+  return anchor.closest(QUIET_FOCUS_SURFACES) !== null;
+}
 
 /* the words a key chip may be made of, beyond single characters and F keys */
 const KEY_WORDS = new Set([
@@ -337,6 +351,7 @@ export function tipProps(input: TipInput, label?: string): TipAnchorProps {
       hideTooltip();
     },
     onFocus: (event) => {
+      if (quietOnFocus(event.currentTarget)) return;
       if (keyboardFocus(event.currentTarget)) showTooltip(event.currentTarget, content);
     },
     onBlur: (event) => hideTooltip(event.currentTarget),

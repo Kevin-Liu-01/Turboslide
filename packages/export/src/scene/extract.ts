@@ -26,6 +26,7 @@ import type { Asset } from '@turboslide/schema/assets';
 import { NATIVE_BLOCK_TYPES } from '@turboslide/schema/export';
 import type { ExportMode } from '@turboslide/schema/export';
 import type { Theme } from '@turboslide/schema/render';
+import { fontFileDataUri } from '@turboslide/fonts/catalog-node';
 import { renderDeck } from '@turboslide/render/deck';
 import { loadThemeBundle } from '@turboslide/render/theme-node';
 import { openSheetPage, SHEET } from '@turboslide/headless/context';
@@ -240,6 +241,12 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
         slideIds: ids,
         numbering: play,
         title: `${deck.title} (${theme})`,
+        // the catalog faces the deck uses ride inside the slides as data URIs (docs/PRODUCT.md
+        // 4.2, the export capture fix of VERIFICATION-5 finding 5): the headless page draws the
+        // face, so the Editable text export names it in a:latin typeface and the PDF embeds the
+        // subset; a deck set in Inter alone emits nothing here
+        fontSrc: (id, file) => fontFileDataUri(id, file.file),
+        deckSlides: Object.values(slides),
       });
       warnings.push(...rendered.warnings.map((w) => `render [${theme}]: ${w}`));
       const file = await writeTempDocument(rendered.html, `deck-${theme}.html`, tmp);

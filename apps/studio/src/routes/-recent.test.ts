@@ -75,3 +75,42 @@ describe('the Recent cookie', () => {
     expect(kept[0]?.id).toBe(`deck-${RECENT_MAX}`);
   });
 });
+
+// The trashed marker (docs/PRODUCT.md section 2 ranks 15 and 16; the rows decks.recent.drops-trashed
+// and decks.trash.editor-undo-snackbar): the editor writes it before it leaves for /decks, the home
+// page takes it once, young and well formed, with the facts Undo restores the Recent entry from.
+describe('the trashed marker', () => {
+  const storage = () => {
+    const map = new Map<string, string>();
+    return {
+      getItem: (key: string) => map.get(key) ?? null,
+      setItem: (key: string, value: string) => void map.set(key, value),
+      removeItem: (key: string) => void map.delete(key),
+    };
+  };
+
+  it('is taken once, with its facts, while young', async () => {
+    const { TRASHED_KEY, TRASHED_MAX_AGE_MS, takeTrashedMarker } = await import('./-recent');
+    const store = storage();
+    store.setItem(
+      TRASHED_KEY,
+      JSON.stringify({
+        id: 'deck-1',
+        title: 'Pitch',
+        at: 1000,
+        facts: { title: 'Pitch', appearance: 'light', firstSlide: 's1', revision: 4 },
+      }),
+    );
+    expect(takeTrashedMarker(1500, store)).toEqual({
+      id: 'deck-1',
+      title: 'Pitch',
+      at: 1000,
+      facts: { title: 'Pitch', appearance: 'light', firstSlide: 's1', revision: 4 },
+    });
+    expect(takeTrashedMarker(1500, store)).toBeNull();
+    store.setItem(TRASHED_KEY, JSON.stringify({ id: 'deck-2', title: 'Old', at: 0 }));
+    expect(takeTrashedMarker(TRASHED_MAX_AGE_MS + 1, store)).toBeNull();
+    store.setItem(TRASHED_KEY, 'not json');
+    expect(takeTrashedMarker(10, store)).toBeNull();
+  });
+});

@@ -8,7 +8,12 @@ import type { ColsRatio } from '@turboslide/schema/deck';
 
 export type ThemeName = 'light' | 'dark';
 
-/** The nine sheet tokens of DECK-GRAMMAR.md:28 plus --thumb, which the viewer's scrollbars use. */
+/**
+ * The nine sheet tokens of DECK-GRAMMAR.md:28 plus --thumb, which the viewer's scrollbars use,
+ * plus the brand kit's two key colours (docs/PRODUCT.md 4.1): --blue, GT blue, the kit's Primary
+ * role (links, the key colour of charts and highlights; the schema's `blue` colour reads it), and
+ * --accent, the kit's second colour, the same value until a kit sets it apart.
+ */
 export const TOKEN_NAMES = [
   'paper',
   'ink',
@@ -20,6 +25,8 @@ export const TOKEN_NAMES = [
   'cross',
   'edge',
   'thumb',
+  'blue',
+  'accent',
 ] as const;
 export type TokenName = (typeof TOKEN_NAMES)[number];
 
@@ -35,6 +42,8 @@ export const TOKENS: Readonly<Record<ThemeName, Readonly<Record<TokenName, strin
     cross: 'rgba(7, 7, 7, 0.38)',
     edge: 'rgba(7, 7, 7, 0.62)',
     thumb: 'rgba(7, 7, 7, 0.32)',
+    blue: '#2f5ce0',
+    accent: '#2f5ce0',
   },
   dark: {
     paper: '#070707',
@@ -47,6 +56,8 @@ export const TOKENS: Readonly<Record<ThemeName, Readonly<Record<TokenName, strin
     cross: 'rgba(255, 255, 255, 0.34)',
     edge: 'rgba(242, 242, 240, 0.55)',
     thumb: 'rgba(242, 242, 240, 0.32)',
+    blue: '#2f5ce0',
+    accent: '#2f5ce0',
   },
 };
 
@@ -141,6 +152,17 @@ export const CROSS = { size: 11, offset: 51 } as const;
 /** The wordmark at left 72, bottom 18, 18 px tall; the counter at right 72, bottom 22, 13 px (head:51-52). */
 export const WORDMARK = { left: 72, bottom: 18, height: 18 } as const;
 export const COUNTER = { right: 72, bottom: 22, fontSize: 13 } as const;
+/**
+ * The brand kit's slots (docs/PRODUCT.md 4.1, 4.4): the title slide's logo box and the footer's
+ * logo box the kit fits a picture into, and the inset of a slot moved to a corner (the frame's
+ * cross offset plus the rail's inner margin, so a corner logo sits inside the rules).
+ */
+export const KIT_SLOTS = {
+  mark: { w: 132, h: 84 },
+  footer: { h: 18, maxW: 120 },
+  cornerInset: 72,
+  cornerTop: 22,
+} as const;
 /** The two paper chips under the wordmark and the counter on full-picture slides (SPEC 5.2). */
 export const CHIPS = [
   { x: 66, y: 858, w: 40, h: 30 },

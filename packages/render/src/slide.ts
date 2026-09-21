@@ -18,6 +18,10 @@ import { normalizeRotation } from '@turboslide/schema/position';
 import type { Box, Theme } from '@turboslide/schema/render';
 import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 import { importResidual } from '@turboslide/schema/ext';
+import type { SlotPosition } from '@turboslide/schema/brand';
+import type { FontSrc } from './fonts.ts';
+import { deckFontsCss, routeFontSrc } from './fonts.ts';
+import { THEME_CSS_CLASS, themeCss } from './theme-css.ts';
 
 export type RenderOptions = {
   theme: Theme;
@@ -49,6 +53,23 @@ export type RenderOptions = {
    * frame module from the sanitized markup; absent, the block renders as the scoped escape.
    */
   htmlFrame?: (block: BlockOf<'html'>) => HtmlFrameSource | undefined;
+  /**
+   * Where a catalog face's woff2 comes from (docs/PRODUCT.md 4.2; fonts.ts): the studio's fonts
+   * route when absent, a data URI or a file URL for a self contained document (the export's
+   * capture passes @turboslide/fonts/catalog-node's).
+   */
+  fontSrc?: FontSrc;
+  /**
+   * The slides the deck holds, for the @font-face rules of every catalog face the deck uses
+   * (fonts.ts usedFontIds): the slide alone when absent, so a surface that renders one slide
+   * still loads that slide's faces and the brand kit's two roles.
+   */
+  deckSlides?: Iterable<Slide>;
+  /**
+   * Leave the kit's stylesheet out of the slide (docs/PRODUCT.md 4.1): a caller that mounts
+   * themeCss once for the page (a tile that shows the base theme with `data-theme-base`).
+   */
+  noKitCss?: boolean;
 };
 
 export type RenderedSlide = {
@@ -166,9 +187,15 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
   };
   const residual = importResidual(slide.ext);
   const scopeClass = residual?.css ? `ts-x-${slide.id}` : undefined;
-  const scopedCss = residual?.css
-    ? `<style>${rewriteSlideScope(residual.css, `.ts-x-${slide.id}`)}</style>`
-    : '';
+  // the brand kit's stylesheet and the catalog faces (docs/PRODUCT.md 4.1, 4.2) ride inside the
+  // slide, so every surface that renders slides through this one function carries them: the
+  // editor stage, the filmstrip clones, the layout tiles, the show, the print document, the
+  // standalone file and the export capture. Empty for a deck without a record that uses the
+  // theme's face alone, so every deck stored before the kit renders byte for byte.
+  const kitCss = options.noKitCss === true ? '' : kitStyle(deck, slide, options);
+  const scopedCss =
+    kitCss +
+    (residual?.css ? `<style>${rewriteSlideScope(residual.css, `.ts-x-${slide.id}`)}</style>` : '');
   // The residual rules are written against `.ts-x-<slideId>`; rewriteSlideScope prefixes `.ts-sheet`
   // so they keep the cascade weight they had in the deck, where the theme's rules had one class less.
   const common = {
@@ -240,8 +267,11 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
       break;
     }
     case 'title': {
-      // The title slide (s02:3-7): the mark, h1 44 px below it, the lead 26 px below that.
-      const mark = markSvg(ctx, 'mark', slide.mark.w, slide.mark.h);
+      // The title slide (s02:3-7): the mark, h1 44 px below it, the lead 26 px below that. The
+      // brand kit's logo slot (docs/PRODUCT.md 4.1, 4.4) replaces the mark with a picture, empties
+      // it or moves it to a corner; a deck without a record draws the GT mark as before.
+      const slot = titleMarkSlot(deck, slide.mark, ctx);
+      const mark = slot.inFlow;
       const h1 = el(
         'h1',
         {
@@ -273,7 +303,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
           el(
             'div',
             { class: 'in' },
-            el('div', { class: 'left-mid', 'data-slot': 'main' }, mark + h1 + lead),
+            el('div', { class: 'left-mid', 'data-slot': 'main' }, mark + h1 + lead) + slot.corner,
           ),
       );
       slots = slotBoxesAsRecord({ type: 'left-mid' });
@@ -313,6 +343,68 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     }
   }
   return { html, slots, rasters: ctx.rasters, warnings: ctx.warnings };
+}
+
+/**
+ * The `<style>` a slide carries for the brand kit and the catalog faces: the override stylesheet
+ * (theme-css.ts themeCss) and the @font-face rules of the faces the deck uses (fonts.ts). One
+ * element, class `ts-kit-css`, empty string when there is nothing to say.
+ */
+export function kitStyle(deck: Deck, slide: Slide, options: RenderOptions): string {
+  const css = [
+    themeCss(deck),
+    deckFontsCss(deck, options.deckSlides ?? [slide], options.fontSrc ?? routeFontSrc),
+  ]
+    .filter((part) => part !== '')
+    .join('\n');
+  return css === '' ? '' : `<style class="${THEME_CSS_CLASS}">${css}</style>`;
+}
+
+/**
+ * The title slide's logo slot (docs/PRODUCT.md 4.1, 4.4): the GT mark in the flow above the
+ * heading for a deck without a record or with `mark.kind: 'default'`; a picture fitted into the
+ * 132 by 84 box (or the record's box) for `'picture'`; nothing for `'none'` or a hidden position;
+ * and, for a corner position, the same logo in the kit layer at that corner of the sheet instead
+ * of in the flow. A picture whose asset the deck lacks draws the default logo.
+ */
+export function titleMarkSlot(
+  deck: Deck,
+  markBox: { w: number; h: number },
+  ctx: BlockContext,
+): { inFlow: string; corner: string } {
+  const kit = deck.brand;
+  // a deck without a record, or a record silent about the slot, draws the GT mark byte for byte
+  if (kit === undefined || (kit.mark === undefined && kit.positions?.mark === undefined))
+    return { inFlow: markSvg(ctx, 'mark', markBox.w, markBox.h), corner: '' };
+  const position: SlotPosition = kit.positions?.mark ?? 'bottom-left';
+  const kind = kit.mark?.kind ?? 'default';
+  if (kind === 'none' || position === 'hidden') return { inFlow: '', corner: '' };
+  const box = kit.mark?.box ?? markBox;
+  let logo: string;
+  const assetId = kit.mark?.assetId;
+  const image = kind === 'picture' && assetId !== undefined ? ctx.image(assetId) : undefined;
+  if (kind === 'picture' && image !== undefined) {
+    const [w, h] = image.size ?? [box.w, box.h];
+    const ratio = w > 0 && h > 0 ? w / h : 1;
+    const fit =
+      ratio >= box.w / box.h
+        ? { w: box.w, h: Math.round(box.w / ratio) }
+        : { w: Math.round(box.h * ratio), h: box.h };
+    logo = `<img class="mark mark-picture" src="${escapeAttr(image.src)}"${attrs(twinAttrs(image))} width="${fit.w}" height="${fit.h}" alt="${escapeAttr(image.alt)}" data-slot="mark">`;
+  } else {
+    logo = markSvg(ctx, 'mark', box.w, box.h, { class: 'mark', 'data-slot': 'mark' });
+  }
+  // the default corner of the title mark is the flow (the left mid stack); a named corner takes
+  // the logo out of the flow into the kit layer at the sheet's corner
+  if (kit.positions?.mark === undefined) return { inFlow: logo, corner: '' };
+  return {
+    inFlow: '',
+    corner: el(
+      'div',
+      { class: 'ts-kit', 'aria-hidden': 'true' },
+      el('div', { class: classes('ts-kit-logo', 'is-mark', `pos-${position}`) }, logo),
+    ),
+  };
 }
 
 function slotBoxesAsRecord(layout: Layout): Record<string, Box> {

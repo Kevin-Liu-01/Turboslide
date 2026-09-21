@@ -10,7 +10,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import type { Deck, Slide } from './deck.ts';
+import type { Deck, LayoutId, Slide } from './deck.ts';
 import { LAYOUT_IDS, slideBlocks } from './deck.ts';
 import { WORKED_DECK, workedDocument } from './fixtures.ts';
 import { ICON_NAMES } from './icons.ts';
@@ -27,6 +27,7 @@ import {
   pickAsset,
   pickPicture,
   promptFor,
+  subtitleParagraphId,
 } from './layouts.ts';
 import { validateDeck } from './validate.ts';
 
@@ -37,6 +38,11 @@ const GT_TEMPLATE_JSON = join(DECKS, 'templates', 'gt-brand', 'template.json');
 function readJson<T>(file: string): T {
   return JSON.parse(readFileSync(file, 'utf8')) as T;
 }
+
+/** The product round's Title, subtitle and body id; typed as a LayoutId until it lands in LAYOUT_IDS (build/b3.md R1). */
+const SUBTITLE_ID = 'subtitle-body' as LayoutId;
+/** Whether that id has landed in LAYOUT_IDS. */
+const SUBTITLE_BODY = isLayoutId(SUBTITLE_ID);
 
 /** The blank template's manifest: the four starter pictures and one title slide. */
 const blankDeck = readJson<Deck>(join(BLANK_TEMPLATE, 'deck.json'));
@@ -87,14 +93,18 @@ function texts(slide: Slide): string[] {
 }
 
 describe('LAYOUTS', () => {
-  it('lists the 21 ids of SPEC 5.2 in order, Google’s eleven first with google: true', () => {
+  it('lists the ids of SPEC 5.2 in order, Google’s eleven first with google: true, the GT layouts after', () => {
     expect(LAYOUTS.map((entry) => entry.id)).toEqual([...LAYOUT_IDS]);
-    expect(LAYOUTS).toHaveLength(21);
+    expect(LAYOUTS).toHaveLength(LAYOUT_IDS.length);
     expect(GOOGLE_LAYOUT_COUNT).toBe(11);
     expect(LAYOUTS.slice(0, 11).map((entry) => [entry.id, entry.label])).toEqual(GOOGLE_ELEVEN);
     expect(LAYOUTS.slice(0, 11).every((entry) => entry.google)).toBe(true);
     expect(LAYOUTS.slice(11).every((entry) => !entry.google)).toBe(true);
-    expect(LAYOUTS.slice(11).map((entry) => entry.label)).toEqual([
+    // the product round's Title, subtitle and body is the first GT layout once its id is in
+    // LAYOUT_IDS (docs/PRODUCT.md section 2 rank 2; build/b3.md R1)
+    const gtLabels = LAYOUTS.slice(11).map((entry) => entry.label);
+    expect(gtLabels).toEqual([
+      ...(SUBTITLE_BODY ? ['Title, subtitle and body'] : []),
       'Ruled rows',
       'Ruled statement list',
       'Title and table',
@@ -107,19 +117,30 @@ describe('LAYOUTS', () => {
       'Closing',
     ]);
     expect(layoutGroups().google).toHaveLength(11);
-    expect(layoutGroups().gt).toHaveLength(10);
+    expect(layoutGroups().gt).toHaveLength(LAYOUT_IDS.length - 11);
   });
 
-  it('names a sprite icon, a kind, a one sentence doc and the picture need per entry', () => {
+  it('names a sprite icon, a kind, a one sentence doc, the seller sentence and the picture need per entry', () => {
     for (const entry of LAYOUTS) {
       expect(ICON_NAMES, `${entry.id} icon`).toContain(entry.icon);
       expect(entry.doc.endsWith('.'), `${entry.id} doc`).toBe(true);
+      // the seller sentence (docs/PRODUCT.md rank 24): the name, a colon, the contents; "your
+      // logo" and never "your mark"; no trailing period, as the spec's shapes are written
+      expect(entry.sentence.startsWith(`${entry.label}: `), `${entry.id} sentence`).toBe(true);
+      expect(entry.sentence.endsWith('.'), `${entry.id} sentence period`).toBe(false);
+      expect(/\bmark\b/i.test(entry.sentence), `${entry.id} sentence says mark`).toBe(false);
+      expect(entry.sentence.length).toBeLessThan(120);
       expect(entry.needsPicture).toBe(
         entry.kind === 'opener' || entry.kind === 'mood' || entry.kind === 'closing',
       );
       if (entry.kind === 'content') expect(entry.layout, entry.id).toBeDefined();
       else expect(entry.layout, entry.id).toBeUndefined();
     }
+    expect(layoutEntry('title').sentence).toBe('Title slide: your logo, a title and a subtitle');
+    expect(layoutEntry('split').sentence).toBe('Title and body: a title over one body');
+    expect(layoutEntry('cols').sentence).toBe(
+      'Title and two columns: a title over two columns of text',
+    );
     expect(layoutEntry('big-number').label).toBe('Big number');
     expect(() => layoutEntry('nope')).toThrow(RangeError);
     expect(isLayoutId('table')).toBe(true);
@@ -154,6 +175,45 @@ describe('LAYOUTS', () => {
       expect(nonEmpty.length, `${entry.id}: ${nonEmpty.join(' | ')}`).toBe(expectedNonEmpty);
       if (entry.id !== 'blank') expect(lines.length, entry.id).toBeGreaterThan(0);
     }
+  });
+
+  it('makes Title and body one title over one body, and keeps the 4/8 head as Title, subtitle and body (docs/PRODUCT.md rank 2)', () => {
+    const split = layoutEntry('split').make('x', blankDeck, 'deck');
+    expect(split?.kind === 'content' && split.layout).toMatchObject({
+      type: 'split',
+      head: 'single',
+    });
+    expect(split?.kind === 'content' && Object.keys(split.slots)).toEqual(['head', 'body']);
+    expect(split?.kind === 'content' && split.slots.head?.map((b) => b.type)).toEqual(['heading']);
+    expect(split?.kind === 'content' && split.slots.body?.map((b) => b.type)).toEqual([
+      'paragraph',
+    ]);
+    // the two prompts on the slide never read the same
+    if (split?.kind === 'content') {
+      const [head] = split.slots.head ?? [];
+      const [body] = split.slots.body ?? [];
+      expect(promptFor({ slide: split, block: head, path: '/text' })).toBe(PROMPTS.title);
+      expect(promptFor({ slide: split, block: body, path: '/text' })).toBe(PROMPTS.text);
+    }
+    if (SUBTITLE_BODY) {
+      const withSubtitle = layoutEntry(SUBTITLE_ID).make('x', blankDeck, 'deck');
+      expect(withSubtitle?.kind === 'content' && withSubtitle.layout).toMatchObject({
+        type: 'split',
+        head: { cols: '4/8' },
+      });
+      expect(withSubtitle?.kind === 'content' && Object.keys(withSubtitle.slots)).toEqual([
+        'headLeft',
+        'headRight',
+        'body',
+      ]);
+      expect(subtitleParagraphId(SUBTITLE_ID)).toBe('p1');
+      expect(LAYOUTS[11]?.id).toBe(SUBTITLE_ID);
+    }
+    expect(subtitleParagraphId('split')).toBeUndefined();
+    expect(subtitleParagraphId('tiles')).toBe('p1');
+    expect(subtitleParagraphId('details')).toBe('p1');
+    expect(subtitleParagraphId('board')).toBe('p1');
+    expect(subtitleParagraphId('table')).toBeUndefined();
   });
 
   it('follows the block table of SPEC 5.2 for the new entries', () => {
@@ -275,6 +335,41 @@ describe('promptFor', () => {
     const p = { id: 'p', type: 'paragraph' as const, text: '' };
     expect(promptFor({ slide: { kind: 'content' }, block: p, path: '/text' })).toBe(PROMPTS.text);
   });
+
+  it('prompts the head paragraph of a two column head with the subtitle word (docs/PRODUCT.md rank 2)', () => {
+    const p1 = { id: 'p1', type: 'paragraph' as const, text: '' };
+    // the renderer passes the kind and the template alone
+    expect(
+      promptFor({ slide: { kind: 'content', template: 'tiles' }, block: p1, path: '/text' }),
+    ).toBe(PROMPTS.subtitle);
+    expect(
+      promptFor({ slide: { kind: 'content', template: 'board' }, block: p1, path: '/text' }),
+    ).toBe(PROMPTS.subtitle);
+    if (SUBTITLE_BODY) {
+      expect(
+        promptFor({ slide: { kind: 'content', template: SUBTITLE_ID }, block: p1, path: '/text' }),
+      ).toBe(PROMPTS.subtitle);
+      // the body paragraph of the same layout keeps the text word
+      const p2 = { ...p1, id: 'p2' };
+      expect(
+        promptFor({ slide: { kind: 'content', template: SUBTITLE_ID }, block: p2, path: '/text' }),
+      ).toBe(PROMPTS.text);
+    }
+    // a single head layout has no subtitle, whatever the paragraph's id
+    expect(
+      promptFor({ slide: { kind: 'content', template: 'one-column' }, block: p1, path: '/text' }),
+    ).toBe(PROMPTS.text);
+    expect(
+      promptFor({ slide: { kind: 'content', template: 'split' }, block: p1, path: '/text' }),
+    ).toBe(PROMPTS.text);
+    // a caller with the whole slide: the slot decides, template or not
+    const made = layoutEntry('tiles').make('x', blankDeck, 'deck');
+    if (made?.kind === 'content') {
+      const right = made.slots.headRight?.[0];
+      const { template: _t, ...bare } = made;
+      expect(promptFor({ slide: bare, block: right, path: '/text' })).toBe(PROMPTS.subtitle);
+    }
+  });
 });
 
 describe('derivedLayout', () => {
@@ -286,6 +381,21 @@ describe('derivedLayout', () => {
       expect(derivedLayout(bare as Slide), entry.id).toBe(entry.id);
       expect(derivedLayout({ ...slide, template: 'matrix' }), entry.id).toBe('matrix');
     }
+  });
+
+  it('reads a slide on the old 4/8 Title and body as Title, subtitle and body once that id exists, else as Title and body', () => {
+    const legacy: Slide = {
+      schemaVersion: 1,
+      id: 'legacy',
+      kind: 'content',
+      layout: { type: 'split', gap: 56, head: { cols: '4/8' }, body: { align: 'center' } },
+      slots: {
+        headLeft: [{ id: 'h', type: 'heading', level: 'h2', text: 'Agenda' }],
+        headRight: [{ id: 'p1', type: 'paragraph', text: '' }],
+        body: [{ id: 'p2', type: 'paragraph', text: '', measure: 56 }],
+      },
+    };
+    expect(derivedLayout(legacy)).toBe(SUBTITLE_BODY ? SUBTITLE_ID : 'split');
   });
 
   it('falls back to Title and body for a content slide and to the kind for the others', () => {

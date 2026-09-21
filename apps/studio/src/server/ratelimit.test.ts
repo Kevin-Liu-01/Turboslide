@@ -3,11 +3,14 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { setSecurityLogSink } from './log';
 import type { SecurityLine } from './log';
 import {
+  ASSIST_DAY_CAP_ENV,
   DECK_CAPS,
   QUOTAS,
   QUOTA_NAMES,
   RateLimitedError,
+  assistDayCap,
   bindRateLimiter,
+  checkAssistQuotas,
   checkQuota,
   hasUpstash,
   kvLimiter,
@@ -21,7 +24,7 @@ import {
   upstashLimiter,
   warnPerInstanceQuotas,
 } from './ratelimit';
-import type { LimiterKv, UpstashRatelimitLike } from './ratelimit';
+import type { LimiterKv, QuotaContext, UpstashRatelimitLike } from './ratelimit';
 
 // The application quotas of gslides-parity SPEC-3 8.3: the table with its three tiers, the
 // memory, kv and Upstash (behind a fake) backends, the 429 with Retry-After and the sentence, and
@@ -234,5 +237,92 @@ describe('the hosted degraded tier (VERIFICATION-3 finding 17)', () => {
     const ctx = { identity: 'anon_2', tier: 'anonymous' as const };
     for (let i = 0; i < 5; i += 1) expect(await checkQuota('exportsPerDay', ctx)).toBeNull();
     expect(await checkQuota('exportsPerDay', ctx)).toBeInstanceOf(RateLimitedError);
+  });
+});
+
+describe('the assist quotas (docs/PRODUCT.md 6.3, 8.3)', () => {
+  const ctx = (identity: string, deckId: string): QuotaContext => ({
+    identity,
+    tier: 'anonymous',
+    deckId,
+    action: 'assist.propose',
+    transport: 'route',
+  });
+
+  it('carries the two rows with the tiers and the sentence the specification names', () => {
+    expect(QUOTAS.assistCallsPerMinutePerDeck.limits).toEqual({
+      anonymous: 6,
+      account: 20,
+      agent: 60,
+    });
+    expect(QUOTAS.assistCallsPerMinutePerDeck.perDeck).toBe(true);
+    expect(QUOTAS.assistCallsPerDay.limits).toEqual({ anonymous: 20, account: 300, agent: 1_000 });
+    expect(QUOTAS.assistCallsPerMinutePerDeck.sentence).toBe(
+      'Too many assistant requests. Try again in a minute',
+    );
+    expect(ASSIST_DAY_CAP_ENV).toBe('TURBOSLIDE_ASSIST_DAY_CAP');
+    expect(assistDayCap({})).toBe(20);
+    expect(assistDayCap({ TURBOSLIDE_ASSIST_DAY_CAP: '60' })).toBe(60);
+    expect(assistDayCap({ TURBOSLIDE_ASSIST_DAY_CAP: 'sixty' })).toBe(20);
+    expect(assistDayCap({ TURBOSLIDE_ASSIST_DAY_CAP: '0' })).toBe(20);
+  });
+
+  it('refuses the seventh call in a minute on one deck and admits the seventh on another deck', async () => {
+    let t = 0;
+    bindRateLimiter(memoryLimiter(() => t));
+    for (let i = 0; i < 6; i += 1)
+      expect(await checkAssistQuotas(ctx('anon_a', 'deck-1'), {})).toBeNull();
+    const seventh = await checkAssistQuotas(ctx('anon_a', 'deck-1'), {});
+    expect(seventh).toBeInstanceOf(RateLimitedError);
+    expect(seventh?.quota).toBe('assistCallsPerMinutePerDeck');
+    expect(seventh?.message).toBe('Too many assistant requests. Try again in a minute');
+    expect(rateLimitedResponse(seventh as RateLimitedError).status).toBe(429);
+    // the minute row is per deck: the same identity on another deck is admitted
+    expect(await checkAssistQuotas(ctx('anon_a', 'deck-2'), {})).toBeNull();
+    // a refused minute spent no day unit: 7 admitted so far (6 + 1), 13 left of 20
+    t = 61_000;
+    for (let i = 0; i < 6; i += 1)
+      expect(await checkAssistQuotas(ctx('anon_a', 'deck-1'), {})).toBeNull();
+    expect(lines.filter((line) => line.event === 'http.429')).toHaveLength(1);
+  });
+
+  it('refuses the twenty first call in a day and TURBOSLIDE_ASSIST_DAY_CAP raises the day cap', async () => {
+    let t = 0;
+    bindRateLimiter(memoryLimiter(() => t));
+    // four minutes of six calls each stay under the minute row; the day row counts to 20
+    let admitted = 0;
+    for (let minute = 0; minute < 4; minute += 1) {
+      t = minute * 61_000;
+      for (let i = 0; i < 6; i += 1) {
+        const refused = await checkAssistQuotas(ctx('anon_b', 'deck-1'), {});
+        if (refused === null) admitted += 1;
+        else {
+          expect(refused.quota).toBe('assistCallsPerDay');
+          expect(refused.message).toBe('You have reached today’s limit for the assistant');
+        }
+      }
+    }
+    expect(admitted).toBe(20);
+    // the deployment that sets the cap: the same identity on a fresh limiter admits 60
+    bindRateLimiter(memoryLimiter(() => t));
+    let raised = 0;
+    for (let minute = 0; minute < 11; minute += 1) {
+      t = minute * 61_000;
+      for (let i = 0; i < 6; i += 1) {
+        if (
+          (await checkAssistQuotas(ctx('anon_b', 'deck-1'), {
+            TURBOSLIDE_ASSIST_DAY_CAP: '60',
+          })) === null
+        )
+          raised += 1;
+      }
+    }
+    expect(raised).toBe(60);
+    // an account is not raised by the variable: the table's 300 stands
+    bindRateLimiter(memoryLimiter(() => t));
+    const account: QuotaContext = { ...ctx('acct_1', 'deck-1'), tier: 'account' };
+    t = 0;
+    for (let i = 0; i < 20; i += 1)
+      expect(await checkAssistQuotas(account, { TURBOSLIDE_ASSIST_DAY_CAP: '1' })).toBeNull();
   });
 });

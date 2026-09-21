@@ -32,6 +32,7 @@ import { basename, join, relative } from 'node:path';
 import { promisify } from 'node:util';
 
 import { BAYER8 } from '@turboslide/effects/bayer';
+import { fontFileDataUri } from '@turboslide/fonts/catalog-node';
 import { openSheetPage } from '@turboslide/headless/context';
 import { fileUrl, writeTempDocument } from '@turboslide/headless/document';
 import { launchBrowser } from '@turboslide/headless/launch';
@@ -185,6 +186,10 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
     includeSkipped: options.includeSkipped,
     assetBase,
     title: `${deck.title} (${theme})`,
+    // the catalog faces the deck uses ride inside the pages as data URIs (docs/PRODUCT.md 4.2,
+    // 4.5; build/b5.md R6): the headless page draws the face and the PDF embeds its subset
+    fontSrc: (id, file) => fontFileDataUri(id, file.file),
+    deckSlides: Object.values(slides),
   });
   const tmp = await mkdtemp(join(tmpdir(), 'turboslide-pdf-'));
   const path = join(options.outDir, `${deck.id}-${theme}.pdf`);
@@ -415,6 +420,8 @@ async function gatePages(input: GateInput): Promise<void> {
     slideIds: input.ids,
     numbering: input.play,
     title: `${deck.title} (${input.theme})`,
+    fontSrc: (id, file) => fontFileDataUri(id, file.file),
+    deckSlides: Object.values(slides),
   });
   const doc = await writeTempDocument(surface.html, `surface-${input.theme}.html`, input.tmp);
   const shotPage = await openSheetPage(input.launched.browser, {

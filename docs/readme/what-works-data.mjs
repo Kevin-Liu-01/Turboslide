@@ -6,7 +6,9 @@
 // verbatim (`what-works.test.mjs` asserts it), so the specification and the README cannot drift.
 // The return round (docs/RETURN.md section 7) added the paragraphs of the features that return:
 // tables, charts, diagrams, word art, formatting, the chrome, the View menu and the notifications;
-// each is shown only while every row of its feature passes. Node only; no dependency.
+// each is shown only while every row of its feature passes. The product round (docs/PRODUCT.md
+// section 8) added the brand kit, the fonts, the templates and the assist the same way. Node only;
+// no dependency.
 
 /**
  * The features in the order of the README, keyed by the matrix's `feature` field. `heading` is the
@@ -245,6 +247,36 @@ export const FEATURES = [
     heading: 'Notifications',
     paragraph:
       '**Notifications.** The bell in the title row lists the replies and mentions on a shared deck, and Tools > Notification settings keeps the level a seller picks.',
+    shots: [],
+  },
+  /* the product round (docs/PRODUCT.md sections 4, 6 and 8.1): the four new features, each shown
+     only while every row of its feature passes */
+  {
+    key: 'brand',
+    heading: 'The brand kit',
+    paragraph:
+      "**Brand kit.** Slide > Change theme and the toolbar Theme button open the Brand kit panel: the logo on the title slide and in the corner of every slide, six colours, the display and text faces, the footer text, the slide number format and the frame lines, each previewed on the sheet as it is changed and taken back with Cmd+Z. A picture's right click menu puts it on every slide. Reset to the deployment's kit is one button. The kit travels into the PDF, the PowerPoint file, the view link and the show.",
+    shots: [],
+  },
+  {
+    key: 'fonts',
+    heading: 'Fonts',
+    paragraph:
+      "**Fonts.** The Font dropdown on the toolbar lists the kit's faces, the faces this presentation uses and a catalog of 26 open licence families by category, with a search field; More fonts lists every family with its licence. A face survives a reload, draws in the show, is named in the PowerPoint file and is embedded in the PDF.",
+    shots: [],
+  },
+  {
+    key: 'templates',
+    heading: 'Templates',
+    paragraph:
+      "**Templates.** The template gallery lists your organisation's templates and Blank, each with its cover; File > Save as template saves a presentation as a template with its brand kit, and Use for new presentations makes it the presentation /new opens. A template is read only; start a presentation from it.",
+    shots: [],
+  },
+  {
+    key: 'assist',
+    heading: 'The assist',
+    paragraph:
+      "**Assist.** The Assist button in the title row (Cmd+J) opens a panel with three starter cards: Tailor for a customer (rename the customer, swap the logo and skip slides in one step, with one Undo), Make it shorter and Write speaker notes. A card shows the before and after; nothing changes until it is accepted, and Accept is one undo step. Search the menus understands a seller's words and offers Ask the assistant when nothing matches.",
     shots: [],
   },
   {

@@ -34,13 +34,15 @@ function block(type: Block['type']): Block {
 describe('the sections', () => {
   it('carry the names of SPEC 12 and SPEC-2 section 5 in Google’s order, plus the block fallback', () => {
     const names = FORMAT_SECTIONS.map((section) => section.title);
+    /* the Picture section reads "Image options" since the product round (docs/PRODUCT.md section 2
+       rank 10, the words), in the panel's word list of menus/strings.ts too */
     for (const name of PANELS.formatOptions.sections) expect(names).toContain(name);
     expect(names.indexOf('Size & rotation')).toBeLessThan(names.indexOf('Position'));
     expect(names.indexOf('Text')).toBeLessThan(names.indexOf('Colour'));
     /* SPEC-2 section 5: the round two sections in Google's order (R05 B7, F3) */
     for (const name of ['Adjustments', 'Drop shadow', 'Chart data', 'Line', 'Shape', 'Alt text'])
       expect(names).toContain(name);
-    expect(names.indexOf('Picture')).toBeLessThan(names.indexOf('Adjustments'));
+    expect(names.indexOf('Image options')).toBeLessThan(names.indexOf('Adjustments'));
     expect(names.indexOf('Adjustments')).toBeLessThan(names.indexOf('Drop shadow'));
     expect(names.indexOf('Table')).toBeLessThan(names.indexOf('Chart data'));
     expect(names.indexOf('Chart data')).toBeLessThan(names.indexOf('Line'));

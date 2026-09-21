@@ -88,9 +88,22 @@
       "deck.remove",
       "deck.setBackground",
       "deck.guides",
+      "template.list",
+      "template.slides",
+      "template.create",
+      "template.update",
+      "template.rename",
+      "template.delete",
+      "template.setDefault",
       "section.set",
       "import.run",
-      "validate.run"
+      "validate.run",
+      "deck.tailor",
+      "assist.propose",
+      "assist.accept",
+      "brand.get",
+      "brand.set",
+      "brand.reset"
     ],
     "slide": [
       "slide.list",
@@ -166,7 +179,8 @@
     ],
     "render": [
       "render.slide",
-      "render.sheet"
+      "render.sheet",
+      "font.list"
     ],
     "lint": [
       "lint.run",
@@ -274,7 +288,7 @@
       "admin.mail.list"
     ]
   },
-  "actionCount": 169,
+  "actionCount": 183,
   "resources": [
     {
       "uri": "deck://manifest",

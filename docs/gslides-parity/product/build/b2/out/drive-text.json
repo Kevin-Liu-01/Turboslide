@@ -1,0 +1,78 @@
+{
+  "name": "drive-text",
+  "base": "http://localhost:4412",
+  "ok": 10,
+  "failed": 0,
+  "rows": [
+    {
+      "n": 1,
+      "step": "text.link.detect-url: typing generaltranslation.com then a space wraps a link; one Cmd+Z removes it and keeps the text",
+      "expected": "a link, then plain text",
+      "observed": "linked html <span class=\"para\">Visit <a href=\"https://generaltranslation.com\" target=\"_blank\" rel=\"noreferrer\">generaltranslation.com</a>&nbsp;</span> | after typing <span class=\"para\">Visit <a href=\"https://generaltranslation.com\" target=\"_blank\" rel=\"noreferrer\">generaltranslation.com</a>&nbsp;today</span> | stored \"Visit [generaltranslation.com](https://generaltranslation.com) today\" | second box stored \"See [acme.com](https://acme.com)\" | after Cmd+Z \"See acme.com\"",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "text.link.detect-email: an email then Enter wraps a mailto link",
+      "expected": "a mailto link",
+      "observed": "html <span class=\"para\">Write to <a href=\"mailto:kevin@generaltranslation.com\" target=\"_blank\" rel=\"noreferrer\">kevin@generaltranslation.com</a><br>any time</span> | stored Write to [kevin@generaltranslation.com](mailto:kevin@generaltranslation.com)\nany time",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "text.select.shift-home-line: Shift+Home on the third line selects that line alone",
+      "expected": "one line",
+      "observed": "Shift+Home \"generaltranslation.com\"; Home, Shift+End \"generaltranslation.com\"",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "text.select.double-click-address: a double click on generaltranslation.com selects the whole address",
+      "expected": "the address",
+      "observed": "selection \"generaltranslation.com\"",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "text.link.popover-apply-remove: Cmd+K shows the popover with Link, the text, the field, the slides select, Apply and Remove; Enter applies; the chip shows Change and Remove; Remove takes the link off",
+      "expected": "popover, chip, removal",
+      "observed": "word \"founder\"; popover {\"label\":\"Link\",\"text\":\"founder\",\"url\":true,\"slide\":[\"Slides in this presentation\",\"Next slide\",\"Previous slide\",\"First slide\",\"Last slide\",\"1. B2 product round\"],\"apply\":true,\"remove\":true,\"focused\":\"popover.link.url\"}; after Enter <span class=\"para\">Kevin Liu, <a href=\"https://example.com/acme\" target=\"_blank\" rel=\"noreferrer\">founder</a></span><span class=\"para\"><a href=\"mailto:kevin@generaltranslation.com\" target=\"_blank\" rel; chip {\"href\":\"https://example.com/acme\",\"change\":true,\"remove\":true}; after Remove <span class=\"para\">Kevin Liu, founder</span><span class=\"para\"><a href=\"mailto:kevin@generaltranslation.com\" target=\"_blank\" rel=\"noreferrer\">kevin@generaltrans; chip gone true",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "text.link.slide-target: Slides in this presentation > slide 3 writes a slide link; the show jumps to it on a click",
+      "expected": "a #s link and the jump",
+      "observed": "third option {\"v\":\"blank-2\",\"t\":\"3. Slide 3\"}; html <span class=\"para\"><a href=\"#s/blank-2\">Kevin</a> Liu, founder</span><span class=\"para\"><a href=\"mailto:kevin@generaltranslation.com\" target=\"_blank\" rel=\"noref; stored [Kevin](#s/blank-2) Liu, founder\n[kevin@generaltranslation.com](mailto:kevin@generaltranslation.com)\ngeneraltranslation.com; show true; link {\"x\":66.28948211669922,\"y\":196.41500091552734,\"href\":\"#s/blank-2\",\"target\":null}; active after click blank-2 (want blank-2)",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "text.autofit.textbox-grow: the frame follows the text while typing and the stored height holds it",
+      "expected": "no overflow during and after",
+      "observed": "live {\"frameH\":116.324951171875,\"overflow\":-2.8199462890625,\"ringH\":116.3125}; stored h 165; drawn free h 116.324951171875",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "text.autofit.shrink-on-overflow: with Shrink text on overflow a small box steps the size down until the text fits",
+      "expected": "the size steps down; no overflow",
+      "observed": "stored size 18; drawn {\"font\":\"18px\",\"overflow\":-8.459991455078125}",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "text.find-replace.count-while-typing: typing Acme reads \"1 of 2\"; Next moves the selection to the second",
+      "expected": "the count and the step",
+      "observed": "count 1 of 3 -> 2 of 3 -> 3 of 3; after Next: slide blank-1 block tb-acme; after Next: slide blank-2 (want blank-2) block tb-acme-2",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "console errors during the text drive",
+      "expected": "none",
+      "observed": "none",
+      "ok": true
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { THREAD_ID, threadFixture } from './channel-contract.ts';
 import type { Entry, RoomEvent, RosterEntry, TextSpliceMutation } from './channel.ts';
 import {
+  ENTRY_NOTE_MAX,
   OPS_POST_MAX_ENTRIES,
   PRESENCE_MAX_BYTES,
   entrySchema,
@@ -77,6 +78,36 @@ describe('opsPostSchema', () => {
       ],
     };
     expect(opsPostSchema.safeParse(post).success).toBe(true);
+  });
+
+  it('carries a history label on an edit and refuses it on a comment, blank or over its cap (the product round fix round)', () => {
+    const base = { clientId: CLIENT, base: { seq: 0 } };
+    const noted = { ...editEntry(1), note: 'Brand kit: Primary' };
+    const parsed = opsPostSchema.safeParse({ ...base, entries: [noted] });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) expect(parsed.data.entries[0]?.note).toBe('Brand kit: Primary');
+    expect(
+      opsPostSchema.safeParse({
+        ...base,
+        entries: [{ ...editEntry(1), note: 'x'.repeat(ENTRY_NOTE_MAX + 1) }],
+      }).success,
+    ).toBe(false);
+    expect(
+      opsPostSchema.safeParse({ ...base, entries: [{ ...editEntry(1), note: '  ' }] }).success,
+    ).toBe(false);
+    expect(
+      opsPostSchema.safeParse({
+        ...base,
+        entries: [
+          {
+            opId: `${CLIENT}:1`,
+            kind: 'comment',
+            comment: { op: 'add', thread: threadFixture() },
+            note: 'Assist: notes',
+          },
+        ],
+      }).success,
+    ).toBe(false);
   });
 
   it('caps a post at 64 entries and refuses the 65th (SPEC-3 3.4 step 1)', () => {
@@ -199,6 +230,18 @@ describe('entries and events', () => {
 
   it('parses an entry and refuses one without a seq or with both payloads', () => {
     expect(entrySchema.parse(entry)).toEqual(entry);
+    // the history label rides an edit entry (channel.ts Entry.note) and never a comment
+    const noted = { ...entry, note: 'Assist: Slide 2 shortened' };
+    expect(entrySchema.parse(noted)).toEqual(noted);
+    expect(
+      entrySchema.safeParse({
+        ...entry,
+        mutations: undefined,
+        kind: 'comment',
+        comment: { op: 'add', thread: threadFixture() },
+        note: 'Assist: notes',
+      }).success,
+    ).toBe(false);
     expect(entrySchema.safeParse({ ...entry, seq: 0 }).success).toBe(false);
     expect(
       entrySchema.safeParse({ ...entry, comment: { op: 'add', thread: threadFixture() } }).success,

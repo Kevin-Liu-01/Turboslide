@@ -281,3 +281,86 @@ export function colorFromCss(css: string): Color | null {
   }
   return null;
 }
+
+// ---------------------------------------------------------------------------------------------
+// Link detection and the address word (docs/PRODUCT.md section 2 rank 9; audit-seller 9)
+
+/** The characters a web or mail address may hold once it is typed as one token. */
+const ADDRESS_CHAR = /[\p{L}\p{N}_\-.@:/+%~#?&=]/u;
+/** The punctuation a sentence hangs on the end of an address, never part of it ("see acme.com."). */
+const TRAILING_PUNCTUATION = /[.,;:!?)\]]+$/u;
+/** A top level label: letters alone, two to twenty four of them (".com", ".io", ".technology"). */
+const TLD = /^[\p{L}]{2,24}$/u;
+
+/**
+ * The range of the address around a plain offset, for the double click that must select
+ * `generaltranslation.com` whole where the browser's word selection stops at the dot
+ * (audit-seller 9: the link wrapped "generaltranslation" and ".com" stayed outside). The token is
+ * the run of address characters around the offset with the sentence's trailing punctuation
+ * dropped; null when that token is not an address (`linkOfToken` says), so a plain word keeps the
+ * browser's selection.
+ */
+export function addressRangeAt(plain: string, at: number): [number, number] | null {
+  const clamped = Math.max(0, Math.min(plain.length, at));
+  let start = clamped;
+  let end = clamped;
+  while (start > 0 && ADDRESS_CHAR.test(plain.charAt(start - 1))) start -= 1;
+  while (end < plain.length && ADDRESS_CHAR.test(plain.charAt(end))) end += 1;
+  const trimmed = plain.slice(start, end).replace(TRAILING_PUNCTUATION, '');
+  if (trimmed === '' || linkOfToken(trimmed) === null) return null;
+  return [start, start + trimmed.length];
+}
+
+/**
+ * The link a typed token stands for, or null: a scheme address is kept (`https://`, `http://`,
+ * `mailto:`), `www.` gains `https://`, a bare domain with a path or not (`acme.com/pricing`) gains
+ * `https://`, an email becomes `mailto:`. A number with a dot (`3.5`), a version (`v1.0`), an
+ * abbreviation (`e.g`) and a word are not addresses: the last label must be letters alone.
+ */
+export function linkOfToken(token: string): string | null {
+  const value = token.trim();
+  if (value === '' || /\s/.test(value)) return null;
+  if (/^https?:\/\/[^\s/]+\.[^\s]+$/i.test(value)) return value;
+  if (/^mailto:[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(value)) return value;
+  if (/^[^\s@:/]+@[^\s@:/]+\.[^\s@:/]+$/.test(value)) {
+    const host = value.slice(value.indexOf('@') + 1);
+    return TLD.test(host.slice(host.lastIndexOf('.') + 1)) ? `mailto:${value}` : null;
+  }
+  if (/^www\.[^\s/]+\.[^\s]+$/i.test(value)) return `https://${value}`;
+  const match = /^([\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+)(\/[^\s]*)?$/u.exec(value);
+  if (match === null) return null;
+  const host = match[1] ?? '';
+  const labels = host.split('.');
+  const last = labels[labels.length - 1] ?? '';
+  if (!TLD.test(last)) return null;
+  if (labels.some((label) => label === '' || label.startsWith('-') || label.endsWith('-')))
+    return null;
+  return `https://${value}`;
+}
+
+/**
+ * The link a token just typed before the caret earns as the space or Enter lands (Google's link
+ * detection): the run of non space characters ending at `caret`, its trailing punctuation
+ * dropped, when `linkOfToken` reads it as an address. `range` is the token's plain range; the
+ * caller checks that the range carries no link yet.
+ */
+export function detectLinkBefore(
+  plain: string,
+  caret: number,
+): { range: [number, number]; url: string } | null {
+  const end = Math.max(0, Math.min(plain.length, caret));
+  if (end === 0 || /\s/.test(plain.charAt(end - 1))) return null;
+  let start = end;
+  while (start > 0 && !/\s/.test(plain.charAt(start - 1))) start -= 1;
+  let token = plain.slice(start, end);
+  /* a wrapping parenthesis belongs to the sentence: "(see acme.com)" */
+  if (token.startsWith('(')) {
+    token = token.slice(1);
+    start += 1;
+  }
+  token = token.replace(TRAILING_PUNCTUATION, '');
+  if (token === '') return null;
+  const url = linkOfToken(token);
+  if (url === null) return null;
+  return { range: [start, start + token.length], url };
+}

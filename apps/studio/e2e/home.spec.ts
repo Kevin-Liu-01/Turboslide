@@ -128,7 +128,9 @@ test('the three bands: the strip, the recent cards with thumbnails, search, sort
   await expect(page.getByRole('heading', { name: 'Start a new presentation' })).toBeVisible();
   await expect(page.locator('[data-control="home.blank"]')).toHaveAttribute('href', '/new');
   await expect(page.locator('[data-control="home.blank"]')).toContainText('Blank presentation');
-  await expect(page.locator('[data-control="home.gt-brand"]')).toContainText('GT brand deck');
+  await expect(page.locator('[data-control="home.template.gt-brand"]')).toContainText(
+    'GT brand deck',
+  );
   await expect(page.locator('[data-control="home.gallery"]')).toHaveText('Template gallery');
   /* the recent list */
   await expect(page.getByRole('heading', { name: 'Recent presentations' })).toBeVisible();

@@ -43,6 +43,8 @@ export const LIVE_POINTERS_MAX = 20;
 export const EDITING_TABS_MAX = 100;
 /** the stream's heartbeat comment */
 export const STREAM_HEARTBEAT_MS = 15_000;
+/** the history label an edit entry may carry into Version history (channel.ts `Entry.note`) */
+export const ENTRY_NOTE_MAX = 120;
 /** the stream closes at a random point in this window so tabs never reconnect together (report 10 F24) */
 export const STREAM_LIFETIME_MS: readonly [number, number] = [240_000, 290_000];
 /** the `retry` field, drawn per stream */
@@ -109,6 +111,16 @@ function hasPayload(entry: {
 
 const PAYLOAD_RULE = 'an edit carries mutations and a comment carries one comment op';
 
+/** a note rides an edit alone (channel.ts `Entry.note`) */
+function noteOnEdit(entry: { kind: 'edit' | 'comment'; note?: string | undefined }): boolean {
+  return entry.note === undefined || entry.kind === 'edit';
+}
+
+const NOTE_RULE = 'a note rides an edit';
+
+/** The history label of an edit, at most ENTRY_NOTE_MAX characters and never blank. */
+export const entryNoteSchema = z.string().trim().min(1).max(ENTRY_NOTE_MAX);
+
 export const newEntrySchema = z
   .strictObject({
     rev: nonNegativeInt,
@@ -119,8 +131,10 @@ export const newEntrySchema = z
     mutations: z.array(roomMutationSchema).optional(),
     comment: commentOpSchema.optional(),
     at: z.string().min(1),
+    note: entryNoteSchema.optional(),
   })
-  .refine(hasPayload, PAYLOAD_RULE) satisfies z.ZodType<NewEntry>;
+  .refine(hasPayload, PAYLOAD_RULE)
+  .refine(noteOnEdit, NOTE_RULE) satisfies z.ZodType<NewEntry>;
 
 export const entrySchema = z
   .strictObject({
@@ -133,13 +147,19 @@ export const entrySchema = z
     mutations: z.array(roomMutationSchema).optional(),
     comment: commentOpSchema.optional(),
     at: z.string().min(1),
+    note: entryNoteSchema.optional(),
   })
-  .refine(hasPayload, PAYLOAD_RULE) satisfies z.ZodType<Entry>;
+  .refine(hasPayload, PAYLOAD_RULE)
+  .refine(noteOnEdit, NOTE_RULE) satisfies z.ZodType<Entry>;
 
 // ---------------------------------------------------------------------------------------------
 // Up: what a client posts
 
-/** `POST /api/decks/:id/ops` (SPEC-3 3.3): at most 64 entries; the byte cap is the route's. */
+/**
+ * `POST /api/decks/:id/ops` (SPEC-3 3.3): at most 64 entries; the byte cap is the route's. An
+ * edit may carry `note`, the history label Version history lists it under (the brand kit's and
+ * the assist's writes; channel.ts `Entry.note`); the author is never the body's.
+ */
 export const opsPostSchema = z
   .strictObject({
     clientId: clientIdSchema,
@@ -152,8 +172,10 @@ export const opsPostSchema = z
             kind: entryKindSchema,
             mutations: z.array(roomMutationSchema).optional(),
             comment: commentOpSchema.optional(),
+            note: entryNoteSchema.optional(),
           })
-          .refine(hasPayload, PAYLOAD_RULE),
+          .refine(hasPayload, PAYLOAD_RULE)
+          .refine(noteOnEdit, NOTE_RULE),
       )
       .min(1)
       .max(OPS_POST_MAX_ENTRIES),

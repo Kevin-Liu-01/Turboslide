@@ -33,6 +33,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
+import { bandAssetResolver, bandForSlide, frameBandOf } from '@turboslide/render/stage';
 import type { ActionId } from '@turboslide/schema/actions';
 import type { Asset } from '@turboslide/schema/assets';
 import type { Block, BlockType, ShotTrim } from '@turboslide/schema/blocks';
@@ -44,6 +45,7 @@ import { isMultilinePath, isMultilineType } from '@turboslide/schema/catalog';
 import type { Color } from '@turboslide/schema/color';
 import { detachConnectors, followConnectors } from '@turboslide/schema/connect';
 import type { DeckDocument, DeckGuides, Slide } from '@turboslide/schema/deck';
+import { slideOrder, slideTitle } from '@turboslide/schema/deck';
 import type { Finding } from '@turboslide/schema/findings';
 import type {
   AlignEdge,
@@ -59,10 +61,10 @@ import { applyMutations } from '@turboslide/schema/reduce';
 import type { Box } from '@turboslide/schema/render';
 import { isClosedShapeKind } from '@turboslide/schema/shapes';
 import type { Text as Markup } from '@turboslide/schema/text';
-import { canonicalText, parseText, plainLength } from '@turboslide/schema/text';
+import { canonicalText, parseText, plainLength, plainOf } from '@turboslide/schema/text';
 import type { RunMarks } from '@turboslide/schema/text';
 import { TYPE_LADDER } from '@turboslide/schema/typography';
-import { CONTENT_ORIGIN, SHEET } from '@turboslide/theme/tokens';
+import { SHEET } from '@turboslide/theme/tokens';
 
 import { measureForCanvas, measureForFit, virtualObjectIds } from './canvas-measure';
 import type { FitMeasure, VirtualObjectId } from './canvas-measure';
@@ -167,7 +169,22 @@ import {
   textBurstMutation,
   textFromNode,
 } from './InlineText';
-import { growMutation, liveContentHeight, RECONCILE_RESEND_MS, sessionReconcile } from './text-fit';
+import {
+  pictureInsertArea,
+  pictureInsertBox,
+  pictureNameOf,
+  sniffPictureKind,
+  uploadFailureOf,
+  uploadFailureSentence,
+  urlFailureSentence,
+} from './picture-place';
+import {
+  growMutation,
+  liveContentHeight,
+  RECONCILE_RESEND_MS,
+  sessionReconcile,
+  shrinkMutation,
+} from './text-fit';
 import type {
   CaretInfo,
   CaretPlacement,
@@ -453,6 +470,16 @@ export type EditorNotice = { text: string; undo?: true };
  * The stage's imperative surface for the chrome (the context menu, the toolbar, the menu bar):
  * every method is what the matching key does, so a menu item and its shortcut are one code path.
  */
+/**
+ * The window event the studio's controller sends once a chrome insert (Insert > Table, the table
+ * grid, Insert > Chart) has committed, with `{ deckId, slideId, blockIds }` as its detail, so the
+ * stage selects the new object as Google does (docs/PRODUCT.md section 2 rank 1; the product
+ * round's build/b3.md). The name is the studio's `SELECT_OBJECTS_EVENT` of
+ * `apps/studio/src/editor/select-after-write.ts`, repeated here because the viewer cannot import
+ * the studio; that module's test pins the two to one string.
+ */
+export const SELECT_OBJECTS_EVENT = 'turboslide:select-objects';
+
 export type EditorHandle = {
   cut: () => Promise<void>;
   copy: () => Promise<void>;
@@ -486,6 +513,30 @@ export type EditorHandle = {
     file: File,
     where?: { blockId?: string; point?: Point; replace?: boolean; background?: boolean },
   ) => Promise<void>;
+  /**
+   * a picture at a web address (Insert > Image > By URL, Replace image > By URL; docs/PRODUCT.md
+   * section 5 "Image by URL"): the bytes are fetched by the page when the address answers it (its
+   * own origin, a host that allows it), and then take the upload's path whole (the sniff, the
+   * instant preview, `asset.add`, the placement in the body slot or the swap of `blockId`'s
+   * picture); an address the page cannot read goes to the server's `asset.add` by URL. Rejects
+   * with the sentence the dialog shows when no picture lands.
+   */
+  insertPictureFromUrl: (
+    url: string,
+    where?: { blockId?: string; replace?: boolean },
+  ) => Promise<void>;
+  /**
+   * an asset the document holds already (Image by URL's `asset.add` answer) placed as a picture
+   * object centred in the body slot at the largest size with the 40 px margin, selected
+   * (docs/PRODUCT.md section 5 "Image by URL"); `blockId` swaps the picture of that block instead.
+   * An asset the server answered but the document has not received yet is waited for.
+   */
+  insertPictureAsset: (
+    asset: { id: string; size?: Asset['size'] | undefined },
+    where?: { blockId?: string },
+  ) => Promise<void>;
+  /** Add a caption on the selected shot (docs/PRODUCT.md section 2 rank 10): the caption field appears with its prompt and takes the caret; false when nothing selected takes one */
+  addCaption: () => boolean;
   /* round two: the canvas (SPEC-2 sections 1 and 6) */
   /** converts the slide to the canvas with no other write (slide.toCanvas) */
   toCanvas: () => Promise<void>;
@@ -570,6 +621,12 @@ export type EditorProps = {
   /** the selection, when the page owns it (the inspector reads it); internal otherwise */
   selection?: Selection;
   onSelectionChange?: (selection: Selection) => void;
+  /**
+   * Link detection (docs/PRODUCT.md section 2 rank 9): a typed web or mail address becomes a link
+   * as the space or Enter lands; on unless the Tools > Preferences row turns it off. The route
+   * passes the stored preference; absent means on.
+   */
+  linkDetection?: boolean;
   /**
    * the ids of the selected objects beyond the anchor (a Shift or Cmd click, a marquee, Select
    * all), whenever they change: the page's selection names the anchor alone, so this is the
@@ -676,10 +733,10 @@ type CropState = {
 const DRAG_START_PX = 4;
 /** How long the stage waits for a server write (an asset) to reach the document before it gives up. */
 const ASSET_WAIT_MS = 20_000;
+/** How long the page waits for a web address to answer a picture (Image by URL) before the server tries. */
+const URL_FETCH_MS = 15_000;
 /** The default box of a dropped picture (palette-data.ts DEFAULT_SIZE shot). */
 const DROP_PICTURE_WIDTH = 480;
-/** Pictures up to 25 MB (gslides-parity SPEC 11.3; the sentence of menus/strings.ts ERRORS.pictureSize). */
-const PICTURE_SIZE_NOTICE = 'Pictures up to 25 MB';
 /** The indent step of Cmd+] and Cmd+[ in px (SPEC-2 2.2.11). */
 const INDENT_STEP_PX = 64;
 
@@ -811,6 +868,7 @@ export function Editor({
   dispatch,
   selection: controlled,
   onSelectionChange,
+  linkDetection = true,
   onMultiSelectionChange,
   findings,
   lintLayer = false,
@@ -897,6 +955,18 @@ export function Editor({
   /* a member selected alone inside its group after a double click (SPEC-2 6.1 row 14) */
   const [groupEntered, setGroupEntered] = useState<string | null>(null);
   const [readout, setReadout] = useState<GestureReadout>(null);
+  /* the picture being uploaded, drawn at once from the local file at its final box with a thin
+     progress bar until the asset lands (docs/PRODUCT.md section 2 rank 10; audit-seller 22) */
+  const [uploading, setUploading] = useState<{ box: Box; url: string } | null>(null);
+  /* Cmd+Shift+V pressed: the paste event that follows inserts plain text (rank 11 of the gaps) */
+  const plainPasteArmed = useRef(false);
+  const uploadingUrl = useRef<string | null>(null);
+  const clearUploading = () => {
+    const url = uploadingUrl.current;
+    uploadingUrl.current = null;
+    if (url !== null) URL.revokeObjectURL(url);
+    setUploading(null);
+  };
   const [space, setSpace] = useState(false);
   const [draggingGuide, setDraggingGuide] = useState<DraggingGuide | null>(null);
   const [pointer, setPointer] = useState<Point | null>(null);
@@ -1552,36 +1622,99 @@ export function Editor({
     const el = body.current;
     if (!after || !el) return null;
     const block = blockById(after, current.blockId);
-    if (!block || block.type !== 'text' || !('autofit' in block) || block.autofit !== 'grow')
-      return null;
+    if (!block || block.type !== 'text' || !('autofit' in block)) return null;
+    if (block.autofit !== 'grow' && block.autofit !== 'shrink') return null;
     const blockEl = el.querySelector<HTMLElement>(`[data-block="${block.id}"]`);
     if (!blockEl) return null;
     const wrapper = blockEl.parentElement?.closest<HTMLElement>(`.free[data-free="${block.id}"]`);
     const stage = el.parentElement;
     const k = stage ? stage.getBoundingClientRect().width / SHEET.width : 0;
-    return growMutation(after.id, block, liveContentHeight(blockEl, wrapper ?? null, k, window));
+    const content = liveContentHeight(blockEl, wrapper ?? null, k, window);
+    if (block.autofit === 'shrink') {
+      /* Shrink text on overflow (docs/PRODUCT.md section 5 "Autofit"): the size steps down the
+         ladder until the text fits; the live element takes the step at once, since the markup is
+         frozen for the session and would draw the old size until Escape */
+      const typography =
+        'typography' in block && typeof block.typography === 'object' && block.typography !== null
+          ? (block.typography as { size?: number })
+          : {};
+      const drawn = parseFloat(window.getComputedStyle(blockEl).fontSize);
+      const size = typography.size ?? (Number.isFinite(drawn) ? Math.round(drawn) : undefined);
+      /* the ladder is walked in one pass: each rung is drawn on the live element and the
+         content measured again, so one burst of a long paste lands on the rung where the text
+         fits, or on the floor, instead of one rung per burst (the walk's 230 characters in a 90 px
+         box stopped at 20 px with 150 px of text) */
+      let current: Block = block;
+      let fontSize = size;
+      let measured = content;
+      let step: Mutation | null = null;
+      for (;;) {
+        const rung = shrinkMutation(after.id, current, measured, fontSize, ladderStepDown);
+        if (rung === null || rung.op !== 'block.set') break;
+        const nextSize = (rung.value as { size?: number }).size;
+        if (nextSize === undefined) break;
+        step = rung;
+        blockEl.style.fontSize = `${nextSize}px`;
+        fontSize = nextSize;
+        current = { ...current, typography: rung.value } as Block;
+        measured = liveContentHeight(blockEl, wrapper ?? null, k, window);
+      }
+      if (step !== null) window.requestAnimationFrame(measure);
+      return step;
+    }
+    const grow = growMutation(after.id, block, content);
+    /* the frame follows the text while the session is open (audit-gaps 5: `pos.h` was written and
+       the drawn box stayed 45 px, because the session freezes the markup); the wrapper's height is
+       the stored height in sheet px, and the ring re-measures on the next frame */
+    if (grow !== null && grow.op === 'block.set' && wrapper && typeof grow.value === 'number') {
+      wrapper.style.height = `${grow.value}px`;
+      window.requestAnimationFrame(measure);
+    }
+    return grow;
   };
 
-  /** The write of one burst, or of the final text: the changed span against what the document holds. */
-  const writeText = (current: Editing, text: Markup): Mutation | null => {
+  /** The writes of one burst, or of the final text: the changed span against what the document holds (empty when nothing changed). */
+  const writeText = (current: Editing, text: Markup): Mutation[] => {
     const slideNow = slideRef.current;
-    if (!slideNow) return null;
-    const mutation = textBurstMutation(
+    if (!slideNow) return [];
+    const mutations = textBurstMutation(
       slideNow,
       current.blockId,
       current.pointer,
       committedText.current,
       text,
     );
-    if (mutation) {
+    if (mutations.length > 0) {
       committedText.current = text;
-      const after = slideAfter([mutation]);
+      const after = slideAfter(mutations);
       const grow = growAfterBurst(current, after);
-      commit(grow ? [mutation, grow] : [mutation]);
-      expectedDocText.current =
-        (after && readRunText(after, current.blockId, current.pointer)) ?? committedText.current;
+      commit(grow ? [...mutations, grow] : mutations);
+      const docText = after && readRunText(after, current.blockId, current.pointer);
+      expectedDocText.current = docText ?? committedText.current;
+      /* the document's markup after the splice can differ from the editable's in its marks alone
+         (the reducer's flag inheritance against Chromium's editing: VERIFICATION.md product pass
+         1 finding 5 had the address kept by the document and dropped by the anchor, and the next
+         link apply then spliced raw markup at the plain offsets of the wrong base). The session
+         absorbs the document's markup at once, the way a collaborator's mark write reaches it,
+         so the editable draws what the show and the export will, and the next burst diffs
+         against the document's own text. The letters must agree: a document a burst behind
+         (slideAfter's ref lags one render) is left to the reconcile effect. */
+      if (
+        docText !== undefined &&
+        docText !== text &&
+        editingRef.current === current &&
+        plainOf(docText) === plainOf(text)
+      ) {
+        committedText.current = docText;
+        announceTextChanged({
+          slideId: slideNow.id,
+          blockId: current.blockId,
+          pointer: current.pointer,
+          text: docText,
+        });
+      }
     }
-    return mutation;
+    return mutations;
   };
 
   /*
@@ -1727,7 +1860,7 @@ export function Editor({
     /* the final write consumed any marker the session held; one it did not reach (no slide to
        write against) dies with the session rather than waiting for the next one on this run */
     forgetAbsorbed(runKey(slideIdRef.current, current.blockId, current.pointer));
-    const slideNow = slideAfter(written ? [written] : []);
+    const slideNow = slideAfter(written);
     const backToBlock = () => select({ kind: 'block', blockId: current.blockId });
     if (!slideNow) {
       backToBlock();
@@ -1930,6 +2063,79 @@ export function Editor({
     // refs; a session's end runs it too, so a queued cell (Tab, Shift+Tab) opens on the markup
     // that end committed even when that markup did not change (docs/RETURN.md 2.4 fix 1)
   }, [shownHtml, theme, editing]);
+
+  /*
+   * The instant preview of a picture being uploaded (docs/PRODUCT.md section 2 rank 10; the row
+   * images.insert.instant-preview): the picture drawn inside the sheet at the box it will take, in
+   * sheet px, with the thin progress bar, until the asset lands. It lives inside `.pt-slide`, where
+   * the seller's eye and the drivers read the first img, and not on the overlay (the overlay's
+   * copy drew at once and counted for nothing: VERIFICATION.md product pass 1 finding 6 timed the
+   * block's own img at 727 to 1034 ms). The sheet's markup is one string React sets whole, so the
+   * preview is a child appended by hand and put back whenever that markup is set again.
+   */
+  useLayoutEffect(() => {
+    const sheet = body.current;
+    if (!sheet || uploading === null) return undefined;
+    const holder = document.createElement('div');
+    holder.className = 'ts-upload-preview';
+    holder.setAttribute('data-control', 'picture.upload');
+    holder.setAttribute('aria-hidden', 'true');
+    holder.style.left = `${uploading.box[0]}px`;
+    holder.style.top = `${uploading.box[1]}px`;
+    holder.style.width = `${uploading.box[2]}px`;
+    holder.style.height = `${uploading.box[3]}px`;
+    const img = document.createElement('img');
+    img.src = uploading.url;
+    img.alt = '';
+    const bar = document.createElement('div');
+    bar.className = 'ts-upload-progress';
+    bar.setAttribute('role', 'progressbar');
+    bar.setAttribute('aria-label', 'Uploading the picture');
+    bar.setAttribute('data-control', 'picture.upload.progress');
+    bar.appendChild(document.createElement('span'));
+    holder.append(img, bar);
+    sheet.appendChild(holder);
+    return () => {
+      holder.remove();
+    };
+  }, [uploading, shownHtml]);
+
+  /*
+   * The selection after a chrome insert (docs/PRODUCT.md section 2 rank 1): the controller sends
+   * SELECT_OBJECTS_EVENT once Insert > Table, the table grid or Insert > Chart has committed; the
+   * stage selects the named objects when they are on the sheet, now if the markup already carries
+   * them (the ring, the eight handles, the chip and its tail), else from the layout effect above
+   * on the render that brings them. An event for another slide or another deck is not this
+   * stage's, and an agent's insert sends none (select-after-write.ts, the origin rule). The
+   * handler lives in a ref so the listener, added once, reads the current closures.
+   */
+  const onSelectObjectsRef = useRef<(event: Event) => void>(() => undefined);
+  onSelectObjectsRef.current = (event: Event) => {
+    const detail = (
+      event as CustomEvent<{ deckId?: string; slideId?: string; blockIds?: string[] } | undefined>
+    ).detail;
+    if (!detail || !Array.isArray(detail.blockIds) || detail.blockIds.length === 0) return;
+    if (detail.deckId !== undefined && detail.deckId !== deckIdRef.current) return;
+    if (detail.slideId !== slideRef.current?.id) return;
+    const ids = detail.blockIds.filter((id): id is string => typeof id === 'string');
+    const el = body.current;
+    if (
+      el &&
+      ids.every((id) => el.querySelector(`[data-block="${id}"], .free[data-free="${id}"]`))
+    ) {
+      pendingSelect.current = null;
+      const picked = selectionOf(ids);
+      select(picked.selection, picked.extra);
+      return;
+    }
+    pendingSelect.current = ids;
+  };
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const listener = (event: Event) => onSelectObjectsRef.current(event);
+    window.addEventListener(SELECT_OBJECTS_EVENT, listener);
+    return () => window.removeEventListener(SELECT_OBJECTS_EVENT, listener);
+  }, []);
 
   /* a selection that names an object the slide no longer has is dropped */
   useEffect(() => {
@@ -2879,15 +3085,31 @@ export function Editor({
    * the stack), on top of the stack, converting the slide first. A new text box opens in the caret
    * state.
    */
-  const insertObject = (block: Block, options: { box?: Box; bottom?: boolean } = {}) => {
+  const insertObject = (
+    block: Block,
+    options: {
+      box?: Box;
+      bottom?: boolean;
+      /**
+       * the box read from the slide as a canvas at commit time (a picture's place in the body
+       * slot, picture-place.ts), with the empty placeholders the object takes the place of, which
+       * leave in the same write so one Cmd+Z restores them with the object gone
+       */
+      place?: (canvas: Slide) => { box: Box; remove?: ReadonlyArray<string> };
+    } = {},
+  ) => {
     void commitCanvas(
       (canvas) => {
         const taken = takenBlockIds(canvas);
         const id = freeId(block.id, taken);
-        const stack = freeformBlocks(canvas);
+        const placed = options.place?.(canvas);
+        const removed = new Set(placed?.remove ?? []);
+        const stack = freeformBlocks(canvas).filter((each) => !removed.has(each.id));
         const size = TOOL_DEFAULT_SIZE[block.type as keyof typeof TOOL_DEFAULT_SIZE] ?? [320, 160];
         const box =
-          options.box ?? (block.type === 'picture' ? [0, 0, 1600, 900] : centredBox(size));
+          placed?.box ??
+          options.box ??
+          (block.type === 'picture' ? [0, 0, 1600, 900] : centredBox(size));
         const bottom = options.bottom === true || block.type === 'picture';
         const z = bottom ? -1 : Math.max(0, ...stack.map((b) => b.pos?.z ?? 0)) + 1;
         const pos: Position = {
@@ -2898,6 +3120,10 @@ export function Editor({
           z: Math.max(0, z),
         };
         const mutations: Mutation[] = [];
+        for (const blockId of removed) {
+          if (blockById(canvas, blockId) !== undefined)
+            mutations.push({ op: 'block.remove', slideId: canvas.id, blockId });
+        }
         if (bottom) {
           /* the picture takes z 0 and everything else moves up one, so it is the bottom of the stack */
           for (const each of stack) {
@@ -2927,50 +3153,90 @@ export function Editor({
     );
   };
 
+  /** The natural size of a picture file, read from the browser's decoder; undefined when it cannot be decoded in time. */
+  const pictureSizeOf = (url: string): Promise<readonly [number, number] | undefined> =>
+    new Promise((resolve) => {
+      const image = new Image();
+      const timer = window.setTimeout(() => resolve(undefined), 1500);
+      image.onload = () => {
+        window.clearTimeout(timer);
+        resolve(
+          image.naturalWidth > 0 && image.naturalHeight > 0
+            ? [image.naturalWidth, image.naturalHeight]
+            : undefined,
+        );
+      };
+      image.onerror = () => {
+        window.clearTimeout(timer);
+        resolve(undefined);
+      };
+      image.src = url;
+    });
+
+  /** What a picture route came to: a picture landed, or the sentence that says why none did. */
+  type PictureOutcome = { ok: true } | { ok: false; sentence: string };
+
+  /** Where a picture goes: a block's picture swapped, the picture slide's, the background, a drop point, or the body slot. */
+  type PictureWhere = {
+    blockId?: string;
+    point?: Point;
+    replace?: boolean;
+    background?: boolean;
+    box?: Box;
+  };
+
   /**
-   * One step insert of a picture (gslides-parity SPEC 7.2.14): asset.add with the alt from the
-   * file name and the capture role, then the block or slide write once the asset has reached the
-   * document over the watch channel: a drop on an image block replaces its picture, a drop on the
-   * background of a picture slide replaces the slide's, anything else inserts a picture block as
-   * an object at the drop (SPEC-2 0.8).
+   * The box a new picture takes on the slide as it stands (picture-place.ts pictureInsertArea):
+   * the slide read as a canvas, the stage's measured boxes standing in for the hidden sheet's
+   * conversion when the slide is not a canvas yet, so the preview and the write agree to a pixel
+   * or so; the write reads the measured canvas itself through insertObject's `place`.
    */
-  const insertPicture = async (
-    file: File,
-    where: { blockId?: string; point?: Point; replace?: boolean; background?: boolean } = {},
-  ): Promise<void> => {
-    if (!file.type.startsWith('image/')) return;
-    if (file.size > PICTURE_MAX_BYTES) {
-      notice(PICTURE_SIZE_NOTICE);
-      return;
-    }
-    const dataUrl = await fileToDataUrl(file);
-    const taken = new Set(Object.keys(docRef.current.deck.assets));
-    const id = assetIdFor(file.name, taken);
-    let asset: Asset;
-    try {
-      asset = (await call('asset.add', {
-        id,
-        file: dataUrl,
-        role: 'capture',
-        alt: altFor(file.name),
-      })) as Asset;
-    } catch {
-      return;
-    }
-    const landed = await waitFor(
-      () => docRef.current.deck.assets[asset.id] !== undefined,
-      ASSET_WAIT_MS,
-    );
-    if (!landed) {
-      notice('The picture did not reach this presentation; try the drop again');
-      return;
+  const picturePlaceOn = (
+    slideNow: Slide | undefined,
+    size: readonly [number, number] | undefined,
+  ): { box: Box; remove: string[] } => {
+    if (!slideNow) return { box: pictureInsertBox(size), remove: [] };
+    const canvas = isFreeformSlide(slideNow)
+      ? slideNow
+      : (toFreeform(slideNow, boxesRef.current)?.slide ?? slideNow);
+    const placed = pictureInsertArea(canvas, size);
+    return { box: pictureInsertBox(size, placed.area), remove: placed.replaces };
+  };
+
+  /**
+   * The write for an asset the document holds (docs/PRODUCT.md section 2 rank 10; Google puts an
+   * inserted image into the slide's empty body placeholder, else centred over the body): a drop
+   * keeps its point at the drop width; the picture of `blockId` is swapped in place with its box
+   * kept ("Picture replaced" with Undo); `replace` on a picture slide swaps the slide's picture;
+   * `background` lands the covering picture object at the bottom of the stack (SPEC-2 2.6.4);
+   * every other route places a picture object in the body slot at the largest size with the 40
+   * px margin, selected, and the empty body placeholder it fills leaves in the same write, so no
+   * prompt sits under it and one Cmd+Z restores it. An asset the server answered but the document
+   * has not received over the watch channel yet is waited for first: a block naming it before then
+   * is refused by the validator, which is how Image by URL landed nothing (VERIFICATION.md product
+   * pass 1 finding 7).
+   */
+  const placePictureAsset = async (
+    asset: { id: string; size?: Asset['size'] | undefined },
+    where: PictureWhere = {},
+    naturalSize?: readonly [number, number],
+  ): Promise<PictureOutcome> => {
+    const maxMb = Math.round(PICTURE_MAX_BYTES / (1024 * 1024));
+    if (docRef.current.deck.assets[asset.id] === undefined) {
+      const landed = await waitFor(
+        () => docRef.current.deck.assets[asset.id] !== undefined,
+        ASSET_WAIT_MS,
+      );
+      if (!landed) return { ok: false, sentence: uploadFailureSentence('did-not-finish', maxMb) };
     }
     const slideNow = slideRef.current;
-    if (!slideNow) return;
+    if (!slideNow) return { ok: false, sentence: 'Open a slide in Editing mode to add a picture' };
     if (where.background === true) {
       /* the picture object covering the sheet at the bottom of the stack (SPEC-2 2.6.4) */
-      insertObject({ id: 'picture', type: 'picture', asset: asset.id } as Block, { bottom: true });
-      return;
+      insertObject({ id: 'picture', type: 'picture', asset: asset.id } as Block, {
+        bottom: true,
+      });
+      return { ok: true };
     }
     const target = where.blockId !== undefined ? blockById(slideNow, where.blockId) : undefined;
     if (target && (target.type === 'shot' || target.type === 'picture')) {
@@ -2984,19 +3250,245 @@ export function Editor({
         },
       ]);
       select({ kind: 'block', blockId: target.id });
-      return;
+      notice('Picture replaced', true);
+      return { ok: true };
     }
     if (where.replace === true && target === undefined && 'picture' in slideNow) {
       commit([{ op: 'slide.set', slideId: slideNow.id, path: '/picture/asset', value: asset.id }]);
-      return;
+      notice('Picture replaced', true);
+      return { ok: true };
     }
-    const [ox, oy] = CONTENT_ORIGIN;
-    const at = where.point ?? { x: ox, y: oy };
     /* the box at the picture's own aspect: the picture fills its box since the focus round
        (docs/FOCUS.md rank 18), so a fixed box would squash it at the insert */
-    insertObject({ id: 'shot', type: 'shot', asset: asset.id } as Block, {
-      box: droppedPictureBox(at, DROP_PICTURE_WIDTH, asset.size),
-    });
+    const size = asset.size ?? naturalSize;
+    const shot = { id: 'shot', type: 'shot', asset: asset.id } as Block;
+    if (where.box !== undefined) {
+      insertObject(shot, { box: where.box });
+    } else if (where.point !== undefined) {
+      insertObject(shot, { box: droppedPictureBox(where.point, DROP_PICTURE_WIDTH, size) });
+    } else {
+      insertObject(shot, {
+        place: (canvas) => {
+          const placed = pictureInsertArea(canvas, size);
+          return { box: pictureInsertBox(size, placed.area), remove: placed.replaces };
+        },
+      });
+    }
+    return { ok: true };
+  };
+
+  /**
+   * A picture object for an asset the document holds (Image by URL's `asset.add` answer, the
+   * upload once its asset landed): placePictureAsset with the sentence shown when nothing lands.
+   */
+  const insertPictureAsset = async (
+    asset: { id: string; size?: Asset['size'] | undefined },
+    where: { blockId?: string; box?: Box } = {},
+  ): Promise<void> => {
+    const outcome = await placePictureAsset(asset, where);
+    if (!outcome.ok) notice(outcome.sentence);
+  };
+
+  /**
+   * One step insert of a picture file (gslides-parity SPEC 7.2.14; docs/PRODUCT.md section 2 rank
+   * 10): the file's first bytes are read before anything else, so a file that is not a picture is
+   * refused at once with the sentence and nothing is drawn; a picture draws at once from a local
+   * object URL inside the sheet at the box it will take, with a progress bar while `asset.add`
+   * runs (the box is read again once the browser has decoded the picture's size), then the write
+   * of placePictureAsset lands once the asset has reached the document over the watch channel.
+   * A refusal from the server reads as one sentence with its reason (never a code): "the file is
+   * not a picture", "the file is over 25 MB", "the upload did not finish".
+   */
+  const insertPictureFile = async (file: File, where: PictureWhere): Promise<PictureOutcome> => {
+    const maxMb = Math.round(PICTURE_MAX_BYTES / (1024 * 1024));
+    if (file.size > PICTURE_MAX_BYTES)
+      return { ok: false, sentence: uploadFailureSentence('too-large', maxMb) };
+    let head: Uint8Array;
+    try {
+      head = new Uint8Array(await file.slice(0, 512).arrayBuffer());
+    } catch {
+      return { ok: false, sentence: uploadFailureSentence('not-a-picture', maxMb) };
+    }
+    if (sniffPictureKind(head) === null)
+      return { ok: false, sentence: uploadFailureSentence('not-a-picture', maxMb) };
+    const slideBefore = slideRef.current;
+    const target =
+      slideBefore && where.blockId !== undefined
+        ? blockById(slideBefore, where.blockId)
+        : undefined;
+    const replacing =
+      (target !== undefined && (target.type === 'shot' || target.type === 'picture')) ||
+      (where.replace === true &&
+        target === undefined &&
+        slideBefore !== undefined &&
+        'picture' in slideBefore) ||
+      where.background === true;
+    /* the instant preview: the file drawn at the box it will take (rank 10; audit-seller 22: the
+       sheet showed nothing for up to 3 s), first at the 16:9 guess and then at the picture's own
+       aspect once the decoder has read its size, so the first frame never waits for the decode */
+    const localUrl = URL.createObjectURL(file);
+    const previewFor = (size: readonly [number, number] | undefined): Box | null =>
+      replacing
+        ? null
+        : where.box !== undefined
+          ? where.box
+          : where.point !== undefined
+            ? droppedPictureBox(where.point, DROP_PICTURE_WIDTH, size)
+            : picturePlaceOn(slideBefore, size).box;
+    const firstBox = previewFor(undefined);
+    if (firstBox !== null) {
+      clearUploading();
+      uploadingUrl.current = localUrl;
+      setUploading({ box: firstBox, url: localUrl });
+    }
+    const naturalSize = await pictureSizeOf(localUrl);
+    if (firstBox !== null && naturalSize !== undefined && uploadingUrl.current === localUrl) {
+      const sized = previewFor(naturalSize);
+      if (sized !== null) setUploading({ box: sized, url: localUrl });
+    }
+    if (firstBox === null) URL.revokeObjectURL(localUrl);
+    const done = () => {
+      if (uploadingUrl.current === localUrl) clearUploading();
+    };
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      const taken = new Set(Object.keys(docRef.current.deck.assets));
+      const id = assetIdFor(file.name, taken);
+      let asset: Asset;
+      try {
+        asset = (await call('asset.add', {
+          id,
+          file: dataUrl,
+          role: 'capture',
+          alt: altFor(file.name),
+        })) as Asset;
+      } catch (error) {
+        /* the preview leaves before the sentence, so no placeholder stands under a refusal */
+        done();
+        return { ok: false, sentence: uploadFailureSentence(uploadFailureOf(error), maxMb) };
+      }
+      const outcome = await placePictureAsset(asset, where, naturalSize);
+      /* the preview stays until the block draws: the write measures a slide that is not a canvas
+         yet before it commits, and a preview that left first showed a blank box for that moment */
+      if (outcome.ok && firstBox !== null) {
+        await waitFor(() => {
+          const slideNow = slideRef.current;
+          return (
+            slideNow !== undefined &&
+            freeformBlocks(slideNow).some(
+              (block) => (block as { asset?: string }).asset === asset.id,
+            )
+          );
+        }, 2500);
+      }
+      return outcome;
+    } finally {
+      done();
+    }
+  };
+
+  /** The handle's picture insert: insertPictureFile with the sentence shown when nothing lands. */
+  const insertPicture = async (file: File, where: PictureWhere = {}): Promise<void> => {
+    const outcome = await insertPictureFile(file, where);
+    if (!outcome.ok) notice(outcome.sentence);
+  };
+
+  /**
+   * A picture at a web address (Insert > Image > By URL, Replace image > By URL; docs/PRODUCT.md
+   * section 5 "Image by URL"; VERIFICATION.md product pass 1 finding 7): the page fetches the
+   * bytes itself when the address lets it (its own origin on every tier, a host that allows a
+   * cross origin read), and the file then takes the upload's whole path, the sniff, the instant
+   * preview and the placement included. An address the page cannot read (a host with no CORS
+   * headers) goes to the server's `asset.add` by URL, which fetches from its capture allowlist
+   * with the pinned lookup and never from a private address. Rejects with the sentence the dialog
+   * shows when no picture lands; a same origin address that fails is final, since the server
+   * cannot reach a page's origin the page itself could not.
+   */
+  const insertPictureFromUrl = async (
+    url: string,
+    where: { blockId?: string; replace?: boolean } = {},
+  ): Promise<void> => {
+    const address = url.trim();
+    let sameOrigin = false;
+    try {
+      sameOrigin = new URL(address, window.location.href).origin === window.location.origin;
+    } catch {
+      throw new Error(urlFailureSentence('the address is not a web address'));
+    }
+    let file: File | null = null;
+    try {
+      const response = await fetch(address, {
+        mode: 'cors',
+        signal: AbortSignal.timeout(URL_FETCH_MS),
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        file = new File([blob], pictureNameOf(address, blob.type), { type: blob.type });
+      } else if (sameOrigin) {
+        throw new Error(urlFailureSentence(`the address answered ${response.status}`));
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('The picture could not')) throw error;
+      if (sameOrigin) throw new Error(urlFailureSentence('the address did not answer'));
+      /* a cross origin read the page may not make: the server tries */
+    }
+    if (file !== null) {
+      const outcome = await insertPictureFile(file, where);
+      if (!outcome.ok) throw new Error(outcome.sentence);
+      return;
+    }
+    let asset: Asset;
+    try {
+      asset = (await call('asset.add', {
+        url: address,
+        role: 'capture',
+        alt: altFor(pictureNameOf(address, '')),
+      })) as Asset;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const reason = /allowlist|not a public address|private address/i.test(message)
+        ? 'the page could not read it and the server may not fetch from this host'
+        : /no answer within|timed out|timeout/i.test(message)
+          ? 'the address did not answer'
+          : /HTTP (\d{3})/.exec(message)
+            ? `the address answered ${/HTTP (\d{3})/.exec(message)?.[1] ?? ''}`
+            : uploadFailureSentence(
+                uploadFailureOf(error),
+                Math.round(PICTURE_MAX_BYTES / (1024 * 1024)),
+              ).replace('The picture could not be uploaded: ', '');
+      throw new Error(urlFailureSentence(reason));
+    }
+    const outcome = await placePictureAsset(asset, where);
+    if (!outcome.ok) throw new Error(outcome.sentence);
+  };
+
+  /**
+   * Add a caption on the selected shot (docs/PRODUCT.md section 2 rank 10; Google's caption is a
+   * text box the seller places by hand): the caption field is written empty, so the figure draws
+   * its "Add a caption" prompt, and the session opens on it at once; typing stores the caption
+   * through the burst path and one Cmd+Z takes it back.
+   */
+  const addCaption = (): boolean => {
+    const slideNow = slideRef.current;
+    if (!slideNow || editingRef.current) return false;
+    const anchor = selectedBlockId(selectionRef.current);
+    const block = anchor === null ? undefined : blockById(slideNow, anchor);
+    if (!block || block.type !== 'shot') return false;
+    if (block.caption === undefined) {
+      commit([
+        { op: 'block.set', slideId: slideNow.id, blockId: block.id, path: '/caption', value: '' },
+      ]);
+    }
+    pendingEdit.current = { blockId: block.id, pointer: 'caption', caret: 'end' };
+    if (block.caption !== undefined) {
+      const el = body.current;
+      const run = el ? runElement(el, block.id, 'caption') : null;
+      if (run) {
+        pendingEdit.current = null;
+        startEdit({ blockId: block.id, pointer: 'caption', element: run }, 'end');
+      }
+    }
+    return true;
   };
 
   // -------------------------------------------------------------------------------------------
@@ -3337,6 +3829,9 @@ export function Editor({
       focus: () => root.current?.focus({ preventScroll: true }),
       menuSelection,
       insertPicture,
+      insertPictureFromUrl,
+      insertPictureAsset,
+      addCaption,
       toCanvas,
       zoomTo,
       zoomStep: zoomStepBy,
@@ -3696,12 +4191,23 @@ export function Editor({
         case 'paste': {
           /* the browser's copy, cut and paste events carry these (below): the default stays so
              the browser fires them, and the chord stops here so the shell's key table (which
-             prevents the default of every Edit menu chord it matches) never swallows it */
+             prevents the default of every Edit menu chord it matches) never swallows it. Cmd+Shift+V
+             arms a plain paste for the paste event the chord fires (docs/PRODUCT.md section 5:
+             the handler reads the paste event's text, never the async clipboard, which needs a
+             permission and answered nothing, audit-gaps 11) */
           const owns =
             current !== null ||
             e.target === document.body ||
             (e.target instanceof Node && (root.current?.contains(e.target) ?? false));
-          if (owns) e.stopImmediatePropagation();
+          if (owns) {
+            e.stopImmediatePropagation();
+            if (action.type === 'paste') {
+              plainPasteArmed.current = action.plain;
+              window.setTimeout(() => {
+                plainPasteArmed.current = false;
+              }, 500);
+            }
+          }
           return;
         }
         case 'link':
@@ -3772,6 +4278,8 @@ export function Editor({
     };
     const onPaste = (e: ClipboardEvent) => {
       if (!stageOwns(e)) return;
+      const plain = plainPasteArmed.current;
+      plainPasteArmed.current = false;
       const files = imageFilesOf(e.clipboardData);
       if (files.length > 0) {
         e.preventDefault();
@@ -3780,10 +4288,15 @@ export function Editor({
         return;
       }
       const text = e.clipboardData?.getData('text/plain') ?? '';
-      const payload = decodeClipboard(text) ?? clipboardRef.current.last();
+      /* Paste without formatting reads the event's plain text and never the product's envelope */
+      const payload = plain
+        ? text === ''
+          ? null
+          : ({ kind: 'text', text } as ClipboardPayload)
+        : (decodeClipboard(text) ?? clipboardRef.current.last());
       if (payload === null) return;
       e.preventDefault();
-      void pastePayload(payload, false);
+      void pastePayload(payload, plain);
     };
     document.addEventListener('copy', onCopyOrCut);
     document.addEventListener('cut', onCopyOrCut);
@@ -5027,9 +5540,30 @@ export function Editor({
 
   const backdrop = backdropFor(shown, shownSlide, theme, assetBase);
   const isPicture = backdrop !== undefined;
+  /* the brand kit's frame band (docs/PRODUCT.md 4.1, 4.4): the footer logo, the footer text and
+     the counter's format on the editor's own Frame, so Logo > Replace, Footer > Text and Slide
+     numbers > Format read on the stage as they do in the show and the exports */
+  const band = useMemo(
+    () =>
+      frameBandOf(
+        doc.deck,
+        theme,
+        bandAssetResolver(doc.deck, (_id, _theme, path) => assetBase + path),
+      ),
+    [doc.deck, theme, assetBase],
+  );
   const editingBox = editing
     ? (boxes.runs[`${editing.blockId}/${editing.pointer}`] ?? boxes.blocks[editing.blockId] ?? null)
     : null;
+  /* the slides the link popover can point at, by title (docs/PRODUCT.md section 2 rank 19) */
+  const slideTargets = useMemo(
+    () =>
+      slideOrder(shown.deck).map((id, index) => {
+        const each = shown.slides[id];
+        return { id, title: each === undefined ? id : slideTitle(each, index + 1) };
+      }),
+    [shown],
+  );
 
   const rootClass = [
     'ts-stagewrap ts-sheet ts-editor',
@@ -5085,6 +5619,7 @@ export function Editor({
             index={index}
             total={total}
             counter={slide === undefined || slideCounter(doc.deck, slide, index + 1, total) !== ''}
+            band={bandForSlide(band, slide)}
           />
           <div
             key={slideId}
@@ -5158,6 +5693,8 @@ export function Editor({
             multiline={editing.multiline}
             caret={editing.caret}
             autoLink={editing.link === true}
+            slideTargets={slideTargets}
+            detectLinks={linkDetection}
             onBurst={onBurst}
             onEnd={endEdit}
             onListEnter={onListEnter}

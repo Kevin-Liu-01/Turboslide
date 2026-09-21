@@ -191,6 +191,36 @@ describe('admitOnBlob and the admitted op memory (the focus round, cycle 3; VERI
       role: 'editor',
     }) as unknown as Input;
 
+  it('carries an edit’s history label on the candidate the append commits (the product round fix round)', async () => {
+    const notes: (string | undefined)[] = [];
+    const room = {
+      deckId: 'noted-deck',
+      tier: 'blob',
+      live: async () => ({ seq: 7, document: documentAt(7) }),
+      store: { sync: async () => undefined },
+      channel: {
+        append: async (
+          _deckId: string,
+          base: number,
+          entries: { opId: string; note?: string }[],
+        ) => {
+          for (const entry of entries) notes.push(entry.note);
+          return { ok: true, entries: entries.map((entry) => ({ ...entry, seq: base + 1 })) };
+        },
+      },
+    } as unknown as Room;
+    const input = post('c1:9', 'k');
+    (input.post.entries[0] as { note?: string }).note = 'Brand kit: Primary';
+    input.post.entries.push({
+      opId: 'c1:10',
+      kind: 'edit',
+      mutations: [splice(1, 0, 'q')],
+    } as (typeof input.post.entries)[number]);
+    const result = await admitOnBlob(room, input);
+    expect(result.ok).toBe(true);
+    expect(notes).toEqual(['Brand kit: Primary', undefined]);
+  });
+
   it('answers a resent op id with the entry its first admission made and appends nothing twice', async () => {
     const { room, appends } = roomOver('dedup-deck', 7);
     const first = await admitOnBlob(room, post('c1:1', 'q'));

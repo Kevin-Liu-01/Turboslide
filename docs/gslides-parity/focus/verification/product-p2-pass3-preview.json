@@ -1,0 +1,30 @@
+{
+  "base": "https://turboslide-d0zxgtfia-kl01s-projects.vercel.app",
+  "rows": [
+    {
+      "name": "a deck from /new",
+      "ok": true,
+      "observed": "deck untitled-20260921-ynwo"
+    },
+    {
+      "name": "the access record of the fresh deck: share.get on the window API and over HTTP at 0, 5 and 20 s; the Share dialog",
+      "ok": true,
+      "observed": "reads [{\"at\":\"0s\",\"window\":{\"mode\":\"link\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_18620688-4ea6-4b5b-934c-23964c1ce184\"},\"http\":{\"status\":200,\"mode\":\"link\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_18620688-4ea6-4b5b-934c-23964c1ce184\"}},{\"at\":\"5s\",\"window\":{\"mode\":\"link\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_18620688-4ea6-4b5b-934c-23964c1ce184\"},\"http\":{\"status\":200,\"mode\":\"link\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_18620688-4ea6-4b5b-934c-23964c1ce184\"}},{\"at\":\"20s\",\"window\":{\"mode\":\"link\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_18620688-4ea6-4b5b-934c-23964c1ce184\"},\"http\":{\"status\":200,\"mode\":\"link\",\"role\":\"editor\",\"owner\":\"set\",\"createdBy\":\"anon_18620688-4ea6-4b5b-934c-23964c1ce184\"}}]; dialog {\"legacy\":false,\"mode\":\"link\",\"role\":\"editor\",\"sentence\":\"Anyone with this link can open and edit this presentation. Pick Viewer before you send it to a customer\",\"address\":\"\",\"owner\":null}"
+    },
+    {
+      "name": "an email address then Enter then a line, in a body paragraph; a Cmd+K link on a later word; the chip",
+      "ok": true,
+      "observed": "after Enter {\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"visible\":\"Click to add title || Write to sales@acme.com\"}; after the second line {\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"visible\":\"Click to add title || Write to sales@acme.comsecond line here\"}; stored [\"\\\"text\\\":\\\"\\\"\",\"\\\"text\\\":\\\"Write to [sales@acme.com](mailto:sales@acme.com)\\\\nsecond line here\\\"\"]; after a Cmd+K link on Renewal {\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"},{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"visible\":\"Click to add title || Write to sales@acme.comsecond line hereRenewal\"}; stored [\"\\\"text\\\":\\\"\\\"\",\"\\\"text\\\":\\\"Write to [sales@acme.com](mailto:sales@acme.com)\\\\nsecond line here\\\\n[Renewal](https://acme.com/renewal)\\\"\"]; chip after a click on the anchor {\"change\":true,\"remove\":true,\"any\":[\"chip.link\",\"chip.link.href\",\"chip.link.change\",\"chip.link.remove\"]}; leak of link syntax into the visible text false; product-p2-pass3-body-links.png"
+    },
+    {
+      "name": "the same in a heading (the split layout's h/text run)",
+      "ok": true,
+      "observed": "after Enter {\"anchors\":[{\"href\":\"mailto:sales@acme.com\",\"text\":\"sales@acme.com\"}],\"visible\":\"Write to sales@acme.com || Click to add text\"}; after the second line {\"anchors\":[],\"visible\":\"second line here || Click to add text\"}; stored [\"\\\"text\\\":\\\"second line here\\\"\",\"\\\"text\\\":\\\"\\\"\"]; after a Cmd+K link on Renewal {\"anchors\":[{\"href\":\"https://acme.com/renewal\",\"text\":\"Renewal\"}],\"visible\":\"Renewal || Click to add text\"}; stored [\"\\\"text\\\":\\\"[Renewal](https://acme.com/renewal)\\\"\",\"\\\"text\\\":\\\"\\\"\"]; chip after a click on the anchor {\"change\":true,\"remove\":true,\"any\":[\"chip.link\",\"chip.link.href\",\"chip.link.change\",\"chip.link.remove\"]}; leak of link syntax into the visible text false; product-p2-pass3-heading-links.png"
+    },
+    {
+      "name": "the ? key typed on the stage opens Keyboard shortcuts within 1 s and shows no snackbar",
+      "ok": true,
+      "observed": "opened in 796 ms; snackbar \"\"; {\"redo\":1,\"groups\":[{\"head\":\"Common actions\",\"first\":\"New slide\"},{\"head\":\"Film strip actions\",\"first\":\"Duplicate slide\"},{\"head\":\"Navigation\",\"first\":\"Slideshow\"}],\"first\":[\"New slide\",\"Undo\",\"Redo\",\"Copy\",\"Paste\",\"Slideshow\",\"Search the menus\"]}"
+    }
+  ]
+}

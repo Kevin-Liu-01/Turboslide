@@ -18,6 +18,12 @@
 // wordart, formatting, chrome, view and inbox, the list of unparkable features (a red row of one
 // blocks the ship), the `parks` field (the data-control ids a row alone guards, validated against
 // the menu model's sources) and the `parkedRows` half of the parked list beside `parkedFeatures`.
+// The product round (docs/PRODUCT.md section 8) added the features brand, fonts, templates and
+// assist (each parkable), the three spec drivers chrome, brand and assist, the panel and page
+// sources the `parks` ids are read from (7.1), the declared ids of PRODUCT.md 7.1 for a control a
+// lane has not landed yet, and the `measure` field (8.2): a measurement row records its seconds
+// per slide in the run and never holds the ship, so a red one is written into the ship note by
+// id with its mechanism and neither parks its feature nor blocks.
 //
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
@@ -59,6 +65,11 @@ export const CORE_FEATURES = Object.freeze([
   'chrome',
   'view',
   'inbox',
+  /* the product round (docs/PRODUCT.md 8.1): the brand kit, the font catalog, the templates and the assist */
+  'brand',
+  'fonts',
+  'templates',
+  'assist',
   'surface',
 ]);
 
@@ -85,6 +96,11 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
   'core/surface.spec.ts',
   /* the return round (docs/RETURN.md section 5): the clipboard paste into the chart grid */
   'core/documents.spec.ts',
+  /* the product round (docs/PRODUCT.md 8.1): the viewport rows at 1440 and 1280, the kit and the
+     catalog's file chooser, network and window API rows, the assist panel against the fixture */
+  'core/chrome.spec.ts',
+  'core/brand.spec.ts',
+  'core/assist.spec.ts',
 ]);
 
 export const CORE_DRIVERS = Object.freeze([PROBE_DRIVER, ...CORE_SPEC_DRIVERS]);
@@ -136,6 +152,7 @@ const ROW_KEYS = new Set([
   'setup',
   'manual',
   'parks',
+  'measure',
 ]);
 
 /**
@@ -150,8 +167,59 @@ export const CONTROL_SOURCE_PATHS = Object.freeze(
     '../../packages/chrome/src/menus/model.ts',
     '../../packages/chrome/src/menus/toolbar-tails.ts',
     '../../packages/chrome/src/TitleRow.tsx',
+    /* the product round (docs/PRODUCT.md 7.1): a `parks` id may name a panel or a page control */
+    '../../packages/chrome/src/ThemesPanel.tsx',
+    '../../packages/chrome/src/FontPicker.tsx',
+    '../../packages/chrome/src/panels/Assist.tsx',
+    '../../packages/chrome/src/dialogs/Tailor.tsx',
+    '../../packages/chrome/src/dialogs/SaveAsTemplate.tsx',
+    '../../apps/studio/src/routes/decks.index.tsx',
+    '../../apps/studio/src/routes/decks.templates.tsx',
   ].map((rel) => fileURLToPath(new URL(rel, import.meta.url))),
 );
+
+/**
+ * The control ids docs/PRODUCT.md 7.1 declares before the lanes' files exist (the product round):
+ * every new control has its id in that table before a driver is written, and a `parks` id in this
+ * list is known while the file that will hold it is not on the tree yet, so the matrix validates
+ * on the tree the lanes start from. Two ids here are templated in their source and never appear
+ * as one literal: `format.image.replaceImage.byUrl` (`replaceImageItems(prefix)` writes
+ * `${prefix}.byUrl`, model.ts) and `templates.card.menu`, which names the card menu family
+ * `templates.card.<id>.menu` of 7.1. Once every lane has landed, an id here that its source holds
+ * as a literal is found there first; the list is then documentation and may be trimmed.
+ */
+export const DECLARED_CONTROL_IDS = Object.freeze([
+  /* the Brand kit panel and the colour plate (B5a) */
+  'panel.brand',
+  'panel.brand.template.useForNew',
+  'panel.brand.reset',
+  'toolbar.textColor.menu',
+  'format.image.useOnEverySlide',
+  /* the Font dropdown (B5a) */
+  'toolbar.font.search',
+  'toolbar.font.more',
+  'dialog.moreFonts',
+  'format.text.font',
+  /* the templates (B5b) */
+  'templates.page',
+  'templates.card.menu',
+  'file.saveAsTemplate',
+  'dialog.saveAsTemplate',
+  'home.gallery',
+  /* the assist (B6) */
+  'title.assist',
+  'tools.assist',
+  'tools.tailor',
+  'panel.assist',
+  'panel.assist.prompt',
+  'panel.assist.starter.tailor',
+  'panel.assist.starter.shorter',
+  'panel.assist.starter.notes',
+  'finder.assist.ask',
+  'dialog.tailor',
+  /* the pictures (B2): the templated By URL row */
+  'format.image.replaceImage.byUrl',
+]);
 
 let controlSourceText = null;
 /** The concatenated text of the control sources, read once; empty when none exists (a copied file alone). */
@@ -166,8 +234,13 @@ function controlSources() {
 /** A data-control id: dot separated parts of letters and digits. */
 export const CONTROL_ID_PATTERN = /^[a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)+$/;
 
-/** True when the id appears as a string literal in one of the control sources. */
+/**
+ * True when the id appears as a string literal in one of the control sources, or is one of the
+ * ids docs/PRODUCT.md 7.1 declares (`DECLARED_CONTROL_IDS`) for a control whose file a lane has
+ * not landed yet.
+ */
 export function isKnownControl(id) {
+  if (DECLARED_CONTROL_IDS.includes(id)) return true;
   const text = controlSources();
   if (text === '') return true;
   return text.includes(`'${id}'`) || text.includes(`"${id}"`) || text.includes(`\`${id}\``);
@@ -183,6 +256,18 @@ export function isKnownControl(id) {
  */
 export function isManualRow(row) {
   return typeof row?.manual === 'string' && row.manual.length > 0;
+}
+
+/**
+ * A measurement row (docs/PRODUCT.md 8.2): `measure: true` on a row whose claim is a number the
+ * run records (the seconds per slide of the large deck exports). It runs in the second preview
+ * run and the production run, its measurement is written into the run's JSON (the gate collects a
+ * spec's `measure` annotations), and it never holds the ship: a red measurement row is written
+ * into the ship note by id with its mechanism and neither parks its feature nor blocks. A row
+ * nobody drives is still "no step" and fails the run.
+ */
+export function isMeasureRow(row) {
+  return row?.measure === true;
 }
 
 /** The area of an id: its first part. */
@@ -234,6 +319,10 @@ export function validateCoreMatrix(rows) {
       problems.push(`${where}: manual is not a sentence naming the obstacle`);
     if (row.setup !== undefined && typeof row.setup !== 'string')
       problems.push(`${where}: setup is not a string`);
+    if (row.measure !== undefined && row.measure !== true)
+      problems.push(`${where}: measure is true or absent`);
+    if (row.measure === true && row.manual !== undefined)
+      problems.push(`${where}: a measurement row is driven, never manual`);
     if (row.parks !== undefined) {
       if (!Array.isArray(row.parks) || row.parks.length === 0)
         problems.push(`${where}: parks is not a list of data-control ids`);
@@ -315,8 +404,9 @@ export function tally(rows = CORE_MATRIX) {
  * the features that would be parked at a ship on this run (`parked`), the rows whose own controls
  * would stay parked (`parkedRows`, each `{ id, parks, result }`: a red row carrying `parks` parks
  * those ids alone, never its feature), the rows of an unparkable feature that would block the ship
- * (`blocking`), and the red rows by feature, so the ship note renders the list instead of typing
- * it. `rows` narrows the reading to one driver's rows (the walk probe judges its own rows, the gate
+ * (`blocking`), the red measurement rows recorded for the ship note (`measured`, PRODUCT.md 8.2;
+ * they park nothing and block nothing) and the red rows by feature, so the ship note renders the
+ * list instead of typing it. `rows` narrows the reading to one driver's rows (the walk probe judges its own rows, the gate
  * judges the whole matrix).
  */
 export function parkedFeaturesOf(results, rows = CORE_MATRIX) {
@@ -324,12 +414,18 @@ export function parkedFeaturesOf(results, rows = CORE_MATRIX) {
   const parkedRows = [];
   const parkingFeatures = new Set();
   const blocking = [];
+  const measured = [];
   for (const row of rows) {
     const result = results[row.id] ?? 'not driven';
     if (!RUN_RESULTS.includes(result)) throw new RangeError(`${row.id}: unknown result ${result}`);
     if (result === 'passed') continue;
     /* a manual row not driven is the checklist's, never a reason to park (ruling (3)) */
     if (result === 'not driven' && isManualRow(row)) continue;
+    /* a red measurement row is recorded by id for the ship note and holds nothing (PRODUCT.md 8.2) */
+    if (isMeasureRow(row)) {
+      measured.push({ id: row.id, feature: row.feature, result });
+      continue;
+    }
     const list = red.get(row.feature) ?? [];
     list.push({ id: row.id, result });
     red.set(row.feature, list);
@@ -341,7 +437,7 @@ export function parkedFeaturesOf(results, rows = CORE_MATRIX) {
     else blocking.push({ id: row.id, feature: row.feature, result });
   }
   const parked = CORE_FEATURES.filter((feature) => parkingFeatures.has(feature));
-  return { parked, parkedRows, blocking, red: Object.fromEntries(red) };
+  return { parked, parkedRows, blocking, measured, red: Object.fromEntries(red) };
 }
 
 /** The features and rows of a parked list: an array of features (the focus round's form) or the object. */
@@ -405,23 +501,30 @@ export function readParkedList(path) {
  * `passed` unless its feature is in `parkedFeatures` or the row itself is in `parkedRows` (a row
  * carrying `parks`, whose own controls stay behind the switch for the ship); an unparkable
  * feature cannot be listed. `parked` is the array of features (the focus round's form) or the
- * object `readParkedList` returns. Returns `ok` and the ids that fail it with their result.
- * `rows` narrows the rule to one driver's rows.
+ * object `readParkedList` returns. Returns `ok`, the ids that fail it with their result, and the
+ * red measurement rows (`measured`) the verdict recorded and did not count. `rows` narrows the
+ * rule to one driver's rows.
  */
 export function shipVerdict(results, parked = [], rows = CORE_MATRIX) {
   const { parkedFeatures, parkedRows } = parkedOf(parked);
   checkParkedList(parkedFeatures, parkedRows, '');
   const parkedIds = new Set(parkedRows.map((entry) => entry.id));
   const failures = [];
+  const measured = [];
   for (const row of rows) {
     const result = results[row.id] ?? 'not driven';
     if (!RUN_RESULTS.includes(result)) throw new RangeError(`${row.id}: unknown result ${result}`);
     if (result === 'passed' || parkedFeatures.includes(row.feature) || parkedIds.has(row.id))
       continue;
     if (result === 'not driven' && isManualRow(row)) continue;
+    /* a measurement row never holds the ship; the ship note carries it by id (PRODUCT.md 8.2) */
+    if (isMeasureRow(row)) {
+      measured.push({ id: row.id, feature: row.feature, result });
+      continue;
+    }
     failures.push({ id: row.id, feature: row.feature, result });
   }
-  return { ok: failures.length === 0, failures };
+  return { ok: failures.length === 0, failures, measured };
 }
 
 if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1]) {
@@ -443,8 +546,10 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.
         `  ${driver.padEnd(24)} ${String(rowsForDriver(driver).length).padStart(3)} rows`,
       );
     const withParks = CORE_MATRIX.filter((row) => row.parks !== undefined);
+    const measure = CORE_MATRIX.filter(isMeasureRow);
+    const manual = CORE_MATRIX.filter(isManualRow);
     console.log(
-      `  ${withParks.length} rows carry parks; unparkable features: ${UNPARKABLE_FEATURES.join(', ')}`,
+      `  ${withParks.length} rows carry parks; ${measure.length} measurement rows (${measure.map((r) => r.id).join(', ') || 'none'}); ${manual.length} manual rows; unparkable features: ${UNPARKABLE_FEATURES.join(', ')}`,
     );
   }
 }

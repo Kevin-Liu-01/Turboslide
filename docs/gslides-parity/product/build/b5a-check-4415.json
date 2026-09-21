@@ -1,0 +1,48 @@
+{
+  "tips": {
+    "text": {
+      "text": "Textheadings and body text. #f2f2f0",
+      "anchor": "panel.brand.color.text.swatch",
+      "hovered": "INPUT"
+    },
+    "background": {
+      "text": "Backgroundthe slide’s ground. #070707",
+      "anchor": "panel.brand.color.background.swatch",
+      "hovered": "INPUT"
+    },
+    "caption": {
+      "text": "Captionscaptions, labels and the footer text. #b9bcc3",
+      "anchor": "panel.brand.color.caption.swatch",
+      "hovered": "INPUT"
+    },
+    "hint": {
+      "text": "Hintsslide numbers, placeholder prompts and the wordmark. #8a8f98",
+      "anchor": "panel.brand.color.hint.swatch",
+      "hovered": "INPUT"
+    },
+    "primary": {
+      "text": "Primarylinks and the key colour of charts and highlights. #2f5ce0",
+      "anchor": "panel.brand.color.primary.swatch",
+      "hovered": "INPUT"
+    },
+    "accent": {
+      "text": "Accentthe second colour of charts and highlights. #2f5ce0",
+      "anchor": "panel.brand.color.accent.swatch",
+      "hovered": "INPUT"
+    }
+  },
+  "inserted": "{\"slide\":{\"schemaVersion\":1,\"id\":\"blank-1\",\"template\":\"blank\",\"kind\":\"content\",\"layout\":{\"type\":\"freeform\"},\"slots\":{}},\"revision\":1,\"outline\":[{\"id\":\"deck\",\"name\":\"Deck\",\"slides\":[{\"id\":\"title\",\"n\":1",
+  "box": "{\"slide\":{\"schemaVersion\":1,\"id\":\"blank-1\",\"template\":\"blank\",\"kind\":\"content\",\"layout\":{\"type\":\"freeform\"},\"slots\":{\"main\":[{\"id\":\"font-box\",\"pos\":{\"x\":160,\"y\":200,\"w\":900,\"h\":140},\"type\":\"text\",\"tex",
+  "fontControl": {
+    "disabled": null,
+    "text": "Inter"
+  },
+  "rowFace": "Merriweather, serif",
+  "font": {
+    "revBefore": 2,
+    "revAfter": 3,
+    "drawn": "Roboto, sans-serif",
+    "saved": "All changes saved"
+  },
+  "deckId": "untitled-20260920-5gw0"
+}

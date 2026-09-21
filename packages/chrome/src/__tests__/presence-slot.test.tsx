@@ -131,13 +131,18 @@ describe('the title row slots', () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     const right = container.querySelector('.ts-title-r')!;
     const controls = Array.from(right.children).map((el) => el.getAttribute('data-control'));
+    /* the side panel toggle joined the cluster in the product round (docs/PRODUCT.md section 2
+       rank 25): the bottom bar that held it left */
     expect(controls).toEqual([
       'title.presence',
+      'title.assist.slot',
       'title.comments.slot',
+      'title.sidePanel.slot',
       'title.inbox.slot',
       'present.split',
       'share.slot',
     ]);
+    expect(right.querySelector('[data-control="title.sidePanel"]')).not.toBeNull();
     const presence = right.querySelector('[data-control="title.presence"]')!;
     expect(presence.querySelectorAll('.ts-presence-slot.is-empty')).toHaveLength(4);
     expect(presence.querySelector('[data-control="presence.more"]')?.textContent).toBe('');

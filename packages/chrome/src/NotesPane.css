@@ -82,6 +82,7 @@
 }
 
 .ts-notes-field:focus-visible {
-  outline: 1px solid var(--pt-ink);
+  /* the field rule (docs/PRODUCT.md 3.1): a focused field shows the field boundary, one ring */
+  outline: 1px solid var(--pt-field);
   outline-offset: -1px;
 }

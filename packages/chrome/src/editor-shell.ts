@@ -2,6 +2,7 @@ import type { AnchorHTMLAttributes, ComponentType, ReactNode } from 'react';
 
 import type { MarkSpec } from '@turboslide/identity/marks';
 import type { Asset } from '@turboslide/schema/assets';
+import type { DefaultKit } from '@turboslide/schema/brand';
 import type {
   Block,
   BlockType,
@@ -191,6 +192,14 @@ export type EditorHandle = {
   ditherPreview?: (blockId: string, dither: PictureDitherLike | null) => void;
   /** View > Mode: Editing, Commenting or Viewing (5.3, 6.3); the gates live in the editor */
   setMode?: (mode: EditorMode) => void;
+  /* the product round (docs/PRODUCT.md section 2 rank 10, section 5; B2) */
+  /** places an asset the document holds as a picture (Image by URL), or swaps a block's picture with its box kept */
+  insertPictureAsset?: (
+    asset: { id: string; size?: [number, number] },
+    where?: { blockId?: string },
+  ) => void;
+  /** Add a caption on the selected picture: writes the caption field and opens it; false with no picture selected */
+  addCaption?: () => boolean;
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -696,6 +705,11 @@ export type EditorShellInput = {
    * Tools > Advanced tools the way it reads the zoom. Read only; the rows flip them.
    */
   onSettingsChange?: (settings: ShellSettings) => void;
+  /**
+   * The deployment's default kit (docs/PRODUCT.md 4.1, 4.3): the name every Reset reads and the
+   * default logo; the blank template's `brand` fields when no default template names another.
+   */
+  defaultKit?: DefaultKit;
   /** the current slide's findings, for Check slides; every finding when the route passes them */
   findings?: ReadonlyArray<Finding>;
   versions?: ReadonlyArray<Version>;
@@ -858,6 +872,8 @@ export const PANEL_IDS = [
   'inbox',
   'activity',
   'editHtml',
+  /* the product round (docs/PRODUCT.md 6.1): the Assist panel */
+  'assist',
 ] as const;
 export type PanelId = (typeof PANEL_IDS)[number];
 
@@ -865,7 +881,12 @@ export type PanelId = (typeof PANEL_IDS)[number];
 export function panelIdOfTitle(title: string): PanelId | null {
   switch (title) {
     case 'Themes':
+    /* the product round (docs/PRODUCT.md 4.1): the Themes panel is the Brand kit panel; the id
+       stays `themes` so the toolbar's Theme toggle and the stored panel keep working */
+    case 'Brand kit':
       return 'themes';
+    case 'Assist':
+      return 'assist';
     case 'Format options':
       return 'formatOptions';
     case 'Version history':
@@ -929,6 +950,11 @@ export const DIALOG_IDS = [
   'requestAccess',
   /* Forget this browser asks first (7.4, ACCOUNT.forgetConfirm); the route's `account.forget` runs on Forget */
   'forgetBrowser',
+  /* the product round (docs/PRODUCT.md section 2 rank 8, 4.3, section 5): Download options, Save
+     as template and Tailor for a customer */
+  'downloadOptions',
+  'saveAsTemplate',
+  'tailor',
 ] as const;
 export type DialogId = (typeof DIALOG_IDS)[number];
 
@@ -947,6 +973,13 @@ export function dialogIdOf(title: string, itemId?: string): DialogId | null {
       return 'publish';
     case 'Download':
       return itemId === 'file.download.pdf' ? 'downloadPdf' : 'download';
+    /* the product round (docs/PRODUCT.md section 2 rank 8, 4.3, section 5) */
+    case 'Download options':
+      return 'downloadOptions';
+    case 'Save as template':
+      return 'saveAsTemplate';
+    case 'Tailor for a customer':
+      return 'tailor';
     case 'Slide numbers':
       return 'slideNumbers';
     case 'Details':
@@ -1464,6 +1497,36 @@ const SPACING_ON_LIST = 'Line spacing applies to a text block';
 
 function currentSlide(facts: ActionFacts): Slide | undefined {
   return facts.document.slides[facts.slideId];
+}
+
+/**
+ * The marks under the caret or the selection (docs/PRODUCT.md 3.1, the pressed cell of the shell
+ * button; audit-interface 14): the editor's own report when the selection carries one (the
+ * InlineText's caret info, which names `b` beside the schema's marks), else the marks of the
+ * selected range read from the block's text, so Bold, Italic and Underline light after Cmd+B,
+ * Cmd+I and Cmd+U whichever surface wrote the mark. `b` is the run flag the schema keeps outside
+ * `RunMarks` (text.ts `Run`); it is read here so the toolbar has one answer. Undefined with no
+ * text selection.
+ */
+export function selectionMarks(facts: ActionFacts): (RunMarks & { b?: true }) | undefined {
+  const selection = facts.selection;
+  if (selection === null || selection === undefined) return undefined;
+  const reported = selection.marks as (RunMarks & { b?: true }) | undefined;
+  if (reported !== undefined) return reported;
+  if (selection.range === undefined) return undefined;
+  const target = block(facts);
+  if (target === undefined) return undefined;
+  const path = textPathOf(target, selection);
+  if (path === null) return undefined;
+  const text = textAt(target, path);
+  if (text === undefined) return undefined;
+  const range = rangeOf(target, path, facts);
+  const marks: RunMarks & { b?: true } = marksOfRange(text, range);
+  const inside = placeRuns(text).filter(
+    (placed) => placed.end > range[0] && placed.start < Math.max(range[1], range[0] + 1),
+  );
+  if (inside.length > 0 && inside.every((placed) => placed.run.b === true)) marks.b = true;
+  return marks;
 }
 
 /** The facts `menuActionPlan` reads, from the shell's input (the dialogs build their plans the same way). */
@@ -2311,9 +2374,12 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
   switch (item.id) {
     case 'insert.newSlide':
     case 'slide.newSlide': {
+      /* the product round (docs/PRODUCT.md section 2 rank 2; research 07 rule 12): after the
+         title slide New slide is Title and body, after any other slide it inherits the current
+         slide's layout; the arrow's last pick (`facts.lastLayout`) rings the arrow's plate and
+         no longer takes precedence here (build/b3.md R2) */
       const layout: LayoutId =
-        facts.lastLayout ??
-        (slide === undefined ? 'split' : slide.kind === 'title' ? 'split' : derivedLayout(slide));
+        slide === undefined ? 'split' : slide.kind === 'title' ? 'split' : derivedLayout(slide);
       return {
         action: 'slide.new',
         input: {
@@ -3055,6 +3121,8 @@ export const STORED_SETTINGS: ReadonlyArray<MenuSetting> = [
   /* the focus round (docs/FOCUS.md 3.1): Tools > Advanced tools, remembered the same way; when a
      preferences record lands the setting follows the principal and this copy is the fallback */
   'advancedTools',
+  /* the product round (docs/PRODUCT.md section 2 rank 9): Tools > Preferences > Link detection */
+  'linkDetection',
 ];
 
 /**
@@ -3090,6 +3158,8 @@ export const DEFAULT_SETTINGS: ShellSettings = {
   showChanges: false,
   /* docs/FOCUS.md 3.1: the parked set is hidden until the person asks for it */
   advancedTools: false,
+  /* docs/PRODUCT.md section 2 rank 9: a typed address becomes a link unless the seller turns it off */
+  linkDetection: true,
 };
 
 /** The mode the shell is in: the route's word, else the round one Viewing flag, else Editing (SPEC-3 5.3). */

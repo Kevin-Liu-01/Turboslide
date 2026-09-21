@@ -213,7 +213,9 @@ describe('applyLayout', () => {
     });
     expect(statement.slide).toMatchObject({ kind: 'statement', big: 'The content rule' });
     expect(statement.dropped.sort()).toEqual(['fig', 'list', 'p1', 'p2']);
-    // the other way: a title slide's heading and lead land in the head of Title and body
+    // the other way: a title slide's heading lands in the head of Title and body and its lead in
+    // the body (the product round made Title and body one title over one body, docs/PRODUCT.md
+    // section 2 rank 2; the 4/8 head is Title, subtitle and body)
     const back = applyLayout({
       slide: title.slide,
       layout: 'split',
@@ -222,10 +224,53 @@ describe('applyLayout', () => {
     });
     expect(back.dropped).toEqual([]);
     if (back.slide.kind !== 'content') throw new Error('kind');
-    expect(back.slide.slots.headLeft?.[0]).toMatchObject({ text: 'The content rule' });
-    expect(back.slide.slots.headRight?.[0]).toMatchObject({
+    expect(back.slide.slots.head?.[0]).toMatchObject({ text: 'The content rule' });
+    expect(back.slide.slots.body?.[0]).toMatchObject({
       text: 'Every post states what was built.',
     });
+  });
+
+  it('keeps a body paragraph out of the subtitle slot of Title, subtitle and body and puts a lead in it', () => {
+    // Title and body's paragraph is body copy: it lands in the body placeholder and the head
+    // paragraph beside the title keeps its prompt (the product round's gate, slide 102)
+    const titleAndBody: ContentSlide = {
+      schemaVersion: 1,
+      id: 'split-1',
+      kind: 'content',
+      layout: { type: 'split', gap: 56, head: 'single', body: { align: 'center' } },
+      slots: {
+        head: [{ id: 'h', type: 'heading', level: 'h2', text: 'The plan' }],
+        body: [{ id: 'p1', type: 'paragraph', text: 'Body words of the old slide', measure: 56 }],
+      },
+    };
+    const applied = applyLayout({
+      slide: titleAndBody,
+      layout: 'subtitle-body',
+      deck: blankDeck,
+      sectionId: 'deck',
+    });
+    expect(applied.dropped).toEqual([]);
+    if (applied.slide.kind !== 'content') throw new Error('kind');
+    expect(applied.slide.slots.headLeft?.[0]).toMatchObject({ text: 'The plan' });
+    expect(applied.slide.slots.headRight?.[0]).toMatchObject({ text: '' });
+    expect(applied.slide.slots.body?.[0]).toMatchObject({ text: 'Body words of the old slide' });
+    // a title slide's lead is the subtitle: it lands beside the title
+    const fromTitle = applyLayout({
+      slide: {
+        schemaVersion: 1,
+        id: 'title-1',
+        kind: 'title',
+        mark: { w: 28, h: 18 },
+        heading: 'The plan',
+        lead: 'A subtitle under it',
+      },
+      layout: 'subtitle-body',
+      deck: blankDeck,
+      sectionId: 'deck',
+    });
+    if (fromTitle.slide.kind !== 'content') throw new Error('kind');
+    expect(fromTitle.slide.slots.headRight?.[0]).toMatchObject({ text: 'A subtitle under it' });
+    expect(fromTitle.slide.slots.body?.[0]).toMatchObject({ text: '' });
   });
 
   it('takes the first picture as the background of a picture layout and keeps the credit', () => {
@@ -427,7 +472,7 @@ describe('applyLayout', () => {
     expect(extracted.rest).toEqual([]);
     const title = extractContent(filled('title'));
     expect(title.title).toBe('heading 1');
-    expect(title.body).toEqual([{ text: 'lead 2', from: 'lead' }]);
+    expect(title.body).toEqual([{ text: 'lead 2', from: 'lead', head: true }]);
   });
 });
 

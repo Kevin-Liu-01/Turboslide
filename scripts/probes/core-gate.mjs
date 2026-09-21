@@ -62,6 +62,7 @@ import {
   PROBE_DRIVER,
   coreRow,
   isManualRow,
+  isMeasureRow,
   parkedFeaturesOf,
   readParkedList,
   rowsForDriver,
@@ -275,6 +276,8 @@ function runSpecs() {
 function readSpecs(report, exit, ms) {
   const results = {};
   const reasons = {};
+  /* the `measure` annotations of a measurement row's tests (PRODUCT.md 8.2), by row id */
+  const measures = {};
   let retries = null;
   let retried = 0;
   if (existsSync(report)) {
@@ -286,6 +289,10 @@ function readSpecs(report, exit, ms) {
       const attempts = test.results ?? [];
       if (attempts.some((r) => r.retry > 0)) retried += 1;
       const last = attempts[attempts.length - 1];
+      const measured = [...(test.annotations ?? []), ...(last?.annotations ?? [])]
+        .filter((a) => a.type === 'measure' && typeof a.description === 'string')
+        .map((a) => a.description);
+      if (measured.length > 0) measures[id] = [...(measures[id] ?? []), ...measured];
       let result;
       let reason = '';
       if (test.status === 'skipped' || last?.status === 'skipped') {
@@ -308,13 +315,14 @@ function readSpecs(report, exit, ms) {
         if (reason && !(prior === 'failed')) reasons[id] = reason;
       }
     }
-    return { exit, ms, results, reasons, report, retries, retried };
+    return { exit, ms, results, reasons, measures, report, retries, retried };
   }
   return {
     exit: exit ?? 1,
     ms,
     results,
     reasons,
+    measures,
     report: null,
     retries,
     retried,
@@ -405,6 +413,11 @@ const noStep = table.filter((r) => r.result === 'no step').map((r) => r.id);
 const manual = table
   .filter((r) => r.result === 'not driven' && isManualRow(coreRow(r.id)))
   .map((r) => r.id);
+/* the measurement rows (PRODUCT.md 8.2): their result, reason and recorded numbers, listed apart */
+const measures = specs?.measures ?? {};
+const measured = table
+  .filter((r) => isMeasureRow(coreRow(r.id)))
+  .map((r) => ({ id: r.id, result: r.result, reason: r.reason, measures: measures[r.id] ?? [] }));
 const verdict = shipVerdict(results, parked, judged);
 const parking = parkedFeaturesOf(results, judged);
 const retriesOk = specs === null || (specs.retries === 0 && specs.retried === 0);
@@ -437,6 +450,8 @@ const summary = {
   failed: count('failed'),
   notDriven: count('not driven'),
   manual,
+  /* the measurement rows with their recorded numbers (PRODUCT.md 8.2); a red one never fails the verdict */
+  measured,
   noStep,
   /* the run's results by row id, the shape docs/readme/what-works.mjs --results reads (b5.md R10) */
   commit: gitCommit(),
@@ -467,7 +482,7 @@ const esc = (s) =>
 const lines = [
   '# Core gate matrix',
   '',
-  `Base ${BASE}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}${(parked.parkedRows ?? []).length > 0 ? ` and the parked rows ${parked.parkedRows.map((r) => r.id).join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): ${parking.parked.join(', ') || 'none'}; rows whose own controls a ship would keep parked: ${parking.parkedRows.map((r) => `${r.id} (${r.parks.join(', ')})`).join('; ') || 'none'}; rows of an unparkable feature blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
+  `Base ${BASE}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step. Measurement rows (PRODUCT.md 8.2, recorded and never holding the ship): ${measured.map((m) => `${m.id} ${m.result}${m.measures.length > 0 ? ` (${m.measures.join('; ')})` : ''}`).join('; ') || 'none judged'}. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}${(parked.parkedRows ?? []).length > 0 ? ` and the parked rows ${parked.parkedRows.map((r) => r.id).join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): ${parking.parked.join(', ') || 'none'}; rows whose own controls a ship would keep parked: ${parking.parkedRows.map((r) => `${r.id} (${r.parks.join(', ')})`).join('; ') || 'none'}; rows of an unparkable feature blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
   '',
   '| Row | Feature | Driver | Today | Result | Reason |',
   '| --- | --- | --- | --- | --- | --- |',
@@ -486,6 +501,16 @@ const lines = [
   '',
 ];
 if (noStep.length > 0) lines.push('## No step', '', ...noStep.map((id) => `- \`${id}\``), '');
+if (measured.length > 0)
+  lines.push(
+    '## Measurement rows, by id (PRODUCT.md 8.2)',
+    '',
+    ...measured.map(
+      (m) =>
+        `- \`${m.id}\`: ${m.result}${m.reason ? ` (${esc(m.reason)})` : ''}${m.measures.length > 0 ? `; recorded ${esc(m.measures.join('; '))}` : ''}`,
+    ),
+    '',
+  );
 writeFileSync(join(OUT, 'core-matrix.md'), `${lines.join('\n')}\n`);
 
 console.log(

@@ -45,10 +45,11 @@ export type FormatSectionMeta = {
   doc: string;
   /**
    * A parked section (docs/FOCUS.md 3.2, 3.3): drawn only while Tools > Advanced tools is on. The
-   * Dither, Drop shadow and Alt text sections belong to parked rows (`format.image.dither`,
-   * `format.dropShadow`, `format.altText`; docs/RETURN.md 2.15, 3.4 and questions 6 and 7 of its
-   * section 9). The Table, Chart data and Shape sections returned with their features in the
-   * return round (RETURN.md 2.2, 2.4, 2.5). `presentFormatSections` applies the flag.
+   * Dither and Drop shadow sections belong to parked rows (`format.image.dither`,
+   * `format.dropShadow`; docs/RETURN.md 2.15, 3.4 and question 7 of its section 9). The Table,
+   * Chart data and Shape sections returned with their features in the return round (RETURN.md 2.2,
+   * 2.4, 2.5) and Alt text in the product round (PRODUCT.md section 5). `presentFormatSections`
+   * applies the flag.
    */
   advanced?: true;
 };
@@ -83,9 +84,9 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
   { id: 'colour', title: 'Colour', icon: 'swatch', doc: 'Fill, border and text colour' },
   {
     id: 'picture',
-    title: 'Picture',
+    title: 'Image options',
     icon: 'photo',
-    doc: 'The picture, its crop, mask, frame and caption',
+    doc: 'The picture, its caption, crop, mask and frame',
   },
   {
     id: 'adjustments',
@@ -132,12 +133,13 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     doc: 'The shape and its adjustable sides',
   },
   { id: 'list', title: 'List', icon: 'list-bullet', doc: 'The items and how the list draws them' },
+  /* Alt text returned to the default view in the product round (docs/PRODUCT.md section 5;
+     docs/RETURN.md question 6, default return): an enterprise buyer's deck policy asks for it */
   {
     id: 'altText',
     title: 'Alt text',
     icon: 'information-circle',
     doc: 'The description a screen reader reads',
-    advanced: true,
   },
   { id: 'block', title: 'Options', icon: 'adjustments', doc: 'The block’s own options' },
 ];

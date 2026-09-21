@@ -10,12 +10,17 @@ import { playList } from '../export-pptx.ts';
 import {
   BATCH_BUDGET_S,
   EXPORT_BATCH_SIZE,
+  FILE_NAME_MAX,
   MARGIN,
   SECONDS_PER_SLIDE,
   assetHashes,
   batchSize,
   derivedBatchSize,
+  displayNameOf,
+  exportFileName,
+  fileNameBase,
   isStale,
+  isUntitled,
   jobIdNow,
   jobPrefix,
   jobStartedAt,
@@ -236,5 +241,67 @@ describe('the dialog’s estimate', () => {
     expect(leftWords(100)).toBe('1 and a half minutes');
     expect(leftWords(125)).toBe('2 minutes');
     expect(leftWords(0)).toBe('half a minute');
+  });
+});
+
+describe('the file names a download saves as (docs/PRODUCT.md section 2 rank 7)', () => {
+  it('names the file after the title, never the id, the appearance or the default mode', () => {
+    expect(
+      exportFileName({ title: 'GT pitch for Acme', deckId: 'gt-pitch-9x2k', format: 'pdf' }),
+    ).toBe('GT pitch for Acme.pdf');
+    expect(
+      exportFileName({
+        title: 'GT pitch for Acme',
+        deckId: 'gt-pitch-9x2k',
+        format: 'pptx',
+        theme: 'light',
+        mode: 'flatten',
+      }),
+    ).toBe('GT pitch for Acme.pptx');
+  });
+
+  it('joins the appearance only when both left one run and the mode only for Editable text', () => {
+    const base = { title: 'GT pitch for Acme', deckId: 'gt-pitch-9x2k', format: 'pptx' as const };
+    expect(exportFileName({ ...base, theme: 'dark', bothThemes: true })).toBe(
+      'GT pitch for Acme (dark).pptx',
+    );
+    expect(exportFileName({ ...base, mode: 'native' })).toBe('GT pitch for Acme (editable).pptx');
+    expect(exportFileName({ ...base, theme: 'light', bothThemes: true, mode: 'native' })).toBe(
+      'GT pitch for Acme (light, editable).pptx',
+    );
+    // the PDF has one mode: never a mode mark
+    expect(exportFileName({ ...base, format: 'pdf', mode: 'native' })).toBe(
+      'GT pitch for Acme.pdf',
+    );
+  });
+
+  it('removes the characters a file system refuses and keeps the id for an Untitled deck', () => {
+    expect(fileNameBase('Q3: "Acme" <review> | a/b\\c *?')).toBe('Q3 Acme review abc');
+    expect(fileNameBase('  spaced   out  ')).toBe('spaced out');
+    expect(fileNameBase('ends with dots...')).toBe('ends with dots');
+    expect(fileNameBase('x'.repeat(200))).toHaveLength(FILE_NAME_MAX);
+    for (const title of ['Untitled presentation', 'untitled', '', '   ', '"?*']) {
+      expect(isUntitled(title)).toBe(true);
+      expect(exportFileName({ title, deckId: 'untitled-20260920-peg8', format: 'pdf' })).toBe(
+        'untitled-20260920-peg8.pdf',
+      );
+    }
+    expect(isUntitled('Untitled deck for Acme')).toBe(false);
+  });
+
+  it('reads the theme off the produced names when the run made both, and leaves a foreign name alone', () => {
+    const input = { title: 'GT pitch for Acme', deckId: 'q4-review', mode: 'flatten' as const };
+    const both = ['q4-review-r12-dark.pptx', 'q4-review-r12-light.pptx'];
+    expect(displayNameOf(both[0]!, input, both)).toBe('GT pitch for Acme (dark).pptx');
+    expect(displayNameOf(both[1]!, input, both)).toBe('GT pitch for Acme (light).pptx');
+    expect(displayNameOf('q4-review-r12-dark.pptx', input)).toBe('GT pitch for Acme.pptx');
+    expect(displayNameOf('q4-review.pdf', input)).toBe('GT pitch for Acme.pdf');
+    expect(
+      displayNameOf('q4-review-r12-flatten.zip', input, [...both, 'q4-review-r12-flatten.zip']),
+    ).toBe('GT pitch for Acme.zip');
+    expect(displayNameOf('q4-review-r12-dark.pptx', { ...input, mode: 'native' })).toBe(
+      'GT pitch for Acme (editable).pptx',
+    );
+    expect(displayNameOf('export-report.json', input)).toBe('export-report.json');
   });
 });

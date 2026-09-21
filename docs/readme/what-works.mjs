@@ -27,6 +27,7 @@ import {
   RUN_RESULTS,
   coreRow,
   isManualRow,
+  isMeasureRow,
   parkedFeaturesOf,
 } from '../../scripts/probes/core-matrix.mjs';
 import { FEATURES, LEAD, OUTPUTS_SENTENCE } from './what-works-data.mjs';
@@ -137,6 +138,19 @@ export function renderSection(run) {
     lines.push(
       `Walked by hand, never counted as passed by a run (docs/gslides-parity/focus/manual-checklist.md): ${manual
         .map((r) => code(r.id))
+        .join(', ')}.`,
+    );
+  }
+  /* the measurement rows of docs/PRODUCT.md 8.2: a red one is recorded with its number and never
+     holds a release or a feature's paragraph; the ship note carries it by id with its mechanism */
+  const measured = CORE_MATRIX.filter((r) => isMeasureRow(r) && results[r.id] !== 'passed');
+  if (measured.length > 0) {
+    lines.push('');
+    lines.push(
+      `Measured and recorded, never holding a release (docs/PRODUCT.md 8.2): ${measured
+        .map(
+          (r) => `${code(r.id)} (${wordOf({ id: r.id, result: results[r.id] ?? 'not driven' })})`,
+        )
         .join(', ')}.`,
     );
   }

@@ -1,7 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "gt-brand",
-  "name": "GT brand deck",
+  "name": "General Translation brand deck",
+  "organisation": true,
+  "category": "work",
+  "appearance": "dark",
+  "cover": "opener-brand",
   "description": "The General Translation brand deck as a template: 85 slides in 8 sections in the gt-ink-paper theme, cut from decks/gt-brand at revision 24. deck.create copies deck.json, slides/ and the assets folder named below into decks/<id> with a new id, title and revision 0. The archetypes are the layouts the editor inserts (the New slide arrow, the Layout button, Slide > Apply layout); their documents live in packages/schema/src/layouts.ts and insert empty placeholders that the editor draws as prompts (docs/gslides-parity/SPEC.md 5.2, 5.4). The ids here are the twenty-one of the layout list in its order (packages/schema/src/layouts.ts);  names the GT slide an archetype was cut from where one exists.",
   "theme": "gt-ink-paper",
   "deck": "deck.json",

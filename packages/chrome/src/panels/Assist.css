@@ -1,0 +1,222 @@
+/* The Assist panel (Assist.tsx; docs/PRODUCT.md 6.1): the Panel frame, the first line in
+   titanium, the three starter cards as ruled rows, a log region of cards and sentences, the
+   composer at the bottom. Inter at 13 px, paper and ink, one hairline per boundary, the tokens
+   only; nothing decorative (docs/brand.md section 9, docs/grammar.md copy rules). */
+.ts-assist {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  font: 13px/1.45 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-assist-note {
+  margin: 0;
+  padding: 10px 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--pt-titanium);
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-assist-slide {
+  margin: 0;
+  padding: 8px 16px 0;
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+/* the starters: one ruled row each, the whole row a button */
+.ts-assist-starters {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 0;
+}
+
+.ts-assist-starter {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-assist-starter svg {
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  fill: currentColor;
+  color: var(--pt-titanium);
+}
+
+.ts-assist-starter:hover {
+  background: var(--pt-plate);
+}
+
+.ts-assist-starter:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-assist-starter b {
+  display: block;
+  font-weight: 500;
+}
+
+.ts-assist-starter span {
+  display: block;
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+/* the log: asks, cards and sentences in order */
+.ts-assist-log {
+  flex: 1 1 auto;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 8px;
+}
+
+.ts-assist-ask {
+  margin: 0;
+  padding: 10px 16px 2px;
+  color: var(--pt-ink-2);
+}
+
+.ts-assist-sentence {
+  margin: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-assist-sentence.is-accepted {
+  color: var(--pt-titanium);
+}
+
+/* a card: the sentence, the rows, the three buttons */
+.ts-assist-card {
+  margin: 8px 16px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+}
+
+.ts-assist-card-sentence {
+  margin: 0;
+  padding: 10px 12px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-assist-card-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ts-assist-row {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-assist-row-head {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-assist-text {
+  margin: 0;
+  padding: 0;
+  font: 12.5px/1.5 var(--pt-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ts-assist-text.is-before {
+  color: var(--pt-titanium);
+  text-decoration: line-through;
+  text-decoration-color: var(--pt-hair);
+}
+
+.ts-assist-text .is-changed {
+  color: var(--pt-ink);
+  border-bottom: 1px solid var(--pt-ink);
+}
+
+.ts-assist-card-actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.ts-assist-card-actions .pt-ib.is-text {
+  border-color: var(--pt-hair);
+}
+
+/* the composer: the box and Send in one row, on a hairline */
+.ts-assist-composer {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  position: sticky;
+  bottom: 0;
+}
+
+.ts-assist-composer textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 32px;
+  max-height: 120px;
+  padding: 6px 10px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.4 var(--pt-text);
+  resize: none;
+}
+
+.ts-assist-composer textarea:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-assist-composer textarea::placeholder {
+  color: var(--pt-titanium);
+}
+
+.ts-assist-busy {
+  margin: 0;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-assist-error {
+  margin: 0;
+  padding: 8px 16px;
+  color: var(--pt-ink);
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+/* the disabled panel: the one sentence, the starters and the composer gone */
+.ts-assist-disabled {
+  margin: 0;
+  padding: 16px;
+  color: var(--pt-titanium);
+}

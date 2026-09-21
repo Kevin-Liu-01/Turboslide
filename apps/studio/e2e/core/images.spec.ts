@@ -399,6 +399,410 @@ test(title('images.background.remove-picture'), async () => {
   await settled(page);
 });
 
+// ---------------------------------------------------------------------------------------------
+// the product round's rows (docs/PRODUCT.md section 2 ranks 10, 14 and 17, section 5, 8.1): the
+// upload centred in the body slot and selected, the instant preview with its progress bar and no
+// snackbar, the toolbar Image button opening the chooser on click, the failure sentence for a
+// file that is not a picture, and Image by URL with its paused fetch and Replace image > By URL.
+// B2 owns the picture routes; a control not on the build is skipped with its id.
+
+/** The body slot of the current slide in sheet px: the body placeholder's box before a picture lands. */
+/**
+ * The body slot a picture is centred in (docs/PRODUCT.md section 2 rank 10; b2.md R-F4;
+ * viewer/picture-place.ts `pictureInsertArea`): the empty body paragraph's column (its box's x
+ * and width; the box itself when it stands 240 px or taller), from the head band's bottom plus
+ * 40 (the lowest heading whose top sits in the top third; the content top 129 without one) to
+ * the content box's bottom at 771, or the paragraph's own bottom when lower. The first run whose
+ * id lacked "heading" was the heading block itself on the Title and body layout.
+ */
+async function bodySlot(): Promise<{ x: number; y: number; w: number; h: number } | null> {
+  return page.evaluate(() => {
+    const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+    if (!sheet) return null;
+    const s = sheet.getBoundingClientRect();
+    const k = s.width / 1600;
+    const box = (el: Element) => {
+      const r = (el.closest('.free') ?? el).getBoundingClientRect();
+      return { x: (r.x - s.x) / k, y: (r.y - s.y) / k, w: r.width / k, h: r.height / k };
+    };
+    const blocks = [...sheet.querySelectorAll('[data-block]')];
+    /* an empty paragraph shows its prompt ("Click to add text") in a `.prompt` span, which is
+       furniture (SPEC 5.4), so the text read leaves the prompt out */
+    const typed = (el: Element) =>
+      [...el.querySelectorAll('[data-run]')]
+        .map((run) =>
+          [...run.childNodes]
+            .filter(
+              (node) =>
+                !(
+                  node instanceof Element &&
+                  (node.matches('.prompt') || node.hasAttribute('data-prompt'))
+                ),
+            )
+            .map((node) => node.textContent ?? '')
+            .join(''),
+        )
+        .join('')
+        .trim();
+    const paragraphs = blocks
+      .filter(
+        (el) =>
+          el.getAttribute('data-type') === 'paragraph' &&
+          (el.querySelector('.prompt, [data-prompt]') !== null || typed(el) === ''),
+      )
+      .map(box)
+      .sort((a, b) => b.w * b.h - a.w * a.h);
+    const column = paragraphs[0] ?? null;
+    if (column === null) return null;
+    if (column.h >= 240) return column;
+    const headBottom = blocks
+      .filter((el) => el.getAttribute('data-type') === 'heading')
+      .map(box)
+      .filter((b) => b.y < 300)
+      .reduce((m, b) => Math.max(m, b.y + b.h), 0);
+    const top = Math.min(column.y, headBottom > 0 ? headBottom + 40 : 129);
+    const bottom = Math.max(column.y + column.h, 771);
+    return { x: column.x, y: top, w: column.w, h: bottom - top };
+  });
+}
+
+test(title('images.insert.centred-in-body'), async () => {
+  test.setTimeout(120_000);
+  if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  /* the row measures the body slot of a Title and body slide (docs/PRODUCT.md section 2 rank 10;
+     audit-seller 10 is the picture over the head prompt of that layout). New slide hands the fresh
+     slide the current slide's layout (rank 2), and on this file's shared deck the current slide
+     after the picture rows above is a title grammar slide (the mark over the title over the
+     subtitle, one column, centred in the sheet): the product round's ship step read the title
+     prompt at 381,460 inside the body column on three previews, under a picture centred there as
+     the rank says. Title and body is applied first, so the slot read is the layout's the row names */
+  await page.keyboard.press('Escape');
+  const layoutButton = ctl(page, 'toolbar.layout');
+  if (await layoutButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await layoutButton.click();
+    await ctl(page, 'layout.apply.plate').waitFor({ timeout: 8000 });
+    await ctl(page, 'layout.apply.split').click();
+    await expect(ctl(page, 'layout.apply.plate')).toHaveCount(0, { timeout: 8000 });
+    await settled(page);
+  }
+  test.info().annotations.push({
+    type: 'layout',
+    description: `the slide's layout before the upload: ${JSON.stringify(
+      (await objectsOf(page, slideId)).map((o) => `${o.type}:${o.id}`),
+    )}`,
+  });
+  const slot = await bodySlot();
+  const before = await pictureCount(slideId);
+  await uploadThrough(
+    () => menuPath(page, 'insert', 'insert.image', 'insert.image.upload'),
+    'centred.png',
+  );
+  const pic = await expectPictureWithin(slideId, before, 10_000);
+  const selected = await page.locator(`.ts-overlay [data-control="handle.${pic.id}.move"]`).count();
+  /* the placeholder leaves in the same write as the picture lands (picture-place.ts `replaces`),
+     and the sheet redraws a moment after the model carries the picture: the prompt count is
+     read until it settles at zero, or for 4 s */
+  const promptsUnder = () =>
+    page.evaluate((id) => {
+      const el = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`);
+      const box = (el?.closest('.free') ?? el)?.getBoundingClientRect();
+      if (!box) return null;
+      return [
+        ...document.querySelectorAll(
+          '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-prompt]',
+        ),
+      ].filter((p) => {
+        const r = p.getBoundingClientRect();
+        return (
+          r.width > 0 &&
+          r.height > 0 &&
+          r.left < box.right &&
+          r.right > box.left &&
+          r.top < box.bottom &&
+          r.bottom > box.top &&
+          getComputedStyle(p).visibility !== 'hidden'
+        );
+      }).length;
+    }, pic.id);
+  let overPrompt = await promptsUnder();
+  for (let i = 0; i < 20 && overPrompt !== 0; i += 1) {
+    await page.waitForTimeout(200);
+    overPrompt = await promptsUnder();
+  }
+  test.info().annotations.push({
+    type: 'placement',
+    description: `body slot ${JSON.stringify(slot)}; picture ${JSON.stringify(pic.pos)}; selected ${selected}; prompts under it ${overPrompt}`,
+  });
+  if (overPrompt !== 0) {
+    /* the mechanism, named: which block's prompt stands under the picture and what the model holds
+       (the first enforce preview of the ship step read one prompt under a centred picture) */
+    const under = await page.evaluate(() =>
+      [
+        ...document.querySelectorAll(
+          '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-prompt]',
+        ),
+      ].map((p) => {
+        const block = p.closest('[data-block]');
+        const r = p.getBoundingClientRect();
+        return `${block?.getAttribute('data-type') ?? '?'}:${block?.getAttribute('data-block') ?? '?'} "${(p.textContent ?? '').trim().slice(0, 24)}" at ${Math.round(r.left)},${Math.round(r.top)} ${Math.round(r.width)}x${Math.round(r.height)} visibility ${getComputedStyle(p).visibility}`;
+      }),
+    );
+    const model = (await objectsOf(page, slideId)).map(
+      (o) =>
+        `${o.type}:${o.id}${'text' in o && typeof (o as { text?: unknown }).text === 'string' ? `(${JSON.stringify(((o as { text?: string }).text ?? '').slice(0, 16))})` : ''}${o.pos ? `@${o.pos.x},${o.pos.y},${o.pos.w}x${o.pos.h}` : ''}`,
+    );
+    test.info().annotations.push({
+      type: 'prompts',
+      description: `prompts on the slide: ${under.join(' | ')}; the model's objects: ${model.join(' ')}`,
+    });
+  }
+  expect(slot, 'the slide has a body slot').not.toBeNull();
+  const cx = pic.pos.x + pic.pos.w / 2;
+  const cy = pic.pos.y + pic.pos.h / 2;
+  expect(
+    Math.abs(cx - (slot!.x + slot!.w / 2)),
+    'centred horizontally in the body slot',
+  ).toBeLessThan(6);
+  expect(Math.abs(cy - (slot!.y + slot!.h / 2)), 'centred vertically').toBeLessThan(6);
+  const fitsWidth = Math.abs(pic.pos.w - (slot!.w - 80)) < 6;
+  const fitsHeight = Math.abs(pic.pos.h - (slot!.h - 80)) < 6;
+  expect(fitsWidth || fitsHeight, 'the largest size with a 40 px margin').toBe(true);
+  expect(selected, 'the picture is selected').toBeGreaterThan(0);
+  expect(overPrompt, 'over no prompt').toBe(0);
+  await noRefusal();
+});
+
+test(title('images.insert.instant-preview'), async () => {
+  test.setTimeout(120_000);
+  if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const before = await page.evaluate(
+    () =>
+      document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) img').length,
+  );
+  const t0 = await uploadThrough(
+    () => menuPath(page, 'insert', 'insert.image', 'insert.image.upload'),
+    'preview.png',
+  );
+  let drawnAt: number | null = null;
+  let progressSeen = false;
+  const until = Date.now() + 8000;
+  while (Date.now() < until) {
+    const facts = await page.evaluate(
+      (n) => ({
+        imgs:
+          [
+            ...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) img'),
+          ].filter((i) => (i as HTMLImageElement).getClientRects().length > 0).length > n,
+        progress: Boolean(document.querySelector('[data-control="picture.upload.progress"]')),
+      }),
+      before,
+    );
+    if (facts.progress) progressSeen = true;
+    if (facts.imgs && drawnAt === null) drawnAt = Date.now() - t0;
+    if (drawnAt !== null && facts.progress === false) break;
+    await page.waitForTimeout(50);
+  }
+  const landed = await expect
+    .poll(() => pictureCount(slideId), { timeout: 10_000 })
+    .toBeGreaterThan(0)
+    .then(() => true);
+  await page.waitForTimeout(1500);
+  const snackbar = await ctl(page, 'snackbar')
+    .textContent({ timeout: 500 })
+    .catch(() => null);
+  test.info().annotations.push({
+    type: 'preview',
+    description: `the picture drew ${drawnAt ?? 'not'} ms after the chooser; progress bar seen ${progressSeen}; snackbar after ${snackbar ? `"${snackbar}"` : 'none'}`,
+  });
+  expect(drawnAt, 'the picture draws within 500 ms of the chooser closing').not.toBeNull();
+  expect(drawnAt!, 'within 500 ms').toBeLessThan(500);
+  expect(progressSeen, 'a progress bar shows until the asset lands').toBe(true);
+  expect(landed).toBe(true);
+  expect(snackbar ?? '', 'no snackbar on success').not.toMatch(/asset\.add|picture|uploaded/i);
+});
+
+test(title('images.insert.menu-direct'), async () => {
+  test.setTimeout(90_000);
+  if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const before = await pictureCount(slideId);
+  const chooser = page
+    .waitForEvent('filechooser', { timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  await ctl(page, 'toolbar.insertImage').click();
+  const opened = await chooser;
+  const menuShown = await page
+    .locator('[data-control="menu.insert.image.upload"]')
+    .isVisible()
+    .catch(() => false);
+  await page.keyboard.press('Escape');
+  const arrow = ctl(page, 'toolbar.insertImage.arrow');
+  const hasArrow = (await arrow.count()) > 0;
+  let submenu = false;
+  if (hasArrow) {
+    await arrow.click();
+    submenu = await page
+      .locator('[data-control="menu.insert.image.upload"]')
+      .waitFor({ timeout: 4000 })
+      .then(() => true)
+      .catch(() => false);
+    await page.keyboard.press('Escape');
+  }
+  test.info().annotations.push({
+    type: 'button',
+    description: `click opened the chooser ${opened} (a menu ${menuShown}); arrow drawn ${hasArrow}, its submenu ${submenu}`,
+  });
+  expect(opened, 'the Image button opens the file chooser on click').toBe(true);
+  expect(menuShown, 'and no submenu').toBe(false);
+  expect(hasArrow && submenu, 'the arrow keeps the submenu').toBe(true);
+  expect(await pictureCount(slideId), 'nothing landed').toBe(before);
+});
+
+test(title('images.upload.failure-snackbar'), async () => {
+  test.setTimeout(90_000);
+  if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const before = await pictureCount(slideId);
+  const chooser = page.waitForEvent('filechooser', { timeout: 10_000 });
+  await menuPath(page, 'insert', 'insert.image', 'insert.image.upload');
+  const fc = await chooser;
+  await fc.setFiles({
+    name: 'notes.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('This is a text file renamed to .png, not a picture.', 'utf8'),
+  });
+  const t0 = Date.now();
+  let said: string | null = null;
+  while (Date.now() - t0 < 20_000) {
+    said = await page.evaluate(
+      () =>
+        [
+          ...document.querySelectorAll(
+            '[data-control="snackbar"], [data-control="snackbar.upload.failed"], [role="alert"]',
+          ),
+        ]
+          .map((el) => el.textContent?.trim() ?? '')
+          .filter(Boolean)
+          .join(' | ') || null,
+    );
+    if (said && /could not be uploaded/.test(said)) break;
+    await page.waitForTimeout(200);
+  }
+  await page.waitForTimeout(1000);
+  const placeholders = await page.evaluate(
+    () =>
+      document.querySelectorAll(
+        '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-control="picture.upload.progress"], .ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) .is-uploading',
+      ).length,
+  );
+  test.info().annotations.push({
+    type: 'failure',
+    description: `snackbar "${said ?? 'none'}" after ${Date.now() - t0} ms; placeholders left ${placeholders}; pictures ${before} -> ${await pictureCount(slideId)}`,
+  });
+  expect(said ?? '', 'the failure sentence names the reason').toMatch(
+    /The picture could not be uploaded: the file is not a picture/,
+  );
+  expect(placeholders, 'no placeholder is left').toBe(0);
+  expect(await pictureCount(slideId), 'no picture landed').toBe(before);
+});
+
+test(title('images.insert.by-url'), async () => {
+  test.setTimeout(150_000);
+  if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const slot = await bodySlot();
+  const origin = new URL(page.url()).origin;
+  const address = `${origin}/apple-touch-icon.png`;
+  /* the row may still be parked on this build (FOCUS.md 3.2): with the switch on it draws */
+  const present = async () => {
+    await ctl(page, 'menubar.insert').click();
+    await page.locator('#ts-menu-insert').waitFor({ timeout: 8000 });
+    await ctl(page, 'menu.insert.image').hover();
+    await page.waitForTimeout(350);
+    const there = await ctl(page, 'menu.insert.image.byUrl')
+      .isVisible()
+      .catch(() => false);
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    return there;
+  };
+  let switched = false;
+  if (!(await present())) {
+    await menuPath(page, 'tools', 'tools.advancedTools');
+    switched = true;
+    if (!(await present()))
+      test.skip(true, 'Insert > Image > By URL is not reachable on this build');
+  }
+  /* the fetches the typed address starts, counted while typing at human speed */
+  const fetched: number[] = [];
+  const started = Date.now();
+  page.on('request', (req) => {
+    const u = req.url();
+    if (
+      u.includes('apple-touch-icon') ||
+      /\/api\/x\.upload|\/api\/actions\/asset\.add|imageByUrl|preview/.test(u)
+    )
+      fetched.push(Date.now() - started);
+  });
+  await menuPath(page, 'insert', 'insert.image', 'insert.image.byUrl');
+  await ctl(page, 'dialog.imageByUrl.url').waitFor({ timeout: 8000 });
+  await ctl(page, 'dialog.imageByUrl.url').click();
+  const typingStart = Date.now() - started;
+  await page.keyboard.type(address, { delay: 60 });
+  const typingEnd = Date.now() - started;
+  const duringTyping = fetched.filter((t) => t >= typingStart && t <= typingEnd + 100).length;
+  await page.waitForTimeout(900);
+  const before = await pictureCount(slideId);
+  await ctl(page, 'dialog.imageByUrl.ok').click();
+  const pic = await expectPictureWithin(slideId, before, 20_000);
+  const selected = await page.locator(`.ts-overlay [data-control="handle.${pic.id}.move"]`).count();
+  const cx = pic.pos.x + pic.pos.w / 2;
+  const centred = slot ? Math.abs(cx - (slot.x + slot.w / 2)) < 6 : null;
+  /* Replace image > By URL keeps the box */
+  await page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-block="${pic.id}"]`).first().click();
+  await expect(page.locator(`.ts-overlay [data-control="handle.${pic.id}.move"]`)).toBeAttached();
+  await ctl(page, 'toolbar.replaceImage').click();
+  const byUrl = page.locator('[data-control="menu.format.image.replaceImage.byUrl"]').first();
+  const replaceRow = await byUrl
+    .waitFor({ timeout: 4000 })
+    .then(() => true)
+    .catch(() => false);
+  let replaced: { asset: unknown; pos: unknown } | null = null;
+  if (replaceRow) {
+    await byUrl.click();
+    await ctl(page, 'dialog.imageByUrl.url').waitFor({ timeout: 8000 });
+    await ctl(page, 'dialog.imageByUrl.url').click();
+    await page.keyboard.type(`${origin}/icons/icon-192.png`, { delay: 40 });
+    await page.waitForTimeout(900);
+    await ctl(page, 'dialog.imageByUrl.ok').click();
+    await expect
+      .poll(async () => (await pictures(slideId)).find((o) => o.id === pic.id)?.block['asset'], {
+        timeout: 20_000,
+      })
+      .not.toBe(pic.block['asset']);
+    const after = (await pictures(slideId)).find((o) => o.id === pic.id)!;
+    replaced = { asset: after.block['asset'], pos: after.pos };
+  } else await page.keyboard.press('Escape');
+  if (switched) await menuPath(page, 'tools', 'tools.advancedTools');
+  test.info().annotations.push({
+    type: 'by url',
+    description: `${switched ? 'with the switch on; ' : ''}fetches while typing ${duringTyping} (${fetched.length} in all); picture ${JSON.stringify(pic.pos)} centred ${centred}, selected ${selected}; Replace image > By URL ${replaceRow ? `swapped to ${String(replaced?.asset)} at ${JSON.stringify(replaced?.pos)}` : 'has no row'}`,
+  });
+  expect(duringTyping, 'no fetch until a 600 ms pause or blur').toBe(0);
+  expect(centred, 'Insert places the picture centred in the body slot').toBe(true);
+  expect(selected, 'selected').toBeGreaterThan(0);
+  expect(replaceRow, 'Replace image > By URL is a row').toBe(true);
+  expect(replaced?.pos, 'the replaced picture keeps its box').toEqual(pic.pos);
+});
+
 coverage(import.meta.filename, [
   'images.insert.first-on-new-deck',
   'images.insert.upload',
@@ -409,4 +813,10 @@ coverage(import.meta.filename, [
   'images.background.upload-picture',
   'images.background.remove-picture',
   'images.replace.drop-on-picture',
+  /* the product round (docs/PRODUCT.md 8.1) */
+  'images.insert.centred-in-body',
+  'images.insert.instant-preview',
+  'images.insert.menu-direct',
+  'images.upload.failure-snackbar',
+  'images.insert.by-url',
 ]);

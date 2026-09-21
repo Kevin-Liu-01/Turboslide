@@ -368,8 +368,15 @@ describe('the selection colour (the orchestrator’s ruling 1; Kevin’s directi
       'plate',
       'edge',
     ] as const) {
-      expect(light[`pt-${name}`]).toBe(TOKENS.light[name]);
-      expect(dark[`pt-${name}`]).toBe(TOKENS.dark[name]);
+      /* the chrome's light titanium reads #6f747d since the product round (docs/PRODUCT.md 3.1:
+         4.7 to 1 on paper for the save words, the menu keys and the filmstrip numbers); the
+         sheet's titanium of tokens.ts is the deck grammar's and stays */
+      if (name === 'titanium') expect(light[`pt-${name}`]).toBe('#6f747d');
+      else if (name === 'plate') expect(light[`pt-${name}`]).toBe('rgba(7, 7, 7, 0.06)');
+      else expect(light[`pt-${name}`]).toBe(TOKENS.light[name]);
+      /* the hover ground reads a step darker in both appearances since the product round (3.1) */
+      if (name === 'plate') expect(dark[`pt-${name}`]).toBe('rgba(242, 242, 240, 0.08)');
+      else expect(dark[`pt-${name}`]).toBe(TOKENS.dark[name]);
     }
     /* the dark remap gains exactly the names below and nothing else that is not a colour of
        tokens.ts: the two of round four (the selection colour and the guide), and the three of the
@@ -378,6 +385,9 @@ describe('the selection colour (the orchestrator’s ruling 1; Kevin’s directi
     expect(
       Object.keys(dark).filter((name) => !TOKENS.dark[name.slice(3) as keyof typeof TOKENS.dark]),
     ).toEqual([
+      /* the product round's two state tokens (docs/PRODUCT.md 3.1): the disabled ink and the field boundary */
+      'pt-disabled',
+      'pt-field',
       'pt-hair-on-ink',
       'pt-plate-on-ink',
       'pt-plate-on-ink-open',

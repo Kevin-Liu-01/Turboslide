@@ -19,7 +19,19 @@
   --pt-paper: #ffffff;
   --pt-ink: #070707;
   --pt-ink-2: #3a3d44;
-  --pt-titanium: #8a8f98;
+  /* The product round (docs/PRODUCT.md 3.1; audit-interface 3): the secondary text of light chrome
+     (the save words, the menu keys, the filmstrip numbers, the field labels, the version meta, the
+     empty state sentences) reads at 4.70:1 on paper and 4.29:1 on ink; #8a8f98 was 3.25:1, under
+     the 4.5:1 of WCAG 2.2 SC 1.4.3. The dark remap keeps #8a8f98, which is 6.20:1 there. */
+  --pt-titanium: #6f747d;
+  /* A disabled control's text and glyph (3.1, the disabled cell): the old titanium on light, so a
+     disabled Redo reads as disabled beside the enabled ink-2 (disabled text is exempt from SC
+     1.4.3); #6b6e73 on dark, 3.94:1 against the paper there and apart from ink-2 at 10.59:1. */
+  --pt-disabled: #8a8f98;
+  /* The boundary of every input, select and textarea (3.1, the field cell; audit-interface 7): ink at
+     0.44 composites #929292 on paper, 3.1:1, the 3:1 of SC 1.4.11 for a component's boundary. The
+     hairline below stays the divider's and the card frame's line. */
+  --pt-field: rgba(7, 7, 7, 0.44);
   --pt-hair: rgba(7, 7, 7, 0.18);
   --pt-hair-soft: rgba(7, 7, 7, 0.09);
   /* The return round (docs/RETURN.md 4.1, 4.2 item 3): the line and the two grounds drawn over
@@ -31,7 +43,10 @@
   --pt-hair-on-ink: rgba(255, 255, 255, 0.26);
   --pt-plate-on-ink: rgba(255, 255, 255, 0.16);
   --pt-plate-on-ink-open: rgba(255, 255, 255, 0.24);
-  --pt-plate: rgba(7, 7, 7, 0.035);
+  /* The hover ground of every shell button, menu title and menu row, and the stage ground (3.1;
+     audit-interface 8): 0.06 composites #f0f0f0 on paper, 1.14:1, the tint Google's toolbar hover
+     uses; 0.035 read 1.08:1 and a pointer resting on Undo changed almost nothing. */
+  --pt-plate: rgba(7, 7, 7, 0.06);
   --pt-cross: rgba(7, 7, 7, 0.38);
   --pt-edge: rgba(7, 7, 7, 0.62);
   --pt-thumb: rgba(7, 7, 7, 0.32);
@@ -46,7 +61,12 @@
   --pt-menu-h: 28px;
   --pt-tool-h: 40px;
   --pt-notes-h: 64px;
-  --pt-status-h: 32px;
+  /* The bottom bar left in the product round (docs/PRODUCT.md section 2 rank 25; audit-interface
+     35): the side panel toggle moved into the title row's right cluster and the stage gained the
+     32 px. The token stays at 0 so the snackbar, the floating name prompt and the edit route's
+     banner, which clear the bar by this height, sit at the window's edge. */
+  --pt-status-h: 0px;
+  /* a menu plate's minimum width; Menu.css sizes the plate to its longest label up to 320 px (3.1.1) */
   --pt-menu-w: 220px;
   /* the one control height of the title row's right cluster (docs/RETURN.md 4.3): Share, the
      Slideshow split button and the comments glyph; the presence chips are 24 px centred in it */
@@ -126,13 +146,16 @@
   --pt-ink: #f2f2f0;
   --pt-ink-2: #b9bcc3;
   --pt-titanium: #8a8f98;
+  --pt-disabled: #6b6e73;
+  --pt-field: rgba(242, 242, 240, 0.44);
   --pt-hair: rgba(242, 242, 240, 0.22);
   --pt-hair-soft: rgba(242, 242, 240, 0.1);
   /* the lines and grounds over the dark appearance's ink (#f2f2f0): a paper (#070707) tint */
   --pt-hair-on-ink: rgba(7, 7, 7, 0.26);
   --pt-plate-on-ink: rgba(7, 7, 7, 0.16);
   --pt-plate-on-ink-open: rgba(7, 7, 7, 0.24);
-  --pt-plate: rgba(242, 242, 240, 0.05);
+  /* 0.08 composites #1a1a1a on the dark paper, 1.16:1 (3.1) */
+  --pt-plate: rgba(242, 242, 240, 0.08);
   --pt-cross: rgba(255, 255, 255, 0.34);
   --pt-edge: rgba(242, 242, 240, 0.55);
   --pt-thumb: rgba(242, 242, 240, 0.32);
@@ -263,11 +286,19 @@ body[data-shell] {
   flex: 0 0 auto;
 }
 
+/* hover (docs/PRODUCT.md 3.1, the shell button row): the plate ground under the hairline frame and
+   ink text, so a pointer resting on a button reads (the frame alone was 1.51:1 on light) */
 .pt-ib:hover {
   color: var(--pt-ink);
+  background: var(--pt-plate);
   border-color: var(--pt-hair);
 }
 
+/* The one focus rule (3.1, the focus column; audit-interface 38): a 1 px ink ring inset on every
+   control that has a box of its own, in chrome, in the dialogs and on the pages. A text link with
+   no box keeps its 2 px offset ring. `.pt-focus` is the class a control without the shell button
+   grammar takes; the rules below apply the same ring to the shell button itself. */
+.pt-focus:focus-visible,
 .pt-ib:focus-visible {
   outline: 1px solid var(--pt-ink);
   outline-offset: -1px;
@@ -277,6 +308,79 @@ body[data-shell] {
 .pt-ib.is-on {
   color: var(--pt-ink);
   border-color: var(--pt-ink);
+}
+
+/* disabled (3.1, the disabled cell; SPEC 13.1 for a stub): the disabled text token, the default
+   cursor, no hover ground and no frame; `disabled` for a control out of the tab order,
+   `aria-disabled` for a stub or a predicate that keeps it reachable so its tooltip still reads */
+.pt-ib.is-disabled,
+.pt-ib[aria-disabled='true'],
+.pt-ib:disabled {
+  color: var(--pt-disabled);
+  cursor: default;
+}
+
+.pt-ib.is-disabled:hover,
+.pt-ib[aria-disabled='true']:hover,
+.pt-ib:disabled:hover {
+  color: var(--pt-disabled);
+  background: none;
+  border-color: transparent;
+}
+
+/* a disabled solid button: the disabled ground under paper text */
+.pt-ib.is-solid:disabled,
+.pt-ib.is-solid:disabled:hover {
+  background: var(--pt-disabled);
+  border-color: var(--pt-disabled);
+  color: var(--pt-paper);
+}
+
+/* The one select rule of chrome (3.1, the select row; audit-interface 22): a 32 px field with the
+   field boundary and the chrome's own chevron, drawn with two gradients so no browser arrow shows
+   (the rule the /decks sort select drew alone). Every select in a dialog takes it by element; a
+   select elsewhere (the Comments filter, the access page) takes the class. */
+.pt-select,
+.ts-dialog select {
+  box-sizing: border-box;
+  height: 32px;
+  min-height: 32px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--pt-field);
+  border-radius: 0;
+  background-color: var(--pt-paper);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--pt-ink-2) 50%),
+    linear-gradient(135deg, var(--pt-ink-2) 50%, transparent 50%);
+  background-position:
+    calc(100% - 15px) 13px,
+    calc(100% - 10px) 13px;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+  appearance: none;
+  cursor: pointer;
+}
+
+.pt-select:hover,
+.ts-dialog select:hover {
+  border-color: var(--pt-field);
+}
+
+.pt-select:focus-visible,
+.ts-dialog select:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.pt-select:disabled,
+.ts-dialog select:disabled {
+  color: var(--pt-disabled);
+  border-color: var(--pt-hair-soft);
+  cursor: default;
 }
 
 /* icon-only, 32px square */

@@ -212,7 +212,14 @@ describe('templates and deck heads', () => {
     expect(blank.record.id).toBe('blank');
     expect(blank.record.assets).toBe('assets');
     expect(() => parseTemplateRecord({ schemaVersion: 2 }, 'x')).toThrow(/schemaVersion/);
-    expect(() => parseTemplateRecord({ schemaVersion: 1, id: 'nope' }, 'x')).toThrow(/id must/);
+    // the product round widened the id to any slug (docs/PRODUCT.md 4.3): a name with spaces or
+    // the templates folder's own name are the two things a template id cannot be
+    expect(() => parseTemplateRecord({ schemaVersion: 1, id: 'Not A Slug' }, 'x')).toThrow(
+      /id must/,
+    );
+    expect(() => parseTemplateRecord({ schemaVersion: 1, id: 'templates' }, 'x')).toThrow(
+      /id must/,
+    );
   });
 
   it('lists deck heads newest first and skips the templates folder', () => {

@@ -145,8 +145,10 @@ describe('Menu rows', () => {
     expect(row('edit.paste').getAttribute('aria-disabled')).toBe('true');
     expect(document.querySelector('[data-menu-item="edit.gone"]')).toBeNull();
     expect(document.querySelectorAll('[role="separator"]')).toHaveLength(1);
-    /* the access key is underlined once */
-    expect(row('edit.undo').querySelector('u.ts-menu-ak')?.textContent).toBe('U');
+    /* no mnemonic mark on macOS, where the platform has no Alt mnemonics (docs/PRODUCT.md 3.1.1;
+       audit-interface 18): the label is plain text */
+    expect(row('edit.undo').querySelector('u.ts-menu-ak')).toBeNull();
+    expect(row('edit.undo').querySelector('.ts-menu-label')?.textContent).toBe('Undo');
     expect(document.querySelectorAll('[role="menuitem"], [role="menuitemcheckbox"]').length).toBe(
       5,
     );
@@ -164,6 +166,16 @@ describe('Menu rows', () => {
     expect(document.querySelectorAll('[role="menuitem"], [role="menuitemcheckbox"]').length).toBe(
       4,
     );
+  });
+
+  it('marks the access key on Windows and underlines it while Alt is held, never before (3.1.1)', () => {
+    render(<Harness context={{ ...CTX, platform: 'win' }} />);
+    expect(row('edit.undo').querySelector('u.ts-menu-ak')?.textContent).toBe('U');
+    expect(menu().classList.contains('is-alt')).toBe(false);
+    fireEvent.keyDown(document, { key: 'Alt', altKey: true });
+    expect(menu().classList.contains('is-alt')).toBe(true);
+    fireEvent.keyUp(document, { key: 'Alt', altKey: false });
+    expect(menu().classList.contains('is-alt')).toBe(false);
   });
 
   it('prints Windows words and Windows chords on the other platform', () => {
@@ -231,7 +243,8 @@ describe('Menu keys', () => {
     const onSelect = vi.fn();
     render(<Harness onSelect={onSelect} />);
     expect(ITEMS.find((item) => item.id === 'edit.more')?.accessKey).toBe('m');
-    expect(row('edit.grid').querySelector('u.ts-menu-ak')?.textContent).toBe('r');
+    /* the key runs the row on every platform; the mark is drawn on Windows alone (3.1.1) */
+    expect(row('edit.grid').querySelector('u.ts-menu-ak')).toBeNull();
     /* 'g' is no access key here; type ahead lands on the label that starts with it and runs nothing */
     fireEvent.keyDown(menu(), { key: 'g' });
     expect(onSelect).not.toHaveBeenCalled();

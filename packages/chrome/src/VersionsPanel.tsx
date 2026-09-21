@@ -53,6 +53,8 @@ export type VersionsPanelProps = {
   onMakeCopy?: (version: Version) => void;
   /** the resolved identities of the records' authors, by principal id (SPEC-3 7.8) */
   identities?: Readonly<Record<string, IdentityView>>;
+  /** this browser's own identity: its rows read You (docs/PRODUCT.md 3.2; audit-interface 31) */
+  me?: IdentityView;
   /** Show changes (SPEC-3 5.7): the checkbox's state and the selected version */
   showChanges?: boolean;
   selected?: Version | null;
@@ -152,8 +154,18 @@ export function VersionsPanel({
   onShowChanges,
   onSelect,
   menuContext = DEFAULT_MENU_CONTEXT,
+  me,
   className,
 }: VersionsPanelProps) {
+  /* the author's name: You for this browser's own records, the display name otherwise (3.2); an
+     agent author with a name of its own reads it (the assistant's accept writes as "Assistant",
+     docs/PRODUCT.md 6.1), where the presence chips word an agent by its run (nameOf) */
+  const authorWord = (identity: IdentityView): string => {
+    if (me !== undefined && identity.principalId === me.principalId) return 'You';
+    if (identity.trust === 'agent' && identity.name !== undefined && identity.name !== 'Agent')
+      return identity.name;
+    return nameOf(identity);
+  };
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -300,9 +312,9 @@ export function VersionsPanel({
           )}
           <span className="ts-version-meta">
             {version.note !== '' ? `${formatWhen(version.createdAt)} · ` : ''}
-            <span className="ts-version-author">
-              {nameOf(identity)}
-              {trust !== null ? ` · ${trust}` : ''}
+            <span className="ts-version-author" data-author-word={authorWord(identity)}>
+              {authorWord(identity)}
+              {trust !== null && authorWord(identity) !== 'You' ? ` · ${trust}` : ''}
             </span>
             {' · '}
             {version.mutations.length === 0
@@ -364,7 +376,7 @@ export function VersionsPanel({
             doc: `${window.versions.length} versions by ${window.authors.length === 1 ? 'one person' : `${window.authors.length} people`}; click to list them`,
           })}
         >
-          <span className="ts-version-marks" aria-label={window.authors.map(nameOf).join(', ')}>
+          <span className="ts-version-marks" aria-label={window.authors.map(authorWord).join(', ')}>
             {marks.map((identity) =>
               isLegacyAuthor(identity) ? (
                 <span key={identity.principalId} className="ts-chip is-blank ts-chip-16" />
@@ -379,7 +391,7 @@ export function VersionsPanel({
               {formatTime(window.from)} to {formatTime(window.to)}
             </span>
             <span className="ts-version-meta">
-              {window.authors.map(nameOf).join(', ')} ·{' '}
+              {window.authors.map(authorWord).join(', ')} ·{' '}
               {PANELS.versionHistory.changes(window.changes)}
             </span>
           </span>

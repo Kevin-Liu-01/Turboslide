@@ -21,7 +21,7 @@ import {
   visibleItems,
 } from './menus/model.ts';
 import { openRoster } from './presence/roster-hook';
-import { sentence, tipProps } from './Tooltip';
+import { hideTooltip, sentence, tipProps } from './Tooltip';
 
 import './Menu.css';
 
@@ -42,6 +42,13 @@ import './Menu.css';
  * The plate is placed by `placeMenu` to stay inside the viewport: below its anchor for the bar,
  * to the right of its parent row for a submenu (to the left when the viewport ends), at the
  * pointer for a context menu. New in Turboslide (no Prototemplate source).
+ *
+ * The product round (docs/PRODUCT.md 3.1.1): the access key underline draws on Windows and Linux
+ * while Alt is held and never on macOS, where the platform has no Alt mnemonics and the
+ * underlines read as links (audit-interface 18); a row whose submenu or grid is open schedules no
+ * tooltip and the one that was up leaves when the submenu opens, so the plate of Insert > Table
+ * never covers the neighbouring rows (section 2 rank 28); the plate is as wide as its longest
+ * label (Menu.css).
  */
 
 export type MenuAnchor =
@@ -211,9 +218,20 @@ function hasSubmenu(
   return item.items !== undefined && visibleItems(item.items, { context }).length > 0;
 }
 
-/** The label with its access key letter underlined once. */
-function AccessLabel({ label, accessKey }: { label: string; accessKey: string | undefined }) {
-  if (accessKey === undefined) return <>{label}</>;
+/**
+ * The label with its access key letter marked once, on the platforms that have Alt mnemonics;
+ * Menu.css underlines the mark only while Alt is held. On macOS the label is plain text.
+ */
+function AccessLabel({
+  label,
+  accessKey,
+  platform,
+}: {
+  label: string;
+  accessKey: string | undefined;
+  platform: MenuContext['platform'];
+}) {
+  if (accessKey === undefined || platform === 'mac') return <>{label}</>;
   const at = label.toLowerCase().indexOf(accessKey.toLowerCase());
   if (at < 0) return <>{label}</>;
   return (
@@ -268,6 +286,8 @@ function MenuList({
   /* bumped to focus the row again when focusId does not change (a submenu closing back to its parent) */
   const [focusTick, setFocusTick] = useState(0);
   const [openId, setOpenId] = useState<string | null>(null);
+  /* Alt held: the mnemonic underline shows on the platforms that have one (3.1.1) */
+  const [altHeld, setAltHeld] = useState(false);
   /* a submenu opened from the keyboard focuses its first row; from the pointer it does not */
   const openViaKeyboard = useRef(false);
   const hoverTimer = useRef(0);
@@ -324,6 +344,21 @@ function MenuList({
 
   useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
 
+  /* the root list watches Alt for the mnemonic underline; a nested list reads its parent's plate */
+  useEffect(() => {
+    if (level !== 0 || context.platform === 'mac') return undefined;
+    const onKey = (event: KeyboardEvent) => setAltHeld(event.altKey);
+    const onBlur = () => setAltHeld(false);
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('keyup', onKey);
+    window.addEventListener('blur', onBlur);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('keyup', onKey);
+      window.removeEventListener('blur', onBlur);
+    };
+  }, [level, context.platform]);
+
   const focusStep = useCallback(
     (step: number) => {
       if (enabled.length === 0) return;
@@ -342,6 +377,8 @@ function MenuList({
   const openSubmenu = useCallback((item: MenuItem, viaKeyboard: boolean) => {
     window.clearTimeout(hoverTimer.current);
     openViaKeyboard.current = viaKeyboard;
+    /* the row's own plate leaves: its submenu or grid takes the space beside it (rank 28) */
+    hideTooltip();
     setOpenId(item.id);
     setFocusId(item.id);
   }, []);
@@ -485,7 +522,7 @@ function MenuList({
       role="menu"
       aria-label={label}
       tabIndex={-1}
-      className={cn('ts-menu', level > 0 && 'is-sub', className)}
+      className={cn('ts-menu', level > 0 && 'is-sub', altHeld && 'is-alt', className)}
       data-level={level}
       style={
         position
@@ -559,6 +596,11 @@ function MenuList({
                 activate(item, false);
               }}
               {...tip}
+              onMouseEnter={(event) => {
+                /* a row whose submenu or grid is open shows no plate over it (rank 28) */
+                if (isOpen) return;
+                tip.onMouseEnter(event);
+              }}
             >
               <span className="ts-menu-ic" aria-hidden="true">
                 {checked === true ? (
@@ -568,7 +610,7 @@ function MenuList({
                 ) : null}
               </span>
               <span className="ts-menu-label">
-                <AccessLabel label={text} accessKey={item.accessKey} />
+                <AccessLabel label={text} accessKey={item.accessKey} platform={context.platform} />
               </span>
               {submenu ? (
                 <span className="ts-menu-sub" aria-hidden="true">

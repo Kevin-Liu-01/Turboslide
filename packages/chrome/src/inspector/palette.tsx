@@ -135,7 +135,9 @@ const TOKEN_DOC: Readonly<Record<ColorToken, string>> = {
   green: `The semantic ok hue ${SEMANTIC_PALETTE.green}.`,
   amber: `The semantic warn hue ${SEMANTIC_PALETTE.amber}.`,
   red: `The semantic no hue ${SEMANTIC_PALETTE.red}.`,
-  blue: `GT blue ${SEMANTIC_PALETTE.blue}, the semantic info hue.`,
+  blue: `GT blue ${SEMANTIC_PALETTE.blue}, the semantic info hue; the brand kit's Primary.`,
+  accent:
+    'The brand kit’s Accent, the second colour of charts and highlights; Primary until a kit sets it.',
 };
 
 export function PaletteControl({ spec, onChange, disabled }: ControlProps) {

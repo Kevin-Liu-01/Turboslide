@@ -249,9 +249,10 @@ test('every link and button carries the Tooltip primitive', async ({ page }) => 
     return out;
   });
   expect(bare).toEqual([]);
-  /* the lockup is the h1 with the mark and the word */
-  await expect(page.locator('h1.ts-product-h1')).toHaveText('Turboslide');
-  await expect(page.locator('h1.ts-product-h1 svg.ts-mark')).toHaveCount(1);
+  /* the lockup with the mark and the word is a paragraph; the h1 is the seller's sentence
+     (docs/PRODUCT.md section 2 rank 22; build/b1.md R13) */
+  await expect(page.locator('p.ts-product-h1')).toHaveText('Turboslide');
+  await expect(page.locator('p.ts-product-h1 svg.ts-mark')).toHaveCount(1);
   /* the credit line sits under the band */
   await expect(page.locator('.ts-product-credit')).toHaveText(
     'Material: liquid metal, Paper Shaders, one frame through the two tone screen',

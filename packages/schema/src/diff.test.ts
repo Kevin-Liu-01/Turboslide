@@ -115,6 +115,33 @@ const scenarios: { name: string; b: DeckDocument }[] = [
     }),
   },
   {
+    // the mechanism of the product round's undo after a restore: the slot names follow the layout
+    // type, so the slide is replaced whole and the inverse is valid in either order
+    name: 'a layout type change to a freeform canvas',
+    b: edit((d) => {
+      const s = d.slides['content-rule'];
+      if (s?.kind !== 'content') throw new Error('fixture');
+      s.layout = { type: 'freeform' };
+      s.slots = {
+        main: [
+          {
+            id: 'h',
+            type: 'heading',
+            level: 'h2',
+            text: 'Now a canvas',
+            pos: { x: 137, y: 129, w: 640, h: 56, z: 0 },
+          },
+          {
+            id: 'p1',
+            type: 'text',
+            text: 'Moved onto the sheet.',
+            pos: { x: 137, y: 209, w: 480, h: 72, z: 1 },
+          },
+        ],
+      };
+    }),
+  },
+  {
     name: 'blocks edited, added, removed, reordered and moved between slots',
     b: edit((d) => {
       const s = d.slides['content-rule'];
@@ -163,6 +190,15 @@ describe('diffDecks', () => {
     const { document } = applyMutations(a, mutations);
     expect(normalized(document)).toEqual(target);
     expect(diffDecks(normalized(document), target)).toEqual([]);
+  });
+
+  it.each(scenarios)('the inverse of every scenario takes b back to a: $name', ({ b }) => {
+    const a = workedDocument();
+    const target = normalized(b);
+    const mutations = diffDecks(a, target);
+    const applied = applyMutations(a, mutations);
+    const { document } = applyMutations(applied.document, applied.inverse);
+    expect(normalized(document)).toEqual(normalized(a));
   });
 
   it('emits block-level mutations rather than a slide replacement for a text edit', () => {

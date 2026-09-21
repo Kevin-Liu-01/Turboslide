@@ -26,12 +26,15 @@ export function typingKeyOf(mutations: ReadonlyArray<Mutation>): string | null {
     // same block (viewer/text-fit.ts growMutation, docs/FOCUS.md rank 11): the call keeps the
     // splice's key, so a burst that grows its box stays in the typing group and one Cmd Z removes
     // the letters and the growth together
+    // Shrink text on overflow steps `typography.size` down the ladder beside the splice the same
+    // way (docs/PRODUCT.md section 5; build/b2.md R7), so one Cmd Z removes the letters and the
+    // step together
     const second = mutations[1];
     if (
       first.op === 'text.splice' &&
       second !== undefined &&
       second.op === 'block.set' &&
-      second.path === '/pos/h' &&
+      (second.path === '/pos/h' || second.path === '/typography') &&
       second.slideId === first.slideId &&
       second.blockId === first.blockId
     )

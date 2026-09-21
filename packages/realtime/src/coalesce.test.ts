@@ -168,6 +168,33 @@ describe('coalesceEntries', () => {
     expect(tabs).toHaveLength(2);
   });
 
+  it('closes a run on either side of a noted entry, and the write carries the note (the product round fix round)', () => {
+    seq = 0;
+    const typing1 = entry(CLIENT_A, kevin, [splice(0, 0, 'H')]);
+    const typing2 = entry(CLIENT_A, kevin, [splice(1, 0, 'i')]);
+    const kit: Entry = {
+      ...entry(CLIENT_A, kevin, [setPointer('list', '/size', 22)]),
+      note: 'Brand kit: Primary',
+    };
+    const typing3 = entry(CLIENT_A, kevin, [splice(2, 0, '!')]);
+    const writes = coalesceEntries([typing1, typing2, kit, typing3]);
+    expect(writes.map((w) => [w.fromSeq, w.toSeq, w.note])).toEqual([
+      [1, 2, undefined],
+      [3, 3, 'Brand kit: Primary'],
+      [4, 4, undefined],
+    ]);
+    expect(writes[0]?.mutations).toEqual([splice(0, 0, 'Hi')]);
+    expect(writes[1]?.mutations).toEqual([setPointer('list', '/size', 22)]);
+    // two noted entries in a row are two writes, each under its own name
+    seq = 0;
+    const two = coalesceEntries([
+      { ...entry(CLIENT_A, kevin, [setPointer('list', '/size', 20)]), note: 'Brand kit: Primary' },
+      { ...entry(CLIENT_A, kevin, [setPointer('list', '/size', 24)]), note: 'Brand kit: Accent' },
+    ]);
+    expect(two.map((w) => w.note)).toEqual(['Brand kit: Primary', 'Brand kit: Accent']);
+    expect(two[1]?.mutations).toEqual([setPointer('list', '/size', 24)]);
+  });
+
   it('gives each author a record whose inverse undoes only that author’s work', () => {
     seq = 0;
     // an interleaved two author session on one slide: kevin resizes the list while maya widens

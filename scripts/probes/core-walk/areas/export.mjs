@@ -44,8 +44,12 @@ export async function run(t) {
       };
     },
   );
+  /* the PDF row starts its download at once (docs/PRODUCT.md section 2 rank 8), so the dialog's way
+     in is Download options with the PDF type picked; its control then reads dialog.download.pdf */
   const openPdf = async () => {
-    await t.menuPath('file', 'file.download', 'file.download.pdf');
+    await t.menuPath('file', 'file.download', 'file.download.options');
+    await t.waitControl('dialog.download.type.pdf', 8000);
+    await t.clickControl('dialog.download.type.pdf');
     await t.waitControl('dialog.download.pdf', 8000);
   };
   /* a checkbox reads its input; the PowerPoint dialog's two modes are `role="radio"` buttons
@@ -128,10 +132,20 @@ export async function run(t) {
   );
   await t.step(
     'export.pptx.dialog',
-    'File > Download > Microsoft PowerPoint',
-    'Perfect selected and Editable text as the other radio',
+    'File > Download > Download options (the PowerPoint row starts its download at once, rank 8)',
+    'Perfect selected, or Editable text when the deck holds a table or a chart (rank 8); both radios present',
     async () => {
-      await t.menuPath('file', 'file.download', 'file.download.pptx');
+      /* rank 8 (docs/PRODUCT.md section 2): Editable text is preselected when the deck holds a
+         table or a chart, since Perfect writes both as pictures; Perfect otherwise. The walk's
+         deck holds both by the time the export rows run */
+      let holds = false;
+      for (const id of await t.slideOrder()) {
+        if (/"type":"(table|chart)"/.test(JSON.stringify(await t.slideJson(id)))) {
+          holds = true;
+          break;
+        }
+      }
+      await t.menuPath('file', 'file.download', 'file.download.options');
       await t.waitControl('dialog.download.pptx', 8000);
       const flatten = await checked('dialog.download.mode.flatten');
       const native = await checked('dialog.download.mode.native');
@@ -149,11 +163,11 @@ export async function run(t) {
       await t.waitGone('[data-control="dialog.download.pptx"]', 4000);
       return {
         ok:
-          flatten === true &&
-          native === false &&
+          flatten === !holds &&
+          native === holds &&
           labels.some((l) => /Perfect/.test(l)) &&
           labels.some((l) => /Editable text/.test(l)),
-        observed: `Perfect checked ${flatten}; Editable text checked ${native}; labels ${labels.join(' | ')}`,
+        observed: `deck holds a table or chart ${holds}; Perfect checked ${flatten}; Editable text checked ${native}; labels ${labels.join(' | ')}`,
       };
     },
   );
@@ -208,11 +222,29 @@ export async function run(t) {
       for (const c of cards.filter((x) => x.skipped)) {
         if (await held(c.id)) return { ok: true, observed: `already skipped and held: ${c.id}` };
       }
-      const ordered = [
+      let ordered = [
         ...cards.filter((c) => c.id === t.deck.secondSlide),
         ...cards.filter((c) => c.id !== t.deck.secondSlide && c.id !== t.deck.titleSlide),
       ].filter((c) => !c.skipped);
-      if (ordered.length === 0) return { ok: false, observed: 'no card to skip beside the title' };
+      /* a deck with no card beside the title (the return round's production run lost this row to
+         a cascade on the deck a restore left with one card, VERIFICATION.md S.3): a slide is added
+         through the window API first, the setup write PRODUCT.md 8.2 names, so the row is judged
+         on its own interaction */
+      if (ordered.length === 0) {
+        const added = await t.setupSlide(t.deck.titleSlide, 'blank').catch(() => null);
+        if (!added)
+          return {
+            ok: false,
+            observed: 'no card to skip beside the title and slide.new added none',
+          };
+        t.deck.secondSlide = t.deck.secondSlide ?? added;
+        ordered = (await t.cards()).filter((c) => c.id === added);
+        if (ordered.length === 0)
+          return {
+            ok: false,
+            observed: `slide.new added ${added} but the filmstrip shows no card for it`,
+          };
+      }
       const tried = [];
       for (const victim of ordered.slice(0, 3)) {
         await t.clickCard(victim.id);

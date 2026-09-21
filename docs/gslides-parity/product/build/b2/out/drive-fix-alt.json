@@ -1,0 +1,22 @@
+{
+  "name": "drive-fix-alt",
+  "base": "http://localhost:4412",
+  "ok": 0,
+  "failed": 2,
+  "rows": [
+    {
+      "n": 1,
+      "step": "formatting.alt-text.write-undo (the formatted box): the description with Tab, then the export at once and after the idle checkpoint",
+      "expected": "both exports carry descr=\"A renewal chart\"",
+      "observed": "alt after Tab \"A renewal chart\" (7 ms); export at once (4430 ms after Tab, 4420 ms): 200, descr false, 1 of 7 named shapes carry a descr; export after 3.5 s (12159 ms after Tab): 200, descr true, 2 of 7",
+      "ok": false
+    },
+    {
+      "n": 2,
+      "step": "the same on a plain text box",
+      "expected": "both exports carry descr=\"A plain description\"",
+      "observed": "alt after Tab \"A plain description\" (2 ms); export at once (5594 ms after Tab, 5590 ms): 200, descr false, 2 of 8 named shapes carry a descr; export after 3.5 s (19477 ms after Tab): 200, descr true, 3 of 8",
+      "ok": false
+    }
+  ]
+}

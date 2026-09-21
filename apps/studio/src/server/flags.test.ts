@@ -10,6 +10,8 @@ import {
   FLAG_CACHE_MS,
   FLAG_OFF_MEANS,
   FLAG_REFUSALS,
+  STUDIO_FLAG_DEFAULTS,
+  STUDIO_FLAG_NAMES,
   FlagOffError,
   assertFlag,
   bindFlags,
@@ -40,8 +42,8 @@ afterEach(() => {
 });
 
 describe('the table', () => {
-  it('names twelve flags, each with a default, a meaning and a refusal sentence', () => {
-    expect(FLAG_NAMES).toHaveLength(12);
+  it('names thirteen flags (the assistant switch among them since the product round), each with a default, a meaning and a refusal sentence', () => {
+    expect(FLAG_NAMES).toHaveLength(13);
     for (const name of FLAG_NAMES) {
       expect(typeof FLAG_DEFAULTS[name]).toBe('boolean');
       expect(FLAG_OFF_MEANS[name].length).toBeGreaterThan(10);
@@ -127,5 +129,48 @@ describe('requireFlag and setFlag', () => {
     await expect(assertFlag('exports')).rejects.toBeInstanceOf(FlagOffError);
     await setFlag('exports', true);
     expect(await requireFlag('exports')).toBeNull();
+  });
+});
+
+describe('the assist switch (docs/PRODUCT.md 6.3, 6.4; build/b7.md Product round)', () => {
+  it('is known to this server beside the schema’s twelve, on by default, with its meaning and its sentence', async () => {
+    expect(STUDIO_FLAG_NAMES).toContain('assist');
+    expect(STUDIO_FLAG_DEFAULTS.assist).toBe(true);
+    expect(FLAG_OFF_MEANS.assist.length).toBeGreaterThan(10);
+    expect(FLAG_REFUSALS.assist).toBe('The assistant is off on this Turboslide');
+    // a reader that knows the schema's names alone answers nothing for it: the default, on
+    bindFlags({
+      read: async (name) => (name === 'assist' ? (undefined as unknown as boolean) : true),
+      write: null,
+    });
+    expect(await flagOn('assist')).toBe(true);
+    expect(await requireFlag('assist')).toBeNull();
+  });
+
+  it('answers 503 with the sentence when the checkout file turns it off, and reads on again after the flip', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'turboslide-flags-assist-'));
+    try {
+      const store = fileFlagStore(dir);
+      let t = 0;
+      bindFlags({ read: store.read, write: store.write, now: () => t });
+      await setFlag('assist', false, 'kevin');
+      const refused = await requireFlag('assist', { deckId: 'q4', action: 'assist.propose' });
+      expect(refused?.status).toBe(503);
+      expect(await refused?.json()).toEqual({
+        error: 'unavailable',
+        message: 'The assistant is off on this Turboslide',
+        flag: 'assist',
+      });
+      expect(readFlagFile(dir).assist).toBe(false);
+      expect(
+        lines.some((line) => line.event === 'flag.refused' && line.killSwitch === 'assist'),
+      ).toBe(true);
+      await setFlag('assist', true, 'kevin');
+      t += FLAG_CACHE_MS + 1;
+      expect(await requireFlag('assist')).toBeNull();
+      expect((await flagTable()).assist).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

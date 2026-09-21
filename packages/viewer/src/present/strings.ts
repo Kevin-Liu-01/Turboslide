@@ -12,8 +12,9 @@ export const STUB_PREFIX = 'Not available in Turboslide yet';
 export const PRESENT_TEXT = {
   /** the toolbar */
   toolbar: 'Slideshow controls',
-  previous: 'Previous',
-  next: 'Next',
+  /* sentence case, the whole phrase (docs/PRODUCT.md 3.6; audit-interface 26) */
+  previous: 'Previous slide',
+  next: 'Next slide',
   counter: (index: number, total: number) => `${index} of ${total}`,
   slideList: 'Slides',
   laserOn: 'Turn on the laser pointer',

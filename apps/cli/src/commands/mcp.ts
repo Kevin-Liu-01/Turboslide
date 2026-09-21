@@ -68,6 +68,7 @@ import { EXIT } from '../exit.ts';
 import type { Output } from '../output.ts';
 import { registerRecordActions } from '../record-actions.ts';
 import { readIndex } from '../records/comments.ts';
+import { registerBrandActions } from '../brand-actions.ts';
 import { canvasCounts, registerStoreActions } from '../store-actions.ts';
 import { recordDeps } from '../write.ts';
 import { headlessCanvasMeasurer, headlessFitMeasurer } from '../deps/canvas.ts';
@@ -232,6 +233,8 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
         ...canvas,
       },
       ...(loaded.deck.defaults !== undefined ? { defaults: loaded.deck.defaults } : {}),
+      /* the brand kit record (docs/PRODUCT.md 4.1), only when the deck carries one */
+      ...(loaded.deck.brand !== undefined ? { brand: loaded.deck.brand } : {}),
       ...(loaded.deck.guides !== undefined ? { guides: loaded.deck.guides } : {}),
       ...(loaded.deck.trashedAt !== undefined ? { trashedAt: loaded.deck.trashedAt } : {}),
     };
@@ -662,6 +665,8 @@ export function createDeckDispatcher(env: HandlerEnv): Dispatcher {
     diagrams: makeDiagram,
   };
   registerStoreActions(dispatcher, deps);
+  /* the brand kit's four ids (docs/PRODUCT.md 4.1; build/b5.md R3) */
+  registerBrandActions(dispatcher, deps);
   /* the record actions of round three (gslides-parity SPEC-3 12): comments, the inbox, activity,
      sharing, the checkout's account facts, the flags, presence and sync reads, deck.watch and the
      background picture and material (record-actions.ts) */

@@ -144,7 +144,7 @@ describe('createMcpServer', () => {
     await expect(client.readResource({ uri: 'deck://lint' })).rejects.toThrow(/no handler/);
     await expect(client.readResource({ uri: 'deck://nope' })).rejects.toThrow(/Resource not found/);
     const prompts = await client.listPrompts();
-    expect(prompts.prompts.map((prompt) => prompt.name)).toEqual(['deck_review']);
+    expect(prompts.prompts.map((prompt) => prompt.name)).toEqual(['deck_review', 'deck_assist']);
     const prompt = await client.getPrompt({ name: 'deck_review', arguments: { lens: 'layout' } });
     const content = prompt.messages[0]?.content;
     expect(content?.type === 'text' ? content.text : '').toContain('revision 3');

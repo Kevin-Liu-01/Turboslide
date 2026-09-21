@@ -38,3 +38,6 @@ decks/*/comments/
 
 # Python bytecode the fonts script leaves beside itself (round four ship step, VERIFICATION-4 finding 20)
 __pycache__/
+
+# the deployment default template record (docs/PRODUCT.md 4.3): written by Use for new presentations, never committed
+decks/templates/default.json

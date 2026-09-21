@@ -88,8 +88,11 @@ export function renderRuns(runs: Run[], options: RenderTextOptions): string {
     for (let i = shared; i < want.length; i += 1) out += openTag(want[i] as Wrapper);
     open = want;
     if (run.link) {
+      /* a slide link (`#s/<id>`, `#next`) stays in the page so the show and the viewer follow it
+         through the hash (docs/PRODUCT.md section 2 rank 19); an external address opens a tab */
+      const external = options.externalLinks !== false && !run.link.startsWith('#');
       const anchor = `<a href="${escapeAttr(run.link)}"${
-        options.externalLinks === false ? '' : ' target="_blank" rel="noreferrer"'
+        external ? ' target="_blank" rel="noreferrer"' : ''
       }>${escapeText(run.t)}</a>`;
       out += options.linkGlyph
         ? `<span class="lk">${anchor}<svg class="ic ext" aria-hidden="true"><use href="#i-arrow-top-right-on-square"/></svg></span>`

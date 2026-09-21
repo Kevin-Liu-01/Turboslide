@@ -41,6 +41,11 @@ const FEATURES = [
   ['chrome', "RETURN 2.16 The editor's chrome"],
   ['view', 'RETURN 2.16 The View menu'],
   ['inbox', 'RETURN 2.16 Notifications'],
+  /* the product round's features (docs/PRODUCT.md sections 4 and 6, 8.1), numbered by its sections */
+  ['brand', 'PRODUCT 4.1 The brand kit'],
+  ['fonts', 'PRODUCT 4.2 The font catalog'],
+  ['templates', 'PRODUCT 4.3 Templates'],
+  ['assist', 'PRODUCT 6 The assist'],
   ['surface', '3 The switch'],
 ];
 const STATES = ['works', 'broken', 'flaky', 'not driven'];
@@ -86,6 +91,14 @@ const README = {
   view: '**The View menu.** View > Appearance sets the chrome to light or dark; Show filmstrip, Full screen and the editing modes are in the View menu, with the rulers, the guides and the snaps for arranging objects.',
   inbox:
     '**Notifications.** The bell in the title row lists the replies and mentions on a shared deck, and Tools > Notification settings keeps the level a seller picks.',
+  brand:
+    "**Brand kit.** Slide > Change theme and the toolbar Theme button open the Brand kit panel: the logo on the title slide and in the corner of every slide, six colours, the display and text faces, the footer text, the slide number format and the frame lines, each previewed on the sheet as it is changed and taken back with Cmd+Z. A picture's right click menu puts it on every slide. Reset to the deployment's kit is one button. The kit travels into the PDF, the PowerPoint file, the view link and the show.",
+  fonts:
+    "**Fonts.** The Font dropdown on the toolbar lists the kit's faces, the faces this presentation uses and a catalog of 26 open licence families by category, with a search field; More fonts lists every family with its licence. A face survives a reload, draws in the show, is named in the PowerPoint file and is embedded in the PDF.",
+  templates:
+    "**Templates.** The template gallery lists your organisation's templates and Blank, each with its cover; File > Save as template saves a presentation as a template with its brand kit, and Use for new presentations makes it the presentation /new opens. A template is read only; start a presentation from it.",
+  assist:
+    "**Assist.** The Assist button in the title row (Cmd+J) opens a panel with three starter cards: Tailor for a customer (rename the customer, swap the logo and skip slides in one step, with one Undo), Make it shorter and Write speaker notes. A card shows the before and after; nothing changes until it is accepted, and Accept is one undo step. Search the menus understands a seller's words and offers Ask the assistant when nothing matches.",
   surface:
     '**For agents and advanced tools.** Every action the editor runs is also a CLI command, an MCP tool, an HTTP route and a window function, including the features behind Tools > Advanced tools. `GET /api/agent` lists them.',
 };

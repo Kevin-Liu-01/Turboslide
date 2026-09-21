@@ -1,5 +1,5 @@
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import type { Block, PlainBlock } from '@turboslide/schema/blocks';
 import { STROKE_WIDTHS } from '@turboslide/schema/blocks';
@@ -13,6 +13,8 @@ import type { ChartBlock } from '@turboslide/schema/blocks/chart';
 import type { TableBlock } from '@turboslide/schema/blocks/table';
 import { isLineKind } from '@turboslide/schema/shapes';
 import type { Color } from '@turboslide/schema/color';
+import { deckAppearance } from '@turboslide/schema/deck';
+import { headingBlockSchema } from '@turboslide/schema/blocks';
 import { BULLET_PRESETS, NUMBER_PRESETS } from '@turboslide/schema/text';
 import { TYPE_LADDER } from '@turboslide/schema/typography';
 
@@ -25,11 +27,13 @@ import {
   PLAIN_SIZE_LADDER,
   selectedBlock,
   selectedBlocks,
+  selectionMarks,
   shapePickPlan,
   SPACING_STEPS,
   stepLadder,
   stepPlainSize,
   tailKindOf as tailOfSelection,
+  pictureTargetOf,
   textStylePlan,
 } from './editor-shell';
 import type { ActionPlan, ActionRefusal } from './editor-shell';
@@ -40,14 +44,10 @@ import { useMountEffect } from './lib/useMountEffect';
 import { Menu } from './Menu';
 import { evaluate, isPresent, itemById, presentControls, visibleItems } from './menus/model';
 import type { MenuItem } from './menus/model';
-import {
-  HIDE_MENUS_CONTROL,
-  MORE_BREAKPOINT_PX,
-  TOOLBAR_TAIL_END,
-  tailFor,
-} from './menus/toolbar-tails';
+import { HIDE_MENUS_CONTROL, TOOLBAR_TAIL_END, tailFor } from './menus/toolbar-tails';
 import { PRESENCE } from './menus/strings';
 import type { TailControl, TailKind, TailOp } from './menus/toolbar-tails';
+import { FontField } from './FontPicker';
 import { ColorPlate, anchoredAt } from './pickers/ColorPlate';
 import { DashList } from './pickers/DashList';
 import { LineEndPicker } from './pickers/LineEndPicker';
@@ -68,11 +68,84 @@ import { tipProps } from './Tooltip';
  * line decoration grid, the shape picker, the chart dropdowns) or edits the size field. A colour,
  * border or dash op on a group selection writes every member that has the field in one write
  * (SPEC-2 0.102); on word art Border color and Border weight write the outline (0.62); on a table
- * Fill color writes the selected cells through the table plans. At or below 1100 px the tail from
- * position 8 collapses into one More button whose menu lists the same controls with their labels
- * (SPEC 0.6, 1.3); nothing wraps. The Hide the menus chevron sits at the far right of every tail.
+ * Fill color writes the selected cells through the table plans. The tail measures its controls
+ * against the bar on every selection change and on every resize and folds the ones that do not
+ * fit into one More button whose menu lists them with their labels, at any window width
+ * (docs/PRODUCT.md 3.4; the fixed fold at 1100 px left with the product round: with a shape
+ * selected the tail ended at x 1525 in a 1440 px bar and Format options was cut to "Format
+ * optio", audit-interface section 6). The fold order is Clear formatting, the indent pair, the
+ * list buttons, Highlight color, then the fill and border group, then the rest from the right
+ * end; Format options never folds, and the pointer toggle and the Hide the menus chevron stand
+ * outside the fold at the far right. Nothing wraps. The pressed state of Bold, Italic and
+ * Underline follows the marks under the caret or the selection (3.1; audit-interface 14).
  */
 export { tailOfSelection as tailKindOf };
+
+/** True once the heading block's schema accepts `/color` (build/b5.md request); read from the schema, never assumed. */
+const HEADING_TAKES_COLOR = 'color' in headingBlockSchema.shape;
+
+/**
+ * The fold order (3.4): the lower the number, the sooner the control leaves the bar for More; a
+ * control not named here folds after these, from the right end of the tail; Format options never.
+ */
+export const FOLD_ORDER: Readonly<Record<string, number>> = {
+  'toolbar.clearFormatting': 1,
+  'toolbar.decreaseIndent': 2,
+  'toolbar.increaseIndent': 2,
+  'toolbar.bulletedList': 3,
+  'toolbar.numberedList': 3,
+  'toolbar.highlightColor': 4,
+  'toolbar.fillColor': 5,
+  'toolbar.borderColor': 5,
+  'toolbar.borderWeight': 5,
+  'toolbar.borderDash': 5,
+};
+
+/** The controls that stay in the bar whatever the width (3.4). */
+export const NEVER_FOLDS: ReadonlySet<string> = new Set(['toolbar.formatOptions']);
+
+const FOLD_LAST = 6;
+
+/** The 4 px gap of the toolbar row (EditorToolbar.css), between every pair of slots. */
+export const TAIL_GAP_PX = 4;
+
+/** The width of the More button, a 32 px icon square. */
+export const MORE_BUTTON_PX = 32;
+
+/**
+ * Which controls fold into More so the rest fit `available` px (the tail's room after the pointer
+ * toggle and the Hide the menus chevron): none when every control fits; else the controls in fold
+ * order until what stays, plus the More button, fits. Pure, so the order is testable; a control
+ * with no measured width (0) counts as taking no room.
+ */
+export function foldPlan(
+  controls: ReadonlyArray<{ id: string; width: number }>,
+  available: number,
+): Set<string> {
+  const folded = new Set<string>();
+  const total = (ids: ReadonlySet<string>): number => {
+    const kept = controls.filter((control) => !ids.has(control.id));
+    const widths = kept.reduce((sum, control) => sum + control.width, 0);
+    const gaps = Math.max(0, kept.length - 1) * TAIL_GAP_PX;
+    const more = ids.size > 0 ? MORE_BUTTON_PX + TAIL_GAP_PX : 0;
+    return widths + gaps + more;
+  };
+  if (total(folded) <= available) return folded;
+  const order = controls
+    .map((control, index) => ({ control, index }))
+    .filter(({ control }) => !NEVER_FOLDS.has(control.id))
+    .sort((a, b) => {
+      const pa = FOLD_ORDER[a.control.id] ?? FOLD_LAST;
+      const pb = FOLD_ORDER[b.control.id] ?? FOLD_LAST;
+      if (pa !== pb) return pa - pb;
+      return b.index - a.index;
+    });
+  for (const { control } of order) {
+    folded.add(control.id);
+    if (total(folded) <= available) break;
+  }
+  return folded;
+}
 
 type Plate =
   | { kind: 'menu'; items: ReadonlyArray<MenuItem>; label: string; control: TailControl }
@@ -206,17 +279,62 @@ export function ToolbarTail() {
     menuContext,
   );
   const [plate, setPlate] = useState<{ anchor: HTMLElement; plate: Plate } | null>(null);
-  const [narrow, setNarrow] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreButton = useRef<HTMLButtonElement>(null);
+  const tailRef = useRef<HTMLDivElement>(null);
+  /* the fold (3.4): the ids in More, measured against the bar; the widths every control had while
+     visible, so a folded control is never measured at zero and a resize can unfold it */
+  const [folded, setFolded] = useState<ReadonlySet<string>>(() => new Set());
+  const widths = useRef(new Map<string, number>());
+  const [resizeTick, setResizeTick] = useState(0);
+  const controlIds = controls.map((control) => control.control).join('|');
 
   useMountEffect(() => {
-    const media = window.matchMedia(`(max-width: ${MORE_BREAKPOINT_PX}px)`);
-    const apply = () => setNarrow(media.matches);
-    apply();
-    media.addEventListener('change', apply);
-    return () => media.removeEventListener('change', apply);
+    const el = tailRef.current;
+    if (!el) return undefined;
+    const bump = () => setResizeTick((tick) => tick + 1);
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(bump);
+      observer.observe(el);
+    }
+    window.addEventListener('resize', bump);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', bump);
+    };
   });
+
+  /* measured before paint on every selection change and every resize: the slots' widths, the room
+     the tail's end leaves, then the plan; a control the plan folds leaves the row with its divider */
+  useLayoutEffect(() => {
+    const el = tailRef.current;
+    if (!el) return;
+    const slots = [...el.querySelectorAll<HTMLElement>(':scope > [data-slot]')];
+    let unknown = false;
+    for (const slot of slots) {
+      const id = slot.dataset.slot ?? '';
+      if (slot.offsetWidth > 0) widths.current.set(id, slot.offsetWidth);
+      else if (!widths.current.has(id)) unknown = true;
+    }
+    if (unknown) {
+      /* a folded control with no remembered width: unfold everything once so it is measured */
+      if (folded.size > 0) setFolded(new Set());
+      return;
+    }
+    const end = [...el.querySelectorAll<HTMLElement>(':scope > .ts-tb-end, :scope > .ts-tb-hide')];
+    const endWidth = end.reduce((sum, each) => sum + each.offsetWidth + TAIL_GAP_PX, 0);
+    const available = el.clientWidth - endWidth;
+    const plan = foldPlan(
+      controls.map((control) => ({
+        id: control.control,
+        width: widths.current.get(control.control) ?? 0,
+      })),
+      available,
+    );
+    const same = plan.size === folded.size && [...plan].every((id) => folded.has(id));
+    if (!same) setFolded(plan);
+  }, [controlIds, controls, folded, resizeTick]);
 
   /* a change of selection closes any open plate */
   useEffect(() => {
@@ -283,12 +401,23 @@ export function ToolbarTail() {
           return { path: '/frame', current: colorOf(block.frame?.color) };
         return null;
       case 'textColor':
-        if (block.type === 'heading' || block.type === 'paragraph')
+        /* a heading or a paragraph takes any kit colour once its schema carries `color`
+           (docs/PRODUCT.md 4.1, the fix for the heading swatch that did nothing; the field is the
+           integrator's request in build/b5.md); until then the two tones of before */
+        if (block.type === 'heading' || block.type === 'paragraph') {
+          if (HEADING_TAKES_COLOR)
+            return {
+              path: '/color',
+              current:
+                colorOf((block as { color?: Color }).color) ??
+                ('tone' in block && block.tone === 'muted' ? 'titanium' : undefined),
+            };
           return {
             path: '/tone',
             current: 'tone' in block && block.tone === 'muted' ? 'titanium' : 'ink',
             tones: true,
           };
+        }
         /* a shape's label colour is its `color` field, optional in the schema, so a shape drawn by
            the tool has none until a swatch writes it: the `in` check below answered null and the
            Paper swatch wrote nothing on the rectangle (docs/RETURN.md 2.2 the fix; audit-formatting
@@ -748,6 +877,12 @@ export function ToolbarTail() {
       shell.runControl(control, anchor);
       return;
     }
+    /* the Image button opens the file chooser on click (docs/PRODUCT.md section 2 rank 17; build/b2.md
+       R4); its arrow keeps the Insert > Image sources */
+    if (control.control === 'toolbar.insertImage' && input.uploadPicture !== undefined) {
+      input.uploadPicture(pictureTargetOf('insert.image.upload', input.slideId, undefined));
+      return;
+    }
     if (
       control.arrow !== undefined ||
       (control.op !== undefined &&
@@ -774,37 +909,162 @@ export function ToolbarTail() {
     item: hide.id,
   };
 
-  const moreItems: MenuItem[] = controls.map((control) => ({
-    id: `toolbar.more.${control.control}`,
-    label: control.label,
-    status: control.status,
-    ...(control.icon === undefined ? {} : { icon: control.icon }),
-    ...(control.key === undefined ? {} : { key: control.key }),
-    ...(control.stubReason === undefined ? {} : { stubReason: control.stubReason }),
-    ...(control.enabled === undefined ? {} : { enabled: control.enabled }),
-    ...(control.disabledReason === undefined ? {} : { disabledReason: control.disabledReason }),
-    ...(control.doc === undefined ? {} : { doc: control.doc }),
-    ...(control.dividerBefore === undefined ? {} : { dividerBefore: control.dividerBefore }),
-    effect: { kind: 'client', handler: 'runAction' },
-  }));
+  /* the More menu lists the folded controls alone, in the tail's order, with their labels */
+  const moreItems: MenuItem[] = controls
+    .filter((control) => folded.has(control.control))
+    .map((control) => ({
+      id: `toolbar.more.${control.control}`,
+      label: control.label,
+      status: control.status,
+      ...(control.icon === undefined ? {} : { icon: control.icon }),
+      ...(control.key === undefined ? {} : { key: control.key }),
+      ...(control.stubReason === undefined ? {} : { stubReason: control.stubReason }),
+      ...(control.enabled === undefined ? {} : { enabled: control.enabled }),
+      ...(control.disabledReason === undefined ? {} : { disabledReason: control.disabledReason }),
+      ...(control.doc === undefined ? {} : { doc: control.doc }),
+      ...(control.dividerBefore === undefined ? {} : { dividerBefore: control.dividerBefore }),
+      effect: { kind: 'client', handler: 'runAction' },
+    }));
 
-  /** The pressed state of a text mark button from the caret's run (SPEC-2 6.2). */
+  /**
+   * The pressed state of a text mark button (SPEC-2 6.2; docs/PRODUCT.md 3.1, the pressed cell):
+   * the marks under the caret or the selection, from the editor's report when it carries them and
+   * else from the block's text and the range (`selectionMarks`), so Cmd+B in a session lights the
+   * button; a block level bold (the heading's weight) counts as well.
+   */
   const markPressed = (control: TailControl): boolean | undefined => {
-    const marks = input.selection?.marks;
+    const marks = selectionMarks(facts());
     if (control.control === 'toolbar.italic') return marks?.i === true;
     if (control.control === 'toolbar.underline') return marks?.u === true;
-    if (control.control === 'toolbar.bold') return typography(block).weight === 500;
+    if (control.control === 'toolbar.bold')
+      return marks?.b === true || typography(block).weight === 500;
     return undefined;
   };
 
   return (
     <div
-      className={cn('ts-tb-tail', narrow && 'is-more')}
+      ref={tailRef}
+      className={cn('ts-tb-tail', folded.size > 0 && 'has-more')}
       data-control="toolbar.tail"
       data-tail={kind}
+      data-folded={folded.size}
     >
-      {narrow ? (
-        <>
+      {controls.map((control, index) => {
+        const key = `${control.control}-${index}`;
+        const isFolded = folded.has(control.control);
+        const slotClass = cn('ts-tb-slot', isFolded && 'is-folded');
+        if (control.op === 'fontSize')
+          return (
+            <span
+              key={key}
+              className={slotClass}
+              data-slot={control.control}
+              aria-hidden={isFolded ? true : undefined}
+            >
+              <FontSizeField control={control} block={block} />
+            </span>
+          );
+        /* the Font dropdown in Google's position, left of the size field (docs/PRODUCT.md 4.2;
+           FontPicker.tsx); the read only family while the catalog is parked (3.4) */
+        if (control.op === 'font')
+          return (
+            <span
+              key={key}
+              className={slotClass}
+              data-slot={control.control}
+              aria-hidden={isFolded ? true : undefined}
+            >
+              <FontField control={control} block={block} readOnly={control.readOnly === true} />
+            </span>
+          );
+        const divider =
+          control.dividerBefore === true && index > 0 ? (
+            <ToolbarDivider key={`${key}-sep`} />
+          ) : null;
+        const pressed =
+          control.op === 'formatOptions'
+            ? shell.panel === 'formatOptions'
+            : control.control === 'toolbar.theme'
+              ? shell.panel === 'themes'
+              : control.control === 'toolbar.layout'
+                ? shell.layoutGrid?.purpose === 'apply'
+                : plate?.plate.control.control === control.control
+                  ? true
+                  : markPressed(control);
+        /* Crop image and the two list buttons: the button and its arrow are two controls
+             (SPEC-2 4.2; docs/FOCUS.md rank 9) */
+        if (
+          (control.op === 'crop' ||
+            listButtonOf(control) !== null ||
+            control.control === 'toolbar.insertLine' ||
+            (control.control === 'toolbar.insertImage' && input.uploadPicture !== undefined)) &&
+          control.arrow !== undefined
+        ) {
+          const arrowItem = itemById(control.arrow);
+          return (
+            <span
+              key={key}
+              className={cn(slotClass, 'ts-tb-split')}
+              data-slot={control.control}
+              aria-hidden={isFolded ? true : undefined}
+            >
+              {divider}
+              <ToolbarButton
+                control={control}
+                onClick={(anchor) => onControl(control, anchor)}
+                className="ts-tb-split-main"
+              />
+              <button
+                type="button"
+                className="pt-ib pt-icon ts-tb ts-tb-split-arrow"
+                aria-label={arrowItem.label}
+                aria-haspopup="menu"
+                aria-expanded={plate?.plate.control.control === `${control.control}.arrow`}
+                data-control={`${control.control}.arrow`}
+                data-menu-item={arrowItem.id}
+                onClick={(event) =>
+                  openPlate(
+                    { ...control, control: `${control.control}.arrow`, op: undefined },
+                    event.currentTarget,
+                  )
+                }
+                {...tipProps({
+                  name: arrowItem.label,
+                  doc:
+                    arrowItem.doc ??
+                    (control.op === 'crop'
+                      ? 'Shows the picture inside a shape'
+                      : control.control === 'toolbar.insertLine'
+                        ? 'Line or arrow'
+                        : control.control === 'toolbar.insertImage'
+                          ? 'Upload from computer, By URL or a picture of this presentation'
+                          : 'Another style'),
+                })}
+              >
+                <Icon name="chevron-down" />
+              </button>
+            </span>
+          );
+        }
+        return (
+          <span
+            key={key}
+            className={slotClass}
+            data-slot={control.control}
+            aria-hidden={isFolded ? true : undefined}
+          >
+            {divider}
+            <ToolbarButton
+              control={control}
+              onClick={(anchor) => onControl(control, anchor)}
+              pressed={pressed}
+              chevron={control.dropdown === true || control.arrow !== undefined}
+            />
+          </span>
+        );
+      })}
+      {folded.size > 0 ? (
+        <span className="ts-tb-slot ts-tb-more-slot">
           <button
             ref={moreButton}
             type="button"
@@ -813,8 +1073,12 @@ export function ToolbarTail() {
             aria-haspopup="menu"
             aria-expanded={moreOpen}
             data-control="toolbar.more"
+            data-count={folded.size}
             onClick={() => setMoreOpen((on) => !on)}
-            {...tipProps({ name: 'More', doc: 'The rest of the toolbar' })}
+            {...tipProps({
+              name: 'More',
+              doc: `${folded.size === 1 ? 'One more tool' : `${folded.size} more tools`} that did not fit the bar`,
+            })}
           >
             <Icon name="ellipsis-horizontal" />
           </button>
@@ -837,86 +1101,8 @@ export function ToolbarTail() {
               id="ts-menu-toolbar-more"
             />
           ) : null}
-        </>
-      ) : (
-        controls.map((control, index) => {
-          const key = `${control.control}-${index}`;
-          if (control.op === 'fontSize')
-            return <FontSizeField key={key} control={control} block={block} />;
-          const divider =
-            control.dividerBefore === true && index > 0 ? (
-              <ToolbarDivider key={`${key}-sep`} />
-            ) : null;
-          const pressed =
-            control.op === 'formatOptions'
-              ? shell.panel === 'formatOptions'
-              : control.control === 'toolbar.theme'
-                ? shell.panel === 'themes'
-                : control.control === 'toolbar.layout'
-                  ? shell.layoutGrid?.purpose === 'apply'
-                  : plate?.plate.control.control === control.control
-                    ? true
-                    : markPressed(control);
-          /* Crop image and the two list buttons: the button and its arrow are two controls
-             (SPEC-2 4.2; docs/FOCUS.md rank 9) */
-          if (
-            (control.op === 'crop' ||
-              listButtonOf(control) !== null ||
-              control.control === 'toolbar.insertLine') &&
-            control.arrow !== undefined
-          ) {
-            const arrowItem = itemById(control.arrow);
-            return (
-              <span key={key} className="ts-tb-slot ts-tb-split">
-                {divider}
-                <ToolbarButton
-                  control={control}
-                  onClick={(anchor) => onControl(control, anchor)}
-                  className="ts-tb-split-main"
-                />
-                <button
-                  type="button"
-                  className="pt-ib pt-icon ts-tb ts-tb-split-arrow"
-                  aria-label={arrowItem.label}
-                  aria-haspopup="menu"
-                  aria-expanded={plate?.plate.control.control === `${control.control}.arrow`}
-                  data-control={`${control.control}.arrow`}
-                  data-menu-item={arrowItem.id}
-                  onClick={(event) =>
-                    openPlate(
-                      { ...control, control: `${control.control}.arrow`, op: undefined },
-                      event.currentTarget,
-                    )
-                  }
-                  {...tipProps({
-                    name: arrowItem.label,
-                    doc:
-                      arrowItem.doc ??
-                      (control.op === 'crop'
-                        ? 'Shows the picture inside a shape'
-                        : control.control === 'toolbar.insertLine'
-                          ? 'Line or arrow'
-                          : 'Another style'),
-                  })}
-                >
-                  <Icon name="chevron-down" />
-                </button>
-              </span>
-            );
-          }
-          return (
-            <span key={key} className="ts-tb-slot">
-              {divider}
-              <ToolbarButton
-                control={control}
-                onClick={(anchor) => onControl(control, anchor)}
-                pressed={pressed}
-                chevron={control.dropdown === true || control.arrow !== undefined}
-              />
-            </span>
-          );
-        })
-      )}
+        </span>
+      ) : null}
       <span className="ts-tb-spring" aria-hidden="true" />
       {/* the tail's end (SPEC-3 4.4, 6.3, 13.2): the pointer toggle for editors, the View only
           button for a viewer on the editor route; each present only when its predicate says so */}
@@ -950,7 +1136,11 @@ export function ToolbarTail() {
       })}
       {/* Hide the menus is parked with View > Full screen (docs/FOCUS.md 3.2, 3.3) */}
       {isPresent(hide, menuContext) ? (
-        <ToolbarButton control={hideControl} onClick={() => shell.setCompact(true)} />
+        <ToolbarButton
+          control={hideControl}
+          className="ts-tb-hide"
+          onClick={() => shell.setCompact(true)}
+        />
       ) : null}
       {plate !== null ? (
         plate.plate.kind === 'menu' ? (
@@ -972,6 +1162,8 @@ export function ToolbarTail() {
             label={plate.plate.control.label}
             current={colorTarget(plate.plate.op)?.current}
             tones={colorTarget(plate.plate.op)?.tones === true}
+            kit={input.document.deck.brand}
+            appearance={deckAppearance(input.document.deck)}
             control={plate.plate.control.control}
             onPick={(
               (op: TailOp) => (value: Color | 'none') =>

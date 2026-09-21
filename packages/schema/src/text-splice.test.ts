@@ -25,9 +25,26 @@ describe('spliceText (SPEC-3 3.1)', () => {
     expect(spliceText('Every *post* states', 6, 0, 'a ')).toBe('Every a *post* states');
     // typing at the very start takes the flags of the run that starts there
     expect(spliceText('*Post* states', 0, 0, 'A ')).toBe('*A Post* states');
-    // typing inside a link continues the link
+    // typing inside a link continues the link; at its end the letters leave it (below)
+    expect(spliceText(MARKED, 21, 0, 'ever')).toBe(
+      'Every *post* states [whaevert](https://x.y) was built.',
+    );
     expect(spliceText(MARKED, 22, 0, 'ever')).toBe(
-      'Every *post* states [whatever](https://x.y) was built.',
+      'Every *post* states [what](https://x.y)ever was built.',
+    );
+    // typing at the end of a link continues the sentence, never the link (docs/PRODUCT.md
+    // section 2 rank 9; the link detection's space and the words after it stay plain)
+    expect(spliceText('Visit [acme.com](https://acme.com)', 14, 0, ' today')).toBe(
+      'Visit [acme.com](https://acme.com) today',
+    );
+    expect(spliceText('See [acme.com](https://acme.com) now', 12, 0, 's')).toBe(
+      'See [acme.com](https://acme.com)s now',
+    );
+    // a bold link keeps the bold and drops the address at its end
+    expect(spliceText('[*acme*](https://acme.com)', 4, 0, 's')).toBe('*[acme](https://acme.com)s*');
+    // a paragraph break typed at a link's end starts a plain paragraph
+    expect(spliceText('[acme.com](https://acme.com)', 8, 0, '\nmore')).toBe(
+      '[acme.com](https://acme.com)\nmore',
     );
   });
 
@@ -46,6 +63,26 @@ describe('spliceText (SPEC-3 3.1)', () => {
     );
     // retyping from inside a plain run into the link stays plain
     expect(spliceText(MARKED, 16, 5, 'x')).toBe('Every *post* statex[t](https://x.y) was built.');
+  });
+
+  it('drops the link when the replacement covers the whole linked span', () => {
+    // the heading case of VERIFICATION.md product pass 1 finding 5: the address typed, linked
+    // on Enter, then a word typed over the whole selection; the editable's anchor left with its
+    // last character and the document kept the address, so the two disagreed and the next link
+    // apply spliced markup at plain offsets
+    expect(spliceText('[sales@acme.com](mailto:sales@acme.com)', 0, 14, 'Renewal')).toBe('Renewal');
+    expect(spliceText(MARKED, 18, 4, 'which')).toBe('Every *post* states which was built.');
+    // a linked span of several runs (a bold word inside the link) counts whole; the letters keep
+    // the first character's other marks
+    expect(
+      spliceText('See *[acme](https://acme.com)*[.com](https://acme.com) now', 4, 8, 'Globex'),
+    ).toBe('See *Globex* now');
+    expect(spliceText('*[acme](https://acme.com)*', 0, 4, 'Globex')).toBe('*Globex*');
+    // a replacement that starts or ends inside the span keeps the link
+    expect(spliceText(MARKED, 19, 3, 'o')).toBe('Every *post* states [wo](https://x.y) was built.');
+    expect(spliceText(MARKED, 18, 3, 'x')).toBe('Every *post* states [xt](https://x.y) was built.');
+    // a wider replacement that begins before the link takes the plain run's flags, as before
+    expect(spliceText(MARKED, 11, 11, 'said')).toBe('Every *post* said was built.');
   });
 
   it('joins paragraphs when the break is removed and starts one on a newline', () => {

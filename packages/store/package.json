@@ -25,6 +25,7 @@
     "./migrate": "./src/migrate.ts",
     "./tmp-store": "./src/tmp-store.ts",
     "./blob-store": "./src/blob-store.ts",
+    "./blob-templates": "./src/blob-templates.ts",
     "./snapshots": "./src/snapshots.ts",
     "./blob-fake": "./src/blob-fake.ts",
     "./blob-disk": "./src/blob-disk.ts",

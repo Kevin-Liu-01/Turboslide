@@ -1,5 +1,5 @@
 /* ToolButton. tokens.css owns .pt-ib and every state it shares across the
-   shell (hover, focus-visible, .is-on, .pt-icon, .is-solid, .pt-lb) so one
+   shell (hover, focus-visible, .is-on, .pt-icon, .is-solid, .is-disabled, .pt-lb) so one
    rule set draws every button. This sheet holds only what the base leaves
    open. Ported from Prototemplate/src/components/viewer/ToolButton.css. */
 
@@ -27,7 +27,8 @@
    word first and the 12px play glyph after it (the row is reversed here so
    ToolButton keeps its one icon-then-label markup), and a hover that drops
    the ink ground for ink text inside the ink frame. The toolbar's tier four
-   still collapses it to a 32px square. */
+   still collapses it to a 32px square. The corner is unchanged this round
+   (docs/PRODUCT.md 3.1.1: the kit's `corner` field decides it next round). */
 .pt-ib.is-solid {
   flex-direction: row-reverse;
   gap: 7px;
@@ -58,13 +59,6 @@
   }
 }
 
-/* a stub (gslides-parity SPEC 13.1): titanium, in the tab order, no pointer change, no hover frame */
-.pt-ib.is-disabled {
-  color: var(--pt-titanium);
-  cursor: default;
-}
-
-.pt-ib.is-disabled:hover {
-  color: var(--pt-titanium);
-  border-color: transparent;
-}
+/* a stub (gslides-parity SPEC 13.1) and every disabled control read --pt-disabled, stay in the
+   tab order and take no hover ground and no frame: the rule lives in tokens.css with the other
+   states of the shell button (docs/PRODUCT.md 3.1) */

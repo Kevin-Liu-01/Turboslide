@@ -202,9 +202,11 @@ describe('Inspector sections', () => {
       />,
     );
     const swatches = document.querySelectorAll('[data-section="color"] .ts-ctl-swatch[data-token]');
-    expect(swatches).toHaveLength(12);
+    /* twelve tokens plus the brand kit's accent (docs/PRODUCT.md 4.1; schema color.ts) */
+    expect(swatches).toHaveLength(13);
     expect(swatches[0]?.getAttribute('data-tip')).toBe('Ink');
     expect(swatches[11]?.getAttribute('data-tip')).toBe('GT blue');
+    expect(swatches[12]?.getAttribute('data-tip')).toBe('Accent');
     expect(screen.getByLabelText<HTMLInputElement>('t: Color hex').value).toBe('#123456');
     expect(document.querySelector('[data-rule="color/off-palette"]')).not.toBeNull();
     expect(document.querySelector('.ts-ctl-contrast')?.textContent).toMatch(/:1$/);

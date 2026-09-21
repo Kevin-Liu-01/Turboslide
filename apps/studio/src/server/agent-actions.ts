@@ -126,9 +126,27 @@ export const SERVER_SIDE_WINDOW_ACTIONS_PENDING: ReadonlyArray<string> = (
   SERVER_SIDE_WINDOW_ACTIONS_GS3 as readonly string[]
 ).filter((id) => !isActionId(id));
 
+/**
+ * The product round (docs/PRODUCT.md 4.3; build/b5b.md R3): the template ids. A template is a
+ * folder under the collection's decks/templates, so every one of them needs the store and runs
+ * through runDeckAction; the studio dispatcher registers them over the collection (actions.ts
+ * registerTemplateActions), the three deckless writes refusing an agent token without the admin
+ * scope.
+ */
+export const SERVER_SIDE_WINDOW_ACTIONS_P1 = [
+  'template.list',
+  'template.slides',
+  'template.create',
+  'template.update',
+  'template.rename',
+  'template.delete',
+  'template.setDefault',
+] as const satisfies readonly ActionId[];
+
 export const SERVER_SIDE_WINDOW_ACTIONS: ReadonlyArray<ActionId> = [
   ...SERVER_SIDE_WINDOW_ACTIONS_GS2,
   ...SERVER_SIDE_WINDOW_ACTIONS_GS3,
+  ...SERVER_SIDE_WINDOW_ACTIONS_P1,
 ];
 
 export type ServerSideWindowAction = ActionId;

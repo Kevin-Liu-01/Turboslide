@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "blank",
   "name": "Blank",
-  "description": "A fresh presentation (gslides-parity SPEC 6.1): one Title slide with empty placeholders, titled Untitled presentation, and the theme starter set of four two-tone pictures from the GT brand deck (two opener materials, one mood photograph, one closing picture, with their credits) so Section header, Caption and Closing work on a new deck. deck.create copies deck.json, slides/ and assets/ into decks/<id> with a new id, title and revision 0; the archetypes are the layout list of packages/schema/src/layouts.ts.",
+  "description": "A fresh presentation (gslides-parity SPEC 6.1): one Title slide with empty placeholders, titled Untitled presentation, and the theme starter set of four two-tone pictures from the GT brand deck (two opener materials, one mood photograph, one closing picture, with their credits) so Section header, Caption and Closing work on a new deck. deck.create copies deck.json, slides/ and assets/ into decks/<id> with a new id, title and revision 0; the archetypes are the layout list of packages/schema/src/layouts.ts. The `brand` fields are the deployment's default kit when no default template names another (docs/PRODUCT.md 4.1, 4.3): the name every Reset and every default logo reads, and the appearance a new presentation opens in.",
   "theme": "gt-ink-paper",
   "deck": "deck.json",
   "slides": "slides",
@@ -14,5 +14,9 @@
       "slides": 1
     }
   ],
-  "archetypes": []
+  "archetypes": [],
+  "brand": {
+    "name": "General Translation",
+    "appearance": "light"
+  }
 }

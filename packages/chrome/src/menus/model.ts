@@ -280,7 +280,10 @@ export type MenuSetting =
   /* the focus round (docs/FOCUS.md 3.1): Tools > Advanced tools, the one switch that shows the
      parked rows, controls and palette entries; off by default, kept per browser with the other
      stored settings (`STORED_SETTINGS` in editor-shell.ts) */
-  | 'advancedTools';
+  | 'advancedTools'
+  /* the product round (docs/PRODUCT.md section 2 rank 9): Tools > Preferences > Link detection,
+     the one preference row; on by default, kept per browser; the Editor reads it as `linkDetection` */
+  | 'linkDetection';
 
 /** Client side handlers with no action of their own (SPEC 2.13: undo, redo, the clipboard, zoom). */
 export type MenuClientHandler =
@@ -313,7 +316,14 @@ export type MenuClientHandler =
   | 'comment'
   | 'copyLink'
   | 'goToClient'
-  | 'accountMenu';
+  | 'accountMenu'
+  /* the product round (docs/PRODUCT.md sections 2, 4.1, 4.4, 7.1): the title row's side panel
+     toggle, Add a caption on a picture, Use on every slide, the Font row that opens the toolbar's
+     dropdown */
+  | 'toggleSidePanel'
+  | 'addCaption'
+  | 'useOnEverySlide'
+  | 'fontPicker';
 
 /**
  * The plates a dynamic submenu draws instead of a list of rows: the layout grid, a shape
@@ -647,8 +657,9 @@ function gate(
 function replaceImageItems(prefix: string): MenuItem[] {
   return [
     now(`${prefix}.upload`, 'Upload from computer', action('asset.add'), { icon: 'photo' }),
-    /* docs/FOCUS.md 3.2: By URL and From this presentation are parked with the Insert rows */
-    now(`${prefix}.byUrl`, 'By URL', dialog('Image by URL'), { advanced: true }),
+    /* docs/FOCUS.md 3.2 parked By URL and From this presentation with the Insert rows; By URL
+       returned in the product round (docs/PRODUCT.md section 5) */
+    now(`${prefix}.byUrl`, 'By URL', dialog('Image by URL')),
     now(
       `${prefix}.fromThisPresentation`,
       'From this presentation',
@@ -764,10 +775,25 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
       doc: 'Who has this presentation open; click a chip to follow that person',
     },
   ),
+  /* the product round (docs/PRODUCT.md 6.1): the assistant's entry, where Google draws Ask Gemini */
+  now('title.assist', 'Assist', panel('Assist'), {
+    turboslide: true,
+    icon: 'sparkles',
+    key: shortcut('Cmd+J'),
+    when: 'write',
+    doc: 'Tailor the deck for a customer, ask for a shorter slide or for speaker notes; nothing changes until you accept',
+  }),
   now('title.comments', 'Show all comments', panel('Comments'), {
     icon: 'chat',
     when: 'readComments',
     doc: 'Every comment on this presentation, with the ones for you first',
+  }),
+  /* the product round (docs/PRODUCT.md section 2 rank 25): the side panel toggle the bottom bar
+     held, now in the title row's right cluster (TitleRow.tsx draws it) */
+  now('title.sidePanel', 'Show side panel', client('toggleSidePanel'), {
+    turboslide: true,
+    icon: 'sidebar',
+    doc: 'Reopens the last panel: Format options, Brand kit, Comments or Version history; closes the open one',
   }),
   now('title.inbox', 'Notifications', panel('Notifications'), {
     turboslide: true,
@@ -864,8 +890,15 @@ const FILE: Menu = {
         icon: 'plus',
         turboslide: true,
       }),
-      now('file.new.templateGallery', 'From template gallery', route('/decks#templates', true), {
+      /* parked with the templates feature at the product round's ship (docs/PRODUCT.md 8.2; the
+         parks rule of the ship step): templates.card.rename-and-delete and
+         templates.default.use-for-new read red twice on the enforce preview of record, the
+         gallery on another instance keeping a renamed, deleted or default template for the
+         rows' bounds while the public store's edge refused the just written index; the gallery
+         page stays at its address and the actions stay for agents (product/build/ship.md 7) */
+      now('file.new.templateGallery', 'From template gallery', route('/decks/templates', true), {
         google: 'From Template Gallery',
+        advanced: true,
       }),
     ]),
     now('file.open', 'Open…', dialog('Open'), {
@@ -888,6 +921,16 @@ const FILE: Menu = {
       ],
       { when: 'copy' },
     ),
+    /* the product round (docs/PRODUCT.md 4.3): the deck as a template of this deployment, listed
+       under Your organisation in the gallery; the same name replaces and keeps the slug */
+    now('file.saveAsTemplate', 'Save as template', dialog('Save as template'), {
+      when: 'copy',
+      turboslide: true,
+      /* parked with the templates feature at the product round's ship (the comment on
+         file.new.templateGallery above); the dialog and template.create stay for agents */
+      advanced: true,
+      doc: 'Saves this presentation as a template for new ones on this Turboslide, with its brand kit',
+    }),
     sub(
       'file.share',
       'Share',
@@ -920,6 +963,12 @@ const FILE: Menu = {
         later('file.download.odp', 'ODP Document (.odp)', DOWNLOAD_FORMATS),
         now('file.download.pdf', 'PDF Document (.pdf)', dialog('Download'), {
           doc: 'One slide per page',
+        }),
+        /* the product round (docs/PRODUCT.md section 2 rank 8): the two rows above start their
+           download at once; this row opens the whole dialog */
+        now('file.download.options', 'Download options', dialog('Download options'), {
+          turboslide: true,
+          doc: 'The file type and the modes, Include skipped slides and Include speaker notes',
         }),
         /* docs/FOCUS.md 3.2 parked the text, picture, web page and bundle downloads. The return
            round returns the pictures (with the signed render url of docs/RETURN.md 2.19, since the
@@ -1295,9 +1344,10 @@ const INSERT: Menu = {
         ),
         omit('insert.image.drivePhotos', 'Drive & Photos', GOOGLE_SERVICE),
         omit('insert.image.camera', 'Camera', GOOGLE_SERVICE),
-        /* docs/FOCUS.md 3.2: By URL (three stacked defects, audit-images rows 2 to 4) and From
-           this presentation are parked; Upload from computer is the core route */
-        now('insert.image.byUrl', 'By URL', dialog('Image by URL'), { advanced: true }),
+        /* docs/FOCUS.md 3.2 parked By URL (three stacked defects, audit-images rows 2 to 4) and
+           From this presentation; Upload from computer is the core route. The product round
+           returns By URL with its three defects fixed (docs/PRODUCT.md section 5; build/b2.md 1.12) */
+        now('insert.image.byUrl', 'By URL', dialog('Image by URL')),
         now(
           'insert.image.fromThisPresentation',
           'From this presentation',
@@ -1551,6 +1601,13 @@ const FORMAT: Menu = {
           enabled: 'textBlockSelected',
           doc: 'Your browser may take this key; the Format menu has the item',
         }),
+        /* the product round (docs/PRODUCT.md 4.2): the Font row opens the toolbar's dropdown */
+        now('format.text.font', 'Font', client('fontPicker'), {
+          turboslide: true,
+          enabled: 'textBlockSelected',
+          dividerBefore: true,
+          doc: 'The face of the selected text; More fonts lists every face with its licence',
+        }),
         sub(
           'format.text.size',
           'Size',
@@ -1797,10 +1854,22 @@ const FORMAT: Menu = {
           replaceImageItems('format.image.replaceImage'),
           { enabled: 'imageSelected' },
         ),
+        /* the product round (docs/PRODUCT.md section 2 rank 10): the caption under a picture */
+        now('format.image.addCaption', 'Add a caption', client('addCaption'), {
+          enabled: 'imageSelected',
+          turboslide: true,
+          doc: 'A caption under the picture; type it on the slide or in Image options',
+        }),
         now('format.image.resetImage', 'Reset image', action('block.resetImage'), {
           enabled: 'imageEdited',
           disabledReason: 'The picture is not cropped, masked or adjusted',
           icon: 'arrow-uturn-left',
+        }),
+        /* the product round (docs/PRODUCT.md 4.4): the picture as the kit's logo on every slide */
+        now('format.image.useOnEverySlide', 'Use on every slide', client('useOnEverySlide'), {
+          enabled: 'imageSelected',
+          turboslide: true,
+          doc: 'Makes this picture the logo on the title slide and in the footer of every slide',
         }),
         /* SPEC-3 10.5, 13.2: the deck's two tone screen over the picture, on and off; the Format
            options Dither section carries the parameters */
@@ -1866,7 +1935,8 @@ const FORMAT: Menu = {
        stays in the default view */
     now('format.altText', 'Alt text', panel('Format options'), {
       key: shortcut('Cmd+Option+Y'),
-      advanced: true,
+      /* the product round returns Alt text to the default view (docs/PRODUCT.md section 5;
+         docs/RETURN.md question 6's default) */
       enabled: 'blockSelected',
       contextOnly: true,
       doc: 'The description a screen reader reads',
@@ -2002,16 +2072,15 @@ const SLIDE: Menu = {
       },
     ),
     later('slide.transition', 'Transition', STILL_SLIDES),
-    /* SPEC-2 0.75, 12: the frame, the wordmark and the counter stay theme level until Edit theme */
-    later(
-      'slide.editTheme',
-      'Edit theme',
-      'The footer mark, the slide counter and the rails belong to the GT theme',
-      { dividerBefore: true },
-    ),
+    /* the product round (docs/PRODUCT.md 4.1): Edit theme opens the Brand kit panel, the deck's
+       colours, faces, logo, footer, slide numbers and frame */
+    now('slide.editTheme', 'Edit theme', panel('Brand kit'), {
+      dividerBefore: true,
+      doc: 'The colours, faces, logo, footer, slide numbers and frame of this presentation',
+    }),
     /* docs/FOCUS.md 3.2 parked Change theme; it returns as the appearance switch between the GT
-       light and dark appearances (docs/RETURN.md 2.13) */
-    now('slide.changeTheme', 'Change theme', panel('Themes'), { icon: 'swatch' }),
+       light and dark appearances (docs/RETURN.md 2.13), the Appearance section of the Brand kit panel */
+    now('slide.changeTheme', 'Change theme', panel('Brand kit'), { icon: 'swatch' }),
   ],
 };
 
@@ -2231,11 +2300,14 @@ const TOOLS: Menu = {
       advanced: true,
       doc: 'Which comments reach your notifications: all of them, the ones for you, or none',
     }),
-    later(
-      'tools.preferences',
-      'Preferences',
-      'Text fitting is set per text box in Format options; the ruler reads inches',
-    ),
+    /* the product round (docs/PRODUCT.md section 2 rank 9): the one preference Turboslide keeps,
+       link detection as you type; text fitting is set per text box in Format options */
+    sub('tools.preferences', 'Preferences', [
+      now('tools.preferences.linkDetection', 'Link detection', toggle('linkDetection'), {
+        turboslide: true,
+        doc: 'A web or mail address becomes a link when you type a space or Enter after it',
+      }),
+    ]),
     /* SPEC-3 0.42, 4.9, 13.1: a submenu with the one row Turboslide can honour; the screen reader
        and braille rows stay out with their reason */
     sub('tools.accessibilitySettings', 'Accessibility settings', [
@@ -2270,10 +2342,23 @@ const TOOLS: Menu = {
         }),
       ],
     }),
+    /* the product round (docs/PRODUCT.md sections 5 and 6): the deterministic tailoring pass and
+       the assistant's panel, both under Tools beside Check slides */
+    now('tools.tailor', 'Tailor for a customer', dialog('Tailor for a customer'), {
+      turboslide: true,
+      icon: 'sparkles',
+      dividerBefore: true,
+      when: 'write',
+      doc: 'Replaces the customer name everywhere, swaps the pictures named after the old one and skips slides, as one change',
+    }),
+    now('tools.assist', 'Assist', panel('Assist'), {
+      turboslide: true,
+      when: 'write',
+      doc: 'Tailor the deck for a customer, ask for a shorter slide or for speaker notes; nothing changes until you accept',
+    }),
     now('tools.checkSlides', 'Check slides', panel('Suggestions for this slide'), {
       turboslide: true,
       icon: 'check-badge',
-      dividerBefore: true,
       when: 'write',
       doc: 'One suggestion per row, with Fix where there is one',
     }),
@@ -2776,8 +2861,11 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     DIVIDER,
     'format.image.replaceImage',
     'format.image.cropImage',
+    /* the product round (docs/PRODUCT.md section 2 rank 10, 4.4): the caption and the kit's logo */
+    'format.image.addCaption',
     'format.image.maskImage',
     'format.image.resetImage',
+    'format.image.useOnEverySlide',
     /* SPEC-3 13.2: the picture's Dither toggle sits with the image rows */
     'format.image.dither',
     'format.image.imageOptions',

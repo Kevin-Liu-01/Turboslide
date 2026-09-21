@@ -96,7 +96,9 @@ export async function run(t) {
         ok:
           /^untitled-/.test(info.id) &&
           s.revision === 0 &&
-          words === 'Not saved yet' &&
+          /* the untouched draft shows no save words until the first edit (docs/PRODUCT.md section 2
+             rank 30; the cell keeps its width): empty, or the phrase on a build before the rule */
+          (words === '' || words === 'Not saved yet') &&
           prompts > 0 &&
           Boolean(t.deck.head),
         observed: `${info.id}; revision ${s.revision}; save words "${words}"; prompts ${prompts}; runs ${allRuns.join(',')}`,
@@ -159,8 +161,7 @@ export async function run(t) {
       await watcher;
       const words = await t.pollUntil(t.saveWords, (w) => w === 'All changes saved', 10_000);
       const stored = JSON.stringify(await t.slideJson(t.deck.titleSlide)).includes(TITLE);
-      if (await t.visible('dialog.namePrompt'))
-        await t.clickControl('dialog.namePrompt.close').catch(() => undefined);
+      if (await t.visible('dialog.namePrompt')) await t.dismissPrompts().catch(() => undefined);
       return {
         ok:
           on &&

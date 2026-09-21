@@ -1,0 +1,105 @@
+{
+  "started": "2026-09-20T04:06:47.046Z",
+  "ended": "2026-09-20T04:07:57.363Z",
+  "base": "http://localhost:4413",
+  "decks": [
+    "untitled-20260920-tu7j",
+    "untitled-20260920-gdan"
+  ],
+  "rows": [
+    {
+      "n": 1,
+      "id": null,
+      "step": "the source deck",
+      "expected": "four slides",
+      "observed": "untitled-20260920-tu7j: 4 slides",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "id": "slides.layout.title-and-body-single",
+      "step": "New slide (the toolbar button) after the title slide, then four lines typed into the body",
+      "expected": "the slide is Title and body with one title prompt over one body prompt; the four lines land in the body at the body size",
+      "observed": "template split; head \"single\"; slots head,body; prompts [\"Click to add title\",\"Click to add text\"]; body text \"Agenda\\nPricing\\nTimeline\\nNext steps\" (4 lines) at 22px",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "id": "slides.layout.new-slide-inherits",
+      "step": "Apply layout > Title and two columns on the slide, New slide; then the title slide, New slide",
+      "expected": "the first New slide gives Title and two columns; the second Title and body",
+      "observed": "after cols: cols; after the title slide: split",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "id": null,
+      "step": "the arrow beside New slide > Title only, then the Title and two columns slide, New slide",
+      "expected": "Title and two columns (R2); today the arrow pick wins",
+      "observed": "New slide on the cols slide after an arrow pick of Title only: title-only",
+      "ok": false
+    },
+    {
+      "n": 5,
+      "id": "slides.layout.subtitle-prompt",
+      "step": "Apply layout > Title, subtitle and body; read the head paragraph prompt",
+      "expected": "the head paragraph prompts \"Click to add subtitle\" and the body \"Click to add text\"",
+      "observed": "not driven: no Title, subtitle and body tile: the id waits on build/b3.md R1 (LAYOUT_IDS in deck.ts)",
+      "ok": null
+    },
+    {
+      "n": 6,
+      "id": null,
+      "step": "Apply layout > Tile grid; read the head paragraph prompt (the same rule on an existing two column head)",
+      "expected": "the head paragraph prompts \"Click to add subtitle\"",
+      "observed": "prompts [\"Click to add title\"]",
+      "ok": false
+    },
+    {
+      "n": 7,
+      "id": "arrange.insert.selected-after-menu",
+      "step": "Insert > Table (3 by 3), Q1 typed into the first cell, Insert > Chart > Column",
+      "expected": "the table is selected with its handles after the insert; the chart is selected (chip Chart, eight handles) and its box does not overlap the table",
+      "observed": "table table 320,218 960x320 chip \"Table\" handles 8, cell \"Q1\"; chart chart 480,578 640x193 chip \"Chart\" handles 8; overlap false; inside true",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "id": "arrange.insert.free-rectangle",
+      "step": "with the body taken by the table and the chart, Insert > Table again",
+      "expected": "the third object lands 40 by 40 sheet px from the last object (the y clamped to the sheet) and inside the sheet",
+      "observed": "last chart 480,578 640x193; third table 520,580 960x320; wanted 520,580; inside true; handles 8",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "id": null,
+      "step": "a Blank slide: Insert > Chart > Bar, then Insert > Table 4 by 3 (the existing rows charts.insert.bar and tables.insert.grid)",
+      "expected": "the chart is 960 by 540 and the table 960 by 320, each at the top of the content box",
+      "observed": "chart 320,129 960x540; table 360,169 960x320 (the table cascades from the chart, which fills the body)",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "id": null,
+      "step": "block.insert through the window API with its own box on the insert slide",
+      "expected": "the object lands exactly where asked and nothing is selected",
+      "observed": "1000,600 400x240; chip none",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "id": "slides.import.none-preselected",
+      "step": "File > Import slides, the source deck; three clicks; None; a click and a Shift click; Import",
+      "expected": "no tile is selected; three clicks read \"Import 3 slides\"; a Shift click selects a range; Import brings three",
+      "observed": "4 tiles; selected at open 0; button at open \"Import slides\" disabled true; after three clicks \"Import 3 slides\"; after None 0; after a click and a Shift click 3 selected, \"Import 3 slides\"; slides 8 -> 11",
+      "ok": true
+    }
+  ],
+  "consoleErrors": [],
+  "counts": {
+    "ok": 8,
+    "failed": 2,
+    "notDriven": 1
+  }
+}

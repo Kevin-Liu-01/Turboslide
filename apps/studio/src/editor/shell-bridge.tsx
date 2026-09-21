@@ -103,6 +103,9 @@ export function ShellBridge({
   const theme = useTheme();
   controller.attachShell(shell);
   api.current = editorShell;
+  /* the editor shell's snackbar with one action (docs/PRODUCT.md 6.1; build/b6.md R10): the
+     outside write's Undo and the assist accept's reach the seller through it */
+  controller.attachEditorShell(editorShell);
   const [editorEl, setEditorEl] = useState<HTMLElement | null>(null);
   const [viewerEl, setViewerEl] = useState<HTMLElement | null>(null);
   useStudioOwner(controller.editorAdapter(), editorEl);

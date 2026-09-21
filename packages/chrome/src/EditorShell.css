@@ -1,23 +1,26 @@
 /* EditorShell (EditorShell.tsx, ViewerShell.tsx with `editor`): the editor's frame of
    gslides-parity SPEC 1.1 over the viewer shell's root. The root stays .pt-viewer (Sidebar.css
    and the chrome lint key on it) and becomes a five row, three column grid when .is-editor is
-   set: the title row (44), the menu bar (28), the toolbar (40), the body (the filmstrip column,
-   the canvas column with the notes pane under the stage, the right panel column) and the bottom
-   bar (32). Compact mode (Ctrl+Shift+F) zeroes the menu bar and toolbar rows; present mode zeroes
-   every row but the body and closes every column but the canvas. Lines (SPEC 1.2; docs/RETURN.md
-   4.2, one --pt-hair line per boundary drawn once): the title row and the toolbar draw their
-   bottom edges, the filmstrip its right edge (Sidebar.css), the right panel its left edge
-   (Panel.css), the notes pane draws its own top edge with the handle on it (NotesPane.css) and
-   its slot draws none, the bottom bar draws --pt-hair above itself; the menu bar, the canvas and
-   the body draw no rule.
+   set: the title row (44), the menu bar (28), the toolbar (40) and the body (the filmstrip
+   column, the canvas column with the notes pane under the stage, the right panel column). The
+   bottom bar of the parity rounds left in the product round (docs/PRODUCT.md section 2 rank 25;
+   audit-interface 35): its one control, the side panel toggle, sits in the title row's right
+   cluster and the stage keeps the 32 px. Compact mode (Ctrl+Shift+F) zeroes the menu bar and
+   toolbar rows; present mode zeroes every row but the body and closes every column but the
+   canvas. Lines (SPEC 1.2; docs/RETURN.md 4.2, one --pt-hair line per boundary drawn once): the
+   title row and the toolbar draw their bottom edges, the filmstrip its right edge (Sidebar.css),
+   the right panel its left edge (Panel.css), the notes pane draws its own top edge with the
+   handle on it (NotesPane.css) and its slot draws none; the menu bar, the canvas and the body
+   draw no rule.
    At or below 900 px the filmstrip is the overlay Sidebar.css draws (offset under the three top
    rows here), the right panel floats over the canvas and the notes pane hides by default. */
 .pt-viewer.is-editor {
   --ts-top-h: calc(var(--pt-title-h, 44px) + var(--pt-menu-h, 28px) + var(--pt-tool-h, 40px));
   grid-template-columns: var(--pt-sb-w) minmax(0, 1fr) 0;
-  grid-template-rows:
-    var(--pt-title-h, 44px) var(--pt-menu-h, 28px) var(--pt-tool-h, 40px) minmax(0, 1fr)
-    var(--pt-status-h, 32px);
+  grid-template-rows: var(--pt-title-h, 44px) var(--pt-menu-h, 28px) var(--pt-tool-h, 40px) minmax(
+      0,
+      1fr
+    );
 }
 
 .pt-viewer.is-editor[data-rpanel] {
@@ -35,7 +38,7 @@
 /* compact mode: the menu bar and the toolbar leave, the title row keeps the Show the menus chevron */
 .pt-viewer.is-editor.is-compact {
   --ts-top-h: var(--pt-title-h, 44px);
-  grid-template-rows: var(--pt-title-h, 44px) 0 0 minmax(0, 1fr) var(--pt-status-h, 32px);
+  grid-template-rows: var(--pt-title-h, 44px) 0 0 minmax(0, 1fr);
 }
 
 .pt-viewer.is-editor.is-compact > .ts-menubar,
@@ -71,15 +74,15 @@
   grid-row: 4;
 }
 
-/* the narrow overlay sits under the top rows and over the bottom bar's seam */
+/* the narrow overlay sits under the top rows and reaches the window's bottom edge */
 .pt-viewer.is-editor > .pt-sb.is-overlay {
   top: var(--ts-top-h);
-  bottom: var(--pt-status-h, 32px);
+  bottom: 0;
 }
 
 .pt-viewer.is-editor > .pt-sb-scrim {
   top: var(--ts-top-h);
-  bottom: var(--pt-status-h, 32px);
+  bottom: 0;
 }
 
 /* the canvas column: the stage over the notes pane, no rule of its own */
@@ -131,13 +134,12 @@
 /* present mode: the chrome leaves, the stage is the window */
 .pt-viewer.is-editor.is-present {
   grid-template-columns: 0 minmax(0, 1fr) 0;
-  grid-template-rows: 0 0 0 minmax(0, 1fr) 0;
+  grid-template-rows: 0 0 0 minmax(0, 1fr);
 }
 
 .pt-viewer.is-editor.is-present > .ts-title-row,
 .pt-viewer.is-editor.is-present > .ts-menubar,
 .pt-viewer.is-editor.is-present > .ts-toolbar,
-.pt-viewer.is-editor.is-present > .ts-bottombar,
 .pt-viewer.is-editor.is-present > .ts-rpanel,
 .pt-viewer.is-editor.is-present > .pt-main > .ts-notes-slot {
   display: none;
@@ -155,7 +157,8 @@
   padding: 8px 8px 12px;
   background: var(--pt-paper);
   color: var(--pt-ink);
-  border: 1px solid var(--pt-hair);
+  /* a plate that floats over the stage takes the frame weight (docs/PRODUCT.md 3.1) */
+  border: 1px solid var(--pt-edge);
   max-height: calc(100vh - 16px);
   overflow-y: auto;
   animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
@@ -199,7 +202,7 @@
     position: absolute;
     top: var(--ts-top-h);
     right: 0;
-    bottom: var(--pt-status-h, 32px);
+    bottom: 0;
     width: min(var(--pt-panel-w, 320px), 100vw);
     grid-column: auto;
     grid-row: auto;

@@ -9,7 +9,9 @@ import type { ExportReport } from '@turboslide/schema/export';
 import { exportReportSchema } from '@turboslide/schema/export';
 import type { BlobClient } from '@turboslide/store/blob-store';
 
-import { ensureDeckAssets, exportBlobClient, workerClientOptions } from './root';
+import { displayNameOf, exportFileName } from '@turboslide/export/batch/plan';
+
+import { ensureDeckAssets, exportBlobClient, openDeckStore, workerClientOptions } from './root';
 
 /**
  * The synchronous export (docs/hosting-chromium.md): one call runs the export job to completion
@@ -47,8 +49,14 @@ export type SyncExportInput = {
 };
 
 export type SyncExportFile = {
-  /** The base name, as the report lists it. */
+  /**
+   * The name the download saves as: the deck's title with the marks of plan.ts `exportFileName`
+   * (the product round, docs/PRODUCT.md section 2 rank 7; before it the exporter's own
+   * `<deck id>-<theme>.pptx`).
+   */
   name: string;
+  /** The base name the exporter wrote, as the report lists it: the key of the worker's job file. */
+  source: string;
   bytes: number;
   sha256: string;
   contentType: string;
@@ -62,6 +70,8 @@ export type SyncExportFile = {
 export type SyncExportResult = {
   jobId: string;
   deckId: string;
+  /** the deck's title the file names are made from; null when the deck has none */
+  title: string | null;
   report: ExportReport;
   files: SyncExportFile[];
   verify: VerifyOutcome;
@@ -105,9 +115,32 @@ export function storedExportPath(deckId: string, jobId: string, name: string): s
   return `exports/${deckId}/${jobId}/${name}`;
 }
 
-/** The route that serves a produced file from the instance that made it (the tmp backend). */
-export function jobFileUrl(deckId: string, jobId: string, name: string): string {
-  return `/api/export/${deckId}?job=${encodeURIComponent(jobId)}&file=${encodeURIComponent(name)}`;
+/**
+ * The route that serves a produced file from the instance that made it (the tmp backend): the
+ * file by the exporter's name, saved as the display name when one is given (`as`).
+ */
+export function jobFileUrl(deckId: string, jobId: string, name: string, as?: string): string {
+  const base = `/api/export/${deckId}?job=${encodeURIComponent(jobId)}&file=${encodeURIComponent(name)}`;
+  return as !== undefined && as !== name ? `${base}&as=${encodeURIComponent(as)}` : base;
+}
+
+/** The deck's title for the file names, or null when the store has none to read. */
+export async function deckTitleOf(deckId: string): Promise<string | null> {
+  try {
+    const { document } = await (await openDeckStore(deckId)).read();
+    const title = document.deck.title;
+    return typeof title === 'string' && title.trim() !== '' ? title : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The display names of the exporter's files, in one pass so a two appearance run marks each. */
+export function displayNamesOf(
+  sources: readonly string[],
+  input: { title: string | null; deckId: string; mode: ExportReport['mode'] },
+): Map<string, string> {
+  return new Map(sources.map((source) => [source, displayNameOf(source, input, sources)]));
 }
 
 /**
@@ -123,7 +156,7 @@ export async function storeExportFiles(
     if (client === null) {
       files.push({
         ...file,
-        url: jobFileUrl(result.deckId, result.jobId, file.name),
+        url: jobFileUrl(result.deckId, result.jobId, file.source, file.name),
         stored: false,
       });
       continue;
@@ -148,6 +181,11 @@ export type SyncExportOptions = {
   store?: boolean;
   /** the Blob client for the stored copies; the backend's when omitted, null for none */
   blob?: BlobClient | null;
+  /**
+   * The worker's job as soon as it is queued, before the wait: the progress record of
+   * export-batch.ts `runSyncExportWithProgress` follows it by id while the export runs.
+   */
+  onSubmitted?: (job: PublicJob) => void;
 };
 
 /** The `renderer: ...` residual line the exporter writes, without its prefix. */
@@ -167,12 +205,22 @@ export async function runSyncExport(
   input: SyncExportInput,
   options: SyncExportOptions = {},
 ): Promise<SyncExportResult> {
+  // the tab's last edits are in the room's stream until the checkpointer writes them (2 s idle
+  // on the memory tier): the folder the worker renders is brought current first, so a hosted
+  // export renders the document as the tab holds it (b2.md R-F1; formatting.alt-text.write-undo,
+  // brand.footer.text on a checkout)
+  const { flushRoom } = await import('./room');
+  await flushRoom(deckId).catch(() => undefined);
   await ensureDeckAssets(deckId);
   const client = options.client ?? defaultClient();
+  const title = await deckTitleOf(deckId);
   const t = performance.now();
-  const job: PublicJob = await client.runJob(
-    'export',
-    { deckId, ...input },
+  // submit, then wait: what `runJob` does, with the queued job handed out in between so a
+  // progress record can follow it (runSyncExportWithProgress)
+  const submitted = await client.submit('export', { deckId, ...input });
+  options.onSubmitted?.(submitted);
+  const job: PublicJob = await client.wait(
+    submitted.id,
     options.timeoutMs ?? SYNC_EXPORT_TIMEOUT_MS,
   );
   if (job.status !== 'done') {
@@ -187,21 +235,24 @@ export async function runSyncExport(
   if (!parsed.success) throw new Error('the export job finished without an export report');
   const report = parsed.data;
   const files: SyncExportFile[] = [];
-  for (const entry of report.files) {
-    const name = basename(entry.path);
+  const sources = report.files.map((entry) => basename(entry.path));
+  const names = displayNamesOf(sources, { title, deckId, mode: report.mode });
+  for (const source of sources) {
     // the job writes under <job dir>/export; the report's paths are absolute in the worker's tree
-    const data = await client.readJobFile(job.id, `export/${name}`);
+    const data = await client.readJobFile(job.id, `export/${source}`);
     files.push({
-      name,
+      name: names.get(source) ?? source,
+      source,
       bytes: data.byteLength,
       sha256: createHash('sha256').update(data).digest('hex'),
-      contentType: contentTypeOf(name),
+      contentType: contentTypeOf(source),
       data,
     });
   }
   const produced: SyncExportResult = {
     jobId: job.id,
     deckId,
+    title,
     report,
     files,
     verify: result?.verify ?? (input.verify ? 'ran' : 'not-requested'),
@@ -314,13 +365,13 @@ export function zipStored(entries: readonly ZipEntry[]): Uint8Array<ArrayBuffer>
 
 export type SyncAttachment = { name: string; contentType: string; data: Uint8Array<ArrayBuffer> };
 
-/** One file as itself; several as one stored zip named for the deck, the revision and the mode. */
+/** One file as itself; several as one stored zip named after the deck's title (plan.ts exportFileName). */
 export function attachmentOf(result: SyncExportResult): SyncAttachment {
   const [first] = result.files;
   if (!first) throw new Error('the export produced no file');
   if (result.files.length === 1)
     return { name: first.name, contentType: first.contentType, data: first.data };
-  const name = `${result.deckId}-r${result.report.revision}-${result.report.mode}.zip`;
+  const name = exportFileName({ title: result.title, deckId: result.deckId, format: 'zip' });
   return {
     name,
     contentType: contentTypeOf(name),
@@ -378,9 +429,17 @@ export function headerJson(value: unknown): string {
   return JSON.stringify(value).replace(/[^\x20-\x7e]/g, '?');
 }
 
-/** `attachment; filename="..."` with the quote and control characters removed from the name. */
+/**
+ * `attachment; filename="..."` with the quote and control characters removed from the name, and
+ * `filename*=UTF-8''...` beside it when the name carries a character outside ASCII (RFC 6266;
+ * a title in another script), which the page's download module reads first.
+ */
 export function contentDisposition(name: string): string {
-  return `attachment; filename="${name.replace(/["\\\r\n]/g, '')}"`;
+  const clean = name.replace(/["\\\r\n]/g, '');
+  // eslint-disable-next-line no-control-regex
+  const ascii = clean.replace(/[^\x20-\x7e]/g, '_');
+  if (ascii === clean) return `attachment; filename="${clean}"`;
+  return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(clean)}`;
 }
 
 /** The names of the files a report lists, without directories. */
@@ -399,7 +458,10 @@ export function jsonBody(result: SyncExportResult): {
   summary: ExportSummary;
   report: ExportReport;
   files: {
+    /** the name the download saves as */
     name: string;
+    /** the exporter's own name, the key of the worker's job file */
+    source: string;
     bytes: number;
     sha256: string;
     contentType: string;
@@ -414,8 +476,9 @@ export function jsonBody(result: SyncExportResult): {
     sync: true,
     summary: exportSummary(result),
     report: result.report,
-    files: result.files.map(({ name, bytes, sha256, contentType, url, stored }) => ({
+    files: result.files.map(({ name, source, bytes, sha256, contentType, url, stored }) => ({
       name,
+      source,
       bytes,
       sha256,
       contentType,

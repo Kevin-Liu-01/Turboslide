@@ -412,6 +412,31 @@ export async function getThumbnail(
     };
   }
 
+  // 1b. a stamp named that is not the slide's content stamp (the home cards name the deck's
+  // revision): the copy the capture on save wrote to this disk under the content stamp is the
+  // same pixels for this revision (thumbs step 2b below says why; card-thumb.ts writes it)
+  if (named !== null && named !== current) {
+    const byContent = thumbPath(
+      request.deckId,
+      current,
+      request.theme,
+      request.width,
+      request.slideId,
+    );
+    if (existsSync(byContent)) {
+      return {
+        kind: 'bytes',
+        png: new Uint8Array(readFileSync(byContent)),
+        stamp: current,
+        current,
+        revision,
+        cached: true,
+        source: 'disk',
+        fresh: true,
+      };
+    }
+  }
+
   // 2. the store, under the asked stamp
   if (blob !== null) {
     const pathname = thumbPathname(
@@ -452,9 +477,54 @@ export async function getThumbnail(
         };
       }
     }
-    // 3. no stamp named: the newest stored thumbnail of the slide answers now and the current one
-    // renders behind the response when it is not that one (stale while revalidate)
-    if (named === null) {
+    // 2b. a stamp named that is not the slide's content stamp (the home cards name the deck's
+    // revision, `r=<revision>`, decks.index.tsx) and not stored under that name: the copy the
+    // capture on save stored under the slide's current content stamp is the same pixels for this
+    // revision, so it answers as fresh (the product round, docs/PRODUCT.md 3.6; the row
+    // decks.card.thumbnail-slide-1: before this every card whose revision named no stored copy
+    // rendered in Chromium on the request, and the cards stayed plates while the renders queued)
+    if (named !== null && named !== current) {
+      const byContent = thumbPathname(
+        request.deckId,
+        current,
+        request.theme,
+        request.width,
+        request.slideId,
+      );
+      const storedCurrent = await blob.head(byContent);
+      if (storedCurrent !== null) {
+        if (access === 'public') {
+          return {
+            kind: 'stored',
+            url: storedCurrent.url,
+            stamp: current,
+            current,
+            revision,
+            cached: true,
+            source: 'blob',
+            fresh: true,
+          };
+        }
+        const fetched = await blob.get(byContent);
+        if (fetched !== null) {
+          return {
+            kind: 'bytes',
+            png: new Uint8Array(fetched.bytes),
+            stamp: current,
+            current,
+            revision,
+            cached: true,
+            source: 'blob',
+            fresh: true,
+          };
+        }
+      }
+    }
+    // 3. nothing under the named stamp or the current one: the newest stored thumbnail of the
+    // slide answers now and the current one renders behind the response when it is not that
+    // one (stale while revalidate; a request that named a stamp is answered as not fresh, so the
+    // route's cache rule is the revalidating one and the older pixels never pin the new name)
+    {
       const newest = storedThumbs(
         await blob.list(thumbsPrefix(request.deckId)),
         request.deckId,
@@ -523,7 +593,9 @@ export function thumbHeaders(
   options: { revisionInUrl: boolean },
 ): Record<string, string> {
   return {
-    'cache-control': thumbCacheControl(options),
+    // an answer that is not the current pixels never takes the immutable year, whatever the URL
+    // named: the next request under the same name reads the refreshed copy
+    'cache-control': thumbCacheControl({ revisionInUrl: options.revisionInUrl && result.fresh }),
     etag: `"${request.deckId}-${result.stamp}-${request.slideId}-${request.theme}-${request.width}"`,
     'x-turboslide-revision': String(result.revision),
     'x-turboslide-stamp': result.stamp,
@@ -537,8 +609,9 @@ export function thumbHeaders(
 
 /**
  * The HTTP response for a thumbnail: a 302 to the store's URL for a stored answer on a public
- * store, the PNG body otherwise. A request that named the stamp (`r`) gets an immutable year; one
- * that did not gets a minute at the CDN and a day of stale service while the current one renders.
+ * store, the PNG body otherwise. A request that named the stamp (`r`) and got the current pixels
+ * gets an immutable year; one that did not, or that got an older stored copy while the current
+ * one renders, gets a minute at the CDN and a day of stale service.
  */
 export function thumbResponse(
   result: ThumbResult,

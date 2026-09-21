@@ -44,14 +44,25 @@ import {
   finishedExportJob,
   missingExportJobPoll,
   pollOfExportJob,
+  progressLine,
+  progressOfLog,
   pruneExportJobs,
   queuedExportJob,
   readExportJob,
+  runningExportJob,
   writeExportJob,
 } from './export-jobs';
 import type { ExportJobDownload, ExportJobPoll, ExportJobRecord } from './export-jobs';
-import { SYNC_EXPORT_TIMEOUT_MS, contentTypeOf, jsonBody, storedExportPath } from './export-sync';
-import type { SyncExportFile, SyncExportResult } from './export-sync';
+import {
+  SYNC_EXPORT_TIMEOUT_MS,
+  contentTypeOf,
+  deckTitleOf,
+  displayNamesOf,
+  jsonBody,
+  runSyncExport,
+  storedExportPath,
+} from './export-sync';
+import type { SyncExportFile, SyncExportInput, SyncExportResult } from './export-sync';
 import { deckDir, ensureDeckAssets, exportBlobClient, openDeckStore, stateDir } from './root';
 import { cancelTokenFor } from './tokens';
 
@@ -395,18 +406,28 @@ export async function mergeExport(deckId: string, jobId: string): Promise<MergeE
     }
     const files: SyncExportFile[] = [];
     const produced = [...merged.files, ...(merged.zipPath ? [merged.zipPath] : [])];
-    for (const path of produced) {
-      const name = path.split('/').pop() ?? path;
+    // the files are stored under the names the downloads save as (the product round, rank 7):
+    // the deck's title with the appearance mark when both left this run, never the deck id
+    const sources = produced.map((path) => path.split('/').pop() ?? path);
+    const names = displayNamesOf(sources, {
+      title: plan.deckTitle === '' ? null : plan.deckTitle,
+      deckId,
+      mode: plan.mode,
+    });
+    for (const [i, path] of produced.entries()) {
+      const source = sources[i] ?? path;
+      const name = names.get(source) ?? source;
       const data = new Uint8Array(await readFile(path));
       const entry = await client.put(`${jobPrefix(deckId, jobId)}${name}`, data, {
         overwrite: true,
-        contentType: contentTypeOf(name),
+        contentType: contentTypeOf(source),
       });
       files.push({
         name,
+        source,
         bytes: data.byteLength,
         sha256: createHash('sha256').update(data).digest('hex'),
-        contentType: contentTypeOf(name),
+        contentType: contentTypeOf(source),
         data,
         url: entry.url,
         stored,
@@ -422,6 +443,7 @@ export async function mergeExport(deckId: string, jobId: string): Promise<MergeE
     const result: SyncExportResult = {
       jobId,
       deckId,
+      title: plan.deckTitle === '' ? null : plan.deckTitle,
       report: merged.merged,
       files,
       verify,
@@ -451,6 +473,19 @@ export async function cancelBatchedExport(
   return { jobId, removed: entries.length };
 }
 
+/**
+ * A name a produced file may carry on the route: letters, digits, spaces, dots, dashes,
+ * underscores and parentheses (a title's marks, plan.ts exportFileName), never a path segment or
+ * a leading dot.
+ */
+export function isProducedFileName(name: string): boolean {
+  return (
+    /^[^\\/\u0000-\u001f"*:<>?|]{1,160}$/.test(name) &&
+    !name.startsWith('.') &&
+    name.trim() === name
+  );
+}
+
 /** A file of a batched job (the route's `?job=<id>&file=<name>` on this instance), or null. */
 export async function batchedJobFile(
   deckId: string,
@@ -458,7 +493,7 @@ export async function batchedJobFile(
   name: string,
 ): Promise<{ data: Uint8Array<ArrayBuffer>; contentType: string } | null> {
   requireSlug(deckId);
-  if (!isJobId(jobId) || !/^[A-Za-z0-9._-]+$/.test(name) || name.startsWith('.')) return null;
+  if (!isJobId(jobId) || !isProducedFileName(name)) return null;
   const { client } = await partStore();
   if ((await readPlanFrom(client, deckId, jobId)) === null) return null;
   const fetched = await client.get(`${jobPrefix(deckId, jobId)}${name}`);
@@ -538,12 +573,20 @@ export async function storeFinishedExportJob(
   if (store.stored) {
     downloads = [];
     try {
-      for (const file of report.data.files) {
-        const name = basename(file.path);
-        const data = await worker.readJobFile(job.id, `export/${name}`);
+      // stored under the names the downloads save as (the product round, rank 7), read by the
+      // exporter's own names from the worker's job folder
+      const sources = report.data.files.map((file) => basename(file.path));
+      const names = displayNamesOf(sources, {
+        title: current.title ?? null,
+        deckId: record.deckId,
+        mode: report.data.mode,
+      });
+      for (const source of sources) {
+        const name = names.get(source) ?? source;
+        const data = await worker.readJobFile(job.id, `export/${source}`);
         const entry = await store.client.put(storedExportPath(record.deckId, job.id, name), data, {
           overwrite: true,
-          contentType: contentTypeOf(name),
+          contentType: contentTypeOf(source),
         });
         downloads.push({ name, bytes: data.byteLength, url: attachmentUrlOf(entry.url) });
       }
@@ -584,22 +627,74 @@ export async function storeFinishedExportJob(
  * than a day pruned, and the job followed to its end after the response (the worker's instance
  * rewrites the record with the stored files), so a poll routed anywhere reads the outcome.
  */
+/** How often the follow reads the job's log for the record's progress: the blob tier's tick (pulse.ts HOSTED_POLL_MS). */
+export const EXPORT_PROGRESS_TICK_MS = 2_000;
+
+/**
+ * Writes the job's progress into its record while it runs (the product round, the row
+ * export.download.progress-per-slide): one read of the in process job per tick and one put when
+ * the slide moved, so a poll routed to another instance reads "slide k of n" from the record.
+ * The follow's own instance answers from the live log. Stops when the job ends or the signal
+ * fires; a put the store refuses is skipped, never retried in a loop.
+ */
+export async function followExportProgress(
+  worker: WorkerClient,
+  store: PartStore,
+  record: ExportJobRecord,
+  done: Promise<unknown>,
+  tickMs: number = EXPORT_PROGRESS_TICK_MS,
+  workerJobId: string = record.jobId,
+): Promise<void> {
+  if (!store.stored) return;
+  let ended = false;
+  void done.finally(() => {
+    ended = true;
+  });
+  let last = '';
+  while (!ended) {
+    await new Promise((resolve) => setTimeout(resolve, tickMs));
+    if (ended) return;
+    const job = await worker.job(workerJobId);
+    if (job === null || job.status !== 'running') continue;
+    const progress = progressOfLog(job.log);
+    const key =
+      progress === null ? '' : `${progress.slide}/${progress.total}/${progress.theme ?? ''}`;
+    if (progress === null || key === last) continue;
+    last = key;
+    await writeExportJob(
+      store.client,
+      runningExportJob(record, new Date().toISOString(), {
+        progress,
+        ...(job.log[job.log.length - 1] !== undefined ? { line: job.log[job.log.length - 1] } : {}),
+      }),
+    );
+  }
+}
+
 export async function followExportJob(
   worker: WorkerClient,
   job: PublicJob,
   deckId: string,
   format: 'pptx' | 'pdf',
   store?: PartStore,
+  title?: string | null,
 ): Promise<void> {
   store ??= await partStore();
-  const record = queuedExportJob(job.id, deckId, format, new Date().toISOString());
+  const record = queuedExportJob(job.id, deckId, format, new Date().toISOString(), title);
   await writeExportJob(store.client, record);
   afterResponse(
     (async () => {
       await pruneExportJobs(store.client, Date.now());
       let finished: PublicJob;
+      const waiting = worker.wait(job.id, SYNC_EXPORT_TIMEOUT_MS);
+      void followExportProgress(
+        worker,
+        store,
+        record,
+        waiting.catch(() => undefined),
+      ).catch(() => undefined);
       try {
-        finished = await worker.wait(job.id, SYNC_EXPORT_TIMEOUT_MS);
+        finished = await waiting;
       } catch (error) {
         const again = await readExportJob(store.client, job.id);
         if (again?.status === 'done' || again?.status === 'failed') return;
@@ -622,8 +717,11 @@ export async function followExportJob(
 export type ExportPollDeps = {
   /** `authorize(export)` on the job's deck, the poll's right (download.ts `pollExportFn`) */
   authorize: (deckId: string) => Promise<void>;
-  /** a signed one time download URL of a job file on this instance (the checkout path) */
-  sign: (jobId: string, name: string) => string;
+  /**
+   * a signed one time download URL of a job file on this instance (the checkout path): the file
+   * by the exporter's name, saved as the display name when one is given
+   */
+  sign: (jobId: string, name: string, saveAs?: string) => string;
 };
 
 /**
@@ -646,11 +744,16 @@ export async function pollExportJob(
     if (typeof deckOfJob === 'string' && SLUG_PATTERN.test(deckOfJob))
       await deps.authorize(deckOfJob);
     const status = exportJobStatusOf(job.status);
-    const line = lastLineOf(job);
+    // where the worker is, off its own log (the product round, the row
+    // export.download.progress-per-slide): the play list number of the last slide line, read
+    // into the poll's line as "slide k of n" (the snackbar's words), else the last log line
+    const progress = status === 'running' ? progressOfLog(job.log) : null;
+    const line = progressLine(progress) ?? lastLineOf(job);
     const poll: ExportJobPoll = {
       jobId: job.id,
       status,
       ...(line !== undefined ? { line } : {}),
+      ...(progress !== null ? { progress } : {}),
       ...(job.ms !== undefined ? { ms: job.ms } : {}),
     };
     if (status === 'failed') return { ...poll, error: job.error?.message ?? 'the export failed' };
@@ -658,14 +761,22 @@ export async function pollExportJob(
     const report = exportReportSchema.safeParse((job.result as JobResultLike | undefined)?.report);
     if (!report.success) return { ...poll, status: 'failed', error: EXPORT_JOB_NO_REPORT };
     if (!store.stored) {
+      const record = await readExportJob(store.client, jobId);
+      const sources = report.data.files.map((file) => basename(file.path));
+      const names = displayNamesOf(sources, {
+        title: record?.title ?? null,
+        deckId: typeof deckOfJob === 'string' ? deckOfJob : report.data.deckId,
+        mode: report.data.mode,
+      });
       return {
         ...poll,
         report: report.data,
         downloads:
           worker.mode === 'local'
             ? report.data.files.map((file) => {
-                const name = basename(file.path);
-                return { name, bytes: file.bytes, url: deps.sign(job.id, name) };
+                const source = basename(file.path);
+                const name = names.get(source) ?? source;
+                return { name, bytes: file.bytes, url: deps.sign(job.id, source, name) };
               })
             : [],
       };
@@ -682,10 +793,184 @@ export async function pollExportJob(
     const finished = await storeFinishedExportJob(worker, store, record, job);
     return pollOfExportJob(finished, { stored: true });
   }
-  const record = await readExportJob(store.client, jobId);
+  const record = await readExportJobCached(store.client, jobId);
   if (record === null) return missingExportJobPoll(jobId);
   await deps.authorize(record.deckId);
+  // a record the page named over a worker job of this instance (the sync export's progress
+  // record, runSyncExportWithProgress): while that job runs, the answer is its live log, so the
+  // page reads "slide k of n" on the worker's own instance without the record's tick, and a
+  // checkout's folder store, which the follow never writes, answers it too
+  if (record.workerJobId !== undefined && record.status !== 'done' && record.status !== 'failed') {
+    const live = await worker.job(record.workerJobId);
+    if (live !== null && (live.status === 'running' || live.status === 'queued')) {
+      const progress = live.status === 'running' ? progressOfLog(live.log) : null;
+      const line = progressLine(progress) ?? lastLineOf(live);
+      return {
+        jobId: record.jobId,
+        status: exportJobStatusOf(live.status),
+        ...(line !== undefined ? { line } : {}),
+        ...(progress !== null ? { progress } : {}),
+      };
+    }
+    // the worker's job ended and the sync call is writing the record: still in progress
+    if (live !== null)
+      return {
+        jobId: record.jobId,
+        status: 'running',
+        ...(record.line !== undefined ? { line: record.line } : {}),
+      };
+  }
   return pollOfExportJob(record, { stored: store.stored });
+}
+
+/**
+ * The synchronous export with a progress record beside it (the product round fix round, the
+ * row `export.download.progress-per-slide`; build/b7.md R4's second choice, the server half): the
+ * editor mints `jobId` (`newSyncProgressJobId`), calls `syncExport` with it and polls
+ * `pollExport` with the same id while the call runs. The record is written queued at once, then
+ * running with the worker's job id as soon as the export is submitted (so the poll on this
+ * instance reads the live log, and a poll routed elsewhere the record the follow writes every
+ * tick), and done or failed with the call's outcome, so a late poll never reads a job that runs
+ * for ever. The export itself is `runSyncExport`, unchanged.
+ */
+export async function runSyncExportWithProgress(
+  worker: WorkerClient,
+  jobId: string,
+  deckId: string,
+  input: SyncExportInput,
+  options: { store?: PartStore; now?: () => string; tickMs?: number } = {},
+): Promise<SyncExportResult> {
+  const store = options.store ?? (await partStore());
+  const now = options.now ?? (() => new Date().toISOString());
+  const queued = queuedExportJob(jobId, deckId, input.format, now(), await deckTitleOf(deckId));
+  await writeExportJob(store.client, queued);
+  let record = queued;
+  let end: () => void = () => undefined;
+  const done = new Promise<void>((resolve) => {
+    end = resolve;
+  });
+  try {
+    const result = await runSyncExport(deckId, input, {
+      client: worker,
+      onSubmitted: (job) => {
+        record = runningExportJob(queued, now(), { workerJobId: job.id });
+        void writeExportJob(store.client, record).then(() =>
+          followExportProgress(worker, store, record, done, options.tickMs, job.id).catch(
+            () => undefined,
+          ),
+        );
+      },
+    });
+    end();
+    const downloads = result.files
+      .filter((file) => file.url !== undefined && file.url !== '')
+      .map((file) => ({ name: file.name, bytes: file.bytes, url: file.url ?? '' }));
+    const last = result.log[result.log.length - 1];
+    await writeExportJob(
+      store.client,
+      finishedExportJob(
+        record,
+        {
+          status: 'done',
+          report: result.report,
+          downloads,
+          ms: result.ms,
+          ...(last === undefined ? {} : { line: last }),
+        },
+        now(),
+      ),
+    );
+    return result;
+  } catch (error) {
+    end();
+    await writeExportJob(
+      store.client,
+      finishedExportJob(
+        record,
+        { status: 'failed', error: error instanceof Error ? error.message : String(error) },
+        now(),
+      ),
+    );
+    throw error;
+  }
+}
+
+/** How long a running job's record answers polls on this instance before the store is read again. */
+export const EXPORT_POLL_CACHE_MS = 2_000;
+type RecentRecords = Map<string, { at: number; record: ExportJobRecord | null }>;
+/** per store client, so two stores in one process (the tests' fakes) never read each other's records */
+const recentByClient = new WeakMap<BlobClient, RecentRecords>();
+function recentRecordsOf(client: BlobClient): RecentRecords {
+  let recent = recentByClient.get(client);
+  if (recent === undefined) {
+    recent = new Map();
+    recentByClient.set(client, recent);
+  }
+  return recent;
+}
+
+/**
+ * The record for a poll on an instance that never held the job: a running record is read from
+ * the store at most once per EXPORT_POLL_CACHE_MS per job (the editor polls every second; the
+ * blob tier budget is one timed call per 2 s per deck), a settled record is kept for the process,
+ * and a queued or missing one is asked again each time, so a job queued a moment ago on another
+ * instance is found and its end is read within the poll.
+ */
+export async function readExportJobCached(
+  client: BlobClient,
+  jobId: string,
+  now: () => number = () => Date.now(),
+): Promise<ExportJobRecord | null> {
+  const recentRecords = recentRecordsOf(client);
+  const kept = recentRecords.get(jobId);
+  const t = now();
+  if (kept !== undefined && kept.record !== null) {
+    const settled = kept.record.status === 'done' || kept.record.status === 'failed';
+    // a running record is the one that costs: the follow writes its progress every tick and the
+    // page polls every second, so it answers from here for a tick; a queued record moves to
+    // running or done within a moment and is read each time
+    if (settled || (kept.record.status === 'running' && t - kept.at < EXPORT_POLL_CACHE_MS))
+      return kept.record;
+  }
+  const record = await readExportJob(client, jobId);
+  recentRecords.set(jobId, { at: t, record });
+  if (recentRecords.size > 200) {
+    const oldest = [...recentRecords.entries()].sort((a, b) => a[1].at - b[1].at)[0];
+    if (oldest !== undefined) recentRecords.delete(oldest[0]);
+  }
+  return record;
+}
+
+/** Forgets the poll cache of a store client (tests). */
+export function forgetExportPollCache(client?: BlobClient): void {
+  if (client !== undefined) recentByClient.delete(client);
+}
+
+/**
+ * The exporter's own name of a job file the editor asks for again by its display name (the deck's
+ * title): the report's file whose display name is the one asked, else the name itself when the
+ * report lists it, else null. The checkout path's `signDownload` opens the file by this name.
+ */
+export async function jobFileSource(
+  worker: WorkerClient,
+  jobId: string,
+  name: string,
+): Promise<string | null> {
+  const job = await worker.job(jobId);
+  const report = exportReportSchema.safeParse((job?.result as JobResultLike | undefined)?.report);
+  if (!job || !report.success) return null;
+  const sources = report.data.files.map((file) => basename(file.path));
+  if (sources.includes(name)) return name;
+  const store = await partStore();
+  const record = await readExportJob(store.client, jobId);
+  const deckOfJob = (job.input as { deckId?: string } | undefined)?.deckId;
+  const names = displayNamesOf(sources, {
+    title: record?.title ?? null,
+    deckId: typeof deckOfJob === 'string' ? deckOfJob : report.data.deckId,
+    mode: report.data.mode,
+  });
+  for (const [source, display] of names) if (display === name) return source;
+  return null;
 }
 
 /** The stored copy of a finished job's file with the deck it belongs to, for a download the editor asks for again; null on a checkout or for a name the job did not make. */

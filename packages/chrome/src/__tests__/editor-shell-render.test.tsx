@@ -24,7 +24,7 @@ import { useSnackbar } from '../Snackbar';
 import { hideTooltip } from '../Tooltip';
 
 // The editor shell rendered in its default state (gslides-parity SPEC 11.1, 12, 13, 14.2): the
-// title row, the menu bar with the ten menus, the toolbar in the order of 3.1, the bottom bar;
+// title row, the menu bar with the ten menus, the toolbar in the order of 3.1, the side panel toggle;
 // no engineering word in the default view's text or tooltips; no action id or JSON pointer in a
 // tooltip; the File menu opens, closes on Esc and returns focus; Ctrl+Shift+F is compact mode and
 // Esc restores it; Cmd+/ opens the shortcuts dialog; a retired letter shows its sentence once and
@@ -167,7 +167,7 @@ afterEach(async () => {
 });
 
 describe('the editor shell in its default state', () => {
-  it('draws the title row, the ten menus, the toolbar of 3.1 and the bottom bar', () => {
+  it('draws the title row, the ten menus, the toolbar of 3.1 and the side panel toggle, and no bottom bar', () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     expect(container.querySelector('.ts-title-row')).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Presentation title' }).textContent).toBe(
@@ -212,9 +212,12 @@ describe('the editor shell in its default state', () => {
       'toolbar.hideMenus',
     ])
       expect(toolbar.querySelector(`[data-control="${returned}"]`), returned).not.toBeNull();
-    expect(container.querySelector('[data-control="bottombar"]')).not.toBeNull();
-    expect(container.querySelector('[data-control="panel.toggle"]')).not.toBeNull();
-    /* the bottom bar's view buttons follow View > Grid view, parked with the switch off (3.1, 3.2) */
+    /* the bottom bar left in the product round (docs/PRODUCT.md section 2 rank 25): its side panel
+       toggle sits in the title row's right cluster */
+    expect(container.querySelector('[data-control="bottombar"]')).toBeNull();
+    expect(container.querySelector('.ts-bottombar')).toBeNull();
+    expect(container.querySelector('[data-control="title.sidePanel"]')).not.toBeNull();
+    /* the grid view's buttons left with the bar; the View menu row stays behind the switch */
     expect(container.querySelector('[data-control="view.gridView"]')).toBeNull();
     expect(container.querySelector('[data-control="view.filmstripView"]')).toBeNull();
     expect(container.querySelector('.ts-rpanel')?.childElementCount).toBe(0);
@@ -242,9 +245,8 @@ describe('the editor shell in its default state', () => {
     expect(transition.getAttribute('aria-disabled')).toBe('true');
     expect(transition.hasAttribute('disabled')).toBe(false);
     expect(container.querySelector('.pt-viewer')?.hasAttribute('data-advanced-tools')).toBe(true);
-    /* the bottom bar's two view buttons return with the grid view (3.1's table) */
-    expect(container.querySelector('[data-control="view.gridView"]')).not.toBeNull();
-    expect(container.querySelector('[data-control="view.filmstripView"]')).not.toBeNull();
+    /* no bottom bar with the switch on either (rank 25); Grid view stays a View menu row */
+    expect(container.querySelector('[data-control="bottombar"]')).toBeNull();
     /* SPEC-3 13.3: Email is present with Email collaborators as its Later row */
     const file = container.querySelector('[data-control="menubar.file"]') as HTMLElement;
     fireEvent.click(file);
@@ -274,7 +276,7 @@ describe('the editor shell in its default state', () => {
     expect(FORBIDDEN_DEFAULT_VIEW_WORDS.length).toBeGreaterThan(10);
   });
 
-  it('opens the File menu, keeps its words clean, closes on Esc with focus back on the title', () => {
+  it('opens the File menu, keeps its words clean, closes on Esc with the focus off the title (docs/PRODUCT.md section 2 rank 29)', () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     const file = container.querySelector('[data-control="menubar.file"]') as HTMLElement;
     fireEvent.click(file);
@@ -294,7 +296,9 @@ describe('the editor shell in its default state', () => {
     expect(file.getAttribute('aria-expanded')).toBe('true');
     fireEvent.keyDown(menu, { key: 'Escape' });
     expect(screen.queryByRole('menu', { name: 'File menu' })).toBeNull();
-    expect(document.activeElement).toBe(file);
+    /* a menu the pointer opened returns the focus to the stage, not to its title, so no ring stays
+       on the menu bar (rank 29; audit-seller 31); the harness has no stage, so the body takes it */
+    expect(document.activeElement).not.toBe(file);
     expect(file.getAttribute('aria-expanded')).toBe('false');
   });
 
@@ -352,9 +356,10 @@ describe('the editor shell in its default state', () => {
       'toolbar.formatOptions',
     ])
       expect(ids, core).toContain(core);
+    /* the Font dropdown is live (docs/PRODUCT.md 4.2; B5a): a listbox trigger, not a disabled word */
     expect(
-      toolbar.querySelector('[data-control="toolbar.font"]')?.getAttribute('aria-disabled'),
-    ).toBe('true');
+      toolbar.querySelector('[data-control="toolbar.font"]')?.getAttribute('aria-haspopup'),
+    ).toBe('listbox');
     /* the button writes text.list with the first preset (audit-text rows 38 and 39 saw no write) */
     fireEvent.click(toolbar.querySelector('[data-control="toolbar.bulletedList"]') as HTMLElement);
     await flush();
@@ -457,7 +462,7 @@ describe('the editor shell in its default state', () => {
     );
   });
 
-  it('Format options opens the empty panel and the bottom chevron closes it', () => {
+  it('Format options opens the empty panel and the title row toggle closes it', () => {
     /* the Theme button is parked (docs/FOCUS.md 3.3): asserted behind the switch */
     localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container } = render(<Harness input={input()} shell={shellState()} />);
@@ -468,8 +473,15 @@ describe('the editor shell in its default state', () => {
     const panel = container.querySelector('[data-control="panel.formatOptions"]');
     expect(panel).not.toBeNull();
     expect(panel?.textContent).toContain('Select something on the slide to see its options');
-    fireEvent.click(container.querySelector('[data-control="panel.toggle"]') as HTMLElement);
+    const toggle = container.querySelector('[data-control="title.sidePanel"]') as HTMLElement;
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(toggle);
     expect(container.querySelector('[data-control="panel.formatOptions"]')).toBeNull();
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+    /* the toggle reopens the last panel */
+    fireEvent.click(toggle);
+    expect(container.querySelector('[data-control="panel.formatOptions"]')).not.toBeNull();
+    fireEvent.click(toggle);
     /* the Theme button opens Themes with the two thumbnails */
     fireEvent.click(container.querySelector('[data-control="toolbar.theme"]') as HTMLElement);
     expect(container.querySelector('[data-control="panel.themes"]')).not.toBeNull();
@@ -482,7 +494,11 @@ describe('the editor shell in its default state', () => {
       container.querySelector('[data-control="toolbar.newSlide.arrow"]') as HTMLElement,
     );
     const grid = screen.getByRole('dialog', { name: 'New slide with layout' });
-    expect(grid.querySelectorAll('.ts-layout-tile')).toHaveLength(21);
+    /* Google's eleven first; the GT layouts open from the disclosure row (docs/PRODUCT.md 3.4) */
+    expect(grid.querySelectorAll('.ts-layout-tile')).toHaveLength(11);
+    fireEvent.click(grid.querySelector('[data-control="layout.new.gt"]') as HTMLElement);
+    /* twenty two since the product round: Title, subtitle and body joined the GT layouts (docs/PRODUCT.md section 2 rank 2) */
+    expect(grid.querySelectorAll('.ts-layout-tile')).toHaveLength(22);
     fireEvent.click(grid.querySelector('[data-layout="big-number"]') as HTMLElement);
     await act(async () => {
       await Promise.resolve();

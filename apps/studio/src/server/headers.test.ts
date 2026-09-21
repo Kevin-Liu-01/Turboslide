@@ -364,6 +364,27 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
     expect(csp).toContain('report-uri /api/x/csp/report');
     expect(csp).not.toContain('upgrade-insecure-requests');
     expect(buildCsp({ nonce: 'x', env: { VERCEL: '1' } })).toContain('upgrade-insecure-requests');
+    // a report only policy cannot carry the directive: the browser ignores it and Chromium logs
+    // one console error per page load (VERIFICATION-5 finding 16; the product round, b7)
+    expect(buildCsp({ nonce: 'x', env: { VERCEL: '1' }, reportOnly: true })).not.toContain(
+      'upgrade-insecure-requests',
+    );
+    const reported = securityHeadersFor('/edit/q4', {
+      nonce: 'n',
+      requestId: 'r',
+      secure: true,
+      env: { VERCEL: '1' },
+    });
+    expect(reported['content-security-policy-report-only']).not.toContain(
+      'upgrade-insecure-requests',
+    );
+    const enforced = securityHeadersFor('/edit/q4', {
+      nonce: 'n',
+      requestId: 'r',
+      secure: true,
+      env: { VERCEL: '1', TURBOSLIDE_CSP: 'enforce' },
+    });
+    expect(enforced['content-security-policy']).toContain('upgrade-insecure-requests');
     expect(
       securityHeadersFor('/new', { ...base, env: { TURBOSLIDE_CSP: 'enforce' } })[
         'content-security-policy'

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { brandWriteMutation } from '@turboslide/schema/brand';
+import type { BrandKit } from '@turboslide/schema/brand';
 import { contentSlideSchema, deckCounter } from '@turboslide/schema/deck';
 import type { CounterMode } from '@turboslide/schema/deck';
 import type { Mutation } from '@turboslide/schema/mutations';
@@ -12,7 +14,9 @@ import { DIALOGS } from '../menus/strings';
  * Insert > Slide numbers (gslides-parity SPEC 2.4, 7.2.4, 12 "Dialogs"; docs/RETURN.md section 5
  * `slides.numbers.apply`, research 07 "Number slides"): Google's dialog, On or Off, a Skip title
  * slides check under On, Apply for the whole presentation and Apply to selected for the selected
- * slides alone. Apply is one `deck.set /defaults/counter` (on, off or skip-title) and Apply to
+ * slides alone. Apply writes the brand kit's Slide numbers (`brand.set /counter/show` and
+ * `/counter/skipTitle`, docs/PRODUCT.md 4.1: the Brand kit panel's section writes the same
+ * fields, and the older `defaults.counter` is read as the fallback until it is gone) and Apply to
  * selected one `slide.set /counter` per selected slide (on or off; the deck's mode stands for the
  * others), each through the editor's commit as one history entry, so Cmd+Z takes the numbers
  * back in one step. The per slide field is the return round's request to the schema and the
@@ -50,11 +54,19 @@ export function SlideNumbersDialog() {
       .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)));
   };
 
-  const apply = () =>
-    write(
-      [{ op: 'deck.set', path: '/defaults/counter', value: modeOf(numbering, skipTitles) }],
-      'Slide numbers',
-    );
+  const apply = () => {
+    const deck = input.document.deck;
+    const show = numbering === 'on';
+    const skip = show && skipTitles;
+    // two kit writes as one entry, the second read against the record the first leaves
+    const first = brandWriteMutation(deck, '/counter/show', show);
+    const afterFirst: { brand?: BrandKit } = {
+      brand: { ...(deck.brand ?? {}), counter: { ...(deck.brand?.counter ?? {}), show } },
+    };
+    const second = brandWriteMutation(afterFirst, '/counter/skipTitle', skip);
+    write([first as Mutation, second as Mutation], 'Brand kit: Slide numbers');
+    void modeOf;
+  };
 
   const applyToSelected = () =>
     write(

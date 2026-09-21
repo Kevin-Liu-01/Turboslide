@@ -113,8 +113,14 @@ const SEED_IGNORE = [
 // function and `new URL('../calibration/calibration.json', import.meta.url)` names a file that
 // is not in the bundle.
 const PACKAGES_DIR = `${REPO}packages`;
+// The font catalog of the product round (docs/PRODUCT.md 4.2, 5.1; SPEC-5-amendments A5):
+// `fonts/assets/<id>/*` carries the 26 open families beside their LICENSE files once B5a's port
+// lands them (99 files, about 14.4 MB), so the export function names a catalog face in the
+// PowerPoint's `a:latin typeface` and embeds its subset in the PDF; on a tree without the
+// folders the glob matches nothing and the group is the 6.1 MB it was. The group's size after
+// the port is measured on the first preview deploy and recorded in build/b7.md, never typed here.
 const PACKAGES_PATTERN =
-  '{theme/src/gt-ink-paper/*.css,theme/assets/sprite.svg,fonts/src/inter.css,fonts/assets/InterVariable.woff2,fonts/export/*,export/src/calibration/calibration.json}';
+  '{theme/src/gt-ink-paper/*.css,theme/assets/sprite.svg,fonts/src/inter.css,fonts/assets/InterVariable.woff2,fonts/assets/*/*,fonts/export/*,export/src/calibration/calibration.json}';
 
 // Vercel Functions (docs/hosting.md, section limits): the base function keeps the project's
 // duration default written out; the routes that render or export (and the server functions, which
@@ -124,6 +130,11 @@ const PACKAGES_PATTERN =
 // for a function, and Fluid compute maps it to its 4 GB tier or warns at build time (the first
 // preview deploy records which; docs/hosting.md).
 const HEAVY = { maxDuration: 800, memory: 3009 } as const;
+
+// The assist route (docs/PRODUCT.md 6.3): its own function directory with a 60 s duration and the
+// base memory, so a WAF rule (firewall/rules.json R22) and a duration can name it; a model call
+// at low effort answers in about ten seconds and the route's own deadline is under the minute.
+const ASSIST = { maxDuration: 60 } as const;
 
 // @sparticuz/chromium reads bin/*.br relative to its own module, which the dependency tracer
 // cannot see, and @turboslide/headless imports the package through a variable specifier, which
@@ -269,6 +280,8 @@ export default defineConfig({
           '/api/x/render/**': HEAVY,
           '/api/decks/bundle': HEAVY,
           '/api/decks/**/bundle': HEAVY,
+          '/api/assist': ASSIST,
+          '/api/assist/**': ASSIST,
           '/_serverFn/**': HEAVY,
         },
       },

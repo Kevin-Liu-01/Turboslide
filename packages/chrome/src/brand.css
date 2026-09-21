@@ -182,9 +182,22 @@
   background-image: url('/brand/figure-dark.png');
 }
 
-/* The Not found page (SPEC-4 1.10; __root.tsx NotFound): the empty figure with the 64 px mark
-   over the notfound twin's crop, the heading, one paragraph, three .pt-ib buttons. Body text at
-   --ts-body, nothing under --ts-small. */
+/* The skeleton's sheet since the product round (docs/PRODUCT.md 3.5; audit-interface 30): a
+   quiet paper plate in a hairline where the sheet will stand, at the 16:9 box the curtain took,
+   so the editor's sheet replaces it in place; the dither figure stays the empty states' and the
+   Not found page's picture. */
+.ts-skeleton .ts-curtain-host > .ts-skeleton-sheet {
+  box-sizing: border-box;
+  width: min(100cqw - 56px, calc((100cqh - 58px) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  background: var(--pt-paper);
+  border: 1px solid var(--pt-hair);
+}
+
+/* The Not found page (SPEC-4 1.10; __root.tsx NotFound; docs/PRODUCT.md 3.6): the empty figure
+   with the 64 px mark over the notfound twin's crop, the heading, one paragraph, three .pt-ib
+   buttons in sentence case at the hero's 40 px (audit-interface 37). Body text at --ts-body,
+   nothing under --ts-small. */
 .ts-notfound {
   max-width: var(--ts-rail);
   margin: 0 auto;
@@ -204,6 +217,7 @@
 }
 
 .ts-notfound-actions .pt-ib {
+  height: 40px;
   text-decoration: none;
 }
 

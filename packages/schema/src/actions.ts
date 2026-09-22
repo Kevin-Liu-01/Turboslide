@@ -294,6 +294,11 @@ export const ACTION_IDS = [
   'brand.set',
   'brand.reset',
   'font.list',
+  // the features round's logo picker (docs/FEATURES.md 4.11; B6, build/b6.md R2), before the round
+  // three block for the same reason
+  'logo.search',
+  'logo.insert',
+  'logo.refresh',
   // the Google Slides parity round three (gslides-parity SPEC-3 12): 64 actions, counted once here
   'presence.list',
   'presence.follow',
@@ -1067,6 +1072,47 @@ export type TailorInput = z.infer<typeof tailorInputSchema>;
 
 const A = ALL_TRANSPORTS;
 const noWindow: ReadonlyArray<Transport> = ['cli', 'mcp', 'http'];
+
+/**
+ * One row of the cached logo index (docs/FEATURES.md 4.2; the shape of
+ * packages/chrome/src/logo-model.ts `LogoRow`): the `icons.json` record trimmed to what the picker
+ * reads, the variant file paths as the source names them, the licence string as recorded and the
+ * two reads flags, absent until the refresh has rasterized the default once.
+ */
+const logoRowSchema = z.strictObject({
+  slug: z.string().min(1).max(200),
+  title: z.string().min(1).max(200),
+  aliases: z.array(z.string()),
+  categories: z.array(z.string()),
+  hex: z.string().optional(),
+  variants: z.record(z.string(), z.string()),
+  license: z.string(),
+  url: z.string().optional(),
+  guidelines: z.string().optional(),
+  collection: z.string(),
+  dateAdded: z.string().optional(),
+  readsOnPaper: z.boolean().optional(),
+  readsOnInk: z.boolean().optional(),
+  unavailable: z
+    .record(
+      z.string(),
+      z.strictObject({
+        at: z.string(),
+        status: z.number().int().optional(),
+        reason: z.enum(['missing', 'broken', 'sanitized', 'gradient']).optional(),
+      }),
+    )
+    .optional(),
+});
+const logoIndexErrorSchema = z.strictObject({
+  at: z.string(),
+  status: z.number().int().optional(),
+  message: z.string(),
+});
+const logoIndexProgressSchema = z.strictObject({
+  done: z.number().int().nonnegative(),
+  total: z.number().int().nonnegative(),
+});
 
 function action(spec: ActionSpec): ActionSpec {
   return spec;
@@ -4017,6 +4063,124 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     cli: { usage: 'turboslide fonts list' },
     mcp: 'deck_fonts_list',
     example: {},
+  }),
+  /* the features round's logo picker over thesvg.org (docs/FEATURES.md 4.2, 4.4, 4.11; audit-logos
+     8; B6): a deck less search over the cached index, the insert as a stored asset with its `logo`
+     source, and the index refresh the daily cron and the CLI run */
+  'logo.search': action({
+    id: 'logo.search',
+    label: 'Find a logo',
+    doc: 'Searches the cached index of thesvg.org’s brand marks by title, slug, alias and category, ranked prefix, then word start, then substring, brands before community; answers each mark’s variants, its licence as recorded with the seller’s sentence, its brand site and guidelines and whether its default reads on paper and on ink, with the index’s date and its last upstream failure.',
+    group: 'asset',
+    mutates: false,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      query: z.string().min(1).max(120).describe('A company name, a slug, an alias or a category'),
+      limit: z.number().int().min(1).max(50).optional().describe('Defaults to 20'),
+      kind: z
+        .enum(['symbol', 'wordmark'])
+        .optional()
+        .describe('wordmark lists the marks that have a wordmark of some kind'),
+      collection: z
+        .enum(['brands', 'all'])
+        .optional()
+        .describe(
+          'brands (the default) is the brand and community marks; all adds the cloud service icons and the auth badges',
+        ),
+    }),
+    output: z.strictObject({
+      logos: z.array(logoRowSchema.extend({ licenceSentence: z.string() })),
+      updatedAt: z.string().nullable().describe('The time of the last complete index build'),
+      lastError: logoIndexErrorSchema.optional(),
+      progress: logoIndexProgressSchema.optional(),
+      source: z.literal('thesvg.org'),
+      indexed: z.number().int().nonnegative().describe('The marks the index holds in the collections searched'),
+    }),
+    cli: {
+      usage: 'turboslide logo search <query> --limit <limit> --kind <kind> --collection <collection>',
+    },
+    mcp: 'deck_logo_search',
+    example: { query: 'figma', limit: 5 },
+  }),
+  'logo.insert': action({
+    id: 'logo.insert',
+    label: 'Insert a logo',
+    doc: 'Stores a thesvg.org mark on the deck as an asset with the role logo, PNG twins at 3x of the logo size, the sanitized SVG as its source file and a source record naming the mark, its licence and its guidelines, never the source’s address; with slideId it places the picture at the logo size in the free area of the body slot, with blockId it swaps that picture’s asset and keeps the box, with everySlide or kit it writes the brand kit’s logo slots in the same write.',
+    group: 'asset',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      slug: z.string().min(1).max(200).describe('The mark’s slug on thesvg.org'),
+      variant: z
+        .string()
+        .min(1)
+        .max(40)
+        .optional()
+        .describe(
+          'default, mono, light, dark, wordmark, wordmarkLight or wordmarkDark; the appearance rule chooses when absent',
+        ),
+      slideId: slugSchema.optional().describe('The slide the picture lands on; none stores the asset alone'),
+      box: z
+        .strictObject({
+          x: z.number(),
+          y: z.number(),
+          w: z.number().positive(),
+          h: z.number().positive(),
+        })
+        .optional()
+        .describe('The box in sheet px; the logo size in the free area of the body slot when absent'),
+      everySlide: z
+        .boolean()
+        .optional()
+        .describe('Use as this presentation’s logo on every slide: the kit’s mark and footer slots take the asset'),
+      kit: z.boolean().optional().describe('The brand kit’s logo slots alone, for the Brand kit panel'),
+      blockId: blockIdSchema.optional().describe('Replace image: the picture whose asset is swapped'),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      asset: assetSchema,
+      blockId: blockIdSchema.optional(),
+      slideId: slugSchema.optional(),
+      revision,
+      variant: z.string().describe('The variant the insert took'),
+    }),
+    cli: {
+      usage:
+        'turboslide logo insert <slug> --variant <variant> --slide <slideId> --every-slide --kit --block <blockId>',
+    },
+    mcp: 'deck_logo_insert',
+    example: { slug: 'figma', slideId: 'content-rule', baseRevision: 412 },
+  }),
+  'logo.refresh': action({
+    id: 'logo.refresh',
+    label: 'Refresh the logo index',
+    doc: 'Rebuilds the cached logo index from thesvg.org’s manifest inside its time budget, marks the variants that answer 404 unavailable, drops the marks the source removed with their cached files and answers the counts; with dryRun it answers the counts, the index’s date, its last failure and its progress without an upstream fetch.',
+    group: 'asset',
+    mutates: false,
+    transports: noWindow,
+    milestone: 'P1',
+    input: z.strictObject({
+      dryRun: z.boolean().optional().describe('The counts alone, no fetch and no write'),
+    }),
+    output: z.strictObject({
+      icons: z.number().int().nonnegative(),
+      brands: z.number().int().nonnegative(),
+      cachedMarks: z.number().int().nonnegative(),
+      unavailable: z.number().int().nonnegative(),
+      updatedAt: z.string().nullable(),
+      builtAt: z.string().nullable(),
+      lastError: logoIndexErrorSchema.optional(),
+      progress: logoIndexProgressSchema.optional(),
+      fetched: z.number().int().nonnegative(),
+      dropped: z.array(z.string()),
+      dryRun: z.boolean(),
+      upstream: z.enum(['network', 'fixture', 'down']),
+    }),
+    cli: { usage: 'turboslide logo refresh --dry-run' },
+    mcp: 'deck_logo_refresh',
+    example: { dryRun: true },
   }),
 
   'presence.list': action({

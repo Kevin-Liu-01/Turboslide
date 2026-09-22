@@ -57,7 +57,32 @@ export type AssetSource =
       license: 'CC0' | 'CC BY' | 'CC BY-SA' | 'public domain' | string;
       shareAlike: boolean;
     }
-  | { kind: 'file' };
+  | { kind: 'file' }
+  | LogoAssetSource;
+
+/**
+ * A company mark from a logo source (docs/FEATURES.md 4.4; audit-logos 2): the provider and the
+ * mark's slug and variant as the source names them, the title, the licence string as recorded on
+ * the day of the insert, the brand's site and guidelines, when it was fetched and the digest of the
+ * sanitized file; `sanitized` records the elements the sanitizer dropped (4.7), `tint` the kit's
+ * text colour written into a mono mark per appearance. The document never carries the source's
+ * address: the twins are the deck's own PNG files and `sourceFile` is the sanitized SVG.
+ */
+export type LogoAssetSource = {
+  kind: 'logo';
+  provider: 'thesvg';
+  slug: string;
+  variant: string;
+  title: string;
+  license: string;
+  url?: string;
+  guidelines?: string;
+  fetchedAt: string;
+  /** sha256, hex, of the sanitized SVG the twins were rasterized from */
+  digest: string;
+  sanitized?: { removed: string[] };
+  tint?: { light?: string; dark?: string };
+};
 
 export type TwoToneTreatment = {
   kind: 'two-tone';
@@ -181,6 +206,31 @@ export const assetSourceSchema = z.discriminatedUnion('kind', [
     shareAlike: z.boolean(),
   }),
   z.strictObject({ kind: z.literal('file') }),
+  z.strictObject({
+    kind: z.literal('logo'),
+    provider: z.literal('thesvg'),
+    slug: z.string().min(1).max(200),
+    variant: z.string().min(1).max(40),
+    title: z.string().min(1).max(200),
+    license: z.string().min(1).max(400),
+    url: z.string().url().optional(),
+    guidelines: z.string().url().optional(),
+    fetchedAt: z.string().min(1),
+    digest: z.string().regex(/^[0-9a-f]{8,64}$/, 'a hex digest'),
+    sanitized: z.strictObject({ removed: z.array(z.string()) }).optional(),
+    tint: z
+      .strictObject({
+        light: z
+          .string()
+          .regex(/^#[0-9a-fA-F]{6}$/)
+          .optional(),
+        dark: z
+          .string()
+          .regex(/^#[0-9a-fA-F]{6}$/)
+          .optional(),
+      })
+      .optional(),
+  }),
 ]) satisfies z.ZodType<AssetSource>;
 
 export const twoToneTreatmentSchema = z.strictObject({

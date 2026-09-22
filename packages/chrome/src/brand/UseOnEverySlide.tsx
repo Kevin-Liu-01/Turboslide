@@ -28,6 +28,20 @@ export function useOnEverySlidePlan(
   const assetId = block.asset;
   if (typeof assetId !== 'string' || document.deck.assets[assetId] === undefined)
     return { refused: 'The picture has no stored file yet' };
+  return useOnEverySlidePlanForAsset(document, assetId);
+}
+
+/**
+ * The same plan over an asset id (docs/FEATURES.md 4.4; the logo picker's "Use as this
+ * presentation's logo on every slide" and the Brand kit's Find a logo reuse it): the kit's
+ * `/mark`, `/footer/logo` and `/footer/assetId` as three writes of one commit. The asset need not
+ * be in the document yet when the caller commits the record in the same write (the logo insert
+ * does), so nothing here reads the assets.
+ */
+export function useOnEverySlidePlanForAsset(
+  document: Pick<DeckDocument, 'deck'>,
+  assetId: string,
+): { mutations: Mutation[]; label: string } {
   const first: BrandMutation = brandWriteMutation(document.deck, '/mark', {
     kind: 'picture',
     assetId,

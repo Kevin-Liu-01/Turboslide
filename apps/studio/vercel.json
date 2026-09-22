@@ -2,5 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "buildCommand": "NITRO_PRESET=vercel pnpm run build:deploy",
-  "installCommand": "pnpm install --frozen-lockfile"
+  "installCommand": "pnpm install --frozen-lockfile",
+  "crons": [
+    {
+      "path": "/api/logo/refresh",
+      "schedule": "0 6 * * *"
+    }
+  ]
 }

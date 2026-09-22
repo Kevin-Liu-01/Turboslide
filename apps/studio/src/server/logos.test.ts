@@ -1,0 +1,997 @@
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterAll, describe, expect, it } from 'vitest';
+
+import { createDispatcher } from '@turboslide/agent/dispatch';
+import type { ActionContext } from '@turboslide/agent/dispatch';
+import { LOGO_WORDS, chooseVariant, rankLogos } from '@turboslide/chrome/logo-model';
+import type { LogoRow } from '@turboslide/chrome/logo-model';
+import type { Asset } from '@turboslide/schema/assets';
+import { assetSchema } from '@turboslide/schema/assets';
+import type { Deck, Slide } from '@turboslide/schema/deck';
+import { FREEFORM_SLIDE, WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
+import { canonicalJson } from '@turboslide/schema/json';
+import { openFileStore, slidePath } from '@turboslide/store/file-store';
+
+import {
+  FIXTURE_DROPPED_SLUG,
+  FIXTURE_ICONS,
+  FIXTURE_MISSING_PATH,
+} from './logo-fixtures/manifest';
+import { FIXTURE_MARKS } from './logo-fixtures/marks';
+import {
+  LOGO_DOWN_MESSAGE,
+  downUpstream,
+  emptyLogoIndex,
+  fixtureUpstream,
+  litFraction,
+  measureRow,
+  memoryLogoStore,
+  mergeLogoRows,
+  readsFlagsOf,
+  refreshLogoIndex,
+  rowOfIcon,
+  rowsOfManifest,
+  sharpRasterizer,
+  wantsFlags,
+} from './logo-index';
+import type { LogoIndex, LogoUpstream, Rasterizer, UpstreamAnswer } from './logo-index';
+import {
+  LOGO_MAX_BYTES,
+  LogoBrokenError,
+  LogoTooLargeError,
+  attributionOf,
+  descOf,
+  sanitizeLogoSvg,
+  tintLogoSvg,
+  urlsAreLocal,
+  withAttribution,
+} from './logo-sanitize';
+import {
+  createLogoService,
+  kitLogoMutations,
+  logoInsert,
+  logoPlacementOn,
+  rasterizeLogoPng,
+  refreshCredential,
+  registerLogoActions,
+} from './logos';
+
+// The logo picker's server (docs/FEATURES.md 7.3, the B6 test in apps/studio): the sanitizer's
+// fixtures, one per rule of 4.7; the index builder over the ten mark fixture upstream (the variant
+// paths read from the manifest alone, a 404 marked unavailable, a dropped slug taken down with its
+// cached file, a failed upstream keeping the previous file with `lastError`, the budget stop with
+// `progress` and the resume); the refresh credentials; the dry run; the cache rule (a CC0 mark
+// written to the store, a CC BY-ND mark never); the mono tint over explicit fills; the search
+// ranking; the insert as a stored asset with its `logo` source, the block at the logo size, the
+// kit's slots, the untinted CC BY-ND file and the gradient mono that is not offered. Nothing here
+// reaches the network: the upstream is the fixture or a table.
+
+const tmp = mkdtempSync(join(tmpdir(), 'turboslide-logos-'));
+afterAll(() => rmSync(tmp, { recursive: true, force: true }));
+
+const NOW = new Date('2026-09-22T06:00:00.000Z');
+const author: ActionContext['author'] = { kind: 'agent', name: 'test', runId: 'r1' };
+const ctx: ActionContext = { author };
+
+/** A raster the tests do not measure: every pixel opaque grey, so both grounds read. */
+const fakeRasterizer: Rasterizer = async (_svg, size) => {
+  const height = size.height ?? 96;
+  const width = size.width ?? height;
+  const data = new Uint8Array(width * height * 4).fill(128);
+  return { data, width, height };
+};
+
+/** A PNG stand in of the size asked for: the eight magic bytes and the size, for the file store. */
+const fakePng = async (_svg: string, size: [number, number]) => ({
+  png: new Uint8Array([
+    0x89,
+    0x50,
+    0x4e,
+    0x47,
+    0x0d,
+    0x0a,
+    0x1a,
+    0x0a,
+    size[0] & 255,
+    size[1] & 255,
+    1,
+    2,
+    3,
+  ]),
+  width: size[0],
+  height: size[1],
+});
+
+function svgOf(path: string): string {
+  const text = FIXTURE_MARKS[path];
+  if (text === undefined) throw new Error(`no fixture ${path}`);
+  return text;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The sanitizer (4.7)
+
+describe('the sanitizer (4.7)', () => {
+  it('removes script, foreignObject, an onload attribute, an image and an external href, and records the drops', () => {
+    const hostile = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" onload="alert(1)">
+      <script>alert(2)</script>
+      <foreignObject width="10" height="10"><div>hi</div></foreignObject>
+      <image href="https://evil.example/x.png" width="4" height="4"/>
+      <a href="https://evil.example"><path d="M0 0h4v4z" fill="#000"/></a>
+      <use xlink:href="https://evil.example/defs.svg#a"/>
+      <use xlink:href="#local"/>
+      <path d="M0 0h1v1z" fill="#111" onclick="alert(3)"/>
+    </svg>`;
+    const out = sanitizeLogoSvg(hostile);
+    expect(out.svg).not.toMatch(/<script|<foreignObject|<image|<a\b|onload|onclick|evil\.example/);
+    expect(out.svg).toContain('xlink:href="#local"');
+    expect(out.svg).not.toMatch(/<use xlink:href="https/);
+    expect(out.removed).toEqual(['script', 'foreignObject', 'image', 'a']);
+    /* the image, the foreignObject and the link's path drew, so the look changed */
+    expect(out.draws).toBe(true);
+    const quiet = sanitizeLogoSvg(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><script>1</script><metadata>x</metadata><path d="M0 0h1v1z"/></svg>',
+    );
+    expect(quiet.removed).toEqual(['script', 'metadata']);
+    expect(quiet.draws).toBe(false);
+  });
+
+  it('keeps a filter with feGaussianBlur and a pattern, and sharp renders them from a buffer with no base URL', async () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><filter id="f"><feGaussianBlur stdDeviation="2"/></filter><pattern id="p" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#000"/></pattern></defs><rect x="8" y="8" width="48" height="48" fill="url(#p)" filter="url(#f)"/></svg>`;
+    const out = sanitizeLogoSvg(svg);
+    expect(out.removed).toEqual([]);
+    expect(out.svg).toContain('<filter id="f"><feGaussianBlur stdDeviation="2"/></filter>');
+    expect(out.svg).toContain('<pattern id="p"');
+    expect(out.svg).toContain('fill="url(#p)" filter="url(#f)"');
+    const raster = await sharpRasterizer()(out.svg, { height: 96 });
+    expect(raster).not.toBeNull();
+    expect(litFraction(raster as NonNullable<typeof raster>, 255)).toBeGreaterThan(0.01);
+  });
+
+  it('drops a text element with its subtree and marks the variant unavailable through the refresh', async () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M0 0h8v8z" fill="#000"/><text x="2" y="20">Acme<tspan>Corp</tspan></text></svg>`;
+    const out = sanitizeLogoSvg(svg);
+    expect(out.svg).not.toMatch(/<text|<tspan|Acme/);
+    expect(out.removed).toEqual(['text']);
+    expect(out.draws).toBe(true);
+    const row = rowOfIcon({
+      slug: 'texty',
+      title: 'Texty',
+      variants: { default: '/icons/texty/default.svg' },
+      collection: 'brands',
+    }) as LogoRow;
+    const upstream: LogoUpstream = {
+      mode: 'fixture',
+      manifest: async () => ({ ok: true, bytes: new Uint8Array(), contentType: null, url: '' }),
+      mark: async () => ({
+        ok: true,
+        bytes: new TextEncoder().encode(svg),
+        contentType: 'image/svg+xml',
+        url: '',
+      }),
+    };
+    const verdict = await measureRow(row, {
+      upstream,
+      rasterize: fakeRasterizer,
+      sanitize: (bytes) => sanitizeLogoSvg(bytes),
+      now: () => NOW,
+    });
+    expect(verdict).toBe('unavailable');
+    expect(row.unavailable?.default).toEqual({ at: NOW.toISOString(), reason: 'sanitized' });
+    expect(row.readsOnPaper).toBeUndefined();
+  });
+
+  it('removes a style that reaches out whole and keeps a local url(#) reference', () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><defs><linearGradient id="g1"><stop offset="0" stop-color="#000"/></linearGradient></defs><rect width="8" height="8" fill="url(#g1)" style="fill:url(http://evil.example/x.svg#g);stroke:#000"/><rect width="4" height="4" style="fill:#c8102e;stroke:url(#g1)" clip-path="url(  'http://evil.example/c.svg#c' )"/></svg>`;
+    const out = sanitizeLogoSvg(svg);
+    expect(out.svg).toContain('fill="url(#g1)"');
+    expect(out.svg).not.toContain('evil.example');
+    expect(out.svg).toContain('style="fill:#c8102e;stroke:url(#g1)"');
+    expect(out.svg).not.toContain('clip-path=');
+    expect(urlsAreLocal('url(#a) url( "#b" )')).toBe(true);
+    expect(urlsAreLocal('url(#a) url(http://x)')).toBe(false);
+    expect(urlsAreLocal('url(data:image/svg+xml;base64,AAAA)')).toBe(false);
+    expect(urlsAreLocal('#plain')).toBe(true);
+    /* a stylesheet that imports leaves; one that draws stays */
+    const imported = sanitizeLogoSvg(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><style>@import url(http://evil.example/a.css);</style><path d="M0 0h1v1z"/></svg>',
+    );
+    expect(imported.svg).not.toContain('<style');
+    expect(imported.removed).toEqual(['style']);
+    const styled = sanitizeLogoSvg(svgOf('/icons/acme/default.svg'));
+    expect(styled.svg).toContain('<style>.a{fill:#c8102e}.b{fill:#1d1d1b}</style>');
+    expect(styled.removed).toEqual([]);
+  });
+
+  it('refuses a 300 KB file before parsing with the sentence naming the cap, and a broken XML with the seller’s sentence', () => {
+    const big = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="${'M0 0h1v1z'.repeat(40_000)}"/></svg>`;
+    expect(new TextEncoder().encode(big).byteLength).toBeGreaterThan(300 * 1024);
+    let caught: unknown;
+    try {
+      sanitizeLogoSvg(big);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(LogoTooLargeError);
+    expect((caught as Error).message).toBe(LOGO_WORDS.tooLarge(LOGO_MAX_BYTES));
+    expect((caught as Error).message).toContain('256 KB');
+    for (const broken of [
+      '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0" fill="#000"/>',
+      '<svg viewBox="0 0 8 8"><path d="M0 0h1v1z" fill=#000/></svg>',
+      '<svg viewBox="0 0 8 8"><title>A & B</title></svg>',
+      '<!DOCTYPE svg [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><svg viewBox="0 0 8 8">&xxe;</svg>',
+      '<html><svg viewBox="0 0 8 8"/></html>',
+      'not xml at all',
+      '<svg><path d="M0 0h1v1z"/></svg>',
+    ]) {
+      let error: unknown;
+      try {
+        sanitizeLogoSvg(broken);
+      } catch (e) {
+        error = e;
+      }
+      expect(error, broken).toBeInstanceOf(LogoBrokenError);
+      expect((error as Error).message).toBe(LOGO_WORDS.broken);
+      expect((error as Error).message).toBe('This logo’s file is broken on thesvg.org');
+    }
+  });
+
+  it('adds a viewBox from width and height, and the attribution desc to a cached file', () => {
+    const out = sanitizeLogoSvg(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="54px" height="80"><path d="M0 0h1v1z"/></svg>',
+    );
+    expect(out.svg).toContain('viewBox="0 0 54 80"');
+    expect(out.size).toEqual([54, 80]);
+    const cached = withAttribution(out.svg, 'Figma', 'CC0-1.0');
+    expect(descOf(cached)).toBe(
+      'Figma logo, from thesvg.org under CC0-1.0; the mark belongs to its owner',
+    );
+    expect(attributionOf('Figma', 'CC0-1.0')).toBe(descOf(cached));
+    /* the desc sits first and replaces an older one */
+    expect(cached.indexOf('<desc>')).toBeLessThan(cached.indexOf('<path'));
+    expect(descOf(withAttribution(cached, 'Figma', 'MIT'))).toContain('under MIT');
+    expect((cached.match(/<desc>/g) ?? []).length).toBe(1);
+    /* the real marks pass unchanged in what they draw */
+    for (const [path, text] of Object.entries(FIXTURE_MARKS)) {
+      const real = sanitizeLogoSvg(text);
+      expect(real.draws, path).toBe(false);
+      expect(real.svg.startsWith('<svg'), path).toBe(true);
+    }
+  });
+
+  it('tints every fill and stroke that is not none, in attributes, style attributes and stylesheets, and the root', () => {
+    const svg = sanitizeLogoSvg(svgOf('/icons/acme/mono.svg')).svg;
+    const tinted = tintLogoSvg(svg, '#f2f2f0');
+    expect(tinted).not.toMatch(/#000\b|#000000/);
+    expect((tinted.match(/fill="#f2f2f0"/g) ?? []).length).toBe(3);
+    expect(tinted).toContain('stroke="#f2f2f0"');
+    expect(tinted).toContain('style="fill:#f2f2f0;stroke:none"');
+    const styled = tintLogoSvg(sanitizeLogoSvg(svgOf('/icons/acme/default.svg')).svg, '#0b3d91');
+    expect(styled).toContain('<style>.a{fill:#0b3d91}.b{fill:#0b3d91}</style>');
+    expect(styled).toContain('fill="#0b3d91"');
+    expect(styled).not.toContain('#1d1d1b');
+    const inherited = tintLogoSvg(sanitizeLogoSvg(svgOf('/icons/vercel/mono.svg')).svg, '#0b3d91');
+    expect(inherited).toMatch(/^<svg[^>]* fill="#0b3d91"/);
+    const noneKept = tintLogoSvg(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><path fill="none" stroke="currentColor" d="M0 0h1"/></svg>',
+      '#111111',
+    );
+    expect(noneKept).toContain('fill="none"');
+    expect(noneKept).toContain('stroke="#111111"');
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// The index (4.2)
+
+describe('the index rows', () => {
+  it('reads variant paths from icons.json alone and never composes one from a key', () => {
+    const row = rowOfIcon({
+      slug: 'openai',
+      title: 'OpenAI',
+      variants: {
+        default: '/icons/openai/default.svg',
+        wordmarkLight: '/icons/openai/wordmark-light.svg',
+        odd: 'wordmarkLight.svg',
+      },
+      license: 'MIT',
+      url: 'https://openai.com/',
+      collection: 'brands',
+      dateAdded: '2026-03-07',
+    });
+    expect(row?.variants).toEqual({
+      default: '/icons/openai/default.svg',
+      wordmarkLight: '/icons/openai/wordmark-light.svg',
+    });
+    expect(row?.variants.wordmarkLight).not.toContain('wordmarkLight');
+    /* registry.json's shape (keys as a list, no paths) is no index */
+    expect(
+      rowOfIcon({ slug: 'openai', title: 'OpenAI', variants: ['default', 'wordmarkLight'] }),
+    ).toBeNull();
+    expect(
+      rowOfIcon({ slug: 'Bad Slug', title: 'x', variants: { default: '/icons/x/default.svg' } }),
+    ).toBeNull();
+    expect(rowsOfManifest(FIXTURE_ICONS)).toHaveLength(10);
+    expect(rowsOfManifest({ icons: FIXTURE_ICONS.slice(0, 2) })).toHaveLength(2);
+    expect(() => rowsOfManifest({ total: 1 })).toThrow(TypeError);
+  });
+
+  it('merges the upstream rows over the previous index, keeping flags while the default path stands', () => {
+    const previous = rowsOfManifest(FIXTURE_ICONS);
+    (previous[0] as LogoRow).readsOnPaper = true;
+    (previous[0] as LogoRow).readsOnInk = false;
+    (previous[1] as LogoRow).unavailable = {
+      dark: { at: NOW.toISOString(), status: 404, reason: 'missing' },
+    };
+    const upstream = rowsOfManifest(FIXTURE_ICONS.filter((icon) => icon.slug !== 'stripe'));
+    (upstream[1] as LogoRow).variants = {
+      ...(upstream[1] as LogoRow).variants,
+      dark: '/icons/vercel/dark-2.svg',
+    };
+    const merged = mergeLogoRows(previous, upstream);
+    expect(merged.dropped).toEqual(['stripe']);
+    expect(merged.rows[0]?.readsOnPaper).toBe(true);
+    expect(merged.rows[0]?.readsOnInk).toBe(false);
+    /* the unavailable mark of a variant whose path moved is forgotten */
+    expect(merged.rows[1]?.unavailable).toBeUndefined();
+    expect(wantsFlags(merged.rows[0] as LogoRow, NOW.getTime())).toBe(false);
+    expect(wantsFlags(merged.rows[1] as LogoRow, NOW.getTime())).toBe(true);
+    const aws = merged.rows.find((row) => row.slug === 'aws-amazon-ec2') as LogoRow;
+    expect(wantsFlags(aws, NOW.getTime())).toBe(false);
+  });
+
+  it('measures the two reads flags with the audit’s rule: the white Vercel triangle reads on ink alone', async () => {
+    const rasterize = sharpRasterizer();
+    const vercel = await readsFlagsOf(
+      sanitizeLogoSvg(svgOf('/icons/vercel/default.svg')).svg,
+      rasterize,
+    );
+    expect(vercel).toEqual({ readsOnPaper: false, readsOnInk: true });
+    const figma = await readsFlagsOf(
+      sanitizeLogoSvg(svgOf('/icons/figma/default.svg')).svg,
+      rasterize,
+    );
+    expect(figma).toEqual({ readsOnPaper: true, readsOnInk: true });
+    const anthropic = await readsFlagsOf(
+      sanitizeLogoSvg(svgOf('/icons/anthropic/default.svg')).svg,
+      rasterize,
+    );
+    expect(anthropic?.readsOnPaper).toBe(false);
+  });
+});
+
+describe('the refresh (4.2, 4.9)', () => {
+  it('builds the ten mark fixture, marks a 404 unavailable when the variant is asked for, and takes a dropped slug down with its cached file', async () => {
+    const store = memoryLogoStore();
+    let known: LogoIndex | null = null;
+    const upstream = fixtureUpstream(() => known);
+    const first = await refreshLogoIndex({
+      store,
+      upstream,
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+    });
+    expect(first.icons).toBe(10);
+    expect(first.brands).toBe(9);
+    expect(first.fetched).toBe(9);
+    expect(first.updatedAt).toBe(NOW.toISOString());
+    expect(first.progress).toBeUndefined();
+    expect(first.dropped).toEqual([]);
+    known = await store.readIndex();
+    expect(known?.icons.find((row) => row.slug === 'figma')?.readsOnPaper).toBe(true);
+    /* the variant answering 404 is discovered when it is fetched, never composed from a key */
+    const service = createLogoService({
+      store,
+      upstream,
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+    });
+    const missing = await service.mark('acme', 'wordmark');
+    expect(missing).toEqual({
+      ok: false,
+      status: 404,
+      message: LOGO_WORDS.noVariant('Acme', 'wordmark'),
+    });
+    expect((await service.row('acme'))?.unavailable?.wordmark).toEqual({
+      at: NOW.toISOString(),
+      status: 404,
+      reason: 'missing',
+    });
+    expect(FIXTURE_ICONS.find((icon) => icon.slug === 'acme')?.variants.wordmark).toBe(
+      FIXTURE_MISSING_PATH,
+    );
+    /* the cached CC0 mark of the slug the fixture drops at the second refresh */
+    const northwind = await service.mark(FIXTURE_DROPPED_SLUG, 'default');
+    expect(northwind.ok).toBe(true);
+    expect(store.marks.has(`${FIXTURE_DROPPED_SLUG}/default`)).toBe(true);
+    expect((await service.index()).cached[`${FIXTURE_DROPPED_SLUG}/default`]).toBeDefined();
+    known = await service.index();
+    const second = await service.refresh();
+    expect(second.dropped).toEqual([FIXTURE_DROPPED_SLUG]);
+    expect(second.icons).toBe(9);
+    expect(store.marks.has(`${FIXTURE_DROPPED_SLUG}/default`)).toBe(false);
+    const after = await service.index();
+    expect(after.icons.some((row) => row.slug === FIXTURE_DROPPED_SLUG)).toBe(false);
+    expect(after.cached[`${FIXTURE_DROPPED_SLUG}/default`]).toBeUndefined();
+    /* the unavailable mark survives the refresh while its path is the same */
+    expect(after.icons.find((row) => row.slug === 'acme')?.unavailable?.wordmark?.status).toBe(404);
+    expect((await service.search('acme')).logos[0]?.slug).toBe('acme');
+  });
+
+  it('keeps the previous file and records lastError when the upstream does not answer', async () => {
+    const store = memoryLogoStore();
+    await refreshLogoIndex({
+      store,
+      upstream: fixtureUpstream(() => null),
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+    });
+    const later = new Date(NOW.getTime() + 60_000);
+    const counts = await refreshLogoIndex({
+      store,
+      upstream: downUpstream(),
+      rasterize: fakeRasterizer,
+      now: () => later,
+    });
+    expect(counts.icons).toBe(10);
+    expect(counts.updatedAt).toBe(NOW.toISOString());
+    expect(counts.lastError).toEqual({
+      at: later.toISOString(),
+      status: 0,
+      message: LOGO_DOWN_MESSAGE,
+    });
+    const stored = await store.readIndex();
+    expect(stored?.icons).toHaveLength(10);
+    expect(stored?.lastError?.message).toBe(LOGO_DOWN_MESSAGE);
+    /* the search answers from the cache while the source is down, the foot names the failure */
+    const service = createLogoService({
+      store,
+      upstream: downUpstream(),
+      rasterize: fakeRasterizer,
+      now: () => later,
+    });
+    const answer = await service.search('figma');
+    expect(answer.logos[0]?.slug).toBe('figma');
+    expect(answer.lastError?.message).toBe(LOGO_DOWN_MESSAGE);
+    expect(LOGO_WORDS.source(answer)).toContain('thesvg.org did not answer at 06:01 UTC');
+    const mark = await service.mark('figma', 'default');
+    expect(mark).toEqual({ ok: false, status: 503, message: LOGO_WORDS.upstreamDown });
+    /* a refresh that succeeds again clears the failure */
+    const back = createLogoService({
+      store,
+      upstream: fixtureUpstream(() => stored),
+      rasterize: fakeRasterizer,
+      now: () => later,
+    });
+    const counts2 = await back.refresh();
+    expect(counts2.lastError).toBeUndefined();
+  });
+
+  it('stops at the time budget with progress and resumes from the first slug without flags', async () => {
+    const store = memoryLogoStore();
+    const slow: LogoUpstream = {
+      mode: 'fixture',
+      manifest: fixtureUpstream(() => null).manifest,
+      mark: async (path, mode) => {
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        return fixtureUpstream(() => null).mark(path, mode);
+      },
+    };
+    const partial = await refreshLogoIndex({
+      store,
+      upstream: slow,
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+      budgetMs: 1,
+      concurrency: 1,
+    });
+    expect(partial.updatedAt).toBeNull();
+    expect(partial.progress).toBeDefined();
+    expect((partial.progress as { done: number }).done).toBeLessThan(9);
+    expect(partial.progress?.total).toBe(9);
+    expect(partial.fetched).toBeLessThan(9);
+    const stored = await store.readIndex();
+    expect(stored?.icons).toHaveLength(10);
+    const flagged = stored?.icons.filter((row) => row.readsOnPaper !== undefined).length ?? 0;
+    expect(flagged).toBe(partial.progress?.done);
+    const later = new Date(NOW.getTime() + 60_000);
+    const complete = await refreshLogoIndex({
+      store,
+      upstream: slow,
+      rasterize: fakeRasterizer,
+      now: () => later,
+      budgetMs: 60_000,
+      concurrency: 8,
+    });
+    expect(complete.fetched).toBe(9 - flagged);
+    expect(complete.updatedAt).toBe(later.toISOString());
+    expect(complete.progress).toBeUndefined();
+  });
+
+  it('answers the counts on a dry run with no upstream fetch and no write', async () => {
+    const store = memoryLogoStore();
+    let calls = 0;
+    const counted: LogoUpstream = {
+      mode: 'fixture',
+      manifest: async () => {
+        calls += 1;
+        return fixtureUpstream(() => null).manifest();
+      },
+      mark: async (path, mode) => {
+        calls += 1;
+        return fixtureUpstream(() => null).mark(path, mode);
+      },
+    };
+    await refreshLogoIndex({ store, upstream: counted, rasterize: fakeRasterizer, now: () => NOW });
+    const before = calls;
+    const writes = store.writes;
+    const dry = await refreshLogoIndex(
+      { store, upstream: counted, rasterize: fakeRasterizer, now: () => NOW },
+      { dryRun: true },
+    );
+    expect(calls).toBe(before);
+    expect(store.writes).toBe(writes);
+    expect(dry).toMatchObject({
+      icons: 10,
+      brands: 9,
+      cachedMarks: 0,
+      unavailable: 0,
+      dryRun: true,
+      upstream: 'fixture',
+      fetched: 0,
+    });
+    expect(dry.updatedAt).toBe(NOW.toISOString());
+    const service = createLogoService({
+      store,
+      upstream: counted,
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+    });
+    const viaService = await service.refresh({ dryRun: true });
+    expect(viaService.dryRun).toBe(true);
+    expect(calls).toBe(before);
+  });
+
+  it('caches a CC0 mark in the store with its attribution and never a CC BY-ND mark', async () => {
+    const store = memoryLogoStore();
+    let fetches = 0;
+    const base = fixtureUpstream(() => null);
+    const counted: LogoUpstream = {
+      mode: 'fixture',
+      manifest: base.manifest,
+      mark: async (path, mode) => {
+        fetches += 1;
+        return base.mark(path, mode);
+      },
+    };
+    const service = createLogoService({
+      store,
+      upstream: counted,
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+    });
+    const figma = await service.mark('figma', 'default');
+    expect(figma.ok).toBe(true);
+    if (!figma.ok) return;
+    expect(figma.cached).toBe(false);
+    expect(descOf(figma.svg)).toBe(attributionOf('Figma', 'CC0-1.0'));
+    expect(store.marks.has('figma/default')).toBe(true);
+    expect(descOf(new TextDecoder().decode(store.marks.get('figma/default')))).toContain(
+      'Figma logo, from thesvg.org under CC0-1.0',
+    );
+    expect((await service.index()).cached['figma/default']?.digest).toMatch(/^[0-9a-f]{64}$/);
+    const again = await service.mark('figma', 'default');
+    expect(again.ok && again.cached).toBe(true);
+    const after = fetches;
+    const aws = await service.mark('aws-amazon-ec2', 'default');
+    expect(aws.ok).toBe(true);
+    expect(store.marks.has('aws-amazon-ec2/default')).toBe(false);
+    expect((await service.index()).cached['aws-amazon-ec2/default']).toBeUndefined();
+    expect(fetches).toBe(after + 1);
+    /* the second draw of a mark that is not cached comes from this instance's memory */
+    const awsAgain = await service.mark('aws-amazon-ec2', 'default');
+    expect(awsAgain.ok && !awsAgain.cached).toBe(true);
+    expect(fetches).toBe(after + 1);
+    const counts = await service.refresh({ dryRun: true });
+    expect(counts.cachedMarks).toBe(1);
+  });
+
+  it('ranks the search prefix, then word start, then substring, brands before community, then shorter titles', async () => {
+    const store = memoryLogoStore();
+    const service = createLogoService({
+      store,
+      upstream: fixtureUpstream(() => null),
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+    });
+    const answer = await service.search('a');
+    /* Acme and Anthropic by their titles and OpenAI by its AI category are prefix matches, shorter
+       titles first; Figma, GitHub, Stripe and Vercel match a category as a substring, Northwind its
+       Retail category; Gradientco is the community mark and comes last */
+    expect(answer.logos.map((row) => row.slug)).toEqual([
+      'acme',
+      'openai',
+      'anthropic',
+      'figma',
+      'github',
+      'stripe',
+      'vercel',
+      'northwind',
+      'gradientco',
+    ]);
+    expect(answer.logos[0]?.licenceSentence).toBe('The brand’s own terms');
+    expect(answer.source).toBe('thesvg.org');
+    expect(answer.indexed).toBe(9);
+    expect((await service.search('amazon')).logos).toEqual([]);
+    expect((await service.search('amazon', { collection: 'all' })).logos[0]?.slug).toBe(
+      'aws-amazon-ec2',
+    );
+    const rows = (await service.index()).icons;
+    expect(rankLogos(rows, 'acme corporation')[0]?.slug).toBe('acme');
+    expect(rankLogos(rows, 'git')[0]?.slug).toBe('github');
+    expect(rankLogos(rows, 'hub')[0]?.slug).toBe('github');
+  });
+
+  it('accepts the agent bearer and the cron secret for the refresh and refuses neither and a wrong secret', () => {
+    const env = { CRON_SECRET: 'cron-secret-for-the-test-0000000000' };
+    const req = (bearer?: string) =>
+      new Request('https://studio.example/api/logo/refresh', {
+        method: 'POST',
+        headers: bearer === undefined ? {} : { authorization: `Bearer ${bearer}` },
+      });
+    const refusing = () => ({ ok: false });
+    const accepting = () => ({ ok: true });
+    expect(refreshCredential(req(env.CRON_SECRET), env, refusing)).toBe('cron');
+    expect(refreshCredential(req('the-agent-bearer'), env, accepting)).toBe('agent');
+    expect(refreshCredential(req(), env, refusing)).toBeNull();
+    expect(refreshCredential(req('wrong-secret'), env, refusing)).toBeNull();
+    expect(refreshCredential(req(env.CRON_SECRET), {}, refusing)).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// The insert (4.4)
+
+function deckDir(name: string, appearance: 'light' | 'dark' = 'light'): string {
+  const dir = join(tmp, name, 'decks', 'gt-brand');
+  mkdirSync(join(dir, 'slides'), { recursive: true });
+  const deck: Deck = {
+    ...WORKED_DECK,
+    defaults: { ...(WORKED_DECK.defaults ?? {}), appearance },
+    sections: [
+      {
+        ...(WORKED_DECK.sections[0] as Deck['sections'][number]),
+        slideIds: [
+          ...(WORKED_DECK.sections[0] as Deck['sections'][number]).slideIds,
+          FREEFORM_SLIDE.id,
+        ],
+      },
+      ...WORKED_DECK.sections.slice(1),
+    ],
+  };
+  writeFileSync(join(dir, 'deck.json'), canonicalJson(deck));
+  for (const slide of [...WORKED_SLIDES, FREEFORM_SLIDE] as Slide[])
+    writeFileSync(slidePath(dir, slide.id), canonicalJson(slide));
+  return dir;
+}
+
+async function serviceFor(): Promise<ReturnType<typeof createLogoService>> {
+  const store = memoryLogoStore();
+  const service = createLogoService({
+    store,
+    upstream: fixtureUpstream(() => null),
+    rasterize: fakeRasterizer,
+    now: () => NOW,
+  });
+  await service.index();
+  return service;
+}
+
+describe('the insert (4.4, 4.11)', () => {
+  it('stores the mark as a logo asset with its source and places the picture at the logo size, one write', async () => {
+    const dir = deckDir('insert-figma');
+    const store = openFileStore({ dir });
+    const before = (await store.read()).document;
+    const service = await serviceFor();
+    const output = await logoInsert(
+      { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+      ctx,
+      {
+        slug: 'figma',
+        slideId: FREEFORM_SLIDE.id,
+        baseRevision: before.deck.revision,
+      },
+    );
+    expect(output.asset.id).toBe('figma');
+    expect(output.variant).toBe('default');
+    expect(output.slideId).toBe('free');
+    expect(output.blockId).toBe('logo');
+    expect(output.revision).toBe(before.deck.revision + 1);
+    const asset = output.asset;
+    expect(asset.role).toBe('logo');
+    expect(asset.alt).toBe('Figma logo');
+    expect(asset.scale).toBe(3);
+    expect(asset.source.kind).toBe('logo');
+    if (asset.source.kind !== 'logo') return;
+    expect(asset.source).toMatchObject({
+      provider: 'thesvg',
+      slug: 'figma',
+      variant: 'default',
+      title: 'Figma',
+      license: 'CC0-1.0',
+      guidelines: 'https://www.figma.com/using-the-figma-brand/',
+    });
+    expect(asset.source.digest).toMatch(/^[0-9a-f]{64}$/);
+    expect(asset.source.tint).toBeUndefined();
+    expect(asset.sourceFile).toMatch(/^assets\/figma\.source\.[0-9a-f]{8}\.svg$/);
+    expect('neutral' in asset.twins).toBe(true);
+    /* 3x of a 108 by 160 symbol */
+    expect(asset.size).toEqual([324, 480]);
+    expect(assetSchema.safeParse(asset).success).toBe(true);
+    const after = (await store.read()).document;
+    const slide = after.slides['free'] as Slide;
+    const block = (slide.kind === 'content' ? (slide.slots.main ?? []) : []).find(
+      (b) => b.id === 'logo',
+    );
+    expect(block?.type).toBe('shot');
+    expect((block as { asset?: string }).asset).toBe('figma');
+    const pos = block?.pos;
+    expect(pos?.h).toBe(160);
+    expect(pos?.w).toBe(108);
+    expect(pos?.z).toBe(6);
+    /* the document never carries the source's address */
+    const text = readFileSync(join(dir, 'deck.json'), 'utf8');
+    expect(text).not.toContain('thesvg.org');
+    expect(text).not.toContain('jsdelivr');
+    const source = readFileSync(join(dir, asset.sourceFile as string), 'utf8');
+    expect(source.startsWith('<svg')).toBe(true);
+    expect(descOf(source)).toContain('Figma logo, from thesvg.org under CC0-1.0');
+    /* the version log holds one entry for the insert */
+    const versions = await store.listVersions();
+    expect(versions[versions.length - 1]?.note).toBe('Logo: Figma');
+  });
+
+  it('tints a mono with the kit’s text colour per appearance and records it; a CC BY-ND mark inserts unmodified', async () => {
+    const dir = deckDir('insert-mono', 'dark');
+    const store = openFileStore({ dir });
+    const service = await serviceFor();
+    const output = await logoInsert(
+      { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+      ctx,
+      {
+        slug: 'figma',
+        variant: 'mono',
+        baseRevision: (await store.read()).document.deck.revision,
+      },
+    );
+    const asset = output.asset;
+    if (asset.source.kind !== 'logo') throw new Error('logo source');
+    expect(asset.source.variant).toBe('mono');
+    expect(asset.source.tint).toEqual({ light: '#070707', dark: '#f2f2f0' });
+    expect('light' in asset.twins && 'dark' in asset.twins).toBe(true);
+    const source = readFileSync(join(dir, asset.sourceFile as string), 'utf8');
+    /* the deck is dark, so the source carries the dark appearance's text colour */
+    expect(source).toContain('fill="#f2f2f0"');
+    expect(source).not.toContain('#070707');
+    expect(output.blockId).toBeUndefined();
+    /* an AWS mark with the cloud switch on carries its file unmodified */
+    const aws = await logoInsert(
+      { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+      ctx,
+      {
+        slug: 'aws-amazon-ec2',
+        baseRevision: (await store.read()).document.deck.revision,
+      },
+    );
+    if (aws.asset.source.kind !== 'logo') throw new Error('logo source');
+    expect(aws.asset.source.tint).toBeUndefined();
+    expect(aws.asset.source.license).toBe('CC-BY-ND-2.0');
+    const awsSource = readFileSync(join(dir, aws.asset.sourceFile as string), 'utf8');
+    expect(awsSource).toContain('#ED7100');
+    expect(awsSource).not.toContain('#f2f2f0');
+    /* the paired light and dark files become the twins the other way round */
+    const github = await logoInsert(
+      { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+      ctx,
+      {
+        slug: 'github',
+        baseRevision: (await store.read()).document.deck.revision,
+      },
+    );
+    expect(github.variant).toBe('light');
+    expect('light' in github.asset.twins).toBe(true);
+  });
+
+  it('writes the kit’s three slots with everySlide in the same write, and swaps a block’s asset for Replace image', async () => {
+    const dir = deckDir('insert-every');
+    const store = openFileStore({ dir });
+    const service = await serviceFor();
+    const output = await logoInsert(
+      { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+      ctx,
+      {
+        slug: 'figma',
+        slideId: 'free',
+        everySlide: true,
+        baseRevision: (await store.read()).document.deck.revision,
+      },
+    );
+    const after = (await store.read()).document;
+    expect(after.deck.brand?.mark).toEqual({ kind: 'picture', assetId: 'figma' });
+    expect(after.deck.brand?.footer).toEqual({ logo: 'picture', assetId: 'figma' });
+    expect(after.deck.revision).toBe(output.revision);
+    const versions = await store.listVersions();
+    expect(versions[versions.length - 1]?.note).toBe('Brand kit: Logo');
+    expect(kitLogoMutations(after.deck, 'figma')).toHaveLength(3);
+    /* the kit alone, for the Brand kit panel */
+    const kit = await logoInsert(
+      { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+      ctx,
+      {
+        slug: 'stripe',
+        kit: true,
+        baseRevision: after.deck.revision,
+      },
+    );
+    const kitted = (await store.read()).document;
+    expect(kitted.deck.brand?.mark).toEqual({ kind: 'picture', assetId: 'stripe' });
+    expect(kit.blockId).toBeUndefined();
+    /* Replace image > Logo: the asset swaps and the box stays */
+    const swapped = await logoInsert(
+      { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+      ctx,
+      {
+        slug: 'openai',
+        blockId: 'logo',
+        baseRevision: kitted.deck.revision,
+      },
+    );
+    expect(swapped.blockId).toBe('logo');
+    const final = (await store.read()).document;
+    const slide = final.slides['free'] as Slide;
+    const block = (slide.kind === 'content' ? (slide.slots.main ?? []) : []).find(
+      (b) => b.id === 'logo',
+    ) as { asset?: string; pos?: { w: number; h: number } };
+    expect(block.asset).toBe('openai');
+    expect(block.pos?.w).toBe(108);
+    expect(block.pos?.h).toBe(160);
+    expect(Object.keys(final.deck.assets)).toEqual(
+      expect.arrayContaining(['figma', 'stripe', 'openai']),
+    );
+  });
+
+  it('does not offer a gradient mono as Mono and falls back to the untinted default; refuses an unknown slug and a missing variant', async () => {
+    const dir = deckDir('insert-gradient');
+    const store = openFileStore({ dir });
+    const service = await serviceFor();
+    const output = await logoInsert(
+      { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+      ctx,
+      {
+        slug: 'gradientco',
+        variant: 'mono',
+        baseRevision: (await store.read()).document.deck.revision,
+      },
+    );
+    expect(output.variant).toBe('default');
+    if (output.asset.source.kind !== 'logo') throw new Error('logo source');
+    expect(output.asset.source.tint).toBeUndefined();
+    expect((await service.row('gradientco'))?.unavailable?.mono?.reason).toBe('gradient');
+    expect(
+      chooseVariant((await service.row('gradientco')) as LogoRow, 'dark', { tone: 'mono' }),
+    ).toEqual({ variant: 'default', tint: false });
+    const revision = (await store.read()).document.deck.revision;
+    await expect(
+      logoInsert(
+        { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+        ctx,
+        { slug: 'nobody', baseRevision: revision },
+      ),
+    ).rejects.toThrow(LOGO_WORDS.unknown('nobody'));
+    await expect(
+      logoInsert(
+        { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+        ctx,
+        { slug: 'stripe', variant: 'wordmark', baseRevision: revision },
+      ),
+    ).rejects.toThrow(LOGO_WORDS.noVariant('Stripe', 'wordmark'));
+    /* the 404 wordmark of acme answers the missing sentence, and a second figma takes the next id */
+    await expect(
+      logoInsert(
+        { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+        ctx,
+        { slug: 'acme', variant: 'wordmark', baseRevision: revision },
+      ),
+    ).rejects.toThrow(LOGO_WORDS.noVariant('Acme', 'wordmark'));
+    await logoInsert(
+      { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+      ctx,
+      { slug: 'figma', baseRevision: revision },
+    );
+    const second = await logoInsert(
+      { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+      ctx,
+      {
+        slug: 'figma',
+        baseRevision: (await store.read()).document.deck.revision,
+      },
+    );
+    expect(second.asset.id).toBe('figma-2');
+  });
+
+  it('places a logo in the free area of the body slot, centred, never at the largest fit', () => {
+    const box = logoPlacementOn(FREEFORM_SLIDE, [108, 160]);
+    expect(box[2]).toBe(108);
+    expect(box[3]).toBe(160);
+    /* inside the content box and clear of the heading band */
+    expect(box[0]).toBeGreaterThanOrEqual(137);
+    expect(box[0] + box[2]).toBeLessThanOrEqual(137 + 1326);
+    expect(box[1]).toBeGreaterThan(129 + 56);
+    expect(box[1] + box[3]).toBeLessThanOrEqual(129 + 642);
+  });
+
+  it('rasterizes the sanitized SVG with sharp to a PNG of the size asked for', async () => {
+    const svg = sanitizeLogoSvg(svgOf('/icons/figma/default.svg')).svg;
+    const out = await rasterizeLogoPng(svg, [324, 480]);
+    expect(Array.from(out.png.subarray(0, 8))).toEqual([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ]);
+    expect(out.width).toBe(324);
+    expect(out.height).toBe(480);
+  });
+
+  it('answers the three actions through a dispatcher in the table’s shapes', async () => {
+    const dir = deckDir('insert-actions');
+    const store = openFileStore({ dir });
+    const service = await serviceFor();
+    const dispatcher = createDispatcher();
+    registerLogoActions(dispatcher, {
+      store,
+      deckId: 'gt-brand',
+      service,
+      now: () => NOW,
+      rasterizePng: fakePng,
+    });
+    const search = (await dispatcher.dispatch(
+      'logo.search',
+      { query: 'figma', limit: 5 },
+      ctx,
+    )) as { logos: { slug: string; licenceSentence: string }[]; source: string };
+    expect(search.logos[0]?.slug).toBe('figma');
+    expect(search.logos[0]?.licenceSentence).toBe('Free to use');
+    expect(search.source).toBe('thesvg.org');
+    const dry = (await dispatcher.dispatch('logo.refresh', { dryRun: true }, ctx)) as {
+      icons: number;
+      dryRun: boolean;
+    };
+    expect(dry).toMatchObject({ icons: 10, dryRun: true });
+    const inserted = (await dispatcher.dispatch(
+      'logo.insert',
+      {
+        slug: 'vercel',
+        slideId: 'free',
+        baseRevision: (await store.read()).document.deck.revision,
+      },
+      ctx,
+    )) as { asset: Asset; blockId?: string; variant: string };
+    /* a light deck takes the dark Vercel triangle, the white default being invisible on paper */
+    expect(inserted.variant).toBe('dark');
+    expect(inserted.asset.role).toBe('logo');
+    expect(inserted.blockId).toBe('logo');
+    await expect(
+      dispatcher.dispatch('logo.insert', { slug: 'vercel', nope: 1, baseRevision: 1 }, ctx),
+    ).rejects.toThrow(TypeError);
+  });
+
+  it('answers a mark that does not draw as an empty check: the fixture upstream rejects nothing the tests need', async () => {
+    const answers: UpstreamAnswer[] = [];
+    const upstream = fixtureUpstream(() => emptyLogoIndex());
+    for (const icon of FIXTURE_ICONS)
+      answers.push(await upstream.mark(icon.variants.default as string, 'bulk'));
+    expect(answers.every((answer) => answer.ok)).toBe(true);
+    expect((await upstream.mark(FIXTURE_MISSING_PATH, 'single')).ok).toBe(false);
+  });
+});

@@ -1,0 +1,1225 @@
+{
+  "config": {
+    "argv": [
+      "/Users/kevinliu/.nvm/versions/node/v24.13.0/bin/node",
+      "/Users/kevinliu/repos/Turboslide/node_modules/@playwright/test/cli.js",
+      "test",
+      "apps/studio/e2e/core/sync.spec.ts",
+      "apps/studio/e2e/core/images.spec.ts",
+      "--reporter=list,json",
+      "--output",
+      "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship/gate-production-rerun/playwright"
+    ],
+    "configFile": "/Users/kevinliu/repos/Turboslide/playwright.config.ts",
+    "rootDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship/gate-production-rerun/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "core/images.spec.ts",
+      "file": "core/images.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "images.insert.first-on-new-deck: On a fresh /new draft, Insert > Image > Upload from computer before any other write; the picture lands within 5 s",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4604,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:38:18.187Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-9c455fd2d86c329c8188",
+          "file": "core/images.spec.ts",
+          "line": 167,
+          "column": 1
+        },
+        {
+          "title": "images.insert.upload: Insert > Image > Upload from computer through the file chooser; the picture lands within 5 s",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10642,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:38:22.914Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-63db5464c418127188cf",
+          "file": "core/images.spec.ts",
+          "line": 182,
+          "column": 1
+        },
+        {
+          "title": "images.insert.upload-while-pending: Upload a second picture right after the first, while its write is pending; both land within 5 s, or the snackbar names the refusal",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "timing",
+                  "description": "both pictures landed 2381 ms after the first upload and 1871 ms after the second"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5696,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:38:33.561Z",
+                  "annotations": [
+                    {
+                      "type": "timing",
+                      "description": "both pictures landed 2381 ms after the first upload and 1871 ms after the second"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-05cee401460bd9aeb318",
+          "file": "core/images.spec.ts",
+          "line": 194,
+          "column": 1
+        },
+        {
+          "title": "images.insert.drop: Drop a PNG on the slide; it lands at the drop point within 5 s",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5529,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:38:39.261Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-2a1ff503619c1e34285a",
+          "file": "core/images.spec.ts",
+          "line": 228,
+          "column": 1
+        },
+        {
+          "title": "images.insert.paste: Cmd+V with a PNG on the clipboard inserts it within 5 s",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6314,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:38:44.795Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-444004985ee5d76c03c5",
+          "file": "core/images.spec.ts",
+          "line": 248,
+          "column": 1
+        },
+        {
+          "title": "images.replace.upload: The toolbar Replace image > Upload from computer swaps the asset within 5 s and keeps the box",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 15331,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: not \u001b[32m\"shot-mucnumyq-asset\"\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: not \u001b[32m\"shot-mucnumyq-asset\"\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/images.spec.ts:282:10",
+                    "location": {
+                      "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/images.spec.ts",
+                      "column": 10,
+                      "line": 282
+                    },
+                    "snippet": "  280 |       timeout: 5000,\n  281 |     })\n> 282 |     .not.toBe(before.block['asset']);\n      |          ^\n  283 |   expect(Date.now() - t).toBeLessThan(5000);\n  284 |   const after = (await pictures(slideId)).find((o) => o.id === id)!;\n  285 |   expect(after.pos).toEqual(before.pos);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/images.spec.ts",
+                        "column": 10,
+                        "line": 282
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: not \u001b[32m\"shot-mucnumyq-asset\"\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  280 |       timeout: 5000,\n  281 |     })\n> 282 |     .not.toBe(before.block['asset']);\n      |          ^\n  283 |   expect(Date.now() - t).toBeLessThan(5000);\n  284 |   const after = (await pictures(slideId)).find((o) => o.id === id)!;\n  285 |   expect(after.pos).toEqual(before.pos);\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/images.spec.ts:282:10"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:38:51.115Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship/gate-production-rerun/playwright/core-images-images-replace-b18b5-ithin-5-s-and-keeps-the-box/error-context.md"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship/gate-production-rerun/playwright/core-images-images-replace-b18b5-ithin-5-s-and-keeps-the-box/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship/gate-production-rerun/playwright/core-images-images-replace-b18b5-ithin-5-s-and-keeps-the-box/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/images.spec.ts",
+                    "column": 10,
+                    "line": 282
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-5201d0580caf42be6fe5",
+          "file": "core/images.spec.ts",
+          "line": 263,
+          "column": 1
+        },
+        {
+          "title": "images.replace.drop-on-picture: Drop a PNG on a picture; its asset is replaced within 5 s and the box keeps its position and size",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 29502,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:39:18.993Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-cacbe89fe16846bf30e9",
+          "file": "core/images.spec.ts",
+          "line": 290,
+          "column": 1
+        },
+        {
+          "title": "images.background.upload-picture: Change background > Choose image > Upload from computer covers the sheet at the bottom of the stack within 5 s",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9010,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:39:48.610Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-75025d4e1fb999dcd855",
+          "file": "core/images.spec.ts",
+          "line": 316,
+          "column": 1
+        },
+        {
+          "title": "images.background.remove-picture: Change background > Remove picture takes the covering picture away",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2280,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:39:57.625Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-8f1d3cf0ced069c92bd3",
+          "file": "core/images.spec.ts",
+          "line": 351,
+          "column": 1
+        },
+        {
+          "title": "images.insert.centred-in-body: Upload from computer lands the picture centred in the body slot at the largest size with a 40 px margin, selected, over no prompt",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "layout",
+                  "description": "the slide's layout before the upload: []"
+                },
+                {
+                  "type": "placement",
+                  "description": "body slot {\"x\":136.99998787954345,\"y\":217.3906301944814,\"w\":767.578125,\"h\":553.6093698055186}; picture {\"x\":177,\"y\":266,\"w\":688,\"h\":458,\"z\":1}; selected 1; prompts under it 0"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6183,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:39:59.909Z",
+                  "annotations": [
+                    {
+                      "type": "layout",
+                      "description": "the slide's layout before the upload: []"
+                    },
+                    {
+                      "type": "placement",
+                      "description": "body slot {\"x\":136.99998787954345,\"y\":217.3906301944814,\"w\":767.578125,\"h\":553.6093698055186}; picture {\"x\":177,\"y\":266,\"w\":688,\"h\":458,\"z\":1}; selected 1; prompts under it 0"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-954dba7f5efa272974c3",
+          "file": "core/images.spec.ts",
+          "line": 469,
+          "column": 1
+        },
+        {
+          "title": "images.insert.instant-preview: The picture draws within 500 ms of the chooser closing, with a progress bar until the asset lands, and no snackbar on success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "preview",
+                  "description": "the picture drew 4 ms after the chooser; progress bar seen true; snackbar after none"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8805,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:40:06.097Z",
+                  "annotations": [
+                    {
+                      "type": "preview",
+                      "description": "the picture drew 4 ms after the chooser; progress bar seen true; snackbar after none"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-fee16339bd56b65f9dbe",
+          "file": "core/images.spec.ts",
+          "line": 577,
+          "column": 1
+        },
+        {
+          "title": "images.insert.menu-direct: The toolbar Image button opens the file chooser on click and the submenu on its arrow",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "button",
+                  "description": "click opened the chooser true (a menu false); arrow drawn true, its submenu true"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3989,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:40:14.906Z",
+                  "annotations": [
+                    {
+                      "type": "button",
+                      "description": "click opened the chooser true (a menu false); arrow drawn true, its submenu true"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-a780d338139e18c8e901",
+          "file": "core/images.spec.ts",
+          "line": 628,
+          "column": 1
+        },
+        {
+          "title": "images.upload.failure-snackbar: A file the upload refuses (a text file renamed .png) shows \"The picture could not be uploaded: the file is not a picture\" and leaves no placeholder",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "failure",
+                  "description": "snackbar \"The picture could not be uploaded: the file is not a picture\" after 1011 ms; placeholders left 0; pictures 0 -> 0"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17334,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:40:18.900Z",
+                  "annotations": [
+                    {
+                      "type": "failure",
+                      "description": "snackbar \"The picture could not be uploaded: the file is not a picture\" after 1011 ms; placeholders left 0; pictures 0 -> 0"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-112ad5e31fa0787b8dc8",
+          "file": "core/images.spec.ts",
+          "line": 667,
+          "column": 1
+        },
+        {
+          "title": "images.insert.by-url: Insert > Image > By URL, an address typed at human speed; no fetch until a 600 ms pause or blur; Insert places the picture centred in the body slot, selected; Replace image > By URL swaps a picture and keeps its box",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [
+                {
+                  "type": "by url",
+                  "description": "fetches while typing 0 (4 in all); picture {\"x\":284,\"y\":258,\"w\":473,\"h\":473,\"z\":1} centred true, selected 1; Replace image > By URL swapped to icon-192 at {\"x\":284,\"y\":258,\"w\":473,\"h\":473,\"z\":1}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 18030,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:40:36.239Z",
+                  "annotations": [
+                    {
+                      "type": "by url",
+                      "description": "fetches while typing 0 (4 in all); picture {\"x\":284,\"y\":258,\"w\":473,\"h\":473,\"z\":1} centred true, selected 1; Replace image > By URL swapped to icon-192 at {\"x\":284,\"y\":258,\"w\":473,\"h\":473,\"z\":1}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "db5426c2c3779b98ccd8-2559d0addc8e9b5c4c2c",
+          "file": "core/images.spec.ts",
+          "line": 716,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "core/sync.spec.ts",
+      "file": "core/sync.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "sync.serial.order-and-latency: A types 30 words into the title one per 3 s; B reads every word in order, none lost, none doubled, each within 5 s of the keystroke on the blob tier and 1 s on the memory tier; every ops POST is answered at the next revision",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "tier",
+                  "description": "blob, bound 5000 ms"
+                },
+                {
+                  "type": "measure",
+                  "description": "latency mean 1960 ms, max 4121 ms over 30 words; POSTs 30"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 112437,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:41:05.791Z",
+                  "annotations": [
+                    {
+                      "type": "tier",
+                      "description": "blob, bound 5000 ms"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "latency mean 1960 ms, max 4121 ms over 30 words; POSTs 30"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-df894268726f61c10f03",
+          "file": "core/sync.spec.ts",
+          "line": 416,
+          "column": 1
+        },
+        {
+          "title": "sync.title.concurrent-both-kept: A and B type a word each into a title slide's heading within 200 ms with both sessions open, then once more and both press Escape; both words are in both browsers within 5 s and stay after Escape, three rounds of three",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "title travelled as",
+                  "description": "text.splice (the field as a text run, docs/SYNC.md 3.4)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 60301,
+                  "error": {
+                    "message": "Error: both words in both browsers in every round of three\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"round 1, sessions open: A \\\"Sync title cb1 ca1\\\", B \\\"Sync title cb1\\\"\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                    "stack": "Error: both words in both browsers in every round of three\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"round 1, sessions open: A \\\"Sync title cb1 ca1\\\", B \\\"Sync title cb1\\\"\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts:566:77",
+                    "location": {
+                      "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts",
+                      "column": 77,
+                      "line": 566
+                    },
+                    "snippet": "  564 |     }\n  565 |     test.info().annotations.push({ type: 'title travelled as', description: titleShape(wire) });\n> 566 |     expect(failures, 'both words in both browsers in every round of three').toEqual([]);\n      |                                                                             ^\n  567 |     const a = await headingOf(A);\n  568 |     expect(a).toBe(await headingOf(B));\n  569 |     for (const w of all) expect(countIn(a, w), `${w} once`).toBe(1);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts",
+                        "column": 77,
+                        "line": 566
+                      },
+                      "message": "Error: both words in both browsers in every round of three\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"round 1, sessions open: A \\\"Sync title cb1 ca1\\\", B \\\"Sync title cb1\\\"\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  564 |     }\n  565 |     test.info().annotations.push({ type: 'title travelled as', description: titleShape(wire) });\n> 566 |     expect(failures, 'both words in both browsers in every round of three').toEqual([]);\n      |                                                                             ^\n  567 |     const a = await headingOf(A);\n  568 |     expect(a).toBe(await headingOf(B));\n  569 |     for (const w of all) expect(countIn(a, w), `${w} once`).toBe(1);\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts:566:77"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:42:58.234Z",
+                  "annotations": [
+                    {
+                      "type": "title travelled as",
+                      "description": "text.splice (the field as a text run, docs/SYNC.md 3.4)"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship/gate-production-rerun/playwright/core-sync-sync-title-concu-7c39d-scape-three-rounds-of-three/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship/gate-production-rerun/playwright/core-sync-sync-title-concu-7c39d-scape-three-rounds-of-three/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts",
+                    "column": 77,
+                    "line": 566
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-f52d1edcd51ec3a288fd",
+          "file": "core/sync.spec.ts",
+          "line": 503,
+          "column": 1
+        },
+        {
+          "title": "sync.title.offline-both-kept: A goes offline 20 s, B types three words into the title, A types one and closes its session, A comes back; all four words are in both browsers within 10 s of the reconnect",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "measure",
+                  "description": "converged true 5926 ms after the reconnect; A \"Sync title offline ob1 ob2 ob3 oa1\", B \"Sync title offline ob1 ob2 ob3 oa1\"; title travelled as text.splice (the field as a text run, docs/SYNC.md 3.4)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 50195,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:43:59.082Z",
+                  "annotations": [
+                    {
+                      "type": "measure",
+                      "description": "converged true 5926 ms after the reconnect; A \"Sync title offline ob1 ob2 ob3 oa1\", B \"Sync title offline ob1 ob2 ob3 oa1\"; title travelled as text.splice (the field as a text run, docs/SYNC.md 3.4)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-49b2255f96a454c2567f",
+          "file": "core/sync.spec.ts",
+          "line": 575,
+          "column": 1
+        },
+        {
+          "title": "sync.block.concurrent-same-offset-order: A and B each insert a word at offset 0 of one body block within 200 ms; both browsers show the two words in the same order within 3 s on the memory tier and 5 s on the blob tier, and no repair splice (a text.splice with remove above 0 from the session) is posted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "tier",
+                  "description": "blob, bound 5000 ms"
+                },
+                {
+                  "type": "measure",
+                  "description": "the two words agreed in both browsers 1875, 3886, 3884 ms after the bursts (bound 5000 ms on the blob tier); ops POSTs 7; final A \"pa3pb3pb2pa2pa1pb1end\""
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 42846,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:44:49.352Z",
+                  "annotations": [
+                    {
+                      "type": "tier",
+                      "description": "blob, bound 5000 ms"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "the two words agreed in both browsers 1875, 3886, 3884 ms after the bursts (bound 5000 ms on the blob tier); ops POSTs 7; final A \"pa3pb3pb2pa2pa1pb1end\""
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-6e046a633e356b85eb43",
+          "file": "core/sync.spec.ts",
+          "line": 659,
+          "column": 1
+        },
+        {
+          "title": "sync.structural.concurrent: A and B each drag one block (pos.set on the same block) within 200 ms; both browsers show one position within 3 s on the memory tier and 5 s on the blob tier (the block row's split: two drags each make up to two commits, which the blob tier spaces a second apart on one instance and delivers by the 2 s pulse tick). Then A moves a block while B deletes its slide within 200 ms; the loser reads the reducer's sentence in its reject card and both browsers show the slide gone within 5 s",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "tier",
+                  "description": "blob, bound 5000 ms"
+                },
+                {
+                  "type": "measure",
+                  "description": "two drags: before {\"x\":200,\"y\":400,\"w\":480,\"h\":120,\"z\":3}, A {\"x\":203,\"y\":574,\"w\":480,\"h\":120,\"z\":3}, B {\"x\":203,\"y\":574,\"w\":480,\"h\":120,\"z\":3}, one position within 5000 ms true (agreed 4919 ms after the drags)"
+                },
+                {
+                  "type": "measure",
+                  "description": "slide gone in both within 5 s true (3239 ms); A's reject card \"A change was not appliedNo slide \"split-1\"Object changedDetails[ { \"op\": \"block.set\", \"slideId\": \"split-1\", \"blockId\": \"sync-doomed\", \"path\": \"/pos\", \"value\": {\""
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 40975,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:45:32.202Z",
+                  "annotations": [
+                    {
+                      "type": "tier",
+                      "description": "blob, bound 5000 ms"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "two drags: before {\"x\":200,\"y\":400,\"w\":480,\"h\":120,\"z\":3}, A {\"x\":203,\"y\":574,\"w\":480,\"h\":120,\"z\":3}, B {\"x\":203,\"y\":574,\"w\":480,\"h\":120,\"z\":3}, one position within 5000 ms true (agreed 4919 ms after the drags)"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "slide gone in both within 5 s true (3239 ms); A's reject card \"A change was not appliedNo slide \"split-1\"Object changedDetails[ { \"op\": \"block.set\", \"slideId\": \"split-1\", \"blockId\": \"sync-doomed\", \"path\": \"/pos\", \"value\": {\""
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-ca3a943b13477522c46b",
+          "file": "core/sync.spec.ts",
+          "line": 762,
+          "column": 1
+        },
+        {
+          "title": "sync.block.offline-replay-converges: A offline 20 s, B types three words into a body block, A types one, A back; both browsers read all four words within 10 s and A's resend carries the shifted offset",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "measure",
+                  "description": "converged true 6919 ms after the reconnect; A's splice offset 18 first, 30 on the admitted POST; A \"Start of the block ob1 ob2 ob3 oa1\""
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 53630,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:46:13.182Z",
+                  "annotations": [
+                    {
+                      "type": "measure",
+                      "description": "converged true 6919 ms after the reconnect; A's splice offset 18 first, 30 on the admitted POST; A \"Start of the block ob1 ob2 ob3 oa1\""
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-cafae7066ea9cffabb5e",
+          "file": "core/sync.spec.ts",
+          "line": 908,
+          "column": 1
+        },
+        {
+          "title": "sync.viewer.live-updates: C, a viewer, reads A's word within 5 s of the keystroke with no reload, three times of three",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "C joined through",
+                  "description": "the /s/ link of share.setGeneralAccess, which landed on /deck/<id>, then /edit/<id>"
+                },
+                {
+                  "type": "C role",
+                  "description": "viewer"
+                },
+                {
+                  "type": "measure",
+                  "description": "C read the words in 2054, 3061, 2072 ms"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 34665,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:47:06.817Z",
+                  "annotations": [
+                    {
+                      "type": "C joined through",
+                      "description": "the /s/ link of share.setGeneralAccess, which landed on /deck/<id>, then /edit/<id>"
+                    },
+                    {
+                      "type": "C role",
+                      "description": "viewer"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "C read the words in 2054, 3061, 2072 ms"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-7d4c7ed6d3f7a29392bc",
+          "file": "core/sync.spec.ts",
+          "line": 980,
+          "column": 1
+        },
+        {
+          "title": "sync.reload.same-document: After the rows above A, B and C reload together and read byte equal documents at the live revision within 5 s",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "C joined through",
+                  "description": "the /s/ link of share.setGeneralAccess, which landed on /deck/<id>, then /edit/<id>"
+                },
+                {
+                  "type": "C role",
+                  "description": "viewer"
+                },
+                {
+                  "type": "measure",
+                  "description": "reloads 1687, 2700, 2699 ms; revisions 5, 5, 5 against the live 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 45316,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:47:41.487Z",
+                  "annotations": [
+                    {
+                      "type": "C joined through",
+                      "description": "the /s/ link of share.setGeneralAccess, which landed on /deck/<id>, then /edit/<id>"
+                    },
+                    {
+                      "type": "C role",
+                      "description": "viewer"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "reloads 1687, 2700, 2699 ms; revisions 5, 5, 5 against the live 5"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-b903fa3cf38d4fb2f6c2",
+          "file": "core/sync.spec.ts",
+          "line": 1041,
+          "column": 1
+        },
+        {
+          "title": "sync.undo.after-remote: A types a word into a body block, B inserts a word before it in the same block, A presses Undo; A's word alone leaves both browsers within 5 s and B's stays, three of three",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 46811,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:48:26.808Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-c2fc7a4e67a18ae3825e",
+          "file": "core/sync.spec.ts",
+          "line": 1106,
+          "column": 1
+        },
+        {
+          "title": "sync.resend.idempotent: A's POST is committed and its answer dropped by the driver (page.route aborts the response once); the resend under the same op ids is admitted once, B reads the word once, and deck.info shows one record whose origin.opIds names A's op",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "measure",
+                  "description": "dropped answer status 200; POSTs carrying the dropped op ids 1; records after 2: 1 (0 with origin)"
+                },
+                {
+                  "type": "skip",
+                  "description": "not on this build: the version record carries no origin (docs/SYNC.md 3.2, B3); the word landed once in both browsers",
+                  "location": {
+                    "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts",
+                    "line": 1221,
+                    "column": 12
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 21413,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T12:49:13.623Z",
+                  "annotations": [
+                    {
+                      "type": "measure",
+                      "description": "dropped answer status 200; POSTs carrying the dropped op ids 1; records after 2: 1 (0 with origin)"
+                    },
+                    {
+                      "type": "skip",
+                      "description": "not on this build: the version record carries no origin (docs/SYNC.md 3.2, B3); the word landed once in both browsers",
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts",
+                        "line": 1221,
+                        "column": 12
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "9665879b6dd06692a514-d52c87531ec3cc26104a",
+          "file": "core/sync.spec.ts",
+          "line": 1163,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-22T12:38:18.005Z",
+    "duration": 677142.132,
+    "expected": 21,
+    "skipped": 1,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}

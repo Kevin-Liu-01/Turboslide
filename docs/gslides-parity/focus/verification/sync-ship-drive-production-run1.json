@@ -1,0 +1,1246 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-22T11:00:36.365Z",
+  "rows": {
+    "title-concurrent": {
+      "rounds": [
+        {
+          "round": 1,
+          "pair1": [
+            " ca1",
+            " cb1"
+          ],
+          "pair2": [
+            " da1",
+            " db1"
+          ],
+          "pair1BothOpen": {
+            "ok": true,
+            "msAfterTyping": 3698,
+            "A": "Verifier drive cb1 ca1",
+            "B": "Verifier drive cb1 ca1",
+            "bStartedAfterA": 74
+          },
+          "afterEscape": {
+            "ok": true,
+            "msAfterEscape": 4399,
+            "A": "Verifier drive cb1 ca1 db1 da1",
+            "B": "Verifier drive cb1 ca1 db1 da1"
+          },
+          "stays": {
+            "ok": true,
+            "A": "Verifier drive cb1 ca1 db1 da1",
+            "B": "Verifier drive cb1 ca1 db1 da1"
+          },
+          "firstSeen": {
+            " ca1": {
+              "A": -44,
+              "B": 3623
+            },
+            " cb1": {
+              "A": 2300,
+              "B": -44
+            },
+            " da1": {
+              "A": -118,
+              "B": 4654
+            },
+            " db1": {
+              "A": 2518,
+              "B": -16
+            }
+          },
+          "intact": {
+            " ca1": {
+              "A": 1,
+              "B": 1
+            },
+            " cb1": {
+              "A": 1,
+              "B": 1
+            },
+            " da1": {
+              "A": 1,
+              "B": 1
+            },
+            " db1": {
+              "A": 1,
+              "B": 1
+            }
+          },
+          "pass": true
+        },
+        {
+          "round": 2,
+          "pair1": [
+            " ca2",
+            " cb2"
+          ],
+          "pair2": [
+            " da2",
+            " db2"
+          ],
+          "pair1BothOpen": {
+            "ok": true,
+            "msAfterTyping": 4496,
+            "A": "Verifier drive cb1 ca1 db1 da1 cb2 ca2",
+            "B": "Verifier drive cb1 ca1 db1 da1 cb2 ca2",
+            "bStartedAfterA": 34
+          },
+          "afterEscape": {
+            "ok": true,
+            "msAfterEscape": 3609,
+            "A": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2",
+            "B": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2"
+          },
+          "stays": {
+            "ok": true,
+            "A": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2",
+            "B": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2"
+          },
+          "firstSeen": {
+            " ca2": {
+              "A": -15,
+              "B": 4563
+            },
+            " cb2": {
+              "A": 696,
+              "B": -15
+            },
+            " da2": {
+              "A": -81,
+              "B": 937
+            },
+            " db2": {
+              "A": 3789,
+              "B": 21
+            }
+          },
+          "intact": {
+            " ca2": {
+              "A": 1,
+              "B": 1
+            },
+            " cb2": {
+              "A": 1,
+              "B": 1
+            },
+            " da2": {
+              "A": 1,
+              "B": 1
+            },
+            " db2": {
+              "A": 1,
+              "B": 1
+            }
+          },
+          "pass": true
+        },
+        {
+          "round": 3,
+          "pair1": [
+            " ca3",
+            " cb3"
+          ],
+          "pair2": [
+            " da3",
+            " db3"
+          ],
+          "pair1BothOpen": {
+            "ok": true,
+            "msAfterTyping": 3476,
+            "A": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2 ca3 cb3",
+            "B": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2 ca3 cb3",
+            "bStartedAfterA": 97
+          },
+          "afterEscape": {
+            "ok": true,
+            "msAfterEscape": 3323,
+            "A": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2 ca3 cb3 da3 db3",
+            "B": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2 ca3 cb3 da3 db3"
+          },
+          "stays": {
+            "ok": true,
+            "A": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2 ca3 cb3 da3 db3",
+            "B": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2 ca3 cb3 da3 db3"
+          },
+          "firstSeen": {
+            " ca3": {
+              "A": -85,
+              "B": 1134
+            },
+            " cb3": {
+              "A": 3475,
+              "B": 17
+            },
+            " da3": {
+              "A": -32,
+              "B": 1184
+            },
+            " db3": {
+              "A": 3526,
+              "B": -32
+            }
+          },
+          "intact": {
+            " ca3": {
+              "A": 1,
+              "B": 1
+            },
+            " cb3": {
+              "A": 1,
+              "B": 1
+            },
+            " da3": {
+              "A": 1,
+              "B": 1
+            },
+            " db3": {
+              "A": 1,
+              "B": 1
+            }
+          },
+          "pass": true
+        }
+      ],
+      "pass": true,
+      "titleTravelledAs": "text.splice",
+      "seconds": 48
+    },
+    "title-offline": {
+      "kind": "title",
+      "run": "heading/text",
+      "aPendingWhileOffline": 1,
+      "aOfflineFlag": true,
+      "converged": {
+        "ok": true,
+        "msAfterReconnect": 2800,
+        "A": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2 ca3 cb3 da3 db3 ob1 ob2 ob3 oa1",
+        "B": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2 ca3 cb3 da3 db3 ob1 ob2 ob3 oa1"
+      },
+      "final": {
+        "A": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2 ca3 cb3 da3 db3 ob1 ob2 ob3 oa1",
+        "B": "Verifier drive cb1 ca1 db1 da1 cb2 ca2 da2 db2 ca3 cb3 da3 db3 ob1 ob2 ob3 oa1",
+        "equal": true,
+        "fourOnce": true
+      },
+      "aSpliceOffsetFirst": 62,
+      "aSpliceOffsetAdmitted": 62,
+      "aFirstAttemptStatus": "no response",
+      "pass": true,
+      "seconds": 24
+    },
+    "block-concurrent": {
+      "rounds": [
+        {
+          "round": 1,
+          "words": [
+            "pa1",
+            "pb1"
+          ],
+          "sameWithin3s": {
+            "ok": true,
+            "msAfterTyping": 2054,
+            "A": "pa1pb1end",
+            "B": "pa1pb1end",
+            "bStartedAfterA": 51
+          },
+          "repairSplices": 0,
+          "firstSeen": {
+            "pa1": {
+              "A": -63,
+              "B": 1254
+            },
+            "pb1": {
+              "A": 2068,
+              "B": 38
+            }
+          },
+          "final": {
+            "A": "pa1pb1end",
+            "B": "pa1pb1end",
+            "equal": true
+          },
+          "pass": true
+        },
+        {
+          "round": 2,
+          "words": [
+            "pa2",
+            "pb2"
+          ],
+          "sameWithin3s": {
+            "ok": true,
+            "msAfterTyping": 1847,
+            "A": "pb2pa2pa1pb1end",
+            "B": "pb2pa2pa1pb1end",
+            "bStartedAfterA": 62
+          },
+          "repairSplices": 0,
+          "firstSeen": {
+            "pa2": {
+              "A": -77,
+              "B": 1846
+            },
+            "pb2": {
+              "A": 1846,
+              "B": 24
+            }
+          },
+          "final": {
+            "A": "pb2pa2pa1pb1end",
+            "B": "pb2pa2pa1pb1end",
+            "equal": true
+          },
+          "pass": true
+        },
+        {
+          "round": 3,
+          "words": [
+            "pa3",
+            "pb3"
+          ],
+          "sameWithin3s": {
+            "ok": false,
+            "msAfterTyping": 3082,
+            "A": "pa3pb2pa2pa1pb1end",
+            "B": "pa3pb3pb2pa2pa1pb1end",
+            "bStartedAfterA": 25
+          },
+          "sameLater": {
+            "ok": true,
+            "msAfterTyping": 4517,
+            "A": "pa3pb3pb2pa2pa1pb1end",
+            "B": "pa3pb3pb2pa2pa1pb1end"
+          },
+          "repairSplices": 0,
+          "firstSeen": {
+            "pa3": {
+              "A": -58,
+              "B": 2583
+            },
+            "pb3": {
+              "A": 4516,
+              "B": -58
+            }
+          },
+          "final": {
+            "A": "pa3pb3pb2pa2pa1pb1end",
+            "B": "pa3pb3pb2pa2pa1pb1end",
+            "equal": true
+          },
+          "pass": false
+        }
+      ],
+      "pass": false,
+      "seconds": 23
+    },
+    "block-offline": {
+      "kind": "block",
+      "run": "verifier-body/text",
+      "aPendingWhileOffline": 1,
+      "aOfflineFlag": true,
+      "converged": {
+        "ok": true,
+        "msAfterReconnect": 5400,
+        "A": "pa3pb3pb2pa2pa1pb1end ob1 ob2 ob3 oa1",
+        "B": "pa3pb3pb2pa2pa1pb1end ob1 ob2 ob3 oa1"
+      },
+      "final": {
+        "A": "pa3pb3pb2pa2pa1pb1end ob1 ob2 ob3 oa1",
+        "B": "pa3pb3pb2pa2pa1pb1end ob1 ob2 ob3 oa1",
+        "equal": true,
+        "fourOnce": true
+      },
+      "aSpliceOffsetFirst": 21,
+      "aSpliceOffsetAdmitted": 33,
+      "aFirstAttemptStatus": "no response",
+      "pass": true,
+      "seconds": 25
+    }
+  },
+  "wire": [
+    {
+      "who": "A",
+      "at": 11843,
+      "base": 1,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 14,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 503,
+      "ms": 670,
+      "admitted": null
+    },
+    {
+      "who": "B",
+      "at": 11921,
+      "base": 1,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 14,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 1082,
+      "admitted": [
+        2
+      ]
+    },
+    {
+      "who": "A",
+      "at": 13517,
+      "base": 1,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 14,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 493,
+      "admitted": [
+        3
+      ]
+    },
+    {
+      "who": "A",
+      "at": 17213,
+      "base": 3,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 22,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 4093,
+      "admitted": [
+        5
+      ]
+    },
+    {
+      "who": "B",
+      "at": 17293,
+      "base": 3,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 22,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 591,
+      "admitted": [
+        4
+      ]
+    },
+    {
+      "who": "A",
+      "at": 28211,
+      "base": 5,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:3"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 30,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 2245,
+      "admitted": [
+        7
+      ]
+    },
+    {
+      "who": "B",
+      "at": 28248,
+      "base": 5,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:3"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 30,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 482,
+      "admitted": [
+        6
+      ]
+    },
+    {
+      "who": "A",
+      "at": 34121,
+      "base": 7,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:4"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 38,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 432,
+      "admitted": [
+        8
+      ]
+    },
+    {
+      "who": "B",
+      "at": 34213,
+      "base": 7,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:4"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 38,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 1779,
+      "admitted": [
+        9
+      ]
+    },
+    {
+      "who": "A",
+      "at": 44985,
+      "base": 9,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:5"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 46,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 458,
+      "admitted": [
+        10
+      ]
+    },
+    {
+      "who": "B",
+      "at": 45080,
+      "base": 9,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:5"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 46,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 1671,
+      "admitted": [
+        11
+      ]
+    },
+    {
+      "who": "A",
+      "at": 49790,
+      "base": 11,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 54,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 428,
+      "admitted": [
+        12
+      ]
+    },
+    {
+      "who": "B",
+      "at": 49809,
+      "base": 11,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 54,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 1715,
+      "admitted": [
+        13
+      ]
+    },
+    {
+      "who": "B",
+      "at": 60035,
+      "base": 13,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:7"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 62,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 563,
+      "admitted": [
+        14
+      ]
+    },
+    {
+      "who": "B",
+      "at": 62793,
+      "base": 14,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:8"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 66,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 468,
+      "admitted": [
+        15
+      ]
+    },
+    {
+      "who": "A",
+      "at": 63269,
+      "base": 13,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:7"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 62,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "admitted": null
+    },
+    {
+      "who": "A",
+      "at": 63772,
+      "base": 13,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:7"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 62,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "admitted": null
+    },
+    {
+      "who": "A",
+      "at": 64776,
+      "base": 13,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:7"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 62,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "admitted": null
+    },
+    {
+      "who": "B",
+      "at": 65546,
+      "base": 15,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:9"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 70,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 481,
+      "admitted": [
+        16
+      ]
+    },
+    {
+      "who": "A",
+      "at": 66779,
+      "base": 13,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:7"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 62,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "admitted": null
+    },
+    {
+      "who": "A",
+      "at": 70783,
+      "base": 13,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:7"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 62,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "admitted": null
+    },
+    {
+      "who": "A",
+      "at": 78786,
+      "base": 13,
+      "opIds": [
+        "60d926dc92d867f0bce0f20553310e9d:7"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 62,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 930,
+      "admitted": [
+        17
+      ]
+    },
+    {
+      "who": "A",
+      "at": 82939,
+      "base": 17,
+      "opIds": [
+        "42658688b924279a0fac2d0e25ce0120:8"
+      ],
+      "mutations": [
+        {
+          "op": "slide.replace"
+        },
+        {
+          "op": "block.insert"
+        }
+      ],
+      "status": 200,
+      "ms": 405,
+      "admitted": [
+        18
+      ]
+    },
+    {
+      "who": "A",
+      "at": 89010,
+      "base": 18,
+      "opIds": [
+        "42658688b924279a0fac2d0e25ce0120:9"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 0,
+          "remove": 0,
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 487,
+      "admitted": [
+        19
+      ]
+    },
+    {
+      "who": "B",
+      "at": 89060,
+      "base": 18,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:10"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 0,
+          "remove": 0,
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 1868,
+      "admitted": [
+        20
+      ]
+    },
+    {
+      "who": "A",
+      "at": 96563,
+      "base": 20,
+      "opIds": [
+        "42658688b924279a0fac2d0e25ce0120:10"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 2,
+          "remove": 0,
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 446,
+      "admitted": [
+        21
+      ]
+    },
+    {
+      "who": "B",
+      "at": 96623,
+      "base": 20,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:11"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 1,
+          "remove": 0,
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 1647,
+      "admitted": [
+        22
+      ]
+    },
+    {
+      "who": "A",
+      "at": 102723,
+      "base": 22,
+      "opIds": [
+        "42658688b924279a0fac2d0e25ce0120:11"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 1,
+          "remove": 0,
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 981,
+      "admitted": [
+        23
+      ]
+    },
+    {
+      "who": "B",
+      "at": 102751,
+      "base": 22,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:12"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 2,
+          "remove": 0,
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 2387,
+      "admitted": [
+        24
+      ]
+    },
+    {
+      "who": "B",
+      "at": 110902,
+      "base": 24,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:13"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 21,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 584,
+      "admitted": [
+        25
+      ]
+    },
+    {
+      "who": "B",
+      "at": 113669,
+      "base": 25,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:14"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 25,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 595,
+      "admitted": [
+        26
+      ]
+    },
+    {
+      "who": "A",
+      "at": 114154,
+      "base": 24,
+      "opIds": [
+        "42658688b924279a0fac2d0e25ce0120:12"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 21,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "admitted": null
+    },
+    {
+      "who": "A",
+      "at": 114657,
+      "base": 24,
+      "opIds": [
+        "42658688b924279a0fac2d0e25ce0120:12"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 21,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "admitted": null
+    },
+    {
+      "who": "A",
+      "at": 115659,
+      "base": 24,
+      "opIds": [
+        "42658688b924279a0fac2d0e25ce0120:12"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 21,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "admitted": null
+    },
+    {
+      "who": "B",
+      "at": 116433,
+      "base": 26,
+      "opIds": [
+        "23f9d4360c7d73ff67e115658abcc4a5:15"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 29,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 443,
+      "admitted": [
+        27
+      ]
+    },
+    {
+      "who": "A",
+      "at": 117662,
+      "base": 24,
+      "opIds": [
+        "42658688b924279a0fac2d0e25ce0120:12"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 21,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "admitted": null
+    },
+    {
+      "who": "A",
+      "at": 121664,
+      "base": 24,
+      "opIds": [
+        "42658688b924279a0fac2d0e25ce0120:12"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 21,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "admitted": null
+    },
+    {
+      "who": "A",
+      "at": 129666,
+      "base": 24,
+      "opIds": [
+        "42658688b924279a0fac2d0e25ce0120:12"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 21,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": "no response",
+      "ms": null,
+      "admitted": null
+    },
+    {
+      "who": "A",
+      "at": 133428,
+      "base": 27,
+      "opIds": [
+        "7ce0776824fac466a54f9036fb9d3b94:13"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "verifier-body",
+          "at": 33,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 747,
+      "admitted": [
+        28
+      ]
+    }
+  ],
+  "deck": "untitled-20260922-e210",
+  "tier": "blob",
+  "teardown": {
+    "trashed": "deck.trash through the window API (base 28)",
+    "removed": "deck.remove through the window API (base 28)",
+    "edit": 404,
+    "deckInfo": "revision 28",
+    "gone": true
+  },
+  "notes": [],
+  "endedAt": "2026-09-22T11:03:15.770Z"
+}

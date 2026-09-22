@@ -1,0 +1,315 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-22T12:38:17.811Z",
+  "ms": 677350,
+  "parked": {
+    "commit": "7ea3db9",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "collab.roster.go-to-slide",
+        "parks": [
+          "title.presence.goTo"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 677348,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship/gate-production-rerun/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "rows": 24,
+  "passed": 21,
+  "failed": 2,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "commit": "667772f",
+  "origin": "https://turboslide.vercel.app",
+  "date": "2026-09-22",
+  "results": {
+    "images.insert.first-on-new-deck": "passed",
+    "images.insert.upload": "passed",
+    "images.insert.upload-while-pending": "passed",
+    "images.insert.drop": "passed",
+    "images.insert.paste": "passed",
+    "images.replace.upload": "failed",
+    "images.replace.drop-on-picture": "passed",
+    "images.background.upload-picture": "passed",
+    "images.background.remove-picture": "passed",
+    "images.insert.centred-in-body": "passed",
+    "images.insert.instant-preview": "passed",
+    "images.insert.menu-direct": "passed",
+    "images.upload.failure-snackbar": "passed",
+    "images.insert.by-url": "passed",
+    "sync.serial.order-and-latency": "passed",
+    "sync.title.concurrent-both-kept": "failed",
+    "sync.title.offline-both-kept": "passed",
+    "sync.block.concurrent-same-offset-order": "passed",
+    "sync.structural.concurrent": "passed",
+    "sync.block.offline-replay-converges": "passed",
+    "sync.viewer.live-updates": "passed",
+    "sync.reload.same-document": "passed",
+    "sync.undo.after-remote": "passed",
+    "sync.resend.idempotent": "not driven"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "images.replace.upload",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "sync.title.concurrent-both-kept",
+        "feature": "sync",
+        "result": "failed"
+      },
+      {
+        "id": "sync.resend.idempotent",
+        "feature": "sync",
+        "result": "not driven"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "images.replace.upload",
+      "feature": "images",
+      "result": "failed"
+    },
+    {
+      "id": "sync.title.concurrent-both-kept",
+      "feature": "sync",
+      "result": "failed"
+    },
+    {
+      "id": "sync.resend.idempotent",
+      "feature": "sync",
+      "result": "not driven"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "images.insert.first-on-new-deck",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.upload",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.upload-while-pending",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.drop",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.paste",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.replace.upload",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "images.background.upload-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.background.remove-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.replace.drop-on-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.centred-in-body",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.instant-preview",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.menu-direct",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.upload.failure-snackbar",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.by-url",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.serial.order-and-latency",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.title.concurrent-both-kept",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: both words in both browsers in every round of three"
+    },
+    {
+      "id": "sync.title.offline-both-kept",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.block.concurrent-same-offset-order",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.structural.concurrent",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.block.offline-replay-converges",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.viewer.live-updates",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.reload.same-document",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.undo.after-remote",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.resend.idempotent",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: the version record carries no origin (docs/SYNC.md 3.2, B3); the word landed once in both browsers"
+    }
+  ]
+}

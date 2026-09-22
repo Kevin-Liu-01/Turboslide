@@ -1,0 +1,229 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-22T10:55:11.224Z",
+  "minutes": 3,
+  "samples": [
+    {
+      "atS": 30,
+      "status": 200,
+      "ms": 491,
+      "storeCalls": {
+        "head": 10,
+        "get": 3,
+        "put": 3,
+        "list": 0,
+        "del": 0,
+        "windowMs": 60000,
+        "instance": "020d7bd8",
+        "lists": {
+          "versions": 0,
+          "snapshots": 0,
+          "assets": 0,
+          "thumbs": 0,
+          "presence": 0,
+          "deck": 0,
+          "other": 0
+        }
+      },
+      "revision": 1,
+      "tier": "blob"
+    },
+    {
+      "atS": 60,
+      "status": 200,
+      "ms": 187,
+      "storeCalls": {
+        "head": 12,
+        "get": 6,
+        "put": 0,
+        "list": 0,
+        "del": 0,
+        "windowMs": 60000,
+        "instance": "0f9d04b5",
+        "lists": {
+          "versions": 0,
+          "snapshots": 0,
+          "assets": 0,
+          "thumbs": 0,
+          "presence": 0,
+          "deck": 0,
+          "other": 0
+        }
+      },
+      "revision": 1,
+      "tier": "blob"
+    },
+    {
+      "atS": 90,
+      "status": 200,
+      "ms": 325,
+      "storeCalls": {
+        "head": 4,
+        "get": 2,
+        "put": 0,
+        "list": 0,
+        "del": 0,
+        "windowMs": 60000,
+        "instance": "201c2a68",
+        "lists": {
+          "versions": 0,
+          "snapshots": 0,
+          "assets": 0,
+          "thumbs": 0,
+          "presence": 0,
+          "deck": 0,
+          "other": 0
+        }
+      },
+      "revision": 1,
+      "tier": "blob"
+    },
+    {
+      "atS": 120,
+      "status": 200,
+      "ms": 204,
+      "storeCalls": {
+        "head": 10,
+        "get": 3,
+        "put": 3,
+        "list": 0,
+        "del": 0,
+        "windowMs": 60000,
+        "instance": "153ba00d",
+        "lists": {
+          "versions": 0,
+          "snapshots": 0,
+          "assets": 0,
+          "thumbs": 0,
+          "presence": 0,
+          "deck": 0,
+          "other": 0
+        }
+      },
+      "revision": 1,
+      "tier": "blob"
+    },
+    {
+      "atS": 150,
+      "status": 200,
+      "ms": 287,
+      "storeCalls": {
+        "head": 11,
+        "get": 3,
+        "put": 3,
+        "list": 0,
+        "del": 0,
+        "windowMs": 60000,
+        "instance": "153ba00d",
+        "lists": {
+          "versions": 0,
+          "snapshots": 0,
+          "assets": 0,
+          "thumbs": 0,
+          "presence": 0,
+          "deck": 0,
+          "other": 0
+        }
+      },
+      "revision": 1,
+      "tier": "blob"
+    },
+    {
+      "atS": 180,
+      "status": 200,
+      "ms": 291,
+      "storeCalls": {
+        "head": 4,
+        "get": 2,
+        "put": 0,
+        "list": 0,
+        "del": 0,
+        "windowMs": 60000,
+        "instance": "25df1afd",
+        "lists": {
+          "versions": 0,
+          "snapshots": 0,
+          "assets": 0,
+          "thumbs": 0,
+          "presence": 0,
+          "deck": 0,
+          "other": 0
+        }
+      },
+      "revision": 1,
+      "tier": "blob"
+    }
+  ],
+  "requests": {
+    "/api/decks/<id>/presence": 20,
+    "/_serverFn/*": 9
+  },
+  "deck": "untitled-20260922-8e3m",
+  "tier": "blob",
+  "teardown": {
+    "trashed": 200,
+    "removed": 200,
+    "edit": 404,
+    "gone": true
+  },
+  "connectedAtStart": true,
+  "connectedAtEnd": true,
+  "functionRequestsInWindow": 29,
+  "functionRequestsPerMinute": 9.67,
+  "storeCallsMaxPerInstance": {
+    "020d7bd8": {
+      "head": 10,
+      "get": 3,
+      "put": 3,
+      "list": 0,
+      "del": 0,
+      "samples": 1
+    },
+    "0f9d04b5": {
+      "head": 12,
+      "get": 6,
+      "put": 0,
+      "list": 0,
+      "del": 0,
+      "samples": 1
+    },
+    "201c2a68": {
+      "head": 4,
+      "get": 2,
+      "put": 0,
+      "list": 0,
+      "del": 0,
+      "samples": 1
+    },
+    "153ba00d": {
+      "head": 11,
+      "get": 3,
+      "put": 3,
+      "list": 0,
+      "del": 0,
+      "samples": 2
+    },
+    "25df1afd": {
+      "head": 4,
+      "get": 2,
+      "put": 0,
+      "list": 0,
+      "del": 0,
+      "samples": 1
+    }
+  },
+  "deckInfoCounts": {
+    "slides": 1,
+    "sections": 1,
+    "assets": 4,
+    "htmlBlocks": 0,
+    "skipped": 0,
+    "canvas": 0,
+    "charts": 0,
+    "guides": 0,
+    "snapshots": 2,
+    "records": 1,
+    "holes": 0
+  },
+  "endedAt": "2026-09-22T10:58:24.120Z"
+}

@@ -1,0 +1,17 @@
+{
+  "commit": "7ea3db9",
+  "renderedFrom": [
+    "docs/gslides-parity/focus/verification/gate-preview-sync-ship.json",
+    "docs/gslides-parity/focus/verification/gate-preview-sync-ship-rerun.json"
+  ],
+  "rule": "docs/PRODUCT.md 8.2 and docs/RETURN.md section 1 rule 2: parkedFeaturesOf over the last readings of the enforce preview of record https://turboslide-eiyqlolll-kl01s-projects.vercel.app (the ship step's whole run with its rerun once of the four spec files red by the blob tier's timing laid over it); a feature or a row red in that reading stays parked and the rows that differ between the runs are flaky and are not listed (docs/gslides-parity/sync/build/ship.md sections 5 and 7); the assist is not parked for its quota row, which PRODUCT.md 8.2 exempts as the environment's; the roster's Go to slide row is kept from the product round's list because its control still carries the advanced flag in the chrome's menu model although the row read green in every run of this ship (ship.md section 7); the list is the product round's ship-b22ffa0.json unchanged",
+  "parkedFeatures": ["inbox", "templates"],
+  "parkedRows": [
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": ["view.livePointers.mine", "view.livePointers.collaborators"]
+    },
+    { "id": "versions.show-changes-marks", "parks": ["file.versionHistory.showChanges"] },
+    { "id": "collab.roster.go-to-slide", "parks": ["title.presence.goTo"] }
+  ]
+}

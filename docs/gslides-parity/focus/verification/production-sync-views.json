@@ -1,0 +1,74 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deck": "untitled-20260922-dfqm",
+  "startedAt": "2026-09-22T11:06:59.204Z",
+  "shots": [
+    "production-sync-title-row-1440-light.jpg",
+    "production-sync-history-1440-light.jpg",
+    "production-sync-title-row-1440-dark.jpg",
+    "production-sync-history-1440-dark.jpg"
+  ],
+  "steps": [
+    {
+      "name": "draft on /new",
+      "observed": "id untitled-20260922-dfqm",
+      "at": "2026-09-22T11:07:02.064Z"
+    },
+    {
+      "name": "first write",
+      "observed": "address /edit/untitled-20260922-dfqm; revision 1",
+      "at": "2026-09-22T11:07:07.837Z"
+    },
+    {
+      "name": "appearance light",
+      "observed": "data-theme light",
+      "at": "2026-09-22T11:07:08.995Z"
+    },
+    {
+      "name": "title row 1440-light",
+      "observed": "clip 1440 by 46",
+      "at": "2026-09-22T11:07:09.018Z"
+    },
+    {
+      "name": "history panel 1440-light",
+      "observed": "the panel open with 1 row(s)",
+      "at": "2026-09-22T11:07:11.081Z"
+    },
+    {
+      "name": "appearance dark",
+      "observed": "data-theme dark",
+      "at": "2026-09-22T11:07:12.651Z"
+    },
+    {
+      "name": "title row 1440-dark",
+      "observed": "clip 1440 by 46",
+      "at": "2026-09-22T11:07:12.668Z"
+    },
+    {
+      "name": "history panel 1440-dark",
+      "observed": "the panel open with 1 row(s)",
+      "at": "2026-09-22T11:07:14.728Z"
+    },
+    {
+      "name": "appearance match",
+      "observed": "data-theme light",
+      "at": "2026-09-22T11:07:16.192Z"
+    },
+    {
+      "name": "teardown error",
+      "observed": "page.evaluate: TypeError: deck.trash: invalid input at /baseRevision: Invalid input: expected number, received undefined\n    at Object.dispatch (https://turboslide.vercel.app/assets/SlideList-CFIGTEMw.js:1:1355)\n    at Rt (https://turboslide.vercel.app/assets/EditorRoot-v5sObmSf.js:24:33109)\n    at ",
+      "at": "2026-09-22T11:07:16.193Z"
+    },
+    {
+      "name": "teardown through the actions API",
+      "observed": "untitled-20260922-dfqm trashed and deleted forever with the bearer; /edit 404",
+      "at": "2026-09-22T11:07:30.000Z"
+    }
+  ],
+  "endedAt": "2026-09-22T11:07:16.193Z",
+  "teardown": {
+    "inScript": "deck.trash through the window API failed: the input needs baseRevision (the script omitted it)",
+    "throughTheApi": "deck.trash and deck.remove with the bearer at 2026-09-22T11:07:30Z: trash 200, remove 200, /edit/untitled-20260922-dfqm 404",
+    "gone": true
+  }
+}

@@ -485,4 +485,3 @@ describe('the table frame and the Edit data button (docs/FEATURES.md 2.1, 2.2 ra
     expect(openPanel).not.toHaveBeenCalled();
   });
 });
-

@@ -219,7 +219,8 @@ export function turboslideUserAgent(
 ): string {
   const version =
     env.TURBOSLIDE_VERSION?.trim() || env.VERCEL_GIT_COMMIT_SHA?.trim().slice(0, 7) || '0.0.0';
-  const origin = env.TURBOSLIDE_PUBLIC_ORIGIN?.trim().replace(/\/+$/, '') || 'https://turboslide.vercel.app';
+  const origin =
+    env.TURBOSLIDE_PUBLIC_ORIGIN?.trim().replace(/\/+$/, '') || 'https://turboslide.vercel.app';
   return `Turboslide/${version} (+${origin})`;
 }
 

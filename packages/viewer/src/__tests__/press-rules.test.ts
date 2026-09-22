@@ -285,9 +285,12 @@ describe('objectPressPlan on a table (docs/FEATURES.md 2.1: A1 rules 1 and 3 ame
   });
 
   it('keeps A1 as written for a table in a multiple selection, in a group, with a modifier or outside a cell', () => {
-    expect(
-      objectPressPlan({ ...editing, under: 'tbl', selected: ['tbl', 't1'], cell }),
-    ).toEqual({ action: 'press', blockId: 'tbl', select: false, drag: true });
+    expect(objectPressPlan({ ...editing, under: 'tbl', selected: ['tbl', 't1'], cell })).toEqual({
+      action: 'press',
+      blockId: 'tbl',
+      select: false,
+      drag: true,
+    });
     expect(
       objectPressPlan({ ...editing, under: 'tbl', selected: ['g1'], grouped: true, cell }),
     ).toEqual({ action: 'press', blockId: 'tbl', select: true, drag: true });

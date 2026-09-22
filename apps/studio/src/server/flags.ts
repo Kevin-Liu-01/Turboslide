@@ -82,7 +82,9 @@ export function logoUpstreamMode(
  * on production (docs/FEATURES.md section 8). A checkout's CLI accepts svg either way (SPEC-3 0.28).
  */
 export const SVG_RASTER_ENV = 'TURBOSLIDE_SVG_RASTER';
-export function svgRasterOn(env: Readonly<Record<string, string | undefined>> = process.env): boolean {
+export function svgRasterOn(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
   const value = env[SVG_RASTER_ENV]?.trim().toLowerCase();
   return value === '1' || value === 'true' || value === 'on';
 }

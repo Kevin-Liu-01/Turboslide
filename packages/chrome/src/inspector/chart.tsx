@@ -376,8 +376,16 @@ export function ChartSection({
     menu === null
       ? null
       : menu.row === 0
-        ? { kind: 'series' as const, index: menu.column - 1, name: block.series[menu.column - 1]?.name ?? '' }
-        : { kind: 'category' as const, index: menu.row - 1, name: block.categories[menu.row - 1] ?? '' };
+        ? {
+            kind: 'series' as const,
+            index: menu.column - 1,
+            name: block.series[menu.column - 1]?.name ?? '',
+          }
+        : {
+            kind: 'category' as const,
+            index: menu.row - 1,
+            name: block.categories[menu.row - 1] ?? '',
+          };
   const menuCanRemove =
     menuTarget !== null && (menuTarget.kind === 'series' ? columns > 1 : rows > 1);
 

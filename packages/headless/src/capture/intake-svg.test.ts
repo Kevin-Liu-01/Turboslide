@@ -15,7 +15,8 @@ import { CHECKOUT_INTAKE_POLICY, setIntakePolicy } from './shared.ts';
 
 const WIDE =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50"><script>alert(1)</script><rect width="200" height="50" fill="#0af"/></svg>';
-const TALL = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="20"><rect width="10" height="20" fill="#f00"/></svg>';
+const TALL =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="20"><rect width="10" height="20" fill="#f00"/></svg>';
 
 /** A stand in for the studio's sanitizer: drops `<script>` and names it, as logo-sanitize.ts does. */
 const sanitize = (bytes: Uint8Array): { svg: string; removed: string[] } => {
@@ -70,7 +71,10 @@ describe('addAsset with an svg (docs/FEATURES.md 4.7)', () => {
   test('hosted without the policy: the refusal line is the one it always had', async () => {
     const dataUrl = `data:image/svg+xml;base64,${Buffer.from(TALL).toString('base64')}`;
     await expect(
-      addAsset({ id: 'acme-2', file: dataUrl, role: 'logo', alt: 'x' }, { deckDir: dir, hosted: true, allowPaths: false }),
+      addAsset(
+        { id: 'acme-2', file: dataUrl, role: 'logo', alt: 'x' },
+        { deckDir: dir, hosted: true, allowPaths: false },
+      ),
     ).rejects.toThrow(/svg is not accepted here; send png, jpeg, webp or gif/);
   });
 
@@ -81,6 +85,8 @@ describe('addAsset with an svg (docs/FEATURES.md 4.7)', () => {
       { deckDir: dir, hosted: false, svgRaster: { sanitize } },
     );
     expect(result.asset.scale).toBe(1);
-    expect('neutral' in result.asset.twins && result.asset.twins.neutral.endsWith('.svg')).toBe(true);
+    expect('neutral' in result.asset.twins && result.asset.twins.neutral.endsWith('.svg')).toBe(
+      true,
+    );
   });
 });

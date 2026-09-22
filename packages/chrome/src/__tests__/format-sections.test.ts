@@ -203,4 +203,3 @@ describe('the leading section (docs/FEATURES.md 2.2 rank 13; docs/RETURN.md 2.5)
     expect(ids(block('heading'))).toEqual(FORMAT_SECTIONS.map((section) => section.id));
   });
 });
-

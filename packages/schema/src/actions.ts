@@ -4095,10 +4095,15 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       lastError: logoIndexErrorSchema.optional(),
       progress: logoIndexProgressSchema.optional(),
       source: z.literal('thesvg.org'),
-      indexed: z.number().int().nonnegative().describe('The marks the index holds in the collections searched'),
+      indexed: z
+        .number()
+        .int()
+        .nonnegative()
+        .describe('The marks the index holds in the collections searched'),
     }),
     cli: {
-      usage: 'turboslide logo search <query> --limit <limit> --kind <kind> --collection <collection>',
+      usage:
+        'turboslide logo search <query> --limit <limit> --kind <kind> --collection <collection>',
     },
     mcp: 'deck_logo_search',
     example: { query: 'figma', limit: 5 },
@@ -4121,7 +4126,9 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .describe(
           'default, mono, light, dark, wordmark, wordmarkLight or wordmarkDark; the appearance rule chooses when absent',
         ),
-      slideId: slugSchema.optional().describe('The slide the picture lands on; none stores the asset alone'),
+      slideId: slugSchema
+        .optional()
+        .describe('The slide the picture lands on; none stores the asset alone'),
       box: z
         .strictObject({
           x: z.number(),
@@ -4130,13 +4137,22 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
           h: z.number().positive(),
         })
         .optional()
-        .describe('The box in sheet px; the logo size in the free area of the body slot when absent'),
+        .describe(
+          'The box in sheet px; the logo size in the free area of the body slot when absent',
+        ),
       everySlide: z
         .boolean()
         .optional()
-        .describe('Use as this presentation’s logo on every slide: the kit’s mark and footer slots take the asset'),
-      kit: z.boolean().optional().describe('The brand kit’s logo slots alone, for the Brand kit panel'),
-      blockId: blockIdSchema.optional().describe('Replace image: the picture whose asset is swapped'),
+        .describe(
+          'Use as this presentation’s logo on every slide: the kit’s mark and footer slots take the asset',
+        ),
+      kit: z
+        .boolean()
+        .optional()
+        .describe('The brand kit’s logo slots alone, for the Brand kit panel'),
+      blockId: blockIdSchema
+        .optional()
+        .describe('Replace image: the picture whose asset is swapped'),
       baseRevision,
     }),
     output: z.strictObject({

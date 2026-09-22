@@ -356,7 +356,14 @@ export function objectPressPlan(input: {
   if (cell !== null && !input.grouped) {
     /* the one selected table: a tap moves the caret, a move selects a range */
     if (held && input.selected.length === 1)
-      return { action: 'press', blockId: under, select: false, drag: false, caret: cell, range: true };
+      return {
+        action: 'press',
+        blockId: under,
+        select: false,
+        drag: false,
+        caret: cell,
+        range: true,
+      };
     /* an unselected table: the press selects it and arms the drag; a tap places the caret */
     if (!held)
       return { action: 'press', blockId: under, select: true, drag: input.object, caret: cell };

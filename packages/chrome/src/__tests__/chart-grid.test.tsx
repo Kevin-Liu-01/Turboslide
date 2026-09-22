@@ -414,4 +414,3 @@ describe('the grid owns its keys and shows its remove controls (docs/FEATURES.md
     expect(cell(2, 1).getAttribute('aria-selected')).toBe('true');
   });
 });
-

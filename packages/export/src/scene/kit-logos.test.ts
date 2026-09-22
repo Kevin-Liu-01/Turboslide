@@ -71,7 +71,12 @@ describe('logoBlockIds', () => {
       plate: { blocks: [{ id: 'q1', type: 'picture', asset: 'figma' }] },
     } as unknown as Slide;
     expect([...logoBlockIds(opener, deck)]).toEqual(['q1']);
-    const bare = { kind: 'content', id: 'b', layout: { type: 'left-mid' }, slots: {} } as unknown as Slide;
+    const bare = {
+      kind: 'content',
+      id: 'b',
+      layout: { type: 'left-mid' },
+      slots: {},
+    } as unknown as Slide;
     expect(logoBlockIds(bare, deck).size).toBe(0);
   });
 });
@@ -79,15 +84,27 @@ describe('logoBlockIds', () => {
 describe('kitHasPictureLogo', () => {
   test('a picture in the title slot or the footer, with an asset; the GT mark and a missing asset are none', () => {
     expect(kitHasPictureLogo({ brand: undefined })).toBe(false);
-    expect(kitHasPictureLogo({ brand: { mark: { kind: 'default' } } } as Pick<Deck, 'brand'>)).toBe(false);
-    expect(kitHasPictureLogo({ brand: { mark: { kind: 'picture' } } } as Pick<Deck, 'brand'>)).toBe(false);
+    expect(kitHasPictureLogo({ brand: { mark: { kind: 'default' } } } as Pick<Deck, 'brand'>)).toBe(
+      false,
+    );
+    expect(kitHasPictureLogo({ brand: { mark: { kind: 'picture' } } } as Pick<Deck, 'brand'>)).toBe(
+      false,
+    );
     expect(
-      kitHasPictureLogo({ brand: { mark: { kind: 'picture', assetId: 'figma' } } } as Pick<Deck, 'brand'>),
+      kitHasPictureLogo({ brand: { mark: { kind: 'picture', assetId: 'figma' } } } as Pick<
+        Deck,
+        'brand'
+      >),
     ).toBe(true);
     expect(
-      kitHasPictureLogo({ brand: { footer: { logo: 'picture', assetId: 'figma' } } } as Pick<Deck, 'brand'>),
+      kitHasPictureLogo({ brand: { footer: { logo: 'picture', assetId: 'figma' } } } as Pick<
+        Deck,
+        'brand'
+      >),
     ).toBe(true);
-    expect(kitHasPictureLogo({ brand: { footer: { logo: 'none' } } } as Pick<Deck, 'brand'>)).toBe(false);
+    expect(kitHasPictureLogo({ brand: { footer: { logo: 'none' } } } as Pick<Deck, 'brand'>)).toBe(
+      false,
+    );
   });
 
   test('the two kit block ids are the names the builder overlays', () => {

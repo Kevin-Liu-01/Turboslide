@@ -448,4 +448,3 @@ describe('the chart and the table sections (docs/FEATURES.md 2.2 ranks 11 and 13
     expect(document.querySelectorAll(`${body} [data-control]`).length).toBeGreaterThan(0);
   });
 });
-

@@ -33,7 +33,11 @@ describe('createsDraft', () => {
   it('carries the logo picker’s three ids once the action table names them (docs/FEATURES.md 4.11)', () => {
     // the pattern of SERVER_SIDE_WINDOW_ACTIONS_PENDING: the list is filtered through the table,
     // so on a tree before B6's entries land it is empty and nothing here is claimed
-    expect([...SERVER_SIDE_WINDOW_ACTIONS_F1_IDS]).toEqual(['logo.search', 'logo.insert', 'logo.refresh']);
+    expect([...SERVER_SIDE_WINDOW_ACTIONS_F1_IDS]).toEqual([
+      'logo.search',
+      'logo.insert',
+      'logo.refresh',
+    ]);
     for (const id of SERVER_SIDE_WINDOW_ACTIONS_F1_IDS) {
       if (!isActionId(id)) {
         expect(SERVER_SIDE_WINDOW_ACTIONS_F1).not.toContain(id);

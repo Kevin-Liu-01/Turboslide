@@ -38,7 +38,13 @@ const step = async (id, name, expected, fn) => {
     record(id, name, expected, r.ok === null ? `not driven: ${r.observed}` : r.observed, r.ok);
     return r;
   } catch (error) {
-    record(id, name, expected, `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`, false);
+    record(
+      id,
+      name,
+      expected,
+      `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+      false,
+    );
     return { ok: false };
   }
 };
@@ -112,28 +118,33 @@ const pollUntil = async (read, test, timeout = 15_000, every = 150) => {
     await sleep(every);
   }
 };
-const slideJson = async (page, slideId) => invoke(page, 'slide.get', { slideId }).then((g) => g.slide ?? g);
+const slideJson = async (page, slideId) =>
+  invoke(page, 'slide.get', { slideId }).then((g) => g.slide ?? g);
 const objectsOf = async (page, slideId) => {
   const slide = await slideJson(page, slideId);
   const out = [];
   const walk = (node) => {
     if (Array.isArray(node)) return node.forEach(walk);
     if (node && typeof node === 'object') {
-      if (typeof node.id === 'string' && typeof node.type === 'string' && node.pos) out.push({ id: node.id, type: node.type, pos: node.pos, block: node });
+      if (typeof node.id === 'string' && typeof node.type === 'string' && node.pos)
+        out.push({ id: node.id, type: node.type, pos: node.pos, block: node });
       for (const v of Object.values(node)) walk(v);
     }
   };
   walk(slide.slots ?? slide);
   return out;
 };
-const blockOf = async (page, slideId, id) => (await objectsOf(page, slideId)).find((o) => o.id === id) ?? null;
+const blockOf = async (page, slideId, id) =>
+  (await objectsOf(page, slideId)).find((o) => o.id === id) ?? null;
 const slideOrder = async (page) => {
   const list = await invoke(page, 'slide.list', {});
   const arr = list.slides ?? list.items ?? list;
   return (Array.isArray(arr) ? arr : []).map((s) => s.id ?? s);
 };
-const chip = (page) => page.evaluate(() => document.querySelector('.ts-overlay .ts-select-chip')?.textContent ?? null);
-const editing = (page) => page.evaluate(() => Boolean(document.querySelector('.ts-stagewrap.ts-editor[data-editing]')));
+const chip = (page) =>
+  page.evaluate(() => document.querySelector('.ts-overlay .ts-select-chip')?.textContent ?? null);
+const editing = (page) =>
+  page.evaluate(() => Boolean(document.querySelector('.ts-stagewrap.ts-editor[data-editing]')));
 const sessionCell = (page) =>
   page.evaluate(() => {
     const el = document.activeElement?.closest?.('[data-run]');
@@ -150,11 +161,19 @@ const caretOffsets = (page) =>
     const pre = document.createRange();
     pre.selectNodeContents(el);
     pre.setEnd(r.startContainer, r.startOffset);
-    return { start: pre.toString().length, collapsed: r.collapsed, length: el.textContent?.length ?? 0 };
+    return {
+      start: pre.toString().length,
+      collapsed: r.collapsed,
+      length: el.textContent?.length ?? 0,
+    };
   });
 const ctl = (page, control) => page.locator(`[data-control="${control}"]`);
 const rectOf = async (page, selector) => {
-  const r = await page.locator(selector).first().boundingBox().catch(() => null);
+  const r = await page
+    .locator(selector)
+    .first()
+    .boundingBox()
+    .catch(() => null);
   return r ? { x: r.x, y: r.y, w: r.width, h: r.height } : null;
 };
 const clickControl = async (page, control) => {
@@ -172,7 +191,11 @@ const clickCard = async (page, slideId) => {
   const r = await ctl(page, `filmstrip.slide.${slideId}`).first().boundingBox();
   if (!r) throw new Error(`no card ${slideId}`);
   await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
-  await pollUntil(() => state(page).then((s) => s.slideId), (a) => a === slideId, 8000);
+  await pollUntil(
+    () => state(page).then((s) => s.slideId),
+    (a) => a === slideId,
+    8000,
+  );
   await sleep(300);
 };
 const SHEET = '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)';
@@ -184,7 +207,12 @@ const cellPoint = async (page, id, r, c) => {
   return { x: rc.x + rc.w / 2, y: rc.y + rc.h / 2 };
 };
 const dismissNamePrompt = async (page) => {
-  if (await ctl(page, 'dialog.namePrompt').first().isVisible().catch(() => false))
+  if (
+    await ctl(page, 'dialog.namePrompt')
+      .first()
+      .isVisible()
+      .catch(() => false)
+  )
     await clickControl(page, 'dialog.namePrompt.close').catch(() => press(page, 'Escape'));
 };
 const newDeck = async (page, title) => {
@@ -193,13 +221,21 @@ const newDeck = async (page, title) => {
   await dismissNamePrompt(page);
   const info = await invoke(page, 'deck.info');
   const s = await state(page);
-  const runs = await page.evaluate((sel) => [...document.querySelectorAll(`${sel} [data-run]`)].map((e) => e.getAttribute('data-run')), SHEET);
+  const runs = await page.evaluate(
+    (sel) =>
+      [...document.querySelectorAll(`${sel} [data-run]`)].map((e) => e.getAttribute('data-run')),
+    SHEET,
+  );
   const head = runs.find((r) => /heading/.test(r)) ?? runs[0];
   const r = await runRect(page, head);
   await dblclickAt(page, r.x + r.w / 2, r.y + r.h / 2);
   await typeHuman(page, title);
   await press(page, 'Escape', 2);
-  await pollUntil(() => state(page).then((x) => x.revision), (rev) => rev >= 1, 20_000);
+  await pollUntil(
+    () => state(page).then((x) => x.revision),
+    (rev) => rev >= 1,
+    20_000,
+  );
   await settled(page);
   return { id: info.id, titleSlide: s.slideId };
 };
@@ -207,7 +243,11 @@ const setupSlide = async (page, after) => {
   const before = await slideOrder(page);
   const s = await state(page);
   await invoke(page, 'slide.new', { baseRevision: s.revision, after, layout: 'blank' });
-  const order = await pollUntil(() => slideOrder(page), (o) => o.length === before.length + 1, 20_000);
+  const order = await pollUntil(
+    () => slideOrder(page),
+    (o) => o.length === before.length + 1,
+    20_000,
+  );
   await settled(page);
   return order.find((x) => !before.includes(x)) ?? null;
 };
@@ -215,25 +255,40 @@ const placeBlock = async (page, slideId, block) => {
   const before = (await objectsOf(page, slideId)).map((o) => o.id);
   const s = await state(page);
   await invoke(page, 'block.insert', { baseRevision: s.revision, slideId, slot: 'main', block });
-  const obj = await pollUntil(async () => (await objectsOf(page, slideId)).find((o) => !before.includes(o.id)) ?? null, (o) => o !== null, 20_000);
+  const obj = await pollUntil(
+    async () => (await objectsOf(page, slideId)).find((o) => !before.includes(o.id)) ?? null,
+    (o) => o !== null,
+    20_000,
+  );
   await settled(page);
   return obj;
 };
 const cleanup = async (page, deckId) => {
   const status = { edit: 0, deck: 0 };
   try {
-    await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+    await page
+      .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+      .catch(() => undefined);
     await editorReady(page).catch(() => undefined);
     const info = await invoke(page, 'deck.info').catch(() => null);
     if (info) {
-      await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+      await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+        () => undefined,
+      );
       const again = await invoke(page, 'deck.info').catch(() => null);
-      await invoke(page, 'deck.remove', { id: deckId, baseRevision: again?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+      await invoke(page, 'deck.remove', {
+        id: deckId,
+        baseRevision: again?.revision ?? info.revision,
+        confirm: true,
+      }).catch(() => undefined);
     }
     const until = Date.now() + 20_000;
     for (;;) {
       for (const route of ['edit', 'deck']) {
-        const res = await page.request.get(`${BASE}/${route}/${deckId}`, { headers, maxRedirects: 0 });
+        const res = await page.request.get(`${BASE}/${route}/${deckId}`, {
+          headers,
+          maxRedirects: 0,
+        });
         status[route] = res.status();
       }
       if ((status.edit === 404 && status.deck === 404) || Date.now() > until) break;
@@ -248,16 +303,24 @@ const typedTable = (id, columns, rowsN, pos) => ({
   id,
   type: 'table',
   columns: Array.from({ length: columns }, () => ({})),
-  rows: Array.from({ length: rowsN }, (_, r) => ({ cells: Array.from({ length: columns }, (_, c) => (r === 0 ? `H${c}` : `R${r}C${c}`)), ...(r === 0 ? { header: true } : {}) })),
+  rows: Array.from({ length: rowsN }, (_, r) => ({
+    cells: Array.from({ length: columns }, (_, c) => (r === 0 ? `H${c}` : `R${r}C${c}`)),
+    ...(r === 0 ? { header: true } : {}),
+  })),
   pos,
 });
 
 // ---- the drive
 const browser = await chromium.launch();
-const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, extraHTTPHeaders: headers });
+const context = await browser.newContext({
+  viewport: { width: 1440, height: 900 },
+  extraHTTPHeaders: headers,
+});
 const page = await context.newPage();
 const consoleErrors = [];
-page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text().slice(0, 300)); });
+page.on('console', (m) => {
+  if (m.type() === 'error') consoleErrors.push(m.text().slice(0, 300));
+});
 let deck = null;
 const start = Date.now();
 try {
@@ -269,97 +332,194 @@ try {
   await placeBlock(page, S, typedTable(T, 4, 3, { x: 80, y: 120, w: 900, h: 240 }));
   const textOf = async (r, c) => (await blockOf(page, S, T))?.block?.rows?.[r]?.cells?.[c] ?? null;
 
-  await step('debug.bold-range', 'select the table, a range over the header row, Cmd+B; watch state', 'the write is acknowledged and the revision bumps', async () => {
-    await clearAll(page);
-    const p = await cellPoint(page, T, 1, 1);
-    await clickAt(page, p.x, p.y);
-    await sleep(300);
-    await press(page, 'Escape');
-    await sleep(200);
-    const a = await cellPoint(page, T, 0, 0);
-    const b = await cellPoint(page, T, 0, 3);
-    await drag(page, a, b, { steps: 12 });
-    await sleep(300);
-    const ring = await page.evaluate(() => document.querySelector('.ts-overlay .ts-select.is-cells')?.getAttribute('data-cell-range') ?? null);
-    const s0 = await state(page);
-    await press(page, 'Meta+b');
-    const samples = [];
-    for (let i = 0; i < 12; i += 1) {
-      await sleep(500);
-      const s = await state(page);
-      samples.push(`${(i + 1) * 0.5}s rev ${s.revision} pending ${s.sync?.pending ?? s.pending} rejects ${JSON.stringify(s.rejects ?? s.sync?.rejects ?? null)}`);
-    }
-    const cells = [await textOf(0, 0), await textOf(0, 1), await textOf(0, 2), await textOf(0, 3)];
-    const snack = await page.evaluate(() => [...document.querySelectorAll('.ts-snackbar, .pt-toast')].map((e) => e.textContent).join(' | '));
-    const words = await page.evaluate(() => document.querySelector('[data-control="deck.saveState"]')?.textContent ?? null);
-    return { ok: cells.every((c) => /^\*.*\*$/.test(c ?? '')), observed: `ring ${ring}; rev0 ${s0.revision}; ${samples.join('; ')}; cells ${JSON.stringify(cells)}; snackbar "${snack}"; save words "${words}"; console ${consoleErrors.slice(-3).join(' || ')}` };
-  });
+  await step(
+    'debug.bold-range',
+    'select the table, a range over the header row, Cmd+B; watch state',
+    'the write is acknowledged and the revision bumps',
+    async () => {
+      await clearAll(page);
+      const p = await cellPoint(page, T, 1, 1);
+      await clickAt(page, p.x, p.y);
+      await sleep(300);
+      await press(page, 'Escape');
+      await sleep(200);
+      const a = await cellPoint(page, T, 0, 0);
+      const b = await cellPoint(page, T, 0, 3);
+      await drag(page, a, b, { steps: 12 });
+      await sleep(300);
+      const ring = await page.evaluate(
+        () =>
+          document
+            .querySelector('.ts-overlay .ts-select.is-cells')
+            ?.getAttribute('data-cell-range') ?? null,
+      );
+      const s0 = await state(page);
+      await press(page, 'Meta+b');
+      const samples = [];
+      for (let i = 0; i < 12; i += 1) {
+        await sleep(500);
+        const s = await state(page);
+        samples.push(
+          `${(i + 1) * 0.5}s rev ${s.revision} pending ${s.sync?.pending ?? s.pending} rejects ${JSON.stringify(s.rejects ?? s.sync?.rejects ?? null)}`,
+        );
+      }
+      const cells = [
+        await textOf(0, 0),
+        await textOf(0, 1),
+        await textOf(0, 2),
+        await textOf(0, 3),
+      ];
+      const snack = await page.evaluate(() =>
+        [...document.querySelectorAll('.ts-snackbar, .pt-toast')]
+          .map((e) => e.textContent)
+          .join(' | '),
+      );
+      const words = await page.evaluate(
+        () => document.querySelector('[data-control="deck.saveState"]')?.textContent ?? null,
+      );
+      return {
+        ok: cells.every((c) => /^\*.*\*$/.test(c ?? '')),
+        observed: `ring ${ring}; rev0 ${s0.revision}; ${samples.join('; ')}; cells ${JSON.stringify(cells)}; snackbar "${snack}"; save words "${words}"; console ${consoleErrors.slice(-3).join(' || ')}`,
+      };
+    },
+  );
 
-  await step('debug.colour-range', 'a range over the header row; the tail Text color, green', 'every cell gets the colour', async () => {
-    await clearAll(page);
-    const p = await cellPoint(page, T, 1, 1);
-    await clickAt(page, p.x, p.y);
-    await sleep(300);
-    await press(page, 'Escape');
-    await sleep(200);
-    const a = await cellPoint(page, T, 0, 0);
-    const b = await cellPoint(page, T, 0, 3);
-    await drag(page, a, b, { steps: 12 });
-    await sleep(300);
-    const tail = await page.evaluate(() => [...document.querySelectorAll('.ts-toolbar [data-control^="toolbar."]')].filter((e) => e.getClientRects().length > 0).map((e) => e.getAttribute('data-control')));
-    await clickControl(page, 'toolbar.textColor');
-    await sleep(400);
-    const swatches = await page.evaluate(() => [...document.querySelectorAll('[data-control^="toolbar.textColor."]')].filter((e) => e.getClientRects().length > 0).map((e) => e.getAttribute('data-control')));
-    const pick = swatches.find((c) => /\.green$/.test(c)) ?? swatches.find((c) => !/plate|menu|none|hex$|kit\./.test(c));
-    if (pick) await clickControl(page, pick);
-    await sleep(800);
-    await settled(page);
-    const s = await state(page);
-    const cells = [await textOf(0, 0), await textOf(0, 1), await textOf(0, 2), await textOf(0, 3)];
-    const snack = await page.evaluate(() => [...document.querySelectorAll('.ts-snackbar, .pt-toast')].map((e) => e.textContent).join(' | '));
-    return { ok: cells.every((c) => /c:/.test(c ?? '')), observed: `tail ${tail.join(',')}; pick ${pick}; rev ${s.revision} pending ${s.sync?.pending ?? s.pending}; cells ${JSON.stringify(cells)}; snackbar "${snack}"; console ${consoleErrors.slice(-3).join(' || ')}` };
-  });
-
-  await step('debug.arrows', 'open cell 1,1 by one click; End, Right; Down; Home, Left; Up', 'the session crosses cells at the edges', async () => {
-    await clearAll(page);
-    const p = await cellPoint(page, T, 1, 1);
-    await clickAt(page, p.x, p.y);
-    await sleep(300);
-    const facts = [];
-    const move = async (keys) => {
-      for (const key of keys) await press(page, key);
+  await step(
+    'debug.colour-range',
+    'a range over the header row; the tail Text color, green',
+    'every cell gets the colour',
+    async () => {
+      await clearAll(page);
+      const p = await cellPoint(page, T, 1, 1);
+      await clickAt(page, p.x, p.y);
+      await sleep(300);
+      await press(page, 'Escape');
+      await sleep(200);
+      const a = await cellPoint(page, T, 0, 0);
+      const b = await cellPoint(page, T, 0, 3);
+      await drag(page, a, b, { steps: 12 });
+      await sleep(300);
+      const tail = await page.evaluate(() =>
+        [...document.querySelectorAll('.ts-toolbar [data-control^="toolbar."]')]
+          .filter((e) => e.getClientRects().length > 0)
+          .map((e) => e.getAttribute('data-control')),
+      );
+      await clickControl(page, 'toolbar.textColor');
       await sleep(400);
-      const where = await sessionCell(page);
-      const caret = await caretOffsets(page);
-      facts.push(`${keys.join('+')} -> ${where ? `${where.row},${where.column}` : 'no cell'} caret ${caret ? `${caret.start}/${caret.length}` : 'none'}`);
-      return where;
-    };
-    const r1 = await move(['End', 'ArrowRight']);
-    const r2 = await move(['ArrowDown']);
-    const r3 = await move(['Home', 'ArrowLeft']);
-    const r4 = await move(['ArrowUp']);
-    await press(page, 'Escape');
-    return { ok: r1?.row === 1 && r1?.column === 2 && r2?.row === 2 && r2?.column === 2 && r3?.row === 2 && r3?.column === 1 && r4?.row === 1 && r4?.column === 1, observed: facts.join('; ') };
-  });
+      const swatches = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-control^="toolbar.textColor."]')]
+          .filter((e) => e.getClientRects().length > 0)
+          .map((e) => e.getAttribute('data-control')),
+      );
+      const pick =
+        swatches.find((c) => /\.green$/.test(c)) ??
+        swatches.find((c) => !/plate|menu|none|hex$|kit\./.test(c));
+      if (pick) await clickControl(page, pick);
+      await sleep(800);
+      await settled(page);
+      const s = await state(page);
+      const cells = [
+        await textOf(0, 0),
+        await textOf(0, 1),
+        await textOf(0, 2),
+        await textOf(0, 3),
+      ];
+      const snack = await page.evaluate(() =>
+        [...document.querySelectorAll('.ts-snackbar, .pt-toast')]
+          .map((e) => e.textContent)
+          .join(' | '),
+      );
+      return {
+        ok: cells.every((c) => /c:/.test(c ?? '')),
+        observed: `tail ${tail.join(',')}; pick ${pick}; rev ${s.revision} pending ${s.sync?.pending ?? s.pending}; cells ${JSON.stringify(cells)}; snackbar "${snack}"; console ${consoleErrors.slice(-3).join(' || ')}`,
+      };
+    },
+  );
 
-  await step('debug.shift-arrows', 'open cell 1,1; Home; Shift+Right; Shift+Down', 'a range over 4 cells', async () => {
-    await clearAll(page);
-    const p = await cellPoint(page, T, 1, 1);
-    await clickAt(page, p.x, p.y);
-    await sleep(300);
-    await press(page, 'Home');
-    await press(page, 'Shift+ArrowRight');
-    await sleep(300);
-    const ring1 = await page.evaluate(() => document.querySelector('.ts-overlay .ts-select.is-cells')?.getAttribute('data-cell-range') ?? null);
-    await press(page, 'Shift+ArrowDown');
-    await sleep(400);
-    const ring2 = await page.evaluate(() => document.querySelector('.ts-overlay .ts-select.is-cells')?.getAttribute('data-cell-range') ?? null);
-    await clearAll(page);
-    return { ok: ring2 === '1,1:2,2', observed: `after Shift+Right ${ring1}; after Shift+Down ${ring2}` };
-  });
+  await step(
+    'debug.arrows',
+    'open cell 1,1 by one click; End, Right; Down; Home, Left; Up',
+    'the session crosses cells at the edges',
+    async () => {
+      await clearAll(page);
+      const p = await cellPoint(page, T, 1, 1);
+      await clickAt(page, p.x, p.y);
+      await sleep(300);
+      const facts = [];
+      const move = async (keys) => {
+        for (const key of keys) await press(page, key);
+        await sleep(400);
+        const where = await sessionCell(page);
+        const caret = await caretOffsets(page);
+        facts.push(
+          `${keys.join('+')} -> ${where ? `${where.row},${where.column}` : 'no cell'} caret ${caret ? `${caret.start}/${caret.length}` : 'none'}`,
+        );
+        return where;
+      };
+      const r1 = await move(['End', 'ArrowRight']);
+      const r2 = await move(['ArrowDown']);
+      const r3 = await move(['Home', 'ArrowLeft']);
+      const r4 = await move(['ArrowUp']);
+      await press(page, 'Escape');
+      return {
+        ok:
+          r1?.row === 1 &&
+          r1?.column === 2 &&
+          r2?.row === 2 &&
+          r2?.column === 2 &&
+          r3?.row === 2 &&
+          r3?.column === 1 &&
+          r4?.row === 1 &&
+          r4?.column === 1,
+        observed: facts.join('; '),
+      };
+    },
+  );
+
+  await step(
+    'debug.shift-arrows',
+    'open cell 1,1; Home; Shift+Right; Shift+Down',
+    'a range over 4 cells',
+    async () => {
+      await clearAll(page);
+      const p = await cellPoint(page, T, 1, 1);
+      await clickAt(page, p.x, p.y);
+      await sleep(300);
+      await press(page, 'Home');
+      await press(page, 'Shift+ArrowRight');
+      await sleep(300);
+      const ring1 = await page.evaluate(
+        () =>
+          document
+            .querySelector('.ts-overlay .ts-select.is-cells')
+            ?.getAttribute('data-cell-range') ?? null,
+      );
+      await press(page, 'Shift+ArrowDown');
+      await sleep(400);
+      const ring2 = await page.evaluate(
+        () =>
+          document
+            .querySelector('.ts-overlay .ts-select.is-cells')
+            ?.getAttribute('data-cell-range') ?? null,
+      );
+      await clearAll(page);
+      return {
+        ok: ring2 === '1,1:2,2',
+        observed: `after Shift+Right ${ring1}; after Shift+Down ${ring2}`,
+      };
+    },
+  );
 } finally {
   const status = deck ? await cleanup(page, deck.id) : null;
   console.log(`cleanup ${JSON.stringify(status)}; ${Math.round((Date.now() - start) / 1000)} s`);
-  if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify({ base: BASE, deck: deck?.id ?? null, cleanup: status, rows, consoleErrors }, null, 2));
+  if (JSON_OUT)
+    writeFileSync(
+      JSON_OUT,
+      JSON.stringify(
+        { base: BASE, deck: deck?.id ?? null, cleanup: status, rows, consoleErrors },
+        null,
+        2,
+      ),
+    );
   await browser.close();
 }

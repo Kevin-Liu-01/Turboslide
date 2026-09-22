@@ -1091,9 +1091,7 @@ export function ToolbarTail() {
               onClick={(anchor) => onControl(control, anchor)}
               pressed={pressed}
               chevron={control.dropdown === true || control.arrow !== undefined}
-              {...(control.op === 'align'
-                ? { value: alignState().horizontal ?? 'left' }
-                : {})}
+              {...(control.op === 'align' ? { value: alignState().horizontal ?? 'left' } : {})}
             />
           </span>
         );

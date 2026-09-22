@@ -817,7 +817,12 @@ describe('menuActionPlan', () => {
     const bold = menuActionPlan(itemById('format.text.bold'), header);
     expect(bold).toMatchObject({ action: 'slide.update', label: 'Bold' });
     if ('refused' in bold) throw new Error('refused');
-    const mutations = bold.input.mutations as { op: string; path: string; range: number[]; edit: unknown }[];
+    const mutations = bold.input.mutations as {
+      op: string;
+      path: string;
+      range: number[];
+      edit: unknown;
+    }[];
     expect(mutations.map((m) => [m.op, m.path, m.range])).toEqual([
       ['text.mark', '/rows/0/cells/0', [0, 6]],
       ['text.mark', '/rows/0/cells/1', [0, 2]],

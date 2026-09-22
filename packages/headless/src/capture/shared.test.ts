@@ -395,9 +395,9 @@ describe('the features round (docs/FEATURES.md 4.7)', () => {
   });
 
   test('the allowlist refusal is the seller’s sentence when paths are off, the CLI’s line when on', () => {
-    expect(() => assertAllowedHost('https://thesvg.org/icons/figma/default.svg', [], { allowPaths: false })).toThrow(
-      ALLOWLIST_SENTENCE,
-    );
+    expect(() =>
+      assertAllowedHost('https://thesvg.org/icons/figma/default.svg', [], { allowPaths: false }),
+    ).toThrow(ALLOWLIST_SENTENCE);
     expect(ALLOWLIST_SENTENCE).toBe(
       'Pictures can be fetched from these sites only: generaltranslation.com, prototemplate.com, glyphfield.com and Wikimedia Commons. Upload the file instead',
     );
@@ -411,24 +411,32 @@ describe('the features round (docs/FEATURES.md 4.7)', () => {
     setIntakePolicy(CHECKOUT_INTAKE_POLICY);
     expect(() => assertAllowedHost('https://thesvg.org/x.svg')).toThrow(/--allow/);
     // the allowlisted source still answers
-    expect(assertAllowedHost('https://upload.wikimedia.org/a.png', [], { allowPaths: false }).hostname).toBe(
-      'upload.wikimedia.org',
-    );
+    expect(
+      assertAllowedHost('https://upload.wikimedia.org/a.png', [], { allowPaths: false }).hostname,
+    ).toBe('upload.wikimedia.org');
   });
 
   test('the User-Agent names the product, its version and the origin', () => {
     expect(turboslideUserAgent({})).toBe('Turboslide/0.0.0 (+https://turboslide.vercel.app)');
-    expect(turboslideUserAgent({ TURBOSLIDE_VERSION: '1.2.3', TURBOSLIDE_PUBLIC_ORIGIN: 'https://x.test/' })).toBe(
-      'Turboslide/1.2.3 (+https://x.test)',
-    );
+    expect(
+      turboslideUserAgent({
+        TURBOSLIDE_VERSION: '1.2.3',
+        TURBOSLIDE_PUBLIC_ORIGIN: 'https://x.test/',
+      }),
+    ).toBe('Turboslide/1.2.3 (+https://x.test)');
     expect(turboslideUserAgent({ VERCEL_GIT_COMMIT_SHA: '88b68e7abcdef' })).toBe(
       'Turboslide/88b68e7 (+https://turboslide.vercel.app)',
     );
   });
 
   test('the svg raster policy keeps an svg hosted and leaves the refusal line as it was', async () => {
-    const svg = new Uint8Array(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"/>'));
-    const sanitize = (bytes: Uint8Array) => ({ svg: Buffer.from(bytes).toString('utf8'), removed: [] });
+    const svg = new Uint8Array(
+      Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"/>'),
+    );
+    const sanitize = (bytes: Uint8Array) => ({
+      svg: Buffer.from(bytes).toString('utf8'),
+      removed: [],
+    });
     expect(svgRasterPolicy()).toBeNull();
     expect(svgRasterPolicy(false)).toBeNull();
     expect(svgRasterPolicy({ sanitize })?.sanitize).toBe(sanitize);
@@ -439,6 +447,8 @@ describe('the features round (docs/FEATURES.md 4.7)', () => {
     expect(svgRasterPolicy()?.sanitize).toBe(sanitize);
     expect((await imageInfo(svg)).format).toBe('svg');
     setIntakePolicy({ allowPaths: false, hosted: true, svgRaster: false });
-    await expect(imageInfo(svg)).rejects.toThrow(/svg is not accepted here; send png, jpeg, webp or gif/);
+    await expect(imageInfo(svg)).rejects.toThrow(
+      /svg is not accepted here; send png, jpeg, webp or gif/,
+    );
   });
 });

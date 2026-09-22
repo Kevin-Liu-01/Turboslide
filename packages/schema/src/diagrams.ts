@@ -297,15 +297,7 @@ function makeGrid(count: number, style: DiagramStyle, box: Box, group: string): 
       h: cardH,
     };
     out.push(
-      ...node(
-        `item-${index + 1}`,
-        'roundRect',
-        `Item ${index + 1}`,
-        card,
-        look,
-        out.length,
-        group,
-      ),
+      ...node(`item-${index + 1}`, 'roundRect', `Item ${index + 1}`, card, look, out.length, group),
     );
   }
   return out;
@@ -328,9 +320,7 @@ function makeHierarchy(levels: number, style: DiagramStyle, box: Box, group: str
   const top: Box = { x: box.x + (box.w - nodeW) / 2, y: box.y, w: nodeW, h: rowH };
   const out: Block[] = [];
   const placed: { id: string; box: Box }[][] = [];
-  out.push(
-    ...node('level-1', 'roundRect', 'Level 1', top, look, 0, group),
-  );
+  out.push(...node('level-1', 'roundRect', 'Level 1', top, look, 0, group));
   placed.push([{ id: 'level-1', box: top }]);
   let n = 1;
   for (let level = 2; level <= levels; level += 1) {
@@ -338,17 +328,7 @@ function makeHierarchy(levels: number, style: DiagramStyle, box: Box, group: str
     for (const [column, x] of columns.entries()) {
       n += 1;
       const b: Box = { x, y: box.y + (level - 1) * (rowH + rowGap), w: nodeW, h: rowH };
-      out.push(
-        ...node(
-          `level-${n}`,
-          'roundRect',
-          `Level ${level}`,
-          b,
-          look,
-          out.length,
-          group,
-        ),
-      );
+      out.push(...node(`level-${n}`, 'roundRect', `Level ${level}`, b, look, out.length, group));
       row.push({ id: `level-${n}`, box: b });
       /* the parent: the box above in the same column, or the top box on the second level */
       const parents = placed[placed.length - 1] ?? [];
@@ -447,17 +427,7 @@ function makeProcess(count: number, style: DiagramStyle, box: Box, group: string
     const id = `step-${index + 1}`;
     if (previous !== undefined)
       out.push(link(`link-${index}`, previous, { id, box: b }, out.length, group, true));
-    out.push(
-      ...node(
-        id,
-        'roundRect',
-        `Step ${index + 1}`,
-        b,
-        look,
-        out.length,
-        group,
-      ),
-    );
+    out.push(...node(id, 'roundRect', `Step ${index + 1}`, b, look, out.length, group));
     previous = { id, box: b };
   }
   return out;
@@ -477,15 +447,7 @@ function makeRelationship(count: number, style: DiagramStyle, box: Box, group: s
   for (let index = 0; index < count; index += 1) {
     const b: Box = { x: left + index * d * (1 - overlap), y, w: d, h: d };
     out.push(
-      ...node(
-        `item-${index + 1}`,
-        'ellipse',
-        `Item ${index + 1}`,
-        b,
-        look,
-        out.length,
-        group,
-      ),
+      ...node(`item-${index + 1}`, 'ellipse', `Item ${index + 1}`, b, look, out.length, group),
     );
   }
   return out;
@@ -515,15 +477,7 @@ function makeCycle(count: number, style: DiagramStyle, box: Box, group: string):
   const out: Block[] = [];
   for (const [index, entry] of boxes.entries()) {
     out.push(
-      ...node(
-        entry.id,
-        'roundRect',
-        `Step ${index + 1}`,
-        entry.box,
-        look,
-        out.length,
-        group,
-      ),
+      ...node(entry.id, 'roundRect', `Step ${index + 1}`, entry.box, look, out.length, group),
     );
   }
   for (const [index, entry] of boxes.entries()) {

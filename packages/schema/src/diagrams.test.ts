@@ -114,7 +114,8 @@ describe('DIAGRAM_TEMPLATES', () => {
               (block.type === 'shape' && block.shape !== 'line' && block.text !== undefined),
           );
           expect(texts).toHaveLength(template.nodes(count));
-          if (kind !== 'timeline') expect(blocks.some((block) => block.type === 'text')).toBe(false);
+          if (kind !== 'timeline')
+            expect(blocks.some((block) => block.type === 'text')).toBe(false);
           for (const text of texts) {
             expect(text.typography).toEqual({ align: 'center', weight: 500 });
             expect(text.valign).toBe('middle');

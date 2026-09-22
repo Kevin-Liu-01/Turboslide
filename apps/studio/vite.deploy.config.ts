@@ -125,14 +125,16 @@ const PACKAGES_PATTERN =
 // Vercel Functions (docs/hosting.md, section limits): the base function keeps the project's
 // duration default written out; the routes that render or export (and the server functions, which
 // TanStack Start posts to /_serverFn/<id>) get their own function directories with the longer
-// budget and more memory. 800 s is the Pro maximum and what the synchronous export's 780 s
-// budget assumes (server/export-sync.ts SYNC_EXPORT_TIMEOUT_MS); 3009 MB is the Pro memory cap
-// for a function, and Fluid compute maps it to its 4 GB tier or warns at build time (the first
-// preview deploy records which; docs/hosting.md).
-const HEAVY = { maxDuration: 800, memory: 3009 } as const;
+// budget. 800 s is the Pro maximum and what the synchronous export's 780 s budget assumes
+// (server/export-sync.ts SYNC_EXPORT_TIMEOUT_MS). The memory size is not set here: on Fluid
+// compute it is the project's dashboard setting (standard, 2 GB and 1 vCPU; the seven day metric
+// read 2048 MB for every /_serverFn path) and a `memory` value in the build output is ignored with
+// a build warning, so the `memory: 3009` this rule carried until the sync and costs round was
+// inert (docs/gslides-parity/sync/audit-costs.md item 19; docs/HOSTING-MOVE.md section 9).
+const HEAVY = { maxDuration: 800 } as const;
 
-// The assist route (docs/PRODUCT.md 6.3): its own function directory with a 60 s duration and the
-// base memory, so a WAF rule (firewall/rules.json R22) and a duration can name it; a model call
+// The assist route (docs/PRODUCT.md 6.3): its own function directory with a 60 s duration, so a
+// WAF rule (firewall/rules.json R22) and a duration can name it; a model call
 // at low effort answers in about ten seconds and the route's own deadline is under the minute.
 const ASSIST = { maxDuration: 60 } as const;
 

@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 // The core gate (docs/FOCUS.md section 6; the drivers lane of the focus round): one command that
 // runs every driver of the matrix against one base and judges the whole matrix. It runs the walk
-// probe in --core mode (scripts/probes/editor-walk-probe.mjs --core) and the seven core specs
-// under apps/studio/e2e/core/ with Playwright's JSON reporter, merges every row's result by its
+// probe in --core mode (scripts/probes/editor-walk-probe.mjs --core), the core specs under
+// apps/studio/e2e/core/ with Playwright's JSON reporter and, since the sync and costs round
+// (docs/SYNC.md 6.3), the cost probe (scripts/probes/sync-cost-probe.mjs --all: one page state per
+// process for three minutes, every request the page made, sync.status.storeCalls sampled five
+// times, the counts beside the ceilings in its JSON), merges every row's result by its
 // matrix id, writes the matrix table with every row id and its result, and exits 1 on any
 // failed or not driven driven row unless its feature is in the committed parked list (6.2;
 // an unparkable feature cannot be listed) or the row is one of the list's `parkedRows` (a row
@@ -10,8 +13,15 @@
 // the list says. Not driven rows are listed by id and reason and are never counted as passed.
 //
 //   node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--parked <ship json>]
-//     [--only probe|specs] [--spec <area>[,<area>]] [--shots] [--matrix <path>] [--report <dir>]
+//     [--only probe|specs|cost] [--spec <area>[,<area>]] [--cost-rows <id>[,<id>]]
+//     [--cost-minutes <n>] [--shots] [--matrix <path>] [--report <dir>]
 //     [--allow-scratch] [--decks <dir>] [--dry-run] [--lock <path>]
+// `--only cost` runs the cost probe alone and judges its rows alone; `--only specs` judges the spec
+// rows alone and `--only probe` the walk probe's, so a driver's partial run never reads another
+// driver's rows as "no step". `--cost-rows` narrows the cost probe to the rows named and
+// `--cost-minutes` shortens each state's window for a smoke (the run of record keeps 3; the JSON
+// names the minutes it ran). On a deployment the cost probe reads the bearer for sync.status
+// from TURBOSLIDE_TOKEN or the origin's row of ~/.config/turboslide/hosts.json and never prints it.
 // The gate refuses to start while scratch decks sit under the repository's decks/ folder (every
 // folder there git does not track; the check chains' spec runs left eight behind, VERIFICATION.md
 // C2-F29): it prints them and exits 2, so a run never measures against a store carrying another
@@ -59,8 +69,11 @@ import { fileURLToPath } from 'node:url';
 import {
   CORE_MATRIX,
   CORE_SPEC_DRIVERS,
+  COST_PROBE_DRIVER,
   PROBE_DRIVER,
   coreRow,
+  costRows,
+  isCostRow,
   isManualRow,
   isMeasureRow,
   parkedFeaturesOf,
@@ -77,28 +90,30 @@ const arg = (name, fallback) => {
 };
 const flag = (name) => argv.includes(`--${name}`);
 const BASE = (arg('base', process.env.PLAYWRIGHT_BASE_URL) ?? '').replace(/\/$/, '');
+const USAGE =
+  'usage: node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--matrix <path>] [--parked <ship json>] [--only probe|specs|cost] [--spec <areas>] [--cost-rows <ids>] [--cost-minutes <n>]';
 if (!BASE) {
-  console.error(
-    'usage: node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--matrix <path>] [--parked <ship json>] [--only probe|specs] [--spec <areas>]',
-  );
+  console.error(USAGE);
   process.exit(2);
 }
 const OUT = resolve(ROOT, arg('out', '.turboslide/core-gate'));
 const PARKED = arg('parked', null);
 const ONLY = arg('only', null);
-if (ONLY !== null && ONLY !== 'probe' && ONLY !== 'specs') {
+if (ONLY !== null && ONLY !== 'probe' && ONLY !== 'specs' && ONLY !== 'cost') {
   // `--only` names a driver, never an area: an unknown value used to run the whole matrix without
   // a word (s2.md S2-R4, `--only text,slides`); the areas go to `--spec` here and to the walk
   // probe's own `--only`
   console.error(
-    `core-gate: --only takes probe or specs, not ${JSON.stringify(ONLY)}; name the areas with --spec <areas> (the specs) or the walk probe's --only (the walk)`,
+    `core-gate: --only takes probe, specs or cost, not ${JSON.stringify(ONLY)}; name the areas with --spec <areas> (the specs), the walk probe's --only (the walk) or --cost-rows <ids> (the cost probe)`,
   );
-  console.error(
-    'usage: node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--matrix <path>] [--parked <ship json>] [--only probe|specs] [--spec <areas>]',
-  );
+  console.error(USAGE);
   process.exit(2);
 }
 const SPEC_ONLY = arg('spec', null);
+/** The cost rows the cost probe drives (`--cost-rows`); every cost row when absent. */
+const COST_ROWS = arg('cost-rows', null);
+/** The minutes of each cost state's window (`--cost-minutes`; the probe's own default, 3, when absent). */
+const COST_MINUTES = arg('cost-minutes', null);
 const MATRIX_OUT = arg('matrix', null);
 /** A finished run's directory to re-render from, instead of running the drivers. */
 const REPORT = arg('report', null);
@@ -236,6 +251,61 @@ function readProbe(json, exit, ms) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// the cost probe (docs/SYNC.md 6.3)
+
+function runCost() {
+  const json = join(OUT, 'cost-probe.json');
+  rmSync(json, { force: true });
+  const args = ['scripts/probes/sync-cost-probe.mjs', '--all', '--base', BASE, '--out', json];
+  if (COST_ROWS) args.push('--rows', COST_ROWS);
+  if (COST_MINUTES) args.push('--minutes', COST_MINUTES);
+  if (flag('shots')) args.push('--shots', join(OUT, 'cost-shots'));
+  console.log(`core-gate: node ${args.join(' ')}`);
+  const t = Date.now();
+  const result = spawnSync('node', args, { cwd: ROOT, stdio: 'inherit', env: process.env });
+  return readCost(json, result.status, Date.now() - t);
+}
+
+/**
+ * The cost probe's rows from its JSON: every row id with its result, its reason and its counts
+ * beside its ceilings, the last rendered as the row's measure lines (the shape of a spec's
+ * `measure` annotations, so the ship note reads both kinds from one place).
+ */
+function readCost(json, exit, ms) {
+  const results = {};
+  const reasons = {};
+  const measures = {};
+  if (existsSync(json)) {
+    const summary = JSON.parse(readFileSync(json, 'utf8'));
+    for (const row of summary.rows ?? []) {
+      if (!row?.id || !row.result) continue;
+      results[row.id] = row.result;
+      if (row.reason) reasons[row.id] = row.reason;
+      if (Array.isArray(row.measures) && row.measures.length > 0) measures[row.id] = row.measures;
+    }
+    return {
+      exit: exit ?? summary.exitCode ?? null,
+      ms,
+      results,
+      reasons,
+      measures,
+      json,
+      minutes: summary.minutes,
+      instances: summary.instances,
+    };
+  }
+  return {
+    exit: exit ?? 1,
+    ms,
+    results,
+    reasons,
+    measures,
+    json: null,
+    error: 'the cost probe wrote no JSON',
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
 // the core specs with the JSON reporter
 
 /** Walks a Playwright JSON report and yields every test with its spec title and outcome. */
@@ -335,11 +405,17 @@ function readSpecs(report, exit, ms) {
 
 let probe = null;
 let specs = null;
+let cost = null;
+/** Which drivers this run covers: every one, or the one `--only` names. */
+const runs = (driver) => ONLY === null || ONLY === driver;
 if (REPORT !== null) {
   const dir = resolve(ROOT, REPORT);
   console.log(`core-gate: re-rendering the run under ${dir} (no driver runs)`);
-  if (ONLY !== 'specs') probe = readProbe(join(dir, 'core-walk.json'), null, 0);
-  if (ONLY !== 'probe') specs = readSpecs(join(dir, 'specs.json'), null, 0);
+  if (runs('probe')) probe = readProbe(join(dir, 'core-walk.json'), null, 0);
+  if (runs('specs')) specs = readSpecs(join(dir, 'specs.json'), null, 0);
+  /* a run from before the sync and costs round has no cost-probe.json; its rows then read no step */
+  if (runs('cost') && existsSync(join(dir, 'cost-probe.json')))
+    cost = readCost(join(dir, 'cost-probe.json'), null, 0);
 } else {
   if (UNDER_VITEST && LOCAL && !DRY_RUN && !LOCK_NAMED) {
     console.error(
@@ -372,7 +448,9 @@ if (REPORT !== null) {
         ? 'the walk probe'
         : ONLY === 'specs'
           ? 'the core specs'
-          : 'the walk probe and the core specs';
+          : ONLY === 'cost'
+            ? 'the cost probe'
+            : 'the walk probe, the core specs and the cost probe';
     console.log(
       `core-gate: dry run against ${BASE}: ${scratchLine}; the run would take ${LOCAL ? `the lock ${LOCK}` : 'no lock (a deployment)'} and run ${drivers}. Nothing ran and no lock was taken; exit 0.`,
     );
@@ -380,26 +458,43 @@ if (REPORT !== null) {
   }
   const held = await takeLock();
   try {
-    if (ONLY !== 'specs') probe = runProbe();
-    if (ONLY !== 'probe') specs = runSpecs();
+    if (runs('probe')) probe = runProbe();
+    if (runs('specs')) specs = runSpecs();
+    if (runs('cost')) cost = runCost();
   } finally {
     releaseLock(held);
   }
 }
 
-const results = { ...(probe?.results ?? {}), ...(specs?.results ?? {}) };
-const reasons = { ...(probe?.reasons ?? {}), ...(specs?.reasons ?? {}) };
+const results = {
+  ...(probe?.results ?? {}),
+  ...(specs?.results ?? {}),
+  ...(cost?.results ?? {}),
+};
+const reasons = {
+  ...(probe?.reasons ?? {}),
+  ...(specs?.reasons ?? {}),
+  ...(cost?.reasons ?? {}),
+};
+/* the rows this run judges: every row, or the rows of the one driver `--only` names, narrowed by
+   `--spec` (the specs) or `--cost-rows` (the cost probe); a driver's partial run never reads the
+   other drivers' rows as no step */
+const specRowsJudged = CORE_MATRIX.filter(
+  (r) =>
+    CORE_SPEC_DRIVERS.includes(r.driver) &&
+    (!SPEC_ONLY || SPEC_ONLY.split(',').some((a) => r.driver === `core/${a.trim()}.spec.ts`)),
+);
+const costRowsJudged = costRows().filter(
+  (r) => !COST_ROWS || COST_ROWS.split(',').some((id) => id.trim() === r.id),
+);
 const judged =
   ONLY === 'probe'
     ? rowsForDriver(PROBE_DRIVER)
     : ONLY === 'specs'
-      ? CORE_MATRIX.filter(
-          (r) =>
-            r.driver !== PROBE_DRIVER &&
-            (!SPEC_ONLY ||
-              SPEC_ONLY.split(',').some((a) => r.driver === `core/${a.trim()}.spec.ts`)),
-        )
-      : CORE_MATRIX;
+      ? specRowsJudged
+      : ONLY === 'cost'
+        ? costRowsJudged
+        : CORE_MATRIX;
 const table = judged.map((row) => ({
   id: row.id,
   feature: row.feature,
@@ -413,16 +508,32 @@ const noStep = table.filter((r) => r.result === 'no step').map((r) => r.id);
 const manual = table
   .filter((r) => r.result === 'not driven' && isManualRow(coreRow(r.id)))
   .map((r) => r.id);
-/* the measurement rows (PRODUCT.md 8.2): their result, reason and recorded numbers, listed apart */
-const measures = specs?.measures ?? {};
+/* the measurement rows (PRODUCT.md 8.2) and the cost rows (SYNC.md 6.1): their result, reason and
+   recorded numbers, listed apart; a cost row's numbers are its counts beside its ceilings */
+const measures = { ...(specs?.measures ?? {}), ...(cost?.measures ?? {}) };
 const measured = table
   .filter((r) => isMeasureRow(coreRow(r.id)))
-  .map((r) => ({ id: r.id, result: r.result, reason: r.reason, measures: measures[r.id] ?? [] }));
+  .map((r) => ({
+    id: r.id,
+    result: r.result,
+    reason: r.reason,
+    measures: measures[r.id] ?? [],
+    ...(isCostRow(coreRow(r.id)) ? { cost: true } : {}),
+  }));
+/* SYNC.md 6.2: a cost row over its ceiling holds the ship. The module's verdict records a measure
+   row and never counts it, so the gate adds the cost probe's own reading: a cost row it judged
+   as failed fails this run's exit code (the ship step reads the preview run's), while a not
+   driven cost row stays recorded (the hidden row's visibility reason, a deployment without the
+   bearer) and holds nothing. */
+const costOverCeiling = table
+  .filter((r) => isCostRow(coreRow(r.id)) && r.result === 'failed')
+  .map((r) => r.id);
 const verdict = shipVerdict(results, parked, judged);
 const parking = parkedFeaturesOf(results, judged);
 const retriesOk = specs === null || (specs.retries === 0 && specs.retried === 0);
 const count = (word) => table.filter((r) => r.result === word).length;
-const exitCode = verdict.ok && noStep.length === 0 && retriesOk ? 0 : 1;
+const exitCode =
+  verdict.ok && noStep.length === 0 && retriesOk && costOverCeiling.length === 0 ? 0 : 1;
 
 const summary = {
   base: BASE,
@@ -445,6 +556,17 @@ const summary = {
     retried: specs.retried,
     error: specs.error,
   },
+  /* the cost probe (SYNC.md 6.3): its exit, its JSON, the minutes each state ran and the instances it saw */
+  cost: cost && {
+    exit: cost.exit,
+    ms: cost.ms,
+    json: cost.json,
+    minutes: cost.minutes,
+    instances: cost.instances,
+    error: cost.error,
+  },
+  /* the cost rows over their ceiling in this run (SYNC.md 6.2: on the preview they hold the ship) */
+  costOverCeiling,
   rows: table.length,
   passed: count('passed'),
   failed: count('failed'),
@@ -482,7 +604,7 @@ const esc = (s) =>
 const lines = [
   '# Core gate matrix',
   '',
-  `Base ${BASE}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step. Measurement rows (PRODUCT.md 8.2, recorded and never holding the ship): ${measured.map((m) => `${m.id} ${m.result}${m.measures.length > 0 ? ` (${m.measures.join('; ')})` : ''}`).join('; ') || 'none judged'}. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}${(parked.parkedRows ?? []).length > 0 ? ` and the parked rows ${parked.parkedRows.map((r) => r.id).join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): ${parking.parked.join(', ') || 'none'}; rows whose own controls a ship would keep parked: ${parking.parkedRows.map((r) => `${r.id} (${r.parks.join(', ')})`).join('; ') || 'none'}; rows of an unparkable feature blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
+  `Base ${BASE}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step. Measurement rows (PRODUCT.md 8.2, recorded and never holding the ship; the cost rows of SYNC.md 6.1 among them, which hold it over their ceiling on the preview): ${measured.map((m) => `${m.id} ${m.result}${m.measures.length > 0 ? ` (${m.measures.join('; ')})` : ''}`).join('; ') || 'none judged'}. Cost rows over their ceiling in this run: ${costOverCeiling.join(', ') || 'none'}. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}${(parked.parkedRows ?? []).length > 0 ? ` and the parked rows ${parked.parkedRows.map((r) => r.id).join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): ${parking.parked.join(', ') || 'none'}; rows whose own controls a ship would keep parked: ${parking.parkedRows.map((r) => `${r.id} (${r.parks.join(', ')})`).join('; ') || 'none'}; rows of an unparkable feature blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
   '',
   '| Row | Feature | Driver | Today | Result | Reason |',
   '| --- | --- | --- | --- | --- | --- |',
@@ -503,21 +625,23 @@ const lines = [
 if (noStep.length > 0) lines.push('## No step', '', ...noStep.map((id) => `- \`${id}\``), '');
 if (measured.length > 0)
   lines.push(
-    '## Measurement rows, by id (PRODUCT.md 8.2)',
+    '## Measurement rows, by id (PRODUCT.md 8.2; the cost rows of SYNC.md 6.1)',
     '',
     ...measured.map(
       (m) =>
-        `- \`${m.id}\`: ${m.result}${m.reason ? ` (${esc(m.reason)})` : ''}${m.measures.length > 0 ? `; recorded ${esc(m.measures.join('; '))}` : ''}`,
+        `- \`${m.id}\`: ${m.result}${m.reason ? ` (${esc(m.reason)})` : ''}${m.measures.length > 0 ? `; recorded ${esc(m.measures.join('; '))}` : ''}${m.cost ? ' (a cost row: over its ceiling on the preview it holds the ship)' : ''}`,
     ),
     '',
   );
 writeFileSync(join(OUT, 'core-matrix.md'), `${lines.join('\n')}\n`);
 
 console.log(
-  `\ncore-gate: ${table.length} rows: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} manual), ${noStep.length} no step; verdict ${verdict.ok ? 'ok' : 'failed'}; retries ${retriesOk ? 'zero' : 'NOT zero'}; ${Math.round(summary.ms / 1000)} s against ${BASE}; table ${join(OUT, 'core-matrix.md')}; exit ${exitCode}`,
+  `\ncore-gate: ${table.length} rows: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} manual), ${noStep.length} no step; verdict ${verdict.ok ? 'ok' : 'failed'}; retries ${retriesOk ? 'zero' : 'NOT zero'}; cost rows over their ceiling ${costOverCeiling.length}; ${Math.round(summary.ms / 1000)} s against ${BASE}; table ${join(OUT, 'core-matrix.md')}; exit ${exitCode}`,
 );
 if (!verdict.ok)
   console.log(
     `  failing the gate: ${verdict.failures.map((f) => `${f.id} (${f.result})`).join(', ')}`,
   );
+if (costOverCeiling.length > 0)
+  console.log(`  cost rows over their ceiling: ${costOverCeiling.join(', ')}`);
 process.exit(exitCode);

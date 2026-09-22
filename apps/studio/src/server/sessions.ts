@@ -15,8 +15,9 @@ import { identityOfRequest, sessionDirectory } from './sessions.server';
 
 /**
  * Attached studio pages (SPEC 7.3 "the view tools when a studio session is attached"; MILESTONES
- * M4 item 1). A page on /edit or /deck attaches once its window.turboslide.studio owner is ready,
- * long-polls for commands and answers them through that handle
+ * M4 item 1). A page on /edit, or a page on /deck, /present or /embed opened with `?agent=1`
+ * (docs/SYNC.md 3.10), attaches once its window.turboslide.studio owner is ready, polls for
+ * commands while it is visible and answers them through that handle
  * (components/useStudioSession.ts), so `deck_goto_slide` over /mcp and `view.goto` over the HTTP
  * dispatcher run in the page with the same dispatcher a click uses and return its view state. The
  * registry (@turboslide/agent/http/sessions, framework free) lives on globalThis so the dev
@@ -44,7 +45,7 @@ export function studioSessions(): SessionRegistry {
 
 export const SESSIONS_PER_IDENTITY_MAX = 20;
 export const SESSIONS_PER_DECK_MAX = 200;
-/** A binding not touched by a poll for this long is gone (the poll is 20 s, the sweep 45 s). */
+/** A binding not touched by a poll for this long is gone (the poll cycle is 20 s, the sweep 45 s). */
 export const SESSION_BINDING_TTL_MS = 90_000;
 
 export type SessionBinding = {
@@ -153,8 +154,16 @@ export function redisSessionDirectory(kv: Kv, key = 'sessions:studio'): SessionD
 // production build's import protection refused the chain until the server half moved out. The
 // handlers below are the only callers and the client transform drops them.
 
-const POLL_DEFAULT_MS = 20_000;
-const POLL_MAX_MS = 25_000;
+/**
+ * The longest a poll is held on the server (docs/SYNC.md 3.10; audit-costs item 1). Zero: a poll
+ * answers at once with the queued commands or `[]`, so the function runs for its own few
+ * milliseconds instead of the 25 s hold that was 88 percent of production's provisioned memory
+ * bill (413 of 467 GB hours in the seven days to 2026-09-20). The pacing is the client's
+ * (useStudioSession.ts `EMPTY_ANSWER_PAUSE_MS`, 20 s); a page of an older deployment that still
+ * asks for 25 s is clamped here and paces itself with its own 6 s pause, at a few milliseconds
+ * a call.
+ */
+const POLL_MAX_MS = 0;
 
 function requireSlug(value: unknown, name: string): string {
   if (typeof value !== 'string' || !SLUG_PATTERN.test(value))
@@ -245,16 +254,16 @@ const pollFn = createServerFn({ method: 'POST' })
     const input = parseJsonInput<Untrusted<PollSessionInput>>(raw);
     if (typeof input.id !== 'string' || input.id === '')
       throw new TypeError('id must be a session id');
-    const timeoutMs = typeof input.timeoutMs === 'number' ? input.timeoutMs : POLL_DEFAULT_MS;
+    const timeoutMs = typeof input.timeoutMs === 'number' ? input.timeoutMs : 0;
     return { id: input.id, timeoutMs: Math.min(POLL_MAX_MS, Math.max(0, timeoutMs)) };
   })
   .handler(async ({ data }): Promise<string> => {
     void (await sessionDirectory()).touch(data.id, new Date().toISOString()).catch(() => undefined);
-    const commands = await studioSessions().poll(data.id, data.timeoutMs ?? POLL_DEFAULT_MS);
+    const commands = await studioSessions().poll(data.id, data.timeoutMs ?? 0);
     return JSON.stringify(commands);
   });
 
-/** The pending commands for a session; an empty list at the timeout or when the session is unknown. */
+/** The pending commands for a session, answered at once; an empty list when there are none or the session is unknown here. */
 export async function pollStudioSession(input: PollSessionInput): Promise<SessionCommand[]> {
   return JSON.parse(await pollFn({ data: JSON.stringify(input) })) as SessionCommand[];
 }

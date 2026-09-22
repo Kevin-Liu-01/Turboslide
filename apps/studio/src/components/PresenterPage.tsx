@@ -38,8 +38,10 @@ import { useStudioSession } from './useStudioSession';
  * slideshow window over BroadcastChannel('turboslide:<deckId>') with localStorage as the fallback:
  * the audience reports its slide and follows the console's goto, so arrow keys in either window
  * move both. The console is a window API owner too (`presenter`, with view.goto and view.present)
- * and attaches to the studio's session registry, so `deck_goto_slide` over /mcp lands here when
- * this is the page attached, and the audience window follows over the channel.
+ * and, when its address carries `?agent=1` (docs/SYNC.md 3.10), attaches to the studio's session
+ * registry, so `deck_goto_slide` over /mcp lands here when this is the page attached, and the
+ * audience window follows over the channel; without the flag the console makes no function
+ * request after its load.
  */
 
 /* the five chrome icons as their own module, so the route does not load the chrome's icon set
@@ -98,7 +100,14 @@ type Live = {
   revision: number;
 };
 
-export function PresenterPage({ payload }: { payload: EditorDeck }) {
+export function PresenterPage({
+  payload,
+  agent = false,
+}: {
+  payload: EditorDeck;
+  /** ?agent=1 from the route: the console attaches a studio session (docs/SYNC.md 3.10) */
+  agent?: boolean;
+}) {
   const { deckId, document } = payload;
   const theme = useTheme();
   const platform = useMemo(() => detectPlatform(), []);
@@ -161,7 +170,7 @@ export function PresenterPage({ payload }: { payload: EditorDeck }) {
     if (!ownerEl) return;
     return registerStudioAutomation(adapter.current.adapter, ownerEl);
   }, [ownerEl]);
-  useStudioSession({ deckId, author: 'presenter' });
+  useStudioSession({ deckId, author: 'presenter', enabled: agent });
 
   return (
     <>

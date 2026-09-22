@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-import { CORE_MATRIX, PROBE_DRIVER } from './core-matrix.mjs';
+import { CORE_MATRIX, CORE_SPEC_DRIVERS } from './core-matrix.mjs';
 
 // The core gate's tail (docs/FOCUS.md 6.2; VERIFICATION.md F3): after the drivers the gate merges
 // every row by id, writes core-gate.json, core-matrix.md and the `--matrix` ledger copy, prints
@@ -17,7 +17,9 @@ import { CORE_MATRIX, PROBE_DRIVER } from './core-matrix.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const GATE = join(ROOT, 'scripts', 'probes', 'core-gate.mjs');
-const specRows = CORE_MATRIX.filter((row) => row.driver !== PROBE_DRIVER);
+/* the spec rows alone: `--only specs` judges them, never the walk probe's or the cost probe's rows
+   (the sync and costs round added the `cost-probe` driver) */
+const specRows = CORE_MATRIX.filter((row) => CORE_SPEC_DRIVERS.includes(row.driver));
 
 /** A Playwright JSON report with one passed test per spec row, `failing` rows failed. */
 function stubReport(failing = []) {
@@ -325,7 +327,7 @@ describe('the gate refuses an --only value that names no driver (s2.md S2-R4)', 
       { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
     );
     expect(run.status).toBe(2);
-    expect(run.stderr).toContain('--only takes probe or specs, not "text,slides"');
+    expect(run.stderr).toContain('--only takes probe, specs or cost, not "text,slides"');
     expect(run.stderr).toContain('--spec <areas>');
     expect(run.stderr).toContain('usage: node scripts/probes/core-gate.mjs');
     expect(run.stdout).toBe('');
@@ -339,6 +341,6 @@ describe('the gate refuses an --only value that names no driver (s2.md S2-R4)', 
       { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
     );
     expect(run.status).toBe(0);
-    expect(run.stderr).not.toContain('--only takes probe or specs');
+    expect(run.stderr).not.toContain('--only takes probe, specs or cost');
   }, 30_000);
 });

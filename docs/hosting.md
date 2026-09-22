@@ -1,3 +1,5 @@
+The move of the hosted studio to the General Translation team is planned in [docs/HOSTING-MOVE.md](HOSTING-MOVE.md), which supersedes the project and account facts below; this file stays the reference for the store selection, the seed, the Blob backend, the deploy configuration and the verification it describes.
+
 # Hosting the studio
 
 How a deployed studio finds its decks, keeps edits and serves the asset twins, written for the

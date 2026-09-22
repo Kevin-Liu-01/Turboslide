@@ -13,6 +13,7 @@
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
 import type { Mutation } from '@turboslide/schema/mutations';
+import { slideFieldOf, slideFieldPath } from '@turboslide/schema/mutations';
 
 /**
  * The ids a fixed kind's fields carry as objects before the slide converts: the ones the renderer
@@ -35,10 +36,30 @@ export function fieldObjectIds(slide: Slide): ReadonlySet<string> {
 }
 
 /**
+ * A text run on a title or statement slide's field (docs/SYNC.md 3.4; the sync and costs round):
+ * `text.splice`, `text.mark` or `text.replace` whose `blockId` names a field of the slide's kind
+ * and whose `path` is the field's own pointer (schema mutations.ts `slideFieldOf`,
+ * `slideFieldPath`). The reducer writes the field in place, so such a write addresses no block
+ * and never asks for the conversion: typing into the cover keeps its kind and the first format
+ * write alone converts it (build/b2.md R2).
+ */
+export function isSlideFieldTextRun(slide: Slide, mutation: Mutation): boolean {
+  if (
+    mutation.op !== 'text.splice' &&
+    mutation.op !== 'text.mark' &&
+    mutation.op !== 'text.replace'
+  )
+    return false;
+  const field = slideFieldOf(slide, mutation.blockId);
+  return field !== null && mutation.path === slideFieldPath(field);
+}
+
+/**
  * The slide a write must convert to a canvas before its mutations apply: the first one whose
  * mutation names a block that is one of the slide's field objects and not a block of the slide.
  * Null when every named block exists (the common case, one Set lookup per mutation on a fixed
- * kind and nothing on a content slide).
+ * kind and nothing on a content slide). A text run on a slide field (`isSlideFieldTextRun`) is
+ * read past: it writes the field itself.
  */
 export function slideToConvertFor(
   document: DeckDocument,
@@ -49,6 +70,7 @@ export function slideToConvertFor(
     const slide = document.slides[mutation.slideId];
     if (slide === undefined || slide.kind === 'content') continue;
     if (!fieldObjectIds(slide).has(mutation.blockId)) continue;
+    if (isSlideFieldTextRun(slide, mutation)) continue;
     if (slideBlocks(slide).some(({ block }) => block.id === mutation.blockId)) continue;
     return slide.id;
   }

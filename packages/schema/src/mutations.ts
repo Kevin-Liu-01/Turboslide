@@ -42,7 +42,8 @@ export type Mutation =
   /**
    * Typing, coalesced; range is [start, end) in the markup string at `path`. Kept for every stored
    * record, the replay paths and the agents that still send it (gslides-parity SPEC-3 0.4); a whole
-   * value write at admission.
+   * value write at admission. `blockId` may name a slide field (`slideFieldOf`) with `path` the
+   * field's own pointer, as for `text.splice`.
    */
   | {
       op: 'text.replace';
@@ -62,6 +63,14 @@ export type Mutation =
    * the caret's run, so two clients converge on the flags whatever order the server admits
    * concurrent edits in; the transform splits a concurrent mark around a pinned insertion).
    * Transformed at admission; the inverse is a splice.
+   *
+   * The target is a block's Text, or a slide field (the sync round, docs/SYNC.md 3.4): `blockId`
+   * `heading` or `lead` on a title slide and `big` on a statement slide name the field, with
+   * `path` the field's own pointer (`/heading`, `/lead`, `/big`; `slideFieldPath`). The three
+   * fields travelled as `slide.set` of the whole value before, so two people typing into a cover
+   * lost each other's words (audit-ordering item 1); as text runs they are transformed on both
+   * sides like a block's text. The reducer resolves the target by the slide's kind
+   * (`slideFieldOf`), so a content slide's block whose id happens to be `heading` is a block.
    */
   | {
       op: 'text.splice';
@@ -101,6 +110,36 @@ export type TextMarkEdit =
 
 export type MutationOp = Mutation['op'];
 
+/**
+ * The slide fields a person types into that are not blocks (docs/SYNC.md 3.4): the heading and
+ * the lead of a title slide, the big text of a statement slide. A text op names one with
+ * `blockId` the field and `path` the field's pointer.
+ */
+export const SLIDE_FIELD_IDS = ['heading', 'lead', 'big'] as const;
+export type SlideFieldId = (typeof SLIDE_FIELD_IDS)[number];
+
+/** The pointer a slide field's text op carries: `/heading`, `/lead` or `/big`. */
+export function slideFieldPath(field: SlideFieldId): string {
+  return `/${field}`;
+}
+
+/** True for the pointer of one of the three slide fields. */
+export function isSlideFieldPath(path: string): path is `/${SlideFieldId}` {
+  return path.startsWith('/') && (SLIDE_FIELD_IDS as ReadonlyArray<string>).includes(path.slice(1));
+}
+
+/**
+ * The slide field a `blockId` names on a slide, by the slide's kind: `heading` and `lead` on a
+ * title slide, `big` on a statement slide; null on any other slide, where the id is a block's
+ * (a content slide may carry a block whose id is `heading`). The one rule the reducer, the
+ * transform's callers and the client share (packages/viewer InlineText `isSlideField`).
+ */
+export function slideFieldOf(slide: { kind: string }, blockId: string): SlideFieldId | null {
+  if (slide.kind === 'title' && (blockId === 'heading' || blockId === 'lead')) return blockId;
+  if (slide.kind === 'statement' && blockId === 'big') return blockId;
+  return null;
+}
+
 export const MUTATION_OPS = [
   'slide.insert',
   'slide.remove',
@@ -139,7 +178,25 @@ export type Author = {
   runId?: string;
   principalId?: string;
 };
-export type Write = { baseRevision: number; author: Author; note?: string; mutations: Mutation[] };
+/**
+ * Who first sent a write, so a record names its origin (docs/SYNC.md 3.2, invariant 3): the
+ * server issued client id of the tab and the op ids the write folded, in the order the client
+ * posted them. The blob channel fills it from the POST's entries and the store carries it onto
+ * the version record (`VersionRecord.origin`, packages/store), so a resend of the same op ids on
+ * any instance is answered with the seq the first admission made and never committed twice, and
+ * a tab acknowledges its own echo by id. Absent on a write made outside a room (the CLI, an
+ * agent's strict write, a named version) and on every record written before the round.
+ */
+export type WriteOrigin = { clientId: string; opIds: string[] };
+
+export type Write = {
+  baseRevision: number;
+  author: Author;
+  note?: string;
+  mutations: Mutation[];
+  /** the room client and op ids this write carries; the channel's, never a caller's (`WriteOrigin`) */
+  origin?: WriteOrigin;
+};
 export type Version = {
   n: number;
   revision: number;
@@ -250,6 +307,18 @@ export const authorSchema = z.strictObject({
   runId: z.string().optional(),
   principalId: z.string().min(1).optional(),
 }) satisfies z.ZodType<Author>;
+
+/**
+ * A write's origin as a record stores it (`WriteOrigin`): the client id and at least one op id,
+ * each bounded the way the room protocol bounds them. The store's tolerant record parser extends
+ * `versionSchema` with this as an optional field (docs/SYNC.md 3.2, deployment N tolerates it
+ * before N plus 1 writes it); `writeSchema` below stays closed to it on purpose, since an agent's
+ * `deck.write` never carries one.
+ */
+export const writeOriginSchema = z.strictObject({
+  clientId: z.string().min(1).max(64),
+  opIds: z.array(z.string().min(1).max(64)).min(1),
+}) satisfies z.ZodType<WriteOrigin>;
 
 export const writeSchema = z.strictObject({
   baseRevision: z.number().int().nonnegative(),

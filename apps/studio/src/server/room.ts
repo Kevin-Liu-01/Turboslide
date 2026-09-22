@@ -12,7 +12,7 @@ import { resolvePrincipal } from '@turboslide/identity/resolve';
 import type { ResolvedIdentity, Trust } from '@turboslide/identity/resolve';
 import { appendWithRetry, CAPS, checkBaseWindow, replayPlan } from '@turboslide/realtime/admission';
 import type { IdentityKind } from '@turboslide/realtime/admission';
-import { blobChannel } from '@turboslide/realtime/blob';
+import { blobChannel, synthesizeReplayed } from '@turboslide/realtime/blob';
 import type {
   Entry,
   NewEntry,
@@ -28,6 +28,7 @@ import { memoryChannel } from '@turboslide/realtime/memory';
 import { ioredisCommands, redisChannel } from '@turboslide/realtime/redis';
 import type { RedisCommands } from '@turboslide/realtime/redis';
 import {
+  BASE_SEQ_WINDOW,
   CLIENT_BINDING_TTL_MS,
   EDITING_TABS_MAX,
   LIVE_POINTERS_MAX,
@@ -46,8 +47,10 @@ import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
 import { ConflictError, NotImplementedError } from '@turboslide/schema/errors';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
+import { isSlideFieldPath } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
-import { isTextOp, sameText, transformMutation } from '@turboslide/schema/transform';
+import { insertTieSide, isTextOp, sameText, transformMutation } from '@turboslide/schema/transform';
+import type { Side } from '@turboslide/schema/transform';
 import { validateDocument } from '@turboslide/schema/validate';
 import type { Issue } from '@turboslide/schema/validate';
 import { boundedBlobClient } from '@turboslide/store/blob-store';
@@ -888,7 +891,6 @@ export async function roomBackedStore(deckId: string, store: DeckStore): Promise
  * in flight or pending when the folder goes.
  */
 export async function closeRoom(deckId: string): Promise<void> {
-  forgetBlobAdmitted(deckId);
   const s = shared.__turboslideRoom;
   const pending = s?.rooms.get(deckId);
   if (s === undefined || pending === undefined) return;
@@ -1077,7 +1079,12 @@ function slideBytes(slide: Slide): number {
   return new TextEncoder().encode(canonicalJson(slide)).byteLength;
 }
 
-/** The whole Text rewrites a text op cannot survive (SPEC-3 3.5): a set of its own pointer, its block's removal, its slide's replacement. */
+/**
+ * The whole Text rewrites a text op cannot survive (SPEC-3 3.5): a set of its own pointer, its
+ * block's removal, its slide's replacement, and a `slide.set` of the slide field the op names
+ * (docs/SYNC.md 3.4: the heading, the lead and the big text are text runs whose whole value
+ * write is `slide.set /heading` and the like; it rewrites that field's ops alone).
+ */
 function rewritesText(against: Mutation, op: Mutation): boolean {
   if (!isTextOp(op)) return false;
   switch (against.op) {
@@ -1088,6 +1095,13 @@ function rewritesText(against: Mutation, op: Mutation): boolean {
     case 'text.replace':
       return (
         against.slideId === op.slideId && against.blockId === op.blockId && against.path === op.path
+      );
+    case 'slide.set':
+      return (
+        against.slideId === op.slideId &&
+        isSlideFieldPath(against.path) &&
+        op.path === against.path &&
+        op.blockId === against.path.slice(1)
       );
     case 'block.remove':
       return against.slideId === op.slideId && against.blockId === op.blockId;
@@ -1108,24 +1122,50 @@ function rewritesText(against: Mutation, op: Mutation): boolean {
 }
 
 /**
+ * A mutation that landed since a POST's base, with the side the POST's inserts take against it
+ * in a tie at one offset (`@turboslide/schema/transform` `insertTieSide`; the sync round fix
+ * round, VERIFICATION.md sync pass 1 F3): by the two client ids when the POST declares the rule
+ * (`OpsPost.insertTie`), server order (`right`) when it does not, so the server places an
+ * incoming insert exactly where the client that sent it moved its own copy.
+ */
+export type Landed = { mutation: Mutation; insertTie: Side };
+
+/** The landed entries' mutations in order, each with the tie the POST's inserts take against it. */
+export function landedOf(entries: ReadonlyArray<Entry>, post: OpsPost): Landed[] {
+  const out: Landed[] = [];
+  for (const entry of entries) {
+    const insertTie: Side =
+      post.insertTie === 'client-id' ? insertTieSide(post.clientId, entry.clientId) : 'right';
+    for (const mutation of entry.mutations ?? []) out.push({ mutation, insertTie });
+  }
+  return out;
+}
+
+/** Mutations of this POST's own making (the undo of a refused entry) that the later entries move past by server order. */
+export function landedOwn(mutations: ReadonlyArray<Mutation>): Landed[] {
+  return mutations.map((mutation) => ({ mutation, insertTie: 'right' }));
+}
+
+/**
  * Transforms one entry's mutations against the mutations that landed since its base (SPEC-3
  * 3.4 step 3): text ops through the schema's transform (identity while B1's functions throw
  * NotImplementedError, which keeps a non concurrent keystroke flowing), a text op against a whole
  * Text rewrite returned to its author, `after` anchors re-resolved by the reducer at apply time,
- * everything else unchanged. Null when nothing survives.
+ * everything else unchanged. Null when nothing survives. Two inserts at one offset tie by each
+ * landed row's `insertTie` (`landedOf`).
  */
 export function transformEntry(
   mutations: readonly Mutation[],
-  landed: readonly Mutation[],
+  landed: ReadonlyArray<Landed>,
 ): Mutation[] | null {
   let out: Mutation[] = [...mutations];
-  for (const against of landed) {
+  for (const { mutation: against, insertTie } of landed) {
     const next: Mutation[] = [];
     for (const mutation of out) {
       if (rewritesText(against, mutation)) continue;
       if (isTextOp(mutation) && isTextOp(against) && sameText(mutation, against)) {
         try {
-          next.push(...transformMutation(mutation, against, 'right'));
+          next.push(...transformMutation(mutation, against, 'right', insertTie));
         } catch (error) {
           if (error instanceof NotImplementedError) next.push(mutation);
           else throw error;
@@ -1410,9 +1450,10 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
   };
   const landed =
     post.base.seq < head ? await channel.since(deckId, post.base.seq, head - post.base.seq) : [];
-  // what the later entries of this POST are transformed past: what landed since the base, then
-  // the undo of every entry refused before them (undoOfSplices)
-  const landedMutations = landed.flatMap((entry) => entry.mutations ?? []);
+  // what the later entries of this POST are transformed past: what landed since the base (each
+  // with the tie the POST declared, landedOf), then the undo of every entry refused before them
+  // (undoOfSplices)
+  const landedMutations = landedOf(landed, post);
   // a retried POST (a fetch that failed after the server admitted it, a tab that resends its
   // persisted queue) carries the op ids of the first one: an id already in the stream's tail is
   // answered with its entry and never appended twice (SPEC-3 3.4; report 10 F29). Measured
@@ -1459,7 +1500,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
     );
     if (!placed.ok) {
       rejected.push(placed.rejected);
-      landedMutations.push(...undoOfSplices(transformed));
+      landedMutations.push(...landedOwn(undoOfSplices(transformed)));
       continue;
     }
     running = placed.document;
@@ -1481,7 +1522,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
   const result = await appendWithRetry(channel, deckId, head, candidates, (entries, more) => {
     // the head moved while this request transformed: transform once more against what landed
     // (SPEC-3 3.4 step 5); a candidate that cannot be placed is dropped and rejected
-    const moreMutations = more.flatMap((entry) => entry.mutations ?? []);
+    const moreMutations = landedOf(more, post);
     const base = applyEntries(running, []);
     let document = base;
     try {
@@ -1507,7 +1548,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
       );
       if (!placed.ok) {
         rejected.push(placed.rejected);
-        moreMutations.push(...undoOfSplices(transformed));
+        moreMutations.push(...landedOwn(undoOfSplices(transformed)));
         continue;
       }
       document = placed.document;
@@ -1634,70 +1675,64 @@ export async function liveAtLeast(
 }
 
 /**
- * A candidate the reducer refused on the blob tier is a real refusal only when the document it
- * was judged against is the one the client wrote against (the base of the POST). Judged against
- * a document at another revision, the refusal says nothing about the client's write: the
- * answer is a resync at the head, and the client transforms and sends the write again.
+ * A candidate the reducer refused on the blob tier. Since the sync round the entry was transformed
+ * past every record between its base and the mirror's revision before the reducer judged it
+ * (docs/SYNC.md 3.3, invariant 2), so a refusal against a mirror at or above the base is the
+ * reducer's answer to the client's write and the loser reads the reducer's sentence in its
+ * reject card, as on the memory tier (row `sync.structural.concurrent`: a move of a block whose
+ * slide another person deleted first is refused with "No slide"). Before the round the blob
+ * tier placed the entry verbatim, so a refusal against a document at another revision said
+ * nothing about the write and every such refusal was a resync; that reading stays for the one
+ * case the transform cannot cover, a mirror the forced syncs could not bring up to the client's
+ * base (the write names a document this instance has not read), where the answer is a resync at
+ * the head and the client sends the write again. The sentence travels as the reducer wrote it.
  */
 export function blobRefusal(
   baseSeq: number,
   liveRevision: number,
   rejected: Rejected,
 ): { kind: 'reject'; rejected: Rejected } | { kind: 'resync' } {
-  if (baseSeq !== liveRevision && rejected.reason === 'invalid') return { kind: 'resync' };
-  return {
-    kind: 'reject',
-    rejected:
-      rejected.message === undefined
-        ? rejected
-        : {
-            ...rejected,
-            message: `${rejected.message} (this instance's document is at revision ${liveRevision}; the write's base was ${baseSeq})`,
-          },
-  };
+  if (liveRevision < baseSeq && rejected.reason === 'invalid') return { kind: 'resync' };
+  return { kind: 'reject', rejected };
 }
 
 /**
- * The op ids this instance admitted on the blob tier lately, by deck, with the entry each made
- * (the focus round, cycle 3; VERIFICATION C2-F24). A client that gave up on a POST after the
- * room client's 30 s (controller.tsx OPS_POST_TIMEOUT_MS) resends its ops under the same ids
- * while this instance may have committed the first POST after all; on the memory tier `admitOps`
- * finds such an id in the stream's tail and answers the entry it made, but the blob tier's
- * stream is the version log, whose records carry `clientId: 'store'` and no client op id, so a
- * resend was admitted and committed a second time (a doubled word, a second copy of a slide).
- * The memory is per instance and bounded; a resend that lands on another instance is not caught
- * here (its record carries no id to match), and the room client's own match of a store echo
- * against the POST it lost covers that side (room-client.ts `settleLostPost`).
+ * The origin check of docs/SYNC.md 3.2 (invariant 3), the cheap first pass: the records above a
+ * POST's base, read from the mirror as stream entries (blob.ts `since`, `Entry.covers`), name the
+ * op ids they folded, so a resent POST whose first attempt committed is answered with one
+ * synthesized entry per op id at that record's seq and never placed again. Until the sync round
+ * this instance kept a per instance memory of the last 512 admitted op ids (the focus round,
+ * cycle 3; VERIFICATION C2-F24), which a resend landing on another instance never met; the
+ * record's origin is the same fact on every instance. The second pass, against the records the
+ * write path's own head and pull just proved, is the store's (`WriteOutcome.replayed`, blob.ts
+ * `append`). `entries` are the POST's; the answer names the covered ones and the rest.
  */
-const BLOB_ADMITTED_MAX = 512;
-const blobAdmitted = new Map<string, Map<string, Entry>>();
-
-/** Remembers the entries one blob tier POST admitted, newest last, the oldest forgotten past the cap. */
-export function rememberBlobAdmitted(deckId: string, entries: readonly Entry[]): void {
-  let known = blobAdmitted.get(deckId);
-  if (known === undefined) {
-    known = new Map();
-    blobAdmitted.set(deckId, known);
-  }
+export function splitReplayed(
+  entries: ReadonlyArray<OpsPost['entries'][number]>,
+  landed: ReadonlyArray<Entry>,
+): { replayed: Entry[]; fresh: OpsPost['entries'][number][] } {
+  const coveredBy = new Map<string, Entry>();
+  for (const entry of landed) for (const opId of entry.covers ?? []) coveredBy.set(opId, entry);
+  const replayed: Entry[] = [];
+  const fresh: OpsPost['entries'][number][] = [];
+  const byRecord = new Map<Entry, string[]>();
   for (const entry of entries) {
-    known.delete(entry.opId);
-    known.set(entry.opId, entry);
+    const covering = coveredBy.get(entry.opId);
+    if (covering === undefined) {
+      fresh.push(entry);
+      continue;
+    }
+    const ids = byRecord.get(covering);
+    if (ids === undefined) byRecord.set(covering, [entry.opId]);
+    else ids.push(entry.opId);
   }
-  while (known.size > BLOB_ADMITTED_MAX) {
-    const oldest = known.keys().next().value;
-    if (oldest === undefined) break;
-    known.delete(oldest);
-  }
+  for (const [covering, opIds] of byRecord) replayed.push(...synthesizeReplayed(covering, opIds));
+  return { replayed: replayed.sort((a, b) => a.seq - b.seq), fresh };
 }
 
-/** The entry an op id made on this instance, when this instance admitted it lately. */
-export function blobAdmittedBefore(deckId: string, opId: string): Entry | undefined {
-  return blobAdmitted.get(deckId)?.get(opId);
-}
-
-function forgetBlobAdmitted(deckId: string): void {
-  blobAdmitted.delete(deckId);
-}
+/** The sentence of a text op returned to its author because a whole Text rewrite landed first (SPEC-3 3.5); the room client's own words for the same case. */
+export const STALE_AFTER_REMOTE =
+  'This change no longer fits the slide after another change landed; make it again';
 
 /** A refusal that names an asset the instance's document does not hold (the validator's sentence). */
 export function namesUnknownAsset(rejected: Rejected): boolean {
@@ -1711,19 +1746,44 @@ export const BLOB_APPEND_RETRIES = 1;
 export const STALE_AFTER_REFUSAL =
   'This change was not applied because a change before it was refused; make it again';
 
-/** The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. Exported for its test. */
+/**
+ * The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. Exported for
+ * its test. The sync round (docs/SYNC.md 3.2, 3.3; invariants 2 and 3) made it read the records
+ * between the POST's base and the mirror's revision once (`channel.since`, from the mirror, no
+ * store call) and use them twice: the op ids they cover answer a resend without a placement
+ * (`splitReplayed`), and their mutations are what every fresh entry is transformed past before
+ * the reducer judges it, with the memory tier's `transformEntry`. Before this the entries were
+ * placed against the newer document verbatim, so two inserts at one offset landed in the wrong
+ * order on the server while the client had shifted its own past the other's, and two browsers
+ * read two orders until the session repaired them (audit-ordering item 4, run 4). After a head
+ * that moved under the append the loop reads the records again and transforms the POST's
+ * original mutations past the whole set, never the transformed candidates past the delta alone.
+ * A candidate the reducer refuses after that transform is the reducer's answer (`blobRefusal`):
+ * the loser reads the sentence in its reject card, as on the memory tier, and a resync is left
+ * for the mirror the syncs could not bring up to the client's base. Two inserts at one offset tie
+ * by the rule the POST declares (`landedOf`; `OpsPost.insertTie`).
+ */
 export async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResult> {
   const { post, identity } = input;
   let live = await liveForBase(room, post.base.seq);
   const stamp = new Date((input.now ?? (() => Date.now()))()).toISOString();
-  // the entries of a resent POST this instance admitted already, answered as they were made
-  const replayed: Entry[] = [];
-  const fresh = post.entries.filter((entry) => {
-    const already = blobAdmittedBefore(room.deckId, entry.opId);
-    if (already === undefined) return true;
-    replayed.push(already);
-    return false;
+  const resyncAt = (head: number): AdmissionResult => ({
+    ok: false,
+    status: 409,
+    code: 'resync',
+    message: `The deck is at revision ${head} on this instance and the write was made against ${post.base.seq}; reload and rebase`,
+    head,
   });
+  // the base window (admission.ts checkBaseWindow, the "behind" half): a tab more than the
+  // window behind the head reloads instead of being transformed past hundreds of records
+  if (live.document.deck.revision - post.base.seq > BASE_SEQ_WINDOW) {
+    return resyncAt(live.document.deck.revision);
+  }
+  /** The records between the POST's base and the mirror's revision, as stream entries; none at the head. */
+  const readLanded = async (): Promise<Entry[]> => {
+    const count = live.document.deck.revision - post.base.seq;
+    return count > 0 ? await room.channel.since(room.deckId, post.base.seq, count) : [];
+  };
   /**
    * A candidate that names an asset this instance's document lacks is judged once more on a
    * mirror synced by force (the focus round, cycle 3 stream fix round; VERIFICATION C3S-F6,
@@ -1734,18 +1794,23 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
   let resynced = false;
   type Placement =
     | { kind: 'resync'; head: number }
-    | { kind: 'placed'; candidates: NewEntry[]; rejected: Rejected[] };
+    | { kind: 'placed'; replayed: Entry[]; candidates: NewEntry[]; rejected: Rejected[] };
   /**
-   * Places the POST's entries against the live document as it stands: the reducer and the
-   * validator on each, the later entries transformed past the undo of every entry refused before
-   * them. Run once, and once more against the head when the store moved under the append below.
+   * Places the POST's entries against the live document as it stands: the origin check first
+   * (an op a landed record covers is answered from it), then for each fresh entry the transform
+   * of its original mutations past the landed records' mutations, then past the undo of every
+   * entry refused before it in this POST, then the reducer and the validator. Run once, and once
+   * more from the originals against the head when the store moved under the append below.
    */
-  const place = async (): Promise<Placement> => {
+  const place = async (landed: ReadonlyArray<Entry>): Promise<Placement> => {
+    const { replayed, fresh } = splitReplayed(post.entries, landed);
     const rejected: Rejected[] = [];
     const candidates: NewEntry[] = [];
     let running = live.document;
+    // each landed row with the tie this POST's inserts take against it (landedOf)
+    const landedMutations = landedOf(landed, post);
     // the undo of every entry refused so far, which the later entries are transformed past
-    const refusedUndo: Mutation[] = [];
+    const refusedUndo: Landed[] = [];
     const freshLive = async (): Promise<boolean> => {
       if (resynced || candidates.length > 0) return false;
       resynced = true;
@@ -1775,10 +1840,17 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
           });
         continue;
       }
-      const mutations =
-        refusedUndo.length === 0
+      // past what landed since the base (3.3), then past the undo of the refused (rank 13)
+      const moved =
+        landedMutations.length === 0
           ? (entry.mutations ?? [])
-          : transformEntry(entry.mutations ?? [], refusedUndo);
+          : transformEntry(entry.mutations ?? [], landedMutations);
+      if (moved === null) {
+        // a whole Text rewrite landed first: the op returns to its author with a sentence
+        rejected.push({ opId: entry.opId, reason: 'stale', message: STALE_AFTER_REMOTE });
+        continue;
+      }
+      const mutations = refusedUndo.length === 0 ? moved : transformEntry(moved, refusedUndo);
       if (mutations === null) {
         // a refusal the tab can show (the product round fix round, pass 1 finding 9: a paste
         // that vanished on the blob tier left no sentence anywhere); the reason stays `stale`
@@ -1794,7 +1866,7 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
         placed = landCandidate(running, { opId: entry.opId, kind: 'edit', mutations }, () => true);
       }
       if (!placed.ok) {
-        refusedUndo.push(...undoOfSplices(mutations));
+        refusedUndo.push(...landedOwn(undoOfSplices(mutations)));
         const refusal = blobRefusal(post.base.seq, live.document.deck.revision, placed.rejected);
         if (refusal.kind === 'resync') return { kind: 'resync', head: live.document.deck.revision };
         rejected.push(refusal.rejected);
@@ -1813,26 +1885,30 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
         ...(entry.note === undefined ? {} : { note: entry.note }),
       });
     }
-    return { kind: 'placed', candidates, rejected };
+    return { kind: 'placed', replayed, candidates, rejected };
   };
   void identity;
-  const resyncAt = (head: number): AdmissionResult => ({
-    ok: false,
-    status: 409,
-    code: 'resync',
-    message: `The deck is at revision ${head} on this instance and the write was made against ${post.base.seq}; reload and rebase`,
-    head,
-  });
-  const nothingToAppend = (rejected: Rejected[]): AdmissionResult => ({
-    ok: true,
-    entries: replayed,
-    rejected,
-    head: live.seq,
-    revision: live.document.deck.revision,
-  });
-  let placement = await place();
+  const nothingToAppend = (placed: Extract<Placement, { kind: 'placed' }>): AdmissionResult => {
+    const revision = live.document.deck.revision;
+    const first = placed.replayed[0]?.seq;
+    // a resend answered from the records alone: what landed under the record rides the answer
+    const between =
+      first !== undefined && first - post.base.seq > 1
+        ? betweenEntries(landed, post.base.seq, first)
+        : undefined;
+    return {
+      ok: true,
+      entries: placed.replayed,
+      rejected: placed.rejected,
+      head: revision,
+      revision,
+      ...(between === undefined ? {} : { between }),
+    };
+  };
+  let landed = await readLanded();
+  let placement = await place(landed);
   if (placement.kind === 'resync') return resyncAt(placement.head);
-  if (placement.candidates.length === 0) return nothingToAppend(placement.rejected);
+  if (placement.candidates.length === 0) return nothingToAppend(placement);
   let result = await room.channel.append(
     room.deckId,
     live.document.deck.revision,
@@ -1843,15 +1919,18 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
     // the store moved under the write: another instance committed between this instance's
     // placement and its manifest put (on the wire, the second upload's `asset.set` landing under
     // the first picture's insert; the focus round, cycle 3 stream fix round two, VERIFICATION
-    // C3T-F2). The mirror is synced to the head the store named, the entries are placed against
-    // it and appended once more, in place of the 409 the tab answered with a resync read and a
-    // resend (about a second of the picture's 5 s). A mirror that cannot reach that head keeps
-    // the 409 below.
+    // C3T-F2). The mirror is synced to the head the store named, the records above the base are
+    // read again (the origin check runs on them too, so a first attempt that committed between
+    // the placement and the retry is answered, not committed again), the POST's original
+    // mutations are transformed past the whole set and placed, and appended once more, in place
+    // of the 409 the tab answered with a resync read and a resend (about a second of the
+    // picture's 5 s). A mirror that cannot reach that head keeps the 409 below.
     live = await liveAtLeast(room, result.head);
     if (live.document.deck.revision < result.head) break;
-    placement = await place();
+    landed = await readLanded();
+    placement = await place(landed);
     if (placement.kind === 'resync') return resyncAt(placement.head);
-    if (placement.candidates.length === 0) return nothingToAppend(placement.rejected);
+    if (placement.candidates.length === 0) return nothingToAppend(placement);
     result = await room.channel.append(
       room.deckId,
       live.document.deck.revision,
@@ -1874,26 +1953,15 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
       head: result.head,
     };
   }
-  rememberBlobAdmitted(room.deckId, result.entries);
   const revision = result.entries[0]?.seq ?? live.document.deck.revision;
-  const entries = [...replayed, ...result.entries].sort((a, b) => a.seq - b.seq);
+  const entries = [...placement.replayed, ...result.entries].sort((a, b) => a.seq - b.seq);
   // the records other writers committed between the tab's position and this write ride the
   // answer, so the tab settles its ops without a stream delivery under them (C3S-F8: the
-  // second picture's insert waited 8.4 s on the gap watch for the first's commit). The version
-  // log is the stream on this tier and the mirror holds it after the sync above: no store call
+  // second picture's insert waited 8.4 s on the gap watch for the first's commit). They are the
+  // records the placement transformed past, read from the mirror above: no store call
   const first = entries[0]?.seq ?? revision;
   const between =
-    first - post.base.seq > 1
-      ? betweenEntries(
-          await room.channel.since(
-            room.deckId,
-            post.base.seq,
-            Math.min(first - post.base.seq - 1, BETWEEN_MAX_ENTRIES + 1),
-          ),
-          post.base.seq,
-          first,
-        )
-      : undefined;
+    first - post.base.seq > 1 ? betweenEntries(landed, post.base.seq, first) : undefined;
   return {
     ok: true,
     entries,
@@ -2047,13 +2115,19 @@ function stripNotes(entry: Entry): Entry | null {
 }
 
 /**
- * The events one stream forwards (SPEC-3 3.3, report 10 F25): a viewer receives checkpoints,
- * presence and the deck level notices and never raw operations; a commenter receives operations
- * with the notes stripped; comment entries only for a reader with `readComments`.
+ * The events one stream forwards (SPEC-3 3.3, report 10 F25): an owner and an editor receive
+ * every operation; a commenter and a viewer receive operations with the notes stripped
+ * (docs/SYNC.md 3.7, invariant 6: before the sync round a viewer received checkpoints alone, so
+ * its revision climbed while its document stood still and it read nothing without a reload,
+ * audit-ordering item 2); everyone receives checkpoints, presence and the deck level notices;
+ * comment entries only a reader with `readComments`.
  */
 export function filterEventForReader(event: RoomEvent, reader: ViewerFacts): RoomEvent | null {
   const canSeeOps =
-    reader.role === 'owner' || reader.role === 'editor' || reader.role === 'commenter';
+    reader.role === 'owner' ||
+    reader.role === 'editor' ||
+    reader.role === 'commenter' ||
+    reader.role === 'viewer';
   const fullOps = reader.role === 'owner' || reader.role === 'editor';
   const filterEntry = (entry: Entry): Entry | null => {
     if (entry.kind === 'comment') return reader.readComments ? entry : null;
@@ -2885,7 +2959,8 @@ export async function admitServerWrite(
     ...(input.note === undefined ? {} : { note: input.note }),
   };
   const result = await appendWithRetry(channel, deckId, live.seq, [entry], (entries, more) => {
-    const moreMutations = more.flatMap((row) => row.mutations ?? []);
+    // a server write declares no tie rule: server order, as a client before the round
+    const moreMutations = landedOwn(more.flatMap((row) => row.mutations ?? []));
     let document: DeckDocument;
     try {
       document = applyEntries(live.document, more);

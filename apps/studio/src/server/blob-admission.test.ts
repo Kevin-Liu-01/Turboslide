@@ -1,9 +1,10 @@
 // The blob tier's admission against this instance's mirror (docs/FOCUS.md rank 3; audit-slides
-// rows 93, 95 and 96): a candidate the reducer refuses is a refusal of the client's write only
-// when the document it was judged against is the one the client wrote against. Judged against a
-// document at another revision (the instance behind the client, or ahead of it), the answer is a
-// resync at the head and the client transforms and sends again; a real refusal names both
-// revisions so a probe records them on every refused write.
+// rows 93, 95 and 96; docs/SYNC.md 3.3, invariant 2): every entry is transformed past the
+// records between its base and the mirror's revision before the reducer judges it, so a
+// candidate the reducer refuses against a mirror at or above the base is the reducer's answer
+// and the loser reads its sentence (the sync round fix round, VERIFICATION.md sync pass 1 F2).
+// A mirror the forced syncs could not bring up to the client's base is the one case a refusal
+// says nothing: the answer is a resync at the head and the client sends the write again.
 import { describe, expect, it } from 'vitest';
 
 import type { DeckDocument } from '@turboslide/schema/deck';
@@ -13,19 +14,27 @@ import { validateDocument } from '@turboslide/schema/validate';
 
 import type { Entry } from '@turboslide/realtime/channel';
 
+import { TITLE_ROW } from '@turboslide/chrome/menus/strings';
+import { BASE_SEQ_WINDOW } from '@turboslide/realtime/protocol';
+import { UNTITLED_DECK_TITLE } from '@turboslide/schema/reduce';
+import { DEFAULT_BLANK_TITLE } from '@turboslide/store/templates';
+
 import {
   BETWEEN_MAX_ENTRIES,
   BLOB_APPEND_RETRIES,
+  STALE_AFTER_REMOTE,
   admitOnBlob,
   betweenEntries,
-  blobAdmittedBefore,
   blobRefusal,
-  closeRoom,
+  filterEventForReader,
+  landedOf,
+  landedOwn,
   liveAtLeast,
   namesUnknownAsset,
-  rememberBlobAdmitted,
+  splitReplayed,
   storeBusyResult,
   storeRefusalOf,
+  transformEntry,
   undoOfSplices,
 } from './room';
 
@@ -60,7 +69,7 @@ describe('undoOfSplices', () => {
 });
 
 describe('blobRefusal', () => {
-  it('turns an invalid candidate judged against another revision into a resync', () => {
+  it("turns an invalid candidate judged against a mirror still behind the client's base into a resync", () => {
     expect(
       blobRefusal(15, 14, {
         opId: 'c:1',
@@ -68,25 +77,19 @@ describe('blobRefusal', () => {
         message: 'Slide "split-5" already exists',
       }),
     ).toEqual({ kind: 'resync' });
-    expect(
-      blobRefusal(15, 16, { opId: 'c:1', reason: 'invalid', message: 'No slide "split-5"' }),
-    ).toEqual({ kind: 'resync' });
   });
 
-  it('keeps a refusal judged against the base and names both revisions in it', () => {
-    const refusal = blobRefusal(15, 15, {
+  it("keeps the reducer's sentence for a candidate judged at the base or past it, since the entry was transformed past what landed (docs/SYNC.md invariant 2; the sync round fix round, F2)", () => {
+    const gone = { opId: 'c:1', reason: 'invalid' as const, message: 'No slide "split-5"' };
+    // the slide was deleted by the record between the base and the head: the loser's card
+    expect(blobRefusal(15, 16, gone)).toEqual({ kind: 'reject', rejected: gone });
+    const exists = {
       opId: 'c:1',
-      reason: 'invalid',
+      reason: 'invalid' as const,
       message: 'Slide "split-5" already exists',
-    });
-    expect(refusal.kind).toBe('reject');
-    if (refusal.kind === 'reject') {
-      expect(refusal.rejected.opId).toBe('c:1');
-      expect(refusal.rejected.reason).toBe('invalid');
-      expect(refusal.rejected.message).toBe(
-        'Slide "split-5" already exists (this instance\'s document is at revision 15; the write\'s base was 15)',
-      );
-    }
+    };
+    // the sentence travels as the reducer wrote it, without the two revisions appended
+    expect(blobRefusal(15, 15, exists)).toEqual({ kind: 'reject', rejected: exists });
   });
 
   it('leaves a refusal without a message and a refusal for another reason as they are', () => {
@@ -150,7 +153,7 @@ describe('liveAtLeast', () => {
   });
 });
 
-describe('admitOnBlob and the admitted op memory (the focus round, cycle 3; VERIFICATION C2-F24)', () => {
+describe('admitOnBlob and a resend (the focus round, cycle 3, VERIFICATION C2-F24; the sync round, docs/SYNC.md 3.2)', () => {
   type Room = Parameters<typeof admitOnBlob>[0];
   type Input = Parameters<typeof admitOnBlob>[1];
 
@@ -160,23 +163,54 @@ describe('admitOnBlob and the admitted op memory (the focus round, cycle 3; VERI
     return { deck: { ...result.deck, revision }, slides: result.slides };
   };
 
-  /** A blob tier room over one document: the appends are recorded and answered at the next revision. */
-  const roomOver = (deckId: string, revision: number) => {
-    const appends: { base: number; opIds: string[] }[] = [];
+  /**
+   * A blob tier room over one document: the appends are recorded and answered at the next
+   * revision; `records` are the mirror's entries above the base, as `since` reads them (a record
+   * that names its origin carries `covers`, blob.ts entryOfRecord).
+   */
+  const roomOver = (deckId: string, revision: number, records: Entry[] = []) => {
+    const appends: { base: number; opIds: string[]; mutations: Mutation[][] }[] = [];
     const room = {
       deckId,
       tier: 'blob',
       live: async () => ({ seq: revision, document: documentAt(revision) }),
       store: { sync: async () => undefined },
       channel: {
-        append: async (_deckId: string, base: number, entries: { opId: string }[]) => {
-          appends.push({ base, opIds: entries.map((entry) => entry.opId) });
+        append: async (
+          _deckId: string,
+          base: number,
+          entries: { opId: string; mutations?: Mutation[] }[],
+        ) => {
+          appends.push({
+            base,
+            opIds: entries.map((entry) => entry.opId),
+            mutations: entries.map((entry) => entry.mutations ?? []),
+          });
           return { ok: true, entries: entries.map((entry) => ({ ...entry, seq: base + 1 })) };
         },
+        since: async (_deckId: string, seq: number, limit: number) =>
+          records.filter((entry) => entry.seq > seq).slice(0, limit),
       },
     } as unknown as Room;
     return { room, appends };
   };
+  /** The stream entry of a record another tab's POST made: its origin names the tab and the op ids. */
+  const covering = (
+    seq: number,
+    clientId: string,
+    opIds: string[],
+    mutations: Mutation[],
+  ): Entry => ({
+    seq,
+    rev: seq - 1,
+    kind: 'edit',
+    author: { kind: 'human', name: 'Titanium 471' },
+    clientId,
+    opId: `store:${seq}`,
+    mutations,
+    at: '2026-09-21T19:00:00.000Z',
+    covers: opIds,
+  });
 
   const post = (opId: string, insert: string): Input =>
     ({
@@ -221,24 +255,72 @@ describe('admitOnBlob and the admitted op memory (the focus round, cycle 3; VERI
     expect(notes).toEqual(['Brand kit: Primary', undefined]);
   });
 
-  it('answers a resent op id with the entry its first admission made and appends nothing twice', async () => {
-    const { room, appends } = roomOver('dedup-deck', 7);
-    const first = await admitOnBlob(room, post('c1:1', 'q'));
-    expect(first.ok).toBe(true);
-    if (!first.ok) return;
-    expect(first.entries.map((entry) => [entry.opId, entry.seq])).toEqual([['c1:1', 8]]);
-    expect(appends).toHaveLength(1);
-    // the client gave up on the POST and sends the same op again
-    const again = await admitOnBlob(room, post('c1:1', 'q'));
+  it('answers a resent op id from the record above its base that names it, with one entry per op id at that seq, and appends nothing twice (docs/SYNC.md 3.2)', async () => {
+    // the first attempt committed as revision 8 on some instance and its answer was lost; the
+    // record's origin names the tab and its two op ids, so this instance, at 8, answers from it
+    const record = covering(8, 'c1', ['c1:1', 'c1:2'], [splice(0, 0, 'qr')]);
+    const { room, appends } = roomOver('dedup-deck', 8, [record]);
+    const resend = post('c1:1', 'q');
+    resend.post.entries.push({
+      opId: 'c1:2',
+      kind: 'edit',
+      mutations: [splice(1, 0, 'r')],
+    } as (typeof resend.post.entries)[number]);
+    const again = await admitOnBlob(room, resend);
     expect(again.ok).toBe(true);
     if (!again.ok) return;
-    expect(again.entries).toEqual(first.entries);
-    expect(appends).toHaveLength(1);
-    // a new op id is admitted as before
-    const next = await admitOnBlob(room, post('c1:2', 'r'));
+    expect(again.entries.map((entry) => [entry.opId, entry.seq, entry.clientId])).toEqual([
+      ['c1:1', 8, 'c1'],
+      ['c1:2', 8, 'c1'],
+    ]);
+    // the fold rides the first synthesized entry alone, so a client applies it once
+    expect(again.entries.map((entry) => entry.mutations?.length)).toEqual([1, 0]);
+    expect(again.entries.every((entry) => entry.covers?.join() === 'c1:1,c1:2')).toBe(true);
+    expect(again.revision).toBe(8);
+    expect(appends).toHaveLength(0);
+    // a new op id in the same resend is placed past the record and committed
+    const mixed = post('c1:1', 'q');
+    mixed.post.entries.push({
+      opId: 'c1:3',
+      kind: 'edit',
+      mutations: [splice(0, 0, 's')],
+    } as (typeof mixed.post.entries)[number]);
+    const next = await admitOnBlob(room, mixed);
     expect(next.ok).toBe(true);
-    expect(appends).toHaveLength(2);
-    expect(blobAdmittedBefore('dedup-deck', 'c1:2')?.seq).toBe(8);
+    if (!next.ok) return;
+    expect(next.entries.map((entry) => [entry.opId, entry.seq])).toEqual([
+      ['c1:1', 8],
+      ['c1:3', 9],
+    ]);
+    expect(appends).toHaveLength(1);
+    // the fresh op was transformed past the record's insert before it was placed (3.3)
+    expect(appends[0]?.mutations).toEqual([[splice(2, 0, 's')]]);
+    // the record the answer names was not in the tab's stream: it rides the answer as `between`
+    // only when something sits under the first entry, and here the record is the first entry
+    expect(next.between).toBeUndefined();
+  });
+
+  it('splits a POST into the ops a record covers and the fresh ones, one synthesized entry per covered op id', () => {
+    const a = covering(8, 'c1', ['c1:1', 'c1:2'], [splice(0, 0, 'ab')]);
+    const b = covering(9, 'c1', ['c1:4'], [splice(2, 0, 'd')]);
+    const other = covering(10, 'c2', ['c2:1'], [splice(0, 0, 'z')]);
+    const entries = ['c1:2', 'c1:3', 'c1:4', 'c1:1'].map((opId) => ({
+      opId,
+      kind: 'edit' as const,
+      mutations: [splice(0, 0, 'x')],
+    }));
+    const split = splitReplayed(entries, [a, b, other]);
+    expect(split.fresh.map((entry) => entry.opId)).toEqual(['c1:3']);
+    // in the records' order, the fold on each record's first synthesized entry alone
+    expect(split.replayed.map((entry) => [entry.opId, entry.seq, entry.mutations?.length])).toEqual(
+      [
+        ['c1:1', 8, 1],
+        ['c1:2', 8, 0],
+        ['c1:4', 9, 1],
+      ],
+    );
+    // a record without an origin covers nothing
+    expect(splitReplayed(entries, [{ ...a, covers: undefined }]).fresh).toHaveLength(4);
   });
 
   it("answers a write the store did not move for as the transient 503, never a resync at the client's own base (C3-F1 `decks.access.paint`)", async () => {
@@ -404,24 +486,9 @@ describe('admitOnBlob and the admitted op memory (the focus round, cycle 3; VERI
     expect(storeRefusalOf(null)).toBeNull();
   });
 
-  it('keeps the last 512 op ids of a deck and forgets the deck with its room', async () => {
-    const entries = Array.from({ length: 600 }, (_, i) => ({
-      seq: i + 1,
-      rev: i,
-      kind: 'edit' as const,
-      author: { kind: 'human' as const, name: 'Titanium 471' },
-      clientId: 'c1',
-      opId: `c1:${i + 1}`,
-      mutations: [],
-      at: '2026-09-17T00:00:00.000Z',
-    }));
-    rememberBlobAdmitted('cap-deck', entries);
-    expect(blobAdmittedBefore('cap-deck', 'c1:1')).toBeUndefined();
-    expect(blobAdmittedBefore('cap-deck', 'c1:88')).toBeUndefined();
-    expect(blobAdmittedBefore('cap-deck', 'c1:89')?.seq).toBe(89);
-    expect(blobAdmittedBefore('cap-deck', 'c1:600')?.seq).toBe(600);
-    await closeRoom('cap-deck');
-    expect(blobAdmittedBefore('cap-deck', 'c1:600')).toBeUndefined();
+  it('spells the blank deck title the reducer follows the heading from as the store and the chrome spell it (docs/SYNC.md 3.4)', () => {
+    expect(UNTITLED_DECK_TITLE).toBe(DEFAULT_BLANK_TITLE);
+    expect(UNTITLED_DECK_TITLE).toBe(TITLE_ROW.untitled);
   });
 });
 
@@ -623,9 +690,10 @@ describe('the append that meets a store moved under it (the stream fix round two
     if (!busy.ok) expect(busy).toMatchObject({ status: 503, code: 'store_busy' });
   });
 
-  it('answers the resync at once when the entries do not place against the head the sync brought', async () => {
-    // the head deleted the slide the tab's splice names: invalid against a document at another
-    // revision than the base is the resync (blobRefusal), not a refusal of the write
+  it("answers the reducer's sentence when the entries do not place against the head the sync brought, so the loser reads why (docs/SYNC.md invariant 2; the sync round fix round, F2)", async () => {
+    // the head deleted the slide the tab's splice names: transformed past the record under the
+    // head, the splice is judged against the document without its slide, and the refusal is the
+    // reducer's answer to the write, not a resync (blobRefusal; row sync.structural.concurrent)
     let revision = 7;
     const room = {
       deckId: 'moved-under-gone-deck',
@@ -646,10 +714,276 @@ describe('the append that meets a store moved under it (the stream fix round two
       channel: {
         append: async (_deckId: string, base: number) =>
           base < 8 ? { ok: false, head: 8, count: 1 } : { ok: true, entries: [] },
+        // the record under the head touches nothing the splice names, so the transform passes
+        // it through and the reducer meets the slide gone from the synced document
+        since: async () => [
+          { ...storeEntry(8), mutations: [{ op: 'deck.set', path: '/title', value: 'Moved' }] },
+        ],
       },
     } as unknown as Room;
     const result = await admitOnBlob(room, input(7, 'c1:4'));
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.message);
+    expect(result.entries).toEqual([]);
+    expect(result.rejected).toEqual([
+      { opId: 'c1:4', reason: 'invalid', message: 'No slide "content-rule"' },
+    ]);
+    expect(result.head).toBe(8);
+  });
+});
+
+describe('the server transforms before it places, on the blob tier too (the sync round, docs/SYNC.md 3.3, 3.2; invariants 2 and 3)', () => {
+  type Room = Parameters<typeof admitOnBlob>[0];
+  type Input = Parameters<typeof admitOnBlob>[1];
+  const documentAt = (revision: number): DeckDocument => {
+    const result = validateDocument(workedDocument());
+    if (!result.ok || result.deck === null) throw new Error('fixture');
+    return { deck: { ...result.deck, revision }, slides: result.slides };
+  };
+  /** A record another instance committed: a store entry without an origin, as every record before the round. */
+  const landed = (
+    seq: number,
+    mutations: Mutation[],
+    covers?: string[],
+    clientId = 'store',
+  ): Entry => ({
+    seq,
+    rev: seq - 1,
+    kind: 'edit',
+    author: { kind: 'human', name: 'Cobalt 118' },
+    clientId,
+    opId: `store:${seq}`,
+    mutations,
+    at: '2026-09-21T19:00:00.000Z',
+    ...(covers === undefined ? {} : { covers }),
+  });
+  const input = (base: number, entries: { opId: string; mutations: Mutation[] }[]): Input =>
+    ({
+      post: {
+        clientId: 'c1',
+        base: { seq: base },
+        entries: entries.map((entry) => ({ ...entry, kind: 'edit' })),
+      },
+      bytes: 128,
+      identity: { kind: 'anonymous', identity: 'anon' },
+      author: { kind: 'human', name: 'Titanium 471' },
+      role: 'editor',
+    }) as unknown as Input;
+  /**
+   * A room whose mirror moves as `revisions` says on every forced sync, whose log is `records`
+   * and whose append answers by `headAt`: the head the store names for an append at that base,
+   * or a commit at base plus one.
+   */
+  const roomOf = (records: Entry[], revisions: number[], headAt: Record<number, number> = {}) => {
+    let at = 0;
+    const revision = (): number => revisions[Math.min(at, revisions.length - 1)] ?? 0;
+    const appends: { base: number; mutations: Mutation[][] }[] = [];
+    const sinces: [number, number][] = [];
+    const room = {
+      deckId: 'transform-deck',
+      tier: 'blob',
+      live: async () => ({ seq: revision(), document: documentAt(revision()) }),
+      store: {
+        sync: async (force?: boolean) => {
+          if (force === true) at += 1;
+        },
+      },
+      channel: {
+        append: async (_deckId: string, base: number, entries: { mutations?: Mutation[] }[]) => {
+          appends.push({ base, mutations: entries.map((entry) => entry.mutations ?? []) });
+          const head = headAt[base];
+          if (head !== undefined) return { ok: false, head, count: head - base };
+          return { ok: true, entries: entries.map((entry) => ({ ...entry, seq: base + 1 })) };
+        },
+        since: async (_deckId: string, seq: number, limit: number) => {
+          sinces.push([seq, limit]);
+          return records.filter((entry) => entry.seq > seq).slice(0, limit);
+        },
+      },
+    } as unknown as Room;
+    return { room, appends, sinces };
+  };
+
+  it('places a POST at base n against a document at n plus 2 with its splice shifted past the two records, and answers the placed mutations', async () => {
+    // two other writers inserted three characters each at offset 0 of the block (run 4 part a)
+    const records = [landed(8, [splice(0, 0, 'pa1')]), landed(9, [splice(0, 0, 'pb1')])];
+    const { room, appends, sinces } = roomOf(records, [9]);
+    const result = await admitOnBlob(
+      room,
+      input(7, [{ opId: 'c1:1', mutations: [splice(0, 0, 'g')] }]),
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.message);
+    // the later arrival lands after both inserts: offset 6, never the verbatim 0
+    expect(appends).toEqual([{ base: 9, mutations: [[splice(6, 0, 'g')]] }]);
+    expect(result.entries.map((entry) => [entry.opId, entry.seq])).toEqual([['c1:1', 10]]);
+    expect(result.entries[0]?.mutations).toEqual([splice(6, 0, 'g')]);
+    // the two records ride the answer under the entry (C3S-F8), from the same read: one since
+    expect(result.between?.map((entry) => entry.seq)).toEqual([8, 9]);
+    expect(sinces).toEqual([[7, 2]]);
+  });
+
+  it('ties two inserts at one offset by the two client ids when the POST declares the rule, and by server order when it does not (the sync round fix round, F3)', async () => {
+    // another client inserted three characters at offset 0; this POST inserts at 0 too
+    const post = (insertTie?: 'client-id') => {
+      const row = input(7, [{ opId: 'c1:1', mutations: [splice(0, 0, 'g')] }]);
+      return insertTie === undefined
+        ? row
+        : ({ ...row, post: { ...row.post, insertTie } } as typeof row);
+    };
+    // the record's author sorts after c1: c1 keeps the left and its insert stays at 0
+    const later = roomOf([landed(8, [splice(0, 0, 'pa1')], undefined, 'zz')], [8]);
+    const left = await admitOnBlob(later.room, post('client-id'));
+    expect(left.ok && left.entries[0]?.mutations).toEqual([splice(0, 0, 'g')]);
+    expect(later.appends).toEqual([{ base: 8, mutations: [[splice(0, 0, 'g')]] }]);
+    // the record's author sorts before c1: c1 lands after the three characters
+    const earlier = roomOf([landed(8, [splice(0, 0, 'pa1')], undefined, 'a0')], [8]);
+    const right = await admitOnBlob(earlier.room, post('client-id'));
+    expect(right.ok && right.entries[0]?.mutations).toEqual([splice(3, 0, 'g')]);
+    // a record written without an origin travels as `store`, which every client id sorts before
+    const store = roomOf([landed(8, [splice(0, 0, 'pa1')])], [8]);
+    const beforeStore = await admitOnBlob(store.room, post('client-id'));
+    expect(beforeStore.ok && beforeStore.entries[0]?.mutations).toEqual([splice(0, 0, 'g')]);
+    // no declaration: server order, the later arrival lands after, as before the round
+    const plain = roomOf([landed(8, [splice(0, 0, 'pa1')], undefined, 'zz')], [8]);
+    const order = await admitOnBlob(plain.room, post());
+    expect(order.ok && order.entries[0]?.mutations).toEqual([splice(3, 0, 'g')]);
+    // the rows the server transforms past carry the tie per record; a refused entry's own undo
+    // is moved past by server order whatever the POST declared
+    const rows = landedOf(
+      [landed(8, [splice(0, 0, 'pa1')], undefined, 'zz')],
+      post('client-id').post,
+    );
+    expect(rows).toEqual([{ mutation: splice(0, 0, 'pa1'), insertTie: 'left' }]);
+    expect(landedOwn([splice(0, 0, 'x')])).toEqual([
+      { mutation: splice(0, 0, 'x'), insertTie: 'right' },
+    ]);
+    expect(transformEntry([splice(0, 0, 'g')], rows)).toEqual([splice(0, 0, 'g')]);
+    expect(transformEntry([splice(0, 0, 'g')], landedOwn([splice(0, 0, 'pa1')]))).toEqual([
+      splice(3, 0, 'g'),
+    ]);
+  });
+
+  it('re-places from the original mutations past every record between the base and the new head after a moved head, not the transformed candidates past the delta', async () => {
+    // the mirror is at 8 when the POST arrives (record 8 landed); record 9 lands under the
+    // append; the retry syncs to 9 and transforms the original splice at 0 past both records
+    const records = [landed(8, [splice(0, 0, 'pa1')]), landed(9, [splice(0, 0, 'pb1')])];
+    const { room, appends, sinces } = roomOf(records, [8, 9], { 8: 9 });
+    const result = await admitOnBlob(
+      room,
+      input(7, [{ opId: 'c1:1', mutations: [splice(0, 0, 'g')] }]),
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.message);
+    expect(appends).toEqual([
+      { base: 8, mutations: [[splice(3, 0, 'g')]] },
+      // from the original at 0 past 3 and 3 characters: 6, never 3 transformed again past both (9)
+      { base: 9, mutations: [[splice(6, 0, 'g')]] },
+    ]);
+    expect(sinces).toEqual([
+      [7, 1],
+      [7, 2],
+    ]);
+    expect(result.entries.map((entry) => entry.seq)).toEqual([10]);
+    expect(result.between?.map((entry) => entry.seq)).toEqual([8, 9]);
+  });
+
+  it('answers a resend from the records above its base with their seqs and commits nothing, and the same when the record appears only after the sync inside the retry loop', async () => {
+    // the record the first attempt made sits above the base and names the op id
+    const record = landed(8, [splice(0, 0, 'g')], ['c1:1'], 'c1');
+    const direct = roomOf([record], [8]);
+    const answered = await admitOnBlob(
+      direct.room,
+      input(7, [{ opId: 'c1:1', mutations: [splice(0, 0, 'g')] }]),
+    );
+    expect(answered.ok).toBe(true);
+    if (!answered.ok) throw new Error(answered.message);
+    expect(answered.entries.map((entry) => [entry.opId, entry.seq, entry.clientId])).toEqual([
+      ['c1:1', 8, 'c1'],
+    ]);
+    expect(answered.revision).toBe(8);
+    expect(direct.appends).toEqual([]);
+    // the mirror is at 7 when the resend arrives: the record is not in it yet, the append meets
+    // the store at 8, the sync brings the record and the origin check answers before a second
+    // placement (JC rejection 2: the check runs again after every sync in the loop)
+    const late = roomOf([record], [7, 8], { 7: 8 });
+    const afterSync = await admitOnBlob(
+      late.room,
+      input(7, [{ opId: 'c1:1', mutations: [splice(0, 0, 'g')] }]),
+    );
+    expect(afterSync.ok).toBe(true);
+    if (!afterSync.ok) throw new Error(afterSync.message);
+    expect(afterSync.entries.map((entry) => [entry.opId, entry.seq])).toEqual([['c1:1', 8]]);
+    // one append, the one the store refused; nothing committed after the sync
+    expect(late.appends.map((row) => row.base)).toEqual([7]);
+    expect(late.sinces).toEqual([[7, 1]]);
+  });
+
+  it('answers a POST more than BASE_SEQ_WINDOW behind the mirror as a resync at the head, before any placement', async () => {
+    const far = roomOf([], [BASE_SEQ_WINDOW + 8]);
+    const result = await admitOnBlob(
+      far.room,
+      input(7, [{ opId: 'c1:1', mutations: [splice(0, 0, 'g')] }]),
+    );
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result).toMatchObject({ status: 409, code: 'resync', head: 8 });
+    if (result.ok) return;
+    expect(result).toMatchObject({ status: 409, code: 'resync', head: BASE_SEQ_WINDOW + 8 });
+    expect(far.appends).toEqual([]);
+    expect(far.sinces).toEqual([]);
+    // exactly the window behind is still placed
+    const edge = roomOf([], [BASE_SEQ_WINDOW + 7]);
+    const placed = await admitOnBlob(
+      edge.room,
+      input(7, [{ opId: 'c1:2', mutations: [splice(0, 0, 'g')] }]),
+    );
+    expect(placed.ok).toBe(true);
+    expect(edge.appends).toHaveLength(1);
+  });
+
+  it('returns a text op to its author with a sentence when a whole Text rewrite of its block landed first', async () => {
+    const rewrite: Mutation = {
+      op: 'block.set',
+      slideId: 'content-rule',
+      blockId: 'p1',
+      path: '/text',
+      value: 'Rewritten',
+    };
+    const { room, appends } = roomOf([landed(8, [rewrite])], [8]);
+    const result = await admitOnBlob(
+      room,
+      input(7, [{ opId: 'c1:1', mutations: [splice(0, 0, 'g')] }]),
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.message);
+    expect(result.entries).toEqual([]);
+    expect(result.rejected).toEqual([
+      { opId: 'c1:1', reason: 'stale', message: STALE_AFTER_REMOTE },
+    ]);
+    expect(appends).toEqual([]);
+  });
+
+  it("delivers a viewer's stream every op with the notes stripped, as a commenter's (docs/SYNC.md 3.7, invariant 6)", () => {
+    const reader = { role: 'viewer' as const, via: 'link', showNames: false, readComments: false };
+    const entry: Entry = landed(8, [
+      { op: 'slide.set', slideId: 'content-rule', path: '/notes', value: 'private' },
+      splice(0, 0, 'g'),
+    ]);
+    const op = filterEventForReader({ type: 'op', entry }, reader);
+    expect(op).toEqual({ type: 'op', entry: { ...entry, mutations: [splice(0, 0, 'g')] } });
+    const ops = filterEventForReader({ type: 'ops', entries: [entry] }, reader);
+    expect(ops).toEqual({ type: 'ops', entries: [{ ...entry, mutations: [splice(0, 0, 'g')] }] });
+    // an entry that carried notes alone reaches no viewer
+    const notesOnly = landed(9, [
+      { op: 'slide.set', slideId: 'content-rule', path: '/notes', value: 'p' },
+    ]);
+    expect(filterEventForReader({ type: 'op', entry: notesOnly }, reader)).toBeNull();
+    // an editor reads the notes as before
+    expect(filterEventForReader({ type: 'op', entry }, { ...reader, role: 'editor' })).toEqual({
+      type: 'op',
+      entry,
+    });
+    // a comment entry still needs the comments right
+    const comment: Entry = { ...landed(10, []), kind: 'comment', mutations: undefined } as Entry;
+    expect(filterEventForReader({ type: 'op', entry: comment }, reader)).toBeNull();
   });
 });

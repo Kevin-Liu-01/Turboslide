@@ -1,0 +1,143 @@
+{
+  "base": "https://turboslide-bkwnt59my-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-22T02:07:09.817Z",
+  "rows": {
+    "viewer": {
+      "kind": "viewer",
+      "words": [
+        " view1",
+        " view2",
+        " view3"
+      ],
+      "times": [
+        {
+          "word": " view1",
+          "seen": false,
+          "ms": 5582,
+          "reloaded": false
+        },
+        {
+          "word": " view2",
+          "seen": false,
+          "ms": 5549,
+          "reloaded": false
+        },
+        {
+          "word": " view3",
+          "seen": false,
+          "ms": 5540,
+          "reloaded": false
+        }
+      ],
+      "generalAccess": "link, viewer",
+      "linkShape": "https://turboslide-bkwnt59my-kl01s-projects.vercel.app/s/<token>",
+      "cLandedOn": "/deck/untitled-20260922-haw4",
+      "cOpenMs": 1499,
+      "cStatus": null,
+      "cTextAtStart": "Turboslide 1 slides Deck 01 Verifier drive Verifier drive Previous 01 / 01 Next Verifier drive Assist Slide Grid Book ◐ Theme Present Help 01 / 01 Verifier driv",
+      "cTextAtEnd": "Turboslide 1 slides Deck 01 Verifier drive Verifier drive Previous 01 / 01 Next Verifier drive Assist Slide Grid Book ◐ Theme Present Help 01 / 01 Verifier drive",
+      "pass": false,
+      "seconds": 28
+    },
+    "reload": {
+      "reloadMs": {
+        "A": 1207,
+        "B": 962,
+        "C": 1033
+      },
+      "live": 4,
+      "revisions": {
+        "A": 4,
+        "B": 4
+      },
+      "byteEqual": true,
+      "withinBound": true,
+      "msToEqual": 1212,
+      "cShowsHeading": true,
+      "pass": true,
+      "seconds": 1
+    }
+  },
+  "wire": [
+    {
+      "who": "A",
+      "at": 12377,
+      "base": 1,
+      "opIds": [
+        "0aa6eb965afeaf01661cf16626ae980e:1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 14,
+          "remove": 0,
+          "insertLength": 6
+        }
+      ],
+      "status": 200,
+      "ms": 569,
+      "admitted": [
+        2
+      ]
+    },
+    {
+      "who": "A",
+      "at": 20215,
+      "base": 2,
+      "opIds": [
+        "0aa6eb965afeaf01661cf16626ae980e:2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 20,
+          "remove": 0,
+          "insertLength": 6
+        }
+      ],
+      "status": 200,
+      "ms": 539,
+      "admitted": [
+        3
+      ]
+    },
+    {
+      "who": "A",
+      "at": 28275,
+      "base": 3,
+      "opIds": [
+        "0aa6eb965afeaf01661cf16626ae980e:3"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 26,
+          "remove": 0,
+          "insertLength": 6
+        }
+      ],
+      "status": 200,
+      "ms": 583,
+      "admitted": [
+        4
+      ]
+    }
+  ],
+  "deck": "untitled-20260922-haw4",
+  "tier": "blob",
+  "teardown": {
+    "trashed": "deck.trash through the window API (base 4)",
+    "removed": "deck.remove through the window API (base 4)",
+    "edit": 404,
+    "deckInfo": "revision 4",
+    "gone": false
+  },
+  "notes": [],
+  "endedAt": "2026-09-22T02:08:10.592Z"
+}

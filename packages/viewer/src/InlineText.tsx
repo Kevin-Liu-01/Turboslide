@@ -23,6 +23,7 @@ import type { TableBlock } from '@turboslide/schema/blocks/table';
 import type { Color } from '@turboslide/schema/color';
 import type { Slide } from '@turboslide/schema/deck';
 import type { Mutation } from '@turboslide/schema/mutations';
+import { slideFieldOf, slideFieldPath } from '@turboslide/schema/mutations';
 import { getAt } from '@turboslide/schema/pointer';
 import type { Box } from '@turboslide/schema/render';
 import {
@@ -361,8 +362,12 @@ export function textDiff(from: string, to: string): { start: number; end: number
  * session did not draw into the middle of the stored link when the document and the editable
  * disagreed in their marks (VERIFICATION.md "Product round, pass 1" finding 5). A markup change
  * with no flag behind it (a canonical form the reducer will settle) is the whole value write of
- * 0.4. The text of a title or statement slide is a field and travels as `slide.set`. Empty when
- * nothing changed.
+ * 0.4. The text of a title or statement slide is a field and travels as a text run too since the
+ * sync round (docs/SYNC.md 3.4; audit-ordering item 1): `blockId` names the field and `path` is
+ * the field's own pointer (`slideFieldPath`, schema mutations.ts), so two people typing into one
+ * cover are transformed past each other on both sides instead of the last whole value winning,
+ * and the deck's title follows the heading in the reducer instead of riding every burst. Empty
+ * when nothing changed.
  */
 export function textBurstMutation(
   slide: Slide,
@@ -384,10 +389,13 @@ export function textBurstMutation(
   // the document holds `to` once this write lands, or holds it already when nothing is sent:
   // the session's next absorb diffs against it (handedText)
   noteHanded(key, to);
-  if (isSlideField(slide, blockId) || blockById(slide, blockId) === undefined) {
+  const field = slideFieldOf(slide, blockId);
+  if (field === null && blockById(slide, blockId) === undefined) {
     const whole = textCommitMutation(slide, blockId, pointer, to);
     return whole === null ? [] : [whole];
   }
+  // a slide field's run is addressed at the field's pointer, a block's at the run's (SYNC.md 3.4)
+  const path = field === null ? `/${pointer}` : slideFieldPath(field);
   const base = absorbed ?? from;
   if (base === to) return [];
   const plainFrom = plainOf(base);
@@ -399,7 +407,7 @@ export function textBurstMutation(
         op: 'text.splice',
         slideId: slide.id,
         blockId,
-        path: `/${pointer}`,
+        path,
         at: diff.start,
         remove: diff.end - diff.start,
         insert: diff.text,
@@ -415,7 +423,7 @@ export function textBurstMutation(
     op: 'text.mark',
     slideId: slide.id,
     blockId,
-    path: `/${pointer}`,
+    path,
     range: edit.range,
     edit: {
       kind: 'marks',

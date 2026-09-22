@@ -1,0 +1,336 @@
+{
+  "base": "http://localhost:4414",
+  "startedAt": "2026-09-21T20:20:54.313Z",
+  "endedAt": "2026-09-21T20:27:52.497Z",
+  "minutes": 1,
+  "tier": "memory",
+  "instances": [],
+  "rows": [
+    {
+      "id": "sync.pull.no-listing",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "commits 10 (at least 10), landed in A true",
+        "the store half reads zero on this base (the file store); the function requests alone are asserted"
+      ],
+      "counts": {
+        "minutes": 0.75,
+        "functionRequests": 89,
+        "functionPerMinute": 118.65,
+        "polls": 4,
+        "failedRequests": 0,
+        "commits": 10,
+        "opsPosts": 12,
+        "opsAnswered200": 12,
+        "landed": true,
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "instances": 0
+      },
+      "ceilings": {
+        "list": 0,
+        "commits": 10
+      },
+      "where": "zero",
+      "instances": [],
+      "tier": "memory",
+      "deck": "untitled-20260921-hgcf",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4/out/smoke-all/cost-probe/sync.pull.no-listing.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.editor-idle.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "function requests 12 a minute (ceiling 12; 12 in 1 min)",
+        "the store half reads zero on this base (the file store); the function requests alone are asserted"
+      ],
+      "counts": {
+        "minutes": 1,
+        "functionRequests": 12,
+        "functionPerMinute": 12,
+        "polls": 3,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": null,
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "instances": 0
+      },
+      "ceilings": {
+        "functionPerMinute": 12,
+        "simplePerMinute": 40,
+        "advancedPerMinute": 11
+      },
+      "where": "zero",
+      "instances": [],
+      "tier": "memory",
+      "deck": "untitled-20260921-pnz1",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4/out/smoke-all/cost-probe/cost.editor-idle.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.editor-hidden.calls",
+      "result": "failed",
+      "reason": "function requests 11.99 a minute over 8; 3 session poll(s), ceiling none",
+      "measures": [
+        "function requests 11.99 a minute (ceiling 8; 12 in 1 min)",
+        "session polls 3 (ceiling 0)"
+      ],
+      "counts": {
+        "minutes": 1,
+        "functionRequests": 12,
+        "functionPerMinute": 11.99,
+        "polls": 3,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached",
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "instances": 0
+      },
+      "ceilings": {
+        "functionPerMinute": 8,
+        "polls": 0
+      },
+      "where": "zero",
+      "instances": [],
+      "tier": "memory",
+      "deck": "untitled-20260921-58zo",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4/out/smoke-all/cost-probe/cost.editor-hidden.calls.json",
+      "exit": 1
+    },
+    {
+      "id": "cost.editor-editing.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "function requests 68.99 a minute (ceiling 75; 69 in 1 min)",
+        "the store half reads zero on this base (the file store); the function requests alone are asserted"
+      ],
+      "counts": {
+        "minutes": 1,
+        "functionRequests": 69,
+        "functionPerMinute": 68.99,
+        "polls": 3,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": null,
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "instances": 0
+      },
+      "ceilings": {
+        "functionPerMinute": 75,
+        "simplePerMinute": 140,
+        "advancedPerMinute": 85
+      },
+      "where": "zero",
+      "instances": [],
+      "tier": "memory",
+      "deck": "untitled-20260921-pn56",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4/out/smoke-all/cost-probe/cost.editor-editing.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.two-tabs-idle.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "the store half reads zero on this base (the file store); the function requests alone are asserted"
+      ],
+      "counts": {
+        "minutes": 1,
+        "functionRequests": 23,
+        "functionPerMinute": 22.99,
+        "polls": 6,
+        "failedRequests": 0,
+        "connected": true,
+        "mutual": true,
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "instances": 0
+      },
+      "ceilings": {
+        "list": 0,
+        "advancedPerMinute": 30
+      },
+      "where": "zero",
+      "instances": [],
+      "tier": "memory",
+      "deck": "untitled-20260921-f3c6",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4/out/smoke-all/cost-probe/cost.two-tabs-idle.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.show.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "function requests 0 in the window (ceiling 0)",
+        "the store half reads zero on this base (the file store); the function requests alone are asserted"
+      ],
+      "counts": {
+        "minutes": 1,
+        "functionRequests": 0,
+        "functionPerMinute": 0,
+        "polls": 0,
+        "failedRequests": 0,
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "instances": 0
+      },
+      "ceilings": {
+        "functionRequests": 0,
+        "storeCalls": 0
+      },
+      "where": "zero",
+      "instances": [],
+      "tier": "memory",
+      "deck": "untitled-20260921-teuc",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4/out/smoke-all/cost-probe/cost.show.calls.json",
+      "exit": 0
+    }
+  ],
+  "exitCode": 1
+}

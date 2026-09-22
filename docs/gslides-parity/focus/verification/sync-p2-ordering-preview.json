@@ -1,0 +1,4417 @@
+{
+  "probe": "sync-ordering-probe",
+  "prefix": "p2",
+  "base": "https://turboslide-xp25z99wa-kl01s-projects.vercel.app",
+  "tierFlag": "blob",
+  "bounds": {
+    "serialWord": 5000,
+    "viewerWord": 5000,
+    "titleConcurrent": 5000,
+    "blockConcurrent": 5000,
+    "reconnect": 10000,
+    "reload": 5000
+  },
+  "phasesAsked": [
+    "serial",
+    "title-open",
+    "title-closed",
+    "title-offline",
+    "block-open",
+    "block-closed",
+    "block-offline",
+    "reload"
+  ],
+  "startedAt": "2026-09-22T03:47:05.201Z",
+  "phases": {
+    "create": {
+      "deckId": "untitled-20260922-r9oh",
+      "tier": "blob",
+      "revision": 1,
+      "serverRevision": 1,
+      "seq": 1,
+      "pending": 0,
+      "retained": 0,
+      "connected": true,
+      "offline": false,
+      "streamDown": false,
+      "role": "owner",
+      "clientId": "48569863e1cb6c25a622c760d7a5d81d"
+    },
+    "access": {
+      "generalAccess": "set",
+      "link": "the /s/ URL of the answer, exchanged by C as a navigation before /edit/<id> (the token is not recorded)",
+      "landed": "/deck/<id>"
+    },
+    "join": {
+      "b": {
+        "revision": 1,
+        "serverRevision": 1,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "role": "owner",
+        "clientId": "6289050064e2f0fbe73d326e64fb74bb",
+        "heading": "Ordering probe"
+      },
+      "c": {
+        "revision": 1,
+        "serverRevision": 1,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "role": "viewer",
+        "clientId": "ca62f9e8d6c103e3644db65d0e48aaa4",
+        "heading": "Ordering probe",
+        "editorStage": false
+      }
+    },
+    "serial": {
+      "tokens": [
+        {
+          "token": " a01",
+          "typedAt": 8571,
+          "ackMs": 818,
+          "revision": 2,
+          "latencyMs": 1382,
+          "viewerMs": 878
+        },
+        {
+          "token": " a02",
+          "typedAt": 11595,
+          "ackMs": 566,
+          "revision": 3,
+          "latencyMs": 2938,
+          "viewerMs": 902
+        },
+        {
+          "token": " a03",
+          "typedAt": 14557,
+          "ackMs": 507,
+          "revision": 4,
+          "latencyMs": 583,
+          "viewerMs": 2520
+        },
+        {
+          "token": " a04",
+          "typedAt": 17547,
+          "ackMs": 633,
+          "revision": 5,
+          "latencyMs": 1156,
+          "viewerMs": 1057
+        },
+        {
+          "token": " a05",
+          "typedAt": 20565,
+          "ackMs": 817,
+          "revision": 6,
+          "latencyMs": 779,
+          "viewerMs": 3118
+        },
+        {
+          "token": " a06",
+          "typedAt": 23511,
+          "ackMs": 825,
+          "revision": 7,
+          "latencyMs": 780,
+          "viewerMs": 2202
+        },
+        {
+          "token": " a07",
+          "typedAt": 26600,
+          "ackMs": 570,
+          "revision": 8,
+          "latencyMs": 2566,
+          "viewerMs": 634
+        },
+        {
+          "token": " a08",
+          "typedAt": 29584,
+          "ackMs": 695,
+          "revision": 9,
+          "latencyMs": 1814,
+          "viewerMs": 694
+        },
+        {
+          "token": " a09",
+          "typedAt": 32524,
+          "ackMs": 631,
+          "revision": 10,
+          "latencyMs": 599,
+          "viewerMs": 1821
+        },
+        {
+          "token": " a10",
+          "typedAt": 35543,
+          "ackMs": 749,
+          "revision": 11,
+          "latencyMs": 2251,
+          "viewerMs": 831
+        },
+        {
+          "token": " a11",
+          "typedAt": 38625,
+          "ackMs": 569,
+          "revision": 12,
+          "latencyMs": 1409,
+          "viewerMs": 798
+        },
+        {
+          "token": " a12",
+          "typedAt": 41572,
+          "ackMs": 571,
+          "revision": 13,
+          "latencyMs": 703,
+          "viewerMs": 907
+        },
+        {
+          "token": " a13",
+          "typedAt": 44609,
+          "ackMs": 629,
+          "revision": 14,
+          "latencyMs": 1831,
+          "viewerMs": 913
+        },
+        {
+          "token": " a14",
+          "typedAt": 47612,
+          "ackMs": 698,
+          "revision": 15,
+          "latencyMs": 1259,
+          "viewerMs": 952
+        },
+        {
+          "token": " a15",
+          "typedAt": 50510,
+          "ackMs": 633,
+          "revision": 16,
+          "latencyMs": 593,
+          "viewerMs": 2629
+        },
+        {
+          "token": " a16",
+          "typedAt": 53598,
+          "ackMs": 637,
+          "revision": 17,
+          "latencyMs": 1473,
+          "viewerMs": 1065
+        },
+        {
+          "token": " a17",
+          "typedAt": 56555,
+          "ackMs": 632,
+          "revision": 18,
+          "latencyMs": 2785,
+          "viewerMs": 645
+        },
+        {
+          "token": " a18",
+          "typedAt": 59601,
+          "ackMs": 517,
+          "revision": 19,
+          "latencyMs": 1966,
+          "viewerMs": 647
+        },
+        {
+          "token": " a19",
+          "typedAt": 62595,
+          "ackMs": 569,
+          "revision": 20,
+          "latencyMs": 1300,
+          "viewerMs": 689
+        },
+        {
+          "token": " a20",
+          "typedAt": 65608,
+          "ackMs": 586,
+          "revision": 21,
+          "latencyMs": 2654,
+          "viewerMs": 725
+        },
+        {
+          "token": " a21",
+          "typedAt": 68557,
+          "ackMs": 642,
+          "revision": 22,
+          "latencyMs": 2147,
+          "viewerMs": 823
+        },
+        {
+          "token": " a22",
+          "typedAt": 71646,
+          "ackMs": 576,
+          "revision": 23,
+          "latencyMs": 1187,
+          "viewerMs": 778
+        },
+        {
+          "token": " a23",
+          "typedAt": 74571,
+          "ackMs": 696,
+          "revision": 24,
+          "latencyMs": 2635,
+          "viewerMs": 906
+        },
+        {
+          "token": " a24",
+          "typedAt": 77620,
+          "ackMs": 577,
+          "revision": 25,
+          "latencyMs": 1914,
+          "viewerMs": 901
+        },
+        {
+          "token": " a25",
+          "typedAt": 80607,
+          "ackMs": 692,
+          "revision": 26,
+          "latencyMs": 965,
+          "viewerMs": 965
+        },
+        {
+          "token": " a26",
+          "typedAt": 83635,
+          "ackMs": 575,
+          "revision": 27,
+          "latencyMs": 2312,
+          "viewerMs": 989
+        },
+        {
+          "token": " a27",
+          "typedAt": 86540,
+          "ackMs": 1070,
+          "revision": 28,
+          "latencyMs": 1548,
+          "viewerMs": 2155
+        },
+        {
+          "token": " a28",
+          "typedAt": 89579,
+          "ackMs": 626,
+          "revision": 29,
+          "latencyMs": 947,
+          "viewerMs": 642
+        },
+        {
+          "token": " a29",
+          "typedAt": 92637,
+          "ackMs": 816,
+          "revision": 30,
+          "latencyMs": 831,
+          "viewerMs": 2664
+        },
+        {
+          "token": " a30",
+          "typedAt": 95549,
+          "ackMs": 566,
+          "revision": 31,
+          "latencyMs": 1376,
+          "viewerMs": 763
+        }
+      ],
+      "latency": {
+        "n": 30,
+        "mean": 1556,
+        "p50": 1409,
+        "p95": 2785,
+        "max": 2938,
+        "min": 583
+      },
+      "viewerLatency": {
+        "n": 30,
+        "mean": 1207,
+        "p50": 906,
+        "p95": 2664,
+        "max": 3118,
+        "min": 634
+      },
+      "ack": {
+        "n": 30,
+        "mean": 656,
+        "p50": 632,
+        "p95": 825,
+        "max": 1070,
+        "min": 507
+      },
+      "postMs": {
+        "n": 30,
+        "mean": 479,
+        "p50": 440,
+        "p95": 659,
+        "max": 883,
+        "min": 362
+      },
+      "posts": 30,
+      "postsNotAtNextRevision": 0,
+      "arrivalOrder": [
+        " a01",
+        " a02",
+        " a03",
+        " a04",
+        " a05",
+        " a06",
+        " a07",
+        " a08",
+        " a09",
+        " a10",
+        " a11",
+        " a12",
+        " a13",
+        " a14",
+        " a15",
+        " a16",
+        " a17",
+        " a18",
+        " a19",
+        " a20",
+        " a21",
+        " a22",
+        " a23",
+        " a24",
+        " a25",
+        " a26",
+        " a27",
+        " a28",
+        " a29",
+        " a30"
+      ],
+      "inOrder": true,
+      "lost": [],
+      "duplicates": [],
+      "lateInB": [],
+      "lateInC": [],
+      "aText": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30",
+      "bText": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30",
+      "cText": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30",
+      "equalAB": true,
+      "equalAC": true,
+      "a": {
+        "revision": 31,
+        "serverRevision": 31,
+        "seq": 31,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "role": "owner"
+      },
+      "b": {
+        "revision": 31,
+        "serverRevision": 31,
+        "seq": 31,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "role": "owner"
+      },
+      "c": {
+        "revision": 31,
+        "serverRevision": 31,
+        "seq": 31,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "role": "viewer",
+        "seenTokens": 30
+      },
+      "bSamples": [
+        {
+          "at": 8037,
+          "revision": 1,
+          "serverRevision": 1,
+          "seq": 1,
+          "text": "Ordering probe"
+        },
+        {
+          "at": 9953,
+          "revision": 2,
+          "serverRevision": 2,
+          "seq": 2,
+          "text": "Ordering probe a01"
+        },
+        {
+          "at": 14533,
+          "revision": 3,
+          "serverRevision": 3,
+          "seq": 3,
+          "text": "Ordering probe a01 a02"
+        },
+        {
+          "at": 15140,
+          "revision": 4,
+          "serverRevision": 4,
+          "seq": 4,
+          "text": "Ordering probe a01 a02 a03"
+        },
+        {
+          "at": 18703,
+          "revision": 4,
+          "serverRevision": 4,
+          "seq": 5,
+          "text": "Ordering probe a01 a02 a03 a04"
+        },
+        {
+          "at": 18805,
+          "revision": 5,
+          "serverRevision": 5,
+          "seq": 5,
+          "text": "Ordering probe a01 a02 a03 a04"
+        },
+        {
+          "at": 21344,
+          "revision": 6,
+          "serverRevision": 6,
+          "seq": 6,
+          "text": "Ordering probe a01 a02 a03 a04 a05"
+        },
+        {
+          "at": 24291,
+          "revision": 7,
+          "serverRevision": 7,
+          "seq": 7,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06"
+        },
+        {
+          "at": 29166,
+          "revision": 8,
+          "serverRevision": 8,
+          "seq": 8,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07"
+        },
+        {
+          "at": 31398,
+          "revision": 9,
+          "serverRevision": 9,
+          "seq": 9,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08"
+        },
+        {
+          "at": 33123,
+          "revision": 9,
+          "serverRevision": 9,
+          "seq": 10,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09"
+        },
+        {
+          "at": 33224,
+          "revision": 10,
+          "serverRevision": 10,
+          "seq": 10,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09"
+        },
+        {
+          "at": 37794,
+          "revision": 11,
+          "serverRevision": 11,
+          "seq": 11,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10"
+        },
+        {
+          "at": 40034,
+          "revision": 12,
+          "serverRevision": 12,
+          "seq": 12,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11"
+        },
+        {
+          "at": 42275,
+          "revision": 13,
+          "serverRevision": 13,
+          "seq": 13,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12"
+        },
+        {
+          "at": 46440,
+          "revision": 14,
+          "serverRevision": 14,
+          "seq": 14,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13"
+        },
+        {
+          "at": 48871,
+          "revision": 15,
+          "serverRevision": 15,
+          "seq": 15,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14"
+        },
+        {
+          "at": 51103,
+          "revision": 15,
+          "serverRevision": 15,
+          "seq": 16,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15"
+        },
+        {
+          "at": 51204,
+          "revision": 16,
+          "serverRevision": 16,
+          "seq": 16,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15"
+        },
+        {
+          "at": 55071,
+          "revision": 16,
+          "serverRevision": 16,
+          "seq": 17,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16"
+        },
+        {
+          "at": 55173,
+          "revision": 17,
+          "serverRevision": 17,
+          "seq": 17,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16"
+        },
+        {
+          "at": 59340,
+          "revision": 18,
+          "serverRevision": 18,
+          "seq": 18,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17"
+        },
+        {
+          "at": 61567,
+          "revision": 19,
+          "serverRevision": 19,
+          "seq": 19,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18"
+        },
+        {
+          "at": 63895,
+          "revision": 19,
+          "serverRevision": 19,
+          "seq": 20,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19"
+        },
+        {
+          "at": 63998,
+          "revision": 20,
+          "serverRevision": 20,
+          "seq": 20,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19"
+        },
+        {
+          "at": 68262,
+          "revision": 21,
+          "serverRevision": 21,
+          "seq": 21,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20"
+        },
+        {
+          "at": 70704,
+          "revision": 22,
+          "serverRevision": 22,
+          "seq": 22,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21"
+        },
+        {
+          "at": 72833,
+          "revision": 23,
+          "serverRevision": 23,
+          "seq": 23,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22"
+        },
+        {
+          "at": 77206,
+          "revision": 24,
+          "serverRevision": 24,
+          "seq": 24,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23"
+        },
+        {
+          "at": 79534,
+          "revision": 25,
+          "serverRevision": 25,
+          "seq": 25,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24"
+        },
+        {
+          "at": 81572,
+          "revision": 26,
+          "serverRevision": 26,
+          "seq": 26,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25"
+        },
+        {
+          "at": 85947,
+          "revision": 27,
+          "serverRevision": 27,
+          "seq": 27,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26"
+        },
+        {
+          "at": 88088,
+          "revision": 27,
+          "serverRevision": 27,
+          "seq": 28,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27"
+        },
+        {
+          "at": 88189,
+          "revision": 28,
+          "serverRevision": 28,
+          "seq": 28,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27"
+        },
+        {
+          "at": 90526,
+          "revision": 29,
+          "serverRevision": 29,
+          "seq": 29,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28"
+        },
+        {
+          "at": 93468,
+          "revision": 30,
+          "serverRevision": 30,
+          "seq": 30,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29"
+        },
+        {
+          "at": 96925,
+          "revision": 31,
+          "serverRevision": 31,
+          "seq": 31,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30"
+        }
+      ],
+      "saveWords": {
+        "a": "All changes saved",
+        "b": "All changes saved"
+      },
+      "stale": {
+        "a": null,
+        "b": null
+      }
+    },
+    "title": {
+      "open": {
+        "rounds": [
+          {
+            "round": 1,
+            "windowMs": 444,
+            "convergedWithinBound": true,
+            "convergedMs": 2056,
+            "a": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1",
+            "b": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1",
+            "equal": true,
+            "aHas": {
+              "own": 1,
+              "other": 1
+            },
+            "bHas": {
+              "own": 1,
+              "other": 1
+            },
+            "orderInA": "a then b",
+            "orderInB": "a then b",
+            "posts": 2,
+            "repairSplices": 0,
+            "wire": [
+              {
+                "who": "A",
+                "at": 101250,
+                "base": 31,
+                "opIds": [
+                  "31"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/heading",
+                    "blockId": "heading",
+                    "at": 134,
+                    "remove": 0,
+                    "insert": " pa1",
+                    "insertLength": 4
+                  }
+                ],
+                "status": 200,
+                "ms": 483,
+                "revision": "32",
+                "admitted": [
+                  32
+                ],
+                "rejected": 0,
+                "between": null
+              },
+              {
+                "who": "B",
+                "at": 101383,
+                "base": 31,
+                "opIds": [
+                  "1"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/heading",
+                    "blockId": "heading",
+                    "at": 134,
+                    "remove": 0,
+                    "insert": " pb1",
+                    "insertLength": 4
+                  }
+                ],
+                "status": 200,
+                "ms": 1668,
+                "revision": "33",
+                "admitted": [
+                  33
+                ],
+                "rejected": 0,
+                "between": [
+                  {
+                    "seq": 32,
+                    "mutations": [
+                      "splice@134-0+4"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "samples": [
+              {
+                "at": 103328,
+                "a": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1",
+                "b": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1",
+                "ra": 33,
+                "rb": 33,
+                "pa": 0,
+                "pb": 0
+              }
+            ],
+            "stale": {
+              "a": null,
+              "b": null
+            }
+          },
+          {
+            "round": 2,
+            "windowMs": 482,
+            "convergedWithinBound": true,
+            "convergedMs": 1948,
+            "a": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2",
+            "b": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2",
+            "equal": true,
+            "aHas": {
+              "own": 1,
+              "other": 1
+            },
+            "bHas": {
+              "own": 1,
+              "other": 1
+            },
+            "orderInA": "a then b",
+            "orderInB": "a then b",
+            "posts": 2,
+            "repairSplices": 0,
+            "wire": [
+              {
+                "who": "A",
+                "at": 115913,
+                "base": 33,
+                "opIds": [
+                  "32"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/heading",
+                    "blockId": "heading",
+                    "at": 142,
+                    "remove": 0,
+                    "insert": " pa2",
+                    "insertLength": 4
+                  }
+                ],
+                "status": 200,
+                "ms": 396,
+                "revision": "34",
+                "admitted": [
+                  34
+                ],
+                "rejected": 0,
+                "between": null
+              },
+              {
+                "who": "B",
+                "at": 116111,
+                "base": 33,
+                "opIds": [
+                  "2"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/heading",
+                    "blockId": "heading",
+                    "at": 142,
+                    "remove": 0,
+                    "insert": " pb2",
+                    "insertLength": 4
+                  }
+                ],
+                "status": 200,
+                "ms": 1518,
+                "revision": "35",
+                "admitted": [
+                  35
+                ],
+                "rejected": 0,
+                "between": [
+                  {
+                    "seq": 34,
+                    "mutations": [
+                      "splice@142-0+4"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "samples": [
+              {
+                "at": 117949,
+                "a": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2",
+                "b": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2",
+                "ra": 35,
+                "rb": 35,
+                "pa": 0,
+                "pb": 0
+              }
+            ],
+            "stale": {
+              "a": null,
+              "b": null
+            }
+          }
+        ],
+        "afterEscape": {
+          "a": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2",
+          "b": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2",
+          "equal": true,
+          "a2": {
+            "revision": 35,
+            "serverRevision": 35,
+            "seq": 35,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "role": "owner"
+          },
+          "b2": {
+            "revision": 35,
+            "serverRevision": 35,
+            "seq": 35,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "role": "owner"
+          }
+        }
+      },
+      "closed": {
+        "rounds": [
+          {
+            "round": 1,
+            "convergedMs": 3876,
+            "a": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1",
+            "b": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1",
+            "equal": true,
+            "aHas": {
+              "own": 1,
+              "other": 1
+            },
+            "bHas": {
+              "own": 1,
+              "other": 1
+            },
+            "posts": 2,
+            "postMs": {
+              "n": 2,
+              "mean": 1074,
+              "p50": 1670,
+              "p95": 1670,
+              "max": 1670,
+              "min": 477
+            },
+            "wire": [
+              {
+                "who": "A",
+                "at": 135219,
+                "base": 35,
+                "opIds": [
+                  "33"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/heading",
+                    "blockId": "heading",
+                    "at": 150,
+                    "remove": 0,
+                    "insert": " qpa1",
+                    "insertLength": 5
+                  }
+                ],
+                "status": 200,
+                "ms": 477,
+                "revision": "36",
+                "admitted": [
+                  36
+                ],
+                "rejected": 0,
+                "between": null
+              },
+              {
+                "who": "B",
+                "at": 135316,
+                "base": 35,
+                "opIds": [
+                  "3"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/heading",
+                    "blockId": "heading",
+                    "at": 150,
+                    "remove": 0,
+                    "insert": " qpb1",
+                    "insertLength": 5
+                  }
+                ],
+                "status": 200,
+                "ms": 1670,
+                "revision": "37",
+                "admitted": [
+                  37
+                ],
+                "rejected": 0,
+                "between": [
+                  {
+                    "seq": 36,
+                    "mutations": [
+                      "splice@150-0+5"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "stale": {
+              "a": null,
+              "b": null
+            },
+            "a2": {
+              "revision": 37,
+              "serverRevision": 37,
+              "seq": 37,
+              "pending": 0,
+              "retained": 0,
+              "connected": true,
+              "offline": false,
+              "streamDown": false,
+              "role": "owner"
+            },
+            "b2": {
+              "revision": 37,
+              "serverRevision": 37,
+              "seq": 37,
+              "pending": 0,
+              "retained": 0,
+              "connected": true,
+              "offline": false,
+              "streamDown": false,
+              "role": "owner"
+            }
+          },
+          {
+            "round": 2,
+            "convergedMs": 2038,
+            "a": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1 qpa2 qpb2",
+            "b": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1 qpa2 qpb2",
+            "equal": true,
+            "aHas": {
+              "own": 1,
+              "other": 1
+            },
+            "bHas": {
+              "own": 1,
+              "other": 1
+            },
+            "posts": 2,
+            "postMs": {
+              "n": 2,
+              "mean": 1190,
+              "p50": 1854,
+              "p95": 1854,
+              "max": 1854,
+              "min": 526
+            },
+            "wire": [
+              {
+                "who": "A",
+                "at": 142788,
+                "base": 37,
+                "opIds": [
+                  "34"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/heading",
+                    "blockId": "heading",
+                    "at": 160,
+                    "remove": 0,
+                    "insert": " qpa2",
+                    "insertLength": 5
+                  }
+                ],
+                "status": 200,
+                "ms": 526,
+                "revision": "38",
+                "admitted": [
+                  38
+                ],
+                "rejected": 0,
+                "between": null
+              },
+              {
+                "who": "B",
+                "at": 142871,
+                "base": 37,
+                "opIds": [
+                  "4"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/heading",
+                    "blockId": "heading",
+                    "at": 160,
+                    "remove": 0,
+                    "insert": " qpb2",
+                    "insertLength": 5
+                  }
+                ],
+                "status": 200,
+                "ms": 1854,
+                "revision": "39",
+                "admitted": [
+                  39
+                ],
+                "rejected": 0,
+                "between": [
+                  {
+                    "seq": 38,
+                    "mutations": [
+                      "splice@160-0+5"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "stale": {
+              "a": null,
+              "b": null
+            },
+            "a2": {
+              "revision": 39,
+              "serverRevision": 39,
+              "seq": 39,
+              "pending": 0,
+              "retained": 0,
+              "connected": true,
+              "offline": false,
+              "streamDown": false,
+              "role": "owner"
+            },
+            "b2": {
+              "revision": 39,
+              "serverRevision": 39,
+              "seq": 39,
+              "pending": 0,
+              "retained": 1,
+              "connected": true,
+              "offline": false,
+              "streamDown": false,
+              "role": "owner"
+            }
+          }
+        ]
+      },
+      "offline": {
+        "before": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1 qpa2 qpb2",
+        "aBeforeOnline": {
+          "revision": 39,
+          "serverRevision": 39,
+          "seq": 39,
+          "pending": 1,
+          "retained": 0,
+          "connected": false,
+          "offline": true,
+          "streamDown": true,
+          "role": "owner",
+          "words": "Offline. Changes will save when you reconnect",
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1 qpa2 qpb2 opa1"
+        },
+        "bBeforeOnline": {
+          "revision": 42,
+          "serverRevision": 42,
+          "seq": 42,
+          "pending": 0,
+          "retained": 0,
+          "connected": true,
+          "offline": false,
+          "streamDown": false,
+          "role": "owner",
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1 qpa2 qpb2 opb1 opb2 opb3"
+        },
+        "aSettledMs": 4331,
+        "aSettled": {
+          "revision": 43,
+          "serverRevision": 43,
+          "seq": 43,
+          "pending": 0,
+          "retained": 1,
+          "connected": true,
+          "offline": false,
+          "streamDown": false,
+          "role": "owner"
+        },
+        "convergedMs": 4333,
+        "convergedWithinBound": true,
+        "a": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1 qpa2 qpb2 opb1 opb2 opb3 opa1",
+        "b": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1 qpa2 qpb2 opb1 opb2 opb3 opa1",
+        "lostInA": [],
+        "lostInB": [],
+        "duplicatesInA": [],
+        "duplicatesInB": [],
+        "resend": {
+          "firstAt": 170,
+          "resentAt": 185,
+          "shifted": true
+        },
+        "wire": [
+          {
+            "who": "B",
+            "at": 148500,
+            "base": 39,
+            "opIds": [
+              "5"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/heading",
+                "blockId": "heading",
+                "at": 170,
+                "remove": 0,
+                "insert": " opb1",
+                "insertLength": 5
+              }
+            ],
+            "status": 200,
+            "ms": 455,
+            "revision": "40",
+            "admitted": [
+              40
+            ],
+            "rejected": 0,
+            "between": null
+          },
+          {
+            "who": "B",
+            "at": 151364,
+            "base": 40,
+            "opIds": [
+              "6"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/heading",
+                "blockId": "heading",
+                "at": 175,
+                "remove": 0,
+                "insert": " opb2",
+                "insertLength": 5
+              }
+            ],
+            "status": 200,
+            "ms": 547,
+            "revision": "41",
+            "admitted": [
+              41
+            ],
+            "rejected": 0,
+            "between": null
+          },
+          {
+            "who": "A",
+            "at": 151648,
+            "base": 39,
+            "opIds": [
+              "35"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/heading",
+                "blockId": "heading",
+                "at": 170,
+                "remove": 0,
+                "insert": " opa1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 0,
+            "revision": null
+          },
+          {
+            "who": "A",
+            "at": 152150,
+            "base": 39,
+            "opIds": [
+              "35"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/heading",
+                "blockId": "heading",
+                "at": 170,
+                "remove": 0,
+                "insert": " opa1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 0,
+            "revision": null
+          },
+          {
+            "who": "A",
+            "at": 153154,
+            "base": 39,
+            "opIds": [
+              "35"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/heading",
+                "blockId": "heading",
+                "at": 170,
+                "remove": 0,
+                "insert": " opa1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 0,
+            "revision": null
+          },
+          {
+            "who": "B",
+            "at": 154219,
+            "base": 41,
+            "opIds": [
+              "7"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/heading",
+                "blockId": "heading",
+                "at": 180,
+                "remove": 0,
+                "insert": " opb3",
+                "insertLength": 5
+              }
+            ],
+            "status": 200,
+            "ms": 469,
+            "revision": "42",
+            "admitted": [
+              42
+            ],
+            "rejected": 0,
+            "between": null
+          },
+          {
+            "who": "A",
+            "at": 155156,
+            "base": 39,
+            "opIds": [
+              "35"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/heading",
+                "blockId": "heading",
+                "at": 170,
+                "remove": 0,
+                "insert": " opa1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 0,
+            "revision": null
+          },
+          {
+            "who": "A",
+            "at": 159159,
+            "base": 39,
+            "opIds": [
+              "35"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/heading",
+                "blockId": "heading",
+                "at": 170,
+                "remove": 0,
+                "insert": " opa1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 1,
+            "revision": null
+          },
+          {
+            "who": "A",
+            "at": 167162,
+            "base": 39,
+            "opIds": [
+              "35"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/heading",
+                "blockId": "heading",
+                "at": 170,
+                "remove": 0,
+                "insert": " opa1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 1,
+            "revision": null
+          },
+          {
+            "who": "A",
+            "at": 171731,
+            "base": 42,
+            "opIds": [
+              "36"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/heading",
+                "blockId": "heading",
+                "at": 185,
+                "remove": 0,
+                "insert": " opa1",
+                "insertLength": 5
+              }
+            ],
+            "status": 200,
+            "ms": 554,
+            "revision": "43",
+            "admitted": [
+              43
+            ],
+            "rejected": 0,
+            "between": null
+          }
+        ],
+        "stale": {
+          "a": null,
+          "b": null
+        },
+        "a2": {
+          "revision": 43,
+          "serverRevision": 43,
+          "seq": 43,
+          "pending": 0,
+          "retained": 1,
+          "connected": true,
+          "offline": false,
+          "streamDown": false,
+          "role": "owner"
+        },
+        "b2": {
+          "revision": 43,
+          "serverRevision": 43,
+          "seq": 43,
+          "pending": 0,
+          "retained": 0,
+          "connected": true,
+          "offline": false,
+          "streamDown": false,
+          "role": "owner"
+        }
+      },
+      "travelledAs": "text.splice"
+    },
+    "block": {
+      "run": "ordering-block/text",
+      "open": {
+        "rounds": [
+          {
+            "round": 1,
+            "windowMs": 222,
+            "convergedWithinBound": true,
+            "convergedMs": 4214,
+            "a": "ka1kb1end",
+            "b": "ka1kb1end",
+            "equal": true,
+            "aHas": {
+              "own": 1,
+              "other": 1
+            },
+            "bHas": {
+              "own": 1,
+              "other": 1
+            },
+            "orderInA": "a then b",
+            "orderInB": "a then b",
+            "posts": 2,
+            "repairSplices": 0,
+            "wire": [
+              {
+                "who": "B",
+                "at": 174606,
+                "base": 44,
+                "opIds": [
+                  "8"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 0,
+                    "remove": 0,
+                    "insert": "kb1",
+                    "insertLength": 3
+                  }
+                ],
+                "status": 200,
+                "ms": 2733,
+                "revision": "46",
+                "admitted": [
+                  46
+                ],
+                "rejected": 0,
+                "between": [
+                  {
+                    "seq": 45,
+                    "mutations": [
+                      "splice@0-0+3"
+                    ]
+                  }
+                ]
+              },
+              {
+                "who": "A",
+                "at": 174622,
+                "base": 44,
+                "opIds": [
+                  "38"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 0,
+                    "remove": 0,
+                    "insert": "ka1",
+                    "insertLength": 3
+                  }
+                ],
+                "status": 200,
+                "ms": 584,
+                "revision": "45",
+                "admitted": [
+                  45
+                ],
+                "rejected": 0,
+                "between": null
+              }
+            ],
+            "samples": [
+              {
+                "at": 178701,
+                "a": "ka1kb1end",
+                "b": "ka1kb1end",
+                "ra": 46,
+                "rb": 46,
+                "pa": 0,
+                "pb": 0
+              }
+            ],
+            "stale": {
+              "a": null,
+              "b": null
+            }
+          },
+          {
+            "round": 2,
+            "windowMs": 297,
+            "convergedWithinBound": true,
+            "convergedMs": 1844,
+            "a": "kb2ka2ka1kb1end",
+            "b": "kb2ka2ka1kb1end",
+            "equal": true,
+            "aHas": {
+              "own": 1,
+              "other": 1
+            },
+            "bHas": {
+              "own": 1,
+              "other": 1
+            },
+            "orderInA": "b then a",
+            "orderInB": "b then a",
+            "posts": 2,
+            "repairSplices": 0,
+            "wire": [
+              {
+                "who": "A",
+                "at": 191222,
+                "base": 46,
+                "opIds": [
+                  "39"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 2,
+                    "remove": 0,
+                    "insert": "2ka",
+                    "insertLength": 3
+                  }
+                ],
+                "status": 200,
+                "ms": 453,
+                "revision": "47",
+                "admitted": [
+                  47
+                ],
+                "rejected": 0,
+                "between": null
+              },
+              {
+                "who": "B",
+                "at": 191297,
+                "base": 46,
+                "opIds": [
+                  "9"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 1,
+                    "remove": 0,
+                    "insert": "b2k",
+                    "insertLength": 3
+                  }
+                ],
+                "status": 200,
+                "ms": 1655,
+                "revision": "48",
+                "admitted": [
+                  48
+                ],
+                "rejected": 0,
+                "between": [
+                  {
+                    "seq": 47,
+                    "mutations": [
+                      "splice@2-0+3"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "samples": [
+              {
+                "at": 193013,
+                "a": "kb2ka2ka1kb1end",
+                "b": "kb2ka2ka1kb1end",
+                "ra": 48,
+                "rb": 48,
+                "pa": 0,
+                "pb": 0
+              }
+            ],
+            "stale": {
+              "a": null,
+              "b": null
+            }
+          }
+        ],
+        "afterEscape": {
+          "a": "kb2ka2ka1kb1end",
+          "b": "kb2ka2ka1kb1end",
+          "equal": true,
+          "a2": {
+            "revision": 48,
+            "serverRevision": 48,
+            "seq": 48,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "role": "owner"
+          },
+          "b2": {
+            "revision": 48,
+            "serverRevision": 48,
+            "seq": 48,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "role": "owner"
+          }
+        }
+      },
+      "closed": {
+        "rounds": [
+          {
+            "round": 1,
+            "convergedMs": 4488,
+            "a": "kb2ka2ka1kb1end qka1 qkb1",
+            "b": "kb2ka2ka1kb1end qka1 qkb1",
+            "equal": true,
+            "aHas": {
+              "own": 1,
+              "other": 1
+            },
+            "bHas": {
+              "own": 1,
+              "other": 1
+            },
+            "posts": 2,
+            "postMs": {
+              "n": 2,
+              "mean": 1297,
+              "p50": 2001,
+              "p95": 2001,
+              "max": 2001,
+              "min": 593
+            },
+            "wire": [
+              {
+                "who": "A",
+                "at": 209818,
+                "base": 48,
+                "opIds": [
+                  "40"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 15,
+                    "remove": 0,
+                    "insert": " qka1",
+                    "insertLength": 5
+                  }
+                ],
+                "status": 200,
+                "ms": 593,
+                "revision": "49",
+                "admitted": [
+                  49
+                ],
+                "rejected": 0,
+                "between": null
+              },
+              {
+                "who": "B",
+                "at": 209883,
+                "base": 48,
+                "opIds": [
+                  "10"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 15,
+                    "remove": 0,
+                    "insert": " qkb1",
+                    "insertLength": 5
+                  }
+                ],
+                "status": 200,
+                "ms": 2001,
+                "revision": "50",
+                "admitted": [
+                  50
+                ],
+                "rejected": 0,
+                "between": [
+                  {
+                    "seq": 49,
+                    "mutations": [
+                      "splice@15-0+5"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "stale": {
+              "a": null,
+              "b": null
+            },
+            "a2": {
+              "revision": 50,
+              "serverRevision": 50,
+              "seq": 50,
+              "pending": 0,
+              "retained": 0,
+              "connected": true,
+              "offline": false,
+              "streamDown": false,
+              "role": "owner"
+            },
+            "b2": {
+              "revision": 50,
+              "serverRevision": 50,
+              "seq": 50,
+              "pending": 0,
+              "retained": 0,
+              "connected": true,
+              "offline": false,
+              "streamDown": false,
+              "role": "owner"
+            }
+          },
+          {
+            "round": 2,
+            "convergedMs": 2038,
+            "a": "kb2ka2ka1kb1end qka1 qkb1 qka2 qkb2",
+            "b": "kb2ka2ka1kb1end qka1 qkb1 qka2 qkb2",
+            "equal": true,
+            "aHas": {
+              "own": 1,
+              "other": 1
+            },
+            "bHas": {
+              "own": 1,
+              "other": 1
+            },
+            "posts": 2,
+            "postMs": {
+              "n": 2,
+              "mean": 1150,
+              "p50": 1757,
+              "p95": 1757,
+              "max": 1757,
+              "min": 543
+            },
+            "wire": [
+              {
+                "who": "A",
+                "at": 217904,
+                "base": 50,
+                "opIds": [
+                  "41"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 25,
+                    "remove": 0,
+                    "insert": " qka2",
+                    "insertLength": 5
+                  }
+                ],
+                "status": 200,
+                "ms": 543,
+                "revision": "51",
+                "admitted": [
+                  51
+                ],
+                "rejected": 0,
+                "between": null
+              },
+              {
+                "who": "B",
+                "at": 217922,
+                "base": 50,
+                "opIds": [
+                  "11"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 25,
+                    "remove": 0,
+                    "insert": " qkb2",
+                    "insertLength": 5
+                  }
+                ],
+                "status": 200,
+                "ms": 1757,
+                "revision": "52",
+                "admitted": [
+                  52
+                ],
+                "rejected": 0,
+                "between": [
+                  {
+                    "seq": 51,
+                    "mutations": [
+                      "splice@25-0+5"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "stale": {
+              "a": null,
+              "b": null
+            },
+            "a2": {
+              "revision": 52,
+              "serverRevision": 52,
+              "seq": 52,
+              "pending": 0,
+              "retained": 0,
+              "connected": true,
+              "offline": false,
+              "streamDown": false,
+              "role": "owner"
+            },
+            "b2": {
+              "revision": 52,
+              "serverRevision": 52,
+              "seq": 52,
+              "pending": 0,
+              "retained": 1,
+              "connected": true,
+              "offline": false,
+              "streamDown": false,
+              "role": "owner"
+            }
+          }
+        ]
+      },
+      "offline": {
+        "before": "kb2ka2ka1kb1end qka1 qkb1 qka2 qkb2",
+        "aBeforeOnline": {
+          "revision": 52,
+          "serverRevision": 52,
+          "seq": 52,
+          "pending": 1,
+          "retained": 0,
+          "connected": false,
+          "offline": true,
+          "streamDown": true,
+          "role": "owner",
+          "words": "Offline. Changes will save when you reconnect",
+          "text": "kb2ka2ka1kb1end qka1 qkb1 qka2 qkb2 oka1"
+        },
+        "bBeforeOnline": {
+          "revision": 55,
+          "serverRevision": 55,
+          "seq": 55,
+          "pending": 0,
+          "retained": 0,
+          "connected": true,
+          "offline": false,
+          "streamDown": false,
+          "role": "owner",
+          "text": "kb2ka2ka1kb1end qka1 qkb1 qka2 qkb2 okb1 okb2 okb3"
+        },
+        "aSettledMs": 4123,
+        "aSettled": {
+          "revision": 56,
+          "serverRevision": 56,
+          "seq": 56,
+          "pending": 0,
+          "retained": 0,
+          "connected": true,
+          "offline": false,
+          "streamDown": false,
+          "role": "owner"
+        },
+        "convergedMs": 4943,
+        "convergedWithinBound": true,
+        "a": "kb2ka2ka1kb1end qka1 qkb1 qka2 qkb2 okb1 okb2 okb3 oka1",
+        "b": "kb2ka2ka1kb1end qka1 qkb1 qka2 qkb2 okb1 okb2 okb3 oka1",
+        "lostInA": [],
+        "lostInB": [],
+        "duplicatesInA": [],
+        "duplicatesInB": [],
+        "resend": {
+          "firstAt": 35,
+          "resentAt": 50,
+          "shifted": true
+        },
+        "wire": [
+          {
+            "who": "B",
+            "at": 223595,
+            "base": 52,
+            "opIds": [
+              "12"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/text",
+                "blockId": "ordering-block",
+                "at": 35,
+                "remove": 0,
+                "insert": " okb1",
+                "insertLength": 5
+              }
+            ],
+            "status": 200,
+            "ms": 484,
+            "revision": "53",
+            "admitted": [
+              53
+            ],
+            "rejected": 0,
+            "between": null
+          },
+          {
+            "who": "B",
+            "at": 226472,
+            "base": 53,
+            "opIds": [
+              "13"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/text",
+                "blockId": "ordering-block",
+                "at": 40,
+                "remove": 0,
+                "insert": " okb2",
+                "insertLength": 5
+              }
+            ],
+            "status": 200,
+            "ms": 450,
+            "revision": "54",
+            "admitted": [
+              54
+            ],
+            "rejected": 0,
+            "between": null
+          },
+          {
+            "who": "A",
+            "at": 226700,
+            "base": 52,
+            "opIds": [
+              "42"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/text",
+                "blockId": "ordering-block",
+                "at": 35,
+                "remove": 0,
+                "insert": " oka1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 1,
+            "revision": null
+          },
+          {
+            "who": "A",
+            "at": 227204,
+            "base": 52,
+            "opIds": [
+              "42"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/text",
+                "blockId": "ordering-block",
+                "at": 35,
+                "remove": 0,
+                "insert": " oka1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 0,
+            "revision": null
+          },
+          {
+            "who": "A",
+            "at": 228206,
+            "base": 52,
+            "opIds": [
+              "42"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/text",
+                "blockId": "ordering-block",
+                "at": 35,
+                "remove": 0,
+                "insert": " oka1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 0,
+            "revision": null
+          },
+          {
+            "who": "B",
+            "at": 229356,
+            "base": 54,
+            "opIds": [
+              "14"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/text",
+                "blockId": "ordering-block",
+                "at": 45,
+                "remove": 0,
+                "insert": " okb3",
+                "insertLength": 5
+              }
+            ],
+            "status": 200,
+            "ms": 458,
+            "revision": "55",
+            "admitted": [
+              55
+            ],
+            "rejected": 0,
+            "between": null
+          },
+          {
+            "who": "A",
+            "at": 230209,
+            "base": 52,
+            "opIds": [
+              "42"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/text",
+                "blockId": "ordering-block",
+                "at": 35,
+                "remove": 0,
+                "insert": " oka1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 0,
+            "revision": null
+          },
+          {
+            "who": "A",
+            "at": 234212,
+            "base": 52,
+            "opIds": [
+              "42"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/text",
+                "blockId": "ordering-block",
+                "at": 35,
+                "remove": 0,
+                "insert": " oka1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 1,
+            "revision": null
+          },
+          {
+            "who": "A",
+            "at": 242216,
+            "base": 52,
+            "opIds": [
+              "42"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/text",
+                "blockId": "ordering-block",
+                "at": 35,
+                "remove": 0,
+                "insert": " oka1",
+                "insertLength": 5
+              }
+            ],
+            "status": "no response",
+            "ms": 0,
+            "revision": null
+          },
+          {
+            "who": "A",
+            "at": 246733,
+            "base": 55,
+            "opIds": [
+              "43"
+            ],
+            "mutations": [
+              {
+                "op": "text.splice",
+                "path": "/text",
+                "blockId": "ordering-block",
+                "at": 50,
+                "remove": 0,
+                "insert": " oka1",
+                "insertLength": 5
+              }
+            ],
+            "status": 200,
+            "ms": 387,
+            "revision": "56",
+            "admitted": [
+              56
+            ],
+            "rejected": 0,
+            "between": null
+          }
+        ],
+        "stale": {
+          "a": null,
+          "b": null
+        },
+        "a2": {
+          "revision": 56,
+          "serverRevision": 56,
+          "seq": 56,
+          "pending": 0,
+          "retained": 0,
+          "connected": true,
+          "offline": false,
+          "streamDown": false,
+          "role": "owner"
+        },
+        "b2": {
+          "revision": 56,
+          "serverRevision": 56,
+          "seq": 56,
+          "pending": 0,
+          "retained": 0,
+          "connected": true,
+          "offline": false,
+          "streamDown": false,
+          "role": "owner"
+        }
+      }
+    },
+    "reload": {
+      "reloadMs": {
+        "a": 827,
+        "b": 813,
+        "c": 1116
+      },
+      "bound": 5000,
+      "withinBound": true,
+      "live": 56,
+      "a": {
+        "id": "untitled-20260922-r9oh",
+        "title": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1 qpa2 qpb2 opb1 opb2 opb3 opa1",
+        "revision": 56,
+        "serverRevision": 56,
+        "order": [
+          "title"
+        ]
+      },
+      "b": {
+        "id": "untitled-20260922-r9oh",
+        "title": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1 qpa2 qpb2 opb1 opb2 opb3 opa1",
+        "revision": 56,
+        "serverRevision": 56,
+        "order": [
+          "title"
+        ]
+      },
+      "c": {
+        "id": "untitled-20260922-r9oh",
+        "title": "Ordering probe a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 pa1 pb1 pa2 pb2 qpa1 qpb1 qpa2 qpb2 opb1 opb2 opb3 opa1",
+        "revision": 56,
+        "serverRevision": 56,
+        "order": [
+          "title"
+        ]
+      },
+      "sameAB": true,
+      "sameAC": true,
+      "sameRevision": true,
+      "atLive": true
+    }
+  },
+  "wire": [
+    {
+      "who": "A",
+      "at": 4450,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "B",
+      "at": 7572,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "C",
+      "at": 7907,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 8686,
+      "base": 1,
+      "opIds": [
+        "1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 14,
+          "remove": 0,
+          "insert": " a01",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 659,
+      "revision": "2",
+      "admitted": [
+        2
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 11717,
+      "base": 2,
+      "opIds": [
+        "2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 18,
+          "remove": 0,
+          "insert": " a02",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 433,
+      "revision": "3",
+      "admitted": [
+        3
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 14685,
+      "base": 3,
+      "opIds": [
+        "3"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 22,
+          "remove": 0,
+          "insert": " a03",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 362,
+      "revision": "4",
+      "admitted": [
+        4
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 17704,
+      "base": 4,
+      "opIds": [
+        "4"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 26,
+          "remove": 0,
+          "insert": " a04",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 445,
+      "revision": "5",
+      "admitted": [
+        5
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 20710,
+      "base": 5,
+      "opIds": [
+        "5"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 30,
+          "remove": 0,
+          "insert": " a05",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 616,
+      "revision": "6",
+      "admitted": [
+        6
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 23666,
+      "base": 6,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 34,
+          "remove": 0,
+          "insert": " a06",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 611,
+      "revision": "7",
+      "admitted": [
+        7
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 26714,
+      "base": 7,
+      "opIds": [
+        "7"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 38,
+          "remove": 0,
+          "insert": " a07",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 415,
+      "revision": "8",
+      "admitted": [
+        8
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 29733,
+      "base": 8,
+      "opIds": [
+        "8"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 42,
+          "remove": 0,
+          "insert": " a08",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 507,
+      "revision": "9",
+      "admitted": [
+        9
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 32685,
+      "base": 9,
+      "opIds": [
+        "9"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 46,
+          "remove": 0,
+          "insert": " a09",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 428,
+      "revision": "10",
+      "admitted": [
+        10
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 35686,
+      "base": 10,
+      "opIds": [
+        "10"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 50,
+          "remove": 0,
+          "insert": " a10",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 593,
+      "revision": "11",
+      "admitted": [
+        11
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 38736,
+      "base": 11,
+      "opIds": [
+        "11"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 54,
+          "remove": 0,
+          "insert": " a11",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 440,
+      "revision": "12",
+      "admitted": [
+        12
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 41712,
+      "base": 12,
+      "opIds": [
+        "12"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 58,
+          "remove": 0,
+          "insert": " a12",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 390,
+      "revision": "13",
+      "admitted": [
+        13
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 44734,
+      "base": 13,
+      "opIds": [
+        "13"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 62,
+          "remove": 0,
+          "insert": " a13",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 452,
+      "revision": "14",
+      "admitted": [
+        14
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 47731,
+      "base": 14,
+      "opIds": [
+        "14"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 66,
+          "remove": 0,
+          "insert": " a14",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 538,
+      "revision": "15",
+      "admitted": [
+        15
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 50666,
+      "base": 15,
+      "opIds": [
+        "15"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 70,
+          "remove": 0,
+          "insert": " a15",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 433,
+      "revision": "16",
+      "admitted": [
+        16
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 53716,
+      "base": 16,
+      "opIds": [
+        "16"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 74,
+          "remove": 0,
+          "insert": " a16",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 516,
+      "revision": "17",
+      "admitted": [
+        17
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 56717,
+      "base": 17,
+      "opIds": [
+        "17"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 78,
+          "remove": 0,
+          "insert": " a17",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 405,
+      "revision": "18",
+      "admitted": [
+        18
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 59724,
+      "base": 18,
+      "opIds": [
+        "18"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 82,
+          "remove": 0,
+          "insert": " a18",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 364,
+      "revision": "19",
+      "admitted": [
+        19
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 62743,
+      "base": 19,
+      "opIds": [
+        "19"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 86,
+          "remove": 0,
+          "insert": " a19",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 389,
+      "revision": "20",
+      "admitted": [
+        20
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 65737,
+      "base": 20,
+      "opIds": [
+        "20"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 90,
+          "remove": 0,
+          "insert": " a20",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 398,
+      "revision": "21",
+      "admitted": [
+        21
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 68718,
+      "base": 21,
+      "opIds": [
+        "21"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 94,
+          "remove": 0,
+          "insert": " a21",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 424,
+      "revision": "22",
+      "admitted": [
+        22
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 71780,
+      "base": 22,
+      "opIds": [
+        "22"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 98,
+          "remove": 0,
+          "insert": " a22",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 434,
+      "revision": "23",
+      "admitted": [
+        23
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 74723,
+      "base": 23,
+      "opIds": [
+        "23"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 102,
+          "remove": 0,
+          "insert": " a23",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 495,
+      "revision": "24",
+      "admitted": [
+        24
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 77751,
+      "base": 24,
+      "opIds": [
+        "24"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 106,
+          "remove": 0,
+          "insert": " a24",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 386,
+      "revision": "25",
+      "admitted": [
+        25
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 80745,
+      "base": 25,
+      "opIds": [
+        "25"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 110,
+          "remove": 0,
+          "insert": " a25",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 507,
+      "revision": "26",
+      "admitted": [
+        26
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 83759,
+      "base": 26,
+      "opIds": [
+        "26"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 114,
+          "remove": 0,
+          "insert": " a26",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 388,
+      "revision": "27",
+      "admitted": [
+        27
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 86697,
+      "base": 27,
+      "opIds": [
+        "27"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 118,
+          "remove": 0,
+          "insert": " a27",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 883,
+      "revision": "28",
+      "admitted": [
+        28
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 89733,
+      "base": 28,
+      "opIds": [
+        "28"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 122,
+          "remove": 0,
+          "insert": " a28",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 453,
+      "revision": "29",
+      "admitted": [
+        29
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 92789,
+      "base": 29,
+      "opIds": [
+        "29"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 126,
+          "remove": 0,
+          "insert": " a29",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 613,
+      "revision": "30",
+      "admitted": [
+        30
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 95704,
+      "base": 30,
+      "opIds": [
+        "30"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 130,
+          "remove": 0,
+          "insert": " a30",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 390,
+      "revision": "31",
+      "admitted": [
+        31
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 101250,
+      "base": 31,
+      "opIds": [
+        "31"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 134,
+          "remove": 0,
+          "insert": " pa1",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 483,
+      "revision": "32",
+      "admitted": [
+        32
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 101383,
+      "base": 31,
+      "opIds": [
+        "1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 134,
+          "remove": 0,
+          "insert": " pb1",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 1668,
+      "revision": "33",
+      "admitted": [
+        33
+      ],
+      "rejected": 0,
+      "between": [
+        {
+          "seq": 32,
+          "mutations": [
+            "splice@134-0+4"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 115913,
+      "base": 33,
+      "opIds": [
+        "32"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 142,
+          "remove": 0,
+          "insert": " pa2",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 396,
+      "revision": "34",
+      "admitted": [
+        34
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 116111,
+      "base": 33,
+      "opIds": [
+        "2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 142,
+          "remove": 0,
+          "insert": " pb2",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 1518,
+      "revision": "35",
+      "admitted": [
+        35
+      ],
+      "rejected": 0,
+      "between": [
+        {
+          "seq": 34,
+          "mutations": [
+            "splice@142-0+4"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 135219,
+      "base": 35,
+      "opIds": [
+        "33"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 150,
+          "remove": 0,
+          "insert": " qpa1",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 477,
+      "revision": "36",
+      "admitted": [
+        36
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 135316,
+      "base": 35,
+      "opIds": [
+        "3"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 150,
+          "remove": 0,
+          "insert": " qpb1",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 1670,
+      "revision": "37",
+      "admitted": [
+        37
+      ],
+      "rejected": 0,
+      "between": [
+        {
+          "seq": 36,
+          "mutations": [
+            "splice@150-0+5"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 142788,
+      "base": 37,
+      "opIds": [
+        "34"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 160,
+          "remove": 0,
+          "insert": " qpa2",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 526,
+      "revision": "38",
+      "admitted": [
+        38
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 142871,
+      "base": 37,
+      "opIds": [
+        "4"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 160,
+          "remove": 0,
+          "insert": " qpb2",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 1854,
+      "revision": "39",
+      "admitted": [
+        39
+      ],
+      "rejected": 0,
+      "between": [
+        {
+          "seq": 38,
+          "mutations": [
+            "splice@160-0+5"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 148007,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_ABORTED"
+    },
+    {
+      "who": "B",
+      "at": 148500,
+      "base": 39,
+      "opIds": [
+        "5"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 170,
+          "remove": 0,
+          "insert": " opb1",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 455,
+      "revision": "40",
+      "admitted": [
+        40
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 148509,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 148951,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 149512,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 151287,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "B",
+      "at": 151364,
+      "base": 40,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 175,
+          "remove": 0,
+          "insert": " opb2",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 547,
+      "revision": "41",
+      "admitted": [
+        41
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 151386,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 151472,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 151514,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 151632,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 151648,
+      "base": 39,
+      "opIds": [
+        "35"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 170,
+          "remove": 0,
+          "insert": " opa1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 0,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 151648,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 152150,
+      "base": 39,
+      "opIds": [
+        "35"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 170,
+          "remove": 0,
+          "insert": " opa1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 0,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 152150,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 153154,
+      "base": 39,
+      "opIds": [
+        "35"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 170,
+          "remove": 0,
+          "insert": " opa1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 0,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 153154,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 153954,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "B",
+      "at": 154219,
+      "base": 41,
+      "opIds": [
+        "7"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 180,
+          "remove": 0,
+          "insert": " opb3",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 469,
+      "revision": "42",
+      "admitted": [
+        42
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 155156,
+      "base": 39,
+      "opIds": [
+        "35"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 170,
+          "remove": 0,
+          "insert": " opa1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 0,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 155156,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 155516,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 158957,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 159159,
+      "base": 39,
+      "opIds": [
+        "35"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 170,
+          "remove": 0,
+          "insert": " opa1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 1,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 159160,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 163517,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 163959,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 167162,
+      "base": 39,
+      "opIds": [
+        "35"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 170,
+          "remove": 0,
+          "insert": " opa1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 1,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 167163,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 171684,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 171731,
+      "base": 42,
+      "opIds": [
+        "36"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 185,
+          "remove": 0,
+          "insert": " opa1",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 554,
+      "revision": "43",
+      "admitted": [
+        43
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 172365,
+      "base": 43,
+      "opIds": [
+        "37"
+      ],
+      "mutations": [
+        {
+          "op": "slide.replace",
+          "path": null
+        },
+        {
+          "op": "block.insert",
+          "path": null
+        }
+      ],
+      "status": 200,
+      "ms": 759,
+      "revision": "44",
+      "admitted": [
+        44
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 174606,
+      "base": 44,
+      "opIds": [
+        "8"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 0,
+          "remove": 0,
+          "insert": "kb1",
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 2733,
+      "revision": "46",
+      "admitted": [
+        46
+      ],
+      "rejected": 0,
+      "between": [
+        {
+          "seq": 45,
+          "mutations": [
+            "splice@0-0+3"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 174622,
+      "base": 44,
+      "opIds": [
+        "38"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 0,
+          "remove": 0,
+          "insert": "ka1",
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 584,
+      "revision": "45",
+      "admitted": [
+        45
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 191222,
+      "base": 46,
+      "opIds": [
+        "39"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 2,
+          "remove": 0,
+          "insert": "2ka",
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 453,
+      "revision": "47",
+      "admitted": [
+        47
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 191297,
+      "base": 46,
+      "opIds": [
+        "9"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 1,
+          "remove": 0,
+          "insert": "b2k",
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 1655,
+      "revision": "48",
+      "admitted": [
+        48
+      ],
+      "rejected": 0,
+      "between": [
+        {
+          "seq": 47,
+          "mutations": [
+            "splice@2-0+3"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 209818,
+      "base": 48,
+      "opIds": [
+        "40"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 15,
+          "remove": 0,
+          "insert": " qka1",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 593,
+      "revision": "49",
+      "admitted": [
+        49
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 209883,
+      "base": 48,
+      "opIds": [
+        "10"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 15,
+          "remove": 0,
+          "insert": " qkb1",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 2001,
+      "revision": "50",
+      "admitted": [
+        50
+      ],
+      "rejected": 0,
+      "between": [
+        {
+          "seq": 49,
+          "mutations": [
+            "splice@15-0+5"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 217904,
+      "base": 50,
+      "opIds": [
+        "41"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 25,
+          "remove": 0,
+          "insert": " qka2",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 543,
+      "revision": "51",
+      "admitted": [
+        51
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 217922,
+      "base": 50,
+      "opIds": [
+        "11"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 25,
+          "remove": 0,
+          "insert": " qkb2",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 1757,
+      "revision": "52",
+      "admitted": [
+        52
+      ],
+      "rejected": 0,
+      "between": [
+        {
+          "seq": 51,
+          "mutations": [
+            "splice@25-0+5"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 223076,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_ABORTED"
+    },
+    {
+      "who": "A",
+      "at": 223578,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "B",
+      "at": 223595,
+      "base": 52,
+      "opIds": [
+        "12"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 35,
+          "remove": 0,
+          "insert": " okb1",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 484,
+      "revision": "53",
+      "admitted": [
+        53
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 223979,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 224580,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 226360,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 226455,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "B",
+      "at": 226472,
+      "base": 53,
+      "opIds": [
+        "13"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 40,
+          "remove": 0,
+          "insert": " okb2",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 450,
+      "revision": "54",
+      "admitted": [
+        54
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 226583,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 226622,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 226700,
+      "base": 52,
+      "opIds": [
+        "42"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 35,
+          "remove": 0,
+          "insert": " oka1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 1,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 226701,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 227204,
+      "base": 52,
+      "opIds": [
+        "42"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 35,
+          "remove": 0,
+          "insert": " oka1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 0,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 227204,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 228206,
+      "base": 52,
+      "opIds": [
+        "42"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 35,
+          "remove": 0,
+          "insert": " oka1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 0,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 228206,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 228980,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "B",
+      "at": 229356,
+      "base": 54,
+      "opIds": [
+        "14"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 45,
+          "remove": 0,
+          "insert": " okb3",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 458,
+      "revision": "55",
+      "admitted": [
+        55
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 230209,
+      "base": 52,
+      "opIds": [
+        "42"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 35,
+          "remove": 0,
+          "insert": " oka1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 0,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 230209,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 230586,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 233982,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 234212,
+      "base": 52,
+      "opIds": [
+        "42"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 35,
+          "remove": 0,
+          "insert": " oka1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 1,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 234213,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 238589,
+      "failed": "/api/decks/untitled-20260922-r9oh/stream",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 238985,
+      "failed": "/api/decks/untitled-20260922-r9oh/presence",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 242216,
+      "base": 52,
+      "opIds": [
+        "42"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 35,
+          "remove": 0,
+          "insert": " oka1",
+          "insertLength": 5
+        }
+      ],
+      "status": "no response",
+      "ms": 0,
+      "revision": null
+    },
+    {
+      "who": "A",
+      "at": 242216,
+      "failed": "/api/decks/untitled-20260922-r9oh/ops",
+      "reason": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "who": "A",
+      "at": 246688,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 246733,
+      "base": 55,
+      "opIds": [
+        "43"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 50,
+          "remove": 0,
+          "insert": " oka1",
+          "insertLength": 5
+        }
+      ],
+      "status": 200,
+      "ms": 387,
+      "revision": "56",
+      "admitted": [
+        56
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 248547,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 248746,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "C",
+      "at": 248897,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 250440,
+      "stream": true,
+      "status": 200
+    }
+  ],
+  "anomalies": [],
+  "console": [
+    {
+      "who": "A",
+      "at": 254513,
+      "error": "Failed to load resource: the server responded with a status of 404 ()"
+    }
+  ],
+  "tier": "blob",
+  "finishedAt": "2026-09-22T03:51:14.358Z",
+  "seconds": 249,
+  "teardown": {
+    "trashed": true,
+    "deletedForever": true,
+    "deckStatus": 404,
+    "gone": true
+  },
+  "deckId": "untitled-20260922-r9oh"
+}

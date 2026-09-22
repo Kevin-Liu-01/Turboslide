@@ -51,6 +51,15 @@ import { useStudioSession } from './useStudioSession';
  * moment after first paint. Until then those items render with an empty `html`, which the clones
  * draw as the plate. The first build streamed the answer inside the document instead
  * (routes/deck.$deckId.tsx says what that cost).
+ *
+ * The document is the load's (docs/SYNC.md 3.10 and 4.1; VERIFICATION.md, the sync round's pass 1,
+ * F10): the page opens no stream and makes no function request after its load, so a reader here
+ * sees a seller's later edit on a reload alone. The live document for a reader who may not edit is
+ * the editor page on its viewer floor (/edit/<id> under a viewer grant, whose stream carries the
+ * ops to a viewer, SYNC.md 3.7; the verifier read a word there in 0.6 to 1.1 s). Where the Share
+ * dialog's Viewer link lands is server/auth/links.ts `landingPath` (SPEC-3 0.13); moving it to
+ * the editor page, or giving this page a gated stream, is one decision, recorded with its costs in
+ * docs/gslides-parity/sync/build/b5.md under the sync round's fix round (R10).
  */
 export type DeckViewerProps = {
   payload: DeckPayload;
@@ -62,6 +71,11 @@ export type DeckViewerProps = {
   theme?: Theme;
   /** ?present=1 from the route: present mode (chrome hidden) on mount */
   present?: boolean;
+  /**
+   * ?agent=1 from the route (docs/SYNC.md 3.10): the page attaches a studio session so an agent
+   * can drive it; off, the page makes no function request after its load
+   */
+  agent?: boolean;
   /** the frame protocol for Prototemplate's /deck iframe */
   embed?: boolean;
   onModeChange?: (mode: ShellMode) => void;
@@ -133,6 +147,7 @@ export function DeckViewer({
   mode,
   theme,
   present = false,
+  agent = false,
   embed = false,
   onModeChange,
 }: DeckViewerProps) {
@@ -225,7 +240,7 @@ export function DeckViewer({
       >
         <StageBridge deck={deck} serverTheme={theme ?? 'dark'} show={show} />
         <PresentOnLoad on={present} />
-        <ViewerOwner deck={deck} attach={!embed} show={show} />
+        <ViewerOwner deck={deck} attach={agent} show={show} />
       </ViewerShell>
     </>
   );
@@ -347,9 +362,12 @@ function StageBridge({
  * render.sheet)") and an attached studio session (MILESTONES M4 item 1): view.goto, view.mode,
  * view.theme and view.present run against the shell, render.slide through the render worker's
  * server function, and describe().state reports the deck facts. The marker element is the owner;
- * the session hook long-polls the server for commands (`deck_goto_slide` over /mcp) and answers
- * them through this handle. The embed frame registers the owner but does not attach: the host
- * page drives it through the frame protocol.
+ * the session hook polls the server for commands (`deck_goto_slide` over /mcp) and answers them
+ * through this handle. The owner is registered on every viewer page, so the window API works for
+ * a script in the page; the session attaches only when the address carries `?agent=1`
+ * (docs/SYNC.md 3.10), on /deck and in the embed frame alike, so a show or a colleague's view
+ * costs no function request after its load and a host page drives a plain frame through the
+ * frame protocol.
  */
 function ViewerOwner({
   deck,

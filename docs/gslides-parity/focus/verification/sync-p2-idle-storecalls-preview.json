@@ -1,0 +1,143 @@
+{
+  "base": "https://turboslide-xp25z99wa-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-22T03:43:53.061Z",
+  "minutes": 3,
+  "samples": [
+    {
+      "atS": 30,
+      "status": 200,
+      "ms": 237,
+      "storeCalls": {
+        "head": 22,
+        "get": 1,
+        "put": 20,
+        "list": 0,
+        "del": 0,
+        "windowMs": 60000,
+        "instance": "ef8fcf30"
+      },
+      "revision": 1,
+      "tier": "blob"
+    },
+    {
+      "atS": 60,
+      "status": 200,
+      "ms": 174,
+      "storeCalls": {
+        "head": 12,
+        "get": 1,
+        "put": 3,
+        "list": 0,
+        "del": 0,
+        "windowMs": 60000,
+        "instance": "ef8fcf30"
+      },
+      "revision": 1,
+      "tier": "blob"
+    },
+    {
+      "atS": 90,
+      "status": 200,
+      "ms": 167,
+      "storeCalls": {
+        "head": 9,
+        "get": 4,
+        "put": 3,
+        "list": 0,
+        "del": 0,
+        "windowMs": 60000,
+        "instance": "ef8fcf30"
+      },
+      "revision": 1,
+      "tier": "blob"
+    },
+    {
+      "atS": 120,
+      "status": 200,
+      "ms": 176,
+      "storeCalls": {
+        "head": 10,
+        "get": 4,
+        "put": 6,
+        "list": 0,
+        "del": 1,
+        "windowMs": 60000,
+        "instance": "ef8fcf30"
+      },
+      "revision": 1,
+      "tier": "blob"
+    },
+    {
+      "atS": 150,
+      "status": 200,
+      "ms": 231,
+      "storeCalls": {
+        "head": 8,
+        "get": 0,
+        "put": 9,
+        "list": 0,
+        "del": 1,
+        "windowMs": 60000,
+        "instance": "ef8fcf30"
+      },
+      "revision": 1,
+      "tier": "blob"
+    },
+    {
+      "atS": 180,
+      "status": 200,
+      "ms": 230,
+      "storeCalls": {
+        "head": 8,
+        "get": 1,
+        "put": 6,
+        "list": 0,
+        "del": 1,
+        "windowMs": 60000,
+        "instance": "ef8fcf30"
+      },
+      "revision": 1,
+      "tier": "blob"
+    }
+  ],
+  "requests": {
+    "/api/decks/<id>/presence": 20,
+    "/_serverFn/*": 9
+  },
+  "deck": "untitled-20260922-8ue0",
+  "tier": "blob",
+  "teardown": {
+    "trashed": 200,
+    "removed": 200,
+    "edit": 404,
+    "gone": true
+  },
+  "connectedAtStart": true,
+  "connectedAtEnd": true,
+  "functionRequestsInWindow": 29,
+  "functionRequestsPerMinute": 9.67,
+  "storeCallsMaxPerInstance": {
+    "ef8fcf30": {
+      "head": 22,
+      "get": 4,
+      "put": 20,
+      "list": 0,
+      "del": 1,
+      "samples": 6
+    }
+  },
+  "deckInfoCounts": {
+    "slides": 1,
+    "sections": 1,
+    "assets": 4,
+    "htmlBlocks": 0,
+    "skipped": 0,
+    "canvas": 0,
+    "charts": 0,
+    "guides": 0,
+    "snapshots": 2,
+    "records": 1,
+    "holes": 0
+  },
+  "endedAt": "2026-09-22T03:47:05.043Z"
+}

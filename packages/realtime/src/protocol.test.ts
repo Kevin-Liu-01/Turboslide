@@ -110,6 +110,19 @@ describe('opsPostSchema', () => {
     ).toBe(false);
   });
 
+  it('carries the tie rule a client applies to its inserts, and refuses one it does not know (the sync round fix round, F3)', () => {
+    const base = { clientId: CLIENT, base: { seq: 0 }, entries: [editEntry(1)] };
+    const declared = opsPostSchema.safeParse({ ...base, insertTie: 'client-id' });
+    expect(declared.success).toBe(true);
+    if (declared.success) expect(declared.data.insertTie).toBe('client-id');
+    // absent: server order, what every client before the round applied
+    const plain = opsPostSchema.safeParse(base);
+    expect(plain.success).toBe(true);
+    if (plain.success) expect(plain.data.insertTie).toBeUndefined();
+    expect(opsPostSchema.safeParse({ ...base, insertTie: 'server-order' }).success).toBe(false);
+    expect(opsPostSchema.safeParse({ ...base, insertTie: true }).success).toBe(false);
+  });
+
   it('caps a post at 64 entries and refuses the 65th (SPEC-3 3.4 step 1)', () => {
     const entries = Array.from({ length: OPS_POST_MAX_ENTRIES }, (_, i) => editEntry(i + 1));
     expect(opsPostSchema.safeParse({ clientId: CLIENT, base: { seq: 0 }, entries }).success).toBe(
@@ -246,6 +259,21 @@ describe('entries and events', () => {
     expect(
       entrySchema.safeParse({ ...entry, comment: { op: 'add', thread: threadFixture() } }).success,
     ).toBe(false);
+  });
+
+  it('carries the op ids a blob tier record covers, and lets a covering edit ride without mutations (channel.ts Entry.covers; docs/SYNC.md 3.2)', () => {
+    const covered = { ...entry, covers: [`${CLIENT}:7`, `${CLIENT}:8`] };
+    expect(entrySchema.parse(covered)).toEqual(covered);
+    // the later synthesized entries of a resend answer carry the ids and no mutations
+    const sibling = { ...covered, opId: `${CLIENT}:8`, mutations: [] };
+    expect(entrySchema.parse(sibling)).toEqual(sibling);
+    // without covers an edit still needs its mutations, and covers never comes empty
+    expect(entrySchema.safeParse({ ...entry, mutations: [] }).success).toBe(false);
+    expect(entrySchema.safeParse({ ...entry, covers: [] }).success).toBe(false);
+    expect(roomEventSchema.parse({ type: 'op', entry: covered })).toEqual({
+      type: 'op',
+      entry: covered,
+    });
   });
 
   it('parses every event kind of SPEC-3 3.3', () => {

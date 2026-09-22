@@ -23,7 +23,13 @@
 // sources the `parks` ids are read from (7.1), the declared ids of PRODUCT.md 7.1 for a control a
 // lane has not landed yet, and the `measure` field (8.2): a measurement row records its seconds
 // per slide in the run and never holds the ship, so a red one is written into the ship note by
-// id with its mechanism and neither parks its feature nor blocks.
+// id with its mechanism and neither parks its feature nor blocks. The sync and costs round
+// (docs/SYNC.md section 6) added the two unparkable features `sync` and `cost`, the spec driver
+// `core/sync.spec.ts` (two browsers with one person's cookies and a third as a stranger) and the
+// driver `cost-probe` (scripts/probes/sync-cost-probe.mjs: one page state per process for three
+// minutes, every request the page made and `sync.status.storeCalls` sampled, the counts beside
+// the ceiling in the run's JSON); a cost row carries `measure: true` in SYNC.md 6.1's sense (its
+// counts are recorded and the row holds the ship only over its ceiling on the preview).
 //
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
@@ -70,6 +76,9 @@ export const CORE_FEATURES = Object.freeze([
   'fonts',
   'templates',
   'assist',
+  /* the sync and costs round (docs/SYNC.md 6.1): the write path's order and the calls per state */
+  'sync',
+  'cost',
   'surface',
 ]);
 
@@ -84,6 +93,13 @@ export const RUN_RESULTS = Object.freeze(['passed', 'failed', 'not driven']);
 
 /** The walk probe in --core mode. */
 export const PROBE_DRIVER = 'probe --core';
+
+/**
+ * The cost probe (docs/SYNC.md 6.3): scripts/probes/sync-cost-probe.mjs, run by the gate. It drives
+ * one page state per process for three minutes at human speed, records every request the page
+ * made, samples `sync.status.storeCalls` five times and writes the counts beside the ceiling.
+ */
+export const COST_PROBE_DRIVER = 'cost-probe';
 
 /** The Playwright specs under apps/studio/e2e/core/, as the `driver` field spells them. */
 export const CORE_SPEC_DRIVERS = Object.freeze([
@@ -101,9 +117,11 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
   'core/chrome.spec.ts',
   'core/brand.spec.ts',
   'core/assist.spec.ts',
+  /* the sync and costs round (docs/SYNC.md 6.1): the two browser spec of the ordering rows */
+  'core/sync.spec.ts',
 ]);
 
-export const CORE_DRIVERS = Object.freeze([PROBE_DRIVER, ...CORE_SPEC_DRIVERS]);
+export const CORE_DRIVERS = Object.freeze([PROBE_DRIVER, ...CORE_SPEC_DRIVERS, COST_PROBE_DRIVER]);
 
 /** `area.feature.interaction`: two to four parts of lower case letters, digits and hyphens. */
 export const CORE_ID_PATTERN = /^[a-z][a-z0-9]*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*){1,3}$/;
@@ -119,6 +137,10 @@ export const CORE_ID_PATTERN = /^[a-z][a-z0-9]*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*){1,
 export const UNPARKABLE_FEATURES = Object.freeze([
   'surface',
   'chrome',
+  /* the sync and costs round (docs/SYNC.md 6.1): every row of both holds the ship, except that a
+     cost row marked measure records its counts and holds it only over its ceiling on the preview */
+  'sync',
+  'cost',
   'decks',
   'slides',
   'text',
@@ -265,9 +287,21 @@ export function isManualRow(row) {
  * spec's `measure` annotations), and it never holds the ship: a red measurement row is written
  * into the ship note by id with its mechanism and neither parks its feature nor blocks. A row
  * nobody drives is still "no step" and fails the run.
+ *
+ * The cost rows of the sync and costs round (docs/SYNC.md 6.1) carry the field in a narrower
+ * sense: their counts are recorded beside their ceilings, and a cost row over its ceiling on the
+ * preview holds the ship (6.2). The verdict helpers below keep the PRODUCT.md rule for every
+ * measurement row (recorded, never counted), so the ship step reads a red cost row from `measured`
+ * and the cost probe's own exit code, which is 1 on a row over its ceiling; `isCostRow` tells the
+ * two kinds apart.
  */
 export function isMeasureRow(row) {
   return row?.measure === true;
+}
+
+/** A row of the cost probe (docs/SYNC.md 6.1, 6.3): its driver is `cost-probe`. */
+export function isCostRow(row) {
+  return row?.driver === COST_PROBE_DRIVER;
 }
 
 /** The area of an id: its first part. */
@@ -380,15 +414,26 @@ export function rowsForFeature(feature) {
   return CORE_MATRIX.filter((row) => row.feature === feature);
 }
 
-/** The rows a driver carries: `probe --core` or a `core/<area>.spec.ts` file name (`core/` optional). */
+/**
+ * The rows a driver carries: `probe --core`, `cost-probe` or a `core/<area>.spec.ts` file name
+ * (`core/` optional).
+ */
 export function rowsForDriver(driver) {
-  const name = driver === PROBE_DRIVER || driver.startsWith('core/') ? driver : `core/${driver}`;
+  const name =
+    driver === PROBE_DRIVER || driver === COST_PROBE_DRIVER || driver.startsWith('core/')
+      ? driver
+      : `core/${driver}`;
   return CORE_MATRIX.filter((row) => row.driver === name);
 }
 
 /** The rows the walk probe drives in --core mode. */
 export function probeRows() {
   return rowsForDriver(PROBE_DRIVER);
+}
+
+/** The rows the cost probe drives (docs/SYNC.md 6.3). */
+export function costRows() {
+  return rowsForDriver(COST_PROBE_DRIVER);
 }
 
 /** The counts of a list of rows by the four words, the shape of 6.3. */
@@ -546,10 +591,11 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.
         `  ${driver.padEnd(24)} ${String(rowsForDriver(driver).length).padStart(3)} rows`,
       );
     const withParks = CORE_MATRIX.filter((row) => row.parks !== undefined);
-    const measure = CORE_MATRIX.filter(isMeasureRow);
+    const measure = CORE_MATRIX.filter((row) => isMeasureRow(row) && !isCostRow(row));
+    const cost = CORE_MATRIX.filter(isCostRow);
     const manual = CORE_MATRIX.filter(isManualRow);
     console.log(
-      `  ${withParks.length} rows carry parks; ${measure.length} measurement rows (${measure.map((r) => r.id).join(', ') || 'none'}); ${manual.length} manual rows; unparkable features: ${UNPARKABLE_FEATURES.join(', ')}`,
+      `  ${withParks.length} rows carry parks; ${measure.length} measurement rows (${measure.map((r) => r.id).join(', ') || 'none'}); ${cost.length} cost probe rows (${cost.map((r) => r.id).join(', ') || 'none'}); ${manual.length} manual rows; unparkable features: ${UNPARKABLE_FEATURES.join(', ')}`,
     );
   }
 }

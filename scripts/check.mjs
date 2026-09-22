@@ -226,8 +226,10 @@ const OVERWRITE_ALLOW = [
   // the editor's queued export job record `exports/.jobs/<jobId>.json` (the stream fix round two,
   // T1, VERIFICATION C3S-F7): written queued when the export starts and rewritten done or failed
   // by the instance that ran the job, idempotently, so a poll on any instance answers from it; a
-  // state record beside the export prefixes, never a public asset (the seam step of the round)
-  'apps/studio/src/server/export-jobs.ts',
+  // state record beside the export prefixes, never a public asset (the seam step of the round).
+  // The write moved to export-jobs-store.ts in the sync and costs round (build/b1.md R10: the
+  // pure module the client reads keeps no store import)
+  'apps/studio/src/server/export-jobs-store.ts',
   // the saved templates across instances (the product round fix round, b7 F2; docs/PRODUCT.md
   // 4.3): `templates/<id>/<file>` are one saved template folder's files, rewritten whole by the
   // instance that saved or replaced the template (the store's extras removed after), and

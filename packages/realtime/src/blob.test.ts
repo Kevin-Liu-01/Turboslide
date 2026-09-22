@@ -27,7 +27,16 @@ import {
 
 import { ConflictError } from '@turboslide/schema/errors';
 
-import { blobChannel, isDeckGone, isLostRace } from './blob.ts';
+import type { VersionRecord } from '@turboslide/store/store';
+
+import {
+  blobChannel,
+  entryOfRecord,
+  isDeckGone,
+  isLostRace,
+  recordOrigin,
+  synthesizeReplayed,
+} from './blob.ts';
 import type { RoomEvent, RosterEntry } from './channel.ts';
 import { roomEventSchema } from './protocol.ts';
 import {
@@ -193,6 +202,7 @@ describe('blobChannel', () => {
               proven,
             }),
           pollMs: 20,
+          quietPollMs: 20,
         },
       });
       return channel;
@@ -248,7 +258,11 @@ describe('blobChannel', () => {
     const proven = { fetchFresh: async () => null, retries: 0, sleep: async () => {} };
     /** The seed of the store's tests, pushed to a fake store; two channels over two mirrors of it. */
     const setup = async (
-      options: { pollMs?: number; client?: (fake: BlobClient) => BlobClient } = {},
+      options: {
+        pollMs?: number;
+        quietPollMs?: number;
+        client?: (fake: BlobClient) => BlobClient;
+      } = {},
     ) => {
       const fake = memoryBlobClient();
       const seedRoot = join(root, 'seed');
@@ -284,6 +298,9 @@ describe('blobChannel', () => {
                 proven,
               }),
             pollMs: options.pollMs ?? 20,
+            // one tab alone and quiet ticks at the quiet pace (docs/SYNC.md 3.10); the tests of
+            // the active pace pass the same value for both, the quiet test its own
+            quietPollMs: options.quietPollMs ?? options.pollMs ?? 20,
           },
           onError: (error, context) =>
             errors.push(`${context}: ${error instanceof Error ? error.message : String(error)}`),
@@ -357,6 +374,98 @@ describe('blobChannel', () => {
       expect(errors).toEqual([]);
       await a.close();
       await b.close();
+    });
+
+    it('ticks at the quiet pace while the one tab is alone and quiet, and at the active pace once another row joins the roster or an op lands here (docs/SYNC.md 3.10)', async () => {
+      // the active tick 20 ms, the quiet one 200 ms: alone and quiet, the pulse is headed
+      // about once per 200 ms; a second roster row (another client's presence push, read on
+      // the next quiet tick) brings the 20 ms tick back
+      const { fake, instance, errors } = await setup({ pollMs: 20, quietPollMs: 200 });
+      const a = instance('a');
+      const b = instance('b');
+      const stop = a.subscribe('gt-brand', () => undefined);
+      await until(() => fake.calls.some((call) => call.op === 'head'), 2000);
+      // the first tick's reads settle, then the quiet cadence
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      const pulseHeads = (): number =>
+        fake.calls.filter((call) => call.op === 'head' && call.pathname === pulsePath('gt-brand'))
+          .length;
+      const quietBefore = pulseHeads();
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      const quiet = pulseHeads() - quietBefore;
+      // 600 ms at 200 ms a tick: about three heads, never the thirty of the active pace
+      expect(quiet).toBeGreaterThanOrEqual(2);
+      expect(quiet).toBeLessThanOrEqual(5);
+      // a colleague arrives on another instance: their push moves the pulse; a's next quiet
+      // tick (within 200 ms) reads the roster's second row and the tick returns to the active
+      // pace. The roster question itself costs no store call: every call of the window is a
+      // head of the pulse or one of the reads a moved pulse names
+      await b.presence.set('gt-brand', CLIENT_B, rosterEntry(CLIENT_B, 1, 'Cobalt 118'), 120_000);
+      await new Promise((resolve) => setTimeout(resolve, 450));
+      expect((await a.presence.roster('gt-brand')).map((row) => row.clientId)).toContain(CLIENT_B);
+      const activeBefore = pulseHeads();
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      const active = pulseHeads() - activeBefore;
+      expect(active).toBeGreaterThanOrEqual(8);
+      stop();
+      expect(errors).toEqual([]);
+      await a.close();
+      await b.close();
+    });
+
+    it('keeps the active pace for the window after an op landed on this instance, alone in the roster', async () => {
+      const { fake, instance, errors } = await setup({ pollMs: 20, quietPollMs: 400 });
+      const a = instance('a');
+      const stop = a.subscribe('gt-brand', () => undefined);
+      await until(() => fake.calls.some((call) => call.op === 'head'), 2000);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      // a commit on this instance: the deck is in use here, the tick stays at 20 ms
+      const result = await a.append('gt-brand', 412, [editEntry(CLIENT_A, 1, kevin, 22)]);
+      expect(result.ok).toBe(true);
+      const pulseHeads = (): number =>
+        fake.calls.filter((call) => call.op === 'head' && call.pathname === pulsePath('gt-brand'))
+          .length;
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      const before = pulseHeads();
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      expect(pulseHeads() - before).toBeGreaterThanOrEqual(8);
+      stop();
+      expect(errors).toEqual([]);
+      await a.close();
+    });
+
+    it("ticks at the active pace while two streams of the deck are open on this instance, or while two rows this instance set are in the roster, because a tab's POST may commit on another instance (the sync and costs round's ship; VERIFICATION.md pass 2 F1)", async () => {
+      // the platform routes each request on its own: a tab's ops POST can commit on an instance
+      // other than the one holding its stream, and its colleague's tab here then reads the word
+      // through this instance's tick. So a second stream here, or a second roster row whoever
+      // set it, is company: the quiet pace is a tab's alone
+      const { fake, instance, errors } = await setup({ pollMs: 20, quietPollMs: 400 });
+      const a = instance('a');
+      const pulseHeads = (): number =>
+        fake.calls.filter((call) => call.op === 'head' && call.pathname === pulsePath('gt-brand'))
+          .length;
+      const stopOne = a.subscribe('gt-brand', () => undefined);
+      const stopTwo = a.subscribe('gt-brand', () => undefined);
+      await until(() => pulseHeads() >= 1, 2000);
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      let before = pulseHeads();
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      // two streams, an empty roster: 400 ms at 20 ms a tick, never the one head of the quiet pace
+      expect(pulseHeads() - before).toBeGreaterThanOrEqual(8);
+      stopTwo();
+      // one stream left; two rows set through this instance's own presence route
+      await a.presence.set('gt-brand', CLIENT_A, rosterEntry(CLIENT_A, 1, 'Titanium 471'), 120_000);
+      await a.presence.set('gt-brand', CLIENT_B, rosterEntry(CLIENT_B, 1, 'Cobalt 118'), 120_000);
+      await new Promise((resolve) => setTimeout(resolve, 450));
+      expect((await a.presence.roster('gt-brand')).map((row) => row.clientId).sort()).toEqual(
+        [CLIENT_A, CLIENT_B].sort(),
+      );
+      before = pulseHeads();
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      expect(pulseHeads() - before).toBeGreaterThanOrEqual(8);
+      stopOne();
+      expect(errors).toEqual([]);
+      await a.close();
     });
 
     it('backs the poll off when the store refuses and tells the streams, then says the store answers again', async () => {
@@ -500,6 +609,116 @@ describe('blobChannel', () => {
     await b.close();
   });
 
+  it("announces the first record above a hole in the log as an external checkpoint and the records after it as ops, so a tab under the hole reloads once (docs/SYNC.md 3.6, the reader's rule)", async () => {
+    // a store whose log holds n 1, n 3 and n 4 (n 2 a claim whose commit landed after its record
+    // was released, or a record the store lost); the mirror's position is 412 when the stream
+    // opens and the store then reads 416
+    const record = (n: number, revision: number): VersionRecord => ({
+      n,
+      revision,
+      baseRevision: revision - 1,
+      author: kevin,
+      note: '',
+      createdAt: now,
+      mutations: [
+        { op: 'block.set', slideId: 'content-rule', blockId: 'list', path: '/size', value: n },
+      ],
+      inverse: [],
+    });
+    let revision = 412;
+    let fire: (() => void) | undefined;
+    const stub = {
+      id: 'gt-brand',
+      revision: async () => revision,
+      records: async () => (revision > 412 ? [record(1, 413), record(3, 415), record(4, 416)] : []),
+      watch: (listener: (event: { type: 'change'; revision: number; files: string[] }) => void) => {
+        fire = () => listener({ type: 'change', revision, files: ['deck.json'] });
+        return () => undefined;
+      },
+    } as unknown as FileStore;
+    const channel = blobChannel({ open: async () => stub, minWriteSpacingMs: 0 });
+    const seen: RoomEvent[] = [];
+    const stop = channel.subscribe('gt-brand', (event) => seen.push(event));
+    await until(() => fire !== undefined, 2000);
+    revision = 416;
+    fire?.();
+    await until(() => seen.filter((event) => event.type === 'checkpoint').length >= 3, 4000);
+    expect(
+      seen.map((event) =>
+        event.type === 'op'
+          ? `op ${event.entry.seq}`
+          : `${event.type} ${(event as { revision?: number }).revision ?? ''}${(event as { external?: true }).external ? ' external' : ''}`,
+      ),
+    ).toEqual(['op 413', 'checkpoint 413', 'checkpoint 415 external', 'op 416', 'checkpoint 416']);
+    // since reads the record above the hole as an entry like any other: the answer's between
+    // and the replay carry it; the checkpoint alone tells the tab to reload
+    expect((await channel.since('gt-brand', 412, 10)).map((entry) => entry.seq)).toEqual([
+      413, 415, 416,
+    ]);
+    stop();
+    await channel.close();
+  });
+
+  it("prunes the store's snapshots once when the deck's last stream on the instance has stayed closed for the delay and this instance committed while one was open; a reader's close and a reopen inside the delay list nothing (docs/SYNC.md 3.6, invariant 13; the sync round fix round, F6 and F7)", async () => {
+    const fake = memoryBlobClient();
+    const seedRoot = join(root, 'seed-prune');
+    mkdirSync(join(seedRoot, 'gt-brand'), { recursive: true });
+    writeRawDeck(join(seedRoot, 'gt-brand'));
+    await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+    const mirror = join(root, 'prune', 'decks', 'gt-brand');
+    const errors: string[] = [];
+    const channel = blobChannel({
+      open: async () =>
+        openBlobStore({
+          client: fake,
+          deckId: 'gt-brand',
+          dir: mirror,
+          now: () => now,
+          syncTtlMs: 0,
+        }),
+      minWriteSpacingMs: 0,
+      pruneAtCloseDelayMs: 150,
+      onError: (error, context) =>
+        errors.push(`${context}: ${error instanceof Error ? error.message : String(error)}`),
+    });
+    const snapshotLists = (): number =>
+      fake.calls.filter((call) => call.op === 'list' && call.pathname.includes('snapshots/'))
+        .length;
+    // a reader: two streams open and close with no commit of this instance's; no prune, even
+    // past the delay (the instance that wrote the snapshots is the one that prunes them)
+    const first = channel.subscribe('gt-brand', () => undefined);
+    const second = channel.subscribe('gt-brand', () => undefined);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    first();
+    second();
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    expect(snapshotLists()).toBe(0);
+    // a writer: a stream opens, this instance commits, the stream closes at its lifetime's end
+    // and the tab reopens inside the delay: no prune yet
+    let stream = channel.subscribe('gt-brand', () => undefined);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const committed = await channel.append('gt-brand', 412, [editEntry(CLIENT_A, 1, kevin, 22)]);
+    expect(committed.ok).toBe(true);
+    stream();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    stream = channel.subscribe('gt-brand', () => undefined);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    expect(snapshotLists()).toBe(0);
+    // the seller leaves: the last stream stays closed past the delay and the prune lists once
+    stream();
+    await until(() => snapshotLists() >= 1, 4000);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(snapshotLists()).toBe(1);
+    // a later visit without a commit closes without a second prune
+    const visit = channel.subscribe('gt-brand', () => undefined);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    visit();
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    expect(snapshotLists()).toBe(1);
+    expect(errors).toEqual([]);
+    await channel.close();
+  });
+
   it("announces the records another instance committed between this instance's position and its own write before that write's entries, so a tab's stream holds no gap (VERIFICATION C3S-F8)", async () => {
     // instance B holds a tab's stream and, for this reading, no watch of the store (the blob
     // tier's poll runs every 2 s; the append path is what is read here): its position is 412
@@ -598,6 +817,119 @@ describe('blobChannel', () => {
     ).toHaveLength(1);
     stop();
     await b.close();
+  });
+
+  describe('the record names its origin (the sync round, docs/SYNC.md 3.2)', () => {
+    const record = (n: number, origin?: { clientId: string; opIds: string[] }): VersionRecord => ({
+      n,
+      revision: 412 + n,
+      baseRevision: 411 + n,
+      author: kevin,
+      note: '',
+      createdAt: now,
+      mutations: [
+        { op: 'block.set', slideId: 'content-rule', blockId: 'list', path: '/size', value: 22 },
+      ],
+      inverse: [],
+      ...(origin === undefined ? {} : { origin }),
+    });
+
+    it("travels as the writer's client id with every op id it covers, and as `store` without an origin", () => {
+      const own = entryOfRecord(
+        record(1, { clientId: CLIENT_A, opIds: [`${CLIENT_A}:1`, `${CLIENT_A}:2`] }),
+      );
+      expect(own).toMatchObject({
+        seq: 413,
+        rev: 412,
+        clientId: CLIENT_A,
+        opId: 'store:1',
+        covers: [`${CLIENT_A}:1`, `${CLIENT_A}:2`],
+      });
+      const old = entryOfRecord(record(2));
+      expect(old.clientId).toBe('store');
+      expect(old.covers).toBeUndefined();
+      expect(
+        recordOrigin({ ...record(3), origin: { clientId: 'x', opIds: [] } } as VersionRecord),
+      ).toBeUndefined();
+    });
+
+    it("answers a resend with one entry per covered op id at the record's seq, the fold on the first alone", () => {
+      const covering = entryOfRecord(
+        record(1, {
+          clientId: CLIENT_A,
+          opIds: [`${CLIENT_A}:1`, `${CLIENT_A}:2`, `${CLIENT_A}:3`],
+        }),
+      );
+      const answer = synthesizeReplayed(covering, [
+        `${CLIENT_A}:3`,
+        `${CLIENT_A}:1`,
+        `${CLIENT_A}:9`,
+      ]);
+      expect(answer.map((entry) => [entry.opId, entry.seq, entry.mutations?.length])).toEqual([
+        [`${CLIENT_A}:1`, 413, 1],
+        [`${CLIENT_A}:3`, 413, 0],
+      ]);
+      expect(
+        answer.every((entry) => entry.clientId === CLIENT_A && entry.covers?.length === 3),
+      ).toBe(true);
+      expect(synthesizeReplayed(entryOfRecord(record(2)), [`${CLIENT_A}:1`])).toEqual([]);
+    });
+
+    it("fills the Write's origin from the batch and answers the store's replay as the record's entries without a commit", async () => {
+      const writes: unknown[] = [];
+      let replay: VersionRecord | undefined;
+      const fake = new Proxy(store, {
+        get(target, property, receiver) {
+          if (property === 'write')
+            return async (write: unknown) => {
+              writes.push(write);
+              if (replay !== undefined) {
+                const read = await store.read();
+                return {
+                  ok: true,
+                  document: read.document,
+                  revision: replay.revision,
+                  entry: replay,
+                  changed: [],
+                  issues: [],
+                  warnings: [],
+                  replayed: replay,
+                };
+              }
+              return target.write(write as Parameters<FileStore['write']>[0]);
+            };
+          return Reflect.get(target, property, receiver) as unknown;
+        },
+      }) as FileStore;
+      const channel = blobChannel({ open: async () => fake, minWriteSpacingMs: 0 });
+      const seen: RoomEvent[] = [];
+      channel.subscribe('gt-brand', (event) => seen.push(event));
+      const first = await channel.append('gt-brand', 412, [
+        editEntry(CLIENT_A, 1, kevin, 22),
+        editEntry(CLIENT_A, 2, kevin, 24),
+      ]);
+      expect(first.ok).toBe(true);
+      expect(writes[0]).toMatchObject({
+        baseRevision: 412,
+        origin: { clientId: CLIENT_A, opIds: [`${CLIENT_A}:1`, `${CLIENT_A}:2`] },
+      });
+      // the store's write path found the record above the base naming these op ids: no commit,
+      // the record's entry back, one per op id
+      replay = {
+        ...(await store.records())[0]!,
+        origin: { clientId: CLIENT_A, opIds: [`${CLIENT_A}:1`, `${CLIENT_A}:2`] },
+      };
+      const again = await channel.append('gt-brand', 413, [editEntry(CLIENT_A, 2, kevin, 24)]);
+      expect(again.ok).toBe(true);
+      if (!again.ok) return;
+      expect(again.entries.map((entry) => [entry.opId, entry.seq, entry.clientId])).toEqual([
+        [`${CLIENT_A}:2`, 413, CLIENT_A],
+      ]);
+      expect(await store.revision()).toBe(413);
+      // the streams here saw the record once, as the first append's entries
+      expect(seen.filter((event) => event.type === 'op')).toHaveLength(2);
+      await channel.close();
+    });
   });
 
   it('spaces two commits of one deck by the minimum write spacing', async () => {

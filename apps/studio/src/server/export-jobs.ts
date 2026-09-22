@@ -2,7 +2,6 @@ import { JOB_MAX_AGE_MS } from '@turboslide/export/batch/plan';
 import type { ExportReport } from '@turboslide/schema/export';
 import { exportReportSchema } from '@turboslide/schema/export';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
-import type { BlobClient } from '@turboslide/store/blob-store';
 
 /**
  * The record of an editor export job where every instance reads it (the focus round, cycle 3
@@ -18,8 +17,23 @@ import type { BlobClient } from '@turboslide/store/blob-store';
  * a job no record names answers a refusal in the product's words, never a thrown error, so the
  * dialog shows the sentence and stays. The PDF path shares every function here.
  *
- * Pure over a `BlobClient` so the record's life is unit tested (export-jobs.test.ts); the runtime
- * (the part store, the worker client, `waitUntil`) is server/export-batch.ts's.
+ * The record is an overwritten path (the start writes it queued, the worker's instance rewrites
+ * it running and done), so it follows the store's proof rule since the sync and costs round
+ * (docs/SYNC.md 3.5, invariant 8; audit-costs items 4 and 13): written with its immutable copy
+ * first (`putWithCopy`, under the store's `.turboslide/copies/` folder beside the record) and
+ * read through `provenGet` (the head's version, the body only when its md5 is that version,
+ * else the copy), because the public host serves an overwritten object for up to thirty days
+ * and a plain `get` on the polling instance could read the queued record long after the job
+ * finished elsewhere.
+ *
+ * This module holds the pure half (the record shapes, the sentences, the parse, the stale paths)
+ * and nothing that names the store: the editor's client reads its plain exports (download.ts
+ * imports `SYNC_PROGRESS_JOB_PATTERN` into a server function's validator), so a store import
+ * here reaches the browser and takes node:crypto with it (the sync round, build/b1.md R10). The
+ * three functions that touch a `BlobClient` (`writeExportJob`, `readExportJob`,
+ * `pruneExportJobs`) are export-jobs-store.ts's, unit tested beside these in
+ * export-jobs.test.ts; the runtime (the part store, the worker client, `waitUntil`) is
+ * server/export-batch.ts's.
  */
 
 /** Where the records live: a folder no deck id can name (a slug carries no dot). */
@@ -329,46 +343,6 @@ export function parseExportJob(raw: unknown): ExportJobRecord | null {
 }
 
 /**
- * Writes the record; best effort. A put the store refuses answers false and never fails the
- * export it describes: the poll on the worker's own instance answers from the job table, and a
- * poll elsewhere answers the missing record's refusal instead of a hang.
- */
-export async function writeExportJob(
-  client: BlobClient,
-  record: ExportJobRecord,
-): Promise<boolean> {
-  try {
-    await client.put(exportJobKey(record.jobId), new TextEncoder().encode(JSON.stringify(record)), {
-      overwrite: true,
-      contentType: 'application/json',
-    });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/** The record of a job, or null when the store holds none (never queued here, pruned, or another kind of job). */
-export async function readExportJob(
-  client: BlobClient,
-  jobId: string,
-): Promise<ExportJobRecord | null> {
-  if (!isExportJobId(jobId)) return null;
-  let fetched: { bytes: Uint8Array } | null;
-  try {
-    fetched = await client.get(exportJobKey(jobId));
-  } catch {
-    return null;
-  }
-  if (fetched === null) return null;
-  try {
-    return parseExportJob(JSON.parse(new TextDecoder().decode(fetched.bytes)));
-  } catch {
-    return null;
-  }
-}
-
-/**
  * The record pathnames older than `maxAgeMs`: by the store's upload time, else by the start time
  * the worker's job id carries; a record with neither is left alone.
  */
@@ -388,17 +362,6 @@ export function staleExportJobPaths(
     if (now - age > maxAgeMs) out.push(entry.pathname);
   }
   return out.sort();
-}
-
-/** Removes the records older than a day (one list of the folder); the count removed, 0 when the store refused. */
-export async function pruneExportJobs(client: BlobClient, now: number): Promise<number> {
-  try {
-    const doomed = staleExportJobPaths(await client.list(EXPORT_JOBS_PREFIX), now);
-    if (doomed.length > 0) await client.del(doomed);
-    return doomed.length;
-  } catch {
-    return 0;
-  }
 }
 
 /** A stored copy is asked for as an attachment (Vercel Blob honours `download=1`); a route of ours already is one. */

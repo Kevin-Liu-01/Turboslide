@@ -1,0 +1,232 @@
+{
+  "config": {
+    "argv": [
+      "/Users/kevinliu/.nvm/versions/node/v24.13.0/bin/node",
+      "/Users/kevinliu/repos/Turboslide/node_modules/@playwright/test/cli.js",
+      "test",
+      "apps/studio/e2e/core/sync.spec.ts",
+      "--grep",
+      "sync.block.concurrent-same-offset-order|sync.viewer.live-updates",
+      "--reporter=list,json"
+    ],
+    "configFile": "/Users/kevinliu/repos/Turboslide/playwright.config.ts",
+    "rootDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "core/sync.spec.ts",
+      "file": "core/sync.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "sync.block.concurrent-same-offset-order: A and B each insert a word at offset 0 of one body block within 200 ms; both browsers show the two words in the same order within 3 s on the memory tier and 5 s on the blob tier, and no repair splice (a text.splice with remove above 0 from the session) is posted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "tier",
+                  "description": "blob, bound 5000 ms"
+                },
+                {
+                  "type": "measure",
+                  "description": "the two words agreed in both browsers 1873, 1872, 2876 ms after the bursts (bound 5000 ms on the blob tier); ops POSTs 7; final A \"pa3pb3pb2pa2pa1pb1end\""
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 37960,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T05:15:26.401Z",
+                  "annotations": [
+                    {
+                      "type": "tier",
+                      "description": "blob, bound 5000 ms"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "the two words agreed in both browsers 1873, 1872, 2876 ms after the bursts (bound 5000 ms on the blob tier); ops POSTs 7; final A \"pa3pb3pb2pa2pa1pb1end\""
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-6e046a633e356b85eb43",
+          "file": "core/sync.spec.ts",
+          "line": 659,
+          "column": 1
+        },
+        {
+          "title": "sync.viewer.live-updates: C, a viewer, reads A's word within 5 s of the keystroke with no reload, three times of three",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "C joined through",
+                  "description": "the /s/ link of share.setGeneralAccess, which landed on /deck/<id>, then /edit/<id>"
+                },
+                {
+                  "type": "C role",
+                  "description": "viewer"
+                },
+                {
+                  "type": "measure",
+                  "description": "C read the words in 5077, 5083, 3058 ms"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 30675,
+                  "error": {
+                    "message": "Error: C reads every word within 5 s with no reload, three of three\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \" view1: seen false in 5077 ms, reload false\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                    "stack": "Error: C reads every word within 5 s with no reload, three of three\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \" view1: seen false in 5077 ms, reload false\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts:1012:86",
+                    "location": {
+                      "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts",
+                      "column": 86,
+                      "line": 1012
+                    },
+                    "snippet": "  1010 |       description: `C read the words in ${times.join(', ')} ms`,\n  1011 |     });\n> 1012 |     expect(failures, 'C reads every word within 5 s with no reload, three of three').toEqual([]);\n       |                                                                                      ^\n  1013 |   } finally {\n  1014 |     await cleanUp();\n  1015 |   }"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts",
+                        "column": 86,
+                        "line": 1012
+                      },
+                      "message": "Error: C reads every word within 5 s with no reload, three of three\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \" view1: seen false in 5077 ms, reload false\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  1010 |       description: `C read the words in ${times.join(', ')} ms`,\n  1011 |     });\n> 1012 |     expect(failures, 'C reads every word within 5 s with no reload, three of three').toEqual([]);\n       |                                                                                      ^\n  1013 |   } finally {\n  1014 |     await cleanUp();\n  1015 |   }\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts:1012:86"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T05:16:04.431Z",
+                  "annotations": [
+                    {
+                      "type": "C joined through",
+                      "description": "the /s/ link of share.setGeneralAccess, which landed on /deck/<id>, then /edit/<id>"
+                    },
+                    {
+                      "type": "C role",
+                      "description": "viewer"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "C read the words in 5077, 5083, 3058 ms"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright/core-sync-sync-viewer-live-c1ba2-reload-three-times-of-three/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright/core-sync-sync-viewer-live-c1ba2-reload-three-times-of-three/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts",
+                    "column": 86,
+                    "line": 1012
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-7d4c7ed6d3f7a29392bc",
+          "file": "core/sync.spec.ts",
+          "line": 966,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-22T05:15:26.130Z",
+    "duration": 69207.98,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

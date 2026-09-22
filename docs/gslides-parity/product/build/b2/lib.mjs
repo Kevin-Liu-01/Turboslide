@@ -9,7 +9,8 @@ const require = createRequire('/Users/kevinliu/repos/Turboslide/package.json');
 export const { chromium } = require('playwright-core');
 
 export const BASE = process.env.B2_BASE ?? 'http://localhost:4412';
-export const OUT = process.env.B2_OUT ?? '/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/build/b2/out';
+export const OUT =
+  process.env.B2_OUT ?? '/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/build/b2/out';
 
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const rand = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
@@ -37,10 +38,18 @@ export function bind(page, name) {
   let shotIndex = 0;
   const t = { page, rows };
   t.record = (step, expected, observed, ok) => {
-    const row = { n: rows.length + 1, step, expected, observed: typeof observed === 'string' ? observed : JSON.stringify(observed), ok };
+    const row = {
+      n: rows.length + 1,
+      step,
+      expected,
+      observed: typeof observed === 'string' ? observed : JSON.stringify(observed),
+      ok,
+    };
     rows.push(row);
     const tag = ok === true ? 'ok  ' : ok === false ? 'FAIL' : 'n/d ';
-    console.log(`${tag} ${String(row.n).padStart(3)} ${step}\n       expected: ${expected}\n       observed: ${row.observed.slice(0, 1200)}`);
+    console.log(
+      `${tag} ${String(row.n).padStart(3)} ${step}\n       expected: ${expected}\n       observed: ${row.observed.slice(0, 1200)}`,
+    );
     return row;
   };
   t.step = async (label, expected, fn) => {
@@ -48,11 +57,22 @@ export function bind(page, name) {
       const r = await fn();
       return t.record(label, expected, r.observed, r.ok);
     } catch (error) {
-      return t.record(label, expected, `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`, false);
+      return t.record(
+        label,
+        expected,
+        `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+        false,
+      );
     }
   };
   t.finish = () => {
-    const out = { name, base: BASE, ok: rows.filter((r) => r.ok === true).length, failed: rows.filter((r) => r.ok === false).length, rows };
+    const out = {
+      name,
+      base: BASE,
+      ok: rows.filter((r) => r.ok === true).length,
+      failed: rows.filter((r) => r.ok === false).length,
+      rows,
+    };
     writeFileSync(path.join(OUT, `${name}.json`), JSON.stringify(out, null, 2));
     console.log(`\n${name}: ${out.ok} ok, ${out.failed} failed`);
     return out;
@@ -148,7 +168,12 @@ export function bind(page, name) {
     const walk = (node) => {
       if (Array.isArray(node)) return node.forEach(walk);
       if (node && typeof node === 'object') {
-        if (typeof node.id === 'string' && typeof node.type === 'string' && node.pos && typeof node.pos === 'object')
+        if (
+          typeof node.id === 'string' &&
+          typeof node.type === 'string' &&
+          node.pos &&
+          typeof node.pos === 'object'
+        )
           out.push({ id: node.id, type: node.type, pos: node.pos, block: node });
         for (const v of Object.values(node)) walk(v);
       }
@@ -181,8 +206,14 @@ export function bind(page, name) {
     const r = await card.boundingBox().catch(() => null);
     if (r) await page.mouse.click(r.x + r.width / 2, r.y + r.height / 2);
     else await t.invoke('view.goto', { slideId }).catch(() => undefined);
-    await t.pollUntil(() => t.activeSlide(), (a) => a === slideId, 8000);
-    await page.waitForSelector(`.pt-viewer[data-active="${slideId}"]`, { timeout: 5000 }).catch(() => undefined);
+    await t.pollUntil(
+      () => t.activeSlide(),
+      (a) => a === slideId,
+      8000,
+    );
+    await page
+      .waitForSelector(`.pt-viewer[data-active="${slideId}"]`, { timeout: 5000 })
+      .catch(() => undefined);
     await sleep(400);
   };
   t.setupSlide = async (after = null, layout = 'blank') => {
@@ -195,7 +226,11 @@ export function bind(page, name) {
     return id;
   };
   t.newObjectAfter = async (slideId, before, timeout = 20_000) => {
-    const objs = await t.pollUntil(() => t.objectsOf(slideId), (o) => o.some((x) => !before.includes(x.id)), timeout);
+    const objs = await t.pollUntil(
+      () => t.objectsOf(slideId),
+      (o) => o.some((x) => !before.includes(x.id)),
+      timeout,
+    );
     return objs.find((x) => !before.includes(x.id)) ?? null;
   };
   t.objectIds = async (slideId) => (await t.objectsOf(slideId)).map((o) => o.id);
@@ -214,14 +249,20 @@ export function bind(page, name) {
     await t.settled();
   };
   t.pngDataUrl = (w = 96, h = 64, a = '#1b1b1b', b = '#e8e8e8') =>
-    page.evaluate(([pw, ph, ca, cb]) => {
-      const c = document.createElement('canvas');
-      c.width = pw; c.height = ph;
-      const g = c.getContext('2d');
-      g.fillStyle = ca; g.fillRect(0, 0, pw, ph);
-      g.fillStyle = cb; g.fillRect(pw / 8, ph / 5, (pw * 3) / 4, (ph * 3) / 5);
-      return c.toDataURL('image/png');
-    }, [w, h, a, b]);
+    page.evaluate(
+      ([pw, ph, ca, cb]) => {
+        const c = document.createElement('canvas');
+        c.width = pw;
+        c.height = ph;
+        const g = c.getContext('2d');
+        g.fillStyle = ca;
+        g.fillRect(0, 0, pw, ph);
+        g.fillStyle = cb;
+        g.fillRect(pw / 8, ph / 5, (pw * 3) / 4, (ph * 3) / 5);
+        return c.toDataURL('image/png');
+      },
+      [w, h, a, b],
+    );
   t.pngBuffer = async (w = 120, h = 80, a = '#204080', b = '#e0e8ff') => {
     const url = await t.pngDataUrl(w, h, a, b);
     return Buffer.from(url.split(',')[1], 'base64');
@@ -229,62 +270,102 @@ export function bind(page, name) {
   t.placePicture = async (slideId, pos, id = `shot-b2-${Date.now().toString(36)}`) => {
     const png = await t.pngDataUrl(96, 64);
     const s = await t.state();
-    const asset = await t.invoke('asset.add', { id: `${id}-asset`, url: png, role: 'capture', alt: 'b2 picture', baseRevision: s.revision });
+    const asset = await t.invoke('asset.add', {
+      id: `${id}-asset`,
+      url: png,
+      role: 'capture',
+      alt: 'b2 picture',
+      baseRevision: s.revision,
+    });
     await t.settled();
     const s2 = await t.state();
     const before = await t.objectIds(slideId);
-    await t.invoke('block.insert', { slideId, slot: 'main', block: { id, type: 'shot', asset: asset.id, pos }, baseRevision: Math.max(s2.revision, asset.revision ?? 0) });
+    await t.invoke('block.insert', {
+      slideId,
+      slot: 'main',
+      block: { id, type: 'shot', asset: asset.id, pos },
+      baseRevision: Math.max(s2.revision, asset.revision ?? 0),
+    });
     const obj = await t.newObjectAfter(slideId, before, 20_000);
     await t.settled();
     return obj;
   };
-  t.kOf = () => page.evaluate(() => {
-    const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
-    return sheet ? sheet.getBoundingClientRect().width / 1600 : 0;
-  });
-  t.sheetRect = () => page.evaluate(() => {
-    const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
-    if (!sheet) return null;
-    const r = sheet.getBoundingClientRect();
-    return { x: r.x, y: r.y, w: r.width, h: r.height };
-  });
+  t.kOf = () =>
+    page.evaluate(() => {
+      const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+      return sheet ? sheet.getBoundingClientRect().width / 1600 : 0;
+    });
+  t.sheetRect = () =>
+    page.evaluate(() => {
+      const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+      if (!sheet) return null;
+      const r = sheet.getBoundingClientRect();
+      return { x: r.x, y: r.y, w: r.width, h: r.height };
+    });
   t.sheetPoint = async (sx, sy) => {
     const r = await t.sheetRect();
     const k = r.w / 1600;
     return { x: r.x + sx * k, y: r.y + sy * k };
   };
-  t.rectOf = (selector) => page.evaluate((sel) => {
-    const el = document.querySelector(sel);
-    if (!el) return null;
-    const r = el.getBoundingClientRect();
-    return { x: r.x, y: r.y, w: r.width, h: r.height };
-  }, selector);
+  t.rectOf = (selector) =>
+    page.evaluate((sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, w: r.width, h: r.height };
+    }, selector);
   t.center = (r) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
-  t.chip = () => page.evaluate(() => document.querySelector('.ts-overlay .ts-select-chip')?.textContent ?? null);
-  t.editing = () => page.evaluate(() => Boolean(document.querySelector('.ts-stagewrap.ts-editor[data-editing]')));
-  t.runInfo = (run) => page.evaluate((r) => {
-    const el = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`);
-    if (!el) return null;
-    const clone = el.cloneNode(true);
-    clone.querySelectorAll('[data-prompt]').forEach((p) => p.remove());
-    const rect = el.getBoundingClientRect();
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    const lines = new Set([...range.getClientRects()].map((c) => Math.round(c.top))).size;
-    return { text: clone.textContent ?? '', html: el.innerHTML, rect: { x: rect.x, y: rect.y, w: rect.width, h: rect.height }, editable: el.getAttribute('contenteditable') === 'true', lines, font: parseFloat(getComputedStyle(el).fontSize) };
-  }, run);
-  t.runs = () => page.evaluate(() => [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide [data-run]')].map((el) => el.getAttribute('data-run')));
+  t.chip = () =>
+    page.evaluate(() => document.querySelector('.ts-overlay .ts-select-chip')?.textContent ?? null);
+  t.editing = () =>
+    page.evaluate(() => Boolean(document.querySelector('.ts-stagewrap.ts-editor[data-editing]')));
+  t.runInfo = (run) =>
+    page.evaluate((r) => {
+      const el = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`);
+      if (!el) return null;
+      const clone = el.cloneNode(true);
+      clone.querySelectorAll('[data-prompt]').forEach((p) => p.remove());
+      const rect = el.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const lines = new Set([...range.getClientRects()].map((c) => Math.round(c.top))).size;
+      return {
+        text: clone.textContent ?? '',
+        html: el.innerHTML,
+        rect: { x: rect.x, y: rect.y, w: rect.width, h: rect.height },
+        editable: el.getAttribute('contenteditable') === 'true',
+        lines,
+        font: parseFloat(getComputedStyle(el).fontSize),
+      };
+    }, run);
+  t.runs = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide [data-run]')].map((el) =>
+        el.getAttribute('data-run'),
+      ),
+    );
   t.runsOfBlock = async (blockId) => (await t.runs()).filter((r) => r.startsWith(`${blockId}/`));
   t.selectionText = () => page.evaluate(() => window.getSelection()?.toString() ?? '');
-  t.boxOf = (id) => page.evaluate((blockId) => {
-    const inner = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`);
-    if (!inner) return null;
-    const free = inner.closest('.free') ?? inner;
-    const f = free.getBoundingClientRect();
-    const i = inner.getBoundingClientRect();
-    return { free: { x: f.x, y: f.y, w: f.width, h: f.height }, inner: { x: i.x, y: i.y, w: i.width, h: i.height } };
-  }, id);
-  t.handleControls = () => page.evaluate(() => [...document.querySelectorAll('.ts-overlay [data-control^="handle."]')].map((el) => el.getAttribute('data-control')));
+  t.boxOf = (id) =>
+    page.evaluate((blockId) => {
+      const inner = document.querySelector(
+        `.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`,
+      );
+      if (!inner) return null;
+      const free = inner.closest('.free') ?? inner;
+      const f = free.getBoundingClientRect();
+      const i = inner.getBoundingClientRect();
+      return {
+        free: { x: f.x, y: f.y, w: f.width, h: f.height },
+        inner: { x: i.x, y: i.y, w: i.width, h: i.height },
+      };
+    }, id);
+  t.handleControls = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('.ts-overlay [data-control^="handle."]')].map((el) =>
+        el.getAttribute('data-control'),
+      ),
+    );
   t.ctl = (control) => page.locator(`[data-control="${control}"]`);
   t.clickControl = async (control) => {
     const el = t.ctl(control).first();
@@ -293,7 +374,12 @@ export function bind(page, name) {
     if (!r) throw new Error(`no control ${control}`);
     await t.clickAt(r.x + r.width / 2, r.y + r.height / 2);
   };
-  t.has = (selector) => page.locator(selector).first().isVisible().catch(() => false);
+  t.has = (selector) =>
+    page
+      .locator(selector)
+      .first()
+      .isVisible()
+      .catch(() => false);
   t.visible = (control) => t.has(`[data-control="${control}"]`);
   t.openMenu = async (id) => {
     await t.clickControl(`menubar.${id}`);
@@ -304,7 +390,11 @@ export function bind(page, name) {
     const row = t.ctl(`menu.${rowId}`).first();
     const r = await row.boundingBox();
     if (!r) throw new Error(`no menu row ${rowId}`);
-    await t.moveHuman({ x: r.x - 20, y: r.y + r.height / 2 }, { x: r.x + r.width / 2, y: r.y + r.height / 2 }, 6);
+    await t.moveHuman(
+      { x: r.x - 20, y: r.y + r.height / 2 },
+      { x: r.x + r.width / 2, y: r.y + r.height / 2 },
+      6,
+    );
     await sleep(rand(250, 400));
     if (waitFor) await page.locator(waitFor).first().waitFor({ timeout: 6000 });
   };
@@ -328,7 +418,7 @@ export function bind(page, name) {
       await t.clickAt(b.free.x + 4, b.free.y + 4);
       ctrls = await t.handleControls();
     }
-    if ((await t.editing())) {
+    if (await t.editing()) {
       await t.press('Escape');
       await sleep(200);
       ctrls = await t.handleControls();
@@ -341,13 +431,23 @@ export function bind(page, name) {
     await t.dblclickAt(info.rect.x + info.rect.w / 2, info.rect.y + info.rect.h / 2);
     return t.editing();
   };
-  t.snackbar = () => page.evaluate(() => document.querySelector('.ts-snackbar.is-on')?.textContent?.trim() ?? null);
+  t.snackbar = () =>
+    page.evaluate(() => document.querySelector('.ts-snackbar.is-on')?.textContent?.trim() ?? null);
   t.rightClickAt = async (x, y) => {
     await t.moveHuman({ x: x - 30, y: y - 20 }, { x, y }, 6);
     await page.mouse.click(x, y, { button: 'right' });
     await sleep(rand(200, 350));
   };
-  t.contextRows = () => page.evaluate(() => [...document.querySelectorAll('.ts-context-menu [data-control^="menu."], .ts-context-menu [data-control^="context."]')].filter((el) => el.getClientRects().length > 0).map((el) => el.getAttribute('data-control')));
+  t.contextRows = () =>
+    page.evaluate(() =>
+      [
+        ...document.querySelectorAll(
+          '.ts-context-menu [data-control^="menu."], .ts-context-menu [data-control^="context."]',
+        ),
+      ]
+        .filter((el) => el.getClientRects().length > 0)
+        .map((el) => el.getAttribute('data-control')),
+    );
   t.newDeck = async () => {
     await page.goto(`${BASE}/new`, { waitUntil: 'domcontentloaded' });
     await t.editorReady();
@@ -355,7 +455,8 @@ export function bind(page, name) {
     const s = await t.state();
     const allRuns = await t.runs();
     const head = allRuns.find((x) => /heading/.test(x)) ?? allRuns[0] ?? null;
-    if (await t.visible('dialog.namePrompt')) await t.clickControl('dialog.namePrompt.close').catch(() => undefined);
+    if (await t.visible('dialog.namePrompt'))
+      await t.clickControl('dialog.namePrompt.close').catch(() => undefined);
     await t.openRun(head);
     await t.typeHuman('B2 product round');
     await sleep(300);
@@ -363,7 +464,8 @@ export function bind(page, name) {
     await t.waitRevision(1, 30_000);
     await t.settled();
     await page.waitForURL(/\/edit\//, { timeout: 30_000 }).catch(() => undefined);
-    if (await t.visible('dialog.namePrompt')) await t.clickControl('dialog.namePrompt.close').catch(() => undefined);
+    if (await t.visible('dialog.namePrompt'))
+      await t.clickControl('dialog.namePrompt.close').catch(() => undefined);
     return { id: info.id, titleSlide: s.slideId, head };
   };
   t.uploadThrough = async (open, name = 'logo.png', buffer = null, mimeType = 'image/png') => {

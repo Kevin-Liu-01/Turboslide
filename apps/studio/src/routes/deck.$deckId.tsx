@@ -5,6 +5,7 @@ import type { ShellMode } from '@turboslide/chrome/shell-data';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { DeckViewer } from '../components/DeckViewer';
+import { agentSessionRequested } from '../components/useStudioSession';
 import { refusalSentence } from '../editor/refusal';
 import { deckRevision, getDeck } from '../server/decks';
 import type { DeckPayload, GetDeckInput } from '../server/decks';
@@ -45,7 +46,19 @@ import { AccessPage } from './-access-page';
 // streamed document. The request now travels as data and the viewer fetches it after hydration
 // through the cacheable GET, so the document is the shell and one slide, and the CDN serves the
 // other slides from its cache for a minute (stale for an hour) under the revision's URL.
-export type DeckSearch = { mode?: ShellMode; theme?: Theme; present?: 1; p?: string };
+//
+// The sync and costs round (docs/SYNC.md 3.10, open question 3's default): the page attaches a
+// studio session only when the address carries `?agent=1` (components/useStudioSession.ts
+// `agentSessionRequested`), so a seller's show or a colleague's view costs no function request
+// after its load and `deck_goto_slide` over /mcp reaches a viewer tab only when an agent opened
+// it. A show's own controls, the keys and the presenter window's channel need no session.
+//
+// The page follows no stream (VERIFICATION.md, the sync round's pass 1, F10): the document is the
+// load's revision and a seller's later edit reaches this page on a reload. The Viewer link's
+// landing here is server/auth/links.ts `landingPath` (SPEC-3 0.13); moving it to the editor
+// page's viewer floor, or giving this page a gated stream, is one decision with its costs in
+// docs/gslides-parity/sync/build/b5.md under the sync round's fix round (R10).
+export type DeckSearch = { mode?: ShellMode; theme?: Theme; present?: 1; p?: string; agent?: 1 };
 
 /** What the two viewer routes' loaders return: the document's payload and the request for the rest. */
 export type DeckLoaderData = {
@@ -74,6 +87,7 @@ export function validateDeckSearch(search: Record<string, unknown>): DeckSearch 
   if (isTheme(search.theme)) out.theme = search.theme;
   if (search.present === 1 || search.present === '1' || search.present === true) out.present = 1;
   if (typeof search.p === 'string' && PUBLISH_TOKEN_PATTERN.test(search.p)) out.p = search.p;
+  if (agentSessionRequested(search)) out.agent = 1;
   return out;
 }
 
@@ -164,6 +178,7 @@ function DeckPage() {
       mode={search.mode}
       theme={search.theme}
       present={search.present === 1}
+      agent={search.agent === 1}
       onModeChange={onModeChange}
     />
   );

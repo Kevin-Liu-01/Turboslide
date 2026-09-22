@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   AREA_FEATURE,
+  COST_PROBE_DRIVER,
   CORE_DRIVERS,
   DECLARED_CONTROL_IDS,
   CORE_FEATURES,
@@ -18,8 +19,10 @@ import {
   UNPARKABLE_FEATURES,
   areaOf,
   coreRow,
+  costRows,
   featureOf,
   isCoreId,
+  isCostRow,
   isKnownControl,
   isManualRow,
   isMeasureRow,
@@ -68,7 +71,9 @@ describe('the committed matrix', () => {
     expect(rowsForDriver('decks.spec.ts')).toEqual(rowsForDriver('core/decks.spec.ts'));
     expect(probeRows()).toEqual(rowsForDriver(PROBE_DRIVER));
     expect(
-      probeRows().length + CORE_SPEC_DRIVERS.reduce((n, d) => n + rowsForDriver(d).length, 0),
+      probeRows().length +
+        costRows().length +
+        CORE_SPEC_DRIVERS.reduce((n, d) => n + rowsForDriver(d).length, 0),
     ).toBe(CORE_MATRIX.length);
     for (const row of CORE_MATRIX.filter((each) => areaOf(each.id) === 'collab'))
       expect(row.feature, row.id).toBe('share');
@@ -384,8 +389,8 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
       expect(rowsForFeature(feature).length, feature).toBeGreaterThan(0);
     for (const driver of ['core/chrome.spec.ts', 'core/brand.spec.ts', 'core/assist.spec.ts'])
       expect(rowsForDriver(driver).length, driver).toBeGreaterThan(0);
-    expect(CORE_MATRIX.length).toBe(565 + 133);
-    expect(CORE_MATRIX.filter(isMeasureRow).map((r) => r.id)).toEqual([
+    expect(CORE_MATRIX.length).toBe(565 + 133 + 16);
+    expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
       'export.download.large-deck-pptx',
     ]);
@@ -424,5 +429,62 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     /* every parks id of the added rows is a declared id or a literal of a control source */
     for (const row of CORE_MATRIX)
       for (const control of row.parks ?? []) expect(isKnownControl(control), control).toBe(true);
+  });
+});
+
+describe('the sync and costs round (docs/SYNC.md section 6)', () => {
+  it('holds the 16 rows under the two unparkable features, the sync spec and the cost probe', () => {
+    /* ten spec rows and the pull row of the cost probe under sync; the five cost rows under cost */
+    expect(rowsForFeature('sync').length).toBe(11);
+    expect(rowsForFeature('cost').length).toBe(5);
+    expect(isParkable('sync')).toBe(false);
+    expect(isParkable('cost')).toBe(false);
+    expect(UNPARKABLE_FEATURES).toContain('sync');
+    expect(UNPARKABLE_FEATURES).toContain('cost');
+    expect(CORE_SPEC_DRIVERS).toContain('core/sync.spec.ts');
+    expect(CORE_DRIVERS).toContain(COST_PROBE_DRIVER);
+    expect(rowsForDriver('core/sync.spec.ts').length).toBe(10);
+    expect(rowsForDriver('sync.spec.ts')).toEqual(rowsForDriver('core/sync.spec.ts'));
+    /* the cost probe drives the five cost rows and the pull row of the sync feature */
+    expect(costRows().map((r) => r.id)).toEqual([
+      'sync.pull.no-listing',
+      'cost.editor-idle.calls',
+      'cost.editor-hidden.calls',
+      'cost.editor-editing.calls',
+      'cost.two-tabs-idle.calls',
+      'cost.show.calls',
+    ]);
+    expect(rowsForDriver(COST_PROBE_DRIVER)).toEqual(costRows());
+    for (const row of costRows()) expect(isCostRow(row), row.id).toBe(true);
+    for (const row of rowsForFeature('sync'))
+      if (!isCostRow(row)) expect(row.driver).toBe('core/sync.spec.ts');
+    /* every cost row of the cost feature is a measurement row in SYNC.md 6.1's sense; the pull row is not */
+    for (const row of rowsForFeature('cost')) expect(isMeasureRow(row), row.id).toBe(true);
+    expect(isMeasureRow(coreRow('sync.pull.no-listing'))).toBe(false);
+    /* today as the audits saw production on 2026-09-20 */
+    expect(coreRow('sync.title.concurrent-both-kept').today).toBe('broken');
+    expect(coreRow('sync.title.concurrent-both-kept').severity).toBe(3);
+    expect(coreRow('sync.serial.order-and-latency').today).toBe('works');
+    expect(coreRow('sync.viewer.live-updates').setup).toMatch(/share\.setGeneralAccess/);
+    expect(coreRow('cost.show.calls').severity).toBe(3);
+  });
+
+  it('reads a red cost row as recorded, and a red pull row as blocking the ship', () => {
+    const results = {};
+    for (const id of CORE_IDS) results[id] = 'passed';
+    const run = parkedFeaturesOf({
+      ...results,
+      'cost.show.calls': 'failed',
+      'sync.pull.no-listing': 'failed',
+      'sync.viewer.live-updates': 'not driven',
+    });
+    expect(run.parked).toEqual([]);
+    expect(run.measured).toEqual([{ id: 'cost.show.calls', feature: 'cost', result: 'failed' }]);
+    expect(run.blocking).toEqual([
+      { id: 'sync.viewer.live-updates', feature: 'sync', result: 'not driven' },
+      { id: 'sync.pull.no-listing', feature: 'sync', result: 'failed' },
+    ]);
+    expect(() => shipVerdict(results, ['sync'])).toThrow(/sync cannot be parked/);
+    expect(() => shipVerdict(results, ['cost'])).toThrow(/cost cannot be parked/);
   });
 });

@@ -164,6 +164,8 @@ import type {
   OpsResponse,
   PersistedOffer,
   Rejected,
+  ResyncAnswer,
+  ResyncOrigin,
   RoomClient,
   RoomTransport,
   StreamFailure,
@@ -193,6 +195,7 @@ import type { Finding } from '@turboslide/schema/findings';
 import { ICON_NAMES } from '@turboslide/schema/icon-names';
 import { canonicalJson } from '@turboslide/schema/json';
 import type { Author, Lease, Mutation, Version, Write } from '@turboslide/schema/mutations';
+import { slideFieldOf, slideFieldPath } from '@turboslide/schema/mutations';
 import { applyMutations, applyWrite } from '@turboslide/schema/reduce';
 import { validateSlide } from '@turboslide/schema/validate';
 import type { Issue } from '@turboslide/schema/validate';
@@ -1060,6 +1063,50 @@ function menuInputOf(input: ExportRunInput): ExportMenuInput {
   };
 }
 
+/** True for the three text run ops the admission transforms and the reducer follows the title from (docs/SYNC.md 3.4). */
+function isTextRunMutation(
+  mutation: Mutation,
+): mutation is Extract<Mutation, { op: 'text.splice' | 'text.mark' | 'text.replace' }> {
+  return (
+    mutation.op === 'text.splice' || mutation.op === 'text.mark' || mutation.op === 'text.replace'
+  );
+}
+
+/**
+ * True for a text run on a title or statement slide's field: `blockId` names the field on a
+ * slide of that kind and `path` is the field's pointer (schema mutations.ts `slideFieldOf`,
+ * `slideFieldPath`; docs/SYNC.md 3.4). Such a write addresses no block, so it never asks for the
+ * canvas conversion a format write on the field object does (convert-first.ts).
+ */
+function isSlideFieldTextRun(document: DeckDocument, mutation: Mutation): boolean {
+  if (!isTextRunMutation(mutation)) return false;
+  const slide = document.slides[mutation.slideId];
+  if (slide === undefined) return false;
+  const field = slideFieldOf(slide, mutation.blockId);
+  return field !== null && mutation.path === slideFieldPath(field);
+}
+
+/**
+ * The origins the resync read answered (docs/SYNC.md 3.2; write.ts `readEditorDeck` with
+ * `since` answers `EditorDeck.origins`, B3's half): the records above the tab's old position
+ * that name their origin, each with the seq its commit made and the op ids it folded, the
+ * newest RESYNC_ORIGINS_MAX of them. The payload is parsed JSON, so each row is checked before
+ * the room client reads it; a payload without the field answers none and the room client
+ * re-folds its pending ops as before, and the bound (a head more than REPLAY_MAX_ENTRIES above
+ * the old position) is the room client's own reading on the blob tier.
+ */
+function resyncOriginsOf(payload: EditorDeck): Pick<ResyncAnswer, 'origins'> {
+  const origins: ResyncOrigin[] = [];
+  for (const row of payload.origins ?? []) {
+    if (typeof row !== 'object' || row === null) continue;
+    const { seq, opIds } = row as { seq?: unknown; opIds?: unknown };
+    if (typeof seq !== 'number' || !Number.isInteger(seq) || !Array.isArray(opIds)) continue;
+    const ids = opIds.filter((id): id is string => typeof id === 'string' && id !== '');
+    if (ids.length > 0) origins.push({ seq, opIds: ids });
+  }
+  return origins.length === 0 ? {} : { origins };
+}
+
 export function createEditorController(init: {
   deckId: string;
   author: Author;
@@ -1382,7 +1429,7 @@ export function createEditorController(init: {
     }, EXTERNAL_BANNER_MS);
   };
 
-  /** The History panel's version rows follow the checkpoints, read once per burst of them. */
+  /** The History panel's version rows re-read from the log, once per burst of the calls that need it. */
   const refreshVersionsSoon = (): void => {
     if (versionsTimer !== undefined) clearTimeout(versionsTimer);
     versionsTimer = setTimeout(() => {
@@ -1391,6 +1438,43 @@ export function createEditorController(init: {
         .then((versions) => publish({ versions }))
         .catch(() => undefined);
     }, 500);
+  };
+
+  /**
+   * The History panel's rows follow the checkpoint frames (docs/SYNC.md 3.10; audit-costs item
+   * 7): a frame at the revision after the last row appends one row from what it carries (the
+   * revision, the author, the note; the record number is the next one, since a named version
+   * and a restore append their own rows when they land), and the log is read only when a frame
+   * does not continue the rows (a gap after a stream that was down, a named version another tab
+   * saved at the same revision, an empty list), when the panel asks (`refreshVersions`,
+   * `version.list`) or when a restore lands. An external checkpoint reloads the tab and the
+   * reload's payload carries the rows. Before this every edit was followed by a `listVersions`
+   * server function 500 ms after its checkpoint, 12 a minute while editing (audit-costs 4.1).
+   */
+  const noteCheckpointVersion = (event: Extract<RoomEvent, { type: 'checkpoint' }>): void => {
+    if (event.external === true) return;
+    const rows = latest().versions;
+    const last = rows[rows.length - 1];
+    if (last !== undefined && event.revision === last.revision + 1) {
+      publish({
+        versions: [
+          ...rows,
+          {
+            n: last.n + 1,
+            revision: event.revision,
+            author: event.author,
+            note: event.note,
+            createdAt: new Date().toISOString(),
+            mutations: [],
+          },
+        ],
+      });
+      return;
+    }
+    // a frame at or under the last row's revision with no note repeats a row the tab holds (the
+    // blob tier delivers a late frame of an earlier revision after the answer moved the rows)
+    if (last !== undefined && event.revision <= last.revision && event.note === '') return;
+    refreshVersionsSoon();
   };
 
   const rejectNoticeOf = (rejected: Rejected & { mutations?: Mutation[] }): RejectNotice => {
@@ -1510,7 +1594,9 @@ export function createEditorController(init: {
             },
           },
     );
-    if (before !== null) {
+    // a text run on the cover's heading carries the title with it in the reducer (docs/SYNC.md
+    // 3.4), so only a whole value write the reducer does not derive from is followed here
+    if (before !== null && !mutations.some(isTextRunMutation)) {
       const rename = autoTitleMutations(before, mutations, autoTitle);
       if (rename.length > 0) commit(rename, 'rename').catch(() => undefined);
     }
@@ -1535,12 +1621,16 @@ export function createEditorController(init: {
       ) {
         continue;
       }
-      const pointer = mutation.path.replace(/^\//, '');
+      const slide = document.slides[mutation.slideId];
+      if (slide === undefined) continue;
+      // a slide field's run is addressed at the field's pointer on the wire (`/heading`; docs/
+      // SYNC.md 3.4) and drawn as `<field>/text` on the sheet (render/slide.ts data-run), so the
+      // session is told under the pointer it keys its run by
+      const pointer =
+        slideFieldOf(slide, mutation.blockId) !== null ? 'text' : mutation.path.replace(/^\//, '');
       const key = `${mutation.slideId}:${mutation.blockId}/${pointer}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      const slide = document.slides[mutation.slideId];
-      if (slide === undefined) continue;
       const text = readRunText(slide, mutation.blockId, pointer);
       if (text === undefined) continue;
       announceTextChanged({ slideId: mutation.slideId, blockId: mutation.blockId, pointer, text });
@@ -1780,7 +1870,7 @@ export function createEditorController(init: {
             if (latest().following === event.clientId) publish({ following: null });
             return;
           case 'checkpoint':
-            refreshVersionsSoon();
+            noteCheckpointVersion(event);
             if (event.comments !== undefined) scheduleCommentsRefresh();
             if (event.external === true) {
               showExternal({
@@ -1819,17 +1909,21 @@ export function createEditorController(init: {
           ],
         });
       },
-      onResync: async (revision) => {
+      onResync: async (revision, since) => {
         // the reload lands at or above the revision the room named (the focus round, cycle 2):
         // on the blob tier the instance that answers may hold a mirror behind the write this
         // tab just learned of (its own restore, another tab's write announced as an external
         // checkpoint), and a document from before it left the tab on the old slides while its
-        // revision moved (VERIFICATION F-versions); write.ts syncs the store by force when behind
+        // revision moved (VERIFICATION F-versions); write.ts syncs the store by force when behind.
+        // The read carries the tab's position before the resync (`since`; docs/SYNC.md 3.2), so
+        // the answer names the op ids of the records above it and the room client drops the
+        // pending ops those records name instead of re-sending them (invariant 10)
         let payload: EditorDeck | null;
         try {
           payload = await readEditorDeck({
             deckId,
             ...(revision > 0 ? { atLeast: revision } : {}),
+            since,
           });
         } catch (error) {
           // a store error the server function threw (the 429 of VERIFICATION C3-F2) stays out
@@ -1859,7 +1953,7 @@ export function createEditorController(init: {
           // stands when a reload lands below it
           serverRevision: Math.max(fresh, latest().serverRevision),
         });
-        return payload.document;
+        return { document: payload.document, ...resyncOriginsOf(payload) };
       },
       onPersisted: (offer) => {
         publish({
@@ -2226,6 +2320,14 @@ export function createEditorController(init: {
      reads its whole title (decks.name.follows-heading) */
   const autoTitle: AutoTitleMemory = { lastAuto: null };
   const withAutoTitle = (mutations: Mutation[]): Mutation[] => {
+    /* the sync round (docs/SYNC.md 3.4, audit-ordering item 1): a text run on the cover's heading
+       carries no rename of its own, since the reducer derives the deck's title from the heading
+       while the title was following it (schema reduce.ts `followTitle`) and the inverse it answers
+       restores the title too. A `deck.set /title` riding every burst was never transformed, so two
+       people typing into one cover wrote each other's titles over and the title stopped
+       following. The rename still rides the whole value writes the reducer does not derive from
+       (a slide.replace that makes a title slide, a canvas conversion) */
+    if (mutations.some(isTextRunMutation)) return mutations;
     const rename = autoTitleMutations(snapshot.document, mutations, autoTitle);
     const first = rename[0];
     if (first?.op === 'deck.set' && typeof first.value === 'string')
@@ -2258,7 +2360,14 @@ export function createEditorController(init: {
   const commit = (rawMutations: Mutation[], label: string): Promise<Committed> => {
     /* the seller's edit of an assisted block clears its mark (docs/PRODUCT.md 6.1) */
     const mutations = withAssistClear(snapshot.document, rawMutations);
-    const convert = slideToConvertFor(snapshot.document, mutations);
+    /* a text run on a title or statement slide's field names the field as its blockId (docs/
+       SYNC.md 3.4) and is not a write against the field object that converts the slide to a
+       canvas first (convert-first.ts): the reducer writes the field in place, so the cover keeps
+       its kind under typing and converts on the first format write alone, as before */
+    const convert = slideToConvertFor(
+      snapshot.document,
+      mutations.filter((mutation) => !isSlideFieldTextRun(snapshot.document, mutation)),
+    );
     if (convert !== null) return convertThenCommit(convert, mutations, label);
     return commitAs(withAutoTitle(mutations), label, 'edit');
   };

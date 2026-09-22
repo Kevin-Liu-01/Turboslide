@@ -29,6 +29,22 @@ export const SNAPSHOT_KEEP_RECORDS = 50;
  */
 export const SNAPSHOT_GRACE_MS = 5 * 60_000;
 
+/**
+ * The prune runs on every this many records the deck's log gains and once when the deck's last
+ * stream on an instance closes, instead of after every commit (docs/SYNC.md 3.6, 4.4 rank 6;
+ * audit-costs item 14): the one `list` of the write path leaves the hot path, and the retention
+ * set of SNAPSHOT_KEEP_RECORDS bounds what waits between two prunes at about seventy snapshots.
+ * Counted on the record number, which every instance agrees on, so two instances never prune
+ * the same twentieth commit twice; a named version takes a number too, and its save is the
+ * prune's turn when it lands on one.
+ */
+export const SNAPSHOT_PRUNE_EVERY = 20;
+
+/** True when the record numbered `n` is one the prune runs after (SNAPSHOT_PRUNE_EVERY). */
+export function pruneDue(n: number): boolean {
+  return Number.isInteger(n) && n > 0 && n % SNAPSHOT_PRUNE_EVERY === 0;
+}
+
 const MD5_HEX = /^[0-9a-f]{32}$/;
 
 /** The md5 of a body in lower case hex: the snapshot key of the `deck.json` bytes it belongs to. */

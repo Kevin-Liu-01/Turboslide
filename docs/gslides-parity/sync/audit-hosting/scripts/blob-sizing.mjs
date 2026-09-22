@@ -6,12 +6,23 @@
 // from BLOB_READ_WRITE_TOKEN in the environment (sourced in a subshell by the caller).
 //
 //   ( set -a; . .turboslide/vercel-dev.env; set +a; node blob-sizing.mjs --out <file> ) | grep -v -i token
+//
+// `--etags <file>` (the sync and costs round, build/b6.md R2; docs/HOSTING-MOVE.md section 10
+// item 5): writes the pathname and etag of every `decks/<id>/deck.json` the listing returned, one
+// row each, sorted by pathname, so the file taken at the start of cutover step 4 and the one taken
+// after the transfer compare on the 72 manifests. That file names deck ids (the pathnames) and
+// nothing else; the summary file and stdout stay as before, counts and bytes alone.
 import { writeFileSync } from 'node:fs';
 
 const API = 'https://vercel.com/api/blob';
 const argv = process.argv.slice(2);
 const outIndex = argv.indexOf('--out');
 const OUT = outIndex >= 0 ? argv[outIndex + 1] : null;
+const etagsIndex = argv.indexOf('--etags');
+const ETAGS = etagsIndex >= 0 ? argv[etagsIndex + 1] : null;
+/** the manifests' pathname and etag, when --etags asked for them */
+const manifestEtags = [];
+const MANIFEST = /^decks\/[^/]+\/deck\.json$/;
 
 const token = process.env.BLOB_READ_WRITE_TOKEN;
 if (token === undefined || token === '') {
@@ -90,6 +101,11 @@ for (;;) {
       oldest = oldest === null ? at : Math.min(oldest, at);
       newest = newest === null ? at : Math.max(newest, at);
     }
+    if (ETAGS !== null && MANIFEST.test(path))
+      manifestEtags.push({
+        pathname: path,
+        etag: typeof blob.etag === 'string' ? blob.etag : null,
+      });
     const slash = path.indexOf('/');
     const first = slash < 0 ? path : path.slice(0, slash);
     add(prefixes, `${first}/`, size);
@@ -99,7 +115,14 @@ for (;;) {
       const deckId = s2 < 0 ? rest : rest.slice(0, s2);
       const inside = s2 < 0 ? '' : rest.slice(s2 + 1);
       add(deckKinds, deckKind(inside), size);
-      const row = decks.get(deckId) ?? { objects: 0, bytes: 0, snapshots: 0, thumbs: 0, slides: 0, versions: 0 };
+      const row = decks.get(deckId) ?? {
+        objects: 0,
+        bytes: 0,
+        snapshots: 0,
+        thumbs: 0,
+        slides: 0,
+        versions: 0,
+      };
       row.objects += 1;
       row.bytes += size;
       if (inside.startsWith('snapshots/')) row.snapshots += 1;
@@ -119,10 +142,16 @@ for (;;) {
 const sorted = (map) =>
   [...map.entries()]
     .sort((a, b) => b[1].bytes - a[1].bytes)
-    .map(([key, row]) => ({ key, objects: row.objects, bytes: row.bytes, mib: +(row.bytes / 1048576).toFixed(2) }));
+    .map(([key, row]) => ({
+      key,
+      objects: row.objects,
+      bytes: row.bytes,
+      mib: +(row.bytes / 1048576).toFixed(2),
+    }));
 
 const deckRows = [...decks.values()].sort((a, b) => b.bytes - a.bytes);
-const quantile = (arr, q) => (arr.length === 0 ? 0 : arr[Math.min(arr.length - 1, Math.floor(q * (arr.length - 1)))]);
+const quantile = (arr, q) =>
+  arr.length === 0 ? 0 : arr[Math.min(arr.length - 1, Math.floor(q * (arr.length - 1)))];
 const bytesSorted = deckRows.map((d) => d.bytes).sort((a, b) => a - b);
 const objectsSorted = deckRows.map((d) => d.objects).sort((a, b) => a - b);
 
@@ -153,9 +182,22 @@ const summary = {
     thumbsTotal: deckRows.reduce((n, d) => n + d.thumbs, 0),
     slidesTotal: deckRows.reduce((n, d) => n + d.slides, 0),
     versionsTotal: deckRows.reduce((n, d) => n + d.versions, 0),
-    largestFive: deckRows.slice(0, 5).map((d) => ({ objects: d.objects, bytes: d.bytes, snapshots: d.snapshots, thumbs: d.thumbs, slides: d.slides })),
+    largestFive: deckRows.slice(0, 5).map((d) => ({
+      objects: d.objects,
+      bytes: d.bytes,
+      snapshots: d.snapshots,
+      thumbs: d.thumbs,
+      slides: d.slides,
+    })),
   },
 };
 
 if (OUT) writeFileSync(OUT, `${JSON.stringify(summary, null, 2)}\n`);
+if (ETAGS !== null) {
+  manifestEtags.sort((a, b) => a.pathname.localeCompare(b.pathname));
+  writeFileSync(
+    ETAGS,
+    `${JSON.stringify({ listedAt: summary.listedAt, manifests: manifestEtags }, null, 2)}\n`,
+  );
+}
 console.log(JSON.stringify(summary, null, 2));

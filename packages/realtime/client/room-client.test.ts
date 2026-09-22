@@ -16,6 +16,7 @@ import { validateDocument } from '@turboslide/schema/validate';
 import type { Entry, RoomEvent } from '../src/channel.ts';
 import { memoryChannel } from '../src/memory.ts';
 import { until } from '../src/channel-contract.ts';
+import { PRESENCE_BATCH_MS } from '../src/protocol.ts';
 import type { OpsPost, PresencePost } from '../src/protocol.ts';
 import { fakeRoomServer, tabTransport } from './fake-transport.ts';
 import type { FakeIdentity } from './fake-transport.ts';
@@ -1850,5 +1851,472 @@ describe('the roster keeps its join order across presence posts (the stream fix 
     await d.room.stop();
     await b.room.stop();
     await a.room.stop();
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// The sync and costs round (docs/SYNC.md 3.2, 3.10, 3.11 invariants 4, 10 and 11; 6.4's named
+// tests for B2): acknowledgement by id from an echo's `covers`, the byte match as the fallback
+// for a record without an origin, the undo inverse past a remote insert, the own echo skipped
+// and a second tab of the same person read as remote, the resync read's origins dropping the
+// pending ops they name, and the heartbeat's two cadences.
+
+describe('the sync and costs round: acknowledgement by id, undo past remote entries, the resync origins and the heartbeat (docs/SYNC.md 3.2, 3.10, 3.11)', () => {
+  const TAB_A = 'c'.repeat(32);
+  const TAB_A2 = 'd'.repeat(32);
+  const TAB_B = 'e'.repeat(32);
+
+  type FakeTimer = { run: () => void; ms: number; at: number };
+
+  /**
+   * A blob tier transport of this block's own: one POST is one revision, every entry of it at
+   * that seq under the client's id; `hold` keeps the answer back so an echo can arrive first;
+   * `fire` hands the client a stream event; the timers and the clock are the test's.
+   */
+  const blobTab = (
+    options: {
+      author: FakeIdentity['author'];
+      head: number;
+      onResync?: RoomClientOptions['onResync'];
+      fakeTimers?: boolean;
+    } = { author: kevin.author, head: 0 },
+  ) => {
+    const document = normalized();
+    const r0 = options.head === 0 ? document.deck.revision : options.head;
+    let head = r0;
+    let onEvent: ((event: RoomEvent) => void) | null = null;
+    const posts: OpsPost[] = [];
+    const presences: PresencePost[] = [];
+    let holding = false;
+    let held: (() => void) | null = null;
+    const timers: FakeTimer[] = [];
+    let clock = 1_000_000;
+    /** the seq an echo fired for a POST's op ids already made, so the answer names the same commit */
+    const echoedByOp = new Map<string, number>();
+    let answerSeq: number | null = null;
+    const transport: RoomTransport = {
+      open(o: OpenOptions) {
+        onEvent = o.onEvent;
+        return { close: () => undefined };
+      },
+      async postOps(body) {
+        posts.push(structuredClone(body));
+        if (holding) await new Promise<void>((resolve) => (held = resolve));
+        const echoed = body.entries.map((entry) => echoedByOp.get(entry.opId)).find(Boolean);
+        const seq =
+          answerSeq ??
+          echoed ??
+          // the store's head is at least the client's base (a resync moved the client to the head)
+          Math.max(head, body.base.seq) + 1;
+        answerSeq = null;
+        head = Math.max(head, seq);
+        const entries: Entry[] = body.entries.map((entry) => ({
+          seq,
+          rev: seq - 1,
+          kind: 'edit',
+          author: options.author,
+          clientId: body.clientId,
+          opId: entry.opId,
+          mutations: (entry as { mutations?: Mutation[] }).mutations ?? [],
+          at: new Date().toISOString(),
+        }));
+        return { ok: true, entries, rejected: [], head, revision: head };
+      },
+      async postPresence(body) {
+        presences.push(structuredClone(body));
+      },
+    };
+    const changes: DocumentChange[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: r0,
+      tier: 'blob',
+      transform: testTransform,
+      onChange: (change) => changes.push(change),
+      ...(options.onResync === undefined ? {} : { onResync: options.onResync }),
+      ...(options.fakeTimers === true
+        ? {
+            now: () => clock,
+            timers: {
+              setTimeout: (run: () => void, ms: number) => {
+                const handle: FakeTimer = { run, ms, at: clock + ms };
+                timers.push(handle);
+                return handle;
+              },
+              clearTimeout: (handle: unknown) => {
+                const at = timers.indexOf(handle as FakeTimer);
+                if (at >= 0) timers.splice(at, 1);
+              },
+            },
+          }
+        : {}),
+    });
+    return {
+      room,
+      posts,
+      presences,
+      changes,
+      r0,
+      head: () => head,
+      fire: (event: RoomEvent) => {
+        // a record's echo moves the store's head, and the ops it covers were committed at its seq
+        if (event.type === 'op') {
+          head = Math.max(head, event.entry.seq);
+          for (const id of event.entry.covers ?? []) echoedByOp.set(id, event.entry.seq);
+        }
+        onEvent?.(event);
+      },
+      /** the next POST is answered at this seq (an echo without covers already carried its commit) */
+      answerAt(seq: number) {
+        answerSeq = seq;
+      },
+      hello: (clientId: string) =>
+        onEvent?.({
+          type: 'hello',
+          seq: r0,
+          revision: r0,
+          clientId,
+          role: 'editor',
+          clients: [],
+          editing: 1,
+          tier: 'blob',
+        }),
+      hold(on: boolean) {
+        holding = on;
+        if (!on && held !== null) {
+          held();
+          held = null;
+        }
+      },
+      /** the record's stream entry as blob.ts entryOfRecord emits it since the round */
+      echo: (seq: number, clientId: string, covers: string[], mutations: Mutation[]): Entry => ({
+        seq,
+        rev: seq - 1,
+        kind: 'edit',
+        author: options.author,
+        clientId,
+        opId: `store:${seq}`,
+        mutations,
+        at: new Date().toISOString(),
+        covers,
+      }),
+      /** advances the fake clock and runs every timer due by then, in order */
+      advance(ms: number) {
+        const until = clock + ms;
+        for (;;) {
+          const due = timers.filter((t) => t.at <= until).sort((a, b) => a.at - b.at)[0];
+          if (due === undefined) break;
+          timers.splice(timers.indexOf(due), 1);
+          clock = Math.max(clock, due.at);
+          due.run();
+        }
+        clock = until;
+      },
+      timers,
+    };
+  };
+
+  it('acknowledges two pending ops from an echo whose covers names them, at the echo’s seq, and applies its mutations once (invariant 4)', async () => {
+    const h = blobTab();
+    h.room.start();
+    h.hello(TAB_A);
+    const before = textOf(h.room.document());
+    h.hold(true);
+    const first = h.room.apply([splice(0, 0, 'ab')], 'type');
+    const second = h.room.apply([splice(2, 0, 'cd')], 'type');
+    await until(() => h.posts.length === 1);
+    expect(h.posts[0]!.entries).toHaveLength(2);
+    const [id1, id2] = h.posts[0]!.entries.map((entry) => entry.opId);
+    expect(h.room.status().pending).toBe(2);
+    // the record's echo lands before the answer: this tab's id, the fold, and the two op ids
+    h.fire({
+      type: 'op',
+      entry: h.echo(h.r0 + 1, TAB_A, [id1!, id2!], [splice(0, 0, 'abcd')]),
+    });
+    expect(await first.settled).toEqual({ seq: h.r0 + 1 });
+    expect(await second.settled).toEqual({ seq: h.r0 + 1 });
+    expect(h.room.status()).toMatchObject({ pending: 0, retained: 2, seq: h.r0 + 1 });
+    expect(textOf(h.room.document())).toBe(`abcd${before}`);
+    expect(h.changes[h.changes.length - 1]?.reason).toBe('ack');
+    // the answer follows: its two entries at the same seq repeat nothing
+    h.hold(false);
+    await h.room.flush();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(textOf(h.room.document())).toBe(`abcd${before}`);
+    expect(h.posts).toHaveLength(1);
+    // the echo delivered again by the stream (the answer's instance and the poll's) is a duplicate
+    h.fire({
+      type: 'op',
+      entry: h.echo(h.r0 + 1, TAB_A, [id1!, id2!], [splice(0, 0, 'abcd')]),
+    });
+    expect(textOf(h.room.document())).toBe(`abcd${before}`);
+    expect(h.room.status().pending).toBe(0);
+    await h.room.stop();
+  });
+
+  it('settles a record without an origin by the byte match of its fold, the fallback for a server from before the round', async () => {
+    const h = blobTab();
+    h.room.start();
+    h.hello(TAB_A);
+    const before = textOf(h.room.document());
+    h.hold(true);
+    const applied = h.room.apply([splice(0, 0, 'q')], 'type');
+    await until(() => h.posts.length === 1);
+    // the record travels as `store` with no covers: the fold, byte for byte, is the match
+    h.fire({
+      type: 'op',
+      entry: {
+        seq: h.r0 + 1,
+        rev: h.r0,
+        kind: 'edit',
+        author: kevin.author,
+        clientId: 'store',
+        opId: `store:${h.r0 + 1}`,
+        mutations: [splice(0, 0, 'q')],
+        at: new Date().toISOString(),
+      },
+    });
+    expect(await applied.settled).toEqual({ seq: h.r0 + 1 });
+    expect(textOf(h.room.document())).toBe(`q${before}`);
+    // the answer arrives after the echo, at the commit's seq, and repeats nothing
+    h.answerAt(h.r0 + 1);
+    h.hold(false);
+    await h.room.flush();
+    expect(textOf(h.room.document())).toBe(`q${before}`);
+    // an equal fold from another tab that names its origin is never taken for this tab's
+    h.hold(true);
+    const other = h.room.apply([splice(0, 0, 'z')], 'type');
+    await until(() => h.posts.length === 2);
+    h.fire({
+      type: 'op',
+      entry: h.echo(h.r0 + 2, TAB_B, [`${TAB_B}:1`], [splice(0, 0, 'z')]),
+    });
+    expect(h.room.status().pending).toBe(1);
+    expect(textOf(h.room.document())).toBe(`zzq${before}`);
+    h.hold(false);
+    await h.room.flush();
+    expect(await other.settled).toEqual({ seq: h.r0 + 3 });
+    expect(textOf(h.room.document())).toBe(`zzq${before}`);
+    await h.room.stop();
+  });
+
+  it('applies an inverse recorded before a remote insert in the same block at the shifted offset (invariant 11)', async () => {
+    const h = blobTab();
+    h.room.start();
+    h.hello(TAB_A);
+    const before = textOf(h.room.document());
+    const applied = h.room.apply([splice(0, 0, 'A')], 'type');
+    await h.room.flush();
+    expect(await applied.settled).toEqual({ seq: h.r0 + 1 });
+    // another person's record lands in front of the insert
+    h.fire({
+      type: 'op',
+      entry: h.echo(h.r0 + 2, TAB_B, [`${TAB_B}:1`], [splice(0, 0, 'BB')]),
+    });
+    expect(textOf(h.room.document())).toBe(`BBA${before}`);
+    const inverse = h.room.transformSince(applied.inverse, applied.at);
+    expect(inverse).toEqual([splice(2, 1, '')]);
+    h.room.apply(inverse, 'undo');
+    expect(textOf(h.room.document())).toBe(`BB${before}`);
+    await h.room.stop();
+  });
+
+  it('skips the author’s own echo by client id in transformSince and moves the inverse past a second tab of the same person (invariant 11)', async () => {
+    const h = blobTab();
+    h.room.start();
+    h.hello(TAB_A);
+    const before = textOf(h.room.document());
+    h.hold(true);
+    const applied = h.room.apply([splice(0, 0, 'A')], 'type');
+    await until(() => h.posts.length === 1);
+    const opId = h.posts[0]!.entries[0]!.opId;
+    // the own echo, under this tab's id and covering its op: not a remote entry for the inverse
+    h.fire({ type: 'op', entry: h.echo(h.r0 + 1, TAB_A, [opId], [splice(0, 0, 'A')]) });
+    expect(await applied.settled).toEqual({ seq: h.r0 + 1 });
+    expect(h.room.transformSince(applied.inverse, applied.at)).toEqual([splice(0, 1, '')]);
+    // a second tab of the same person (another client id, the same author) inserts before it:
+    // remote to this tab, so the inverse moves past it
+    h.fire({
+      type: 'op',
+      entry: h.echo(h.r0 + 2, TAB_A2, [`${TAB_A2}:1`], [splice(0, 0, 'xy')]),
+    });
+    expect(textOf(h.room.document())).toBe(`xyA${before}`);
+    expect(h.room.transformSince(applied.inverse, applied.at)).toEqual([splice(2, 1, '')]);
+    // an echo under `store` whose covers name this tab's op (a follower that kept the fixed id)
+    // is this tab's own as well
+    const again = h.room.apply([splice(3, 0, 'Q')], 'type');
+    h.hold(false);
+    await h.room.flush();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const second = h.posts[h.posts.length - 1]!.entries[0]!.opId;
+    expect(await again.settled).toEqual({ seq: h.r0 + 3 });
+    h.fire({ type: 'op', entry: h.echo(h.r0 + 3, 'store', [second], [splice(3, 0, 'Q')]) });
+    expect(h.room.transformSince(again.inverse, again.at)).toEqual([splice(3, 1, '')]);
+    expect(textOf(h.room.document())).toBe(`xyAQ${before}`);
+    await h.room.stop();
+  });
+
+  it('drops the pending ops a resync’s since answer names as acknowledged at their record’s seq and re-folds the rest (invariant 10)', async () => {
+    const document = normalized();
+    const r0 = document.deck.revision;
+    let sinceAsked: number | null = null;
+    let pendingIds: string[] = [];
+    const h = blobTab({
+      author: kevin.author,
+      head: r0,
+      onResync: async (_revision, since) => {
+        sinceAsked = since;
+        // the store's document at the head: the first op committed as revision r0 + 1, then a
+        // colleague's word as r0 + 2; the resync read answers both records' origins
+        const committed = applyMutations(document, [
+          splice(0, 0, 'k'),
+          splice(1, 0, 'mm'),
+        ]).document;
+        return {
+          document: { deck: { ...committed.deck, revision: r0 + 2 }, slides: committed.slides },
+          origins: [
+            { seq: r0 + 1, opIds: [pendingIds[0]!] },
+            { seq: r0 + 2, opIds: [`${TAB_B}:7`] },
+          ],
+        };
+      },
+    });
+    h.room.start();
+    h.hello(TAB_A);
+    h.hold(true);
+    const first = h.room.apply([splice(0, 0, 'k')], 'type');
+    await until(() => h.posts.length === 1);
+    const second = h.room.apply([splice(1, 0, 'zz')], 'type');
+    pendingIds = [h.posts[0]!.entries[0]!.opId];
+    expect(h.room.status().pending).toBe(2);
+    // the server asks for a resync: the read carries the tab's position before it
+    h.fire({ type: 'resync', revision: r0 + 2 });
+    expect(await first.settled).toEqual({ seq: r0 + 1 });
+    await until(() => h.room.status().seq === r0 + 2);
+    expect(sinceAsked).toBe(r0);
+    // the first op is acknowledged from the origins and never re-sent; the second re-folds on
+    // the fresh document and goes on the new base
+    expect(h.room.status().pending).toBe(1);
+    h.hold(false);
+    await h.room.flush();
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    const resent = h.posts.slice(1).flatMap((post) => post.entries.map((entry) => entry.opId));
+    expect(resent).not.toContain(pendingIds[0]);
+    expect(await second.settled).toEqual({ seq: r0 + 3 });
+    expect(h.room.status().pending).toBe(0);
+    await h.room.stop();
+  });
+
+  it('returns a posted op to its author when the resync read is bounded (the records did not reach the old position), and keeps one never posted', async () => {
+    const document = normalized();
+    const r0 = document.deck.revision;
+    const rejects: string[] = [];
+    const h = blobTab({
+      author: kevin.author,
+      head: r0,
+      onResync: async () => ({
+        document: { deck: { ...document.deck, revision: r0 + 5000 }, slides: document.slides },
+        bounded: true,
+      }),
+    });
+    h.room.start();
+    h.hello(TAB_A);
+    h.hold(true);
+    const posted = h.room.apply([splice(0, 0, 'k')], 'type');
+    await until(() => h.posts.length === 1);
+    // typed after the POST left: no op id yet, never on the wire
+    const fresh = h.room.apply([splice(1, 0, 'q')], 'type');
+    h.fire({ type: 'resync', revision: r0 + 5000 });
+    const outcome = await posted.settled;
+    expect('rejected' in outcome && outcome.rejected.reason).toBe('stale');
+    if ('rejected' in outcome) rejects.push(outcome.rejected.message ?? '');
+    expect(rejects[0]).toContain('no longer fits');
+    expect(h.room.rejects()).toHaveLength(1);
+    // the never posted op stays pending and goes on the new base
+    expect(h.room.status().pending).toBe(1);
+    h.hold(false);
+    await h.room.flush();
+    expect(await fresh.settled).toEqual({ seq: r0 + 5001 });
+    await h.room.stop();
+  });
+
+  it('moves the heartbeat from 5 s to 10 s after 30 quiet seconds and back to 5 s on a pointer move (3.10)', async () => {
+    const h = blobTab({ author: kevin.author, head: 0, fakeTimers: true });
+    h.room.start();
+    h.hello(TAB_A);
+    // the hello posts the presence at once (a zero wait on the test's clock)
+    h.advance(0);
+    expect(h.presences.length).toBe(1);
+    const beats = () => h.timers.filter((t) => t.ms === 5000 || t.ms === 10_000).map((t) => t.ms);
+    // active: the beat is armed at 5 s and posts every 5 s
+    expect(beats()).toEqual([5000]);
+    h.advance(5000);
+    expect(h.presences.length).toBe(2);
+    expect(beats()).toEqual([5000]);
+    // the pointer, the selection and the slide stay still: from 30 quiet seconds on the beat
+    // that is armed is the quiet one
+    for (let i = 0; i < 5; i += 1) h.advance(5000);
+    expect(h.presences.length).toBe(7);
+    expect(beats()).toEqual([10_000]);
+    h.advance(10_000);
+    expect(h.presences.length).toBe(8);
+    expect(beats()).toEqual([10_000]);
+    // a pointer move: the tab is active again and the quiet beat re-arms at 5 s
+    h.room.setPresence({ pointer: { x: 10, y: 10 } });
+    expect(beats()).toEqual([5000]);
+    // the batch posts the move at once, and the beat 5 s later is the active one again
+    h.advance(PRESENCE_BATCH_MS);
+    expect(h.presences.length).toBe(9);
+    h.advance(5000);
+    expect(h.presences.length).toBe(10);
+    expect(beats()).toEqual([5000]);
+    // a presence change that moves nothing (the pointer toggle) keeps the quiet window running
+    for (let i = 0; i < 6; i += 1) h.advance(5000);
+    expect(beats()).toEqual([10_000]);
+    h.room.setPresence({ pointerOn: true });
+    expect(beats()).toEqual([10_000]);
+    await h.room.stop();
+  });
+  it('applies a batch once when its echo and the answer’s own entries drain together above a gap, in either order (3.2)', async () => {
+    for (const echoFirst of [true, false]) {
+      const h = blobTab();
+      h.room.start();
+      h.hello(TAB_A);
+      const before = textOf(h.room.document());
+      h.hold(true);
+      const first = h.room.apply([splice(0, 0, 'ab')], 'type');
+      const second = h.room.apply([splice(2, 0, 'cd')], 'type');
+      await until(() => h.posts.length === 1);
+      const ids = h.posts[0]!.entries.map((entry) => entry.opId);
+      // another writer's record lands at r0 + 1 and this tab's batch at r0 + 2 (placed by the
+      // server past that insert, so its offsets read one higher), but the stream delivers r0 + 2
+      // first: the echo and the answer's entries buffer above the gap
+      const echo = h.echo(h.r0 + 2, TAB_A, ids, [splice(1, 0, 'abcd')]);
+      const answers: Entry[] = ids.map((opId, i) => ({
+        seq: h.r0 + 2,
+        rev: h.r0 + 1,
+        kind: 'edit',
+        author: kevin.author,
+        clientId: TAB_A,
+        opId,
+        mutations: [i === 0 ? splice(1, 0, 'ab') : splice(3, 0, 'cd')],
+        at: new Date().toISOString(),
+      }));
+      const above = echoFirst ? [echo, ...answers] : [...answers, echo];
+      for (const entry of above) h.fire({ type: 'op', entry });
+      // nothing applied yet: the gap under them is open
+      expect(h.room.status()).toMatchObject({ seq: h.r0, pending: 2 });
+      // the gap fills with the other writer's record: everything drains in one pass
+      h.fire({ type: 'op', entry: h.echo(h.r0 + 1, TAB_B, [`${TAB_B}:1`], [splice(0, 0, 'Z')]) });
+      expect(await first.settled).toEqual({ seq: h.r0 + 2 });
+      expect(await second.settled).toEqual({ seq: h.r0 + 2 });
+      expect(h.room.status()).toMatchObject({ seq: h.r0 + 2, pending: 0 });
+      // the batch once, at the offsets the server placed it, whichever sibling drained first
+      expect(textOf(h.room.document())).toBe(`Zabcd${before}`);
+      h.hold(false);
+      await h.room.stop();
+    }
   });
 });

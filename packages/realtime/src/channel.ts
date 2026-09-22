@@ -60,7 +60,11 @@ export type Entry = {
   rev: number;
   kind: EntryKind;
   author: Author;
-  /** the server issued client id (SPEC-3 3.3), or a fixed word for a writer without a tab */
+  /**
+   * the server issued client id (SPEC-3 3.3), or a fixed word for a writer without a tab; on the
+   * blob tier a record that names its origin travels with its writer's id (blob.ts
+   * `entryOfRecord`), a record without one as `store`
+   */
   clientId: string;
   /** `<clientId>:<counter>`, the client's own id, deduplicated per (deck, client) */
   opId: string;
@@ -68,6 +72,17 @@ export type Entry = {
   comment?: CommentOp;
   /** the admission time, ISO 8601 */
   at: string;
+  /**
+   * The op ids one blob tier record folded, in the order the client posted them (the sync round,
+   * docs/SYNC.md 3.2; `VersionRecord.origin`): a record's stream entry carries `opId: store:<n>`
+   * and every client op id it covers here, so a tab acknowledges its own ops by id from the
+   * echo, the replay and the answer's `between`, and undo skips the own echo by `clientId`. A
+   * resent POST is answered with one synthesized entry per covered op id at the record's seq
+   * (apps/studio room.ts `admitOnBlob`), the first carrying the record's mutations and the rest
+   * none, so a client applies the fold once. Absent on the memory and redis tiers and on a
+   * record written before the round.
+   */
+  covers?: string[];
   /**
    * The history label an edit carries into Version history (the product round fix round;
    * docs/PRODUCT.md 4.1 "Brand kit: Primary", 6.1 "Assist: <sentence>"): the checkpointer

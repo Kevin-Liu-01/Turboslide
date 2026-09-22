@@ -7,8 +7,9 @@
 // The return round (docs/RETURN.md section 7) added the paragraphs of the features that return:
 // tables, charts, diagrams, word art, formatting, the chrome, the View menu and the notifications;
 // each is shown only while every row of its feature passes. The product round (docs/PRODUCT.md
-// section 8) added the brand kit, the fonts, the templates and the assist the same way. Node only;
-// no dependency.
+// section 8) added the brand kit, the fonts, the templates and the assist the same way, and the sync
+// and costs round (docs/SYNC.md 6.1) the two unparkable features sync and cost. Node only; no
+// dependency.
 
 /**
  * The features in the order of the README, keyed by the matrix's `feature` field. `heading` is the
@@ -277,6 +278,21 @@ export const FEATURES = [
     heading: 'The assist',
     paragraph:
       "**Assist.** The Assist button in the title row (Cmd+J) opens a panel with three starter cards: Tailor for a customer (rename the customer, swap the logo and skip slides in one step, with one Undo), Make it shorter and Write speaker notes. A card shows the before and after; nothing changes until it is accepted, and Accept is one undo step. Search the menus understands a seller's words and offers Ask the assistant when nothing matches.",
+    shots: [],
+  },
+  /* the sync and costs round (docs/SYNC.md 6.1): the write path's order and the calls per state */
+  {
+    key: 'sync',
+    heading: 'Sync',
+    paragraph:
+      "**Sync.** Two people on one deck see each other's words in order within seconds, on a title slide and in a body block, while both type at once and after one of them was offline. A viewer's tab shows every edit live. A reload reads the same document in every browser. Undo takes back your own word and leaves your colleague's. A change whose answer was lost is never applied twice.",
+    shots: [],
+  },
+  {
+    key: 'cost',
+    heading: 'Costs',
+    paragraph:
+      '**Costs.** An open editor, a hidden tab, an editing session, two tabs on one deck and a show each make a bounded number of requests a minute, and the store calls a deck costs a minute are counted in every release run and stay under their ceilings.',
     shots: [],
   },
   {

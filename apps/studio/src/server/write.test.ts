@@ -2,7 +2,16 @@ import { describe, expect, it } from 'vitest';
 
 import type { Version } from '@turboslide/schema/mutations';
 
-import { EDITOR_VERSIONS_KEPT, shapeByRole, trimVersionLog, withTrashStamp } from './write';
+import type { VersionRecord } from '@turboslide/store/store';
+
+import {
+  EDITOR_VERSIONS_KEPT,
+  RESYNC_ORIGINS_MAX,
+  originsSince,
+  shapeByRole,
+  trimVersionLog,
+  withTrashStamp,
+} from './write';
 import type { EditorDeck } from './write';
 
 // The editor payload's version log (gslides-parity SPEC-4 0.34; PP 3.5 item 3): the loader
@@ -25,6 +34,35 @@ function version(n: number, mutationCount = 1): Version {
     })) as Version['mutations'],
   };
 }
+
+describe('originsSince', () => {
+  const record = (n: number, opIds?: string[]): VersionRecord => ({
+    ...version(n),
+    baseRevision: n - 1,
+    inverse: [],
+    ...(opIds === undefined ? {} : { origin: { clientId: `tab-${n % 2}`, opIds } }),
+  });
+
+  it('answers the origins of the records above since, oldest first, mutations stripped, and skips a record without one (docs/SYNC.md 3.2)', () => {
+    const log = [record(1, ['a1']), record(2), record(3, ['c1', 'c2']), record(4, ['d1'])];
+    expect(originsSince(log, 1)).toEqual([
+      { seq: 3, n: 3, clientId: 'tab-1', opIds: ['c1', 'c2'] },
+      { seq: 4, n: 4, clientId: 'tab-0', opIds: ['d1'] },
+    ]);
+    expect(originsSince(log, 0).map((row) => row.seq)).toEqual([1, 3, 4]);
+    expect(originsSince(log, 4)).toEqual([]);
+    expect(originsSince([], 0)).toEqual([]);
+    // the bound: the newest `max` records above since are read, the older ones are not
+    const long = Array.from({ length: 6 }, (_, i) => record(i + 1, [`op-${i + 1}`]));
+    expect(originsSince(long, 0, 3).map((row) => row.seq)).toEqual([4, 5, 6]);
+    expect(RESYNC_ORIGINS_MAX).toBe(2000);
+    // the answer carries no mutations and does not alias the record's op id list
+    const [first] = originsSince(log, 2);
+    expect(first).not.toHaveProperty('mutations');
+    first?.opIds.push('x');
+    expect(log[2]?.origin?.opIds).toEqual(['c1', 'c2']);
+  });
+});
 
 describe('trimVersionLog', () => {
   it('keeps the newest fifty records in the log order and drops every mutation', () => {

@@ -47,3 +47,14 @@ docs/gslides-parity/return/return-drive/*.json
 docs/gslides-parity/return/return-drive/*.html
 docs/gslides-parity/build-4/hotfix-4/*.json
 docs/gslides-parity/verification-4/production-ship/*.json
+# The sync and costs round: the lanes' run JSON under their evidence folders (build/b1/, build/b4/,
+# build/b5/, build/integrator/) and the hosting checks' run JSON; the notes beside them stay under
+# the formatter (build/b4.md, b5.md R9, b6.md R5)
+docs/gslides-parity/sync/build/*/**/*.json
+docs/gslides-parity/sync/hosting/**/*.json
+# The same rule for the run JSON of the discovery audits committed at 0b4f459 (the sync, hosting and
+# features rounds) and of the product round's lanes: evidence a script wrote, never reflowed by hand
+docs/gslides-parity/sync/audit-*/**/*.json
+docs/gslides-parity/features/audit-*/**/*.json
+docs/gslides-parity/product/audit-*/**/*.json
+docs/gslides-parity/product/build/*/**/*.json

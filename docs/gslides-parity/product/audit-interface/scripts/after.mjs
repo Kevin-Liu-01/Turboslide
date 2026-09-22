@@ -5,9 +5,33 @@
 //   node after.mjs
 import path from 'node:path';
 import {
-  BASE, OUT, SCRATCH, Table, chromium, clickAt, clickControl, createDeck, destroyDeck, dismissPrompts, editorReady, hoverAt,
-  menuPath, newContext, openMenu, pad, press, rectOf, rectOfControl, runs, settled, shot, sleep, state, step,
-  surfaceClear, typeHuman,
+  BASE,
+  OUT,
+  SCRATCH,
+  Table,
+  chromium,
+  clickAt,
+  clickControl,
+  createDeck,
+  destroyDeck,
+  dismissPrompts,
+  editorReady,
+  hoverAt,
+  menuPath,
+  newContext,
+  openMenu,
+  pad,
+  press,
+  rectOf,
+  rectOfControl,
+  runs,
+  settled,
+  shot,
+  sleep,
+  state,
+  step,
+  surfaceClear,
+  typeHuman,
 } from './lib.mjs';
 
 const table = new Table(path.join(SCRATCH, 'after-run.json'));
@@ -71,27 +95,55 @@ try {
     await page.goto(`${BASE}/decks`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
     await sleep(800);
-    await pair('decks-search-field', async () => {}, CSS.fields, { x: 420, y: 16, width: 760, height: 72 });
-    await pair('decks-card-menu-tooltip', async () => {
-      const r = await rectOf(page, '.ts-hm-card:not(.ts-hm-card-frame) .ts-hm-card-more');
-      await clickAt(page, r.x + r.w / 2, r.y + r.h / 2);
-      await sleep(700);
-    }, CSS.tipQuiet + CSS.menuIcons, async () => { const m = await rectOf(page, '.ts-menu'); return pad({ x: m.x - 60, y: m.y - 60, w: m.w + 120, h: m.h + 120 }, 0, V.w, V.h); });
+    await pair('decks-search-field', async () => {}, CSS.fields, {
+      x: 420,
+      y: 16,
+      width: 760,
+      height: 72,
+    });
+    await pair(
+      'decks-card-menu-tooltip',
+      async () => {
+        const r = await rectOf(page, '.ts-hm-card:not(.ts-hm-card-frame) .ts-hm-card-more');
+        await clickAt(page, r.x + r.w / 2, r.y + r.h / 2);
+        await sleep(700);
+      },
+      CSS.tipQuiet + CSS.menuIcons,
+      async () => {
+        const m = await rectOf(page, '.ts-menu');
+        return pad({ x: m.x - 60, y: m.y - 60, w: m.w + 120, h: m.h + 120 }, 0, V.w, V.h);
+      },
+    );
     await press(page, 'Escape');
     await page.goto(`${BASE}/decks/trash`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
     await sleep(800);
-    await pair('trash-buttons', async () => {}, CSS.trash + CSS.hover, { x: 184, y: 90, width: 1080, height: 340 });
-    await pair('trash-confirm', async () => {
-      const r = await rectOfControl(page, 'trash.empty');
-      await clickAt(page, r.x + r.w / 2, r.y + r.h / 2);
-      await sleep(700);
-    }, CSS.tipQuiet + CSS.confirm, { x: 440, y: 330, width: 600, height: 280 });
+    await pair('trash-buttons', async () => {}, CSS.trash + CSS.hover, {
+      x: 184,
+      y: 90,
+      width: 1080,
+      height: 340,
+    });
+    await pair(
+      'trash-confirm',
+      async () => {
+        const r = await rectOfControl(page, 'trash.empty');
+        await clickAt(page, r.x + r.w / 2, r.y + r.h / 2);
+        await sleep(700);
+      },
+      CSS.tipQuiet + CSS.confirm,
+      { x: 440, y: 330, width: 600, height: 280 },
+    );
     await press(page, 'Escape');
     await page.goto(`${BASE}/deck/no-such-deck-${Date.now()}`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.ts-access', { timeout: 30_000 });
     await sleep(500);
-    await pair('access-form', async () => {}, CSS.fields + CSS.corner, { x: 480, y: 90, width: 480, height: 380 });
+    await pair('access-form', async () => {}, CSS.fields + CSS.corner, {
+      x: 480,
+      y: 90,
+      width: 480,
+      height: 380,
+    });
 
     // ---- the editor
     if (!deckId) {
@@ -104,39 +156,119 @@ try {
     }
     await dismissPrompts(page);
     const titleClip = { x: 0, y: 0, width: V.w, height: 44 };
-    await pair('title-row-titanium', async () => { await page.mouse.move(700, 500); }, CSS.titanium, titleClip);
-    await pair('title-row-corner', async () => {}, CSS.corner, { x: 940, y: 0, width: 500, height: 44 });
-    await pair('toolbar-hover', async () => { const r = await rectOfControl(page, 'toolbar.newSlide'); await hoverAt(page, r.x + r.w / 2, r.y + r.h / 2, 300); }, CSS.hover, { x: 0, y: 72, width: 520, height: 40 });
-    await pair('menubar-hover', async () => { const r = await rectOfControl(page, 'menubar.view'); await hoverAt(page, r.x + r.w / 2, r.y + r.h / 2, 300); }, CSS.plate, { x: 0, y: 44, width: 520, height: 28 });
-    await pair('file-menu', async () => { await surfaceClear(page); await openMenu(page, 'file'); await sleep(400); }, CSS.titanium + CSS.menuIcons + CSS.plate, { x: 0, y: 44, width: 560, height: 440 });
+    await pair(
+      'title-row-titanium',
+      async () => {
+        await page.mouse.move(700, 500);
+      },
+      CSS.titanium,
+      titleClip,
+    );
+    await pair('title-row-corner', async () => {}, CSS.corner, {
+      x: 940,
+      y: 0,
+      width: 500,
+      height: 44,
+    });
+    await pair(
+      'toolbar-hover',
+      async () => {
+        const r = await rectOfControl(page, 'toolbar.newSlide');
+        await hoverAt(page, r.x + r.w / 2, r.y + r.h / 2, 300);
+      },
+      CSS.hover,
+      { x: 0, y: 72, width: 520, height: 40 },
+    );
+    await pair(
+      'menubar-hover',
+      async () => {
+        const r = await rectOfControl(page, 'menubar.view');
+        await hoverAt(page, r.x + r.w / 2, r.y + r.h / 2, 300);
+      },
+      CSS.plate,
+      { x: 0, y: 44, width: 520, height: 28 },
+    );
+    await pair(
+      'file-menu',
+      async () => {
+        await surfaceClear(page);
+        await openMenu(page, 'file');
+        await sleep(400);
+      },
+      CSS.titanium + CSS.menuIcons + CSS.plate,
+      { x: 0, y: 44, width: 560, height: 440 },
+    );
     await press(page, 'Escape', 2);
-    await pair('filmstrip-numbers', async () => { await clickControl(page, 'toolbar.newSlide'); await sleep(800); await settled(page); }, CSS.titanium, { x: 0, y: 112, width: 256, height: 300 });
-    await pair('zoom-and-size-fields', async () => {
-      const all = await runs(page);
-      const head = all.find((r) => /heading/.test(r)) ?? all[0];
-      const r = await rectOf(page, `.ts-stagewrap.ts-editor .pt-slide [data-run="${head}"]`);
-      if (r) { await clickAt(page, r.x + r.w / 2, r.y + r.h / 2); await sleep(400); }
-      const z = await rectOf(page, '.ts-tb-zoom');
-      if (z) await hoverAt(page, z.x + z.w / 2, z.y + z.h / 2, 300);
-    }, CSS.fields + CSS.font, { x: 0, y: 72, width: 900, height: 40 });
+    await pair(
+      'filmstrip-numbers',
+      async () => {
+        await clickControl(page, 'toolbar.newSlide');
+        await sleep(800);
+        await settled(page);
+      },
+      CSS.titanium,
+      { x: 0, y: 112, width: 256, height: 300 },
+    );
+    await pair(
+      'zoom-and-size-fields',
+      async () => {
+        const all = await runs(page);
+        const head = all.find((r) => /heading/.test(r)) ?? all[0];
+        const r = await rectOf(page, `.ts-stagewrap.ts-editor .pt-slide [data-run="${head}"]`);
+        if (r) {
+          await clickAt(page, r.x + r.w / 2, r.y + r.h / 2);
+          await sleep(400);
+        }
+        const z = await rectOf(page, '.ts-tb-zoom');
+        if (z) await hoverAt(page, z.x + z.w / 2, z.y + z.h / 2, 300);
+      },
+      CSS.fields + CSS.font,
+      { x: 0, y: 72, width: 900, height: 40 },
+    );
     await press(page, 'Escape', 2);
-    await pair('share-dialog-fields', async () => { await surfaceClear(page); await clickControl(page, 'share.open'); await page.locator('[data-control="dialog.share"]').waitFor({ timeout: 8000 }); await sleep(600); }, CSS.fields + CSS.titanium + CSS.tipQuiet + CSS.focus, async () => { const d = await rectOf(page, '.ts-dialog-scrim [role="dialog"], .ts-dialog'); return d ? pad(d, 24, V.w, V.h) : null; });
+    await pair(
+      'share-dialog-fields',
+      async () => {
+        await surfaceClear(page);
+        await clickControl(page, 'share.open');
+        await page.locator('[data-control="dialog.share"]').waitFor({ timeout: 8000 });
+        await sleep(600);
+      },
+      CSS.fields + CSS.titanium + CSS.tipQuiet + CSS.focus,
+      async () => {
+        const d = await rectOf(page, '.ts-dialog-scrim [role="dialog"], .ts-dialog');
+        return d ? pad(d, 24, V.w, V.h) : null;
+      },
+    );
     await surfaceClear(page);
-    await pair('format-options-labels', async () => {
-      await surfaceClear(page);
-      const all = await runs(page);
-      const head = all.find((r) => /heading/.test(r)) ?? all[0];
-      const r = await rectOf(page, `.ts-stagewrap.ts-editor .pt-slide [data-run="${head}"]`);
-      if (r) { await clickAt(page, r.x + r.w / 2, r.y + r.h / 2); await sleep(300); }
-      await menuPath(page, 'format', 'format.formatOptions');
-      await page.locator('.ts-rpanel .ts-panel').waitFor({ timeout: 8000 });
-      await sleep(600);
-    }, CSS.titanium + CSS.fields, { x: V.w - 320, y: 112, width: 320, height: 520 });
+    await pair(
+      'format-options-labels',
+      async () => {
+        await surfaceClear(page);
+        const all = await runs(page);
+        const head = all.find((r) => /heading/.test(r)) ?? all[0];
+        const r = await rectOf(page, `.ts-stagewrap.ts-editor .pt-slide [data-run="${head}"]`);
+        if (r) {
+          await clickAt(page, r.x + r.w / 2, r.y + r.h / 2);
+          await sleep(300);
+        }
+        await menuPath(page, 'format', 'format.formatOptions');
+        await page.locator('.ts-rpanel .ts-panel').waitFor({ timeout: 8000 });
+        await sleep(600);
+      },
+      CSS.titanium + CSS.fields,
+      { x: V.w - 320, y: 112, width: 320, height: 520 },
+    );
     await context.close();
     table.save({ deckId });
   }
 } finally {
-  const context = await newContext(browser, { width: 1440, height: 900, theme: 'light', storageState: deckId ? `${SCRATCH}/after-storage.json` : null });
+  const context = await newContext(browser, {
+    width: 1440,
+    height: 900,
+    theme: 'light',
+    storageState: deckId ? `${SCRATCH}/after-storage.json` : null,
+  });
   const page = await context.newPage();
   const result = await destroyDeck(page, deckId, (m) => table.add('trash', m, ''));
   table.add('trash', 'the scratch deck', result);

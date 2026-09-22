@@ -8,7 +8,7 @@
 import { existsSync } from 'node:fs';
 import { join, normalize, resolve, sep } from 'node:path';
 
-import type { BlobClient } from './blob-store.ts';
+import type { BlobClient, DeckCardFacts } from './blob-store.ts';
 import { blobDecks } from './blob-store.ts';
 import { loadDeckDir, openFileStore } from './file-store.ts';
 import type { SeedSource } from './seed.ts';
@@ -89,6 +89,12 @@ export type HostedDecks = {
   ready: () => Promise<void>;
   /** every deck, newest first; the decks in the trash only with includeTrashed (gslides-parity SPEC 7.2.5) */
   list: (options?: ListDecksOptions) => Promise<DeckHead[]>;
+  /**
+   * the appearance and the first slide of a deck the last `list` proved on this instance, from the
+   * manifest bytes it read (blob: the listing writes no mirror, so a card needs them from here);
+   * null before a listing named the deck; absent on the stores whose listing mirrors the manifest
+   */
+  cardFacts?: (deckId: string) => DeckCardFacts | null;
   has: (deckId: string) => Promise<boolean>;
   /** the store for a deck; a RangeError when the deck is missing */
   open: (deckId: string) => Promise<DeckStore>;

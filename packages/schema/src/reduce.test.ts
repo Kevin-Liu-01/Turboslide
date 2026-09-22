@@ -1192,3 +1192,100 @@ describe('the undo of a text session against a document a collaborator moved (VE
     expect(textOf(undoB.document)).toBe(before.replace('post', 'note'));
   });
 });
+
+describe('the slide fields as text runs (the sync round, docs/SYNC.md 3.4)', () => {
+  const heading = { slideId: 'title', blockId: 'heading', path: '/heading' } as const;
+  const lead = { slideId: 'title', blockId: 'lead', path: '/lead' } as const;
+  const big = { slideId: 'thesis', blockId: 'big', path: '/big' } as const;
+
+  it("splices, marks and replaces the heading, the lead and the big text like a block's Text, with splice inverses", () => {
+    const document = base();
+    const spliced = applyWrite(
+      document,
+      write([{ op: 'text.splice', ...heading, at: 7, remove: 0, insert: ' Global' }]),
+      { now: NOW },
+    );
+    if (!spliced.ok) throw new Error(spliced.message);
+    expect(spliced.document.slides['title']).toMatchObject({
+      heading: 'General Global Translation',
+    });
+    expect(spliced.inverse[0]).toEqual({
+      op: 'text.splice',
+      ...heading,
+      at: 7,
+      remove: 7,
+      insert: '',
+    });
+    // the lead is multiline: a paragraph break is a character of it
+    const leadWrite = applyWrite(
+      document,
+      write([{ op: 'text.splice', ...lead, at: 4, remove: 0, insert: '\nNew paragraph.' }]),
+      { now: NOW },
+    );
+    if (!leadWrite.ok) throw new Error(leadWrite.message);
+    expect(
+      (leadWrite.document.slides['title'] as { lead: string }).lead.startsWith(
+        'This\nNew paragraph. deck',
+      ),
+    ).toBe(true);
+    const marked = applyWrite(
+      document,
+      write([
+        { op: 'text.mark', ...big, range: [0, 5], edit: { kind: 'marks', set: { i: true } } },
+      ]),
+      { now: NOW },
+    );
+    if (!marked.ok) throw new Error(marked.message);
+    expect((marked.document.slides['thesis'] as { big: string }).big).toBe(
+      '[Every]{i} product in every language',
+    );
+    const replaced = applyWrite(
+      document,
+      write([{ op: 'text.replace', ...big, range: [0, 5], text: 'Each' }]),
+      { now: NOW },
+    );
+    if (!replaced.ok) throw new Error(replaced.message);
+    expect((replaced.document.slides['thesis'] as { big: string }).big).toBe(
+      'Each product in every language',
+    );
+    // the whole round trip through the inverse leaves the document as it was
+    const back = applyMutations(spliced.document, spliced.inverse).document;
+    expect(stable(back)).toEqual(stable(document));
+  });
+
+  it('refuses a field addressed at another pointer, a break in the heading, and a field name on a slide without it', () => {
+    const document = base();
+    const wrongPath = applyWrite(
+      document,
+      write([{ op: 'text.splice', ...heading, path: '/text', at: 0, remove: 0, insert: 'x' }]),
+    );
+    expect(wrongPath.ok).toBe(false);
+    if (wrongPath.ok || wrongPath.code !== 'invalid') throw new Error('expected invalid');
+    expect(wrongPath.message).toMatch(/addressed at \/heading, got \/text/);
+    const broken = applyWrite(
+      document,
+      write([{ op: 'text.splice', ...heading, at: 3, remove: 0, insert: '\n' }]),
+    );
+    expect(broken.ok).toBe(false);
+    // `big` on a title slide is a block id there, and the slide has no such block
+    const noField = applyWrite(
+      document,
+      write([
+        {
+          op: 'text.splice',
+          slideId: 'title',
+          blockId: 'big',
+          path: '/big',
+          at: 0,
+          remove: 0,
+          insert: 'x',
+        },
+      ]),
+    );
+    expect(noField.ok).toBe(false);
+    if (noField.ok || noField.code !== 'invalid') throw new Error('expected invalid');
+    expect(noField.message).toMatch(/No block "big"/);
+    // nothing of the input changed
+    expect(stable(document)).toEqual(stable(base()));
+  });
+});

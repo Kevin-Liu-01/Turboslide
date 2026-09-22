@@ -19,7 +19,9 @@ import { publishedPlayerGate } from '../server/published';
 // document, the rest fetched by the viewer after it mounts, the reads keyed by the revision for
 // the CDN (deck.$deckId.tsx says why the rest no longer streams inside the document). A missing
 // or restricted deck falls to the root's Not found page: the You need access form belongs to a
-// top level document, not to a frame another page embeds.
+// top level document, not to a frame another page embeds. A frame attaches a studio session only
+// when its address carries `?agent=1`, as /deck does (docs/SYNC.md 3.10); the host page drives it
+// through the frame protocol otherwise.
 export const Route = createFileRoute('/embed/$deckId')({
   validateSearch: validateDeckSearch,
   loaderDeps: ({ search }) => ({ theme: search.theme, p: search.p }),
@@ -44,5 +46,14 @@ export const Route = createFileRoute('/embed/$deckId')({
 function EmbedPage() {
   const { payload, rest } = Route.useLoaderData();
   const search = Route.useSearch();
-  return <DeckViewer payload={payload} rest={rest} mode={search.mode} theme={search.theme} embed />;
+  return (
+    <DeckViewer
+      payload={payload}
+      rest={rest}
+      mode={search.mode}
+      theme={search.theme}
+      agent={search.agent === 1}
+      embed
+    />
+  );
 }

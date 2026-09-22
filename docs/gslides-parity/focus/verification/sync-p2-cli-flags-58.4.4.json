@@ -1,0 +1,597 @@
+[
+  {
+    "cmd": "`vercel whoami`",
+    "results": [
+      {
+        "block": "vercel whoami",
+        "args": "whoami --help",
+        "status": 0,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel teams list`",
+    "results": [
+      {
+        "block": "vercel teams list",
+        "args": "teams --help list",
+        "status": 2,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel project add <name> --scope <team>`",
+    "results": [
+      {
+        "block": "vercel project add",
+        "args": "project --help add",
+        "status": 0,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel project remove <name> --scope <team>`",
+    "results": [
+      {
+        "block": "vercel project remove",
+        "args": "project --help remove",
+        "status": 0,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel project inspect <name> --scope <team>`",
+    "results": [
+      {
+        "block": "vercel project inspect",
+        "args": "project --help inspect",
+        "status": 0,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel project update <name> --framework other --build-command \"\" --output-directory \"\" --auto-detect build-command --auto-detect output-directory --scope <team>`",
+    "results": [
+      {
+        "block": "vercel project update",
+        "args": "project --help update",
+        "status": 0,
+        "wanted": [
+          "--framework",
+          "--build-command",
+          "--output-directory",
+          "--auto-detect"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel link --project <name> --scope <team> --yes`",
+    "results": [
+      {
+        "block": "vercel link",
+        "args": "link --help",
+        "status": 2,
+        "wanted": [
+          "--project",
+          "--yes"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel blob create-store <name> --access public --region iad1 --yes --environment <env> ... --scope <team>`",
+    "results": [
+      {
+        "block": "vercel blob create-store",
+        "args": "blob --help create-store",
+        "status": 2,
+        "wanted": [
+          "--access",
+          "--region",
+          "--yes",
+          "--environment"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel blob put <file> --pathname <p> --access public --scope <team>`",
+    "results": [
+      {
+        "block": "vercel blob put",
+        "args": "blob --help put",
+        "status": 2,
+        "wanted": [
+          "--pathname",
+          "--access",
+          "--rw-token"
+        ],
+        "missing": [
+          "--rw-token"
+        ],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel blob get <pathname> --access public --scope <team>`",
+    "results": [
+      {
+        "block": "vercel blob get",
+        "args": "blob --help get",
+        "status": 2,
+        "wanted": [
+          "--access"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel blob list --prefix <p> --limit 1000 --mode expanded`",
+    "results": [
+      {
+        "block": "vercel blob list",
+        "args": "blob --help list",
+        "status": 2,
+        "wanted": [
+          "--prefix",
+          "--limit",
+          "--mode"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel blob list-stores --all --json --scope <team>`",
+    "results": [
+      {
+        "block": "vercel blob list-stores",
+        "args": "blob --help list-stores",
+        "status": 2,
+        "wanted": [
+          "--all",
+          "--json"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel blob delete-store <store id> --yes --scope <team>`",
+    "results": [
+      {
+        "block": "vercel blob delete-store",
+        "args": "blob --help delete-store",
+        "status": 2,
+        "wanted": [
+          "--yes"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel env ls [production] --scope <team> [--project <name>]`",
+    "results": [
+      {
+        "block": "vercel env list",
+        "args": "env --help list",
+        "status": 2,
+        "wanted": [
+          "--project"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel env pull <file> --environment development --yes --scope <team> [--project <name>]`",
+    "results": [
+      {
+        "block": "vercel env pull",
+        "args": "env --help pull",
+        "status": 2,
+        "wanted": [
+          "--environment",
+          "--yes",
+          "--project"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel env add <NAME> <environment> --sensitive --scope <team> [--project <name>]` (the value at the prompt)",
+    "results": [
+      {
+        "block": "vercel env add",
+        "args": "env --help add",
+        "status": 2,
+        "wanted": [
+          "--sensitive",
+          "--project",
+          "--value"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel env add <NAME> <environment> --value <plain> --yes [--force] --scope <team>`",
+    "results": [
+      {
+        "block": "vercel env add",
+        "args": "env --help add",
+        "status": 2,
+        "wanted": [
+          "--value",
+          "--yes",
+          "--force"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel env rm <NAME> <environment> --yes --scope <team> --project <name>`",
+    "results": [
+      {
+        "block": "vercel env remove",
+        "args": "env --help remove",
+        "status": 2,
+        "wanted": [
+          "--yes",
+          "--project"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel deploy --prod [--yes]`",
+    "results": [
+      {
+        "block": "vercel deploy",
+        "args": "deploy --help",
+        "status": 2,
+        "wanted": [
+          "--prod",
+          "--yes"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel deploy --yes --archive=tgz` (the pipeline's previews, unchanged)",
+    "results": [
+      {
+        "block": "vercel deploy",
+        "args": "deploy --help",
+        "status": 2,
+        "wanted": [
+          "--yes",
+          "--archive"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel redeploy <url> --target production --scope <team>`",
+    "results": [
+      {
+        "block": "vercel redeploy",
+        "args": "redeploy --help",
+        "status": 2,
+        "wanted": [
+          "--target"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel inspect <url> [--json] [--scope <team>]`",
+    "results": [
+      {
+        "block": "vercel inspect",
+        "args": "inspect --help",
+        "status": 2,
+        "wanted": [
+          "--json"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel list <project> --scope <team> --status READY`",
+    "results": [
+      {
+        "block": "vercel list",
+        "args": "list --help",
+        "status": 0,
+        "wanted": [
+          "--status"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel rollback <url> --scope <team> --yes`",
+    "results": [
+      {
+        "block": "vercel rollback",
+        "args": "rollback --help",
+        "status": 2,
+        "wanted": [
+          "--yes"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel promote <url> --scope <team> --yes`",
+    "results": [
+      {
+        "block": "vercel promote",
+        "args": "promote --help",
+        "status": 2,
+        "wanted": [
+          "--yes"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel git disconnect`, `vercel git connect <git url>`",
+    "results": [
+      {
+        "block": "vercel git connect",
+        "args": "git --help connect",
+        "status": 2,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel firewall rules add \"<name>\" --condition '<json>' --action redirect --redirect-url <url> --project <name> --scope <team> --yes`",
+    "results": [
+      {
+        "block": "vercel firewall rules add",
+        "args": "firewall rules --help add",
+        "status": 2,
+        "wanted": [
+          "--condition",
+          "--action",
+          "--redirect-url",
+          "--project",
+          "--yes",
+          "--redirect-permanent"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel firewall rules remove \"<name>\" --project <name> --scope <team> --yes`",
+    "results": [
+      {
+        "block": "vercel firewall rules",
+        "args": "firewall --help rules",
+        "status": 2,
+        "wanted": [
+          "--project",
+          "--yes"
+        ],
+        "missing": [
+          "--project",
+          "--yes"
+        ],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel firewall publish --project <name> --scope <team> --yes`",
+    "results": [
+      {
+        "block": "vercel firewall publish",
+        "args": "firewall --help publish",
+        "status": 2,
+        "wanted": [
+          "--project",
+          "--yes"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel firewall overview --project <name> --scope <team>`",
+    "results": [
+      {
+        "block": "vercel firewall overview",
+        "args": "firewall --help overview",
+        "status": 2,
+        "wanted": [
+          "--project"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel logs --project <name> --scope <team> --environment production --since 1h --source serverless --limit 100`",
+    "results": [
+      {
+        "block": "vercel logs",
+        "args": "logs --help",
+        "status": 0,
+        "wanted": [
+          "--project",
+          "--environment",
+          "--since",
+          "--source",
+          "--limit"
+        ],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`vercel project speed-insights`, `vercel project web-analytics`",
+    "results": [
+      {
+        "block": "vercel project speed-insights",
+        "args": "project --help speed-insights",
+        "status": 0,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": true
+      },
+      {
+        "block": "vercel project web-analytics",
+        "args": "project --help web-analytics",
+        "status": 0,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": true
+      }
+    ]
+  },
+  {
+    "cmd": "`turboslide login --to <url>`, `turboslide share get <id> --to <url>`",
+    "results": [
+      {
+        "block": "vercel",
+        "args": "vercel --help",
+        "status": 1,
+        "wanted": [
+          "--to",
+          "--to"
+        ],
+        "missing": [
+          "--to",
+          "--to"
+        ],
+        "scopeShown": false
+      }
+    ]
+  },
+  {
+    "cmd": "`node scripts/hosting-check.mjs --from <origin> --to <origin> [--scope <team>] [--parked <ship json>] [--json <out>]`",
+    "results": [
+      {
+        "block": "vercel",
+        "args": "vercel --help",
+        "status": 1,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": false
+      }
+    ]
+  },
+  {
+    "cmd": "`node scripts/hosted-smoke.mjs <origin> --token-env TURBOSLIDE_TOKEN --template-copy`",
+    "results": [
+      {
+        "block": "vercel",
+        "args": "vercel --help",
+        "status": 1,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": false
+      }
+    ]
+  },
+  {
+    "cmd": "`node scripts/probes/core-gate.mjs --base <origin> --parked <ship json>`",
+    "results": [
+      {
+        "block": "vercel",
+        "args": "vercel --help",
+        "status": 1,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": false
+      }
+    ]
+  },
+  {
+    "cmd": "`node scripts/blob-copy.mjs [--dry-run] [--verify] [--delta] --skip <rules> --state <file>`",
+    "results": [
+      {
+        "block": "vercel",
+        "args": "vercel --help",
+        "status": 1,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": false
+      }
+    ]
+  },
+  {
+    "cmd": "`node docs/gslides-parity/sync/audit-hosting/scripts/blob-sizing.mjs --out <file>`",
+    "results": [
+      {
+        "block": "vercel",
+        "args": "vercel --help",
+        "status": 1,
+        "wanted": [],
+        "missing": [],
+        "scopeShown": false
+      }
+    ]
+  }
+]

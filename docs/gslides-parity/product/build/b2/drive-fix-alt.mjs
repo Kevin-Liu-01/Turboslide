@@ -59,8 +59,16 @@ async function exportDescr(deckId, alt) {
   const slides = [...entries.keys()].filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n));
   const xml = slides.map((n) => entries.get(n)()).join('\n');
   const descr = new RegExp(`descr="${alt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`).test(xml);
-  const shapes = [...xml.matchAll(/<p:cNvPr\b([^>]*)>/g)].map((m) => m[1]).filter((a) => /name="ts:/.test(a));
-  return { status: 200, ms, descr, shapes: shapes.length, named: shapes.filter((a) => /descr=/.test(a)).length };
+  const shapes = [...xml.matchAll(/<p:cNvPr\b([^>]*)>/g)]
+    .map((m) => m[1])
+    .filter((a) => /name="ts:/.test(a));
+  return {
+    status: 200,
+    ms,
+    descr,
+    shapes: shapes.length,
+    named: shapes.filter((a) => /descr=/.test(a)).length,
+  };
 }
 
 /** Writes the description through Format options > Alt text with Tab, polls the block's alt, and exports at once and after the idle checkpoint. */
@@ -70,8 +78,15 @@ async function writeAndExport(deckId, S, id, alt) {
   await t.clickControl('toolbar.formatOptions');
   await t.ctl('panel.formatOptions').first().waitFor({ timeout: 6000 });
   const sec = page.locator('[data-control="panel.formatOptions"] [data-section="altText"]');
-  if (!(await sec.first().isVisible().catch(() => false))) return { ok: false, observed: 'no Alt text section in Format options' };
-  if (await sec.evaluate((el) => el.classList.contains('is-closed')).catch(() => false)) await sec.locator('.ts-panel-section-head').click();
+  if (
+    !(await sec
+      .first()
+      .isVisible()
+      .catch(() => false))
+  )
+    return { ok: false, observed: 'no Alt text section in Format options' };
+  if (await sec.evaluate((el) => el.classList.contains('is-closed')).catch(() => false))
+    await sec.locator('.ts-panel-section-head').click();
   const field = page.locator('[data-control="formatOptions.altText.description"]').first();
   await field.scrollIntoViewIfNeeded().catch(() => undefined);
   await field.click();
@@ -88,7 +103,8 @@ async function writeAndExport(deckId, S, id, alt) {
   await sleep(3500);
   const second = await exportDescr(deckId, alt);
   const secondAt = Date.now() - tabAt;
-  if (await t.visible('panel.formatOptions.close')) await t.clickControl('panel.formatOptions.close');
+  if (await t.visible('panel.formatOptions.close'))
+    await t.clickControl('panel.formatOptions.close');
   return {
     ok: written === alt && first.descr === true && second.descr === true,
     observed: `alt after Tab ${JSON.stringify(written)} (${writtenMs} ms); export at once (${firstAt} ms after Tab, ${first.ms} ms): ${first.status}, descr ${first.descr}, ${first.named ?? 0} of ${first.shapes ?? 0} named shapes carry a descr; export after 3.5 s (${secondAt} ms after Tab): ${second.status}, descr ${second.descr}, ${second.named ?? 0} of ${second.shapes ?? 0}`,
@@ -118,7 +134,12 @@ try {
   );
 
   /* a plain box, the same two exports */
-  await t.placeBlock(S, { id: 'plain', type: 'text', text: 'A plain box', pos: { x: 160, y: 420, w: 640, h: 120 } });
+  await t.placeBlock(S, {
+    id: 'plain',
+    type: 'text',
+    text: 'A plain box',
+    pos: { x: 160, y: 420, w: 640, h: 120 },
+  });
   await t.step(
     'the same on a plain text box',
     'both exports carry descr="A plain description"',

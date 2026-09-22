@@ -10,6 +10,8 @@ import { BlobTimeoutError, deckPrefix } from './blob-store.ts';
 import { STATE_DIR } from './file-store.ts';
 import {
   HOSTED_POLL_MS,
+  HOSTED_POLL_QUIET_MS,
+  POLL_ACTIVE_WINDOW_MS,
   POLL_BACKOFF_MAX_MS,
   POLL_CALLS_PER_MINUTE_MAX,
   PULSE_FILE,
@@ -17,6 +19,7 @@ import {
   headPulse,
   isStoreBusy,
   pollBackoffMs,
+  pollTickMs,
   pulsePath,
   putPulse,
   storeRetryAfterMs,
@@ -100,5 +103,28 @@ describe('the deck pulse', () => {
     // the safety tick heads the manifest in place of the pulse, one call that tick as well
     expect(PULSE_SAFETY_TICKS * HOSTED_POLL_MS).toBe(30_000);
     expect(POLL_BACKOFF_MAX_MS).toBe(60_000);
+  });
+
+  it('ticks at 2 s with another roster row or an op in the last 30 s and at 10 s otherwise, both under the budget (docs/SYNC.md 3.10)', () => {
+    expect(HOSTED_POLL_QUIET_MS).toBe(10_000);
+    expect(POLL_ACTIVE_WINDOW_MS).toBe(30_000);
+    const t = 1_000_000;
+    // alone and quiet: the quiet tick
+    expect(pollTickMs({ now: t, others: 0 })).toBe(HOSTED_POLL_QUIET_MS);
+    expect(pollTickMs({ now: t, others: 0, lastOpAt: 0 })).toBe(HOSTED_POLL_QUIET_MS);
+    // an op landed on this instance inside the window
+    expect(pollTickMs({ now: t, others: 0, lastOpAt: t - 29_999 })).toBe(HOSTED_POLL_MS);
+    expect(pollTickMs({ now: t, others: 0, lastOpAt: t - 30_000 })).toBe(HOSTED_POLL_QUIET_MS);
+    // a row of another client in the roster, whatever the ops
+    expect(pollTickMs({ now: t, others: 1 })).toBe(HOSTED_POLL_MS);
+    expect(pollTickMs({ now: t, others: 2, lastOpAt: t - 120_000 })).toBe(HOSTED_POLL_MS);
+    // the tests' shorter paces follow the same rule, and the quiet pace is never under the active one
+    expect(pollTickMs({ now: t, others: 0, activeMs: 20, quietMs: 200 })).toBe(200);
+    expect(pollTickMs({ now: t, others: 1, activeMs: 20, quietMs: 200 })).toBe(20);
+    expect(pollTickMs({ now: t, others: 0, activeMs: 50, quietMs: 20 })).toBe(50);
+    // one call per tick at either pace stays under POLL_CALLS_PER_MINUTE_MAX
+    expect(Math.ceil(60_000 / HOSTED_POLL_MS)).toBeLessThanOrEqual(POLL_CALLS_PER_MINUTE_MAX);
+    expect(Math.ceil(60_000 / HOSTED_POLL_QUIET_MS)).toBeLessThanOrEqual(POLL_CALLS_PER_MINUTE_MAX);
+    expect(Math.ceil(60_000 / HOSTED_POLL_QUIET_MS)).toBe(6);
   });
 });

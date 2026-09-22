@@ -63,7 +63,7 @@ export const EXECUTION_RULES: ExecutionRules = {
     deck: '?deck=<slug> on the initialize request; the instance default otherwise.',
     author: 'x-turboslide-author or ?author= on the initialize request; agent:mcp-http otherwise.',
     viewTools:
-      'deck_goto_slide (view.goto) is listed when a studio page (/edit or /deck) is attached to the deck and runs in that page.',
+      'deck_goto_slide (view.goto) is listed when a studio page is attached to the deck and runs in that page: the editor at /edit while it is visible, and a /deck, /present or /embed page opened with ?agent=1 while it is visible; a page hidden for 10 s detaches and the call answers 404 until it is shown again.',
   },
   leases:
     'slide.lease takes ten minutes on a slide; an agent write to a slide another author holds is 409 with the holder unless force is set; a human write warns and goes through (SPEC 6.7).',

@@ -8,6 +8,7 @@
 // interleaving of two authors typing at one offset is shown as documentation.
 import { describe, expect, it } from 'vitest';
 import { errorStatus } from './errors.ts';
+import type { Slide } from './deck.ts';
 import type { MarkMutation, Mutation, SpliceMutation, TextOp } from './mutations.ts';
 import type { CaseMode, RunFlagKey, RunFlags } from './text.ts';
 import {
@@ -23,6 +24,7 @@ import {
   sameRunFlags,
 } from './text.ts';
 import {
+  insertTieSide,
   isTextOp,
   rewritesText,
   sameText,
@@ -33,8 +35,9 @@ import {
   transformMutation,
   transformSplice,
 } from './transform.ts';
+import type { Side } from './transform.ts';
 import { workedDocument } from './fixtures.ts';
-import { applyMutation } from './reduce.ts';
+import { UNTITLED_DECK_TITLE, applyMutation, applyMutations, deckTitleSource } from './reduce.ts';
 import { validateDocument } from './validate.ts';
 
 const address = { slideId: 'content-rule', blockId: 'p1', path: '/text' } as const;
@@ -289,6 +292,45 @@ describe('transformMutation and transformAgainst', () => {
     expect(transformMutation(splice(3, 0, 'a'), other, 'right')).toEqual([splice(3, 0, 'a')]);
   });
 
+  it('ties two inserts at one offset by the two client ids, the lower id keeping the left, the same from either end (the sync round fix round, F3)', () => {
+    const a = '0a1b2c3d4e5f60718293a4b5c6d7e8f9';
+    const b = 'f9e8d7c6b5a493827160f5e4d3c2b1a0';
+    expect(insertTieSide(a, b)).toBe('left');
+    expect(insertTieSide(b, a)).toBe('right');
+    expect(insertTieSide(a, a)).toBe('right');
+    // a record without an origin travels as `store`; every client id sorts before it
+    expect(insertTieSide(a, 'store')).toBe('left');
+    // the fourth argument is the inserts' tie; marks keep the third (server order)
+    expect(transformMutation(splice(5, 0, 'B'), splice(5, 0, 'A'), 'right', 'left')).toEqual([
+      splice(5, 0, 'B'),
+    ]);
+    expect(transformMutation(splice(5, 0, 'B'), splice(5, 0, 'A'), 'right')).toEqual([
+      splice(6, 0, 'B'),
+    ]);
+    const bold: MarkMutation['edit'] = { kind: 'marks', set: { b: true } };
+    const clear: MarkMutation['edit'] = { kind: 'marks', clear: ['b'] };
+    // the later mark still wins the flag over the overlap whatever the inserts' tie says
+    expect(transformMutation(mark([0, 3], bold), mark([0, 3], clear), 'right', 'left')).toEqual([
+      mark([0, 3], bold),
+    ]);
+    // the two ends agree: the server transforms A's incoming insert against B's landed one
+    // with tie(A, B), A's client its pending insert against B's remote one with tie(A, B)
+    const text = 'Hello world';
+    for (const [me, them] of [
+      [a, b],
+      [b, a],
+    ] as const) {
+      const mine = splice(5, 0, ' mine');
+      const theirs = splice(5, 0, ' theirs');
+      const server = transformMutation(mine, theirs, 'right', insertTieSide(me, them));
+      const client = transformMutation(mine, theirs, 'right', insertTieSide(me, them));
+      expect(client).toEqual(server);
+      expect(applyAll(applyOp(text, theirs), server)).toBe(
+        me < them ? 'Hello mine theirs world' : 'Hello theirs mine world',
+      );
+    }
+  });
+
   it('returns a text op to its author when a whole Text rewrite landed first', () => {
     const rewrite: Mutation = {
       op: 'text.replace',
@@ -334,6 +376,64 @@ describe('transformMutation and transformAgainst', () => {
     expect(plainOf(straight).startsWith('A')).toBe(true);
     expect(plainOf(other).startsWith('A')).toBe(true);
     expect(transformAgainst(mark([0, 2], italic), [splice(0, 5, '')])).toEqual([]);
+  });
+
+  it("transforms a heading splice against another heading splice on both sides, as a block's (docs/SYNC.md 3.4)", () => {
+    const heading = { slideId: 'title', blockId: 'heading', path: '/heading' } as const;
+    const hs = (at: number, remove: number, insert: string): SpliceMutation => ({
+      op: 'text.splice',
+      ...heading,
+      at,
+      remove,
+      insert,
+    });
+    // two people insert a word each at offset 0 of the cover's heading: the later arrival lands
+    // after the earlier one on the server, and the earlier one stays first on the later's tab
+    const a = hs(0, 0, 'pa1 ');
+    const b = hs(0, 0, 'pb1 ');
+    expect(transformMutation(b, a, 'right')).toEqual([hs(4, 0, 'pb1 ')]);
+    expect(transformMutation(a, b, 'left')).toEqual([hs(0, 0, 'pa1 ')]);
+    const text = 'General Translation';
+    const { ab, ba } = bothOrders(text, a, b);
+    expect(ab).toBe('pa1 pb1 General Translation');
+    expect(ba).toBe(ab);
+    // a splice on the lead is another Text of the same slide and passes through
+    const lead = { ...hs(2, 0, 'x'), blockId: 'lead', path: '/lead' };
+    expect(transformMutation(lead, a, 'right')).toEqual([lead]);
+    expect(sameText(a, lead)).toBe(false);
+  });
+
+  it('reads slide.set of a field as a rewrite of that field alone, and of another slide pointer as the whole slide (docs/SYNC.md 3.4)', () => {
+    const heading = { slideId: 'title', blockId: 'heading', path: '/heading' } as const;
+    const onHeading: SpliceMutation = {
+      op: 'text.splice',
+      ...heading,
+      at: 0,
+      remove: 0,
+      insert: 'A',
+    };
+    const onLead: SpliceMutation = { ...onHeading, blockId: 'lead', path: '/lead' };
+    const setHeading: Mutation = {
+      op: 'slide.set',
+      slideId: 'title',
+      path: '/heading',
+      value: 'New',
+    };
+    expect(rewritesText(setHeading, onHeading)).toBe(true);
+    expect(rewritesText(setHeading, onLead)).toBe(false);
+    expect(transformMutation(onHeading, setHeading, 'right')).toEqual([]);
+    expect(transformMutation(onLead, setHeading, 'right')).toEqual([onLead]);
+    // a body block's op on a content slide is never a heading field's
+    const block: SpliceMutation = { ...splice(1, 0, 'a'), slideId: 'title' };
+    expect(rewritesText(setHeading, block)).toBe(false);
+    // a block on a content slide whose id happens to be heading, with a block pointer
+    const lookalike: SpliceMutation = { ...splice(1, 0, 'a'), blockId: 'heading', path: '/text' };
+    expect(rewritesText({ ...setHeading, slideId: 'content-rule' }, lookalike)).toBe(false);
+    // another slide pointer keeps the whole slide rule
+    const setNotes: Mutation = { op: 'slide.set', slideId: 'title', path: '/notes', value: 'n' };
+    expect(rewritesText(setNotes, onHeading)).toBe(true);
+    expect(rewritesText(setNotes, onLead)).toBe(true);
+    expect(rewritesText({ ...setHeading, slideId: 'other' }, onHeading)).toBe(false);
   });
 
   it('names the text ops and the Texts they share', () => {
@@ -662,12 +762,21 @@ describe('the convergence property (SPEC-3 3.4, 16.6: 10,000 random pairs)', () 
     }
   });
 
-  it('documents the interleaving anomaly: two authors typing at one offset interleave by server order', () => {
-    // A types "abc" and B types "xyz" at offset 5 of "Hello world", one character per op, while
-    // the server admits them alternately. Each client keeps its pending ops, transforms an
-    // incoming admitted op against them (the incoming came first at the server, so it is `left`)
-    // and its pending ops against the incoming (`right`), the room client's rule (SPEC-3 3.6).
-    // Every client converges with the server, and the characters interleave (02 E17).
+  /**
+   * Two authors typing at one offset, one character per op, the server admitting alternately
+   * (02 E17). Each client keeps its pending ops, transforms an incoming admitted op forward
+   * through them (the opposite side each time, so a later pending op meets the incoming in its
+   * own frame) and its pending ops against the incoming, the room client's rule (SPEC-3 3.6);
+   * the server transforms an incoming op against everything since the client's base. A POST's
+   * answer carries what landed under the admitted entry (`between`) and the entry itself, and
+   * the client drains both at once (room-client.ts `take`), so its base moves past its own
+   * commit before its next POST: the model receives after every POST. `tie` gives the side of
+   * an author's insert against another's at one offset, from the two ids.
+   */
+  const twoAuthorsAtOneOffset = (
+    ids: [string, string],
+    tie: (opClientId: string, againstClientId: string) => Side,
+  ): { server: string; clients: string[] } => {
     type Client = { text: string; pending: TextOp[]; seen: number; cursor: number };
     const clients: Client[] = [
       { text: 'Hello world', pending: [], seen: 0, cursor: 5 },
@@ -685,7 +794,9 @@ describe('the convergence property (SPEC-3 3.4, 16.6: 10,000 random pairs)', () 
       let landed: Mutation[] = [op];
       for (const entry of history.slice(client.seen)) {
         if (entry.author === who) continue;
-        landed = landed.flatMap((row) => transformMutation(row, entry.op, 'right'));
+        landed = landed.flatMap((row) =>
+          transformMutation(row, entry.op, 'right', tie(ids[who]!, ids[entry.author]!)),
+        );
       }
       for (const row of landed as TextOp[]) {
         server = applyOp(server, row);
@@ -698,17 +809,22 @@ describe('the convergence property (SPEC-3 3.4, 16.6: 10,000 random pairs)', () 
         if (entry.author === who) {
           client.pending.shift();
         } else {
+          const mine = tie(ids[who]!, ids[entry.author]!);
+          const theirs: Side = mine === 'left' ? 'right' : 'left';
           let incoming: Mutation[] = [entry.op];
           const nextPending: TextOp[] = [];
           for (const pending of client.pending) {
-            const transformedPending = pending && transformMutation(pending, entry.op, 'right');
-            nextPending.push(...(transformedPending as TextOp[]));
-            incoming = incoming.flatMap((row) => transformMutation(row, pending, 'left'));
+            const moved = incoming.flatMap((row) => transformMutation(pending, row, 'right', mine));
+            nextPending.push(...(moved as TextOp[]));
+            incoming = incoming.flatMap((row) => transformMutation(row, pending, 'left', theirs));
           }
           for (const row of incoming as TextOp[]) {
             client.text = applyOp(client.text, row);
             if (row.op !== 'text.splice') continue;
-            if (row.at < client.cursor || (row.at === client.cursor && client.pending.length === 0))
+            if (
+              row.at < client.cursor ||
+              (row.at === client.cursor && (client.pending.length === 0 || mine === 'right'))
+            )
               client.cursor += row.insert.length - row.remove;
           }
           client.pending = nextPending;
@@ -716,30 +832,89 @@ describe('the convergence property (SPEC-3 3.4, 16.6: 10,000 random pairs)', () 
         client.seen += 1;
       }
     };
-    type(0, 'a');
-    // typing order a, x, b, y, c, z with nobody receiving until the end
+    // typing order a, x, b, y, c, z; each POST's answer brings its author up to its own commit
     const typed: [number, string][] = [
+      [0, 'a'],
       [1, 'x'],
       [0, 'b'],
       [1, 'y'],
       [0, 'c'],
       [1, 'z'],
     ];
-    for (const [who, ch] of typed) type(who, ch);
+    for (const [who, ch] of typed) {
+      type(who, ch);
+      receive(who);
+    }
     receive(0);
     receive(1);
-    expect(plainOf(clients[0]!.text)).toBe(plainOf(server));
-    expect(plainOf(clients[1]!.text)).toBe(plainOf(server));
-    const plain = plainOf(server);
-    expect(plain.startsWith('Hello')).toBe(true);
-    expect(plain.endsWith(' world')).toBe(true);
-    expect([...plain.slice(5, 11)].sort().join('')).toBe('abcxyz');
-    // the anomaly: neither author's word survives whole
-    expect(plain.includes('abc') && plain.includes('xyz')).toBe(false);
+    return { server: plainOf(server), clients: clients.map((client) => plainOf(client.text)) };
+  };
+  const A = '0a1b2c3d4e5f60718293a4b5c6d7e8f9';
+  const B = 'f9e8d7c6b5a493827160f5e4d3c2b1a0';
+
+  it('documents what server order alone does at one offset: every client converges and the two words interleave (02 E17)', () => {
+    const { server, clients } = twoAuthorsAtOneOffset([A, B], () => 'right');
+    expect(clients[0]).toBe(server);
+    expect(clients[1]).toBe(server);
+    expect(server.startsWith('Hello')).toBe(true);
+    expect(server.endsWith(' world')).toBe(true);
+    expect([...server.slice(5, 11)].sort().join('')).toBe('abcxyz');
+    // the anomaly the tie below closes: neither author's word survives whole
+    expect(server.includes('abc') && server.includes('xyz')).toBe(false);
     // the same six characters as two whole words converge without interleaving
     const { ab, ba } = bothOrders('Hello world', splice(5, 0, 'abc'), splice(5, 0, 'xyz'));
     expect(ab).toBe('Helloabcxyz world');
     expect(ba).toBe(ab);
+  });
+
+  it('keeps both words whole under the tie by client id, whichever id sorts first (the sync round fix round, F3)', () => {
+    for (const ids of [
+      [A, B],
+      [B, A],
+    ] as [string, string][]) {
+      const { server, clients } = twoAuthorsAtOneOffset(ids, insertTieSide);
+      expect(clients[0]).toBe(server);
+      expect(clients[1]).toBe(server);
+      // the lower id's word stands first, and each author's stream of inserts is contiguous
+      expect(server).toBe(ids[0] < ids[1] ? 'Helloabcxyz world' : 'Helloxyzabc world');
+    }
+  });
+
+  it('replays the ordering probe’s split word and reads it whole under the tie (sync-p1-ordering-local.json, title round 1)', () => {
+    // the wire on 4419: B at 134 insert " p" (revision 33); A at 134 insert " pa1", written at
+    // base 32 and moved past B's; B's "b1" pending at 136, the end of B's own " p", when A's
+    // insert lands there. By server order alone each author yields at the same offset in turn
+    // and the text reads "p pa1b1" in both browsers; by the two ids both words stay whole.
+    const text = 'x'.repeat(134);
+    for (const [aId, bId] of [
+      [A, B],
+      [B, A],
+    ] as [string, string][]) {
+      const bFirst = splice(134, 0, ' p');
+      const afterB = applyOp(text, bFirst);
+      // A's insert, at the server and on A's client: the same tie from either end
+      const aMoved = transformMutation(
+        splice(134, 0, ' pa1'),
+        bFirst,
+        'right',
+        insertTieSide(aId, bId),
+      );
+      const afterA = applyAll(afterB, aMoved);
+      // B's continuation, pending at the end of its own " p", meets A's insert at that offset
+      const bNext = splice(136, 0, 'b1');
+      const bMoved = aMoved.flatMap((row) =>
+        transformMutation(bNext, row, 'right', insertTieSide(bId, aId)),
+      );
+      const final = applyAll(afterA, bMoved);
+      expect(final.includes(' pa1')).toBe(true);
+      expect(final.includes(' pb1')).toBe(true);
+      expect(final.slice(134)).toBe(aId < bId ? ' pa1 pb1' : ' pb1 pa1');
+    }
+    // and by server order alone, what the probe read
+    const bFirst = splice(134, 0, ' p');
+    const aMoved = transformMutation(splice(134, 0, ' pa1'), bFirst, 'right');
+    const bMoved = aMoved.flatMap((row) => transformMutation(splice(136, 0, 'b1'), row, 'right'));
+    expect(applyAll(applyAll(applyOp(text, bFirst), aMoved), bMoved).slice(134)).toBe(' p pa1b1');
   });
 });
 
@@ -748,3 +923,101 @@ function base() {
   if (!result.ok || result.deck === null) throw new Error('fixture');
   return { deck: result.deck, slides: result.slides };
 }
+
+describe('the deck title follows the cover heading in the reducer (the sync round, docs/SYNC.md 3.4)', () => {
+  const heading = { slideId: 'title', blockId: 'heading', path: '/heading' } as const;
+  const hs = (at: number, remove: number, insert: string): SpliceMutation => ({
+    op: 'text.splice',
+    ...heading,
+    at,
+    remove,
+    insert,
+  });
+  const rename = (value: string): Mutation => ({ op: 'deck.set', path: '/title', value });
+  /** The worked deck with the given title; its first title slide reads "General Translation". */
+  const deckTitled = (title: string) => {
+    const document = base();
+    return { deck: { ...document.deck, title }, slides: document.slides };
+  };
+
+  it('moves the title with a splice while the title equals the heading, and names a blank deck from its first burst', () => {
+    const following = deckTitled('General Translation');
+    const moved = applyMutations(following, [hs(19, 0, ' for Acme')]);
+    expect(moved.document.slides['title']).toMatchObject({
+      heading: 'General Translation for Acme',
+    });
+    expect(moved.document.deck.title).toBe('General Translation for Acme');
+    // the inverse carries the previous title behind the splice's own inverse, so undo is exact
+    expect(moved.inverse).toEqual([hs(19, 9, ''), rename('General Translation')]);
+    const back = applyMutations(moved.document, moved.inverse).document;
+    expect(back.deck.title).toBe('General Translation');
+    expect(back.slides['title']).toMatchObject({ heading: 'General Translation' });
+    // a blank deck: the untitled name follows the first characters typed into the cover
+    const blank = applyMutations(deckTitled(UNTITLED_DECK_TITLE), [hs(0, 19, 'R')]);
+    expect(blank.document.deck.title).toBe('R');
+    expect(applyMutations(blank.document, [hs(1, 0, 'enewal')]).document.deck.title).toBe(
+      'Renewal',
+    );
+    // undoing the first burst brings the untitled name back, not a derived one
+    expect(applyMutations(blank.document, blank.inverse).document.deck.title).toBe(
+      UNTITLED_DECK_TITLE,
+    );
+  });
+
+  it('leaves the title alone after a deck.set /title made them differ, until a set makes them equal again', () => {
+    const renamed = applyMutations(deckTitled('General Translation'), [rename('Acme pitch')]);
+    expect(renamed.document.deck.title).toBe('Acme pitch');
+    const typed = applyMutations(renamed.document, [hs(19, 0, ' 2027')]);
+    expect(typed.document.slides['title']).toMatchObject({ heading: 'General Translation 2027' });
+    expect(typed.document.deck.title).toBe('Acme pitch');
+    // no title inverse rides a splice that moved no title
+    expect(typed.inverse).toEqual([hs(19, 5, '')]);
+    // a later set that equals the heading resumes the following
+    const equal = applyMutations(typed.document, [rename('General Translation 2027')]);
+    expect(applyMutations(equal.document, [hs(24, 0, '!')]).document.deck.title).toBe(
+      'General Translation 2027!',
+    );
+  });
+
+  it('keeps the title on an emptied heading, follows a case change, and ignores the lead and a second title slide', () => {
+    const following = deckTitled('General Translation');
+    const emptied = applyMutations(following, [hs(0, 19, '')]);
+    expect(emptied.document.deck.title).toBe('General Translation');
+    const cased = applyMutations(following, [
+      { op: 'text.mark', ...heading, range: [0, 19], edit: { kind: 'case', mode: 'upper' } },
+    ]);
+    expect(cased.document.deck.title).toBe('GENERAL TRANSLATION');
+    expect(cased.inverse[cased.inverse.length - 1]).toEqual(rename('General Translation'));
+    const lead = applyMutations(following, [
+      {
+        op: 'text.splice',
+        slideId: 'title',
+        blockId: 'lead',
+        path: '/lead',
+        at: 0,
+        remove: 0,
+        insert: 'X',
+      },
+    ]);
+    expect(lead.document.deck.title).toBe('General Translation');
+    // a replace on the heading follows too
+    const replaced = applyMutations(following, [
+      { op: 'text.replace', ...heading, range: [0, 7], text: 'Global' },
+    ]);
+    expect(replaced.document.slides['title']).toMatchObject({ heading: 'Global Translation' });
+    expect(replaced.document.deck.title).toBe('Global Translation');
+    // a second title slide after the first is not the title's source
+    const cover = following.slides['title'] as Extract<Slide, { kind: 'title' }>;
+    const second = applyMutations(following, [
+      {
+        op: 'slide.insert',
+        sectionId: 'brand',
+        after: 'title',
+        slide: { ...cover, id: 'title-two', heading: 'General Translation' },
+      },
+    ]);
+    const onSecond = applyMutations(second.document, [{ ...hs(0, 0, 'Z'), slideId: 'title-two' }]);
+    expect(onSecond.document.deck.title).toBe('General Translation');
+    expect(deckTitleSource(second.document)).toEqual({ slideId: 'title', blockId: 'heading' });
+  });
+});

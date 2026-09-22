@@ -76,6 +76,50 @@ describe('slideToConvertFor', () => {
     expect(slideToConvertFor(document, [])).toBeNull();
   });
 
+  it('reads past a text run on a slide field and still converts on a mark at another path', () => {
+    // the sync and costs round (docs/SYNC.md 3.4; build/b2.md R2): a burst into the cover's
+    // heading travels as text.splice { blockId: 'heading', path: '/heading' } and writes the
+    // field in place, so it names nothing; a mark on the heading at another path is a write
+    // against the field object and converts as before
+    expect(
+      slideToConvertFor(document, [
+        {
+          op: 'text.splice',
+          slideId: 'title',
+          blockId: 'heading',
+          path: '/heading',
+          at: 0,
+          remove: 0,
+          insert: 'Acme ',
+        },
+      ]),
+    ).toBeNull();
+    expect(
+      slideToConvertFor(document, [
+        {
+          op: 'text.mark',
+          slideId: 'thesis',
+          blockId: 'big',
+          path: '/big',
+          range: [0, 2],
+          edit: { kind: 'marks', set: { b: true } },
+        },
+      ]),
+    ).toBeNull();
+    expect(
+      slideToConvertFor(document, [
+        {
+          op: 'text.mark',
+          slideId: 'title',
+          blockId: 'heading',
+          path: '/text',
+          range: [0, 2],
+          edit: { kind: 'marks', set: { b: true } },
+        },
+      ]),
+    ).toBe('title');
+  });
+
   it('names the ids the conversion keeps for every fixed kind', () => {
     expect([...fieldObjectIds(document.slides['title']!)].sort()).toEqual([
       'heading',

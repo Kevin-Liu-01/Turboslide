@@ -63,7 +63,11 @@ const pollUntil = async (read, test, timeout = 15_000, every = 100) => {
   }
 };
 const connected = (page, timeout = 45_000) =>
-  pollUntil(() => state(page), (s) => s.sync?.connected === true, timeout);
+  pollUntil(
+    () => state(page),
+    (s) => s.sync?.connected === true,
+    timeout,
+  );
 const settled = (page, timeout = 30_000) =>
   pollUntil(
     () => state(page),
@@ -71,7 +75,12 @@ const settled = (page, timeout = 30_000) =>
     timeout,
   );
 const waitRevision = (page, want, timeout = 20_000) =>
-  pollUntil(() => state(page).then((s) => s.revision), (r) => r >= want, timeout, 60);
+  pollUntil(
+    () => state(page).then((s) => s.revision),
+    (r) => r >= want,
+    timeout,
+    60,
+  );
 const dismissPrompt = async (page) => {
   const prompt = page.locator('[data-control="dialog.namePrompt"]');
   if (await prompt.isVisible().catch(() => false)) {
@@ -118,7 +127,12 @@ const openRun = async (page) => {
   await page.mouse.move(x, y, { steps: 12 });
   await sleep(rand(60, 120));
   await page.mouse.dblclick(x, y);
-  const ok = await pollUntil(() => el.getAttribute('contenteditable'), (v) => v === 'true', 4000, 50);
+  const ok = await pollUntil(
+    () => el.getAttribute('contenteditable'),
+    (v) => v === 'true',
+    4000,
+    50,
+  );
   await page.keyboard.press(END_OF_TEXT);
   await page.keyboard.press('End');
   return ok === 'true';
@@ -129,15 +143,22 @@ const typeHuman = async (page, text) => {
     await sleep(rand(40, 90));
   }
 };
-const shot = (page, name) => page.screenshot({ path: path.join(OUT, `${name}.png`) }).catch(() => undefined);
+const shot = (page, name) =>
+  page.screenshot({ path: path.join(OUT, `${name}.png`) }).catch(() => undefined);
 const saveWords = (page) =>
-  page.evaluate(() => document.querySelector('[data-control="deck.saveState"]')?.textContent?.trim() ?? null);
+  page.evaluate(
+    () => document.querySelector('[data-control="deck.saveState"]')?.textContent?.trim() ?? null,
+  );
 const staleWords = (page) =>
   page.evaluate(
     () =>
       [...document.querySelectorAll('.ts-snackbar, .pt-toast, [data-control="snackbar"]')]
         .map((el) => el.textContent ?? '')
-        .filter((t) => /stale|not accepted|refused|reload and rebase|changed in the Blob|No block|was not applied/i.test(t))
+        .filter((t) =>
+          /stale|not accepted|refused|reload and rebase|changed in the Blob|No block|was not applied/i.test(
+            t,
+          ),
+        )
         .join(' | ') || null,
   );
 /** The document as the editor holds it: every slide through slide.get, the deck facts through deck.info. */
@@ -176,7 +197,16 @@ const wireOf = (page, name, sink) => {
     } catch {
       // not json
     }
-    const row = { who: name, at: rel(now()), entries, base, status: null, ms: null, revision: null, vercelId: null };
+    const row = {
+      who: name,
+      at: rel(now()),
+      entries,
+      base,
+      status: null,
+      ms: null,
+      revision: null,
+      vercelId: null,
+    };
     sink.push(row);
     request
       .response()
@@ -195,14 +225,27 @@ const wireOf = (page, name, sink) => {
   });
   page.on('response', (response) => {
     if (!/\/api\/decks\/[^/]+\/stream/.test(response.url())) return;
-    sink.push({ who: name, at: rel(now()), stream: true, status: response.status(), vercelId: response.headers()['x-vercel-id'] ?? null });
+    sink.push({
+      who: name,
+      at: rel(now()),
+      stream: true,
+      status: response.status(),
+      vercelId: response.headers()['x-vercel-id'] ?? null,
+    });
   });
 };
 
 // ---------------------------------------------------------------------------------------------
 // the run
 
-const report = { base: BASE, startedAt: new Date().toISOString(), phases: {}, wire: [], anomalies: [], console: [] };
+const report = {
+  base: BASE,
+  startedAt: new Date().toISOString(),
+  phases: {},
+  wire: [],
+  anomalies: [],
+  console: [],
+};
 const anomaly = (kind, detail) => {
   report.anomalies.push({ kind, ...detail });
   log(`ANOMALY ${kind}: ${JSON.stringify(detail)}`);
@@ -212,8 +255,13 @@ const ctxA = await browser.newContext({ viewport: { width: 1440, height: 900 } }
 const ctxB = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 const A = await ctxA.newPage();
 const B = await ctxB.newPage();
-for (const [name, page] of [['A', A], ['B', B]]) {
-  page.on('pageerror', (e) => report.console.push({ who: name, at: rel(now()), error: String(e).slice(0, 300) }));
+for (const [name, page] of [
+  ['A', A],
+  ['B', B],
+]) {
+  page.on('pageerror', (e) =>
+    report.console.push({ who: name, at: rel(now()), error: String(e).slice(0, 300) }),
+  );
   page.on('console', (m) => {
     if (m.type() === 'error' || m.type() === 'warning')
       report.console.push({ who: name, at: rel(now()), [m.type()]: m.text().slice(0, 300) });
@@ -280,7 +328,13 @@ try {
       ]);
       const rev = s?.serverRevision ?? null;
       if (text !== lastText || rev !== lastRev) {
-        bSamples.push({ at: rel(t), revision: s?.revision ?? null, serverRevision: rev, seq: s?.sync?.seq ?? null, text });
+        bSamples.push({
+          at: rel(t),
+          revision: s?.revision ?? null,
+          serverRevision: rev,
+          seq: s?.sync?.seq ?? null,
+          text,
+        });
         if (text !== null)
           for (const token of tokens)
             if (!seenInB.has(token.text) && text.includes(token.text))
@@ -300,7 +354,12 @@ try {
     const typedAt = now();
     tokens.push({ text, i, typedAt: rel(typedAt) });
     // the acknowledgement: A's pending back to 0
-    const acked = await pollUntil(() => state(A), (s) => (s.sync?.pending ?? 0) === 0, 6000, 50);
+    const acked = await pollUntil(
+      () => state(A),
+      (s) => (s.sync?.pending ?? 0) === 0,
+      6000,
+      50,
+    );
     tokens[tokens.length - 1].ackAt = rel(now());
     tokens[tokens.length - 1].ackMs = now() - typedAt;
     tokens[tokens.length - 1].revision = acked.revision;
@@ -312,7 +371,12 @@ try {
   await A.keyboard.press('Escape');
   await dismissPrompt(A);
   // let B catch up
-  await pollUntil(() => Promise.resolve(seenInB.size), (n) => n >= tokens.length, 20_000, 200);
+  await pollUntil(
+    () => Promise.resolve(seenInB.size),
+    (n) => n >= tokens.length,
+    20_000,
+    200,
+  );
   await sleep(2000);
   samplerStop = true;
   await sampler;
@@ -320,13 +384,23 @@ try {
   const bText = await headingOf(B);
   const latencies = tokens.map((t) => {
     const seen = seenInB.get(t.text);
-    return { token: t.text, typedAt: t.typedAt, ackMs: t.ackMs, revision: t.revision, seenAt: seen?.at ?? null, latencyMs: seen ? seen.at - t.typedAt : null, seenRevision: seen?.revision ?? null };
+    return {
+      token: t.text,
+      typedAt: t.typedAt,
+      ackMs: t.ackMs,
+      revision: t.revision,
+      seenAt: seen?.at ?? null,
+      latencyMs: seen ? seen.at - t.typedAt : null,
+      seenRevision: seen?.revision ?? null,
+    };
   });
-  const arrivalOrder = [...seenInB.entries()].sort((x, y) => x[1].at - y[1].at).map(([token]) => token);
+  const arrivalOrder = [...seenInB.entries()]
+    .sort((x, y) => x[1].at - y[1].at)
+    .map(([token]) => token);
   const expectedOrder = tokens.map((t) => t.text);
   const inOrder = arrivalOrder.join('') === expectedOrder.filter((t) => seenInB.has(t)).join('');
   const lost = tokens.filter((t) => !seenInB.has(t.text)).map((t) => t.text);
-  const dup = (text, token) => (text.split(token).length - 1) > 1;
+  const dup = (text, token) => text.split(token).length - 1 > 1;
   const duplicates = tokens.filter((t) => aText && dup(aText, t.text)).map((t) => t.text);
   const over3s = latencies.filter((l) => l.latencyMs !== null && l.latencyMs > 3000);
   const sA = await state(A);
@@ -343,13 +417,27 @@ try {
     aText,
     bText,
     equal: aText === bText,
-    a: { revision: sA.revision, serverRevision: sA.serverRevision, seq: sA.sync?.seq, pending: sA.sync?.pending, retained: sA.sync?.retained },
-    b: { revision: sB.revision, serverRevision: sB.serverRevision, seq: sB.sync?.seq, pending: sB.sync?.pending, retained: sB.sync?.retained },
+    a: {
+      revision: sA.revision,
+      serverRevision: sA.serverRevision,
+      seq: sA.sync?.seq,
+      pending: sA.sync?.pending,
+      retained: sA.sync?.retained,
+    },
+    b: {
+      revision: sB.revision,
+      serverRevision: sB.serverRevision,
+      seq: sB.sync?.seq,
+      pending: sB.sync?.pending,
+      retained: sB.sync?.retained,
+    },
     bSamples,
     saveWords: { a: await saveWords(A), b: await saveWords(B) },
     stale: { a: await staleWords(A), b: await staleWords(B) },
   };
-  log(`phase 1: latency ${JSON.stringify(report.phases.serial.latency)}, ack ${JSON.stringify(report.phases.serial.ack)}, inOrder ${inOrder}, lost ${lost.length}, equal ${aText === bText}`);
+  log(
+    `phase 1: latency ${JSON.stringify(report.phases.serial.latency)}, ack ${JSON.stringify(report.phases.serial.ack)}, inOrder ${inOrder}, lost ${lost.length}, equal ${aText === bText}`,
+  );
   if (!inOrder) anomaly('reorder', { arrivalOrder });
   if (lost.length > 0) anomaly('lost-write', { lost, aText, bText });
   if (duplicates.length > 0) anomaly('duplicate', { duplicates });
@@ -375,8 +463,18 @@ try {
       })(),
     ]);
     const typedAt = now();
-    const sa = await pollUntil(() => state(A), (s) => (s.sync?.pending ?? 0) === 0, 8000, 50);
-    const sb = await pollUntil(() => state(B), (s) => (s.sync?.pending ?? 0) === 0, 8000, 50);
+    const sa = await pollUntil(
+      () => state(A),
+      (s) => (s.sync?.pending ?? 0) === 0,
+      8000,
+      50,
+    );
+    const sb = await pollUntil(
+      () => state(B),
+      (s) => (s.sync?.pending ?? 0) === 0,
+      8000,
+      50,
+    );
     // convergence: both texts equal within 10 s
     const both = await pollUntil(
       async () => ({ a: await runText(A), b: await runText(B) }),
@@ -388,8 +486,20 @@ try {
       round: k,
       windowMs: typedAt - startedAt,
       convergedMs: now() - typedAt,
-      a: { text: both.a, revision: sa.revision, serverRevision: sa.serverRevision, pending: sa.sync?.pending, stale: await staleWords(A) },
-      b: { text: both.b, revision: sb.revision, serverRevision: sb.serverRevision, pending: sb.sync?.pending, stale: await staleWords(B) },
+      a: {
+        text: both.a,
+        revision: sa.revision,
+        serverRevision: sa.serverRevision,
+        pending: sa.sync?.pending,
+        stale: await staleWords(A),
+      },
+      b: {
+        text: both.b,
+        revision: sb.revision,
+        serverRevision: sb.serverRevision,
+        pending: sb.sync?.pending,
+        stale: await staleWords(B),
+      },
       equal: both.a === both.b,
       aHasBoth: Boolean(both.a && both.a.includes(ta) && both.a.includes(tb)),
       bHasBoth: Boolean(both.b && both.b.includes(ta) && both.b.includes(tb)),
@@ -406,11 +516,30 @@ try {
   await sleep(3000);
   const c2a = await headingOf(A);
   const c2b = await headingOf(B);
-  report.phases.concurrent = { rounds: concurrent, aText: c2a, bText: c2b, equal: c2a === c2b, a: await state(A).then((s) => ({ revision: s.revision, serverRevision: s.serverRevision, pending: s.sync?.pending, retained: s.sync?.retained })), b: await state(B).then((s) => ({ revision: s.revision, serverRevision: s.serverRevision, pending: s.sync?.pending, retained: s.sync?.retained })) };
+  report.phases.concurrent = {
+    rounds: concurrent,
+    aText: c2a,
+    bText: c2b,
+    equal: c2a === c2b,
+    a: await state(A).then((s) => ({
+      revision: s.revision,
+      serverRevision: s.serverRevision,
+      pending: s.sync?.pending,
+      retained: s.sync?.retained,
+    })),
+    b: await state(B).then((s) => ({
+      revision: s.revision,
+      serverRevision: s.serverRevision,
+      pending: s.sync?.pending,
+      retained: s.sync?.retained,
+    })),
+  };
   for (const r of concurrent) {
     if (!r.equal) anomaly('divergence-concurrent', { round: r.round, a: r.a.text, b: r.b.text });
-    if (!r.aHasBoth || !r.bHasBoth) anomaly('lost-write-concurrent', { round: r.round, a: r.a.text, b: r.b.text });
-    if (r.a.stale || r.b.stale) anomaly('stale-words-concurrent', { round: r.round, a: r.a.stale, b: r.b.stale });
+    if (!r.aHasBoth || !r.bHasBoth)
+      anomaly('lost-write-concurrent', { round: r.round, a: r.a.text, b: r.b.text });
+    if (r.a.stale || r.b.stale)
+      anomaly('stale-words-concurrent', { round: r.round, a: r.a.stale, b: r.b.stale });
   }
   if (c2a !== c2b) anomaly('divergence-after-concurrent', { aText: c2a, bText: c2b });
   await shot(A, '02-a-after-concurrent');
@@ -437,7 +566,16 @@ try {
     for (let k = 1; k <= 2; k += 1) {
       const t = ` o${k}`;
       await typeHuman(A, t);
-      aOffline.push({ text: t, at: rel(now()), state: await state(A).then((s) => ({ pending: s.sync?.pending, offline: s.sync?.offline, streamDown: s.sync?.streamDown, connected: s.sync?.connected })) });
+      aOffline.push({
+        text: t,
+        at: rel(now()),
+        state: await state(A).then((s) => ({
+          pending: s.sync?.pending,
+          offline: s.sync?.offline,
+          streamDown: s.sync?.streamDown,
+          connected: s.sync?.connected,
+        })),
+      });
       await sleep(5000);
     }
   })();
@@ -450,7 +588,12 @@ try {
   await ctxA.setOffline(false);
   const onlineAt = now();
   log('phase 3: A back online');
-  const aSettled = await pollUntil(() => state(A), (s) => (s.sync?.pending ?? 0) === 0 && s.sync?.connected === true, 45_000, 100);
+  const aSettled = await pollUntil(
+    () => state(A),
+    (s) => (s.sync?.pending ?? 0) === 0 && s.sync?.connected === true,
+    45_000,
+    100,
+  );
   const aSettledMs = now() - onlineAt;
   await A.keyboard.press('Escape');
   await B.keyboard.press('Escape');
@@ -470,9 +613,21 @@ try {
     offlineMs: onlineAt - offlineAt,
     bTokens,
     aOffline,
-    aBeforeOnline: { pending: aBeforeOnline.sync?.pending, offline: aBeforeOnline.sync?.offline, streamDown: aBeforeOnline.sync?.streamDown, connected: aBeforeOnline.sync?.connected, revision: aBeforeOnline.revision, words: aWordsOffline },
+    aBeforeOnline: {
+      pending: aBeforeOnline.sync?.pending,
+      offline: aBeforeOnline.sync?.offline,
+      streamDown: aBeforeOnline.sync?.streamDown,
+      connected: aBeforeOnline.sync?.connected,
+      revision: aBeforeOnline.revision,
+      words: aWordsOffline,
+    },
     aSettledMs,
-    aSettled: { pending: aSettled.sync?.pending, connected: aSettled.sync?.connected, revision: aSettled.revision, serverRevision: aSettled.serverRevision },
+    aSettled: {
+      pending: aSettled.sync?.pending,
+      connected: aSettled.sync?.connected,
+      revision: aSettled.revision,
+      serverRevision: aSettled.serverRevision,
+    },
     convergedMs,
     converged: converged.a === converged.b,
     aText: converged.a,
@@ -481,15 +636,38 @@ try {
     lostInB: allTokens.filter((t) => !(converged.b ?? '').includes(t)),
     duplicatesInA: allTokens.filter((t) => (converged.a ?? '').split(t).length - 1 > 1),
     duplicatesInB: allTokens.filter((t) => (converged.b ?? '').split(t).length - 1 > 1),
-    a: { revision: s3a.revision, serverRevision: s3a.serverRevision, seq: s3a.sync?.seq, pending: s3a.sync?.pending, retained: s3a.sync?.retained },
-    b: { revision: s3b.revision, serverRevision: s3b.serverRevision, seq: s3b.sync?.seq, pending: s3b.sync?.pending, retained: s3b.sync?.retained },
+    a: {
+      revision: s3a.revision,
+      serverRevision: s3a.serverRevision,
+      seq: s3a.sync?.seq,
+      pending: s3a.sync?.pending,
+      retained: s3a.sync?.retained,
+    },
+    b: {
+      revision: s3b.revision,
+      serverRevision: s3b.serverRevision,
+      seq: s3b.sync?.seq,
+      pending: s3b.sync?.pending,
+      retained: s3b.sync?.retained,
+    },
     saveWords: { a: await saveWords(A), b: await saveWords(B) },
     stale: { a: await staleWords(A), b: await staleWords(B) },
   };
-  log(`phase 3: ${JSON.stringify({ ...report.phases.offline, bTokens: undefined, aOffline: undefined })}`);
-  if (!report.phases.offline.converged) anomaly('divergence-after-offline', { aText: converged.a, bText: converged.b });
-  if (report.phases.offline.lostInA.length || report.phases.offline.lostInB.length) anomaly('lost-write-offline', { lostInA: report.phases.offline.lostInA, lostInB: report.phases.offline.lostInB });
-  if (report.phases.offline.duplicatesInA.length || report.phases.offline.duplicatesInB.length) anomaly('duplicate-offline', { a: report.phases.offline.duplicatesInA, b: report.phases.offline.duplicatesInB });
+  log(
+    `phase 3: ${JSON.stringify({ ...report.phases.offline, bTokens: undefined, aOffline: undefined })}`,
+  );
+  if (!report.phases.offline.converged)
+    anomaly('divergence-after-offline', { aText: converged.a, bText: converged.b });
+  if (report.phases.offline.lostInA.length || report.phases.offline.lostInB.length)
+    anomaly('lost-write-offline', {
+      lostInA: report.phases.offline.lostInA,
+      lostInB: report.phases.offline.lostInB,
+    });
+  if (report.phases.offline.duplicatesInA.length || report.phases.offline.duplicatesInB.length)
+    anomaly('duplicate-offline', {
+      a: report.phases.offline.duplicatesInA,
+      b: report.phases.offline.duplicatesInB,
+    });
   await shot(A, '03-a-after-offline');
   await shot(B, '03-b-after-offline');
 
@@ -514,18 +692,34 @@ try {
   const expectedHeading = converged.a;
   report.phases.reload = {
     reloadMs: { a: msA, b: msB },
-    a: { ...docA, slides: undefined, heading: String(docA.slides.title?.heading ?? '').replace(/\u00a0/g, ' ') },
-    b: { ...docB, slides: undefined, heading: String(docB.slides.title?.heading ?? '').replace(/\u00a0/g, ' ') },
+    a: {
+      ...docA,
+      slides: undefined,
+      heading: String(docA.slides.title?.heading ?? '').replace(/\u00a0/g, ' '),
+    },
+    b: {
+      ...docB,
+      slides: undefined,
+      heading: String(docB.slides.title?.heading ?? '').replace(/\u00a0/g, ' '),
+    },
     same,
     sameRevision: docA.revision === docB.revision,
-    staleAgainstLive: { a: docA.revision < serverBefore.a, b: docB.revision < serverBefore.b, liveBefore: serverBefore },
-    headingMatchesLive: { a: String(docA.slides.title?.heading ?? '').replace(/\u00a0/g, ' ') === expectedHeading, b: String(docB.slides.title?.heading ?? '').replace(/\u00a0/g, ' ') === expectedHeading },
+    staleAgainstLive: {
+      a: docA.revision < serverBefore.a,
+      b: docB.revision < serverBefore.b,
+      liveBefore: serverBefore,
+    },
+    headingMatchesLive: {
+      a: String(docA.slides.title?.heading ?? '').replace(/\u00a0/g, ' ') === expectedHeading,
+      b: String(docB.slides.title?.heading ?? '').replace(/\u00a0/g, ' ') === expectedHeading,
+    },
   };
   writeFileSync(path.join(OUT, 'reload-a.json'), JSON.stringify(docA, null, 2));
   writeFileSync(path.join(OUT, 'reload-b.json'), JSON.stringify(docB, null, 2));
   log(`phase 4: ${JSON.stringify(report.phases.reload)}`);
   if (!same) anomaly('reload-diverged', { a: report.phases.reload.a, b: report.phases.reload.b });
-  if (report.phases.reload.staleAgainstLive.a || report.phases.reload.staleAgainstLive.b) anomaly('stale-reload', report.phases.reload.staleAgainstLive);
+  if (report.phases.reload.staleAgainstLive.a || report.phases.reload.staleAgainstLive.b)
+    anomaly('stale-reload', report.phases.reload.staleAgainstLive);
   await shot(A, '04-a-reloaded');
   await shot(B, '04-b-reloaded');
 } catch (error) {
@@ -560,13 +754,21 @@ try {
     } catch (error) {
       report.teardown.productPathError = error instanceof Error ? error.message : String(error);
       try {
-        await A.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+        await A.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(
+          () => undefined,
+        );
         await editorReady(A).catch(() => undefined);
         const info = await invoke(A, 'deck.info').catch(() => null);
         if (info) {
-          await invoke(A, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+          await invoke(A, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+            () => undefined,
+          );
           const t = await invoke(A, 'deck.info').catch(() => null);
-          await invoke(A, 'deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+          await invoke(A, 'deck.remove', {
+            id: deckId,
+            baseRevision: t?.revision ?? info.revision,
+            confirm: true,
+          }).catch(() => undefined);
           report.teardown.fallback = true;
         }
       } catch {
@@ -576,7 +778,9 @@ try {
     let status = 0;
     const until = now() + 30_000;
     for (;;) {
-      const res = await A.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 }).catch(() => null);
+      const res = await A.request
+        .get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 })
+        .catch(() => null);
       status = res ? res.status() : 0;
       if (status === 404 || now() > until) break;
       await sleep(2000);
@@ -586,6 +790,9 @@ try {
     log(`teardown: ${JSON.stringify(report.teardown)}`);
   }
   await browser.close().catch(() => undefined);
-  writeFileSync(path.join(OUT, 'ordering-run.json'), JSON.stringify({ ...report, deckId }, null, 2));
+  writeFileSync(
+    path.join(OUT, 'ordering-run.json'),
+    JSON.stringify({ ...report, deckId }, null, 2),
+  );
   log(`written ${path.join(OUT, 'ordering-run.json')}; anomalies ${report.anomalies.length}`);
 }

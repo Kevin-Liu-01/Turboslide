@@ -203,7 +203,10 @@ const BUDGETS = {
       layoutGrid: 50,
     },
     filmstrip: { steadyP95: 20, steadyMax: 50, firstPassMax: 100, nodes: 1500, steadyFpsMin: 50 },
-    idle: { serverFnPerMinute: 4, eventsPerMinute: 2 },
+    // the unheld 20 s session poll of the sync and costs round lands up to 4 times in a 60 s
+    // window plus the editor's two own calls (docs/SYNC.md 6.1 cost.editor-idle.calls supersedes
+    // SPEC-4 4.4's four)
+    idle: { serverFnPerMinute: 6, eventsPerMinute: 2 },
     twins: { refetched: 0 },
     cdn: null,
     vitals: { inp: null },
@@ -283,7 +286,10 @@ const BUDGETS = {
       layoutGrid: 50,
     },
     filmstrip: { steadyP95: 20, steadyMax: 50, firstPassMax: 100, nodes: 1500, steadyFpsMin: 50 },
-    idle: { serverFnPerMinute: 4, eventsPerMinute: 2 },
+    // the unheld 20 s session poll of the sync and costs round lands up to 4 times in a 60 s
+    // window plus the editor's two own calls (docs/SYNC.md 6.1 cost.editor-idle.calls supersedes
+    // SPEC-4 4.4's four)
+    idle: { serverFnPerMinute: 6, eventsPerMinute: 2 },
     twins: { refetched: 0 },
     cdn: { hit: true },
     vitals: { inp: null },

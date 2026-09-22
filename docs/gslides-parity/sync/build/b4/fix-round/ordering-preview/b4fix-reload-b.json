@@ -1,0 +1,123 @@
+{
+  "id": "untitled-20260922-g2gd",
+  "title": "Ordering probe a01 a02 a03 a04 a05 a06",
+  "revision": 12,
+  "serverRevision": 12,
+  "order": [
+    "title"
+  ],
+  "slides": {
+    "title": {
+      "schemaVersion": 1,
+      "id": "title",
+      "template": "title",
+      "grammar": {
+        "kind": "title",
+        "slots": {
+          "main": [
+            "mark",
+            "heading",
+            "lead"
+          ]
+        },
+        "boxes": {
+          "mark": {
+            "x": 137,
+            "y": 262.40625,
+            "w": 132,
+            "h": 84,
+            "z": 0
+          },
+          "heading": {
+            "x": 137,
+            "y": 394.40625,
+            "w": 1326,
+            "h": 179.5,
+            "z": 1
+          },
+          "lead": {
+            "x": 137,
+            "y": 599.90625,
+            "w": 901.453125,
+            "h": 38,
+            "z": 2
+          }
+        },
+        "fields": {
+          "mark": {
+            "w": 132,
+            "h": 84
+          },
+          "template": "title",
+          "autofit": [
+            "heading",
+            "lead"
+          ]
+        }
+      },
+      "kind": "content",
+      "layout": {
+        "type": "freeform"
+      },
+      "slots": {
+        "main": [
+          {
+            "id": "mark",
+            "pos": {
+              "x": 137,
+              "y": 262.40625,
+              "w": 132,
+              "h": 84,
+              "z": 0
+            },
+            "type": "mark",
+            "w": 132,
+            "h": 84
+          },
+          {
+            "id": "heading",
+            "pos": {
+              "x": 137,
+              "y": 394.40625,
+              "w": 1326,
+              "h": 179.5,
+              "z": 1
+            },
+            "type": "heading",
+            "level": "h1",
+            "text": "Ordering probe a01 a02 a03 a04 a05 a06",
+            "autofit": "shrink"
+          },
+          {
+            "id": "lead",
+            "pos": {
+              "x": 137,
+              "y": 599.90625,
+              "w": 901.453125,
+              "h": 38,
+              "z": 2
+            },
+            "type": "paragraph",
+            "text": "",
+            "role": "lead",
+            "tone": "muted",
+            "measure": 56,
+            "autofit": "shrink"
+          },
+          {
+            "id": "ordering-block",
+            "pos": {
+              "x": 160,
+              "y": 520,
+              "w": 1280,
+              "h": 160,
+              "z": 3
+            },
+            "type": "text",
+            "text": "kb2ka2ka1kb1end"
+          }
+        ]
+      }
+    }
+  }
+}

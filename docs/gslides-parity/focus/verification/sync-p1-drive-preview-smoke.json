@@ -1,0 +1,499 @@
+{
+  "base": "https://turboslide-bkwnt59my-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-22T00:03:20.923Z",
+  "rows": {
+    "title-concurrent": {
+      "rounds": [
+        {
+          "round": 1,
+          "pair1": [
+            " ca1",
+            " cb1"
+          ],
+          "pair2": [
+            " da1",
+            " db1"
+          ],
+          "pair1BothOpen": {
+            "ok": false,
+            "msAfterTyping": 5017,
+            "A": "Verifier drive ca1",
+            "B": "Verifier drive ca1 cb1",
+            "bStartedAfterA": 20
+          },
+          "afterEscape": {
+            "ok": true,
+            "msAfterEscape": 1646,
+            "A": "Verifier drive ca1 cb1 db1 da1",
+            "B": "Verifier drive ca1 cb1 db1 da1"
+          },
+          "stays": {
+            "ok": true,
+            "A": "Verifier drive ca1 cb1 db1 da1",
+            "B": "Verifier drive ca1 cb1 db1 da1"
+          },
+          "firstSeen": {
+            " ca1": {
+              "A": -44,
+              "B": 567
+            },
+            " cb1": {
+              "A": 6166,
+              "B": -44
+            },
+            " da1": {
+              "A": 1,
+              "B": 1937
+            },
+            " db1": {
+              "A": 1937,
+              "B": 1
+            }
+          },
+          "intact": {
+            " ca1": {
+              "A": 1,
+              "B": 1
+            },
+            " cb1": {
+              "A": 1,
+              "B": 1
+            },
+            " da1": {
+              "A": 1,
+              "B": 1
+            },
+            " db1": {
+              "A": 1,
+              "B": 1
+            }
+          },
+          "pass": false
+        },
+        {
+          "round": 2,
+          "pair1": [
+            " ca2",
+            " cb2"
+          ],
+          "pair2": [
+            " da2",
+            " db2"
+          ],
+          "pair1BothOpen": {
+            "ok": true,
+            "msAfterTyping": 4088,
+            "A": "Verifier drive ca1 cb1 db1 da1 ca2 cb2",
+            "B": "Verifier drive ca1 cb1 db1 da1 ca2 cb2",
+            "bStartedAfterA": 112
+          },
+          "afterEscape": {
+            "ok": true,
+            "msAfterEscape": 2538,
+            "A": "Verifier drive ca1 cb1 db1 da1 ca2 cb2 da2 db2",
+            "B": "Verifier drive ca1 cb1 db1 da1 ca2 cb2 da2 db2"
+          },
+          "stays": {
+            "ok": true,
+            "A": "Verifier drive ca1 cb1 db1 da1 ca2 cb2 da2 db2",
+            "B": "Verifier drive ca1 cb1 db1 da1 ca2 cb2 da2 db2"
+          },
+          "firstSeen": {
+            " ca2": {
+              "A": -75,
+              "B": 2369
+            },
+            " cb2": {
+              "A": 4097,
+              "B": 27
+            },
+            " da2": {
+              "A": -48,
+              "B": 663
+            },
+            " db2": {
+              "A": 2997,
+              "B": -48
+            }
+          },
+          "intact": {
+            " ca2": {
+              "A": 1,
+              "B": 1
+            },
+            " cb2": {
+              "A": 1,
+              "B": 1
+            },
+            " da2": {
+              "A": 1,
+              "B": 1
+            },
+            " db2": {
+              "A": 1,
+              "B": 1
+            }
+          },
+          "pass": true
+        },
+        {
+          "round": 3,
+          "pair1": [
+            " ca3",
+            " cb3"
+          ],
+          "pair2": [
+            " da3",
+            " db3"
+          ],
+          "pair1BothOpen": {
+            "ok": true,
+            "msAfterTyping": 1424,
+            "A": "Verifier drive ca1 cb1 db1 da1 ca2 cb2 da2 db2 ca3 cb3",
+            "B": "Verifier drive ca1 cb1 db1 da1 ca2 cb2 da2 db2 ca3 cb3",
+            "bStartedAfterA": 112
+          },
+          "afterEscape": {
+            "ok": true,
+            "msAfterEscape": 2325,
+            "A": "Verifier drive ca1 cb1 db1 da1 ca2 cb2 da2 db2 ca3 cb3 db3 da3",
+            "B": "Verifier drive ca1 cb1 db1 da1 ca2 cb2 da2 db2 ca3 cb3 db3 da3"
+          },
+          "stays": {
+            "ok": true,
+            "A": "Verifier drive ca1 cb1 db1 da1 ca2 cb2 da2 db2 ca3 cb3 db3 da3",
+            "B": "Verifier drive ca1 cb1 db1 da1 ca2 cb2 da2 db2 ca3 cb3 db3 da3"
+          },
+          "firstSeen": {
+            " ca3": {
+              "A": -103,
+              "B": 610
+            },
+            " cb3": {
+              "A": 1422,
+              "B": -1
+            },
+            " da3": {
+              "A": -48,
+              "B": 2594
+            },
+            " db3": {
+              "A": 561,
+              "B": -48
+            }
+          },
+          "intact": {
+            " ca3": {
+              "A": 1,
+              "B": 1
+            },
+            " cb3": {
+              "A": 1,
+              "B": 1
+            },
+            " da3": {
+              "A": 1,
+              "B": 1
+            },
+            " db3": {
+              "A": 1,
+              "B": 1
+            }
+          },
+          "pass": true
+        }
+      ],
+      "pass": false,
+      "titleTravelledAs": "text.splice",
+      "seconds": 43
+    }
+  },
+  "wire": [
+    {
+      "who": "A",
+      "at": 8818,
+      "base": 1,
+      "opIds": [
+        "e32e487ac1bbb9b91dd6bbc0d5a4ba9a:1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 14,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 425,
+      "admitted": [
+        2
+      ]
+    },
+    {
+      "who": "B",
+      "at": 8840,
+      "base": 1,
+      "opIds": [
+        "d9bfc3d8a6be732232f581903832c02d:1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 14,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 1697,
+      "admitted": [
+        3
+      ]
+    },
+    {
+      "who": "A",
+      "at": 15298,
+      "base": 3,
+      "opIds": [
+        "e32e487ac1bbb9b91dd6bbc0d5a4ba9a:2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 22,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 1726,
+      "admitted": [
+        5
+      ]
+    },
+    {
+      "who": "B",
+      "at": 15306,
+      "base": 3,
+      "opIds": [
+        "d9bfc3d8a6be732232f581903832c02d:2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 22,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 408,
+      "admitted": [
+        4
+      ]
+    },
+    {
+      "who": "A",
+      "at": 23804,
+      "base": 5,
+      "opIds": [
+        "e32e487ac1bbb9b91dd6bbc0d5a4ba9a:3"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 30,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 405,
+      "admitted": [
+        6
+      ]
+    },
+    {
+      "who": "B",
+      "at": 23916,
+      "base": 5,
+      "opIds": [
+        "d9bfc3d8a6be732232f581903832c02d:3"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 30,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 2262,
+      "admitted": [
+        7
+      ]
+    },
+    {
+      "who": "A",
+      "at": 29519,
+      "base": 7,
+      "opIds": [
+        "e32e487ac1bbb9b91dd6bbc0d5a4ba9a:4"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 38,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 508,
+      "admitted": [
+        8
+      ]
+    },
+    {
+      "who": "B",
+      "at": 29584,
+      "base": 7,
+      "opIds": [
+        "d9bfc3d8a6be732232f581903832c02d:4"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 38,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 1706,
+      "admitted": [
+        9
+      ]
+    },
+    {
+      "who": "A",
+      "at": 39312,
+      "base": 9,
+      "opIds": [
+        "e32e487ac1bbb9b91dd6bbc0d5a4ba9a:5"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 46,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 527,
+      "admitted": [
+        10
+      ]
+    },
+    {
+      "who": "B",
+      "at": 39426,
+      "base": 9,
+      "opIds": [
+        "d9bfc3d8a6be732232f581903832c02d:5"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 46,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 1210,
+      "admitted": [
+        11
+      ]
+    },
+    {
+      "who": "A",
+      "at": 42000,
+      "base": 11,
+      "opIds": [
+        "e32e487ac1bbb9b91dd6bbc0d5a4ba9a:6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 54,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 2440,
+      "admitted": [
+        13
+      ]
+    },
+    {
+      "who": "B",
+      "at": 42019,
+      "base": 11,
+      "opIds": [
+        "d9bfc3d8a6be732232f581903832c02d:6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 54,
+          "remove": 0,
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 404,
+      "admitted": [
+        12
+      ]
+    }
+  ],
+  "deck": "untitled-20260922-y32x",
+  "tier": "blob",
+  "teardown": {
+    "trashed": "deck.trash through the window API",
+    "removed": "deck.remove through the window API",
+    "edit": 404,
+    "gone": true
+  },
+  "notes": [],
+  "endedAt": "2026-09-22T00:04:12.596Z"
+}

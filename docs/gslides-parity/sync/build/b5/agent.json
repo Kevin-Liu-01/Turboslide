@@ -1,0 +1,131 @@
+{
+  "base": "http://localhost:4415",
+  "mode": "agent",
+  "at": "2026-09-21T20:29:26.269Z",
+  "headed": false,
+  "row": "the attach rule and the drive (SYNC.md 3.10, open question 3)",
+  "steps": [
+    {
+      "name": "no session without agent=1: /deck/gt-brand",
+      "sessions": 0,
+      "attaches": 0,
+      "polls": 0,
+      "pass": true
+    },
+    {
+      "name": "no session without agent=1: /deck/gt-brand?present=1",
+      "sessions": 0,
+      "attaches": 0,
+      "polls": 0,
+      "pass": true
+    },
+    {
+      "name": "no session without agent=1: /present/gt-brand",
+      "sessions": 0,
+      "attaches": 0,
+      "polls": 0,
+      "pass": true
+    },
+    {
+      "name": "no session without agent=1: /embed/gt-brand",
+      "sessions": 0,
+      "attaches": 0,
+      "polls": 0,
+      "pass": true
+    },
+    {
+      "name": "a session with agent=1: /present/gt-brand?agent=1",
+      "sessions": 1,
+      "owner": "presenter",
+      "pass": true
+    },
+    {
+      "name": "a session with agent=1: /embed/gt-brand?agent=1",
+      "sessions": 1,
+      "owner": "viewer",
+      "pass": true
+    },
+    {
+      "name": "the closed pages are swept before the drive",
+      "waitedMs": 44961,
+      "left": 0,
+      "pass": true
+    },
+    {
+      "name": "a session with agent=1: /deck",
+      "sessions": 1,
+      "owner": "viewer",
+      "withinMs": 274,
+      "pass": true
+    },
+    {
+      "name": "deck_goto_slide is listed while the page is attached",
+      "listed": true,
+      "pass": true
+    },
+    {
+      "name": "deck_goto_slide reaches the page (the idle pace: up to one 20 s pause)",
+      "ok": true,
+      "ms": 19232,
+      "slideId": "thesis",
+      "text": "{\n  \"slideId\": \"thesis\",\n  \"n\": 3,\n  \"mode\": \"slide\",\n  \"theme\": \"light\",\n  \"present\": false\n}",
+      "active": "thesis",
+      "pass": true
+    },
+    {
+      "name": "a second deck_goto_slide inside the quick window",
+      "ok": true,
+      "ms": 29,
+      "slideId": "why",
+      "text": "{\n  \"slideId\": \"why\",\n  \"n\": 5,\n  \"mode\": \"slide\",\n  \"theme\": \"light\",\n  \"present\": false\n}",
+      "active": "why",
+      "pass": true
+    },
+    {
+      "name": "hidden: the session stays at 8 s, is gone by 12 s, and the drive is refused at once",
+      "at8s": 1,
+      "at12s": 0,
+      "detachAtMs": 10000,
+      "refused": {
+        "ok": false,
+        "ms": 3,
+        "text": "{\n  \"error\": {\n    \"name\": \"RangeError\",\n    \"status\": 404,\n    \"message\": \"No studio page is attached to deck gt-brand; open /deck/gt-brand or /edit/gt-brand\",\n    \"action\": \"view.goto\"\n  }\n}"
+      },
+      "pass": true
+    },
+    {
+      "name": "hidden: no poll left the tab",
+      "polls": 0,
+      "pass": true
+    },
+    {
+      "name": "shown again: the same session id is back",
+      "sessions": 1,
+      "sameId": true,
+      "withinMs": 271,
+      "pass": true
+    },
+    {
+      "name": "shown again: the drive reaches the page",
+      "ok": true,
+      "ms": 765,
+      "slideId": "title",
+      "text": "{\n  \"slideId\": \"title\",\n  \"n\": 2,\n  \"mode\": \"slide\",\n  \"theme\": \"light\",\n  \"present\": false\n}",
+      "active": "title",
+      "pass": true
+    }
+  ],
+  "hide": {
+    "visibility": "hidden",
+    "method": "synthetic"
+  },
+  "sampleSession": {
+    "id": "<uuid>",
+    "deckId": "gt-brand",
+    "owner": "presenter",
+    "actions": ["view.goto", "view.present"],
+    "lastSeenAt": "2026-09-21T20:28:05.413Z"
+  },
+  "hiddenHalfSynthetic": true,
+  "pass": true
+}

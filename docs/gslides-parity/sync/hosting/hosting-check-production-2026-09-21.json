@@ -1,0 +1,82 @@
+{
+  "checkedAt": "2026-09-21T20:12:19.491Z",
+  "from": "https://turboslide.vercel.app",
+  "to": "https://turboslide-general-translation.vercel.app",
+  "path": "/edit/abc?x=1",
+  "rows": [
+    {
+      "name": "redirect head",
+      "expect": "308 to https://turboslide-general-translation.vercel.app/edit/abc?x=1",
+      "driven": true,
+      "ok": false,
+      "reason": "status 404",
+      "status": 404,
+      "location": null,
+      "ms": 232
+    },
+    {
+      "name": "redirect get",
+      "expect": "308 to https://turboslide-general-translation.vercel.app/edit/abc?x=1",
+      "driven": true,
+      "ok": false,
+      "reason": "status 404",
+      "status": 404,
+      "location": null,
+      "ms": 237
+    },
+    {
+      "name": "redirect post",
+      "expect": "308 to https://turboslide-general-translation.vercel.app/api/actions/deck.info",
+      "driven": true,
+      "ok": false,
+      "reason": "status 401",
+      "status": 401,
+      "location": null,
+      "ms": 203
+    },
+    {
+      "name": "post through the redirect",
+      "expect": "401 from the team host without a bearer",
+      "driven": false,
+      "ok": false,
+      "skipped": true,
+      "reason": "no absolute location to follow",
+      "status": 0,
+      "ms": 0
+    },
+    {
+      "name": "inspect",
+      "expect": "no function in the deployment",
+      "driven": true,
+      "ok": false,
+      "reason": "READY, 10 function(s): __server, _serverFn/[...], api/decks/[...]/bundle, api/decks/bundle, api/export/[...], api/render/[...], api/x/export/[...], api/x/render/[...], api/assist, api/assist/[...]",
+      "functions": [
+        "__server",
+        "_serverFn/[...]",
+        "api/decks/[...]/bundle",
+        "api/decks/bundle",
+        "api/export/[...]",
+        "api/render/[...]",
+        "api/x/export/[...]",
+        "api/x/render/[...]",
+        "api/assist",
+        "api/assist/[...]"
+      ],
+      "deployment": "turboslide-la2ibidab-kl01s-projects.vercel.app",
+      "status": "-",
+      "ms": 1116
+    }
+  ],
+  "commands": {
+    "smoke": "node scripts/hosted-smoke.mjs https://turboslide-general-translation.vercel.app --token-env TURBOSLIDE_TOKEN --template-copy",
+    "gate": "node scripts/probes/core-gate.mjs --base https://turboslide-general-translation.vercel.app --parked docs/gslides-parity/focus/ship-<commit>.json",
+    "authenticatedPost": "turboslide share get gt-brand --to https://turboslide.vercel.app  # 401 through the 308 (the bearer does not survive); then: turboslide share get gt-brand --to https://turboslide-general-translation.vercel.app  # 200 after turboslide login --to https://turboslide-general-translation.vercel.app"
+  },
+  "verdict": {
+    "passed": 0,
+    "failed": 4,
+    "undriven": 0,
+    "total": 4,
+    "ok": false
+  }
+}

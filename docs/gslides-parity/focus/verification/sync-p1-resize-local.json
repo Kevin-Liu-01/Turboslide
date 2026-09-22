@@ -1,0 +1,574 @@
+{
+  "config": {
+    "argv": [
+      "/Users/kevinliu/.nvm/versions/node/v24.13.0/bin/node",
+      "/Users/kevinliu/repos/Turboslide/node_modules/@playwright/test/cli.js",
+      "test",
+      "apps/studio/e2e/resize.spec.ts",
+      "--reporter=list,json"
+    ],
+    "configFile": "/Users/kevinliu/repos/Turboslide/playwright.config.ts",
+    "rootDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "resize.spec.ts",
+      "file": "resize.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the canvas with a rectangle, a picture, a text box and a group is set up",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16955,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T01:21:47.255Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1f56c95020158930ab41-390df51710de55b0f4b2",
+          "file": "resize.spec.ts",
+          "line": 642,
+          "column": 1
+        },
+        {
+          "title": "at 50 percent every handle of the rectangle, the picture and the text box lands the model's box, scales the content and matches the readout and the inspector",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 105361,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "[resize] z0.5 shape nw 3924 ms: {\"x\":163,\"y\":147,\"w\":197,\"h\":123,\"z\":1} readout 197 × 123\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 shape n 7444 ms: {\"x\":163,\"y\":169,\"w\":197,\"h\":101,\"z\":1} readout 197 × 101\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 shape ne 10969 ms: {\"x\":163,\"y\":187,\"w\":232,\"h\":83,\"z\":1} readout 232 × 83\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 shape e 14521 ms: {\"x\":163,\"y\":187,\"w\":274,\"h\":83,\"z\":1} readout 274 × 83\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 shape se 18037 ms: {\"x\":163,\"y\":187,\"w\":323,\"h\":98,\"z\":1} readout 323 × 98\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 shape s 21567 ms: {\"x\":163,\"y\":187,\"w\":323,\"h\":116,\"z\":1} readout 323 × 116\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 shape sw 25089 ms: {\"x\":221,\"y\":187,\"w\":265,\"h\":137,\"z\":1} readout 265 × 137\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 shape w 28594 ms: {\"x\":269,\"y\":187,\"w\":217,\"h\":137,\"z\":1} readout 217 × 137\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 picture nw 35210 ms: {\"x\":503,\"y\":149,\"w\":197,\"h\":131,\"z\":2} readout 197 × 131\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 picture n 38687 ms: {\"x\":503,\"y\":173,\"w\":197,\"h\":107,\"z\":2} readout 197 × 107\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 picture ne 42155 ms: {\"x\":503,\"y\":154,\"w\":232,\"h\":126,\"z\":2} readout 232 × 126\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 picture e 45612 ms: {\"x\":503,\"y\":154,\"w\":274,\"h\":126,\"z\":2} readout 274 × 126\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 picture se 49081 ms: {\"x\":503,\"y\":154,\"w\":324,\"h\":149,\"z\":2} readout 324 × 149\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 picture s 52563 ms: {\"x\":503,\"y\":154,\"w\":324,\"h\":176,\"z\":2} readout 324 × 176\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 picture sw 56067 ms: {\"x\":444,\"y\":154,\"w\":383,\"h\":208,\"z\":2} readout 383 × 208\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 picture w 59559 ms: {\"x\":513,\"y\":154,\"w\":314,\"h\":208,\"z\":2} readout 314 × 208\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 text nw 66169 ms: {\"x\":847,\"y\":145,\"w\":213,\"h\":115,\"z\":3} readout 213 × 115\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 text n 69654 ms: {\"x\":847,\"y\":166,\"w\":213,\"h\":94,\"z\":3} readout 213 × 94\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 text ne 73138 ms: {\"x\":847,\"y\":183,\"w\":251,\"h\":77,\"z\":3} readout 251 × 77\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 text e 76630 ms: {\"x\":847,\"y\":183,\"w\":296,\"h\":77,\"z\":3} readout 296 × 77\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 text se 80136 ms: {\"x\":847,\"y\":183,\"w\":349,\"h\":91,\"z\":3} readout 349 × 91\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 text s 83629 ms: {\"x\":847,\"y\":183,\"w\":349,\"h\":107,\"z\":3} readout 349 × 107\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 text sw 87146 ms: {\"x\":910,\"y\":183,\"w\":286,\"h\":126,\"z\":3} readout 286 × 126\n"
+                    },
+                    {
+                      "text": "[resize] z0.5 text w 90640 ms: {\"x\":961,\"y\":183,\"w\":235,\"h\":126,\"z\":3} readout 235 × 126\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T01:22:04.321Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1f56c95020158930ab41-aa856e55683285871bba",
+          "file": "resize.spec.ts",
+          "line": 692,
+          "column": 3
+        },
+        {
+          "title": "at 50 percent every handle of the group scales both members about the union",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 39296,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T01:23:49.689Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1f56c95020158930ab41-d84687a48dc4efed9d6c",
+          "file": "resize.spec.ts",
+          "line": 763,
+          "column": 3
+        },
+        {
+          "title": "at 100 percent every handle of the rectangle, the picture and the text box lands the model's box, scales the content and matches the readout and the inspector",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 105217,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "[resize] z1 shape nw 3885 ms: {\"x\":163,\"y\":147,\"w\":197,\"h\":123,\"z\":1} readout 197 × 123\n"
+                    },
+                    {
+                      "text": "[resize] z1 shape n 7407 ms: {\"x\":163,\"y\":169,\"w\":197,\"h\":101,\"z\":1} readout 197 × 101\n"
+                    },
+                    {
+                      "text": "[resize] z1 shape ne 10927 ms: {\"x\":163,\"y\":187,\"w\":232,\"h\":83,\"z\":1} readout 232 × 83\n"
+                    },
+                    {
+                      "text": "[resize] z1 shape e 14458 ms: {\"x\":163,\"y\":187,\"w\":274,\"h\":83,\"z\":1} readout 274 × 83\n"
+                    },
+                    {
+                      "text": "[resize] z1 shape se 17981 ms: {\"x\":163,\"y\":187,\"w\":323,\"h\":98,\"z\":1} readout 323 × 98\n"
+                    },
+                    {
+                      "text": "[resize] z1 shape s 21503 ms: {\"x\":163,\"y\":187,\"w\":323,\"h\":116,\"z\":1} readout 323 × 116\n"
+                    },
+                    {
+                      "text": "[resize] z1 shape sw 25016 ms: {\"x\":221,\"y\":187,\"w\":265,\"h\":137,\"z\":1} readout 265 × 137\n"
+                    },
+                    {
+                      "text": "[resize] z1 shape w 28524 ms: {\"x\":269,\"y\":187,\"w\":217,\"h\":137,\"z\":1} readout 217 × 137\n"
+                    },
+                    {
+                      "text": "[resize] z1 picture nw 35152 ms: {\"x\":503,\"y\":149,\"w\":197,\"h\":131,\"z\":2} readout 197 × 131\n"
+                    },
+                    {
+                      "text": "[resize] z1 picture n 38653 ms: {\"x\":503,\"y\":173,\"w\":197,\"h\":107,\"z\":2} readout 197 × 107\n"
+                    },
+                    {
+                      "text": "[resize] z1 picture ne 42124 ms: {\"x\":503,\"y\":154,\"w\":232,\"h\":126,\"z\":2} readout 232 × 126\n"
+                    },
+                    {
+                      "text": "[resize] z1 picture e 45578 ms: {\"x\":503,\"y\":154,\"w\":274,\"h\":126,\"z\":2} readout 274 × 126\n"
+                    },
+                    {
+                      "text": "[resize] z1 picture se 49038 ms: {\"x\":503,\"y\":154,\"w\":324,\"h\":149,\"z\":2} readout 324 × 149\n"
+                    },
+                    {
+                      "text": "[resize] z1 picture s 52489 ms: {\"x\":503,\"y\":154,\"w\":324,\"h\":176,\"z\":2} readout 324 × 176\n"
+                    },
+                    {
+                      "text": "[resize] z1 picture sw 55979 ms: {\"x\":444,\"y\":154,\"w\":383,\"h\":208,\"z\":2} readout 383 × 208\n"
+                    },
+                    {
+                      "text": "[resize] z1 picture w 59448 ms: {\"x\":513,\"y\":154,\"w\":314,\"h\":208,\"z\":2} readout 314 × 208\n"
+                    },
+                    {
+                      "text": "[resize] z1 text nw 66048 ms: {\"x\":847,\"y\":145,\"w\":213,\"h\":115,\"z\":3} readout 213 × 115\n"
+                    },
+                    {
+                      "text": "[resize] z1 text n 69533 ms: {\"x\":847,\"y\":166,\"w\":213,\"h\":94,\"z\":3} readout 213 × 94\n"
+                    },
+                    {
+                      "text": "[resize] z1 text ne 73023 ms: {\"x\":847,\"y\":183,\"w\":251,\"h\":77,\"z\":3} readout 251 × 77\n"
+                    },
+                    {
+                      "text": "[resize] z1 text e 76515 ms: {\"x\":847,\"y\":183,\"w\":296,\"h\":77,\"z\":3} readout 296 × 77\n"
+                    },
+                    {
+                      "text": "[resize] z1 text se 80017 ms: {\"x\":847,\"y\":183,\"w\":349,\"h\":91,\"z\":3} readout 349 × 91\n"
+                    },
+                    {
+                      "text": "[resize] z1 text s 83528 ms: {\"x\":847,\"y\":183,\"w\":349,\"h\":107,\"z\":3} readout 349 × 107\n"
+                    },
+                    {
+                      "text": "[resize] z1 text sw 87041 ms: {\"x\":910,\"y\":183,\"w\":286,\"h\":126,\"z\":3} readout 286 × 126\n"
+                    },
+                    {
+                      "text": "[resize] z1 text w 90531 ms: {\"x\":961,\"y\":183,\"w\":235,\"h\":126,\"z\":3} readout 235 × 126\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T01:24:28.990Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1f56c95020158930ab41-13536301fe68d215ae52",
+          "file": "resize.spec.ts",
+          "line": 692,
+          "column": 3
+        },
+        {
+          "title": "at 100 percent every handle of the group scales both members about the union",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 39272,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T01:26:14.214Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1f56c95020158930ab41-19c8125e97f4ae17160d",
+          "file": "resize.spec.ts",
+          "line": 763,
+          "column": 3
+        },
+        {
+          "title": "at 200 percent every handle of the rectangle, the picture and the text box lands the model's box, scales the content and matches the readout and the inspector",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 105680,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "[resize] z2 shape nw 3917 ms: {\"x\":163,\"y\":147,\"w\":197,\"h\":123,\"z\":1} readout 197 × 123\n"
+                    },
+                    {
+                      "text": "[resize] z2 shape n 7460 ms: {\"x\":163,\"y\":169,\"w\":197,\"h\":101,\"z\":1} readout 197 × 101\n"
+                    },
+                    {
+                      "text": "[resize] z2 shape ne 11003 ms: {\"x\":163,\"y\":187,\"w\":232,\"h\":83,\"z\":1} readout 232 × 83\n"
+                    },
+                    {
+                      "text": "[resize] z2 shape e 14520 ms: {\"x\":163,\"y\":187,\"w\":274,\"h\":83,\"z\":1} readout 274 × 83\n"
+                    },
+                    {
+                      "text": "[resize] z2 shape se 18030 ms: {\"x\":163,\"y\":187,\"w\":323,\"h\":98,\"z\":1} readout 323 × 98\n"
+                    },
+                    {
+                      "text": "[resize] z2 shape s 21553 ms: {\"x\":163,\"y\":187,\"w\":323,\"h\":116,\"z\":1} readout 323 × 116\n"
+                    },
+                    {
+                      "text": "[resize] z2 shape sw 25084 ms: {\"x\":221,\"y\":187,\"w\":265,\"h\":137,\"z\":1} readout 265 × 137\n"
+                    },
+                    {
+                      "text": "[resize] z2 shape w 28615 ms: {\"x\":269,\"y\":187,\"w\":217,\"h\":137,\"z\":1} readout 217 × 137\n"
+                    },
+                    {
+                      "text": "[resize] z2 picture nw 35278 ms: {\"x\":503,\"y\":149,\"w\":197,\"h\":131,\"z\":2} readout 197 × 131\n"
+                    },
+                    {
+                      "text": "[resize] z2 picture n 38815 ms: {\"x\":503,\"y\":173,\"w\":197,\"h\":107,\"z\":2} readout 197 × 107\n"
+                    },
+                    {
+                      "text": "[resize] z2 picture ne 42326 ms: {\"x\":503,\"y\":154,\"w\":232,\"h\":126,\"z\":2} readout 232 × 126\n"
+                    },
+                    {
+                      "text": "[resize] z2 picture e 45791 ms: {\"x\":503,\"y\":154,\"w\":274,\"h\":126,\"z\":2} readout 274 × 126\n"
+                    },
+                    {
+                      "text": "[resize] z2 picture se 49269 ms: {\"x\":503,\"y\":154,\"w\":324,\"h\":149,\"z\":2} readout 324 × 149\n"
+                    },
+                    {
+                      "text": "[resize] z2 picture s 52783 ms: {\"x\":503,\"y\":154,\"w\":324,\"h\":176,\"z\":2} readout 324 × 176\n"
+                    },
+                    {
+                      "text": "[resize] z2 picture sw 56264 ms: {\"x\":444,\"y\":154,\"w\":383,\"h\":208,\"z\":2} readout 383 × 208\n"
+                    },
+                    {
+                      "text": "[resize] z2 picture w 59737 ms: {\"x\":513,\"y\":154,\"w\":314,\"h\":208,\"z\":2} readout 314 × 208\n"
+                    },
+                    {
+                      "text": "[resize] z2 text nw 66367 ms: {\"x\":847,\"y\":145,\"w\":213,\"h\":115,\"z\":3} readout 213 × 115\n"
+                    },
+                    {
+                      "text": "[resize] z2 text n 69869 ms: {\"x\":847,\"y\":166,\"w\":213,\"h\":94,\"z\":3} readout 213 × 94\n"
+                    },
+                    {
+                      "text": "[resize] z2 text ne 73382 ms: {\"x\":847,\"y\":183,\"w\":251,\"h\":77,\"z\":3} readout 251 × 77\n"
+                    },
+                    {
+                      "text": "[resize] z2 text e 76917 ms: {\"x\":847,\"y\":183,\"w\":296,\"h\":77,\"z\":3} readout 296 × 77\n"
+                    },
+                    {
+                      "text": "[resize] z2 text se 80415 ms: {\"x\":847,\"y\":183,\"w\":349,\"h\":91,\"z\":3} readout 349 × 91\n"
+                    },
+                    {
+                      "text": "[resize] z2 text s 83929 ms: {\"x\":847,\"y\":183,\"w\":349,\"h\":107,\"z\":3} readout 349 × 107\n"
+                    },
+                    {
+                      "text": "[resize] z2 text sw 87444 ms: {\"x\":910,\"y\":183,\"w\":286,\"h\":126,\"z\":3} readout 286 × 126\n"
+                    },
+                    {
+                      "text": "[resize] z2 text w 90936 ms: {\"x\":961,\"y\":183,\"w\":235,\"h\":126,\"z\":3} readout 235 × 126\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T01:26:53.494Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1f56c95020158930ab41-c1ff5a8363987a4a1c19",
+          "file": "resize.spec.ts",
+          "line": 692,
+          "column": 3
+        },
+        {
+          "title": "at 200 percent every handle of the group scales both members about the union",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 39358,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T01:28:39.184Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1f56c95020158930ab41-0abd0eff52027707c8ef",
+          "file": "resize.spec.ts",
+          "line": 763,
+          "column": 3
+        },
+        {
+          "title": "a rotated rectangle keeps its anchored corner on the sheet and lands the dragged corner under the pointer; Shift keeps a text box’s ratio and Alt keeps the centre",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 53840,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T01:29:18.548Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1f56c95020158930ab41-e97f5514d2f562d41461",
+          "file": "resize.spec.ts",
+          "line": 816,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-22T01:21:47.080Z",
+    "duration": 506194.63100000005,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

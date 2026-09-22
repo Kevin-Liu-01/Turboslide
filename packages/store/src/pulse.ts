@@ -17,16 +17,64 @@
 // is refreshed anyway before its TTL). Node free, so the realtime package's blob channel imports
 // it; the callers pass a bounded client (blob-store.ts boundedBlobClient), so a hung put ends at
 // its deadline.
+//
+// The sync round (docs/SYNC.md 3.10, 4.5; audit-costs item 12) makes the tick two paced: 2 s
+// while the deck is in use on this instance (an op landed here in the last 30 s) or somebody
+// else is in the roster (a colleague's edit may land any second), 10 s when the one tab is
+// alone and quiet. A colleague's arrival moves the pulse through their presence push, so the
+// quiet poller reads it within one quiet tick, finds the second roster row and returns to the
+// 2 s tick, inside the 35 s chip bound of `collab.presence-chips`; `pollTickMs` is the rule.
 import type { BlobClient, BlobEntry } from './blob-store.ts';
 
-/** The hosted poll interval per open deck per instance: one head of the pulse per tick (SPEC-3 2.5, amended). */
+/** The hosted poll interval per open deck per instance while the deck is in use: one head of the pulse per tick (SPEC-3 2.5, amended). */
 export const HOSTED_POLL_MS = 2000;
+/** The tick when the one tab is alone in the roster and no op landed on this instance lately (docs/SYNC.md 3.10). */
+export const HOSTED_POLL_QUIET_MS = 10_000;
+/** How long after an op landed on this instance the deck counts as in use, so the tick stays at HOSTED_POLL_MS. */
+export const POLL_ACTIVE_WINDOW_MS = 30_000;
 /** The most a poll waits after the store answered 429 or a 5xx: the backoff doubles from HOSTED_POLL_MS to here. */
 export const POLL_BACKOFF_MAX_MS = 60_000;
 /** Every this many ticks the poll heads the manifest instead of the pulse (a writer that stopped before its pulse put). */
 export const PULSE_SAFETY_TICKS = 15;
 /** The most timed store calls a minute one open deck costs one instance at rest: 60 s over the tick, one call per tick. */
 export const POLL_CALLS_PER_MINUTE_MAX = 30;
+
+export type PollTickInput = {
+  /** the clock now, in ms */
+  now: number;
+  /** when an op last landed on this instance for the deck, in ms; 0 or absent when none did */
+  lastOpAt?: number;
+  /**
+   * how many tabs keep the deck company: the roster rows other instances' tabs set, a second row
+   * of this instance's tabs, or a second stream of the deck open on this instance (blob.ts
+   * `nextTickMs` says why a second tab of the same instance counts: its POST may commit on
+   * another instance)
+   */
+  others: number;
+  /** the tick while in use; HOSTED_POLL_MS by default (the tests shorten it) */
+  activeMs?: number;
+  /** the tick when alone and quiet; HOSTED_POLL_QUIET_MS by default */
+  quietMs?: number;
+  /** the window an op keeps the deck in use for; POLL_ACTIVE_WINDOW_MS by default */
+  activeWindowMs?: number;
+};
+
+/**
+ * The wait before the next poll of one deck on one instance (docs/SYNC.md 3.10): the active tick
+ * while an op landed here inside the window or the deck has company (`others`: another
+ * instance's row, a second own row, or a second stream on this instance), the quiet tick
+ * otherwise. Both stay under
+ * POLL_CALLS_PER_MINUTE_MAX, one call per tick (pulse.test.ts pins the arithmetic).
+ */
+export function pollTickMs(input: PollTickInput): number {
+  const activeMs = input.activeMs ?? HOSTED_POLL_MS;
+  const quietMs = input.quietMs ?? HOSTED_POLL_QUIET_MS;
+  const windowMs = input.activeWindowMs ?? POLL_ACTIVE_WINDOW_MS;
+  const lastOpAt = input.lastOpAt ?? 0;
+  const inUse = lastOpAt > 0 && input.now - lastOpAt < windowMs;
+  const company = input.others > 0;
+  return inUse || company ? activeMs : Math.max(activeMs, quietMs);
+}
 
 export const PULSE_FILE = 'pulse.json';
 

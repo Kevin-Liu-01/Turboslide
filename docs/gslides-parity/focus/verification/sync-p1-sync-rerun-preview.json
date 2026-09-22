@@ -1,0 +1,208 @@
+{
+  "config": {
+    "argv": [
+      "/Users/kevinliu/.nvm/versions/node/v24.13.0/bin/node",
+      "/Users/kevinliu/repos/Turboslide/node_modules/@playwright/test/cli.js",
+      "test",
+      "apps/studio/e2e/core/sync.spec.ts",
+      "--grep",
+      "sync.title.concurrent-both-kept|sync.block.concurrent-same-offset-order",
+      "--reporter=list,json"
+    ],
+    "configFile": "/Users/kevinliu/repos/Turboslide/playwright.config.ts",
+    "rootDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "core/sync.spec.ts",
+      "file": "core/sync.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "sync.title.concurrent-both-kept: A and B type a word each into a title slide's heading within 200 ms with both sessions open, then once more and both press Escape; both words are in both browsers within 5 s and stay after Escape, three rounds of three",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "title travelled as",
+                  "description": "text.splice (the field as a text run, docs/SYNC.md 3.4)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 47211,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T02:03:37.313Z",
+                  "annotations": [
+                    {
+                      "type": "title travelled as",
+                      "description": "text.splice (the field as a text run, docs/SYNC.md 3.4)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-f52d1edcd51ec3a288fd",
+          "file": "core/sync.spec.ts",
+          "line": 463,
+          "column": 1
+        },
+        {
+          "title": "sync.block.concurrent-same-offset-order: A and B each insert a word at offset 0 of one body block within 200 ms; both browsers show the two words in the same order within 3 s and no repair splice (a text.splice with remove above 0 from the session) is posted",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "measure",
+                  "description": "ops POSTs 7; final A \"pa3pb3pb2pa2pa1pb1end\""
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 25610,
+                  "error": {
+                    "message": "Error: the two words in the same order in both browsers, no repair splice, three rounds\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"round 2: A \\\"pb2pa2pa1pb1end\\\", B \\\"pb2pa1pb1end\\\" (same order within 3 s false; repair splices 0)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                    "stack": "Error: the two words in the same order in both browsers, no repair splice, three rounds\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"round 2: A \\\"pb2pa2pa1pb1end\\\", B \\\"pb2pa1pb1end\\\" (same order within 3 s false; repair splices 0)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts:672:7",
+                    "location": {
+                      "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts",
+                      "column": 7,
+                      "line": 672
+                    },
+                    "snippet": "  670 |       failures,\n  671 |       'the two words in the same order in both browsers, no repair splice, three rounds',\n> 672 |     ).toEqual([]);\n      |       ^\n  673 |   } finally {\n  674 |     await cleanUp();\n  675 |   }"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts",
+                        "column": 7,
+                        "line": 672
+                      },
+                      "message": "Error: the two words in the same order in both browsers, no repair splice, three rounds\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"round 2: A \\\"pb2pa2pa1pb1end\\\", B \\\"pb2pa1pb1end\\\" (same order within 3 s false; repair splices 0)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  670 |       failures,\n  671 |       'the two words in the same order in both browsers, no repair splice, three rounds',\n> 672 |     ).toEqual([]);\n      |       ^\n  673 |   } finally {\n  674 |     await cleanUp();\n  675 |   }\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts:672:7"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T02:04:24.598Z",
+                  "annotations": [
+                    {
+                      "type": "measure",
+                      "description": "ops POSTs 7; final A \"pa3pb3pb2pa2pa1pb1end\""
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright/core-sync-sync-block-concu-d5afc--from-the-session-is-posted/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright/core-sync-sync-block-concu-d5afc--from-the-session-is-posted/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/sync.spec.ts",
+                    "column": 7,
+                    "line": 672
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "9665879b6dd06692a514-4b2e971499c05dd12090",
+          "file": "core/sync.spec.ts",
+          "line": 619,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-22T02:03:37.128Z",
+    "duration": 73425.097,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

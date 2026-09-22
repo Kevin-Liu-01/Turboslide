@@ -25,7 +25,9 @@ for (;;) {
   const url = new URL(API);
   url.searchParams.set('limit', '1000');
   if (cursor) url.searchParams.set('cursor', cursor);
-  const res = await fetch(url, { headers: { authorization: `Bearer ${token}`, 'x-api-version': '12' } });
+  const res = await fetch(url, {
+    headers: { authorization: `Bearer ${token}`, 'x-api-version': '12' },
+  });
   if (!res.ok) {
     console.error(`listing answered ${res.status}`);
     process.exit(1);
@@ -38,25 +40,58 @@ for (;;) {
       const sub = parts.length > 4 ? `${parts[3]}/` : (parts[3] ?? '').replace(/-[^-]*$/, '-*');
       add(turboslideSub, sub, size);
     } else if (parts[0] === 'builds') {
-      add(buildsSub, parts.length > 2 ? `<id>/${parts.slice(2).join('/').replace(/[0-9a-f]{8,}/g, '<hex>')}` : '<file>', size);
+      add(
+        buildsSub,
+        parts.length > 2
+          ? `<id>/${parts
+              .slice(2)
+              .join('/')
+              .replace(/[0-9a-f]{8,}/g, '<hex>')}`
+          : '<file>',
+        size,
+      );
     } else if (parts[0] === 'bundles') {
       add(bundlesSub, parts.length > 2 ? '<id>/<file>' : '<file>', size);
     } else if (parts[0] === 'exports') {
       const at = blob.uploadedAt ? new Date(blob.uploadedAt).getTime() : now;
       const days = (now - at) / 86_400_000;
-      add(exportsAge, days < 1 ? 'under 1 day' : days < 3 ? '1 to 3 days' : days < 7 ? '3 to 7 days' : 'over 7 days', size);
+      add(
+        exportsAge,
+        days < 1
+          ? 'under 1 day'
+          : days < 3
+            ? '1 to 3 days'
+            : days < 7
+              ? '3 to 7 days'
+              : 'over 7 days',
+        size,
+      );
       add(exportsPerDeck, parts[1] ?? '?', size);
     }
   }
   if (!body.hasMore || !body.cursor) break;
   cursor = body.cursor;
 }
-const rows = (map) => [...map.entries()].sort((a, b) => b[1].bytes - a[1].bytes).map(([key, r]) => ({ key, objects: r.objects, bytes: r.bytes, mib: +(r.bytes / 1048576).toFixed(2) }));
-console.log(JSON.stringify({
-  turboslideSub: rows(turboslideSub),
-  buildsSub: rows(buildsSub),
-  bundlesSub: rows(bundlesSub),
-  exportsAge: rows(exportsAge),
-  exportsDecks: exportsPerDeck.size,
-  exportsPerDeckMax: Math.max(0, ...[...exportsPerDeck.values()].map((r) => r.objects)),
-}, null, 2));
+const rows = (map) =>
+  [...map.entries()]
+    .sort((a, b) => b[1].bytes - a[1].bytes)
+    .map(([key, r]) => ({
+      key,
+      objects: r.objects,
+      bytes: r.bytes,
+      mib: +(r.bytes / 1048576).toFixed(2),
+    }));
+console.log(
+  JSON.stringify(
+    {
+      turboslideSub: rows(turboslideSub),
+      buildsSub: rows(buildsSub),
+      bundlesSub: rows(bundlesSub),
+      exportsAge: rows(exportsAge),
+      exportsDecks: exportsPerDeck.size,
+      exportsPerDeckMax: Math.max(0, ...[...exportsPerDeck.values()].map((r) => r.objects)),
+    },
+    null,
+    2,
+  ),
+);

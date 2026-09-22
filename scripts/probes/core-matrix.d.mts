@@ -30,6 +30,8 @@ export type CoreFeature =
   | 'fonts'
   | 'templates'
   | 'assist'
+  | 'sync'
+  | 'cost'
   | 'surface';
 
 /** The four words of the audits for what production did on the day the matrix was written. */
@@ -49,9 +51,13 @@ export type CoreSpecDriver =
   | 'core/documents.spec.ts'
   | 'core/chrome.spec.ts'
   | 'core/brand.spec.ts'
-  | 'core/assist.spec.ts';
+  | 'core/assist.spec.ts'
+  | 'core/sync.spec.ts';
 
-export type CoreDriver = 'probe --core' | CoreSpecDriver;
+/** The cost probe of docs/SYNC.md 6.3 (scripts/probes/sync-cost-probe.mjs), run by the gate. */
+export type CostProbeDriver = 'cost-probe';
+
+export type CoreDriver = 'probe --core' | CoreSpecDriver | CostProbeDriver;
 
 /** One row of docs/gslides-parity/focus/core-matrix.json. */
 export type CoreRow = {
@@ -82,7 +88,8 @@ export type CoreRow = {
   /**
    * docs/PRODUCT.md 8.2: a measurement row records its number (the seconds per slide of a large
    * deck export) in the run and never holds the ship; a red one is written into the ship note by
-   * id with its mechanism.
+   * id with its mechanism. On a cost row (docs/SYNC.md 6.1) the counts are recorded beside the
+   * ceiling and the row holds the ship only over its ceiling on the preview.
    */
   readonly measure?: true;
 };
@@ -105,6 +112,7 @@ export const AREA_FEATURE: Readonly<Record<string, CoreFeature>>;
 export const CORE_STATES: readonly CoreState[];
 export const RUN_RESULTS: readonly RunResult[];
 export const PROBE_DRIVER: 'probe --core';
+export const COST_PROBE_DRIVER: 'cost-probe';
 export const CORE_SPEC_DRIVERS: readonly CoreSpecDriver[];
 export const CORE_DRIVERS: readonly CoreDriver[];
 export const CORE_ID_PATTERN: RegExp;
@@ -128,6 +136,8 @@ export function isCoreId(id: string): boolean;
 export function isManualRow(row: CoreRow | undefined): boolean;
 /** True for a measurement row (PRODUCT.md 8.2): red parks nothing and fails no ship; the ship note carries it. */
 export function isMeasureRow(row: CoreRow | undefined): boolean;
+/** True for a row of the cost probe (docs/SYNC.md 6.1, 6.3). */
+export function isCostRow(row: CoreRow | undefined): boolean;
 /** True for a feature a red row can park. */
 export function isParkable(feature: string): boolean;
 /** True when the id appears as a string literal in one of the control sources. */
@@ -139,6 +149,8 @@ export function rowsForFeature(feature: CoreFeature): CoreRow[];
 /** The rows of a driver: `probe --core` or a `core/<area>.spec.ts` file name, `core/` optional. */
 export function rowsForDriver(driver: string): CoreRow[];
 export function probeRows(): CoreRow[];
+/** The rows the cost probe drives (docs/SYNC.md 6.3). */
+export function costRows(): CoreRow[];
 export function tally(rows?: readonly CoreRow[]): Tally;
 export function parkedFeaturesOf(
   results: Readonly<Record<string, RunResult>>,

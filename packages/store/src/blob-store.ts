@@ -10,6 +10,17 @@
 // therefore end with one committed write and one conflict outcome, never two manifests. The
 // store talks to Blob through the small BlobClient below, so the tests run it against an
 // in-memory fake (blob-fake.ts) and the studio against @vercel/blob (blob-vercel.ts).
+//
+// The sync and costs round (docs/SYNC.md 3.2, 3.5, 3.6, 6.3): the head is read, never listed (a
+// pull walks the records by number, proves the document from the snapshot the manifest's etag
+// names and reads the comments sidecar through its index head; `list` runs in the prune, the
+// removal and the listing page alone); a record names its origin and a write whose op ids a
+// record above its base names is answered with that record instead of a second commit (on
+// deployment N, which writes no origin yet, the instance holds the origins of its own commits in
+// memory and answers the resend it committed itself; the sync round fix round, F4); the
+// walk continues past a missing record number and a timed out commit keeps its record as a
+// claim; the leases are read proven; the prune runs every SNAPSHOT_PRUNE_EVERY records; and
+// `boundedBlobClient` counts every call by deck and operation for `sync.status.storeCalls`.
 import { createHash } from 'node:crypto';
 import {
   existsSync,
@@ -22,13 +33,13 @@ import {
 } from 'node:fs';
 import { dirname, extname, join, posix } from 'node:path';
 
-import type { DeckDocument } from '@turboslide/schema/deck';
+import type { Appearance, DeckDocument } from '@turboslide/schema/deck';
 import { canonicalJson } from '@turboslide/schema/json';
 import { ConflictError } from '@turboslide/schema/errors';
-import type { Author, Lease, Version, Write } from '@turboslide/schema/mutations';
+import type { Author, Lease, Version } from '@turboslide/schema/mutations';
 import { applyWrite } from '@turboslide/schema/reduce';
 
-import { fileCommentsOnWrite, pushSidecar } from './comments-store.ts';
+import { INDEX_FILE, fileCommentsOnWrite, pullSidecar, pushSidecar } from './comments-store.ts';
 import type { SidecarChange } from './comments-store.ts';
 import {
   STATE_DIR,
@@ -45,6 +56,7 @@ import {
   etagMd5,
   parseSnapshot,
   prunableSnapshots,
+  pruneDue,
   retainedSnapshots,
   snapshotBody,
   snapshotKey,
@@ -52,15 +64,17 @@ import {
   snapshotPath,
 } from './snapshots.ts';
 import {
+  RECORD_ORIGIN_WRITES,
   documentAtVersion,
   readVersions,
   recordAtRevision,
+  recordNamingOps,
   versionRecordSchema,
   writeVersion,
 } from './versions.ts';
 import type { FileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
-import { provenGet } from './access-store.ts';
+import { provenGet, putWithCopy } from './access-store.ts';
 import { assetPathWithin, checkRevision, factsFor } from './hosted.ts';
 import { HOSTED_POLL_MS, isStoreBusy, pulsePath, putPulse } from './pulse.ts';
 import { eachLimit, isAssetKey, isSafeKey } from './seed.ts';
@@ -71,8 +85,10 @@ import type {
   LeasePolicy,
   ReadResult,
   StoreListener,
+  StoreWrite,
   VersionRecord,
   WriteOptions,
+  WriteOrigin,
   WriteOutcome,
 } from './store.ts';
 import { AssetExistsError } from './store.ts';
@@ -590,6 +606,27 @@ export const CLAIM_RETRY_MS = 200;
 /** How many of the newest records a pull reads to find claims above the proven document. */
 export const CLAIMS_CHECKED = 4;
 
+/**
+ * How many missing record numbers in a row the pull's walk reads past while the records it
+ * found sit below the proven manifest's revision (docs/SYNC.md 3.6, the hole's second rule): a
+ * hole in the log is one or two numbers wide (a claim released under a commit that landed late,
+ * a record a store lost), never a run of them, so a longer run of misses under the manifest's
+ * revision is a log the manifest got ahead of (a commit whose record put failed) and the walk
+ * stops there rather than head numbers to the horizon on every pull.
+ */
+export const HOLE_WALK_LOOKAHEAD = 3;
+/** The most records the walk reads by number in a row before it asks the store's head for the next: a cold mirror of a long log. */
+export const RECORD_WALK_BATCH = 8;
+/** The most records one pull walks (the bound the walk had when it ran off the listing). */
+export const RECORD_WALK_MAX = 10_000;
+/**
+ * The most record origins one store instance holds in memory for the records it committed
+ * without storing their origin (docs/SYNC.md 3.2, deployment N): the bound of invariant 3, the
+ * replay's 2,000 entries (`REPLAY_MAX_ENTRIES`, realtime/protocol.ts), spelled here so this
+ * package takes no realtime dependency; the oldest number leaves first.
+ */
+export const HELD_ORIGINS_MAX = 2000;
+
 function serialQueue(): <T>(run: () => Promise<T>) => Promise<T> {
   let tail: Promise<unknown> = Promise.resolve();
   return <T>(run: () => Promise<T>): Promise<T> => {
@@ -773,6 +810,182 @@ export class BlobTimeoutError extends Error {
   }
 }
 
+/** True for a BlobTimeoutError from any copy of this module (see isBlobExistsError). */
+export function isBlobTimeoutError(error: unknown): error is BlobTimeoutError {
+  if (error instanceof BlobTimeoutError) return true;
+  return (
+    error instanceof Error &&
+    (error.name === 'BlobTimeoutError' || /^The Blob store did not answer /.test(error.message))
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+// The store call counters (docs/SYNC.md 6.3, the call counting harness)
+
+/** The sliding window the counters cover. */
+export const STORE_CALLS_WINDOW_MS = 60_000;
+
+/** The five operations the counters name; `folders` counts as a `list` (one advanced operation per page, like a list). */
+export type StoreCallOp = 'head' | 'get' | 'put' | 'list' | 'del';
+
+export const STORE_CALL_OPS: readonly StoreCallOp[] = ['head', 'get', 'put', 'list', 'del'];
+
+/**
+ * What `sync.status.storeCalls` answers for one deck: the calls of each operation this instance
+ * made under the deck's prefix inside the last `windowMs`, and the id of the instance that
+ * answered, so a probe that samples a deployment can tell two answering instances apart (the
+ * counters are per instance and the platform routes to whichever is warm; docs/SYNC.md 6.3).
+ */
+export type StoreCalls = Record<StoreCallOp, number> & {
+  windowMs: number;
+  instance: string;
+  /**
+   * the `list` calls by the folder they listed under the deck (the sync and costs round's ship):
+   * the pull reads records by number and never lists `versions` (docs/SYNC.md 3.5, the row
+   * `sync.pull.no-listing`); the prune lists `snapshots`, a deck's first open on an instance
+   * `assets`, the card render `thumbs`, the removal `presence` and the deck itself, so a probe
+   * that counts the deck's listings can name each one
+   */
+  lists: Record<StoreListFolder, number>;
+};
+
+/** The folders a `list` under `decks/<id>/` names, for `StoreCalls.lists`. */
+export type StoreListFolder =
+  'versions' | 'snapshots' | 'assets' | 'thumbs' | 'presence' | 'deck' | 'other';
+
+export const STORE_LIST_FOLDERS: readonly StoreListFolder[] = [
+  'versions',
+  'snapshots',
+  'assets',
+  'thumbs',
+  'presence',
+  'deck',
+  'other',
+];
+
+/** The folder a listed prefix names under its deck: `decks/<id>/snapshots/` is `snapshots`, `decks/<id>/.turboslide/presence/` is `presence`, the deck prefix itself is `deck`. */
+export function listFolderOf(prefix: string): StoreListFolder {
+  const match = /^decks\/[^/]+\/(.*)$/.exec(prefix);
+  if (match === null) return 'other';
+  const rest = (match[1] ?? '').replace(/^\.turboslide\//, '');
+  if (rest === '') return 'deck';
+  const folder = rest.split('/')[0] ?? '';
+  return (STORE_LIST_FOLDERS as readonly string[]).includes(folder) && folder !== 'deck'
+    ? (folder as StoreListFolder)
+    : 'other';
+}
+
+type CallTimes = Record<StoreCallOp, number[]> & { lists: Record<StoreListFolder, number[]> };
+
+const CALLS = Symbol.for('turboslide.storeCalls');
+const INSTANCE = Symbol.for('turboslide.storeInstanceId');
+
+type SharedCounters = typeof globalThis & {
+  [CALLS]?: Map<string, CallTimes>;
+  [INSTANCE]?: string;
+};
+
+/** The log of call times by deck, one per process whatever copies of this module a bundle carries (isBlobExistsError says why). */
+function callLog(): Map<string, CallTimes> {
+  const shared = globalThis as SharedCounters;
+  return (shared[CALLS] ??= new Map());
+}
+
+/**
+ * A random id the process mints once: the `instance` of every `storeCalls` answer, the same on
+ * every copy of this module. Eight hex characters, enough to tell the two or three instances a
+ * deployment runs at once apart in a probe's JSON, and nothing anyone can address.
+ */
+export function storeInstanceId(): string {
+  const shared = globalThis as SharedCounters;
+  return (shared[INSTANCE] ??= createHash('md5')
+    .update(`${process.pid}:${Date.now()}:${Math.random()}`)
+    .digest('hex')
+    .slice(0, 8));
+}
+
+/** The deck a stored pathname belongs to (`decks/<id>/...`), or null for a path outside `decks/`. */
+export function deckIdOfPathname(pathname: string): string | null {
+  const match = /^decks\/([^/]+)\//.exec(pathname);
+  return match?.[1] ?? null;
+}
+
+const emptyLists = (): Record<StoreListFolder, number[]> => ({
+  versions: [],
+  snapshots: [],
+  assets: [],
+  thumbs: [],
+  presence: [],
+  deck: [],
+  other: [],
+});
+
+const emptyTimes = (): CallTimes => ({
+  head: [],
+  get: [],
+  put: [],
+  list: [],
+  del: [],
+  lists: emptyLists(),
+});
+
+/** Drops the times older than the window from one list of times. */
+function trimList(list: number[], now: number): void {
+  let drop = 0;
+  while (drop < list.length && (list[drop] as number) <= now - STORE_CALLS_WINDOW_MS) drop += 1;
+  if (drop > 0) list.splice(0, drop);
+}
+
+/** Drops the times older than the window from one deck's log. */
+function trimTimes(times: CallTimes, now: number): void {
+  for (const op of STORE_CALL_OPS) trimList(times[op], now);
+  for (const folder of STORE_LIST_FOLDERS) trimList(times.lists[folder], now);
+}
+
+/**
+ * Records one call of the store on this instance under the deck the pathname names (a path
+ * outside `decks/` counts under the empty key). `boundedBlobClient` calls it for every call it
+ * bounds, so every call of a deck store, the collection, the presence store and the comments
+ * watch is counted once; the fake of the unit tests records its own `calls` list beside this.
+ */
+export function noteStoreCall(op: StoreCallOp, pathname: string, now: number = Date.now()): void {
+  const key = deckIdOfPathname(pathname) ?? '';
+  const log = callLog();
+  let times = log.get(key);
+  if (times === undefined) {
+    times = emptyTimes();
+    log.set(key, times);
+  }
+  trimTimes(times, now);
+  times[op].push(now);
+  if (op === 'list') times.lists[listFolderOf(pathname)].push(now);
+}
+
+/** The counts of one deck's calls inside the window, and this instance's id. */
+export function storeCallsFor(deckId: string, now: number = Date.now()): StoreCalls {
+  const times = callLog().get(deckId);
+  const counts: StoreCalls = {
+    head: 0,
+    get: 0,
+    put: 0,
+    list: 0,
+    del: 0,
+    windowMs: STORE_CALLS_WINDOW_MS,
+    instance: storeInstanceId(),
+    lists: { versions: 0, snapshots: 0, assets: 0, thumbs: 0, presence: 0, deck: 0, other: 0 },
+  };
+  if (times === undefined) return counts;
+  trimTimes(times, now);
+  for (const op of STORE_CALL_OPS) counts[op] = times[op].length;
+  for (const folder of STORE_LIST_FOLDERS) counts.lists[folder] = times.lists[folder].length;
+  return counts;
+}
+
+/** Forgets every counted call (the tests). */
+export function resetStoreCalls(): void {
+  callLog().clear();
+}
+
 const BOUNDED = Symbol.for('turboslide.boundedBlobClient');
 
 type Bounded = BlobClient & { [BOUNDED]?: true };
@@ -808,7 +1021,9 @@ function callSignal(deadline: AbortSignal, own: AbortSignal | undefined): AbortS
  * its sockets and hitting the store at every step; every timed out call on a stalled instance
  * left one such chain behind it, and the instance stayed slow long after whatever had stalled
  * it (the enforce preview's "Saving..." for eight minutes, the ops route's `BlobTimeoutError ...
- * head deck.json within 20 s` lines). A client wrapped once is not wrapped again.
+ * head deck.json within 20 s` lines). A client wrapped once is not wrapped again. Every call it
+ * bounds is counted under the deck the pathname names (`noteStoreCall`; docs/SYNC.md 6.3), which
+ * is what `sync.status.storeCalls` reads.
  */
 export function boundedBlobClient(client: BlobClient, deadlines: BlobDeadlines = {}): BlobClient {
   if ((client as Bounded)[BOUNDED] === true) return client;
@@ -821,6 +1036,7 @@ export function boundedBlobClient(client: BlobClient, deadlines: BlobDeadlines =
     run: (signal: AbortSignal) => Promise<T>,
   ) =>
     new Promise<T>((resolve, reject) => {
+      noteStoreCall(op === 'folders' ? 'list' : op, pathname);
       const controller = new AbortController();
       let settled = false;
       let grace: ReturnType<typeof setTimeout> | undefined;
@@ -935,6 +1151,12 @@ export type BlobStoreOptions = {
    * them, keeps the store's answer (the focus round, cycle 3 fix round).
    */
   degradedReads?: boolean;
+  /**
+   * Whether a committed write's record stores the write's `origin` (docs/SYNC.md 3.2); the
+   * deployment constant `RECORD_ORIGIN_WRITES` (versions.ts) by default, which deployment N
+   * ships as false and N plus 1 as true. The origin check on a write runs whatever this reads.
+   */
+  writeOrigin?: boolean;
 };
 
 export type BlobStore = DeckStore & {
@@ -945,7 +1167,7 @@ export type BlobStore = DeckStore & {
   pullAssets: () => Promise<number>;
   /** how many immutable documents the store holds under snapshots/ (deck.info's `snapshots`, SPEC-2 8.2) */
   snapshots: () => Promise<number>;
-  /** removes every snapshot no retained record names; returns how many went (write() runs this after a commit) */
+  /** removes every snapshot no retained record names; returns how many went (write() runs this every SNAPSHOT_PRUNE_EVERY records; the channel runs it when the deck's last stream on the instance closes) */
   pruneSnapshots: () => Promise<number>;
   /** how many reads the mirror answered while the store refused (the focus round, cycle 3 fix round) */
   degradedReads: () => number;
@@ -979,6 +1201,39 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
   let syncedAt = 0;
   let lastState: SyncState = { present: false, pulled: false, revision: null };
 
+  /**
+   * The origins of the records this instance committed while the record's bytes store none
+   * (docs/SYNC.md 3.2: deployment N ships `writeOrigin` off, N plus 1 writes the field), by
+   * record number. `records()` and the write path's origin check read the log with these merged
+   * in, so the resend of a POST whose first attempt committed here is answered with its record on
+   * this instance, as the memory of the last 512 admitted op ids did before the round (room.ts,
+   * the focus round's cycle 3; retired for the record's origin, which deployment N does not
+   * write yet: VERIFICATION.md sync pass 1, F4). The bytes in the store and in the mirror are
+   * untouched, so a reader on the older deployment parses them as before, and a resend that
+   * lands on another instance meets a record with no origin until N plus 1 is production. Held
+   * on a proven commit alone: a claim another writer takes over after CLAIM_GRACE_MS would name
+   * the wrong record. Bounded to HELD_ORIGINS_MAX, the oldest number first.
+   */
+  const heldOrigins = new Map<number, WriteOrigin>();
+  const holdOrigin = (n: number, origin: WriteOrigin): void => {
+    heldOrigins.delete(n);
+    heldOrigins.set(n, origin);
+    while (heldOrigins.size > HELD_ORIGINS_MAX) {
+      const oldest = heldOrigins.keys().next().value;
+      if (oldest === undefined) break;
+      heldOrigins.delete(oldest);
+    }
+  };
+  /** The log as read, with a held origin on every record of this instance's that stores none. */
+  const withHeldOrigins = (records: VersionRecord[]): VersionRecord[] => {
+    if (heldOrigins.size === 0) return records;
+    return records.map((record) => {
+      if (record.origin !== undefined) return record;
+      const held = heldOrigins.get(record.n);
+      return held === undefined ? record : { ...record, origin: held };
+    });
+  };
+
   const pathOf = (relative: string): string => join(dir, ...relative.split('/'));
 
   /**
@@ -1002,13 +1257,13 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
    * one, and a document "proven" by the manifest's etag alone carried the wrong slide set, which
    * the reducer refused as "Slide already exists" or "No slide" on the next write.
    */
-  const pull = async (): Promise<void> => {
+  const pull = async (knownHead?: BlobEntry | null): Promise<void> => {
     const manifest = readManifest(dir);
     const before = existsSync(pathOf('deck.json')) ? loadDeckDir(dir).document : null;
-    const deckHead = await client.head(`${prefix}deck.json`);
-    const entries = (await client.list(prefix))
-      .map((entry) => ({ entry, relative: entry.pathname.slice(prefix.length) }))
-      .filter(({ relative }) => isMirroredDocument(relative) && relative !== 'deck.json');
+    // the head the caller read a moment ago serves as the pull's, so a moved pulse costs one
+    // manifest head and not two (docs/SYNC.md 4.5); a head that moves between the two calls
+    // is caught by the caller's own check or the next tick
+    const deckHead = knownHead === undefined ? await client.head(`${prefix}deck.json`) : knownHead;
     const next: Manifest = { files: {} };
     const fetchBody = async (
       relative: string,
@@ -1023,56 +1278,33 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
      * a while after it landed, so the pull could not prove the document and the next write on
      * the instance met a stale mirror (b6's cycle 3 reading, R2 b; VERIFICATION C2-F25 and
      * C2-F28, a second browser's slide late). A body the edge serves that does not hash to the
-     * head's etag, or a miss the edge still serves, is read past the edge (`provenGet`).
+     * head's etag, or a miss the edge still serves, is read past the edge (`provenGet`). Answers
+     * the record's revision (null when its bytes do not parse), or null when the store holds
+     * no record under the name.
      */
-    const fetchRecord = async (relative: string, listed?: string): Promise<boolean> => {
+    const fetchRecord = async (relative: string): Promise<{ revision: number | null } | null> => {
       const pathname = `${prefix}${relative}`;
-      // a listed record's version is the listing's (no head round trip; a cold instance pulls
-      // hundreds of them); a record past the listing is asked of the head
-      const version = listed ?? (await client.head(pathname))?.version ?? null;
-      if (version === null) return false;
+      const version = (await client.head(pathname))?.version ?? null;
+      if (version === null) return null;
       let fetched = await client.get(pathname);
       if (fetched === null || quotedMd5(fetched.bytes) !== version) {
         // a record has no immutable copy of its own: it is one
         fetched = await provenGet(client, pathname, { copyOf: false });
       }
-      if (fetched === null) return false;
+      if (fetched === null) return null;
       writeAtomic(pathOf(relative), fetched.bytes);
       next.files[relative] = version;
-      return true;
+      return { revision: parseRecordBytes(fetched.bytes)?.revision ?? null };
     };
-    // 1. the records: the listing's, then by number past what the listing shows; the comments
-    // sidecar (SPEC-3 2.2) travels with the same rule as a record, by version, because it is
-    // neither a slide body the snapshot proves nor a record that never changes. The listing's
-    // slide entries are not read: the manifest names the bodies (steps 2 and 4 below)
-    await eachLimit(entries, 8, async ({ entry, relative }) => {
-      if (relative.startsWith(`${COMMENTS_DIR}/`)) {
-        if (manifest.files[relative] === entry.version && existsSync(pathOf(relative))) {
-          next.files[relative] = entry.version;
-          return;
-        }
-        const fetched = await fetchBody(relative);
-        if (fetched === null) return;
-        writeAtomic(pathOf(relative), fetched.bytes);
-        next.files[relative] = fetched.version;
-        return;
-      }
-      if (!relative.startsWith('versions/')) return;
-      if (manifest.files[relative] === entry.version && existsSync(pathOf(relative))) {
-        next.files[relative] = entry.version;
-        return;
-      }
-      if (!(await fetchRecord(relative, entry.version)) && existsSync(pathOf(relative)))
-        next.files[relative] = manifest.files[relative] ?? entry.version;
-    });
-    const first = lastRecord(dir, next) + 1;
-    for (let n = first; n < first + 10_000; n++) {
-      const relative = `versions/${n}.json`;
-      if (
-        (next.files[relative] === undefined || !existsSync(pathOf(relative))) &&
-        !(await fetchRecord(relative))
-      )
-        break;
+    // 1. the records the mirror holds keep their rows: a record never changes, so the bytes
+    // this instance proved once are the store's, and no call is made for them (the listing of
+    // the prefix that used to open every pull is gone: docs/SYNC.md 3.5, invariant 7; the
+    // listing lagged the store by up to a minute and cost one advanced operation per thousand
+    // files under the prefix, and the walk below read the same records by number anyway)
+    for (const relative of localDocuments(dir)) {
+      if (!relative.startsWith('versions/')) continue;
+      next.files[relative] =
+        manifest.files[relative] ?? quotedMd5(new Uint8Array(readFileSync(pathOf(relative))));
     }
     if (deckHead === null) {
       for (const relative of localDocuments(dir)) {
@@ -1081,6 +1313,95 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       writeManifestFile(dir, next);
       return;
     }
+    // 1b. the snapshot path (gslides-parity SPEC-2 8.2): the etag is the md5 of the current
+    // deck.json bytes and the writer stored the whole document under that key before it pushed
+    // the manifest, so the snapshot is the current document, proven by its name; no revision is
+    // read and no slide body is fetched. It is read first, so the walk of the records knows the
+    // revision the log must reach. A deck written before the round, or a store whose deck.json
+    // push failed after its snapshot, has none and takes the replay of step 3.
+    const currentKey = etagMd5(deckHead.version);
+    const snapshot = currentKey === null ? null : await readSnapshot(currentKey);
+    const provenSnapshot =
+      snapshot !== null && quotedMd5(canonicalJson(snapshot.deck)) === deckHead.version
+        ? snapshot
+        : null;
+    /**
+     * 1c. The records by number from the mirror's last one (docs/SYNC.md 3.5, 3.6): each is a
+     * head and a get, RECORD_WALK_BATCH at a time once the walk has found records in a row (a
+     * cold mirror of a long log), one at a time at the log's head (a warm mirror learning of one
+     * commit pays one hit and one miss). A missing number is not the end of the log: the walk
+     * continues past it while the records found sit below the proven manifest's revision, up to
+     * HOLE_WALK_LOOKAHEAD misses in a row, and stops at the first miss once they have reached
+     * it; a mirror that reads a hole holds the records on both sides of it, `announce` covers
+     * the tabs above it with an external checkpoint and `deck.info.counts.holes` counts it
+     * (versions.ts logHoles). Before this the walk stopped at the first missing number for good,
+     * so every later commit reached the other instances as an external checkpoint alone.
+     */
+    const walkRecords = async (target: number | null): Promise<void> => {
+      const last = lastRecord(dir, next);
+      const newest = last === 0 ? null : pathOf(`versions/${last}.json`);
+      let known =
+        newest !== null && existsSync(newest)
+          ? (parseRecordBytes(new Uint8Array(readFileSync(newest)))?.revision ?? 0)
+          : 0;
+      let n = last + 1;
+      let batch = 1;
+      let misses = 0;
+      let hits = 0;
+      const limit = last + RECORD_WALK_MAX;
+      while (n <= limit) {
+        const numbers: number[] = [];
+        for (let k = n; k < n + batch && k <= limit; k += 1) numbers.push(k);
+        const results = await Promise.all(numbers.map((k) => fetchRecord(`versions/${k}.json`)));
+        let stop = false;
+        for (const result of results) {
+          if (result !== null) {
+            misses = 0;
+            hits += 1;
+            if (result.revision !== null) known = Math.max(known, result.revision);
+            continue;
+          }
+          misses += 1;
+          hits = 0;
+          // the lookahead runs only past a log the walk knows a record of: a deck with no
+          // record at all (the seed at its revision, a deck made from a template) has nothing
+          // to walk toward
+          if (target === null || known === 0 || known >= target || misses > HOLE_WALK_LOOKAHEAD) {
+            stop = true;
+            break;
+          }
+        }
+        if (stop) break;
+        n += numbers.length;
+        // the batch grows from the second hit in a row, so a warm mirror learning of one
+        // commit pays one hit and one miss, and returns to one behind a hole
+        batch = hits >= 2 ? Math.min(RECORD_WALK_BATCH, batch * 2) : 1;
+      }
+    };
+    await walkRecords(provenSnapshot?.deck.revision ?? null);
+    /**
+     * 1d. The comments sidecar (SPEC-3 2.2), through its index head (docs/SYNC.md 3.5): the
+     * index is the sidecar's commit point (comments-store.ts), so an index at the version the
+     * mirror holds means every thread file is current too and nothing else is read; a moved
+     * index is pulled proven with the thread files it names whose etag rows changed
+     * (`pullSidecar`). The rows the manifest keeps are the local bytes' md5, which a proven
+     * pull makes the store's version.
+     */
+    const syncSidecar = async (): Promise<void> => {
+      const indexRelative = `${COMMENTS_DIR}/${INDEX_FILE}`;
+      const local = (): string[] =>
+        localDocuments(dir).filter((relative) => relative.startsWith(`${COMMENTS_DIR}/`));
+      const indexHead = await client.head(`${prefix}${indexRelative}`);
+      if (indexHead === null) {
+        for (const relative of local()) rmSync(pathOf(relative), { force: true });
+        return;
+      }
+      if (manifest.files[indexRelative] !== indexHead.version || !existsSync(pathOf(indexRelative)))
+        await pullSidecar(client, deckId, dir);
+      for (const relative of local())
+        next.files[relative] = quotedMd5(new Uint8Array(readFileSync(pathOf(relative))));
+    };
+    await syncSidecar();
     /** the mirror's documents from a proven document, and the manifest rows they get */
     const writeDocuments = (document: DeckDocument): void => {
       const current = existsSync(pathOf('deck.json')) ? loadDeckDir(dir).document : null;
@@ -1101,11 +1422,6 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       writeManifest(dir, document.deck);
       next.files['deck.json'] = deckHead.version;
     };
-    // 1b. the snapshot path (gslides-parity SPEC-2 8.2): the etag is the md5 of the current
-    // deck.json bytes and the writer stored the whole document under that key before it pushed
-    // the manifest, so the snapshot is the current document, proven by its name; no revision is
-    // read and no slide body is fetched. A deck written before the round, or a store whose
-    // deck.json push failed after its snapshot, has none and takes the replay below.
     /**
      * A record whose revision is above the proven document's leaves the mirror: the claim of a
      * write in flight on another instance (stored before its commit, the write's round two), or
@@ -1128,11 +1444,10 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         delete next.files[relative];
       }
     };
-    const currentKey = etagMd5(deckHead.version);
-    const snapshot = currentKey === null ? null : await readSnapshot(currentKey);
-    if (snapshot !== null && quotedMd5(canonicalJson(snapshot.deck)) === deckHead.version) {
-      writeDocuments(snapshot);
-      dropRecordsAbove(snapshot.deck.revision);
+    if (provenSnapshot !== null) {
+      // the document the snapshot of step 1b proved, and no slide body read
+      writeDocuments(provenSnapshot);
+      dropRecordsAbove(provenSnapshot.deck.revision);
       for (const relative of localDocuments(dir)) {
         if (next.files[relative] === undefined) rmSync(pathOf(relative), { force: true });
       }
@@ -1246,7 +1561,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     } else {
       const manifest = readManifest(dir);
       if (manifest.files['deck.json'] !== head.version || !existsSync(pathOf('deck.json'))) {
-        await pull();
+        await pull(head);
         pulled = true;
       }
       lastState = { present: true, pulled, revision: readRevision(dir) };
@@ -1280,8 +1595,16 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     if (!state.present) throw new RangeError(`No deck ${deckId} in the Blob store`);
   };
 
+  /**
+   * The leases file is an overwritten path and is read proven (docs/SYNC.md 3.5, invariant 8;
+   * audit-costs items 4 and 13): the head's version first, the body accepted only when its md5
+   * is that version, else the immutable copy `pushLeases` stores under it (`putWithCopy`). A
+   * plain `get` read the public host, which serves an overwritten object for up to thirty days,
+   * so a lease taken on another instance could stay invisible here and the enforce policy of
+   * agent writes decided on stale rows.
+   */
   const pullLeases = async (): Promise<void> => {
-    const fetched = await client.get(`${prefix}${LEASES_FILE}`);
+    const fetched = await provenGet(client, `${prefix}${LEASES_FILE}`);
     if (fetched === null) rmSync(file.leaseFile, { force: true });
     else writeAtomic(file.leaseFile, fetched.bytes);
   };
@@ -1296,12 +1619,18 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     }
   };
 
+  /** The leases file with its immutable copy first (`putWithCopy`), so `pullLeases` proves it whatever the CDN serves. */
   const pushLeases = async (): Promise<void> => {
     if (!existsSync(file.leaseFile)) return;
-    await client.put(`${prefix}${LEASES_FILE}`, new Uint8Array(readFileSync(file.leaseFile)), {
-      overwrite: true,
-      contentType: blobContentType(LEASES_FILE),
-    });
+    await putWithCopy(
+      client,
+      `${prefix}${LEASES_FILE}`,
+      new Uint8Array(readFileSync(file.leaseFile)),
+      {
+        overwrite: true,
+        contentType: blobContentType(LEASES_FILE),
+      },
+    );
   };
 
   const putDocument = async (relative: string, ifMatch?: string): Promise<BlobEntry> =>
@@ -1434,17 +1763,25 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       return file.revision();
     },
 
-    write(write: Write, writeOptions: WriteOptions = {}): Promise<WriteOutcome> {
+    write(write: StoreWrite, writeOptions: WriteOptions = {}): Promise<WriteOutcome> {
+      const writeOrigin = options.writeOrigin ?? RECORD_ORIGIN_WRITES;
       const runWrite = async (retries: number): Promise<WriteOutcome> => {
         // inside the queue already: sync directly, not through serial(). Round one of the four
         // (gslides-parity SPEC-4 0.33): the manifest head and the leases read leave together;
-        // the leases file is its own document, so neither waits on the other
-        const [head] = await Promise.all([client.head(`${prefix}deck.json`), pullLeases()]);
+        // the leases file is its own document, so neither waits on the other. Both are awaited
+        // to their end, so a write that fails on one leaves no call of the other in flight
+        const [headRead, leasesRead] = await Promise.all([
+          settle(client.head(`${prefix}deck.json`)),
+          settle(pullLeases()),
+        ]);
+        if (!headRead.ok) throw headRead.error;
+        if (!leasesRead.ok) throw leasesRead.error;
+        const head = headRead.value;
         if (head === null) throw new RangeError(`No deck ${deckId} in the Blob store`);
         if (options.hooks?.afterHead) await options.hooks.afterHead();
         const before = readManifest(dir);
         if (before.files['deck.json'] !== head.version || !existsSync(pathOf('deck.json'))) {
-          await pull();
+          await pull(head);
         }
         const manifest = readManifest(dir);
         const synced = manifest.files['deck.json'];
@@ -1459,12 +1796,44 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           if (current.version === head.version) throw new StaleMirrorError(deckId);
           return conflictFromStore();
         }
+        // the origin check (docs/SYNC.md 3.2, invariant 3), here where the mirror is proven: a
+        // write whose op ids a record above its base already names is the resend of a POST whose
+        // first attempt committed and whose answer was lost (on this instance or another, since
+        // the record travels), so it is answered with that record and nothing is claimed or put.
+        // The admission's own check before placement catches the same instance and already
+        // synced cases first; this one runs after the head and the pull brought the record here.
+        // The held origins stand in for the field on the records this instance committed while
+        // the deployment writes none (heldOrigins)
+        if (write.origin !== undefined) {
+          const replayed = recordNamingOps(
+            withHeldOrigins(readVersions(dir)),
+            write.baseRevision,
+            write.origin.opIds,
+          );
+          if (replayed !== undefined) {
+            return {
+              ok: true,
+              document: loadDeckDir(dir).document,
+              revision: replayed.revision,
+              entry: replayed,
+              changed: [],
+              issues: [],
+              warnings: [],
+              replayed,
+            };
+          }
+        }
         const outcome = await file.write(write, writeOptions);
         if (!outcome.ok) return outcome;
         // the snapshot key (SPEC-2 8.2, 0.40): the md5 of the deck.json bytes about to be pushed,
-        // which is the etag the store will answer for them; the record of this commit names it
+        // which is the etag the store will answer for them; the record of this commit names it.
+        // The write's origin joins the record once the deployment writes it (RECORD_ORIGIN_WRITES)
         const key = snapshotKey(new Uint8Array(readFileSync(pathOf('deck.json'))));
-        const entry: VersionRecord = { ...outcome.entry, snapshot: key };
+        const entry: VersionRecord = {
+          ...outcome.entry,
+          snapshot: key,
+          ...(writeOrigin && write.origin !== undefined ? { origin: write.origin } : {}),
+        };
         writeVersion(dir, entry);
         const record = `versions/${entry.n}.json`;
         let claimed = false;
@@ -1520,13 +1889,26 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
             // under a manifest that names its revision) and the mirror discarded, so the client's
             // resend was admitted a second time and the version log lost a number (the focus
             // round, cycle 3 fix round; VERIFICATION C3-F1, docs/FOCUS.md rank 21)
-            if (!(error instanceof BlobTimeoutError)) throw error;
+            if (!isBlobTimeoutError(error)) throw error;
             const ours = quotedMd5(new Uint8Array(readFileSync(pathOf('deck.json'))));
             const landed = await client.head(`${prefix}deck.json`).catch(() => null);
-            if (landed === null || landed.version !== ours) throw error;
+            if (landed === null || landed.version !== ours) {
+              // the hole's first rule (docs/SYNC.md 3.6): the put may still land after this
+              // answer, so the record stays in the store as the claim it is. Released, a commit
+              // that landed late named a revision with no record, which every reader's walk
+              // stopped at for good; kept, a put that never lands is a claim another writer
+              // takes over after CLAIM_GRACE_MS (claimRecord), and a put that lands makes it the
+              // record of its revision. The mirror is discarded below as before
+              claimed = false;
+              throw error;
+            }
             committed = landed;
           }
           claimed = false;
+          // the commit is proven: the record of this number is this write's for good, so its
+          // origin is held here when the deployment stored none in the record (heldOrigins)
+          if (entry.origin === undefined && write.origin !== undefined)
+            holdOrigin(entry.n, write.origin);
           manifest.files['deck.json'] = committed.version;
           manifest.files[record] = stored.version;
           changedBodies.forEach((slideId, i) => {
@@ -1556,8 +1938,10 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           // with this commit; awaited, because a function instance is frozen once its answer
           // has gone and a put left in flight would never land
           await putPulse(client, deckId, 'deck', { now: clock });
-          // retention runs after the commit and never blocks the answer (SPEC-2 8.2)
-          void pruneSnapshots(key).catch(() => undefined);
+          // retention runs behind the answer on every SNAPSHOT_PRUNE_EVERY records the log gains
+          // and at the deck's last stream's close (the channel calls `pruneSnapshots`), never on
+          // every commit (docs/SYNC.md 3.6; the one `list` of the write path leaves the hot path)
+          if (pruneDue(entry.n)) void pruneSnapshots(key).catch(() => undefined);
           return { ...outcome, entry };
         } catch (error) {
           await releaseClaim();
@@ -1607,7 +1991,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       const save = async (): Promise<Version> => {
         const head = await client.head(`${prefix}deck.json`);
         if (head === null) throw new RangeError(`No deck ${deckId} in the Blob store`);
-        if (readManifest(dir).files['deck.json'] !== head.version) await pull();
+        if (readManifest(dir).files['deck.json'] !== head.version) await pull(head);
         const version = await file.saveVersion(author, note);
         const relative = `versions/${version.n}.json`;
         // a named version pins the document it names (SPEC-2 8.2 retention): its record carries
@@ -1653,7 +2037,10 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
 
     async records(): Promise<VersionRecord[]> {
       await requirePresent();
-      return file.records();
+      // the held origins ride the records this instance committed without the field, so the
+      // channel's entries carry `covers` and the resync read's `origins` on this instance
+      // (docs/SYNC.md 3.2) on deployment N as they will everywhere on N plus 1
+      return withHeldOrigins(await file.records());
     },
 
     async documentAt(n: number): Promise<DeckDocument> {
@@ -1679,7 +2066,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       return serial(async () => {
         const head = await client.head(`${prefix}deck.json`);
         if (head === null) throw new RangeError(`No deck ${deckId} in the Blob store`);
-        if (readManifest(dir).files['deck.json'] !== head.version) await pull();
+        if (readManifest(dir).files['deck.json'] !== head.version) await pull(head);
         await pullLeases();
         const lease = await file.lease(slideId, holder, leaseOptions);
         await pushLeases();
@@ -1867,6 +2254,52 @@ export async function pushDeckDir(
  * folder, applied to the store's `deck.json` without a mirror; SPEC-4 0.29). Null when the bytes
  * do not parse to a manifest.
  */
+/**
+ * The two facts a home page card needs beyond its head (gslides-parity SPEC 6.2; the studio's
+ * `deckCardFacts`): the appearance the card's plate and thumbnail are drawn in, by the rule of
+ * `deckAppearance` (SPEC 7.2.3: `defaults.appearance`, else the kit's `brand.appearance`, else
+ * dark), and the first slide's id. Read from the manifest bytes the listing proved at the store's
+ * head, so an instance that never opened the deck draws the same card as one that did: before
+ * the sync and costs round's ship the studio read them from the mirror on disk alone, and an
+ * instance without the mirror drew every card as a dark plate with no thumbnail (VERIFICATION.md
+ * "Sync and costs round, pass 2" F3; production read 53 of 55 cards that way on 2026-09-22).
+ */
+export type DeckCardFacts = { appearance: Appearance; firstSlide: string | null };
+
+export function deckCardFactsOf(bytes: Uint8Array): DeckCardFacts | null {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    return null;
+  }
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
+  const manifest = raw as {
+    defaults?: { appearance?: unknown };
+    brand?: { appearance?: unknown };
+    sections?: unknown;
+  };
+  const named = (value: unknown): Appearance | null =>
+    value === 'light' || value === 'dark' ? value : null;
+  const appearance =
+    named(manifest.defaults?.appearance) ?? named(manifest.brand?.appearance) ?? 'dark';
+  let firstSlide: string | null = null;
+  for (const section of Array.isArray(manifest.sections) ? manifest.sections : []) {
+    const ids =
+      typeof section === 'object' &&
+      section !== null &&
+      Array.isArray((section as { slideIds?: unknown }).slideIds)
+        ? (section as { slideIds: unknown[] }).slideIds
+        : [];
+    const first = ids.find((id) => typeof id === 'string');
+    if (typeof first === 'string') {
+      firstSlide = first;
+      break;
+    }
+  }
+  return { appearance, firstSlide };
+}
+
 export function deckHeadOf(deckId: string, bytes: Uint8Array): DeckHead | null {
   let raw: unknown;
   try {
@@ -2143,7 +2576,10 @@ export function blobDecks(options: HostedOptions): HostedDecks {
    * proven from an unproven body (the CDN's state before the last push) is not kept, so the next
    * listing tries the proof again, as before. `null` is a manifest that made no card.
    */
-  const listed = new Map<string, { version: string; head: DeckHead | null }>();
+  const listed = new Map<
+    string,
+    { version: string; head: DeckHead | null; facts: DeckCardFacts | null }
+  >();
   /** The folders under `decks/` without a manifest when this instance last headed them, by id and time (LISTING_PHANTOM_TTL_MS). */
   const phantoms = new Map<string, number>();
   let listingClientPromise: Promise<BlobClient> | undefined;
@@ -2177,8 +2613,10 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       if (kept !== undefined && kept.version === head.version) return kept.head;
       const manifest = await manifestAtHead(c, deckId, head);
       const card = manifest === null ? null : deckHeadOf(deckId, manifest.bytes);
+      // the card's two thumbnail facts travel with the head (`cardFacts`), read from the same bytes
+      const facts = manifest === null ? null : deckCardFactsOf(manifest.bytes);
       if (manifest === null || manifest.proven)
-        listed.set(deckId, { version: head.version, head: card });
+        listed.set(deckId, { version: head.version, head: card, facts });
       return card;
     } catch (error) {
       if (!isStoreBusy(error)) throw error;
@@ -2250,6 +2688,11 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     root: overlay.root,
     decksDir,
     ready,
+    cardFacts(deckId) {
+      // the facts of the manifest the last listing proved for the deck on this instance; null
+      // before a listing named it (the studio then reads the mirror on disk, root.ts)
+      return listed.get(deckId)?.facts ?? null;
+    },
     async list(listOptions) {
       await ready();
       // the listing reads every manifest at the store's head, in parallel, and writes no mirror

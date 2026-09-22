@@ -9,7 +9,9 @@ import path from 'node:path';
 const BASE = 'https://turboslide.vercel.app';
 const OUT = '/Users/kevinliu/repos/Turboslide/docs/gslides-parity/product/audit-assist';
 mkdirSync(OUT, { recursive: true });
-const hosts = JSON.parse(readFileSync(path.join(homedir(), '.config/turboslide/hosts.json'), 'utf8')).hosts;
+const hosts = JSON.parse(
+  readFileSync(path.join(homedir(), '.config/turboslide/hosts.json'), 'utf8'),
+).hosts;
 const token = hosts[BASE].token;
 const auth = { authorization: `Bearer ${token}` };
 
@@ -31,7 +33,11 @@ for (const p of ['/llms.txt', '/llms-full.txt', '/openapi.json']) {
 }
 const contract = await fetch(`${BASE}/api/actions/text.replaceAll`, { headers: auth });
 rec('GET /api/actions/text.replaceAll (bearer)', contract.status);
-const mcpNoAuth = await fetch(`${BASE}/mcp`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
+const mcpNoAuth = await fetch(`${BASE}/mcp`, {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: '{}',
+});
 rec('POST /mcp (no bearer)', mcpNoAuth.status);
 
 // counts from the manifest
@@ -50,7 +56,9 @@ out.manifest = {
   mutating,
   implemented: (manifest.implemented ?? []).length,
   notImplemented: manifest.notImplemented ?? [],
-  groups: Object.fromEntries(Object.entries(manifest.actionsByGroup ?? {}).map(([g, ids]) => [g, ids.length])),
+  groups: Object.fromEntries(
+    Object.entries(manifest.actionsByGroup ?? {}).map(([g, ids]) => [g, ids.length]),
+  ),
   rules: manifest.rules,
   transports: manifest.transports,
   auth: manifest.auth,
@@ -64,7 +72,11 @@ out.manifest = {
 };
 // any AI or assistant words anywhere in the manifest
 const text = JSON.stringify(manifest).toLowerCase();
-out.words = Object.fromEntries(['assist', 'gemini', 'model', 'llm', 'anthropic', 'openai', 'prompt', 'summar', 'translat'].map((w) => [w, (text.match(new RegExp(w, 'g')) ?? []).length]));
+out.words = Object.fromEntries(
+  ['assist', 'gemini', 'model', 'llm', 'anthropic', 'openai', 'prompt', 'summar', 'translat'].map(
+    (w) => [w, (text.match(new RegExp(w, 'g')) ?? []).length],
+  ),
+);
 console.log(JSON.stringify({ ...out.manifest, words: out.words }, null, 1).slice(0, 3000));
 writeFileSync(path.join(OUT, 'agent-surface.json'), JSON.stringify(out, null, 2));
 console.log(`wrote ${path.join(OUT, 'agent-surface.json')}`);

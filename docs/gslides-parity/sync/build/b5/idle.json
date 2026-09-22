@@ -1,0 +1,146 @@
+{
+  "base": "http://localhost:4415",
+  "mode": "idle",
+  "at": "2026-09-21T20:27:25.176Z",
+  "headed": false,
+  "row": "cost.editor-idle.calls",
+  "ceiling": {
+    "functionRequestsPerMinute": 12
+  },
+  "deckId": "untitled-20260921-cz5p",
+  "visibility": "visible",
+  "sessionsAtEnd": 1,
+  "pollsInWindow": 9,
+  "pollsPerMinute": 3,
+  "t0": 1790022264914,
+  "t1": 1790022444916,
+  "samples": [
+    {
+      "at": 15000,
+      "functionRequests": 1
+    },
+    {
+      "at": 30001,
+      "functionRequests": 1
+    },
+    {
+      "at": 45004,
+      "functionRequests": 2
+    },
+    {
+      "at": 60007,
+      "functionRequests": 3
+    },
+    {
+      "at": 75009,
+      "functionRequests": 3
+    },
+    {
+      "at": 90012,
+      "functionRequests": 4
+    },
+    {
+      "at": 105015,
+      "functionRequests": 5
+    },
+    {
+      "at": 120017,
+      "functionRequests": 6
+    },
+    {
+      "at": 135020,
+      "functionRequests": 6
+    },
+    {
+      "at": 150022,
+      "functionRequests": 7
+    },
+    {
+      "at": 165025,
+      "functionRequests": 8
+    },
+    {
+      "at": 180002,
+      "functionRequests": 9
+    }
+  ],
+  "summary": {
+    "windowMs": 180002,
+    "minutes": 3,
+    "requests": 9,
+    "functionRequests": 9,
+    "functionRequestsPerMinute": 3,
+    "polls": 9,
+    "rows": [
+      {
+        "route": "/_serverFn/eyJmaWxl…",
+        "requests": 9,
+        "fn": true,
+        "statuses": {
+          "200": 9
+        },
+        "methods": {
+          "POST": 9
+        },
+        "perMinute": 3
+      }
+    ]
+  },
+  "functionRequests": [
+    {
+      "at": 14997,
+      "route": "/_serverFn/eyJmaWxl…",
+      "serverFn": "pollStudioSession",
+      "status": 200
+    },
+    {
+      "at": 35004,
+      "route": "/_serverFn/eyJmaWxl…",
+      "serverFn": "pollStudioSession",
+      "status": 200
+    },
+    {
+      "at": 55010,
+      "route": "/_serverFn/eyJmaWxl…",
+      "serverFn": "pollStudioSession",
+      "status": 200
+    },
+    {
+      "at": 75016,
+      "route": "/_serverFn/eyJmaWxl…",
+      "serverFn": "pollStudioSession",
+      "status": 200
+    },
+    {
+      "at": 95022,
+      "route": "/_serverFn/eyJmaWxl…",
+      "serverFn": "pollStudioSession",
+      "status": 200
+    },
+    {
+      "at": 115028,
+      "route": "/_serverFn/eyJmaWxl…",
+      "serverFn": "pollStudioSession",
+      "status": 200
+    },
+    {
+      "at": 135034,
+      "route": "/_serverFn/eyJmaWxl…",
+      "serverFn": "pollStudioSession",
+      "status": 200
+    },
+    {
+      "at": 155040,
+      "route": "/_serverFn/eyJmaWxl…",
+      "serverFn": "pollStudioSession",
+      "status": 200
+    },
+    {
+      "at": 175046,
+      "route": "/_serverFn/eyJmaWxl…",
+      "serverFn": "pollStudioSession",
+      "status": 200
+    }
+  ],
+  "pass": true
+}

@@ -10,7 +10,11 @@ import { launch, bind, sleep, BASE } from './lib.mjs';
 const { browser, page, consoleErrors } = await launch();
 const t = bind(page, 'drive-fix-pictures');
 const errorsSince = (n) =>
-  consoleErrors.slice(n).filter((e) => !/CSP|Content Security|Fast Refresh|hmr|\[vite\]|\[Server\]|AbortError/i.test(e));
+  consoleErrors
+    .slice(n)
+    .filter(
+      (e) => !/CSP|Content Security|Fast Refresh|hmr|\[vite\]|\[Server\]|AbortError/i.test(e),
+    );
 
 /** The boxes of the slide's blocks in sheet px, by block id, with the type. */
 const blockBoxes = () =>
@@ -35,12 +39,14 @@ const blockBoxes = () =>
 const imgCount = () =>
   page.evaluate(
     () =>
-      [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) img')].filter(
-        (i) => i.getClientRects().length > 0,
-      ).length,
+      [
+        ...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) img'),
+      ].filter((i) => i.getClientRects().length > 0).length,
   );
-const progressShown = () => page.evaluate(() => Boolean(document.querySelector('[data-control="picture.upload.progress"]')));
-const shots = async (S) => (await t.objectsOf(S)).filter((o) => o.block?.type === 'shot' || o.block?.type === 'picture');
+const progressShown = () =>
+  page.evaluate(() => Boolean(document.querySelector('[data-control="picture.upload.progress"]')));
+const shots = async (S) =>
+  (await t.objectsOf(S)).filter((o) => o.block?.type === 'shot' || o.block?.type === 'picture');
 
 /** The body slot of the slide: the empty body paragraph's column from the body's top (under a heading in the top third, plus 40) to the content bottom. */
 function bodySlotOf(boxes) {
@@ -86,19 +92,32 @@ try {
         if (drawnAt !== null && !(await progressShown())) break;
         await sleep(20);
       }
-      const landed = await t.pollUntil(() => shots(S), (o) => o.some((x) => !shotsBefore.includes(x.id)), 15_000);
+      const landed = await t.pollUntil(
+        () => shots(S),
+        (o) => o.some((x) => !shotsBefore.includes(x.id)),
+        15_000,
+      );
       const pic = landed.find((x) => !shotsBefore.includes(x.id)) ?? null;
       await sleep(1500);
       const snackbar = await t.snackbar();
       const selected = pic ? (await t.handleControls()).includes(`handle.${pic.id}.move`) : false;
       const after = await blockBoxes();
-      const prompts = await page.evaluate(() => [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-prompt]')].filter((p) => p.getClientRects().length > 0).length);
+      const prompts = await page.evaluate(
+        () =>
+          [
+            ...document.querySelectorAll(
+              '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-prompt]',
+            ),
+          ].filter((p) => p.getClientRects().length > 0).length,
+      );
       const pos = pic?.pos ?? null;
       const cx = pos ? pos.x + pos.w / 2 : null;
       const cy = pos ? pos.y + pos.h / 2 : null;
       const slotCx = slot.x + slot.w / 2;
       const slotCy = (slot.top + slot.bottom) / 2;
-      const fits = pos ? Math.abs(pos.w - (slot.w - 80)) < 6 || Math.abs(pos.h - (slot.bottom - slot.top - 80)) < 6 : false;
+      const fits = pos
+        ? Math.abs(pos.w - (slot.w - 80)) < 6 || Math.abs(pos.h - (slot.bottom - slot.top - 80)) < 6
+        : false;
       await t.shot('uploaded');
       return {
         ok:
@@ -140,11 +159,20 @@ try {
       await sleep(900);
       const t0 = Date.now();
       await t.clickControl('dialog.imageByUrl.ok');
-      const landed = await t.pollUntil(() => shots(S), (o) => o.some((x) => !shotsBefore.includes(x.id)), 20_000);
+      const landed = await t.pollUntil(
+        () => shots(S),
+        (o) => o.some((x) => !shotsBefore.includes(x.id)),
+        20_000,
+      );
       const pic = landed.find((x) => !shotsBefore.includes(x.id)) ?? null;
       const landedMs = Date.now() - t0;
       /* the dialog closes when the insert's promise settles, a few frames after the block draws */
-      const dialogGone = await t.pollUntil(async () => !(await t.visible('dialog.imageByUrl')), (v) => v === true, 3000, 50);
+      const dialogGone = await t.pollUntil(
+        async () => !(await t.visible('dialog.imageByUrl')),
+        (v) => v === true,
+        3000,
+        50,
+      );
       const dialogClosedMs = Date.now() - t0;
       const selected = pic ? (await t.handleControls()).includes(`handle.${pic.id}.move`) : false;
       let replaced = null;
@@ -154,7 +182,12 @@ try {
         await t.clickAt(b.free.x + b.free.w / 2, b.free.y + b.free.h / 2);
         await sleep(300);
         await t.clickControl('toolbar.replaceImage');
-        replaceRow = await t.ctl('menu.format.image.replaceImage.byUrl').first().waitFor({ timeout: 4000 }).then(() => true).catch(() => false);
+        replaceRow = await t
+          .ctl('menu.format.image.replaceImage.byUrl')
+          .first()
+          .waitFor({ timeout: 4000 })
+          .then(() => true)
+          .catch(() => false);
         if (replaceRow) {
           await t.clickRow('format.image.replaceImage.byUrl');
           await t.ctl('dialog.imageByUrl.url').first().waitFor({ timeout: 8000 });
@@ -167,7 +200,13 @@ try {
             (o) => o !== null && o.block.asset !== pic.block.asset,
             20_000,
           );
-          replaced = after ? { asset: after.block.asset, pos: after.pos, sameBox: JSON.stringify(after.pos) === JSON.stringify(pic.pos) } : null;
+          replaced = after
+            ? {
+                asset: after.block.asset,
+                pos: after.pos,
+                sameBox: JSON.stringify(after.pos) === JSON.stringify(pic.pos),
+              }
+            : null;
         } else await t.press('Escape');
       }
       await t.shot('by-url');
@@ -188,7 +227,12 @@ try {
     },
   );
   const errs = errorsSince(errorsAt);
-  t.record('console errors during the drive', 'none', errs.length ? errs.join(' | ') : 'none', errs.length === 0);
+  t.record(
+    'console errors during the drive',
+    'none',
+    errs.length ? errs.join(' | ') : 'none',
+    errs.length === 0,
+  );
 } finally {
   t.finish();
   await browser.close();

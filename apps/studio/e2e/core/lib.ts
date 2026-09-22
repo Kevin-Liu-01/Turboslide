@@ -665,6 +665,27 @@ export async function otherContext(
   return ownerContext(browser);
 }
 
+/**
+ * The same person in a second browser (docs/SYNC.md 6.1's B; the ordering audit's run 2): a fresh
+ * context that carries the first context's cookies and storage, so the second tab is an editor of
+ * the deck the first made and its stream carries a client id of its own. No cookie is read or
+ * printed here; Playwright copies the storage state from one context into the other.
+ */
+export async function sameCookiesContext(
+  browser: Browser,
+  of: BrowserContext,
+): Promise<{ context: BrowserContext; page: Page }> {
+  const context = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+    acceptDownloads: true,
+    permissions: ['clipboard-read', 'clipboard-write'],
+    storageState: await of.storageState(),
+  });
+  const page = await context.newPage();
+  return { context, page };
+}
+
 // ---------------------------------------------------------------------------------------------
 // downloads and the files
 

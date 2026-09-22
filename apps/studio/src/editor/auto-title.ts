@@ -19,6 +19,15 @@
 // document before a remote agent's op and commits the rename it answers (controller.tsx
 // `announceAgentWrite`), so the deck's name and the tab title no longer diverge from the slide
 // after an assistant or an agent over HTTP renamed the customer on the cover.
+//
+// The sync and costs round (docs/SYNC.md 3.4; build/b2.md R3): a heading burst is a text run
+// (`text.splice` on the field) and the reducer derives the title from it (schema reduce.ts
+// `followTitle`: the title follows the heading while it still reads the blank deck's title or
+// the heading's previous text, a `deck.set /title` that made them differ wins until a set makes
+// them equal, and the op's inverse restores the title), so the controller appends nothing here
+// for a write that carries a text run (`withAutoTitle`, `announceAgentWrite`). This function
+// still names the rename for the whole value writes the reducer does not derive from (a
+// `slide.set` of the heading, a `slide.replace`, an agent's write of the field as one value).
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { applyMutation } from '@turboslide/schema/reduce';

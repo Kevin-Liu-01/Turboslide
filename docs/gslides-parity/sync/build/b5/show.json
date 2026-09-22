@@ -1,0 +1,74 @@
+{
+  "base": "http://localhost:4415",
+  "mode": "show",
+  "at": "2026-09-21T20:09:37.703Z",
+  "headed": false,
+  "row": "cost.show.calls",
+  "ceiling": {
+    "functionRequestsPerMinute": 0
+  },
+  "present": true,
+  "sessionsAtEnd": 0,
+  "t0": 1790021197447,
+  "t1": 1790021377460,
+  "samples": [
+    {
+      "at": 15000,
+      "functionRequests": 0
+    },
+    {
+      "at": 30003,
+      "functionRequests": 0
+    },
+    {
+      "at": 45006,
+      "functionRequests": 0
+    },
+    {
+      "at": 60008,
+      "functionRequests": 0
+    },
+    {
+      "at": 75009,
+      "functionRequests": 0
+    },
+    {
+      "at": 90012,
+      "functionRequests": 0
+    },
+    {
+      "at": 105014,
+      "functionRequests": 0
+    },
+    {
+      "at": 120016,
+      "functionRequests": 0
+    },
+    {
+      "at": 135018,
+      "functionRequests": 0
+    },
+    {
+      "at": 150021,
+      "functionRequests": 0
+    },
+    {
+      "at": 165025,
+      "functionRequests": 0
+    },
+    {
+      "at": 180013,
+      "functionRequests": 0
+    }
+  ],
+  "summary": {
+    "windowMs": 180013,
+    "minutes": 3,
+    "requests": 0,
+    "functionRequests": 0,
+    "functionRequestsPerMinute": 0,
+    "polls": 0,
+    "rows": []
+  },
+  "pass": true
+}

@@ -63,7 +63,11 @@ const pollUntil = async (read, test, timeout = 15_000, every = 100) => {
   }
 };
 const connected = (page, timeout = 45_000) =>
-  pollUntil(() => state(page), (s) => s.sync?.connected === true, timeout);
+  pollUntil(
+    () => state(page),
+    (s) => s.sync?.connected === true,
+    timeout,
+  );
 const settled = (page, timeout = 30_000) =>
   pollUntil(
     () => state(page),
@@ -71,16 +75,29 @@ const settled = (page, timeout = 30_000) =>
     timeout,
   );
 const waitRevision = (page, want, timeout = 20_000) =>
-  pollUntil(() => state(page).then((s) => s.revision), (r) => r >= want, timeout, 60);
+  pollUntil(
+    () => state(page).then((s) => s.revision),
+    (r) => r >= want,
+    timeout,
+    60,
+  );
 const dismissPrompt = async (page) => {
   const prompt = page.locator('[data-control="dialog.namePrompt"]');
   if (await prompt.isVisible().catch(() => false)) {
-    await page.locator('[data-control="dialog.namePrompt.close"]').first().click({ timeout: 2000 }).catch(() => undefined);
+    await page
+      .locator('[data-control="dialog.namePrompt.close"]')
+      .first()
+      .click({ timeout: 2000 })
+      .catch(() => undefined);
     await sleep(200);
   }
   const persisted = page.locator('[data-control="sync.persisted"]');
   if (await persisted.isVisible().catch(() => false)) {
-    await page.locator('[data-control="sync.persisted.apply"]').first().click({ timeout: 2000 }).catch(() => undefined);
+    await page
+      .locator('[data-control="sync.persisted.apply"]')
+      .first()
+      .click({ timeout: 2000 })
+      .catch(() => undefined);
     await sleep(200);
   }
 };
@@ -106,8 +123,11 @@ const modeOf = (page) =>
       editorStage: document.querySelector('.ts-stagewrap.ts-editor') !== null,
       role: s.access?.role ?? s.role ?? null,
       mode: s.mode ?? null,
-      saveWords: document.querySelector('[data-control="deck.saveState"]')?.textContent?.trim() ?? null,
-      viewOnly: [...document.querySelectorAll('button, [role="button"], span')].some((el) => /^View only$/.test(el.textContent?.trim() ?? '')),
+      saveWords:
+        document.querySelector('[data-control="deck.saveState"]')?.textContent?.trim() ?? null,
+      viewOnly: [...document.querySelectorAll('button, [role="button"], span')].some((el) =>
+        /^View only$/.test(el.textContent?.trim() ?? ''),
+      ),
     };
   });
 const END_OF_TEXT = process.platform === 'darwin' ? 'Meta+ArrowDown' : 'Control+End';
@@ -121,7 +141,12 @@ const openRun = async (page) => {
   await page.mouse.move(x, y, { steps: 12 });
   await sleep(rand(60, 120));
   await page.mouse.dblclick(x, y);
-  const ok = await pollUntil(() => el.getAttribute('contenteditable'), (v) => v === 'true', 4000, 50);
+  const ok = await pollUntil(
+    () => el.getAttribute('contenteditable'),
+    (v) => v === 'true',
+    4000,
+    50,
+  );
   await page.keyboard.press(END_OF_TEXT);
   await page.keyboard.press('End');
   return ok === 'true';
@@ -132,15 +157,26 @@ const typeHuman = async (page, text) => {
     await sleep(rand(40, 90));
   }
 };
-const shot = (page, name) => page.screenshot({ path: path.join(OUT, `${PREFIX}-${name}.png`) }).catch(() => undefined);
+const shot = (page, name) =>
+  page.screenshot({ path: path.join(OUT, `${PREFIX}-${name}.png`) }).catch(() => undefined);
 const saveWords = (page) =>
-  page.evaluate(() => document.querySelector('[data-control="deck.saveState"]')?.textContent?.trim() ?? null);
+  page.evaluate(
+    () => document.querySelector('[data-control="deck.saveState"]')?.textContent?.trim() ?? null,
+  );
 const staleWords = (page) =>
   page.evaluate(
     () =>
-      [...document.querySelectorAll('.ts-snackbar, .pt-toast, [data-control="snackbar"], .ts-reject, [data-control^="reject"]')]
+      [
+        ...document.querySelectorAll(
+          '.ts-snackbar, .pt-toast, [data-control="snackbar"], .ts-reject, [data-control^="reject"]',
+        ),
+      ]
         .map((el) => el.textContent ?? '')
-        .filter((t) => /stale|not accepted|refused|reload and rebase|changed in the Blob|No block|was not applied|is outside a text/i.test(t))
+        .filter((t) =>
+          /stale|not accepted|refused|reload and rebase|changed in the Blob|No block|was not applied|is outside a text/i.test(
+            t,
+          ),
+        )
         .join(' | ') || null,
   );
 const readDocument = async (page) => {
@@ -163,7 +199,16 @@ const readDocument = async (page) => {
     slides,
   };
 };
-const brief = (s) => ({ revision: s.revision, serverRevision: s.serverRevision, seq: s.sync?.seq, pending: s.sync?.pending, retained: s.sync?.retained, connected: s.sync?.connected, offline: s.sync?.offline, streamDown: s.sync?.streamDown });
+const brief = (s) => ({
+  revision: s.revision,
+  serverRevision: s.serverRevision,
+  seq: s.sync?.seq,
+  pending: s.sync?.pending,
+  retained: s.sync?.retained,
+  connected: s.sync?.connected,
+  offline: s.sync?.offline,
+  streamDown: s.sync?.streamDown,
+});
 
 const wireOf = (page, name, sink) => {
   page.on('request', (request) => {
@@ -177,7 +222,16 @@ const wireOf = (page, name, sink) => {
     } catch {
       // not json
     }
-    const row = { who: name, at: rel(now()), entries, base, status: null, ms: null, revision: null, vercelId: null };
+    const row = {
+      who: name,
+      at: rel(now()),
+      entries,
+      base,
+      status: null,
+      ms: null,
+      revision: null,
+      vercelId: null,
+    };
     sink.push(row);
     request
       .response()
@@ -209,15 +263,35 @@ const wireOf = (page, name, sink) => {
   });
   page.on('response', (response) => {
     if (!/\/api\/decks\/[^/]+\/stream/.test(response.url())) return;
-    sink.push({ who: name, at: rel(now()), stream: true, status: response.status(), vercelId: response.headers()['x-vercel-id'] ?? null, retryAfter: response.headers()['retry-after'] ?? null });
+    sink.push({
+      who: name,
+      at: rel(now()),
+      stream: true,
+      status: response.status(),
+      vercelId: response.headers()['x-vercel-id'] ?? null,
+      retryAfter: response.headers()['retry-after'] ?? null,
+    });
   });
   page.on('requestfailed', (request) => {
     if (!/\/api\/decks\//.test(request.url())) return;
-    sink.push({ who: name, at: rel(now()), failed: request.url().replace(BASE, ''), reason: request.failure()?.errorText ?? null });
+    sink.push({
+      who: name,
+      at: rel(now()),
+      failed: request.url().replace(BASE, ''),
+      reason: request.failure()?.errorText ?? null,
+    });
   });
 };
 
-const report = { run: PREFIX, base: BASE, startedAt: new Date().toISOString(), phases: {}, wire: [], anomalies: [], console: [] };
+const report = {
+  run: PREFIX,
+  base: BASE,
+  startedAt: new Date().toISOString(),
+  phases: {},
+  wire: [],
+  anomalies: [],
+  console: [],
+};
 const anomaly = (kind, detail) => {
   report.anomalies.push({ kind, ...detail });
   log(`ANOMALY ${kind}: ${JSON.stringify(detail).slice(0, 400)}`);
@@ -230,9 +304,14 @@ let B = null;
 let ctxC = null;
 let C = null;
 const attach = (name, page) => {
-  page.on('pageerror', (e) => report.console.push({ who: name, at: rel(now()), error: String(e).slice(0, 300) }));
+  page.on('pageerror', (e) =>
+    report.console.push({ who: name, at: rel(now()), error: String(e).slice(0, 300) }),
+  );
   page.on('console', (m) => {
-    if ((m.type() === 'error' || m.type() === 'warning') && !/upgrade-insecure-requests/.test(m.text()))
+    if (
+      (m.type() === 'error' || m.type() === 'warning') &&
+      !/upgrade-insecure-requests/.test(m.text())
+    )
       report.console.push({ who: name, at: rel(now()), [m.type()]: m.text().slice(0, 300) });
   });
   wireOf(page, name, report.wire);
@@ -255,11 +334,20 @@ try {
   await waitRevision(A, 1);
   await dismissPrompt(A);
   const s0 = await settled(A);
-  report.phases.create = { url: A.url().replace(BASE, ''), tier: first.sync?.tier, ...brief(s0), clientId: s0.presence?.clientId ?? null, mode: await modeOf(A) };
+  report.phases.create = {
+    url: A.url().replace(BASE, ''),
+    tier: first.sync?.tier,
+    ...brief(s0),
+    clientId: s0.presence?.clientId ?? null,
+    mode: await modeOf(A),
+  };
   log(`created: ${JSON.stringify(report.phases.create)}`);
 
   // B: the same person in a second browser (A's cookies), an editor; C: a stranger, the viewer floor
-  ctxB = await browser.newContext({ viewport: { width: 1440, height: 900 }, storageState: await ctxA.storageState() });
+  ctxB = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    storageState: await ctxA.storageState(),
+  });
   B = await ctxB.newPage();
   attach('B', B);
   ctxC = await browser.newContext({ viewport: { width: 1440, height: 900 } });
@@ -275,8 +363,20 @@ try {
   await dismissPrompt(B);
   await dismissPrompt(C);
   report.phases.join = {
-    b: { ...brief(bFirst), clientId: bFirst.presence?.clientId ?? null, others: bFirst.presence?.others?.length ?? null, heading: await headingOf(B), mode: await modeOf(B) },
-    c: { ...brief(cFirst), clientId: cFirst.presence?.clientId ?? null, others: cFirst.presence?.others?.length ?? null, heading: await headingOf(C), mode: await modeOf(C) },
+    b: {
+      ...brief(bFirst),
+      clientId: bFirst.presence?.clientId ?? null,
+      others: bFirst.presence?.others?.length ?? null,
+      heading: await headingOf(B),
+      mode: await modeOf(B),
+    },
+    c: {
+      ...brief(cFirst),
+      clientId: cFirst.presence?.clientId ?? null,
+      others: cFirst.presence?.others?.length ?? null,
+      heading: await headingOf(C),
+      mode: await modeOf(C),
+    },
   };
   log(`joined: ${JSON.stringify(report.phases.join)}`);
   await shot(A, '00-a-created');
@@ -300,21 +400,39 @@ try {
         state(B).catch(() => null),
         tick % 5 === 0 ? headingOf(B).catch(() => null) : Promise.resolve(undefined),
       ]);
-      const cRow = tick % 10 === 0 ? await Promise.all([headingOf(C).catch(() => null), state(C).catch(() => null)]) : null;
+      const cRow =
+        tick % 10 === 0
+          ? await Promise.all([headingOf(C).catch(() => null), state(C).catch(() => null)])
+          : null;
       const key = `${bText}|${bs?.serverRevision}|${bs?.sync?.seq}`;
       if (key !== last) {
-        bSamples.push({ at: rel(t), revision: bs?.revision ?? null, serverRevision: bs?.serverRevision ?? null, seq: bs?.sync?.seq ?? null, pending: bs?.sync?.pending ?? null, text: bText });
+        bSamples.push({
+          at: rel(t),
+          revision: bs?.revision ?? null,
+          serverRevision: bs?.serverRevision ?? null,
+          seq: bs?.sync?.seq ?? null,
+          pending: bs?.sync?.pending ?? null,
+          text: bText,
+        });
         last = key;
       }
       const shown = bText ?? bDoc ?? null;
       if (shown !== null)
         for (const token of tokens)
           if (!seenInB.has(token.text) && shown.includes(token.text))
-            seenInB.set(token.text, { at: rel(t), revision: bs?.serverRevision ?? null, seq: bs?.sync?.seq ?? null });
+            seenInB.set(token.text, {
+              at: rel(t),
+              revision: bs?.serverRevision ?? null,
+              seq: bs?.sync?.seq ?? null,
+            });
       if (cRow && cRow[0] !== null)
         for (const token of tokens)
           if (!seenInC.has(token.text) && cRow[0].includes(token.text))
-            seenInC.set(token.text, { at: rel(t), revision: cRow[1]?.serverRevision ?? null, seq: cRow[1]?.sync?.seq ?? null });
+            seenInC.set(token.text, {
+              at: rel(t),
+              revision: cRow[1]?.serverRevision ?? null,
+              seq: cRow[1]?.sync?.seq ?? null,
+            });
       const spent = now() - t;
       await sleep(Math.max(20, 100 - spent));
     }
@@ -328,13 +446,26 @@ try {
     const typedAt = now();
     const revision = await waitRevision(A, before + 1, 8000);
     const acked = await state(A);
-    tokens.push({ text, i, typedAt: rel(typedAt), ackMs: now() - typedAt, revisionBefore: before, revision, pendingAtAck: acked.sync?.pending ?? null });
+    tokens.push({
+      text,
+      i,
+      typedAt: rel(typedAt),
+      ackMs: now() - typedAt,
+      revisionBefore: before,
+      revision,
+      pendingAtAck: acked.sync?.pending ?? null,
+    });
     const wait = 3000 - (now() - started);
     if (wait > 0) await sleep(wait);
   }
   await A.keyboard.press('Escape');
   await dismissPrompt(A);
-  await pollUntil(() => Promise.resolve(seenInB.size), (n) => n >= tokens.length, 20_000, 200);
+  await pollUntil(
+    () => Promise.resolve(seenInB.size),
+    (n) => n >= tokens.length,
+    20_000,
+    200,
+  );
   await sleep(3000);
   samplerStop = true;
   await sampler;
@@ -344,14 +475,28 @@ try {
   const latencies = tokens.map((t) => {
     const seen = seenInB.get(t.text);
     const seenC = seenInC.get(t.text);
-    return { token: t.text, typedAt: t.typedAt, ackMs: t.ackMs, revision: t.revision, seenAt: seen?.at ?? null, latencyMs: seen ? seen.at - t.typedAt : null, seenRevision: seen?.revision ?? null, seenSeq: seen?.seq ?? null, seenInCMs: seenC ? seenC.at - t.typedAt : null };
+    return {
+      token: t.text,
+      typedAt: t.typedAt,
+      ackMs: t.ackMs,
+      revision: t.revision,
+      seenAt: seen?.at ?? null,
+      latencyMs: seen ? seen.at - t.typedAt : null,
+      seenRevision: seen?.revision ?? null,
+      seenSeq: seen?.seq ?? null,
+      seenInCMs: seenC ? seenC.at - t.typedAt : null,
+    };
   });
-  const arrivalOrder = [...seenInB.entries()].sort((x, y) => x[1].at - y[1].at).map(([token]) => token);
+  const arrivalOrder = [...seenInB.entries()]
+    .sort((x, y) => x[1].at - y[1].at)
+    .map(([token]) => token);
   const expectedOrder = tokens.map((t) => t.text).filter((t) => seenInB.has(t));
   const inOrder = arrivalOrder.join('') === expectedOrder.join('');
   const lost = tokens.filter((t) => !seenInB.has(t.text)).map((t) => t.text);
   const countIn = (text, token) => (text ?? '').split(token).length - 1;
-  const duplicates = tokens.filter((t) => countIn(aText, t.text) > 1 || countIn(bText, t.text) > 1).map((t) => t.text);
+  const duplicates = tokens
+    .filter((t) => countIn(aText, t.text) > 1 || countIn(bText, t.text) > 1)
+    .map((t) => t.text);
   const over3s = latencies.filter((l) => l.latencyMs !== null && l.latencyMs > 3000);
   const sA = await state(A);
   const sB = await state(B);
@@ -376,7 +521,9 @@ try {
     saveWords: { a: await saveWords(A), b: await saveWords(B), c: await saveWords(C) },
     stale: { a: await staleWords(A), b: await staleWords(B) },
   };
-  log(`phase 1: latency ${JSON.stringify(report.phases.serial.latency)}, ack ${JSON.stringify(report.phases.serial.ack)}, inOrder ${inOrder}, lost ${lost.length}, equalAB ${aText === bText}, C saw ${seenInC.size} tokens, C heading "${cText}" at revision ${sC.revision}`);
+  log(
+    `phase 1: latency ${JSON.stringify(report.phases.serial.latency)}, ack ${JSON.stringify(report.phases.serial.ack)}, inOrder ${inOrder}, lost ${lost.length}, equalAB ${aText === bText}, C saw ${seenInC.size} tokens, C heading "${cText}" at revision ${sC.revision}`,
+  );
   if (!inOrder) anomaly('reorder', { arrivalOrder });
   if (lost.length > 0) anomaly('lost-write', { lost, aText, bText });
   if (duplicates.length > 0) anomaly('duplicate', { duplicates });
@@ -405,8 +552,18 @@ try {
       })(),
     ]);
     const typedAt = now();
-    const sa = await pollUntil(() => state(A), (s) => (s.sync?.pending ?? 0) === 0 && s.revision >= ra + 1, 10_000, 50);
-    const sb = await pollUntil(() => state(B), (s) => (s.sync?.pending ?? 0) === 0 && s.revision >= ra + 1, 10_000, 50);
+    const sa = await pollUntil(
+      () => state(A),
+      (s) => (s.sync?.pending ?? 0) === 0 && s.revision >= ra + 1,
+      10_000,
+      50,
+    );
+    const sb = await pollUntil(
+      () => state(B),
+      (s) => (s.sync?.pending ?? 0) === 0 && s.revision >= ra + 1,
+      10_000,
+      50,
+    );
     const both = await pollUntil(
       async () => ({ a: await runText(A), b: await runText(B) }),
       (r) => r.a !== null && r.a === r.b && r.a.includes(ta) && r.a.includes(tb),
@@ -422,8 +579,18 @@ try {
       equal: both.a === both.b,
       aHasBoth: Boolean(both.a && both.a.includes(ta) && both.a.includes(tb)),
       bHasBoth: Boolean(both.b && both.b.includes(ta) && both.b.includes(tb)),
-      orderInA: both.a && both.a.includes(ta) && both.a.includes(tb) ? (both.a.indexOf(ta) < both.a.indexOf(tb) ? 'a then b' : 'b then a') : null,
-      orderInB: both.b && both.b.includes(ta) && both.b.includes(tb) ? (both.b.indexOf(ta) < both.b.indexOf(tb) ? 'a then b' : 'b then a') : null,
+      orderInA:
+        both.a && both.a.includes(ta) && both.a.includes(tb)
+          ? both.a.indexOf(ta) < both.a.indexOf(tb)
+            ? 'a then b'
+            : 'b then a'
+          : null,
+      orderInB:
+        both.b && both.b.includes(ta) && both.b.includes(tb)
+          ? both.b.indexOf(ta) < both.b.indexOf(tb)
+            ? 'a then b'
+            : 'b then a'
+          : null,
     };
     concurrent.push(row);
     log(`phase 2 round ${k}: ${JSON.stringify(row).slice(0, 500)}`);
@@ -436,11 +603,20 @@ try {
   await sleep(3000);
   const c2a = await headingOf(A);
   const c2b = await headingOf(B);
-  report.phases.concurrent = { rounds: concurrent, aText: c2a, bText: c2b, equal: c2a === c2b, a: brief(await state(A)), b: brief(await state(B)) };
+  report.phases.concurrent = {
+    rounds: concurrent,
+    aText: c2a,
+    bText: c2b,
+    equal: c2a === c2b,
+    a: brief(await state(A)),
+    b: brief(await state(B)),
+  };
   for (const r of concurrent) {
     if (!r.equal) anomaly('divergence-concurrent', { round: r.round, a: r.a.text, b: r.b.text });
-    if (!r.aHasBoth || !r.bHasBoth) anomaly('lost-write-concurrent', { round: r.round, a: r.a.text, b: r.b.text });
-    if (r.a.stale || r.b.stale) anomaly('stale-words-concurrent', { round: r.round, a: r.a.stale, b: r.b.stale });
+    if (!r.aHasBoth || !r.bHasBoth)
+      anomaly('lost-write-concurrent', { round: r.round, a: r.a.text, b: r.b.text });
+    if (r.a.stale || r.b.stale)
+      anomaly('stale-words-concurrent', { round: r.round, a: r.a.stale, b: r.b.stale });
   }
   if (c2a !== c2b) anomaly('divergence-after-concurrent', { aText: c2a, bText: c2b });
   await shot(A, '02-a-after-concurrent');
@@ -467,7 +643,12 @@ try {
     for (let k = 1; k <= 2; k += 1) {
       const t = ` o${k}`;
       await typeHuman(A, t);
-      aOffline.push({ text: t, at: rel(now()), state: brief(await state(A)), words: await saveWords(A) });
+      aOffline.push({
+        text: t,
+        at: rel(now()),
+        state: brief(await state(A)),
+        words: await saveWords(A),
+      });
       await sleep(5000);
     }
   })();
@@ -479,7 +660,12 @@ try {
   await ctxA.setOffline(false);
   const onlineAt = now();
   log('phase 3: A back online');
-  const aSettled = await pollUntil(() => state(A), (s) => (s.sync?.pending ?? 0) === 0 && s.sync?.connected === true, 45_000, 100);
+  const aSettled = await pollUntil(
+    () => state(A),
+    (s) => (s.sync?.pending ?? 0) === 0 && s.sync?.connected === true,
+    45_000,
+    100,
+  );
   const aSettledMs = now() - onlineAt;
   await A.keyboard.press('Escape');
   await B.keyboard.press('Escape');
@@ -510,16 +696,30 @@ try {
     lostInB: allTokens.filter((t) => !(converged.b ?? '').includes(t)),
     duplicatesInA: allTokens.filter((t) => countIn(converged.a, t) > 1),
     duplicatesInB: allTokens.filter((t) => countIn(converged.b, t) > 1),
-    orderA: allTokens.map((t) => [t, (converged.a ?? '').indexOf(t)]).sort((x, y) => x[1] - y[1]).map((r) => r[0]),
+    orderA: allTokens
+      .map((t) => [t, (converged.a ?? '').indexOf(t)])
+      .sort((x, y) => x[1] - y[1])
+      .map((r) => r[0]),
     a: brief(s3a),
     b: brief(s3b),
     saveWords: { a: await saveWords(A), b: await saveWords(B) },
     stale: { a: await staleWords(A), b: await staleWords(B) },
   };
-  log(`phase 3: ${JSON.stringify({ ...report.phases.offline, bTokens: undefined, aOffline: undefined }).slice(0, 900)}`);
-  if (!report.phases.offline.converged) anomaly('divergence-after-offline', { aText: converged.a, bText: converged.b });
-  if (report.phases.offline.lostInA.length || report.phases.offline.lostInB.length) anomaly('lost-write-offline', { lostInA: report.phases.offline.lostInA, lostInB: report.phases.offline.lostInB });
-  if (report.phases.offline.duplicatesInA.length || report.phases.offline.duplicatesInB.length) anomaly('duplicate-offline', { a: report.phases.offline.duplicatesInA, b: report.phases.offline.duplicatesInB });
+  log(
+    `phase 3: ${JSON.stringify({ ...report.phases.offline, bTokens: undefined, aOffline: undefined }).slice(0, 900)}`,
+  );
+  if (!report.phases.offline.converged)
+    anomaly('divergence-after-offline', { aText: converged.a, bText: converged.b });
+  if (report.phases.offline.lostInA.length || report.phases.offline.lostInB.length)
+    anomaly('lost-write-offline', {
+      lostInA: report.phases.offline.lostInA,
+      lostInB: report.phases.offline.lostInB,
+    });
+  if (report.phases.offline.duplicatesInA.length || report.phases.offline.duplicatesInB.length)
+    anomaly('duplicate-offline', {
+      a: report.phases.offline.duplicatesInA,
+      b: report.phases.offline.duplicatesInB,
+    });
   await shot(A, '03-a-after-offline');
   await shot(B, '03-b-after-offline');
 
@@ -548,15 +748,25 @@ try {
     sameAB: canon(docA) === canon(docB),
     sameAC: canon(docA) === canon(docC),
     sameRevision: docA.revision === docB.revision && docB.revision === docC.revision,
-    staleAgainstLive: { a: docA.revision < serverBefore.a, b: docB.revision < serverBefore.b, liveBefore: serverBefore },
-    headingMatchesLive: { a: headingOfDoc(docA) === converged.a, b: headingOfDoc(docB) === converged.a, c: headingOfDoc(docC) === converged.a },
+    staleAgainstLive: {
+      a: docA.revision < serverBefore.a,
+      b: docB.revision < serverBefore.b,
+      liveBefore: serverBefore,
+    },
+    headingMatchesLive: {
+      a: headingOfDoc(docA) === converged.a,
+      b: headingOfDoc(docB) === converged.a,
+      c: headingOfDoc(docC) === converged.a,
+    },
   };
   writeFileSync(path.join(OUT, `${PREFIX}-reload-a.json`), JSON.stringify(docA, null, 2));
   writeFileSync(path.join(OUT, `${PREFIX}-reload-b.json`), JSON.stringify(docB, null, 2));
   writeFileSync(path.join(OUT, `${PREFIX}-reload-c.json`), JSON.stringify(docC, null, 2));
   log(`phase 4: ${JSON.stringify(report.phases.reload).slice(0, 900)}`);
-  if (!report.phases.reload.sameAB) anomaly('reload-diverged', { a: report.phases.reload.a, b: report.phases.reload.b });
-  if (report.phases.reload.staleAgainstLive.a || report.phases.reload.staleAgainstLive.b) anomaly('stale-reload', report.phases.reload.staleAgainstLive);
+  if (!report.phases.reload.sameAB)
+    anomaly('reload-diverged', { a: report.phases.reload.a, b: report.phases.reload.b });
+  if (report.phases.reload.staleAgainstLive.a || report.phases.reload.staleAgainstLive.b)
+    anomaly('stale-reload', report.phases.reload.staleAgainstLive);
   await shot(A, '04-a-reloaded');
   await shot(B, '04-b-reloaded');
   await shot(C, '04-c-reloaded');
@@ -593,13 +803,21 @@ try {
     } catch (error) {
       report.teardown.productPathError = error instanceof Error ? error.message : String(error);
       try {
-        await A.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+        await A.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(
+          () => undefined,
+        );
         await editorReady(A).catch(() => undefined);
         const info = await invoke(A, 'deck.info').catch(() => null);
         if (info) {
-          await invoke(A, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+          await invoke(A, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+            () => undefined,
+          );
           const t = await invoke(A, 'deck.info').catch(() => null);
-          await invoke(A, 'deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+          await invoke(A, 'deck.remove', {
+            id: deckId,
+            baseRevision: t?.revision ?? info.revision,
+            confirm: true,
+          }).catch(() => undefined);
           report.teardown.fallback = true;
         }
       } catch {
@@ -609,7 +827,9 @@ try {
     let status = 0;
     const until = now() + 30_000;
     for (;;) {
-      const res = await A.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 }).catch(() => null);
+      const res = await A.request
+        .get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 })
+        .catch(() => null);
       status = res ? res.status() : 0;
       if (status === 404 || now() > until) break;
       await sleep(2000);
@@ -619,6 +839,11 @@ try {
     log(`teardown: ${JSON.stringify(report.teardown)}`);
   }
   await browser.close().catch(() => undefined);
-  writeFileSync(path.join(OUT, `${PREFIX}-ordering-run.json`), JSON.stringify({ ...report, deckId }, null, 2));
-  log(`written ${path.join(OUT, `${PREFIX}-ordering-run.json`)}; anomalies ${report.anomalies.length}`);
+  writeFileSync(
+    path.join(OUT, `${PREFIX}-ordering-run.json`),
+    JSON.stringify({ ...report, deckId }, null, 2),
+  );
+  log(
+    `written ${path.join(OUT, `${PREFIX}-ordering-run.json`)}; anomalies ${report.anomalies.length}`,
+  );
 }

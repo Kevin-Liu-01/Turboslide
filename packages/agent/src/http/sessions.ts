@@ -1,10 +1,13 @@
 // Attached studio sessions (SPEC 7.3 "the view tools when a studio session is attached";
-// MILESTONES M4 item 1). A browser page on /edit or /deck attaches itself, long-polls for
-// commands and answers them through its own window.turboslide.studio handle, so the server never
-// reaches into a page: `view.goto` over /mcp or /api/actions is a command the page runs with the
-// same dispatcher a click uses (SPEC 7.1) and the result is the page's view state. The registry is
-// in-memory and per process; a session that stops polling is swept after `staleMs`. Framework
-// free: the studio wraps it in server functions.
+// MILESTONES M4 item 1). A browser page on /edit, or on /deck, /present or /embed opened with
+// `?agent=1`, attaches itself, polls for commands every 20 s while it is visible and answers them
+// through its own window.turboslide.studio handle, so the server never reaches into a page:
+// `view.goto` over /mcp or /api/actions is a command the page runs with the same dispatcher a
+// click uses (SPEC 7.1) and the result is the page's view state. The registry is in-memory and
+// per process; a session that stops polling is swept after `staleMs`. A poll is answered at once
+// (docs/SYNC.md 3.10): the client paces the loop, so a command waits for the page's next poll,
+// which is why `DEFAULT_COMMAND_TIMEOUT_MS` covers a whole pause. Framework free: the studio
+// wraps it in server functions.
 
 import { ConflictError } from '@turboslide/schema/errors';
 
@@ -65,7 +68,10 @@ export type SessionRegistry = {
   attached: (deckId: string, action?: string, principalId?: string) => StudioSession | undefined;
   /** How many pages one principal holds on this instance, for the caps of SPEC-3 8.2. */
   countFor: (principalId: string) => number;
-  /** Pending commands for a session; resolves at the timeout with an empty list. */
+  /**
+   * Pending commands for a session: at once when any are queued or the id is unknown here, else
+   * after `timeoutMs` with an empty list (the studio passes 0, so every answer is at once).
+   */
   poll: (id: string, timeoutMs: number) => Promise<SessionCommand[]>;
   answer: (id: string, answer: SessionAnswer) => boolean;
   /** Issues one command to a session and waits for its answer. */
@@ -80,13 +86,20 @@ export type SessionRegistry = {
 };
 
 export type SessionRegistryOptions = {
-  /** How long a silent session stays attached. Default 45 s (the poll is 20 s). */
+  /** How long a silent session stays attached. Default 45 s (the poll cycle is 20 s). */
   staleMs?: number;
   now?: () => number;
 };
 
 export const DEFAULT_STALE_MS = 45_000;
-export const DEFAULT_COMMAND_TIMEOUT_MS = 15_000;
+/**
+ * How long a command waits for the page's answer. The page polls every 20 s when idle
+ * (useStudioSession.ts `EMPTY_ANSWER_PAUSE_MS`) and the poll is not held, so a command issued just
+ * after a poll waits a whole pause plus the round trip and the page's own work; 30 s covers that
+ * with room. A page hidden for 10 s has detached, so an agent aiming at a background tab reads the
+ * 404 at once, never this timeout.
+ */
+export const DEFAULT_COMMAND_TIMEOUT_MS = 30_000;
 
 /** The error a command answers with when the page refused or failed it, or when no page answers. */
 export class SessionCommandError extends Error {
@@ -216,13 +229,13 @@ export function createSessionRegistry(options: SessionRegistryOptions = {}): Ses
     poll(id, timeoutMs) {
       const entry = entries.get(id);
       if (!entry) {
-        // an id this instance does not hold (another instance's page, or a swept session): the
-        // answer is empty after the poll's own timeout, never at once, so a page whose polls land
-        // on the wrong instance costs three calls a minute instead of a call every few
-        // milliseconds (gslides-parity SPEC-4 0.37; PP 3.8's interim; R04 7.3, 4.2)
-        return new Promise<SessionCommand[]>((resolve) => {
-          setTimeout(() => resolve([]), Math.max(0, timeoutMs));
-        });
+        // an id this instance does not hold (another instance's page, or a swept session): empty
+        // at once (docs/SYNC.md 3.10). The hold that stood here from the storm fix of 2026-09-15
+        // (gslides-parity SPEC-4 0.37; docs/sessions-polling.md 1.2) cost 25 s of a 2 GB function
+        // per call for nothing; the pace that keeps a wrong instance from being polled every few
+        // milliseconds is the client's pause after an empty answer, on every deployment since
+        // that fix.
+        return Promise.resolve([]);
       }
       registry.heartbeat(id);
       if (entry.queue.length > 0) {

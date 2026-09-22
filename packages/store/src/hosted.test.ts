@@ -17,7 +17,9 @@ import type { Author, Mutation } from '@turboslide/schema/mutations';
 
 import { memoryBlobClient, versionOf } from './blob-fake.ts';
 import type { FakeBlobClient } from './blob-fake.ts';
+import { immutableCopyPath } from './access-store.ts';
 import {
+  deckCardFactsOf,
   BLOB_DOCUMENT_WRITE_TIMEOUT_MS,
   BLOB_READ_TIMEOUT_MS,
   BLOB_WRITE_TIMEOUT_MS,
@@ -34,6 +36,8 @@ import {
   pruneThumbs,
   pushDeckDir,
   putDeadlineFor,
+  HOLE_WALK_LOOKAHEAD,
+  isBlobTimeoutError,
   storedThumbs,
   thumbPathname,
   thumbsPrefix,
@@ -52,8 +56,10 @@ import {
   snapshotKey,
   snapshotPath,
 } from './snapshots.ts';
+import { SNAPSHOT_PRUNE_EVERY } from './snapshots.ts';
 import type { DeckStore, StoreEvent, VersionRecord } from './store.ts';
 import { AssetExistsError } from './store.ts';
+import { RECORD_ORIGIN_WRITES, logHoles } from './versions.ts';
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
 
@@ -531,6 +537,12 @@ describe('hosted stores', () => {
       ) as { deck: { revision: number }; slides: Record<string, unknown> };
       expect(body.deck.revision).toBe(413);
       expect(Object.keys(body.slides)).toHaveLength(WORKED_SLIDES.length);
+      // the seed's snapshot, which no record names, waits for the prune: since the sync and
+      // costs round the prune runs every SNAPSHOT_PRUNE_EVERY records and at the last stream's
+      // close, not after every commit (docs/SYNC.md 3.6), so the write itself lists nothing
+      expect(fake.calls.filter((c) => c.op === 'list')).toEqual([]);
+      expect(await a.snapshots()).toBe(2);
+      expect(await a.pruneSnapshots()).toBe(1);
       expect(await a.snapshots()).toBe(1);
     });
 
@@ -576,9 +588,11 @@ describe('hosted stores', () => {
       });
       expect(lost.ok).toBe(false);
       // two different bodies, two different keys: the loser stored its snapshot and then failed
-      // the conditional manifest push, so its snapshot is named by no record and no etag
+      // the conditional manifest push, so its snapshot is named by no record and no etag; the
+      // seed's snapshot stands beside them until the prune runs (docs/SYNC.md 3.6)
       const stored = blobsOf(pair.fake, 'decks/gt-brand/snapshots/');
-      expect(stored).toHaveLength(2);
+      expect(stored).toHaveLength(3);
+      expect(stored).toContain(seedSnapshot());
       const head = await pair.fake.head('decks/gt-brand/deck.json');
       const winner = etagMd5(head!.version)!;
       expect(stored).toContain(`decks/gt-brand/${snapshotPath(winner)}`);
@@ -598,9 +612,9 @@ describe('hosted stores', () => {
       const at = await fresh.documentAtRevision(413);
       const atList = at.slides['content-rule'];
       expect(atList?.kind === 'content' && atList.slots.right?.[0]).toMatchObject({ size: 20 });
-      // the prune removes the orphan and keeps the winner's
+      // the prune removes the orphan and the seed's and keeps the winner's
       clock = '2026-09-11T10:30:00.000Z';
-      expect(await pair.a.pruneSnapshots()).toBe(1);
+      expect(await pair.a.pruneSnapshots()).toBe(2);
       expect(blobsOf(pair.fake, 'decks/gt-brand/snapshots/')).toEqual([
         `decks/gt-brand/${snapshotPath(winner)}`,
       ]);
@@ -634,7 +648,10 @@ describe('hosted stores', () => {
       if (lost.ok || lost.code !== 'conflict') return;
       expect(lost.message).toMatch(/its snapshot took the name this write computed/);
       expect(lost.currentRevision).toBe(413);
-      expect(blobsOf(pair.fake, 'decks/gt-brand/snapshots/')).toHaveLength(1);
+      // one snapshot from the two writes, beside the seed's (pruned on the prune's schedule)
+      expect(
+        blobsOf(pair.fake, 'decks/gt-brand/snapshots/').filter((key) => key !== seedSnapshot()),
+      ).toHaveLength(1);
       // the one snapshot is a's body, and every reader gets a's document
       const list = (await pair.b.read()).document.slides['content-rule'];
       expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 20 });
@@ -674,27 +691,34 @@ describe('hosted stores', () => {
       // the retention set over a window of one record: the newest write and the named version's
       const retained = retainedSnapshots(records, 1);
       expect([...retained].sort()).toEqual([keys[2]].sort());
+      // the seed's snapshot (uploaded at 10:00, named by no record) is prunable beside the two
+      // older keys: no write pruned it, since the prune runs every SNAPSHOT_PRUNE_EVERY records
       const entries = await fake.list('decks/gt-brand/snapshots/');
       const doomed = prunableSnapshots(entries, 'decks/gt-brand/', retained, {
         now: Date.parse('2026-09-11T11:00:00.000Z'),
         graceMs: 0,
       });
       expect(doomed.sort()).toEqual(
-        keys
-          .slice(0, 2)
-          .map((k) => `decks/gt-brand/${snapshotPath(k)}`)
-          .sort(),
+        [
+          ...keys.slice(0, 2).map((k) => `decks/gt-brand/${snapshotPath(k)}`),
+          seedSnapshot(),
+        ].sort(),
       );
       // a snapshot younger than the grace is left alone whatever the records say: at 10:06:30
-      // the 10:01 upload has aged past five minutes and the 10:02 one has not
+      // the 10:00 and 10:01 uploads have aged past five minutes and the 10:02 one has not
       expect(
         prunableSnapshots(entries, 'decks/gt-brand/', retained, {
           now: Date.parse('2026-09-11T10:06:30.000Z'),
           graceMs: 5 * 60_000,
         }),
-      ).toEqual(keys.slice(0, 1).map((k) => `decks/gt-brand/${snapshotPath(k)}`));
-      // the store's own prune keeps the last 50 records' snapshots: nothing goes here
-      expect(await a.pruneSnapshots()).toBe(0);
+      ).toEqual(
+        [
+          ...keys.slice(0, 1).map((k) => `decks/gt-brand/${snapshotPath(k)}`),
+          seedSnapshot(),
+        ].sort(),
+      );
+      // the store's own prune keeps the last 50 records' snapshots: the seed's alone goes here
+      expect(await a.pruneSnapshots()).toBe(1);
       expect(await a.snapshots()).toBe(3);
     });
 
@@ -773,12 +797,18 @@ describe('hosted stores', () => {
       const ops = fake.calls.map((call) => `${call.op} ${call.pathname}`);
       const at = (needle: string) => ops.findIndex((op) => op.startsWith(needle));
       const key = outcome.entry.snapshot!;
-      // round one: the head and the leases read, before anything is put
+      // round one: the head and the leases read, before anything is put. The leases are read
+      // proven since the sync and costs round (docs/SYNC.md 3.5: the head first, the body only
+      // when its md5 is the head's version), and the seed holds no leases file, so the head
+      // answers null and no body is read
       const firstPut = ops.findIndex((op) => op.startsWith('put '));
       expect(at('head decks/gt-brand/deck.json')).toBeGreaterThanOrEqual(0);
-      expect(at('get decks/gt-brand/leases.json')).toBeGreaterThanOrEqual(0);
+      expect(at('head decks/gt-brand/leases.json')).toBeGreaterThanOrEqual(0);
       expect(at('head decks/gt-brand/deck.json')).toBeLessThan(firstPut);
-      expect(at('get decks/gt-brand/leases.json')).toBeLessThan(firstPut);
+      expect(at('head decks/gt-brand/leases.json')).toBeLessThan(firstPut);
+      expect(at('get decks/gt-brand/leases.json')).toBe(-1);
+      // no listing anywhere in the write (docs/SYNC.md invariant 7)
+      expect(ops.filter((op) => op.startsWith('list '))).toEqual([]);
       // round two: the snapshot, the changed slide body and the record all precede the manifest
       const commit = at('put decks/gt-brand/deck.json');
       expect(at(`put decks/gt-brand/${snapshotPath(key)}`)).toBeLessThan(commit);
@@ -1042,6 +1072,55 @@ describe('hosted stores', () => {
       expect(await decks.assetFile('gt-brand', '../deck.json')).toBeNull();
       expect(await decks.assetFile('gt-brand', 'missing.png')).toBeNull();
     });
+
+    it.skipIf(kind !== 'blob')(
+      "keeps the card's appearance and first slide from the manifest bytes a listing proved, so an instance without the deck's mirror draws the same card (the sync and costs round's ship, VERIFICATION.md pass 2 F3)",
+      async () => {
+        const fake = memoryBlobClient();
+        const first = collection('blob', join(root, 'overlay-facts-1'), fake);
+        await first.ready();
+        clock = '2026-09-14T11:00:00.000Z';
+        await first.create({ name: 'Light deck', from: 'blank' });
+        // a second instance that never opened either deck lists them: no mirror on its disk
+        const second = collection('blob', join(root, 'overlay-facts-2'), fake);
+        await second.ready();
+        expect(second.cardFacts?.('gt-brand')).toBeNull();
+        const heads = await second.list();
+        expect(heads.map((head) => head.id)).toEqual(['light-deck', 'gt-brand']);
+        const gt = second.cardFacts?.('gt-brand');
+        expect(gt).toEqual({
+          appearance: WORKED_DECK.defaults?.appearance ?? WORKED_DECK.brand?.appearance ?? 'dark',
+          firstSlide: WORKED_DECK.sections[0]?.slideIds[0] ?? null,
+        });
+        // the new deck's facts are its stored manifest's (the appearance the template gave it, docs/PRODUCT.md 4.1)
+        const stored = JSON.parse(
+          new TextDecoder().decode(fake.blobs.get('decks/light-deck/deck.json')!.bytes),
+        ) as { defaults?: { appearance?: string }; brand?: { appearance?: string } };
+        const light = second.cardFacts?.('light-deck');
+        expect(light?.appearance).toBe(
+          stored.defaults?.appearance ?? stored.brand?.appearance ?? 'dark',
+        );
+        expect(typeof light?.firstSlide).toBe('string');
+        expect(existsSync(join(root, 'overlay-facts-2', 'decks', 'light-deck', 'deck.json'))).toBe(
+          false,
+        );
+        // the bytes alone: no manifest is null, a manifest without sections has no first slide
+        expect(deckCardFactsOf(new TextEncoder().encode('not json'))).toBeNull();
+        expect(
+          deckCardFactsOf(new TextEncoder().encode('{"brand":{"appearance":"dark"}}')),
+        ).toEqual({
+          appearance: 'dark',
+          firstSlide: null,
+        });
+        expect(
+          deckCardFactsOf(
+            new TextEncoder().encode(
+              '{"defaults":{"appearance":"light"},"brand":{"appearance":"dark"},"sections":[{"slideIds":[]},{"slideIds":["s2"]}]}',
+            ),
+          ),
+        ).toEqual({ appearance: 'light', firstSlide: 's2' });
+      },
+    );
 
     it('creates a deck from the template with the twins and lists it first', async () => {
       clock = '2026-09-11T11:00:00.000Z';
@@ -2304,9 +2383,479 @@ describe('hosted stores', () => {
       expect(BLOB_READ_TIMEOUT_MS * 2).toBeLessThan(30_000);
     });
   });
+  // -------------------------------------------------------------------------------------------
+  // The sync and costs round, the store tier (docs/SYNC.md 3.2, 3.5, 3.6, 6.3, 6.4; build/b3.md)
+
+  describe('the sync and costs round: the store tier', () => {
+    const opsOf = (fake: FakeBlobClient): string[] =>
+      fake.calls.map((call) => `${call.op} ${call.pathname}`);
+    const lists = (fake: FakeBlobClient): string[] =>
+      opsOf(fake).filter((op) => op.startsWith('list '));
+    /** A third mirror over the pair's fake, cold. */
+    const third = (fake: FakeBlobClient, name: string): BlobStore =>
+      openBlobStore({
+        client: fake,
+        deckId: 'gt-brand',
+        dir: join(root, name, 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+      });
+
+    it('one edit is five puts and no list on the writer (6.3; the writer’s row of 4.5)', async () => {
+      const { fake, a } = await blobPair();
+      await a.sync();
+      fake.calls.length = 0;
+      const outcome = await a.write({
+        baseRevision: 412,
+        author: agentA,
+        mutations: [setSize(22)],
+      });
+      expect(outcome.ok).toBe(true);
+      if (!outcome.ok) return;
+      const puts = opsOf(fake).filter((op) => op.startsWith('put '));
+      expect(puts).toHaveLength(5);
+      expect(puts.sort()).toEqual(
+        [
+          `put decks/gt-brand/${snapshotPath(outcome.entry.snapshot!)}`,
+          'put decks/gt-brand/versions/1.json',
+          'put decks/gt-brand/slides/content-rule.json',
+          'put decks/gt-brand/deck.json',
+          `put ${pulsePath('gt-brand')}`,
+        ].sort(),
+      );
+      expect(lists(fake)).toEqual([]);
+      // the simple reads of the write: the manifest head and the leases head, nothing else
+      expect(opsOf(fake).filter((op) => /^(head|get) /.test(op))).toEqual([
+        'head decks/gt-brand/deck.json',
+        'head decks/gt-brand/leases.json',
+      ]);
+    });
+
+    it('a remote commit costs the reader no list: the records by number, the snapshot the etag names, the comments index head (3.5, invariant 7)', async () => {
+      const { fake, a, b } = await blobPair();
+      await b.sync();
+      const written = await a.write({
+        baseRevision: 412,
+        author: agentA,
+        mutations: [setSize(22)],
+      });
+      expect(written.ok).toBe(true);
+      fake.calls.length = 0;
+      const seen = await b.read();
+      expect(seen.document.deck.revision).toBe(413);
+      const ops = opsOf(fake);
+      expect(lists(fake)).toEqual([]);
+      // one record read (a head and a get), one miss past it, one snapshot get, one index head
+      expect(ops.filter((op) => op.startsWith('get '))).toEqual([
+        `get decks/gt-brand/${snapshotPath(written.ok ? written.entry.snapshot! : '')}`,
+        'get decks/gt-brand/versions/1.json',
+      ]);
+      expect(ops.filter((op) => op.startsWith('head '))).toEqual([
+        'head decks/gt-brand/deck.json',
+        'head decks/gt-brand/versions/1.json',
+        'head decks/gt-brand/versions/2.json',
+        'head decks/gt-brand/comments/index.json',
+      ]);
+      // four heads and two gets, no listing: the reader's row of docs/SYNC.md 4.5
+      expect(ops).toHaveLength(6);
+      // a second read inside the same head is one head and nothing else
+      fake.calls.length = 0;
+      await b.read();
+      expect(ops.length).toBeGreaterThan(0);
+      expect(opsOf(fake)).toEqual(['head decks/gt-brand/deck.json']);
+      // a cold mirror walks the whole log by number, never by listing
+      const c = third(fake, 'mirror-cold');
+      fake.calls.length = 0;
+      expect((await c.read()).document.deck.revision).toBe(413);
+      expect(lists(fake)).toEqual([]);
+      expect((await c.records()).map((r) => r.n)).toEqual([1]);
+    });
+
+    it('the prune lists on the twentieth commit alone (3.6)', async () => {
+      const { fake, a } = await blobPair();
+      await a.sync();
+      fake.calls.length = 0;
+      let base = 412;
+      for (let i = 1; i <= SNAPSHOT_PRUNE_EVERY; i += 1) {
+        clock = `2026-09-11T10:${String(i).padStart(2, '0')}:00.000Z`;
+        const outcome = await a.write({
+          baseRevision: base,
+          author: agentA,
+          mutations: [setSize([20, 22, 24][i % 3] as number)],
+        });
+        expect(outcome.ok ? 'ok' : outcome.message).toBe('ok');
+        if (!outcome.ok) return;
+        base = outcome.revision;
+        // the prune runs behind the answer; its listing is recorded as it starts
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        expect(lists(fake)).toHaveLength(i === SNAPSHOT_PRUNE_EVERY ? 1 : 0);
+      }
+      expect(lists(fake)).toEqual(['list decks/gt-brand/snapshots/']);
+      expect(opsOf(fake).filter((op) => op.startsWith('put '))).toHaveLength(
+        5 * SNAPSHOT_PRUNE_EVERY,
+      );
+      // the twentieth record is the one the prune follows
+      expect(SNAPSHOT_PRUNE_EVERY).toBe(20);
+    });
+
+    it('pullLeases reads through provenGet: a lease released on another instance is not read from the CDN’s stale copy (3.5, invariant 8)', async () => {
+      const { fake, a, b } = await blobPair();
+      await a.sync();
+      await b.sync();
+      await a.lease('content-rule', agentA, { minutes: 10 });
+      // the push stores the immutable copy under the leases file's version first
+      const leasesPath = 'decks/gt-brand/leases.json';
+      const stored = fake.blobs.get(leasesPath);
+      expect(stored).toBeDefined();
+      expect(fake.blobs.has(immutableCopyPath(leasesPath, stored!.version))).toBe(true);
+      expect((await b.leases()).map((row) => row.slideId)).toEqual(['content-rule']);
+      // the CDN keeps serving the leases file as it was; a releases the lease
+      fake.holdGet();
+      expect(await a.release('content-rule', agentA)).toMatchObject({ slideId: 'content-rule' });
+      fake.calls.length = 0;
+      expect(await b.leases()).toEqual([]);
+      const ops = opsOf(fake);
+      expect(ops[0]).toBe(`head ${leasesPath}`);
+      expect(ops).toContain(`get ${leasesPath}`);
+      const released = fake.blobs.get(leasesPath)!;
+      expect(ops).toContain(`get ${immutableCopyPath(leasesPath, released.version)}`);
+      fake.releaseGet();
+      // an agent's write on the slide goes through now on both instances
+      const allowed = await b.write({
+        baseRevision: 412,
+        author: agentB,
+        mutations: [setSize(22)],
+      });
+      expect(allowed.ok).toBe(true);
+    });
+
+    it('two instances, one fake: the resend of a committed POST is answered with its record and commits nothing, and a third mirror applies the fold once (3.2, invariant 3; 6.4)', async () => {
+      const fake = memoryBlobClient(undefined, { now });
+      await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+      const open = (name: string): BlobStore =>
+        openBlobStore({
+          client: fake,
+          deckId: 'gt-brand',
+          dir: join(root, name, 'gt-brand'),
+          now,
+          syncTtlMs: 0,
+          writeOrigin: true,
+        });
+      const one = open('resend-1');
+      const two = open('resend-2');
+      // both mirrors at 412; instance one commits the POST's batch as record 1
+      expect((await one.read()).document.deck.revision).toBe(412);
+      expect((await two.read()).document.deck.revision).toBe(412);
+      const origin = { clientId: 'tab-a', opIds: ['op-1', 'op-2'] };
+      const first = await one.write({
+        baseRevision: 412,
+        author: kevin,
+        mutations: [setSize(22)],
+        origin,
+      });
+      expect(first.ok).toBe(true);
+      if (!first.ok) return;
+      expect(first.replayed).toBeUndefined();
+      expect(first.entry.origin).toEqual(origin);
+      const stored = JSON.parse(
+        new TextDecoder().decode(fake.blobs.get('decks/gt-brand/versions/1.json')!.bytes),
+      ) as VersionRecord;
+      expect(stored.origin).toEqual(origin);
+      // the answer was lost: the client resends at base 412 and lands on instance two, whose
+      // mirror still stands at 412 and holds no record of the first attempt
+      fake.calls.length = 0;
+      const again = await two.write({
+        baseRevision: 412,
+        author: kevin,
+        mutations: [setSize(22)],
+        origin,
+      });
+      expect(again.ok).toBe(true);
+      if (!again.ok) return;
+      expect(again.replayed?.n).toBe(1);
+      expect(again.revision).toBe(413);
+      expect(again.entry.n).toBe(1);
+      expect(again.changed).toEqual([]);
+      // nothing was claimed, stored or committed by the resend
+      expect(opsOf(fake).filter((op) => op.startsWith('put '))).toEqual([]);
+      expect(blobsOf(fake, 'decks/gt-brand/versions/')).toEqual(['decks/gt-brand/versions/1.json']);
+      expect(await two.revision()).toBe(413);
+      // a resend of one op of the batch is the same first admission
+      const partial = await two.write({
+        baseRevision: 412,
+        author: kevin,
+        mutations: [setSize(22)],
+        origin: { clientId: 'tab-a', opIds: ['op-2'] },
+      });
+      expect(partial.ok && partial.replayed?.n).toBe(1);
+      // another POST from the same base with its own op ids is not a replay: the ordinary
+      // conflict outcome at the head
+      const other = await two.write({
+        baseRevision: 412,
+        author: kevin,
+        mutations: [setSize(24)],
+        origin: { clientId: 'tab-b', opIds: ['op-9'] },
+      });
+      expect(other.ok).toBe(false);
+      expect(!other.ok && other.code).toBe('conflict');
+      // a third mirror reads one record and the fold applied once
+      const three = open('resend-3');
+      const seen = await three.read();
+      expect(seen.document.deck.revision).toBe(413);
+      const list = seen.document.slides['content-rule'];
+      expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 22 });
+      const records = await three.records();
+      expect(records.map((r) => r.n)).toEqual([1]);
+      expect(records[0]?.origin).toEqual(origin);
+      // the store's default follows RECORD_ORIGIN_WRITES, the constant the N plus 1 commit flips
+      // (deployment N: the parser tolerates the origin and the writer stores none; N plus 1
+      // stores it); the committing instance reads the origin on its own record either way
+      const quiet = third(fake, 'resend-quiet');
+      const tabC = { clientId: 'tab-c', opIds: ['op-3'] };
+      const plain = await quiet.write({
+        baseRevision: 413,
+        author: kevin,
+        mutations: [setSize(24)],
+        origin: tabC,
+      });
+      expect(plain.ok ? 'ok' : plain.message).toBe('ok');
+      if (!plain.ok) return;
+      expect(plain.entry.origin).toEqual(RECORD_ORIGIN_WRITES ? tabC : undefined);
+      const storedTwo = JSON.parse(
+        new TextDecoder().decode(fake.blobs.get('decks/gt-brand/versions/2.json')!.bytes),
+      ) as VersionRecord;
+      expect(storedTwo.origin).toEqual(RECORD_ORIGIN_WRITES ? tabC : undefined);
+      expect((await quiet.records()).map((r) => r.origin)).toEqual([origin, tabC]);
+      expect((await three.records()).map((r) => r.origin)).toEqual([
+        origin,
+        RECORD_ORIGIN_WRITES ? tabC : undefined,
+      ]);
+    });
+
+    it('deployment N, the same instance: the record stores no origin, the instance that committed it answers the resend with its record and puts nothing, and another instance, whose mirror reads no origin, commits it again at the head (3.2; sync pass 1 F4)', async () => {
+      const fake = memoryBlobClient(undefined, { now });
+      await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+      const open = (name: string): BlobStore =>
+        openBlobStore({
+          client: fake,
+          deckId: 'gt-brand',
+          dir: join(root, name, 'gt-brand'),
+          now,
+          syncTtlMs: 0,
+          writeOrigin: false,
+        });
+      const one = open('held-1');
+      const two = open('held-2');
+      expect((await one.read()).document.deck.revision).toBe(412);
+      expect((await two.read()).document.deck.revision).toBe(412);
+      const origin = { clientId: 'tab-a', opIds: ['op-1', 'op-2'] };
+      const first = await one.write({
+        baseRevision: 412,
+        author: kevin,
+        mutations: [setSize(22)],
+        origin,
+      });
+      expect(first.ok).toBe(true);
+      if (!first.ok) return;
+      expect(first.replayed).toBeUndefined();
+      // the record's bytes store no origin, in the store and in the mirror, so a reader on the
+      // older deployment parses them as before
+      expect(first.entry.origin).toBeUndefined();
+      const stored = JSON.parse(
+        new TextDecoder().decode(fake.blobs.get('decks/gt-brand/versions/1.json')!.bytes),
+      ) as VersionRecord;
+      expect(stored).not.toHaveProperty('origin');
+      expect(
+        JSON.parse(readFileSync(join(root, 'held-1', 'gt-brand', 'versions', '1.json'), 'utf8')),
+      ).not.toHaveProperty('origin');
+      // the instance that committed it reads its own record with the origin held in memory: the
+      // channel's entries carry `covers` and the write path's check finds the record
+      expect((await one.records()).map((r) => r.origin)).toEqual([origin]);
+      fake.calls.length = 0;
+      const again = await one.write({
+        baseRevision: 412,
+        author: kevin,
+        mutations: [setSize(22)],
+        origin,
+      });
+      expect(again.ok).toBe(true);
+      if (!again.ok) return;
+      expect(again.replayed?.n).toBe(1);
+      expect(again.revision).toBe(413);
+      expect(again.changed).toEqual([]);
+      expect(opsOf(fake).filter((op) => op.startsWith('put '))).toEqual([]);
+      expect(blobsOf(fake, 'decks/gt-brand/versions/')).toEqual(['decks/gt-brand/versions/1.json']);
+      // a resend of one op of the batch is the same answer
+      const partial = await one.write({
+        baseRevision: 412,
+        author: kevin,
+        mutations: [setSize(22)],
+        origin: { clientId: 'tab-a', opIds: ['op-2'] },
+      });
+      expect(partial.ok && partial.replayed?.n).toBe(1);
+      // another instance reads the record without its origin: a resend that lands there is not
+      // recognised on deployment N and, placed past the records between its base and the head
+      // by the channel, commits again at the head. N plus 1 closes this by storing the field
+      expect((await two.records()).map((r) => r.origin)).toEqual([undefined]);
+      const elsewhere = await two.write({
+        baseRevision: 413,
+        author: kevin,
+        mutations: [setSize(22)],
+        origin,
+      });
+      expect(elsewhere.ok).toBe(true);
+      if (!elsewhere.ok) return;
+      expect(elsewhere.replayed).toBeUndefined();
+      expect(elsewhere.entry.n).toBe(2);
+      // the held origins are the committing instance's own and never a claim's: instance one
+      // holds nothing for the number instance two took, and a write it loses at the head holds
+      // nothing either
+      const lost = await one.write({
+        baseRevision: 413,
+        author: kevin,
+        mutations: [setSize(24)],
+        origin: { clientId: 'tab-a', opIds: ['op-3'] },
+      });
+      expect(lost.ok).toBe(false);
+      expect((await one.records()).map((r) => [r.n, r.origin])).toEqual([
+        [1, origin],
+        [2, undefined],
+      ]);
+      expect((await two.records()).map((r) => [r.n, r.origin])).toEqual([
+        [1, undefined],
+        [2, origin],
+      ]);
+      // the memory is the store object's: a cold mirror over the same store reads the bytes
+      const cold = open('held-cold');
+      expect((await cold.records()).map((r) => r.origin)).toEqual([undefined, undefined]);
+    });
+
+    it('a commit put that lands after its deadline leaves the record in place, and the next pull reads n as a record, not a claim (3.6, the hole’s first rule)', async () => {
+      const fake = memoryBlobClient(undefined, { now });
+      await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+      let landLate: (() => void) | undefined;
+      // the store takes the manifest put only once the test says so, and its answer never
+      // arrives: the writer's deadline head reads the old etag
+      const slow: BlobClient = {
+        ...fake,
+        put: async (pathname, bytes, putOptions) => {
+          if (pathname === 'decks/gt-brand/deck.json') {
+            landLate = () => void fake.put(pathname, bytes, putOptions);
+            return new Promise(() => undefined);
+          }
+          return fake.put(pathname, bytes, putOptions);
+        },
+      };
+      const a = openBlobStore({
+        client: slow,
+        deckId: 'gt-brand',
+        dir: join(root, 'late-a', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+        deadlines: { documentWriteMs: 60, readMs: 2000 },
+      });
+      const b = third(fake, 'late-b');
+      expect((await a.read()).document.deck.revision).toBe(412);
+      expect((await b.read()).document.deck.revision).toBe(412);
+      let failed: unknown;
+      try {
+        await a.write({ baseRevision: 412, author: agentA, mutations: [setSize(22)] });
+      } catch (error) {
+        failed = error;
+      }
+      expect(isBlobTimeoutError(failed)).toBe(true);
+      // the record stays as a claim; nothing deleted it
+      expect(fake.blobs.has('decks/gt-brand/versions/1.json')).toBe(true);
+      expect(
+        fake.calls.some((call) => call.op === 'del' && call.pathname.endsWith('versions/1.json')),
+      ).toBe(false);
+      // before the put lands the claim is above the manifest: a reader drops it from its mirror
+      expect((await b.read()).document.deck.revision).toBe(412);
+      expect(await b.records()).toEqual([]);
+      // the put lands late: the manifest names 413 and the claim is its record
+      expect(landLate).toBeDefined();
+      landLate?.();
+      expect((await b.read()).document.deck.revision).toBe(413);
+      expect((await b.records()).map((r) => [r.n, r.revision])).toEqual([[1, 413]]);
+      const list = (await b.read()).document.slides['content-rule'];
+      expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 22 });
+    });
+
+    it('the reader’s walk continues past a missing record number: the document proven from the snapshot, the mirror holding n and n plus 2, one hole counted (3.6, the hole’s second rule)', async () => {
+      const { fake, a, b } = await blobPair();
+      await b.sync();
+      let base = 412;
+      for (const size of [20, 22, 24]) {
+        const outcome = await a.write({
+          baseRevision: base,
+          author: agentA,
+          mutations: [setSize(size)],
+        });
+        expect(outcome.ok).toBe(true);
+        if (outcome.ok) base = outcome.revision;
+      }
+      // b learns of 413 (record 1), then record 2 is lost from the store
+      expect((await b.read()).document.deck.revision).toBe(415);
+      const c = third(fake, 'hole-c');
+      expect((await c.read()).document.deck.revision).toBe(415);
+      // a mirror that holds record 1 alone, then the store loses record 2
+      const d = third(fake, 'hole-d');
+      fake.blobs.delete('decks/gt-brand/versions/2.json');
+      fake.calls.length = 0;
+      const seen = await d.read();
+      expect(seen.document.deck.revision).toBe(415);
+      const list = seen.document.slides['content-rule'];
+      expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 24 });
+      const records = await d.records();
+      expect(records.map((r) => r.n)).toEqual([1, 3]);
+      expect(logHoles(records)).toBe(1);
+      expect(lists(fake)).toEqual([]);
+      // the walk headed 1, 2 (the hole), 3 and 4 (the miss past the manifest's revision)
+      const heads = opsOf(fake)
+        .filter((op) => /^head decks\/gt-brand\/versions\//.test(op))
+        .map((op) => Number(/(\d+)\.json$/.exec(op)?.[1]));
+      expect(heads.sort((x, y) => x - y)).toEqual([1, 2, 3, 4]);
+      // a mirror synced before the loss keeps the record it holds and counts no hole of its own
+      expect(logHoles(await b.records())).toBe(0);
+      // the lookahead bound: a manifest ahead of every record the store holds stops the walk
+      // after HOLE_WALK_LOOKAHEAD misses in a row, and the document is proven from the snapshot
+      // all the same; a cold mirror reads record 1, then the numbers 2 to 5, and stops
+      fake.blobs.delete('decks/gt-brand/versions/3.json');
+      const e = third(fake, 'hole-e');
+      fake.calls.length = 0;
+      expect((await e.read()).document.deck.revision).toBe(415);
+      expect((await e.records()).map((r) => r.n)).toEqual([1]);
+      const probed = opsOf(fake)
+        .filter((op) => /^head decks\/gt-brand\/versions\//.test(op))
+        .map((op) => Number(/(\d+)\.json$/.exec(op)?.[1]))
+        .sort((x, y) => x - y);
+      expect(probed).toEqual([1, 2, 3, 4, 5].slice(0, HOLE_WALK_LOOKAHEAD + 2));
+      expect(lists(fake)).toEqual([]);
+      // a deck with no record at all (the seed at 412) costs one miss and no lookahead
+      const bare = memoryBlobClient(undefined, { now });
+      await pushDeckDir(bare, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
+      const f = openBlobStore({
+        client: bare,
+        deckId: 'gt-brand',
+        dir: join(root, 'hole-f', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+      });
+      bare.calls.length = 0;
+      expect((await f.read()).document.deck.revision).toBe(412);
+      expect(
+        bare.calls.filter((call) => call.op === 'head' && /versions\//.test(call.pathname)),
+      ).toHaveLength(1);
+    });
+  });
 });
 
 /** The stored pathnames under a prefix, sorted. */
 function blobsOf(client: FakeBlobClient, prefix: string): string[] {
   return [...client.blobs.keys()].filter((key) => key.startsWith(prefix)).sort();
+}
+
+/** The snapshot `pushDeckDir` stores for the seed's manifest bytes (writeSeedDecks writes canonical JSON). */
+function seedSnapshot(): string {
+  return `decks/gt-brand/${snapshotPath(snapshotKey(canonicalJson(WORKED_DECK)))}`;
 }

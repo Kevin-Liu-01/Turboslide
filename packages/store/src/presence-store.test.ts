@@ -7,14 +7,19 @@
 // stale body is read through the immutable copy, the pointer stays per instance and the old
 // copies are deleted. The stream fix round two fix round (b4.md C3T-R1, C3T-R2): a read that
 // proved nothing schedules the one push at the floor, and a tombstone keeps the beacon's clock so
-// a set at or below it never lands, on the same instance or pushed from another.
-import { describe, expect, it } from 'vitest';
+// a set at or below it never lands, on the same instance or pushed from another. The sync round
+// fix round (VERIFICATION.md sync pass 1, F5): an idle tab at the quiet heartbeat of 10 s pushes
+// every 20 s, three pushes and nine puts a minute, and the deferred heartbeat's timer pushes only
+// once the heartbeats stop reaching the instance.
+import { describe, expect, it, vi } from 'vitest';
 
 import { memoryBlobClient } from './blob-fake.ts';
 import type { FakeBlobClient } from './blob-fake.ts';
 import {
   PRESENCE_POLL_MS,
   PRESENCE_PUSH_SPACING_MS,
+  PRESENCE_REFRESH_TIMER_MS,
+  PRESENCE_SHARED_TTL_MS,
   PRESENCE_VOLATILE_FIELDS,
   parsePresenceRecord,
   presenceCopyPath,
@@ -332,6 +337,84 @@ describe('the shared presence roster, two instances over one Blob store', () => 
     expect(puts(client)).toBe(after + 6);
     const refreshed = parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes);
     expect(refreshed.rows.get(C1)?.expiresAt).toBe(time.now() + 30_000);
+  });
+
+  it('pushes an idle tab at the quiet heartbeat of 10 s every 20 s, three pushes and nine puts a minute, and the timer pushes a deferred row only once the heartbeats stop (docs/SYNC.md 4.5; cost.editor-idle.calls; sync pass 1 F5)', async () => {
+    expect(PRESENCE_REFRESH_TIMER_MS).toBe(5000);
+    // after the heartbeat the quiet cadence lands with the least life left (15 s of 30 minus 10 s)
+    expect(PRESENCE_REFRESH_TIMER_MS).toBeLessThanOrEqual(PRESENCE_SHARED_TTL_MS / 2 - 10_000);
+    vi.useFakeTimers();
+    try {
+      const client = memoryBlobClient();
+      const a = instance(client, () => Date.now(), { pushSpacingMs: PRESENCE_PUSH_SPACING_MS });
+      let clock = 0;
+      const heartbeat = async (): Promise<void> => {
+        clock += 1;
+        await a.presence.set(DECK, C1, row(C1, clock, 'Titanium 471'), TTL);
+      };
+      const pushes = (): number => puts(client) / 3; // the copy, the record and the pulse
+      const start = Date.now();
+      await heartbeat();
+      expect(pushes()).toBe(1);
+      // one minute of the quiet cadence, the timers running with the clock: the refresh rides the
+      // heartbeat that finds the record's row under half its life, every second heartbeat
+      const pushedAt: number[] = [];
+      let last = pushes();
+      for (let second = 1; second <= 60; second += 1) {
+        await vi.advanceTimersByTimeAsync(1000);
+        if (second % 10 === 0) await heartbeat();
+        if (pushes() !== last) {
+          pushedAt.push(second);
+          last = pushes();
+        }
+      }
+      expect(pushedAt).toEqual([20, 40, 60]);
+      expect(puts(client)).toBe(12);
+      expect(a.errors).toEqual([]);
+      const stored = parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes);
+      expect(stored.rows.get(C1)?.expiresAt).toBe(start + 60_000 + PRESENCE_SHARED_TTL_MS);
+      // the heartbeats stop after one more (70 s, deferred at 20 s of life left): the timer
+      // pushes that row once at PRESENCE_REFRESH_TIMER_MS of life left and nothing after it
+      await vi.advanceTimersByTimeAsync(10_000);
+      await heartbeat();
+      expect(pushes()).toBe(4);
+      await vi.advanceTimersByTimeAsync(14_000);
+      expect(pushes()).toBe(4);
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(pushes()).toBe(5);
+      const refreshed = parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes);
+      expect(refreshed.rows.get(C1)?.expiresAt).toBe(start + 70_000 + PRESENCE_SHARED_TTL_MS);
+      await vi.advanceTimersByTimeAsync(90_000);
+      expect(pushes()).toBe(5);
+      expect(a.errors).toEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('arms no timer for a row the record holds under a higher clock or a local row that ran out, so a stale heartbeat never makes the timer fire and re-arm at once', async () => {
+    vi.useFakeTimers();
+    try {
+      const client = memoryBlobClient();
+      const a = instance(client, () => Date.now(), { pushSpacingMs: PRESENCE_PUSH_SPACING_MS });
+      const b = instance(client, () => Date.now(), { pushSpacingMs: PRESENCE_PUSH_SPACING_MS });
+      await a.presence.set(DECK, C1, row(C1, 1, 'Titanium 471'), TTL);
+      // the tab's heartbeats moved to b, whose push carries clock 3; a reads it on its poll
+      await vi.advanceTimersByTimeAsync(20_000);
+      await b.presence.set(DECK, C1, row(C1, 3, 'Titanium 471'), TTL);
+      await a.presence.poll(DECK);
+      const before = puts(client);
+      // a late heartbeat with a lower clock lands on a: not material, and no timer is armed,
+      // so the clock runs a minute with no push and no timer of a's firing
+      await a.presence.set(DECK, C1, row(C1, 2, 'Titanium 471'), TTL);
+      const timers = vi.getTimerCount();
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(puts(client)).toBe(before);
+      expect(vi.getTimerCount()).toBeLessThanOrEqual(timers);
+      expect(a.errors).toEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('pins the budget: reads on the tick, pushes on a change alone with a five second floor, a selection change starts none', async () => {

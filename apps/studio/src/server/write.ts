@@ -16,6 +16,7 @@ import {
 } from '@turboslide/store/templates';
 import type { DefaultKit } from '@turboslide/store/templates';
 import { toVersion } from '@turboslide/store/versions';
+import { REPLAY_MAX_ENTRIES } from '@turboslide/realtime/protocol';
 import { spriteMarkup } from '@turboslide/theme/sprite';
 
 import type { MailMode } from './auth/mail/mailer';
@@ -133,6 +134,12 @@ export type EditorDeck = {
   versions: Version[];
   /** every record the store holds, counted before the trim; absent on a draft */
   versionCount?: number;
+  /**
+   * The origins of the records above the caller's `since` (docs/SYNC.md 3.2): present when the
+   * read carried `since` (the room client's resync), oldest first, at most RESYNC_ORIGINS_MAX
+   * records considered; the client acknowledges every pending op named here at its `seq`
+   */
+  origins?: RecordOrigin[];
   leases: Lease[];
   /** the store this studio runs on, for the banner over a store whose edits do not persist */
   hosting: HostingFacts;
@@ -163,6 +170,48 @@ export type EditorDeck = {
 
 /** How many version records the editor's loader carries (SPEC-4 0.34). */
 export const EDITOR_VERSIONS_KEPT = 50;
+
+/**
+ * How many records above the caller's `since` the resync read answers the origins of (docs/
+ * SYNC.md 3.2, invariants 3 and 10): the stream's replay bound (`REPLAY_MAX_ENTRIES`, realtime
+ * protocol.ts), so a pending op whose first attempt is further behind the head than a stream
+ * could replay is dropped with the queue and returned to its author, never acknowledged blind.
+ */
+export const RESYNC_ORIGINS_MAX = REPLAY_MAX_ENTRIES;
+
+/**
+ * A record above the resync read's `since` that names its origin (docs/SYNC.md 3.2): the seq
+ * its admission made (the revision on the blob tier), the client id and the op ids it folded,
+ * mutations stripped. The room client drops every pending op named here as acknowledged at
+ * `seq` before it re-folds the rest on the fresh document.
+ */
+export type RecordOrigin = { seq: number; n: number; clientId: string; opIds: string[] };
+
+/**
+ * The origins of the records above `since`, oldest first, at most `max` records considered
+ * (the newest ones when the log above `since` is longer than that, so the bound reads as
+ * "within REPLAY_MAX_ENTRIES of the head"). A record without an origin (a write from the CLI,
+ * an agent's strict write, a record from before the round) names nothing and is skipped. Pure.
+ */
+export function originsSince(
+  records: ReadonlyArray<VersionRecord>,
+  since: number,
+  max: number = RESYNC_ORIGINS_MAX,
+): RecordOrigin[] {
+  const above = records.filter((record) => record.revision > since);
+  const considered = above.slice(Math.max(0, above.length - max));
+  const out: RecordOrigin[] = [];
+  for (const record of considered) {
+    if (record.origin === undefined) continue;
+    out.push({
+      seq: record.revision,
+      n: record.n,
+      clientId: record.origin.clientId,
+      opIds: [...record.origin.opIds],
+    });
+  }
+  return out;
+}
 
 /**
  * The version log trimmed for the loader (SPEC-4 0.34; PP 3.5 item 3): the newest
@@ -257,14 +306,21 @@ function sendMintedCookie(setCookieValue: string | undefined): void {
 
 const readEditorDeckFn = createServerFn({ method: 'GET' })
   .validator((input: string) => {
-    const parsed = parseJsonInput<{ deckId: unknown; atLeast?: unknown }>(input);
+    const parsed = parseJsonInput<{ deckId: unknown; atLeast?: unknown; since?: unknown }>(input);
     const atLeast =
       typeof parsed.atLeast === 'number' && Number.isInteger(parsed.atLeast) && parsed.atLeast > 0
         ? parsed.atLeast
         : undefined;
+    // the tab's position before a resync (docs/SYNC.md 3.2): a non negative integer, else absent;
+    // a hand parsed optional, so a deployment without it and one with it read the same input
+    const since =
+      typeof parsed.since === 'number' && Number.isInteger(parsed.since) && parsed.since >= 0
+        ? parsed.since
+        : undefined;
     return {
       deckId: requireSlug(parsed.deckId, 'deckId'),
       ...(atLeast === undefined ? {} : { atLeast }),
+      ...(since === undefined ? {} : { since }),
     };
   })
   .handler(async ({ data }): Promise<string> => {
@@ -292,6 +348,13 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       deckRoom.store.listVersions(),
       deckRoom.store.leases(),
     ]);
+    // the resync read's answer (docs/SYNC.md 3.2): the origins of the records above the tab's
+    // old position, off the mirror the reads above synced (no store call of its own), so the
+    // client drops every pending op a record already names instead of re-folding it
+    const origins =
+      data.since === undefined
+        ? undefined
+        : originsSince(await deckRoom.store.records(), data.since);
     const record = await access.effectiveAccess(data.deckId);
     const standing = access.standingOf(decision, record);
     const resolved = room.resolveIdentity(
@@ -307,6 +370,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       ok: read.ok,
       sprite: readSprite(),
       versions,
+      ...(origins === undefined ? {} : { origins }),
       leases,
       hosting: hostingFacts(),
       /* the deployment's default kit (docs/PRODUCT.md 4.1): the name Reset reads, the default logo;
@@ -355,6 +419,12 @@ export async function readEditorDeck(input: {
   deckId: string;
   /** a revision the caller knows the store reached; the answer is at or above it on the blob tier */
   atLeast?: number;
+  /**
+   * the tab's stream position before a resync (docs/SYNC.md 3.2): the answer then carries
+   * `origins`, the records above it that name the ops they folded, so the client acknowledges
+   * a pending op whose first attempt committed instead of sending it again
+   */
+  since?: number;
 }): Promise<EditorDeck | null> {
   return JSON.parse(await readEditorDeckFn({ data: JSON.stringify(input) })) as EditorDeck | null;
 }

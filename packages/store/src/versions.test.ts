@@ -7,14 +7,18 @@ import { workedDocument } from '@turboslide/schema/fixtures';
 import type { VersionRecord } from './store.ts';
 import { touchedSlides } from './store.ts';
 import {
+  RECORD_ORIGIN_WRITES,
   assertContiguous,
   documentAtVersion,
   isNamed,
   lastNamed,
+  logHoles,
   nextVersionNumber,
   recordAtRevision,
+  recordNamingOps,
   toVersion,
   versionRecordSchema,
+  writeOriginSchema,
 } from './versions.ts';
 
 const author = { kind: 'agent', name: 'agent', runId: 'r' } as const;
@@ -58,6 +62,58 @@ describe('version records', () => {
     );
     // a record without the field parses as before the round
     expect(versionRecordSchema.parse(record(1, 412, 413))).not.toHaveProperty('ops');
+  });
+
+  it('tolerate the origin a later deployment writes and parse a record without one as before (docs/SYNC.md 3.2)', () => {
+    const origin = { clientId: 'tab-a', opIds: ['op-1', 'op-2'] };
+    const row = { ...record(1, 412, 413), origin };
+    expect(versionRecordSchema.parse(row)).toEqual(row);
+    expect(versionRecordSchema.parse(record(1, 412, 413))).not.toHaveProperty('origin');
+    // the shape is strict: a field the round did not name is refused, an id must be a string
+    expect(versionRecordSchema.safeParse({ ...row, origin: { ...origin, extra: 1 } }).success).toBe(
+      false,
+    );
+    expect(versionRecordSchema.safeParse({ ...row, origin: { clientId: 'x' } }).success).toBe(
+      false,
+    );
+    expect(
+      versionRecordSchema.safeParse({ ...row, origin: { clientId: '', opIds: [] } }).success,
+    ).toBe(false);
+    expect(
+      versionRecordSchema.safeParse({ ...row, origin: { clientId: 'x', opIds: [1] } }).success,
+    ).toBe(false);
+    expect(writeOriginSchema.parse(origin)).toEqual(origin);
+    // the deployment constant: N ships false (the tolerant parser, nothing new written) and the
+    // N plus 1 commit flips it to true; every store test holds under both values, so the flip is
+    // that one line (hosted.test.ts pins the default's effect against the constant)
+    expect(typeof RECORD_ORIGIN_WRITES).toBe('boolean');
+  });
+
+  it('count the holes of a log and find the record that names a resent op (docs/SYNC.md 3.2, 3.6)', () => {
+    const contiguous = [record(1, 412, 413), record(2, 413, 414), record(3, 414, 415)];
+    expect(logHoles(contiguous)).toBe(0);
+    expect(logHoles([])).toBe(0);
+    expect(logHoles([contiguous[0]!, contiguous[2]!])).toBe(1);
+    expect(logHoles([record(1, 412, 413), record(5, 416, 417)])).toBe(3);
+    // a log that starts past 1 (records compacted away) has no hole before its first record
+    expect(logHoles([record(4, 415, 416), record(5, 416, 417)])).toBe(0);
+    const named = {
+      ...record(2, 413, 414),
+      origin: { clientId: 'tab-a', opIds: ['op-1', 'op-2'] },
+    };
+    const log = [record(1, 412, 413), named, record(3, 414, 415)];
+    expect(recordNamingOps(log, 412, ['op-2'])?.n).toBe(2);
+    expect(recordNamingOps(log, 413, ['op-1', 'op-9'])?.n).toBe(2);
+    // the bound is the records above the base: a record at or below it never answers
+    expect(recordNamingOps(log, 414, ['op-1'])).toBeUndefined();
+    expect(recordNamingOps(log, 412, ['op-9'])).toBeUndefined();
+    expect(recordNamingOps(log, 412, [])).toBeUndefined();
+    // the newest match wins when two records name one id (never written; the rule is stated)
+    const twice = [
+      ...log,
+      { ...record(4, 415, 416), origin: { clientId: 'tab-a', opIds: ['op-1'] } },
+    ];
+    expect(recordNamingOps(twice, 412, ['op-1'])?.n).toBe(4);
   });
 
   it('number from 1, find named versions and revisions', () => {

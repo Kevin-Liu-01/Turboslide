@@ -1,0 +1,364 @@
+{
+  "base": "https://turboslide-bkwnt59my-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-22T01:35:18.651Z",
+  "endedAt": "2026-09-22T01:53:15.036Z",
+  "minutes": 3,
+  "tier": "blob",
+  "instances": [
+    "24069121",
+    "4e7450dc",
+    "4ec91814",
+    "d38b9bcf",
+    "52e5c53f",
+    "4b13e5d9"
+  ],
+  "rows": [
+    {
+      "id": "sync.pull.no-listing",
+      "result": "failed",
+      "reason": "store list 2, ceiling none",
+      "measures": [
+        "commits 10 (at least 10), landed in A true",
+        "store list 2 (ceiling 0)",
+        "store get 0 against 10 commit(s) (one snapshot or record read per commit)",
+        "instances answering sync.status 1"
+      ],
+      "counts": {
+        "minutes": 0.75,
+        "functionRequests": 81,
+        "functionPerMinute": 107.64,
+        "polls": 4,
+        "failedRequests": 0,
+        "commits": 10,
+        "opsPosts": 10,
+        "opsAnswered200": 10,
+        "landed": true,
+        "store": {
+          "simple": 122,
+          "advanced": 84,
+          "head": 122,
+          "get": 0,
+          "put": 82,
+          "list": 2,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 63,
+          "advanced": 49,
+          "head": 63,
+          "get": 0,
+          "put": 48,
+          "list": 1,
+          "del": 0
+        },
+        "instances": 1
+      },
+      "ceilings": {
+        "list": 0,
+        "commits": 10
+      },
+      "where": "present",
+      "instances": [
+        "24069121"
+      ],
+      "tier": "blob",
+      "deck": "untitled-20260922-4jnj",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/preview/gate/cost-probe/sync.pull.no-listing.json",
+      "exit": 1
+    },
+    {
+      "id": "cost.editor-idle.calls",
+      "result": "failed",
+      "reason": "store advanced 18 a minute over 11",
+      "measures": [
+        "function requests 9.66 a minute (ceiling 12; 29 in 3 min)",
+        "store simple 34 a minute (ceiling 40)",
+        "store advanced 18 a minute (ceiling 11)",
+        "instances answering sync.status 1"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 29,
+        "functionPerMinute": 9.66,
+        "polls": 9,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": null,
+        "store": {
+          "simple": 34,
+          "advanced": 18,
+          "head": 33,
+          "get": 1,
+          "put": 18,
+          "list": 0,
+          "del": 4
+        },
+        "firstSampleStore": {
+          "simple": 32,
+          "advanced": 15,
+          "head": 31,
+          "get": 1,
+          "put": 15,
+          "list": 0,
+          "del": 0
+        },
+        "instances": 1
+      },
+      "ceilings": {
+        "functionPerMinute": 12,
+        "simplePerMinute": 40,
+        "advancedPerMinute": 11
+      },
+      "where": "present",
+      "instances": [
+        "4e7450dc"
+      ],
+      "tier": "blob",
+      "deck": "untitled-20260922-y3rj",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/preview/gate/cost-probe/cost.editor-idle.calls.json",
+      "exit": 1
+    },
+    {
+      "id": "cost.editor-hidden.calls",
+      "result": "not driven",
+      "reason": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached",
+      "measures": [
+        "function requests 9.66 a minute and 9 session poll(s) were read from the tab that stayed visible"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 29,
+        "functionPerMinute": 9.66,
+        "polls": 9,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached",
+        "store": {
+          "simple": 34,
+          "advanced": 21,
+          "head": 34,
+          "get": 0,
+          "put": 21,
+          "list": 0,
+          "del": 4
+        },
+        "firstSampleStore": {
+          "simple": 33,
+          "advanced": 18,
+          "head": 33,
+          "get": 0,
+          "put": 18,
+          "list": 0,
+          "del": 1
+        },
+        "instances": 1
+      },
+      "ceilings": {
+        "functionPerMinute": 8,
+        "polls": 0
+      },
+      "where": "present",
+      "instances": [
+        "4ec91814"
+      ],
+      "tier": "blob",
+      "deck": "untitled-20260922-qr6h",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/preview/gate/cost-probe/cost.editor-hidden.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.editor-editing.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "function requests 70.26 a minute (ceiling 75; 211 in 3 min)",
+        "store simple 79 a minute (ceiling 140)",
+        "store advanced 73 a minute (ceiling 85)",
+        "instances answering sync.status 2"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 211,
+        "functionPerMinute": 70.26,
+        "polls": 9,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": null,
+        "store": {
+          "simple": 79,
+          "advanced": 73,
+          "head": 56,
+          "get": 23,
+          "put": 70,
+          "list": 3,
+          "del": 3
+        },
+        "firstSampleStore": {
+          "simple": 57,
+          "advanced": 42,
+          "head": 47,
+          "get": 10,
+          "put": 41,
+          "list": 1,
+          "del": 0
+        },
+        "instances": 2
+      },
+      "ceilings": {
+        "functionPerMinute": 75,
+        "simplePerMinute": 140,
+        "advancedPerMinute": 85
+      },
+      "where": "present",
+      "instances": [
+        "d38b9bcf",
+        "52e5c53f"
+      ],
+      "tier": "blob",
+      "deck": "untitled-20260922-ba41",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/preview/gate/cost-probe/cost.editor-editing.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.two-tabs-idle.calls",
+      "result": "failed",
+      "reason": "store list 1, ceiling none",
+      "measures": [
+        "store advanced 19 a minute (ceiling 30)",
+        "store list 1 (ceiling 0)",
+        "instances answering sync.status 1"
+      ],
+      "counts": {
+        "minutes": 3.01,
+        "functionRequests": 58,
+        "functionPerMinute": 19.3,
+        "polls": 18,
+        "failedRequests": 0,
+        "connected": true,
+        "mutual": true,
+        "store": {
+          "simple": 38,
+          "advanced": 19,
+          "head": 38,
+          "get": 0,
+          "put": 18,
+          "list": 1,
+          "del": 6
+        },
+        "firstSampleStore": {
+          "simple": 38,
+          "advanced": 19,
+          "head": 38,
+          "get": 0,
+          "put": 18,
+          "list": 1,
+          "del": 1
+        },
+        "instances": 1
+      },
+      "ceilings": {
+        "list": 0,
+        "advancedPerMinute": 30
+      },
+      "where": "present",
+      "instances": [
+        "4b13e5d9"
+      ],
+      "tier": "blob",
+      "deck": "untitled-20260922-2qvx",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/preview/gate/cost-probe/cost.two-tabs-idle.calls.json",
+      "exit": 1
+    },
+    {
+      "id": "cost.show.calls",
+      "result": "failed",
+      "reason": "11 store call(s) in the window, ceiling none",
+      "measures": [
+        "function requests 0 in the window (ceiling 0)",
+        "store calls at the first sample 11 (head 9, get 0, put 1, list 1, del 0; ceiling 0)",
+        "instances answering sync.status 1"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 0,
+        "functionPerMinute": 0,
+        "polls": 0,
+        "failedRequests": 0,
+        "store": {
+          "simple": 9,
+          "advanced": 4,
+          "head": 9,
+          "get": 0,
+          "put": 3,
+          "list": 1,
+          "del": 1
+        },
+        "firstSampleStore": {
+          "simple": 9,
+          "advanced": 2,
+          "head": 9,
+          "get": 0,
+          "put": 1,
+          "list": 1,
+          "del": 0
+        },
+        "instances": 1
+      },
+      "ceilings": {
+        "functionRequests": 0,
+        "storeCalls": 0
+      },
+      "where": "present",
+      "instances": [
+        "4b13e5d9"
+      ],
+      "tier": "blob",
+      "deck": "untitled-20260922-ujud",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/preview/gate/cost-probe/cost.show.calls.json",
+      "exit": 1
+    }
+  ],
+  "exitCode": 1
+}

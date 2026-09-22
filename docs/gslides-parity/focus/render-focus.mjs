@@ -8,6 +8,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { UNPARKABLE_FEATURES } from '../../../scripts/probes/core-matrix.mjs';
+
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(here, '..', '..', '..');
 const MATRIX = join(here, 'core-matrix.json');
@@ -46,6 +48,9 @@ const FEATURES = [
   ['fonts', 'PRODUCT 4.2 The font catalog'],
   ['templates', 'PRODUCT 4.3 Templates'],
   ['assist', 'PRODUCT 6 The assist'],
+  /* the sync and costs round (docs/SYNC.md 6.1): the write path's order and the calls per state */
+  ['sync', 'SYNC 6.1 The write path'],
+  ['cost', 'SYNC 6.1 The calls per state'],
   ['surface', '3 The switch'],
 ];
 const STATES = ['works', 'broken', 'flaky', 'not driven'];
@@ -99,6 +104,8 @@ const README = {
     "**Templates.** The template gallery lists your organisation's templates and Blank, each with its cover; File > Save as template saves a presentation as a template with its brand kit, and Use for new presentations makes it the presentation /new opens. A template is read only; start a presentation from it.",
   assist:
     "**Assist.** The Assist button in the title row (Cmd+J) opens a panel with three starter cards: Tailor for a customer (rename the customer, swap the logo and skip slides in one step, with one Undo), Make it shorter and Write speaker notes. A card shows the before and after; nothing changes until it is accepted, and Accept is one undo step. Search the menus understands a seller's words and offers Ask the assistant when nothing matches.",
+  sync: "**Sync.** Two people on one deck see each other's words in order within seconds, on a title slide and in a body block, while both type at once and after one of them was offline. A viewer's tab shows every edit live. A reload reads the same document in every browser. Undo takes back your own word and leaves your colleague's. A change whose answer was lost is never applied twice.",
+  cost: '**Costs.** An open editor, a hidden tab, an editing session, two tabs on one deck and a show each make a bounded number of requests a minute, and the store calls a deck costs a minute are counted in every release run and stay under their ceilings.',
   surface:
     '**For agents and advanced tools.** Every action the editor runs is also a CLI command, an MCP tool, an HTTP route and a window function, including the features behind Tools > Advanced tools. `GET /api/agent` lists them.',
 };
@@ -143,6 +150,8 @@ function counts() {
   for (const [key, heading] of FEATURES) {
     const t = tally(rows.filter((r) => r.feature === key));
     const clean = t.rows === t.works;
+    /* an unparkable feature (RETURN.md rule 2; SYNC.md 6.1 for sync and cost) blocks the ship on a
+       red row instead of parking; a red cost row holds it only over its ceiling on the preview */
     const verdict =
       key === 'surface'
         ? clean
@@ -150,7 +159,9 @@ function counts() {
           : 'blocks the ship'
         : clean
           ? 'in the default view'
-          : 'parked';
+          : UNPARKABLE_FEATURES.includes(key)
+            ? 'blocks the ship'
+            : 'parked';
     lines.push(
       `| ${heading} (${code(key)}) | ${t.rows} | ${t.works} | ${t.broken} | ${t.flaky} | ${t['not driven']} | ${verdict} |`,
     );

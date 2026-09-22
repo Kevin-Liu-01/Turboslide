@@ -1,5 +1,5 @@
 {
-  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship.",
+  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2).",
   "rows": [
     {
       "id": "decks.home.new-presentation",
@@ -5869,6 +5869,167 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-assist, the capabilities table; judge-design rejection 10"
+    },
+    {
+      "id": "sync.serial.order-and-latency",
+      "feature": "sync",
+      "interaction": "A types 30 words into the title one per 3 s; B reads every word in order, none lost, none doubled, each within 5 s of the keystroke on the blob tier and 1 s on the memory tier; every ops POST is answered at the next revision",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "evidence": "audit-ordering 4.2 run 2 phase 1 (673 ms POST mean, 1,948 ms propagation mean, 3,000 ms max)"
+    },
+    {
+      "id": "sync.title.concurrent-both-kept",
+      "feature": "sync",
+      "interaction": "A and B type a word each into a title slide's heading within 200 ms with both sessions open, then once more and both press Escape; both words are in both browsers within 5 s and stay after Escape, three rounds of three",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-ordering item 1; run 3 parts a and b; run 2 phase 2",
+      "note": "Needs B1's schema half (the field target of text.splice, docs/SYNC.md 3.4) and B2's client half (textBurstMutation); with one half landed the row reads a known mechanism (6.2), never a flake. The test annotates which mutation the title travelled as."
+    },
+    {
+      "id": "sync.title.offline-both-kept",
+      "feature": "sync",
+      "interaction": "A goes offline 20 s, B types three words into the title, A types one and closes its session, A comes back; all four words are in both browsers within 10 s of the reconnect",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-ordering item 1; run 3 part c; run 2 phase 3",
+      "note": "The same two halves as sync.title.concurrent-both-kept (B1 and B2, docs/SYNC.md 3.4)."
+    },
+    {
+      "id": "sync.block.concurrent-same-offset-order",
+      "feature": "sync",
+      "interaction": "A and B each insert a word at offset 0 of one body block within 200 ms; both browsers show the two words in the same order within 3 s on the memory tier and 5 s on the blob tier, and no repair splice (a text.splice with remove above 0 from the session) is posted",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-ordering item 4; run 4 part a",
+      "setup": "block.insert of the body block the two sessions type into",
+      "note": "B1 (docs/SYNC.md 3.3, the server transform before placement on the blob tier). The bound is split by tier as the serial row's is (the verifier's pass 1 F11: the blob tier's propagation read 1.3 s mean and 2.9 s max on the serial row, and one round in three fell past 3 s there with the words in the same order in both browsers and no repair splice)."
+    },
+    {
+      "id": "sync.structural.concurrent",
+      "feature": "sync",
+      "interaction": "A and B each drag one block (pos.set on the same block) within 200 ms; both browsers show one position within 3 s on the memory tier and 5 s on the blob tier (the block row's split: two drags each make up to two commits, which the blob tier spaces a second apart on one instance and delivers by the 2 s pulse tick). Then A moves a block while B deletes its slide within 200 ms; the loser reads the reducer's sentence in its reject card and both browsers show the slide gone within 5 s",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "evidence": "invariant 2; transform.ts 348 passes non text ops through; room.ts reanchor 1134",
+      "setup": "block.insert of the dragged blocks and slide.new of the slide B deletes",
+      "note": "B1; falsifies invariant 2 outside text (judge-correctness addition 2)."
+    },
+    {
+      "id": "sync.block.offline-replay-converges",
+      "feature": "sync",
+      "interaction": "A offline 20 s, B types three words into a body block, A types one, A back; both browsers read all four words within 10 s and A's resend carries the shifted offset",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "evidence": "audit-ordering 4.4 run 4 part c",
+      "setup": "block.insert of the body block"
+    },
+    {
+      "id": "sync.viewer.live-updates",
+      "feature": "sync",
+      "interaction": "C, a viewer, reads A's word within 5 s of the keystroke with no reload, three times of three",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-ordering item 2; run 1; run 2 (0 of 30)",
+      "setup": "share.setGeneralAccess to Anyone with the link, Viewer through the window API before C opens",
+      "note": "B1 (docs/SYNC.md 3.7: canSeeOps gains viewer with the notes stripped)."
+    },
+    {
+      "id": "sync.reload.same-document",
+      "feature": "sync",
+      "interaction": "After the rows above A, B and C reload together and read byte equal documents at the live revision within 5 s",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "evidence": "audit-ordering 4.2 run 2 phase 4 (1,778, 2,065, 2,032 ms)",
+      "setup": "share.setGeneralAccess to Anyone with the link, Viewer through the window API before C opens"
+    },
+    {
+      "id": "sync.undo.after-remote",
+      "feature": "sync",
+      "interaction": "A types a word into a body block, B inserts a word before it in the same block, A presses Undo; A's word alone leaves both browsers within 5 s and B's stays, three of three",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "evidence": "invariant 11; room-client.ts transformSince 1533 to 1541",
+      "setup": "block.insert of the body block",
+      "note": "B2; the unit half is docs/SYNC.md 6.4 (judge-correctness addition 1)."
+    },
+    {
+      "id": "sync.resend.idempotent",
+      "feature": "sync",
+      "interaction": "A's POST is committed and its answer dropped by the driver (page.route aborts the response once); the resend under the same op ids is admitted once, B reads the word once, and deck.info shows one record whose origin.opIds names A's op",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-ordering item 5 (the case the code does not cover was not driven)",
+      "note": "On a deployment the resend lands on whichever instance is warm, so this row is a smoke of the same instance and synced cases; the cross instance falsifier is the two instance test of docs/SYNC.md 6.4 (B3). The record is read through version.list; a record without origin on the build is recorded not driven with B3 named."
+    },
+    {
+      "id": "sync.pull.no-listing",
+      "feature": "sync",
+      "interaction": "Ten commits from B; sync.status.storeCalls.lists.versions sampled on the answering instance stays 0 over the window (the pull reads records by number and never lists versions/) and get counts one snapshot or record read per commit; the deck's other listings inside the window (the prune's snapshots/, a first open's assets/, the card render's thumbs/) are recorded by folder beside it",
+      "driver": "cost-probe",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-ordering item 3 (blob-store.ts 977)",
+      "note": "The counters are per instance and the sample is whichever instance answers, so on a deployment this row is a smoke; the falsifier is the reader test of hosted.test.ts in docs/SYNC.md 6.4 (B3). Locally the store is the file store and storeCalls reads zero, so the row asserts the ten commits and their answers alone. The ship of the sync and costs round made the ceiling the pull's own listing: the verifier's two passes read list 2 and list 1 in the window from a cold instance's first open (pullAssets lists assets/) and the card render (pruneThumbs lists thumbs/), neither the pull's, so storeCalls names the folder of every list and the row judges versions/ alone (VERIFICATION.md pass 2 F2)."
+    },
+    {
+      "id": "cost.editor-idle.calls",
+      "feature": "cost",
+      "interaction": "One editor tab alone, visible, 3 minutes idle: at most 12 function requests a minute from the browser (today 14; expected about 9 after the fix: 6 presence, 3 poll, 0.23 stream) and, from sync.status.storeCalls, at most 40 simple and 11 advanced store calls a minute for the deck (today about 70 and 12 by the code)",
+      "driver": "cost-probe",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-costs runs/idle.summary.md, section 5",
+      "note": "B2 (the heartbeat), B1 (the tick), B5 (the poll). A measurement row (docs/SYNC.md 6.1): its counts are written beside the ceiling in the run; over its ceiling on the preview it holds the ship.",
+      "measure": true
+    },
+    {
+      "id": "cost.editor-hidden.calls",
+      "feature": "cost",
+      "interaction": "The same tab hidden (a second page brought to the front; not driven with the reason when visibilityState does not read hidden): at most 8 function requests a minute and no session poll",
+      "driver": "cost-probe",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-costs item 1 (useStudioSession.ts has no visibility check)",
+      "note": "B5. A measurement row (docs/SYNC.md 6.1).",
+      "measure": true
+    },
+    {
+      "id": "cost.editor-editing.calls",
+      "feature": "cost",
+      "interaction": "One edit per 5 s for 3 minutes: at most 75 function requests a minute (today 79; expected about 68 after the fix, the presence batches of the selection unchanged) and at most 140 simple and 85 advanced store calls a minute (today about 166 and 99 by the code; expected about 122 and 72)",
+      "driver": "cost-probe",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-costs runs/edit.summary.md, section 5; audit-ordering 3.2",
+      "note": "B2 (listVersions), B3 (the prune, the thumbnail). A measurement row (docs/SYNC.md 6.1).",
+      "measure": true
+    },
+    {
+      "id": "cost.two-tabs-idle.calls",
+      "feature": "cost",
+      "interaction": "A and B idle on two browsers for 3 minutes: no list call and at most 30 advanced store calls a minute for the deck (today 24 by the code, section 2.3)",
+      "driver": "cost-probe",
+      "today": "works",
+      "evidence": "docs/SYNC.md section 2.3 (syncNow 1208 to 1226; pushNow)",
+      "note": "Pins invariant 7. A measurement row (docs/SYNC.md 6.1). The probe starts the window once the setup's card render (one put and one list at the deck's rest, docs/SYNC.md 3.10) has left the counters' 60 s window (the settle of the cost probe; the verifier's pass 1 F7).",
+      "measure": true
+    },
+    {
+      "id": "cost.show.calls",
+      "feature": "cost",
+      "interaction": "/deck/<id>?present=1 for 3 minutes after the load: no function request and no store call (today 2 polls a minute, each held 25 s of a 2 GB function)",
+      "driver": "cost-probe",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-costs runs/show.summary.md, item 1",
+      "note": "B5. A measurement row (docs/SYNC.md 6.1). The probe counts its own sync.status reads (one deck.json head each, build/b3.md R7 b) apart from the page's, and starts the window once the editor tab the show left behind has closed on the server (the reader gone rule, 35 s) and its card render and snapshot prune have left the counters' 60 s window (the settle; the verifier's pass 1 F8). The show load's own store reads are the round after's published snapshot (docs/SYNC.md 5.2).",
+      "measure": true
     }
   ]
 }

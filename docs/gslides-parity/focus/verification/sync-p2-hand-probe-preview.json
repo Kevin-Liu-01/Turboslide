@@ -1,0 +1,51 @@
+{
+  "base": "https://turboslide-xp25z99wa-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-22T05:27:50.493Z",
+  "thumbnail": {
+    "deckId": "untitled-20260922-4idf",
+    "theme": "gt-ink-paper",
+    "firstWriteMs": 3314,
+    "reads": [
+      {
+        "card": false,
+        "plate": null,
+        "img": null,
+        "colorScheme": "light",
+        "htmlTheme": "light",
+        "pageBg": "rgb(255, 255, 255)",
+        "atMs": 20873
+      },
+      {
+        "card": true,
+        "plate": null,
+        "img": {
+          "complete": true,
+          "natural": 320,
+          "src": "/api/render/title"
+        },
+        "colorScheme": "light",
+        "htmlTheme": "light",
+        "pageBg": "rgb(255, 255, 255)",
+        "atMs": 25033
+      },
+      {
+        "card": false,
+        "plate": null,
+        "img": null,
+        "colorScheme": "light",
+        "htmlTheme": "light",
+        "pageBg": "rgb(255, 255, 255)",
+        "atMs": 42141
+      }
+    ],
+    "renderedAfterMs": 25033
+  },
+  "comments": null,
+  "teardown": {
+    "trashed": "deck.trash failed: Error: page.evaluate: Error: Vercel Blob: Failed to fetch blob: 403 Forbidden\n    at Object.deserialize (https://turbosl",
+    "removed": "deck.remove through the window API",
+    "edit": 404,
+    "gone": true
+  },
+  "error": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded."
+}

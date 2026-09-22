@@ -53,7 +53,17 @@ export const STREAM_RETRY_MS: readonly [number, number] = [1000, 4000];
 export const CLIENT_BINDING_TTL_MS = 320_000;
 export const PRESENCE_BATCH_MS = 80;
 export const PRESENCE_PER_SECOND = 15;
+/**
+ * The presence heartbeat while the tab is active: the pointer, the selection or the slide moved
+ * in the last 30 s (docs/SYNC.md 3.10; room-client.ts `heartbeat`, `PRESENCE_QUIET_AFTER_MS`).
+ */
 export const PRESENCE_HEARTBEAT_MS = 5000;
+/**
+ * The heartbeat while the tab is quiet (docs/SYNC.md 3.10, audit-costs item 5): the row's 30 s
+ * life and the server's refresh at a remaining life under 15 s stay, so an idle tab pushes
+ * every 20 s instead of every 15 s.
+ */
+export const PRESENCE_HEARTBEAT_QUIET_MS = 10_000;
 export const PRESENCE_STALE_MS = 30_000;
 export const PRESENCE_EXPIRY_MS = 120_000;
 
@@ -98,18 +108,26 @@ export const commentOpSchema = schemaCommentOpSchema;
 
 const entryKindSchema = z.enum(['edit', 'comment']);
 
-/** an entry carries mutations when it is an edit and a comment op when it is a comment */
+/**
+ * an entry carries mutations when it is an edit and a comment op when it is a comment; an edit
+ * that names the op ids it covers (channel.ts `Entry.covers`) may carry an empty list, since the
+ * later synthesized entries of a resend answer ride the fold their first sibling carries
+ */
 function hasPayload(entry: {
   kind: 'edit' | 'comment';
   mutations?: unknown[] | undefined;
   comment?: unknown;
+  covers?: unknown[] | undefined;
 }): boolean {
-  return entry.kind === 'edit'
-    ? entry.mutations !== undefined && entry.mutations.length > 0 && entry.comment === undefined
-    : entry.comment !== undefined && entry.mutations === undefined;
+  if (entry.kind !== 'edit') return entry.comment !== undefined && entry.mutations === undefined;
+  if (entry.mutations === undefined || entry.comment !== undefined) return false;
+  return entry.mutations.length > 0 || (entry.covers !== undefined && entry.covers.length > 0);
 }
 
 const PAYLOAD_RULE = 'an edit carries mutations and a comment carries one comment op';
+
+/** The op ids a blob tier record covers (channel.ts `Entry.covers`): client op ids, at least one. */
+const coversSchema = z.array(z.string().min(1).max(64)).min(1);
 
 /** a note rides an edit alone (channel.ts `Entry.note`) */
 function noteOnEdit(entry: { kind: 'edit' | 'comment'; note?: string | undefined }): boolean {
@@ -132,6 +150,7 @@ export const newEntrySchema = z
     comment: commentOpSchema.optional(),
     at: z.string().min(1),
     note: entryNoteSchema.optional(),
+    covers: coversSchema.optional(),
   })
   .refine(hasPayload, PAYLOAD_RULE)
   .refine(noteOnEdit, NOTE_RULE) satisfies z.ZodType<NewEntry>;
@@ -148,6 +167,9 @@ export const entrySchema = z
     comment: commentOpSchema.optional(),
     at: z.string().min(1),
     note: entryNoteSchema.optional(),
+    // the op ids a blob tier record folded (channel.ts Entry.covers); tolerated by the same
+    // deployment that first writes it, since a client parses every frame with this schema
+    covers: coversSchema.optional(),
   })
   .refine(hasPayload, PAYLOAD_RULE)
   .refine(noteOnEdit, NOTE_RULE) satisfies z.ZodType<Entry>;
@@ -156,14 +178,28 @@ export const entrySchema = z
 // Up: what a client posts
 
 /**
+ * The tie rule a client applies when it moves its pending inserts past a remote insert at the
+ * same offset, declared on its ops POST so the server transforms that client's incoming inserts
+ * by the same rule and the two ends place one text (`@turboslide/schema/transform`
+ * `insertTieSide`; the sync round fix round, VERIFICATION.md sync pass 1 F3): `client-id` is the
+ * tie by the two authors' client ids, the lower id keeping the left. A POST without it keeps
+ * server order (the later arrival lands after), which every client before the round applied.
+ */
+export const INSERT_TIE_RULES = ['client-id'] as const;
+export type InsertTieRule = (typeof INSERT_TIE_RULES)[number];
+export const insertTieRuleSchema = z.enum(INSERT_TIE_RULES);
+
+/**
  * `POST /api/decks/:id/ops` (SPEC-3 3.3): at most 64 entries; the byte cap is the route's. An
  * edit may carry `note`, the history label Version history lists it under (the brand kit's and
- * the assist's writes; channel.ts `Entry.note`); the author is never the body's.
+ * the assist's writes; channel.ts `Entry.note`); the author is never the body's. `insertTie`
+ * names the tie rule the client applies to its pending inserts (above); absent, server order.
  */
 export const opsPostSchema = z
   .strictObject({
     clientId: clientIdSchema,
     base: z.strictObject({ seq: nonNegativeInt }),
+    insertTie: insertTieRuleSchema.optional(),
     entries: z
       .array(
         z

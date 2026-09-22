@@ -25,11 +25,24 @@
 // it at apply time (text.ts insertPlain), which differs by order when the neighbour changed
 // concurrently, so two clients may show one inserted word in two styles until the server's order
 // is applied; the property test in transform.test.ts asserts exact convergence with `flags` and
-// character convergence without. Two anomalies are accepted and documented (b1.md, stage 2):
-// concurrent inserts at one offset interleave by server order when both authors keep typing
-// there (02 E17; Google's OT shares it), and a case change that alters the plain length (a sharp
-// s upper cased) is treated as length preserving here.
+// character convergence without. One anomaly is accepted and documented (b1.md, stage 2): a case
+// change that alters the plain length (a sharp s upper cased) is treated as length preserving
+// here.
+//
+// The tie of two inserts at one offset (the sync round fix round; VERIFICATION.md "Sync and
+// costs round, pass 1" F3). By server order alone (`right` for the later arrival) two authors
+// typing at one point interleave burst by burst (02 E17): an author's committed burst stands
+// while their next pending burst yields to the other's insert at its end, so a word is cut in two
+// (the ordering probe read `p pa1b1` from B's " p", A's " pa1" and B's "b1"). The tie is
+// therefore by the two authors' client ids (`insertTieSide`): the lower id keeps the left, on
+// every client and on the server, so each author's stream of inserts stays contiguous whatever
+// the arrival order. Both ends must compute it: the client declares the rule on its ops POST
+// (protocol.ts `OpsPost.insertTie`) and the server applies it to that client's incoming ops; a
+// POST without the declaration keeps server order, as every client before the round did.
+// Marks keep server order (`transformMarkAgainstMark`: the later arrival wins the flag), which
+// is what last writer wins means for them.
 import type { MarkMutation, Mutation, SpliceMutation, TextOp } from './mutations.ts';
+import { isSlideFieldPath } from './mutations.ts';
 import type { RunFlagKey, RunFlags } from './text.ts';
 import { RUN_FLAG_KEYS } from './text.ts';
 
@@ -37,13 +50,26 @@ import { RUN_FLAG_KEYS } from './text.ts';
 export type Splice = { at: number; remove: number; insert: string };
 
 /**
- * Which side wins a tie at one offset: `left` is the op that arrived first at the server (its
- * insertion stays before the other's), `right` the later one. The admission transforms the
- * incoming op as `right` against every entry since its base, so server order breaks every tie
- * and every client converges (02 3.3; the interleaving of concurrent inserts at one offset is the
- * accepted anomaly, 02 E17).
+ * Which side wins a tie at one offset: `left` keeps its insertion before the other's, `right`
+ * lands after it. For marks the admission transforms the incoming op as `right` against every
+ * entry since its base, so server order breaks the tie (the later arrival wins the flag) and every
+ * client converges (02 3.3). For two inserts at one offset the side is `insertTieSide`'s, by the
+ * two authors' client ids, the same on the server and on every client (the header's last
+ * paragraph); server order is the fallback for a client that did not declare the rule.
  */
 export type Side = 'left' | 'right';
+
+/**
+ * The side of an insert in a tie with another author's insert at the same offset, by the two
+ * authors' client ids: the lower id keeps the left, and equal ids (one author against their own
+ * record, which the transform never meets) land after. Pure and symmetric, so the server (the
+ * POST's client against the landed record's) and the client (its own id against the remote
+ * entry's) read one answer from one pair; a blob tier record written without an origin travels
+ * as `store` (blob.ts `entryOfRecord`) and every client id sorts before it, on both ends alike.
+ */
+export function insertTieSide(opClientId: string, againstClientId: string): Side {
+  return opClientId < againstClientId ? 'left' : 'right';
+}
 
 /**
  * A plain text range moved by a splice that happened before it was read (08 1.2): an insert at or
@@ -310,9 +336,11 @@ export function sameText(a: TextOp, b: TextOp): boolean {
 /**
  * True when `against` rewrites or removes the Text `op` names as a whole (SPEC-3 3.5): a
  * `text.replace` of the pointer, a `block.set` of the pointer or a parent of it, a
- * `slide.replace` or `slide.set` of the slide, the removal of the block or the slide, or a
- * restore. The string is last writer wins, so the text op cannot be placed and returns to its
- * author.
+ * `slide.replace` of the slide, a `slide.set` of one of the three slide fields when the op names
+ * that field (docs/SYNC.md 3.4: `slide.set /heading` rewrites the heading's ops alone, never the
+ * lead's or a block's) and of any other slide pointer as before, the removal of the block or the
+ * slide, or a restore. The string is last writer wins, so the text op cannot be placed and
+ * returns to its author.
  */
 export function rewritesText(against: Mutation, op: TextOp): boolean {
   switch (against.op) {
@@ -328,8 +356,14 @@ export function rewritesText(against: Mutation, op: TextOp): boolean {
       );
     case 'block.remove':
       return against.slideId === op.slideId && against.blockId === op.blockId;
-    case 'slide.replace':
     case 'slide.set':
+      if (against.slideId !== op.slideId) return false;
+      // a whole value write of a slide field is a rewrite of that field's Text alone: the op
+      // names the field as its blockId and the field's pointer as its path (mutations.ts)
+      if (isSlideFieldPath(against.path))
+        return op.path === against.path && op.blockId === against.path.slice(1);
+      return true;
+    case 'slide.replace':
     case 'slide.remove':
       return against.slideId === op.slideId;
     case 'version.restore':
@@ -343,13 +377,22 @@ export function rewritesText(against: Mutation, op: TextOp): boolean {
  * The general step of the admission: a text op is transformed against a text op on the same Text;
  * a text op against a whole Text rewrite of its Text is returned to its author (an empty list, the
  * caller answers with the content, SPEC-3 3.5); every other mutation passes through unchanged.
+ * `side` is the tie of two marks (server order); `insertTie` the tie of two inserts at one offset
+ * (`insertTieSide` when the caller knows both authors' client ids), `side` when not given.
  */
-export function transformMutation(mutation: Mutation, against: Mutation, side: Side): Mutation[] {
+export function transformMutation(
+  mutation: Mutation,
+  against: Mutation,
+  side: Side,
+  insertTie: Side = side,
+): Mutation[] {
   if (!isTextOp(mutation)) return [mutation];
   if (rewritesText(against, mutation)) return [];
   if (!isTextOp(against) || !sameText(mutation, against)) return [mutation];
   if (mutation.op === 'text.splice') {
-    return against.op === 'text.splice' ? transformSplice(mutation, against, side) : [mutation];
+    return against.op === 'text.splice'
+      ? transformSplice(mutation, against, insertTie)
+      : [mutation];
   }
   if (against.op === 'text.splice') return transformMark(mutation, against);
   return transformMarkAgainstMark(mutation, against, side);

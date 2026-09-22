@@ -18,7 +18,10 @@ import { join } from 'node:path';
 import { chromium } from 'playwright-core';
 
 const args = Object.fromEntries(
-  process.argv.slice(2).map((a, i, all) => (a.startsWith('--') ? [a.slice(2), all[i + 1]] : [])).filter((x) => x.length),
+  process.argv
+    .slice(2)
+    .map((a, i, all) => (a.startsWith('--') ? [a.slice(2), all[i + 1]] : []))
+    .filter((x) => x.length),
 );
 const MODE = args.mode ?? 'idle';
 const MINUTES = Number(args.minutes ?? 3);
@@ -79,16 +82,30 @@ const openMenu = async (page, id) => {
   if (!r) throw new Error(`no menubar button ${id}`);
   await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
   await page.locator(`#ts-menu-${id}`).waitFor({ timeout: 8000 });
-  await page.locator(`#ts-menu-${id} [data-control^="menu."]`).first().waitFor({ timeout: 4000 }).catch(() => undefined);
+  await page
+    .locator(`#ts-menu-${id} [data-control^="menu."]`)
+    .first()
+    .waitFor({ timeout: 4000 })
+    .catch(() => undefined);
   await sleep(rand(150, 300));
 };
 const hoverRow = async (page, rowId, waitFor) => {
   const row = ctl(page, `menu.${rowId}`);
   const r = await row.boundingBox();
   if (!r) throw new Error(`no menu row ${rowId}`);
-  await moveHuman(page, { x: r.x - 20, y: r.y + r.height / 2 }, { x: r.x + r.width / 2, y: r.y + r.height / 2 }, 6);
+  await moveHuman(
+    page,
+    { x: r.x - 20, y: r.y + r.height / 2 },
+    { x: r.x + r.width / 2, y: r.y + r.height / 2 },
+    6,
+  );
   await sleep(rand(250, 400));
-  const ok = await page.locator(waitFor).first().waitFor({ timeout: 6000 }).then(() => true).catch(() => false);
+  const ok = await page
+    .locator(waitFor)
+    .first()
+    .waitFor({ timeout: 6000 })
+    .then(() => true)
+    .catch(() => false);
   if (!ok) {
     await page.mouse.click(r.x + r.width / 2, r.y + r.height / 2);
     await sleep(rand(300, 450));
@@ -126,7 +143,9 @@ const waitRevision = async (page, want, timeout = 30_000) => {
 };
 const runs = (page) =>
   page.evaluate(() =>
-    [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide [data-run]')].map((el) => el.getAttribute('data-run')),
+    [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide [data-run]')].map((el) =>
+      el.getAttribute('data-run'),
+    ),
   );
 const runRect = (page, run) =>
   page.evaluate((r) => {
@@ -135,7 +154,8 @@ const runRect = (page, run) =>
     const b = el.getBoundingClientRect();
     return { x: b.x, y: b.y, w: b.width, h: b.height };
   }, run);
-const editing = (page) => page.evaluate(() => Boolean(document.querySelector('.ts-stagewrap.ts-editor[data-editing]')));
+const editing = (page) =>
+  page.evaluate(() => Boolean(document.querySelector('.ts-stagewrap.ts-editor[data-editing]')));
 const openRun = async (page, run) => {
   const r = await runRect(page, run);
   if (!r) throw new Error(`no run ${run}`);
@@ -143,7 +163,12 @@ const openRun = async (page, run) => {
   return editing(page);
 };
 const closeNamePrompt = async (page) => {
-  if (await ctl(page, 'dialog.namePrompt').first().isVisible().catch(() => false))
+  if (
+    await ctl(page, 'dialog.namePrompt')
+      .first()
+      .isVisible()
+      .catch(() => false)
+  )
     await clickControl(page, 'dialog.namePrompt.close').catch(() => undefined);
 };
 
@@ -161,7 +186,8 @@ function routeOf(url) {
   if (u.hostname !== 'turboslide.vercel.app') return `third party ${u.hostname}`;
   const p = u.pathname;
   let m;
-  if ((m = /^\/api\/decks\/[^/]+\/(stream|ops|presence)$/.exec(p))) return `/api/decks/<id>/${m[1]}`;
+  if ((m = /^\/api\/decks\/[^/]+\/(stream|ops|presence)$/.exec(p)))
+    return `/api/decks/<id>/${m[1]}`;
   if (p.startsWith('/_serverFn/')) return `/_serverFn/${p.slice(11, 19)}…`;
   if (p.startsWith('/api/render/')) return '/api/render/<slide>';
   if (p.startsWith('/api/export/')) return '/api/export/<id>';
@@ -170,9 +196,12 @@ function routeOf(url) {
   if (p.startsWith('/api/')) return p.replace(/[a-z0-9]{8,}/g, '<x>');
   if (/^\/decks\/[^/]+\/assets\//.test(p)) return '/decks/<id>/assets/*';
   if (p.startsWith('/assets/')) return '/assets/* (static)';
-  if (p.startsWith('/home/') || p.startsWith('/brand/') || p.startsWith('/icons/')) return `${p.split('/')[1]}/* (static)`;
-  if (/^\/(edit|deck|present|embed|print)\/[^/]+/.test(p)) return `/${p.split('/')[1]}/<id> (document)`;
-  if (p === '/new' || p === '/decks' || p === '/home' || p === '/decks/trash') return `${p} (document)`;
+  if (p.startsWith('/home/') || p.startsWith('/brand/') || p.startsWith('/icons/'))
+    return `${p.split('/')[1]}/* (static)`;
+  if (/^\/(edit|deck|present|embed|print)\/[^/]+/.test(p))
+    return `/${p.split('/')[1]}/<id> (document)`;
+  if (p === '/new' || p === '/decks' || p === '/home' || p === '/decks/trash')
+    return `${p} (document)`;
   return p;
 }
 
@@ -229,11 +258,20 @@ function summarize(records, t0, t1) {
   const byRoute = {};
   for (const r of inWindow) {
     const k = r.route;
-    byRoute[k] ??= { requests: 0, bytes: 0, statuses: {}, cache: {}, methods: {}, types: {}, pending: 0 };
+    byRoute[k] ??= {
+      requests: 0,
+      bytes: 0,
+      statuses: {},
+      cache: {},
+      methods: {},
+      types: {},
+      pending: 0,
+    };
     const b = byRoute[k];
     b.requests += 1;
     b.bytes += r.bytes ?? 0;
-    b.statuses[r.status ?? (r.failed ? 'failed' : 'pending')] = (b.statuses[r.status ?? (r.failed ? 'failed' : 'pending')] ?? 0) + 1;
+    b.statuses[r.status ?? (r.failed ? 'failed' : 'pending')] =
+      (b.statuses[r.status ?? (r.failed ? 'failed' : 'pending')] ?? 0) + 1;
     if (r.cache) b.cache[r.cache] = (b.cache[r.cache] ?? 0) + 1;
     b.methods[r.method] = (b.methods[r.method] ?? 0) + 1;
     b.types[r.type] = (b.types[r.type] ?? 0) + 1;
@@ -242,10 +280,19 @@ function summarize(records, t0, t1) {
   const rows = Object.entries(byRoute)
     .map(([route, b]) => ({ route, ...b, perMinute: Number((b.requests / minutes).toFixed(2)) }))
     .sort((a, b) => b.requests - a.requests);
-  return { windowMs: t1 - t0, minutes: Number(minutes.toFixed(2)), requests: inWindow.length, rows };
+  return {
+    windowMs: t1 - t0,
+    minutes: Number(minutes.toFixed(2)),
+    requests: inWindow.length,
+    rows,
+  };
 }
 
-const strip = (records) => records.map(({ _req, ...r }) => ({ ...r, url: r.url.replace(/\?.*$/, (q) => (q.length > 80 ? q.slice(0, 80) + '…' : q)) }));
+const strip = (records) =>
+  records.map(({ _req, ...r }) => ({
+    ...r,
+    url: r.url.replace(/\?.*$/, (q) => (q.length > 80 ? q.slice(0, 80) + '…' : q)),
+  }));
 
 // ------------------------------------------------------------------------------------------------
 // the scratch deck
@@ -287,17 +334,24 @@ async function cleanup(page, deckId, note) {
   } catch (error) {
     result.trashed = `the menu failed (${String(error).split('\n')[0]}); the window API`;
     try {
-      await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+      await page
+        .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+        .catch(() => undefined);
       await editorReady(page).catch(() => undefined);
       const info = await invoke(page, 'deck.info').catch(() => null);
-      if (info) await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+      if (info)
+        await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+          () => undefined,
+        );
     } catch {
       // the 404 row below tells the truth
     }
   }
   try {
     await page.goto(`${BASE}/decks/trash`, { waitUntil: 'domcontentloaded' });
-    await page.waitForSelector('.ts-trash-page[data-hydrated], .ts-home-page[data-hydrated]', { timeout: 30_000 });
+    await page.waitForSelector('.ts-trash-page[data-hydrated], .ts-home-page[data-hydrated]', {
+      timeout: 30_000,
+    });
     const card = page.locator(`[data-control="trash.card.${deckId}"]`);
     await card.waitFor({ timeout: 30_000 });
     await clickControl(page, `trash.delete.${deckId}`);
@@ -306,19 +360,29 @@ async function cleanup(page, deckId, note) {
     result.removed = 'Delete forever on /decks/trash';
   } catch (error) {
     result.removed = `the trash page failed (${String(error).split('\n')[0]}); the window API`;
-    await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+    await page
+      .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+      .catch(() => undefined);
     await editorReady(page).catch(() => undefined);
     const info = await invoke(page, 'deck.info').catch(() => null);
     if (info) {
-      await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+      await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+        () => undefined,
+      );
       const again = await invoke(page, 'deck.info').catch(() => null);
-      await invoke(page, 'deck.remove', { id: deckId, baseRevision: again?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+      await invoke(page, 'deck.remove', {
+        id: deckId,
+        baseRevision: again?.revision ?? info.revision,
+        confirm: true,
+      }).catch(() => undefined);
     }
   }
   const until = Date.now() + 30_000;
   for (;;) {
     for (const route of ['edit', 'deck']) {
-      const res = await page.request.get(`${BASE}/${route}/${deckId}`, { maxRedirects: 0 }).catch(() => null);
+      const res = await page.request
+        .get(`${BASE}/${route}/${deckId}`, { maxRedirects: 0 })
+        .catch(() => null);
       result[route] = res ? res.status() : 'no answer';
     }
     if ((result.edit === 404 && result.deck === 404) || Date.now() > until) break;
@@ -337,13 +401,22 @@ async function main() {
   const page = await context.newPage();
   const records = [];
   attachLog(page, records);
-  const out = { mode: MODE, base: BASE, viewport: VIEWPORT, startedAt: new Date().toISOString(), phases: {} };
+  const out = {
+    mode: MODE,
+    base: BASE,
+    viewport: VIEWPORT,
+    startedAt: new Date().toISOString(),
+    phases: {},
+  };
   let deck = null;
   try {
     const tSetup0 = Date.now();
     deck = await freshDeck(page);
     out.deck = deck;
-    out.phases.setup = { ...summarize(records, tSetup0, Date.now()), note: 'from /new to the deck at /edit with its title written' };
+    out.phases.setup = {
+      ...summarize(records, tSetup0, Date.now()),
+      note: 'from /new to the deck at /edit with its title written',
+    };
     log('deck', deck.id, 'revision', deck.revision, 'at', deck.url);
 
     if (MODE === 'idle' || MODE === 'edit') {
@@ -375,20 +448,29 @@ async function main() {
       const t1 = Date.now();
       await page.screenshot({ path: join(SHOTS, `${MODE}-end.png`) });
       out.phases.window = { ...summarize(records, t0, t1), note: `${MODE} for ${MINUTES} minutes` };
-      out.saveState = await page.evaluate(() => document.querySelector('[data-control="deck.saveState"]')?.textContent?.trim() ?? null);
+      out.saveState = await page.evaluate(
+        () =>
+          document.querySelector('[data-control="deck.saveState"]')?.textContent?.trim() ?? null,
+      );
     }
 
     if (MODE === 'show') {
       const tLoad0 = Date.now();
       await page.goto(`${BASE}/deck/${deck.id}?present=1`, { waitUntil: 'load' });
       await sleep(8000);
-      out.phases.showLoad = { ...summarize(records, tLoad0, Date.now()), note: 'the show load, /deck/<id>?present=1, until 8 s after load' };
+      out.phases.showLoad = {
+        ...summarize(records, tLoad0, Date.now()),
+        note: 'the show load, /deck/<id>?present=1, until 8 s after load',
+      };
       const t0 = Date.now();
       await page.screenshot({ path: join(SHOTS, 'show-start.png') });
       await sleep(MINUTES * 60_000);
       const t1 = Date.now();
       await page.screenshot({ path: join(SHOTS, 'show-end.png') });
-      out.phases.window = { ...summarize(records, t0, t1), note: `the show left alone for ${MINUTES} minutes` };
+      out.phases.window = {
+        ...summarize(records, t0, t1),
+        note: `the show left alone for ${MINUTES} minutes`,
+      };
     }
 
     if (MODE === 'loads') {
@@ -399,12 +481,16 @@ async function main() {
       ]) {
         const t0 = Date.now();
         await page.goto(`${BASE}${path}`, { waitUntil: 'load' });
-        if (waitFor) await page.waitForSelector(waitFor, { timeout: 30_000 }).catch(() => undefined);
+        if (waitFor)
+          await page.waitForSelector(waitFor, { timeout: 30_000 }).catch(() => undefined);
         await page.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => undefined);
         await sleep(6000);
         const t1 = Date.now();
         await page.screenshot({ path: join(SHOTS, `load-${name}.png`) });
-        out.phases[`load ${name}`] = { ...summarize(records, t0, t1), note: `one load of ${path}, recorded until the network rested plus 6 s` };
+        out.phases[`load ${name}`] = {
+          ...summarize(records, t0, t1),
+          note: `one load of ${path}, recorded until the network rested plus 6 s`,
+        };
       }
     }
 
@@ -420,23 +506,42 @@ async function main() {
       await clickControl(page, 'menu.file.download.pdf');
       const dl = await download;
       const t1 = Date.now();
-      out.download = dl ? { name: dl.suggestedFilename(), url: dl.url().replace(/\?.*$/, '?…') } : null;
+      out.download = dl
+        ? { name: dl.suggestedFilename(), url: dl.url().replace(/\?.*$/, '?…') }
+        : null;
       if (dl) await dl.cancel().catch(() => undefined);
       await sleep(4000);
       await page.screenshot({ path: join(SHOTS, 'export-end.png') });
-      out.phases.export = { ...summarize(records, t0, Date.now()), note: 'File > Download > PDF, from the click to the download plus 4 s', downloadMs: dl ? t1 - t0 : null };
-      out.saveState = await page.evaluate(() => document.querySelector('[data-control="deck.saveState"]')?.textContent?.trim() ?? null);
-      out.snackbar = await page.evaluate(() => [...document.querySelectorAll('.ts-snackbar, .pt-toast')].map((el) => el.textContent?.trim()).filter(Boolean));
+      out.phases.export = {
+        ...summarize(records, t0, Date.now()),
+        note: 'File > Download > PDF, from the click to the download plus 4 s',
+        downloadMs: dl ? t1 - t0 : null,
+      };
+      out.saveState = await page.evaluate(
+        () =>
+          document.querySelector('[data-control="deck.saveState"]')?.textContent?.trim() ?? null,
+      );
+      out.snackbar = await page.evaluate(() =>
+        [...document.querySelectorAll('.ts-snackbar, .pt-toast')]
+          .map((el) => el.textContent?.trim())
+          .filter(Boolean),
+      );
     }
   } catch (error) {
-    out.error = String(error && error.stack ? error.stack : error).split('\n').slice(0, 4).join(' | ');
+    out.error = String(error && error.stack ? error.stack : error)
+      .split('\n')
+      .slice(0, 4)
+      .join(' | ');
     log('error', out.error);
     await page.screenshot({ path: join(SHOTS, `${MODE}-error.png`) }).catch(() => undefined);
   } finally {
     if (deck) {
       const tC = Date.now();
       out.cleanup = await cleanup(page, deck.id, MODE).catch((error) => ({ error: String(error) }));
-      out.phases.cleanup = { ...summarize(records, tC, Date.now()), note: 'File > Move to trash, Delete forever on /decks/trash, the 404 checks' };
+      out.phases.cleanup = {
+        ...summarize(records, tC, Date.now()),
+        note: 'File > Move to trash, Delete forever on /decks/trash, the 404 checks',
+      };
     }
     out.requests = strip(records);
     out.endedAt = new Date().toISOString();

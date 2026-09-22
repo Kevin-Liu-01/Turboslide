@@ -405,16 +405,32 @@ describe('textDiff and textBurstMutation', () => {
     ]);
   });
 
-  it('falls back to slide.set for the fields of a title slide', () => {
+  it('sends a burst on a title slide’s field as a text run at the field’s pointer (docs/SYNC.md 3.4)', () => {
     const title = document.slides['title'];
     if (!title) throw new Error('no title slide');
+    // the field is the run's blockId and the field's own pointer its path, never `/text`, so the
+    // admission transforms two people's bursts on one cover past each other (audit-ordering item 1)
     expect(textBurstMutation(title, 'heading', 'text', 'Old', 'New')).toEqual([
       {
-        op: 'slide.set',
+        op: 'text.splice',
         slideId: 'title',
+        blockId: 'heading',
         path: '/heading',
-        value: 'New',
+        at: 0,
+        remove: 3,
+        insert: 'New',
       },
+    ]);
+    // a mark change on the field is a text.mark at the same pointer
+    expect(textBurstMutation(title, 'heading', 'text', 'New', '*New*')).toEqual([
+      expect.objectContaining({
+        op: 'text.mark',
+        slideId: 'title',
+        blockId: 'heading',
+        path: '/heading',
+        range: [0, 3],
+        edit: { kind: 'marks', set: { b: true } },
+      }),
     ]);
   });
 

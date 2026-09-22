@@ -2,20 +2,27 @@
 // typing bursts on one Text inside TEXT_UNDO_GROUP_MS fold into one Cmd Z. Framework free.
 import type { Mutation } from '@turboslide/schema/mutations';
 
-/** The slide fields a title or statement slide's text runs write (render/slide.ts pseudo blocks). */
+/** The slide fields a title or statement slide's whole value writes name (render/slide.ts pseudo blocks). */
 export const SLIDE_TEXT_FIELDS: ReadonlySet<string> = new Set(['/heading', '/lead', '/big']);
 
 /**
  * The Text one typing burst writes, or null for any other write. A burst on a block's run is a
- * `text.splice`; a burst on a title or statement slide's text is the `slide.set` of the field,
- * because those runs are slide fields and every burst rewrites the field (InlineText
- * textCommitMutation). Without the second form each 100 ms burst of a title was its own undo
- * step (build-4/hotfix-4.md cause W10: Cmd Z after " undo" removed "do" and left " un").
+ * `text.splice`, and since the sync and costs round so is a burst on a title or statement
+ * slide's field: it travels as `text.splice { blockId: <the field>, path: '/heading' | '/lead' |
+ * '/big' }` (docs/SYNC.md 3.4; InlineText textBurstMutation), so it takes the splice key
+ * `<slideId>/<field><path>` and the bursts of one word fold into one Cmd Z as a block's do. The
+ * `slide.set` form below is the whole value write of a field (a markup change with no flag
+ * behind it, the Escape commit, an agent's write), which keys by the field the same way; before
+ * that round every burst of a title was a `slide.set` and without this form each 100 ms burst
+ * was its own undo step (build-4/hotfix-4.md cause W10: Cmd Z after " undo" removed "do" and
+ * left " un").
  */
 export function typingKeyOf(mutations: ReadonlyArray<Mutation>): string | null {
-  /* the auto-title's rename rides the burst that changed the heading (auto-title.ts, docs/RETURN.md
-     2.18: the name follows the heading burst by burst), so the bursts of one word still fold into
-     one Cmd Z; the rename is read past, never as the burst's own key */
+  /* a rename appended to a burst is read past, never as the burst's own key, so the bursts of one
+     word still fold into one Cmd Z. Since the sync and costs round the reducer derives the deck
+     title from a heading burst itself (schema reduce.ts followTitle; docs/SYNC.md 3.4) and the
+     controller appends no `deck.set /title` to a text run; the branch stays for the whole value
+     writes the rename still rides (auto-title.ts) */
   const last = mutations[mutations.length - 1];
   if (mutations.length > 1 && last?.op === 'deck.set' && last.path === '/title')
     return typingKeyOf(mutations.slice(0, -1));

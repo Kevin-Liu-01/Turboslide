@@ -331,6 +331,7 @@ export async function createStoredDeck(input: CreateDeckInput): Promise<CreateDe
 type RawManifest = {
   sections?: { slideIds?: unknown }[];
   defaults?: { appearance?: unknown };
+  brand?: { appearance?: unknown };
 };
 
 /**
@@ -343,14 +344,22 @@ export function deckCardFacts(deckId: string): {
   appearance: Appearance;
   firstSlide: string | null;
 } {
+  // the facts the collection's listing proved at the store's head come first (the blob
+  // collection keeps them per listed deck; the listing writes no mirror, so on an instance that
+  // never opened the deck the manifest below is not on disk and every card read as a dark plate
+  // with no thumbnail: the sync and costs round's ship, VERIFICATION.md pass 2 F3)
+  const listed = hostedDecks().cardFacts?.(deckId) ?? null;
+  if (listed !== null) return listed;
   let appearance: Appearance = 'dark';
   let firstSlide: string | null = null;
   const manifestPath = join(decksDir(), deckId, 'deck.json');
   if (existsSync(manifestPath)) {
     try {
       const raw = JSON.parse(readFileSync(manifestPath, 'utf8')) as RawManifest;
-      // the rule of deckAppearance (SPEC 7.2.3): dark unless the manifest says light
-      appearance = raw.defaults?.appearance === 'light' ? 'light' : 'dark';
+      // the rule of deckAppearance (SPEC 7.2.3): the Themes tiles' choice, else the kit's, else dark
+      const named = (value: unknown): Appearance | null =>
+        value === 'light' || value === 'dark' ? value : null;
+      appearance = named(raw.defaults?.appearance) ?? named(raw.brand?.appearance) ?? 'dark';
       for (const section of raw.sections ?? []) {
         const ids = Array.isArray(section.slideIds) ? section.slideIds : [];
         const first = ids.find((id) => typeof id === 'string');

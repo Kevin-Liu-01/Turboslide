@@ -1,0 +1,103 @@
+{
+  "probe": "sync-ordering-probe",
+  "prefix": "ordering-2026-09-22",
+  "base": "https://turboslide-bkwnt59my-kl01s-projects.vercel.app",
+  "tierFlag": "blob",
+  "bounds": {
+    "serialWord": 5000,
+    "viewerWord": 5000,
+    "titleConcurrent": 5000,
+    "blockConcurrent": 3000,
+    "reconnect": 10000,
+    "reload": 5000
+  },
+  "phasesAsked": [
+    "serial",
+    "title-open",
+    "title-closed",
+    "title-offline",
+    "block-open",
+    "block-closed",
+    "block-offline",
+    "reload"
+  ],
+  "startedAt": "2026-09-22T01:57:42.987Z",
+  "phases": {
+    "create": {
+      "deckId": "untitled-20260922-4jdx",
+      "tier": "blob",
+      "revision": 1,
+      "serverRevision": 1,
+      "seq": 1,
+      "pending": 0,
+      "retained": 0,
+      "connected": true,
+      "offline": false,
+      "streamDown": false,
+      "role": "owner",
+      "clientId": "f3ca83e8d1ad11d0ae01b04950a8cc73"
+    },
+    "access": {
+      "generalAccess": "set"
+    }
+  },
+  "wire": [
+    {
+      "who": "A",
+      "at": 4911,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "B",
+      "at": 7606,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 97750,
+      "stream": true,
+      "status": 200
+    }
+  ],
+  "anomalies": [],
+  "console": [
+    {
+      "who": "C",
+      "at": 6202,
+      "error": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "who": "C",
+      "at": 6953,
+      "error": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "who": "A",
+      "at": 101674,
+      "error": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "who": "A",
+      "at": 102004,
+      "error": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "who": "A",
+      "at": 103067,
+      "error": "Failed to load resource: the server responded with a status of 404 ()"
+    }
+  ],
+  "tier": "blob",
+  "error": "page.waitForFunction: Timeout 90000ms exceeded.\n    at editorReady (/Users/kevinliu/repos/Turboslide/scripts/probes/sync-ordering-probe.mjs:137:14)\n    at /Users/kevinliu/repos/Turboslide/scripts/probes/sync-ordering-probe.mjs:852:38",
+  "finishedAt": "2026-09-22T01:59:19.934Z",
+  "seconds": 97,
+  "teardown": {
+    "trashed": true,
+    "deletedForever": true,
+    "deckStatus": 404,
+    "gone": true
+  },
+  "deckId": "untitled-20260922-4jdx"
+}

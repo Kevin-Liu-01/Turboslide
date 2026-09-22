@@ -109,7 +109,7 @@ export function generateDescribe(): Describe {
       },
       {
         id: 'viewer',
-        when: '/deck/:deckId in slide, grid or book mode',
+        when: '/deck/:deckId in slide, grid or book mode (the window API on every viewer page; the studio session an agent drives over MCP only when the address carries ?agent=1 and while the page is visible)',
         actions: [...viewIds, 'render.slide', 'render.sheet'],
       },
       {

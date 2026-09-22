@@ -19,7 +19,8 @@ const require = createRequire('/Users/kevinliu/repos/Turboslide/package.json');
 const { chromium } = require('playwright-core');
 
 const BASE = 'https://turboslide.vercel.app';
-const OUT = process.argv[2] ?? '/Users/kevinliu/repos/Turboslide/docs/gslides-parity/sync/audit-hosting';
+const OUT =
+  process.argv[2] ?? '/Users/kevinliu/repos/Turboslide/docs/gslides-parity/sync/audit-hosting';
 mkdirSync(OUT, { recursive: true });
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -79,7 +80,8 @@ const revision = (page) =>
 // ---- the request ledger
 function family(url, method) {
   const u = new URL(url);
-  if (u.hostname.endsWith('.blob.vercel-storage.com')) return `blob ${u.hostname.split('.')[1]} ${method}`;
+  if (u.hostname.endsWith('.blob.vercel-storage.com'))
+    return `blob ${u.hostname.split('.')[1]} ${method}`;
   if (u.hostname !== 'turboslide.vercel.app') return `other ${u.hostname}`;
   const p = u.pathname;
   if (/^\/api\/decks\/[^/]+\/stream/.test(p)) return 'function /api/decks/:id/stream';
@@ -91,7 +93,11 @@ function family(url, method) {
   if (p.startsWith('/assets/')) return 'static /assets (chunks)';
   if (/^\/decks\/[^/]+\/assets\//.test(p)) return 'twins /decks/:id/assets';
   if (p.startsWith('/fonts/')) return 'static /fonts';
-  if (/^\/(icons|brand|og)\//.test(p) || /^\/(favicon\.ico|icon\.svg|manifest\.webmanifest)$/.test(p)) return 'static icons';
+  if (
+    /^\/(icons|brand|og)\//.test(p) ||
+    /^\/(favicon\.ico|icon\.svg|manifest\.webmanifest)$/.test(p)
+  )
+    return 'static icons';
   return `page ${p.replace(/\/[^/]+$/, '/:x')}`;
 }
 
@@ -105,7 +111,10 @@ const record = (name, expected, observed, ok) => {
 };
 
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+const context = await browser.newContext({
+  viewport: { width: 1440, height: 900 },
+  deviceScaleFactor: 1,
+});
 const page = await context.newPage();
 page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${String(e).slice(0, 200)}`));
 page.on('console', (m) => {
@@ -126,7 +135,14 @@ page.on('response', (res) => {
   });
 });
 page.on('requestfailed', (req) => {
-  ledger.push({ t: Date.now(), phase, family: family(req.url(), req.method()), method: req.method(), status: 0, failure: req.failure()?.errorText ?? 'failed' });
+  ledger.push({
+    t: Date.now(),
+    phase,
+    family: family(req.url(), req.method()),
+    method: req.method(),
+    status: 0,
+    failure: req.failure()?.errorText ?? 'failed',
+  });
 });
 
 const shot = (name) => page.screenshot({ path: join(OUT, `${name}.png`), fullPage: false });
@@ -146,7 +162,12 @@ try {
     chain.unshift({ url: rr.url(), status: (await rr.response())?.status() ?? null });
     r = rr;
   }
-  record('GET / redirects to /new', 'a 307 and the editor shell', `${chain.map((c) => `${c.status} ${c.url.replace(BASE, '')}`).join(' -> ') || 'no redirect'} -> ${page.url().replace(BASE, '')}`, /\/new$/.test(page.url()));
+  record(
+    'GET / redirects to /new',
+    'a 307 and the editor shell',
+    `${chain.map((c) => `${c.status} ${c.url.replace(BASE, '')}`).join(' -> ') || 'no redirect'} -> ${page.url().replace(BASE, '')}`,
+    /\/new$/.test(page.url()),
+  );
   await editorReady(page);
   const info = await invoke(page, 'deck.info');
   deckId = info.id;
@@ -171,7 +192,12 @@ try {
   }
   if (await page.locator('[data-control="dialog.namePrompt"]').count())
     await clickControl(page, 'dialog.namePrompt.close').catch(() => undefined);
-  record('Escape commits the title and creates the deck', 'the address moves to /edit/<id>, revision 1 or more', `${page.url().replace(BASE, '')}; revision ${rev}`, /\/edit\//.test(page.url()) && rev !== null && rev >= 1);
+  record(
+    'Escape commits the title and creates the deck',
+    'the address moves to /edit/<id>, revision 1 or more',
+    `${page.url().replace(BASE, '')}; revision ${rev}`,
+    /\/edit\//.test(page.url()) && rev !== null && rev >= 1,
+  );
   await shot('02-created');
 
   // ---- 3. one idle tab for 60 s
@@ -186,18 +212,37 @@ try {
   }
   const functionHits = idle.filter((e) => e.family.startsWith('function')).length;
   const blobHits = idle.filter((e) => e.family.startsWith('blob')).length;
-  record('60 s idle in the editor', 'the pulse on a budget: few function calls, no Blob calls from the browser', `${idle.length} responses: ${functionHits} function, ${blobHits} blob; ${JSON.stringify(byFamily)}`, true);
+  record(
+    '60 s idle in the editor',
+    'the pulse on a budget: few function calls, no Blob calls from the browser',
+    `${idle.length} responses: ${functionHits} function, ${blobHits} blob; ${JSON.stringify(byFamily)}`,
+    true,
+  );
   await shot('03-idle-60s');
 
   // ---- 4. /decks
   phase = 'decks';
   await page.goto(`${BASE}/decks`, { waitUntil: 'domcontentloaded' });
-  await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 }).catch(() => undefined);
+  await page
+    .waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 })
+    .catch(() => undefined);
   await sleep(2500);
   const listed = (await page.locator(`[data-control="home.card.${deckId}"]`).count()) > 0;
-  const footer = await page.locator('.ts-home-tail').innerText().catch(() => '');
-  const twinHosts = [...new Set(ledger.filter((e) => e.phase === 'decks' && e.family.startsWith('blob')).map((e) => e.family))];
-  record('/decks lists the new deck', 'the card is listed (the folder listing lags the store by up to a minute)', `card listed ${listed}; footer "${footer.replace(/\s+/g, ' ').trim()}"; blob families ${twinHosts.join(', ') || 'none'}`, true);
+  const footer = await page
+    .locator('.ts-home-tail')
+    .innerText()
+    .catch(() => '');
+  const twinHosts = [
+    ...new Set(
+      ledger.filter((e) => e.phase === 'decks' && e.family.startsWith('blob')).map((e) => e.family),
+    ),
+  ];
+  record(
+    '/decks lists the new deck',
+    'the card is listed (the folder listing lags the store by up to a minute)',
+    `card listed ${listed}; footer "${footer.replace(/\s+/g, ' ').trim()}"; blob families ${twinHosts.join(', ') || 'none'}`,
+    true,
+  );
   await shot('04-decks');
 
   // ---- 5. File > Move to trash
@@ -211,14 +256,23 @@ try {
   await page.locator('[data-control="menu.file.moveToTrash"]').waitFor({ timeout: 8000 });
   await clickControl(page, 'menu.file.moveToTrash');
   await page.waitForURL(/\/decks(\?.*)?$/, { timeout: 20_000 });
-  await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 }).catch(() => undefined);
+  await page
+    .waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 })
+    .catch(() => undefined);
   const stillListed = (await page.locator(`[data-control="home.card.${deckId}"]`).count()) > 0;
-  record('File > Move to trash', 'the address moves to /decks and the deck is not listed', `${page.url().replace(BASE, '')}; card listed ${stillListed}`, /\/decks/.test(page.url()) && !stillListed);
+  record(
+    'File > Move to trash',
+    'the address moves to /decks and the deck is not listed',
+    `${page.url().replace(BASE, '')}; card listed ${stillListed}`,
+    /\/decks/.test(page.url()) && !stillListed,
+  );
   await shot('05-after-trash');
 
   // ---- 6. Delete forever
   await page.goto(`${BASE}/decks/trash`, { waitUntil: 'domcontentloaded' });
-  await page.waitForSelector('.ts-trash-page[data-hydrated], .ts-home-page[data-hydrated]', { timeout: 30_000 });
+  await page.waitForSelector('.ts-trash-page[data-hydrated], .ts-home-page[data-hydrated]', {
+    timeout: 30_000,
+  });
   const card = page.locator(`[data-control="trash.card.${deckId}"]`);
   await card.waitFor({ timeout: 30_000 });
   await shot('06-trash-page');
@@ -236,27 +290,55 @@ try {
     if ((status.edit === 404 && status.deck === 404) || Date.now() > deadline) break;
     await sleep(1000);
   }
-  record('Delete forever, then GET /edit/<id> and /deck/<id>', 'both answer 404 within 20 s', `edit ${status.edit}, deck ${status.deck}`, status.edit === 404 && status.deck === 404);
+  record(
+    'Delete forever, then GET /edit/<id> and /deck/<id>',
+    'both answer 404 within 20 s',
+    `edit ${status.edit}, deck ${status.deck}`,
+    status.edit === 404 && status.deck === 404,
+  );
   await shot('07-trash-after-delete');
 } catch (error) {
-  record('the walk threw', 'no throw', error instanceof Error ? error.message.split('\n')[0] : String(error), false);
+  record(
+    'the walk threw',
+    'no throw',
+    error instanceof Error ? error.message.split('\n')[0] : String(error),
+    false,
+  );
   await shot('99-error').catch(() => undefined);
 } finally {
   if (deckId && !removed) {
     // the actions API through the window, the fallback of the core walk's finally block
     try {
-      await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+      await page
+        .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+        .catch(() => undefined);
       await editorReady(page).catch(() => undefined);
       const info = await invoke(page, 'deck.info').catch(() => null);
       if (info) {
-        await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+        await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+          () => undefined,
+        );
         const again = await invoke(page, 'deck.info').catch(() => null);
-        await invoke(page, 'deck.remove', { id: deckId, baseRevision: again?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+        await invoke(page, 'deck.remove', {
+          id: deckId,
+          baseRevision: again?.revision ?? info.revision,
+          confirm: true,
+        }).catch(() => undefined);
       }
       const res = await page.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 });
-      record('fallback cleanup through the actions API', '404 on /deck/<id>', `deck ${res.status()}`, res.status() === 404);
+      record(
+        'fallback cleanup through the actions API',
+        '404 on /deck/<id>',
+        `deck ${res.status()}`,
+        res.status() === 404,
+      );
     } catch (error) {
-      record('fallback cleanup', 'the deck removed', error instanceof Error ? error.message.split('\n')[0] : String(error), false);
+      record(
+        'fallback cleanup',
+        'the deck removed',
+        error instanceof Error ? error.message.split('\n')[0] : String(error),
+        false,
+      );
     }
   }
   const idle = ledger.filter((e) => e.phase === 'idle');
@@ -282,9 +364,15 @@ try {
       acc[k] = (acc[k] ?? 0) + 1;
       return acc;
     }, {}),
-    regions: [...new Set(ledger.map((e) => (e.vercelId ?? '').split('::').slice(0, 2).join('::')).filter(Boolean))],
+    regions: [
+      ...new Set(
+        ledger.map((e) => (e.vercelId ?? '').split('::').slice(0, 2).join('::')).filter(Boolean),
+      ),
+    ],
   };
   writeFileSync(join(OUT, 'hosting-walk.json'), `${JSON.stringify(summary, null, 2)}\n`);
   await browser.close();
-  console.log(`\n${steps.filter((s) => s.ok).length}/${steps.length} steps ok; deck ${deckId || 'none'} removed ${removed}`);
+  console.log(
+    `\n${steps.filter((s) => s.ok).length}/${steps.length} steps ok; deck ${deckId || 'none'} removed ${removed}`,
+  );
 }

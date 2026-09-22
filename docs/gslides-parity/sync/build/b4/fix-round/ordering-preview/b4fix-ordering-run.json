@@ -1,0 +1,917 @@
+{
+  "probe": "sync-ordering-probe",
+  "prefix": "b4fix",
+  "base": "https://turboslide-bkwnt59my-kl01s-projects.vercel.app",
+  "tierFlag": "blob",
+  "bounds": {
+    "serialWord": 5000,
+    "viewerWord": 5000,
+    "titleConcurrent": 5000,
+    "blockConcurrent": 5000,
+    "reconnect": 10000,
+    "reload": 5000
+  },
+  "phasesAsked": [
+    "serial",
+    "block-open",
+    "reload"
+  ],
+  "startedAt": "2026-09-22T03:22:41.201Z",
+  "phases": {
+    "create": {
+      "deckId": "untitled-20260922-g2gd",
+      "tier": "blob",
+      "revision": 1,
+      "serverRevision": 1,
+      "seq": 1,
+      "pending": 0,
+      "retained": 0,
+      "connected": true,
+      "offline": false,
+      "streamDown": false,
+      "role": null,
+      "clientId": "4fef41340b607eff43a6c5311c8c256c"
+    },
+    "access": {
+      "generalAccess": "set",
+      "link": "the /s/ URL of the answer, exchanged by C as a navigation before /edit/<id> (the token is not recorded)",
+      "landed": "/deck/<id>"
+    },
+    "join": {
+      "b": {
+        "revision": 1,
+        "serverRevision": 1,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "role": "owner",
+        "clientId": "1131972f75b175a97260c5d21cbb760a",
+        "heading": "Ordering probe"
+      },
+      "c": {
+        "revision": 1,
+        "serverRevision": 1,
+        "seq": 1,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "role": "viewer",
+        "clientId": "bafea810e1fc62c6021c4b677f6509a4",
+        "heading": "Ordering probe",
+        "editorStage": false
+      }
+    },
+    "serial": {
+      "tokens": [
+        {
+          "token": " a01",
+          "typedAt": 7877,
+          "ackMs": 562,
+          "revision": 2,
+          "latencyMs": 632,
+          "viewerMs": 937
+        },
+        {
+          "token": " a02",
+          "typedAt": 10907,
+          "ackMs": 944,
+          "revision": 3,
+          "latencyMs": 957,
+          "viewerMs": 957
+        },
+        {
+          "token": " a03",
+          "typedAt": 13919,
+          "ackMs": 690,
+          "revision": 4,
+          "latencyMs": 691,
+          "viewerMs": 994
+        },
+        {
+          "token": " a04",
+          "typedAt": 16840,
+          "ackMs": 632,
+          "revision": 5,
+          "latencyMs": 621,
+          "viewerMs": 621
+        },
+        {
+          "token": " a05",
+          "typedAt": 19871,
+          "ackMs": 508,
+          "revision": 6,
+          "latencyMs": 535,
+          "viewerMs": 637
+        },
+        {
+          "token": " a06",
+          "typedAt": 22863,
+          "ackMs": 640,
+          "revision": 7,
+          "latencyMs": 688,
+          "viewerMs": 688
+        }
+      ],
+      "latency": {
+        "n": 6,
+        "mean": 687,
+        "p50": 688,
+        "p95": 957,
+        "max": 957,
+        "min": 535
+      },
+      "viewerLatency": {
+        "n": 6,
+        "mean": 806,
+        "p50": 937,
+        "p95": 994,
+        "max": 994,
+        "min": 621
+      },
+      "ack": {
+        "n": 6,
+        "mean": 663,
+        "p50": 640,
+        "p95": 944,
+        "max": 944,
+        "min": 508
+      },
+      "postMs": {
+        "n": 6,
+        "mean": 497,
+        "p50": 467,
+        "p95": 741,
+        "max": 741,
+        "min": 367
+      },
+      "posts": 6,
+      "postsNotAtNextRevision": 0,
+      "arrivalOrder": [
+        " a01",
+        " a02",
+        " a03",
+        " a04",
+        " a05",
+        " a06"
+      ],
+      "inOrder": true,
+      "lost": [],
+      "duplicates": [],
+      "lateInB": [],
+      "lateInC": [],
+      "aText": "Ordering probe a01 a02 a03 a04 a05 a06",
+      "bText": "Ordering probe a01 a02 a03 a04 a05 a06",
+      "cText": "Ordering probe a01 a02 a03 a04 a05 a06",
+      "equalAB": true,
+      "equalAC": true,
+      "a": {
+        "revision": 7,
+        "serverRevision": 7,
+        "seq": 7,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "role": "owner"
+      },
+      "b": {
+        "revision": 7,
+        "serverRevision": 7,
+        "seq": 7,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "role": "owner"
+      },
+      "c": {
+        "revision": 7,
+        "serverRevision": 7,
+        "seq": 7,
+        "pending": 0,
+        "retained": 0,
+        "connected": true,
+        "offline": false,
+        "streamDown": false,
+        "role": "viewer",
+        "seenTokens": 6
+      },
+      "bSamples": [
+        {
+          "at": 7396,
+          "revision": 1,
+          "serverRevision": 1,
+          "seq": 1,
+          "text": "Ordering probe"
+        },
+        {
+          "at": 8509,
+          "revision": 2,
+          "serverRevision": 2,
+          "seq": 2,
+          "text": "Ordering probe a01"
+        },
+        {
+          "at": 11864,
+          "revision": 3,
+          "serverRevision": 3,
+          "seq": 3,
+          "text": "Ordering probe a01 a02"
+        },
+        {
+          "at": 14610,
+          "revision": 4,
+          "serverRevision": 4,
+          "seq": 4,
+          "text": "Ordering probe a01 a02 a03"
+        },
+        {
+          "at": 17461,
+          "revision": 5,
+          "serverRevision": 5,
+          "seq": 5,
+          "text": "Ordering probe a01 a02 a03 a04"
+        },
+        {
+          "at": 20406,
+          "revision": 6,
+          "serverRevision": 6,
+          "seq": 6,
+          "text": "Ordering probe a01 a02 a03 a04 a05"
+        },
+        {
+          "at": 23551,
+          "revision": 7,
+          "serverRevision": 7,
+          "seq": 7,
+          "text": "Ordering probe a01 a02 a03 a04 a05 a06"
+        }
+      ],
+      "saveWords": {
+        "a": "All changes saved",
+        "b": "All changes saved"
+      },
+      "stale": {
+        "a": null,
+        "b": null
+      }
+    },
+    "block": {
+      "run": "ordering-block/text",
+      "open": {
+        "rounds": [
+          {
+            "round": 1,
+            "windowMs": 325,
+            "convergedWithinBound": true,
+            "convergedMs": 1849,
+            "a": "ka1kb1end",
+            "b": "ka1kb1end",
+            "equal": true,
+            "aHas": {
+              "own": 1,
+              "other": 1
+            },
+            "bHas": {
+              "own": 1,
+              "other": 1
+            },
+            "orderInA": "a then b",
+            "orderInB": "a then b",
+            "posts": 2,
+            "repairSplices": 0,
+            "wire": [
+              {
+                "who": "A",
+                "at": 28802,
+                "base": 8,
+                "opIds": [
+                  "8"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 0,
+                    "remove": 0,
+                    "insert": "ka1",
+                    "insertLength": 3
+                  }
+                ],
+                "status": 200,
+                "ms": 500,
+                "revision": "9",
+                "admitted": [
+                  9
+                ],
+                "rejected": 0,
+                "between": null
+              },
+              {
+                "who": "B",
+                "at": 28973,
+                "base": 8,
+                "opIds": [
+                  "1"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 0,
+                    "remove": 0,
+                    "insert": "kb1",
+                    "insertLength": 3
+                  }
+                ],
+                "status": 200,
+                "ms": 1664,
+                "revision": "10",
+                "admitted": [
+                  10
+                ],
+                "rejected": 0,
+                "between": [
+                  {
+                    "seq": 9,
+                    "mutations": [
+                      "splice@0-0+3"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "samples": [
+              {
+                "at": 30661,
+                "a": "ka1kb1end",
+                "b": "ka1kb1end",
+                "ra": 10,
+                "rb": 10,
+                "pa": 0,
+                "pb": 0
+              }
+            ],
+            "stale": {
+              "a": null,
+              "b": null
+            }
+          },
+          {
+            "round": 2,
+            "windowMs": 216,
+            "convergedWithinBound": true,
+            "convergedMs": 1853,
+            "a": "kb2ka2ka1kb1end",
+            "b": "kb2ka2ka1kb1end",
+            "equal": true,
+            "aHas": {
+              "own": 1,
+              "other": 1
+            },
+            "bHas": {
+              "own": 1,
+              "other": 1
+            },
+            "orderInA": "b then a",
+            "orderInB": "b then a",
+            "posts": 2,
+            "repairSplices": 0,
+            "wire": [
+              {
+                "who": "B",
+                "at": 43219,
+                "base": 10,
+                "opIds": [
+                  "2"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 1,
+                    "remove": 0,
+                    "insert": "b2k",
+                    "insertLength": 3
+                  }
+                ],
+                "status": 200,
+                "ms": 1682,
+                "revision": "12",
+                "admitted": [
+                  12
+                ],
+                "rejected": 0,
+                "between": [
+                  {
+                    "seq": 11,
+                    "mutations": [
+                      "splice@2-0+3"
+                    ]
+                  }
+                ]
+              },
+              {
+                "who": "A",
+                "at": 43219,
+                "base": 10,
+                "opIds": [
+                  "9"
+                ],
+                "mutations": [
+                  {
+                    "op": "text.splice",
+                    "path": "/text",
+                    "blockId": "ordering-block",
+                    "at": 2,
+                    "remove": 0,
+                    "insert": "2ka",
+                    "insertLength": 3
+                  }
+                ],
+                "status": 200,
+                "ms": 396,
+                "revision": "11",
+                "admitted": [
+                  11
+                ],
+                "rejected": 0,
+                "between": null
+              }
+            ],
+            "samples": [
+              {
+                "at": 44937,
+                "a": "kb2ka2ka1kb1end",
+                "b": "kb2ka2ka1kb1end",
+                "ra": 12,
+                "rb": 12,
+                "pa": 0,
+                "pb": 0
+              }
+            ],
+            "stale": {
+              "a": null,
+              "b": null
+            }
+          }
+        ],
+        "afterEscape": {
+          "a": "kb2ka2ka1kb1end",
+          "b": "kb2ka2ka1kb1end",
+          "equal": true,
+          "a2": {
+            "revision": 12,
+            "serverRevision": 12,
+            "seq": 12,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "role": "owner"
+          },
+          "b2": {
+            "revision": 12,
+            "serverRevision": 12,
+            "seq": 12,
+            "pending": 0,
+            "retained": 0,
+            "connected": true,
+            "offline": false,
+            "streamDown": false,
+            "role": "owner"
+          }
+        }
+      }
+    },
+    "reload": {
+      "reloadMs": {
+        "a": 1479,
+        "b": 567,
+        "c": 1975
+      },
+      "bound": 5000,
+      "withinBound": true,
+      "live": 12,
+      "a": {
+        "id": "untitled-20260922-g2gd",
+        "title": "Ordering probe a01 a02 a03 a04 a05 a06",
+        "revision": 12,
+        "serverRevision": 12,
+        "order": [
+          "title"
+        ]
+      },
+      "b": {
+        "id": "untitled-20260922-g2gd",
+        "title": "Ordering probe a01 a02 a03 a04 a05 a06",
+        "revision": 12,
+        "serverRevision": 12,
+        "order": [
+          "title"
+        ]
+      },
+      "c": {
+        "id": "untitled-20260922-g2gd",
+        "title": "Ordering probe a01 a02 a03 a04 a05 a06",
+        "revision": 12,
+        "serverRevision": 12,
+        "order": [
+          "title"
+        ]
+      },
+      "sameAB": true,
+      "sameAC": true,
+      "sameRevision": true,
+      "atLive": true
+    }
+  },
+  "wire": [
+    {
+      "who": "A",
+      "at": 4173,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "B",
+      "at": 6254,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "C",
+      "at": 7265,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 8002,
+      "base": 1,
+      "opIds": [
+        "1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 14,
+          "remove": 0,
+          "insert": " a01",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 435,
+      "revision": "2",
+      "admitted": [
+        2
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 11048,
+      "base": 2,
+      "opIds": [
+        "2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 18,
+          "remove": 0,
+          "insert": " a02",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 741,
+      "revision": "3",
+      "admitted": [
+        3
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 14035,
+      "base": 3,
+      "opIds": [
+        "3"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 22,
+          "remove": 0,
+          "insert": " a03",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 511,
+      "revision": "4",
+      "admitted": [
+        4
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 16954,
+      "base": 4,
+      "opIds": [
+        "4"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 26,
+          "remove": 0,
+          "insert": " a04",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 467,
+      "revision": "5",
+      "admitted": [
+        5
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 20005,
+      "base": 5,
+      "opIds": [
+        "5"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 30,
+          "remove": 0,
+          "insert": " a05",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 367,
+      "revision": "6",
+      "admitted": [
+        6
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 23024,
+      "base": 6,
+      "opIds": [
+        "6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 34,
+          "remove": 0,
+          "insert": " a06",
+          "insertLength": 4
+        }
+      ],
+      "status": 200,
+      "ms": 458,
+      "revision": "7",
+      "admitted": [
+        7
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 27645,
+      "base": 7,
+      "opIds": [
+        "7"
+      ],
+      "mutations": [
+        {
+          "op": "slide.replace",
+          "path": null
+        },
+        {
+          "op": "block.insert",
+          "path": null
+        }
+      ],
+      "status": 200,
+      "ms": 373,
+      "revision": "8",
+      "admitted": [
+        8
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "A",
+      "at": 28802,
+      "base": 8,
+      "opIds": [
+        "8"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 0,
+          "remove": 0,
+          "insert": "ka1",
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 500,
+      "revision": "9",
+      "admitted": [
+        9
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 28973,
+      "base": 8,
+      "opIds": [
+        "1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 0,
+          "remove": 0,
+          "insert": "kb1",
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 1664,
+      "revision": "10",
+      "admitted": [
+        10
+      ],
+      "rejected": 0,
+      "between": [
+        {
+          "seq": 9,
+          "mutations": [
+            "splice@0-0+3"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "B",
+      "at": 43219,
+      "base": 10,
+      "opIds": [
+        "2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 1,
+          "remove": 0,
+          "insert": "b2k",
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 1682,
+      "revision": "12",
+      "admitted": [
+        12
+      ],
+      "rejected": 0,
+      "between": [
+        {
+          "seq": 11,
+          "mutations": [
+            "splice@2-0+3"
+          ]
+        }
+      ]
+    },
+    {
+      "who": "A",
+      "at": 43219,
+      "base": 10,
+      "opIds": [
+        "9"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/text",
+          "blockId": "ordering-block",
+          "at": 2,
+          "remove": 0,
+          "insert": "2ka",
+          "insertLength": 3
+        }
+      ],
+      "status": 200,
+      "ms": 396,
+      "revision": "11",
+      "admitted": [
+        11
+      ],
+      "rejected": 0,
+      "between": null
+    },
+    {
+      "who": "B",
+      "at": 62180,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 63021,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "C",
+      "at": 63224,
+      "stream": true,
+      "status": 200
+    },
+    {
+      "who": "A",
+      "at": 64355,
+      "stream": true,
+      "status": 200
+    }
+  ],
+  "anomalies": [],
+  "console": [
+    {
+      "who": "C",
+      "at": 7484,
+      "error": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "who": "A",
+      "at": 67369,
+      "error": "Failed to load resource: the server responded with a status of 404 ()"
+    }
+  ],
+  "tier": "blob",
+  "finishedAt": "2026-09-22T03:23:44.819Z",
+  "seconds": 64,
+  "teardown": {
+    "trashed": true,
+    "deletedForever": true,
+    "deckStatus": 404,
+    "gone": true
+  },
+  "deckId": "untitled-20260922-g2gd"
+}

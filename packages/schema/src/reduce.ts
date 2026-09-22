@@ -7,7 +7,8 @@ import type { DeckDocument, Slide } from './deck.ts';
 import { slideSchema, slotsForLayout } from './deck.ts';
 import { diffDecks } from './diff.ts';
 import type { BlockId, SlideId } from './ids.ts';
-import type { Author, BlockSlot, Mutation, Write } from './mutations.ts';
+import type { Author, BlockSlot, Mutation, SlideFieldId, Write } from './mutations.ts';
+import { slideFieldOf, slideFieldPath } from './mutations.ts';
 import { cloneJson, getAt, hasAt, setAt } from './pointer.ts';
 import {
   canonicalText,
@@ -16,6 +17,7 @@ import {
   markRange,
   plainLength,
   plainOf,
+  plainText,
   spliceText,
 } from './text.ts';
 import type { Issue } from './validate.ts';
@@ -123,12 +125,42 @@ function blockIds(slide: Slide): Set<string> {
   return ids;
 }
 
-/** The Text a text op names, read as a string; TypeError when the pointer holds anything else. */
-function requireText(
+/** What a text op writes into: a block at the op's pointer, or the slide itself for a slide field. */
+type TextTarget = {
+  slide: Slide;
+  /** the object `path` points into: the block, or the slide for a field */
+  holder: Block | Slide;
+  /** the slide field the op names, null for a block's Text */
+  field: SlideFieldId | null;
+  current: string;
+};
+
+/**
+ * The Text a text op names, read as a string (docs/SYNC.md 3.4): a slide field when `blockId`
+ * names one on this slide's kind (`slideFieldOf`), whose `path` must be the field's own pointer,
+ * else the block's Text at `path`. TypeError when the pointer holds anything else or a field's
+ * path is not its pointer.
+ */
+function resolveTextTarget(
   document: DeckDocument,
   mutation: { op: string; slideId: SlideId; blockId: BlockId; path: string },
-): { block: Block; current: string } {
+): TextTarget {
   const slide = requireSlide(document, mutation.slideId);
+  const field = slideFieldOf(slide, mutation.blockId);
+  if (field !== null) {
+    if (mutation.path !== slideFieldPath(field)) {
+      throw new TypeError(
+        `${mutation.op}: the slide field "${field}" of slide "${slide.id}" is addressed at ${slideFieldPath(field)}, got ${mutation.path}`,
+      );
+    }
+    const current = getAt(slide, mutation.path);
+    if (typeof current !== 'string') {
+      throw new TypeError(
+        `${mutation.op}: ${mutation.path} is not a string on slide "${slide.id}"`,
+      );
+    }
+    return { slide, holder: slide, field, current };
+  }
   const { block } = locateBlock(slide, mutation.blockId);
   const current = getAt(block, mutation.path);
   if (typeof current !== 'string') {
@@ -136,7 +168,73 @@ function requireText(
       `${mutation.op}: ${mutation.path} is not a string on block "${mutation.blockId}"`,
     );
   }
-  return { block, current };
+  return { slide, holder: block, field: null, current };
+}
+
+/**
+ * The deck title a blank deck starts with: the store's `DEFAULT_BLANK_TITLE` and the chrome's
+ * `TITLE_ROW.untitled`, spelled here because the store's templates module reaches `node:fs` and
+ * the chrome sits downstream of this package (apps/studio's blob-admission.test.ts pins the
+ * three agree).
+ */
+export const UNTITLED_DECK_TITLE = 'Untitled presentation';
+
+/**
+ * The Text the deck's title follows (docs/SYNC.md 3.4): the heading of the deck's first title
+ * slide in section order, whether a grammar title slide (the `heading` field) or a title slide
+ * converted to a canvas (canvas.ts keeps `grammar.kind` 'title' and the heading block's id as the
+ * second id of its main slot, `heading` by default). Null for a deck without one.
+ */
+export function deckTitleSource(
+  document: DeckDocument,
+): { slideId: SlideId; blockId: string } | null {
+  for (const section of document.deck.sections) {
+    for (const slideId of section.slideIds) {
+      const slide = document.slides[slideId];
+      if (slide === undefined) continue;
+      if (slide.kind === 'title') return { slideId, blockId: 'heading' };
+      if (slide.kind === 'content' && slide.grammar?.kind === 'title') {
+        return { slideId, blockId: slide.grammar.slots?.main?.[1] ?? 'heading' };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * The title rule of docs/SYNC.md 3.4, run after a text op landed on the deck's title source: the
+ * deck title takes the heading's new plain text while it was following the heading, that is
+ * while it still reads the blank deck's title or the heading's plain text from before the op.
+ * A `deck.set /title` that made them differ (a rename from the title row, the card menu or the
+ * CLI) stops the following until a later set makes them equal again, so a rename is never
+ * undone by the next keystroke on the cover. An emptied heading keeps the title (the manifest
+ * needs one) and the title stays put when the heading already reads it. Answers the inverse that
+ * restores the previous title, appended after the op's own inverse so undo is exact even when
+ * the re-applied inverse would derive a different title (a deck named from its first character).
+ * Before this every heading burst rode with a `deck.set /title` from the client, and two people
+ * typing into one cover wrote each other's titles over (audit-ordering item 1).
+ */
+function followTitle(document: DeckDocument, before: string, after: string): Mutation[] {
+  const title = document.deck.title;
+  const heading = plainText(after).trim();
+  if (heading === '' || heading === title) return [];
+  const previous = plainText(before).trim();
+  if (title !== UNTITLED_DECK_TITLE && title !== previous) return [];
+  document.deck.title = heading;
+  return [{ op: 'deck.set', path: '/title', value: title }];
+}
+
+/** True when a text op writes the Text the deck's title follows (`deckTitleSource`). */
+function writesTitleSource(
+  document: DeckDocument,
+  target: TextTarget,
+  blockId: string,
+  path: string,
+): boolean {
+  const source = deckTitleSource(document);
+  if (source === null || source.slideId !== target.slide.id || source.blockId !== blockId)
+    return false;
+  return target.field !== null ? target.field === 'heading' : path === '/text';
 }
 
 /**
@@ -376,13 +474,8 @@ export function applyMutation(
       ];
     }
     case 'text.replace': {
-      const slide = requireSlide(document, mutation.slideId);
-      const { block } = locateBlock(slide, mutation.blockId);
-      const current = getAt(block, mutation.path);
-      if (typeof current !== 'string')
-        throw new TypeError(
-          `text.replace: ${mutation.path} is not a string on block "${mutation.blockId}"`,
-        );
+      const target = resolveTextTarget(document, mutation);
+      const { holder, current } = target;
       const [start, end] = mutation.range;
       if (start > end || end > current.length) {
         throw new RangeError(
@@ -392,7 +485,10 @@ export function applyMutation(
       // The stored form is canonical, so the inverse covers the whole new string: exact, whatever
       // escaping the canonical form added to the typed text.
       const next = canonicalText(current.slice(0, start) + mutation.text + current.slice(end));
-      setAt(block, mutation.path, next);
+      setAt(holder, mutation.path, next);
+      const title = writesTitleSource(document, target, mutation.blockId, mutation.path)
+        ? followTitle(document, current, next)
+        : [];
       return [
         {
           op: 'text.replace',
@@ -402,10 +498,12 @@ export function applyMutation(
           range: [0, next.length],
           text: current,
         },
+        ...title,
       ];
     }
     case 'text.splice': {
-      const { block, current } = requireText(document, mutation);
+      const target = resolveTextTarget(document, mutation);
+      const { holder, current } = target;
       const plain = plainOf(current);
       const { at, remove, insert } = mutation;
       if (at < 0 || remove < 0 || at + remove > plain.length) {
@@ -415,7 +513,11 @@ export function applyMutation(
       }
       const removed = plain.slice(at, at + remove);
       const next = canonicalText(spliceText(current, at, remove, insert, mutation.flags));
-      setAt(block, mutation.path, next);
+      setAt(holder, mutation.path, next);
+      // the deck title follows the cover's heading while it was following it (followTitle)
+      const title = writesTitleSource(document, target, mutation.blockId, mutation.path)
+        ? followTitle(document, current, next)
+        : [];
       // The inverse is a splice (SPEC-3 3.1), so undo transforms against later ops; the flags the
       // removed span carried come back through the marks the re-inserted text lacks.
       const back: Mutation = {
@@ -428,10 +530,11 @@ export function applyMutation(
         insert: removed,
       };
       const restored = canonicalText(spliceText(next, at, insert.length, removed));
-      return [back, ...flagRestores(mutation, restored, current, [at, at + remove])];
+      return [back, ...flagRestores(mutation, restored, current, [at, at + remove]), ...title];
     }
     case 'text.mark': {
-      const { block, current } = requireText(document, mutation);
+      const target = resolveTextTarget(document, mutation);
+      const { holder, current } = target;
       const [start, end] = mutation.range;
       const length = plainLength(current);
       if (start > end || end > length) {
@@ -445,7 +548,12 @@ export function applyMutation(
           ? markRange(current, mutation.range, edit)
           : caseRange(current, mutation.range, edit.mode),
       );
-      setAt(block, mutation.path, next);
+      setAt(holder, mutation.path, next);
+      // a case change moves the heading's letters, so the title follows it as it follows a splice
+      const title =
+        edit.kind === 'case' && writesTitleSource(document, target, mutation.blockId, mutation.path)
+          ? followTitle(document, current, next)
+          : [];
       // the mark that restores the previous flags of the range, per segment where they differed
       if (edit.kind === 'marks') return flagRestores(mutation, next, current, mutation.range);
       // a case change: the previous characters come back through a splice (a case change can move
@@ -463,7 +571,7 @@ export function applyMutation(
         insert: before,
       };
       const restored = canonicalText(spliceText(next, start, nextEnd - start, before));
-      return [back, ...flagRestores(mutation, restored, current, [start, end])];
+      return [back, ...flagRestores(mutation, restored, current, [start, end]), ...title];
     }
     case 'section.set': {
       const old = cloneJson(document.deck.sections);

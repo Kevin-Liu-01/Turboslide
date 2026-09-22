@@ -41,3 +41,6 @@ __pycache__/
 
 # the deployment default template record (docs/PRODUCT.md 4.3): written by Use for new presentations, never committed
 decks/templates/default.json
+
+# a Playwright storage state with a localhost session cookie, written by the product round's b1 lane; never committed
+docs/gslides-parity/product/build/b1/.storage-state.json

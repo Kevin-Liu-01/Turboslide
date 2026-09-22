@@ -29,6 +29,19 @@ export type WriteOptions = {
 };
 
 /**
+ * Who made a write and which client ops it folded (docs/SYNC.md 3.2, invariant 3): the room's
+ * client id and the op ids of the batch a POST carried. A record that names its origin lets any
+ * instance answer a resend of the same ops with the seq the first admission made instead of
+ * committing them a second time; a write from the CLI or an agent's strict write carries none.
+ * The same shape lands on `Write` in `@turboslide/schema/mutations` (B1's half); the store reads
+ * it off `StoreWrite` whichever lands first.
+ */
+export type WriteOrigin = { clientId: string; opIds: string[] };
+
+/** A Write with the optional origin the room's channel attaches (docs/SYNC.md 3.2). */
+export type StoreWrite = Write & { origin?: WriteOrigin };
+
+/**
  * One entry of the version log on disk: a Version (SPEC 4.2) plus the two fields the store needs
  * to walk history, the revision the write started from and the inverse mutations. Every committed
  * write appends one entry; `version save` appends one with an empty mutation list and a note.
@@ -37,6 +50,13 @@ export type WriteOptions = {
 export type VersionRecord = Version & {
   baseRevision: number;
   inverse: Mutation[];
+  /**
+   * The write's origin (docs/SYNC.md 3.2): the client id and the op ids of the batch this record
+   * committed. Optional, so every record written before the round and every record of a write
+   * made outside the room parses as before; the parser tolerates it one deployment before the
+   * writer stores it (`versions.ts` RECORD_ORIGIN_WRITES).
+   */
+  origin?: WriteOrigin;
   /**
    * The Blob backend's immutable document of this entry (gslides-parity SPEC-2 8.2): the md5 of
    * the `deck.json` bytes the write pushed, naming `snapshots/<md5>.json`. Absent on the file and
@@ -120,6 +140,14 @@ export type WriteOutcome =
       issues: Issue[];
       /** Advisory lease notices: another author holds a lease on a touched slide. */
       warnings: string[];
+      /**
+       * Set when the write was not committed because a record above its base already names one
+       * of its `origin.opIds` (docs/SYNC.md 3.2, invariant 3): the resend of a POST whose first
+       * attempt landed. `entry` and `revision` are that record's, `document` is the current one,
+       * `changed` is empty; nothing was claimed or put. The channel answers the client one entry
+       * per op id at the record's seq.
+       */
+      replayed?: VersionRecord;
     }
   | {
       ok: false;
@@ -161,9 +189,11 @@ export type DeckStore = {
   /**
    * Applies a Write atomically: a stale baseRevision returns the current document, a mutation
    * that throws or a result that fails validation returns `invalid`, and a committed write bumps
-   * the revision, writes the touched files and appends a version log entry.
+   * the revision, writes the touched files and appends a version log entry. A write that names
+   * its origin (docs/SYNC.md 3.2) is answered with the record of its first admission when the
+   * log above its base holds one (`WriteOutcome.replayed`).
    */
-  write: (write: Write, options?: WriteOptions) => Promise<WriteOutcome>;
+  write: (write: StoreWrite, options?: WriteOptions) => Promise<WriteOutcome>;
   /** Appends a named version at the current revision. */
   saveVersion: (author: Author, note: string) => Promise<Version>;
   /** Every version log entry, oldest first. */

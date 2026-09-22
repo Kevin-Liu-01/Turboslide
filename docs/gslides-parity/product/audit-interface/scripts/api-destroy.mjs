@@ -15,13 +15,25 @@ if (!token) throw new Error('no bearer for the production host in hosts.json');
 const call = async (action, input) => {
   const res = await fetch(`${BASE}/api/actions/${action}?deck=${encodeURIComponent(id)}`, {
     method: 'POST',
-    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', 'x-turboslide-author': 'audit-cleanup' },
+    headers: {
+      authorization: `Bearer ${token}`,
+      'content-type': 'application/json',
+      'x-turboslide-author': 'audit-cleanup',
+    },
     body: JSON.stringify(input),
   });
   const text = await res.text();
   let body;
-  try { body = JSON.parse(text); } catch { body = text.slice(0, 200); }
-  console.log(action, res.status, JSON.stringify(body).replace(new RegExp(token, 'g'), '<token>').slice(0, 240));
+  try {
+    body = JSON.parse(text);
+  } catch {
+    body = text.slice(0, 200);
+  }
+  console.log(
+    action,
+    res.status,
+    JSON.stringify(body).replace(new RegExp(token, 'g'), '<token>').slice(0, 240),
+  );
   return { status: res.status, body };
 };
 

@@ -21,16 +21,34 @@ import { DEFAULT_THUMB_WIDTH, afterResponse, warmThumbs } from './thumbs';
  * polls anything; the render is an event of the write, floored so a typing burst renders once,
  * and a deck no one edits costs nothing. The scheduler is pure over injected clocks so its floor
  * and settle are unit tested (card-thumb.test.ts); the runtime binding at the foot renders.
+ *
+ * The sync and costs round (docs/SYNC.md 3.10, 4.4 rank 2; audit-costs item 6): the card renders
+ * once when the deck has rested CARD_THUMB_SETTLE_MS (30 s, from 2 s), once when the tab hides
+ * and once when the stream closes (`flush`, called by the stream's closer and the presence route
+ * on the client's hide), with the floor kept for a burst that never rests. Before this a person
+ * typing into slide 1 rendered it in Chromium every 8 s (885 renders and 824 CPU s in seven days
+ * of production for the title alone); a typing hour is now at most two renders plus the one at
+ * the end. The row `decks.card.thumbnail-slide-1` reads its bound from the flush at the stream's
+ * close, not from the settle: a seller who edits and leaves has the card within seconds.
  */
 
-/** How long the writes of a deck rest before its card renders: a typing burst renders once. */
-export const CARD_THUMB_SETTLE_MS = 2_000;
+/**
+ * How long the writes of a deck rest before its card renders: a typing burst renders once, and
+ * a seller mid edit is not rendered every few seconds (docs/SYNC.md 3.10).
+ */
+export const CARD_THUMB_SETTLE_MS = 30_000;
 /** At most one card render per deck per instance in this window. */
 export const CARD_THUMB_FLOOR_MS = 8_000;
 
 export type CardThumbScheduler = {
   /** A write landed on the deck: schedule its card's render (nothing when one is pending). */
   note: (deckId: string) => void;
+  /**
+   * The tab hid or the stream closed: a pending render runs now instead of at the settle, at
+   * the floor when the last render is younger than it; nothing when no render is pending (the
+   * deck's card is current already). Answers true when a render was moved up.
+   */
+  flush: (deckId: string) => boolean;
   /** The decks with a render pending on this instance. */
   pending: () => string[];
   /** Cancels every pending render (tests, a closing process). */
@@ -72,20 +90,35 @@ export function createCardThumbScheduler(
   const log = options.log ?? ((line: string) => console.error(`turboslide card thumb: ${line}`));
   const timers = new Map<string, unknown>();
   const lastRunAt = new Map<string, number>();
+  /** Arms the deck's one render `delay` from now (the caller cleared any earlier timer). */
+  const arm = (deckId: string, delay: number): void => {
+    const handle = clock.setTimeout(() => {
+      timers.delete(deckId);
+      lastRunAt.set(deckId, clock.now());
+      run(deckId).catch((error: unknown) => {
+        log(`${deckId}: ${error instanceof Error ? error.message : String(error)}`);
+      });
+    }, delay);
+    timers.set(deckId, handle);
+  };
+  /** How long the floor still holds the deck's next render, 0 when it does not. */
+  const floorLeft = (deckId: string, t: number): number => {
+    const last = lastRunAt.get(deckId);
+    return last === undefined ? 0 : Math.max(0, last + floorMs - t);
+  };
   return {
     note(deckId) {
       if (!SLUG_PATTERN.test(deckId) || timers.has(deckId)) return;
       const t = clock.now();
-      const last = lastRunAt.get(deckId);
-      const delay = Math.max(settleMs, last === undefined ? 0 : last + floorMs - t);
-      const handle = clock.setTimeout(() => {
-        timers.delete(deckId);
-        lastRunAt.set(deckId, clock.now());
-        run(deckId).catch((error: unknown) => {
-          log(`${deckId}: ${error instanceof Error ? error.message : String(error)}`);
-        });
-      }, delay);
-      timers.set(deckId, handle);
+      arm(deckId, Math.max(settleMs, floorLeft(deckId, t)));
+    },
+    flush(deckId) {
+      const handle = timers.get(deckId);
+      if (handle === undefined) return false;
+      clock.clearTimeout(handle);
+      timers.delete(deckId);
+      arm(deckId, floorLeft(deckId, clock.now()));
+      return true;
     },
     pending: () => [...timers.keys()],
     stop() {
@@ -128,4 +161,14 @@ function scheduler(): CardThumbScheduler {
 /** A write landed on the deck: its card renders once the writes settle (the runtime binding). */
 export function scheduleCardThumb(deckId: string): void {
   scheduler().note(deckId);
+}
+
+/**
+ * The tab hid or the deck's stream closed on this instance (docs/SYNC.md 3.10): a render that
+ * waits for the settle runs now, at the floor when one ran inside it; nothing when none waits.
+ * The stream's closer and the presence route call it (the realtime core and the client own
+ * those two calls; build/b3.md names the requests).
+ */
+export function flushCardThumb(deckId: string): boolean {
+  return scheduler().flush(deckId);
 }

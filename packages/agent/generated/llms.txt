@@ -37,7 +37,7 @@ Turboslide holds the GT brand deck as typed JSON (deck.json plus slides/<id>.jso
 - MCP streamable HTTP: POST JSON-RPC to /mcp (initialize first), GET for the notification stream, DELETE to end the session; the mcp-session-id header carries the session.
 - One MCP session is bound to one deck and one author at initialize; tools are deck_<action> for every implemented action on the mcp transport.
 - ?deck=<slug> on the initialize request; the instance default otherwise. x-turboslide-author or ?author= on the initialize request; agent:mcp-http otherwise.
-- deck_goto_slide (view.goto) is listed when a studio page (/edit or /deck) is attached to the deck and runs in that page.
+- deck_goto_slide (view.goto) is listed when a studio page is attached to the deck and runs in that page: the editor at /edit while it is visible, and a /deck, /present or /embed page opened with ?agent=1 while it is visible; a page hidden for 10 s detaches and the call answers 404 until it is shown again.
 
 ## Leases and revisions
 

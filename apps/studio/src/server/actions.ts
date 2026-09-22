@@ -66,6 +66,7 @@ import {
 } from '@turboslide/theme/tokens';
 
 import { hostedAccessHooks } from './access';
+import { registerStoreStatusActions } from './agent-actions';
 import { registerAssistActions } from './assist';
 import { agentAuth } from './auth';
 import { authorize, bootstrapAgentContext, denialBody, identityLabel } from './authorize';
@@ -95,6 +96,7 @@ import { registerMigrateStorage } from './migrate';
 import {
   commentCallerFor,
   decideFor,
+  realtimeTier,
   redisCommands,
   requestIdentity as roomIdentity,
 } from './room';
@@ -1101,6 +1103,10 @@ export async function deckDispatcher(
   registerSlideImport(dispatcher, deckId, storeDeps, store.dir, deckStore, decks);
   const assets = assetDispatcherLoader(dispatcher, deckId, store, deckStore);
   registerRecordActionsFor(dispatcher, deckId, store, deckStore, storeDeps, facts, assets);
+  // the store's view of the deck for the HTTP and MCP transports (docs/SYNC.md 6.3, 3.6; the sync
+  // round, build/b3.md R2): `sync.status` with `storeCalls` replaces the CLI's placeholder the
+  // record actions register above, and `deck.info` gains `counts.records` and `counts.holes`
+  registerStoreStatusActions(dispatcher, { deckId, store: deckStore, tier: realtimeTier() });
   if (request !== undefined) {
     registerRoomCommentHandlers(dispatcher, request, deckId);
     registerNotificationHandlers(dispatcher, request, deckId);

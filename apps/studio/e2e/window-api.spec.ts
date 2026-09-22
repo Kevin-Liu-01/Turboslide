@@ -397,11 +397,15 @@ test('an idle editor holds one stream and polls its session at the long poll cad
   /* one stream per tab (SPEC-3 3.3 closes it between 240 and 290 s, so the window sees at most one reconnect) */
   expect(streams.length).toBeGreaterThanOrEqual(1);
   expect(streamsInWindow).toBeLessThanOrEqual(1);
-  /* the idle ceiling of SPEC-4 4.4: four server function responses per minute. The session poll
-     survives round three (0.37); held for its 25 s on the instance that owns the session and
-     paused 6 s after an empty answer (useStudioSession.ts, the round four fixer round), it costs
-     at most two a minute in any 60 s alignment, never the storm R04 7.3 measured */
-  expect(fnInWindow.length).toBeLessThanOrEqual(4);
+  /* the idle ceiling: SPEC-4 4.4's four server function responses per minute (the poll held 25 s
+     and paused 6 s) is superseded by docs/SYNC.md 6.1 `cost.editor-idle.calls` since the sync and
+     costs round. The session poll survives round three (0.37) but is no longer held: the server
+     answers `[]` at once when the instance holds no session and the hook pauses 20 s
+     (useStudioSession.ts EMPTY_ANSWER_PAUSE_MS), so the poll lands floor(60 / 20) + 1 = 4 times in
+     a 60 s window at worst, and with the editor's two own calls the window holds up to 6; never
+     the storm R04 7.3 measured. The cost row itself (12 function requests a minute on the page)
+     is the cost probe's (scripts/probes/sync-cost-probe.mjs) */
+  expect(fnInWindow.length).toBeLessThanOrEqual(6);
   const gaps = fnInWindow.slice(1).map((row, i) => row.at - (fnInWindow[i]?.at ?? row.at));
   for (const gap of gaps) expect(gap).toBeGreaterThan(1_500);
 });

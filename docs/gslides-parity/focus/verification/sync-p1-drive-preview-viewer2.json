@@ -1,0 +1,240 @@
+{
+  "base": "https://turboslide-bkwnt59my-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-22T02:14:36.866Z",
+  "rows": {
+    "viewer": {
+      "kind": "viewer",
+      "words": [
+        " view1",
+        " view2",
+        " view3"
+      ],
+      "times": [
+        {
+          "word": " view1",
+          "seen": false,
+          "ms": 5566,
+          "reloaded": false
+        },
+        {
+          "word": " view2",
+          "seen": false,
+          "ms": 5414,
+          "reloaded": false
+        },
+        {
+          "word": " view3",
+          "seen": false,
+          "ms": 5510,
+          "reloaded": false
+        }
+      ],
+      "generalAccess": "link, viewer",
+      "linkShape": "https://turboslide-bkwnt59my-kl01s-projects.vercel.app/s/<token>",
+      "cLandedOn": "/deck/untitled-20260922-a7mm",
+      "cOpenMs": 1777,
+      "cStatus": null,
+      "cTextAtStart": "Turboslide 1 slides Deck 01 Verifier drive Verifier drive Previous 01 / 01 Next Verifier drive Assist Slide Grid Book ◐ Theme Present Help 01 / 01 Verifier driv",
+      "cTextAtEnd": "Turboslide 1 slides Deck 01 Verifier drive Verifier drive Previous 01 / 01 Next Verifier drive Assist Slide Grid Book ◐ Theme Present Help 01 / 01 Verifier drive",
+      "deckHalf": {
+        "pass": false,
+        "page": "/deck/<id> (where the /s/ link sends a viewer)"
+      },
+      "editHalf": {
+        "page": "/edit/<id> after the link grant",
+        "reached": true,
+        "role": "viewer",
+        "times": [
+          {
+            "word": " view4",
+            "seen": true,
+            "ms": 591,
+            "reloaded": false,
+            "cHeading": "Verifier drive view1 view2 view3 view4"
+          },
+          {
+            "word": " view5",
+            "seen": true,
+            "ms": 704,
+            "reloaded": false,
+            "cHeading": "fier drive view1 view2 view3 view4 view5"
+          },
+          {
+            "word": " view6",
+            "seen": true,
+            "ms": 1115,
+            "reloaded": false,
+            "cHeading": "rive view1 view2 view3 view4 view5 view6"
+          }
+        ],
+        "openMs": 589,
+        "sync": {
+          "seq": 4,
+          "revision": 4,
+          "pending": 0,
+          "retained": 0,
+          "tier": "blob",
+          "transport": "poll",
+          "connected": false,
+          "offline": false,
+          "storeDegraded": false,
+          "streamDown": false
+        },
+        "pass": true
+      },
+      "pass": true,
+      "seconds": 40
+    }
+  },
+  "wire": [
+    {
+      "who": "A",
+      "at": 12474,
+      "base": 1,
+      "opIds": [
+        "e6fc7c6e330662c4629caf0028327a35:1"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 14,
+          "remove": 0,
+          "insertLength": 6
+        }
+      ],
+      "status": 200,
+      "ms": 412,
+      "admitted": [
+        2
+      ]
+    },
+    {
+      "who": "A",
+      "at": 20989,
+      "base": 2,
+      "opIds": [
+        "e6fc7c6e330662c4629caf0028327a35:2"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 20,
+          "remove": 0,
+          "insertLength": 6
+        }
+      ],
+      "status": 200,
+      "ms": 633,
+      "admitted": [
+        3
+      ]
+    },
+    {
+      "who": "A",
+      "at": 29391,
+      "base": 3,
+      "opIds": [
+        "e6fc7c6e330662c4629caf0028327a35:3"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 26,
+          "remove": 0,
+          "insertLength": 6
+        }
+      ],
+      "status": 200,
+      "ms": 430,
+      "admitted": [
+        4
+      ]
+    },
+    {
+      "who": "A",
+      "at": 38098,
+      "base": 4,
+      "opIds": [
+        "e6fc7c6e330662c4629caf0028327a35:4"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 32,
+          "remove": 0,
+          "insertLength": 6
+        }
+      ],
+      "status": 200,
+      "ms": 374,
+      "admitted": [
+        5
+      ]
+    },
+    {
+      "who": "A",
+      "at": 40952,
+      "base": 5,
+      "opIds": [
+        "e6fc7c6e330662c4629caf0028327a35:5"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 38,
+          "remove": 0,
+          "insertLength": 6
+        }
+      ],
+      "status": 200,
+      "ms": 531,
+      "admitted": [
+        6
+      ]
+    },
+    {
+      "who": "A",
+      "at": 44647,
+      "base": 6,
+      "opIds": [
+        "e6fc7c6e330662c4629caf0028327a35:6"
+      ],
+      "mutations": [
+        {
+          "op": "text.splice",
+          "path": "/heading",
+          "blockId": "heading",
+          "at": 44,
+          "remove": 0,
+          "insertLength": 6
+        }
+      ],
+      "status": 200,
+      "ms": 935,
+      "admitted": [
+        7
+      ]
+    }
+  ],
+  "deck": "untitled-20260922-a7mm",
+  "tier": "blob",
+  "teardown": {
+    "trashed": "deck.trash through the window API (base 7)",
+    "removed": "deck.remove through the window API (base 7)",
+    "edit": 404,
+    "deckInfo": "revision 7",
+    "gone": true
+  },
+  "notes": [],
+  "endedAt": "2026-09-22T02:15:49.671Z"
+}

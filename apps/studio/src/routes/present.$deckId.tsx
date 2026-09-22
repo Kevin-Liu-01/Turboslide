@@ -2,6 +2,7 @@ import { createFileRoute, notFound, redirect } from '@tanstack/react-router';
 
 import { PresenterPage } from '../components/PresenterPage';
 import { PresenterSkeleton } from '../components/PresenterSkeleton';
+import { agentSessionRequested } from '../components/useStudioSession';
 import { readEditorDeck } from '../server/write';
 import { AccessPage } from './-access-page';
 
@@ -21,12 +22,17 @@ import { AccessPage } from './-access-page';
 // round trip. `pendingMinMs: 0` beside `pendingMs: 0` so the skeleton never outlives the console.
 // `notFoundComponent` is the You need access page (VERIFICATION-3 finding 53; the round four
 // ruling 3): the loader answers null for a missing and a restricted deck alike.
+//
+// `?agent=1` (docs/SYNC.md 3.10): the console attaches a studio session only when its address
+// carries the flag, as /deck does, so a presenter's own window costs no function request after
+// its load; the audience window follows the console over the BroadcastChannel either way.
 
-export type PresentSearch = { screen?: 1 };
+export type PresentSearch = { screen?: 1; agent?: 1 };
 
 export function validatePresentSearch(search: Record<string, unknown>): PresentSearch {
   const out: PresentSearch = {};
   if (search.screen === 1 || search.screen === '1' || search.screen === true) out.screen = 1;
+  if (agentSessionRequested(search)) out.agent = 1;
   return out;
 }
 
@@ -42,7 +48,7 @@ export const Route = createFileRoute('/present/$deckId')({
       throw redirect({
         to: '/deck/$deckId',
         params: { deckId: params.deckId },
-        search: { present: 1 },
+        search: { present: 1, ...(search.agent === 1 ? { agent: 1 } : {}) },
         replace: true,
       });
     }
@@ -69,7 +75,8 @@ export const Route = createFileRoute('/present/$deckId')({
 
 function PresentPage() {
   const payload = Route.useLoaderData();
-  return <PresenterPage payload={payload} />;
+  const search = Route.useSearch();
+  return <PresenterPage payload={payload} agent={search.agent === 1} />;
 }
 
 function PresentMissing() {

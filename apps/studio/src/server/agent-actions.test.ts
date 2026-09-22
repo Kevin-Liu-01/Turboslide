@@ -4,9 +4,18 @@
 // draft's first `writeDeck` creates it; the collection actions name other decks and never do.
 import { describe, expect, it } from 'vitest';
 
+import { createDispatcher } from '@turboslide/agent/dispatch';
 import { ACTIONS } from '@turboslide/schema/actions';
+import { workedDocument } from '@turboslide/schema/fixtures';
+import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
-import { DRAFT_CREATING_ACTIONS, SERVER_SIDE_WINDOW_ACTIONS, createsDraft } from './agent-actions';
+import {
+  DRAFT_CREATING_ACTIONS,
+  SERVER_SIDE_WINDOW_ACTIONS,
+  createsDraft,
+  outputAccepts,
+  registerStoreStatusActions,
+} from './agent-actions';
 
 describe('createsDraft', () => {
   it('names the server side actions that write this deck, each a mutating window action', () => {
@@ -32,5 +41,83 @@ describe('createsDraft', () => {
     ] as const) {
       expect(createsDraft(action)).toBe(false);
     }
+  });
+});
+
+// The store status handlers of the sync and costs round (docs/SYNC.md 6.3, 3.6): `sync.status`
+// answers the store's view with the call counters once the table names `storeCalls`, and
+// `deck.info` counts the log's records and holes once the table names them. A fake store with a
+// log that misses record 2; the dispatcher parses every answer against the table, so the test
+// passes on a tree before and after the integrator's schema entries land.
+describe('registerStoreStatusActions', () => {
+  const record = (n: number): VersionRecord => ({
+    n,
+    revision: 412 + n,
+    baseRevision: 411 + n,
+    author: { kind: 'human', name: 'kevin' },
+    note: '',
+    createdAt: '2026-09-21T10:00:00.000Z',
+    mutations: [],
+    inverse: [],
+  });
+  const store = {
+    id: 'gt-brand',
+    read: async () => ({ document: workedDocument(), issues: [], ok: true }),
+    revision: async () => 415,
+    records: async () => [record(1), record(3)],
+    snapshots: async () => 7,
+  } as unknown as DeckStore;
+
+  it('answers sync.status with the store’s position, and storeCalls once the table names it', async () => {
+    const dispatcher = createDispatcher();
+    registerStoreStatusActions(dispatcher, { deckId: 'gt-brand', store, tier: 'blob' });
+    const status = (await dispatcher.dispatch(
+      'sync.status',
+      {},
+      { author: { kind: 'human', name: 'kevin' } },
+    )) as Record<string, unknown>;
+    expect(status).toMatchObject({
+      seq: 415,
+      revision: 415,
+      pending: 0,
+      retained: 0,
+      tier: 'blob',
+      transport: 'file',
+      connected: false,
+    });
+    if (outputAccepts('sync.status', ['storeCalls'])) {
+      expect(status.storeCalls).toMatchObject({ windowMs: 60_000 });
+      expect((status.storeCalls as { instance: string }).instance).toMatch(/^[0-9a-f]{8}$/);
+    } else {
+      expect(status).not.toHaveProperty('storeCalls');
+    }
+  });
+
+  it('answers deck.info with the reader’s counts, the snapshots, and the records and holes once the table names them', async () => {
+    const dispatcher = createDispatcher();
+    registerStoreStatusActions(dispatcher, { deckId: 'gt-brand', store, tier: 'blob' });
+    const info = (await dispatcher.dispatch(
+      'deck.info',
+      {},
+      { author: { kind: 'human', name: 'kevin' } },
+    )) as { id: string; revision: number; counts: Record<string, number | undefined> };
+    expect(info.id).toBe('gt-brand');
+    expect(info.counts.slides).toBeGreaterThan(0);
+    expect(info.counts.snapshots).toBe(7);
+    if (outputAccepts('deck.info', ['counts', 'records'])) {
+      expect(info.counts.records).toBe(2);
+      expect(info.counts.holes).toBe(1);
+    } else {
+      expect(info.counts).not.toHaveProperty('records');
+      expect(info.counts).not.toHaveProperty('holes');
+    }
+  });
+
+  it('reads the table’s output shape by path', () => {
+    expect(outputAccepts('deck.info', ['counts', 'slides'])).toBe(true);
+    expect(outputAccepts('deck.info', ['counts', 'snapshots'])).toBe(true);
+    expect(outputAccepts('deck.info', ['counts', 'never-a-field'])).toBe(false);
+    expect(outputAccepts('sync.status', ['revision'])).toBe(true);
+    expect(outputAccepts('sync.status', ['revision', 'deeper'])).toBe(false);
   });
 });

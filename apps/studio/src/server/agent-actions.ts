@@ -1,9 +1,11 @@
 import { createServerFn } from '@tanstack/react-start';
+import type { Dispatcher } from '@turboslide/agent/dispatch';
 import type { ActionId } from '@turboslide/schema/actions';
 import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { authorSchema } from '@turboslide/schema/mutations';
 import type { Author } from '@turboslide/schema/mutations';
+import type { DeckStore } from '@turboslide/store/store';
 
 import { parseJsonInput } from './json';
 import { deckDir } from './root';
@@ -340,6 +342,87 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
     const answer: RunDeckActionAnswer = { output: output ?? null, created };
     return JSON.stringify(answer);
   });
+
+// ---------------------------------------------------------------------------------------------
+// The store status handlers (docs/SYNC.md 6.3, the call counting harness; 3.6, the log's holes)
+
+/** What the two handlers read: the deck, its store and the realtime tier the deployment runs. */
+export type StoreStatusDeps = {
+  deckId: string;
+  store: DeckStore;
+  tier: 'memory' | 'redis' | 'blob';
+};
+
+/**
+ * True when the action table's output schema accepts a field at `path` (a strict object at every
+ * step). The two handlers below add `storeCalls`, `counts.records` and `counts.holes` only once
+ * the table names them (the integrator lands the entries in `packages/schema/src/actions.ts`; the
+ * dispatcher parses every handler's output against the table and refuses an unknown key), so
+ * this file lands and answers on a tree where the entries are not merged yet.
+ */
+export function outputAccepts(id: ActionId, path: readonly string[]): boolean {
+  let schema: unknown = ACTIONS[id].output;
+  for (const key of path) {
+    const shape = (schema as { shape?: Record<string, unknown> }).shape;
+    if (shape === undefined || typeof shape !== 'object' || !(key in shape)) return false;
+    schema = shape[key];
+  }
+  return true;
+}
+
+/**
+ * Registers `sync.status` and `deck.info` on the studio's dispatcher for the HTTP and MCP
+ * transports (the window transport answers both in the page: controller.tsx), replacing the
+ * CLI's `sync.status` placeholder the record actions register (`seq` 0, `tier` `memory`; called
+ * after them) and the reader's `deck.info`. `sync.status` answers the store's view of the deck,
+ * with `storeCalls`, the calls this instance made to the
+ * Blob store under the deck's prefix in the last minute by operation and the instance id
+ * (`boundedBlobClient`'s counters, packages/store/src/blob-store.ts); the cost probe of
+ * docs/SYNC.md 6.3 samples it through `/api/actions/sync.status` with the bearer. `deck.info`
+ * gains `counts.records`, the version records the log holds, and `counts.holes`, the record
+ * numbers missing between its first and last (docs/SYNC.md 3.6, the hole's second rule;
+ * versions.ts `logHoles`), beside the reader's own counts. Called after `registerReadActions`
+ * and the record actions; the imports run inside the handlers so the client stub of this module
+ * (the edit route imports it) pulls no store graph.
+ */
+export function registerStoreStatusActions(dispatcher: Dispatcher, deps: StoreStatusDeps): void {
+  dispatcher.register('sync.status', async () => {
+    const revision = await deps.store.revision();
+    // the store's position: the seq of a record is its revision on the blob tier; no tab, so
+    // nothing pending or retained and no stream connected
+    const status = {
+      seq: revision,
+      revision,
+      pending: 0,
+      retained: 0,
+      tier: deps.tier,
+      transport: 'file' as const,
+      connected: false,
+    };
+    if (!outputAccepts('sync.status', ['storeCalls'])) return status;
+    const { storeCallsFor } = await import('@turboslide/store/blob-store');
+    return { ...status, storeCalls: storeCallsFor(deps.deckId) };
+  });
+  dispatcher.register('deck.info', async () => {
+    const { deckInfo } = await import('@turboslide/agent/http/readers');
+    const { logHoles } = await import('@turboslide/store/versions');
+    const store = deps.store as DeckStore & { snapshots?: () => Promise<number> };
+    const [read, records, snapshots] = await Promise.all([
+      store.read(),
+      store.records(),
+      typeof store.snapshots === 'function' ? store.snapshots() : Promise.resolve(undefined),
+    ]);
+    const info = deckInfo(read.document, snapshots === undefined ? {} : { snapshots });
+    return {
+      ...info,
+      counts: {
+        ...info.counts,
+        ...(outputAccepts('deck.info', ['counts', 'records']) ? { records: records.length } : {}),
+        ...(outputAccepts('deck.info', ['counts', 'holes']) ? { holes: logHoles(records) } : {}),
+      },
+    };
+  });
+}
 
 /** Runs one of the server-side window actions over a deck and returns the action's output. */
 export async function runDeckAction(input: RunDeckActionInput): Promise<unknown> {

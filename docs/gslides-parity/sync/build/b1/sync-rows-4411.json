@@ -1,0 +1,9 @@
+{
+  "base": "http://localhost:4411",
+  "startedAt": "2026-09-21T20:45:51.413Z",
+  "rows": {},
+  "wire": [],
+  "notes": [],
+  "error": "page.waitForFunction: Timeout 90000ms exceeded.\n    at waitEditor (/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/sync-rows-probe.mjs:33:14)\n    at /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/sync-rows-probe.mjs:210:9",
+  "finishedAt": "2026-09-21T20:47:21.837Z"
+}

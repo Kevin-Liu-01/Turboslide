@@ -1,0 +1,536 @@
+{
+  "base": "http://localhost:4414",
+  "startedAt": "2026-09-22T03:15:08.079Z",
+  "endedAt": "2026-09-22T03:22:16.129Z",
+  "minutes": 1,
+  "tier": "memory",
+  "instances": [
+    "12d3747c"
+  ],
+  "rows": [
+    {
+      "id": "sync.pull.no-listing",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "commits 10 (at least 10), landed in A true",
+        "the store half reads zero on this base (the file store); the function requests alone are asserted"
+      ],
+      "counts": {
+        "minutes": 0.75,
+        "functionRequests": 85,
+        "functionPerMinute": 113.32,
+        "polls": 4,
+        "failedRequests": 0,
+        "commits": 10,
+        "opsPosts": 10,
+        "opsAnswered200": 10,
+        "landed": true,
+        "settle": {
+          "settled": true,
+          "ms": 2012,
+          "samples": 1,
+          "first": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "last": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "own": 1
+        },
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 2
+        },
+        "ownMax": 6,
+        "instances": 1
+      },
+      "ceilings": {
+        "list": 0,
+        "commits": 10
+      },
+      "where": "zero",
+      "instances": [
+        "12d3747c"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 2012,
+        "samples": 1
+      },
+      "tier": "memory",
+      "deck": "untitled-20260922-wxhx",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4fix/runs/cost-local/cost-probe/sync.pull.no-listing.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.editor-idle.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "function requests 12 a minute (ceiling 12; 12 in 1 min)",
+        "the store half reads zero on this base (the file store); the function requests alone are asserted"
+      ],
+      "counts": {
+        "minutes": 1,
+        "functionRequests": 12,
+        "functionPerMinute": 12,
+        "polls": 3,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": null,
+        "settle": {
+          "settled": true,
+          "ms": 2018,
+          "samples": 1,
+          "first": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "last": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "own": 1
+        },
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 2
+        },
+        "ownMax": 5,
+        "instances": 1
+      },
+      "ceilings": {
+        "functionPerMinute": 12,
+        "simplePerMinute": 40,
+        "advancedPerMinute": 11
+      },
+      "where": "zero",
+      "instances": [
+        "12d3747c"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 2018,
+        "samples": 1
+      },
+      "tier": "memory",
+      "deck": "untitled-20260922-15vj",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4fix/runs/cost-local/cost-probe/cost.editor-idle.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.editor-hidden.calls",
+      "result": "not driven",
+      "reason": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached",
+      "measures": [
+        "function requests 12 a minute and 3 session poll(s) were read from the tab that stayed visible"
+      ],
+      "counts": {
+        "minutes": 1,
+        "functionRequests": 12,
+        "functionPerMinute": 12,
+        "polls": 3,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached",
+        "settle": {
+          "settled": true,
+          "ms": 2013,
+          "samples": 1,
+          "first": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "last": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "own": 1
+        },
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 2
+        },
+        "ownMax": 5,
+        "instances": 1
+      },
+      "ceilings": {
+        "functionPerMinute": 8,
+        "polls": 0
+      },
+      "where": "zero",
+      "instances": [
+        "12d3747c"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 2013,
+        "samples": 1
+      },
+      "tier": "memory",
+      "deck": "untitled-20260922-scg9",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4fix/runs/cost-local/cost-probe/cost.editor-hidden.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.editor-editing.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "function requests 71 a minute (ceiling 75; 71 in 1 min)",
+        "the store half reads zero on this base (the file store); the function requests alone are asserted"
+      ],
+      "counts": {
+        "minutes": 1,
+        "functionRequests": 71,
+        "functionPerMinute": 71,
+        "polls": 3,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": null,
+        "settle": {
+          "settled": true,
+          "ms": 2014,
+          "samples": 1,
+          "first": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "last": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "own": 1
+        },
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 2
+        },
+        "ownMax": 5,
+        "instances": 1
+      },
+      "ceilings": {
+        "functionPerMinute": 75,
+        "simplePerMinute": 140,
+        "advancedPerMinute": 85
+      },
+      "where": "zero",
+      "instances": [
+        "12d3747c"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 2014,
+        "samples": 1
+      },
+      "tier": "memory",
+      "deck": "untitled-20260922-4dxt",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4fix/runs/cost-local/cost-probe/cost.editor-editing.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.two-tabs-idle.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "the store half reads zero on this base (the file store); the function requests alone are asserted"
+      ],
+      "counts": {
+        "minutes": 1,
+        "functionRequests": 23,
+        "functionPerMinute": 23,
+        "polls": 6,
+        "failedRequests": 0,
+        "connected": true,
+        "mutual": true,
+        "settle": {
+          "settled": true,
+          "ms": 2011,
+          "samples": 1,
+          "first": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "last": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "own": 1
+        },
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 2
+        },
+        "ownMax": 5,
+        "instances": 1
+      },
+      "ceilings": {
+        "list": 0,
+        "advancedPerMinute": 30
+      },
+      "where": "zero",
+      "instances": [
+        "12d3747c"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 2011,
+        "samples": 1
+      },
+      "tier": "memory",
+      "deck": "untitled-20260922-d3g0",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4fix/runs/cost-local/cost-probe/cost.two-tabs-idle.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.show.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "function requests 0 in the window (ceiling 0)",
+        "the store half reads zero on this base (the file store); the function requests alone are asserted"
+      ],
+      "counts": {
+        "minutes": 1,
+        "functionRequests": 0,
+        "functionPerMinute": 0,
+        "polls": 0,
+        "failedRequests": 0,
+        "settle": {
+          "settled": true,
+          "ms": 2011,
+          "samples": 1,
+          "first": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "last": {
+            "simple": 0,
+            "advanced": 0,
+            "head": 0,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0
+          },
+          "own": 1
+        },
+        "functionRequestsBeforeWindow": 0,
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 2
+        },
+        "ownMax": 5,
+        "instances": 1
+      },
+      "ceilings": {
+        "functionRequests": 0,
+        "storeCalls": 0
+      },
+      "where": "zero",
+      "instances": [
+        "12d3747c"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 2011,
+        "samples": 1
+      },
+      "tier": "memory",
+      "deck": "untitled-20260922-n2p8",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b4fix/runs/cost-local/cost-probe/cost.show.calls.json",
+      "exit": 0
+    }
+  ],
+  "exitCode": 0
+}

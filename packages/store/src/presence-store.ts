@@ -26,7 +26,15 @@
 // (the copy, the record, the pulse) at most every PRESENCE_PUSH_SPACING_MS per deck per instance
 // and only on a change that travels (a join, a leave, a slide change, the identity fields, the
 // presenting flag) or when a row's expiry needs a refresh; a heartbeat alone moves the clock and
-// nothing else, and is pushed once the row's remaining life is under half; a selection or a
+// nothing else, and is pushed once the row's remaining life is under half, by the heartbeat that
+// finds it so: with the client at 10 s between heartbeats when the tab is quiet (docs/SYNC.md
+// 3.10) that is every 20 s, three pushes and nine puts a minute for an idle tab (SYNC.md 4.5,
+// the row `cost.editor-idle.calls`). The timer a deferred heartbeat arms fires at
+// PRESENCE_REFRESH_TIMER_MS of life left, after the heartbeat that would carry the refresh: it
+// pushes only when no heartbeat of the tab reached this instance in time. Before the sync round
+// fix round it fired at the half life itself, ahead of every heartbeat, so an idle tab pushed
+// every 10 s and the idle store count read 18 advanced operations a minute against the ceiling
+// of 11 (VERIFICATION.md sync pass 1, F5); a selection or a
 // follow change rides the next push and starts none (PRESENCE_VOLATILE_FIELDS). A push is one
 // attempt under `ifMatch`: a lost race leaves the changes pending for the next push after the
 // floor, never a loop inside one push; a read that proved nothing (the copy under the head's
@@ -66,8 +74,18 @@ export const PRESENCE_FILE = 'presence.json';
 export const PRESENCE_POLL_MS = 5000;
 /** The floor between two pushes of one deck from one instance (the budget: a change alone, 5 s apart at least). */
 export const PRESENCE_PUSH_SPACING_MS = 5000;
-/** The most a shared row lives without a refresh; the client posts a heartbeat every 5 s. */
+/** The most a shared row lives without a refresh; the client posts a heartbeat every 5 s while active and every 10 s when quiet (docs/SYNC.md 3.10). */
 export const PRESENCE_SHARED_TTL_MS = 30_000;
+/**
+ * The remaining life at which the timer a deferred heartbeat armed pushes the row when no later
+ * heartbeat carried the refresh. A heartbeat pushes the refresh itself once the row has under
+ * half its life left (`material`), and the quiet cadence of 10 s lands one with between 5 s and
+ * 15 s left, so the timer sits at 5 s: after every heartbeat that would refresh the row and
+ * ahead of the row's expiry by the tick and the push (the other instances read the record on
+ * their 2 s tick once the pulse moved). A timer at the half life pushed ahead of every heartbeat
+ * and doubled the idle pushes (VERIFICATION.md sync pass 1, F5).
+ */
+export const PRESENCE_REFRESH_TIMER_MS = 5000;
 /** How long an instance's earlier copies of the record stay before it deletes them. */
 export const PRESENCE_COPY_GRACE_MS = 60_000;
 /** The row fields that never travel: the live pointer stays per instance. */
@@ -112,6 +130,8 @@ export type SharedPresenceOptions<T extends PresenceRow> = {
   pushSpacingMs?: number;
   maxTtlMs?: number;
   copyGraceMs?: number;
+  /** the remaining life at which the timer pushes a deferred heartbeat's row; PRESENCE_REFRESH_TIMER_MS by default */
+  refreshTimerMs?: number;
   /** the row fields stripped from the shared record; the pointer by default */
   omit?: readonly string[];
   /** the row fields whose change starts no push; PRESENCE_VOLATILE_FIELDS by default */
@@ -305,6 +325,7 @@ export function sharedPresence<T extends PresenceRow>(
   const spacing = options.pushSpacingMs ?? PRESENCE_PUSH_SPACING_MS;
   const maxTtl = options.maxTtlMs ?? PRESENCE_SHARED_TTL_MS;
   const copyGrace = options.copyGraceMs ?? PRESENCE_COPY_GRACE_MS;
+  const refreshTimer = options.refreshTimerMs ?? PRESENCE_REFRESH_TIMER_MS;
   const omit = options.omit ?? PRESENCE_OMITTED_FIELDS;
   const volatile = options.volatile ?? PRESENCE_VOLATILE_FIELDS;
   const onError = options.onError ?? (() => {});
@@ -439,14 +460,24 @@ export function sharedPresence<T extends PresenceRow>(
   const needsPush = (d: DeckPresence<T>, t: number): boolean =>
     [...d.pending.keys()].some((clientId) => material(d, clientId, t));
 
-  /** When the earliest deferred heartbeat has to refresh its row, or null when nothing is deferred. */
+  /**
+   * When the timer pushes the earliest deferred heartbeat's row, or null when nothing is
+   * deferred: at `refreshTimer` of the record's row's life left, after the heartbeat that would
+   * carry the refresh at the half life (`material`), so the timer pushes only for a tab whose
+   * heartbeats stopped reaching this instance in time. A local row that ran out and a row the
+   * record holds under a higher clock (the tab's heartbeats land on another instance now) arm
+   * nothing: the next reconcile drops them, and a timer at their record row's past due would
+   * fire at once and arm itself again until then.
+   */
   const nextRefreshAt = (d: DeckPresence<T>, t: number): number | null => {
     let at: number | null = null;
     for (const [clientId, change] of d.pending) {
       if (change.kind !== 'set' || material(d, clientId, t)) continue;
+      const local = d.local.get(clientId);
       const remote = d.remote.rows.get(clientId);
-      if (remote === undefined) continue;
-      const due = remote.expiresAt - maxTtl / 2;
+      if (!alive(local, t) || remote === undefined || remote.state.clock > local.state.clock)
+        continue;
+      const due = remote.expiresAt - refreshTimer;
       if (at === null || due < at) at = due;
     }
     return at;

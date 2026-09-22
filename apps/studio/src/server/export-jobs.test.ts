@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { PublicJob, WorkerClient } from '@turboslide/render-worker/client';
 import type { ExportReport } from '@turboslide/schema/export';
+import { immutableCopyPath } from '@turboslide/store/access-store';
 import { memoryBlobClient } from '@turboslide/store/blob-fake';
 
 import {
@@ -33,12 +34,10 @@ import {
   parseExportJob,
   pollOfExportJob,
   progressLine,
-  pruneExportJobs,
   queuedExportJob,
-  readExportJob,
   staleExportJobPaths,
-  writeExportJob,
 } from './export-jobs';
+import { pruneExportJobs, readExportJob, writeExportJob } from './export-jobs-store';
 import { storedExportPath } from './export-sync';
 
 // The record of an editor export job across instances (the focus round, cycle 3 stream fix
@@ -135,6 +134,37 @@ const noAuth = {
 };
 
 describe('the export job record', () => {
+  it('is written with its immutable copy first and read through the proof, so a stale body never answers (docs/SYNC.md 3.5, invariant 8)', async () => {
+    const { client, fake } = stored();
+    const queued = queuedExportJob(JOB, 'q4-review', 'pptx', NOW);
+    expect(await writeExportJob(client, queued)).toBe(true);
+    const key = exportJobKey(JOB);
+    const stored1 = fake.blobs.get(key);
+    expect(stored1).toBeDefined();
+    // the copy under the record's version, put before the record itself
+    const copy1 = immutableCopyPath(key, stored1!.version);
+    expect(fake.blobs.has(copy1)).toBe(true);
+    const puts = fake.calls.filter((call) => call.op === 'put').map((call) => call.pathname);
+    expect(puts.indexOf(copy1)).toBeLessThan(puts.indexOf(key));
+    // the CDN keeps serving the queued body; the worker's instance writes the record done
+    fake.holdGet();
+    const done = finishedExportJob(queued, { status: 'done', report, ms: 912 }, LATER);
+    expect(await writeExportJob(client, done)).toBe(true);
+    fake.calls.length = 0;
+    const read = await readExportJob(client, JOB);
+    expect(read?.status).toBe('done');
+    expect(read).toEqual(done);
+    const ops = fake.calls.map((call) => `${call.op} ${call.pathname}`);
+    expect(ops[0]).toBe(`head ${key}`);
+    expect(ops).toContain(`get ${key}`);
+    expect(ops).toContain(`get ${immutableCopyPath(key, fake.blobs.get(key)!.version)}`);
+    fake.releaseGet();
+    // a record the store never held is null after one head
+    fake.calls.length = 0;
+    expect(await readExportJob(client, 'never-queued')).toBeNull();
+    expect(fake.calls.map((call) => call.op)).toEqual(['head']);
+  });
+
   it('is written at queue time under a folder no deck id can name, and read back as it was', async () => {
     const { client } = stored();
     const record = queuedExportJob(JOB, 'q4-review', 'pptx', NOW);
@@ -243,8 +273,9 @@ describe('the export job record', () => {
     });
     await writeExportJob(client, queuedExportJob(old, 'q4-review', 'pptx', NOW));
     await writeExportJob(client, queuedExportJob(fresh, 'q4-review', 'pptx', NOW));
-    // both uploads read three days old on this fake: both go
-    expect(await pruneExportJobs(client, now)).toBe(2);
+    // both uploads read three days old on this fake: both go, with the immutable copy each
+    // write stored beside its record (docs/SYNC.md 3.5; the copies age with their records)
+    expect(await pruneExportJobs(client, now)).toBe(4);
     expect(await readExportJob(client, old)).toBeNull();
     expect(await readExportJob(client, fresh)).toBeNull();
   });

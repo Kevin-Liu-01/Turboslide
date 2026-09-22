@@ -869,6 +869,20 @@ export const syncStatusSchema = z.strictObject({
   tier: z.enum(SYNC_TIERS),
   transport: z.enum(SYNC_TRANSPORTS),
   connected: z.boolean(),
+  /** The calls this instance made to the Blob store under the deck's prefix in the last `windowMs`, by operation, and the id of the answering instance (docs/SYNC.md 6.3); absent off the blob tier and in the page's own answer */
+  storeCalls: z
+    .strictObject({
+      head: z.number().int().nonnegative(),
+      get: z.number().int().nonnegative(),
+      put: z.number().int().nonnegative(),
+      list: z.number().int().nonnegative(),
+      del: z.number().int().nonnegative(),
+      windowMs: z.number().int().positive(),
+      instance: z.string().regex(/^[0-9a-f]{8}$/),
+      /** the `list` calls by the folder listed under the deck (versions, snapshots, assets, thumbs, presence, deck, other): the pull never lists versions (docs/SYNC.md 3.5), the rest name their listing */
+      lists: z.record(z.string(), z.number().int().nonnegative()).optional(),
+    })
+    .optional(),
 });
 
 const shareLinkView = z.strictObject({
@@ -1094,6 +1108,10 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         guides: z.number().int().optional(),
         /** the store's immutable per revision documents, on the Blob backend alone (SPEC-2 8.2) */
         snapshots: z.number().int().optional(),
+        /** the version records the log holds (docs/SYNC.md 3.6) */
+        records: z.number().int().nonnegative().optional(),
+        /** the record numbers missing between the log's first and last record (docs/SYNC.md 3.6, the hole's second rule) */
+        holes: z.number().int().nonnegative().optional(),
       }),
       /** the deck's appearance, counter and background defaults (gslides-parity SPEC 7.2.3, 7.2.4, SPEC-2 2.6.2) */
       defaults: z

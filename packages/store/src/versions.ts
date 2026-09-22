@@ -6,6 +6,8 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { z } from 'zod';
+
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { canonicalJson, parseJson } from '@turboslide/schema/json';
 import type { Version } from '@turboslide/schema/mutations';
@@ -13,9 +15,25 @@ import { mutationSchema, versionSchema } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 import { validateDocument } from '@turboslide/schema/validate';
 
-import type { VersionRecord } from './store.ts';
+import type { VersionRecord, WriteOrigin } from './store.ts';
 
 export const VERSIONS_DIR = 'versions';
+
+/**
+ * Whether a committed write's record stores its `origin` (docs/SYNC.md 3.2, the two deployment
+ * landing). The parser below tolerates the field whatever this reads, so deployment N ships with
+ * `false` (every instance reads a record that names its origin and writes none), and N plus 1
+ * flips it to `true` once N is the deployment an Instant Rollback lands on; a rollback of N plus
+ * 1 therefore lands on a reader that parses what N plus 1 wrote, never earlier. The blob store
+ * reads it as the default of `BlobStoreOptions.writeOrigin`; the tests pass `true`.
+ */
+export const RECORD_ORIGIN_WRITES = false;
+
+/** `{ clientId, opIds }` as the record stores it (store.ts WriteOrigin). Strict, both fields plain strings. */
+export const writeOriginSchema = z.strictObject({
+  clientId: z.string().min(1),
+  opIds: z.array(z.string().min(1)),
+}) satisfies z.ZodType<WriteOrigin>;
 
 /** The operation stream range a checkpoint coalesced (gslides-parity SPEC-3 2.1, 0.3). */
 export type OpsRange = { fromSeq: number; toSeq: number };
@@ -59,12 +77,58 @@ export const versionRecordSchema = versionSchema.extend({
   // the operation stream range a checkpoint coalesced (gslides-parity SPEC-3 2.1): optional, so
   // every record written outside the room and before the round still parses
   ops: opsRangeSchema,
+  // the write's origin (docs/SYNC.md 3.2): optional, tolerated one deployment before it is
+  // written (RECORD_ORIGIN_WRITES), so a reader on the older deployment never stops on a record
+  // the newer one wrote; a record without it parses as before the round
+  origin: writeOriginSchema.optional(),
 });
 
 /** A parsed record with `ops` narrowed to the range the schema's refinement proved. */
 function asRecord(parsed: ReturnType<typeof versionRecordSchema.parse>): VersionRecord {
   const { ops, ...rest } = parsed;
   return isOpsRange(ops) ? { ...rest, ops } : rest;
+}
+
+/**
+ * How many record numbers are missing from a log: every n between the first record and the last
+ * that no record carries (docs/SYNC.md 3.6, the hole's two rules; `deck.info.counts.holes`). A
+ * hole is a number a writer claimed whose commit landed after its record was released, or a
+ * record a store lost; the reader's walk continues past it and the tabs above it reload once.
+ * Version history's restore range ends at a hole (`assertContiguous`). Pure.
+ */
+export function logHoles(records: ReadonlyArray<VersionRecord>): number {
+  if (records.length === 0) return 0;
+  let first = Number.POSITIVE_INFINITY;
+  let last = 0;
+  const seen = new Set<number>();
+  for (const record of records) {
+    first = Math.min(first, record.n);
+    last = Math.max(last, record.n);
+    seen.add(record.n);
+  }
+  return last - first + 1 - seen.size;
+}
+
+/**
+ * The newest record above `baseRevision` whose origin names one of `opIds` (docs/SYNC.md 3.2,
+ * invariant 3): the first admission of a POST whose answer was lost, found by key rather than by
+ * the byte equality of its mutations. Undefined when no record above the base names them, which
+ * is every first attempt. Pure; the callers bound the records to the ones above the POST's base.
+ */
+export function recordNamingOps(
+  records: ReadonlyArray<VersionRecord>,
+  baseRevision: number,
+  opIds: ReadonlyArray<string>,
+): VersionRecord | undefined {
+  if (opIds.length === 0) return undefined;
+  const wanted = new Set(opIds);
+  for (let i = records.length - 1; i >= 0; i -= 1) {
+    const record = records[i];
+    if (record === undefined || record.revision <= baseRevision || record.origin === undefined)
+      continue;
+    if (record.origin.opIds.some((id) => wanted.has(id))) return record;
+  }
+  return undefined;
 }
 
 export function versionPath(dir: string, n: number): string {

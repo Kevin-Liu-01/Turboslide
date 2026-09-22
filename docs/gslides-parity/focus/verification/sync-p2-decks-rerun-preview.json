@@ -1,0 +1,203 @@
+{
+  "config": {
+    "argv": [
+      "/Users/kevinliu/.nvm/versions/node/v24.13.0/bin/node",
+      "/Users/kevinliu/repos/Turboslide/node_modules/@playwright/test/cli.js",
+      "test",
+      "apps/studio/e2e/core/decks.spec.ts",
+      "--grep",
+      "decks.card.present|decks.card.thumbnail-slide-1",
+      "--reporter=list,json"
+    ],
+    "configFile": "/Users/kevinliu/repos/Turboslide/playwright.config.ts",
+    "rootDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "core/decks.spec.ts",
+      "file": "core/decks.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "decks.card.present: Card menu > Present; a new tab opens /deck/<id>?present=1 as a show",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3165,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T05:16:35.761Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "95b4079def0a6a377664-5c712be45ac34e695617",
+          "file": "core/decks.spec.ts",
+          "line": 345,
+          "column": 1
+        },
+        {
+          "title": "decks.card.thumbnail-slide-1: A card shows slide 1's render within 10 s of the first edit; until then a plate in the deck's paper colour with the title in ink",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "thumbnail",
+                  "description": "plate {\"background\":\"rgb(7, 7, 7)\",\"color\":\"rgb(242, 242, 240)\",\"lum\":7,\"text\":\"Thumbnail deck\"}; slide 1 rendered after 6779 ms"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 10125,
+                  "error": {
+                    "message": "Error: the plate is the deck's paper colour, not black (rgb(7, 7, 7))\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m160\u001b[39m\nReceived:   \u001b[31m7\u001b[39m",
+                    "stack": "Error: the plate is the deck's paper colour, not black (rgb(7, 7, 7))\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m160\u001b[39m\nReceived:   \u001b[31m7\u001b[39m\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/decks.spec.ts:1397:7",
+                    "location": {
+                      "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/decks.spec.ts",
+                      "column": 7,
+                      "line": 1397
+                    },
+                    "snippet": "  1395 |       plate.lum ?? 0,\n  1396 |       `the plate is the deck's paper colour, not black (${plate.background})`,\n> 1397 |     ).toBeGreaterThan(160);\n       |       ^\n  1398 |   }\n  1399 |   expect(rendered, \"the card shows slide 1's render within 10 s of the first edit\").not.toBeNull();\n  1400 | });"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/decks.spec.ts",
+                        "column": 7,
+                        "line": 1397
+                      },
+                      "message": "Error: the plate is the deck's paper colour, not black (rgb(7, 7, 7))\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m160\u001b[39m\nReceived:   \u001b[31m7\u001b[39m\n\n  1395 |       plate.lum ?? 0,\n  1396 |       `the plate is the deck's paper colour, not black (${plate.background})`,\n> 1397 |     ).toBeGreaterThan(160);\n       |       ^\n  1398 |   }\n  1399 |   expect(rendered, \"the card shows slide 1's render within 10 s of the first edit\").not.toBeNull();\n  1400 | });\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/decks.spec.ts:1397:7"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T05:16:44.679Z",
+                  "annotations": [
+                    {
+                      "type": "thumbnail",
+                      "description": "plate {\"background\":\"rgb(7, 7, 7)\",\"color\":\"rgb(242, 242, 240)\",\"lum\":7,\"text\":\"Thumbnail deck\"}; slide 1 rendered after 6779 ms"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright/core-decks-decks-card-thum-69b62-olour-with-the-title-in-ink/error-context.md"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright/core-decks-decks-card-thum-69b62-olour-with-the-title-in-ink/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright/core-decks-decks-card-thum-69b62-olour-with-the-title-in-ink/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/decks.spec.ts",
+                    "column": 7,
+                    "line": 1397
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "95b4079def0a6a377664-48c8833d3a3398ed20f9",
+          "file": "core/decks.spec.ts",
+          "line": 1354,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-22T05:16:35.572Z",
+    "duration": 35512.144,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

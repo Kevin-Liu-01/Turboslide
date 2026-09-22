@@ -10,10 +10,20 @@
 // Offline, the pending and retained ops persist to the pending store; a reconnect replays from the
 // last seq; `resync` reloads at a revision and rebases. Framework free, browser safe (no `node:`);
 // the transport is injected so the tests run it against fake-transport.ts.
+//
+// The sync and costs round (docs/SYNC.md 3.2, 3.10, 3.11 invariants 4, 10 and 11): the client
+// acknowledges by op id from the answer, from an echo's `covers` (the op ids a record folded,
+// channel.ts `Entry.covers`), from the replay and from the resync read's origins above its old
+// position; the byte match of `settleOwnEcho` stays as the fallback for a record without an
+// origin. `transformSince` skips the author's own echo by client id and treats a second tab of
+// the same person as remote. The presence heartbeat runs at PRESENCE_HEARTBEAT_MS while the
+// pointer, the selection or the slide moved in the last PRESENCE_QUIET_AFTER_MS and at
+// PRESENCE_HEARTBEAT_QUIET_MS otherwise.
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
 import { NotImplementedError } from '@turboslide/schema/errors';
 import type { Mutation } from '@turboslide/schema/mutations';
+import { isSlideFieldPath } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 import { isTextOp, sameText, transformMutation } from '@turboslide/schema/transform';
 
@@ -35,6 +45,8 @@ import {
   OPS_POST_MAX_ENTRIES,
   PRESENCE_BATCH_MS,
   PRESENCE_HEARTBEAT_MS,
+  PRESENCE_HEARTBEAT_QUIET_MS,
+  REPLAY_MAX_ENTRIES,
 } from '../src/protocol.ts';
 import type { OpsPost, PresencePost } from '../src/protocol.ts';
 import type { PendingStore, PersistedOp, PersistedQueue } from './pending-store.ts';
@@ -201,6 +213,12 @@ export const RETIRE_MAX = 8;
 export const GAP_REOPEN_MS = 8000;
 /** How many recent entries `transformSince` can reach back over. */
 export const RECENT_ENTRIES = 2000;
+/**
+ * How long after the last pointer, selection or slide move a tab counts as active (docs/SYNC.md
+ * 3.10): the heartbeat runs at PRESENCE_HEARTBEAT_MS inside this window and at
+ * PRESENCE_HEARTBEAT_QUIET_MS after it, and a move brings it back at once.
+ */
+export const PRESENCE_QUIET_AFTER_MS = 30_000;
 
 /** How a pending op ended: in the stream at a seq, or returned to its author. */
 export type Settled = { seq: number } | { rejected: Rejected };
@@ -275,6 +293,26 @@ export type PersistedOffer = {
   discard: () => Promise<void>;
 };
 
+/**
+ * One record above the tab's old position, as the resync read answers it (docs/SYNC.md 3.2,
+ * invariant 10): the seq its commit made and the op ids it folded (`origin.opIds`), mutations
+ * stripped. A pending op named here is acknowledged at `seq` and never re-sent.
+ */
+export type ResyncOrigin = { seq: number; opIds: readonly string[] };
+
+/**
+ * What `onResync` answers when it read the records above the old position: the document at the
+ * head and the origins of the records between `since` and it, at most REPLAY_MAX_ENTRIES. With
+ * `bounded` true the records did not reach the old position, so a pending op posted before the
+ * resync cannot be told from a lost first attempt and is dropped with the queue (invariant 3's
+ * bound). A bare document is accepted too, for an answer that carries no origins.
+ */
+export type ResyncAnswer = {
+  document: DeckDocument;
+  origins?: readonly ResyncOrigin[];
+  bounded?: boolean;
+};
+
 export type RoomClientOptions = {
   deckId: string;
   transport: RoomTransport;
@@ -298,8 +336,13 @@ export type RoomClientOptions = {
   /** every event of the stream after the client applied it (presence, checkpoint, inbox, access) */
   onEvent?: (event: RoomEvent) => void;
   onReject?: (rejected: Rejected & { mutations?: Mutation[]; comment?: CommentOp }) => void;
-  /** the document at a revision the server named (a `resync`); null keeps the current one */
-  onResync?: (revision: number) => Promise<DeckDocument | null>;
+  /**
+   * The document at a revision the server named (a `resync`); null keeps the current one.
+   * `since` is the tab's position before the resync, so the read can answer the origins of the
+   * records above it (`ResyncAnswer`; docs/SYNC.md 3.2) and the client drops the pending ops
+   * those records name instead of re-sending them.
+   */
+  onResync?: (revision: number, since: number) => Promise<DeckDocument | ResyncAnswer | null>;
   /** a persisted queue from an earlier tab of this browser (SPEC-3 0.7) */
   onPersisted?: (offer: PersistedOffer) => void;
   /** a pending op that no longer applies after a remote change was returned to its author */
@@ -366,7 +409,13 @@ export function defaultTransform(mutation: Mutation, against: Mutation): Mutatio
   }
 }
 
-/** The whole Text rewrites a pending text op cannot survive (SPEC-3 3.5). */
+/**
+ * The whole Text rewrites a pending text op cannot survive (SPEC-3 3.5). A `slide.set` of a
+ * title or statement slide's field (`/heading`, `/lead`, `/big`) rewrites the text run that
+ * targets that field alone and no block's run (docs/SYNC.md 3.4, invariant 5); a `slide.set` of
+ * any other slide pointer rewrites every run on the slide, as the schema's own rule reads it
+ * (transform.ts `rewritesText`), so the client never keeps an op the admission would refuse.
+ */
 export function rewritesText(against: Mutation, op: Mutation): boolean {
   if (!isTextOp(op)) return false;
   switch (against.op) {
@@ -377,6 +426,13 @@ export function rewritesText(against: Mutation, op: Mutation): boolean {
       );
     case 'block.remove':
       return against.slideId === op.slideId && against.blockId === op.blockId;
+    case 'slide.set':
+      if (against.slideId !== op.slideId) return false;
+      // a whole value write of a slide field rewrites that field's run alone: the run names the
+      // field as its blockId and the field's pointer as its path (schema mutations.ts, B1's half)
+      if (isSlideFieldPath(against.path))
+        return op.path === against.path && op.blockId === against.path.slice(1);
+      return true;
     case 'slide.replace':
       // the slide was rewritten (a canvas conversion, the source drawer): a text op on a block
       // whose id survives is kept and re-anchored, the rest return to their author (SPEC-3 3.5)
@@ -391,6 +447,24 @@ export function rewritesText(against: Mutation, op: Mutation): boolean {
     default:
       return false;
   }
+}
+
+/**
+ * The op ids a record's entry folded (channel.ts `Entry.covers`; docs/SYNC.md 3.2): the blob
+ * channel emits them from the record's `origin` for every record written since the round, and
+ * a record from before it carries none. Read structurally so an entry from an older server, or
+ * a malformed field, covers nothing.
+ */
+export function coversOf(entry: Entry): readonly string[] {
+  const raw = (entry as Entry & { covers?: unknown }).covers;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((id): id is string => typeof id === 'string' && id !== '');
+}
+
+/** The client id an op id was minted under (`<clientId>:<counter>`), or the whole id without a colon. */
+function clientOfOpId(opId: string): string {
+  const colon = opId.indexOf(':');
+  return colon < 0 ? opId : opId.slice(0, colon);
 }
 
 /** The slides a mutation list touches, for the change signal; deck level ops mark `all`. */
@@ -532,6 +606,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let presenceTimer: unknown;
   let presenceDirty = false;
   let heartbeatTimer: unknown;
+  /** the last pointer, selection or slide move, for the heartbeat's cadence (docs/SYNC.md 3.10) */
+  let lastMovedAt = now();
+  /** whether the armed heartbeat is the quiet one, so a move can bring the cadence back */
+  let heartbeatQuiet = false;
   const rejects: (Rejected & { mutations?: Mutation[] })[] = [];
   const persistKey = (): string => pendingKey(deckId, clientId ?? 'unbound');
 
@@ -673,6 +751,27 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     if (recent.length > RECENT_ENTRIES) recent.splice(0, recent.length - RECENT_ENTRIES);
   };
 
+  /**
+   * The op ids of this tab that were acknowledged (from an answer, an echo's `covers`, the
+   * replay or the resync read), the newest RECENT_ENTRIES of them: a record's echo whose every
+   * op is here repeats content the document holds, whatever order the answer, the echo and the
+   * checkpoint frame arrived in (docs/SYNC.md 3.2, invariant 4).
+   */
+  const settledOps = new Set<string>();
+  const noteSettled = (opId: string): void => {
+    if (settledOps.has(opId)) settledOps.delete(opId);
+    settledOps.add(opId);
+    if (settledOps.size > RECENT_ENTRIES) {
+      const oldest = settledOps.values().next().value;
+      if (oldest !== undefined) settledOps.delete(oldest);
+    }
+  };
+
+  /** True for an entry of this tab's own: its client id is one of the tab's, or its `covers` name an op the tab minted. */
+  const ownEntry = (entry: Entry): boolean =>
+    myClientIds.has(entry.clientId) ||
+    coversOf(entry).some((id) => myClientIds.has(clientOfOpId(id)));
+
   /** The fold of a batch's edit mutations, as the blob channel commits one POST (blob.ts `append`). */
   const foldOf = (batch: readonly PendingOp[]): string => {
     const folded: RoomMutation[] = [];
@@ -684,14 +783,76 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   };
 
   /**
-   * A store echo that is the commit of one of this client's own POSTs (in flight or lost): its
-   * base at or above the POST's and its mutations the POST's fold, byte for byte. The ops of
+   * The pending ops an entry acknowledges, taken out of the pending set and settled at the
+   * entry's seq (retained until a checkpoint covers them): the ops the entry's `covers` names,
+   * and the op the entry's own id names when the entry is this tab's. The POST records those
+   * ops rode leave the echo list. Answers the ops it settled, none when the entry names nothing
+   * of this tab's.
+   */
+  const acknowledge = (entry: Entry): PendingOp[] => {
+    const covers = coversOf(entry);
+    const own = pending.filter(
+      (op) =>
+        covers.includes(op.opId) || (myClientIds.has(entry.clientId) && op.opId === entry.opId),
+    );
+    if (own.length === 0) return own;
+    const ids = new Set(own.map((op) => op.opId));
+    posted = posted.filter((row) => !row.opIds.some((id) => ids.has(id)));
+    pending = pending.filter((op) => !ids.has(op.opId));
+    for (const id of covers) noteSettled(id);
+    for (const op of own) {
+      op.settle?.({ seq: entry.seq });
+      noteSettled(op.opId);
+      if (op.kind === 'edit' && !retained.some((row) => row.opId === op.opId)) {
+        retained.push({
+          opId: op.opId,
+          seq: entry.seq,
+          ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
+        });
+      }
+    }
+    return own;
+  };
+
+  /**
+   * An echo that is the commit of one of this client's own POSTs, told by id (docs/SYNC.md 3.2,
+   * invariant 4): its `covers` names ops still pending here, so they are acknowledged at the
+   * echo's seq, the server document takes the record's folded mutations once (unless it holds
+   * that revision already, after a resync), and nothing is resent. The answer of the POST, when
+   * it comes, finds its ops settled and repeats nothing (`take`). False when the echo names
+   * nothing pending here, which leaves it to the byte match or to the remote path.
+   */
+  const settleByCovers = (entry: Entry): boolean => {
+    if (coversOf(entry).length === 0) return false;
+    const own = acknowledge(entry);
+    if (own.length === 0) return false;
+    if (!(tier === 'blob' && entry.seq <= server.deck.revision)) {
+      try {
+        server = applyMutations(server, entry.mutations ?? [], { now: entry.at }).document;
+      } catch {
+        scheduleResync(Math.max(entry.seq, revision));
+      }
+    }
+    const refolded = fold();
+    emitChange(refolded.document, 'all', 'ack');
+    options.onEvent?.({ type: 'op', entry });
+    persist();
+    emitStatus();
+    return true;
+  };
+
+  /**
+   * A store echo that is the commit of one of this client's own POSTs (in flight or lost), told
+   * by content: its base at or above the POST's and its mutations the POST's fold, byte for
+   * byte. The fallback for a record written without an origin (a server from before the sync
+   * round; docs/SYNC.md 3.2): a record that names its origin settles by id in `settleByCovers`
+   * and never here, so an equal fold from another tab is never taken for this tab's. The ops of
    * that POST still pending are acknowledged at the echo's seq, the server document takes the
    * echo once, and nothing is resent; the answer of the POST, when it comes, finds its ops
    * settled and repeats nothing (`held`). False for any other echo.
    */
   const settleOwnEcho = (entry: Entry): boolean => {
-    if (tier !== 'blob' || posted.length === 0) return false;
+    if (tier !== 'blob' || posted.length === 0 || coversOf(entry).length > 0) return false;
     const folded = JSON.stringify(entry.mutations ?? []);
     const batch = posted.find(
       (row) => !row.answered && entry.rev >= row.base && row.folded === folded,
@@ -703,6 +864,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     pending = pending.filter((op) => !own.includes(op));
     for (const op of own) {
       op.settle?.({ seq: entry.seq });
+      noteSettled(op.opId);
       if (!retained.some((row) => row.opId === op.opId)) {
         retained.push({
           opId: op.opId,
@@ -725,32 +887,28 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   };
 
   /**
-   * An entry of this client's own at or behind the position (the answer of a resent POST, which
-   * the server replays with the seq its first admission made; VERIFICATION C3-F1): the op it
-   * names is acknowledged and leaves the pending set. The document holds its content already,
-   * through the echo applied at that seq or the resync that brought the revision in, so nothing
-   * is applied again. Before this such an entry was dropped as a duplicate of the position and
-   * its op stayed pending and in flight for good: the title row read Saving with the tab and
-   * the server at one revision (the stall of C2-F24 and C3-F1 on the blob tier).
+   * An entry at or behind the position that names ops of this tab's (the answer of a resent
+   * POST, which the server replays with the seq its first admission made, VERIFICATION C3-F1;
+   * the record's echo through `covers` after the answer settled the ops; docs/SYNC.md 3.2): the
+   * ops it names are acknowledged and leave the pending set. The document holds their content
+   * already, through the entry applied at that seq, the echo, or the resync that brought the
+   * revision in, so nothing is applied again. Before this such an entry was dropped as a
+   * duplicate of the position and its op stayed pending and in flight for good: the title row
+   * read Saving with the tab and the server at one revision (the stall of C2-F24 and C3-F1 on
+   * the blob tier).
    */
   const settleBehind = (entry: Entry): void => {
-    if (!myClientIds.has(entry.clientId)) return;
-    const own = pending.find((op) => op.opId === entry.opId);
-    if (own === undefined) return;
-    pending = pending.filter((op) => op !== own);
-    own.settle?.({ seq: entry.seq });
-    if (entry.kind === 'edit' && !retained.some((row) => row.opId === own.opId)) {
-      retained.push({
-        opId: own.opId,
-        seq: entry.seq,
-        ...(own.mutations === undefined ? {} : { mutations: own.mutations }),
-      });
-    }
+    const own = acknowledge(entry);
+    if (own.length === 0) return;
     const folded = fold();
     emitChange(folded.document, 'all', 'ack');
     persist();
     emitStatus();
   };
+
+  /** A record's echo (the store's copy of a commit): the follower's fixed client id, or an entry that names the ops it folded. */
+  const isRecordEcho = (entry: Entry): boolean =>
+    entry.clientId === 'store' || coversOf(entry).length > 0;
 
   /** One admitted entry in stream order. */
   const applyEntry = (entry: Entry): void => {
@@ -763,6 +921,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       if (mine) {
         pending.find((op) => op.opId === entry.opId)?.settle?.({ seq: entry.seq });
         pending = pending.filter((op) => op.opId !== entry.opId);
+        noteSettled(entry.opId);
       }
       options.onEvent?.({ type: 'op', entry });
       persist();
@@ -770,16 +929,26 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       return;
     }
     const mutations = entry.mutations ?? [];
+    const covers = coversOf(entry);
+    // a record's echo whose every op this tab settled already (from the answer, an earlier echo
+    // or the resync read): its content is in the document, so it repeats nothing (docs/SYNC.md
+    // 3.2; the position moved above)
+    if (covers.length > 0 && covers.every((id) => settledOps.has(id))) return;
+    // the echo of this tab's own POST, told by the op ids the record folded (docs/SYNC.md 3.2)
+    if (settleByCovers(entry)) return;
     // a store entry (the follower's copy of a record) that the document holds already is skipped
-    if (entry.clientId === 'store' && entry.rev < server.deck.revision) return;
+    if (isRecordEcho(entry) && entry.rev < server.deck.revision) return;
     if (entry.clientId === 'store' && settleOwnEcho(entry)) return;
-    if (mine) {
+    if (mine && covers.length === 0) {
       const own = pending.find((op) => op.opId === entry.opId);
-      // acknowledged before this entry arrived (the store echo of its POST, settleOwnEcho): its
-      // content is in the server document already
-      const acknowledged = own === undefined && retained.some((row) => row.opId === entry.opId);
+      // acknowledged before this entry arrived (the store echo of its POST, settleOwnEcho, or a
+      // record's covers): its content is in the server document already
+      const acknowledged =
+        own === undefined &&
+        (settledOps.has(entry.opId) || retained.some((row) => row.opId === entry.opId));
       pending = pending.filter((op) => op.opId !== entry.opId);
       own?.settle?.({ seq: entry.seq });
+      noteSettled(entry.opId);
       if (!retained.some((row) => row.opId === entry.opId))
         retained.push({ opId: entry.opId, seq: entry.seq, mutations });
       // on the blob tier the seq is the revision the record made: an entry at or under the
@@ -861,13 +1030,39 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     if (pending.some((op) => !op.inflight)) scheduleFlush('now');
   };
 
-  /** Drains the contiguous entries buffered by seq, every sibling of a seq in arrival order. */
+  /**
+   * An entry at the position. A record's echo (the batch was applied from its entries, or the
+   * echo itself was), an applied sibling, or an op of this tab's acknowledged already repeats
+   * nothing and settles what it still names (`settleBehind`); another sibling of the batch the
+   * blob tier committed as one revision (hotfix 2 cause A2) applies.
+   */
+  const takeAtPosition = (entry: Entry): void => {
+    if (
+      isRecordEcho(entry) ||
+      appliedAtSeq.has(entry.opId) ||
+      settledOps.has(entry.opId) ||
+      retained.some((row) => row.opId === entry.opId)
+    ) {
+      settleBehind(entry);
+      return;
+    }
+    applyEntry(entry);
+  };
+
+  /**
+   * Drains the contiguous entries buffered by seq, every sibling of a seq in arrival order: the
+   * first moves the position and applies (a record's echo included, when it is what carries the
+   * revision), the rest are taken at the position, so an echo buffered beside the answer's own
+   * entries above a gap never applies the batch a second time (docs/SYNC.md 3.2).
+   */
   const drain = (): void => {
     for (;;) {
       const next = incoming.get(seq + 1);
       if (next === undefined) break;
       incoming.delete(seq + 1);
-      for (const entry of next) applyEntry(entry);
+      const [first, ...rest] = next;
+      if (first !== undefined) applyEntry(first);
+      for (const entry of rest) takeAtPosition(entry);
     }
     // anything below the seq is a duplicate
     for (const key of [...incoming.keys()]) if (key <= seq) incoming.delete(key);
@@ -899,10 +1094,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
 
   /**
    * One entry off the wire (the stream or an ops POST answer). Below the position it is a
-   * duplicate. At the position it is a sibling of a batch the blob tier committed as one
-   * revision (hotfix 2 cause A2) and is applied unless its op id was applied already; a store
-   * echo (`clientId: 'store'`, the record's folded mutations) at the position repeats what the
-   * batch's entries already carried and is dropped. Above the position it is buffered by seq.
+   * duplicate that may still name ops of this tab's (a resent POST's answer, an echo's
+   * `covers`), which `settleBehind` acknowledges. At the position it is a sibling of a batch the
+   * blob tier committed as one revision (hotfix 2 cause A2) and is applied unless its op id was
+   * applied already; a record's echo (`clientId: 'store'` or an entry with `covers`, the
+   * record's folded mutations) at the position repeats what the batch's entries already carried
+   * and settles what it still names. Above the position it is buffered by seq.
    */
   const take = (entry: Entry): void => {
     if (entry.seq < seq) {
@@ -910,12 +1107,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       return;
     }
     if (entry.seq === seq) {
-      if (entry.clientId === 'store') return;
-      if (appliedAtSeq.has(entry.opId)) {
-        settleBehind(entry);
-        return;
-      }
-      applyEntry(entry);
+      takeAtPosition(entry);
       return;
     }
     const siblings = incoming.get(entry.seq);
@@ -942,12 +1134,58 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       });
   };
 
+  /**
+   * The pending ops the resync read acknowledged (docs/SYNC.md 3.2, invariant 10): every op an
+   * origin above the old position names is settled at that record's seq and leaves the queue,
+   * never re-sent. When the records did not reach the old position (`bounded`, or on the blob
+   * tier a head more than REPLAY_MAX_ENTRIES above it, where the seq is the revision), an op
+   * posted before the resync cannot be told from a lost first attempt and is dropped with the
+   * queue and returned to its author with the reject card's sentence, the way an op the document
+   * no longer takes is (invariant 3's bound); an op never posted (no id yet) stays and re-folds.
+   */
+  const settleFromResync = (answer: ResyncAnswer, since: number): void => {
+    for (const origin of answer.origins ?? []) {
+      const own = pending.filter((op) => origin.opIds.includes(op.opId));
+      if (own.length === 0) continue;
+      const ids = new Set(own.map((op) => op.opId));
+      pending = pending.filter((op) => !ids.has(op.opId));
+      for (const op of own) {
+        op.settle?.({ seq: origin.seq });
+        noteSettled(op.opId);
+      }
+    }
+    const bounded =
+      answer.bounded === true ||
+      (tier === 'blob' && answer.document.deck.revision - since > REPLAY_MAX_ENTRIES);
+    if (!bounded) return;
+    const kept: PendingOp[] = [];
+    for (const op of pending) {
+      if (op.opId === '' || op.kind !== 'edit') {
+        kept.push(op);
+        continue;
+      }
+      options.onUnplaceable?.(op);
+      const rejected: Rejected = { opId: op.opId, reason: 'stale', message: UNPLACEABLE_SENTENCE };
+      rejects.push({
+        ...rejected,
+        ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
+      });
+      op.settle?.({ rejected });
+    }
+    pending = kept;
+  };
+
   const resync = async (at: number): Promise<void> => {
     if (options.onResync === undefined) return;
-    const fresh = await options.onResync(at);
-    if (fresh === null || stopped) return;
+    // the position before the reload: the read answers the origins of the records above it
+    const since = seq;
+    const answered = await options.onResync(at, since);
+    if (answered === null || stopped) return;
+    const answer: ResyncAnswer = 'slides' in answered ? { document: answered } : answered;
+    const fresh = answer.document;
     server = fresh;
     revision = Math.max(revision, fresh.deck.revision);
+    settleFromResync(answer, since);
     // the reload brought the document to the head. On the blob tier the seq of an entry is the
     // revision its record made (blob.ts), so the fresh document's revision is the stream
     // position; a position left at the last hello buffered every later entry for good and the
@@ -1202,11 +1440,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       offline = false;
       if (response.ok) {
         backoff = 0;
-        if (record !== null) posted = posted.filter((row) => row !== record);
         // what landed under the admitted entries first, so they drain at once (C3S-F8); an
-        // entry the stream delivered meanwhile is a duplicate `take` drops
+        // entry the stream delivered meanwhile is a duplicate `take` drops. The POST's record
+        // leaves the echo list after the entries were taken, so an echo of this commit that
+        // drains beside them (buffered above a gap the `between` just filled) still matches it
         for (const entry of response.between ?? []) take(entry);
         for (const entry of response.entries) take(entry);
+        if (record !== null) posted = posted.filter((row) => row !== record);
         for (const rejected of response.rejected) {
           const op = pending.find((row) => row.opId === rejected.opId);
           pending = pending.filter((row) => row.opId !== rejected.opId);
@@ -1410,13 +1650,35 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     }, ms);
   };
 
+  /** The heartbeat's wait: PRESENCE_HEARTBEAT_MS while the tab moved inside PRESENCE_QUIET_AFTER_MS, PRESENCE_HEARTBEAT_QUIET_MS otherwise. */
+  const heartbeatWaitMs = (): number =>
+    now() - lastMovedAt < PRESENCE_QUIET_AFTER_MS
+      ? PRESENCE_HEARTBEAT_MS
+      : PRESENCE_HEARTBEAT_QUIET_MS;
+
+  /**
+   * The heartbeat (docs/SYNC.md 3.10, audit-costs item 5): every 5 s while the pointer, the
+   * selection or the slide moved in the last 30 s, every 10 s when the tab is quiet; the wait is
+   * chosen when each beat is armed, and a move while the quiet wait runs re-arms it at the
+   * active cadence (`noteMoved`). The roster row's 30 s life and the server's refresh under 15 s
+   * of remaining life stay, so an idle tab pushes every 20 s.
+   */
   const heartbeat = (): void => {
+    if (heartbeatTimer !== undefined) timers.clearTimeout(heartbeatTimer);
+    const wait = heartbeatWaitMs();
+    heartbeatQuiet = wait === PRESENCE_HEARTBEAT_QUIET_MS;
     heartbeatTimer = timers.setTimeout(() => {
       heartbeatTimer = undefined;
       if (stopped) return;
       void postPresence();
       heartbeat();
-    }, PRESENCE_HEARTBEAT_MS);
+    }, wait);
+  };
+
+  /** A pointer, selection or slide move: the tab is active again, and a quiet heartbeat re-arms at 5 s. */
+  const noteMoved = (): void => {
+    lastMovedAt = now();
+    if (heartbeatQuiet && heartbeatTimer !== undefined) heartbeat();
   };
 
   // -------------------------------------------------------------------------------------------
@@ -1534,17 +1796,29 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     },
     transformSince(mutations, at) {
       // the entries that landed after the op was recorded: every remote entry with a higher
-      // position in the recent log, and none of the author's own (which the inverse already knows)
+      // position in the recent log, and none of the author's own (which the inverse already
+      // knows). Own means this tab's: an entry under one of its client ids, or a record's echo
+      // whose `covers` name an op it minted (docs/SYNC.md invariant 11). A second tab of the
+      // same person carries its own client id, so its entries are remote here and the inverse
+      // is moved past them, which is the right reading.
       const marker = recentMarkers.get(at);
       const since = marker === undefined ? [] : recent.filter((entry) => entry.seq > marker);
       const landed = since
-        .filter((entry) => !myClientIds.has(entry.clientId))
+        .filter((entry) => !ownEntry(entry))
         .flatMap((entry) => entry.mutations ?? []);
       return transformPast(mutations, landed, transform) ?? [];
     },
     flush,
     setPresence(state) {
+      const before = presence;
       presence = { ...presence, ...state };
+      // the pointer, the selection or the slide moved: the heartbeat's active window restarts
+      if (
+        JSON.stringify(before.pointer) !== JSON.stringify(presence.pointer) ||
+        JSON.stringify(before.selection) !== JSON.stringify(presence.selection) ||
+        before.slideId !== presence.slideId
+      )
+        noteMoved();
       presenceDirty = true;
       schedulePresence(PRESENCE_BATCH_MS);
     },

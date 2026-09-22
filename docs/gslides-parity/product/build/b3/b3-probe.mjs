@@ -38,7 +38,13 @@ const step = async (id, name, expected, fn) => {
     record(id, name, expected, r.ok === null ? `not driven: ${r.observed}` : r.observed, r.ok);
     return r;
   } catch (error) {
-    record(id, name, expected, `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`, false);
+    record(
+      id,
+      name,
+      expected,
+      `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+      false,
+    );
     return { ok: false };
   }
 };
@@ -109,7 +115,12 @@ const objectsOf = async (page, slideId) => {
   const walk = (node) => {
     if (Array.isArray(node)) return node.forEach(walk);
     if (node && typeof node === 'object') {
-      if (typeof node.id === 'string' && typeof node.type === 'string' && node.pos && typeof node.pos === 'object')
+      if (
+        typeof node.id === 'string' &&
+        typeof node.type === 'string' &&
+        node.pos &&
+        typeof node.pos === 'object'
+      )
         out.push({ id: node.id, type: node.type, pos: node.pos, block: node });
       for (const v of Object.values(node)) walk(v);
     }
@@ -132,11 +143,15 @@ const chip = (page) =>
   page.evaluate(() => document.querySelector('.ts-overlay .ts-select-chip')?.textContent ?? null);
 const handleControls = (page) =>
   page.evaluate(() =>
-    [...document.querySelectorAll('.ts-overlay [data-control^="handle."]')].map((el) => el.getAttribute('data-control')),
+    [...document.querySelectorAll('.ts-overlay [data-control^="handle."]')].map((el) =>
+      el.getAttribute('data-control'),
+    ),
   );
 const selectionFacts = async (page, id) => {
   const ctrls = await handleControls(page);
-  const dirs = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'].filter((d) => ctrls.includes(`handle.${id}.resize.${d}`));
+  const dirs = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'].filter((d) =>
+    ctrls.includes(`handle.${id}.resize.${d}`),
+  );
   return {
     chip: await chip(page),
     ring: await page.evaluate(() => document.querySelector('.ts-overlay .ts-select') !== null),
@@ -147,7 +162,11 @@ const selectionFacts = async (page, id) => {
 };
 const ctl = (page, control) => page.locator(`[data-control="${control}"]`);
 const rectOf = async (page, selector) => {
-  const r = await page.locator(selector).first().boundingBox().catch(() => null);
+  const r = await page
+    .locator(selector)
+    .first()
+    .boundingBox()
+    .catch(() => null);
   return r ? { x: r.x, y: r.y, w: r.width, h: r.height } : null;
 };
 const clickControl = async (page, control) => {
@@ -167,7 +186,12 @@ const openMenu = async (page, id) => {
 const hoverRow = async (page, rowId, waitFor) => {
   const r = await ctl(page, `menu.${rowId}`).boundingBox();
   if (!r) throw new Error(`no menu row ${rowId}`);
-  await moveHuman(page, { x: r.x - 20, y: r.y + r.height / 2 }, { x: r.x + r.width / 2, y: r.y + r.height / 2 }, 6);
+  await moveHuman(
+    page,
+    { x: r.x - 20, y: r.y + r.height / 2 },
+    { x: r.x + r.width / 2, y: r.y + r.height / 2 },
+    6,
+  );
   await sleep(rand(250, 400));
   if (waitFor) await page.locator(waitFor).first().waitFor({ timeout: 6000 });
 };
@@ -184,7 +208,11 @@ const clickCard = async (page, slideId) => {
   const r = await ctl(page, `filmstrip.slide.${slideId}`).first().boundingBox();
   if (!r) throw new Error(`no card ${slideId}`);
   await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
-  await pollUntil(() => state(page).then((s) => s.slideId), (a) => a === slideId, 8000);
+  await pollUntil(
+    () => state(page).then((s) => s.slideId),
+    (a) => a === slideId,
+    8000,
+  );
   await sleep(300);
 };
 /** Opens the GT layouts group of the plate when it is collapsed (B1's disclosure row). */
@@ -198,12 +226,20 @@ const openGtGroup = async (page, control = 'layout.apply') => {
 const SHEET = '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)';
 const runRect = (page, run) => rectOf(page, `${SHEET} [data-run="${run}"]`);
 const prompts = (page) =>
-  page.evaluate((sel) => [...document.querySelectorAll(`${sel} [data-prompt]`)].map((e) => e.textContent), SHEET);
+  page.evaluate(
+    (sel) => [...document.querySelectorAll(`${sel} [data-prompt]`)].map((e) => e.textContent),
+    SHEET,
+  );
 const overlaps = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 const posStr = (p) => (p ? `${p.x},${p.y} ${p.w}x${p.h}` : 'none');
 const near = (a, b, tol) => Math.abs(a - b) <= tol;
 const dismissNamePrompt = async (page) => {
-  if (await ctl(page, 'dialog.namePrompt').first().isVisible().catch(() => false))
+  if (
+    await ctl(page, 'dialog.namePrompt')
+      .first()
+      .isVisible()
+      .catch(() => false)
+  )
     await clickControl(page, 'dialog.namePrompt.close').catch(() => press(page, 'Escape'));
 };
 /** Opens /new, makes the first write (the title), returns the deck id and the title slide. */
@@ -214,31 +250,50 @@ const newDeck = async (page, title) => {
   const info = await invoke(page, 'deck.info');
   const s = await state(page);
   // the first write: the title typed by a double click on the heading run
-  const runs = await page.evaluate((sel) => [...document.querySelectorAll(`${sel} [data-run]`)].map((e) => e.getAttribute('data-run')), SHEET);
+  const runs = await page.evaluate(
+    (sel) =>
+      [...document.querySelectorAll(`${sel} [data-run]`)].map((e) => e.getAttribute('data-run')),
+    SHEET,
+  );
   const head = runs.find((r) => /heading/.test(r)) ?? runs[0];
   const r = await runRect(page, head);
   await dblclickAt(page, r.x + r.w / 2, r.y + r.h / 2);
   await typeHuman(page, title);
   await press(page, 'Escape', 2);
-  await pollUntil(() => state(page).then((x) => x.revision), (rev) => rev >= 1, 20_000);
+  await pollUntil(
+    () => state(page).then((x) => x.revision),
+    (rev) => rev >= 1,
+    20_000,
+  );
   await settled(page);
   return { id: info.id, titleSlide: s.slideId };
 };
 const cleanup = async (page, deckId) => {
   const status = { edit: 0, deck: 0 };
   try {
-    await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+    await page
+      .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+      .catch(() => undefined);
     await editorReady(page).catch(() => undefined);
     const info = await invoke(page, 'deck.info').catch(() => null);
     if (info) {
-      await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+      await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+        () => undefined,
+      );
       const again = await invoke(page, 'deck.info').catch(() => null);
-      await invoke(page, 'deck.remove', { id: deckId, baseRevision: again?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+      await invoke(page, 'deck.remove', {
+        id: deckId,
+        baseRevision: again?.revision ?? info.revision,
+        confirm: true,
+      }).catch(() => undefined);
     }
     const until = Date.now() + 20_000;
     for (;;) {
       for (const route of ['edit', 'deck']) {
-        const res = await page.request.get(`${BASE}/${route}/${deckId}`, { headers, maxRedirects: 0 });
+        const res = await page.request.get(`${BASE}/${route}/${deckId}`, {
+          headers,
+          maxRedirects: 0,
+        });
         status[route] = res.status();
       }
       if ((status.edit === 404 && status.deck === 404) || Date.now() > until) break;
@@ -247,18 +302,24 @@ const cleanup = async (page, deckId) => {
   } catch (error) {
     status.error = error instanceof Error ? error.message : String(error);
   }
-  console.log(`cleanup ${deckId}: /edit ${status.edit}, /deck ${status.deck}${status.error ? `; ${status.error}` : ''}`);
+  console.log(
+    `cleanup ${deckId}: /edit ${status.edit}, /deck ${status.deck}${status.error ? `; ${status.error}` : ''}`,
+  );
   return status;
 };
 
 // ---- the run
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, extraHTTPHeaders: headers });
+const context = await browser.newContext({
+  viewport: { width: 1440, height: 900 },
+  extraHTTPHeaders: headers,
+});
 const page = await context.newPage();
 const consoleErrors = [];
 page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${String(e).slice(0, 200)}`));
 page.on('console', (m) => {
-  if (m.type() === 'error' && !m.text().startsWith('%c[Server]')) consoleErrors.push(m.text().slice(0, 200));
+  if (m.type() === 'error' && !m.text().startsWith('%c[Server]'))
+    consoleErrors.push(m.text().slice(0, 200));
 });
 const decks = [];
 const started = new Date().toISOString();
@@ -268,11 +329,21 @@ try {
   decks.push(source.id);
   for (const layout of ['split', 'cols', 'title-only']) {
     const s = await state(page);
-    await invoke(page, 'slide.new', { baseRevision: s.revision, after: (await slideOrder(page)).at(-1), layout });
+    await invoke(page, 'slide.new', {
+      baseRevision: s.revision,
+      after: (await slideOrder(page)).at(-1),
+      layout,
+    });
     await settled(page);
   }
   const sourceOrder = await slideOrder(page);
-  record(null, 'the source deck', 'four slides', `${source.id}: ${sourceOrder.length} slides`, sourceOrder.length === 4);
+  record(
+    null,
+    'the source deck',
+    'four slides',
+    `${source.id}: ${sourceOrder.length} slides`,
+    sourceOrder.length === 4,
+  );
 
   // ---- the deck the rows drive
   const deck = await newDeck(page, 'B3 objects and layout');
@@ -288,19 +359,35 @@ try {
     async () => {
       const before = await slideOrder(page);
       await clickControl(page, 'toolbar.newSlide');
-      const order = await pollUntil(() => slideOrder(page), (o) => o.length === before.length + 1, 15_000);
+      const order = await pollUntil(
+        () => slideOrder(page),
+        (o) => o.length === before.length + 1,
+        15_000,
+      );
       S = order.find((id) => !before.includes(id)) ?? null;
       if (!S) return { ok: false, observed: 'no slide added' };
-      await pollUntil(() => state(page).then((s) => s.slideId), (a) => a === S, 8000);
+      await pollUntil(
+        () => state(page).then((s) => s.slideId),
+        (a) => a === S,
+        8000,
+      );
       await settled(page);
       const slide = await slideJson(page, S);
       const head = slide.layout?.head;
       const slots = Object.keys(slide.slots ?? {});
-      const seen = await pollUntil(() => prompts(page), (p) => p.length >= 2, 8000);
+      const seen = await pollUntil(
+        () => prompts(page),
+        (p) => p.length >= 2,
+        8000,
+      );
       // the body run: the paragraph in the body slot
       const bodyId = slide.slots?.body?.[0]?.id;
       const r = await runRect(page, `${bodyId}/text`);
-      if (!r) return { ok: false, observed: `template ${slide.template}; head ${JSON.stringify(head)}; slots ${slots.join(',')}; prompts ${JSON.stringify(seen)}; no body run` };
+      if (!r)
+        return {
+          ok: false,
+          observed: `template ${slide.template}; head ${JSON.stringify(head)}; slots ${slots.join(',')}; prompts ${JSON.stringify(seen)}; no body run`,
+        };
       await dblclickAt(page, r.x + r.w / 2, r.y + r.h / 2);
       await typeHuman(page, 'Agenda\nPricing\nTimeline\nNext steps');
       await press(page, 'Escape', 2);
@@ -314,9 +401,14 @@ try {
       const lines = String(body?.text ?? '').split('\n').length;
       return {
         ok:
-          slide.template === 'split' && head === 'single' && slots.join(',') === 'head,body' &&
-          seen.length === 2 && seen.includes('Click to add title') && seen.includes('Click to add text') &&
-          lines === 4 && size === '22px',
+          slide.template === 'split' &&
+          head === 'single' &&
+          slots.join(',') === 'head,body' &&
+          seen.length === 2 &&
+          seen.includes('Click to add title') &&
+          seen.includes('Click to add text') &&
+          lines === 4 &&
+          size === '22px',
         observed: `template ${slide.template}; head ${JSON.stringify(head)}; slots ${slots.join(',')}; prompts ${JSON.stringify(seen)}; body text ${JSON.stringify(body?.text)} (${lines} lines) at ${size}`,
       };
     },
@@ -333,22 +425,49 @@ try {
       await clickControl(page, 'toolbar.layout');
       await page.locator('[data-control="layout.apply.plate"]').waitFor({ timeout: 8000 });
       await clickControl(page, 'layout.apply.cols');
-      await pollUntil(() => slideJson(page, S).then((s) => s.template), (t) => t === 'cols', 15_000);
+      await pollUntil(
+        () => slideJson(page, S).then((s) => s.template),
+        (t) => t === 'cols',
+        15_000,
+      );
       await settled(page);
       let before = await slideOrder(page);
       await clickControl(page, 'toolbar.newSlide');
-      let order = await pollUntil(() => slideOrder(page), (o) => o.length === before.length + 1, 15_000);
+      let order = await pollUntil(
+        () => slideOrder(page),
+        (o) => o.length === before.length + 1,
+        15_000,
+      );
       const a = order.find((id) => !before.includes(id));
-      const aLayout = a ? await pollUntil(() => slideJson(page, a).then((s) => s.template), (t) => Boolean(t), 8000) : null;
+      const aLayout = a
+        ? await pollUntil(
+            () => slideJson(page, a).then((s) => s.template),
+            (t) => Boolean(t),
+            8000,
+          )
+        : null;
       await settled(page);
       await clickCard(page, T);
       before = await slideOrder(page);
       await clickControl(page, 'toolbar.newSlide');
-      order = await pollUntil(() => slideOrder(page), (o) => o.length === before.length + 1, 15_000);
+      order = await pollUntil(
+        () => slideOrder(page),
+        (o) => o.length === before.length + 1,
+        15_000,
+      );
       const b = order.find((id) => !before.includes(id));
-      const bLayout = b ? await pollUntil(() => slideJson(page, b).then((s) => s.template), (t) => Boolean(t), 8000) : null;
+      const bLayout = b
+        ? await pollUntil(
+            () => slideJson(page, b).then((s) => s.template),
+            (t) => Boolean(t),
+            8000,
+          )
+        : null;
       await settled(page);
-      return { ok: aLayout === 'cols' && bLayout === 'split', observed: `after cols: ${aLayout}; after the title slide: ${bLayout}` };
+      return {
+        ok: aLayout === 'cols' && bLayout === 'split',
+        observed: `after cols: ${aLayout}; after the title slide: ${bLayout}`,
+      };
     },
   );
   // the same after an arrow pick (R2, build/b3.md): recorded, not a matrix row
@@ -366,11 +485,24 @@ try {
       await clickCard(page, S);
       const before = await slideOrder(page);
       await clickControl(page, 'toolbar.newSlide');
-      const order = await pollUntil(() => slideOrder(page), (o) => o.length === before.length + 1, 15_000);
+      const order = await pollUntil(
+        () => slideOrder(page),
+        (o) => o.length === before.length + 1,
+        15_000,
+      );
       const c = order.find((id) => !before.includes(id));
-      const cLayout = c ? await pollUntil(() => slideJson(page, c).then((s) => s.template), (t) => Boolean(t), 8000) : null;
+      const cLayout = c
+        ? await pollUntil(
+            () => slideJson(page, c).then((s) => s.template),
+            (t) => Boolean(t),
+            8000,
+          )
+        : null;
       await settled(page);
-      return { ok: cLayout === 'cols', observed: `New slide on the cols slide after an arrow pick of Title only: ${cLayout}` };
+      return {
+        ok: cLayout === 'cols',
+        observed: `New slide on the cols slide after an arrow pick of Title only: ${cLayout}`,
+      };
     },
   );
 
@@ -388,13 +520,31 @@ try {
       const has = await ctl(page, 'layout.apply.subtitle-body').count();
       if (has === 0) {
         await press(page, 'Escape');
-        return { ok: null, observed: 'no Title, subtitle and body tile: the id waits on build/b3.md R1 (LAYOUT_IDS in deck.ts)' };
+        return {
+          ok: null,
+          observed:
+            'no Title, subtitle and body tile: the id waits on build/b3.md R1 (LAYOUT_IDS in deck.ts)',
+        };
       }
       await clickControl(page, 'layout.apply.subtitle-body');
-      await pollUntil(() => slideJson(page, S).then((s) => s.template), (t) => t === 'subtitle-body', 15_000);
+      await pollUntil(
+        () => slideJson(page, S).then((s) => s.template),
+        (t) => t === 'subtitle-body',
+        15_000,
+      );
       await settled(page);
-      const seen = await pollUntil(() => prompts(page), (p) => p.length >= 3, 8000);
-      return { ok: seen.includes('Click to add subtitle') && seen.includes('Click to add text') && seen.includes('Click to add title'), observed: `prompts ${JSON.stringify(seen)}` };
+      const seen = await pollUntil(
+        () => prompts(page),
+        (p) => p.length >= 3,
+        8000,
+      );
+      return {
+        ok:
+          seen.includes('Click to add subtitle') &&
+          seen.includes('Click to add text') &&
+          seen.includes('Click to add title'),
+        observed: `prompts ${JSON.stringify(seen)}`,
+      };
     },
   );
   await step(
@@ -408,10 +558,21 @@ try {
       await page.locator('[data-control="layout.apply.plate"]').waitFor({ timeout: 8000 });
       await openGtGroup(page);
       await clickControl(page, 'layout.apply.tiles');
-      await pollUntil(() => slideJson(page, S).then((s) => s.template), (t) => t === 'tiles', 15_000);
+      await pollUntil(
+        () => slideJson(page, S).then((s) => s.template),
+        (t) => t === 'tiles',
+        15_000,
+      );
       await settled(page);
-      const seen = await pollUntil(() => prompts(page), (p) => p.length >= 2, 8000);
-      return { ok: seen.includes('Click to add subtitle'), observed: `prompts ${JSON.stringify(seen.slice(0, 6))}` };
+      const seen = await pollUntil(
+        () => prompts(page),
+        (p) => p.length >= 2,
+        8000,
+      );
+      return {
+        ok: seen.includes('Click to add subtitle'),
+        observed: `prompts ${JSON.stringify(seen.slice(0, 6))}`,
+      };
     },
   );
 
@@ -421,7 +582,11 @@ try {
     const s = await state(page);
     const before = await slideOrder(page);
     await invoke(page, 'slide.new', { baseRevision: s.revision, after: S, layout: 'split' });
-    const order = await pollUntil(() => slideOrder(page), (o) => o.length === before.length + 1, 15_000);
+    const order = await pollUntil(
+      () => slideOrder(page),
+      (o) => o.length === before.length + 1,
+      15_000,
+    );
     I = order.find((id) => !before.includes(id));
     await settled(page);
     await clickCard(page, I);
@@ -442,7 +607,11 @@ try {
       await settled(page);
       if (!t) return { ok: false, observed: 'no table inserted within 20 s' };
       table = t;
-      const tableFacts = await pollUntil(() => selectionFacts(page, t.id), (f) => f.resize === 8, 8000);
+      const tableFacts = await pollUntil(
+        () => selectionFacts(page, t.id),
+        (f) => f.resize === 8,
+        8000,
+      );
       // type into the first cell
       const cellRun = `${t.id}/rows/0/cells/0`;
       const r = await runRect(page, cellRun);
@@ -452,21 +621,38 @@ try {
         await press(page, 'Escape', 2);
         await settled(page);
       }
-      const typed = (await objectsOf(page, I)).find((o) => o.id === t.id)?.block?.rows?.[0]?.cells?.[0];
+      const typed = (await objectsOf(page, I)).find((o) => o.id === t.id)?.block?.rows?.[0]
+        ?.cells?.[0];
       const before2 = await objectsOf(page, I).then((o) => o.map((x) => x.id));
       await openMenu(page, 'insert');
       await hoverRow(page, 'insert.chart', '[data-control="menu.insert.chart.column"]');
       await clickRow(page, 'insert.chart.column');
       const c = await newObjectAfter(page, I, before2);
       await settled(page);
-      if (!c) return { ok: false, observed: `table ${t.id} ${posStr(t.pos)} selected ${JSON.stringify(tableFacts)}; no chart inserted within 20 s` };
+      if (!c)
+        return {
+          ok: false,
+          observed: `table ${t.id} ${posStr(t.pos)} selected ${JSON.stringify(tableFacts)}; no chart inserted within 20 s`,
+        };
       chart = c;
-      const chartFacts = await pollUntil(() => selectionFacts(page, c.id), (f) => f.resize === 8, 8000);
+      const chartFacts = await pollUntil(
+        () => selectionFacts(page, c.id),
+        (f) => f.resize === 8,
+        8000,
+      );
       const tablePos = (await objectsOf(page, I)).find((o) => o.id === t.id)?.pos;
       const overlap = overlaps(c.pos, tablePos);
-      const inside = c.pos.x >= 0 && c.pos.y >= 0 && c.pos.x + c.pos.w <= 1600 && c.pos.y + c.pos.h <= 900;
+      const inside =
+        c.pos.x >= 0 && c.pos.y >= 0 && c.pos.x + c.pos.w <= 1600 && c.pos.y + c.pos.h <= 900;
       return {
-        ok: tableFacts.resize === 8 && tableFacts.chip === 'Table' && typed === 'Q1' && chartFacts.resize === 8 && chartFacts.chip === 'Chart' && !overlap && inside,
+        ok:
+          tableFacts.resize === 8 &&
+          tableFacts.chip === 'Table' &&
+          typed === 'Q1' &&
+          chartFacts.resize === 8 &&
+          chartFacts.chip === 'Chart' &&
+          !overlap &&
+          inside,
         observed: `table ${t.id} ${posStr(tablePos)} chip "${tableFacts.chip}" handles ${tableFacts.resize}, cell "${typed}"; chart ${c.id} ${posStr(c.pos)} chip "${chartFacts.chip}" handles ${chartFacts.resize}; overlap ${overlap}; inside ${inside}`,
       };
     },
@@ -487,12 +673,20 @@ try {
       const third = await newObjectAfter(page, I, before);
       await settled(page);
       if (!third) return { ok: false, observed: 'no third object within 20 s' };
-      const facts = await pollUntil(() => selectionFacts(page, third.id), (f) => f.resize === 8, 8000);
+      const facts = await pollUntil(
+        () => selectionFacts(page, third.id),
+        (f) => f.resize === 8,
+        8000,
+      );
       const wantX = Math.min(last.pos.x + 40, 1600 - third.pos.w);
       const wantY = Math.min(last.pos.y + 40, 900 - third.pos.h);
       const inside = third.pos.x + third.pos.w <= 1600 && third.pos.y + third.pos.h <= 900;
       return {
-        ok: near(third.pos.x, wantX, 1) && near(third.pos.y, wantY, 1) && inside && facts.resize === 8,
+        ok:
+          near(third.pos.x, wantX, 1) &&
+          near(third.pos.y, wantY, 1) &&
+          inside &&
+          facts.resize === 8,
         observed: `last ${last.type} ${posStr(last.pos)}; third ${third.type} ${posStr(third.pos)}; wanted ${wantX},${wantY}; inside ${inside}; handles ${facts.resize}`,
       };
     },
@@ -506,7 +700,11 @@ try {
       const s = await state(page);
       const before = await slideOrder(page);
       await invoke(page, 'slide.new', { baseRevision: s.revision, after: I, layout: 'blank' });
-      const order = await pollUntil(() => slideOrder(page), (o) => o.length === before.length + 1, 15_000);
+      const order = await pollUntil(
+        () => slideOrder(page),
+        (o) => o.length === before.length + 1,
+        15_000,
+      );
       const B = order.find((id) => !before.includes(id));
       await settled(page);
       await clickCard(page, B);
@@ -524,7 +722,14 @@ try {
       const t = await newObjectAfter(page, B, before2);
       await settled(page);
       return {
-        ok: Boolean(c) && near(c.pos.w, 960, 2) && near(c.pos.h, 540, 2) && c.pos.y === 129 && Boolean(t) && near(t.pos.w, 960, 2) && near(t.pos.h, 320, 2),
+        ok:
+          Boolean(c) &&
+          near(c.pos.w, 960, 2) &&
+          near(c.pos.h, 540, 2) &&
+          c.pos.y === 129 &&
+          Boolean(t) &&
+          near(t.pos.w, 960, 2) &&
+          near(t.pos.h, 320, 2),
         observed: `chart ${c ? posStr(c.pos) : 'none'}; table ${t ? posStr(t.pos) : 'none'} (the table cascades from the chart, which fills the body)`,
       };
     },
@@ -542,13 +747,29 @@ try {
         baseRevision: s.revision,
         slideId: I,
         slot: 'main',
-        block: { id: 'agent-chart', type: 'chart', kind: 'pie', categories: ['A', 'B'], series: [{ name: 'S', values: [1, 2] }], pos: { x: 1000, y: 600, w: 400, h: 240 } },
+        block: {
+          id: 'agent-chart',
+          type: 'chart',
+          kind: 'pie',
+          categories: ['A', 'B'],
+          series: [{ name: 'S', values: [1, 2] }],
+          pos: { x: 1000, y: 600, w: 400, h: 240 },
+        },
       });
       const obj = await newObjectAfter(page, I, before);
       await settled(page);
       await sleep(600);
       const c = await chip(page);
-      return { ok: Boolean(obj) && obj.pos.x === 1000 && obj.pos.y === 600 && obj.pos.w === 400 && obj.pos.h === 240 && c === null, observed: `${obj ? posStr(obj.pos) : 'none'}; chip ${c === null ? 'none' : `"${c}"`}` };
+      return {
+        ok:
+          Boolean(obj) &&
+          obj.pos.x === 1000 &&
+          obj.pos.y === 600 &&
+          obj.pos.w === 400 &&
+          obj.pos.h === 240 &&
+          c === null,
+        observed: `${obj ? posStr(obj.pos) : 'none'}; chip ${c === null ? 'none' : `"${c}"`}`,
+      };
     },
   );
 
@@ -565,10 +786,18 @@ try {
       await clickRow(page, 'file.importSlides');
       await page.locator('[data-control="dialog.importSlides"]').waitFor({ timeout: 8000 });
       await clickControl(page, `dialog.importSlides.deck.${source.id}`);
-      await page.locator('[data-control^="dialog.importSlides.slide."]').first().waitFor({ timeout: 15_000 });
+      await page
+        .locator('[data-control^="dialog.importSlides.slide."]')
+        .first()
+        .waitFor({ timeout: 15_000 });
       const tiles = page.locator('[data-control^="dialog.importSlides.slide."]');
       const count = await tiles.count();
-      const selectedAtOpen = await page.evaluate(() => document.querySelectorAll('[data-control^="dialog.importSlides.slide."][aria-selected="true"]').length);
+      const selectedAtOpen = await page.evaluate(
+        () =>
+          document.querySelectorAll(
+            '[data-control^="dialog.importSlides.slide."][aria-selected="true"]',
+          ).length,
+      );
       const okAtOpen = await page.evaluate(() => {
         const b = document.querySelector('[data-control="dialog.importSlides.ok"]');
         return { label: b?.textContent?.trim() ?? null, disabled: b?.disabled ?? null };
@@ -577,24 +806,56 @@ try {
         const r = await tiles.nth(i).boundingBox();
         await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
       }
-      const okAfterThree = await page.evaluate(() => document.querySelector('[data-control="dialog.importSlides.ok"]')?.textContent?.trim() ?? null);
+      const okAfterThree = await page.evaluate(
+        () =>
+          document.querySelector('[data-control="dialog.importSlides.ok"]')?.textContent?.trim() ??
+          null,
+      );
       await clickControl(page, 'dialog.importSlides.none');
-      const afterNone = await page.evaluate(() => document.querySelectorAll('[data-control^="dialog.importSlides.slide."][aria-selected="true"]').length);
+      const afterNone = await page.evaluate(
+        () =>
+          document.querySelectorAll(
+            '[data-control^="dialog.importSlides.slide."][aria-selected="true"]',
+          ).length,
+      );
       const r0 = await tiles.nth(0).boundingBox();
       await clickAt(page, r0.x + r0.width / 2, r0.y + r0.height / 2);
       const r2 = await tiles.nth(2).boundingBox();
       await page.keyboard.down('Shift');
       await clickAt(page, r2.x + r2.width / 2, r2.y + r2.height / 2);
       await page.keyboard.up('Shift');
-      const afterShift = await page.evaluate(() => [...document.querelectorAll?.('x') ?? []].length);
-      const shiftCount = await page.evaluate(() => document.querySelectorAll('[data-control^="dialog.importSlides.slide."][aria-selected="true"]').length);
-      const okAfterShift = await page.evaluate(() => document.querySelector('[data-control="dialog.importSlides.ok"]')?.textContent?.trim() ?? null);
+      const afterShift = await page.evaluate(
+        () => [...(document.querelectorAll?.('x') ?? [])].length,
+      );
+      const shiftCount = await page.evaluate(
+        () =>
+          document.querySelectorAll(
+            '[data-control^="dialog.importSlides.slide."][aria-selected="true"]',
+          ).length,
+      );
+      const okAfterShift = await page.evaluate(
+        () =>
+          document.querySelector('[data-control="dialog.importSlides.ok"]')?.textContent?.trim() ??
+          null,
+      );
       await clickControl(page, 'dialog.importSlides.ok');
-      const order = await pollUntil(() => slideOrder(page), (o) => o.length === before.length + 3, 20_000);
+      const order = await pollUntil(
+        () => slideOrder(page),
+        (o) => o.length === before.length + 3,
+        20_000,
+      );
       await settled(page);
       void afterShift;
       return {
-        ok: count === 4 && selectedAtOpen === 0 && okAtOpen.disabled === true && okAfterThree === 'Import 3 slides' && afterNone === 0 && shiftCount === 3 && okAfterShift === 'Import 3 slides' && order.length === before.length + 3,
+        ok:
+          count === 4 &&
+          selectedAtOpen === 0 &&
+          okAtOpen.disabled === true &&
+          okAfterThree === 'Import 3 slides' &&
+          afterNone === 0 &&
+          shiftCount === 3 &&
+          okAfterShift === 'Import 3 slides' &&
+          order.length === before.length + 3,
         observed: `${count} tiles; selected at open ${selectedAtOpen}; button at open "${okAtOpen.label}" disabled ${okAtOpen.disabled}; after three clicks "${okAfterThree}"; after None ${afterNone}; after a click and a Shift click ${shiftCount} selected, "${okAfterShift}"; slides ${before.length} -> ${order.length}`,
       };
     },
@@ -616,5 +877,7 @@ try {
     },
   };
   if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(summary, null, 2));
-  console.log(`\n${summary.counts.ok} ok, ${summary.counts.failed} failed, ${summary.counts.notDriven} not driven; console errors ${consoleErrors.length}`);
+  console.log(
+    `\n${summary.counts.ok} ok, ${summary.counts.failed} failed, ${summary.counts.notDriven} not driven; console errors ${consoleErrors.length}`,
+  );
 }

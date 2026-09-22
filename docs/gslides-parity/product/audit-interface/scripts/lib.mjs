@@ -82,7 +82,10 @@ export const hoverAt = async (page, x, y, settle = 200) => {
  * default dark) and the editor chrome reads `ts-chrome-appearance` (light, dark or match).
  */
 export const STORAGE_FILE = `${SCRATCH}/storage-state.json`;
-export const newContext = async (browser, { width = 1440, height = 900, theme = 'light', storageState = null } = {}) => {
+export const newContext = async (
+  browser,
+  { width = 1440, height = 900, theme = 'light', storageState = null } = {},
+) => {
   // the anonymous principal lives in the browser's cookies and storage: a context that must edit
   // a deck another context created loads that context's saved storage state
   const context = await browser.newContext({
@@ -163,7 +166,12 @@ export const openMenu = async (page, id) => {
 export const hoverRow = async (page, rowId, waitFor) => {
   const r = await rectOfControl(page, `menu.${rowId}`);
   if (!r) throw new Error(`no menu row ${rowId}`);
-  await moveHuman(page, { x: r.x - 20, y: r.y + r.h / 2 }, { x: r.x + r.w / 2, y: r.y + r.h / 2 }, 6);
+  await moveHuman(
+    page,
+    { x: r.x - 20, y: r.y + r.h / 2 },
+    { x: r.x + r.w / 2, y: r.y + r.h / 2 },
+    6,
+  );
   await sleep(rand(300, 450));
   if (waitFor) await page.locator(waitFor).first().waitFor({ timeout: 6000 });
 };
@@ -182,7 +190,11 @@ export const clickControl = async (page, control) => {
 export const menuPath = async (page, menuId, ...rowIds) => {
   await openMenu(page, menuId);
   for (let i = 0; i < rowIds.length - 1; i += 1) {
-    await hoverRow(page, rowIds[i], `[data-control="menu.${rowIds[i + 1]}"], [data-control="${rowIds[i + 1]}"]`);
+    await hoverRow(
+      page,
+      rowIds[i],
+      `[data-control="menu.${rowIds[i + 1]}"], [data-control="${rowIds[i + 1]}"]`,
+    );
   }
   const last = rowIds[rowIds.length - 1];
   if (await has(page, `[data-control="menu.${last}"]`)) await clickRow(page, last);
@@ -203,9 +215,14 @@ export const surfaceState = (page) =>
         dialogs: [...document.querySelectorAll('.ts-dialog-scrim [role="dialog"]')].filter(visible)
           .length,
         popovers: [
-          ...document.querySelectorAll('.ts-picker, [data-control$=".plate"], .ts-popover, .ts-tb-swatches, .ts-layout-plate'),
+          ...document.querySelectorAll(
+            '.ts-picker, [data-control$=".plate"], .ts-popover, .ts-tb-swatches, .ts-layout-plate',
+          ),
         ].filter(visible).length,
-        panel: document.querySelector('.pt-viewer.is-editor[data-rpanel]')?.getAttribute('data-rpanel') ?? null,
+        panel:
+          document
+            .querySelector('.pt-viewer.is-editor[data-rpanel]')
+            ?.getAttribute('data-rpanel') ?? null,
         editing: document.querySelector('.ts-stagewrap.ts-editor[data-editing]') !== null,
       };
     })
@@ -287,7 +304,12 @@ export const objectsOf = async (page, slideId) => {
       return;
     }
     if (node && typeof node === 'object') {
-      if (typeof node.id === 'string' && typeof node.type === 'string' && node.pos && typeof node.pos === 'object')
+      if (
+        typeof node.id === 'string' &&
+        typeof node.type === 'string' &&
+        node.pos &&
+        typeof node.pos === 'object'
+      )
         out.push({ id: node.id, type: node.type, pos: node.pos });
       for (const v of Object.values(node)) walk(v);
     }
@@ -297,21 +319,34 @@ export const objectsOf = async (page, slideId) => {
 };
 export const runs = (page) =>
   page.evaluate(() =>
-    [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide [data-run]')].map((el) => el.getAttribute('data-run')),
+    [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide [data-run]')].map((el) =>
+      el.getAttribute('data-run'),
+    ),
   );
 export const boxOf = (page, id) =>
   page.evaluate((blockId) => {
-    const inner = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`);
+    const inner = document.querySelector(
+      `.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`,
+    );
     if (!inner) return null;
     const free = inner.closest('.free') ?? inner;
     const f = free.getBoundingClientRect();
     const i = inner.getBoundingClientRect();
-    return { free: { x: f.x, y: f.y, w: f.width, h: f.height }, inner: { x: i.x, y: i.y, w: i.width, h: i.height } };
+    return {
+      free: { x: f.x, y: f.y, w: f.width, h: f.height },
+      inner: { x: i.x, y: i.y, w: i.width, h: i.height },
+    };
   }, id);
 export const handleControls = (page) =>
-  page.evaluate(() => [...document.querySelectorAll('.ts-overlay [data-control^="handle."]')].map((el) => el.getAttribute('data-control')));
-export const readout = (page) => page.evaluate(() => document.querySelector('.ts-readout')?.textContent ?? null);
-export const chip = (page) => page.evaluate(() => document.querySelector('.ts-overlay .ts-select-chip')?.textContent ?? null);
+  page.evaluate(() =>
+    [...document.querySelectorAll('.ts-overlay [data-control^="handle."]')].map((el) =>
+      el.getAttribute('data-control'),
+    ),
+  );
+export const readout = (page) =>
+  page.evaluate(() => document.querySelector('.ts-readout')?.textContent ?? null);
+export const chip = (page) =>
+  page.evaluate(() => document.querySelector('.ts-overlay .ts-select-chip')?.textContent ?? null);
 /** The first object of a slide that was not there before, or null after `timeout`. */
 export const newObjectAfter = async (page, slideId, before, timeout = 20_000, want = null) => {
   // a slide that becomes a canvas on its first insert gives its placeholders a pos in the same
@@ -373,7 +408,8 @@ export const contrast = (a, b) => {
   const [hi, lo] = la > lb ? [la, lb] : [lb, la];
   return Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100;
 };
-export const hex = ([r, g, b]) => `#${[r, g, b].map((c) => Math.round(c).toString(16).padStart(2, '0')).join('')}`;
+export const hex = ([r, g, b]) =>
+  `#${[r, g, b].map((c) => Math.round(c).toString(16).padStart(2, '0')).join('')}`;
 
 /**
  * Reads one element: its box, the computed values that name its grammar (height, padding,
@@ -471,7 +507,9 @@ export const PROBE_FN = `(sel, pseudo) => {
   };
 }`;
 export const probe = async (page, sel, pseudo = null) => {
-  const facts = await page.evaluate(`(${PROBE_FN})(${JSON.stringify(sel)}, ${JSON.stringify(pseudo)})`);
+  const facts = await page.evaluate(
+    `(${PROBE_FN})(${JSON.stringify(sel)}, ${JSON.stringify(pseudo)})`,
+  );
   return decorate(facts);
 };
 export const probeAll = async (page, sel, limit = 40) => {
@@ -497,9 +535,27 @@ export const tokens = (page) =>
   page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     const names = [
-      '--pt-paper', '--pt-ink', '--pt-ink-2', '--pt-titanium', '--pt-hair', '--pt-hair-soft', '--pt-plate', '--pt-edge',
-      '--pt-select', '--pt-guide', '--pt-radius', '--pt-title-h', '--pt-menu-h', '--pt-tool-h', '--pt-status-h',
-      '--pt-panel-w', '--pt-sb-w', '--pt-menu-w', '--pt-ctl-h', '--pt-dur-fast', '--pt-dur-enter',
+      '--pt-paper',
+      '--pt-ink',
+      '--pt-ink-2',
+      '--pt-titanium',
+      '--pt-hair',
+      '--pt-hair-soft',
+      '--pt-plate',
+      '--pt-edge',
+      '--pt-select',
+      '--pt-guide',
+      '--pt-radius',
+      '--pt-title-h',
+      '--pt-menu-h',
+      '--pt-tool-h',
+      '--pt-status-h',
+      '--pt-panel-w',
+      '--pt-sb-w',
+      '--pt-menu-w',
+      '--pt-ctl-h',
+      '--pt-dur-fast',
+      '--pt-dur-enter',
     ];
     const out = { theme: document.documentElement.getAttribute('data-theme') };
     for (const n of names) out[n] = cs.getPropertyValue(n).trim();
@@ -511,7 +567,9 @@ export const tokens = (page) =>
 
 export const shot = async (page, name, clip = null) => {
   const file = path.join(OUT, `${name}.png`);
-  await page.screenshot({ path: file, ...(clip ? { clip } : {}) }).catch((e) => console.log(`shot ${name} failed: ${e.message}`));
+  await page
+    .screenshot({ path: file, ...(clip ? { clip } : {}) })
+    .catch((e) => console.log(`shot ${name} failed: ${e.message}`));
   return file;
 };
 export const shotBytes = (page, clip = null) => page.screenshot(clip ? { clip } : {});
@@ -593,11 +651,25 @@ export class Table {
   add(surface, what, observed, extra = {}) {
     const row = { n: this.rows.length + 1, surface, what, observed, ...extra };
     this.rows.push(row);
-    console.log(`${String(row.n).padStart(3)} [${surface}] ${what}: ${typeof observed === 'string' ? observed : JSON.stringify(observed).slice(0, 300)}`);
+    console.log(
+      `${String(row.n).padStart(3)} [${surface}] ${what}: ${typeof observed === 'string' ? observed : JSON.stringify(observed).slice(0, 300)}`,
+    );
     return row;
   }
   save(extra = {}) {
-    writeFileSync(this.file, JSON.stringify({ startedAt: this.startedAt, finishedAt: new Date().toISOString(), ...extra, rows: this.rows }, null, 2));
+    writeFileSync(
+      this.file,
+      JSON.stringify(
+        {
+          startedAt: this.startedAt,
+          finishedAt: new Date().toISOString(),
+          ...extra,
+          rows: this.rows,
+        },
+        null,
+        2,
+      ),
+    );
   }
 }
 
@@ -608,7 +680,12 @@ export const step = async (table, surface, what, fn) => {
     if (r !== undefined) table.add(surface, what, r);
     return r;
   } catch (error) {
-    table.add(surface, what, `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`, { error: true });
+    table.add(
+      surface,
+      what,
+      `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+      { error: true },
+    );
     return null;
   }
 };
@@ -642,7 +719,11 @@ export const destroyDeck = async (page, deckId, log = console.log) => {
   try {
     await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' });
     await editorReady(page);
-    await pollUntil(() => state(page), (s) => s.sync?.connected === true, 30_000);
+    await pollUntil(
+      () => state(page),
+      (s) => s.sync?.connected === true,
+      30_000,
+    );
     await settled(page);
     await dismissPrompts(page);
     await clickControl(page, 'menubar.file');
@@ -660,17 +741,27 @@ export const destroyDeck = async (page, deckId, log = console.log) => {
     log(`trash: ${deckId} deleted forever`);
     trashed = true;
   } catch (error) {
-    log(`trash: the product path failed (${error instanceof Error ? error.message.split('\n')[0] : String(error)}); falling back to the actions API`);
+    log(
+      `trash: the product path failed (${error instanceof Error ? error.message.split('\n')[0] : String(error)}); falling back to the actions API`,
+    );
   }
   if (!trashed) {
     try {
-      await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+      await page
+        .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+        .catch(() => undefined);
       await editorReady(page).catch(() => undefined);
       const info = await invoke(page, 'deck.info').catch(() => null);
       if (info) {
-        await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+        await invoke(page, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+          () => undefined,
+        );
         const t = await invoke(page, 'deck.info').catch(() => null);
-        await invoke(page, 'deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+        await invoke(page, 'deck.remove', {
+          id: deckId,
+          baseRevision: t?.revision ?? info.revision,
+          confirm: true,
+        }).catch(() => undefined);
       }
     } catch {
       /* the 404 probe below tells the truth */
@@ -679,7 +770,9 @@ export const destroyDeck = async (page, deckId, log = console.log) => {
   let status = 0;
   const until = Date.now() + 20_000;
   for (;;) {
-    const res = await page.request.get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 }).catch(() => null);
+    const res = await page.request
+      .get(`${BASE}/deck/${deckId}`, { maxRedirects: 0 })
+      .catch(() => null);
     status = res ? res.status() : 0;
     if (status === 404 || Date.now() > until) break;
     await sleep(2000);

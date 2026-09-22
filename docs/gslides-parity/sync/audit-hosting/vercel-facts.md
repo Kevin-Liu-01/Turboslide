@@ -4,47 +4,47 @@ Read only, on 2026-09-20 between 11:50 and 12:10 PDT, with Vercel CLI 58.4.4 on 
 
 ## 1. Accounts and teams
 
-| Fact | Value |
-| --- | --- |
-| `vercel whoami` | `kevin-liu-01` |
-| `vercel teams ls` | `kl01s-projects` (KL01's projects, the linked scope), `general-translation`, `hths-digital-magazine`, `hths-magazine` |
-| kl01s-projects | `team_KpAxFhYN63bKUy7bj8bNoOkh`, plan `pro`, Kevin `OWNER`, no team deployment policy, `concurrentBuilds: 1`, `buildMachine.default: elastic` |
-| general-translation | `team_8oC6z09EmYEXHlv0GgC6Gucu`, plan `pro`, Kevin `MEMBER`; owners `pie575`, `faviles28`, `brian-lou`, `ernest-4753`, `archie-mckenzie`; `concurrentBuilds: 1` |
-| GitHub repository | `Kevin-Liu-01/Turboslide`, public, default branch `main`, pushed 2026-09-20T18:40:56Z |
-| GitHub organization `generaltranslation` | enterprise plan, 5 public and 40 private repositories; Kevin's membership `member`, `active` |
+| Fact                                     | Value                                                                                                                                                           |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vercel whoami`                          | `kevin-liu-01`                                                                                                                                                  |
+| `vercel teams ls`                        | `kl01s-projects` (KL01's projects, the linked scope), `general-translation`, `hths-digital-magazine`, `hths-magazine`                                           |
+| kl01s-projects                           | `team_KpAxFhYN63bKUy7bj8bNoOkh`, plan `pro`, Kevin `OWNER`, no team deployment policy, `concurrentBuilds: 1`, `buildMachine.default: elastic`                   |
+| general-translation                      | `team_8oC6z09EmYEXHlv0GgC6Gucu`, plan `pro`, Kevin `MEMBER`; owners `pie575`, `faviles28`, `brian-lou`, `ernest-4753`, `archie-mckenzie`; `concurrentBuilds: 1` |
+| GitHub repository                        | `Kevin-Liu-01/Turboslide`, public, default branch `main`, pushed 2026-09-20T18:40:56Z                                                                           |
+| GitHub organization `generaltranslation` | enterprise plan, 5 public and 40 private repositories; Kevin's membership `member`, `active`                                                                    |
 
 ## 2. The personal project `turboslide` (kl01s-projects)
 
 `vercel project inspect turboslide` and `GET /v9/projects/prj_sWt52OAxiFaboav50hepmtl7Ct74`:
 
-| Fact | Value |
-| --- | --- |
-| Id | `prj_sWt52OAxiFaboav50hepmtl7Ct74`, created 2026-09-10 |
-| Root directory | `apps/studio` |
-| Framework | `nitro` (detected from the output; `apps/studio/vercel.json` sets `framework: null` and the build command `NITRO_PRESET=vercel pnpm run build:deploy`) |
-| Node | `24.x` |
-| Regions | `serverlessFunctionRegion: iad1`, `functionDefaultRegions: ["iad1"]`; requests enter through `sfo1` (`x-vercel-id: sfo1::iad1::...`) |
-| Compute | `fluid: true`, `elasticConcurrencyEnabled: true`, default memory type and timeout at the project defaults (null) |
-| Build machine | `standard` |
-| Git | GitHub `Kevin-Liu-01/Turboslide`, production branch `main`, no deploy hooks, fork protection on |
-| Protection | `ssoProtection.deploymentType: all_except_custom_domains` (previews behind Vercel Authentication, production open) |
-| Analytics | Speed Insights on, Web Analytics on |
-| Skew protection | 43,200 s |
-| Connected stores (API) | `[]`, although `BLOB_READ_WRITE_TOKEN` is set for production, preview and development |
-| Latest production | `turboslide-218fcapng-kl01s-projects.vercel.app`, Ready, created 2026-09-20 11:40:59 PDT; aliases `turboslide.vercel.app`, `turboslide-kl01s-projects.vercel.app`, `turboslide-git-main-kl01s-projects.vercel.app`; eight function directories of 87.36 MB each (`__server`, `_serverFn/[...]`, `api/decks/[...]/bundle`, `api/decks/bundle`, `api/export/[...]` and three hidden) in `iad1` |
+| Fact                   | Value                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Id                     | `prj_sWt52OAxiFaboav50hepmtl7Ct74`, created 2026-09-10                                                                                                                                                                                                                                                                                                                                       |
+| Root directory         | `apps/studio`                                                                                                                                                                                                                                                                                                                                                                                |
+| Framework              | `nitro` (detected from the output; `apps/studio/vercel.json` sets `framework: null` and the build command `NITRO_PRESET=vercel pnpm run build:deploy`)                                                                                                                                                                                                                                       |
+| Node                   | `24.x`                                                                                                                                                                                                                                                                                                                                                                                       |
+| Regions                | `serverlessFunctionRegion: iad1`, `functionDefaultRegions: ["iad1"]`; requests enter through `sfo1` (`x-vercel-id: sfo1::iad1::...`)                                                                                                                                                                                                                                                         |
+| Compute                | `fluid: true`, `elasticConcurrencyEnabled: true`, default memory type and timeout at the project defaults (null)                                                                                                                                                                                                                                                                             |
+| Build machine          | `standard`                                                                                                                                                                                                                                                                                                                                                                                   |
+| Git                    | GitHub `Kevin-Liu-01/Turboslide`, production branch `main`, no deploy hooks, fork protection on                                                                                                                                                                                                                                                                                              |
+| Protection             | `ssoProtection.deploymentType: all_except_custom_domains` (previews behind Vercel Authentication, production open)                                                                                                                                                                                                                                                                           |
+| Analytics              | Speed Insights on, Web Analytics on                                                                                                                                                                                                                                                                                                                                                          |
+| Skew protection        | 43,200 s                                                                                                                                                                                                                                                                                                                                                                                     |
+| Connected stores (API) | `[]`, although `BLOB_READ_WRITE_TOKEN` is set for production, preview and development                                                                                                                                                                                                                                                                                                        |
+| Latest production      | `turboslide-218fcapng-kl01s-projects.vercel.app`, Ready, created 2026-09-20 11:40:59 PDT; aliases `turboslide.vercel.app`, `turboslide-kl01s-projects.vercel.app`, `turboslide-git-main-kl01s-projects.vercel.app`; eight function directories of 87.36 MB each (`__server`, `_serverFn/[...]`, `api/decks/[...]/bundle`, `api/decks/bundle`, `api/export/[...]` and three hidden) in `iad1` |
 
 `vercel env ls` (names and targets only):
 
-| Variable | Targets | Type |
-| --- | --- | --- |
-| `BLOB_READ_WRITE_TOKEN` | production, preview, development | encrypted |
-| `TURBOSLIDE_TOKEN` | production; preview (a second value) | sensitive |
-| `TURBOSLIDE_AUTHORIZE` | production | sensitive |
-| `TURBOSLIDE_REALTIME` | production | sensitive |
-| `TURBOSLIDE_MAIL` | production | sensitive |
-| `TURBOSLIDE_SESSION_SECRET` | production | sensitive |
-| `TURBOSLIDE_DOWNLOAD_SECRET` | production | sensitive |
-| `TURBOSLIDE_PUBLIC_STORE_HOST` | production | sensitive |
+| Variable                       | Targets                              | Type      |
+| ------------------------------ | ------------------------------------ | --------- |
+| `BLOB_READ_WRITE_TOKEN`        | production, preview, development     | encrypted |
+| `TURBOSLIDE_TOKEN`             | production; preview (a second value) | sensitive |
+| `TURBOSLIDE_AUTHORIZE`         | production                           | sensitive |
+| `TURBOSLIDE_REALTIME`          | production                           | sensitive |
+| `TURBOSLIDE_MAIL`              | production                           | sensitive |
+| `TURBOSLIDE_SESSION_SECRET`    | production                           | sensitive |
+| `TURBOSLIDE_DOWNLOAD_SECRET`   | production                           | sensitive |
+| `TURBOSLIDE_PUBLIC_STORE_HOST` | production                           | sensitive |
 
 No `REDIS_URL`, `UPSTASH_*`, `DATABASE_URL`, `RESEND_API_KEY`, `ANTHROPIC_API_KEY`, `TURBOSLIDE_PUBLIC_ORIGIN`, `TURBOSLIDE_EMBED_ANCESTORS` or `TURBOSLIDE_TRUST_PROXY` is set.
 
@@ -70,16 +70,16 @@ Team stores (`GET /v1/storage/stores?teamId=team_8oC6z09EmYEXHlv0GgC6Gucu`): Blo
 
 Sizing (`scripts/blob-sizing.mjs`, 18 listing pages of 1,000, 9.1 s, the token sourced from `.turboslide/vercel-dev.env` in a subshell; `blob-sizing.json` beside this file): 17,201 objects, 1,359,673,370 bytes (1.266 GiB), oldest object 2026-09-12T00:36Z, newest 2026-09-20T19:07Z.
 
-| Prefix | Objects | MiB | What it is |
-| --- | --- | --- | --- |
-| `exports/` | 2,114 | 649.5 | produced export files under `exports/<deckId>/<jobId>/`, 219 deck ids (72 decks exist), no `.jobs/` record left; 1,193 objects under a day old (361.1 MiB), 353 at 1 to 3 days (24.2 MiB), 362 at 3 to 7 days (64.3 MiB), 206 over 7 days (200.0 MiB) |
-| `decks/` | 13,617 | 568.2 | 72 decks: `assets/` 2,901 twins 483.7 MiB; `snapshots/` 977 objects 43.7 MiB; `.turboslide/presence/` 4,149 objects 29.8 MiB plus 37 `presence.json`, 33 `pulse.json` and 43 `copies/`; `versions/` 3,907 objects 4.4 MiB; `slides/` 1,172 objects 2.5 MiB; `.thumbs/` 216 objects 2.4 MiB; `deck.json` 72; `access.json` 57; `leases.json` 12; `comments/` 11 |
-| `bundles/` | 4 | 73.3 | bundle uploads (`bundle-core.ts` 219 to 230) |
-| `builds/` | 10 | 5.4 | web page downloads (`download.ts` 650 to 669) |
-| `users/` | 943 | 0.2 | per anonymous principal deck indexes |
-| `links/` | 477 | 0.04 | link grants |
-| `vitals/` | 35 | 0.01 | |
-| `index/` | 1 | 0 | |
+| Prefix     | Objects | MiB   | What it is                                                                                                                                                                                                                                                                                                                                                     |
+| ---------- | ------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `exports/` | 2,114   | 649.5 | produced export files under `exports/<deckId>/<jobId>/`, 219 deck ids (72 decks exist), no `.jobs/` record left; 1,193 objects under a day old (361.1 MiB), 353 at 1 to 3 days (24.2 MiB), 362 at 3 to 7 days (64.3 MiB), 206 over 7 days (200.0 MiB)                                                                                                          |
+| `decks/`   | 13,617  | 568.2 | 72 decks: `assets/` 2,901 twins 483.7 MiB; `snapshots/` 977 objects 43.7 MiB; `.turboslide/presence/` 4,149 objects 29.8 MiB plus 37 `presence.json`, 33 `pulse.json` and 43 `copies/`; `versions/` 3,907 objects 4.4 MiB; `slides/` 1,172 objects 2.5 MiB; `.thumbs/` 216 objects 2.4 MiB; `deck.json` 72; `access.json` 57; `leases.json` 12; `comments/` 11 |
+| `bundles/` | 4       | 73.3  | bundle uploads (`bundle-core.ts` 219 to 230)                                                                                                                                                                                                                                                                                                                   |
+| `builds/`  | 10      | 5.4   | web page downloads (`download.ts` 650 to 669)                                                                                                                                                                                                                                                                                                                  |
+| `users/`   | 943     | 0.2   | per anonymous principal deck indexes                                                                                                                                                                                                                                                                                                                           |
+| `links/`   | 477     | 0.04  | link grants                                                                                                                                                                                                                                                                                                                                                    |
+| `vitals/`  | 35      | 0.01  |                                                                                                                                                                                                                                                                                                                                                                |
+| `index/`   | 1       | 0     |                                                                                                                                                                                                                                                                                                                                                                |
 
 Size buckets: 26 objects over 8 MB carry 495.3 MiB (exports and bundles); 844 objects of 256 KB to 1 MB carry 390.4 MiB (twins).
 

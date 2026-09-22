@@ -33,7 +33,9 @@ export function makeTable(name) {
     };
     rows.push(row);
     const tag = ok === true ? 'ok  ' : ok === false ? 'FAIL' : 'n/d ';
-    console.log(`${tag} ${String(row.n).padStart(3)} ${step}\n       expected: ${expected}\n       observed: ${row.observed.slice(0, 900)}`);
+    console.log(
+      `${tag} ${String(row.n).padStart(3)} ${step}\n       expected: ${expected}\n       observed: ${row.observed.slice(0, 900)}`,
+    );
     return row;
   };
   const step = async (label, expected, fn) => {
@@ -41,7 +43,12 @@ export function makeTable(name) {
       const r = await fn();
       return record(label, expected, r.observed, r.ok, r.extra ?? {});
     } catch (error) {
-      return record(label, expected, `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`, false);
+      return record(
+        label,
+        expected,
+        `error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+        false,
+      );
     }
   };
   const skip = (label, expected, why) => record(label, expected, `not driven: ${why}`, null);
@@ -62,7 +69,9 @@ export function makeTable(name) {
       rows,
     };
     writeFileSync(path.join(EVIDENCE, `${name}.json`), JSON.stringify(out, null, 2));
-    console.log(`\n${name}: ${out.ok} ok, ${out.failed} failed, ${out.notDriven} not driven, ${out.seconds} s`);
+    console.log(
+      `\n${name}: ${out.ok} ok, ${out.failed} failed, ${out.notDriven} not driven, ${out.seconds} s`,
+    );
     return out;
   };
   return { rows, record, step, skip, shotName, finish };
@@ -127,7 +136,11 @@ export function bind(page, table) {
     await t.moveHuman({ x: x - 30, y: y - 20 }, { x, y }, 6);
     await sleep(rand(40, 90));
     await page.mouse.click(x, y, { button: 'right' });
-    await page.locator('.ts-context-menu').first().waitFor({ timeout: 6000 }).catch(() => undefined);
+    await page
+      .locator('.ts-context-menu')
+      .first()
+      .waitFor({ timeout: 6000 })
+      .catch(() => undefined);
     await sleep(rand(200, 350));
     return t.has('.ts-context-menu');
   };
@@ -180,7 +193,10 @@ export function bind(page, table) {
   t.textOf = (selector) =>
     page.evaluate((sel) => document.querySelector(sel)?.textContent?.trim() ?? null, selector);
   t.attr = (selector, name) =>
-    page.evaluate(([sel, n]) => document.querySelector(sel)?.getAttribute(n) ?? null, [selector, name]);
+    page.evaluate(
+      ([sel, n]) => document.querySelector(sel)?.getAttribute(n) ?? null,
+      [selector, name],
+    );
   t.rectOf = (selector) =>
     page.evaluate((sel) => {
       const el = document.querySelector(sel);
@@ -316,7 +332,12 @@ export function bind(page, table) {
     const walk = (node) => {
       if (Array.isArray(node)) return node.forEach(walk);
       if (node && typeof node === 'object') {
-        if (typeof node.id === 'string' && typeof node.type === 'string' && node.pos && typeof node.pos === 'object')
+        if (
+          typeof node.id === 'string' &&
+          typeof node.type === 'string' &&
+          node.pos &&
+          typeof node.pos === 'object'
+        )
           out.push({ id: node.id, type: node.type, pos: node.pos, block: node });
         for (const v of Object.values(node)) walk(v);
       }
@@ -332,8 +353,15 @@ export function bind(page, table) {
   const GRAMMAR_TYPES = ['mark', 'heading', 'lead', 'paragraph', 'plate'];
   t.newObjectAfter = async (slideId, beforeIds, timeout = 20_000, type = null) => {
     const pick = (o) =>
-      o.find((x) => !beforeIds.includes(x.id) && (type ? x.type === type : !GRAMMAR_TYPES.includes(x.type))) ?? null;
-    const objs = await t.pollUntil(() => t.objectsOf(slideId), (o) => pick(o) !== null, timeout);
+      o.find(
+        (x) =>
+          !beforeIds.includes(x.id) && (type ? x.type === type : !GRAMMAR_TYPES.includes(x.type)),
+      ) ?? null;
+    const objs = await t.pollUntil(
+      () => t.objectsOf(slideId),
+      (o) => pick(o) !== null,
+      timeout,
+    );
     return pick(objs);
   };
   /** The slide ids in deck order, from deck.info's sections. */
@@ -344,13 +372,20 @@ export function bind(page, table) {
   /** Opens the show from the title row's Slideshow button and waits for it. */
   t.openShow = async () => {
     await t.clickControl('present.open');
-    await page.waitForSelector('.ts-slideshow, [data-control="present.toolbar"], [data-control="present.laserDot"], [data-control="present.blank"]', { timeout: 15_000 }).catch(() => undefined);
+    await page
+      .waitForSelector(
+        '.ts-slideshow, [data-control="present.toolbar"], [data-control="present.laserDot"], [data-control="present.blank"]',
+        { timeout: 15_000 },
+      )
+      .catch(() => undefined);
     await sleep(1200);
     return t.has('.ts-slideshow, [data-control="present.toolbar"], [data-control="present.blank"]');
   };
   t.runs = () =>
     page.evaluate(() =>
-      [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide [data-run]')].map((el) => el.getAttribute('data-run')),
+      [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide [data-run]')].map((el) =>
+        el.getAttribute('data-run'),
+      ),
     );
   t.runInfo = (run) =>
     page.evaluate((r) => {
@@ -368,7 +403,9 @@ export function bind(page, table) {
     }, run);
   t.boxOf = (id) =>
     page.evaluate((blockId) => {
-      const inner = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`);
+      const inner = document.querySelector(
+        `.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`,
+      );
       if (!inner) return null;
       const free = inner.closest('.free') ?? inner;
       const f = free.getBoundingClientRect();
@@ -378,7 +415,14 @@ export function bind(page, table) {
       return {
         free: { x: f.x, y: f.y, w: f.width, h: f.height },
         inner: { x: i.x, y: i.y, w: i.width, h: i.height },
-        img: ir ? { w: ir.width, h: ir.height, opacity: getComputedStyle(img).opacity, filter: getComputedStyle(img).filter } : null,
+        img: ir
+          ? {
+              w: ir.width,
+              h: ir.height,
+              opacity: getComputedStyle(img).opacity,
+              filter: getComputedStyle(img).filter,
+            }
+          : null,
       };
     }, id);
   /** One click selects (A1 rule 1); Escape ends a session a click landed in. */
@@ -418,7 +462,12 @@ export function bind(page, table) {
     await sleep(400);
     const p = await t.sheetPoint(at.x, at.y);
     await t.clickAt(p.x, p.y);
-    const obj = await t.newObjectAfter(slideId, before, 20_000, rows[rows.length - 1] === 'insert.textBox' ? 'text' : null);
+    const obj = await t.newObjectAfter(
+      slideId,
+      before,
+      20_000,
+      rows[rows.length - 1] === 'insert.textBox' ? 'text' : null,
+    );
     await sleep(300);
     if (obj && obj.type === 'text' && text !== null && (await t.editing())) {
       await t.typeHuman(text);
@@ -479,7 +528,8 @@ export async function cleanupDeck(t, deckId, context) {
   let trashed = false;
   try {
     if (context) await context.setOffline(false).catch(() => undefined);
-    for (const p of context ? context.pages() : []) if (p !== page) await p.close().catch(() => undefined);
+    for (const p of context ? context.pages() : [])
+      if (p !== page) await p.close().catch(() => undefined);
     await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' });
     await t.editorReady();
     await t.pollUntil(t.state, (s) => s.sync?.connected === true, 30_000);
@@ -490,7 +540,12 @@ export async function cleanupDeck(t, deckId, context) {
     await page.locator('[data-control="menu.file.moveToTrash"]').waitFor({ timeout: 8000 });
     await t.clickControl('menu.file.moveToTrash');
     await page.waitForURL(/\/decks$/, { timeout: 20_000 });
-    table.record('File > Move to trash', 'the deck moves to the trash and the page returns to /decks', page.url().replace(BASE, ''), true);
+    table.record(
+      'File > Move to trash',
+      'the deck moves to the trash and the page returns to /decks',
+      page.url().replace(BASE, ''),
+      true,
+    );
     await page.goto(`${BASE}/decks/trash`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
     const card = page.locator(`[data-control="trash.card.${deckId}"]`);
@@ -501,17 +556,32 @@ export async function cleanupDeck(t, deckId, context) {
     table.record('Delete forever', 'the card leaves the trash', deckId, true);
     trashed = true;
   } catch (error) {
-    table.record('the product trash path', 'File > Move to trash then Delete forever', `failed: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}; falling back to the actions API`, false);
+    table.record(
+      'the product trash path',
+      'File > Move to trash then Delete forever',
+      `failed: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}; falling back to the actions API`,
+      false,
+    );
   }
   if (!trashed) {
     try {
-      await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+      await page
+        .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
+        .catch(() => undefined);
       await t.editorReady().catch(() => undefined);
       const info = await t.invoke('deck.info').catch(() => null);
       if (info) {
-        await t.invoke('deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+        await t
+          .invoke('deck.trash', { id: deckId, baseRevision: info.revision })
+          .catch(() => undefined);
         const i2 = await t.invoke('deck.info').catch(() => null);
-        await t.invoke('deck.remove', { id: deckId, baseRevision: i2?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+        await t
+          .invoke('deck.remove', {
+            id: deckId,
+            baseRevision: i2?.revision ?? info.revision,
+            confirm: true,
+          })
+          .catch(() => undefined);
       }
     } catch {
       // the 404 probe below tells the truth
@@ -526,7 +596,12 @@ export async function cleanupDeck(t, deckId, context) {
     if ((status === 404 && statusEdit === 404) || Date.now() > until) break;
     await sleep(2000);
   }
-  table.record('the scratch deck answers 404', `GET /deck/${deckId} and /edit/${deckId} are 404 within 25 s`, `/deck ${status}; /edit ${statusEdit}`, status === 404 && statusEdit === 404);
+  table.record(
+    'the scratch deck answers 404',
+    `GET /deck/${deckId} and /edit/${deckId} are 404 within 25 s`,
+    `/deck ${status}; /edit ${statusEdit}`,
+    status === 404 && statusEdit === 404,
+  );
 }
 
 /** A 480 by 300 PNG (two tone blocks) written by hand: the picture rows' file. */

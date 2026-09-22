@@ -383,7 +383,12 @@ async function main() {
     launched = await step('a headless viewer page opens /deck and attaches', async () => {
       const opened = await launchBrowser({ probeRenderer: false });
       const page = await opened.browser.newPage({ viewport: { width: 1440, height: 900 } });
-      await page.goto(new URL(`/deck/${DECK}`, STUDIO_URL).href, { waitUntil: 'load' });
+      // the flag is the rule, not a test convenience: since the sync and costs round a /deck,
+      // /present or /embed page attaches a studio session only when its address carries
+      // agent=1 and while it is visible (docs/SYNC.md 3.10, question 3's default;
+      // useStudioSession.ts agentSessionRequested), so an agent that wants deck_goto_slide to
+      // reach a viewer page opens it this way
+      await page.goto(new URL(`/deck/${DECK}?agent=1`, STUDIO_URL).href, { waitUntil: 'load' });
       await page.waitForFunction(() => {
         try {
           return Boolean(window.turboslide?.studio);

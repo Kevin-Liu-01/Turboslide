@@ -1,7 +1,8 @@
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 
-import type { EditorOverlayView, LintBox } from '@turboslide/viewer/Editor';
+import type { ChartCellDetail, EditorOverlayView, LintBox } from '@turboslide/viewer/Editor';
+import { CHART_CELL_EVENT } from '@turboslide/viewer/Editor';
 import type { Box, Handle } from '@turboslide/viewer/Gestures';
 import { GuideLines } from '@turboslide/viewer/Guides';
 import { MarqueeRect } from '@turboslide/viewer/Marquee';
@@ -12,6 +13,7 @@ import { DeckGuides } from './DeckGuides';
 import { EditorShellContext } from './editor-shell-context';
 import { cn } from './lib/cn';
 import { CANVAS } from './menus/strings';
+import { isParked } from './parked-controls';
 import { Rulers } from './Rulers';
 import { tipProps } from './Tooltip';
 
@@ -76,6 +78,19 @@ function readoutStyle(box: Box, k: number): CSSProperties {
     left: (box[0] + box[2]) * k,
     top: above >= 0 ? above : (box[1] + box[3]) * k + CHIP_GAP,
     transform: 'translateX(-100%)',
+  };
+}
+
+/** The height of a bar button under the ring and its gap (the Edit data button, docs/FEATURES.md 2.2 rank 7). */
+const BAR_H = 22;
+const BAR_GAP = 6;
+
+/** A bar button sits under the ring's bottom left corner, or above its top left when the ring meets the sheet's bottom. */
+function barStyle(box: Box, k: number, sheetHeight: number): CSSProperties {
+  const below = (box[1] + box[3]) * k + BAR_GAP;
+  return {
+    left: box[0] * k,
+    top: below + BAR_H <= sheetHeight ? below : box[1] * k - BAR_H - BAR_GAP,
   };
 }
 
@@ -345,8 +360,32 @@ export function Overlay({ view }: OverlayProps) {
      when the overlay is mounted under it; the viewer's own overlay (a test, the twin stage) has
      no shell and draws none */
   const shell = useContext(EditorShellContext);
+  /* the chart's numbers from the stage (docs/FEATURES.md 2.2 rank 7; Editor.tsx CHART_CELL_EVENT):
+     a double click on a chart, Enter on it or a click on one of its marks asks for Format options
+     on the Chart data section; the section itself makes the cell active (inspector/chart.tsx) */
+  const openPanel = shell?.openPanel;
+  useEffect(() => {
+    if (openPanel === undefined) return undefined;
+    const listener = (event: Event) => {
+      const detail = (event as CustomEvent<ChartCellDetail>).detail;
+      if (detail === undefined || !detail.open) return;
+      if (detail.slideId !== view.slideId) return;
+      openPanel('formatOptions', { section: 'chart' });
+    };
+    window.addEventListener(CHART_CELL_EVENT, listener);
+    return () => window.removeEventListener(CHART_CELL_EVENT, listener);
+  }, [openPanel, view.slideId]);
   const chipHandle = view.handles.find((handle) => handle.shape === 'chip');
   const drawn = view.handles.filter((handle) => handle.shape !== 'chip');
+  /* a table with a cell open keeps its chip and ring band as its move surface while `editing`
+     is true (docs/FEATURES.md 2.1; the view's `tableFrame`) */
+  const frameLive = !view.editing || view.tableFrame;
+  /* the Edit data button under the selected chart (rank 7), unless the ship parked it
+     (parked-controls.ts: `bar.chart.editData`, hidden while Tools > Advanced tools is off) */
+  const editData =
+    view.editData !== null && !isParked('bar.chart.editData', shell?.settings ?? null)
+      ? view.editData
+      : null;
   const onHandleKey = (e: ReactKeyboardEvent<HTMLButtonElement>, handle: Handle) => {
     /* Cmd Up and Cmd Down on a move chip (Ctrl on Windows): Google's Bring forward and Send
        backward, Shift for the ends (gslides-parity SPEC 10.1), through the view's order and never
@@ -397,7 +436,7 @@ export function Overlay({ view }: OverlayProps) {
   /* the frame of an object is its drag surface (gslides-parity SPEC 10.2, R09 A1): four edge
      strips start the same free-move gesture as the chip */
   const frameEdges =
-    chipHandle && chipHandle.kind === 'free-move' && ringBox && !view.editing && !view.crop
+    chipHandle && chipHandle.kind === 'free-move' && ringBox && frameLive && !view.crop
       ? frameEdgeStyles(rotated ? [0, 0, ringBox[2], ringBox[3]] : ringBox, k)
       : null;
   const angle = view.selectionPos?.rotate ?? 0;
@@ -438,10 +477,13 @@ export function Overlay({ view }: OverlayProps) {
     view.rotation !== null
       ? CANVAS.rotation(Math.round(view.rotation))
       : view.sizeReadout !== null
-        ? CANVAS.size(Math.round(view.sizeReadout.w), Math.round(view.sizeReadout.h))
+        ? view.valueReadout !== null
+          ? /* a word art's letter size beside its box while the resize is down (docs/FEATURES.md 2.3 item 8) */
+            `${CANVAS.size(Math.round(view.sizeReadout.w), Math.round(view.sizeReadout.h))} · ${view.valueReadout}`
+          : CANVAS.size(Math.round(view.sizeReadout.w), Math.round(view.sizeReadout.h))
         : view.widthReadout !== null
           ? CANVAS.width(Math.round(view.widthReadout))
-          : null;
+          : view.valueReadout;
   return (
     <>
       {view.rulers ? (
@@ -515,7 +557,7 @@ export function Overlay({ view }: OverlayProps) {
                   />
                 ))
               : null}
-            {view.editing ? null : turning.map((handle) => handleButton(handle, true))}
+            {frameLive ? turning.map((handle) => handleButton(handle, true)) : null}
           </div>
         ) : (
           <div
@@ -540,7 +582,7 @@ export function Overlay({ view }: OverlayProps) {
         )
       ) : null}
       {ringBox && chipText !== null && !view.crop ? (
-        chipHandle && !view.editing ? (
+        chipHandle && frameLive ? (
           <HandleButton
             handle={chipHandle}
             className={cn('ts-select-chip', view.activeHandle === chipHandle.id && 'is-active')}
@@ -565,6 +607,25 @@ export function Overlay({ view }: OverlayProps) {
         <span className="ts-readout" role="status" style={readoutStyle(ringBox, k)}>
           {readout}
         </span>
+      ) : null}
+      {/* the Edit data button under the selected chart (docs/FEATURES.md 2.2 rank 7; audit
+          objects 17: the numbers were four clicks away): Format options opens on the Chart data
+          section, the grid's first value cell active */}
+      {editData !== null && ringBox && shell !== null ? (
+        <button
+          type="button"
+          className="ts-bar-btn"
+          data-control="bar.chart.editData"
+          style={barStyle(ringBox, k, view.boxes.slots.main ? 900 * k : Number.POSITIVE_INFINITY)}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={() => shell.openPanel('formatOptions', { section: 'chart' })}
+          {...tipProps({
+            name: CANVAS.editData,
+            doc: 'The categories and series of this chart, in Format options',
+          })}
+        >
+          {CANVAS.editData}
+        </button>
       ) : null}
       {frameEdges && chipHandle && !rotated
         ? (Object.keys(frameEdges) as Array<keyof typeof frameEdges>).map((side) => (

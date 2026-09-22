@@ -638,10 +638,28 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const selection =
     snap.selection && snap.selection.slideId === snap.activeSlide ? snap.selection : null;
 
+  /* the refusal card's gate (docs/FEATURES.md 2.2 rank 8; audit-objects 7): a write the room
+     refused as invalid with no typed text behind it came from a chrome control (Bold on a table
+     wrote `/typography` and the schema refused it), and the seller reads one sentence in the
+     snackbar instead of the card with the schema's pointer; the card stays for a conflict and for
+     a refused write that carries text to keep, which is the agent transport's and a collaborator's
+     case. Each notice is said once and dismissed. */
+  const conflicts = snap.rejects.filter((notice) => !isControlRefusal(notice));
+  const refusedByControl = snap.rejects.filter(isControlRefusal);
+  const refusalsSaid = useRef(new Set<string>());
+  useEffect(() => {
+    for (const notice of refusedByControl) {
+      if (refusalsSaid.current.has(notice.opId)) continue;
+      refusalsSaid.current.add(notice.opId);
+      controller.say(CONTROL_REFUSED);
+      controller.dismissReject(notice.opId);
+    }
+  }, [refusedByControl, controller]);
+
   /* the save words (SPEC-3 3.6): Saving… while anything is pending or retained, the retry word
      while the wire is down; a reject notice is the one conflict state left */
   const status: SaveState =
-    snap.rejects.length > 0
+    conflicts.length > 0
       ? 'conflict'
       : snap.sync?.offline === true
         ? 'unsaved'
@@ -1652,9 +1670,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
           onClose={() => setReportOpen(false)}
         />
       ) : null}
-      {snap.rejects.length > 0 ? (
-        <RejectCard controller={controller} notices={snap.rejects} />
-      ) : null}
+      {conflicts.length > 0 ? <RejectCard controller={controller} notices={conflicts} /> : null}
       {trashed ? (
         <TrashedBanner deckId={deckId} controller={controller} />
       ) : snap.external ? (
@@ -2108,6 +2124,19 @@ export function changeWords(mutations: ReadonlyArray<{ op: string }>): string {
   const seen = new Set<string>();
   for (const m of mutations) seen.add(words[m.op] ?? 'Change');
   return [...seen].join(', ') || 'Change';
+}
+
+/** The one sentence a refused write from a chrome control says (docs/FEATURES.md 2.2 rank 8). */
+const CONTROL_REFUSED = 'The change could not be applied to this object';
+
+/**
+ * True for a reject notice the refusal card never shows (docs/FEATURES.md 2.2 rank 8): the room
+ * refused the write as invalid (the schema, not a conflict) and no typed text rides on it, so
+ * nothing of the seller's is lost and the snackbar's sentence is enough. A stale write, a locked
+ * deck and every notice carrying text keep the card and its Copy text.
+ */
+export function isControlRefusal(notice: Pick<RejectNotice, 'reason' | 'text'>): boolean {
+  return notice.reason === 'invalid' && notice.text === '';
 }
 
 /**

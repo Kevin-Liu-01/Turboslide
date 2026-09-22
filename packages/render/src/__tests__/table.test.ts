@@ -113,12 +113,12 @@ describe('renderTable', () => {
     expect(html).not.toContain('--table-rule');
   });
 
-  it('draws the prompt in every empty cell on the editor stage and nothing elsewhere', () => {
+  it('draws no prompt in an empty cell, on the editor stage or elsewhere, and keeps the empty paragraph (docs/FEATURES.md 2.3 item 9)', () => {
+    /* the editor's stage appends "Click to add text" to the hovered empty cell alone
+       (packages/viewer Editor.tsx promptHoveredCell); a 5 by 6 table drew thirty prompts before */
     const live = renderTable(emptyTable('t', 2, 1), context({ live: true }));
-    expect(
-      live.match(/<span class="prompt" data-prompt aria-hidden="true">Click to add text<\/span>/g)
-        ?.length,
-    ).toBe(2);
+    expect(live).not.toContain('data-prompt');
+    expect(live.match(/<span class="para"><\/span>/g)?.length).toBe(2);
     const still = renderTable(emptyTable('t', 2, 1), context());
     expect(still).not.toContain('data-prompt');
   });

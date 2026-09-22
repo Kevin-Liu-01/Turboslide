@@ -784,6 +784,120 @@ describe('menuActionPlan', () => {
     });
   });
 
+  it('Bold, Italic, a colour and Align on a table write every selected cell in one slide.update (docs/FEATURES.md 2.2 rank 8)', () => {
+    const table: Slide = {
+      schemaVersion: 1,
+      id: 'tbl2',
+      kind: 'content',
+      layout: { type: 'center' },
+      slots: {
+        main: [
+          {
+            id: 't',
+            type: 'table',
+            columns: [{}, {}, {}],
+            rows: [
+              { cells: ['Region', 'Q1', ''], header: true },
+              { cells: ['North', '*100*', '200'] },
+            ],
+          } as Block,
+        ],
+      },
+    };
+    const doc: DeckDocument = { deck: document.deck, slides: { ...document.slides, tbl2: table } };
+    /* a range over the header row: the bold run into its two typed cells, the empty one left out */
+    const header = {
+      ...facts('tbl2', {
+        blockId: 't',
+        cell: { row: 0, column: 0 },
+        cells: { r0: 0, c0: 0, r1: 0, c1: 2 },
+      }),
+      document: doc,
+    };
+    const bold = menuActionPlan(itemById('format.text.bold'), header);
+    expect(bold).toMatchObject({ action: 'slide.update', label: 'Bold' });
+    if ('refused' in bold) throw new Error('refused');
+    const mutations = bold.input.mutations as { op: string; path: string; range: number[]; edit: unknown }[];
+    expect(mutations.map((m) => [m.op, m.path, m.range])).toEqual([
+      ['text.mark', '/rows/0/cells/0', [0, 6]],
+      ['text.mark', '/rows/0/cells/1', [0, 2]],
+    ]);
+    /* the range is the plain length: the bold cell's asterisks are markup, not characters */
+    expect(mutations[0]?.edit).toEqual({ kind: 'marks', set: { b: true } });
+    /* the table selected by one click, no cell: every typed cell; the bold cell is not bold whole
+       across the table, so the run is set everywhere */
+    const whole = { ...facts('tbl2', { blockId: 't' }), document: doc };
+    const all = menuActionPlan(itemById('format.text.bold'), whole);
+    if ('refused' in all) throw new Error('refused');
+    expect((all.input.mutations as unknown[]).length).toBe(5);
+    /* a range whose every cell is bold already clears the run */
+    const boldOnly = {
+      ...facts('tbl2', {
+        blockId: 't',
+        cell: { row: 1, column: 1 },
+        cells: { r0: 1, c0: 1, r1: 1, c1: 1 },
+      }),
+      document: doc,
+    };
+    const clear = menuActionPlan(itemById('format.text.bold'), boldOnly);
+    if ('refused' in clear) throw new Error('refused');
+    expect((clear.input.mutations as { edit: unknown }[])[0]?.edit).toEqual({
+      kind: 'marks',
+      clear: ['b'],
+    });
+    /* Italic through textStylePlan and a colour, over the range */
+    const italic = textStylePlan(header, { mark: 'i' }, 'Italic');
+    if ('refused' in italic) throw new Error('refused');
+    expect(italic.action).toBe('slide.update');
+    expect((italic.input.mutations as { edit: unknown }[])[0]?.edit).toEqual({
+      kind: 'marks',
+      set: { i: true },
+    });
+    const colour = textStylePlan(header, { color: 'blue' }, 'Text color');
+    if ('refused' in colour) throw new Error('refused');
+    expect((colour.input.mutations as { edit: unknown }[])[1]?.edit).toEqual({
+      kind: 'marks',
+      set: { color: 'blue' },
+    });
+    /* a caret in one cell keeps the cell's own text.style */
+    const caret = {
+      ...facts('tbl2', { blockId: 't', cell: { row: 1, column: 0 }, text: true, range: [0, 5] }),
+      document: doc,
+    };
+    expect(textStylePlan(caret, { mark: 'i' }, 'Italic')).toMatchObject({
+      action: 'text.style',
+      input: { path: '/rows/1/cells/0', range: [0, 5] },
+    });
+    /* a range with no text refuses with a sentence and never writes /typography */
+    const empty = {
+      ...facts('tbl2', {
+        blockId: 't',
+        cell: { row: 0, column: 2 },
+        cells: { r0: 0, c0: 2, r1: 0, c1: 2 },
+      }),
+      document: doc,
+    };
+    expect(menuActionPlan(itemById('format.text.bold'), empty)).toEqual({
+      refused: 'Type into a cell first',
+    });
+    /* Align on the range writes its columns; with no cell every column */
+    const right = menuActionPlan(itemById('format.alignIndent.right'), {
+      ...facts('tbl2', {
+        blockId: 't',
+        cell: { row: 0, column: 1 },
+        cells: { r0: 0, c0: 1, r1: 1, c1: 2 },
+      }),
+      document: doc,
+    });
+    expect(right).toMatchObject({
+      action: 'block.set',
+      input: { path: '/columns', value: [{}, { align: 'right' }, { align: 'right' }] },
+    });
+    expect(menuActionPlan(itemById('format.alignIndent.center'), whole)).toMatchObject({
+      input: { value: [{ align: 'center' }, { align: 'center' }, { align: 'center' }] },
+    });
+  });
+
   it('Clear formatting removes only the overrides that exist, as one write', () => {
     const styled: Slide = {
       schemaVersion: 1,

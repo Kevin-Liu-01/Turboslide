@@ -607,6 +607,8 @@ export const CANVAS = {
   size: (width: number, height: number) => `${width} × ${height}`,
   /* the width chip while a table's column seam is down (docs/RETURN.md 2.4 fix 5): "400 px" */
   width: (px: number) => `${px} px`,
+  /* the button under the selected chart (docs/FEATURES.md 2.2 rank 7) */
+  editData: 'Edit data',
 } as const;
 
 /**

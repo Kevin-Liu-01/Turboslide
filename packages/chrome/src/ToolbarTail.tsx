@@ -52,6 +52,7 @@ import { ColorPlate, anchoredAt } from './pickers/ColorPlate';
 import { DashList } from './pickers/DashList';
 import { LineEndPicker } from './pickers/LineEndPicker';
 import { ShapePicker } from './pickers/ShapePicker';
+import { chartTailPlan, chartWriteInput } from './chart-tools';
 import { tablePlan, tableWriteInput } from './table-tools';
 import { ToolbarButton, ToolbarDivider, controlTip } from './ToolbarHead';
 import { tipProps } from './Tooltip';
@@ -352,6 +353,30 @@ export function ToolbarTail() {
     input.dispatch(plan.action, plan.input).catch(fail(plan.label));
   };
 
+  /**
+   * The effective alignment the Align control reads and shows (docs/FEATURES.md 2.2 rank 3): the
+   * block's typography, a table's caret column, and a closed shape's label centred and middle
+   * unless the block says otherwise (the renderer's default, packages/render/src/block-css.ts
+   * `.shape-text`); `undefined` reads as Left and Top in the list.
+   */
+  const alignState = (): { horizontal: string | undefined; vertical: string } => {
+    const closedShape = block?.type === 'shape' && !isLineKind(block.shape);
+    const horizontal =
+      (typography(block).align as string | undefined) ??
+      (block?.type === 'table'
+        ? (block as TableBlock).columns[input.selection?.cell?.column ?? 0]?.align
+        : closedShape
+          ? 'center'
+          : undefined);
+    const vertical =
+      block !== undefined && 'valign' in block && typeof block.valign === 'string'
+        ? block.valign
+        : closedShape
+          ? 'middle'
+          : 'top';
+    return { horizontal, vertical };
+  };
+
   const write = (path: string, value: unknown, label: string) => {
     if (block === undefined) return;
     input
@@ -494,11 +519,7 @@ export function ToolbarTail() {
         const items = ALIGN_ITEMS.map((id) => itemById(id)).filter((item) =>
           isPresent(item, menuContext),
         );
-        const current =
-          typography(block).align ??
-          (block?.type === 'table'
-            ? (block as TableBlock).columns[input.selection?.cell?.column ?? 0]?.align
-            : undefined);
+        const { horizontal: current, vertical: valign } = alignState();
         const horizontal = items.map((item) => ({
           id: item.id,
           label: item.label,
@@ -511,10 +532,6 @@ export function ToolbarTail() {
             : {}),
         }));
         if (!takesValign(block)) return horizontal;
-        const valign =
-          block !== undefined && 'valign' in block && block.valign !== undefined
-            ? block.valign
-            : 'top';
         return [
           ...horizontal,
           ...(['top', 'middle', 'bottom'] as const).map((each) => ({
@@ -547,7 +564,10 @@ export function ToolbarTail() {
         }));
       }
       case 'legend': {
-        const current = block?.type === 'chart' ? ((block as ChartBlock).legend ?? 'none') : 'none';
+        /* an absent field means right (blocks/chart.ts); the check mark reads it so (docs/FEATURES.md
+           2.2 rank 10, audit-objects 15: the tail checked None while the legend was drawn) */
+        const current =
+          block?.type === 'chart' ? ((block as ChartBlock).legend ?? 'right') : 'right';
         return CHART_LEGENDS.map((legend) => ({
           id: legend,
           label: LEGEND_LABELS[legend] ?? legend,
@@ -621,13 +641,18 @@ export function ToolbarTail() {
           .catch(fail('Chart type'));
         return;
       case 'legend':
-        return write('/legend', option.value === 'none' ? undefined : option.value, 'Legend');
-      case 'numberFormat':
-        return write(
-          '/numberFormat',
-          option.value === 'plain' ? undefined : option.value,
-          'Number format',
-        );
+      case 'numberFormat': {
+        /* the tail's pick goes through the same plan as the panel's select (chart-tools.ts
+           chartTailPlan): the default of a field (right, plain) removes it and every other value
+           is stored, so Legend > None writes `none` and hides the legend (docs/FEATURES.md 2.2
+           rank 10; audit-objects 15 measured `/legend` written as undefined for None) */
+        if (block.type !== 'chart') return;
+        const plan = chartTailPlan(block as ChartBlock, op, String(option.value));
+        input
+          .dispatch(plan.action, chartWriteInput(plan, input.slideId, input.revision))
+          .catch(fail(op === 'legend' ? 'Legend' : 'Number format'));
+        return;
+      }
       default:
         return;
     }
@@ -646,6 +671,13 @@ export function ToolbarTail() {
        or a box the block's own colour is written even though the block carries none yet
        (docs/FOCUS.md rank 12: no colour reached a plain text box) */
     if (op === 'textColor' && input.selection?.range !== undefined && !many) {
+      run(textStylePlan(facts(), { color: value === 'none' ? null : value }, 'Text color'));
+      return;
+    }
+    /* Text color on a table with a range or with no cell open writes the colour mark into every
+       selected cell's text (docs/FEATURES.md 2.2 rank 8; editor-shell.ts tableMarksPlan); before
+       this the swatch reached no colour target on a table and wrote nothing */
+    if (op === 'textColor' && !many && block !== undefined && block.type === 'table') {
       run(textStylePlan(facts(), { color: value === 'none' ? null : value }, 'Text color'));
       return;
     }
@@ -1059,6 +1091,9 @@ export function ToolbarTail() {
               onClick={(anchor) => onControl(control, anchor)}
               pressed={pressed}
               chevron={control.dropdown === true || control.arrow !== undefined}
+              {...(control.op === 'align'
+                ? { value: alignState().horizontal ?? 'left' }
+                : {})}
             />
           </span>
         );

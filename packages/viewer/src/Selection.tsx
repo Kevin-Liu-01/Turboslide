@@ -290,9 +290,20 @@ export type PressPlan =
    * a plain press: `select` when the object joins the selection alone (it was not selected, or a
    * group member the seller has not entered stands in for its group), and `drag` when the press
    * arms the move gesture, which a move past its threshold turns into the drag of the whole
-   * selection
+   * selection. On a table the press names the cell it landed in (docs/FEATURES.md 2.1, the
+   * amended A1 for tables alone): `caret` is the cell a pointer up without a move opens with the
+   * caret at the click point, and `range` says a move past the threshold selects the cells from
+   * that cell instead of moving the table, because the table is already the one selected object
+   * and its move surface is its ring band, its chip and its eight handles.
    */
-  | { action: 'press'; blockId: string; select: boolean; drag: boolean };
+  | {
+      action: 'press';
+      blockId: string;
+      select: boolean;
+      drag: boolean;
+      caret?: { row: number; col: number };
+      range?: true;
+    };
 
 /**
  * The click model of the canvas (A1, binding above docs/FOCUS.md 2.3), for every object kind
@@ -306,6 +317,16 @@ export type PressPlan =
  * goes inside"; the verifier's F4 and F5 saw the old one click session claim the drag, the right
  * click and the Shift click). Commenting and Viewing mode select for a comment's anchor and never
  * drag (SPEC-3 5.3, 6.3). The paint tool and the modifiers keep their rules.
+ *
+ * The table's amendment (docs/FEATURES.md 2.1, 2.2 ranks 2 and 4; question 8 of its section 9
+ * records the alternative): rules 1 and 3 of A1 are amended for tables alone. A pointer down in a
+ * cell of an unselected table followed by a move past the threshold still drags the table (rule
+ * 2, decided at the threshold before any caret); a pointer up without a move selects the table
+ * and places the caret in the pressed cell at the click point, Google's one click (audit-objects
+ * section 2: Google, Notion and Pitch type in one click, Turboslide took two). On the selected
+ * table a press in a cell followed by a move selects a range from that cell and the table does
+ * not move (its move surface is the ring band, the chip and the eight handles), and a click on
+ * another cell moves the caret. A table in a multiple selection or in a group keeps A1 as written.
  */
 export function objectPressPlan(input: {
   /** the object under the pointer (resolveObject), or null on the empty sheet */
@@ -322,6 +343,8 @@ export function objectPressPlan(input: {
   grouped: boolean;
   /** the id names an object the stage measured (Freeform isObjectId), so a chip handle exists */
   object: boolean;
+  /** the cell of a table the press landed in (resolveRun, cellPointer); absent or null elsewhere */
+  cell?: { row: number; col: number } | null;
 }): PressPlan {
   const { under } = input;
   if (under === null) return { action: 'marquee' };
@@ -329,6 +352,15 @@ export function objectPressPlan(input: {
   if (input.modifier) return { action: 'toggle', blockId: under };
   const held = input.selected.includes(under);
   if (!input.editable) return { action: 'press', blockId: under, select: !held, drag: false };
+  const cell = input.cell ?? null;
+  if (cell !== null && !input.grouped) {
+    /* the one selected table: a tap moves the caret, a move selects a range */
+    if (held && input.selected.length === 1)
+      return { action: 'press', blockId: under, select: false, drag: false, caret: cell, range: true };
+    /* an unselected table: the press selects it and arms the drag; a tap places the caret */
+    if (!held)
+      return { action: 'press', blockId: under, select: true, drag: input.object, caret: cell };
+  }
   return {
     action: 'press',
     blockId: under,
@@ -379,11 +411,27 @@ const DISPLAY_NAMES: Readonly<Partial<Record<string, string>>> = {
   ramp: 'Ramp',
 };
 
-/** The name the chip and the accessible label use for a block: its type in Google's words (SPEC 13.7), never its id. */
-export function blockDisplayName(slide: Slide, blockId: string): string {
+/**
+ * The name the chip and the accessible label use for a block: its type in Google's words (SPEC
+ * 13.7), never its id. `assets` is the deck's asset table: a picture whose asset carries the
+ * `logo` role reads Logo (docs/FEATURES.md 4.4; the features round's build/b6.md R6, the row
+ * `logos.insert.logo-size` reads the chip); without the table the picture reads Image.
+ */
+export function blockDisplayName(
+  slide: Slide,
+  blockId: string,
+  assets?: Readonly<Record<string, { role?: string } | undefined>>,
+): string {
   /* a block the assistant wrote reads Assistant until the seller edits it (docs/PRODUCT.md 6.1; build/b6.md R6) */
   const marked = blockById(slide, blockId);
   if (marked !== undefined && assistMark(marked.ext) !== undefined) return 'Assistant';
+  if (
+    assets !== undefined &&
+    marked !== undefined &&
+    (marked.type === 'shot' || marked.type === 'picture') &&
+    assets[marked.asset]?.role === 'logo'
+  )
+    return 'Logo';
   if (slide.kind === 'title' && blockId === 'lead') return 'Subtitle';
   if (slide.kind === 'title' && blockId === 'heading') return 'Title';
   if (

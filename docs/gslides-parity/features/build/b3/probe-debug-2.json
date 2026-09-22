@@ -1,0 +1,25 @@
+{
+  "base": "http://localhost:4413",
+  "deck": "untitled-20260922-di9s",
+  "cleanup": {
+    "edit": 404,
+    "deck": 404
+  },
+  "rows": [
+    {
+      "n": 1,
+      "id": "debug.colour-range",
+      "step": "a range over the header row; the tail Text color, green",
+      "expected": "every cell gets the colour",
+      "observed": "tail toolbar.head,toolbar.search,toolbar.newSlide.split,toolbar.newSlide,toolbar.newSlide.arrow,toolbar.undo,toolbar.redo,toolbar.print,toolbar.paintFormat,toolbar.zoom,toolbar.tail,toolbar.borderColor,toolbar.borderWeight,toolbar.borderDash,toolbar.fillColor,toolbar.mergeCells,toolbar.unmergeCells,toolbar.font,toolbar.fontSize,toolbar.fontSize.minus,toolbar.fontSize.value,toolbar.fontSize.plus,toolbar.bold,toolbar.italic,toolbar.underline,toolbar.textColor,toolbar.insertLink,toolbar.insertComment,toolbar.align,toolbar.spacing,toolbar.formatOptions,toolbar.more,toolbar.end,toolbar.pointer,toolbar.hideMenus; pick toolbar.textColor.green; rev 3 pending 0; cells [\"[H0]{c:green}\",\"[H1]{c:green}\",\"[H2]{c:green}\",\"[H3]{c:green}\"]; snackbar \"\"; console %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4413/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ucre1x7-54ba93 render] render: 1 slide(s) x light at 1x with Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Ma || %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4413/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ucre1x7-54ba93 render]    1 title light ready 1 ms, shot 18 ms || %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4413/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ucre1x7-54ba93 render] render: 1 record(s) in 0.5 s -> /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/.tur",
+      "ok": true
+    }
+  ],
+  "consoleErrors": [
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4413/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 181491 MB free of 1902738 MB",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4413/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ucre1x7-54ba93 render] turboslide render all --deck /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/decks/u",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4413/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ucre1x7-54ba93 render] render: 1 slide(s) x light at 1x with Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Ma",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4413/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ucre1x7-54ba93 render]    1 title light ready 1 ms, shot 18 ms",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4413/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ucre1x7-54ba93 render] render: 1 record(s) in 0.5 s -> /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/.tur"
+  ]
+}

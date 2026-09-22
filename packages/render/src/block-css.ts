@@ -238,7 +238,11 @@ export const BLOCK_CSS = `
 .ts-sheet .shape-block { position: relative; display: block; }
 .ts-sheet .free > .shape-block, .ts-sheet .free > .link > .shape-block { width: 100%; height: 100%; }
 .ts-sheet .shape-block > svg.shape { display: block; width: 100%; height: 100%; }
-.ts-sheet .shape-text { position: absolute; box-sizing: border-box; font-size: 22px; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; }
+/* a shape's label is centred and middle unless the block sets an alignment (docs/FEATURES.md 2.2
+   rank 3, audit-objects 4: a label typed into a drawn rectangle sat in its top left corner);
+   the inline text-align of typography.align and the flex of valign override this default, and
+   the exporter reads the computed style either way */
+.ts-sheet .shape-text { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; font-size: 22px; line-height: 1.5; color: var(--ink); text-align: center; overflow-wrap: anywhere; }
 .ts-sheet .shape-text .para { margin: 0; }
 /* a shape whose text is empty (a fresh shape, docs/FOCUS.md section 4): the layer keeps its run
    for Enter and a double click but takes no pointer until the session gives it the focus, so a
@@ -285,6 +289,10 @@ export const BLOCK_CSS = `
 .ts-sheet .plain.marked > .item > span { display: block; padding: 0; border-bottom: 0; }
 .ts-sheet .plain.marked > .item > .num { font-variant-numeric: tabular-nums; }
 .ts-sheet .plain.marked > .item > .glyph { font-size: 0.8em; line-height: 1.75; }
+/* an empty table cell keeps its line box with no prompt in the markup (docs/FEATURES.md 2.3 item
+   9): a zero width space before the empty paragraph, so the rows of an empty table stand at the
+   text's height and the editor's hovered prompt draws on that line */
+.ts-sheet .table .td > .para:empty::before { content: '\\200B'; }
 /* the table's grid form (2.7.1, 2.7.2): merged cells and per cell rules */
 .ts-sheet .table.grid { display: grid; grid-template-columns: var(--table-cols); }
 .ts-sheet .table.grid > .tr { display: contents; }

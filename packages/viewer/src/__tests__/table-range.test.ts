@@ -5,6 +5,7 @@ import type { TableBlock } from '@turboslide/schema/blocks/table';
 import type { Box } from '@turboslide/schema/render';
 
 import {
+  adjacentCell,
   cellAtPoint,
   cellInBounds,
   cellRunPointer,
@@ -181,5 +182,44 @@ describe('rangeStands', () => {
     const typed = { ...grid, rows: grid.rows.map((row) => ({ ...row, cells: [...row.cells] })) };
     if (typed.rows[1]) typed.rows[1].cells[1] = '101';
     expect(rangeStands(shape, typed)).toBe(true);
+  });
+});
+
+describe('adjacentCell (docs/FEATURES.md 2.2 rank 5: the arrows cross cells at the text edges)', () => {
+  it('walks the drawn cells in reading order for Left and Right and stops at the grid', () => {
+    expect(adjacentCell(grid, { row: 1, col: 1 }, 'right')).toEqual({ row: 1, col: 2 });
+    expect(adjacentCell(grid, { row: 1, col: 3 }, 'right')).toEqual({ row: 2, col: 0 });
+    expect(adjacentCell(grid, { row: 2, col: 3 }, 'right')).toBeNull();
+    expect(adjacentCell(grid, { row: 1, col: 0 }, 'left')).toEqual({ row: 0, col: 3 });
+    expect(adjacentCell(grid, { row: 0, col: 0 }, 'left')).toBeNull();
+  });
+
+  it('takes the cell above or below in the same column for Up and Down and stops at the first and last row', () => {
+    expect(adjacentCell(grid, { row: 1, col: 2 }, 'down')).toEqual({ row: 2, col: 2 });
+    expect(adjacentCell(grid, { row: 2, col: 2 }, 'down')).toBeNull();
+    expect(adjacentCell(grid, { row: 1, col: 2 }, 'up')).toEqual({ row: 0, col: 2 });
+    expect(adjacentCell(grid, { row: 0, col: 2 }, 'up')).toBeNull();
+  });
+
+  it('counts a merged cell as one: its anchor is the stop, a covered position resolves to it, Down steps past its rows', () => {
+    const merged: TableBlock = {
+      ...grid,
+      rows: [...grid.rows, { cells: ['West', '7', '8', '9'] }],
+      spans: [{ row: 1, column: 1, rows: 2, columns: 2 }],
+    };
+    /* Right from North lands on the anchor and then skips the covered 1,2 */
+    expect(adjacentCell(merged, { row: 1, col: 0 }, 'right')).toEqual({ row: 1, col: 1 });
+    expect(adjacentCell(merged, { row: 1, col: 1 }, 'right')).toEqual({ row: 1, col: 3 });
+    /* Left from 1,3 lands on the anchor; a position inside the span resolves to the anchor first */
+    expect(adjacentCell(merged, { row: 1, col: 3 }, 'left')).toEqual({ row: 1, col: 1 });
+    expect(adjacentCell(merged, { row: 2, col: 2 }, 'left')).toEqual({ row: 1, col: 0 });
+    /* Down from the anchor steps past the two rows it spans; Up into the span lands on the anchor */
+    expect(adjacentCell(merged, { row: 1, col: 1 }, 'down')).toEqual({ row: 3, col: 1 });
+    expect(adjacentCell(merged, { row: 3, col: 2 }, 'up')).toEqual({ row: 1, col: 1 });
+    expect(adjacentCell(merged, { row: 0, col: 2 }, 'down')).toEqual({ row: 1, col: 1 });
+  });
+
+  it('clamps a position outside the grid before it walks', () => {
+    expect(adjacentCell(grid, { row: 9, col: 9 }, 'left')).toEqual({ row: 2, col: 2 });
   });
 });

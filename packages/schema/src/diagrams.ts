@@ -57,7 +57,7 @@ export type DiagramTemplate = {
   label: string;
   counts: DiagramCounts;
   styles: ReadonlyArray<DiagramStyle>;
-  /** how many labelled nodes (text blocks) a count gives; the count itself except for a hierarchy */
+  /** how many labelled nodes (a shape carrying its label, or a timeline's text under a dot) a count gives; the count itself except for a hierarchy */
   nodes: (count: number) => number;
   /** the blocks, positioned inside `box`, every one tagged with `group` */
   make: (count: number, style: DiagramStyle, box: Position, group: string) => Block[];
@@ -240,19 +240,33 @@ function link(
   };
 }
 
-/** A labelled node: the shape and the text box over the same box. */
+/**
+ * A labelled node: one shape with its label as the shape's own text (docs/FEATURES.md 2.2 rank
+ * 9; audit-objects 10). A step used to be a shape and a text box over the same box, so a drag
+ * from the label moved the label alone and removing one step took three enter and delete cycles;
+ * as one object a double click opens the label, a drag moves the step with its label and the
+ * connector follows, and one Delete removes it. The label keeps the text box's look (centred,
+ * middle, weight 500, the style's text colour, the 16 px padding), on the shape's own text layer
+ * (render primitives.ts `.shape-text`), which the exporter already writes as the shape's text.
+ */
 function node(
-  ids: { shape: string; text: string },
+  id: string,
   shape: ShapeBlock['shape'],
   label: string,
   box: Box,
   look: Look,
   z: number,
   group: string,
-): [ShapeBlock, TextBlock] {
+): [ShapeBlock] {
   return [
-    shapeBlock(ids.shape, shape, box, look, z, group),
-    textBlock(ids.text, label, box, look, z + 1, group),
+    {
+      ...shapeBlock(id, shape, box, look, z, group),
+      text: label,
+      typography: { align: 'center', weight: 500 },
+      ...(look.text === 'ink' ? {} : { color: look.text }),
+      valign: 'middle',
+      padding: TEXT_PADDING,
+    },
   ];
 }
 
@@ -284,7 +298,7 @@ function makeGrid(count: number, style: DiagramStyle, box: Box, group: string): 
     };
     out.push(
       ...node(
-        { shape: `item-${index + 1}`, text: `label-${index + 1}` },
+        `item-${index + 1}`,
         'roundRect',
         `Item ${index + 1}`,
         card,
@@ -315,7 +329,7 @@ function makeHierarchy(levels: number, style: DiagramStyle, box: Box, group: str
   const out: Block[] = [];
   const placed: { id: string; box: Box }[][] = [];
   out.push(
-    ...node({ shape: 'level-1', text: 'label-1' }, 'roundRect', 'Level 1', top, look, 0, group),
+    ...node('level-1', 'roundRect', 'Level 1', top, look, 0, group),
   );
   placed.push([{ id: 'level-1', box: top }]);
   let n = 1;
@@ -326,7 +340,7 @@ function makeHierarchy(levels: number, style: DiagramStyle, box: Box, group: str
       const b: Box = { x, y: box.y + (level - 1) * (rowH + rowGap), w: nodeW, h: rowH };
       out.push(
         ...node(
-          { shape: `level-${n}`, text: `label-${n}` },
+          `level-${n}`,
           'roundRect',
           `Level ${level}`,
           b,
@@ -435,7 +449,7 @@ function makeProcess(count: number, style: DiagramStyle, box: Box, group: string
       out.push(link(`link-${index}`, previous, { id, box: b }, out.length, group, true));
     out.push(
       ...node(
-        { shape: id, text: `label-${index + 1}` },
+        id,
         'roundRect',
         `Step ${index + 1}`,
         b,
@@ -464,7 +478,7 @@ function makeRelationship(count: number, style: DiagramStyle, box: Box, group: s
     const b: Box = { x: left + index * d * (1 - overlap), y, w: d, h: d };
     out.push(
       ...node(
-        { shape: `item-${index + 1}`, text: `label-${index + 1}` },
+        `item-${index + 1}`,
         'ellipse',
         `Item ${index + 1}`,
         b,
@@ -502,7 +516,7 @@ function makeCycle(count: number, style: DiagramStyle, box: Box, group: string):
   for (const [index, entry] of boxes.entries()) {
     out.push(
       ...node(
-        { shape: entry.id, text: `label-${index + 1}` },
+        entry.id,
         'roundRect',
         `Step ${index + 1}`,
         entry.box,

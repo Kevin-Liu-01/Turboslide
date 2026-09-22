@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { ChartBlock } from '@turboslide/schema/blocks/chart';
+import { CHART_CELL_EVENT } from '@turboslide/viewer/Editor';
 
 import { ChartSection, chartFormatSlot } from '../inspector/chart';
 import { forbiddenWordsIn } from '../menus/strings';
@@ -340,3 +341,77 @@ describe('ChartSection', () => {
     expect(other.container.querySelector('[data-control="formatOptions.chart"]')).toBeNull();
   });
 });
+
+describe('the grid owns its keys and shows its remove controls (docs/FEATURES.md 2.2 ranks 1, 7 and 12)', () => {
+  it('Escape on the active cell with no open field leaves the grid and keeps the section drawn', () => {
+    const { dispatch } = mount();
+    const target = cell(1, 1);
+    target.focus();
+    expect(document.activeElement).toBe(target);
+    fireEvent.keyDown(target, { key: 'Escape' });
+    expect(document.activeElement).not.toBe(target);
+    expect(document.querySelector('[data-control="formatOptions.chart.grid"]')).not.toBeNull();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('marks the active cell’s row and column headers so their remove controls are drawn without a hover', () => {
+    mount();
+    fireEvent.click(cell(2, 2));
+    expect(cell(2, 0).classList.contains('is-active-line')).toBe(true);
+    expect(cell(0, 2).classList.contains('is-active-line')).toBe(true);
+    expect(cell(1, 0).classList.contains('is-active-line')).toBe(false);
+    expect(cell(0, 1).classList.contains('is-active-line')).toBe(false);
+    expect(cell(0, 0).classList.contains('is-active-line')).toBe(false);
+  });
+
+  it('a right click on a series header lists Remove and removes the series as one chart.setData', () => {
+    const { dispatch } = mount();
+    fireEvent.contextMenu(cell(0, 1), { clientX: 40, clientY: 50 });
+    const menu = document.querySelector('[data-control="formatOptions.chart.menu"]') as HTMLElement;
+    expect(menu.getAttribute('role')).toBe('menu');
+    const row = document.querySelector(
+      '[data-control="formatOptions.chart.menu.remove"]',
+    ) as HTMLButtonElement;
+    expect(row.textContent).toBe('Remove Docs');
+    fireEvent.click(row);
+    expect(document.querySelector('[data-control="formatOptions.chart.menu"]')).toBeNull();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    const series = (dispatch.mock.calls[0]?.[1] as { series: { name: string }[] }).series;
+    expect(series.map((each) => each.name)).toEqual(['App']);
+    /* a category header the same way; Escape closes the menu without a write */
+    fireEvent.contextMenu(cell(2, 0), { clientX: 40, clientY: 90 });
+    expect(
+      document.querySelector('[data-control="formatOptions.chart.menu.remove"]')?.textContent,
+    ).toBe('Remove Q2');
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(document.querySelector('[data-control="formatOptions.chart.menu"]')).toBeNull();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+  });
+
+  it('makes the cell the stage names active, mounted or mounting (rank 7)', () => {
+    const { view } = mount();
+    const ask = (blockId: string, row: number, column: number) =>
+      act(() => {
+        window.dispatchEvent(
+          new CustomEvent(CHART_CELL_EVENT, {
+            detail: { deckId: 'd', slideId: 's', blockId, row, column, open: true },
+          }),
+        );
+      });
+    ask('c', 2, 2);
+    expect(cell(2, 2).getAttribute('aria-selected')).toBe('true');
+    /* another chart's request changes nothing here */
+    ask('other', 1, 1);
+    expect(cell(2, 2).getAttribute('aria-selected')).toBe('true');
+    view.unmount();
+    /* a request before the section mounts is read on mount, clamped into the grid */
+    window.dispatchEvent(
+      new CustomEvent(CHART_CELL_EVENT, {
+        detail: { deckId: 'd', slideId: 's', blockId: 'c', row: 9, column: 1, open: true },
+      }),
+    );
+    mount();
+    expect(cell(2, 1).getAttribute('aria-selected')).toBe('true');
+  });
+});
+

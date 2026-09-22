@@ -199,15 +199,19 @@ function pieMarkup(
     const sweep = (value / total) * Math.PI * 2;
     const end = angle + sweep;
     const color = colors[i % colors.length] ?? 'var(--ink)';
+    /* every mark names its cell (`data-series`, `data-category`) so a click on a slice, a bar or a
+       point of the selected chart makes its cell active in the Chart data grid (docs/FEATURES.md
+       2.2 rank 7; the editor's mark hit test reads the two attributes, never the drawing) */
+    const mark = ` data-series="0" data-category="${i}"`;
     if (values.length === 1 || sweep >= Math.PI * 2 - 1e-6) {
-      out += `<circle cx="${px(cx)}" cy="${px(cy)}" r="${px(r)}" fill="${color}" stroke="var(--paper)" stroke-width="1"/>`;
+      out += `<circle cx="${px(cx)}" cy="${px(cy)}" r="${px(r)}"${mark} fill="${color}" stroke="var(--paper)" stroke-width="1"/>`;
     } else if (sweep > 0) {
       const x1 = cx + r * Math.cos(angle);
       const y1 = cy + r * Math.sin(angle);
       const x2 = cx + r * Math.cos(end);
       const y2 = cy + r * Math.sin(end);
       const large = sweep > Math.PI ? 1 : 0;
-      out += `<path d="M${px(cx)},${px(cy)} L${px(x1)},${px(y1)} A${px(r)},${px(r)} 0 ${large} 1 ${px(x2)},${px(y2)} Z" fill="${color}" stroke="var(--paper)" stroke-width="1"/>`;
+      out += `<path d="M${px(cx)},${px(cy)} L${px(x1)},${px(y1)} A${px(r)},${px(r)} 0 ${large} 1 ${px(x2)},${px(y2)} Z"${mark} fill="${color}" stroke="var(--paper)" stroke-width="1"/>`;
     }
     if (block.labels === true && sweep > 0) {
       const mid = angle + sweep / 2;
@@ -293,8 +297,10 @@ function axesMarkup(
       const points = s.values.map((v, i) => ({ x: left + slot * (i + 0.5), y: along(v) }));
       const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(p.x)},${px(p.y)}`).join(' ');
       out += `<path class="series" data-series="${si}" d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-      for (const p of points)
-        out += `<circle cx="${px(p.x)}" cy="${px(p.y)}" r="4" fill="${s.color}"/>`;
+      /* a point names its cell for the editor's mark hit test (docs/FEATURES.md 2.2 rank 7) */
+      points.forEach((p, i) => {
+        out += `<circle cx="${px(p.x)}" cy="${px(p.y)}" r="4" data-series="${si}" data-category="${i}" fill="${s.color}"/>`;
+      });
       if (block.labels === true)
         s.values.forEach((v, i) => {
           const p = points[i] as { x: number; y: number };
@@ -314,10 +320,12 @@ function axesMarkup(
       const end = along(v);
       const from = Math.min(zero, end);
       const length = Math.abs(end - zero);
+      /* a bar names its cell for the editor's mark hit test (docs/FEATURES.md 2.2 rank 7) */
+      const mark = ` data-series="${si}" data-category="${i}"`;
       if (horizontal)
-        out += `<rect x="${px(from)}" y="${px(start)}" width="${px(length)}" height="${px(Math.max(0, barSize - 2))}" fill="${s.color}"/>`;
+        out += `<rect x="${px(from)}" y="${px(start)}" width="${px(length)}" height="${px(Math.max(0, barSize - 2))}"${mark} fill="${s.color}"/>`;
       else
-        out += `<rect x="${px(start)}" y="${px(from)}" width="${px(Math.max(0, barSize - 2))}" height="${px(length)}" fill="${s.color}"/>`;
+        out += `<rect x="${px(start)}" y="${px(from)}" width="${px(Math.max(0, barSize - 2))}" height="${px(length)}"${mark} fill="${s.color}"/>`;
       if (block.labels === true) {
         const label = escapeText(formatChartNumber(v, format));
         if (horizontal)

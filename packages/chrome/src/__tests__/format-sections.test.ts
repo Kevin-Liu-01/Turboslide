@@ -12,6 +12,8 @@ import {
   hasAltText,
   hasShadow,
   hasTextFitting,
+  leadingFormatSection,
+  sectionsInOrderFor,
 } from '../inspector/format-sections';
 import { blockControls, slideControls } from '../inspector/generate';
 import { PANELS, forbiddenWordsIn } from '../menus/strings';
@@ -181,3 +183,24 @@ describe('Drop shadow (gslides-parity SPEC-2 2.3.4)', () => {
     expect(hasShadow(block('paragraph'))).toBe('shadow' in BLOCK_SCHEMAS.paragraph.shape);
   });
 });
+
+describe('the leading section (docs/FEATURES.md 2.2 rank 13; docs/RETURN.md 2.5)', () => {
+  it('leads with Chart data for a chart and Table for a table, and keeps Google’s order otherwise', () => {
+    const chart = { id: 'c', type: 'chart', kind: 'bar', categories: ['a'], series: [] } as Block;
+    const table = { id: 't', type: 'table', columns: [{}], rows: [{ cells: [''] }] } as Block;
+    expect(leadingFormatSection(chart)).toBe('chart');
+    expect(leadingFormatSection(table)).toBe('table');
+    expect(leadingFormatSection(block('heading'))).toBeNull();
+    expect(leadingFormatSection(undefined)).toBeNull();
+    const ids = (blockOf: Block | undefined) =>
+      sectionsInOrderFor(FORMAT_SECTIONS, blockOf).map((section) => section.id);
+    expect(ids(table)[0]).toBe('table');
+    expect(ids(chart)[0]).toBe('chart');
+    /* the sort is stable: the rest keep their order */
+    expect(ids(table).filter((id) => id !== 'table')).toEqual(
+      FORMAT_SECTIONS.map((section) => section.id).filter((id) => id !== 'table'),
+    );
+    expect(ids(block('heading'))).toEqual(FORMAT_SECTIONS.map((section) => section.id));
+  });
+});
+

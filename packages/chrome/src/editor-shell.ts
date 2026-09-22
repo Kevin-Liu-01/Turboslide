@@ -12,7 +12,7 @@ import type {
 } from '@turboslide/schema/blocks';
 import { emptyChart } from '@turboslide/schema/blocks/chart';
 import type { ChartKind } from '@turboslide/schema/blocks/chart';
-import { emptyTable } from '@turboslide/schema/blocks/table';
+import { TABLE_SIZES, emptyTable } from '@turboslide/schema/blocks/table';
 import type { TableBlock, TableCommand } from '@turboslide/schema/blocks/table';
 import { CATALOG, blockTextPaths } from '@turboslide/schema/catalog';
 import type { Color } from '@turboslide/schema/color';
@@ -31,6 +31,7 @@ import {
   BULLET_PRESETS,
   NUMBER_PRESETS,
   marksOfRange,
+  parseText,
   placeRuns,
   plainLength,
   runFlags,
@@ -64,7 +65,13 @@ import type { TailKind } from './menus/toolbar-tails';
 import { freeBlockId } from './palette-data';
 import type { PaletteEntry } from './palette-data';
 import type { SaveState } from './StatusChip';
-import { tableCommandOfItem, tablePlan, tableWriteInput } from './table-tools';
+import {
+  cellsInRange,
+  rangeOf as tableRangeOf,
+  tableCommandOfItem,
+  tablePlan,
+  tableWriteInput,
+} from './table-tools';
 
 /**
  * The editor shell's contract with the studio route (gslides-parity SPEC 1, 2, 3, 6, 12): what
@@ -2048,9 +2055,96 @@ export function hasClearableMarks(text: string, range: readonly [number, number]
   });
 }
 
+/** The sentence for a mark on a table whose selected cells hold no text (docs/FEATURES.md 2.2 rank 8). */
+const TYPE_INTO_CELL = 'Type into a cell first';
+
+/**
+ * The cells of a table a text write covers (docs/FEATURES.md 2.2 rank 8; audit-objects 7): the
+ * range's drawn cells when the selection carries one, the caret's cell when it carries a cell and
+ * no range, else every drawn cell of a table selected by one click; each with the whole plain
+ * range of its text. Cells with no text are left out (a mark on no character writes nothing).
+ */
+export function tableTextTargets(
+  table: TableBlock,
+  selection: EditorSelection | null | undefined,
+): { path: string; text: string; range: [number, number] }[] {
+  const cells: [number, number][] =
+    selection?.cells !== undefined || selection?.cell !== undefined
+      ? (() => {
+          const bounds = tableRangeOf(table, {
+            ...(selection.cell === undefined
+              ? {}
+              : { cell: [selection.cell.row, selection.cell.column] as [number, number] }),
+            ...(selection.cells === undefined ? {} : { cells: selection.cells }),
+          });
+          return bounds === null ? [] : cellsInRange(table, bounds);
+        })()
+      : cellsInRange(table, {
+          r0: 0,
+          c0: 0,
+          r1: table.rows.length - 1,
+          c1: table.columns.length - 1,
+        });
+  return cells.flatMap(([r, c]) => {
+    const text = table.rows[r]?.cells[c] ?? '';
+    const length = plainLength(text);
+    return length === 0 ? [] : [{ path: `/rows/${r}/cells/${c}`, text, range: [0, length] }];
+  });
+}
+
+/** True when every run with a character in the Text is the display run (bold), as the toolbar reads it. */
+function textIsBold(text: string): boolean {
+  const runs = splitParagraphs(text)
+    .flatMap((paragraph) => parseText(paragraph))
+    .filter((run) => run.t !== '');
+  return runs.length > 0 && runs.every((run) => run.b === true || run.gt === true);
+}
+
+/**
+ * One `slide.update` of `text.mark` mutations writing a mark, a bold run or a colour into every
+ * selected cell of a table (docs/FEATURES.md 2.2 rank 8; audit-objects 7: Cmd+B wrote
+ * `/typography` on the table block, the schema refused it and the card "A change was not
+ * applied" opened over the toolbar). A mark is cleared when every cell already carries it whole
+ * and set otherwise; a colour is set as given and cleared with null. One commit, one Cmd+Z.
+ */
+export function tableMarksPlan(
+  facts: ActionFacts,
+  table: TableBlock,
+  edit: { mark: 'b' | 'i' | 'u' | 's' | 'sup' | 'sub' } | { color: string | null },
+  label: string,
+): ActionPlan | ActionRefusal {
+  const targets = tableTextTargets(table, facts.selection);
+  if (targets.length === 0) return { refused: TYPE_INTO_CELL };
+  let flags: { set?: RunFlags; clear?: RunFlagKey[] };
+  if ('mark' in edit) {
+    const on = targets.every((target) =>
+      edit.mark === 'b'
+        ? textIsBold(target.text)
+        : (marksOfRange(target.text, target.range) as Record<string, unknown>)[edit.mark] === true,
+    );
+    flags = on ? { clear: [edit.mark] } : { set: { [edit.mark]: true } };
+    if (!on && edit.mark === 'sup') flags.clear = ['sub'];
+    if (!on && edit.mark === 'sub') flags.clear = ['sup'];
+  } else {
+    flags = edit.color === null ? { clear: ['color'] } : { set: { color: edit.color as Color } };
+  }
+  const mutations: Mutation[] = targets.map((target) => ({
+    op: 'text.mark',
+    slideId: facts.slideId,
+    blockId: table.id,
+    path: target.path,
+    range: target.range,
+    edit: { kind: 'marks', ...flags },
+  }));
+  return slideUpdatePlan(facts, mutations, label);
+}
+
 /**
  * One `text.style` toggling a mark, or setting a colour, over the caret's range or the whole
  * Text (SPEC-2 4.1): the toggle reads the range's current marks (the route's, else the Text's).
+ * On a table with a range, or selected by one click with no cell, the write goes into every
+ * selected cell (`tableMarksPlan`, docs/FEATURES.md 2.2 rank 8); a caret in one cell keeps the
+ * cell's own path.
  */
 export function textStylePlan(
   facts: ActionFacts,
@@ -2062,6 +2156,12 @@ export function textStylePlan(
 ): ActionPlan | ActionRefusal {
   const target = block(facts);
   if (target === undefined) return { refused: SELECT_TEXT };
+  if (
+    target.type === 'table' &&
+    (facts.selection?.cells !== undefined || facts.selection?.cell === undefined) &&
+    !('highlight' in edit)
+  )
+    return tableMarksPlan(facts, target as TableBlock, edit, label);
   const path = textPathOf(target, facts.selection);
   if (path === null) return { refused: SELECT_TEXT };
   const range = rangeOf(target, path, facts);
@@ -2691,6 +2791,10 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
          retrying" until the card was dismissed (VERIFICATION C2-F1; b7's C2-R16, applied by the
          integrator at the cycle 3 merge): refuse with a sentence, as the table branch does */
       if (target.type === 'plain') return { refused: BOLD_ON_LIST };
+      /* a table has no typography field: Bold writes the bold run into every selected cell's
+         text (docs/FEATURES.md 2.2 rank 8; audit-objects 7) */
+      if (target.type === 'table')
+        return tableMarksPlan(facts, target as TableBlock, { mark: 'b' }, 'Bold');
       const typography = typographyOf(target);
       const weight = typography.weight === 500 ? undefined : 500;
       const next = { ...typography };
@@ -2777,8 +2881,24 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
           stepPlainSize((target as PlainBlock).size, direction),
           item.label,
         );
+      if (target.type === 'table') {
+        /* a table's text size is its `size` ladder (blocks/table.ts TABLE_SIZES, 20 down to 15,
+           every cell at once; docs/FEATURES.md 2.2 rank 8): the step walks that ladder and says
+           so at its ends, where the TYPE_LADDER's 22 was refused by the schema before */
+        const ladder = [...TABLE_SIZES].sort((a, b) => a - b);
+        const current = (target as TableBlock).size ?? 20;
+        const at = ladder.indexOf(current as (typeof ladder)[number]);
+        const next = ladder[(at < 0 ? ladder.length - 1 : at) + direction];
+        if (next === undefined)
+          return {
+            refused:
+              direction > 0
+                ? `A table's text is ${ladder[ladder.length - 1]} px at most`
+                : `A table's text is ${ladder[0]} px at least`,
+          };
+        return blockSet(facts, target.id, '/size', next, item.label);
+      }
       const size = stepLadder(currentSize(target), direction);
-      if (target.type === 'table') return blockSet(facts, target.id, '/size', size, item.label);
       return blockSet(
         facts,
         target.id,
@@ -2797,9 +2917,18 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
       if (target.type === 'plain') return { refused: ALIGN_ON_LIST };
       if (target.type === 'table') {
         if (align === 'justify') return { refused: 'Justified applies to a text block' };
-        const column = facts.selection?.cell?.column ?? 0;
+        /* the range's columns, the caret's column, or every column of a table selected by one
+           click (docs/FEATURES.md 2.2 rank 8, `tables.range.size-color`) */
+        const cells = facts.selection?.cells;
+        const cell = facts.selection?.cell;
+        const covers = (index: number): boolean =>
+          cells !== undefined
+            ? index >= Math.min(cells.c0, cells.c1) && index <= Math.max(cells.c0, cells.c1)
+            : cell !== undefined
+              ? index === cell.column
+              : true;
         const columns = (target as TableBlock).columns.map((each, index) =>
-          index === column ? { ...each, align } : each,
+          covers(index) ? { ...each, align } : each,
         );
         return blockSet(facts, target.id, '/columns', columns, item.label);
       }

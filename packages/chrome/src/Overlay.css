@@ -359,6 +359,37 @@
   pointer-events: none;
 }
 
+/* a bar button under the selected object's ring (the Edit data button of a chart, docs/FEATURES.md
+   2.2 rank 7): a 22 px paper button with a hairline, in the chrome's face, that takes the pointer
+   and draws no second ring */
+.ts-bar-btn {
+  position: absolute;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 500 13px/1 var(--pt-text);
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: pointer;
+  appearance: none;
+}
+
+.ts-bar-btn:hover {
+  border-color: var(--pt-ink);
+}
+
+.ts-bar-btn:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
 /* a group's union ring: hair, named for the reader (role="group") */
 .ts-group.is-group {
   pointer-events: none;

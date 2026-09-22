@@ -156,6 +156,28 @@ export function presentFormatSections(
   return sections.filter((section) => advancedTools || section.advanced !== true);
 }
 
+/**
+ * The section that leads the panel for a block (docs/FEATURES.md 2.2 rank 13; docs/RETURN.md 2.5
+ * for the chart): a chart's data is what a seller opens the panel for, and so is a table's Table
+ * section, which sat last of 64 controls and out of view at 900 px (audit-objects 22). Null for
+ * every other block, whose sections keep Google's order.
+ */
+export function leadingFormatSection(block: Block | undefined): FormatSectionId | null {
+  if (block?.type === 'chart') return 'chart';
+  if (block?.type === 'table') return 'table';
+  return null;
+}
+
+/** The sections with the block's leading section first; a stable sort, so the rest keep their order. */
+export function sectionsInOrderFor(
+  sections: ReadonlyArray<FormatSectionMeta>,
+  block: Block | undefined,
+): FormatSectionMeta[] {
+  const lead = leadingFormatSection(block);
+  if (lead === null) return [...sections];
+  return [...sections].sort((a, b) => (a.id === lead ? -1 : b.id === lead ? 1 : 0));
+}
+
 export const FORMAT_SECTION_BY_ID: Readonly<Record<FormatSectionId, FormatSectionMeta>> =
   Object.fromEntries(FORMAT_SECTIONS.map((section) => [section.id, section])) as Record<
     FormatSectionId,

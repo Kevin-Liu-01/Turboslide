@@ -111,23 +111,59 @@ describe('TableSection', () => {
     expect((dispatch.mock.calls[3]?.[1] as { value: unknown }).value).toEqual({ weight: 1 });
   });
 
-  it('lists the row heights and writes a typed height, an empty field clearing it', () => {
-    const { dispatch } = mount();
-    const first = control('rowHeight.0') as HTMLInputElement;
-    const second = control('rowHeight.1') as HTMLInputElement;
-    expect(first.value).toBe('');
-    expect(second.value).toBe('56');
-    fireEvent.change(first, { target: { value: '72' } });
-    fireEvent.keyDown(first, { key: 'Enter' });
-    fireEvent.blur(first);
+  it('shows one Height field for the selected rows and writes the typed height on them, an empty field clearing it (docs/FEATURES.md 2.2 rank 13)', () => {
+    /* the caret's row: row 2 carries 56 */
+    const { dispatch } = mount({ cell: { row: 1, column: 0 } });
+    const field = control('height') as HTMLInputElement;
+    expect(field.value).toBe('56');
+    expect(field.getAttribute('aria-label')).toBe('Row 2 height');
+    expect(document.querySelector('[data-control="formatOptions.table.rowHeight.0"]')).toBeNull();
+    fireEvent.change(field, { target: { value: '72' } });
+    fireEvent.keyDown(field, { key: 'Enter' });
+    fireEvent.blur(field);
     const rows = dispatch.mock.calls[0]?.[1] as { path: string; value: { height?: number }[] };
     expect(rows.path).toBe('/rows');
-    expect(rows.value[0]?.height).toBe(72);
-    fireEvent.change(second, { target: { value: '' } });
-    fireEvent.blur(second);
+    expect(rows.value.map((row) => row.height)).toEqual([undefined, 72, undefined]);
+    fireEvent.change(field, { target: { value: '' } });
+    fireEvent.blur(field);
     expect(
-      (dispatch.mock.calls[1]?.[1] as { value: { height?: number }[] }).value[1]?.height,
-    ).toBeUndefined();
+      (dispatch.mock.calls[1]?.[1] as { value: { height?: number }[] }).value.map(
+        (row) => row.height,
+      ),
+    ).toEqual([undefined, undefined, undefined]);
+  });
+
+  it('the Height field covers a range’s rows, and every row of a table selected by one click', () => {
+    const { dispatch } = mount({ cells: { r0: 0, c0: 0, r1: 1, c1: 1 } });
+    const field = control('height') as HTMLInputElement;
+    /* rows 1 and 2 differ (auto and 56): the field reads empty with the mixed hint */
+    expect(field.value).toBe('');
+    expect(field.placeholder).toBe('mixed');
+    expect(field.getAttribute('aria-label')).toBe('Rows 1 to 2 height');
+    fireEvent.change(field, { target: { value: '40' } });
+    fireEvent.blur(field);
+    expect(
+      (dispatch.mock.calls[0]?.[1] as { value: { height?: number }[] }).value.map(
+        (row) => row.height,
+      ),
+    ).toEqual([40, 40, undefined]);
+    cleanup();
+    const whole = mount(null);
+    const all = control('height') as HTMLInputElement;
+    expect(all.getAttribute('aria-label')).toBe('Height of every row');
+    fireEvent.change(all, { target: { value: '30' } });
+    fireEvent.keyDown(all, { key: 'Enter' });
+    fireEvent.blur(all);
+    expect(
+      (whole.dispatch.mock.calls[0]?.[1] as { value: { height?: number }[] }).value.map(
+        (row) => row.height,
+      ),
+    ).toEqual([30, 30, 30]);
+    /* a value that is not a height writes nothing and says so */
+    fireEvent.change(all, { target: { value: 'tall' } });
+    fireEvent.blur(all);
+    expect(whole.dispatch).toHaveBeenCalledTimes(1);
+    expect(whole.onNotice).toHaveBeenCalledWith('Type a height in px');
   });
 
   it('distributes rows and columns as table.distribute', () => {

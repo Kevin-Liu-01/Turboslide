@@ -105,9 +105,16 @@ describe('DIAGRAM_TEMPLATES', () => {
           }
           /* ids are unique so diagram.insert frees them one by one */
           expect(new Set(blocks.map((block) => block.id)).size).toBe(blocks.length);
-          /* the labelled nodes: one text block per node, centred, middle aligned */
-          const texts = blocks.filter((block): block is TextBlock => block.type === 'text');
+          /* the labelled nodes: one label per node, centred, middle aligned; a step's label is
+             the shape's own text (docs/FEATURES.md 2.2 rank 9), a timeline's a text block under
+             its dot; no node is a shape and a text block over the same box */
+          const texts = blocks.filter(
+            (block): block is TextBlock | ShapeBlock =>
+              block.type === 'text' ||
+              (block.type === 'shape' && block.shape !== 'line' && block.text !== undefined),
+          );
           expect(texts).toHaveLength(template.nodes(count));
+          if (kind !== 'timeline') expect(blocks.some((block) => block.type === 'text')).toBe(false);
           for (const text of texts) {
             expect(text.typography).toEqual({ align: 'center', weight: 500 });
             expect(text.valign).toBe('middle');
@@ -193,10 +200,9 @@ describe('DIAGRAM_TEMPLATES', () => {
     );
     expect(steps).toHaveLength(4);
     expect(steps.map((step) => step.fill)).toEqual(['plate', 'plate', 'plate', 'plate']);
-    const labels = blocks
-      .filter((block): block is TextBlock => block.type === 'text')
-      .map((text) => text.text);
-    expect(labels).toEqual(['Step 1', 'Step 2', 'Step 3', 'Step 4']);
+    /* the step is one object: its label is the shape's own text (docs/FEATURES.md 2.2 rank 9) */
+    expect(steps.map((step) => step.text)).toEqual(['Step 1', 'Step 2', 'Step 3', 'Step 4']);
+    expect(blocks.filter((block) => block.type === 'text')).toHaveLength(0);
   });
 
   it('a cycle closes: the last step points back at the first', () => {

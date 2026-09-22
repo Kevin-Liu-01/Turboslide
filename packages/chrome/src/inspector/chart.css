@@ -128,11 +128,12 @@
   white-space: nowrap;
 }
 
+/* the series swatch at 16 px, always drawn (docs/FEATURES.md 2.2 rank 12; audit-objects 21) */
 .ts-chartgrid-swatch,
 .ts-chart-swatch {
   flex: 0 0 auto;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   padding: 0;
   border: 1px solid var(--pt-hair);
   border-radius: 3px;
@@ -165,10 +166,49 @@
   height: 12px;
 }
 
+/* the remove control is drawn on the active row's and column's header without a hover (rank 12;
+   audit-objects 21 measured the squares at opacity 0 until hovered), and on the hovered header */
 .ts-chartgrid-cell:hover .ts-chartgrid-remove,
 .ts-chartgrid-cell.is-active .ts-chartgrid-remove,
+.ts-chartgrid-cell.is-active-line .ts-chartgrid-remove,
 .ts-chartgrid-remove:focus-visible {
   opacity: 1;
+}
+
+/* the right click menu of a series or category header: one paper plate with a hairline and one
+   row, at the pointer (rank 12) */
+.ts-chartgrid-menu {
+  position: fixed;
+  z-index: 40;
+  min-width: 160px;
+  padding: 4px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+}
+
+.ts-chartgrid-menu-row {
+  display: block;
+  width: 100%;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--pt-ink);
+  font: 13px/1.2 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-chartgrid-menu-row:hover:not(:disabled),
+.ts-chartgrid-menu-row:focus-visible {
+  background: var(--pt-hair-soft);
+  outline: none;
+}
+
+.ts-chartgrid-menu-row:disabled {
+  color: var(--pt-ink-2);
+  cursor: default;
 }
 
 .ts-chartgrid-remove:disabled {

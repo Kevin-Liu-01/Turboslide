@@ -7,8 +7,8 @@
 // addressable through data-run "<blockId>/rows/<r>/cells/<c>" (the pointer the linter, find and
 // replace and the inline editor read, packages/lint/src/context.ts), and every paragraph of a
 // cell is its own `.para` span (SPEC 7.4), always, so the editor's cell contract has one shape. An
-// empty cell draws the prompt "Click to add text" on the editor stage and nothing elsewhere (SPEC
-// 5.4).
+// empty cell draws no prompt (docs/FEATURES.md 2.3 item 9): the editor's stage draws "Click to add
+// text" in the hovered empty cell alone, and the empty `.para` keeps a line box through CSS.
 //
 // Round two (SPEC-2 2.7): a row's `height` is written on its `.tr`; the table border's colour and
 // dash travel as `--table-rule-color` and `--table-rule-style`, weight 0 as `--table-rule: 0px`
@@ -142,7 +142,12 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
                   ? `${span.rows}x${span.columns}`
                   : undefined,
             },
-            renderMultiline(cell, ctx, block, `/rows/${r}/cells/${c}`, true),
+            /* an empty cell draws no prompt (docs/FEATURES.md 2.3 item 9; audit-objects 24): the
+               editor's stage appends "Click to add text" to the hovered empty cell alone, and the
+               empty `.para` keeps its line box through the sheet's CSS (block-css.ts) */
+            cell === ''
+              ? el('span', { class: 'para' }, '')
+              : renderMultiline(cell, ctx, block, `/rows/${r}/cells/${c}`, true),
           );
         })
         .join('');

@@ -53,6 +53,8 @@ export type ToolbarButtonProps = {
   text?: string;
   /** a dropdown chevron after the glyph or the word */
   chevron?: boolean;
+  /** the control's current value as `data-value` (the Align list reads the effective alignment, docs/FEATURES.md 2.2 rank 3) */
+  value?: string;
   className?: string;
   children?: ReactNode;
 };
@@ -64,6 +66,7 @@ export function ToolbarButton({
   pressed,
   text,
   chevron,
+  value,
   className,
   children,
 }: ToolbarButtonProps) {
@@ -90,6 +93,7 @@ export function ToolbarButton({
       aria-haspopup={chevron ? 'menu' : undefined}
       data-control={control.control}
       data-status={control.status}
+      data-value={value}
       {...tipProps(tip)}
       onMouseDown={(event) => {
         /* the focus round (docs/FOCUS.md section 5, rank 10): the pointer down never moves the

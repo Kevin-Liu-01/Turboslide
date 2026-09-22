@@ -5,10 +5,17 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Block } from '@turboslide/schema/blocks';
 import type { ContentSlide } from '@turboslide/schema/deck';
 import type { EditorOverlayView } from '@turboslide/viewer/Editor';
+import { CHART_CELL_EVENT } from '@turboslide/viewer/Editor';
 import { handlesFor } from '@turboslide/viewer/Gestures';
 import type { MeasuredBoxes } from '@turboslide/viewer/Gestures';
 
+import { EditorShellContext } from '../editor-shell-context';
+import type { EditorShellState } from '../editor-shell-context';
 import { FRAME_EDGE_PX, handleDoc, handleTitle, Overlay } from '../Overlay';
+
+/* the collaboration layer reads the viewer shell and the room; the button and the event under
+   test read the editor shell's openPanel alone */
+vi.mock('../CollabLayer', () => ({ CollabLayer: () => null }));
 import { TIP_ID, hideTooltip } from '../Tooltip';
 
 // The overlay in edit mode (SPEC 6.4) on a freeform slide: the rings of a multi-selection, the
@@ -94,6 +101,10 @@ function viewOf(over: Partial<EditorOverlayView> = {}): EditorOverlayView {
     rotation: null,
     sizeReadout: null,
     widthReadout: null,
+    /* the features round (docs/FEATURES.md 2.1, 2.2 rank 7) */
+    tableFrame: false,
+    editData: null,
+    valueReadout: null,
     rulers: null,
     deckGuides: null,
     draggingGuide: null,
@@ -395,3 +406,83 @@ describe('Overlay on a freeform slide', () => {
     }
   });
 });
+
+describe('the table frame and the Edit data button (docs/FEATURES.md 2.1, 2.2 rank 7)', () => {
+  it('keeps the chip and the frame edges as the move surface while a table cell is open', () => {
+    render(<Overlay view={viewOf({ editing: true, tableFrame: true })} />);
+    const chip = document.querySelector('.ts-select-chip') as HTMLElement;
+    expect(chip.tagName).toBe('BUTTON');
+    expect(chip.getAttribute('data-control')).toBe('handle.a.move');
+    expect(document.querySelectorAll('.ts-frame-edge')).toHaveLength(4);
+    /* the ring still reads as editing */
+    expect(document.querySelector('.ts-select.is-editing')).not.toBeNull();
+  });
+
+  it('draws a static chip and no frame edges while another run is being edited', () => {
+    render(<Overlay view={viewOf({ editing: true })} />);
+    expect(document.querySelector('.ts-select-chip')?.tagName).toBe('SPAN');
+    expect(document.querySelectorAll('.ts-frame-edge')).toHaveLength(0);
+  });
+
+  it('draws the Edit data button under a selected chart inside the shell and opens Format options on Chart data', () => {
+    const openPanel = vi.fn();
+    const shell = { openPanel, settings: {}, input: {} } as unknown as EditorShellState;
+    render(
+      <EditorShellContext.Provider value={shell}>
+        <Overlay view={viewOf({ editData: { blockId: 'a' }, chip: 'Chart' })} />
+      </EditorShellContext.Provider>,
+    );
+    const button = document.querySelector('[data-control="bar.chart.editData"]') as HTMLElement;
+    expect(button.textContent).toBe('Edit data');
+    expect(button.hasAttribute('title')).toBe(false);
+    expect(tipShown(button).name).toBe('Edit data');
+    fireEvent.click(button);
+    expect(openPanel).toHaveBeenCalledWith('formatOptions', { section: 'chart' });
+    /* the button sits under the ring's bottom left */
+    expect(button.style.left).toBe(`${200 * 0.5}px`);
+    expect(Number.parseFloat(button.style.top)).toBeGreaterThan((200 + 100) * 0.5);
+  });
+
+  it('draws no Edit data button without a chart or outside the shell', () => {
+    render(<Overlay view={viewOf()} />);
+    expect(document.querySelector('[data-control="bar.chart.editData"]')).toBeNull();
+    cleanup();
+    render(<Overlay view={viewOf({ editData: { blockId: 'a' } })} />);
+    expect(document.querySelector('[data-control="bar.chart.editData"]')).toBeNull();
+  });
+
+  it('shows a tapped chart mark’s value in the readout chip', () => {
+    render(<Overlay view={viewOf({ valueReadout: 'Q2: 1,350' })} />);
+    expect(document.querySelector('.ts-readout')?.textContent).toBe('Q2: 1,350');
+  });
+
+  it('opens Format options on Chart data when the stage asks for a chart cell with open set', () => {
+    const openPanel = vi.fn();
+    const shell = { openPanel, settings: {}, input: {} } as unknown as EditorShellState;
+    render(
+      <EditorShellContext.Provider value={shell}>
+        <Overlay view={viewOf()} />
+      </EditorShellContext.Provider>,
+    );
+    window.dispatchEvent(
+      new CustomEvent(CHART_CELL_EVENT, {
+        detail: { deckId: 'd', slideId: 'free', blockId: 'c', row: 1, column: 1, open: true },
+      }),
+    );
+    expect(openPanel).toHaveBeenCalledWith('formatOptions', { section: 'chart' });
+    /* a request for another slide, or one without open, opens nothing */
+    openPanel.mockClear();
+    window.dispatchEvent(
+      new CustomEvent(CHART_CELL_EVENT, {
+        detail: { deckId: 'd', slideId: 'other', blockId: 'c', row: 1, column: 1, open: true },
+      }),
+    );
+    window.dispatchEvent(
+      new CustomEvent(CHART_CELL_EVENT, {
+        detail: { deckId: 'd', slideId: 'free', blockId: 'c', row: 2, column: 1, open: false },
+      }),
+    );
+    expect(openPanel).not.toHaveBeenCalled();
+  });
+});
+

@@ -37,6 +37,7 @@ import { bandAssetResolver, bandForSlide, frameBandOf } from '@turboslide/render
 import type { ActionId } from '@turboslide/schema/actions';
 import type { Asset } from '@turboslide/schema/assets';
 import type { Block, BlockType, ShotTrim } from '@turboslide/schema/blocks';
+import { formatChartNumber } from '@turboslide/schema/blocks/chart';
 import type { TableBlock, TableCommand } from '@turboslide/schema/blocks/table';
 import { applyTableCommand } from '@turboslide/schema/blocks/table';
 import type { GuidesInput } from '@turboslide/schema/canvas';
@@ -54,6 +55,7 @@ import type {
   OrderMove,
 } from '@turboslide/schema/freeform';
 import { sortByZ } from '@turboslide/schema/freeform';
+import { brandWriteMutation } from '@turboslide/schema/brand';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { jsonEqual } from '@turboslide/schema/pointer';
 import type { Position } from '@turboslide/schema/position';
@@ -61,8 +63,9 @@ import { applyMutations } from '@turboslide/schema/reduce';
 import type { Box } from '@turboslide/schema/render';
 import { isClosedShapeKind } from '@turboslide/schema/shapes';
 import type { Text as Markup } from '@turboslide/schema/text';
-import { canonicalText, parseText, plainLength, plainOf } from '@turboslide/schema/text';
+import { canonicalText, parseText, plainLength, plainOf, styleRange } from '@turboslide/schema/text';
 import type { RunMarks } from '@turboslide/schema/text';
+import { PROMPTS } from '@turboslide/schema/layouts';
 import { TYPE_LADDER } from '@turboslide/schema/typography';
 import { SHEET } from '@turboslide/theme/tokens';
 
@@ -170,6 +173,7 @@ import {
   textFromNode,
 } from './InlineText';
 import {
+  PICTURE_MARGIN,
   pictureInsertArea,
   pictureInsertBox,
   pictureNameOf,
@@ -192,7 +196,7 @@ import type {
   InlineTextHandle,
 } from './InlineText';
 import { editorKeyAction, isBareCharacterKey, typingEntry } from './keys';
-import { toggleMark } from './marks';
+import { boldOfRange, rangeHasMark, setBoldRange, toggleMark } from './marks';
 import type { ToggleMark } from './marks';
 import { isMarquee, marqueeBox, marqueeHits } from './Marquee';
 import { blockTypeIn, boxContains, ringBoxFor } from './text-ring';
@@ -227,9 +231,11 @@ import {
 } from './Selection';
 import type { BlockFamily, Selection } from './Selection';
 import {
+  adjacentCell,
   cellAtPoint,
   cellInBounds,
   cellRunPointer,
+  drawnCellsIn,
   isMultiCell,
   rangeBounds,
   rangeBox,
@@ -237,7 +243,13 @@ import {
   rowsWithRangeCleared,
   tableRangeShapeOf,
 } from './table-range';
-import type { CellAddress, CellBounds, CellRange, TableRangeShape } from './table-range';
+import type {
+  CellAddress,
+  CellBounds,
+  CellDirection,
+  CellRange,
+  TableRangeShape,
+} from './table-range';
 import { isTableSeamHandle, tableSeamHandles, tableSeamMutation } from './table-seam';
 import { movedCellPointer, tableShapeOf } from './table-session';
 import type { TableShape } from './table-session';
@@ -353,6 +365,16 @@ export type EditorOverlayView = {
   groupTag: string | null;
   /** the member names of a group, for the ring's accessible name */
   groupMembers: string[];
+  /**
+   * a table with a cell open or a cell or range active (docs/FEATURES.md 2.1): the chip and the
+   * ring band stay drawn as its move surface although `editing` may be true, and the handles hold
+   * its free-move chip and eight resize squares
+   */
+  tableFrame: boolean;
+  /** the selected chart the Edit data button sits under (docs/FEATURES.md 2.2 rank 7), null otherwise */
+  editData: { blockId: string } | null;
+  /** the value of a tapped chart mark, shown in the readout chip for a moment; null otherwise */
+  valueReadout: string | null;
   /** the selected block count */
   count: number;
   /** the marquee being dragged, or the box a draw tool is drawing */
@@ -480,6 +502,27 @@ export type EditorNotice = { text: string; undo?: true };
  */
 export const SELECT_OBJECTS_EVENT = 'turboslide:select-objects';
 
+/**
+ * The chart's numbers from the stage (docs/FEATURES.md 2.2 rank 7; audit-objects 17): a double
+ * click on a chart, Enter on the selected chart, a click on a bar, a point or a slice of the
+ * selected chart and the Edit data button under it all send this window event with the cell the
+ * grid should make active (the grid's own coordinates: row 1 is the first category, column 1 the
+ * first series). The chrome's Overlay opens Format options on the Chart data section when `open`
+ * is set and the Chart data section makes the cell active (inspector/chart.tsx). A window event
+ * because the viewer never imports the chrome, as `SELECT_OBJECTS_EVENT` travels the other way.
+ */
+export const CHART_CELL_EVENT = 'turboslide:chart-cell';
+
+export type ChartCellDetail = {
+  deckId: string;
+  slideId: string;
+  blockId: string;
+  row: number;
+  column: number;
+  /** open Format options on the Chart data section (a double click, Enter, the button) */
+  open: boolean;
+};
+
 export type EditorHandle = {
   cut: () => Promise<void>;
   copy: () => Promise<void>;
@@ -534,6 +577,18 @@ export type EditorHandle = {
   insertPictureAsset: (
     asset: { id: string; size?: Asset['size'] | undefined },
     where?: { blockId?: string },
+  ) => Promise<void>;
+  /**
+   * a logo asset the document holds (the Logo dialog's `logo.insert` answer; docs/FEATURES.md
+   * 4.4, B6): placed at the logo size, a symbol 160 sheet px tall or a wordmark 320 wide at the
+   * mark's ratio, centred in the body slot's free area and never at the largest fit, selected;
+   * `blockId` swaps that picture's asset and keeps its box (Replace image > Logo); `everySlide`
+   * writes the kit's `/mark`, `/footer/logo` and `/footer/assetId` in the same commit and says
+   * "The <title> logo is on every slide" with Undo. No snackbar on a plain insert.
+   */
+  insertLogoAsset: (
+    asset: { id: string; size?: Asset['size'] | undefined },
+    where: { title: string; variant?: string; everySlide?: boolean; blockId?: string },
   ) => Promise<void>;
   /** Add a caption on the selected shot (docs/PRODUCT.md section 2 rank 10): the caption field appears with its prompt and takes the caret; false when nothing selected takes one */
   addCaption: () => boolean;
@@ -716,7 +771,14 @@ type ActiveGesture = {
 };
 
 /** A press on a block's body that may become a drag; CSS pixels. */
-type Press = { blockId: string; clientX: number; clientY: number; alt: boolean };
+type Press = {
+  blockId: string;
+  clientX: number;
+  clientY: number;
+  alt: boolean;
+  /** what a pointer up without a move does after the press (a table cell's caret, a chart mark's cell) */
+  tap?: () => void;
+};
 
 /** A run to edit once the slide re-rendered with it (a new list item, the next cell, a drawn text box). */
 type PendingEdit = { blockId: string; pointer: string; caret: CaretPlacement; link?: boolean };
@@ -740,6 +802,9 @@ const DROP_PICTURE_WIDTH = 480;
 /** The indent step of Cmd+] and Cmd+[ in px (SPEC-2 2.2.11). */
 const INDENT_STEP_PX = 64;
 
+/** How long the value of a tapped chart mark stays in the readout chip (docs/FEATURES.md 2.2 rank 7). */
+const MARK_READOUT_MS = 1500;
+
 function backdropFor(document: DeckDocument, slide: Slide | undefined, theme: Theme, base: string) {
   if (!slide || !isPictureKind(slide.kind) || !('picture' in slide)) return undefined;
   const asset = document.deck.assets[slide.picture.asset];
@@ -760,9 +825,16 @@ function chipHandleFor(
   );
 }
 
-/** The controls of the chrome a keydown may start from: their own keys, never the stage's. */
+/**
+ * The controls of the chrome a keydown may start from: their own keys, never the stage's. A grid
+ * and its cells and headers are here for the chart data grid (docs/FEATURES.md 2.2 rank 1; audit
+ * objects 1): a letter typed on the active cell opens it, and until this entry the stage's
+ * capture listener consumed the letter as a stray key on the selected chart. The panel's own
+ * class (`.ts-panel`, Panel.tsx) is here for the same reason, so every key pressed inside a panel
+ * is the panel's.
+ */
 const CHROME_CONTROL =
-  'button, input, select, textarea, [contenteditable], [role="menu"], [role="dialog"], [role="listbox"], .ts-inspector';
+  'button, input, select, textarea, [contenteditable], [role="menu"], [role="dialog"], [role="listbox"], [role="grid"], [role="gridcell"], [role="columnheader"], [role="rowheader"], .ts-inspector, .ts-panel';
 
 /**
  * True when a key was pressed on a control outside the stage (an inspector button, a palette
@@ -955,6 +1027,16 @@ export function Editor({
   /* a member selected alone inside its group after a double click (SPEC-2 6.1 row 14) */
   const [groupEntered, setGroupEntered] = useState<string | null>(null);
   const [readout, setReadout] = useState<GestureReadout>(null);
+  /* the value of the chart mark a tap named, shown for a moment in the overlay's readout chip
+     (docs/FEATURES.md 2.2 rank 7: "the readout shows the value") */
+  const [markReadout, setMarkReadout] = useState<string | null>(null);
+  const markReadoutTimer = useRef(0);
+  /* the letter size of a word art while its resize is down (docs/FEATURES.md 2.3 item 8), shown
+     beside the size readout; cleared with the gesture's readout */
+  const [scaleReadout, setScaleReadout] = useState<string | null>(null);
+  useEffect(() => {
+    if (readout === null) setScaleReadout(null);
+  }, [readout]);
   /* the picture being uploaded, drawn at once from the local file at its final box with a thin
      progress bar until the asset lands (docs/PRODUCT.md section 2 rank 10; audit-seller 22) */
   const [uploading, setUploading] = useState<{ box: Box; url: string } | null>(null);
@@ -1605,6 +1687,8 @@ export function Editor({
        last burst, so no burst consumed it) made the first burst here diff against a text two
        remote writes old and send the whole run back at stale offsets (VERIFICATION.md C3-F8) */
     forgetAbsorbed(runKey(slideNow.id, run.blockId, run.pointer));
+    /* the hovered cell's prompt leaves before the session reads the run's text (2.3 item 9) */
+    clearHoverPrompt();
     committedText.current = readRunText(slideNow, run.blockId, run.pointer) ?? '';
     expectedDocText.current = committedText.current;
     frozenHtml.current = htmlRef.current;
@@ -1755,6 +1839,12 @@ export function Editor({
       sessionTableShape.current = null;
       window.clearTimeout(reconcileTimer.current);
       reconcileTimer.current = 0;
+      /* every table command keeps the caret in the cell it had (docs/FEATURES.md 2.3 item 7,
+         P1; audit-objects 18: Insert row below from the cell menu left the table selected and
+         the caret gone): the session that ends here reopens on the moved cell, at the end of its
+         text, from the layout effect the end triggers; a cell that is gone reopens nothing */
+      if (moved !== null)
+        pendingEdit.current = { blockId: current.blockId, pointer: moved, caret: 'end' };
       inlineRef.current?.end('blur');
       return;
     }
@@ -1808,15 +1898,22 @@ export function Editor({
     if (shape !== null && rangeStands(shape, block)) return;
     const bounds = rangeBounds(block, range);
     const spansChanged = shape !== null && shape.spans !== JSON.stringify(block.spans ?? []);
-    setRange(null);
     const anchor: CellAddress = { row: bounds.r0, col: bounds.c0 };
     if (
       spansChanged &&
       editingRef.current === null &&
       anchor.row < block.rows.length &&
       anchor.col < block.columns.length
-    )
-      select({ kind: 'run', blockId: block.id, pointer: cellRunPointer(anchor) });
+    ) {
+      /* a range stays a range after Merge (docs/FEATURES.md 2.3 item 7, P1): the merged cell
+         stands as the range, drawn with the range ring, so Unmerge cells on the tail and in the
+         cell menu act on it at once (the matrix rows tables.cells.merge-unmerge,
+         tables.tail.merge-unmerge-buttons kept their reading: the merged cell selected) */
+      select({ kind: 'block', blockId: block.id });
+      setRange({ blockId: block.id, anchor, focus: anchor });
+      return;
+    }
+    setRange(null);
     // the range's refs are read here, not the render's values
   }, [doc]);
 
@@ -1871,6 +1968,23 @@ export function Editor({
       case 'shift-tab': {
         const block = blockById(slideNow, current.blockId);
         if (block?.type !== 'table') {
+          /* Tab in an open label of a group moves to the next label in the group's order with
+             its text selected, Shift+Tab back, the member entered behind it (docs/FEATURES.md 2.2
+             rank 6; audit-objects 11: Tab ended the session and opened nothing); the last label's
+             Tab and the first's Shift+Tab return to the member, as before */
+          const tag = block?.pos?.group;
+          const el = body.current;
+          if (tag !== undefined && el) {
+            const labels = groupLabelRuns(el, slideNow, tag);
+            const at = labels.findIndex((run) => run.blockId === current.blockId);
+            const next = at >= 0 ? labels[at + (reason === 'tab' ? 1 : -1)] : undefined;
+            if (next !== undefined) {
+              setGroupEntered(next.blockId);
+              groupEnteredRef.current = next.blockId;
+              pendingEdit.current = { blockId: next.blockId, pointer: next.pointer, caret: 'all' };
+              return;
+            }
+          }
           backToBlock();
           return;
         }
@@ -1894,6 +2008,44 @@ export function Editor({
            audit-objects rows 51, 93, 94). The effect runs on the session's end whether or not
            the markup changes, so an empty cell's Tab takes the same path (row 92). */
         pendingEdit.current = { blockId: block.id, pointer: next.pointer, caret: 'all' };
+        return;
+      }
+      case 'arrow-left':
+      case 'arrow-right':
+      case 'arrow-up':
+      case 'arrow-down':
+      case 'range-left':
+      case 'range-right':
+      case 'range-up':
+      case 'range-down': {
+        /* an arrow at the cell's text edge (docs/FEATURES.md 2.2 rank 5; audit-objects 6): the
+           adjacent cell opens with the caret at the matching edge, the start after Right or Down
+           and the end after Left or Up, through the same layout effect as Tab; a merged cell
+           counts as one (table-range.ts adjacentCell). With Shift the cells from this one to the
+           adjacent one become the range and the table stands selected. At the grid's edge the
+           cell stays selected as a run, so the next key still reaches it. */
+        const block = blockById(slideNow, current.blockId);
+        const from = cellPointer(current.pointer);
+        const direction = reason.slice(reason.indexOf('-') + 1) as CellDirection;
+        if (block?.type !== 'table' || from === null) {
+          backToBlock();
+          return;
+        }
+        const next = adjacentCell(block, from, direction);
+        if (next === null) {
+          select({ kind: 'run', blockId: block.id, pointer: current.pointer });
+          return;
+        }
+        if (reason.startsWith('range-')) {
+          select({ kind: 'block', blockId: block.id });
+          setRange({ blockId: block.id, anchor: from, focus: next });
+          return;
+        }
+        pendingEdit.current = {
+          blockId: block.id,
+          pointer: cellRunPointer(next),
+          caret: direction === 'right' || direction === 'down' ? 'start' : 'end',
+        };
         return;
       }
       case 'list-enter': {
@@ -2010,6 +2162,51 @@ export function Editor({
   };
 
   const stageRect = () => body.current?.parentElement?.getBoundingClientRect();
+
+  /*
+   * A table command from the cell's right click menu keeps the caret in its cell (docs/FEATURES.md
+   * 2.3 item 7, P1; audit-objects 18): the right click on a collapsed caret ends the session and
+   * selects the cell as a run (onContextMenuEvent, the F4 rule), so when Insert row below lands the
+   * stage holds a run selection on a table whose grid changed and no session. The memo below keeps
+   * the selected cell's grid and text from before the change; when the grid changes under it the
+   * session reopens on the cell that moved (table-session.ts movedCellPointer), at the end of its
+   * text, through the same layout effect as Tab. A layout effect, before the markup effect in
+   * source order, so the queued cell opens on this render.
+   */
+  const runCellMemo = useRef<{
+    blockId: string;
+    pointer: string;
+    shape: TableShape;
+    text: Markup;
+  } | null>(null);
+  useLayoutEffect(() => {
+    const slideNow = slideRef.current;
+    const current = selectionRef.current;
+    const block = slideNow && current?.kind === 'run' ? blockById(slideNow, current.blockId) : undefined;
+    if (!slideNow || current?.kind !== 'run' || block?.type !== 'table' || cellPointer(current.pointer) === null) {
+      runCellMemo.current = null;
+      return;
+    }
+    const shape = tableShapeOf(block);
+    const memo = runCellMemo.current;
+    if (
+      memo !== null &&
+      memo.blockId === block.id &&
+      memo.pointer === current.pointer &&
+      (memo.shape.rows !== shape.rows || memo.shape.columns !== shape.columns) &&
+      editingRef.current === null &&
+      pendingEdit.current === null
+    ) {
+      const moved = movedCellPointer(block, memo.shape, memo.pointer, memo.text);
+      if (moved !== null) pendingEdit.current = { blockId: block.id, pointer: moved, caret: 'end' };
+    }
+    runCellMemo.current = {
+      blockId: block.id,
+      pointer: current.pointer,
+      shape,
+      text: readRunText(slideNow, block.id, current.pointer) ?? '',
+    };
+  }, [doc, selection]);
 
   /* the fresh markup: the theme's twins and dither canvases, then the boxes; fonts and images
      re-measure; a run queued for editing (a new item, the next cell, a drawn text box) starts */
@@ -2245,6 +2442,35 @@ export function Editor({
   };
 
   /**
+   * The `typography.size` a word art's box height stands for (docs/FEATURES.md 2.3 item 8): the
+   * size at the gesture's start times the new height over the start height, rounded and never
+   * under 8 px; null for every other block or when the size does not change.
+   */
+  const wordArtScale = (
+    canvas: Slide,
+    blockId: string,
+    height: number,
+  ): { mutation: Mutation; size: number } | null => {
+    const block = blockById(canvas, blockId);
+    if (block?.type !== 'text' || block.outline === undefined || block.pos === undefined) return null;
+    const startH = block.pos.h;
+    if (!(startH > 0) || !(height > 0)) return null;
+    const base = typeof block.typography?.size === 'number' ? block.typography.size : 88;
+    const size = Math.max(8, Math.round((base * height) / startH));
+    if (size === base) return null;
+    return {
+      size,
+      mutation: {
+        op: 'block.set',
+        slideId: canvas.id,
+        blockId,
+        path: '/typography',
+        value: { ...(block.typography ?? {}), size },
+      },
+    };
+  };
+
+  /**
    * The mutations a gesture stands for at a point, and what the overlay would show meanwhile: a
    * pure function of the gesture and the point. The pointer move shows the readout it returns
    * through the gesture's life; the release computes its mutations with the same function and
@@ -2271,6 +2497,18 @@ export function Editor({
             : null;
       let mutations = result?.mutations ?? [];
       if (g.duplicate && kind === 'free-move') mutations = duplicateMutations(g, mutations);
+      /* word art scales its letters with its box (docs/FEATURES.md 2.3 item 8, P1; audit
+         objects 20: the box grew to 1027 by 205 and the letters stayed 88 px): a resize of a text
+         block with an outline writes `typography.size` as the size at the gesture's start times
+         the new height over the old, in the same commit as the box, and the readout shows the
+         size beside the box; the preview draws the scaled letters through the draft document */
+      if (kind === 'free-resize' && result?.size !== undefined && g.handle.blockId !== undefined) {
+        const scaled = wordArtScale(g.ctx.slide, g.handle.blockId, result.size.h);
+        if (scaled !== null) {
+          mutations = [...mutations, scaled.mutation];
+          setScaleReadout(`${scaled.size} px`);
+        }
+      }
       return { mutations, guides: result?.guides ?? [], sites: result?.sites ?? [], readout };
     }
     if (isTableSeamHandle(g.handle)) {
@@ -2946,11 +3184,69 @@ export function Editor({
    * key falls through to the shell's `format.text.bold` plan, whose write the studio converts
    * (docs/RETURN.md 2.14 item 1; return/build/b2.md R1, `text.title.bold-cmd-b`).
    */
+  /**
+   * The cells a mark on a selected table writes (docs/FEATURES.md 2.2 rank 8; audit-objects 7):
+   * the range's drawn cells when a range stands on the table, else every drawn cell of a table
+   * selected by one click, each with its text and its whole plain range. Empty cells are left
+   * out: a mark on no character writes nothing.
+   */
+  const tableMarkTargets = (
+    table: TableBlock,
+  ): { pointer: string; text: Markup; range: [number, number] }[] => {
+    const bounds = rangeOn(table.id) ?? {
+      r0: 0,
+      c0: 0,
+      r1: table.rows.length - 1,
+      c1: table.columns.length - 1,
+    };
+    return drawnCellsIn(table, bounds).flatMap(([r, c]) => {
+      const text = table.rows[r]?.cells[c] ?? '';
+      const length = plainLength(text);
+      return length === 0 ? [] : [{ pointer: `/rows/${r}/cells/${c}`, text, range: [0, length] }];
+    });
+  };
+
+  /**
+   * One text.replace per cell of a selected table toggling a mark over every cell (rank 8, the
+   * keys' path; the toolbar and the menu go through the shell's plan): the mark is cleared when
+   * every cell already carries it whole and set otherwise, so one Cmd+B bolds the header row and
+   * the next one takes it back, in one commit and one Cmd+Z.
+   */
+  const tableMarkMutations = (slideNow: Slide, table: TableBlock, mark: ToggleMark): Mutation[] => {
+    const targets = tableMarkTargets(table);
+    if (targets.length === 0) return [];
+    const on = targets.every((target) =>
+      mark === 'b'
+        ? boldOfRange(target.text, target.range)
+        : rangeHasMark(target.text, target.range, mark),
+    );
+    return targets.flatMap((target): Mutation[] => {
+      const next = canonicalText(
+        mark === 'b'
+          ? setBoldRange(target.text, target.range, !on)
+          : styleRange(target.text, target.range, { [mark]: !on }),
+      );
+      if (next === target.text) return [];
+      return [
+        {
+          op: 'text.replace',
+          slideId: slideNow.id,
+          blockId: table.id,
+          path: target.pointer,
+          range: [0, target.text.length],
+          text: next,
+        },
+      ];
+    });
+  };
+
   const toggleWeight = (): boolean => {
     const slideNow = slideRef.current;
     if (!slideNow) return false;
     const mutations = selectedBlocks().flatMap((block): Mutation[] => {
-      if (!isTextBlockType(block.type) || block.type === 'table') return [];
+      /* a table's weight is its cells' bold run over the range or the whole table (rank 8) */
+      if (block.type === 'table') return tableMarkMutations(slideNow, block, 'b');
+      if (!isTextBlockType(block.type)) return [];
       const typography = (block as { typography?: Record<string, unknown> }).typography ?? {};
       const bold = typography['weight'] === 500;
       const next = { ...typography };
@@ -2987,6 +3283,8 @@ export function Editor({
     const slideNow = slideRef.current;
     if (!slideNow) return false;
     const mutations = selectedBlocks().flatMap((block): Mutation[] => {
+      /* a table: the mark over the range's cells or every cell (docs/FEATURES.md 2.2 rank 8) */
+      if (block.type === 'table') return tableMarkMutations(slideNow, block, mark);
       const path =
         block.type === 'heading' || block.type === 'paragraph' || block.type === 'text'
           ? '/text'
@@ -3287,6 +3585,140 @@ export function Editor({
   ): Promise<void> => {
     const outcome = await placePictureAsset(asset, where);
     if (!outcome.ok) notice(outcome.sentence);
+  };
+
+  /**
+   * A logo asset the document holds (docs/FEATURES.md 4.4; audit-logos 9, 11, 14; B6): the Logo
+   * dialog's `logo.insert` stored the mark, and this places it. The size is the logo rule, never
+   * the largest fit: a symbol 160 sheet px tall, a wordmark (a `wordmark*`, `lockup` or
+   * `horizontal` variant) 320 wide, both at the mark's own ratio, scaled down when the free area
+   * of the body slot is smaller and never up, centred in that area (the picture rule's
+   * `pictureInsertArea`, so the empty body placeholder it fills leaves in the same write). The
+   * same rule lives in packages/chrome/src/logo-model.ts for the server's placement; the viewer
+   * cannot import the chrome, so the numbers are repeated here. `blockId` swaps that picture's
+   * asset in place with its box kept (Replace image > Logo). `everySlide` adds the kit's three
+   * writes to the same commit (the plan of packages/chrome/src/brand/UseOnEverySlide.tsx, made
+   * here with the schema's `brandWriteMutation` because the viewer does not import the chrome), so
+   * one Cmd+Z takes the picture and the slots back together, and the snackbar names the mark with
+   * Undo. A plain insert says nothing (audit-logos 20).
+   */
+  const insertLogoAsset = async (
+    asset: { id: string; size?: Asset['size'] | undefined },
+    where: { title: string; variant?: string; everySlide?: boolean; blockId?: string },
+  ): Promise<void> => {
+    const maxMb = Math.round(PICTURE_MAX_BYTES / (1024 * 1024));
+    if (docRef.current.deck.assets[asset.id] === undefined) {
+      const landed = await waitFor(
+        () => docRef.current.deck.assets[asset.id] !== undefined,
+        ASSET_WAIT_MS,
+      );
+      if (!landed) {
+        notice(uploadFailureSentence('did-not-finish', maxMb));
+        return;
+      }
+    }
+    const slideNow = slideRef.current;
+    if (!slideNow) {
+      notice('Open a slide in Editing mode to add a logo');
+      return;
+    }
+    const stored = docRef.current.deck.assets[asset.id];
+    const natural = asset.size ?? stored?.size;
+    const everySlideMutations = (): Mutation[] => {
+      if (where.everySlide !== true) return [];
+      const deck = docRef.current.deck;
+      const first = brandWriteMutation(deck, '/mark', { kind: 'picture', assetId: asset.id });
+      const afterFirst = {
+        brand: { ...(deck.brand ?? {}), mark: { kind: 'picture' as const, assetId: asset.id } },
+      };
+      const second = brandWriteMutation(afterFirst, '/footer/logo', 'picture');
+      const afterSecond = {
+        brand: {
+          ...afterFirst.brand,
+          footer: { ...(afterFirst.brand.footer ?? {}), logo: 'picture' as const },
+        },
+      };
+      const third = brandWriteMutation(afterSecond, '/footer/assetId', asset.id);
+      return [first, second, third] as Mutation[];
+    };
+    const everySlideNotice = (): void => {
+      if (where.everySlide === true) notice(`The ${where.title} logo is on every slide`, true);
+    };
+    if (where.blockId !== undefined) {
+      const target = blockById(slideNow, where.blockId);
+      if (target && (target.type === 'shot' || target.type === 'picture')) {
+        commit([
+          {
+            op: 'block.set',
+            slideId: slideNow.id,
+            blockId: target.id,
+            path: '/asset',
+            value: asset.id,
+          },
+          ...everySlideMutations(),
+        ]);
+        select({ kind: 'block', blockId: target.id });
+        if (where.everySlide === true) everySlideNotice();
+        else notice('Picture replaced', true);
+        return;
+      }
+    }
+    /* the logo size (4.4): a symbol 160 tall, a wordmark 320 wide, at the mark's ratio */
+    const wordmark = where.variant !== undefined && /^wordmark|^lockup|^horizontal$/.test(where.variant);
+    const ok = natural !== undefined && natural[0] > 0 && natural[1] > 0;
+    const ratio = ok ? natural[0] / natural[1] : wordmark ? 4 : 1;
+    const wanted: [number, number] = wordmark
+      ? [320, Math.max(8, Math.round(320 / ratio))]
+      : [Math.max(8, Math.round(160 * ratio)), 160];
+    const logoBox = (area: Box): Box => {
+      const maxW = Math.max(8, area[2] - 2 * PICTURE_MARGIN);
+      const maxH = Math.max(8, area[3] - 2 * PICTURE_MARGIN);
+      const scale = Math.min(1, maxW / wanted[0], maxH / wanted[1]);
+      const w = Math.max(8, Math.round(wanted[0] * scale));
+      const h = Math.max(8, Math.round(wanted[1] * scale));
+      return [
+        Math.round(area[0] + (area[2] - w) / 2),
+        Math.round(area[1] + (area[3] - h) / 2),
+        w,
+        h,
+      ];
+    };
+    await commitCanvas(
+      (canvas) => {
+        const placed = pictureInsertArea(canvas, natural);
+        const box = logoBox(placed.area);
+        const taken = takenBlockIds(canvas);
+        const id = freeId('logo', taken);
+        const removed = new Set(placed.replaces);
+        const stack = freeformBlocks(canvas).filter((each) => !removed.has(each.id));
+        const z = Math.max(0, ...stack.map((b) => b.pos?.z ?? 0)) + 1;
+        const pos: Position = {
+          x: Math.round(box[0]),
+          y: Math.round(box[1]),
+          w: Math.max(1, Math.round(box[2])),
+          h: Math.max(1, Math.round(box[3])),
+          z,
+        };
+        const mutations: Mutation[] = [];
+        for (const blockId of removed) {
+          if (blockById(canvas, blockId) !== undefined)
+            mutations.push({ op: 'block.remove', slideId: canvas.id, blockId });
+        }
+        const last = stack[stack.length - 1]?.id;
+        mutations.push({
+          op: 'block.insert',
+          slideId: canvas.id,
+          slot: 'main',
+          ...(last !== undefined ? { after: last } : {}),
+          block: { id, type: 'shot', asset: asset.id, pos } as Block,
+        });
+        mutations.push(...everySlideMutations());
+        pendingSelect.current = [id];
+        return mutations;
+      },
+      { autofit: false },
+    );
+    everySlideNotice();
   };
 
   /**
@@ -3831,6 +4263,7 @@ export function Editor({
       insertPicture,
       insertPictureFromUrl,
       insertPictureAsset,
+      insertLogoAsset,
       addCaption,
       toCanvas,
       zoomTo,
@@ -4069,10 +4502,31 @@ export function Editor({
             /* accumulate, so a second printable key that lands before the session mounts (a slow
                render) is not lost but appended; startEdit is idempotent on the same run */
             pendingInsert.current = (pendingInsert.current ?? '') + char;
-            startEdit(run, entryCaret('typing', null));
+            startEdit(run, entryCaretFor(slideNow, current.blockId, 'typing'));
           }
           stop();
         }
+        return;
+      }
+      /* Shift with an arrow while a cell range stands on the selected table and no cell is open
+         (docs/FEATURES.md 2.2 rank 5, `tables.range.shift-arrows`): the range's focus steps one
+         cell, the anchor stays; the plain arrows keep nudging the object */
+      if (
+        e.shiftKey &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        e.key.startsWith('Arrow') &&
+        current !== null &&
+        cellRangeRef.current !== null &&
+        cellRangeRef.current.blockId === current.blockId
+      ) {
+        const range = cellRangeRef.current;
+        const table = blockById(slideNow, range.blockId);
+        const direction = e.key.slice(5).toLowerCase() as CellDirection;
+        const focus = table?.type === 'table' ? adjacentCell(table, range.focus, direction) : null;
+        if (focus !== null) setRange({ ...range, focus });
+        stop();
         return;
       }
       switch (action.type) {
@@ -4126,11 +4580,30 @@ export function Editor({
           return;
         case 'enter': {
           /* Enter on a selected text object opens its session with the caret at the end
-             (AMENDMENTS.md A1 rule 4; SPEC 6.9) */
+             (AMENDMENTS.md A1 rule 4; SPEC 6.9); on a table the remembered cell (docs/FEATURES.md
+             2.2 rank 4); on a selected chart the Chart data grid (rank 7); on a selected group
+             the first label, with its member entered behind it (rank 6) */
           if (current === null) return;
+          const groupTag = ids.length > 1 ? sharedGroup(slideNow, ids) : null;
+          if (groupTag !== null) {
+            const first = groupLabelRuns(el, slideNow, groupTag)[0];
+            if (first !== undefined) {
+              setGroupEntered(first.blockId);
+              groupEnteredRef.current = first.blockId;
+              select({ kind: 'block', blockId: first.blockId }, []);
+              startEdit(first, 'end');
+              stop();
+            }
+            return;
+          }
+          if (ids.length === 1 && blockById(slideNow, current.blockId)?.type === 'chart') {
+            requestChartCell(current.blockId, 1, 1, true);
+            stop();
+            return;
+          }
           const run = entryRunOf(el, current.blockId);
           if (run) {
-            startEdit(run, entryCaret('enter', null));
+            startEdit(run, entryCaretFor(slideNow, current.blockId, 'enter'));
             stop();
           }
           return;
@@ -4339,6 +4812,14 @@ export function Editor({
       beginCropDrag(handle.dir, e.clientX, e.clientY);
       return;
     }
+    /* the frame of a table with a cell open is its move surface (docs/FEATURES.md 2.1): the
+       session ends with its write, the table stands selected and the drag begins; every other
+       handle is inert while a session is open, as before */
+    const current = editingRef.current;
+    if (current !== null && handle.blockId === current.blockId) {
+      endSessionForPress(current);
+      if (editingRef.current !== null) return;
+    }
     beginGesture(handle, e.clientX, e.clientY, {
       duplicate: e.altKey && handle.kind === 'free-move',
       target: e.target,
@@ -4492,11 +4973,52 @@ export function Editor({
     if (gesture.current) return;
     const id = resolveObject(e.target, el, slideNow);
     setHover((prev) => (prev === id ? prev : id));
+    promptHoveredCell(e.target, el, slideNow);
     const drawTool = toolRef.current;
     if (drawTool !== 'select' && isLineTool(drawTool) && isFreeformSlide(slideNow)) {
       const rect = stageRect();
       if (rect) setSites(sitesUnder(slideNow, sheetPoint(rect, e.clientX, e.clientY)));
     }
+  };
+
+  /**
+   * The prompt "Click to add text" in the hovered empty cell alone (docs/FEATURES.md 2.3 item 9,
+   * P1; audit-objects 24: a 5 by 6 table drew thirty prompts on the stage and faint rows in the
+   * filmstrip card): the renderer writes no prompt into a table cell (render/blocks/table.ts), and
+   * the stage appends one to the empty cell under the pointer and removes it when the pointer
+   * leaves the cell, the sheet, or a session opens there. The span is the renderer's own prompt
+   * markup, so the session strips it as it strips every prompt (InlineText mounts).
+   */
+  const hoverPrompt = useRef<HTMLElement | null>(null);
+  const clearHoverPrompt = () => {
+    hoverPrompt.current?.remove();
+    hoverPrompt.current = null;
+  };
+  const promptHoveredCell = (target: EventTarget | null, el: HTMLElement, slideNow: Slide) => {
+    const run = resolveRun(target, el);
+    const cell = run === null ? null : cellPointer(run.pointer);
+    const table = run === null ? undefined : blockById(slideNow, run.blockId);
+    const para =
+      cell !== null && table?.type === 'table' && editingRef.current === null
+        ? run?.element.querySelector<HTMLElement>(':scope > .para')
+        : null;
+    const empty =
+      para !== null &&
+      para !== undefined &&
+      (table as TableBlock).rows[cell?.row ?? -1]?.cells[cell?.col ?? -1] === '';
+    if (!empty || para === null || para === undefined) {
+      clearHoverPrompt();
+      return;
+    }
+    if (hoverPrompt.current !== null && hoverPrompt.current.parentElement === para) return;
+    clearHoverPrompt();
+    const prompt = document.createElement('span');
+    prompt.className = 'prompt';
+    prompt.setAttribute('data-prompt', '');
+    prompt.setAttribute('aria-hidden', 'true');
+    prompt.textContent = PROMPTS.text;
+    para.appendChild(prompt);
+    hoverPrompt.current = prompt;
   };
 
   /**
@@ -4573,12 +5095,15 @@ export function Editor({
    * measured cell boxes (the overlay layer covers the sheet). A drag that stays inside the cell
    * is the browser's text selection and nothing here runs.
    */
-  const armCellRangeDrag = (current: Editing, clientX: number, clientY: number) => {
-    const anchor = cellPointer(current.pointer);
+  const armCellRangeDrag = (
+    from: { blockId: string; anchor: CellAddress; session?: Editing },
+    clientX: number,
+    clientY: number,
+    tap?: () => void,
+  ) => {
+    const { blockId, anchor, session } = from;
     const slideNow = slideRef.current;
-    if (anchor === null || !slideNow || blockById(slideNow, current.blockId)?.type !== 'table')
-      return;
-    const blockId = current.blockId;
+    if (!slideNow || blockById(slideNow, blockId)?.type !== 'table') return;
     let live = false;
     const cellUnder = (ev: PointerEvent): CellAddress | null => {
       const rect = stageRect();
@@ -4592,7 +5117,7 @@ export function Editor({
     };
     const move = (ev: PointerEvent) => {
       if (!live) {
-        if (editingRef.current !== current) {
+        if (session !== undefined && editingRef.current !== session) {
           detach();
           return;
         }
@@ -4600,10 +5125,12 @@ export function Editor({
         const cell = cellUnder(ev);
         if (cell === null || (cell.row === anchor.row && cell.col === anchor.col)) return;
         live = true;
-        endSessionForPress(current);
-        if (editingRef.current !== null) {
-          detach();
-          return;
+        if (session !== undefined) {
+          endSessionForPress(session);
+          if (editingRef.current !== null) {
+            detach();
+            return;
+          }
         }
         window.getSelection()?.removeAllRanges();
         select({ kind: 'block', blockId });
@@ -4618,13 +5145,37 @@ export function Editor({
     const up = () => {
       detach();
       if (live) window.getSelection()?.removeAllRanges();
+      /* a press on the selected table that never travelled: the tap moves the caret to the
+         pressed cell (docs/FEATURES.md 2.1); with a session the browser's own click placed it */
+      else if (session === undefined) tap?.();
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', up);
   };
 
-  /** The run a key opens on a selected object: the anchor cell of its cell range, else its first run (A1 rule 4). */
+  /**
+   * The caret in a table cell from a click (docs/FEATURES.md 2.2 rank 2; the amended A1 for
+   * tables): the session opens on the cell's run with the caret at the click point, and the cell
+   * becomes the table's remembered cell (`startEdit` records it). Nothing is written.
+   */
+  const openCellAt = (
+    run: { blockId: string; pointer: string; element: HTMLElement },
+    point: { x: number; y: number },
+  ) => {
+    const slideNow = slideRef.current;
+    if (!slideNow || editingRef.current !== null || gesture.current !== null) return;
+    if (readRunText(slideNow, run.blockId, run.pointer) === undefined) return;
+    startEdit(run, point);
+  };
+
+  /**
+   * The run a key opens on a selected object (A1 rule 4): the anchor cell of its cell range, else
+   * on a table the cell the seller last touched (the click that selected the table, the last
+   * session; `lastCell`, docs/FEATURES.md 2.2 rank 4), else its first run. A table selected by a
+   * marquee, by Tab from another object or from the filmstrip has no remembered cell and opens
+   * cell 1,1.
+   */
   const entryRunOf = (el: HTMLElement, blockId: string) => {
     const range = cellRangeRef.current;
     if (range !== null && range.blockId === blockId) {
@@ -4632,10 +5183,87 @@ export function Editor({
       const element = runElement(el, blockId, pointer);
       if (element) return { blockId, pointer, element };
     }
+    const last = lastCell.current;
+    if (last !== null && last.blockId === blockId) {
+      const pointer = cellRunPointer(last.cell);
+      const element = runElement(el, blockId, pointer);
+      if (element) return { blockId, pointer, element };
+    }
     return firstRunOf(el, blockId);
   };
 
-  /** A press on a block's body arms a drag: past DRAG_START_PX it becomes the chip's gesture. */
+  /**
+   * The caret a typed key or Enter places on a selected object (A1 rule 4, `entryCaret`): over
+   * the whole text so the first character replaces it, as in Google Slides; on a table at the end
+   * of the remembered cell's text so the letter appends (docs/FEATURES.md 2.2 rank 4; audit
+   * objects 5: a stray key with the table selected replaced cell 1,1's whole text), because a
+   * table's text is many texts and replacing the first is a loss the seller did not ask for.
+   */
+  const entryCaretFor = (
+    slideNow: Slide,
+    blockId: string,
+    entry: 'typing' | 'enter',
+  ): CaretPlacement =>
+    blockById(slideNow, blockId)?.type === 'table' ? 'end' : entryCaret(entry, null);
+
+  /**
+   * The labels of a group in document order (docs/FEATURES.md 2.2 rank 6): every member whose
+   * markup carries a run with a text behind it (a text box, a shape with text); a connector has
+   * none. Enter on the selected group opens the first, Tab in an open label the next.
+   */
+  const groupLabelRuns = (el: HTMLElement, slideNow: Slide, tag: string) =>
+    blockOrder(el).flatMap((id) => {
+      const block = blockById(slideNow, id);
+      if (block?.pos?.group !== tag) return [];
+      const run = firstRunOf(el, id);
+      if (run === null || readRunText(slideNow, run.blockId, run.pointer) === undefined) return [];
+      return [run];
+    });
+
+  /**
+   * The Chart data grid from the stage (docs/FEATURES.md 2.2 rank 7): the window event the
+   * chrome's Overlay and the Chart data section answer (CHART_CELL_EVENT); `open` asks for Format
+   * options on the section. Nothing is written.
+   */
+  const requestChartCell = (blockId: string, row: number, column: number, open: boolean) => {
+    const detail: ChartCellDetail = {
+      deckId: deckIdRef.current,
+      slideId: slideIdRef.current,
+      blockId,
+      row,
+      column,
+      open,
+    };
+    window.dispatchEvent(new CustomEvent(CHART_CELL_EVENT, { detail }));
+  };
+
+  /**
+   * The cell of a chart mark under a press (docs/FEATURES.md 2.2 rank 7): a bar, a point or a
+   * slice carries `data-series` and `data-category` (render/blocks/chart.ts), read from the
+   * element and never from the drawing. Null off a mark.
+   */
+  const chartMarkAt = (target: EventTarget | null): { series: number; category: number } | null => {
+    if (!(target instanceof Element)) return null;
+    const mark = target.closest<Element>('[data-category][data-series]');
+    if (mark === null) return null;
+    const series = Number(mark.getAttribute('data-series'));
+    const category = Number(mark.getAttribute('data-category'));
+    if (!Number.isInteger(series) || !Number.isInteger(category)) return null;
+    return { series, category };
+  };
+
+  /** The readout of a tapped chart mark: the category and the value as the chart draws it, for a moment. */
+  const showMarkReadout = (text: string) => {
+    window.clearTimeout(markReadoutTimer.current);
+    setMarkReadout(text);
+    markReadoutTimer.current = window.setTimeout(() => setMarkReadout(null), MARK_READOUT_MS);
+  };
+
+  /**
+   * A press on a block's body arms a drag: past DRAG_START_PX it becomes the chip's gesture; a
+   * pointer up before that is a tap, which runs what the press named (a table cell's caret, a
+   * chart mark's cell) and nothing else.
+   */
   const armPress = (next: Press) => {
     press.current = next;
     const move = (ev: PointerEvent) => {
@@ -4652,9 +5280,11 @@ export function Editor({
       if (chip) beginGesture(chip, p.clientX, p.clientY, { duplicate: p.alt });
     };
     const up = () => {
+      const p = press.current;
       press.current = null;
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
+      p?.tap?.();
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
@@ -4976,7 +5606,13 @@ export function Editor({
       if (verdict === 'caret') {
         /* a press inside an open table cell that travels into another cell selects the cells
            between them (armCellRangeDrag); inside the cell it stays the browser's text selection */
-        armCellRangeDrag(current, e.clientX, e.clientY);
+        const anchor = cellPointer(current.pointer);
+        if (anchor !== null)
+          armCellRangeDrag(
+            { blockId: current.blockId, anchor, session: current },
+            e.clientX,
+            e.clientY,
+          );
         return;
       }
       if (verdict === 'keep') return;
@@ -5038,6 +5674,15 @@ export function Editor({
        DRAG_START_PX the move gesture takes the whole selection with it (armPress, chipHandleFor,
        beginGesture). The double click is the entry into the text (onDoubleClick, InlineText
        clickEntry), and so are a printable key and Enter (onKey). */
+    /* the cell of a table the press landed in (docs/FEATURES.md 2.1, the amended A1 for tables):
+       a tap places the caret there, a move on the selected table selects a range from it */
+    const pressedRun = id !== null ? resolveRun(e.target, el) : null;
+    const pressedCell =
+      pressedRun !== null &&
+      pressedRun.blockId === id &&
+      blockById(slideNow, id)?.type === 'table'
+        ? cellPointer(pressedRun.pointer)
+        : null;
     const plan = objectPressPlan({
       under: id,
       selected,
@@ -5049,6 +5694,7 @@ export function Editor({
         blockById(slideNow, id)?.pos?.group !== undefined &&
         groupEnteredRef.current !== id,
       object: id !== null && isObjectId(slideNow, boxesRef.current, id),
+      cell: pressedCell,
     });
     switch (plan.action) {
       case 'marquee':
@@ -5073,13 +5719,46 @@ export function Editor({
         select(next.selection, next.extra);
         return;
       }
-      case 'press':
+      case 'press': {
         if (plan.select) {
           /* a click on a member of a group selects the group, so the drag that follows moves it
              whole, until a double click enters the member (SPEC-2 6.1 row 14; VERIFICATION-2
              finding 17) */
           if (groupEnteredRef.current !== plan.blockId) setGroupEntered(null);
           selectObjects([plan.blockId]);
+        }
+        const point = { x: e.clientX, y: e.clientY };
+        /* the tap of the press: on a table cell the caret at the click point (docs/FEATURES.md 2.2
+           rank 2; the pressed cell becomes the remembered cell of rank 4); on a bar, a point or a
+           slice of the selected chart its cell in the Chart data grid with the value in the
+           readout (rank 7); nothing elsewhere */
+        const tap = ((): (() => void) | undefined => {
+          if (plan.caret !== undefined && pressedRun !== null) {
+            const run = pressedRun;
+            const cell = plan.caret;
+            return () => {
+              lastCell.current = { blockId: run.blockId, cell };
+              openCellAt(run, point);
+            };
+          }
+          const mark = selected.includes(plan.blockId) ? chartMarkAt(e.target) : null;
+          const chart = mark === null ? undefined : blockById(slideNow, plan.blockId);
+          if (mark !== null && chart?.type === 'chart') {
+            return () => {
+              const category = chart.categories[mark.category];
+              const value = chart.series[mark.series]?.values[mark.category];
+              if (category !== undefined && value !== undefined)
+                showMarkReadout(`${category}: ${formatChartNumber(value, chart.numberFormat)}`);
+              requestChartCell(chart.id, mark.category + 1, mark.series + 1, true);
+            };
+          }
+          return undefined;
+        })();
+        if (plan.range === true && plan.caret !== undefined) {
+          /* the one selected table: a move from the cell selects a range and never moves the
+             table, whose move surface is its ring band, its chip and its handles (2.1) */
+          armCellRangeDrag({ blockId: plan.blockId, anchor: plan.caret }, e.clientX, e.clientY, tap);
+          return;
         }
         /* Commenting and Viewing mode select the object for a comment's anchor and never drag
            (SPEC-3 5.3, 6.3): the plan's `drag` is false there; in Editing mode every measured
@@ -5091,8 +5770,11 @@ export function Editor({
             clientX: e.clientX,
             clientY: e.clientY,
             alt: e.altKey,
+            ...(tap === undefined ? {} : { tap }),
           });
+        else if (tap !== undefined && editableRef.current) tap();
         return;
+      }
     }
   };
 
@@ -5143,7 +5825,18 @@ export function Editor({
     if (!editableRef.current) return;
     const id = resolveObject(e.target, el, slideNow);
     if (id === null) return;
-    switch (clickEntry(entryInputFor(slideNow, el, id, 2))) {
+    const clicked = blockById(slideNow, id);
+    /* a double click on a chart opens its numbers (docs/FEATURES.md 2.2 rank 7; audit-objects
+       17: the double click did nothing and a value was four clicks away): Format options on the
+       Chart data section with the first value cell active; a double click on the title run still
+       opens the title's session, below */
+    if (clicked?.type === 'chart' && resolveRun(e.target, el) === null) {
+      e.preventDefault();
+      requestChartCell(clicked.id, 1, 1, true);
+      return;
+    }
+    const entry = entryInputFor(slideNow, el, id, 2);
+    switch (clickEntry(entry)) {
       case 'crop':
         e.preventDefault();
         if (id === 'picture' && !isFreeformSlide(slideNow)) {
@@ -5152,12 +5845,25 @@ export function Editor({
           void enterCropProvisional('picture');
         } else enterCrop(id);
         return;
-      case 'member':
+      case 'member': {
         e.preventDefault();
         setGroupEntered(id);
         groupEnteredRef.current = id;
         select({ kind: 'block', blockId: id }, []);
+        /* a member that carries a run (a text box, a shape with its label) opens its text at once
+           with the member entered behind it (docs/FEATURES.md 2.2 rank 6; audit-objects 11: one
+           label was five clicks) */
+        if (entry.hasRun && entry.kind !== 'picture' && entry.kind !== 'line') {
+          const under = resolveRun(e.target, el);
+          const run = under !== null && under.blockId === id ? under : firstRunOf(el, id);
+          if (run && readRunText(slideNow, run.blockId, run.pointer) !== undefined)
+            startEdit(
+              run,
+              entryCaret('double-click', run === under ? { x: e.clientX, y: e.clientY } : null),
+            );
+        }
         return;
+      }
       case 'text': {
         /* the run under the pointer takes the caret at the point; a double click on the box's
            padding, or on a closed shape's body (docs/FOCUS.md section 4), opens the first run at
@@ -5405,13 +6111,30 @@ export function Editor({
     anchorBlock?.type === 'table' &&
     ((selection?.kind === 'run' && cellPointer(selection.pointer) !== null) ||
       (cellRange !== null && cellRange.blockId === anchorId));
+  /* a table with a cell open or a cell or range active keeps its frame as a move surface: the
+     chip and the ring band, and the eight handles (docs/FEATURES.md 2.1: "the table moves by its
+     ring band, its chip and its eight handles"; `tables.range.drag-from-selected`), while the
+     column seams stay away from the cells (docs/RETURN.md 2.4) */
+  const tableFrame =
+    shownSlide !== undefined &&
+    editable &&
+    !crop &&
+    ids.length === 1 &&
+    anchorId !== null &&
+    anchorBlock?.type === 'table' &&
+    ((editing !== null && editing.blockId === anchorId && cellPointer(editing.pointer) !== null) ||
+      cellActive);
   const handles =
     shownSlide && !editing && editable && !cellActive
       ? handlesFor(shownSlide, boxes, selection, {
           ids,
           ...(crop ? { crop: { frame: crop.frame } } : {}),
         })
-      : [];
+      : tableFrame && shownSlide && anchorId !== null
+        ? handlesFor(shownSlide, boxes, { kind: 'block', blockId: anchorId }, { ids }).filter(
+            (handle) => handle.kind === 'free-move' || handle.kind === 'free-resize',
+          )
+        : [];
   /* the column seams of one selected table (docs/RETURN.md 2.4 fix 5), from the header row's
      measured cells, beside its eight handles; none while a cell is edited, a cell or range is
      active, or in crop mode */
@@ -5473,7 +6196,14 @@ export function Editor({
         ? 'Group'
         : ids.length > 1
           ? `${ids.length} objects`
-          : `${blockDisplayName(shownSlide, selectedId)}${showIds ? ` · ${selectedId}` : ''}`
+          : `${blockDisplayName(shownSlide, selectedId, shown.deck.assets)}${showIds ? ` · ${selectedId}` : ''}`
+      : null;
+  /* the Edit data button under the selected chart (docs/FEATURES.md 2.2 rank 7, `bar.chart.editData`) */
+  const editData =
+    selectedId !== null && shownSlide && ids.length === 1 && !editing && editable && !crop
+      ? blockById(shownSlide, selectedId)?.type === 'chart'
+        ? { blockId: selectedId }
+        : null
       : null;
 
   const view: EditorOverlayView = {
@@ -5499,7 +6229,12 @@ export function Editor({
     groupBox: group,
     groupTag: ids.length > 1 ? groupTag : null,
     groupMembers:
-      groupTag !== null && shownSlide ? ids.map((id) => blockDisplayName(shownSlide, id)) : [],
+      groupTag !== null && shownSlide
+        ? ids.map((id) => blockDisplayName(shownSlide, id, shown.deck.assets))
+        : [],
+    tableFrame,
+    editData,
+    valueReadout: scaleReadout ?? markReadout,
     count: ids.length,
     marquee,
     guides,
@@ -5627,7 +6362,10 @@ export function Editor({
             className="pt-slide"
             data-slide-id={slideId}
             onPointerMove={onPointerMove}
-            onPointerLeave={() => setHover(null)}
+            onPointerLeave={() => {
+              setHover(null);
+              clearHoverPrompt();
+            }}
             onPointerDown={onPointerDown}
             onDoubleClick={onDoubleClick}
             onClick={onClick}
@@ -5693,6 +6431,11 @@ export function Editor({
             multiline={editing.multiline}
             caret={editing.caret}
             autoLink={editing.link === true}
+            cellArrows={
+              slide !== undefined &&
+              blockById(slide, editing.blockId)?.type === 'table' &&
+              cellPointer(editing.pointer) !== null
+            }
             slideTargets={slideTargets}
             detectLinks={linkDetection}
             onBurst={onBurst}

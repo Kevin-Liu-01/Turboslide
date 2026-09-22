@@ -34,6 +34,7 @@ import {
   hasShadow,
   hasTextFitting,
   isOwnSectionPath,
+  sectionsInOrderFor,
 } from './inspector/format-sections';
 import type { FormatSectionId } from './inspector/format-sections';
 import type { ControlSpec, Generated } from './inspector/generate';
@@ -603,12 +604,11 @@ export function FormatOptions({
     },
   );
   /* a chart's data is what a seller opens the panel for (docs/RETURN.md 2.5: "the round makes the
-     grid the first thing the panel shows for a chart"): its section leads; the sort is stable, so
-     every other section keeps its order (return/build/b5.md request 4) */
-  const sectionsShown =
-    selected?.type === 'chart'
-      ? [...sectionsFiltered].sort((a, b) => (a.id === 'chart' ? -1 : b.id === 'chart' ? 1 : 0))
-      : sectionsFiltered;
+     grid the first thing the panel shows for a chart"), and so is a table's Table section
+     (docs/FEATURES.md 2.2 rank 13; audit-objects 22: it sat last, out of view at 900 px): the
+     leading section comes first; the sort is stable, so every other section keeps its order
+     (return/build/b5.md request 4) */
+  const sectionsShown = sectionsInOrderFor(sectionsFiltered, selected);
 
   const empty =
     selected === undefined &&
@@ -622,6 +622,12 @@ export function FormatOptions({
       ? renderRows(entry, selected, writeBlock, blockFindings)
       : null;
   };
+  /* the generated rows of a chart and a table (the kind again, the categories and series as JSON,
+     a second Title and Legend; the table's rows and columns as JSON) repeat what the Chart data
+     and Table sections draw as controls (docs/FEATURES.md 2.2 rank 11; audit-objects 16): they
+     stay behind Tools > Advanced tools for an agent's reading and never draw beside the section */
+  const renderGeneratedAdvanced = (id: FormatSectionId) =>
+    advancedTools ? renderGenerated(id) : null;
 
   return (
     <Panel
@@ -780,7 +786,6 @@ export function FormatOptions({
             case 'table':
               return selected?.type !== 'table' ? null : (
                 <Section key={section.id} {...common}>
-                  {renderGenerated('table')}
                   {slots?.table?.({
                     block: selected as TableBlock,
                     selection,
@@ -790,6 +795,7 @@ export function FormatOptions({
                     busy,
                     report,
                   }) ?? null}
+                  {renderGeneratedAdvanced('table')}
                 </Section>
               );
             case 'chart':
@@ -803,7 +809,7 @@ export function FormatOptions({
                     busy,
                     report,
                   }) ?? <p className="ts-fo-note">{FORMAT.chartSlot}</p>}
-                  {renderGenerated('chart')}
+                  {renderGeneratedAdvanced('chart')}
                 </Section>
               );
             case 'line':

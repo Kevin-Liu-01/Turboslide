@@ -10,7 +10,7 @@
 // with the range's texts cleared for Delete, and whether the range still stands after the
 // document changed under it. Pinned by table-range.test.ts; the Editor wires the gestures.
 import type { TableBlock, TableRow } from '@turboslide/schema/blocks/table';
-import { isCoveredCell } from '@turboslide/schema/blocks/table';
+import { isCoveredCell, spanAt } from '@turboslide/schema/blocks/table';
 import type { Box } from '@turboslide/schema/render';
 
 /** A cell by position, as data-run names it (`rows/<row>/cells/<col>`). */
@@ -120,6 +120,54 @@ export function isMultiCell(block: TableBlock, range: CellRange): boolean {
 /** The pointer of a cell as data-run writes it without the block id. */
 export function cellRunPointer(cell: CellAddress): string {
   return `rows/${cell.row}/cells/${cell.col}`;
+}
+
+/** The four ways the caret leaves a cell at its text edges (docs/FEATURES.md 2.2 rank 5). */
+export type CellDirection = 'left' | 'right' | 'up' | 'down';
+
+/** The anchor of the merged cell a position belongs to, else the position itself. */
+function anchorOf(block: TableBlock, cell: CellAddress): CellAddress {
+  const span = spanAt(block.spans, cell.row, cell.col);
+  return span === undefined ? cell : { row: span.row, col: span.column };
+}
+
+/**
+ * The cell the caret crosses into from `cell` (docs/FEATURES.md 2.2 rank 5; audit-objects 6:
+ * Google, Notion, Pitch and Keynote all leave a cell with the arrows): Left and Right walk the
+ * drawn cells in reading order, so Right from the last cell of a row lands on the next row's
+ * first cell and Left from a row's first cell on the row above's last; Up and Down take the cell
+ * above or below in the same column. A merged cell counts as one: its anchor is the one stop, a
+ * position inside it resolves to the anchor, and Down from an anchor steps past the rows it
+ * spans. Null at the edge of the grid (the first cell's Left, the last cell's Right, the first
+ * row's Up, the last row's Down), where the caret stays where it is.
+ */
+export function adjacentCell(
+  block: TableBlock,
+  cell: CellAddress,
+  direction: CellDirection,
+): CellAddress | null {
+  const rows = block.rows.length;
+  const columns = block.columns.length;
+  if (rows === 0 || columns === 0) return null;
+  const from = anchorOf(block, clampCell(block, cell));
+  if (direction === 'left' || direction === 'right') {
+    const delta = direction === 'right' ? 1 : -1;
+    let flat = from.row * columns + from.col;
+    for (;;) {
+      flat += delta;
+      if (flat < 0 || flat >= rows * columns) return null;
+      const next = { row: Math.floor(flat / columns), col: flat % columns };
+      if (!isCoveredCell(block.spans, next.row, next.col)) return next;
+    }
+  }
+  if (direction === 'up') {
+    if (from.row === 0) return null;
+    return anchorOf(block, { row: from.row - 1, col: from.col });
+  }
+  const span = spanAt(block.spans, from.row, from.col);
+  const below = from.row + (span === undefined ? 1 : span.rows);
+  if (below >= rows) return null;
+  return anchorOf(block, { row: below, col: from.col });
 }
 
 /**

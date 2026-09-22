@@ -1162,8 +1162,8 @@ export function editableHtml(text: Markup, multiline: boolean): string {
 // ---------------------------------------------------------------------------------------------
 // The caret
 
-/** Where the caret lands on mount: at the client point of the click, at the end, or over everything. */
-export type CaretPlacement = { x: number; y: number } | 'end' | 'all';
+/** Where the caret lands on mount: at the client point of the click, at the start, at the end, or over everything. */
+export type CaretPlacement = { x: number; y: number } | 'start' | 'end' | 'all';
 
 type CaretDocument = Document & {
   caretRangeFromPoint?: (x: number, y: number) => Range | null;
@@ -1189,7 +1189,7 @@ function caretRangeAt(x: number, y: number, element: HTMLElement): Range | null 
   return null;
 }
 
-/** Places the selection inside `element`: at the point when it lands inside, else at the end (or over everything). */
+/** Places the selection inside `element`: at the point when it lands inside, else at the start, the end (or over everything). */
 export function placeCaret(element: HTMLElement, caret: CaretPlacement): void {
   const selection = window.getSelection();
   if (!selection) return;
@@ -1197,7 +1197,7 @@ export function placeCaret(element: HTMLElement, caret: CaretPlacement): void {
   if (range === null) {
     range = document.createRange();
     range.selectNodeContents(element);
-    if (caret !== 'all') range.collapse(false);
+    if (caret !== 'all') range.collapse(caret === 'start');
   }
   selection.removeAllRanges();
   selection.addRange(range);
@@ -1226,6 +1226,87 @@ function caretAtStart(element: HTMLElement, multiline: boolean): boolean {
   return range !== null && range[0] === 0 && range[1] === 0;
 }
 
+/** The four arrows as the direction a cell session leaves in (docs/FEATURES.md 2.2 rank 5). */
+export type CellArrow = 'left' | 'right' | 'up' | 'down';
+
+/** The plain offsets of the selection and the text's length, for the edge tests below. */
+function selectionEdges(
+  element: HTMLElement,
+  multiline: boolean,
+): { start: number; end: number; length: number } | null {
+  const range = selectionOffsets(element, multiline);
+  if (range === null) return null;
+  return { start: range[0], end: range[1], length: plainLengthOf(element, multiline) };
+}
+
+/**
+ * The client rectangle of the line the selection's focus sits on, or null when the browser draws
+ * none. Chromium answers no rectangle for a collapsed range (measured: `getClientRects()` empty,
+ * `getBoundingClientRect()` all zeros), so the range is widened by one character, forward when a
+ * character follows and backward otherwise, and the first rectangle of that character is the
+ * caret's line.
+ */
+function caretRect(): DOMRect | null {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+  const range = selection.getRangeAt(0).cloneRange();
+  range.collapse(false);
+  const node = range.startContainer;
+  const offset = range.startOffset;
+  if (node.nodeType === Node.TEXT_NODE) {
+    const length = node.textContent?.length ?? 0;
+    if (offset < length) range.setEnd(node, offset + 1);
+    else if (offset > 0) range.setStart(node, offset - 1);
+  } else if (node.childNodes.length > 0) {
+    if (offset < node.childNodes.length) range.setEnd(node, offset + 1);
+    else range.setStart(node, offset - 1);
+  }
+  const rects = range.getClientRects();
+  const rect = rects.length > 0 ? rects[0] : range.getBoundingClientRect();
+  if (!rect || (rect.width === 0 && rect.height === 0 && rect.top === 0 && rect.left === 0))
+    return null;
+  return rect;
+}
+
+/**
+ * Whether an arrow pressed in a cell leaves it (docs/FEATURES.md 2.2 rank 5; audit-objects 6:
+ * Google, Notion, Pitch and Keynote all cross cells with the arrows). A plain arrow crosses from a
+ * collapsed caret at the text's edge: Right when the caret is at the text's end, Left when it is
+ * at the start, Up when it sits on the first visual line and Down when it sits on the last, read
+ * from the caret's rectangle against the text's line boxes (an empty cell has one line, so both
+ * hold). With Shift a collapsed caret always crosses, whatever its place, because Shift with an
+ * arrow on a table selects cells (the row `tables.range.shift-arrows`: "from an open cell
+ * Shift+Right then Shift+Down draws a range over 4 cells"), and a text selection under Shift
+ * crosses once its edge reaches the text's edge, so Shift+Right after the seller selected to the
+ * end of the text extends into the next cell. The arrow stays the browser's everywhere else.
+ */
+export function arrowLeavesCell(
+  element: HTMLElement,
+  multiline: boolean,
+  arrow: CellArrow,
+  shift: boolean,
+): boolean {
+  const edges = selectionEdges(element, multiline);
+  if (edges === null) return false;
+  const collapsed = edges.start === edges.end;
+  if (shift && collapsed) return true;
+  if (!shift && !collapsed) return false;
+  if (arrow === 'right') return edges.end === edges.length;
+  if (arrow === 'left') return edges.start === 0;
+  if (edges.length === 0) return true;
+  const caret = caretRect();
+  if (caret === null) return arrow === 'up' ? edges.start === 0 : edges.end === edges.length;
+  const whole = document.createRange();
+  whole.selectNodeContents(element);
+  const lines = Array.from(whole.getClientRects()).filter((rect) => rect.height > 0);
+  if (lines.length === 0) return true;
+  const top = Math.min(...lines.map((rect) => rect.top));
+  const bottom = Math.max(...lines.map((rect) => rect.bottom));
+  const mid = caret.top + caret.height / 2;
+  const line = Math.max(1, caret.height);
+  return arrow === 'up' ? mid - top < line : bottom - mid < line;
+}
+
 // ---------------------------------------------------------------------------------------------
 // The component
 
@@ -1242,6 +1323,19 @@ export type InlineTextEndReason =
   | 'list-backspace'
   /** Enter on an empty list item: the item leaves the list (SPEC-2 6.2 Lists) */
   | 'list-leave'
+  /**
+   * an arrow at a cell's text edge (docs/FEATURES.md 2.2 rank 5, `cellArrows`): the Editor opens
+   * the adjacent cell with the caret at the matching edge; with Shift (`range-*`) it selects the
+   * cells from this one to the adjacent one instead
+   */
+  | 'arrow-left'
+  | 'arrow-right'
+  | 'arrow-up'
+  | 'arrow-down'
+  | 'range-left'
+  | 'range-right'
+  | 'range-up'
+  | 'range-down'
   | 'unmount';
 
 /** What the toolbar reads about the caret: the plain range and the marks of the run it sits in (SPEC-2 6.2). */
@@ -1311,6 +1405,12 @@ export type InlineTextProps = {
   /** open the link popover once the session is up (Cmd K on a selected block) */
   autoLink?: boolean;
   /**
+   * the run is a table cell (docs/FEATURES.md 2.2 rank 5): an arrow at the text's edge ends the
+   * session with its `arrow-*` reason (`range-*` with Shift) so the Editor crosses into the
+   * adjacent cell; off for every other run, where the arrows stay the browser's
+   */
+  cellArrows?: boolean;
+  /**
    * the deck's slides in order, for the popover's Slides in this presentation select (docs/PRODUCT.md
    * section 2 rank 19); the popover offers the four positions alone when absent
    */
@@ -1374,6 +1474,7 @@ export function InlineText({
   multiline = false,
   caret = 'end',
   autoLink = false,
+  cellArrows = false,
   slideTargets = [],
   detectLinks = true,
   onBurst,
@@ -1445,8 +1546,8 @@ export function InlineText({
     onListLeave,
     onHandle,
   };
-  const options = useRef({ multiline, caret, autoLink, detectLinks });
-  options.current = { multiline, caret, autoLink, detectLinks };
+  const options = useRef({ multiline, caret, autoLink, detectLinks, cellArrows });
+  options.current = { multiline, caret, autoLink, detectLinks, cellArrows };
 
   const readText = (): Markup => textFromNode(element, { multiline: options.current.multiline });
 
@@ -1914,6 +2015,25 @@ export function InlineText({
         e.preventDefault();
         e.stopPropagation();
         finish('escape');
+      } else if (
+        options.current.cellArrows &&
+        !meta &&
+        !e.altKey &&
+        (e.key === 'ArrowLeft' ||
+          e.key === 'ArrowRight' ||
+          e.key === 'ArrowUp' ||
+          e.key === 'ArrowDown')
+      ) {
+        /* an arrow at the cell's text edge leaves the cell (docs/FEATURES.md 2.2 rank 5): the
+           Editor opens the adjacent cell at the matching edge, or with Shift selects the cells
+           between; anywhere else the arrow moves the caret as the browser does */
+        const arrow = e.key.slice(5).toLowerCase() as CellArrow;
+        if (arrowLeavesCell(element, options.current.multiline, arrow, e.shiftKey)) {
+          e.preventDefault();
+          e.stopPropagation();
+          finish(`${e.shiftKey ? 'range' : 'arrow'}-${arrow}`);
+          return;
+        }
       } else if (e.key === 'Tab' && !meta && !e.altKey) {
         e.preventDefault();
         e.stopPropagation();

@@ -162,7 +162,25 @@ export function TableSection({
   const merged = isMergedAnchor(block, cell);
   const cellStyle = cell === undefined ? {} : cellStyleAt(block, cell);
   const [count, setCount] = useState(1);
-  const [heightDrafts, setHeightDrafts] = useState<Record<number, string>>({});
+  /* the Height field's draft while it is typed (docs/FEATURES.md 2.2 rank 13) */
+  const [heightDraft, setHeightDraft] = useState<string | null>(null);
+  /* the rows the Height field reads and writes: the range's rows, else the caret's row, else
+     every row of a table selected by one click */
+  const heightRows: number[] =
+    range === null
+      ? block.rows.map((_row, index) => index)
+      : Array.from({ length: range.r1 - range.r0 + 1 }, (_, i) => range.r0 + i);
+  const heightValues = heightRows.map((index) => block.rows[index]?.height);
+  const sharedHeight =
+    heightValues.length > 0 && heightValues.every((value) => value === heightValues[0])
+      ? heightValues[0]
+      : undefined;
+  const heightLabel =
+    range === null
+      ? 'Height of every row'
+      : heightRows.length === 1
+        ? `Row ${range.r0 + 1} height`
+        : `Rows ${range.r0 + 1} to ${range.r1 + 1} height`;
 
   const say = (message: string) => onNotice?.(message);
   const report = (promise: Promise<unknown>) =>
@@ -197,31 +215,39 @@ export function TableSection({
     );
   };
 
-  const commitHeight = (index: number) => {
-    const draft = heightDrafts[index];
-    if (draft === undefined) return;
-    const rest = { ...heightDrafts };
-    delete rest[index];
-    setHeightDrafts(rest);
-    const trimmed = draft.trim();
-    const current = block.rows[index];
-    if (current === undefined) return;
-    const rows = block.rows.map((row) => ({ ...row }));
-    const target = rows[index];
-    if (target === undefined) return;
-    if (trimmed === '') {
-      if (current.height === undefined) return;
-      delete target.height;
-    } else {
-      const value = Math.round(Number(trimmed));
+  /**
+   * The Height field's commit (rank 13; audit-objects 22: one field per row, twenty fields on a
+   * twenty row table): the height in px written on every selected row in one /rows write, one
+   * Cmd+Z; empty clears them so they take their content height.
+   */
+  const commitHeight = () => {
+    if (heightDraft === null) return;
+    const trimmed = heightDraft.trim();
+    setHeightDraft(null);
+    let value: number | undefined;
+    if (trimmed !== '') {
+      value = Math.round(Number(trimmed));
       if (!Number.isFinite(value) || value <= 0) {
         say('Type a height in px');
         return;
       }
-      if (value === current.height) return;
-      target.height = value;
     }
-    writeRows(rows, 'Row height');
+    const rows = block.rows.map((row) => ({ ...row }));
+    let changed = false;
+    for (const index of heightRows) {
+      const target = rows[index];
+      if (target === undefined) continue;
+      if (value === undefined) {
+        if (target.height !== undefined) {
+          delete target.height;
+          changed = true;
+        }
+      } else if (target.height !== value) {
+        target.height = value;
+        changed = true;
+      }
+    }
+    if (changed) writeRows(rows, 'Row height');
   };
 
   const toggleHeader = (on: boolean) => {
@@ -238,6 +264,11 @@ export function TableSection({
   const border = block.border;
   const cellBorder: CellBorder | undefined = cellStyle.border;
   const cellDoc = hasCell ? undefined : SELECT_CELL;
+  const heightTip = tipProps({
+    name: 'Height',
+    doc: 'The selected rows in px; empty takes the content height',
+    key: 'Enter',
+  });
 
   return (
     <div className="ts-table-section" data-control={control}>
@@ -326,57 +357,40 @@ export function TableSection({
         </div>
       </div>
 
-      <div className="ts-table-group" role="group" aria-label="Row heights">
-        <span className="ts-table-heading">Row heights</span>
-        <ol className="ts-table-heights">
-          {block.rows.map((row, index) => {
-            const tip = tipProps({
-              name: `Row ${index + 1} height`,
-              doc: 'In px; empty takes the content height',
-              key: 'Enter',
-            });
-            return (
-              <li key={index} className="ts-table-row">
-                <span className="ts-table-label">Row {index + 1}</span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  className="ts-table-height"
-                  value={
-                    heightDrafts[index] ?? (row.height === undefined ? '' : String(row.height))
-                  }
-                  placeholder="auto"
-                  aria-label={`Row ${index + 1} height`}
-                  data-control={`${control}.rowHeight.${index}`}
-                  disabled={busy}
-                  autoComplete="off"
-                  {...tip}
-                  onChange={(event) =>
-                    setHeightDrafts({ ...heightDrafts, [index]: event.target.value })
-                  }
-                  onBlur={(event) => {
-                    tip.onBlur(event);
-                    commitHeight(index);
-                  }}
-                  onKeyDown={(event) => {
-                    tip.onKeyDown(event);
-                    if (event.key === 'Enter') {
-                      event.preventDefault();
-                      event.currentTarget.blur();
-                    } else if (event.key === 'Escape') {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      const rest = { ...heightDrafts };
-                      delete rest[index];
-                      setHeightDrafts(rest);
-                      event.currentTarget.blur();
-                    }
-                  }}
-                />
-              </li>
-            );
-          })}
-        </ol>
+      <div className="ts-table-group" role="group" aria-label="Rows">
+        <span className="ts-table-heading">Rows</span>
+        <div className="ts-table-row">
+          <span className="ts-table-label">{heightLabel}</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            className="ts-table-height"
+            value={heightDraft ?? (sharedHeight === undefined ? '' : String(sharedHeight))}
+            placeholder={heightValues.some((value) => value !== undefined) ? 'mixed' : 'auto'}
+            aria-label={heightLabel}
+            data-control={`${control}.height`}
+            disabled={busy}
+            autoComplete="off"
+            {...heightTip}
+            onChange={(event) => setHeightDraft(event.target.value)}
+            onBlur={(event) => {
+              heightTip.onBlur(event);
+              commitHeight();
+            }}
+            onKeyDown={(event) => {
+              heightTip.onKeyDown(event);
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                event.currentTarget.blur();
+              } else if (event.key === 'Escape') {
+                event.preventDefault();
+                event.stopPropagation();
+                setHeightDraft(null);
+                event.currentTarget.blur();
+              }
+            }}
+          />
+        </div>
         <div className="ts-table-actions">
           <ToolButton
             label="Distribute rows"

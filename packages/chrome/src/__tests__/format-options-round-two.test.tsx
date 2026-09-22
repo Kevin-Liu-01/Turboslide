@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { Block } from '@turboslide/schema/blocks';
-import type { DeckDocument, Slide } from '@turboslide/schema/deck';
+import type { ContentSlide, DeckDocument, Slide } from '@turboslide/schema/deck';
 import { workedDocument } from '@turboslide/schema/fixtures';
 
 import { FormatOptions } from '../FormatOptions';
@@ -371,3 +371,81 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
     );
   });
 });
+
+describe('the chart and the table sections (docs/FEATURES.md 2.2 ranks 11 and 13)', () => {
+  const chartSlide: ContentSlide = {
+    ...canvas,
+    id: 'charts',
+    slots: {
+      main: [
+        {
+          id: 'chart',
+          type: 'chart',
+          kind: 'column',
+          categories: ['Q1', 'Q2'],
+          series: [{ name: 'Docs', values: [1, 2] }],
+          legend: 'none',
+          pos: { x: 100, y: 100, w: 800, h: 400, z: 0 },
+        } as Block,
+        {
+          id: 'tbl',
+          type: 'table',
+          columns: [{}, {}],
+          rows: [{ cells: ['a', 'b'], header: true }, { cells: ['c', 'd'] }],
+          pos: { x: 100, y: 520, w: 800, h: 200, z: 1 },
+        } as Block,
+      ],
+    },
+  };
+  const chartDoc: DeckDocument = {
+    deck: doc.deck,
+    slides: { ...doc.slides, charts: chartSlide },
+  };
+  const chartPanel = (blockId: string, extra: Partial<Parameters<typeof FormatOptions>[0]> = {}) =>
+    render(
+      <FormatOptions
+        deck={chartDoc.deck}
+        slide={chartSlide}
+        blockId={blockId}
+        selection={{ blockId }}
+        revision={7}
+        dispatch={dispatch}
+        onClose={() => undefined}
+        slots={{
+          chart: () => <div data-testid="chart-slot" />,
+          table: () => <div data-testid="table-slot" />,
+        }}
+        {...extra}
+      />,
+    );
+  const sections = () =>
+    [...document.querySelectorAll('[data-section]')].map((el) => el.getAttribute('data-section'));
+  const generated = (path: string) =>
+    document.querySelector(`.ts-insp-array[data-path="${path}"], [data-path="${path}"]`);
+
+  it('draws the Chart data section first and none of the chart’s generated fields beside it; the JSON view returns behind Tools > Advanced tools', () => {
+    chartPanel('chart');
+    expect(sections()[0]).toBe('chart');
+    expect(document.querySelector('[data-testid="chart-slot"]')).not.toBeNull();
+    /* no second Chart type, Categories or Series rows under the section: the slot alone */
+    const body = '[data-section="chart"] .ts-panel-section-body';
+    expect(document.querySelectorAll(`${body} [data-control]`)).toHaveLength(0);
+    expect(document.querySelectorAll(`${body} textarea`)).toHaveLength(0);
+    expect(generated('/series')).toBeNull();
+    cleanup();
+    chartPanel('chart', { advancedTools: true });
+    expect(document.querySelectorAll(`${body} [data-control]`).length).toBeGreaterThan(0);
+  });
+
+  it('draws the Table section first for a table and none of its generated fields beside it', () => {
+    chartPanel('tbl');
+    expect(sections()[0]).toBe('table');
+    expect(document.querySelector('[data-testid="table-slot"]')).not.toBeNull();
+    const body = '[data-section="table"] .ts-panel-section-body';
+    expect(document.querySelectorAll(`${body} [data-control]`)).toHaveLength(0);
+    cleanup();
+    chartPanel('tbl', { advancedTools: true });
+    expect(document.querySelectorAll(`${body} [data-control]`).length).toBeGreaterThan(0);
+  });
+});
+

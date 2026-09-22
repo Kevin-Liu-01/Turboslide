@@ -251,3 +251,58 @@ describe('the chip the press arms (Editor armPress, chipHandleFor): the whole ar
     }
   });
 });
+
+describe('objectPressPlan on a table (docs/FEATURES.md 2.1: A1 rules 1 and 3 amended for tables alone)', () => {
+  const cell = { row: 1, col: 2 };
+
+  it('selects an unselected table, arms its drag and names the pressed cell for the tap', () => {
+    expect(objectPressPlan({ ...editing, under: 'tbl', selected: [], cell })).toEqual({
+      action: 'press',
+      blockId: 'tbl',
+      select: true,
+      drag: true,
+      caret: cell,
+    });
+    /* another object selected: the table joins alone and the tap still places the caret */
+    expect(objectPressPlan({ ...editing, under: 'tbl', selected: ['t1'], cell })).toEqual({
+      action: 'press',
+      blockId: 'tbl',
+      select: true,
+      drag: true,
+      caret: cell,
+    });
+  });
+
+  it('on the one selected table a press in a cell arms a range and never the move, and a tap moves the caret', () => {
+    expect(objectPressPlan({ ...editing, under: 'tbl', selected: ['tbl'], cell })).toEqual({
+      action: 'press',
+      blockId: 'tbl',
+      select: false,
+      drag: false,
+      caret: cell,
+      range: true,
+    });
+  });
+
+  it('keeps A1 as written for a table in a multiple selection, in a group, with a modifier or outside a cell', () => {
+    expect(
+      objectPressPlan({ ...editing, under: 'tbl', selected: ['tbl', 't1'], cell }),
+    ).toEqual({ action: 'press', blockId: 'tbl', select: false, drag: true });
+    expect(
+      objectPressPlan({ ...editing, under: 'tbl', selected: ['g1'], grouped: true, cell }),
+    ).toEqual({ action: 'press', blockId: 'tbl', select: true, drag: true });
+    expect(
+      objectPressPlan({ ...editing, under: 'tbl', selected: ['tbl'], modifier: true, cell }),
+    ).toEqual({ action: 'toggle', blockId: 'tbl' });
+    expect(objectPressPlan({ ...editing, under: 'tbl', selected: ['tbl'], cell: null })).toEqual({
+      action: 'press',
+      blockId: 'tbl',
+      select: false,
+      drag: true,
+    });
+    /* Commenting and Viewing mode: a selection for a comment's anchor, no caret and no drag */
+    expect(
+      objectPressPlan({ ...editing, under: 'tbl', selected: [], editable: false, cell }),
+    ).toEqual({ action: 'press', blockId: 'tbl', select: true, drag: false });
+  });
+});

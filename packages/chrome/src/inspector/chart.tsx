@@ -1,5 +1,13 @@
-import type { ClipboardEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
+import type {
+  ClipboardEvent,
+  KeyboardEvent as ReactKeyboardEvent,
+  MouseEvent as ReactMouseEvent,
+  ReactNode,
+} from 'react';
 import { useEffect, useRef, useState } from 'react';
+
+import type { ChartCellDetail } from '@turboslide/viewer/Editor';
+import { CHART_CELL_EVENT } from '@turboslide/viewer/Editor';
 
 import type { Block } from '@turboslide/schema/blocks';
 import type {
@@ -97,6 +105,34 @@ function cellId(prefix: string, row: number, column: number): string {
   return `${prefix}-${row}-${column}`;
 }
 
+/**
+ * The cell the stage asked for (docs/FEATURES.md 2.2 rank 7; Editor.tsx CHART_CELL_EVENT): a
+ * double click on the chart, Enter on it or a click on a bar, a point or a slice names a cell of
+ * the grid. A mounted section takes it at once; a section that mounts later (Format options was
+ * closed, the Overlay opens it on the same event) reads the last request for its chart on mount,
+ * so the first value cell or the tapped mark's cell is active when the grid appears.
+ */
+const pendingCells = new Map<string, Active>();
+const cellListeners = new Set<(detail: ChartCellDetail) => void>();
+if (typeof window !== 'undefined') {
+  window.addEventListener(CHART_CELL_EVENT, (event) => {
+    const detail = (event as CustomEvent<ChartCellDetail>).detail;
+    if (detail === undefined) return;
+    pendingCells.set(detail.blockId, { row: detail.row, column: detail.column });
+    for (const listener of cellListeners) listener(detail);
+  });
+}
+
+/** The cell a request named, clamped into the grid; the first value cell when none was asked for. */
+function requestedCell(blockId: string, rows: number, columns: number): Active {
+  const asked = pendingCells.get(blockId);
+  pendingCells.delete(blockId);
+  return {
+    row: Math.max(1, Math.min(rows, asked?.row ?? 1)),
+    column: Math.max(1, Math.min(columns, asked?.column ?? 1)),
+  };
+}
+
 export function ChartSection({
   block,
   slideId,
@@ -109,12 +145,33 @@ export function ChartSection({
   const control = 'formatOptions.chart';
   const rows = block.categories.length;
   const columns = block.series.length;
-  const [active, setActive] = useState<Active>({ row: 1, column: 1 });
+  const [active, setActive] = useState<Active>(() => requestedCell(block.id, rows, columns));
   const [editing, setEditing] = useState<(Active & { draft: string }) | null>(null);
   const [swatchesFor, setSwatchesFor] = useState<number | null>(null);
   const [titleDraft, setTitleDraft] = useState<string | null>(null);
+  /* the right click menu of a series or category header: Remove (docs/FEATURES.md 2.2 rank 12) */
+  const [menu, setMenu] = useState<(Active & { x: number; y: number }) | null>(null);
   const grid = useRef<HTMLTableElement>(null);
   const focusAfter = useRef<Active | null>(null);
+
+  /* the cell the stage names while the section is mounted (rank 7): active and focused */
+  useEffect(() => {
+    const listener = (detail: ChartCellDetail) => {
+      if (detail.blockId !== block.id) return;
+      pendingCells.delete(block.id);
+      const next = {
+        row: Math.max(1, Math.min(rows, detail.row)),
+        column: Math.max(1, Math.min(columns, detail.column)),
+      };
+      setEditing(null);
+      setActive(next);
+      focusAfter.current = next;
+    };
+    cellListeners.add(listener);
+    return () => {
+      cellListeners.delete(listener);
+    };
+  }, [block.id, rows, columns]);
 
   /* the active cell stays inside the grid when a row or a column goes */
   useEffect(() => {
@@ -253,6 +310,12 @@ export function ChartSection({
       case 'F2':
         startEdit(row, column);
         break;
+      case 'Escape':
+        /* the grid owns its keys (docs/FEATURES.md 2.2 rank 1; audit-objects 1): Escape on the
+           active cell with no open field leaves the grid and keeps the chart selected and the
+           panel open; the stage's Escape never sees it, so the selection stands */
+        event.currentTarget.blur();
+        break;
       case 'Backspace':
       case 'Delete':
         startEdit(row, column, '');
@@ -277,6 +340,47 @@ export function ChartSection({
     runEdit({ kind: 'replace', ...pasted });
   };
 
+  /**
+   * A right click on a series or a category header lists Remove (docs/FEATURES.md 2.2 rank 12;
+   * audit-objects 21: no right click row named a series). One row, the product's own menu, the
+   * browser's never; Escape or a click elsewhere closes it.
+   */
+  const onHeaderContextMenu = (
+    event: ReactMouseEvent<HTMLElement>,
+    row: number,
+    column: number,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setActive({ row, column });
+    setMenu({ row, column, x: event.clientX, y: event.clientY });
+  };
+  useEffect(() => {
+    if (menu === null) return undefined;
+    const close = () => setMenu(null);
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        close();
+      }
+    };
+    window.addEventListener('pointerdown', close);
+    window.addEventListener('keydown', onKey, true);
+    return () => {
+      window.removeEventListener('pointerdown', close);
+      window.removeEventListener('keydown', onKey, true);
+    };
+  }, [menu]);
+  const menuTarget =
+    menu === null
+      ? null
+      : menu.row === 0
+        ? { kind: 'series' as const, index: menu.column - 1, name: block.series[menu.column - 1]?.name ?? '' }
+        : { kind: 'category' as const, index: menu.row - 1, name: block.categories[menu.row - 1] ?? '' };
+  const menuCanRemove =
+    menuTarget !== null && (menuTarget.kind === 'series' ? columns > 1 : rows > 1);
+
   const gridTip = tipProps({
     name: words.title,
     doc: 'The categories down the first column and one series per column. Arrows move, Enter edits, Esc restores; paste rows from a spreadsheet',
@@ -290,6 +394,11 @@ export function ChartSection({
   ) => {
     const isActive = active.row === row && active.column === column;
     const isEditing = editing !== null && editing.row === row && editing.column === column;
+    /* the header of the active cell's row or column: its remove control is drawn (rank 12) */
+    const isActiveLine =
+      extra?.header !== undefined &&
+      !(row === 0 && column === 0) &&
+      ((row === 0 && active.column === column) || (column === 0 && active.row === row));
     const role =
       extra?.header === 'column'
         ? 'columnheader'
@@ -306,6 +415,7 @@ export function ChartSection({
           'ts-chartgrid-cell',
           extra?.className,
           isActive && 'is-active',
+          isActiveLine && 'is-active-line',
           isEditing && 'is-editing',
         )}
         tabIndex={row === 0 && column === 0 ? -1 : isActive ? 0 : -1}
@@ -315,6 +425,11 @@ export function ChartSection({
         onClick={() => setActive({ row, column })}
         onDoubleClick={() => startEdit(row, column)}
         onKeyDown={(event) => onCellKey(event, row, column)}
+        onContextMenu={
+          extra?.header !== undefined && !(row === 0 && column === 0)
+            ? (event) => onHeaderContextMenu(event, row, column)
+            : undefined
+        }
       >
         {isEditing ? (
           <input
@@ -493,6 +608,43 @@ export function ChartSection({
           </tbody>
         </table>
       </div>
+
+      {menu !== null && menuTarget !== null ? (
+        <div
+          className="ts-chartgrid-menu ts-chrome"
+          role="menu"
+          aria-label={`${menuTarget.name} options`}
+          data-control={`${control}.menu`}
+          style={{ left: menu.x, top: menu.y }}
+          onPointerDown={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            role="menuitem"
+            className="ts-chartgrid-menu-row"
+            data-control={`${control}.menu.remove`}
+            disabled={busy || !menuCanRemove}
+            onClick={() => {
+              setMenu(null);
+              runEdit(
+                menuTarget.kind === 'series'
+                  ? { kind: 'removeSeries', index: menuTarget.index }
+                  : { kind: 'removeCategory', index: menuTarget.index },
+              );
+            }}
+            {...tipProps({
+              name: words.remove,
+              doc: menuCanRemove
+                ? `Removes ${menuTarget.name} from the chart`
+                : menuTarget.kind === 'series'
+                  ? 'A chart keeps at least one series'
+                  : 'A chart keeps at least one category',
+            })}
+          >
+            {`${words.remove} ${menuTarget.name}`}
+          </button>
+        </div>
+      ) : null}
 
       {swatchesFor !== null && block.series[swatchesFor] !== undefined ? (
         <div

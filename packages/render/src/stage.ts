@@ -167,10 +167,14 @@ export function positionClass(position: SlotPosition): string {
 export function frameBandHtml(band: FrameBand): string {
   if (!band.kit) return WORDMARK_HTML;
   let logo = '';
+  /* the class ts-kit-wordmark is the one the viewer's Frame gives the band: the theme sheet hides
+     `.wordmark:not(.ts-kit-wordmark)` whenever the kit draws the footer (theme-css.ts), so without
+     it the export's document and the print document drew no footer logo (docs/FEATURES.md 4.8;
+     build/b7.md R1) */
   if (band.logo.kind === 'default')
-    logo = `<div class="wordmark ${positionClass(band.logo.position)}" aria-hidden="true"><svg width="28" height="18" fill="currentColor"><use href="#gt-mark"/></svg></div>`;
+    logo = `<div class="wordmark ts-kit-wordmark ${positionClass(band.logo.position)}" aria-hidden="true"><svg width="28" height="18" fill="currentColor"><use href="#gt-mark"/></svg></div>`;
   else if (band.logo.kind === 'picture')
-    logo = `<div class="wordmark ${positionClass(band.logo.position)} is-picture" aria-hidden="true" style="width:${band.logo.w}px"><img src="${escapeAttr(band.logo.src)}" width="${band.logo.w}" height="${band.logo.h}" alt=""></div>`;
+    logo = `<div class="wordmark ts-kit-wordmark ${positionClass(band.logo.position)} is-picture" aria-hidden="true" style="width:${band.logo.w}px"><img src="${escapeAttr(band.logo.src)}" width="${band.logo.w}" height="${band.logo.h}" alt=""></div>`;
   const text =
     band.text !== undefined
       ? `<div class="ts-kit-footer" aria-hidden="true">${escapeText(band.text)}</div>`

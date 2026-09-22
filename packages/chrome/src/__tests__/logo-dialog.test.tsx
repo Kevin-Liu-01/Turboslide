@@ -9,7 +9,6 @@ import type { DeckDocument } from '@turboslide/schema/deck';
 import { workedDocument } from '@turboslide/schema/fixtures';
 
 import {
-  LOGO_DIALOG,
   LogoDialog,
   RECENT_STORAGE,
   licenceRowWords,
@@ -26,6 +25,7 @@ import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
 import { LOGO_PLATE_LINES, LOGO_WORDS, logoMarkPath } from '../logo-model';
 import type { LogoSearchRow } from '../logo-model';
+import { LOGO_DIALOG } from '../menus/strings';
 import { hideTooltip } from '../Tooltip';
 
 // Insert > Logo (docs/FEATURES.md 4.3, 4.4, 4.6, 4.9; the rows logos.picker.* of 7.1): the search

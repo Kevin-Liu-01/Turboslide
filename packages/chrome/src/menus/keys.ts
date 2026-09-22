@@ -1504,24 +1504,35 @@ export function isBareKey(chord: Chord): boolean {
  * of the label. Items with fewer distinct letters choose first (Print before Print settings and
  * preview), so a short label is not left without a letter by its longer neighbours; the output
  * keeps the menu order. Omitted items take no letter; submenus are assigned recursively. Returns
- * a copy.
+ * a copy. When a label finds every one of its letters taken, the holder of a letter moves to
+ * another of its own letters so both keep one (an augmenting path over the items and the letters,
+ * so the assignment is a largest matching; the features round's Insert > Logo took the `l` that
+ * Special characters, with every other letter taken, had used, and one of the two moves on).
  */
 export function assignAccessKeys<T extends MenuItem>(items: ReadonlyArray<T>): T[] {
-  const taken = new Set<string>();
   /* letters, then the digits of a label with none (50%, 1.15) */
   const letters = items.map((item) => [
     ...new Set(item.label.toLowerCase().replace(/[^a-z0-9]/g, '')),
   ]);
+  const holder = new Map<string, number>();
   const chosen = new Map<number, string>();
   const order = Array.from(items.keys())
     .filter((index) => items[index]?.status !== 'omit')
     .sort((a, b) => (letters[a]?.length ?? 0) - (letters[b]?.length ?? 0) || a - b);
-  for (const index of order) {
-    const letter = letters[index]?.find((each) => !taken.has(each));
-    if (letter === undefined) continue;
-    taken.add(letter);
-    chosen.set(index, letter);
-  }
+  const claim = (index: number, tried: Set<string>): boolean => {
+    for (const letter of letters[index] ?? []) {
+      if (tried.has(letter)) continue;
+      tried.add(letter);
+      const other = holder.get(letter);
+      if (other === undefined || claim(other, tried)) {
+        holder.set(letter, index);
+        chosen.set(index, letter);
+        return true;
+      }
+    }
+    return false;
+  };
+  for (const index of order) claim(index, new Set());
   return items.map((item, index) => {
     const copy: T = { ...item };
     const letter = chosen.get(index);

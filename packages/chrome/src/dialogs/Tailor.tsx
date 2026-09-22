@@ -10,6 +10,7 @@ import { useEditorShell } from '../editor-shell-context';
 import { useMountEffect } from '../lib/useMountEffect';
 import { findCustomerLogo, logoMatchFor } from '../logo-model';
 import type { LogoRow } from '../logo-model';
+import { TAILOR_LOGO } from '../menus/strings';
 import { TAILOR } from '../panels/assist-strings';
 import { tipProps } from '../Tooltip';
 import { countMatches, slideStrings } from './FindReplace';
@@ -60,14 +61,6 @@ export function tailorCounts(
 
 /** The four raster types the hosted intake accepts (docs/FEATURES.md 4.5; audit-logos 4). */
 const PICTURE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
-
-/** The words of the Find the logo slot (FEATURES.md 4.5; strings.ts takes them at the merge, b1.md R3). */
-export const TAILOR_LOGO = {
-  find: (to: string) => `Find the ${to} logo`,
-  findDoc: 'Shows the logo thesvg.org has for this name; a click stores it for Apply',
-  found: (title: string) => `The ${title} logo is ready; Apply puts it where the old logo was`,
-  storing: 'Storing the logo',
-} as const;
 
 /** How long the To field rests before the cache is asked whether it knows the name. */
 export const FIND_LOGO_PAUSE_MS = 300;

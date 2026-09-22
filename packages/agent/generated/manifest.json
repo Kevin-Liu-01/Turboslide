@@ -175,7 +175,10 @@
       "asset.dither",
       "asset.capture",
       "material.capture",
-      "material.list"
+      "material.list",
+      "logo.search",
+      "logo.insert",
+      "logo.refresh"
     ],
     "render": [
       "render.slide",
@@ -288,7 +291,7 @@
       "admin.mail.list"
     ]
   },
-  "actionCount": 183,
+  "actionCount": 186,
   "resources": [
     {
       "uri": "deck://manifest",

@@ -13892,6 +13892,387 @@
         }
       }
     },
+    "/api/actions/logo.search": {
+      "post": {
+        "operationId": "logo.search",
+        "summary": "Find a logo",
+        "description": "Searches the cached index of thesvg.org’s brand marks by title, slug, alias and category, ranked prefix, then word start, then substring, brands before community; answers each mark’s variants, its licence as recorded with the seller’s sentence, its brand site and guidelines and whether its default reads on paper and on ink, with the index’s date and its last upstream failure.",
+        "tags": [
+          "asset"
+        ],
+        "x-mutates": false,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoSearchInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoSearchOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/logo.insert": {
+      "post": {
+        "operationId": "logo.insert",
+        "summary": "Insert a logo",
+        "description": "Stores a thesvg.org mark on the deck as an asset with the role logo, PNG twins at 3x of the logo size, the sanitized SVG as its source file and a source record naming the mark, its licence and its guidelines, never the source’s address; with slideId it places the picture at the logo size in the free area of the body slot, with blockId it swaps that picture’s asset and keeps the box, with everySlide or kit it writes the brand kit’s logo slots in the same write.",
+        "tags": [
+          "asset"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoInsertInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoInsertOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/logo.refresh": {
+      "post": {
+        "operationId": "logo.refresh",
+        "summary": "Refresh the logo index",
+        "description": "Rebuilds the cached logo index from thesvg.org’s manifest inside its time budget, marks the variants that answer 404 unavailable, drops the marks the source removed with their cached files and answers the counts; with dryRun it answers the counts, the index’s date, its last failure and its progress without an upstream fetch.",
+        "tags": [
+          "asset"
+        ],
+        "x-mutates": false,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoRefreshInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoRefreshOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/actions/presence.list": {
       "post": {
         "operationId": "presence.list",
@@ -22562,7 +22943,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   },
                   "text": {
@@ -22593,7 +22982,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   }
                 },
@@ -26688,7 +27085,15 @@
                         "jetbrains-mono",
                         "ibm-plex-sans",
                         "ibm-plex-mono",
-                        "fira-code"
+                        "fira-code",
+                        "geist",
+                        "geist-mono",
+                        "instrument-sans",
+                        "manrope",
+                        "bricolage-grotesque",
+                        "schibsted-grotesk",
+                        "newsreader",
+                        "fraunces"
                       ],
                       "group": "Text",
                       "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
@@ -26721,7 +27126,32 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
+                    ]
+                  },
+                  "numerals": {
+                    "title": "Tabular figures",
+                    "x-inspector": {
+                      "label": "Tabular figures",
+                      "control": "toggle",
+                      "snap": [
+                        "tabular"
+                      ],
+                      "group": "Text",
+                      "help": "Every digit takes the same width, so numbers line up in a column"
+                    },
+                    "description": "Every digit takes the same width, so numbers line up in a column",
+                    "type": "string",
+                    "enum": [
+                      "tabular"
                     ]
                   }
                 },
@@ -27321,7 +27751,15 @@
                         "jetbrains-mono",
                         "ibm-plex-sans",
                         "ibm-plex-mono",
-                        "fira-code"
+                        "fira-code",
+                        "geist",
+                        "geist-mono",
+                        "instrument-sans",
+                        "manrope",
+                        "bricolage-grotesque",
+                        "schibsted-grotesk",
+                        "newsreader",
+                        "fraunces"
                       ],
                       "group": "Text",
                       "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
@@ -27354,7 +27792,32 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
+                    ]
+                  },
+                  "numerals": {
+                    "title": "Tabular figures",
+                    "x-inspector": {
+                      "label": "Tabular figures",
+                      "control": "toggle",
+                      "snap": [
+                        "tabular"
+                      ],
+                      "group": "Text",
+                      "help": "Every digit takes the same width, so numbers line up in a column"
+                    },
+                    "description": "Every digit takes the same width, so numbers line up in a column",
+                    "type": "string",
+                    "enum": [
+                      "tabular"
                     ]
                   }
                 },
@@ -35867,7 +36330,15 @@
                         "jetbrains-mono",
                         "ibm-plex-sans",
                         "ibm-plex-mono",
-                        "fira-code"
+                        "fira-code",
+                        "geist",
+                        "geist-mono",
+                        "instrument-sans",
+                        "manrope",
+                        "bricolage-grotesque",
+                        "schibsted-grotesk",
+                        "newsreader",
+                        "fraunces"
                       ],
                       "group": "Text",
                       "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
@@ -35900,7 +36371,32 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
+                    ]
+                  },
+                  "numerals": {
+                    "title": "Tabular figures",
+                    "x-inspector": {
+                      "label": "Tabular figures",
+                      "control": "toggle",
+                      "snap": [
+                        "tabular"
+                      ],
+                      "group": "Text",
+                      "help": "Every digit takes the same width, so numbers line up in a column"
+                    },
+                    "description": "Every digit takes the same width, so numbers line up in a column",
+                    "type": "string",
+                    "enum": [
+                      "tabular"
                     ]
                   }
                 },
@@ -37101,7 +37597,15 @@
                         "jetbrains-mono",
                         "ibm-plex-sans",
                         "ibm-plex-mono",
-                        "fira-code"
+                        "fira-code",
+                        "geist",
+                        "geist-mono",
+                        "instrument-sans",
+                        "manrope",
+                        "bricolage-grotesque",
+                        "schibsted-grotesk",
+                        "newsreader",
+                        "fraunces"
                       ],
                       "group": "Text",
                       "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
@@ -37134,7 +37638,32 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
+                    ]
+                  },
+                  "numerals": {
+                    "title": "Tabular figures",
+                    "x-inspector": {
+                      "label": "Tabular figures",
+                      "control": "toggle",
+                      "snap": [
+                        "tabular"
+                      ],
+                      "group": "Text",
+                      "help": "Every digit takes the same width, so numbers line up in a column"
+                    },
+                    "description": "Every digit takes the same width, so numbers line up in a column",
+                    "type": "string",
+                    "enum": [
+                      "tabular"
                     ]
                   }
                 },
@@ -38416,7 +38945,15 @@
                         "jetbrains-mono",
                         "ibm-plex-sans",
                         "ibm-plex-mono",
-                        "fira-code"
+                        "fira-code",
+                        "geist",
+                        "geist-mono",
+                        "instrument-sans",
+                        "manrope",
+                        "bricolage-grotesque",
+                        "schibsted-grotesk",
+                        "newsreader",
+                        "fraunces"
                       ],
                       "group": "Text",
                       "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
@@ -38449,7 +38986,32 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
+                    ]
+                  },
+                  "numerals": {
+                    "title": "Tabular figures",
+                    "x-inspector": {
+                      "label": "Tabular figures",
+                      "control": "toggle",
+                      "snap": [
+                        "tabular"
+                      ],
+                      "group": "Text",
+                      "help": "Every digit takes the same width, so numbers line up in a column"
+                    },
+                    "description": "Every digit takes the same width, so numbers line up in a column",
+                    "type": "string",
+                    "enum": [
+                      "tabular"
                     ]
                   }
                 },
@@ -42318,6 +42880,95 @@
                   "kind"
                 ],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "logo"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "const": "thesvg"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "variant": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "license": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "guidelines": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "fetchedAt": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{8,64}$"
+                  },
+                  "sanitized": {
+                    "type": "object",
+                    "properties": {
+                      "removed": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "removed"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "tint": {
+                    "type": "object",
+                    "properties": {
+                      "light": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "dark": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind",
+                  "provider",
+                  "slug",
+                  "variant",
+                  "title",
+                  "license",
+                  "fetchedAt",
+                  "digest"
+                ],
+                "additionalProperties": false
               }
             ]
           },
@@ -44651,7 +45302,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   },
                   "text": {
@@ -44682,7 +45341,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   }
                 },
@@ -46283,7 +46950,15 @@
                             "jetbrains-mono",
                             "ibm-plex-sans",
                             "ibm-plex-mono",
-                            "fira-code"
+                            "fira-code",
+                            "geist",
+                            "geist-mono",
+                            "instrument-sans",
+                            "manrope",
+                            "bricolage-grotesque",
+                            "schibsted-grotesk",
+                            "newsreader",
+                            "fraunces"
                           ]
                         },
                         "text": {
@@ -46314,7 +46989,15 @@
                             "jetbrains-mono",
                             "ibm-plex-sans",
                             "ibm-plex-mono",
-                            "fira-code"
+                            "fira-code",
+                            "geist",
+                            "geist-mono",
+                            "instrument-sans",
+                            "manrope",
+                            "bricolage-grotesque",
+                            "schibsted-grotesk",
+                            "newsreader",
+                            "fraunces"
                           ]
                         }
                       },
@@ -51475,6 +52158,95 @@
                   "kind"
                 ],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "logo"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "const": "thesvg"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "variant": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "license": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "guidelines": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "fetchedAt": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{8,64}$"
+                  },
+                  "sanitized": {
+                    "type": "object",
+                    "properties": {
+                      "removed": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "removed"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "tint": {
+                    "type": "object",
+                    "properties": {
+                      "light": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "dark": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind",
+                  "provider",
+                  "slug",
+                  "variant",
+                  "title",
+                  "license",
+                  "fetchedAt",
+                  "digest"
+                ],
+                "additionalProperties": false
               }
             ]
           },
@@ -55084,7 +55856,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   },
                   "text": {
@@ -55115,7 +55895,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   }
                 },
@@ -55418,7 +56206,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   },
                   "text": {
@@ -55449,7 +56245,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   }
                 },
@@ -55741,7 +56545,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   },
                   "text": {
@@ -55772,7 +56584,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   }
                 },
@@ -55967,7 +56787,15 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
                   ]
                 },
                 "name": {
@@ -56016,6 +56844,455 @@
         },
         "required": [
           "fonts"
+        ],
+        "additionalProperties": false
+      },
+      "LogoSearchInput": {
+        "$id": "#/components/schemas/LogoSearchInput",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "A company name, a slug, an alias or a category"
+          },
+          "limit": {
+            "description": "Defaults to 20",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "kind": {
+            "description": "wordmark lists the marks that have a wordmark of some kind",
+            "type": "string",
+            "enum": [
+              "symbol",
+              "wordmark"
+            ]
+          },
+          "collection": {
+            "description": "brands (the default) is the brand and community marks; all adds the cloud service icons and the auth badges",
+            "type": "string",
+            "enum": [
+              "brands",
+              "all"
+            ]
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "LogoSearchOutput": {
+        "$id": "#/components/schemas/LogoSearchOutput",
+        "type": "object",
+        "properties": {
+          "logos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slug": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "aliases": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "hex": {
+                  "type": "string"
+                },
+                "variants": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "license": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "guidelines": {
+                  "type": "string"
+                },
+                "collection": {
+                  "type": "string"
+                },
+                "dateAdded": {
+                  "type": "string"
+                },
+                "readsOnPaper": {
+                  "type": "boolean"
+                },
+                "readsOnInk": {
+                  "type": "boolean"
+                },
+                "unavailable": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "at": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "reason": {
+                        "type": "string",
+                        "enum": [
+                          "missing",
+                          "broken",
+                          "sanitized",
+                          "gradient"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "at"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "licenceSentence": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "slug",
+                "title",
+                "aliases",
+                "categories",
+                "variants",
+                "license",
+                "collection",
+                "licenceSentence"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "updatedAt": {
+            "description": "The time of the last complete index build",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastError": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string"
+              },
+              "status": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          "progress": {
+            "type": "object",
+            "properties": {
+              "done": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "done",
+              "total"
+            ],
+            "additionalProperties": false
+          },
+          "source": {
+            "type": "string",
+            "const": "thesvg.org"
+          },
+          "indexed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The marks the index holds in the collections searched"
+          }
+        },
+        "required": [
+          "logos",
+          "updatedAt",
+          "source",
+          "indexed"
+        ],
+        "additionalProperties": false
+      },
+      "LogoInsertInput": {
+        "$id": "#/components/schemas/LogoInsertInput",
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "The mark’s slug on thesvg.org"
+          },
+          "variant": {
+            "description": "default, mono, light, dark, wordmark, wordmarkLight or wordmarkDark; the appearance rule chooses when absent",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "slideId": {
+            "description": "The slide the picture lands on; none stores the asset alone",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "box": {
+            "description": "The box in sheet px; the logo size in the free area of the body slot when absent",
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "w": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "h": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "w",
+              "h"
+            ],
+            "additionalProperties": false
+          },
+          "everySlide": {
+            "description": "Use as this presentation’s logo on every slide: the kit’s mark and footer slots take the asset",
+            "type": "boolean"
+          },
+          "kit": {
+            "description": "The brand kit’s logo slots alone, for the Brand kit panel",
+            "type": "boolean"
+          },
+          "blockId": {
+            "description": "Replace image: the picture whose asset is swapped",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slug",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "LogoInsertOutput": {
+        "$id": "#/components/schemas/LogoInsertOutput",
+        "type": "object",
+        "properties": {
+          "asset": {
+            "$ref": "#/components/schemas/Asset"
+          },
+          "blockId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "variant": {
+            "type": "string",
+            "description": "The variant the insert took"
+          }
+        },
+        "required": [
+          "asset",
+          "revision",
+          "variant"
+        ],
+        "additionalProperties": false
+      },
+      "LogoRefreshInput": {
+        "$id": "#/components/schemas/LogoRefreshInput",
+        "type": "object",
+        "properties": {
+          "dryRun": {
+            "description": "The counts alone, no fetch and no write",
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LogoRefreshOutput": {
+        "$id": "#/components/schemas/LogoRefreshOutput",
+        "type": "object",
+        "properties": {
+          "icons": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "brands": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "cachedMarks": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unavailable": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "updatedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "builtAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastError": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string"
+              },
+              "status": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          "progress": {
+            "type": "object",
+            "properties": {
+              "done": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "done",
+              "total"
+            ],
+            "additionalProperties": false
+          },
+          "fetched": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "dropped": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "upstream": {
+            "type": "string",
+            "enum": [
+              "network",
+              "fixture",
+              "down"
+            ]
+          }
+        },
+        "required": [
+          "icons",
+          "brands",
+          "cachedMarks",
+          "unavailable",
+          "updatedAt",
+          "builtAt",
+          "fetched",
+          "dropped",
+          "dryRun",
+          "upstream"
         ],
         "additionalProperties": false
       },

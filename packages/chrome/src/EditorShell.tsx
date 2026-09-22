@@ -222,6 +222,8 @@ const SaveAsTemplateDialog = lazyDialog(() =>
   import('./dialogs/SaveAsTemplate').then((m) => m.SaveAsTemplateDialog),
 );
 const TailorDialog = lazyDialog(() => import('./dialogs/Tailor').then((m) => m.TailorDialog));
+/* the features round (docs/FEATURES.md 4.3): the Logo picker over thesvg.org */
+const LogoDialog = lazyDialog(() => import('./dialogs/Logo').then((m) => m.LogoDialog));
 
 const LAZY_DIALOGS = [
   AgentAccessDialog,
@@ -255,6 +257,7 @@ const LAZY_DIALOGS = [
   ShortcutsDialog,
   SaveAsTemplateDialog,
   TailorDialog,
+  LogoDialog,
 ] as const;
 
 /** A colour or weight plate anchored to a menu row (SPEC-2 0.27). */
@@ -1208,7 +1211,9 @@ export function EditorShell({
           return;
         case 'dialog': {
           const id = dialogIdOf(effect.title, item.id);
-          if (id === 'imageByUrl' || id === 'fromThisPresentation') {
+          /* the Logo picker takes the same picture target, so Replace image > Logo swaps the
+             selected picture's asset and keeps its box (docs/FEATURES.md 4.4) */
+          if (id === 'imageByUrl' || id === 'fromThisPresentation' || id === 'logo') {
             const current = inputRef.current;
             openDialog({
               id,
@@ -2083,6 +2088,9 @@ export function EditorShell({
         return <SaveAsTemplateDialog.Component />;
       case 'tailor':
         return <TailorDialog.Component />;
+      /* the features round (docs/FEATURES.md 4.3) */
+      case 'logo':
+        return <LogoDialog.Component target={dialog.target} />;
       case 'slideNumbers':
         return <SlideNumbersDialog.Component />;
       case 'details':

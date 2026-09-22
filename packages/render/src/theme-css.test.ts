@@ -289,7 +289,9 @@ describe('the slots', () => {
     expect(picture.text).toBe('Confidential');
     expect(picture.counterFormat).toBe('Slide n');
     const html = frameBandHtml(picture);
-    expect(html).toContain('class="wordmark pos-bottom-right is-picture"');
+    /* the kit's band carries the class the theme sheet's override reads (the features round,
+       docs/FEATURES.md 4.8): without it the export's document hid the footer logo */
+    expect(html).toContain('class="wordmark ts-kit-wordmark pos-bottom-right is-picture"');
     expect(html).toContain('<img src="decks/acme/assets/acme-mark.png" width="36" height="18"');
     expect(html).toContain('<div class="ts-kit-footer" aria-hidden="true">Confidential</div>');
     // a picture whose asset the deck lacks draws the default logo

@@ -97,10 +97,12 @@ describe('spaces beside hyperlink runs', () => {
 });
 
 describe('the raster scale policy', () => {
-  it('shoots icons and marks at 3x, diagrams at 1x and the rest at 2x under auto, or a fixed scale', () => {
-    expect([...THREE_X_KINDS].sort()).toEqual(['icon', 'mark']);
+  it('shoots icons, marks and logos at 3x, diagrams at 1x and the rest at 2x under auto, or a fixed scale', () => {
+    /* the logo role joined the 3x kinds in the features round (docs/FEATURES.md 4.8) */
+    expect([...THREE_X_KINDS].sort()).toEqual(['icon', 'logo', 'mark']);
     expect(rasterScaleFor('icon', 'auto')).toBe(3);
     expect(rasterScaleFor('mark', 'auto')).toBe(3);
+    expect(rasterScaleFor('logo', 'auto')).toBe(3);
     expect(rasterScaleFor('block', 'auto', 'dia')).toBe(1);
     expect(rasterScaleFor('block', 'auto', 'lang')).toBe(1);
     expect(rasterScaleFor('block', 'auto', 'shot')).toBe(2);

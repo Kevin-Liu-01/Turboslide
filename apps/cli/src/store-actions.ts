@@ -3239,12 +3239,24 @@ export async function diagramInsert(
   const group = freeId(input.kind, groupTags(slide));
   const box = input.pos ?? { ...DIAGRAM_BOX };
   const maxZ = Math.max(-1, ...canvasObjects(slide).map((block) => block.pos?.z ?? 0));
+  /* the template's ids are freed against the slide (step-2 becomes step-2-2 when a diagram already
+     sits there), and a connector's `connect` names the template's ids, so the mapping is applied to
+     every connector the way the paste path does (the features round, build/b3.md R8: a second
+     diagram on a slide bound its arrows to the first diagram's steps) */
+  const mapping = new Map<string, string>();
   const blocks = deps
     .diagrams(input.kind, input.count, input.style ?? 'outline', box, group)
     .map((block, index) => {
       const id = freeId(block.id, taken);
+      mapping.set(block.id, id);
       const pos = block.pos === undefined ? undefined : { ...block.pos, z: maxZ + 1 + index };
       return { ...block, id, ...(pos !== undefined ? { pos } : {}) } as Block;
+    })
+    .map((block) => {
+      if (!isConnector(block) || block.connect === undefined) return block;
+      const renamed = renameConnectorRefs(block.connect, mapping);
+      const { connect: _connect, ...rest } = block;
+      return (renamed === undefined ? rest : { ...rest, connect: renamed }) as Block;
     });
   const mutations: Mutation[] = [...canvas.prefix];
   let after = input.after;

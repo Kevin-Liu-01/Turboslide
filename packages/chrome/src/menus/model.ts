@@ -464,6 +464,12 @@ export type MenuItem = {
   disabledReason?: string;
   /** one sentence for the tooltip beyond the label and the key */
   doc?: string;
+  /**
+   * The seller's own words for Search the menus beyond the label, the path and the doc (the
+   * features round, docs/FEATURES.md 4.3 and 3.1 item 4; finder.ts `sellerTermsOf` reads them
+   * after the finder's own table)
+   */
+  terms?: ReadonlyArray<string>;
   /** a check item's state; a toggle effect implies its own setting */
   checked?: MenuCheck;
   /** a toggle drawn as a plain row: the label flips instead of a check mark (Show ruler reads Hide ruler) */
@@ -660,6 +666,13 @@ function replaceImageItems(prefix: string): MenuItem[] {
     /* docs/FOCUS.md 3.2 parked By URL and From this presentation with the Insert rows; By URL
        returned in the product round (docs/PRODUCT.md section 5) */
     now(`${prefix}.byUrl`, 'By URL', dialog('Image by URL')),
+    /* the features round (docs/FEATURES.md 4.4; build/b6.md R1): Replace image > Logo swaps the
+       picture's asset for a mark of thesvg.org and keeps the box */
+    now(`${prefix}.logo`, 'Logo', dialog('Logo'), {
+      turboslide: true,
+      doc: 'A company logo from thesvg.org in the same box',
+      terms: ['logo', 'brand', 'company', 'mark'],
+    }),
     now(
       `${prefix}.fromThisPresentation`,
       'From this presentation',
@@ -1337,6 +1350,12 @@ const INSERT: Menu = {
         now('insert.image.upload', 'Upload from computer', action('asset.add'), {
           doc: 'Pictures up to 25 MB',
         }),
+        /* the features round (docs/FEATURES.md 4.3; build/b1.md R1): the Logo picker in the submenu */
+        now('insert.image.logo', 'Logo', dialog('Logo'), {
+          turboslide: true,
+          doc: 'A company logo from thesvg.org, or your own',
+          terms: ['logo', 'brand', 'company', 'mark'],
+        }),
         omit(
           'insert.image.stockWeb',
           'Stock & web',
@@ -1357,6 +1376,14 @@ const INSERT: Menu = {
       ],
       { icon: 'photo' },
     ),
+    /* the features round (docs/FEATURES.md 4.3; build/b1.md R1): Insert > Logo in the default view,
+       with the finder terms so Search the menus "logo" answers Logo first (audit-logos 12) */
+    now('insert.logo', 'Logo', dialog('Logo'), {
+      turboslide: true,
+      icon: 'tag',
+      doc: 'A company logo from thesvg.org, or your own',
+      terms: ['logo', 'brand', 'company', 'mark'],
+    }),
     now('insert.textBox', 'Text box', action('block.insert'), {
       icon: 'text',
       doc: 'Click to place a box, or drag to draw one',
@@ -1607,6 +1634,15 @@ const FORMAT: Menu = {
           enabled: 'textBlockSelected',
           dividerBefore: true,
           doc: 'The face of the selected text; More fonts lists every face with its licence',
+        }),
+        /* the features round (docs/FEATURES.md 3.1 item 4; build/b2.md R1): the Tabular figures row
+           opens Format options at its Text section, and the finder terms list it for a seller who
+           never heard the word */
+        now('format.text.tabularFigures', 'Tabular figures', panel('Format options'), {
+          turboslide: true,
+          enabled: 'textBlockSelected',
+          doc: 'Every digit takes the same width, so numbers line up in a column',
+          terms: ['tabular', 'numbers', 'digits', 'line up numbers', 'align numbers'],
         }),
         sub(
           'format.text.size',

@@ -299,10 +299,19 @@ export function urlFailureSentence(reason: string): string {
 }
 
 /** The reasons the failure sentence names (rank 10: a sentence, never a code or an action id). */
-export type UploadFailure = 'not-a-picture' | 'too-large' | 'did-not-finish';
+export type UploadFailure = 'not-a-picture' | 'too-large' | 'did-not-finish' | 'not-svg';
+
+/**
+ * The seller's sentence for an svg the hosted intake refuses (docs/FEATURES.md 4.7; the same
+ * words as the studio's `UPLOAD_REASONS.notSvg`, which the viewer cannot import): whole, so the
+ * snackbar never reads the intake's own line or "the upload did not finish".
+ */
+export const NOT_SVG_SENTENCE =
+  'SVG files are not accepted yet. Export the logo as a PNG and upload that';
 
 /** The one sentence of a refused upload, with its reason (rank 10; the snackbar `snackbar.upload.failed`). */
 export function uploadFailureSentence(reason: UploadFailure, maxMb: number): string {
+  if (reason === 'not-svg') return NOT_SVG_SENTENCE;
   const why =
     reason === 'not-a-picture'
       ? 'the file is not a picture'
@@ -319,6 +328,9 @@ export function uploadFailureSentence(reason: UploadFailure, maxMb: number): str
  */
 export function uploadFailureOf(error: unknown): UploadFailure {
   const message = (error instanceof Error ? error.message : String(error)).toLowerCase();
+  /* the intake's svg line ("svg is not accepted here; send png, jpeg, webp or gif") and the
+     presigned route's `not_svg` code read as the seller's sentence (docs/FEATURES.md 4.7) */
+  if (/svg is not accepted|not_svg/.test(message)) return 'not-svg';
   if (
     /unsupported|not (a|an) (picture|image)|decode|input buffer|corrupt|invalid (png|jpeg|image)|no image|unknown format|bad image|vips|sharp/.test(
       message,

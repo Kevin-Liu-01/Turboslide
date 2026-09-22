@@ -27,7 +27,7 @@ import {
   logoMarkPath,
 } from '../logo-model';
 import type { LogoIndexFacts, LogoRow, LogoSearchRow } from '../logo-model';
-import { SNACKBARS } from '../menus/strings';
+import { LOGO_DIALOG } from '../menus/strings';
 import { isParked } from '../parked-controls';
 import { tipProps } from '../Tooltip';
 
@@ -68,42 +68,17 @@ import './Logo.css';
  */
 
 // ---------------------------------------------------------------------------------------------
-// The words the dialog adds to logo-model.ts's (FEATURES.md 4.3; strings.ts takes them at the
-// merge by request, build/b1.md R3)
+// The words: the dialog's own are LOGO_DIALOG in menus/strings.ts (moved there at the merge,
+// build/b1.md R3) and the seller sentences it shares with the server are LOGO_WORDS in
+// logo-model.ts; DIALOG_WORDS composes the two for the component.
 
-export const LOGO_DIALOG = {
-  title: 'Logo',
+const DIALOG_WORDS = {
+  ...LOGO_DIALOG,
   lead: LOGO_WORDS.lead,
-  search: 'Company name',
-  searchDoc: 'Type a company name; the first match is selected and Enter inserts it',
-  groups: { brand: 'Your brand', recent: 'Recent', results: 'Results' },
-  insert: 'Insert',
-  replace: 'Replace',
-  insertDoc: 'Adds the selected logo to the slide as a picture, sized as a logo',
-  replaceDoc: 'Puts the selected logo in the same box',
   everySlide: LOGO_WORDS.everySlideCheck,
   everySlideDoc: LOGO_WORDS.everySlideLine,
-  everySlideWaits:
-    'Arrives with the logo placement; until then a picture’s Use on every slide row does it',
-  legal: 'https://thesvg.org/legal',
   empty: LOGO_WORDS.empty,
   kitHint: LOGO_WORDS.emptyKit,
-  upload: 'Upload',
-  uploadDoc: 'Opens the file chooser for a PNG, JPEG, WebP or GIF',
-  guidelines: 'brand guidelines',
-  site: 'the brand’s site',
-  more: 'More',
-  includeCloud: 'Include cloud service icons',
-  includeCloudDoc: 'Adds the AWS, Azure, Google Cloud and Kubernetes icon sets to the results',
-  searching: 'Searching thesvg.org',
-  tileDoc: (title: string, sentence: string) => `${title}, ${sentence}; a click inserts it`,
-  kitTileDoc: (name: string) => `${name}’s logo, from the brand kit`,
-  assetTileDoc: 'A logo this presentation already holds',
-  noMarkReplace: 'The theme mark cannot replace a picture. Pick a logo or upload a file',
-  noEditor: SNACKBARS.noFilePicker,
-  /** the sentence a route answer that is not JSON or not 200 reads as */
-  routeFailed: (status: number) =>
-    `thesvg.org’s index did not answer (${status}); try again in a minute`,
 } as const;
 
 /** The group ids as literals, so `parks` names them (core-matrix.mjs reads this file). */
@@ -596,7 +571,7 @@ const WALK_KEYS = new Set(['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'H
 export function LogoDialog({ target }: { target?: PictureTarget }) {
   const shell = useEditorShell();
   const { input, settings } = shell;
-  const words = LOGO_DIALOG;
+  const words = DIALOG_WORDS;
   const parked = (id: string) => isParked(id, settings);
   const where: PictureTarget = target ?? { kind: 'insert', slideId: input.slideId };
   const replacing = where.kind === 'block';

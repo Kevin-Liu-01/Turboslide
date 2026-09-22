@@ -63,7 +63,13 @@ import { applyMutations } from '@turboslide/schema/reduce';
 import type { Box } from '@turboslide/schema/render';
 import { isClosedShapeKind } from '@turboslide/schema/shapes';
 import type { Text as Markup } from '@turboslide/schema/text';
-import { canonicalText, parseText, plainLength, plainOf, styleRange } from '@turboslide/schema/text';
+import {
+  canonicalText,
+  parseText,
+  plainLength,
+  plainOf,
+  styleRange,
+} from '@turboslide/schema/text';
 import type { RunMarks } from '@turboslide/schema/text';
 import { PROMPTS } from '@turboslide/schema/layouts';
 import { TYPE_LADDER } from '@turboslide/schema/typography';
@@ -2182,8 +2188,14 @@ export function Editor({
   useLayoutEffect(() => {
     const slideNow = slideRef.current;
     const current = selectionRef.current;
-    const block = slideNow && current?.kind === 'run' ? blockById(slideNow, current.blockId) : undefined;
-    if (!slideNow || current?.kind !== 'run' || block?.type !== 'table' || cellPointer(current.pointer) === null) {
+    const block =
+      slideNow && current?.kind === 'run' ? blockById(slideNow, current.blockId) : undefined;
+    if (
+      !slideNow ||
+      current?.kind !== 'run' ||
+      block?.type !== 'table' ||
+      cellPointer(current.pointer) === null
+    ) {
       runCellMemo.current = null;
       return;
     }
@@ -2452,7 +2464,8 @@ export function Editor({
     height: number,
   ): { mutation: Mutation; size: number } | null => {
     const block = blockById(canvas, blockId);
-    if (block?.type !== 'text' || block.outline === undefined || block.pos === undefined) return null;
+    if (block?.type !== 'text' || block.outline === undefined || block.pos === undefined)
+      return null;
     const startH = block.pos.h;
     if (!(startH > 0) || !(height > 0)) return null;
     const base = typeof block.typography?.size === 'number' ? block.typography.size : 88;
@@ -3664,7 +3677,8 @@ export function Editor({
       }
     }
     /* the logo size (4.4): a symbol 160 tall, a wordmark 320 wide, at the mark's ratio */
-    const wordmark = where.variant !== undefined && /^wordmark|^lockup|^horizontal$/.test(where.variant);
+    const wordmark =
+      where.variant !== undefined && /^wordmark|^lockup|^horizontal$/.test(where.variant);
     const ok = natural !== undefined && natural[0] > 0 && natural[1] > 0;
     const ratio = ok ? natural[0] / natural[1] : wordmark ? 4 : 1;
     const wanted: [number, number] = wordmark
@@ -3878,16 +3892,25 @@ export function Editor({
       })) as Asset;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      const reason = /allowlist|not a public address|private address/i.test(message)
-        ? 'the page could not read it and the server may not fetch from this host'
-        : /no answer within|timed out|timeout/i.test(message)
-          ? 'the address did not answer'
-          : /HTTP (\d{3})/.exec(message)
-            ? `the address answered ${/HTTP (\d{3})/.exec(message)?.[1] ?? ''}`
-            : uploadFailureSentence(
-                uploadFailureOf(error),
-                Math.round(PICTURE_MAX_BYTES / (1024 * 1024)),
-              ).replace('The picture could not be uploaded: ', '');
+      /* the server's allowlist sentence of the features round names the four sites and reads whole
+         (docs/FEATURES.md 4.7, build/b7.md R2); the older lines keep their clause */
+      const allowlistSentence =
+        /Pictures can be fetched from these sites only:.*?\.\s+Upload the file instead/i.exec(
+          message,
+        )?.[0];
+      const reason =
+        allowlistSentence !== undefined
+          ? allowlistSentence.replace(/^Pictures/, 'pictures')
+          : /allowlist|not a public address|private address/i.test(message)
+            ? 'the page could not read it and the server may not fetch from this host'
+            : /no answer within|timed out|timeout/i.test(message)
+              ? 'the address did not answer'
+              : /HTTP (\d{3})/.exec(message)
+                ? `the address answered ${/HTTP (\d{3})/.exec(message)?.[1] ?? ''}`
+                : uploadFailureSentence(
+                    uploadFailureOf(error),
+                    Math.round(PICTURE_MAX_BYTES / (1024 * 1024)),
+                  ).replace('The picture could not be uploaded: ', '');
       throw new Error(urlFailureSentence(reason));
     }
     const outcome = await placePictureAsset(asset, where);
@@ -5678,9 +5701,7 @@ export function Editor({
        a tap places the caret there, a move on the selected table selects a range from it */
     const pressedRun = id !== null ? resolveRun(e.target, el) : null;
     const pressedCell =
-      pressedRun !== null &&
-      pressedRun.blockId === id &&
-      blockById(slideNow, id)?.type === 'table'
+      pressedRun !== null && pressedRun.blockId === id && blockById(slideNow, id)?.type === 'table'
         ? cellPointer(pressedRun.pointer)
         : null;
     const plan = objectPressPlan({
@@ -5757,7 +5778,12 @@ export function Editor({
         if (plan.range === true && plan.caret !== undefined) {
           /* the one selected table: a move from the cell selects a range and never moves the
              table, whose move surface is its ring band, its chip and its handles (2.1) */
-          armCellRangeDrag({ blockId: plan.blockId, anchor: plan.caret }, e.clientX, e.clientY, tap);
+          armCellRangeDrag(
+            { blockId: plan.blockId, anchor: plan.caret },
+            e.clientX,
+            e.clientY,
+            tap,
+          );
           return;
         }
         /* Commenting and Viewing mode select the object for a comment's anchor and never drag

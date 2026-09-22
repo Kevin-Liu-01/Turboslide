@@ -919,10 +919,16 @@ export function filterPalette(
     );
     return score > 0 ? [{ entry, score }] : [];
   });
+  /* two menu rows with one label and one score list the shallower path first (Insert › Logo
+     before Insert › Image › Logo and Format › Image › Replace image › Logo; the features round,
+     docs/FEATURES.md 4.3): a menu row's `meta` is its path, one ' › ' per level */
+  const depth = (entry: PaletteEntry) => (entry.meta ?? '').split('›').length;
   return PALETTE_GROUPS.flatMap((meta) => {
     const rows = scored
       .filter(({ entry }) => entry.group === meta.id)
-      .sort((a, b) => b.score - a.score)
+      .sort(
+        (a, b) => b.score - a.score || (meta.id === 'menus' ? depth(a.entry) - depth(b.entry) : 0),
+      )
       .map(({ entry }) => entry);
     return rows.length > 0 ? [{ group: meta, rows }] : [];
   });

@@ -3109,7 +3109,7 @@
         {
           "key": "source",
           "flag": "--source",
-          "type": "object | object | object | object",
+          "type": "object | object | object | object | object",
           "required": false,
           "description": "The provenance record; built from title, artist, license and sourceUrl when omitted"
         },
@@ -4525,6 +4525,141 @@
       "positionals": [],
       "options": [],
       "custom": [],
+      "mutates": false,
+      "milestone": "P1"
+    },
+    {
+      "action": "logo.search",
+      "usage": "turboslide logo search <query> --limit <limit> --kind <kind> --collection <collection>",
+      "command": [
+        "logo",
+        "search"
+      ],
+      "positionals": [
+        "query"
+      ],
+      "options": [
+        {
+          "key": "limit",
+          "flag": "--limit",
+          "type": "integer",
+          "required": false,
+          "description": "Defaults to 20"
+        },
+        {
+          "key": "kind",
+          "flag": "--kind",
+          "type": "\"symbol\" | \"wordmark\"",
+          "required": false,
+          "description": "wordmark lists the marks that have a wordmark of some kind",
+          "enum": [
+            "symbol",
+            "wordmark"
+          ]
+        },
+        {
+          "key": "collection",
+          "flag": "--collection",
+          "type": "\"brands\" | \"all\"",
+          "required": false,
+          "description": "brands (the default) is the brand and community marks; all adds the cloud service icons and the auth badges",
+          "enum": [
+            "brands",
+            "all"
+          ]
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "P1"
+    },
+    {
+      "action": "logo.insert",
+      "usage": "turboslide logo insert <slug> --variant <variant> --slide <slideId> --every-slide --kit --block <blockId>",
+      "command": [
+        "logo",
+        "insert"
+      ],
+      "positionals": [
+        "slug"
+      ],
+      "options": [
+        {
+          "key": "variant",
+          "flag": "--variant",
+          "type": "string",
+          "required": false,
+          "description": "default, mono, light, dark, wordmark, wordmarkLight or wordmarkDark; the appearance rule chooses when absent"
+        },
+        {
+          "key": "slideId",
+          "flag": "--slide",
+          "type": "string",
+          "required": false,
+          "description": "The slide the picture lands on; none stores the asset alone"
+        },
+        {
+          "key": "box",
+          "flag": "--box",
+          "type": "object",
+          "required": false,
+          "description": "The box in sheet px; the logo size in the free area of the body slot when absent"
+        },
+        {
+          "key": "everySlide",
+          "flag": "--every-slide",
+          "type": "boolean",
+          "required": false,
+          "description": "Use as this presentation’s logo on every slide: the kit’s mark and footer slots take the asset"
+        },
+        {
+          "key": "kit",
+          "flag": "--kit",
+          "type": "boolean",
+          "required": false,
+          "description": "The brand kit’s logo slots alone, for the Brand kit panel"
+        },
+        {
+          "key": "blockId",
+          "flag": "--block",
+          "type": "string",
+          "required": false,
+          "description": "Replace image: the picture whose asset is swapped"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "logo.refresh",
+      "usage": "turboslide logo refresh --dry-run",
+      "command": [
+        "logo",
+        "refresh"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "dryRun",
+          "flag": "--dry-run",
+          "type": "boolean",
+          "required": false,
+          "description": "The counts alone, no fetch and no write"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--dry-run"
+        }
+      ],
       "mutates": false,
       "milestone": "P1"
     },

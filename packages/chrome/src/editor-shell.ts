@@ -962,6 +962,8 @@ export const DIALOG_IDS = [
   'downloadOptions',
   'saveAsTemplate',
   'tailor',
+  /* the features round (docs/FEATURES.md 4.3): the Logo picker */
+  'logo',
 ] as const;
 export type DialogId = (typeof DIALOG_IDS)[number];
 
@@ -987,6 +989,9 @@ export function dialogIdOf(title: string, itemId?: string): DialogId | null {
       return 'saveAsTemplate';
     case 'Tailor for a customer':
       return 'tailor';
+    /* the features round (docs/FEATURES.md 4.3) */
+    case 'Logo':
+      return 'logo';
     case 'Slide numbers':
       return 'slideNumbers';
     case 'Details':
@@ -1968,6 +1973,8 @@ export const PANEL_SECTION_OF: Readonly<Record<string, string>> = {
   'format.altText': 'altText',
   'format.editData': 'chart',
   'format.image.imageOptions': 'picture',
+  /* the features round (docs/FEATURES.md 3.1 item 4): the Tabular figures row opens the Text section */
+  'format.text.tabularFigures': 'text',
 };
 
 /** The mark a text row toggles (SPEC-2 4.1), read from the effect's input. */

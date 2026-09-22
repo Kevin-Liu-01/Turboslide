@@ -61,7 +61,7 @@ export const TAILOR = {
   logoReplaceAltDoc:
     'Swaps every picture whose description names the customer for the file you choose',
   logoFile: 'Choose a picture',
-  logoFileDoc: 'A PNG, JPEG, WebP or SVG under 20 MB',
+  logoFileDoc: 'A PNG, JPEG, WebP or GIF under 20 MB',
   logoChosen: (name: string) => `Picture: ${name}`,
   skipHead: 'Slides to skip',
   skipDoc:

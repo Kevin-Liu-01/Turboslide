@@ -4,7 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { workedDocument } from '@turboslide/schema/fixtures';
 
-import { TAILOR_LOGO, TailorDialog, tailorCounts } from '../dialogs/Tailor';
+import { TailorDialog, tailorCounts } from '../dialogs/Tailor';
+import { TAILOR_LOGO } from '../menus/strings';
 import type { TailorLogoFinder } from '../dialogs/Tailor';
 import type { LogoRow } from '../logo-model';
 import type { EditorShellInput } from '../editor-shell';

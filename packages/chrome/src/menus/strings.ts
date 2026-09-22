@@ -953,6 +953,50 @@ export const ERRORS = {
 } as const;
 
 /**
+ * The Logo dialog's own words (the features round, docs/FEATURES.md 4.3; build/b1.md R3). The
+ * seller sentences the dialog shares with the server (the lead, the every slide check and its
+ * line, the empty state, the licence sentences) are `LOGO_WORDS` in logo-model.ts, so the dialog
+ * and the server say one thing; dialogs/Logo.tsx composes the two.
+ */
+export const LOGO_DIALOG = {
+  title: 'Logo',
+  search: 'Company name',
+  searchDoc: 'Type a company name; the first match is selected and Enter inserts it',
+  groups: { brand: 'Your brand', recent: 'Recent', results: 'Results' },
+  insert: 'Insert',
+  replace: 'Replace',
+  insertDoc: 'Adds the selected logo to the slide as a picture, sized as a logo',
+  replaceDoc: 'Puts the selected logo in the same box',
+  everySlideWaits:
+    'Arrives with the logo placement; until then a picture’s Use on every slide row does it',
+  legal: 'https://thesvg.org/legal',
+  upload: 'Upload',
+  uploadDoc: 'Opens the file chooser for a PNG, JPEG, WebP or GIF',
+  guidelines: 'brand guidelines',
+  site: 'the brand’s site',
+  more: 'More',
+  includeCloud: 'Include cloud service icons',
+  includeCloudDoc: 'Adds the AWS, Azure, Google Cloud and Kubernetes icon sets to the results',
+  searching: 'Searching thesvg.org',
+  tileDoc: (title: string, sentence: string) => `${title}, ${sentence}; a click inserts it`,
+  kitTileDoc: (name: string) => `${name}’s logo, from the brand kit`,
+  assetTileDoc: 'A logo this presentation already holds',
+  noMarkReplace: 'The theme mark cannot replace a picture. Pick a logo or upload a file',
+  noEditor: SNACKBARS.noFilePicker,
+  /** the sentence a route answer that is not JSON or not 200 reads as */
+  routeFailed: (status: number) =>
+    `thesvg.org’s index did not answer (${status}); try again in a minute`,
+} as const;
+
+/** The words of Tailor's Find the logo slot (docs/FEATURES.md 4.5; build/b1.md R3). */
+export const TAILOR_LOGO = {
+  find: (to: string) => `Find the ${to} logo`,
+  findDoc: 'Shows the logo thesvg.org has for this name; a click stores it for Apply',
+  found: (title: string) => `The ${title} logo is ready; Apply puts it where the old logo was`,
+  storing: 'Storing the logo',
+} as const;
+
+/**
  * The engineering words that never reach the default view (SPEC 12, R07 rule 22; SPEC-2 section
  * 10 adds the words of the canvas work, the marks and the process words `round`, `convert`,
  * `conversion` and `measure`). The default view words test greps every label, tooltip and stub

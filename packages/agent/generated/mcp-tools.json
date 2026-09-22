@@ -1032,6 +1032,95 @@
                 "kind"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "logo"
+                },
+                "provider": {
+                  "type": "string",
+                  "const": "thesvg"
+                },
+                "slug": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "variant": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "license": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 400
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "guidelines": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "fetchedAt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{8,64}$"
+                },
+                "sanitized": {
+                  "type": "object",
+                  "properties": {
+                    "removed": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "removed"
+                  ],
+                  "additionalProperties": false
+                },
+                "tint": {
+                  "type": "object",
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#[0-9a-fA-F]{6}$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#[0-9a-fA-F]{6}$"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "kind",
+                "provider",
+                "slug",
+                "variant",
+                "title",
+                "license",
+                "fetchedAt",
+                "digest"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -1757,6 +1846,95 @@
               },
               "required": [
                 "kind"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "logo"
+                },
+                "provider": {
+                  "type": "string",
+                  "const": "thesvg"
+                },
+                "slug": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "variant": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "license": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 400
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "guidelines": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "fetchedAt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{8,64}$"
+                },
+                "sanitized": {
+                  "type": "object",
+                  "properties": {
+                    "removed": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "removed"
+                  ],
+                  "additionalProperties": false
+                },
+                "tint": {
+                  "type": "object",
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#[0-9a-fA-F]{6}$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#[0-9a-fA-F]{6}$"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "kind",
+                "provider",
+                "slug",
+                "variant",
+                "title",
+                "license",
+                "fetchedAt",
+                "digest"
               ],
               "additionalProperties": false
             }
@@ -3492,7 +3670,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ],
                     "group": "Text",
                     "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
@@ -3525,7 +3711,32 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
+                  ]
+                },
+                "numerals": {
+                  "title": "Tabular figures",
+                  "x-inspector": {
+                    "label": "Tabular figures",
+                    "control": "toggle",
+                    "snap": [
+                      "tabular"
+                    ],
+                    "group": "Text",
+                    "help": "Every digit takes the same width, so numbers line up in a column"
+                  },
+                  "description": "Every digit takes the same width, so numbers line up in a column",
+                  "type": "string",
+                  "enum": [
+                    "tabular"
                   ]
                 }
               },
@@ -4125,7 +4336,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ],
                     "group": "Text",
                     "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
@@ -4158,7 +4377,32 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
+                  ]
+                },
+                "numerals": {
+                  "title": "Tabular figures",
+                  "x-inspector": {
+                    "label": "Tabular figures",
+                    "control": "toggle",
+                    "snap": [
+                      "tabular"
+                    ],
+                    "group": "Text",
+                    "help": "Every digit takes the same width, so numbers line up in a column"
+                  },
+                  "description": "Every digit takes the same width, so numbers line up in a column",
+                  "type": "string",
+                  "enum": [
+                    "tabular"
                   ]
                 }
               },
@@ -12671,7 +12915,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ],
                     "group": "Text",
                     "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
@@ -12704,7 +12956,32 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
+                  ]
+                },
+                "numerals": {
+                  "title": "Tabular figures",
+                  "x-inspector": {
+                    "label": "Tabular figures",
+                    "control": "toggle",
+                    "snap": [
+                      "tabular"
+                    ],
+                    "group": "Text",
+                    "help": "Every digit takes the same width, so numbers line up in a column"
+                  },
+                  "description": "Every digit takes the same width, so numbers line up in a column",
+                  "type": "string",
+                  "enum": [
+                    "tabular"
                   ]
                 }
               },
@@ -13905,7 +14182,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ],
                     "group": "Text",
                     "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
@@ -13938,7 +14223,32 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
+                  ]
+                },
+                "numerals": {
+                  "title": "Tabular figures",
+                  "x-inspector": {
+                    "label": "Tabular figures",
+                    "control": "toggle",
+                    "snap": [
+                      "tabular"
+                    ],
+                    "group": "Text",
+                    "help": "Every digit takes the same width, so numbers line up in a column"
+                  },
+                  "description": "Every digit takes the same width, so numbers line up in a column",
+                  "type": "string",
+                  "enum": [
+                    "tabular"
                   ]
                 }
               },
@@ -15220,7 +15530,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ],
                     "group": "Text",
                     "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
@@ -15253,7 +15571,32 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
+                  ]
+                },
+                "numerals": {
+                  "title": "Tabular figures",
+                  "x-inspector": {
+                    "label": "Tabular figures",
+                    "control": "toggle",
+                    "snap": [
+                      "tabular"
+                    ],
+                    "group": "Text",
+                    "help": "Every digit takes the same width, so numbers line up in a column"
+                  },
+                  "description": "Every digit takes the same width, so numbers line up in a column",
+                  "type": "string",
+                  "enum": [
+                    "tabular"
                   ]
                 }
               },
@@ -19879,7 +20222,15 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
                   ]
                 },
                 "text": {
@@ -19910,7 +20261,15 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
                   ]
                 }
               },
@@ -20205,7 +20564,15 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
                   ]
                 },
                 "text": {
@@ -20236,7 +20603,15 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
                   ]
                 }
               },
@@ -20539,7 +20914,15 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
                   ]
                 },
                 "text": {
@@ -20570,7 +20953,15 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
                   ]
                 }
               },
@@ -25208,7 +25599,15 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
                   ]
                 },
                 "text": {
@@ -25239,7 +25638,15 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
                   ]
                 }
               },
@@ -29519,7 +29926,15 @@
                   "jetbrains-mono",
                   "ibm-plex-sans",
                   "ibm-plex-mono",
-                  "fira-code"
+                  "fira-code",
+                  "geist",
+                  "geist-mono",
+                  "instrument-sans",
+                  "manrope",
+                  "bricolage-grotesque",
+                  "schibsted-grotesk",
+                  "newsreader",
+                  "fraunces"
                 ]
               },
               "name": {
@@ -30340,6 +30755,455 @@
       "items": {
         "$ref": "#/$defs/Finding"
       }
+    },
+    "LogoInsertInput": {
+      "$id": "#/$defs/LogoInsertInput",
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "The mark’s slug on thesvg.org"
+        },
+        "variant": {
+          "description": "default, mono, light, dark, wordmark, wordmarkLight or wordmarkDark; the appearance rule chooses when absent",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "slideId": {
+          "description": "The slide the picture lands on; none stores the asset alone",
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "box": {
+          "description": "The box in sheet px; the logo size in the free area of the body slot when absent",
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "w": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "h": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "x",
+            "y",
+            "w",
+            "h"
+          ],
+          "additionalProperties": false
+        },
+        "everySlide": {
+          "description": "Use as this presentation’s logo on every slide: the kit’s mark and footer slots take the asset",
+          "type": "boolean"
+        },
+        "kit": {
+          "description": "The brand kit’s logo slots alone, for the Brand kit panel",
+          "type": "boolean"
+        },
+        "blockId": {
+          "description": "Replace image: the picture whose asset is swapped",
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "slug",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "LogoInsertOutput": {
+      "$id": "#/$defs/LogoInsertOutput",
+      "type": "object",
+      "properties": {
+        "asset": {
+          "$ref": "#/$defs/Asset"
+        },
+        "blockId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "slideId": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "variant": {
+          "type": "string",
+          "description": "The variant the insert took"
+        }
+      },
+      "required": [
+        "asset",
+        "revision",
+        "variant"
+      ],
+      "additionalProperties": false
+    },
+    "LogoRefreshInput": {
+      "$id": "#/$defs/LogoRefreshInput",
+      "type": "object",
+      "properties": {
+        "dryRun": {
+          "description": "The counts alone, no fetch and no write",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "LogoRefreshOutput": {
+      "$id": "#/$defs/LogoRefreshOutput",
+      "type": "object",
+      "properties": {
+        "icons": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "brands": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cachedMarks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unavailable": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "updatedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "builtAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lastError": {
+          "type": "object",
+          "properties": {
+            "at": {
+              "type": "string"
+            },
+            "status": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "message"
+          ],
+          "additionalProperties": false
+        },
+        "progress": {
+          "type": "object",
+          "properties": {
+            "done": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "done",
+            "total"
+          ],
+          "additionalProperties": false
+        },
+        "fetched": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "dropped": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dryRun": {
+          "type": "boolean"
+        },
+        "upstream": {
+          "type": "string",
+          "enum": [
+            "network",
+            "fixture",
+            "down"
+          ]
+        }
+      },
+      "required": [
+        "icons",
+        "brands",
+        "cachedMarks",
+        "unavailable",
+        "updatedAt",
+        "builtAt",
+        "fetched",
+        "dropped",
+        "dryRun",
+        "upstream"
+      ],
+      "additionalProperties": false
+    },
+    "LogoSearchInput": {
+      "$id": "#/$defs/LogoSearchInput",
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "A company name, a slug, an alias or a category"
+        },
+        "limit": {
+          "description": "Defaults to 20",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "kind": {
+          "description": "wordmark lists the marks that have a wordmark of some kind",
+          "type": "string",
+          "enum": [
+            "symbol",
+            "wordmark"
+          ]
+        },
+        "collection": {
+          "description": "brands (the default) is the brand and community marks; all adds the cloud service icons and the auth badges",
+          "type": "string",
+          "enum": [
+            "brands",
+            "all"
+          ]
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "additionalProperties": false
+    },
+    "LogoSearchOutput": {
+      "$id": "#/$defs/LogoSearchOutput",
+      "type": "object",
+      "properties": {
+        "logos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "hex": {
+                "type": "string"
+              },
+              "variants": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "license": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "guidelines": {
+                "type": "string"
+              },
+              "collection": {
+                "type": "string"
+              },
+              "dateAdded": {
+                "type": "string"
+              },
+              "readsOnPaper": {
+                "type": "boolean"
+              },
+              "readsOnInk": {
+                "type": "boolean"
+              },
+              "unavailable": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "missing",
+                        "broken",
+                        "sanitized",
+                        "gradient"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "licenceSentence": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "slug",
+              "title",
+              "aliases",
+              "categories",
+              "variants",
+              "license",
+              "collection",
+              "licenceSentence"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "updatedAt": {
+          "description": "The time of the last complete index build",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lastError": {
+          "type": "object",
+          "properties": {
+            "at": {
+              "type": "string"
+            },
+            "status": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "message"
+          ],
+          "additionalProperties": false
+        },
+        "progress": {
+          "type": "object",
+          "properties": {
+            "done": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "done",
+            "total"
+          ],
+          "additionalProperties": false
+        },
+        "source": {
+          "type": "string",
+          "const": "thesvg.org"
+        },
+        "indexed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The marks the index holds in the collections searched"
+        }
+      },
+      "required": [
+        "logos",
+        "updatedAt",
+        "source",
+        "indexed"
+      ],
+      "additionalProperties": false
     },
     "MaterialCaptureInput": {
       "$id": "#/$defs/MaterialCaptureInput",
@@ -42570,7 +43434,15 @@
                           "jetbrains-mono",
                           "ibm-plex-sans",
                           "ibm-plex-mono",
-                          "fira-code"
+                          "fira-code",
+                          "geist",
+                          "geist-mono",
+                          "instrument-sans",
+                          "manrope",
+                          "bricolage-grotesque",
+                          "schibsted-grotesk",
+                          "newsreader",
+                          "fraunces"
                         ]
                       },
                       "text": {
@@ -42601,7 +43473,15 @@
                           "jetbrains-mono",
                           "ibm-plex-sans",
                           "ibm-plex-mono",
-                          "fira-code"
+                          "fira-code",
+                          "geist",
+                          "geist-mono",
+                          "instrument-sans",
+                          "manrope",
+                          "bricolage-grotesque",
+                          "schibsted-grotesk",
+                          "newsreader",
+                          "fraunces"
                         ]
                       }
                     },
@@ -44165,7 +45045,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   },
                   "text": {
@@ -44196,7 +45084,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   }
                 },
@@ -45569,7 +46465,15 @@
                             "jetbrains-mono",
                             "ibm-plex-sans",
                             "ibm-plex-mono",
-                            "fira-code"
+                            "fira-code",
+                            "geist",
+                            "geist-mono",
+                            "instrument-sans",
+                            "manrope",
+                            "bricolage-grotesque",
+                            "schibsted-grotesk",
+                            "newsreader",
+                            "fraunces"
                           ]
                         },
                         "text": {
@@ -45600,7 +46504,15 @@
                             "jetbrains-mono",
                             "ibm-plex-sans",
                             "ibm-plex-mono",
-                            "fira-code"
+                            "fira-code",
+                            "geist",
+                            "geist-mono",
+                            "instrument-sans",
+                            "manrope",
+                            "bricolage-grotesque",
+                            "schibsted-grotesk",
+                            "newsreader",
+                            "fraunces"
                           ]
                         }
                       },
@@ -52514,6 +53426,95 @@
                   "kind"
                 ],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "logo"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "const": "thesvg"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "variant": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "license": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "guidelines": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "fetchedAt": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{8,64}$"
+                  },
+                  "sanitized": {
+                    "type": "object",
+                    "properties": {
+                      "removed": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "removed"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "tint": {
+                    "type": "object",
+                    "properties": {
+                      "light": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "dark": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind",
+                  "provider",
+                  "slug",
+                  "variant",
+                  "title",
+                  "license",
+                  "fetchedAt",
+                  "digest"
+                ],
+                "additionalProperties": false
               }
             ]
           },
@@ -52965,6 +53966,95 @@
                 },
                 "required": [
                   "kind"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "logo"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "const": "thesvg"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "variant": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "license": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "guidelines": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "fetchedAt": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{8,64}$"
+                  },
+                  "sanitized": {
+                    "type": "object",
+                    "properties": {
+                      "removed": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "removed"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "tint": {
+                    "type": "object",
+                    "properties": {
+                      "light": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "dark": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind",
+                  "provider",
+                  "slug",
+                  "variant",
+                  "title",
+                  "license",
+                  "fetchedAt",
+                  "digest"
                 ],
                 "additionalProperties": false
               }
@@ -54587,6 +55677,95 @@
                 },
                 "required": [
                   "kind"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "logo"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "const": "thesvg"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "variant": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "license": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "guidelines": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "fetchedAt": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{8,64}$"
+                  },
+                  "sanitized": {
+                    "type": "object",
+                    "properties": {
+                      "removed": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "removed"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "tint": {
+                    "type": "object",
+                    "properties": {
+                      "light": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "dark": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind",
+                  "provider",
+                  "slug",
+                  "variant",
+                  "title",
+                  "license",
+                  "fetchedAt",
+                  "digest"
                 ],
                 "additionalProperties": false
               }
@@ -57888,7 +59067,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   },
                   "text": {
@@ -57919,7 +59106,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   }
                 },
@@ -58235,7 +59430,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   },
                   "text": {
@@ -58266,7 +59469,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   }
                 },
@@ -58571,7 +59782,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   },
                   "text": {
@@ -58602,7 +59821,15 @@
                       "jetbrains-mono",
                       "ibm-plex-sans",
                       "ibm-plex-mono",
-                      "fira-code"
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
                     ]
                   }
                 },
@@ -58816,7 +60043,15 @@
                     "jetbrains-mono",
                     "ibm-plex-sans",
                     "ibm-plex-mono",
-                    "fira-code"
+                    "fira-code",
+                    "geist",
+                    "geist-mono",
+                    "instrument-sans",
+                    "manrope",
+                    "bricolage-grotesque",
+                    "schibsted-grotesk",
+                    "newsreader",
+                    "fraunces"
                   ]
                 },
                 "name": {
@@ -58870,6 +60105,494 @@
       },
       "annotations": {
         "title": "Fonts",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "milestone": "P1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_logo_search",
+      "action": "logo.search",
+      "description": "Searches the cached index of thesvg.org’s brand marks by title, slug, alias and category, ranked prefix, then word start, then substring, brands before community; answers each mark’s variants, its licence as recorded with the seller’s sentence, its brand site and guidelines and whether its default reads on paper and on ink, with the index’s date and its last upstream failure.",
+      "inputSchema": {
+        "$id": "#/$defs/LogoSearchInput",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "A company name, a slug, an alias or a category"
+          },
+          "limit": {
+            "description": "Defaults to 20",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "kind": {
+            "description": "wordmark lists the marks that have a wordmark of some kind",
+            "type": "string",
+            "enum": [
+              "symbol",
+              "wordmark"
+            ]
+          },
+          "collection": {
+            "description": "brands (the default) is the brand and community marks; all adds the cloud service icons and the auth badges",
+            "type": "string",
+            "enum": [
+              "brands",
+              "all"
+            ]
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/LogoSearchOutput",
+        "type": "object",
+        "properties": {
+          "logos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slug": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "aliases": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "hex": {
+                  "type": "string"
+                },
+                "variants": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "license": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "guidelines": {
+                  "type": "string"
+                },
+                "collection": {
+                  "type": "string"
+                },
+                "dateAdded": {
+                  "type": "string"
+                },
+                "readsOnPaper": {
+                  "type": "boolean"
+                },
+                "readsOnInk": {
+                  "type": "boolean"
+                },
+                "unavailable": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "at": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "reason": {
+                        "type": "string",
+                        "enum": [
+                          "missing",
+                          "broken",
+                          "sanitized",
+                          "gradient"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "at"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "licenceSentence": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "slug",
+                "title",
+                "aliases",
+                "categories",
+                "variants",
+                "license",
+                "collection",
+                "licenceSentence"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "updatedAt": {
+            "description": "The time of the last complete index build",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastError": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string"
+              },
+              "status": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          "progress": {
+            "type": "object",
+            "properties": {
+              "done": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "done",
+              "total"
+            ],
+            "additionalProperties": false
+          },
+          "source": {
+            "type": "string",
+            "const": "thesvg.org"
+          },
+          "indexed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The marks the index holds in the collections searched"
+          }
+        },
+        "required": [
+          "logos",
+          "updatedAt",
+          "source",
+          "indexed"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Find a logo",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "milestone": "P1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_logo_insert",
+      "action": "logo.insert",
+      "description": "Stores a thesvg.org mark on the deck as an asset with the role logo, PNG twins at 3x of the logo size, the sanitized SVG as its source file and a source record naming the mark, its licence and its guidelines, never the source’s address; with slideId it places the picture at the logo size in the free area of the body slot, with blockId it swaps that picture’s asset and keeps the box, with everySlide or kit it writes the brand kit’s logo slots in the same write.",
+      "inputSchema": {
+        "$id": "#/$defs/LogoInsertInput",
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "The mark’s slug on thesvg.org"
+          },
+          "variant": {
+            "description": "default, mono, light, dark, wordmark, wordmarkLight or wordmarkDark; the appearance rule chooses when absent",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "slideId": {
+            "description": "The slide the picture lands on; none stores the asset alone",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "box": {
+            "description": "The box in sheet px; the logo size in the free area of the body slot when absent",
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "w": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "h": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "w",
+              "h"
+            ],
+            "additionalProperties": false
+          },
+          "everySlide": {
+            "description": "Use as this presentation’s logo on every slide: the kit’s mark and footer slots take the asset",
+            "type": "boolean"
+          },
+          "kit": {
+            "description": "The brand kit’s logo slots alone, for the Brand kit panel",
+            "type": "boolean"
+          },
+          "blockId": {
+            "description": "Replace image: the picture whose asset is swapped",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slug",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/LogoInsertOutput",
+        "type": "object",
+        "properties": {
+          "asset": {
+            "$ref": "#/$defs/Asset"
+          },
+          "blockId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "variant": {
+            "type": "string",
+            "description": "The variant the insert took"
+          }
+        },
+        "required": [
+          "asset",
+          "revision",
+          "variant"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Insert a logo",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "milestone": "P1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_logo_refresh",
+      "action": "logo.refresh",
+      "description": "Rebuilds the cached logo index from thesvg.org’s manifest inside its time budget, marks the variants that answer 404 unavailable, drops the marks the source removed with their cached files and answers the counts; with dryRun it answers the counts, the index’s date, its last failure and its progress without an upstream fetch.",
+      "inputSchema": {
+        "$id": "#/$defs/LogoRefreshInput",
+        "type": "object",
+        "properties": {
+          "dryRun": {
+            "description": "The counts alone, no fetch and no write",
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/LogoRefreshOutput",
+        "type": "object",
+        "properties": {
+          "icons": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "brands": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "cachedMarks": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unavailable": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "updatedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "builtAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastError": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string"
+              },
+              "status": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          "progress": {
+            "type": "object",
+            "properties": {
+              "done": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "done",
+              "total"
+            ],
+            "additionalProperties": false
+          },
+          "fetched": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "dropped": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "upstream": {
+            "type": "string",
+            "enum": [
+              "network",
+              "fixture",
+              "down"
+            ]
+          }
+        },
+        "required": [
+          "icons",
+          "brands",
+          "cachedMarks",
+          "unavailable",
+          "updatedAt",
+          "builtAt",
+          "fetched",
+          "dropped",
+          "dryRun",
+          "upstream"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Refresh the logo index",
         "readOnlyHint": true,
         "destructiveHint": false,
         "idempotentHint": true

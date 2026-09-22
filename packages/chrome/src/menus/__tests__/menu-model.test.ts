@@ -52,6 +52,8 @@ import {
   walkItems,
 } from '../model.ts';
 import { STUB_PREFIX, forbiddenWordsIn } from '../strings.ts';
+import { filterPalette } from '../../palette-data.ts';
+import type { PaletteEntry } from '../../palette-data.ts';
 import { TOOLBAR_TAILS, TOOLBAR_TAIL_END } from '../toolbar-tails.ts';
 
 // The menu model (SPEC 2.13, 14.2; SPEC-2 section 4; SPEC-3 section 13): every row of SPEC
@@ -253,6 +255,8 @@ const SPEC_ROWS: Row[] = [
   ]),
   row('insert', 'now', ['insert.image.byUrl']),
   row('insert', 'now', ['insert.image.fromThisPresentation']),
+  /* the features round (docs/FEATURES.md 4.3): the Logo picker, in the menu and in the Image submenu */
+  row('insert', 'now', ['insert.logo', 'insert.image.logo']),
   row('insert', 'now', ['insert.textBox']),
   /* SPEC-2 12: Audio and Video are present with the recording clause */
   row('insert', 'later', ['insert.audio', 'insert.video'], { was: 'omit' }),
@@ -317,6 +321,8 @@ const SPEC_ROWS: Row[] = [
   row('format', 'now', ['format.text.superscript', 'format.text.subscript'], { was: 'omit' }),
   /* the product round (docs/PRODUCT.md 4.2): the Font row opens the toolbar's dropdown */
   row('format', 'now', ['format.text.font']),
+  /* the features round (docs/FEATURES.md 3.1 item 4): the Tabular figures row */
+  row('format', 'now', ['format.text.tabularFigures']),
   row('format', 'now', [
     'format.text.size',
     'format.text.size.increase',
@@ -390,6 +396,8 @@ const SPEC_ROWS: Row[] = [
     'format.image.replaceImage',
     'format.image.replaceImage.upload',
     'format.image.replaceImage.byUrl',
+    /* the features round (docs/FEATURES.md 4.4): Replace image > Logo */
+    'format.image.replaceImage.logo',
     'format.image.replaceImage.fromThisPresentation',
   ]),
   row('format', 'now', ['format.image.resetImage'], { was: 'later' }),
@@ -611,10 +619,12 @@ const COUNTS: Record<string, Counts> = {
   file: [26, 5, 5],
   edit: [11, 0, 0],
   view: [16, 1, 2],
-  /* 22 with the Shapes gallery as its own row, All shapes (docs/FOCUS.md section 4, cycle 2) */
-  insert: [22, 3, 5],
-  /* the product round adds Font, Add a caption and Use on every slide (docs/PRODUCT.md 4.2, section 2 rank 10, 4.4) */
-  format: [31, 2, 0],
+  /* 22 with the Shapes gallery as its own row, All shapes (docs/FOCUS.md section 4, cycle 2); 23
+     with the features round's Logo row (docs/FEATURES.md 4.3) */
+  insert: [23, 3, 5],
+  /* the product round adds Font, Add a caption and Use on every slide (docs/PRODUCT.md 4.2, section 2 rank 10, 4.4);
+     the features round adds Tabular figures (docs/FEATURES.md 3.1 item 4) */
+  format: [32, 2, 0],
   /* Edit theme opens the Brand kit panel since the product round (docs/PRODUCT.md 4.1) */
   slide: [9, 1, 0],
   arrange: [7, 0, 0],
@@ -762,11 +772,12 @@ describe('the SPEC rows', () => {
     }
     const zero: Counts = [0, 0, 0];
     const total = Object.values(derived).reduce(add, zero);
-    /* 147 with the Shapes gallery row, All shapes (docs/FOCUS.md section 4, cycle 2) */
-    expect(total).toEqual([158, 15, 24]);
+    /* 147 with the Shapes gallery row, All shapes (docs/FOCUS.md section 4, cycle 2); 160 with the
+       features round's Logo and Tabular figures rows (docs/FEATURES.md 4.3, 3.1 item 4) */
+    expect(total).toEqual([160, 15, 24]);
     /* 188 with the Shapes gallery row (docs/FOCUS.md section 4, cycle 2); 197 with the product
-       round's nine rows (docs/PRODUCT.md sections 2, 4, 5 and 6) */
-    expect(total[0] + total[1] + total[2]).toBe(197);
+       round's nine rows (docs/PRODUCT.md sections 2, 4, 5 and 6); 199 with the features round's two */
+    expect(total[0] + total[1] + total[2]).toBe(199);
   });
 
   it('flips the nine rows of SPEC-3 section 13 away from their round two status, each Now row with a live effect', () => {
@@ -2865,5 +2876,58 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       expect(itemById(id).status, id).toBe('later');
       expect(isPresent(itemById(id), OFF), id).toBe(false);
     }
+  });
+});
+
+describe('the features round, ship one: the Logo rows and the Tabular figures row (docs/FEATURES.md 4.3, 3.1 item 4, 7.3)', () => {
+  const OFF: MenuContext = DEFAULT_MENU_CONTEXT;
+  const ids = (items: ReadonlyArray<MenuItem>, ctx: MenuContext): string[] =>
+    visibleItems(items, { contextOnly: true, context: ctx }).flatMap((item) => [
+      item.id,
+      ...(item.items === undefined ? [] : ids(item.items, ctx)),
+    ]);
+
+  it('lists Insert > Logo under the Image row in the default view, and Logo inside the Image submenu after Upload from computer', () => {
+    const insert = ids(MENUS.find((m) => m.id === 'insert')!.items, OFF);
+    expect(insert.indexOf('insert.logo')).toBeGreaterThan(insert.indexOf('insert.image'));
+    expect(insert.indexOf('insert.logo')).toBeLessThan(insert.indexOf('insert.textBox'));
+    expect(insert.indexOf('insert.image.logo')).toBe(insert.indexOf('insert.image.upload') + 1);
+    for (const id of ['insert.logo', 'insert.image.logo', 'format.image.replaceImage.logo']) {
+      const item = itemById(id);
+      expect(item.status, id).toBe('now');
+      expect(item.advanced, `${id} in the default view`).not.toBe(true);
+      expect(isPresent(item, OFF), `${id} present`).toBe(true);
+      expect(item.effect).toEqual({ kind: 'dialog', title: 'Logo' });
+      expect(resolveLabel(item, OFF)).toBe('Logo');
+    }
+    expect(itemById('insert.logo').icon).toBe('tag');
+  });
+
+  it('answers Search the menus "logo" with Logo first, and "line up numbers" with Tabular figures', () => {
+    /* the entries the way ToolFinder.tsx builds them from the finder rows, ranked by filterPalette */
+    const entries: PaletteEntry[] = finderRows(OFF).map((row) => ({
+      id: row.id,
+      group: 'menus',
+      title: row.title,
+      meta: row.path,
+      icon: row.item.icon ?? 'document',
+      terms: row.terms,
+      run: { kind: 'call', call: () => undefined },
+    }));
+    const listed = (query: string) =>
+      filterPalette(entries, query)
+        .find((group) => group.group.id === 'menus')
+        ?.rows.map((entry) => entry.id.replace(/^menu:/, '')) ?? [];
+    expect(listed('logo')[0]).toBe('insert.logo');
+    expect(listed('logo')).toContain('insert.image.logo');
+    expect(listed('logo')).toContain('format.image.replaceImage.logo');
+    expect(listed('line up numbers')).toContain('format.text.tabularFigures');
+    const row = itemById('format.text.tabularFigures');
+    expect(row.status).toBe('now');
+    expect(row.effect).toEqual({ kind: 'panel', title: 'Format options' });
+    expect(row.enabled).toBe('textBlockSelected');
+    expect(tooltipDoc(row, OFF)).toBe(
+      'Every digit takes the same width, so numbers line up in a column',
+    );
   });
 });

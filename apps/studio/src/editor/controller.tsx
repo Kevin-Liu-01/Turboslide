@@ -214,6 +214,7 @@ import { applyTheme, readTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import {
+  SERVER_SIDE_WINDOW_ACTIONS_F1,
   SERVER_SIDE_WINDOW_ACTIONS_GS3,
   SERVER_SIDE_WINDOW_ACTIONS_P1,
   runDeckAction,
@@ -3607,6 +3608,9 @@ export function createEditorController(init: {
   /* the template ids of the product round (docs/PRODUCT.md 4.3): each is a read or a write of the
      collection's templates folder, so every one runs on the server through runDeckAction */
   for (const id of SERVER_SIDE_WINDOW_ACTIONS_P1) serverSide(id);
+  /* the logo picker's ids of the features round (docs/FEATURES.md 4.11; build/b6.md R3): the
+     index and the store live on the server, so the search, the insert and the refresh run there */
+  for (const id of SERVER_SIDE_WINDOW_ACTIONS_F1) serverSide(id);
   /* Forget this browser (SPEC-3 7.4; VERIFICATION-3 finding 12): the server mints the new
      anonymous principal and its cookie (the response's Set-Cookie replaces the old one), then
      this page clears the localStorage and IndexedDB mirrors together and reloads as the new

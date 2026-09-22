@@ -58,3 +58,6 @@ docs/gslides-parity/sync/audit-*/**/*.json
 docs/gslides-parity/features/audit-*/**/*.json
 docs/gslides-parity/product/audit-*/**/*.json
 docs/gslides-parity/product/build/*/**/*.json
+# The features round: the lanes' run JSON under their evidence folders (build/b1/ to build/b4/,
+# build/integrator/); the notes beside them stay under the formatter (build/b4.md section 6)
+docs/gslides-parity/features/build/*/**/*.json

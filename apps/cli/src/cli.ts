@@ -22,6 +22,7 @@ import { judge } from './commands/judge.ts';
 import { lease } from './commands/lease.ts';
 import { line } from './commands/line.ts';
 import { lint } from './commands/lint.ts';
+import { logo } from './commands/logo.ts';
 import { material } from './commands/material.ts';
 import { mcp } from './commands/mcp.ts';
 import { render } from './commands/render.ts';
@@ -161,6 +162,11 @@ Commands
                                     a page at 1440 by 900 at 2x through a per-site recipe, with identical-region detail crops
   asset dither <id> [--gamma --black --white --crop --plate <side>] | --all-two-tone --from-recorded [--verify-cells]
                                     re-run a two-tone treatment, or read the committed twins back and verify them
+  logo search <query> [--limit <n>] [--kind symbol|wordmark] [--collection brands|all]
+                                    thesvg.org's marks by name, each with its licence sentence, on the studio --to names (logo.search)
+  logo insert <slug> [--variant <variant>] [--slide <slideId>] [--every-slide] [--kit] [--block <blockId>]
+                                    a mark stored as a logo asset and placed at the logo size, swapped into a box, or set as the kit's (logo.insert)
+  logo refresh [--dry-run]          rebuild the studio's logo index, or read its counts (logo.refresh)
   material list [<id>]              the material catalog: paper:* with uniforms and presets, proto:* as unavailable
   material capture <id> --anchor 4000,5500,7000 [--preset <name>] [--uniforms <recipe.json>] [--set u_x=v] [--two-tone --plate <side>]
                                     frozen frames at 3200 by 1800 as assets with recipe keys
@@ -285,6 +291,7 @@ const COMMANDS: Record<string, Command> = {
   diagram,
   sections,
   asset,
+  logo,
   material,
   version,
   lease,

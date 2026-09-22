@@ -111,6 +111,8 @@
         "brand.set",
         "brand.reset",
         "font.list",
+        "logo.search",
+        "logo.insert",
         "presence.list",
         "presence.follow",
         "presence.unfollow",
@@ -322,6 +324,8 @@
     "brand.set",
     "brand.reset",
     "font.list",
+    "logo.search",
+    "logo.insert",
     "presence.list",
     "presence.follow",
     "presence.unfollow",
@@ -1153,6 +1157,20 @@
       "mutates": false,
       "milestone": "P1",
       "group": "render"
+    },
+    "logo.search": {
+      "label": "Find a logo",
+      "doc": "Searches the cached index of thesvg.org’s brand marks by title, slug, alias and category, ranked prefix, then word start, then substring, brands before community; answers each mark’s variants, its licence as recorded with the seller’s sentence, its brand site and guidelines and whether its default reads on paper and on ink, with the index’s date and its last upstream failure.",
+      "mutates": false,
+      "milestone": "P1",
+      "group": "asset"
+    },
+    "logo.insert": {
+      "label": "Insert a logo",
+      "doc": "Stores a thesvg.org mark on the deck as an asset with the role logo, PNG twins at 3x of the logo size, the sanitized SVG as its source file and a source record naming the mark, its licence and its guidelines, never the source’s address; with slideId it places the picture at the logo size in the free area of the body slot, with blockId it swaps that picture’s asset and keeps the box, with everySlide or kit it writes the brand kit’s logo slots in the same write.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "asset"
     },
     "presence.list": {
       "label": "Collaborators",

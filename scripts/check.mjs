@@ -237,6 +237,13 @@ const OVERWRITE_ALLOW = [
   // at; a template file is served through the studio's own routes, never as a public asset the
   // assets route hands out (the ship step of the product round; check step 6 named the two sites)
   'packages/store/src/blob-templates.ts',
+  // the logo index and the open licence mark cache of the features round (docs/FEATURES.md 4.2,
+  // 4.10; build/b6.md item 5): `system/logo-index.json` is one record every refresh rewrites whole
+  // and `system/logos/<slug>/<variant>.svg` is the sanitized file of a mark under an open licence,
+  // rewritten with the same bytes by whichever instance fetched it; both live under the system
+  // prefix, never under a deck's public asset prefix (the integrator, ship one; check step 6 named
+  // the two sites)
+  'apps/studio/src/server/logo-index.ts',
 ];
 
 // MILESTONES.md, M1 acceptance, in order. `needs` marks the environment a step depends on.

@@ -452,9 +452,11 @@ describe('the agent parity walk over the fixture deck', () => {
     expect(refused.code).toBe(2);
   });
 
-  test('diagram insert lands one group of shapes, texts and attached lines through the bound templates', async () => {
+  test('diagram insert lands one group of labelled shapes and attached lines through the bound templates', async () => {
     // B5's templates are bound as deps.diagrams at merge 2 (SPEC-2 2.8.3); the fixture's diagram
-    // slide already holds a process diagram, so a second one lands beside it with its own group tag
+    // slide already holds a process diagram, so a second one lands beside it with its own group tag.
+    // Since the features round a step is one shape carrying its label (docs/FEATURES.md 2.2 rank
+    // 9) and the connectors bind to the freed ids of the second diagram's steps (build/b3.md R8)
     const r = await run([
       'diagram',
       'insert',
@@ -477,12 +479,23 @@ describe('the agent parity walk over the fixture deck', () => {
     expect(groups.size).toBe(2);
     const fresh = [...groups].find((g) => g !== 'process-1');
     const members = blocks(inserted).filter((b) => b.pos?.group === fresh);
-    expect(members.filter((b) => b.type === 'text')).toHaveLength(4);
-    expect(
-      members.filter(
-        (b) => b.type === 'shape' && (b as { connect?: unknown }).connect !== undefined,
-      ),
-    ).toHaveLength(3);
+    expect(members.filter((b) => b.type === 'text')).toHaveLength(0);
+    const steps = members.filter(
+      (b) => b.type === 'shape' && typeof (b as { text?: unknown }).text === 'string',
+    );
+    expect(steps).toHaveLength(4);
+    const memberIds = new Set(members.map((b) => b.id));
+    const connectors = members.filter(
+      (b) => b.type === 'shape' && (b as { connect?: unknown }).connect !== undefined,
+    );
+    expect(connectors).toHaveLength(3);
+    for (const connector of connectors) {
+      const connect = (
+        connector as { connect?: { start?: { block: string }; end?: { block: string } } }
+      ).connect;
+      expect(connect?.start?.block !== undefined && memberIds.has(connect.start.block)).toBe(true);
+      expect(connect?.end?.block !== undefined && memberIds.has(connect.end.block)).toBe(true);
+    }
   });
 
   test('the reads carry the new fields', async () => {

@@ -28,6 +28,16 @@ export const IDS = [
   'charts.light-appearance',
   'charts.present',
   'charts.reload',
+  /* the features round, ship one (docs/FEATURES.md 2.2 ranks 1, 7, 10, 11 and 12): the grid owns
+     its keys, the double click and the mark click, Legend > None from the tail, one control each
+     in the panel and the visible remove controls; driven by `featuresRound` below */
+  'charts.grid.type-to-edit',
+  'charts.grid.escape-stays',
+  'charts.double-click.opens-data',
+  'charts.mark.click-selects-cell',
+  'charts.legend.none-from-toolbar',
+  'charts.panel.no-duplicate-controls',
+  'charts.grid.remove-visible',
 ];
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -792,5 +802,382 @@ export async function run(t) {
       };
     },
   );
+  await featuresRound(t, S, {
+    block,
+    svgFacts,
+    charts,
+    C,
+    openPanel,
+    closePanel,
+    pickTailOption,
+    undo,
+  });
   await t.advancedBack('the charts rows');
+}
+
+/**
+ * The features round, ship one (docs/FEATURES.md 2.2 ranks 1, 7, 10, 11 and 12; the rows
+ * `charts.grid.type-to-edit` to `charts.grid.remove-visible`): the grid owns its keys, a double
+ * click on the chart opens its numbers and a click on a mark selects its cell, Legend > None from
+ * the tail writes none, the panel lists each control once and the grid's remove controls are
+ * visible. The charts are the area's own inserts (C the bar chart, `charts.column` the column
+ * chart). The Edit data button under the chart (`bar.chart.editData`) is B3's new control: a
+ * build without it and without the double click reads not built with its id (docs/PRODUCT.md 8.1).
+ */
+async function featuresRound(t, S, h) {
+  const { page } = t;
+  const LANE = 'B3';
+  const C = h.C;
+  const value = async (r, c) => (await h.block(C))?.series?.[c - 1]?.values?.[r - 1] ?? null;
+  const revision = async () => (await t.state()).revision;
+  /** The grid's active cell (`is-active`) and its open input, read from the panel. */
+  const gridFacts = () =>
+    page.evaluate(() => {
+      const active = document.querySelector(
+        '[data-control^="formatOptions.chart.cell."].is-active, [data-control^="formatOptions.chart.cell."][aria-selected="true"]',
+      );
+      const input = document.querySelector('[data-control="formatOptions.chart.edit"]');
+      const focus = document.activeElement;
+      return {
+        active:
+          active?.getAttribute('data-control')?.replace('formatOptions.chart.cell.', '') ?? null,
+        input: input ? String(input.value) : null,
+        panel: document.querySelector('[data-control="panel.formatOptions"]') !== null,
+        focusInGrid: Boolean(focus?.closest('[data-control="formatOptions.chart.grid"]')),
+        focus: focus
+          ? `${focus.tagName.toLowerCase()}${focus.getAttribute('data-control') ? `[${focus.getAttribute('data-control')}]` : ''}`
+          : 'none',
+      };
+    });
+
+  await t.step(
+    'charts.grid.type-to-edit',
+    'Edit data; click the 1,1 value cell; the keys 42 at human speed; Enter',
+    'the cell opens with "4" and commits 42 on Enter; the stage\'s selection is unchanged',
+    async () => {
+      await h.openPanel();
+      const before = await value(1, 1);
+      const rev0 = await revision();
+      const facts0 = await t.selectionFacts(C);
+      await t.clickControl('formatOptions.chart.cell.1.1');
+      await t.sleep(200);
+      await t.typeHuman('4');
+      await t.sleep(250);
+      const mid = await gridFacts();
+      await t.typeHuman('2');
+      await t.sleep(200);
+      await t.press('Enter');
+      await t.settled();
+      const after = await t
+        .pollUntil(
+          () => value(1, 1),
+          (v) => v === 42,
+          8000,
+        )
+        .catch(() => value(1, 1));
+      const read = (await t.invoke('slide.get', { slideId: S }).catch(() => null)) !== null;
+      const facts1 = await t.selectionFacts(C);
+      const rev1 = await revision();
+      if (after === 42) await h.undo();
+      await h.closePanel();
+      return {
+        ok:
+          mid.input !== null &&
+          mid.input.startsWith('4') &&
+          after === 42 &&
+          facts1.selected &&
+          facts1.chip === facts0.chip &&
+          !facts1.editing,
+        observed: `value ${before} -> ${after} (revision ${rev0} -> ${rev1}); after the first key the open input read ${mid.input === null ? 'no input (the key went nowhere)' : `"${mid.input}"`} with the active cell ${mid.active ?? 'none'}, focus ${mid.focus}; slide.get answered ${read}; stage selection ${t.describeSelection(facts1)}${mid.input !== null ? '' : ` (FEATURES.md 2.2 rank 1, ${LANE})`}`,
+      };
+    },
+  );
+
+  await t.step(
+    'charts.grid.escape-stays',
+    'open the 1,1 value cell with a key; Escape; Escape again',
+    'the first Escape restores the value and keeps the panel with the cell active; the second leaves the grid and keeps the chart selected',
+    async () => {
+      await h.openPanel();
+      const before = await value(1, 1);
+      await t.clickControl('formatOptions.chart.cell.1.1');
+      await t.sleep(200);
+      await t.typeHuman('9');
+      await t.sleep(250);
+      const opened = await gridFacts();
+      await t.press('Escape');
+      await t.sleep(400);
+      const first = await gridFacts();
+      const kept = (await value(1, 1)) === before;
+      await t.press('Escape');
+      await t.sleep(400);
+      const second = await gridFacts();
+      const facts = await t.selectionFacts(C);
+      await h.closePanel();
+      return {
+        ok:
+          opened.input !== null &&
+          first.input === null &&
+          kept &&
+          first.panel &&
+          first.active === '1.1' &&
+          !second.focusInGrid &&
+          facts.selected,
+        observed: `opened with "${opened.input ?? 'no input'}"; after Escape: input ${first.input === null ? 'closed' : `"${first.input}"`}, value ${kept ? 'restored' : 'changed'}, panel ${first.panel}, active cell ${first.active ?? 'none'}; after the second Escape: focus ${second.focus} (in the grid ${second.focusInGrid}), panel ${second.panel}; chart ${t.describeSelection(facts)}${opened.input !== null ? '' : ` (FEATURES.md 2.2 rank 1, ${LANE})`}`,
+      };
+    },
+  );
+
+  await t.step(
+    'charts.double-click.opens-data',
+    'double click the chart; then the Edit data button under the selected chart',
+    'Format options opens on Chart data with the 1,1 cell active within 500 ms; the button opens the same section',
+    async () => {
+      await t.clearAll();
+      await h.closePanel();
+      const b = await t.boxOf(C);
+      const c = t.center(b.free);
+      const t0 = Date.now();
+      await t.dblclickAt(c.x, c.y);
+      const opened = await t
+        .pollUntil(gridFacts, (g) => g.panel && g.active === '1.1', 500)
+        .then(() => Date.now() - t0)
+        .catch(() => null);
+      const after = await gridFacts();
+      const chip = await t.chip();
+      await h.closePanel();
+      await t.clearAll();
+      await t.selectObject(C);
+      const button = await t.visible('bar.chart.editData');
+      let byButton = null;
+      if (button) {
+        await t.clickControl('bar.chart.editData');
+        byButton = await t
+          .pollUntil(gridFacts, (g) => g.panel && g.active !== null, 3000)
+          .then(() => true)
+          .catch(() => false);
+        await h.closePanel();
+      }
+      if (opened === null && !button)
+        return t.notBuilt(
+          'bar.chart.editData',
+          LANE,
+          `the double click opened ${after.panel ? 'the panel without an active cell' : 'nothing'} (chip "${chip}") and no Edit data button sits under the selected chart (FEATURES.md 2.2 rank 7)`,
+        );
+      return {
+        ok: opened !== null && button && byButton === true,
+        observed: `double click: ${opened === null ? `no Chart data with the 1,1 cell within 500 ms (panel ${after.panel}, active ${after.active ?? 'none'})` : `Chart data with the 1,1 cell active after ${opened} ms`}; chip "${chip}"; Edit data button under the chart ${button}${byButton === null ? '' : `, opened the section ${byButton}`}`,
+      };
+    },
+  );
+
+  await t.step(
+    'charts.mark.click-selects-cell',
+    'select the column chart; click its second bar',
+    "the bar's cell is active in the grid and the readout shows the value",
+    async () => {
+      const K = h.charts.column ?? C;
+      await t.clearAll();
+      await t.selectObject(K);
+      const bars = await page.evaluate((id) => {
+        const inner = document.querySelector(
+          `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`,
+        );
+        const svg = inner?.tagName.toLowerCase() === 'svg' ? inner : inner?.querySelector('svg');
+        return [...(svg?.querySelectorAll('.series rect') ?? [])].map((r) => {
+          const b = r.getBoundingClientRect();
+          return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+        });
+      }, K);
+      if (bars.length < 2)
+        return { ok: false, observed: `${bars.length} bar(s) drawn on the column chart` };
+      await t.clickAt(bars[1].x, bars[1].y);
+      await t.sleep(500);
+      const g = await gridFacts();
+      const readout = await t.readout();
+      const want = (await h.block(K))?.series?.[0]?.values?.[1] ?? null;
+      const cellOk = g.active === '2.1';
+      const readoutOk = readout !== null && want !== null && readout.includes(String(want));
+      if (await t.visible('panel.formatOptions')) await h.closePanel();
+      await t.clearAll();
+      return {
+        ok: cellOk && readoutOk,
+        observed: `after the click on the second bar: active cell ${g.active ?? 'none'} (panel ${g.panel}), readout ${readout === null ? 'none' : `"${readout}"`}, the value ${want}${cellOk ? '' : ` (FEATURES.md 2.2 rank 7, ${LANE})`}`,
+      };
+    },
+  );
+
+  await t.step(
+    'charts.legend.none-from-toolbar',
+    "the tail's Legend list, None; read the check mark; then Right",
+    "legend: 'none' is written and no legend is drawn; the list checks None; Right restores it",
+    async () => {
+      await t.clearAll();
+      await t.selectObject(C);
+      const before = (await h.block(C))?.legend ?? null;
+      const none = await h.pickTailOption(
+        'toolbar.legend',
+        (id, text) => /none$/i.test(id) || /^None$/.test(text),
+      );
+      await t.settled();
+      const stored = await t
+        .pollUntil(
+          async () => (await h.block(C))?.legend,
+          (l) => l === 'none',
+          6000,
+        )
+        .catch(async () => (await h.block(C))?.legend);
+      const drawn = (await h.svgFacts(C))?.legendTexts ?? null;
+      /* the check mark: the list opened again and read */
+      await t.tailControl('toolbar.legend');
+      await t.sleep(400);
+      const checked = await page.evaluate(() =>
+        [
+          ...document.querySelectorAll(
+            '[data-control^="menu.toolbar.legend."], [data-control^="toolbar.legend."]',
+          ),
+        ]
+          .filter((e) => e.getClientRects().length > 0 && e.getAttribute('aria-checked') === 'true')
+          .map((e) => e.getAttribute('data-control')),
+      );
+      await t.press('Escape');
+      await t.sleep(200);
+      const right = await h.pickTailOption(
+        'toolbar.legend',
+        (id, text) => /right$/i.test(id) || /^Right$/.test(text),
+      );
+      await t.settled();
+      const restored = await t
+        .pollUntil(
+          async () => (await h.block(C))?.legend,
+          (l) => l === 'right' || l === undefined,
+          6000,
+        )
+        .catch(async () => (await h.block(C))?.legend);
+      const drawnAfter = (await h.svgFacts(C))?.legendTexts ?? null;
+      return {
+        ok:
+          none.pick !== null &&
+          stored === 'none' &&
+          drawn === 0 &&
+          checked.some((c) => /none$/i.test(c)) &&
+          right.pick !== null &&
+          drawnAfter > 0,
+        observed: `legend ${before ?? 'absent (right)'} -> ${stored === undefined ? 'absent' : stored} by ${none.pick ?? 'no pick'}; legend texts drawn ${drawn}; checked in the list ${checked.join(', ') || 'none'}; Right (${right.pick ?? 'no pick'}) -> ${restored === undefined ? 'absent' : restored}, legend texts ${drawnAfter}${stored === 'none' ? '' : ` (FEATURES.md 2.2 rank 10, ${LANE})`}`,
+      };
+    },
+  );
+
+  await t.step(
+    'charts.panel.no-duplicate-controls',
+    'Format options with the chart selected; count the controls; Tools > Advanced tools on and read again',
+    'one Chart type control, one Title, one Legend and no JSON textarea; with the switch on the JSON view is present',
+    async () => {
+      await h.openPanel();
+      const count = () =>
+        page.evaluate(() => {
+          const panel = document.querySelector('[data-control="panel.formatOptions"]');
+          const visible = (el) => el.getClientRects().length > 0;
+          const labels = [
+            ...(panel?.querySelectorAll(
+              'label, .ts-chart-label, .ts-inspector-label, .ts-field-label',
+            ) ?? []),
+          ]
+            .filter(visible)
+            .map((l) => (l.textContent ?? '').trim());
+          const typeGroups = new Set(
+            [...(panel?.querySelectorAll('[data-control^="formatOptions.chart.type."]') ?? [])]
+              .filter(visible)
+              .map(
+                (e) =>
+                  e.closest('[role="radiogroup"], .ts-segmented, .ts-chart-types') ??
+                  e.parentElement,
+              ),
+          ).size;
+          const kindControls = [...(panel?.querySelectorAll('select, [role="radiogroup"]') ?? [])]
+            .filter(visible)
+            .filter((e) =>
+              /chart type|kind/i.test(
+                `${e.getAttribute('aria-label') ?? ''} ${e.closest('label')?.textContent ?? ''}`,
+              ),
+            ).length;
+          return {
+            typeGroups,
+            kindControls,
+            titles: labels.filter((l) => /^Title$/i.test(l)).length,
+            legends: labels.filter((l) => /^Legend$/i.test(l)).length,
+            textareas: [...(panel?.querySelectorAll('textarea') ?? [])].filter(visible).length,
+            json: [...(panel?.querySelectorAll('textarea, pre, code') ?? [])].filter(visible)
+              .length,
+          };
+        });
+      const off = await count();
+      const advanced = await t.setAdvanced(true);
+      if (advanced) t.deck.advanced = true;
+      await t.sleep(400);
+      if (!(await t.visible('panel.formatOptions'))) await h.openPanel();
+      const on = await count();
+      await h.closePanel();
+      return {
+        ok:
+          off.typeGroups === 1 &&
+          off.kindControls <= 1 &&
+          off.titles === 1 &&
+          off.legends === 1 &&
+          off.textareas === 0 &&
+          on.json > 0,
+        observed: `switch off: chart type groups ${off.typeGroups} (kind controls ${off.kindControls}), Title ${off.titles}, Legend ${off.legends}, textareas ${off.textareas}; switch on (${advanced}): JSON view elements ${on.json}${off.textareas === 0 && off.titles === 1 ? '' : ` (FEATURES.md 2.2 rank 11, ${LANE})`}`,
+      };
+    },
+  );
+
+  await t.step(
+    'charts.grid.remove-visible',
+    "the grid with the pointer away; the active row's remove control, the series swatch; a right click on a series header",
+    'the remove control has opacity 1 without hover, the swatch is 16 by 16, the menu lists Remove',
+    async () => {
+      await h.openPanel();
+      await t.clickControl('formatOptions.chart.cell.1.1');
+      await t.sleep(200);
+      await page.mouse.move(20, 450);
+      await t.sleep(400);
+      const facts = await page.evaluate(() => {
+        const remove = document.querySelector(
+          '[data-control="formatOptions.chart.category.0.remove"], [data-control^="formatOptions.chart.category."][data-control$=".remove"], [data-control^="formatOptions.chart.remove.category."]',
+        );
+        const swatch = document.querySelector(
+          '[data-control="formatOptions.chart.series.0.color"]',
+        );
+        const r = swatch?.getBoundingClientRect();
+        return {
+          removeId: remove?.getAttribute('data-control') ?? null,
+          opacity: remove ? getComputedStyle(remove).opacity : null,
+          swatch: r ? `${Math.round(r.width)} by ${Math.round(r.height)}` : null,
+          swatchOk: Boolean(r && Math.round(r.width) === 16 && Math.round(r.height) === 16),
+        };
+      });
+      const header = await t.rectOf('[data-control="formatOptions.chart.cell.0.1"]');
+      let rows = [];
+      if (header) {
+        await t.rightClickAt(header.x + header.w / 2, header.y + header.h / 2);
+        rows = await page.evaluate(() =>
+          [
+            ...document.querySelectorAll(
+              '.ts-context-menu [role="menuitem"], .ts-context-menu [data-control^="menu."], [role="menu"] [role="menuitem"]',
+            ),
+          ]
+            .filter((e) => e.getClientRects().length > 0)
+            .map((e) => (e.textContent ?? '').trim()),
+        );
+        await t.press('Escape');
+        await t.sleep(200);
+      }
+      await h.closePanel();
+      const listsRemove = rows.some((r) => /^Remove/i.test(r));
+      return {
+        ok: facts.opacity === '1' && facts.swatchOk && listsRemove,
+        observed: `remove control ${facts.removeId ?? 'none'} opacity ${facts.opacity ?? 'unread'} with the pointer away; series swatch ${facts.swatch ?? 'unread'}; right click on the series header lists ${rows.join(', ') || 'no menu'}${facts.opacity === '1' ? '' : ` (FEATURES.md 2.2 rank 12, ${LANE})`}`,
+      };
+    },
+  );
 }

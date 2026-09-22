@@ -324,8 +324,139 @@ test(title('chrome.toolbar.fold-any-width'), async () => {
   void menuPath;
 });
 
+/**
+ * Insert > Logo on a page (the switch on when the row is parked); answers whether the dialog is
+ * drawn (the features round, docs/FEATURES.md 4.3; the menu row is the integrator's by request).
+ */
+async function openLogoDialog(page: Page): Promise<{ open: boolean; switched: boolean }> {
+  const present = async (): Promise<boolean> => {
+    await ctl(page, 'menubar.insert').click();
+    await page.locator('#ts-menu-insert').waitFor({ timeout: 8000 });
+    const there = await ctl(page, 'menu.insert.logo')
+      .isVisible()
+      .catch(() => false);
+    if (!there) {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(150);
+      return false;
+    }
+    await ctl(page, 'menu.insert.logo').click();
+    return ctl(page, 'dialog.logo')
+      .waitFor({ timeout: 8000 })
+      .then(() => true)
+      .catch(() => false);
+  };
+  if (await present()) return { open: true, switched: false };
+  if ((await state(page)).settings?.['advancedTools'] !== true) {
+    await menuPath(page, 'tools', 'tools.advancedTools');
+    await page.waitForTimeout(300);
+    const there = await present();
+    if (!there) await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
+    return { open: there, switched: there };
+  }
+  return { open: false, switched: false };
+}
+/** The logo dialog's grid facts: the tiles per row, the horizontal scroll, the card's ground and the halves. */
+async function logoGridFacts(page: Page) {
+  return page.evaluate(() => {
+    const dialog = document.querySelector('[data-control="dialog.logo"]');
+    const card = dialog?.closest('[role="dialog"]') ?? dialog;
+    if (!card) return null;
+    const tiles = [...card.querySelectorAll('[data-control^="dialog.logo.tile."]')].filter(
+      (e) =>
+        e.getClientRects().length > 0 &&
+        e.matches('button, [role="option"]') &&
+        !/\.(paper|ink|pair|variants)$/.test(e.getAttribute('data-control') ?? ''),
+    );
+    const firstTop = tiles[0] ? Math.round(tiles[0].getBoundingClientRect().top) : null;
+    const perRow = tiles.filter(
+      (e) => Math.round(e.getBoundingClientRect().top) === firstTop,
+    ).length;
+    const scrollers = [card, ...card.querySelectorAll('*')].filter(
+      (el) =>
+        el.scrollWidth > el.clientWidth + 1 && /auto|scroll/.test(getComputedStyle(el).overflowX),
+    );
+    const halves = tiles.map((e) => {
+      const id = e.getAttribute('data-control') ?? '';
+      const paper = document.querySelector(`[data-control="${id}.paper"]`);
+      const ink = document.querySelector(`[data-control="${id}.ink"]`);
+      const box = (el: Element | null) => (el ? el.getBoundingClientRect() : null);
+      const p = box(paper);
+      const i = box(ink);
+      return Boolean(p && i && p.width > 8 && p.height > 8 && i.width > 8 && i.height > 8);
+    });
+    const ground = getComputedStyle(card).backgroundColor;
+    const m = ground.match(/\d+/g)?.map(Number) ?? [255, 255, 255];
+    const luminance = 0.2126 * m[0]! + 0.7152 * m[1]! + 0.0722 * m[2]!;
+    const r = card.getBoundingClientRect();
+    return {
+      tiles: tiles.length,
+      perRow,
+      scrollsX: scrollers.length,
+      ground,
+      dark: luminance < 90,
+      halves: halves.filter(Boolean).length,
+      width: Math.round(r.width),
+      viewport: `${window.innerWidth} by ${window.innerHeight}`,
+    };
+  });
+}
+
+test(title('logos.picker.chrome-1280'), async () => {
+  test.setTimeout(180_000);
+  const { page, deck } = laptop;
+  await openEditor(page, deck);
+  const opened = await openLogoDialog(page);
+  if (!opened.open)
+    test.skip(
+      true,
+      'not on this build: insert.logo (docs/FEATURES.md 4.3, B1 by request in model.ts)',
+    );
+  await ctl(page, 'dialog.logo.search').click();
+  await page.keyboard.type('figma', { delay: 60 });
+  await expect
+    .poll(async () => (await logoGridFacts(page))?.tiles ?? 0, {
+      timeout: 15_000,
+      message: 'the results draw',
+    })
+    .toBeGreaterThan(0);
+  /* a query with many results, so the grid fills a row */
+  await ctl(page, 'dialog.logo.search').click();
+  await page.keyboard.press('Meta+a');
+  await page.keyboard.type('a', { delay: 60 });
+  await expect
+    .poll(async () => (await logoGridFacts(page))?.tiles ?? 0, { timeout: 15_000 })
+    .toBeGreaterThanOrEqual(5);
+  const light = await logoGridFacts(page);
+  await page.keyboard.press('Escape');
+  await expect(ctl(page, 'dialog.logo')).toHaveCount(0, { timeout: 5000 });
+  test.info().annotations.push({ type: 'light', description: JSON.stringify(light) });
+  expect(light!.perRow, `five tiles wide at ${light!.viewport}`).toBe(5);
+  expect(light!.scrollsX, 'no horizontal scroll').toBe(0);
+  /* the dark appearance: View > Appearance > Dark, the dialog on ink with both halves in every tile */
+  await menuPath(page, 'view', 'view.appearance', 'view.appearance.dark').catch(() => undefined);
+  await page.waitForTimeout(400);
+  const again = await openLogoDialog(page);
+  expect(again.open, 'the dialog opens in the dark appearance').toBe(true);
+  await ctl(page, 'dialog.logo.search').click();
+  await page.keyboard.type('a', { delay: 60 });
+  await expect
+    .poll(async () => (await logoGridFacts(page))?.tiles ?? 0, { timeout: 15_000 })
+    .toBeGreaterThanOrEqual(5);
+  const dark = await logoGridFacts(page);
+  await page.keyboard.press('Escape');
+  await expect(ctl(page, 'dialog.logo')).toHaveCount(0, { timeout: 5000 });
+  await menuPath(page, 'view', 'view.appearance', 'view.appearance.light').catch(() => undefined);
+  if (opened.switched) await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
+  test.info().annotations.push({ type: 'dark', description: JSON.stringify(dark) });
+  expect(dark!.dark, `the dialog is on ink (${dark!.ground})`).toBe(true);
+  expect(dark!.halves, 'every tile keeps its paper and ink halves').toBe(dark!.tiles);
+});
+
 coverage(import.meta.filename, [
   'slides.layout.plate-four-columns',
   'share.dialog.more-row',
   'chrome.toolbar.fold-any-width',
+  /* the features round, ship one (docs/FEATURES.md 7.1) */
+  'logos.picker.chrome-1280',
 ]);

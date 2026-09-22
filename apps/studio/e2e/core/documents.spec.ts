@@ -133,4 +133,146 @@ test(title('charts.data.paste-rows'), async () => {
   if (switched) await menuPath(page, 'tools', 'tools.advancedTools');
 });
 
-coverage(import.meta.filename, ['charts.data.paste-rows']);
+/** The tab separated rows of docs/FEATURES.md 2.3 item 5: a header row and two rows of numbers. */
+const TSV = ['Region\tQ1\tQ2', 'East\t120\t140', 'West\t80\t95'].join('\n');
+/** Dispatches a paste of text on the element in focus (or the stage), the clipboard event built in the page. */
+async function pasteText(p: Page, text: string): Promise<void> {
+  await p.evaluate((value) => {
+    const target =
+      document.activeElement && document.activeElement !== document.body
+        ? document.activeElement
+        : document.querySelector('.ts-stagewrap.ts-editor');
+    if (!target) throw new Error('nothing to paste on');
+    const data = new DataTransfer();
+    data.setData('text/plain', value);
+    target.dispatchEvent(
+      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
+    );
+  }, text);
+}
+type TableBlock = { columns: unknown[]; rows: { cells: unknown[]; header?: boolean }[] };
+const cellText = (cell: unknown): string =>
+  typeof cell === 'string' ? cell : ((cell as { text?: string } | null)?.text ?? '');
+
+test(title('tables.paste.tsv-makes-table'), async () => {
+  test.setTimeout(120_000);
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  /* the stage takes the focus so the paste reaches the editor with nothing selected */
+  await page
+    .locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)')
+    .first()
+    .click({ position: { x: 20, y: 20 } });
+  await page.keyboard.press('Escape');
+  const before = await objectsOf(page, slideId);
+  const rev0 = (await state(page)).revision;
+  await pasteText(page, TSV);
+  const fresh = await expect
+    .poll(
+      async () =>
+        (await objectsOf(page, slideId)).filter((o) => !before.some((b) => b.id === o.id)),
+      { timeout: 8000 },
+    )
+    .not.toEqual([])
+    .then(async () =>
+      (await objectsOf(page, slideId)).filter((o) => !before.some((b) => b.id === o.id)),
+    );
+  await settled(page);
+  const table = fresh.find((o) => o.type === 'table') ?? null;
+  const other = fresh.filter((o) => o.type !== 'table').map((o) => `${o.type}:${o.id}`);
+  const snackbar = await page
+    .locator('[data-control="snackbar"], .ts-snackbar, .pt-toast')
+    .filter({ hasText: /Table pasted/ })
+    .first()
+    .textContent({ timeout: 4000 })
+    .catch(() => null);
+  const undo = await ctl(page, 'snackbar.action')
+    .isVisible()
+    .catch(() => false);
+  const rev1 = (await state(page)).revision;
+  test.info().annotations.push({
+    type: 'paste',
+    description: `new objects ${fresh.map((o) => `${o.type}:${o.id}`).join(', ')}; snackbar "${snackbar ?? 'none'}" with Undo ${undo}; revision ${rev0} -> ${rev1}`,
+  });
+  expect(
+    table,
+    `a table is inserted (the paste made ${other.join(', ') || 'nothing else'}; docs/FEATURES.md 2.3 item 5, B3)`,
+  ).not.toBeNull();
+  const block = table!.block as unknown as TableBlock;
+  expect(block.columns.length, 'three columns').toBe(3);
+  expect(block.rows.length, 'three rows').toBe(3);
+  expect(block.rows[0]?.header, 'a header row (the first row has no numbers)').toBe(true);
+  expect(block.rows.map((r) => r.cells.map(cellText))).toEqual([
+    ['Region', 'Q1', 'Q2'],
+    ['East', '120', '140'],
+    ['West', '80', '95'],
+  ]);
+  expect(snackbar ?? '', 'the snackbar "Table pasted"').toMatch(/Table pasted/);
+  expect(undo, 'with Undo').toBe(true);
+  expect(rev1, 'one commit').toBe(rev0 + 1);
+});
+
+test(title('tables.paste.into-cell-spreads'), async () => {
+  test.setTimeout(120_000);
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  await placeBlock(page, slideId, {
+    id: 'paste-table',
+    type: 'table',
+    columns: [{}, {}, {}],
+    rows: [
+      { cells: ['A', 'B', 'C'], header: true },
+      { cells: ['a1', 'b1', 'c1'] },
+      { cells: ['a2', 'b2', 'c2'] },
+    ],
+    pos: { x: 160, y: 160, w: 900, h: 260 },
+  });
+  const cell = page
+    .locator('.ts-stagewrap.ts-editor .pt-slide [data-run="paste-table/rows/2/cells/1"]')
+    .first();
+  await cell.dblclick();
+  await page.waitForTimeout(300);
+  const editing = await page.evaluate(
+    () => document.querySelector('.ts-stagewrap.ts-editor[data-editing]') !== null,
+  );
+  expect(editing, 'cell 2,1 is open').toBe(true);
+  const rev0 = (await state(page)).revision;
+  await pasteText(page, TSV);
+  await page.waitForTimeout(600);
+  await page.keyboard.press('Escape');
+  await settled(page);
+  const read = async () =>
+    (await objectsOf(page, slideId)).find((o) => o.id === 'paste-table')?.block as unknown as
+      TableBlock | undefined;
+  await expect
+    .poll(async () => (await read())?.rows.length ?? 0, { timeout: 10_000 })
+    .toBeGreaterThanOrEqual(3);
+  const after = await read();
+  const grid = after?.rows.map((r) => r.cells.map(cellText)) ?? [];
+  const rev1 = (await state(page)).revision;
+  test.info().annotations.push({
+    type: 'spread',
+    description: `${after?.rows.length} rows by ${after?.columns.length} columns: ${JSON.stringify(grid)}; revision ${rev0} -> ${rev1}`,
+  });
+  expect(after?.rows.length, 'two rows added for the three pasted rows from row 2').toBe(5);
+  expect(after?.columns.length, 'one column added for the three pasted columns from column 1').toBe(
+    4,
+  );
+  expect(grid[2]?.slice(1), 'the first pasted row fills from cell 2,1').toEqual([
+    'Region',
+    'Q1',
+    'Q2',
+  ]);
+  expect(grid[3]?.slice(1)).toEqual(['East', '120', '140']);
+  expect(grid[4]?.slice(1)).toEqual(['West', '80', '95']);
+  expect(grid[1], 'the row above is untouched').toEqual(['a1', 'b1', 'c1']);
+});
+
+coverage(import.meta.filename, [
+  'charts.data.paste-rows',
+  /* the features round, ship one (docs/FEATURES.md 2.3 item 5) */
+  'tables.paste.tsv-makes-table',
+  'tables.paste.into-cell-spreads',
+]);

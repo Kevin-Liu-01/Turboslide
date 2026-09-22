@@ -86,6 +86,8 @@ export const IDS = [
   /* the product round (docs/PRODUCT.md 8.1) */
   'arrange.insert.selected-after-menu',
   'arrange.insert.free-rectangle',
+  /* the features round, ship one (docs/FEATURES.md 2.3 item 6, P1): the group tail's text controls */
+  'arrange.group.tail-text-controls',
 ];
 
 const HOMES = {
@@ -2251,6 +2253,7 @@ export async function run(t) {
   );
   await t.clearAll();
   await productRound(t);
+  await featuresRound(t);
 }
 
 /**
@@ -2373,4 +2376,103 @@ async function productRound(t) {
     },
   );
   await t.clearAll();
+}
+
+/**
+ * The features round, ship one (docs/FEATURES.md 2.3 item 6, P1 of B3; the row
+ * `arrange.group.tail-text-controls`): the group tail lists Font, size, Bold, Italic, text colour
+ * and Align and the size step writes every text member in one commit. Two text blocks sharing one
+ * group are placed through the window API as setup; a group tail without the text controls reads
+ * not built with the id `toolbar.group.text`.
+ */
+async function featuresRound(t) {
+  const { page } = t;
+  const A = t.deck.arrangeSlide ?? t.deck.titleSlide;
+  const G = await t
+    .setup('a slide for the group tail', 'slide.new through the window API', async () => {
+      const id = await t.setupSlide(A, 'blank');
+      t.deck.groupTailSlide = id;
+      return { ok: Boolean(id), observed: `slide ${id}` };
+    })
+    .then(() => t.deck.groupTailSlide);
+  await t.clickCard(G);
+  await t.clearAll();
+  const members = ['gt-a', 'gt-b'];
+  await t.setup(
+    'two text blocks sharing one group',
+    'block.insert through the window API',
+    async () => {
+      const made = [];
+      for (const [i, id] of members.entries()) {
+        const obj = await t.placeBlock(G, {
+          id,
+          type: 'text',
+          text: `Step ${i + 1}`,
+          typography: { size: 28 },
+          pos: { x: 200 + i * 500, y: 300, w: 360, h: 120, group: 'g-tail' },
+        });
+        made.push(obj?.id ?? 'none');
+      }
+      return { ok: made.every((m) => m !== 'none'), observed: made.join(', ') };
+    },
+  );
+  const sizes = async () => {
+    const objs = await t.objectsOf(G);
+    return members.map((id) => objs.find((o) => o.id === id)?.block?.typography?.size ?? null);
+  };
+  await t.step(
+    'arrange.group.tail-text-controls',
+    'one click on a member (the group); read the tail; the size step up',
+    'the tail lists Font, size, Bold, Italic, text colour and Align; the step writes every label in one commit',
+    async () => {
+      await t.clearAll();
+      const { facts } = await t.clickSelect(members[0]);
+      const chip = facts.chip;
+      const tail = await page.evaluate(() =>
+        [...document.querySelectorAll('.ts-toolbar [data-control^="toolbar."]')]
+          .filter((e) => e.getClientRects().length > 0)
+          .map((e) => e.getAttribute('data-control')),
+      );
+      const want = [
+        'toolbar.font',
+        'toolbar.fontSize',
+        'toolbar.bold',
+        'toolbar.italic',
+        'toolbar.textColor',
+        'toolbar.align',
+      ];
+      const present = want.filter((c) => tail.some((x) => x === c || x.startsWith(`${c}.`)));
+      if (present.length === 0)
+        return t.notBuilt(
+          'toolbar.group.text',
+          'B3',
+          `chip "${chip}"; the group tail lists ${tail.filter((c) => !/^toolbar\.(head|search|newSlide|undo|redo|print|paintFormat|zoom|tail|end|pointer|hideMenus)/.test(c)).join(', ') || 'nothing'} and none of the text controls (P1, FEATURES.md 2.3 item 6)`,
+        );
+      const before = await sizes();
+      const rev0 = (await t.state()).revision;
+      const plus = tail.includes('toolbar.fontSize.plus') ? 'toolbar.fontSize.plus' : null;
+      if (plus) await t.tailControl(plus);
+      await t.settled();
+      const after = await t
+        .pollUntil(
+          sizes,
+          (s) => s.every((x, i) => typeof x === 'number' && x > (before[i] ?? 0)),
+          6000,
+        )
+        .catch(sizes);
+      const rev1 = (await t.state()).revision;
+      const every = after.every((x, i) => typeof x === 'number' && x > (before[i] ?? 0));
+      if (every) {
+        await t.clearAll();
+        await t.press('Meta+z');
+        await t.sleep(400);
+        await t.settled();
+      }
+      return {
+        ok: chip === 'Group' && present.length === want.length && plus !== null && every,
+        observed: `chip "${chip}"; text controls on the group tail ${present.join(', ')} (missing ${want.filter((c) => !present.includes(c)).join(', ') || 'none'}); sizes ${before.join(',')} -> ${after.join(',')} in ${rev1 - rev0} revision(s)`,
+      };
+    },
+  );
+  await t.clickCard(A);
 }

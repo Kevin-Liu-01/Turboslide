@@ -1,5 +1,5 @@
 {
-  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2).",
+  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship.",
   "rows": [
     {
       "id": "decks.home.new-presentation",
@@ -3759,10 +3759,11 @@
     {
       "id": "diagrams.insert.group",
       "feature": "diagrams",
-      "interaction": "Insert lands a Process diagram of five rounded boxes, five labels and four lines as one group; the panel stays open",
+      "interaction": "Insert lands a Process diagram of five rounded boxes with their five labels and four lines as one group; the panel stays open",
       "driver": "probe --core",
       "today": "works",
-      "evidence": "audit-objects row 115"
+      "evidence": "audit-objects row 115",
+      "note": "The features round (docs/FEATURES.md 2.2 rank 9) made a step one shape with its own text and no separate text block, so the five labels are the boxes' own text (9 objects); the driver accepts the return round's two object templates (14 objects) on an older build and records which form it met."
     },
     {
       "id": "diagrams.select-move",
@@ -3778,7 +3779,8 @@
       "interaction": "Double click a diagram box (the member is selected, A1 rule 3), double click its label, type; the label changes and the group stays one group",
       "driver": "probe --core",
       "today": "not driven",
-      "evidence": "no audit drove it"
+      "evidence": "no audit drove it",
+      "note": "The features round (docs/FEATURES.md 2.2 rank 9): a step's label is the shape's own text; the driver reads it there, or in the separate text member of an older build."
     },
     {
       "id": "diagrams.light-appearance",
@@ -3786,7 +3788,8 @@
       "interaction": "With the diagram on the dark sheet, Slide > Change theme, the light tile; the boxes' strokes, the lines and the labels read on the light sheet; then Slideshow draws it the same",
       "driver": "probe --core",
       "today": "not driven",
-      "evidence": "audit-objects drove the dark appearance only"
+      "evidence": "audit-objects drove the dark appearance only",
+      "note": "The features round (docs/FEATURES.md 2.2 rank 9): a step's label is the shape's own text; the driver reads it there, or in the separate text member of an older build."
     },
     {
       "id": "diagrams.present",
@@ -3794,7 +3797,8 @@
       "interaction": "The show draws the diagram slide with its marks and labels",
       "driver": "probe --core",
       "today": "works",
-      "evidence": "audit-objects row 118"
+      "evidence": "audit-objects row 118",
+      "note": "The features round (docs/FEATURES.md 2.2 rank 9): a step's label is the shape's own text; the driver reads it there, or in the separate text member of an older build."
     },
     {
       "id": "diagrams.reload",
@@ -3802,7 +3806,8 @@
       "interaction": "The diagram survives a reload as one group",
       "driver": "probe --core",
       "today": "not driven",
-      "evidence": "audit-objects row 81 counted no diagram (row 70 placed none)"
+      "evidence": "audit-objects row 81 counted no diagram (row 70 placed none)",
+      "note": "The features round (docs/FEATURES.md 2.2 rank 9): a step's label is the shape's own text; the driver reads it there, or in the separate text member of an older build."
     },
     {
       "id": "wordart.insert",
@@ -5165,7 +5170,8 @@
       "driver": "core/images.spec.ts",
       "today": "broken",
       "evidence": "audit-seller 10",
-      "severity": 3
+      "severity": 3,
+      "note": "The features round (docs/FEATURES.md 4.4): an uploaded picture whose asset role is logo or whose long side is under 600 px takes the logo size (a symbol at 160 sheet px tall, a wordmark at 320 wide), never the largest fit; this row keeps measuring the 120 by 80 PNG at the largest size with the 40 px margin only while the picture's long side is 600 px or over, so the spec uploads a 720 by 480 PNG."
     },
     {
       "id": "images.insert.instant-preview",
@@ -5701,10 +5707,11 @@
     {
       "id": "fonts.more-fonts.licence",
       "feature": "fonts",
-      "interaction": "More fonts lists the 26 families with a licence line each and a link to the licence",
+      "interaction": "More fonts lists every family of the catalog (34 with the features round) with a licence line each and a link to the licence",
       "driver": "probe --core",
       "today": "not driven",
-      "evidence": "SPEC-5-amendments A5 item 4"
+      "evidence": "SPEC-5-amendments A5 item 4",
+      "note": "The features round (docs/FEATURES.md 3.2) adds eight families to the product round's 26, so the dialog lists 34; the driver counts the catalog's ids."
     },
     {
       "id": "fonts.budget.no-load-before-ready",
@@ -5717,18 +5724,20 @@
     {
       "id": "fonts.export.editable-names-face",
       "feature": "fonts",
-      "interaction": "With a heading in Roboto the Editable text PowerPoint names Roboto in a:latin typeface",
+      "interaction": "With a heading in Roboto, a text in Geist and a text in Fraunces the Editable text PowerPoint names Roboto, Geist and Fraunces in a:latin typeface",
       "driver": "core/export.spec.ts",
       "today": "not driven",
-      "evidence": "VERIFICATION-5 finding 5 (measured on the branch's preview; no catalog face exists on production)"
+      "evidence": "VERIFICATION-5 finding 5 (measured on the branch's preview; no catalog face exists on production)",
+      "note": "The features round (docs/FEATURES.md 3.4) adds Geist and Fraunces to the deck: the eight FONT_NAMES entries are the whole export change for the new families; the two faces read not on this build while B2's catalog rows are not."
     },
     {
       "id": "fonts.export.pdf-face",
       "feature": "fonts",
-      "interaction": "The PDF embeds a Roboto subset (pdffonts)",
+      "interaction": "The PDF embeds a Roboto subset, a Geist subset and a Fraunces subset (pdffonts)",
       "driver": "core/export.spec.ts",
       "today": "not driven",
-      "evidence": "VERIFICATION-5 finding 5 (the same)"
+      "evidence": "VERIFICATION-5 finding 5 (the same)",
+      "note": "The features round (docs/FEATURES.md 3.4) adds Geist and Fraunces to the deck; Chromium embeds a subset of every face it drew."
     },
     {
       "id": "fonts.face.reload-and-show",
@@ -5741,10 +5750,11 @@
     {
       "id": "fonts.agent.font-list",
       "feature": "fonts",
-      "interaction": "font.list through the window API answers 26 rows with licence; through HTTP with the bearer the same",
+      "interaction": "font.list through the window API answers every family of the catalog (34 with the features round) with licence; through HTTP with the bearer the same",
       "driver": "probe --core",
       "today": "not driven",
-      "evidence": "SPEC-5-amendments A5 item 6"
+      "evidence": "SPEC-5-amendments A5 item 6",
+      "note": "The features round (docs/FEATURES.md 3.2) adds eight families to the product round's 26; the driver counts the catalog's ids."
     },
     {
       "id": "assist.entry.title-row",
@@ -6030,6 +6040,727 @@
       "evidence": "audit-costs runs/show.summary.md, item 1",
       "note": "B5. A measurement row (docs/SYNC.md 6.1). The probe counts its own sync.status reads (one deck.json head each, build/b3.md R7 b) apart from the page's, and starts the window once the editor tab the show left behind has closed on the server (the reader gone rule, 35 s) and its card render and snapshot prune have left the counters' 60 s window (the settle; the verifier's pass 1 F8). The show load's own store reads are the round after's published snapshot (docs/SYNC.md 5.2).",
       "measure": true
+    },
+    {
+      "id": "charts.grid.type-to-edit",
+      "feature": "charts",
+      "interaction": "With a chart selected, Edit data; a click on the 1,1 value cell and the keys \"42\" at human speed; the cell opens with \"4\" and commits \"42\" on Enter; slide.get reads the value; the stage's selection is unchanged",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects 1 (run-charts-rows.json rows 5, 8; run-charts-2-rows.json rows 2 to 4)",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 1 (B3: the grid owns its keys, CHROME_CONTROL reads the panel)"
+    },
+    {
+      "id": "charts.grid.escape-stays",
+      "feature": "charts",
+      "interaction": "In the open grid cell Escape restores the cell's value and the panel stays open with the cell active; a second Escape leaves the grid and the chart stays selected",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects 1",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 1 (B3)"
+    },
+    {
+      "id": "tables.cell.click-places-caret",
+      "feature": "tables",
+      "interaction": "One click on cell 2,2 of an unselected table selects the table (chip Table, eight handles) and places the caret in 2,2 within 300 ms; a pointer down in a cell of another unselected table followed by a move of 80 by 40 sheet px moves that table exactly and opens no cell",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects 2 (run-tables-rows.json row 2; t03-table-one-click.png)",
+      "setup": "block.insert of two typed 3 by 3 tables through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 2 (B3: objectPressPlan's table branch); AMENDMENTS.md A1 rules 1 and 3 amended for tables alone by FEATURES.md 2.1, question 8 records the alternative"
+    },
+    {
+      "id": "tables.cell.click-then-type",
+      "feature": "tables",
+      "interaction": "One click on cell 2,3 of an unselected typed table and the key \"x\" at human speed, in one gesture; cell 2,3 reads \"<text>x\", cell 1,1 is unchanged; Cmd+Z restores 2,3 in one step",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects 2, 5 (run-tables-rows.json rows 2 and 7)",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 ranks 2 and 4 (B3)"
+    },
+    {
+      "id": "tables.range.drag-from-selected",
+      "feature": "tables",
+      "interaction": "On the selected table a pointer down in cell 1,1 and a move to cell 2,3 draws the range ring over 6 cells and the table does not move; a drag from the ring band moves the table 80 by 40 sheet px exactly",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 2",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 2 (B3: table-range.ts armCellRangeDrag from a selected table; the ring band as the move surface)"
+    },
+    {
+      "id": "shapes.label.centred-default",
+      "feature": "shapes",
+      "interaction": "A rounded rectangle drawn by a drag and labelled by typing \"Next step\" draws the run centred in both axes (the text box's centre within 4 px of the shape's centre); after a se resize the label is still centred; the tail's Align reads centre",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects 4 (d13-shape-labelled.png, d15-shape-resized.png)",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 3 (B3: block-css.ts and primitives.ts default, the Align read in ToolbarTail.tsx)"
+    },
+    {
+      "id": "tables.selected.typing-appends",
+      "feature": "tables",
+      "interaction": "A typed table selected by a marquee (no cell open): the key \"x\" opens cell 1,1 with the caret at the end and its text reads \"<text>x\"; a click on cell 2,3, Escape, then \"y\" opens 2,3 and its text reads \"<text>y\"; Cmd+Z restores each in one step",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects 5 (run-tables-rows.json row 7)",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 4 (B3: table-session.ts lastCell); AMENDMENTS.md A1 rule 4 amended for tables alone"
+    },
+    {
+      "id": "tables.cell.arrows-cross-cells",
+      "feature": "tables",
+      "interaction": "In an open cell Right at the text end opens the cell to the right with the caret at its start; Down on the last line opens the cell below; Left at the start and Up on the first line go back; the session id follows",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 6",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 5 (B3: InlineText.tsx and endEdit's four arrow reasons)"
+    },
+    {
+      "id": "tables.range.shift-arrows",
+      "feature": "tables",
+      "interaction": "From an open cell Shift+Right then Shift+Down draws a range over 4 cells; Delete clears their texts in one step",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 6",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 5 (B3)"
+    },
+    {
+      "id": "diagrams.label.double-click-opens",
+      "feature": "diagrams",
+      "interaction": "One click selects the group, a double click on a step opens its label with the caret; two labels are edited in 6 clicks or fewer",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects 11 (run-diagrams-rows.json rows 3 and 8; d2-01-diagram-member-entered.png)",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 6 (B3: clickEntry opens a member's run at once)"
+    },
+    {
+      "id": "diagrams.label.tab-next",
+      "feature": "diagrams",
+      "interaction": "Tab in an open label opens the next step's label with its text selected; Shift+Tab goes back; Enter on the selected group opens the first label",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 11",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 6 (B3: endEdit's tab reason inside a group)"
+    },
+    {
+      "id": "charts.double-click.opens-data",
+      "feature": "charts",
+      "interaction": "A double click on a chart opens Format options on Chart data with the 1,1 value cell active within 500 ms; an Edit data button sits under the selected chart and opens the same section",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects 17 (run-charts-rows.json rows 2, 4)",
+      "parks": ["bar.chart.editData"],
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 7 (B3: the double click in Editor.tsx, the button in Overlay.tsx)"
+    },
+    {
+      "id": "charts.mark.click-selects-cell",
+      "feature": "charts",
+      "interaction": "A click on the second bar of the selected column chart makes its cell active in the grid and the readout shows the value",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 17",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 7 (B3: the mark hit test)"
+    },
+    {
+      "id": "tables.range.bold-italic",
+      "feature": "tables",
+      "interaction": "With a range over the header row Cmd+B bolds every cell of the range in one commit; no refusal card opens; the title row never reads \"Couldn't save\"; Cmd+Z removes the marks from every cell in one step; the same for Cmd+I",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects 7 (run-tables-rows.json row 21)",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 8 (B3: format.text.* on a table through cellsInRange; the refusal card's gate in EditorRoot.tsx)"
+    },
+    {
+      "id": "tables.range.size-color",
+      "feature": "tables",
+      "interaction": "With the same range the size step up and a text colour from the plate write every cell; Align right from the tail aligns every cell of the range",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 7",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 8 (B3)"
+    },
+    {
+      "id": "diagrams.step.one-object",
+      "feature": "diagrams",
+      "interaction": "A process diagram of three steps has three shape blocks with text and no separate text block; a double click on a step opens its label; a drag of a step moves its box and label together and the connector follows; Delete on a step removes it in one step",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects 10 (d2-02-diagram-label-dragged.png, d2-03-diagram-step-dragged.png, d06-diagram-step-removed.png)",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 9 (B3: diagrams.ts make* writes one shape with its text per step)"
+    },
+    {
+      "id": "diagrams.export.step-label",
+      "feature": "diagrams",
+      "interaction": "The PDF's page carries the step's label text; the Editable PowerPoint carries the label inside the shape's txBody",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-objects 10",
+      "setup": "block.insert of a three step process diagram through the window API when the Diagram panel is not reachable",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 9 (B3; the exporter already writes a shape's text)"
+    },
+    {
+      "id": "charts.legend.none-from-toolbar",
+      "feature": "charts",
+      "interaction": "Legend > None from the tail writes legend: 'none' and the legend is not drawn; the tail's check mark reads None; Right restores it",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects 15 (run-charts-rows.json row 13)",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 10 (B3: ToolbarTail.tsx through chartTailPlan)"
+    },
+    {
+      "id": "charts.panel.no-duplicate-controls",
+      "feature": "charts",
+      "interaction": "With a chart selected Format options draws one Chart type control, one Title, one Legend and no JSON textarea; with Advanced tools on the JSON view is present",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects 16 (c10-chart-format-options.png)",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 11 (B3: FormatOptions.tsx renderGenerated skips the chart's and the table's fields under their sections)"
+    },
+    {
+      "id": "charts.grid.remove-visible",
+      "feature": "charts",
+      "interaction": "The active row's remove control has opacity 1 without hover; the series swatch measures 16 by 16 px; a right click on a series header lists Remove",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects 21 (c2-01-chart-grid-hover-header.png, c2-03-chart-grid-hover-row.png)",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 12 (B3: inspector/chart.tsx and chart.css)"
+    },
+    {
+      "id": "tables.panel.table-first",
+      "feature": "tables",
+      "interaction": "With a table selected Format options opens on the Table section at the top at 900 px; one Height field reads the selected row; Distribute rows evens the heights in one step",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects 22 (t14-table-format-options.png)",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 2.2 rank 13 (B3: format-sections.ts order; inspector/table.tsx formatOptions.table.height and .distributeRows)"
+    },
+    {
+      "id": "tables.seam.row-drag",
+      "feature": "tables",
+      "interaction": "The selected table shows a row seam handle under each row; a drag of the first inner seam by 40 px shows the readout in px and writes rows[0].height; one Cmd+Z restores it; the seam under the last row grows the table",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 8 (run-tables-rows.json rows 16, 17)",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "parks": ["handle.table.row"],
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 1 (B3: table-seam.ts gains the axis; ids handle.table.row.<n>); lands only under the P1 condition of FEATURES.md section 1"
+    },
+    {
+      "id": "tables.edge.add-row-column",
+      "feature": "tables",
+      "interaction": "Hovering the right edge of the selected table at the second seam draws the \"+\"; a click inserts a column there and the widths of the others hold; the same at the bottom edge inserts a row; each is one Cmd+Z",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 9",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "parks": ["handle.table.add.column", "handle.table.add.row"],
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 2 (B3: Overlay.tsx); lands only under the P1 condition"
+    },
+    {
+      "id": "tables.heads.select-row-column",
+      "feature": "tables",
+      "interaction": "A click on the hover band above column 2 selects the whole column as a range; a click on the band left of row 2 selects the row; Fill color from the tail fills every cell of the selection",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 9",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "parks": ["handle.table.head.column", "handle.table.head.row"],
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 2 (B3; ids handle.table.head.column.<n>, handle.table.head.row.<n>); lands only under the P1 condition"
+    },
+    {
+      "id": "tables.bar.row-column-buttons",
+      "feature": "tables",
+      "interaction": "A bar under the selected table lists the row and column buttons, Merge, Fill color, Border and Align; Insert row below from it adds a row and keeps the caret",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 3",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "parks": ["bar.table"],
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 3 (B3: Overlay.tsx; ids bar.table.<command>); lands only under the P1 condition, after ranks 2 and items 2 and 7"
+    },
+    {
+      "id": "brand.objects.kit-colours-first",
+      "feature": "brand",
+      "interaction": "The table's fill plate, the chart's series swatches and the tail's plate list the kit's six roles first with the role's name and hex in the tooltip; a new chart's first two series are Primary and Accent",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 19 (t13 the tail's plate; inspector/table.tsx 92 to 135; inspector/chart.tsx 430 to 460)",
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 4 (B3 owns it, judge-design rejection 3); lands only under the P1 condition"
+    },
+    {
+      "id": "tables.paste.tsv-makes-table",
+      "feature": "tables",
+      "interaction": "Three tab separated rows pasted with nothing selected insert a 3 by 3 table with a header row; the snackbar \"Table pasted\" carries Undo",
+      "driver": "core/documents.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects 12",
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 5 (B3); lands only under the P1 condition"
+    },
+    {
+      "id": "tables.paste.into-cell-spreads",
+      "feature": "tables",
+      "interaction": "The same rows pasted into an open cell 2,1 fill the cells from there and add the rows needed",
+      "driver": "core/documents.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects 12",
+      "setup": "block.insert of a 3 by 3 table through the window API",
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 5 (B3); lands only under the P1 condition"
+    },
+    {
+      "id": "arrange.group.tail-text-controls",
+      "feature": "arrange",
+      "interaction": "With a diagram group selected the tail lists Font, size, Bold, Italic, text colour and Align; the size step writes every label in one commit",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 13",
+      "setup": "block.insert of two text blocks sharing one group through the window API",
+      "parks": ["toolbar.group.text"],
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 6 (B3: toolbar-tails.ts GROUP_TAIL through memberWritePlan); lands only under the P1 condition"
+    },
+    {
+      "id": "tables.command.keeps-caret",
+      "feature": "tables",
+      "interaction": "From an open cell Insert row below from the right click menu keeps the caret in the same cell; Align right from the tail keeps it; a range stays a range after Merge",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects 18 (run-tables-rows.json rows 13, 19)",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 7 (B3: tableCommand through movedCellPointer); lands only under the P1 condition"
+    },
+    {
+      "id": "wordart.resize.scales-letters",
+      "feature": "wordart",
+      "interaction": "A se handle drag of word art from 800 by 120 to 1027 by 205 writes typography.size about 150 and the drawn font follows; the readout shows the size; one Cmd+Z",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects 20 (d11-wordart-resized.png)",
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 8 (B3: the outlined text resize in Editor.tsx and editor-shell.ts); lands only under the P1 condition"
+    },
+    {
+      "id": "tables.cells.prompt-hovered-only",
+      "feature": "tables",
+      "interaction": "A 5 by 6 empty table draws no prompt text on the stage until a cell is hovered, and then one prompt in that cell alone; the filmstrip card draws no prompt rows",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-objects 24 (t03-table-one-click.png)",
+      "setup": "block.insert of an empty 5 by 6 table through the window API",
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 9 (B3: render/blocks/table.ts); lands only under the P1 condition"
+    },
+    {
+      "id": "wordart.tail.fill-outline",
+      "feature": "wordart",
+      "interaction": "With word art selected the tail lists Fill color, Border color, Border weight and Border dash; a border weight writes the outline",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-objects 25 (d12-wordart-context.png)",
+      "parks": ["toolbar.wordart.outline"],
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 10 (B3: toolbar-tails.ts); lands only under the P1 condition"
+    },
+    {
+      "id": "fonts.inter.italic-release",
+      "feature": "fonts",
+      "interaction": "The italic woff2 the editor preloads is 387,976 bytes and its name table reads \"Version 4.001;git-9221beed3\"; the sha256 equals INTER_ITALIC.sha256; Cmd+I on the title renders the italic face",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-fonts 4 (inter-4.1-compare.txt, woff2-names.mjs, title-italic-zoom.png)",
+      "note": "Ship one P0; docs/FEATURES.md 3.1 item 1 (B2: the 4.1 italic file, INTER_ITALIC in inter.ts); a red row of an Inter file fix carries no parks and reverts its commit in the fix round (3.6)"
+    },
+    {
+      "id": "fonts.links.licence-v4-1",
+      "feature": "fonts",
+      "interaction": "More fonts' Inter licence link's href is https://github.com/rsms/inter/blob/v4.1/LICENSE.txt; no href in the dialog contains v4.001",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-fonts 5 (production-and-urls.txt)",
+      "note": "Ship one P0; docs/FEATURES.md 3.1 item 2 (B2's summary.ts; the one line of font-picker-model.ts lands in B1's commit by B2's request, so the row is measured after B1 merges)"
+    },
+    {
+      "id": "fonts.fallback.in-stack",
+      "feature": "fonts",
+      "interaction": "The sheet root's computed font-family lists \"Inter Fallback\" second; document.fonts lists the face",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-fonts 6 (inter.css; sheet.css --display and --text)",
+      "note": "Ship one P0; docs/FEATURES.md 3.1 item 3 (B2: the four stacks and the Liberation Sans src)"
+    },
+    {
+      "id": "fonts.display-features.inter-only",
+      "feature": "fonts",
+      "interaction": "A heading set to Playfair Display computes font-feature-settings: normal; set back to Inter it computes \"cv11\", \"ss01\"; the kit's display face set to Fraunces computes normal on every heading",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-fonts 7 (catalog-features.txt: 17 of the 25 families carry an ss01 of their own)",
+      "setup": "brand.set /fonts/display through the window API for the kit half",
+      "note": "Ship one P0; docs/FEATURES.md 3.1 item 5 (B2: --display-features in theme-css.ts and typographyDeclarations); the Fraunces half needs B2's catalog row fonts.catalog.six-families"
+    },
+    {
+      "id": "tables.cells.tabular-figures",
+      "feature": "tables",
+      "interaction": "A table cell computes font-variant-numeric: tabular-nums; \"1111\" and \"0000\" typed in two cells measure the same width; a paragraph stays proportional",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-fonts 2 (body-digits-proportional-2x.png: \"1111\" 34.81 px and \"0000\" 56.01 px at 500 22px)",
+      "setup": "block.insert of a 3 by 4 table through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 3.1 item 4 (B2: sheet.css .ts-sheet td, th)"
+    },
+    {
+      "id": "formatting.numerals.tabular-row",
+      "feature": "formatting",
+      "interaction": "Format options > Text lists Tabular figures on a text box with the sentence \"Every digit takes the same width, so numbers line up in a column\" under it; on, it writes typography.numerals: 'tabular' and the digits align; on a block in Bebas Neue the row is enabled and on one in Playfair Display it is disabled with \"This face has no tabular figures\"; Search the menus \"line up numbers\" lists the row",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-fonts 2",
+      "setup": "block.insert of three text boxes (Inter, Bebas Neue, Playfair Display) through the window API",
+      "parks": ["formatOptions.typography.numerals"],
+      "note": "Ship one P0; docs/FEATURES.md 3.1 item 4 (B2: inspector/typography.tsx, the row's terms; the tnum flag per family from fetch-fonts.mjs)"
+    },
+    {
+      "id": "fonts.catalog.geist",
+      "feature": "fonts",
+      "interaction": "The Font dropdown lists Geist under Sans serif and Geist Mono under Monospace; a pick on a text box computes the family and document.fonts loads one Geist face; the PDF names it",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-fonts 3 (candidates.md)",
+      "setup": "block.insert of a text box through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 3.2 (B2: FONT_IDS, FONT_SOURCES, the assets and FONT_NAMES); the PDF half is fonts.export.pdf-face's deck, which gains Geist"
+    },
+    {
+      "id": "fonts.catalog.six-families",
+      "feature": "fonts",
+      "interaction": "Instrument Sans, Manrope, Schibsted Grotesk, Bricolage Grotesque, Newsreader and Fraunces are rows in their categories; Fraunces on a heading computes the family and loads",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-fonts 8 (candidates.md)",
+      "setup": "block.insert of a text box through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 3.2 (B2); question 7 of section 9 records the list Kevin may narrow"
+    },
+    {
+      "id": "fonts.picker.specimen-rows",
+      "feature": "fonts",
+      "interaction": "Opening the dropdown and scrolling its whole list loads no woff2 (the network log lists none); each row draws an SVG specimen; the pick loads the face",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-fonts 9 (FontPicker.tsx 89 to 111 FontRowLabel)",
+      "note": "Ship one P1; docs/FEATURES.md 3.5 (B1 the rows, B2 the specimen.svg per family); lands only under the P1 condition"
+    },
+    {
+      "id": "fonts.picker.recent-group",
+      "feature": "fonts",
+      "interaction": "After picking Roboto and Lora the dropdown lists Recent after Used with the two; Clear recent empties it; a new browser context lists none",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-fonts 10",
+      "note": "Ship one P1; docs/FEATURES.md 3.5 (B1: toolbar.font.group.recent, toolbar.font.clearRecent; per browser, question 6); lands only under the P1 condition"
+    },
+    {
+      "id": "fonts.picker.search-category",
+      "feature": "fonts",
+      "interaction": "Typing \"mono\" in the search lists the monospace families; \"serif\" lists the serifs",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-fonts 11",
+      "setup": "block.insert of a text box through the window API",
+      "note": "Ship one P1; docs/FEATURES.md 3.5 (B1: the search over the name, the category label and the id); lands only under the P1 condition"
+    },
+    {
+      "id": "fonts.preload.italic-on-edit-only",
+      "feature": "fonts",
+      "interaction": "/decks carries one font preload link (the upright); /edit carries two",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-fonts 12 (__root.tsx 124 to 137)",
+      "note": "Ship one P1; docs/FEATURES.md 3.1 (B2: the italic preload narrows to /edit, measured on a cold cache first); lands only under the P1 condition"
+    },
+    {
+      "id": "fonts.table.takes-family",
+      "feature": "fonts",
+      "interaction": "The Font dropdown on a selected table writes typography.family and every cell computes the face; the Editable PowerPoint names it in the cells",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-fonts 13 (font-picker-model.ts 125 to 128 takesFamily)",
+      "setup": "block.insert of a typed 3 by 4 table through the window API",
+      "note": "Ship one P1; docs/FEATURES.md 3.5 (B1: takesFamily); the PowerPoint half reads the export route in one request; lands only under the P1 condition"
+    },
+    {
+      "id": "logos.insert.row",
+      "feature": "logos",
+      "interaction": "Insert > Logo is in the default view under the Image row and Insert > Image > Logo is in the submenu; Search the menus \"logo\" lists Logo first",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 1, 17 (02-insert-menu.png, 03-insert-image-submenu.png, 10-search-menus-logo.png)",
+      "parks": ["insert.logo", "insert.image.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.3 (B1 by request in model.ts: the two rows and the terms of insert.logo)"
+    },
+    {
+      "id": "logos.picker.search",
+      "feature": "logos",
+      "interaction": "\"figma\" typed at human speed; the results draw within 300 ms of the pause; Figma is the first tile and preselected; Enter inserts it and the dialog closes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 1",
+      "parks": ["insert.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.3 (B1 the dialog, B6 logo-model.ts ranking and logo.search)"
+    },
+    {
+      "id": "logos.picker.paper-and-ink",
+      "feature": "logos",
+      "interaction": "The Vercel tile draws the triangle on its ink half and nothing white on its paper half; on a light deck the inserted Vercel mark reads (lit fraction over 0.2 percent at the inserted size)",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 6 (12-thesvg-default-marks-on-paper-and-ink.png, raster-check.json)",
+      "parks": ["insert.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.3 (B1 the two grounds per tile, B6 the appearance rule and the readsOnPaper flag)"
+    },
+    {
+      "id": "logos.picker.your-brand",
+      "feature": "logos",
+      "interaction": "On GT's deployment the dialog's first group Your brand lists the default kit's logo before any search; a click inserts it at the logo size without a search; a deck with a role: 'logo' asset lists it there too",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 15",
+      "parks": ["dialog.logo.group.brand"],
+      "note": "Ship one P0; docs/FEATURES.md 4.3 (B1 the group, B6 the model); on a tmp store with no deployment kit the group lists the deck's role logo assets alone and the row says so"
+    },
+    {
+      "id": "logos.picker.empty-state",
+      "feature": "logos",
+      "interaction": "\"zzqx\" answers the empty sentence with Upload; Upload opens the chooser; \"General Translation\" on GT's deployment adds \"Your brand kit's logo is under Your brand\"",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 17, 15",
+      "parks": ["dialog.logo.upload"],
+      "note": "Ship one P0; docs/FEATURES.md 4.3 (B1); the kit name half reads the deployment's kit name and is recorded where the deployment has none"
+    },
+    {
+      "id": "logos.picker.recents",
+      "feature": "logos",
+      "interaction": "After two inserts the Recent group lists them first; a new browser context lists none",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-logos 17",
+      "parks": ["dialog.logo.group.recent"],
+      "note": "Ship one P0; docs/FEATURES.md 4.3 (B1: localStorage per browser, question 6 of section 9)"
+    },
+    {
+      "id": "logos.picker.licence-words",
+      "feature": "logos",
+      "interaction": "The foot sentence names thesvg.org and the date; the Figma row reads \"Figma: Free to use, brand guidelines\" with the guidelines link and its tooltip reads \"Recorded on thesvg.org as CC0-1.0\"; no licence identifier is drawn outside a tooltip; no AWS tile appears until Include cloud service icons is on",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 12 (thesvg-facts.json: 57 licence strings)",
+      "parks": ["dialog.logo.source"],
+      "note": "Ship one P0; docs/FEATURES.md 4.6 (B1 the words, B6 the sentence mapping in logo-model.ts); question 1 of section 9 keeps the cloud collections behind the row"
+    },
+    {
+      "id": "logos.picker.chrome-1280",
+      "feature": "logos",
+      "interaction": "At 1280 by 800 the grid is five tiles wide and the dialog does not scroll horizontally; in the dark appearance the dialog is on ink and every tile keeps its paper and ink halves",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-logos 21 (09-insert-icon-dialog.png as the grid's precedent)",
+      "parks": ["insert.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.3 (B1: Dialog.tsx and the Icon dialog's grid; docs/brand.md section 9)"
+    },
+    {
+      "id": "logos.insert.one-click-asset",
+      "feature": "logos",
+      "interaction": "One click adds an asset with role: 'logo', source.kind: 'logo', source.provider: 'thesvg', PNG twins at scale 3 and a sourceFile; the sheet's img src is same origin; no thesvg.org address appears in deck.json",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 2 (04-upload-thesvg-svg.png: the svg refused; logo-walk.json)",
+      "parks": ["insert.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.4 (B6 logo.insert with B7's registration; the logo source kind in assets.ts)"
+    },
+    {
+      "id": "logos.insert.logo-size",
+      "feature": "logos",
+      "interaction": "The inserted symbol is at most 160 sheet px tall, centred in the body slot's free area, selected with the chip \"Logo\", and overlaps no text run",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 9 (05-upload-png-logo.png, 06-upload-png-wordmark.png: the largest fit)",
+      "parks": ["insert.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.4 (B6 the size rule over the product round's free rectangle helper; the chip word in Selection.tsx by request to B3)"
+    },
+    {
+      "id": "logos.insert.mono-tint",
+      "feature": "logos",
+      "interaction": "On a dark deck the GitHub mark (its default unreadable on ink) inserts as its mono variant with every path's fill in the stored sourceFile equal to the kit's text colour and the twin lit on ink; an AWS mark inserted with the cloud switch on carries its file unmodified",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 5, 6 (raster-check.json)",
+      "parks": ["insert.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.4 (B6: the tint rewrites every fill and stroke; off for CC BY-ND, Proprietary, Trademark and Unknown, question 2 of section 9)"
+    },
+    {
+      "id": "logos.insert.every-slide",
+      "feature": "logos",
+      "interaction": "The foot check reads \"Use as this presentation's logo on every slide\" with \"Replaces the brand kit's logo on the title slide and in every footer\" under it, and is off in a fresh dialog after a checked insert; checked, the Figma insert draws the mark in the title slide's slot and the footer of a new slide, the snackbar reads \"The Figma logo is on every slide\" with Undo, and Cmd+Z removes it from every slide in one step",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 11",
+      "parks": ["dialog.logo.everySlide"],
+      "note": "Ship one P0; docs/FEATURES.md 4.4 (B1 the check and its sentence, B6 useOnEverySlidePlan in the insert's commit); off by default and not remembered, judge-seller rejection 4"
+    },
+    {
+      "id": "logos.tailor.find-customer-logo",
+      "feature": "logos",
+      "interaction": "Tailor: From \"Acme\", To \"Figma\"; Find the Figma logo shows the mark; Apply swaps the pictures whose alt names Acme and renames the text in one undo step; the kit's mark is unchanged",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 3",
+      "setup": "block.insert of a picture whose alt names Acme and a text naming Acme through the window API",
+      "parks": ["dialog.tailor.logo.find"],
+      "note": "Ship one P0; docs/FEATURES.md 4.5 (B1 the button's slot, B6 the handler and the cache match; merge order B1 then B6)"
+    },
+    {
+      "id": "logos.replace-image.row",
+      "feature": "logos",
+      "interaction": "Right click a picture > Replace image > Logo > Figma; the asset swaps and the box stays",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 14 (07-picture-context-menu.png)",
+      "setup": "asset.add and block.insert of a picture through the window API",
+      "parks": ["format.image.replaceImage.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.4 (B6 by request in model.ts; the dialog with the block as its target)"
+    },
+    {
+      "id": "logos.route.mark-headers",
+      "feature": "logos",
+      "interaction": "GET /api/logo/mark/figma/default.svg answers image/svg+xml with nosniff, cross-origin-resource-policy: same-site and a sandbox policy; the body has no <script, no on attribute and no external href; the fixture cases are the unit tests of 7.3",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-logos 2 (svg/ the sampled files; corpus-sample.json)",
+      "parks": ["insert.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.7 (B6: logo-sanitize.ts and routes/api/logo.$.ts); the unit tests are apps/studio/src/server/logos.test.ts"
+    },
+    {
+      "id": "logos.index.refresh-dry-run",
+      "feature": "logos",
+      "interaction": "POST /api/logo/refresh { dryRun: true } with the bearer answers the counts, updatedAt, lastError and progress in under 2 s and the network log shows no upstream fetch; without a credential it answers 401",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-logos 10",
+      "parks": ["insert.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.2 (B6 with B7: the agent bearer and CRON_SECRET; the crons entry of vercel.json); driven on both origins (7.2)"
+    },
+    {
+      "id": "logos.index.refresh-fixture",
+      "feature": "logos",
+      "interaction": "On the preview with TURBOSLIDE_LOGO_UPSTREAM=fixture, a refresh over the ten mark fixture marks the variant that answers 404 unavailable and its tile's menu drops it; a second refresh after the fixture drops one slug removes the slug from the index and its cached file from the store; on production the row is recorded not driven with the unit tests named",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-logos 13 (thesvg-registry.headers; the camel case keys against the kebab case files)",
+      "parks": ["insert.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.9 and 7.2 (B6: logo-fixtures/**; the spec reads the deployment's facts for the upstream and records the row not driven with apps/studio/src/server/logos.test.ts named where the upstream is thesvg.org, the pattern of assist.quota.429)"
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "feature": "logos",
+      "interaction": "With TURBOSLIDE_LOGO_UPSTREAM=down on the preview, logo.search answers from the cache, the foot names the date and the failure, and a cached mark inserts; on production the row is recorded not driven with the unit test named",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-logos 10",
+      "parks": ["insert.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.9 and 7.2 (B6, B7's flag); not driven by design where the upstream is not down, with apps/studio/src/server/logos.test.ts named"
+    },
+    {
+      "id": "logos.cache.open-licence-only",
+      "feature": "logos",
+      "interaction": "After the Figma insert (CC0) the dry run's cachedMarks rose by one and GET /api/logo/mark/figma/default.svg carries the attribution <desc>; after an AWS insert with the cloud switch on cachedMarks is unchanged and the route still serves the mark",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-logos 12, section 1 (thesvg-facts.json: 4,236 of the 4,940 marks under an open licence)",
+      "parks": ["insert.logo"],
+      "note": "Ship one P0; docs/FEATURES.md 4.2 and 4.10 (B6: the week cache for CC0, MIT, Apache, BSD, ISC and Unlicense alone; judge-design rejection 17)"
+    },
+    {
+      "id": "logos.export.pdf-pptx-crisp",
+      "feature": "export",
+      "interaction": "A deck with the Figma mark on every slide: the PDF's first page carries it; both PowerPoint files carry a PNG of at least 84 by 54 px for the footer's box and 396 by 252 for the title slot",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-logos 18",
+      "setup": "logo.insert { slug: 'figma', everySlide: true } through the window API",
+      "note": "Ship one P0; docs/FEATURES.md 4.8 (B7: THREE_X_KINDS gains logo); the feature is export because the row measures the exporters (7.1), so a red row blocks the ship; the insert is B6's and the row reads not driven while logo.insert is not on the build"
+    },
+    {
+      "id": "logos.agent.search-insert",
+      "feature": "logos",
+      "interaction": "turboslide logo search figma lists the row with its licence sentence; logo.insert over HTTP with the bearer and deck_logo_insert over MCP add the asset and the block; deck.info counts one more asset",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-logos 8",
+      "note": "Ship one P0; docs/FEATURES.md 4.11 (B6 in actions.ts by request to the integrator, B7 in agent-actions.ts; pnpm generate:contracts at the merge)"
+    },
+    {
+      "id": "logos.picker.variants",
+      "feature": "logos",
+      "interaction": "Wordmark on Stripe is disabled with the tooltip; Vercel with Wordmark inserts a picture 320 sheet px wide at the wordmark's ratio; Mono on a light deck inserts the mark in the kit's text colour",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 5 (thesvg-facts.json: a wordmark on 315 icons, mono on 3,757)",
+      "parks": ["dialog.logo.kind.wordmark", "dialog.logo.tone.mono"],
+      "note": "Ship one P1; docs/FEATURES.md 4.11 (B1: the two segmented controls); lands only under the P1 condition, the appearance rule of 4.3 chooses until then"
+    },
+    {
+      "id": "logos.kit.find-a-logo",
+      "feature": "logos",
+      "interaction": "Brand kit > Logo > Find a logo > Figma; the slot preview and every footer draw it within 5 s; brand.get reads mark.kind: 'picture'",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-logos 7 (08-theme-panel.png)",
+      "parks": ["panel.brand.logo.find"],
+      "note": "Ship one P1; docs/FEATURES.md 4.5 (B6: ThemesPanel.tsx, logo.insert { kit: true }); lands only under the P1 condition"
+    },
+    {
+      "id": "logos.intake.svg-sentence",
+      "feature": "images",
+      "interaction": "Upload from computer with an .svg: the picture lands as PNG twins, or, while the raster path is off, the snackbar reads \"SVG files are not accepted yet. Export the logo as a PNG and upload that\" and the chooser lists the four raster types",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-logos 4 (04-upload-thesvg-svg.png: \"svg is not accepted here; send png, jpeg, webp or gif\")",
+      "note": "Ship one P1; docs/FEATURES.md 4.7 (B7: intake.ts behind TURBOSLIDE_SVG_RASTER, UPLOAD_REASONS.notSvg); the feature is images (7.1), an unparkable feature, so a red row blocks the ship: the integrator decides at the ship whether B7's P1 landed or the row's sentence is today's"
+    },
+    {
+      "id": "logos.intake.url-sentence",
+      "feature": "images",
+      "interaction": "asset.add { url: 'https://thesvg.org/…' } from the page answers the sentence naming the four sites and no CLI flag; asset.add with the allowlisted Wikimedia PNG answers 200",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-logos 16 (logo-walk.json: \"host thesvg.org is not in the capture allowlist; pass --allow thesvg.org\")",
+      "note": "Ship one P1; docs/FEATURES.md 4.7 (B7: shared.ts the sentence and the User-Agent); the feature is images (7.1), an unparkable feature, so a red row blocks the ship: the integrator decides at the ship whether B7's P1 landed or the sentence is today's"
     }
   ]
 }

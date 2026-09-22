@@ -32,6 +32,7 @@ export type CoreFeature =
   | 'assist'
   | 'sync'
   | 'cost'
+  | 'logos'
   | 'surface';
 
 /** The four words of the audits for what production did on the day the matrix was written. */
@@ -52,7 +53,8 @@ export type CoreSpecDriver =
   | 'core/chrome.spec.ts'
   | 'core/brand.spec.ts'
   | 'core/assist.spec.ts'
-  | 'core/sync.spec.ts';
+  | 'core/sync.spec.ts'
+  | 'core/logos.spec.ts';
 
 /** The cost probe of docs/SYNC.md 6.3 (scripts/probes/sync-cost-probe.mjs), run by the gate. */
 export type CostProbeDriver = 'cost-probe';
@@ -109,6 +111,8 @@ export type ParkedList = {
 export const CORE_MATRIX_PATH: string;
 export const CORE_FEATURES: readonly CoreFeature[];
 export const AREA_FEATURE: Readonly<Record<string, CoreFeature>>;
+/** The rows whose feature is not their id's area (docs/FEATURES.md 7.1): the export and intake rows of the logos area. */
+export const ROW_FEATURE: Readonly<Record<string, CoreFeature>>;
 export const CORE_STATES: readonly CoreState[];
 export const RUN_RESULTS: readonly RunResult[];
 export const PROBE_DRIVER: 'probe --core';
@@ -175,3 +179,18 @@ export function shipVerdict(
 };
 /** The committed parked list of a ship, `ship-<commit>.json` (6.2); an unparkable feature is refused. */
 export function readParkedList(path: string): ParkedList;
+/** B1's module packages/chrome/src/parked-controls.ts, whose set `--emit-parked` writes (docs/FEATURES.md 7.2). */
+export const PARKED_CONTROLS_PATH: string;
+export const PARKED_BEGIN: string;
+export const PARKED_END: string;
+/** The control ids a ship's parked list keeps behind the switch through the module: the union of its parkedRows' parks, sorted. */
+export function parkedControlsOf(list: readonly CoreFeature[] | Partial<ParkedList>): string[];
+/** The lines written between the module's markers for a set and the ship it came from. */
+export function renderParkedSet(controls: readonly string[], commit: string | null): string;
+/** The module's text with its set replaced; throws when the markers are absent or doubled. */
+export function spliceParkedSet(source: string, rendered: string): string;
+/** The `--emit-parked` step: writes (or with check compares) the module's set from a ship's parked list. */
+export function emitParked(
+  listPath: string,
+  options?: { out?: string; check?: boolean },
+): { controls: string[]; changed: boolean; path: string; commit: string | null };

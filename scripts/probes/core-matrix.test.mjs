@@ -1,4 +1,4 @@
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -15,11 +15,15 @@ import {
   CORE_MATRIX,
   CORE_SPEC_DRIVERS,
   CORE_STATES,
+  PARKED_BEGIN,
+  PARKED_END,
   PROBE_DRIVER,
+  ROW_FEATURE,
   UNPARKABLE_FEATURES,
   areaOf,
   coreRow,
   costRows,
+  emitParked,
   featureOf,
   isCoreId,
   isCostRow,
@@ -27,9 +31,12 @@ import {
   isManualRow,
   isMeasureRow,
   isParkable,
+  parkedControlsOf,
   parkedFeaturesOf,
   probeRows,
   readParkedList,
+  renderParkedSet,
+  spliceParkedSet,
   rowsForDriver,
   rowsForFeature,
   shipVerdict,
@@ -52,7 +59,7 @@ describe('the committed matrix', () => {
       expect(CORE_DRIVERS, row.id).toContain(row.driver);
       expect(CORE_STATES, row.id).toContain(row.today);
       const area = areaOf(row.id);
-      expect(row.feature, row.id).toBe(AREA_FEATURE[area] ?? area);
+      expect(row.feature, row.id).toBe(ROW_FEATURE[row.id] ?? AREA_FEATURE[area] ?? area);
       if (row.today === 'broken' || row.today === 'flaky')
         expect([1, 2, 3], row.id).toContain(row.severity);
       else expect(row.severity, row.id).toBeUndefined();
@@ -92,6 +99,8 @@ describe('the committed matrix', () => {
       'fonts',
       'templates',
       'assist',
+      /* the features round, ship one (docs/FEATURES.md 4.12): the logo picker, parkable */
+      'logos',
     ])
       expect(isParkable(feature), feature).toBe(true);
     for (const feature of UNPARKABLE_FEATURES) expect(isParkable(feature), feature).toBe(false);
@@ -389,7 +398,7 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
       expect(rowsForFeature(feature).length, feature).toBeGreaterThan(0);
     for (const driver of ['core/chrome.spec.ts', 'core/brand.spec.ts', 'core/assist.spec.ts'])
       expect(rowsForDriver(driver).length, driver).toBeGreaterThan(0);
-    expect(CORE_MATRIX.length).toBe(565 + 133 + 16);
+    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71);
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
       'export.download.large-deck-pptx',
@@ -486,5 +495,133 @@ describe('the sync and costs round (docs/SYNC.md section 6)', () => {
     ]);
     expect(() => shipVerdict(results, ['sync'])).toThrow(/sync cannot be parked/);
     expect(() => shipVerdict(results, ['cost'])).toThrow(/cost cannot be parked/);
+  });
+});
+
+describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
+  const ship = CORE_MATRIX.filter((row) => /^Ship one P[01];/.test(row.note ?? ''));
+
+  it('holds the logos feature, the logos spec and the 71 added rows with their tiers', () => {
+    expect(CORE_FEATURES).toContain('logos');
+    expect(isParkable('logos')).toBe(true);
+    expect(CORE_SPEC_DRIVERS).toContain('core/logos.spec.ts');
+    expect(rowsForDriver('core/logos.spec.ts').length).toBe(7);
+    expect(ship.length).toBe(71);
+    expect(ship.filter((row) => row.note.startsWith('Ship one P0')).length).toBe(50);
+    expect(ship.filter((row) => row.note.startsWith('Ship one P1')).length).toBe(21);
+    expect(ship.filter((row) => row.driver === PROBE_DRIVER).length).toBe(54);
+    expect(rowsForFeature('logos').length).toBe(22);
+    for (const row of rowsForFeature('logos')) expect(row.today, row.id).toBe('not driven');
+    /* every logos row but the agent row carries parks (4.12) */
+    for (const row of rowsForFeature('logos'))
+      if (row.id !== 'logos.agent.search-insert') expect(row.parks, row.id).toBeDefined();
+  });
+
+  it('carries the export and intake rows of the logos area under their unparkable features', () => {
+    expect(ROW_FEATURE).toEqual({
+      'logos.export.pdf-pptx-crisp': 'export',
+      'logos.intake.svg-sentence': 'images',
+      'logos.intake.url-sentence': 'images',
+    });
+    for (const [id, feature] of Object.entries(ROW_FEATURE)) {
+      expect(coreRow(id).feature).toBe(feature);
+      expect(isParkable(feature), id).toBe(false);
+    }
+    expect(() =>
+      validateCoreMatrix([
+        {
+          id: 'logos.export.pdf-pptx-crisp',
+          feature: 'logos',
+          interaction: 'x',
+          driver: 'core/export.spec.ts',
+          today: 'not driven',
+          evidence: 'e',
+        },
+      ]),
+    ).toThrow(/area logos belongs to export, not logos/);
+    /* a red export row of the logos area blocks the ship and parks nothing (7.1) */
+    const results = {};
+    for (const id of CORE_IDS) results[id] = 'passed';
+    const run = parkedFeaturesOf({ ...results, 'logos.export.pdf-pptx-crisp': 'failed' });
+    expect(run.parked).toEqual([]);
+    expect(run.blocking).toEqual([
+      { id: 'logos.export.pdf-pptx-crisp', feature: 'export', result: 'failed' },
+    ]);
+    /* a red logos row with parks parks its controls alone; one without parks the feature (4.12) */
+    const picker = parkedFeaturesOf({ ...results, 'logos.picker.search': 'failed' });
+    expect(picker.parked).toEqual([]);
+    expect(picker.parkedRows).toEqual([
+      { id: 'logos.picker.search', parks: ['insert.logo'], result: 'failed' },
+    ]);
+    const agent = parkedFeaturesOf({ ...results, 'logos.agent.search-insert': 'not driven' });
+    expect(agent.parked).toEqual(['logos']);
+  });
+
+  it('writes the parked set of parked-controls.ts from a ship list between the markers, empty before the runs', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'core-matrix-parked-'));
+    const module = join(dir, 'parked-controls.ts');
+    const head = "// B1's module\nimport { x } from './y';\n\n";
+    const tail =
+      '\n\nexport function isParked(id: string): boolean {\n  return PARKED_CONTROLS.has(id);\n}\n';
+    writeFileSync(
+      module,
+      `${head}${PARKED_BEGIN}\nexport const PARKED_CONTROLS: ReadonlySet<string> = new Set<string>([]);\n${PARKED_END}${tail}`,
+    );
+    const empty = join(dir, 'ship-empty.json');
+    writeFileSync(empty, JSON.stringify({ commit: 'abc1234', parkedFeatures: [], parkedRows: [] }));
+    expect(parkedControlsOf(readParkedList(empty))).toEqual([]);
+    const first = emitParked(empty, { out: module });
+    expect(first.controls).toEqual([]);
+    expect(readFileSync(module, 'utf8')).toContain(
+      'export const PARKED_CONTROLS: ReadonlySet<string> = new Set<string>([]);',
+    );
+    expect(readFileSync(module, 'utf8').startsWith(head)).toBe(true);
+    expect(readFileSync(module, 'utf8').endsWith(tail)).toBe(true);
+    const list = join(dir, 'ship-two-rows.json');
+    writeFileSync(
+      list,
+      JSON.stringify({
+        commit: 'abc1234',
+        parkedFeatures: [],
+        parkedRows: [
+          { id: 'logos.insert.every-slide', parks: ['dialog.logo.everySlide'] },
+          { id: 'logos.insert.row', parks: ['insert.logo', 'insert.image.logo'] },
+          { id: 'charts.double-click.opens-data', parks: ['bar.chart.editData'] },
+        ],
+      }),
+    );
+    expect(parkedControlsOf(readParkedList(list))).toEqual([
+      'bar.chart.editData',
+      'dialog.logo.everySlide',
+      'insert.image.logo',
+      'insert.logo',
+    ]);
+    const check = emitParked(list, { out: module, check: true });
+    expect(check.changed).toBe(true);
+    expect(readFileSync(module, 'utf8')).toContain('new Set<string>([]);');
+    const written = emitParked(list, { out: module });
+    expect(written.changed).toBe(true);
+    const text = readFileSync(module, 'utf8');
+    expect(text).toContain(
+      "  'bar.chart.editData',\n  'dialog.logo.everySlide',\n  'insert.image.logo',\n  'insert.logo',\n]);",
+    );
+    expect(text).toContain('from ship-abc1234.json; 4 controls');
+    expect(text.split(PARKED_BEGIN).length).toBe(2);
+    expect(emitParked(list, { out: module, check: true }).changed).toBe(false);
+    expect(() => spliceParkedSet('no markers here', renderParkedSet([], null))).toThrow(
+      /parked-controls:begin/,
+    );
+    expect(() => emitParked(list, { out: join(dir, 'missing.ts') })).toThrow(/does not exist/);
+    /* a list naming a row without parks, or controls the row does not guard, is refused before anything is written */
+    const bad = join(dir, 'ship-bad.json');
+    writeFileSync(
+      bad,
+      JSON.stringify({
+        commit: 'abc1234',
+        parkedFeatures: [],
+        parkedRows: [{ id: 'logos.insert.row', parks: ['insert.shader'] }],
+      }),
+    );
+    expect(() => emitParked(bad, { out: module })).toThrow(/controls the row does not guard/);
   });
 });

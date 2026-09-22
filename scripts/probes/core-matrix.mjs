@@ -29,13 +29,25 @@
 // driver `cost-probe` (scripts/probes/sync-cost-probe.mjs: one page state per process for three
 // minutes, every request the page made and `sync.status.storeCalls` sampled, the counts beside
 // the ceiling in the run's JSON); a cost row carries `measure: true` in SYNC.md 6.1's sense (its
-// counts are recorded and the row holds the ship only over its ceiling on the preview).
+// counts are recorded and the row holds the ship only over its ceiling on the preview). The features
+// round, ship one (docs/FEATURES.md section 7) added the parkable feature `logos`, the spec driver
+// `core/logos.spec.ts`, the dialog, overlay and panel files whose control ids `parks` may name
+// (`CONTROL_SOURCE_PATHS`), the ids FEATURES.md declares before the lanes' files exist
+// (`DECLARED_CONTROL_IDS`), `ROW_FEATURE` (a row whose id area is a new feature while its measurement
+// belongs to an unparkable one carries that feature, so a red export or intake row blocks the ship
+// instead of parking the picker) and the `--emit-parked` step, which writes the set of
+// packages/chrome/src/parked-controls.ts (B1's module, 7.2) from a ship's `parkedRows`.
 //
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
+//   node scripts/probes/core-matrix.mjs --emit-parked docs/gslides-parity/focus/ship-<commit>.json
+//     [--out packages/chrome/src/parked-controls.ts] [--check]
+//       writes (or with --check compares) the PARKED_CONTROLS set of the module between its two
+//       markers from the ship's parkedRows: the union of their `parks`, sorted; an empty set on a
+//       preview built before the runs (docs/FEATURES.md 7.2)
 //
 // Node only, no dependency. Type declarations for the TypeScript callers are in core-matrix.d.mts.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 /** The matrix file docs/FOCUS.md is rendered from. */
@@ -79,11 +91,27 @@ export const CORE_FEATURES = Object.freeze([
   /* the sync and costs round (docs/SYNC.md 6.1): the write path's order and the calls per state */
   'sync',
   'cost',
+  /* the features round, ship one (docs/FEATURES.md 4.12): the logo picker over thesvg.org, parkable;
+     ship two adds `shaders` (5.10) with its rows */
+  'logos',
   'surface',
 ]);
 
 /** An id's first part that is not a feature name, with the feature its rows belong to. */
 export const AREA_FEATURE = Object.freeze({ collab: 'share' });
+
+/**
+ * The rows whose feature is not their id's area (docs/FEATURES.md 7.1): a row of a new feature's
+ * area whose measurement belongs to an unparkable feature carries that feature, so a red one blocks
+ * the ship instead of parking the new feature. The export row of the logos area is the exporters'
+ * (B7, `export`), the two intake rows are the upload's (`images`). Ship two adds the shaders area's
+ * export rows and its View row the same way. Every other row's feature is its area's.
+ */
+export const ROW_FEATURE = Object.freeze({
+  'logos.export.pdf-pptx-crisp': 'export',
+  'logos.intake.svg-sentence': 'images',
+  'logos.intake.url-sentence': 'images',
+});
 
 /** The four words of the audits for what production did; nothing else is a state. */
 export const CORE_STATES = Object.freeze(['works', 'broken', 'flaky', 'not driven']);
@@ -119,6 +147,9 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
   'core/assist.spec.ts',
   /* the sync and costs round (docs/SYNC.md 6.1): the two browser spec of the ordering rows */
   'core/sync.spec.ts',
+  /* the features round, ship one (docs/FEATURES.md 7.1): the bearer rows, the network rows, the
+     fixture upstream rows and the two browser rows of the logo picker */
+  'core/logos.spec.ts',
 ]);
 
 export const CORE_DRIVERS = Object.freeze([PROBE_DRIVER, ...CORE_SPEC_DRIVERS, COST_PROBE_DRIVER]);
@@ -197,6 +228,14 @@ export const CONTROL_SOURCE_PATHS = Object.freeze(
     '../../packages/chrome/src/dialogs/SaveAsTemplate.tsx',
     '../../apps/studio/src/routes/decks.index.tsx',
     '../../apps/studio/src/routes/decks.templates.tsx',
+    /* the features round (docs/FEATURES.md section 6, B4's row): the logo dialog, the shader gallery
+       and section, the overlay's handles and bars, the Tabular figures row and B1's parked set */
+    '../../packages/chrome/src/dialogs/Logo.tsx',
+    '../../packages/chrome/src/dialogs/ShaderGallery.tsx',
+    '../../packages/chrome/src/inspector/shader.tsx',
+    '../../packages/chrome/src/inspector/typography.tsx',
+    '../../packages/chrome/src/Overlay.tsx',
+    '../../packages/chrome/src/parked-controls.ts',
   ].map((rel) => fileURLToPath(new URL(rel, import.meta.url))),
 );
 
@@ -241,6 +280,38 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'dialog.tailor',
   /* the pictures (B2): the templated By URL row */
   'format.image.replaceImage.byUrl',
+  /* the features round, ship one (docs/FEATURES.md 2.2, 2.3, 3.1, 4.3 to 4.11, 4.12): the ids the
+     rows' `parks` name before the lanes' files hold them. The menu rows land in model.ts by request
+     (B1 `insert.logo`, `insert.image.logo`; B6 `format.image.replaceImage.logo`, templated as
+     `${prefix}.logo` by `replaceImageItems`); the dialog controls in dialogs/Logo.tsx (B1), the
+     Tailor button in dialogs/Tailor.tsx (B1), the kit button in ThemesPanel.tsx (B6, P1), the Edit
+     data button and the P1 table handles and bar in Overlay.tsx (B3), the two P1 tails in
+     toolbar-tails.ts (B3) and the Tabular figures row in inspector/typography.tsx (B2). Four are
+     families their source templates: `handle.table.row` (`handle.table.row.<n>`),
+     `handle.table.head.column` and `.row` (`handle.table.head.<axis>.<n>`) and `bar.table`
+     (`bar.table.<command>`). */
+  'insert.logo',
+  'insert.image.logo',
+  'format.image.replaceImage.logo',
+  'dialog.logo.group.brand',
+  'dialog.logo.group.recent',
+  'dialog.logo.upload',
+  'dialog.logo.source',
+  'dialog.logo.everySlide',
+  'dialog.logo.kind.wordmark',
+  'dialog.logo.tone.mono',
+  'dialog.tailor.logo.find',
+  'panel.brand.logo.find',
+  'bar.chart.editData',
+  'bar.table',
+  'handle.table.row',
+  'handle.table.add.column',
+  'handle.table.add.row',
+  'handle.table.head.column',
+  'handle.table.head.row',
+  'toolbar.group.text',
+  'toolbar.wordart.outline',
+  'formatOptions.typography.numerals',
 ]);
 
 let controlSourceText = null;
@@ -333,7 +404,7 @@ export function validateCoreMatrix(rows) {
     if (!CORE_FEATURES.includes(row.feature))
       problems.push(`${where}: unknown feature ${row.feature}`);
     const area = areaOf(row.id);
-    const expected = AREA_FEATURE[area] ?? area;
+    const expected = ROW_FEATURE[row.id] ?? AREA_FEATURE[area] ?? area;
     if (row.feature !== expected)
       problems.push(`${where}: area ${area} belongs to ${expected}, not ${row.feature}`);
     if (typeof row.interaction !== 'string' || row.interaction.length === 0)
@@ -572,9 +643,100 @@ export function shipVerdict(results, parked = [], rows = CORE_MATRIX) {
   return { ok: failures.length === 0, failures, measured };
 }
 
+// -----------------------------------------------------------------------------------------------
+// the parked set of packages/chrome/src/parked-controls.ts (docs/FEATURES.md 7.2)
+
+/** B1's module, whose set this generator writes between the two markers. */
+export const PARKED_CONTROLS_PATH = fileURLToPath(
+  new URL('../../packages/chrome/src/parked-controls.ts', import.meta.url),
+);
+/** The two markers the module carries around its set; the generator touches nothing outside them. */
+export const PARKED_BEGIN = '/* parked-controls:begin */';
+export const PARKED_END = '/* parked-controls:end */';
+
+/**
+ * The control ids a ship's parked list keeps behind the switch through the module: the union of
+ * the `parks` of its `parkedRows`, sorted, each checked against the row (readParkedList did). A
+ * list with no parked rows (a preview built before the runs) gives the empty set. A menu row or a
+ * toolbar control among them is hidden by the `advanced` flag of model.ts as well; listing it
+ * here is harmless, since the module's readers are the overlay, the dialogs and the Shader section.
+ */
+export function parkedControlsOf(list) {
+  const { parkedRows } = parkedOf(list);
+  return [...new Set(parkedRows.flatMap((entry) => entry.parks))].sort();
+}
+
+/**
+ * The lines the generator writes between the markers: the set literal and the ship it came from.
+ * `commit` names the ship (`null` for a set written from a run with no commit yet).
+ */
+export function renderParkedSet(controls, commit) {
+  const from = commit === null ? 'no ship yet' : `ship-${commit}.json`;
+  const items = controls.map((id) => `  '${id}',`).join('\n');
+  return [
+    `// written by scripts/probes/core-matrix.mjs --emit-parked from ${from}; ${controls.length} control${controls.length === 1 ? '' : 's'}`,
+    `export const PARKED_CONTROLS: ReadonlySet<string> = new Set<string>([${controls.length === 0 ? '' : `\n${items}\n`}]);`,
+  ].join('\n');
+}
+
+/**
+ * The module's text with its set replaced. The file must carry both markers once; a module without
+ * them is B1's to amend (the request in build/b4.md), so the generator refuses rather than guess
+ * where the set lives.
+ */
+export function spliceParkedSet(source, rendered) {
+  const a = source.indexOf(PARKED_BEGIN);
+  const b = source.indexOf(PARKED_END);
+  if (a < 0 || b < 0 || b < a)
+    throw new Error(
+      `parked-controls.ts must carry ${PARKED_BEGIN} before ${PARKED_END} exactly once; the set is written between them and nothing else is touched`,
+    );
+  if (source.indexOf(PARKED_BEGIN, a + 1) >= 0 || source.indexOf(PARKED_END, b + 1) >= 0)
+    throw new Error('parked-controls.ts carries a marker twice');
+  return `${source.slice(0, a + PARKED_BEGIN.length)}\n${rendered}\n${source.slice(b)}`;
+}
+
+/**
+ * The `--emit-parked` step: reads the ship's parked list, renders its set and writes it into the
+ * module (or, with `check`, answers whether the module already holds it). Returns
+ * `{ controls, changed, path }`; throws when the module is absent or carries no markers.
+ */
+export function emitParked(listPath, { out = PARKED_CONTROLS_PATH, check = false } = {}) {
+  const list = readParkedList(listPath);
+  const controls = parkedControlsOf(list);
+  if (!existsSync(out))
+    throw new Error(
+      `${out} does not exist; packages/chrome/src/parked-controls.ts is B1's module (docs/FEATURES.md 7.2) and the generator writes its set between the markers only`,
+    );
+  const source = readFileSync(out, 'utf8');
+  const next = spliceParkedSet(source, renderParkedSet(controls, list.commit));
+  const changed = next !== source;
+  if (!check && changed) writeFileSync(out, next);
+  return { controls, changed, path: out, commit: list.commit };
+}
+
 if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1]) {
-  if (process.argv.includes('--ids')) {
+  const argv = process.argv.slice(2);
+  const argOf = (name) => {
+    const i = argv.indexOf(name);
+    return i >= 0 ? argv[i + 1] : undefined;
+  };
+  if (argv.includes('--ids')) {
     for (const id of CORE_IDS) console.log(id);
+  } else if (argv.includes('--emit-parked')) {
+    const listPath = argOf('--emit-parked');
+    if (listPath === undefined || listPath.startsWith('--')) {
+      console.error(
+        'usage: node scripts/probes/core-matrix.mjs --emit-parked <ship json> [--out <parked-controls.ts>] [--check]',
+      );
+      process.exit(2);
+    }
+    const check = argv.includes('--check');
+    const result = emitParked(listPath, { out: argOf('--out') ?? PARKED_CONTROLS_PATH, check });
+    console.log(
+      `${check ? (result.changed ? 'stale' : 'current') : result.changed ? 'wrote' : 'unchanged'}: ${result.path} holds ${result.controls.length} parked control${result.controls.length === 1 ? '' : 's'} from ${result.commit === null ? 'a list with no commit' : `ship-${result.commit}.json`}${result.controls.length > 0 ? ` (${result.controls.join(', ')})` : ''}`,
+    );
+    if (check && result.changed) process.exit(1);
   } else {
     const all = tally();
     console.log(

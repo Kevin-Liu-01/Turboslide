@@ -1,3 +1,6 @@
+import { createHash } from 'node:crypto';
+import { brotliDecompressSync } from 'node:zlib';
+
 import { expect, test } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
 
@@ -7,11 +10,13 @@ import {
   coverage,
   ctl,
   extraHTTPHeaders,
+  headingRun,
   invoke,
   menuPath,
   newDeck,
   openEditor,
   ownerContext,
+  placeBlock,
   pngBytes,
   settled,
   state,
@@ -547,6 +552,426 @@ test(title('fonts.budget.no-load-before-ready'), async ({ browser }) => {
   expect(catalog, 'no catalog woff2 request before the ready mark').toEqual([]);
 });
 
+// ---------------------------------------------------------------------------------------------
+// the features round, ship one (docs/FEATURES.md 3.1, 3.5, 7.1): the Inter 4.1 italic, the P1
+// specimen rows and Recent group of the Font dropdown, and the italic preload on /edit alone
+
+/** The sha256 of the Inter 4.1 italic (docs/FEATURES.md 3.1 item 1; `INTER_ITALIC.sha256` in packages/fonts/src/inter.ts). */
+const INTER_ITALIC_SHA256 = 'e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a';
+const INTER_ITALIC_BYTES = 387_976;
+const INTER_ITALIC_VERSION = 'Version 4.001;git-9221beed3';
+const WOFF2_KNOWN_TAGS = [
+  'cmap',
+  'head',
+  'hhea',
+  'hmtx',
+  'maxp',
+  'name',
+  'OS/2',
+  'post',
+  'cvt ',
+  'fpgm',
+  'glyf',
+  'loca',
+  'prep',
+  'CFF ',
+  'VORG',
+  'EBDT',
+  'EBLC',
+  'gasp',
+  'hdmx',
+  'kern',
+  'LTSH',
+  'PCLT',
+  'VDMX',
+  'vhea',
+  'vmtx',
+  'BASE',
+  'GDEF',
+  'GPOS',
+  'GSUB',
+  'EBSC',
+  'JSTF',
+  'MATH',
+  'CBDT',
+  'CBLC',
+  'COLR',
+  'CPAL',
+  'SVG ',
+  'sbix',
+  'acnt',
+  'avar',
+  'bdat',
+  'bloc',
+  'bsln',
+  'cvar',
+  'fdsc',
+  'feat',
+  'fmtx',
+  'fvar',
+  'gvar',
+  'hsty',
+  'just',
+  'lcar',
+  'mort',
+  'morx',
+  'opbd',
+  'prop',
+  'trak',
+  'Zapf',
+  'Silf',
+  'Glat',
+  'Gloc',
+  'Feat',
+  'Sill',
+];
+function uintBase128(buf: Buffer, at: number): [number, number] {
+  let value = 0;
+  for (let i = 0; i < 5; i += 1) {
+    const byte = buf[at + i]!;
+    value = (value << 7) | (byte & 0x7f);
+    if ((byte & 0x80) === 0) return [value, at + i + 1];
+  }
+  throw new Error('a UIntBase128 longer than five bytes');
+}
+/**
+ * The version string (name id 5, the Windows platform) of a woff2 file: the header, the table
+ * directory with its UIntBase128 lengths, the one brotli stream and the name table inside it.
+ * Enough of the format for the row; a font that is not woff2 throws.
+ */
+function woff2Version(bytes: Buffer): string | null {
+  if (bytes.toString('latin1', 0, 4) !== 'wOF2') throw new Error('not a woff2 file');
+  const numTables = bytes.readUInt16BE(12);
+  const totalCompressedSize = bytes.readUInt32BE(20);
+  let at = 48;
+  const tables: { tag: string; length: number }[] = [];
+  for (let i = 0; i < numTables; i += 1) {
+    const flags = bytes[at]!;
+    at += 1;
+    let tag: string;
+    if ((flags & 0x3f) === 63) {
+      tag = bytes.toString('latin1', at, at + 4);
+      at += 4;
+    } else tag = WOFF2_KNOWN_TAGS[flags & 0x3f] ?? '????';
+    let origLength: number;
+    [origLength, at] = uintBase128(bytes, at);
+    let length = origLength;
+    const version = (flags >> 6) & 3;
+    const transformed = tag === 'glyf' || tag === 'loca' ? version === 0 : version !== 0;
+    if (transformed) [length, at] = uintBase128(bytes, at);
+    tables.push({ tag, length });
+  }
+  const data = brotliDecompressSync(bytes.subarray(at, at + totalCompressedSize));
+  let pos = 0;
+  let name: Buffer | null = null;
+  for (const table of tables) {
+    if (table.tag === 'name') name = data.subarray(pos, pos + table.length);
+    pos += table.length;
+  }
+  if (name === null) return null;
+  const count = name.readUInt16BE(2);
+  const stringOffset = name.readUInt16BE(4);
+  for (let i = 0; i < count; i += 1) {
+    const record = 6 + i * 12;
+    const platform = name.readUInt16BE(record);
+    const nameId = name.readUInt16BE(record + 6);
+    const length = name.readUInt16BE(record + 8);
+    const offset = name.readUInt16BE(record + 10);
+    if (nameId === 5 && platform === 3)
+      return Buffer.from(name.subarray(stringOffset + offset, stringOffset + offset + length))
+        .swap16()
+        .toString('utf16le');
+  }
+  return null;
+}
+/** The font preload links of a route's HTML, as hrefs. */
+async function fontPreloads(path: string): Promise<string[]> {
+  const res = await page.request.get(path, { headers: extraHTTPHeaders, maxRedirects: 5 });
+  const html = await res.text();
+  return [...html.matchAll(/<link\b[^>]*>/g)]
+    .map((m) => m[0])
+    .filter((tag) => /rel=["']?preload/.test(tag) && /as=["']?font/.test(tag))
+    .map((tag) => /href=["']([^"']+)["']/.exec(tag)?.[1] ?? tag);
+}
+
+test(title('fonts.inter.italic-release'), async () => {
+  test.setTimeout(180_000);
+  await openEditor(page, deck);
+  const preloads = await fontPreloads(`/edit/${deck}`);
+  const italic = preloads.find((href) => /Italic/i.test(href)) ?? null;
+  test.info().annotations.push({ type: 'preloads', description: preloads.join(', ') || 'none' });
+  expect(italic, 'the editor preloads the italic').not.toBeNull();
+  const res = await page.request.get(italic!, { headers: extraHTTPHeaders, maxRedirects: 5 });
+  expect(res.status()).toBe(200);
+  const bytes = await res.body();
+  const sha = createHash('sha256').update(bytes).digest('hex');
+  const version = woff2Version(bytes);
+  test.info().annotations.push({
+    type: 'italic',
+    description: `${bytes.length} bytes; sha256 ${sha.slice(0, 16)}…; name table "${version ?? 'unread'}"`,
+  });
+  expect(bytes.length, 'the 4.1 italic is 387,976 bytes').toBe(INTER_ITALIC_BYTES);
+  expect(sha, 'the sha256 equals INTER_ITALIC.sha256').toBe(INTER_ITALIC_SHA256);
+  expect(version, 'the name table reads the 4.1 version string').toBe(INTER_ITALIC_VERSION);
+  /* Cmd+I on the title renders the italic face */
+  const first = await page.evaluate(
+    () => (window.turboslide!.studio.describe().state as { slideId: string }).slideId,
+  );
+  void first;
+  const run = await headingRun(page);
+  const el = page
+    .locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${run}"]`)
+    .first();
+  await el.dblclick();
+  await page.waitForTimeout(200);
+  await page.keyboard.press('Meta+a');
+  await page.keyboard.press('Meta+i');
+  await page.waitForTimeout(400);
+  const facts = await page.evaluate((r) => {
+    const root = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`);
+    const mark = root?.querySelector('em, i, [data-mark="italic"], [data-mark="em"]') ?? root;
+    const cs = mark ? getComputedStyle(mark) : null;
+    return {
+      style: cs?.fontStyle ?? null,
+      family: cs?.fontFamily ?? null,
+      loaded: [...document.fonts].some(
+        (f) => /^"?Inter"?$/.test(f.family) && f.style === 'italic' && f.status === 'loaded',
+      ),
+      check: document.fonts.check('italic 700 24px Inter'),
+    };
+  }, run);
+  await page.keyboard.press('Meta+i');
+  await page.waitForTimeout(200);
+  await page.keyboard.press('Escape');
+  await settled(page);
+  test.info().annotations.push({ type: 'italic drawn', description: JSON.stringify(facts) });
+  expect(facts.style, 'the title draws italic').toBe('italic');
+  expect(facts.loaded || facts.check, 'the italic Inter face is loaded').toBe(true);
+});
+
+/** The Font dropdown opened on the selected text box; answers the dropdown's state. */
+async function openFontDropdown(
+  p: Page,
+  blockId: string,
+): Promise<'live' | 'absent' | 'disabled' | 'closed'> {
+  await p.keyboard.press('Escape');
+  const el = p.locator(`.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`).first();
+  await el.click();
+  await p.waitForTimeout(200);
+  if (
+    await p.evaluate(() => document.querySelector('.ts-stagewrap.ts-editor[data-editing]') !== null)
+  ) {
+    await p.keyboard.press('Escape');
+    await p.waitForTimeout(200);
+  }
+  let control = 'toolbar.font';
+  if (
+    !(await ctl(p, control)
+      .isVisible()
+      .catch(() => false))
+  ) {
+    if (
+      await ctl(p, 'toolbar.more')
+        .isVisible()
+        .catch(() => false)
+    ) {
+      await ctl(p, 'toolbar.more').click();
+      await p.waitForTimeout(300);
+      control = 'toolbar.more.toolbar.font';
+    }
+  }
+  if (
+    !(await ctl(p, control)
+      .isVisible()
+      .catch(() => false))
+  )
+    return 'absent';
+  const disabled = await ctl(p, control).evaluate(
+    (e) => e.getAttribute('aria-disabled') === 'true' || e.hasAttribute('disabled'),
+  );
+  if (disabled) return 'disabled';
+  await ctl(p, control).click();
+  const shown = await ctl(p, 'toolbar.font.search')
+    .waitFor({ timeout: 6000 })
+    .then(() => true)
+    .catch(() => false);
+  if (shown)
+    await p
+      .locator('[data-control="toolbar.font.list"][data-rows]')
+      .first()
+      .waitFor({ timeout: 10_000 })
+      .catch(() => undefined);
+  return shown ? 'live' : 'closed';
+}
+const NOT_LIVE = (s: string) =>
+  `not on this build: toolbar.font is ${s} (docs/PRODUCT.md 4.2, B5a; docs/FEATURES.md 3.5)`;
+
+test(title('fonts.picker.specimen-rows'), async () => {
+  test.setTimeout(180_000);
+  await openEditor(page, deck);
+  const slideId = (await state(page)).slideId;
+  await placeBlock(page, slideId, {
+    id: 'specimen-box',
+    type: 'text',
+    text: 'Renewal terms',
+    pos: { x: 160, y: 200, w: 800, h: 120 },
+  });
+  const woff: string[] = [];
+  page.on('request', (req) => {
+    if (/\.woff2?(\?|$)/.test(req.url())) woff.push(req.url());
+  });
+  const dropdown = await openFontDropdown(page, 'specimen-box');
+  if (dropdown !== 'live') test.skip(true, NOT_LIVE(dropdown));
+  const before = woff.length;
+  /* the whole list scrolled */
+  const list = page.locator('[data-control="toolbar.font.list"]').first();
+  for (let i = 0; i < 12; i += 1) {
+    await list.evaluate((el) => {
+      el.scrollTop += 400;
+    });
+    await page.waitForTimeout(150);
+  }
+  await page.waitForTimeout(800);
+  const facts = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('[data-control^="toolbar.font.row."]')];
+    /* a specimen draws the family name as a picture (an img, or an svg at least 60 px wide);
+       a row's icon (a check mark, a chevron) is not one */
+    const specimens = rows.filter((r) =>
+      [...r.querySelectorAll('img, svg')].some((el) => {
+        const w = el.getBoundingClientRect().width;
+        return el.tagName.toLowerCase() === 'img'
+          ? /specimen|\.svg/.test(el.getAttribute('src') ?? '') || w >= 60
+          : w >= 60;
+      }),
+    ).length;
+    return { rows: rows.length, specimens };
+  });
+  const scrolled = woff.length - before;
+  test.info().annotations.push({
+    type: 'specimens',
+    description: `${facts.rows} rows, ${facts.specimens} with an SVG specimen; ${scrolled} woff2 request(s) while scrolling: ${
+      woff
+        .slice(before)
+        .map((u) => u.split('/').slice(-2).join('/'))
+        .join(', ') || 'none'
+    }`,
+  });
+  if (facts.specimens === 0) {
+    await page.keyboard.press('Escape');
+    test.skip(
+      true,
+      'not on this build: the specimen rows of the Font dropdown (docs/FEATURES.md 3.5, P1, B1 with B2)',
+    );
+  }
+  expect(scrolled, 'scrolling the list loads no woff2').toBe(0);
+  expect(facts.specimens, 'each row draws an SVG specimen').toBe(facts.rows);
+  const pickAt = woff.length;
+  await ctl(page, 'toolbar.font.row.lora').click();
+  await settled(page);
+  await expect
+    .poll(() => woff.length, { timeout: 8000, message: 'the pick loads the face' })
+    .toBeGreaterThan(pickAt);
+});
+
+test(title('fonts.picker.recent-group'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  await openEditor(page, deck);
+  const slideId = (await state(page)).slideId;
+  await placeBlock(page, slideId, {
+    id: 'recent-box',
+    type: 'text',
+    text: 'Recent faces',
+    pos: { x: 160, y: 400, w: 800, h: 120 },
+  });
+  for (const id of ['roboto', 'lora']) {
+    const dropdown = await openFontDropdown(page, 'recent-box');
+    if (dropdown !== 'live') test.skip(true, NOT_LIVE(dropdown));
+    if (
+      !(await ctl(page, `toolbar.font.row.${id}`)
+        .isVisible()
+        .catch(() => false))
+    ) {
+      await ctl(page, 'toolbar.font.search').click();
+      await page.keyboard.type(id.slice(0, 3), { delay: 60 });
+      await page.waitForTimeout(400);
+    }
+    await ctl(page, `toolbar.font.row.${id}`).click();
+    await settled(page);
+  }
+  const dropdown = await openFontDropdown(page, 'recent-box');
+  expect(dropdown).toBe('live');
+  const facts = await page.evaluate(() => {
+    const groups = [...document.querySelectorAll('[data-control^="toolbar.font.group."]')].map(
+      (g) => g.getAttribute('data-control')!.replace('toolbar.font.group.', ''),
+    );
+    const recent = document.querySelector('[data-control="toolbar.font.group.recent"]');
+    const rows = [...(recent?.querySelectorAll('[data-control^="toolbar.font.row."]') ?? [])].map(
+      (r) => r.getAttribute('data-control')!.replace('toolbar.font.row.', ''),
+    );
+    return {
+      groups,
+      rows,
+      clear: document.querySelector('[data-control="toolbar.font.clearRecent"]') !== null,
+    };
+  });
+  test.info().annotations.push({ type: 'recent', description: JSON.stringify(facts) });
+  if (!facts.groups.includes('recent')) {
+    await page.keyboard.press('Escape');
+    test.skip(true, 'not on this build: toolbar.font.group.recent (docs/FEATURES.md 3.5, P1, B1)');
+  }
+  expect(facts.rows.slice().sort(), 'Recent lists the two picks').toEqual(['lora', 'roboto']);
+  expect(facts.groups.indexOf('recent'), 'Recent after Used').toBeGreaterThan(
+    facts.groups.indexOf('used'),
+  );
+  expect(facts.clear, 'a Clear recent row').toBe(true);
+  await ctl(page, 'toolbar.font.clearRecent').click();
+  await page.waitForTimeout(300);
+  const cleared = await page.evaluate(() =>
+    document.querySelector(
+      '[data-control="toolbar.font.group.recent"] [data-control^="toolbar.font.row."]',
+    ),
+  );
+  await page.keyboard.press('Escape');
+  expect(cleared, 'Clear recent empties the group').toBeNull();
+  /* a new browser context: the cookie alone, no localStorage */
+  const storage = await page.context().storageState();
+  const fresh = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+    storageState: { cookies: storage.cookies, origins: [] },
+  });
+  try {
+    const p2 = await fresh.newPage();
+    await openEditor(p2, deck);
+    const d2 = await openFontDropdown(p2, 'recent-box');
+    expect(d2).toBe('live');
+    const rows2 = await p2.evaluate(
+      () =>
+        document.querySelectorAll(
+          '[data-control="toolbar.font.group.recent"] [data-control^="toolbar.font.row."]',
+        ).length,
+    );
+    await p2.keyboard.press('Escape');
+    expect(rows2, 'a new browser context lists no recent').toBe(0);
+  } finally {
+    await fresh.close();
+  }
+});
+
+test(title('fonts.preload.italic-on-edit-only'), async () => {
+  test.setTimeout(120_000);
+  await openEditor(page, deck);
+  const decks = await fontPreloads('/decks');
+  const edit = await fontPreloads(`/edit/${deck}`);
+  test.info().annotations.push({
+    type: 'preloads',
+    description: `/decks: ${decks.join(', ') || 'none'}; /edit: ${edit.join(', ') || 'none'}`,
+  });
+  expect(decks.length, '/decks carries one font preload (the upright)').toBe(1);
+  expect(decks[0] ?? '', 'the upright').not.toMatch(/Italic/i);
+  expect(edit.length, '/edit carries two').toBe(2);
+});
+
 coverage(import.meta.filename, [
   'templates.save.as-template',
   'templates.save.same-name-replaces',
@@ -555,4 +980,9 @@ coverage(import.meta.filename, [
   'templates.deck.read-only',
   'brand.logo.replace-every-slide',
   'fonts.budget.no-load-before-ready',
+  /* the features round, ship one (docs/FEATURES.md 7.1) */
+  'fonts.inter.italic-release',
+  'fonts.picker.specimen-rows',
+  'fonts.picker.recent-group',
+  'fonts.preload.italic-on-edit-only',
 ]);

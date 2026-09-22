@@ -35,6 +35,8 @@ export const IDS = [
   'formatting.persistence',
   /* the product round (docs/PRODUCT.md 8.1) */
   'formatting.alt-text.write-undo',
+  /* the features round, ship one (docs/FEATURES.md 3.1 item 4): the Tabular figures row */
+  'formatting.numerals.tabular-row',
 ];
 
 const A_TEXT = 'Alpha beta gamma delta';
@@ -864,6 +866,7 @@ export async function run(t) {
   t.deck.formatBoxes = ['fmt-a', 'fmt-b'];
   await t.advancedBack('the formatting rows');
   await productRound(t);
+  await featuresRound(t);
 }
 
 /**
@@ -949,6 +952,164 @@ async function productRound(t) {
       return {
         ok: written === 'A renewal chart' && undone !== 'A renewal chart' && descr === true,
         observed: `${switched ? 'with the switch on; ' : ''}alt after Tab ${JSON.stringify(written)}; after Cmd+Z ${JSON.stringify(undone)}; the Editable text export answered ${pptx.status}${pptx.bytes ? `, descr carried ${descr} in the light file of the bundle` : ''}`,
+      };
+    },
+  );
+}
+
+/**
+ * The features round, ship one (docs/FEATURES.md 3.1 item 4; the row
+ * `formatting.numerals.tabular-row`): the Tabular figures row of Format options > Text with its
+ * sentence, writing `typography.numerals: 'tabular'`, enabled on a face with `tnum` and disabled
+ * with its sentence on one without, and found by Search the menus under a seller's words. Three
+ * text boxes are placed through the window API as setup (Inter, Bebas Neue, Playfair Display). The
+ * row is B2's (inspector/typography.tsx); a build without the control reads not built with its id.
+ */
+async function featuresRound(t) {
+  const { page } = t;
+  const F = t.deck.formatSlide ?? t.deck.titleSlide;
+  await t.clickCard(F);
+  await t.clearAll();
+  const boxes = { inter: 'num-inter', bebas: 'num-bebas', playfair: 'num-playfair' };
+  await t.setup(
+    'three text boxes for the Tabular figures row',
+    'block.insert through the window API',
+    async () => {
+      const made = [];
+      for (const [key, family] of [
+        ['inter', undefined],
+        ['bebas', 'bebas-neue'],
+        ['playfair', 'playfair-display'],
+      ]) {
+        const obj = await t.placeBlock(F, {
+          id: boxes[key],
+          type: 'text',
+          text: '1111 against 0000',
+          ...(family ? { typography: { family } } : {}),
+          pos: { x: 80, y: 640 + made.length * 80, w: 700, h: 64 },
+        });
+        made.push(obj?.id ?? 'none');
+      }
+      return { ok: made.every((m) => m !== 'none'), observed: made.join(', ') };
+    },
+  );
+  const blockOf = async (id) => (await t.blockOf(F, id))?.block ?? null;
+  const numericOf = (id) =>
+    page.evaluate((blockId) => {
+      const el = document.querySelector(
+        `.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`,
+      );
+      const run = el?.querySelector('[data-run]') ?? el;
+      return run ? getComputedStyle(run).fontVariantNumeric : null;
+    }, id);
+  /** The Tabular figures row of the open panel: its control, its state and the words around it. */
+  const rowFacts = () =>
+    page.evaluate(() => {
+      const el = document.querySelector('[data-control="formatOptions.typography.numerals"]');
+      if (!el) return null;
+      /* the row (inspector/typography.tsx): the label with its sentence under it
+         (`formatOptions.typography.numerals.sentence`), the check with the tooltip's name and doc */
+      const row =
+        el.closest('.ts-ctl-typo-row, label, .ts-field, .ts-inspector-row, li, div') ?? el;
+      const input = el.matches('input') ? el : (el.querySelector('input') ?? el);
+      const sentence = document.querySelector(
+        '[data-control="formatOptions.typography.numerals.sentence"]',
+      );
+      const tipHolder = el.closest('[data-tip]') ?? row.querySelector('[data-tip]') ?? el;
+      return {
+        disabled:
+          input.hasAttribute('disabled') ||
+          el.getAttribute('aria-disabled') === 'true' ||
+          row.getAttribute('aria-disabled') === 'true',
+        checked:
+          input instanceof HTMLInputElement
+            ? input.checked
+            : el.getAttribute('aria-checked') === 'true' ||
+              el.getAttribute('aria-pressed') === 'true',
+        words: `${(sentence?.textContent ?? '').trim()} | ${(row.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 200)}`,
+        tip: [...tipHolder.attributes]
+          .filter((a) => a.name.startsWith('data-tip'))
+          .map((a) => a.value)
+          .join(' '),
+      };
+    });
+  const openPanelOn = async (id) => {
+    await t.clearAll();
+    await t.selectObject(id);
+    if (!(await t.visible('panel.formatOptions'))) {
+      await t.tailControl('toolbar.formatOptions');
+      await t.waitControl('panel.formatOptions', 8000);
+    }
+    await t.sleep(400);
+    return rowFacts();
+  };
+  await t.step(
+    'formatting.numerals.tabular-row',
+    'Format options > Text on the Inter box; toggle Tabular figures; the Bebas Neue box; the Playfair Display box; Search the menus "line up numbers"',
+    "the row carries its sentence and writes typography.numerals: 'tabular'; enabled on Bebas Neue, disabled with its sentence on Playfair Display; the finder lists it",
+    async () => {
+      const inter = await openPanelOn(boxes.inter);
+      if (inter === null) {
+        if (await t.visible('panel.formatOptions.close'))
+          await t.clickControl('panel.formatOptions.close');
+        return t.notBuilt(
+          'formatOptions.typography.numerals',
+          'B2',
+          'no Tabular figures row under Format options > Text (FEATURES.md 3.1 item 4)',
+        );
+      }
+      const sentence = /Every digit takes the same width, so numbers line up in a column/;
+      const before = await blockOf(boxes.inter);
+      const rev0 = (await t.state()).revision;
+      await t.clickControl('formatOptions.typography.numerals');
+      await t.settled();
+      const written = await t
+        .pollUntil(
+          () => blockOf(boxes.inter),
+          (b) => b?.typography?.numerals === 'tabular',
+          6000,
+        )
+        .catch(() => blockOf(boxes.inter));
+      const rev1 = (await t.state()).revision;
+      const numeric = await numericOf(boxes.inter);
+      const bebas = await openPanelOn(boxes.bebas);
+      const playfair = await openPanelOn(boxes.playfair);
+      if (await t.visible('panel.formatOptions.close'))
+        await t.clickControl('panel.formatOptions.close');
+      await t.clearAll();
+      /* Search the menus under the seller's words */
+      await t.menuPath('help', 'help.searchMenus');
+      await t.waitControl('palette.query', 8000);
+      await t.typeHuman('line up numbers');
+      await t.sleep(600);
+      const found = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-control^="palette."]')]
+          .filter(
+            (e) => e.getClientRects().length > 0 && /Tabular figures/i.test(e.textContent ?? ''),
+          )
+          .map((e) => e.getAttribute('data-control')),
+      );
+      await t.press('Escape');
+      await t.waitGone('[data-control="palette.query"]', 4000);
+      if (written?.typography?.numerals === 'tabular') {
+        await t.press('Meta+z');
+        await t.sleep(400);
+        await t.settled();
+      }
+      const ok =
+        sentence.test(`${inter.words} ${inter.tip}`) &&
+        !inter.disabled &&
+        written?.typography?.numerals === 'tabular' &&
+        /tabular-nums/.test(numeric ?? '') &&
+        bebas !== null &&
+        !bebas.disabled &&
+        playfair !== null &&
+        playfair.disabled &&
+        /This face has no tabular figures/.test(`${playfair.words} ${playfair.tip}`) &&
+        found.length > 0;
+      return {
+        ok,
+        observed: `Inter row: "${inter.words}" (tip "${inter.tip}"), disabled ${inter.disabled}; numerals ${before?.typography?.numerals ?? 'absent'} -> ${written?.typography?.numerals ?? 'absent'} (revision ${rev0} -> ${rev1}), computed "${numeric}"; Bebas Neue row disabled ${bebas?.disabled ?? 'absent'}; Playfair Display row disabled ${playfair?.disabled ?? 'absent'} with "${playfair?.words ?? ''}"; the finder lists ${found.join(', ') || 'nothing'} for "line up numbers"`,
       };
     },
   );

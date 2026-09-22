@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { inflateRawSync } from 'node:zlib';
 
 import { expect, test } from '@playwright/test';
@@ -738,7 +740,6 @@ export async function download(
     );
   const d = 'd' in won ? won.d : await waiting;
   const path = await d.path();
-  const { readFileSync } = await import('node:fs');
   const bytes = readFileSync(path);
   return { name: d.suggestedFilename(), bytes, ms: Date.now() - t, download: d };
 }
@@ -805,7 +806,101 @@ export function zipEntries(bytes: Buffer): Map<string, () => string> {
   return out;
 }
 
+/**
+ * The entries of a zip with their bytes (the features round: the PNG media of a PowerPoint, and
+ * the inner .pptx of the export's bundle, which `zipEntries` cannot answer as text).
+ */
+export function zipEntriesRaw(bytes: Buffer): Map<string, () => Buffer> {
+  const out = new Map<string, () => Buffer>();
+  const eocd = bytes.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+  if (eocd < 0) return out;
+  const count = bytes.readUInt16LE(eocd + 10);
+  let offset = bytes.readUInt32LE(eocd + 16);
+  for (let i = 0; i < count; i += 1) {
+    if (bytes.readUInt32LE(offset) !== 0x02014b50) break;
+    const method = bytes.readUInt16LE(offset + 10);
+    const compressed = bytes.readUInt32LE(offset + 20);
+    const nameLength = bytes.readUInt16LE(offset + 28);
+    const extraLength = bytes.readUInt16LE(offset + 30);
+    const commentLength = bytes.readUInt16LE(offset + 32);
+    const local = bytes.readUInt32LE(offset + 42);
+    const name = bytes.subarray(offset + 46, offset + 46 + nameLength).toString('utf8');
+    out.set(name, () => {
+      const localName = bytes.readUInt16LE(local + 26);
+      const localExtra = bytes.readUInt16LE(local + 28);
+      const start = local + 30 + localName + localExtra;
+      const data = bytes.subarray(start, start + compressed);
+      return method === 8 ? inflateRawSync(data) : Buffer.from(data);
+    });
+    offset += 46 + nameLength + extraLength + commentLength;
+  }
+  return out;
+}
+
 /** The slide parts of a PPTX. */
 export function pptxSlides(bytes: Buffer): string[] {
   return [...zipEntries(bytes).keys()].filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n)).sort();
+}
+
+// ---------------------------------------------------------------------------------------------
+// the agent surface and the logo routes (the features round, docs/FEATURES.md 4.2, 4.11, 7.1)
+
+/**
+ * The bearer a spec sends to the agent surface on a deployment: TURBOSLIDE_TOKEN (the
+ * deployment's bootstrap bearer, the rule of core/decks.spec.ts's teardown) or the origin's row of
+ * ~/.config/turboslide/hosts.json (the walk toolkit's rule; read into memory, never printed).
+ * A localhost server's surface is open to the checkout holder (TURBOSLIDE_LOCAL_OPEN=1), so no
+ * bearer is sent there; a deployment run with no bearer answers null and the row records the reason.
+ */
+export function agentBearer(baseURL: string): string | null {
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(baseURL)) return null;
+  const env = process.env['TURBOSLIDE_TOKEN'];
+  if (env !== undefined && env !== '') return env;
+  try {
+    const file = `${homedir()}/.config/turboslide/hosts.json`;
+    if (!existsSync(file)) return null;
+    const hosts =
+      (JSON.parse(readFileSync(file, 'utf8')) as { hosts?: Record<string, { token?: string }> })
+        .hosts ?? {};
+    const row = hosts[baseURL] ?? hosts[baseURL.replace(/\/$/, '')];
+    return typeof row?.token === 'string' && row.token !== '' ? row.token : null;
+  } catch {
+    return null;
+  }
+}
+
+/** True for a localhost base, where the agent surface is open without a bearer. */
+export function isLocalBase(baseURL: string): boolean {
+  return /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(baseURL);
+}
+
+/** The headers of an agent call from a spec: the preview header, JSON, and the bearer where one exists. */
+export function agentHeaders(
+  baseURL: string,
+  extra: Record<string, string> = {},
+): Record<string, string> | null {
+  const bearer = agentBearer(baseURL);
+  if (bearer === null && !isLocalBase(baseURL)) return null;
+  return {
+    ...extraHTTPHeaders,
+    'content-type': 'application/json',
+    ...(bearer === null ? {} : { authorization: `Bearer ${bearer}` }),
+    ...extra,
+  };
+}
+
+/** The window API's action ids on a page (`describe().actions`). */
+export async function windowActions(page: Page): Promise<Set<string>> {
+  const list = await page.evaluate(() =>
+    (window.turboslide?.studio.describe().actions ?? []).map((a: { id: string } | string) =>
+      typeof a === 'string' ? a : a.id,
+    ),
+  );
+  return new Set(list);
+}
+
+/** The dimensions of a PNG from its IHDR chunk, or null for other bytes. */
+export function pngSize(bytes: Buffer): { width: number; height: number } | null {
+  if (bytes.length < 24 || bytes.toString('latin1', 1, 4) !== 'PNG') return null;
+  return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
 }

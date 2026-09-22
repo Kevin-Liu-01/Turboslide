@@ -29,6 +29,8 @@ export const IDS = [
   'brand.reset.default-kit',
   'brand.layout.tiles-in-kit',
   'brand.agent.set-get',
+  /* the features round, ship one (docs/FEATURES.md 2.3 item 4, P1 of B3): the kit's six roles lead every object plate */
+  'brand.objects.kit-colours-first',
 ];
 
 /** The six roles of the kit and the token each maps to (PRODUCT.md 4.1). */
@@ -1201,6 +1203,179 @@ export async function run(t) {
           httpOk === true,
         observed: `window API: --blue ${before} -> ${drawn}; brand.get ${read.slice(0, 160)}; HTTP ${http.noBearer ? 'not driven: no bearer for this origin (TURBOSLIDE_TOKEN or ~/.config/turboslide/hosts.json)' : `${http.status}, --blue ${httpDrawn}, brand.get ${JSON.stringify(httpGet?.body ?? null).slice(0, 120)}`}`,
       };
+    },
+  );
+  await featuresRound(t);
+}
+
+/**
+ * The features round, ship one (docs/FEATURES.md 2.3 item 4, P1 of B3; the row
+ * `brand.objects.kit-colours-first`): the table's fill plate, the chart's series swatches and the
+ * tail's plate list the kit's six roles first with the role's name and hex in the tooltip, and a
+ * new chart's first two series are Primary and Accent. The table and the chart are the earlier
+ * areas' inserts on their slides; a plate without kit swatches reads not built with the id of its
+ * first swatch (docs/PRODUCT.md 8.1).
+ */
+async function featuresRound(t) {
+  const { page } = t;
+  const ROLES = ['text', 'background', 'caption', 'hint', 'primary', 'accent'];
+  const KIT = /\.kit\.(text|background|caption|hint|primary|accent)$/;
+  /** A css colour (rgb(), rgba() or #hex) as lower case #rrggbb, or null. */
+  const hexOf = (css) => {
+    if (typeof css !== 'string') return null;
+    const m = css.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (m)
+      return `#${[m[1], m[2], m[3]].map((v) => Number(v).toString(16).padStart(2, '0')).join('')}`;
+    return /^#[0-9a-f]{6}$/i.test(css.trim()) ? css.trim().toLowerCase() : null;
+  };
+  /** The visible swatches of a plate under a control prefix, in DOM order. */
+  const swatches = (prefix, exclude) =>
+    page.evaluate(
+      ([pre, ex]) =>
+        [...document.querySelectorAll(`[data-control^="${pre}."]`)]
+          .filter((e) => e.getClientRects().length > 0)
+          .map((e) => e.getAttribute('data-control'))
+          .filter((c) => !new RegExp(ex).test(c)),
+      [prefix, exclude],
+    );
+  await t.step(
+    'brand.objects.kit-colours-first',
+    "the table cell's Fill color plate, the chart's series swatches, the text colour plate; a new chart's series",
+    'the six kit roles lead each plate with the role and hex in the tooltip; the first two series of a new chart are Primary and Accent',
+    async () => {
+      const facts = [];
+      let ok = true;
+      /* the table's fill plate */
+      const tableSlide = t.deck.tableSlide;
+      const T = t.deck.table;
+      if (!tableSlide || !T)
+        return { ok: false, observed: 'no table from the tables area to read' };
+      await t.clickCard(tableSlide);
+      await t.clearAll();
+      const cellRun = `${T}/rows/1/cells/1`;
+      const on = await t.openRun(cellRun);
+      if (!on) return { ok: false, observed: 'no cell session on the table' };
+      await t.tailControl('toolbar.fillColor');
+      await t.waitControl('toolbar.fillColor.plate', 5000).catch(() => undefined);
+      const fill = await swatches('toolbar.fillColor', 'plate$|menu$|none$|hex$|custom$');
+      const fillKit = fill.slice(0, 6).filter((c) => KIT.test(c));
+      if (fillKit.length === 0) {
+        await t.press('Escape');
+        await t.clearAll();
+        return t.notBuilt(
+          'toolbar.fillColor.kit.primary',
+          'B3',
+          `the table fill plate lists ${fill.slice(0, 8).join(', ') || 'no swatch'} first and no kit role (P1, FEATURES.md 2.3 item 4)`,
+        );
+      }
+      const tip = await t.hoverControl(fillKit[0]);
+      facts.push(
+        `table fill plate: ${fill.slice(0, 6).join(', ')} first (kit ${fillKit.length} of 6); tooltip "${tip ?? 'none'}"`,
+      );
+      ok =
+        ok &&
+        fillKit.length === 6 &&
+        tip !== null &&
+        /#[0-9a-f]{6}/i.test(tip) &&
+        ROLES.some((r) => new RegExp(r, 'i').test(tip));
+      await t.press('Escape');
+      await t.clearAll();
+      /* the tail's text colour plate */
+      await t.openRun(cellRun);
+      await t.tailControl('toolbar.textColor');
+      await t.waitControl('toolbar.textColor.plate', 5000).catch(() => undefined);
+      const text = await swatches('toolbar.textColor', 'plate$|menu$|none$|hex$|custom$');
+      const textKit = text.slice(0, 6).filter((c) => KIT.test(c));
+      facts.push(`text colour plate: kit ${textKit.length} of 6 first`);
+      ok = ok && textKit.length === 6;
+      await t.press('Escape');
+      await t.clearAll();
+      /* the chart's series swatches */
+      const chartSlide = t.deck.chartSlide;
+      const C = t.deck.chart;
+      let seriesKit = null;
+      if (chartSlide && C) {
+        await t.clickCard(chartSlide);
+        await t.clearAll();
+        await t.selectObject(C);
+        if (!(await t.visible('panel.formatOptions'))) {
+          await t.tailControl('toolbar.formatOptions');
+          await t.waitControl('panel.formatOptions', 8000).catch(() => undefined);
+        }
+        await t.waitControl('formatOptions.chart', 8000).catch(() => undefined);
+        if (await t.visible('formatOptions.chart.series.0.color')) {
+          await t.clickControl('formatOptions.chart.series.0.color');
+          await t.sleep(300);
+          const list = await swatches('formatOptions.chart.swatches', 'swatches$');
+          seriesKit = list
+            .slice(0, 6)
+            .filter((c) => KIT.test(c) || ROLES.some((r) => c.endsWith(`.${r}`)));
+          facts.push(
+            `chart series swatches: ${list.slice(0, 6).join(', ') || 'none'} first (kit ${seriesKit.length} of 6)`,
+          );
+          await t.press('Escape');
+        } else facts.push('no series swatch on the chart grid');
+        /* a new chart's first two series: a column chart inserted through the menu, a series added in the grid */
+        const before = await t.objectIds(chartSlide);
+        await t.clearAll();
+        await t.menuPath('insert', 'insert.chart', 'insert.chart.column').catch(() => undefined);
+        const fresh = await t.newObjectAfter(chartSlide, before).catch(() => null);
+        if (fresh) {
+          await t.settled();
+          await t.clearAll();
+          await t.selectObject(fresh.id);
+          if (!(await t.visible('panel.formatOptions')))
+            await t.tailControl('toolbar.formatOptions');
+          await t.waitControl('formatOptions.chart', 8000).catch(() => undefined);
+          if (await t.visible('formatOptions.chart.addSeries')) {
+            await t.clickControl('formatOptions.chart.addSeries');
+            await t.settled();
+          }
+          const block = (await t.blockOf(chartSlide, fresh.id))?.block ?? null;
+          const colours = (block?.series ?? []).slice(0, 2).map((s) => s.color ?? 'default');
+          const fills = await page.evaluate((id) => {
+            const inner = document.querySelector(
+              `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`,
+            );
+            const svg =
+              inner?.tagName.toLowerCase() === 'svg' ? inner : inner?.querySelector('svg');
+            const rects = [...(svg?.querySelectorAll('.series rect') ?? [])];
+            return [...new Set(rects.map((r) => getComputedStyle(r).fill))].slice(0, 2);
+          }, fresh.id);
+          const primary = (await t.sheetVar('--kit-primary')) ?? (await t.sheetVar('--blue'));
+          const accent = await t.sheetVar('--kit-accent');
+          const first =
+            colours[0] === 'primary' ||
+            (primary !== null &&
+              fills[0] !== undefined &&
+              hexOf(fills[0]) !== null &&
+              hexOf(fills[0]) === hexOf(primary));
+          const second =
+            colours[1] === 'accent' ||
+            (accent !== null &&
+              fills[1] !== undefined &&
+              hexOf(fills[1]) !== null &&
+              hexOf(fills[1]) === hexOf(accent));
+          facts.push(
+            `a new chart's first two series ${colours.join(', ') || 'none'} (fills ${fills.join(', ')}; kit primary ${primary ?? 'unread'}, accent ${accent ?? 'unread'}): Primary ${first}, Accent ${second}`,
+          );
+          ok = ok && first && second;
+          const s = await t.settled();
+          await t
+            .invoke('block.remove', {
+              baseRevision: s.revision,
+              slideId: chartSlide,
+              blockId: fresh.id,
+            })
+            .catch(() => undefined);
+          await t.settled();
+        } else facts.push('no new chart inserted for the series read');
+        if (await t.visible('panel.formatOptions.close'))
+          await t.clickControl('panel.formatOptions.close');
+      } else facts.push('no chart from the charts area to read');
+      ok = ok && seriesKit !== null && seriesKit.length === 6;
+      await t.clearAll();
+      return { ok, observed: facts.join('; ') };
     },
   );
 }

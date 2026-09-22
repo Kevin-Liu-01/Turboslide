@@ -28,6 +28,8 @@ export const IDS = [
   'shapes.text.colour-toolbar',
   'shapes.text.enter-opens-label',
   'shapes.borders-lines.menu',
+  /* the features round, ship one (docs/FEATURES.md 2.2 rank 3): the label centred by default */
+  'shapes.label.centred-default',
 ];
 
 const DIRS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
@@ -1126,4 +1128,94 @@ export async function run(t) {
   );
   t.deck.shape = id;
   t.deck.shapeIds = [rect?.id, rounded?.id, ellipse?.id].filter(Boolean);
+
+  /* the features round, ship one (docs/FEATURES.md 2.2 rank 3): a shape's label is centred by
+     default, the renderer's default the exporter reads; the row draws its own rounded rectangle
+     by a drag so the label meets a block with no explicit alignment */
+  await t.step(
+    'shapes.label.centred-default',
+    'Insert > Shape > Rounded rectangle by a drag; type Next step; a se resize; read the Align control',
+    "the run is centred in both axes within 4 px of the shape's centre, still after the resize; the tail's Align reads centre",
+    async () => {
+      await t.clearAll();
+      const r = await insertShape('rounded', { x: 200, y: 640 }, { x: 560, y: 840 });
+      await t.press('Escape');
+      await t.settled();
+      const shape = r.obj;
+      if (!shape) return { ok: false, observed: `nothing drawn: ${r.route}` };
+      await t.clearAll();
+      await t.selectObject(shape.id);
+      const b = await t.boxOf(shape.id);
+      await t.dblclickAt(b.free.x + b.free.w / 2, b.free.y + b.free.h / 2);
+      await t.sleep(250);
+      let on = await t.editing();
+      if (!on) {
+        await t.press('Escape');
+        await t.selectObject(shape.id);
+        await t.press('Enter');
+        await t.sleep(300);
+        on = await t.editing();
+      }
+      if (!on)
+        return {
+          ok: false,
+          observed: `${r.route}; no text session on the shape by a double click or Enter`,
+        };
+      await t.typeHuman('Next step');
+      await t.sleep(300);
+      await t.press('Escape');
+      await t.settled();
+      /** The run's box against the shape's box: the offsets of the two centres in px. */
+      const centred = async () => {
+        const box = await t.boxOf(shape.id);
+        const run = (await t.runsOfBlock(shape.id))[0];
+        const info = run ? await t.runInfo(run) : null;
+        if (!box || !info) return null;
+        const dx = info.rect.x + info.rect.w / 2 - (box.free.x + box.free.w / 2);
+        const dy = info.rect.y + info.rect.h / 2 - (box.free.y + box.free.h / 2);
+        return {
+          dx: Math.round(dx * 10) / 10,
+          dy: Math.round(dy * 10) / 10,
+          text: info.text,
+          run: info.rect,
+        };
+      };
+      const first = await centred();
+      const stored = (await t.blockOf(S, shape.id))?.block ?? null;
+      await t.clearAll();
+      await t.selectObject(shape.id);
+      const se = await t.findHandle(shape.id, 'resize.se');
+      let second = null;
+      if (se) {
+        const k = await t.kOf();
+        const from = t.center(await t.handleRect(se));
+        await t.drag(from, { x: from.x + 160 * k, y: from.y + 80 * k });
+        await t.settled();
+        second = await centred();
+      }
+      await t.clearAll();
+      await t.selectObject(shape.id);
+      const align = await page.evaluate(() => {
+        const el = document.querySelector('[data-control="toolbar.align"]');
+        if (!el) return null;
+        const use = el.querySelector('use');
+        return `${el.getAttribute('aria-label') ?? ''} ${el.getAttribute('data-value') ?? ''} ${el.getAttribute('data-align') ?? ''} ${el.getAttribute('title') ?? ''} ${use?.getAttribute('href') ?? use?.getAttribute('xlink:href') ?? ''} ${el.textContent ?? ''}`.trim();
+      });
+      const alignCentre = align !== null && /cent/i.test(align);
+      const within = (c) => c !== null && Math.abs(c.dx) <= 4 && Math.abs(c.dy) <= 4;
+      await t.press('Meta+z');
+      await t.sleep(400);
+      await t.settled();
+      await t.clearAll();
+      return {
+        ok:
+          within(first) &&
+          within(second) &&
+          alignCentre &&
+          stored?.typography?.align === undefined &&
+          stored?.valign === undefined,
+        observed: `${r.route}; "${first?.text}" centre offset ${first ? `${first.dx},${first.dy}` : 'unread'} px; after the se resize ${second ? `${second.dx},${second.dy}` : se ? 'unread' : 'no se handle'} px; stored align ${stored?.typography?.align ?? 'none'}, valign ${stored?.valign ?? 'none'}; the Align control reads "${align ?? 'absent'}"${within(first) ? '' : ' (FEATURES.md 2.2 rank 3, B3)'}`,
+      };
+    },
+  );
 }

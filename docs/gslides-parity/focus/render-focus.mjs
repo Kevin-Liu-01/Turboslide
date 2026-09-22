@@ -51,6 +51,8 @@ const FEATURES = [
   /* the sync and costs round (docs/SYNC.md 6.1): the write path's order and the calls per state */
   ['sync', 'SYNC 6.1 The write path'],
   ['cost', 'SYNC 6.1 The calls per state'],
+  /* the features round, ship one (docs/FEATURES.md section 4, 7.1): the logo picker over thesvg.org */
+  ['logos', 'FEATURES 4 The logo picker'],
   ['surface', '3 The switch'],
 ];
 const STATES = ['works', 'broken', 'flaky', 'not driven'];
@@ -106,6 +108,8 @@ const README = {
     "**Assist.** The Assist button in the title row (Cmd+J) opens a panel with three starter cards: Tailor for a customer (rename the customer, swap the logo and skip slides in one step, with one Undo), Make it shorter and Write speaker notes. A card shows the before and after; nothing changes until it is accepted, and Accept is one undo step. Search the menus understands a seller's words and offers Ask the assistant when nothing matches.",
   sync: "**Sync.** Two people on one deck see each other's words in order within seconds, on a title slide and in a body block, while both type at once and after one of them was offline. A viewer's tab shows every edit live. A reload reads the same document in every browser. Undo takes back your own word and leaves your colleague's. A change whose answer was lost is never applied twice.",
   cost: '**Costs.** An open editor, a hidden tab, an editing session, two tabs on one deck and a show each make a bounded number of requests a minute, and the store calls a deck costs a minute are counted in every release run and stay under their ceilings.',
+  logos:
+    "**Logos.** Insert > Logo searches the brand marks of thesvg.org by company name and places the mark on the slide at a logo size, stored on the presentation as its own picture with the brand's licence words; your own brand kit's logo comes first, the tiles show every mark on paper and on ink, and a check puts the mark on the title slide and in every footer. Replace image > Logo swaps a customer's logo and keeps its box, and Tailor for a customer finds the new customer's logo. The picker answers from a daily refreshed index while thesvg.org is down.",
   surface:
     '**For agents and advanced tools.** Every action the editor runs is also a CLI command, an MCP tool, an HTTP route and a window function, including the features behind Tools > Advanced tools. `GET /api/agent` lists them.',
 };

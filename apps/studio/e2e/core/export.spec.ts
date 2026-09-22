@@ -32,6 +32,9 @@ import {
   pngDataUrl,
   headingRun,
   waitEditor,
+  pngSize,
+  windowActions,
+  zipEntriesRaw,
 } from './lib';
 
 // Download and print, the file rows (docs/FOCUS.md 2.8, 6.4 `export.*`, `images.export.*` and
@@ -1387,10 +1390,15 @@ test(title('brand.export.pdf-logo'), async () => {
   ).toBeGreaterThanOrEqual(2);
 });
 
-test(title('fonts.export.editable-names-face'), async () => {
-  test.setTimeout(180_000);
-  const { page, deck } = await withBudget(1);
-  await openEditor(page, deck);
+/**
+ * The three faces of the fonts export rows (docs/PRODUCT.md 4.2; docs/FEATURES.md 3.4): the title
+ * heading in Roboto and two text boxes in Geist and Fraunces on the first slide, written through
+ * the window API as setup. Answers the faces written; a family the schema refuses (the catalog
+ * row not on this build) is named in the annotation and the row skips on it.
+ */
+async function facesSetup(
+  page: Page,
+): Promise<{ first: string; written: string[]; refused: string[] }> {
   const first = (await slideOrder(page))[0]!;
   await clickCard(page, first);
   const run = await headingRun(page);
@@ -1402,64 +1410,111 @@ test(title('fonts.export.editable-names-face'), async () => {
         ?.getAttribute('data-block') ?? null,
     run,
   );
+  const written: string[] = [];
+  const refused: string[] = [];
   const s = await settled(page);
-  const wrote = await invoke(page, 'block.set', {
+  await invoke(page, 'block.set', {
     baseRevision: s.revision,
     slideId: first,
     blockId: blockId ?? 'lead',
     path: '/typography/family',
     value: 'roboto',
   })
-    .then(() => true)
-    .catch((error: unknown) => (error instanceof Error ? error.message : String(error)));
-  if (wrote !== true)
-    test.skip(
-      true,
-      `not on this build: typography.family (docs/PRODUCT.md 4.2, B5a): ${String(wrote).slice(0, 120)}`,
+    .then(() => written.push('roboto'))
+    .catch((error: unknown) =>
+      refused.push(
+        `roboto: ${(error instanceof Error ? error.message : String(error)).slice(0, 100)}`,
+      ),
     );
   await settled(page);
+  for (const [family, y] of [
+    ['geist', 640],
+    ['fraunces', 720],
+  ] as const) {
+    const objects = await objectsOf(page, first);
+    if (objects.some((o) => o.id === `face-${family}`)) {
+      written.push(family);
+      continue;
+    }
+    const s2 = await settled(page);
+    await invoke(page, 'block.insert', {
+      baseRevision: s2.revision,
+      slideId: first,
+      slot: 'main',
+      block: {
+        id: `face-${family}`,
+        type: 'text',
+        text: `Set in ${family}`,
+        typography: { family },
+        pos: { x: 120, y, w: 700, h: 60 },
+      },
+    })
+      .then(() => written.push(family))
+      .catch((error: unknown) =>
+        refused.push(
+          `${family}: ${(error instanceof Error ? error.message : String(error)).slice(0, 100)}`,
+        ),
+      );
+    await settled(page);
+  }
+  return { first, written, refused };
+}
+async function objectsOf(page: Page, slideId: string) {
+  const { objectsOf: read } = await import('./lib');
+  return read(page, slideId);
+}
+
+test(title('fonts.export.editable-names-face'), async () => {
+  test.setTimeout(180_000);
+  const { page, deck } = await withBudget(1);
+  await openEditor(page, deck);
+  const faces = await facesSetup(page);
+  test.info().annotations.push({
+    type: 'setup',
+    description: `written ${faces.written.join(', ') || 'none'}; refused ${faces.refused.join('; ') || 'none'}`,
+  });
+  if (!faces.written.includes('roboto'))
+    test.skip(
+      true,
+      `not on this build: typography.family (docs/PRODUCT.md 4.2, B5a): ${faces.refused.join('; ').slice(0, 120)}`,
+    );
+  if (!faces.written.includes('geist') || !faces.written.includes('fraunces'))
+    test.skip(
+      true,
+      `not on this build: the catalog rows geist and fraunces (docs/FEATURES.md 3.2, B2): ${faces.refused.join('; ').slice(0, 160)}`,
+    );
   await openPptx(page);
   await ctl(page, 'dialog.download.mode.native').click({ force: true });
   const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 90_000);
   await closeDialogs(page);
   const entries = zipEntries(pptx.bytes);
   const slide1 = entries.get('ppt/slides/slide1.xml')?.() ?? '';
-  const faces = [...slide1.matchAll(/<a:latin typeface="([^"]+)"/g)].map((m) => m[1]);
-  test.info().annotations.push({ type: 'faces', description: faces.join(', ') || 'no a:latin' });
-  expect(faces, 'the Editable text PowerPoint names Roboto').toContain('Roboto');
+  const named = [...slide1.matchAll(/<a:latin typeface="([^"]+)"/g)].map((m) => m[1]);
+  test.info().annotations.push({ type: 'faces', description: named.join(', ') || 'no a:latin' });
+  expect(named, 'the Editable text PowerPoint names Roboto').toContain('Roboto');
+  expect(named, 'and Geist').toContain('Geist');
+  expect(named, 'and Fraunces').toContain('Fraunces');
 });
 
 test(title('fonts.export.pdf-face'), async () => {
   test.setTimeout(180_000);
   const { page, deck } = await withBudget(1);
   await openEditor(page, deck);
-  const first = (await slideOrder(page))[0]!;
-  await clickCard(page, first);
-  const run = await headingRun(page);
-  const blockId = await page.evaluate(
-    (r) =>
-      document
-        .querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`)
-        ?.closest('[data-block]')
-        ?.getAttribute('data-block') ?? null,
-    run,
-  );
-  const s = await settled(page);
-  const wrote = await invoke(page, 'block.set', {
-    baseRevision: s.revision,
-    slideId: first,
-    blockId: blockId ?? 'lead',
-    path: '/typography/family',
-    value: 'roboto',
-  })
-    .then(() => true)
-    .catch((error: unknown) => (error instanceof Error ? error.message : String(error)));
-  if (wrote !== true)
+  const faces = await facesSetup(page);
+  test.info().annotations.push({
+    type: 'setup',
+    description: `written ${faces.written.join(', ') || 'none'}; refused ${faces.refused.join('; ') || 'none'}`,
+  });
+  if (!faces.written.includes('roboto'))
     test.skip(
       true,
-      `not on this build: typography.family (docs/PRODUCT.md 4.2, B5a): ${String(wrote).slice(0, 120)}`,
+      `not on this build: typography.family (docs/PRODUCT.md 4.2, B5a): ${faces.refused.join('; ').slice(0, 120)}`,
     );
-  await settled(page);
+  if (!faces.written.includes('geist') || !faces.written.includes('fraunces'))
+    test.skip(
+      true,
+      `not on this build: the catalog rows geist and fraunces (docs/FEATURES.md 3.2, B2): ${faces.refused.join('; ').slice(0, 160)}`,
+    );
   await openPdf(page);
   const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
   await closeDialogs(page);
@@ -1474,6 +1529,174 @@ test(title('fonts.export.pdf-face'), async () => {
     fonts.some((f) => /Roboto/.test(f ?? '')),
     'the PDF embeds a Roboto subset',
   ).toBe(true);
+  expect(
+    fonts.some((f) => /Geist/.test(f ?? '')),
+    'and a Geist subset',
+  ).toBe(true);
+  expect(
+    fonts.some((f) => /Fraunces/.test(f ?? '')),
+    'and a Fraunces subset',
+  ).toBe(true);
+});
+
+/**
+ * The features round, ship one (docs/FEATURES.md 2.2 rank 9; the row `diagrams.export.step-label`):
+ * a process diagram of three steps placed through the window API as setup on a fresh slide, then
+ * the PDF's text and the Editable text PowerPoint's shape with the label inside its txBody.
+ */
+test(title('diagrams.export.step-label'), async () => {
+  test.setTimeout(240_000);
+  const owner = await withBudget(2);
+  const { page, deck } = owner;
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const actions = await windowActions(page);
+  if (!actions.has('diagram.insert'))
+    test.skip(true, 'not on this build: diagram.insert on the window transport');
+  const s = await settled(page);
+  const out = (await invoke(
+    page,
+    'diagram.insert',
+    { slideId, kind: 'process', count: 3, baseRevision: s.revision },
+    60_000,
+  )) as { blockIds: string[] };
+  await settled(page);
+  const objects = await objectsOf(page, slideId);
+  const members = objects.filter((o) => out.blockIds.includes(o.id));
+  const boxes = members.filter(
+    (o) => o.type === 'shape' && (o.block['shape'] as string) !== 'line',
+  );
+  const texts = members.filter((o) => o.type === 'text');
+  const label =
+    (boxes.find((o) => typeof o.block['text'] === 'string')?.block['text'] as string | undefined) ??
+    (texts[0]?.block['text'] as string | undefined) ??
+    'Step 1';
+  test.info().annotations.push({
+    type: 'diagram',
+    description: `${members.length} members: ${boxes.length} boxes (${boxes.filter((o) => typeof o.block['text'] === 'string').length} with their own text), ${texts.length} separate labels; the label read "${label}"`,
+  });
+  /* the PDF */
+  await openPdf(page);
+  const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
+  await closeDialogs(page);
+  const text = pdfText(pdf.bytes);
+  const pdfCarries = text.replace(/\s+/g, ' ').includes(label.replace(/\s+/g, ' '));
+  /* the Editable text PowerPoint: the shape whose txBody carries the label is a shape, not a text box */
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
+  await closeDialogs(page);
+  const entries = zipEntries(pptx.bytes);
+  const slides = pptxSlides(pptx.bytes).map((n) => entries.get(n)?.() ?? '');
+  const shapes = slides.flatMap((xml) => xml.match(/<p:sp>[\s\S]*?<\/p:sp>/g) ?? []);
+  const labelled = shapes.filter((sp) => sp.includes(label) && /<p:txBody>/.test(sp));
+  const inShape = labelled.filter(
+    (sp) => !/txBox="1"/.test(sp) && /<a:prstGeom prst="(?!rect")/.test(sp),
+  );
+  test.info().annotations.push({
+    type: 'pptx',
+    description: `${shapes.length} shapes; ${labelled.length} carry "${label}" in a txBody, ${inShape.length} of them a geometry shape (not a text box); PDF text carries the label ${pdfCarries} (${text.length} characters read)`,
+  });
+  test.skip(
+    !pdfReadable(text, label) && !pdfReadable(text, 'Acme'),
+    'the PDF text is not readable by this spec (pdftotext is not on PATH and no literal or single byte hex string carries the deck words)',
+  );
+  expect(pdfCarries, "the PDF's page carries the step's label text").toBe(true);
+  expect(labelled.length, 'the label is inside a txBody').toBeGreaterThan(0);
+  expect(
+    inShape.length,
+    "the label sits inside the step's shape, not a separate text box (docs/FEATURES.md 2.2 rank 9, B3)",
+  ).toBeGreaterThan(0);
+});
+
+/**
+ * The features round, ship one (docs/FEATURES.md 4.8; the row `logos.export.pdf-pptx-crisp`): the
+ * Figma mark on every slide through `logo.insert { everySlide: true }` as setup, then the PDF's
+ * first page and the two PowerPoint files' PNG sizes (the footer's 84 by 54 and the title slot's
+ * 396 by 252 at 3x). The insert is B6's action registered by B7; a build without it skips.
+ */
+test(title('logos.export.pdf-pptx-crisp'), async () => {
+  test.setTimeout(300_000);
+  const owner = await withBudget(3);
+  const { page, deck } = owner;
+  await openEditor(page, deck);
+  const first = (await slideOrder(page))[0]!;
+  await clickCard(page, first);
+  const actions = await windowActions(page);
+  if (!actions.has('logo.insert'))
+    test.skip(
+      true,
+      'not on this build: logo.insert on the window transport (docs/FEATURES.md 4.4, 4.11; B6 with B7)',
+    );
+  const s = await settled(page);
+  let inserted: unknown;
+  try {
+    inserted = await invoke(
+      page,
+      'logo.insert',
+      { slug: 'figma', everySlide: true, baseRevision: s.revision },
+      120_000,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (/NotImplemented|not implemented|lands in P1/i.test(message))
+      test.skip(
+        true,
+        `not on this build: logo.insert (docs/FEATURES.md 4.4, B6 with B7): ${message.slice(0, 100)}`,
+      );
+    if (/did not answer|thesvg\.org|upstream|index/i.test(message))
+      test.skip(
+        true,
+        `not driven: the logo index answered "${message.slice(0, 120)}" on this base`,
+      );
+    throw error;
+  }
+  await settled(page);
+  test
+    .info()
+    .annotations.push({ type: 'insert', description: JSON.stringify(inserted).slice(0, 200) });
+  const imagesBefore = pdfImages(
+    (
+      await (async () => {
+        await openPdf(page);
+        const f = await download(page, () => ctl(page, 'dialog.download.ok').click());
+        await closeDialogs(page);
+        return f;
+      })()
+    ).bytes,
+  );
+  /* the first page carries the mark: an image object in the first page's resources */
+  expect(imagesBefore, 'the PDF carries image objects').toBeGreaterThan(0);
+  const sizes: Record<string, { width: number; height: number }[]> = {};
+  for (const mode of ['native', 'perfect'] as const) {
+    await openPptx(page);
+    await ctl(page, `dialog.download.mode.${mode}`).click({ force: true });
+    const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 120_000);
+    await closeDialogs(page);
+    /* the export answers a bundle since the product round (the light and the dark files and the
+       report); the light file's media is read through the raw reader */
+    let entries = zipEntriesRaw(pptx.bytes);
+    const inner =
+      [...entries.keys()].find((n) => /\(light, editable\)\.pptx$/.test(n)) ??
+      [...entries.keys()].find((n) => n.endsWith('.pptx'));
+    if (inner !== undefined) entries = zipEntriesRaw(entries.get(inner)!());
+    const pngs = [...entries.keys()].filter((n) => /^ppt\/media\/.*\.png$/i.test(n));
+    sizes[mode] = pngs
+      .map((n) => pngSize(entries.get(n)!()))
+      .filter((x): x is { width: number; height: number } => x !== null);
+  }
+  test.info().annotations.push({ type: 'media', description: JSON.stringify(sizes).slice(0, 400) });
+  for (const mode of ['native', 'perfect'] as const) {
+    const list = sizes[mode] ?? [];
+    expect(
+      list.some((p) => p.width >= 396 && p.height >= 252),
+      `the ${mode} PowerPoint carries a PNG of at least 396 by 252 for the title slot`,
+    ).toBe(true);
+    expect(
+      list.some((p) => p.width >= 84 && p.height >= 54),
+      `and one of at least 84 by 54 for the footer`,
+    ).toBe(true);
+  }
 });
 
 coverage(import.meta.filename, [
@@ -1510,4 +1733,7 @@ coverage(import.meta.filename, [
   'brand.export.pdf-logo',
   'fonts.export.editable-names-face',
   'fonts.export.pdf-face',
+  /* the features round, ship one (docs/FEATURES.md 7.1) */
+  'diagrams.export.step-label',
+  'logos.export.pdf-pptx-crisp',
 ]);

@@ -7,7 +7,9 @@
 // Dither section and `asset dither` can re-tone it, and the plate metrics recorded. The license
 // fields (title, artist, license, share-alike, source URL) become the photo provenance record,
 // and the credit line the plate needs is composed the way the deck writes it ("Photograph: Hans
-// Hillewaert, CC BY-SA 4.0"). The store write is the caller's.
+// Hillewaert, CC BY-SA 4.0"). The store write is the caller's. The features round adds the hosted
+// svg branch (docs/FEATURES.md 4.7): under the svg raster policy an svg is sanitized by the host's
+// parser and rasterized by sharp into one PNG twin at 3x of a 264 by 168 box, its source kept.
 import { createHash } from 'node:crypto';
 
 import sharp from 'sharp';
@@ -27,11 +29,12 @@ import {
   plateBoxFor,
   readInput,
   slugify,
+  svgRasterPolicy,
   treatmentParams,
   twinPaths,
   writeUnder,
 } from './shared.ts';
-import type { PlateSide, ReadInput, TwoToneRequestParams } from './shared.ts';
+import type { PlateSide, ReadInput, SvgRasterPolicy, TwoToneRequestParams } from './shared.ts';
 
 /** OPENERS.md, "Photograph pipeline": sources are scaled to 1800 pixels on the long side first. */
 export const SOURCE_LONG_SIDE = 1800;
@@ -86,6 +89,8 @@ export type AssetIntakeOptions = {
   reencode?: boolean;
   /** Names the twins by their content digest (`assets/<id>.<sha8>.<ext>`), so nothing is ever overwritten hosted. */
   digestNames?: boolean;
+  /** The hosted svg branch (docs/FEATURES.md 4.7); the process policy when absent (shared.ts `svgRasterPolicy`). */
+  svgRaster?: SvgRasterPolicy | false;
 };
 
 export type AssetIntakeResult = {
@@ -172,6 +177,58 @@ export function assetDigest(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex').slice(0, 8);
 }
 
+/** The box an uploaded svg is rasterized for (docs/FEATURES.md 4.7), in sheet px, and the twin's scale. */
+export const SVG_RASTER_BOX = { w: 264, h: 168 } as const;
+export const SVG_RASTER_SCALE = 3 as const;
+
+/**
+ * The pixel size of an svg's PNG twin: the mark fitted inside the 264 by 168 box at its own ratio,
+ * at 3x (so a wide wordmark is 792 wide and a square symbol 504 tall), never under one pixel.
+ */
+export function svgRasterSize(size: [number, number]): { width: number; height: number } {
+  const [w, h] = size;
+  const ratio = w > 0 && h > 0 ? w / h : 1;
+  const box = SVG_RASTER_BOX;
+  const fit =
+    ratio >= box.w / box.h ? { w: box.w, h: box.w / ratio } : { w: box.h * ratio, h: box.h };
+  return {
+    width: Math.max(1, Math.round(fit.w * SVG_RASTER_SCALE)),
+    height: Math.max(1, Math.round(fit.h * SVG_RASTER_SCALE)),
+  };
+}
+
+/**
+ * An svg rasterized by sharp into one PNG at the twin size (SPEC-3 8.5's decode and re-encode
+ * applied to a vector: librsvg reads the sanitized text from a buffer with no base URL, so nothing
+ * it references is fetched, and the PNG holds no byte of the input). The density makes librsvg
+ * draw at the target size instead of upscaling a 72 dpi raster of a small viewBox.
+ */
+export async function rasterizeSvg(
+  svg: string,
+  intrinsic: [number, number],
+): Promise<{ bytes: Uint8Array; width: number; height: number }> {
+  const target = svgRasterSize(intrinsic);
+  const [w, h] = intrinsic;
+  const scale = Math.max(target.width / Math.max(1, w), target.height / Math.max(1, h));
+  const density = Math.min(Math.max(72, Math.ceil(72 * scale)), 100_000);
+  const out = await sharp(Buffer.from(svg, 'utf8'), {
+    density,
+    limitInputPixels: 64_000_000,
+    failOn: 'error',
+  })
+    // `fill` on the box the rule computed: the box carries the mark's own ratio, so the fill moves
+    // an edge by under a pixel and the twin's size is exactly `svgRasterSize` (a `contain` resize
+    // of the density raster came out 790 by 198 for a 200 by 50 viewBox, measured in the test)
+    .resize({ width: target.width, height: target.height, fit: 'fill' })
+    .png()
+    .toBuffer({ resolveWithObject: true });
+  return {
+    bytes: new Uint8Array(out.data.buffer, out.data.byteOffset, out.data.byteLength),
+    width: out.info.width,
+    height: out.info.height,
+  };
+}
+
 /**
  * A continuous asset re-encoded in its own format at the twin size (SPEC-3 8.5, 0.29): sharp
  * decodes with the pixel budget and writes fresh bytes, so no byte of the input survives into the
@@ -247,6 +304,7 @@ export async function addAsset(
   }
   const info = await imageInfo(read.bytes, {
     ...(options.hosted !== undefined ? { hosted: options.hosted } : {}),
+    ...(options.svgRaster !== undefined ? { svgRaster: options.svgRaster } : {}),
   });
   const id =
     request.id !== undefined
@@ -313,6 +371,45 @@ export async function addAsset(
       },
     };
     return { asset, files, metrics: result.metrics, warnings };
+  }
+
+  // the hosted svg branch of the features round (docs/FEATURES.md 4.7; audit-logos 4): the file
+  // sanitized by the host's parser, rasterized by sharp into one PNG twin at 3x of a 264 by 168
+  // box (SVG_RASTER_BOX), the sanitized source kept as `sourceFile`; the record reads like a logo
+  // insert's (scale 3, one neutral twin). A checkout with the policy off keeps the svg as it came,
+  // below, as it always did.
+  const svgPolicy = info.format === 'svg' ? svgRasterPolicy(options.svgRaster) : null;
+  if (svgPolicy !== null && (options.hosted ?? false)) {
+    const sanitized = svgPolicy.sanitize(read.bytes);
+    const svgBytes = new Uint8Array(Buffer.from(sanitized.svg, 'utf8'));
+    const raster = await rasterizeSvg(sanitized.svg, [info.width, info.height]);
+    const sourceFile = await place(
+      options,
+      digest ? `assets/${id}.source.${assetDigest(svgBytes)}.svg` : `assets/${id}.source.svg`,
+      svgBytes,
+    );
+    files.push(sourceFile);
+    const twin = await place(
+      options,
+      digest ? `assets/${id}.${assetDigest(raster.bytes)}.png` : `assets/${id}.png`,
+      raster.bytes,
+    );
+    files.push(twin);
+    if (sanitized.removed.length > 0)
+      warnings.push(`${id}: the svg's ${sanitized.removed.join(', ')} left before it was drawn`);
+    const asset: Asset = {
+      id,
+      role: request.role,
+      alt: request.alt,
+      twins: { neutral: twin },
+      size: [raster.width, raster.height],
+      scale: SVG_RASTER_SCALE,
+      source,
+      sourceFile,
+      ...(credit !== undefined ? { credit } : {}),
+      inline: inlineRuleFor(request.role, false),
+    };
+    return { asset, files, warnings };
   }
 
   // the continuous asset: re-encoded hosted so no byte of the input survives (SPEC-3 8.5)

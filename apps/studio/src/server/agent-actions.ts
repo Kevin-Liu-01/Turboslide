@@ -145,10 +145,30 @@ export const SERVER_SIDE_WINDOW_ACTIONS_P1 = [
   'template.setDefault',
 ] as const satisfies readonly ActionId[];
 
+/**
+ * The features round, ship one (docs/FEATURES.md 4.11; build/b6.md R3): the logo picker's read
+ * and its two writes. `logo.search` reads the server's index (the store's `system/logo-index.json`),
+ * `logo.insert` fetches, sanitizes and rasterizes a mark with sharp and writes the asset, and
+ * `logo.refresh` is the index route as an action; every one needs Node and the store, so the
+ * window handler runs through runDeckAction. Written as strings and filtered through `isActionId`
+ * (the pattern of `SERVER_SIDE_WINDOW_ACTIONS_PENDING`), so this file typechecks and answers on a
+ * tree where B6's three entries in `packages/schema/src/actions.ts` are not merged yet; once they
+ * are, the filter keeps all three and `agent-actions.test.ts` reads them on both lists.
+ */
+export const SERVER_SIDE_WINDOW_ACTIONS_F1_IDS = [
+  'logo.search',
+  'logo.insert',
+  'logo.refresh',
+] as const;
+export const SERVER_SIDE_WINDOW_ACTIONS_F1: ReadonlyArray<ActionId> = (
+  SERVER_SIDE_WINDOW_ACTIONS_F1_IDS as readonly string[]
+).filter(isActionId);
+
 export const SERVER_SIDE_WINDOW_ACTIONS: ReadonlyArray<ActionId> = [
   ...SERVER_SIDE_WINDOW_ACTIONS_GS2,
   ...SERVER_SIDE_WINDOW_ACTIONS_GS3,
   ...SERVER_SIDE_WINDOW_ACTIONS_P1,
+  ...SERVER_SIDE_WINDOW_ACTIONS_F1,
 ];
 
 export type ServerSideWindowAction = ActionId;
@@ -188,6 +208,9 @@ export const DRAFT_CREATING_ACTIONS: ReadonlyArray<ActionId> = [
   'slide.setBackgroundPicture',
   'slide.setBackgroundMaterial',
   'slide.import',
+  // the logo picker's write (docs/FEATURES.md 4.11): a customer's mark can be the first thing a
+  // seller puts on a new presentation, so it creates the draft's deck as asset.add does
+  ...SERVER_SIDE_WINDOW_ACTIONS_F1.filter((id) => id === 'logo.insert'),
 ];
 
 /** True when an action run on an unsaved draft must create the deck before it runs. */

@@ -12,6 +12,7 @@ import sharp from 'sharp';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 
 import {
+  ALLOWLIST_SENTENCE,
   CHECKOUT_INTAKE_POLICY,
   DEFAULT_ALLOW_HOSTS,
   HOSTED_ALLOW_HOSTS,
@@ -32,6 +33,8 @@ import {
   setIntakePolicy,
   setSsrfReporter,
   sniffImage,
+  svgRasterPolicy,
+  turboslideUserAgent,
 } from './shared.ts';
 
 const PNG_2X2 = Buffer.from(
@@ -104,7 +107,8 @@ describe('the allowlist and the process policy (SPEC-3 8.6)', () => {
     const previous = setIntakePolicy({ allowPaths: false, hosted: true });
     expect(previous).toEqual(CHECKOUT_INTAKE_POLICY);
     expect(intakePolicy()).toEqual({ allowPaths: false, hosted: true });
-    expect(() => assertAllowedHost('http://localhost:3005/x')).toThrow(/allowlist/);
+    // paths off is the studio's transports, whose refusal is the seller's sentence (FEATURES 4.7)
+    expect(() => assertAllowedHost('http://localhost:3005/x')).toThrow(ALLOWLIST_SENTENCE);
     expect(assertAllowedHost('http://localhost:3005/x', [], { hosted: false }).port).toBe('3005');
   });
 });
@@ -379,5 +383,62 @@ describe('the pinned lookup (SPEC-3 0.30, 8.6; report 04 F3 sketches 3 and 4)', 
     } finally {
       setSsrfReporter(null);
     }
+  });
+});
+
+// The features round (docs/FEATURES.md 4.7; audit-logos 16 and 4): the browser transports'
+// allowlist sentence names the sites and no CLI flag, the pinned fetch carries a User-Agent, and
+// the svg raster policy lets a hosted imageInfo keep an svg while the refusal's line is unchanged.
+describe('the features round (docs/FEATURES.md 4.7)', () => {
+  afterEach(() => {
+    setIntakePolicy(CHECKOUT_INTAKE_POLICY);
+  });
+
+  test('the allowlist refusal is the seller’s sentence when paths are off, the CLI’s line when on', () => {
+    expect(() => assertAllowedHost('https://thesvg.org/icons/figma/default.svg', [], { allowPaths: false })).toThrow(
+      ALLOWLIST_SENTENCE,
+    );
+    expect(ALLOWLIST_SENTENCE).toBe(
+      'Pictures can be fetched from these sites only: generaltranslation.com, prototemplate.com, glyphfield.com and Wikimedia Commons. Upload the file instead',
+    );
+    expect(ALLOWLIST_SENTENCE).not.toMatch(/--allow|captureHosts|SPEC|[—]/);
+    expect(() => assertAllowedHost('https://thesvg.org/x.svg', [], { allowPaths: true })).toThrow(
+      /pass --allow thesvg\.org/,
+    );
+    // the process policy decides when the option is absent: the studio sets paths off
+    setIntakePolicy({ allowPaths: false, hosted: true });
+    expect(() => assertAllowedHost('https://thesvg.org/x.svg')).toThrow(ALLOWLIST_SENTENCE);
+    setIntakePolicy(CHECKOUT_INTAKE_POLICY);
+    expect(() => assertAllowedHost('https://thesvg.org/x.svg')).toThrow(/--allow/);
+    // the allowlisted source still answers
+    expect(assertAllowedHost('https://upload.wikimedia.org/a.png', [], { allowPaths: false }).hostname).toBe(
+      'upload.wikimedia.org',
+    );
+  });
+
+  test('the User-Agent names the product, its version and the origin', () => {
+    expect(turboslideUserAgent({})).toBe('Turboslide/0.0.0 (+https://turboslide.vercel.app)');
+    expect(turboslideUserAgent({ TURBOSLIDE_VERSION: '1.2.3', TURBOSLIDE_PUBLIC_ORIGIN: 'https://x.test/' })).toBe(
+      'Turboslide/1.2.3 (+https://x.test)',
+    );
+    expect(turboslideUserAgent({ VERCEL_GIT_COMMIT_SHA: '88b68e7abcdef' })).toBe(
+      'Turboslide/88b68e7 (+https://turboslide.vercel.app)',
+    );
+  });
+
+  test('the svg raster policy keeps an svg hosted and leaves the refusal line as it was', async () => {
+    const svg = new Uint8Array(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"/>'));
+    const sanitize = (bytes: Uint8Array) => ({ svg: Buffer.from(bytes).toString('utf8'), removed: [] });
+    expect(svgRasterPolicy()).toBeNull();
+    expect(svgRasterPolicy(false)).toBeNull();
+    expect(svgRasterPolicy({ sanitize })?.sanitize).toBe(sanitize);
+    await expect(imageInfo(svg, { hosted: true })).rejects.toThrow(/svg is not accepted here/);
+    const kept = await imageInfo(svg, { hosted: true, svgRaster: { sanitize } });
+    expect(kept.format).toBe('svg');
+    setIntakePolicy({ allowPaths: false, hosted: true, svgRaster: { sanitize } });
+    expect(svgRasterPolicy()?.sanitize).toBe(sanitize);
+    expect((await imageInfo(svg)).format).toBe('svg');
+    setIntakePolicy({ allowPaths: false, hosted: true, svgRaster: false });
+    await expect(imageInfo(svg)).rejects.toThrow(/svg is not accepted here; send png, jpeg, webp or gif/);
   });
 });

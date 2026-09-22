@@ -48,13 +48,24 @@ export const PRESIGN_THRESHOLD_BYTES = 3 * 1024 * 1024;
  * stays the API's own line. Three sentences cover every refusal: the file is not a picture (the
  * declared type is not one of the four, or the bytes are not what was declared), the file is over
  * the tier's cap, the upload did not finish (a missing body, an expired token, a stream that
- * broke or overran its declared size, a second PUT of one token).
+ * broke or overran its declared size, a second PUT of one token). The features round adds the
+ * fourth (docs/FEATURES.md 4.7; audit-logos 4): an SVG while the raster path is off
+ * (`TURBOSLIDE_SVG_RASTER`, flags.ts), which every logo site offers first and the hosted intake
+ * refuses in a developer's sentence ("svg is not accepted here; send png, jpeg, webp or gif", the
+ * API's line, unchanged). `notSvg` is a whole sentence with its own capital, not a reason after a
+ * colon: the chrome shows it as it stands (row logos.intake.svg-sentence).
  */
 export const UPLOAD_REASONS = {
   notPicture: 'the file is not a picture',
   tooLarge: (maxBytes: number): string => `the file is over ${Math.round(maxBytes / MB)} MB`,
   unfinished: 'the upload did not finish',
+  notSvg: 'SVG files are not accepted yet. Export the logo as a PNG and upload that',
 } as const;
+
+/** True when a refusal's line is the intake's svg refusal (headless shared.ts imageInfo), whatever transport carried it. */
+export function isSvgRefusal(message: string): boolean {
+  return /\bsvg is not accepted here\b/i.test(message);
+}
 
 const MB = 1024 * 1024;
 
@@ -67,6 +78,7 @@ export function uploadFailureReason(refusal: {
   if (refusal.code === 'payload_too_large' && refusal.maxBytes !== undefined)
     return UPLOAD_REASONS.tooLarge(refusal.maxBytes);
   if (refusal.code === 'not_picture') return UPLOAD_REASONS.notPicture;
+  if (refusal.code === 'not_svg') return UPLOAD_REASONS.notSvg;
   return UPLOAD_REASONS.unfinished;
 }
 

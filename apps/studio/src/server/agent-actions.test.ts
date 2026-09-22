@@ -5,13 +5,15 @@
 import { describe, expect, it } from 'vitest';
 
 import { createDispatcher } from '@turboslide/agent/dispatch';
-import { ACTIONS } from '@turboslide/schema/actions';
+import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import { workedDocument } from '@turboslide/schema/fixtures';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
 import {
   DRAFT_CREATING_ACTIONS,
   SERVER_SIDE_WINDOW_ACTIONS,
+  SERVER_SIDE_WINDOW_ACTIONS_F1,
+  SERVER_SIDE_WINDOW_ACTIONS_F1_IDS,
   createsDraft,
   outputAccepts,
   registerStoreStatusActions,
@@ -26,6 +28,22 @@ describe('createsDraft', () => {
     }
     expect(createsDraft('asset.add')).toBe(true);
     expect(createsDraft('slide.import')).toBe(true);
+  });
+
+  it('carries the logo picker’s three ids once the action table names them (docs/FEATURES.md 4.11)', () => {
+    // the pattern of SERVER_SIDE_WINDOW_ACTIONS_PENDING: the list is filtered through the table,
+    // so on a tree before B6's entries land it is empty and nothing here is claimed
+    expect([...SERVER_SIDE_WINDOW_ACTIONS_F1_IDS]).toEqual(['logo.search', 'logo.insert', 'logo.refresh']);
+    for (const id of SERVER_SIDE_WINDOW_ACTIONS_F1_IDS) {
+      if (!isActionId(id)) {
+        expect(SERVER_SIDE_WINDOW_ACTIONS_F1).not.toContain(id);
+        continue;
+      }
+      expect(SERVER_SIDE_WINDOW_ACTIONS_F1).toContain(id);
+      expect(SERVER_SIDE_WINDOW_ACTIONS).toContain(id);
+      expect(createsDraft(id)).toBe(id === 'logo.insert');
+      if (id === 'logo.insert') expect(ACTIONS[id].mutates).toBe(true);
+    }
   });
 
   it('leaves the collection actions and the reads alone', () => {

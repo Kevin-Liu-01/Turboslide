@@ -106,7 +106,30 @@ export type IntakePolicy = {
   allowPaths: boolean;
   /** The hosted allowlist (no loopback) and the hosted format rule (no svg). */
   hosted: boolean;
+  /**
+   * The hosted svg branch of the features round (docs/FEATURES.md 4.7; audit-logos 4): absent or
+   * false, a hosted intake refuses svg as before; set, an svg is passed through `sanitize` and
+   * rasterized by sharp into a PNG twin at 3x of a 264 by 168 box with the sanitized source kept
+   * (intake.ts). The studio sets it from `TURBOSLIDE_SVG_RASTER` with its logo sanitizer
+   * (apps/studio/src/server/actions.ts); a checkout's CLI keeps svg as it came either way.
+   */
+  svgRaster?: SvgRasterPolicy | false;
 };
+
+/**
+ * What the svg branch needs from its host: the sanitizer, an allowlist parser over the file that
+ * answers the sanitized text and the names of the elements it dropped, and throws on a broken or
+ * oversized file with a sentence a seller can read.
+ */
+export type SvgRasterPolicy = {
+  sanitize: (bytes: Uint8Array) => { svg: string; removed: string[] };
+};
+
+/** The svg raster policy in force: the explicit option, else the process policy's, else off. */
+export function svgRasterPolicy(explicit?: SvgRasterPolicy | false): SvgRasterPolicy | null {
+  const policy = explicit ?? intakePolicy().svgRaster;
+  return policy === undefined || policy === false ? null : policy;
+}
 
 const POLICY = Symbol.for('turboslide.headless.intakePolicy');
 
@@ -137,9 +160,26 @@ function hostMatches(host: string, allowed: string): boolean {
 export type AllowHostOptions = {
   /** The hosted list (no loopback) instead of the checkout list; the process policy otherwise. */
   hosted?: boolean;
+  /**
+   * Whether the caller can pass `--allow` (the CLI, paths on); the process policy otherwise. Off,
+   * the refusal is the seller's sentence naming the sites and no flag (docs/FEATURES.md 4.7).
+   */
+  allowPaths?: boolean;
 };
 
-/** Throws RangeError when the URL's host is outside the built-in list plus `extra`. */
+/**
+ * The sentence a browser transport's caller reads when a picture's address is off the list
+ * (docs/FEATURES.md 4.7; audit-logos 16): the sites in the seller's words and what to do instead,
+ * no CLI flag a page cannot pass. The row logos.intake.url-sentence reads it off `asset.add`.
+ */
+export const ALLOWLIST_SENTENCE =
+  'Pictures can be fetched from these sites only: generaltranslation.com, prototemplate.com, glyphfield.com and Wikimedia Commons. Upload the file instead';
+
+/**
+ * Throws RangeError when the URL's host is outside the built-in list plus `extra`: with paths on
+ * (the CLI) the line names the flag that admits the host; with paths off (the studio's HTTP, MCP
+ * and window transports, which cannot pass a flag) the seller's sentence.
+ */
 export function assertAllowedHost(
   url: string,
   extra: ReadonlyArray<string> = [],
@@ -158,11 +198,29 @@ export function assertAllowedHost(
   const base = hosted ? HOSTED_ALLOW_HOSTS : DEFAULT_ALLOW_HOSTS;
   const allowed = [...base, ...extra].some((entry) => hostMatches(host, entry));
   if (!allowed) {
+    const cli = options.allowPaths ?? intakePolicy().allowPaths;
+    if (!cli) throw new RangeError(ALLOWLIST_SENTENCE);
     throw new RangeError(
       `host ${host} is not in the capture allowlist; pass --allow ${host} (SPEC 11 captureHosts)`,
     );
   }
   return parsed;
+}
+
+/**
+ * The User-Agent every pinned fetch sends (docs/FEATURES.md 4.7; audit-logos 16): Wikimedia's
+ * policy asks for a name and a contact, and the one allowlisted public source answered 403 to a
+ * fetch without one. `Turboslide/<version> (+<origin>)`, the version from `TURBOSLIDE_VERSION`,
+ * else the deployment's commit, else the workspace's 0.0.0; the origin from
+ * `TURBOSLIDE_PUBLIC_ORIGIN`, else production's.
+ */
+export function turboslideUserAgent(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): string {
+  const version =
+    env.TURBOSLIDE_VERSION?.trim() || env.VERCEL_GIT_COMMIT_SHA?.trim().slice(0, 7) || '0.0.0';
+  const origin = env.TURBOSLIDE_PUBLIC_ORIGIN?.trim().replace(/\/+$/, '') || 'https://turboslide.vercel.app';
+  return `Turboslide/${version} (+${origin})`;
 }
 
 export const MAX_INPUT_BYTES = 25 * 1024 * 1024;
@@ -298,7 +356,7 @@ export function pinnedFetch(
         port: url.port === '' ? undefined : Number(url.port),
         path: `${url.pathname}${url.search}`,
         method: init.method ?? 'GET',
-        headers: { accept: '*/*', ...(init.headers ?? {}) },
+        headers: { accept: '*/*', 'user-agent': turboslideUserAgent(), ...(init.headers ?? {}) },
         servername: url.protocol === 'https:' ? url.hostname.replace(/^\[|\]$/g, '') : undefined,
         // the pinned address: whatever the name says by the time the socket opens
         lookup: (
@@ -447,8 +505,10 @@ export async function fetchAllowed(
   input: string,
   options: ReadInputOptions = {},
 ): Promise<{ url: URL; bytes: Uint8Array }> {
-  const hostOptions: AllowHostOptions =
-    options.hosted !== undefined ? { hosted: options.hosted } : {};
+  const hostOptions: AllowHostOptions = {
+    ...(options.hosted !== undefined ? { hosted: options.hosted } : {}),
+    ...(options.allowPaths !== undefined ? { allowPaths: options.allowPaths } : {}),
+  };
   let url = assertAllowedHost(input, options.allowHosts, hostOptions);
   const timeoutMs = options.timeoutMs ?? READ_INPUT_TIMEOUT_MS;
   const maxBytes = options.maxBytes ?? MAX_INPUT_BYTES;
@@ -594,13 +654,16 @@ export type ImageInfo = { width: number; height: number; format: string; ext: st
  */
 export async function imageInfo(
   bytes: Uint8Array,
-  options: { hosted?: boolean } = {},
+  options: { hosted?: boolean; svgRaster?: SvgRasterPolicy | false } = {},
 ): Promise<ImageInfo> {
   blockUntrustedLoaders();
   const sniffed = sniffImage(bytes);
   if (sniffed === null) throw new TypeError('not an image: expected png, jpeg, webp, gif or svg');
   const hosted = options.hosted ?? intakePolicy().hosted;
-  if (hosted && !HOSTED_INPUT_FORMATS.includes(sniffed))
+  // the svg branch of the features round (docs/FEATURES.md 4.7): a hosted intake keeps an svg
+  // when the raster policy is set (intake.ts rasterizes it); the refusal's line is unchanged
+  const svgKept = sniffed === 'svg' && svgRasterPolicy(options.svgRaster) !== null;
+  if (hosted && !HOSTED_INPUT_FORMATS.includes(sniffed) && !svgKept)
     throw new TypeError(`${sniffed} is not accepted here; send png, jpeg, webp or gif`);
   const meta = await sharp(Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength), {
     limitInputPixels: LIMIT_INPUT_PIXELS,

@@ -36,6 +36,7 @@ import type { HiddenTitle } from '../ooxml/titles.ts';
 import { validatePackage } from '../ooxml/validate.ts';
 import type { PackageValidation } from '../ooxml/validate.ts';
 import { openPackage, readPart, slideParts, writePackage, writePart } from '../ooxml/zip.ts';
+import { KIT_LOGO_BLOCK_IDS } from '../scene/kit-logos.ts';
 import type { Scene, SceneText } from '../scene/types.ts';
 import { PAGE_EMU, PAGE_IN, compositeHex, parseCssColor, pxToEmu, szOf } from '../units.ts';
 import { addSceneChart } from './chart.ts';
@@ -367,6 +368,14 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         warnings.push(
           `${scene.slideId}: no sheet screenshot; the slide shows the text layer on paper`,
         );
+      }
+      // the brand kit's picture logos over the sheet raster at their boxes, the 3x shots the
+      // extractor took of them (docs/FEATURES.md 4.8, row logos.export.pdf-pptx-crisp): the sheet
+      // raster draws them at 2x, and this object is the crisp one under zoom, the way the GT
+      // wordmark's PNG sits on the master over the same pixels; nothing on a deck under the GT mark
+      for (const raster of scene.rasters) {
+        if (!KIT_LOGO_BLOCK_IDS.has(raster.blockId) || raster.file === undefined) continue;
+        if (existsSync(raster.file)) addRaster(slide, raster, namePrefix);
       }
       // a linked block is an invisible hit target over its box, above the cover (SPEC 7.2.7)
       for (const block of scene.blocks) {

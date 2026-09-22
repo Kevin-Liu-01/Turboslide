@@ -10,6 +10,10 @@ import {
   FLAG_CACHE_MS,
   FLAG_OFF_MEANS,
   FLAG_REFUSALS,
+  LOGO_UPSTREAM_ENV,
+  SVG_RASTER_ENV,
+  logoUpstreamMode,
+  svgRasterOn,
   STUDIO_FLAG_DEFAULTS,
   STUDIO_FLAG_NAMES,
   FlagOffError,
@@ -172,5 +176,36 @@ describe('the assist switch (docs/PRODUCT.md 6.3, 6.4; build/b7.md Product round
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+// The two deployment variables of the features round (docs/FEATURES.md 4.7, 4.9; build/b6.md R5):
+// read from the environment given, never from the flag reader, with the values the preview sets.
+describe('the features round variables', () => {
+  it('reads TURBOSLIDE_LOGO_UPSTREAM as network, fixture or down', () => {
+    expect(LOGO_UPSTREAM_ENV).toBe('TURBOSLIDE_LOGO_UPSTREAM');
+    expect(logoUpstreamMode({})).toBe('network');
+    expect(logoUpstreamMode({ [LOGO_UPSTREAM_ENV]: 'fixture' })).toBe('fixture');
+    expect(logoUpstreamMode({ [LOGO_UPSTREAM_ENV]: ' Down ' })).toBe('down');
+    expect(logoUpstreamMode({ [LOGO_UPSTREAM_ENV]: 'anything else' })).toBe('network');
+  });
+
+  it('agrees with logo-index.ts on the name and the three values', async () => {
+    const index = await import('./logo-index');
+    expect(index.LOGO_UPSTREAM_ENV).toBe(LOGO_UPSTREAM_ENV);
+    for (const value of ['', 'fixture', 'down', 'other']) {
+      const env = value === '' ? {} : { [LOGO_UPSTREAM_ENV]: value };
+      expect(index.logoUpstreamMode(env)).toBe(logoUpstreamMode(env));
+    }
+  });
+
+  it('reads TURBOSLIDE_SVG_RASTER as off unless it says 1, true or on', () => {
+    expect(SVG_RASTER_ENV).toBe('TURBOSLIDE_SVG_RASTER');
+    expect(svgRasterOn({})).toBe(false);
+    expect(svgRasterOn({ [SVG_RASTER_ENV]: '0' })).toBe(false);
+    expect(svgRasterOn({ [SVG_RASTER_ENV]: 'off' })).toBe(false);
+    expect(svgRasterOn({ [SVG_RASTER_ENV]: '1' })).toBe(true);
+    expect(svgRasterOn({ [SVG_RASTER_ENV]: 'true' })).toBe(true);
+    expect(svgRasterOn({ [SVG_RASTER_ENV]: ' ON ' })).toBe(true);
   });
 });

@@ -8,6 +8,7 @@ import { setSecurityLogSink } from './log';
 import {
   UPLOAD_CONTENT_TYPES,
   UPLOAD_REASONS,
+  isSvgRefusal,
   receiveUpload,
   uploadFailureReason,
   verifyUploadToken,
@@ -61,6 +62,19 @@ describe('the seller’s reason of a refused upload', () => {
       expect(sentence).not.toMatch(/[—]|asset\.add|upload_refused|[A-Z]/);
     }
     expect(UPLOAD_CONTENT_TYPES).toEqual(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
+  });
+
+  it('names the svg sentence of the features round as a whole sentence, and reads the intake’s line', () => {
+    // docs/FEATURES.md 4.7; audit-logos 4: the seller's sentence while the raster path is off
+    expect(UPLOAD_REASONS.notSvg).toBe(
+      'SVG files are not accepted yet. Export the logo as a PNG and upload that',
+    );
+    expect(UPLOAD_REASONS.notSvg).not.toMatch(/[—]|asset\.add|svg is not accepted here|\.$/);
+    expect(uploadFailureReason({ code: 'not_svg', status: 400 })).toBe(UPLOAD_REASONS.notSvg);
+    expect(isSvgRefusal('svg is not accepted here; send png, jpeg, webp or gif')).toBe(true);
+    expect(isSvgRefusal('The picture could not be uploaded: svg is not accepted here; send png')).toBe(true);
+    expect(isSvgRefusal('not an image: expected png, jpeg, webp, gif or svg')).toBe(false);
+    expect(isSvgRefusal('the upload did not finish')).toBe(false);
   });
 
   it('answers the unfinished sentence for a token the PUT cannot verify', async () => {

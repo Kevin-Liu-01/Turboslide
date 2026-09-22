@@ -87,9 +87,10 @@ import {
   runCommentAction,
 } from './comments';
 import type { NotificationCaller } from './comments';
-import { FLAG_DEFAULTS, assertFlag, flagOn, setFlag } from './flags';
+import { FLAG_DEFAULTS, assertFlag, flagOn, setFlag, svgRasterOn } from './flags';
 import type { FlagName } from './flags';
 import { lintLists } from './lint';
+import { sanitizeLogoSvg } from './logo-sanitize';
 import { logSecurityEvent } from './log';
 import { measureSlidesThroughWorker } from './measure';
 import { registerMigrateStorage } from './migrate';
@@ -379,9 +380,27 @@ function registerWorkerActions(dispatcher: Dispatcher, deckId: string, store: Fi
  * loopback names leave the allowlist and svg leaves the accepted formats (`hosted`). The CLI and
  * `turboslide mcp` over stdio run in their own process with the checkout policy. A fetch the
  * pinned lookup refuses (a name resolving to a private address) is one `ssrf.refused` line.
+ *
+ * The features round (docs/FEATURES.md 4.7; audit-logos 4): under `TURBOSLIDE_SVG_RASTER` the
+ * hosted intake keeps an svg, sanitizes it with the logo route's own parser (logo-sanitize.ts, an
+ * allowlist over elements and attributes) and rasterizes it into a PNG twin at 3x of a 264 by 168
+ * box (packages/headless intake.ts); off, the svg refusal stands and the chrome reads
+ * `UPLOAD_REASONS.notSvg`. The variable is read at each registration, so a preview that sets it
+ * and production that does not run one code.
  */
 function setStudioIntakePolicy(): void {
-  setIntakePolicy({ allowPaths: false, hosted: isHosted() });
+  setIntakePolicy({
+    allowPaths: false,
+    hosted: isHosted(),
+    svgRaster: svgRasterOn()
+      ? {
+          sanitize: (bytes) => {
+            const sanitized = sanitizeLogoSvg(bytes);
+            return { svg: sanitized.svg, removed: sanitized.removed };
+          },
+        }
+      : false,
+  });
   setSsrfReporter((event) =>
     logSecurityEvent({
       event: 'ssrf.refused',
@@ -452,6 +471,35 @@ function assetDispatcherLoader(
     return inner;
   };
   return load;
+}
+
+/**
+ * The logo picker's ids (docs/FEATURES.md 4.11; build/b6.md R3, R4): `logo.search` over the
+ * server's index, `logo.insert` (the fetch, the sanitizer, the sharp raster and the asset write)
+ * and `logo.refresh`. B6's `logos.ts` imports sharp and the store client at its top, so it loads
+ * on the first call the way the materials package does above, and never enters the graph of the
+ * route files that import this module.
+ */
+const LOGO_ACTION_IDS = ['logo.search', 'logo.insert', 'logo.refresh'] as const;
+
+function registerLogoActionsLazily(
+  dispatcher: Dispatcher,
+  deckId: string,
+  deckStore: DeckStore,
+): void {
+  let inner: Promise<Dispatcher> | undefined;
+  const load = (): Promise<Dispatcher> =>
+    (inner ??= import('./logos').then(({ registerLogoActions }) => {
+      const d = createDispatcher();
+      registerLogoActions(d, {
+        store: deckStore,
+        deckId,
+        dispatch: (id, input, context) => dispatcher.dispatch(id, input, context),
+      });
+      return d;
+    }));
+  for (const id of LOGO_ACTION_IDS)
+    dispatcher.register(id, async (input, context) => (await load()).dispatch(id, input, context));
 }
 
 /** Registers the asset ids over the lazily loaded materials dispatcher. */
@@ -1100,6 +1148,9 @@ export async function deckDispatcher(
   // the assistant's two actions on this deck (docs/PRODUCT.md 6.2; build/b6.md R3): the route
   // /api/assist registers the same handlers on demand; here they answer /api/actions and MCP
   registerAssistActions(dispatcher, { store: deckStore, deckId });
+  // the logo picker's three actions over this deck (docs/FEATURES.md 4.11; build/b6.md R4), so
+  // /api/actions/logo.search, deck_logo_search and the window transport answer them
+  registerLogoActionsLazily(dispatcher, deckId, deckStore);
   registerSlideImport(dispatcher, deckId, storeDeps, store.dir, deckStore, decks);
   const assets = assetDispatcherLoader(dispatcher, deckId, store, deckStore);
   registerRecordActionsFor(dispatcher, deckId, store, deckStore, storeDeps, facts, assets);

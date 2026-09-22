@@ -2,8 +2,9 @@
 // open one 1x page per theme for the geometry and one page per raster scale for the pixels, show
 // each slide by hash on every page, wait for the render surface's readiness stamp, swap two-tone
 // pictures for their regenerated 2x or 3x twins, measure the scene on the 1x page, and shoot what
-// the mode needs: the whole sheet at 2x for flatten, the raster elements at 2x (3x for icons and
-// marks, SPEC 8.6) with alpha for native. The geometry comes from the 1x page because the verify
+// the mode needs: the whole sheet at 2x for flatten (plus the kit's picture logos at 3x, the
+// features round), the raster elements at 2x (3x for icons, marks and logos, SPEC 8.6 and
+// docs/FEATURES.md 4.8) with alpha for native. The geometry comes from the 1x page because the verify
 // loop compares the export with the 1x render: measured in M2 on the 2x page, element boxes
 // disagreed with the record by up to 1.5 px (positioning#dia1 at 731.50 against 733) and rasters
 // landed a pixel off. One browser and a few pages, one slide at a time (AGENTS.md). Every page,
@@ -39,7 +40,14 @@ import { waitForReady } from '@turboslide/headless/ready';
 import { MEASURE_CLASS } from '@turboslide/render/measure-dom';
 
 import { enrichScene } from './enrich.ts';
-import { measureScene, tagRasterElements } from './measure.ts';
+import { KIT_LOGO_BLOCK_IDS, kitHasPictureLogo, logoBlockIds } from './kit-logos.ts';
+import {
+  DEFAULT_SHEET_SELECTOR,
+  DEFAULT_SLIDE_SELECTOR,
+  measureScene,
+  tagRasterElements,
+} from './measure.ts';
+import type { RasterTag } from './measure.ts';
 import { twoToneTwinAt2x } from './two-tone.ts';
 import type { PictureScale } from './two-tone.ts';
 import type { Scene, SceneRaster } from './types.ts';
@@ -53,8 +61,74 @@ export const READY_SELECTOR = 'html[data-ts-ready="1"]';
  */
 export type RasterScalePolicy = 'auto' | 2 | 3;
 
-/** The raster kinds `auto` shoots at 3x: small glyphs whose edges matter under zoom. */
-export const THREE_X_KINDS: ReadonlySet<string> = new Set(['icon', 'mark']);
+/**
+ * The raster kinds `auto` shoots at 3x: small glyphs whose edges matter under zoom, and since the
+ * features round a logo (docs/FEATURES.md 4.8; audit-logos 18): a picture block whose asset
+ * carries `role: 'logo'` is shot at 3x, so the stored twins' 3x pixels reach the file (a 132 by 84
+ * title slot gives 396 by 252, the footer's 28 by 18 gives 84 by 54). The kind `logo` is this
+ * module's reading of the document (`logoBlockIds`), not a `data-raster` value the sheet carries.
+ */
+export const THREE_X_KINDS: ReadonlySet<string> = new Set(['icon', 'mark', 'logo']);
+
+/** The logo names and readers the builder shares (scene/kit-logos.ts), re exported for the tests. */
+export { KIT_LOGO_BLOCK_IDS, kitHasPictureLogo, logoBlockIds };
+
+/**
+ * Tags the kit's picture logos on a page after `tagRasterElements` ran, with rids continuing from
+ * `from` so every page of the extraction names the same elements: the footer picture in the stage
+ * and the title slot picture in the active slide, each once and only outside an element already
+ * tagged. Returns the tags, in the shape `tagRasterElements` returns, kind `mark` (3x) and alpha
+ * on. Nothing on a deck whose kit draws the GT mark (no `.is-picture`, no `.mark-picture`).
+ */
+export async function tagKitLogoElements(page: Page, from: number): Promise<RasterTag[]> {
+  return page.evaluate(
+    async ({ start, slideSelector, sheetSelector, footerId, titleId }) => {
+      const firstOf = (list: string): Element | null => {
+        for (const sel of list.split(',')) {
+          const el = document.querySelector(sel.trim());
+          if (el) return el;
+        }
+        return null;
+      };
+      const sheetEl = firstOf(sheetSelector) ?? document.body;
+      const stage = sheetEl.querySelector('.ts-stage, .stage') ?? sheetEl;
+      const slide = firstOf(slideSelector) ?? sheetEl;
+      const footer = stage.querySelector<HTMLImageElement>('.wordmark.is-picture img');
+      const title = slide.querySelector<HTMLImageElement>('img.mark-picture[data-slot="mark"]');
+      // the footer picture is `height: 18px; width: auto` (sheet.css), so its box is 0 by 0 until
+      // the file has decoded, and the render surface's readiness stamp covers the slides' images
+      // and not the band's: the decode is awaited here, then a frame, so the measurement that
+      // follows reads the drawn box (measured: the footer raster came back [0, 0, 0, 0] without it)
+      for (const img of [footer, title]) {
+        if (img === null || img.complete) continue;
+        try {
+          await img.decode();
+        } catch {
+          // a picture that cannot decode keeps a zero box and the raster is skipped, as any raster is
+        }
+      }
+      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+      const tags: { rid: number; blockId: string; kind: 'mark'; alpha: boolean }[] = [];
+      let rid = start;
+      const tag = (el: Element | null, blockId: string): void => {
+        if (el === null || el.closest('[data-ts-rid]') !== null) return;
+        rid += 1;
+        (el as HTMLElement).dataset.tsRid = String(rid);
+        tags.push({ rid, blockId, kind: 'mark', alpha: true });
+      };
+      tag(footer, footerId);
+      tag(title, titleId);
+      return tags;
+    },
+    {
+      start: from,
+      slideSelector: DEFAULT_SLIDE_SELECTOR,
+      sheetSelector: DEFAULT_SHEET_SELECTOR,
+      footerId: 'footer-logo',
+      titleId: 'title-logo',
+    },
+  ) as Promise<RasterTag[]>;
+}
 
 /**
  * The block types `auto` shoots at 1x, the sheet's own grid. A declared or raw diagram draws 1 px
@@ -256,15 +330,25 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
     renderer = launched.renderer;
     const policy = options.rasterScale ?? 'auto';
     const pictureScale = options.pictureScale ?? 2;
+    // the kit's picture logos (docs/FEATURES.md 4.8): a flatten export of such a deck opens the
+    // 3x page too, for the two logo rasters alone; a deck under the GT mark keeps its two pages
+    const kitLogo = kitHasPictureLogo(deck);
     try {
       for (const theme of options.themes) {
         const doc = docs.get(theme);
         if (!doc) continue;
         // The 1x page measures; the shot pages carry the pixels. Which shot scales a theme needs
-        // depends on the mode: flatten shoots the sheet at 2x, native shoots rasters at 2x and, for
-        // icons and marks under `auto`, at 3x.
+        // depends on the mode: flatten shoots the sheet at 2x (and the kit's picture logos at 3x
+        // when it has them), native shoots rasters at 2x and, for icons, marks and logos under
+        // `auto`, at 3x.
         const shotScales: (2 | 3)[] =
-          options.mode === 'flatten' ? [2] : policy === 'auto' ? [2, 3] : [policy];
+          options.mode === 'flatten'
+            ? kitLogo && policy === 'auto'
+              ? [2, 3]
+              : [2]
+            : policy === 'auto'
+              ? [2, 3]
+              : [policy];
         const measurePage = await openSheetPage(launched.browser, { theme, scale: 1 });
         const shotPages = new Map<2 | 3, SheetPage<2 | 3>>();
         for (const scale of shotScales)
@@ -339,11 +423,19 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
             for (const sheetPage of pages)
               await setMeasureClass(sheetPage.page, true, MEASURE_CLASS);
 
-            // The same tags on every page: one document order, one rid per element.
+            // The same tags on every page: one document order, one rid per element. The kit's
+            // picture logos follow with rids past the last, on every page the same (4.8).
             const tagOptions = { nativeTypes };
             const tags = await tagRasterElements(measurePage.page, tagOptions);
             for (const sheetPage of shotPages.values())
               await tagRasterElements(sheetPage.page, tagOptions);
+            const lastRid = tags.reduce((max, t) => Math.max(max, t.rid), 0);
+            const kitTags = await tagKitLogoElements(measurePage.page, lastRid);
+            for (const sheetPage of shotPages.values())
+              await tagKitLogoElements(sheetPage.page, lastRid);
+            tags.push(...kitTags);
+            // the picture and shot blocks whose asset is a logo: shot as the `logo` kind, 3x (4.8)
+            const logoBlocks = logoBlockIds(slide, deck);
 
             const scene = enrichScene(
               await measureScene(measurePage.page, {
@@ -361,6 +453,12 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
               { deck, deckDir: options.deckDir },
             );
             scene.title = slideTitle(slide, scene.n);
+            // a kit logo the sheet did not draw (a hidden band, a picture that did not decode)
+            // measures under a pixel: it leaves the scene here, so the builder never looks for a
+            // file it cannot have (the residual read "raster footer-logo has no file" otherwise)
+            scene.rasters = scene.rasters.filter(
+              (r) => !KIT_LOGO_BLOCK_IDS.has(r.blockId) || (r.box[2] >= 1 && r.box[3] >= 1),
+            );
             if (pictureFile) scene.pictureFile = pictureFile;
             if (pictureExcluded) scene.pictureExcluded = true;
             if (pictureRegenerated) scene.pictureRegenerated = true;
@@ -369,7 +467,11 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
             const wantRasters: SceneRaster[] =
               options.mode === 'native'
                 ? scene.rasters
-                : scene.rasters.filter((r) => r.blockId === 'wordmark' && !wordmark[theme]);
+                : scene.rasters.filter(
+                    (r) =>
+                      (r.blockId === 'wordmark' && !wordmark[theme]) ||
+                      KIT_LOGO_BLOCK_IDS.has(r.blockId),
+                  );
             if (wantRasters.length > 0) {
               const touched = new Set<SheetPage<SheetScale>>();
               try {
@@ -378,7 +480,9 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
                   const [, , w, h] = raster.box;
                   if (w < 1 || h < 1) continue;
                   const blockType = scene.blocks.find((b) => b.blockId === raster.blockId)?.type;
-                  const scale = rasterScaleFor(raster.kind, policy, blockType);
+                  // a picture or shot block whose asset is a logo is the `logo` kind here (4.8)
+                  const scaleKind = logoBlocks.has(raster.blockId) ? 'logo' : raster.kind;
+                  const scale = rasterScaleFor(scaleKind, policy, blockType);
                   // the 1x shots come from the measure page itself, the sheet's own grid; a
                   // forced policy has one shot page, which then serves every other scale
                   const shotPage =

@@ -49,6 +49,44 @@ export function isStudioFlagName(value: string): value is StudioFlagName {
 /** How long a read is kept before the reader is asked again (SPEC-3 8.12). */
 export const FLAG_CACHE_MS = 5_000;
 
+// ---------------------------------------------------------------------------------------------
+// The two deployment variables of the features round (docs/FEATURES.md 4.7, 4.9; build/b6.md R5).
+// Neither is a kill switch: each is read from the environment at the call, never from Redis, and
+// a preview sets them per spec project while production leaves both unset. The names are defined
+// here, the light module every server file reads, so `logo-index.ts` (sharp, the store) and the
+// intake policy of `actions.ts` agree on one string; `logo-index.test.ts` and `flags.test.ts` pin
+// the agreement.
+
+/**
+ * `TURBOSLIDE_LOGO_UPSTREAM` (4.9): unset for the network (thesvg.org and jsDelivr), `fixture` for
+ * the ten mark fixture the preview serves so the 404 marking and the takedown can be driven, `down`
+ * so every upstream call fails at once and the offline rows can be driven. Any other value reads as
+ * the network.
+ */
+export const LOGO_UPSTREAM_ENV = 'TURBOSLIDE_LOGO_UPSTREAM';
+export type LogoUpstreamMode = 'network' | 'fixture' | 'down';
+export function logoUpstreamMode(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): LogoUpstreamMode {
+  const value = env[LOGO_UPSTREAM_ENV]?.trim().toLowerCase();
+  if (value === 'fixture') return 'fixture';
+  if (value === 'down') return 'down';
+  return 'network';
+}
+
+/**
+ * `TURBOSLIDE_SVG_RASTER` (4.7; audit-logos 4): `1` turns the hosted intake's svg branch on, so
+ * an uploaded SVG is sanitized and rasterized by sharp into PNG twins at 3x of a 264 by 168 box
+ * with the source kept; off, the intake refuses an SVG as before and the chrome reads
+ * `UPLOAD_REASONS.notSvg` (upload.ts). The flag drops once `logos.intake.svg-sentence` has passed
+ * on production (docs/FEATURES.md section 8). A checkout's CLI accepts svg either way (SPEC-3 0.28).
+ */
+export const SVG_RASTER_ENV = 'TURBOSLIDE_SVG_RASTER';
+export function svgRasterOn(env: Readonly<Record<string, string | undefined>> = process.env): boolean {
+  const value = env[SVG_RASTER_ENV]?.trim().toLowerCase();
+  return value === '1' || value === 'true' || value === 'on';
+}
+
 /** The checkout's flag file under the state folder. */
 export const FLAGS_FILE = 'flags.json';
 

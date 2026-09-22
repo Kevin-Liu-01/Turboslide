@@ -24,7 +24,7 @@
 // return (docs/FOCUS.md section 8).
 
 /* parked-controls:begin */
-// written by scripts/probes/core-matrix.mjs --emit-parked from ship-6f3b6d9.json; 0 controls
+// written by scripts/probes/core-matrix.mjs --emit-parked from ship-39ae62e.json; 0 controls
 export const PARKED_CONTROLS: ReadonlySet<string> = new Set<string>([]);
 /* parked-controls:end */
 

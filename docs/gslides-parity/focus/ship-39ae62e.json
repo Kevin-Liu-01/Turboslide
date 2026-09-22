@@ -1,5 +1,5 @@
 {
-  "commit": "6f3b6d9",
+  "commit": "39ae62e",
   "renderedFrom": [],
   "rule": "docs/FEATURES.md 7.2: the features round's ship one list, committed before the runs with parkedFeatures and parkedRows empty, so nothing is pre forgiven and the two enforce preview runs and the production run say what parks; the ship step renders parkedFeatures and parkedRows from the runs' wouldParkRows and rewrites packages/chrome/src/parked-controls.ts with core-matrix.mjs --emit-parked. The previous ship's list (ship-7ea3db9.json: inbox and templates parked, view.live-pointers.second-browser, versions.show-changes-marks and collab.roster.go-to-slide as parked rows) still stands in the menu model's advanced flags and is read against the runs by the integrator's note, never by this empty list",
   "parkedFeatures": [],

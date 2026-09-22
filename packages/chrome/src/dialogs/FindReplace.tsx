@@ -76,7 +76,11 @@ function blockStrings(block: unknown): string[] {
           key === 'pos' ||
           key === 'ext' ||
           key === 'link' ||
-          key === 'name'
+          key === 'name' ||
+          /* a picture's alt is not a text the replace writes (store-actions.ts textTargets: the
+             fixed fields, the block texts, the notes), so it is not counted either; the features
+             round's logo pictures carry alts naming the brand (the integrator, ship one) */
+          key === 'alt'
         )
           continue;
         walk(each);
@@ -94,33 +98,9 @@ export function slideStrings(document: DeckDocument, slideId: string): string[] 
   const out: string[] = [];
   if (slide.kind === 'title') out.push(slide.heading, slide.lead);
   if (slide.kind === 'statement') out.push(slide.big);
-  const walk = (value: unknown): void => {
-    if (typeof value === 'string') {
-      out.push(plainText(value));
-      return;
-    }
-    if (Array.isArray(value)) {
-      value.forEach(walk);
-      return;
-    }
-    if (value !== null && typeof value === 'object') {
-      for (const [key, each] of Object.entries(value as Record<string, unknown>)) {
-        if (
-          key === 'id' ||
-          key === 'type' ||
-          key === 'asset' ||
-          key === 'assets' ||
-          key === 'pos' ||
-          key === 'ext' ||
-          key === 'link' ||
-          key === 'name'
-        )
-          continue;
-        walk(each);
-      }
-    }
-  };
-  for (const { block } of slideBlocks(slide)) walk(block);
+  /* the blocks' strings are blockStrings' (one walk, one list of the keys left out: Tailor's
+     count reads this function while Find and replace reads the block one) */
+  for (const { block } of slideBlocks(slide)) out.push(...blockStrings(block));
   if (slide.notes !== undefined) out.push(slide.notes);
   return out;
 }

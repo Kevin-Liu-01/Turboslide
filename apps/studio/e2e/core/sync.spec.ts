@@ -849,9 +849,15 @@ test(title('sync.structural.concurrent'), async ({ browser }) => {
     await selectBlock(A, 'sync-doomed');
     /* the two gestures overlap: A holds the block mid drag while B's Delete slide lands, and
        releases once B's filmstrip has lost the slide, so A's `block.set /pos` is the write that
-       meets the deleted slide. The first form of this row (B's menu and A's drag started 120 ms
-       apart) hung on A's `selectBlock`, whose click waited for a block B's delete had removed,
-       until the test's own timeout (the integrator's rerun on 4418, 2026-09-21). */
+       meets the deleted slide. A is offline from the hold to the release: a deletion that reaches
+       A before the release takes the slide off A's stage and cancels the gesture with it, so
+       nothing is written and no loser exists (the sync round's two ships and this round's first
+       runs read no card for that reason); offline, A's release still finds the slide on its own
+       document, applies the write and queues it, and the reconnect posts it against a document
+       without the slide, which the room refuses with the reducer's sentence, the loser's card.
+       The first form of this row (B's menu and A's drag started 120 ms apart) hung on A's
+       `selectBlock`, whose click waited for a block B's delete had removed, until the test's own
+       timeout (the integrator's rerun on 4418, 2026-09-21). */
     const doomed = A.locator(
       `.ts-stagewrap.ts-editor .pt-slide [data-block="sync-doomed"]`,
     ).first();
@@ -861,6 +867,7 @@ test(title('sync.structural.concurrent'), async ({ browser }) => {
     await A.mouse.move(dx0, dy0);
     await A.mouse.down();
     await A.mouse.move(dx0 + 60, dy0, { steps: 6 });
+    await owner!.context.setOffline(true);
     const deleteAt = Date.now();
     await menuPath(B, 'slide', 'slide.deleteSlide');
     await expect
@@ -869,6 +876,12 @@ test(title('sync.structural.concurrent'), async ({ browser }) => {
       .catch(() => undefined);
     await A.mouse.move(dx0 + 160, dy0, { steps: 6 });
     await A.mouse.up();
+    /* the write is on A's document and in its queue before the wire comes back */
+    await expect
+      .poll(async () => (await facts(A)).sync.pending, { timeout: 5000 })
+      .toBeGreaterThan(0)
+      .catch(() => undefined);
+    await owner!.context.setOffline(false);
     const gone = await expect
       .poll(
         async () => {
@@ -881,9 +894,11 @@ test(title('sync.structural.concurrent'), async ({ browser }) => {
       .then(() => true)
       .catch(() => false);
     const card = A.locator('.ts-conflict');
+    /* the reconnect, the resend and the refusal: the memory tier answers within a second or two,
+       the blob tier within its pulse */
     const cardShown = await card
       .first()
-      .waitFor({ timeout: 5000 })
+      .waitFor({ timeout: 15_000 })
       .then(() => true)
       .catch(() => false);
     const sentence = cardShown

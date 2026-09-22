@@ -148,6 +148,30 @@ describe('FileStore', () => {
     expect(stored.layout).toEqual({ type: 'cols', ratio: '1/1', gap: 72, align: 'center' });
   });
 
+  it("keeps the manifest's trash stamp across a write (a checkpoint after Move to trash)", async () => {
+    /* Move to trash writes trashedAt on the manifest at the store level (templates.ts trashDeck);
+       a room's checkpoint 2 s later is a write whose mutations the store applies to the stored
+       document, stamp included, so the manifest it writes keeps the deck in the trash (read on
+       the integrator's 4418 store, ship one: a deck trashed at revision 5 and checkpointed to 6
+       kept its trashedAt; the row's teardown failed on the stale base instead) */
+    const manifestFile = join(dir, 'deck.json');
+    const raw = JSON.parse(readFileSync(manifestFile, 'utf8')) as Record<string, unknown>;
+    writeFileSync(manifestFile, JSON.stringify({ ...raw, trashedAt: '2026-09-10T19:59:00.000Z' }));
+    const outcome = await store.write({
+      baseRevision: 412,
+      author: agent,
+      mutations: [setSize(22)],
+    });
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+    expect(outcome.document.deck.trashedAt).toBe('2026-09-10T19:59:00.000Z');
+    const manifest = JSON.parse(readFileSync(manifestFile, 'utf8')) as {
+      revision: number;
+      trashedAt?: string;
+    };
+    expect(manifest).toMatchObject({ revision: 413, trashedAt: '2026-09-10T19:59:00.000Z' });
+  });
+
   it('rejects a stale baseRevision with the current document and writes nothing', async () => {
     const first = await store.write({ baseRevision: 412, author: agent, mutations: [setSize(22)] });
     expect(first.ok).toBe(true);

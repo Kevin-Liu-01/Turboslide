@@ -61,7 +61,7 @@ import { SHAPE_KINDS } from '@turboslide/schema/blocks';
 import { deckAppearance, isTrashed, unskippedSlideOrder } from '@turboslide/schema/deck';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { derivedLayout } from '@turboslide/schema/layouts';
-import type { Slide } from '@turboslide/schema/deck';
+import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import type { Finding } from '@turboslide/schema/findings';
 import { parseAuthor } from '@turboslide/schema/mutations';
 import type { Author, Lease } from '@turboslide/schema/mutations';
@@ -85,7 +85,7 @@ import { pad2, trimTitle } from '@turboslide/viewer/model';
 import type { ViewerDeck } from '@turboslide/viewer/model';
 import { currentPlayIndex, playList, stepPlayIndex } from '@turboslide/viewer/present/presentModel';
 import type { Selection as StageSelection } from '@turboslide/viewer/Selection';
-import { blockFamily, cellPointer, listItemPointer } from '@turboslide/viewer/Selection';
+import { blockById, blockFamily, cellPointer, listItemPointer } from '@turboslide/viewer/Selection';
 import { Stage } from '@turboslide/viewer/Stage';
 import { applyTheme, installThemeBridge, useTheme } from '@turboslide/viewer/theme';
 
@@ -417,7 +417,10 @@ async function uploadBundleFile(file: File): Promise<{ id: string }> {
 function pickPicture(onFile: (file: File) => void): void {
   const input = document.createElement('input');
   input.type = 'file';
-  input.accept = 'image/*';
+  /* the four raster types the hosted intake accepts (docs/FEATURES.md 4.7, 4.5; audit-logos 4):
+     an svg picked by another way meets the seller's sentence, and the raster path behind
+     TURBOSLIDE_SVG_RASTER adds the type when it leaves its flag */
+  input.accept = 'image/png,image/jpeg,image/webp,image/gif';
   input.style.display = 'none';
   input.onchange = () => {
     const file = input.files?.[0];
@@ -644,8 +647,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
      snackbar instead of the card with the schema's pointer; the card stays for a conflict and for
      a refused write that carries text to keep, which is the agent transport's and a collaborator's
      case. Each notice is said once and dismissed. */
-  const conflicts = snap.rejects.filter((notice) => !isControlRefusal(notice));
-  const refusedByControl = snap.rejects.filter(isControlRefusal);
+  const conflicts = snap.rejects.filter((notice) => !isControlRefusal(notice, snap.document));
+  const refusedByControl = snap.rejects.filter((notice) => isControlRefusal(notice, snap.document));
   const refusalsSaid = useRef(new Set<string>());
   useEffect(() => {
     for (const notice of refusedByControl) {
@@ -2131,12 +2134,33 @@ const CONTROL_REFUSED = 'The change could not be applied to this object';
 
 /**
  * True for a reject notice the refusal card never shows (docs/FEATURES.md 2.2 rank 8): the room
- * refused the write as invalid (the schema, not a conflict) and no typed text rides on it, so
- * nothing of the seller's is lost and the snackbar's sentence is enough. A stale write, a locked
- * deck and every notice carrying text keep the card and its Copy text.
+ * refused the write as invalid (the schema, not a conflict), no typed text rides on it, and every
+ * object the write named is still on the document, so the write came from a chrome control on an
+ * object the seller can see and the snackbar's sentence is enough. A stale write, a locked deck,
+ * every notice carrying text, and a write whose slide or block is gone (the loser of a structural
+ * race, docs/SYNC.md: a collaborator deleted the slide under the move) keep the card and its Copy
+ * text; `sync.structural.concurrent` reads that card (the integrator, ship one).
  */
-export function isControlRefusal(notice: Pick<RejectNotice, 'reason' | 'text'>): boolean {
-  return notice.reason === 'invalid' && notice.text === '';
+export function isControlRefusal(
+  notice: Pick<RejectNotice, 'reason' | 'text' | 'mutations' | 'message'>,
+  document?: DeckDocument,
+): boolean {
+  if (notice.reason !== 'invalid' || notice.text !== '') return false;
+  /* the schema's refusal names the pointer it refused ("slides/<id>.json /slots/…: …", room.ts
+     refusalMessage); the reducer's refusal of a write whose slide or block is gone reads "No slide
+     …" or "No block …", and a write the room could not read has no message: those keep the card */
+  if (typeof notice.message !== 'string' || !/^(?:slides\/\S+ )?\/[^\s:]*: /.test(notice.message))
+    return false;
+  if (document === undefined) return true;
+  return notice.mutations.every((mutation) => {
+    const slideId = (mutation as { slideId?: string }).slideId;
+    if (slideId === undefined) return true;
+    const slide = document.slides[slideId];
+    if (slide === undefined) return false;
+    const blockId = (mutation as { blockId?: string }).blockId;
+    if (blockId === undefined || mutation.op === 'block.insert') return true;
+    return blockById(slide, blockId) !== undefined;
+  });
 }
 
 /**

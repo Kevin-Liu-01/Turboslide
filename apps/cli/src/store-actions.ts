@@ -366,6 +366,14 @@ export async function slideMove(
 
 /** The ops slide.update accepts: every mutation must address the named slide. */
 export function checkSlideMutations(slideId: string, mutations: ReadonlyArray<Mutation>): void {
+  const onSlide = mutations.some(
+    (mutation) =>
+      (mutation.op === 'slide.insert'
+        ? mutation.slide.id
+        : 'slideId' in mutation
+          ? mutation.slideId
+          : undefined) === slideId,
+  );
   mutations.forEach((mutation, index) => {
     const target =
       mutation.op === 'slide.insert'
@@ -374,6 +382,10 @@ export function checkSlideMutations(slideId: string, mutations: ReadonlyArray<Mu
           ? mutation.slideId
           : undefined;
     if (target === undefined) {
+      /* the brand kit's slots may ride with the slide's own mutations (the features round,
+         docs/FEATURES.md 4.4: a logo placed on the slide and set as the kit's mark and footer in
+         one write, so one Undo takes both back); a kit write alone keeps its own action */
+      if (onSlide && isKitWrite(mutation)) return;
       throw new TypeError(
         `slide.update: mutation ${index} (${mutation.op}) is a deck-level mutation; use its own action`,
       );
@@ -384,6 +396,15 @@ export function checkSlideMutations(slideId: string, mutations: ReadonlyArray<Mu
       );
     }
   });
+}
+
+/** A `deck.set` under the brand kit (schema brand.ts brandWriteMutation), the one deck-level write a slide update may carry. */
+function isKitWrite(mutation: Mutation): boolean {
+  return (
+    mutation.op === 'deck.set' &&
+    typeof (mutation as { path?: unknown }).path === 'string' &&
+    /^\/brand(\/|$)/.test((mutation as { path: string }).path)
+  );
 }
 
 export async function slideUpdate(

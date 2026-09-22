@@ -58,6 +58,12 @@ export async function run(t) {
     .then(() => t.deck.logoSlide);
   await t.clickCard(L);
   await t.clearAll();
+  /* the index is built on a fresh instance's first read (fixture mode builds its ten marks inline,
+     network mode reads the store), so the route is warmed once here and logos.picker.search
+     measures the search, not the build (the integrator, ship one) */
+  await page.request
+    .get(`${BASE}/api/logo/search?q=warm&limit=1`, { headers: t.headers, timeout: 30_000 })
+    .catch(() => undefined);
 
   // ---------------------------------------------------------------------------------------------
   // the readers
@@ -71,10 +77,13 @@ export async function run(t) {
       return null;
     }
   };
-  /** An asset record of the deck by id, from the source document. */
+  /**
+   * An asset record of the deck by id: describe().state.assets, the deck's asset table as the
+   * document holds it (source.read answers the active slide's source, which carries no assets).
+   */
   const assetOf = async (id) => {
-    const doc = await source();
-    const assets = doc?.assets ?? {};
+    const state = await t.state().catch(() => null);
+    const assets = state?.assets ?? (await source())?.deck?.assets ?? {};
     return Array.isArray(assets) ? (assets.find((a) => a.id === id) ?? null) : (assets[id] ?? null);
   };
   /** The picture objects of a slide. */
@@ -130,6 +139,28 @@ export async function run(t) {
     await t.waitControl('dialog.logo.search', 4000).catch(() => undefined);
     return { open: true, switched: r.switched };
   };
+  /** Opens the dialog's More disclosure (a closed <details> draws nothing inside it), so the cloud switch can be read and clicked. */
+  const openMore = async () => {
+    const summary = page
+      .locator('[data-control="dialog.logo"] details:not([open]) > summary')
+      .first();
+    if ((await summary.count()) > 0) {
+      await summary.click().catch(() => undefined);
+      await t.sleep(250);
+    }
+  };
+  /** Toggles Include cloud service icons through its label (the input sits under the drawn box, build/b1.md R4). */
+  const toggleCloud = async () => {
+    const input = page.locator('[data-control="dialog.logo.includeCloud"]').first();
+    const before = await input.isChecked().catch(() => null);
+    const label = input.locator('xpath=ancestor::label[1]');
+    if ((await label.count()) > 0) await label.click();
+    else await t.clickControl('dialog.logo.includeCloud');
+    await t.sleep(200);
+    const after = await input.isChecked().catch(() => null);
+    if (before !== null && after === before)
+      await input.click({ force: true }).catch(() => undefined);
+  };
   const closeLogo = async () => {
     if (await t.visible('dialog.logo')) {
       await t.press('Escape');
@@ -169,13 +200,44 @@ export async function run(t) {
       error: await t.textOf('dialog.logo.error'),
     };
   };
+  /**
+   * The picture the insert placed: the new object of a picture type, never the first new
+   * positioned object, because the editor's first insert on a Title and body slide converts it to
+   * a canvas in the same commit and the layout's heading and body gain a pos too.
+   */
+  const newPictureAfter = async (slide, before, timeout = 20_000) =>
+    t
+      .pollUntil(
+        () => pictures(slide),
+        (list) => list.some((o) => !before.includes(o.id)),
+        timeout,
+      )
+      .then((list) => list.find((o) => !before.includes(o.id)) ?? null)
+      .catch(() => null);
   /** Inserts the tile with the slug by a click; answers the new picture object on the slide, or null. */
   const insertTile = async (slide, slug) => {
     const before = await t.objectIds(slide);
     await t.clickControl(`dialog.logo.tile.${slug}`);
-    const obj = await t.newObjectAfter(slide, before).catch(() => null);
+    const obj = await newPictureAfter(slide, before);
     await t.waitGone('[data-control="dialog.logo"]', 8000);
     await t.settled();
+    /* the twins are fresh files: the picture is read once its img has decoded (a shot before that
+       reads the ground alone) */
+    if (obj)
+      await t
+        .pollUntil(
+          () =>
+            page.evaluate((id) => {
+              const el = document.querySelector(
+                `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`,
+              );
+              const img = el?.tagName.toLowerCase() === 'img' ? el : el?.querySelector('img');
+              return img ? img.complete && img.naturalWidth > 0 : false;
+            }, obj.id),
+          (x) => x,
+          8000,
+        )
+        .catch(() => undefined);
     return obj;
   };
   /** The body slot's free area of a Title and body slide, in sheet px: under the head, above the frame. */
@@ -187,31 +249,98 @@ export async function run(t) {
     const top = head.length > 0 ? Math.max(...head) + 40 : 129;
     return { x: 80, y: top, w: 1440, h: 771 - top };
   };
+  /**
+   * The area picture-place.ts `pictureInsertArea` centres a new picture in on a layout slide with
+   * an empty body paragraph: the paragraph's column over the body's height (its own box when it is
+   * 240 sheet px or taller), read from the stage before the insert converts the slide and takes the
+   * paragraph away; the slot itself when no empty paragraph stands (the integrator, ship one).
+   */
+  const emptyParagraphColumn = async (slide, slot) => {
+    const json = await t.slideJson(slide);
+    const blank = (value) =>
+      value === undefined ||
+      value === null ||
+      (typeof value === 'string' && value.trim() === '') ||
+      (Array.isArray(value) &&
+        value.every((run) => blank(typeof run === 'string' ? run : (run?.text ?? ''))));
+    let found = null;
+    const walk = (node) => {
+      if (Array.isArray(node)) {
+        node.forEach(walk);
+        return;
+      }
+      if (node && typeof node === 'object') {
+        if (
+          found === null &&
+          typeof node.id === 'string' &&
+          (node.type === 'paragraph' || node.type === 'text') &&
+          blank(node.text)
+        )
+          found = node.id;
+        for (const v of Object.values(node)) walk(v);
+      }
+    };
+    walk(json);
+    if (found === null) return { ...slot, from: 'the slot' };
+    const box = await t.boxOf(found).catch(() => null);
+    const sheet = await t.sheetRect();
+    if (!box || !sheet || !(sheet.w > 0)) return { ...slot, from: 'the slot' };
+    const k = sheet.w / 1600;
+    const x = Math.round((box.free.x - sheet.x) / k);
+    const y = Math.round((box.free.y - sheet.y) / k);
+    const w = Math.round(box.free.w / k);
+    const h = Math.round(box.free.h / k);
+    if (h >= 240) return { x, y, w, h, from: `the paragraph ${found}` };
+    const top = Math.min(y, slot.y);
+    const bottom = Math.max(y + h, slot.y + slot.h);
+    return { x, y: top, w, h: bottom - top, from: `the column of ${found}` };
+  };
   /** The lit fraction of a picture's box on the stage: the pixels differing from the ground by over 40 luminance steps. */
   const litFraction = async (blockId) => {
     const box = await t.boxOf(blockId);
     if (!box) return null;
+    /* the shot takes a 6 px margin around the box and reads the ground from that ring (the
+       sheet's colour where the mark is, whatever the appearance switched to since the sheet's
+       token was read); the mark's pixels are the ones inside the box that differ from it */
+    const margin = 6;
     const clip = {
-      x: Math.round(box.free.x),
-      y: Math.round(box.free.y),
-      width: Math.max(1, Math.round(box.free.w)),
-      height: Math.max(1, Math.round(box.free.h)),
+      x: Math.round(box.free.x - margin),
+      y: Math.round(box.free.y - margin),
+      width: Math.max(1, Math.round(box.free.w + 2 * margin)),
+      height: Math.max(1, Math.round(box.free.h + 2 * margin)),
     };
     const img = await t.shotPixels(clip);
-    const ground = await t.sheetGround();
-    const g = ground
-      ? t.hexOf(ground.match(/\d+/g)?.slice(0, 3).map(Number) ?? [255, 255, 255])
-      : '#ffffff';
-    const gl = luminance(g);
-    let lit = 0;
-    const total = img.width * img.height;
-    for (let i = 0; i < total; i += 1) {
-      const p = img.pixel
-        ? img.pixel(i % img.width, Math.floor(i / img.width))
-        : [img.data[i * 4], img.data[i * 4 + 1], img.data[i * 4 + 2]];
-      if (Math.abs(luminance(t.hexOf([p[0], p[1], p[2]])) - gl) > 40) lit += 1;
+    const at = (x, y) =>
+      img.pixel
+        ? img.pixel(x, y)
+        : [
+            img.data[(y * img.width + x) * 4],
+            img.data[(y * img.width + x) * 4 + 1],
+            img.data[(y * img.width + x) * 4 + 2],
+          ];
+    const ring = [];
+    for (let x = 0; x < img.width; x += 1) {
+      ring.push(at(x, 1), at(x, img.height - 2));
     }
-    return { lit: lit / total, total };
+    for (let y = 0; y < img.height; y += 1) {
+      ring.push(at(1, y), at(img.width - 2, y));
+    }
+    const tally = new Map();
+    for (const p of ring) {
+      const hex = t.hexOf([p[0], p[1], p[2]]);
+      tally.set(hex, (tally.get(hex) ?? 0) + 1);
+    }
+    const ground = [...tally.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '#ffffff';
+    const gl = luminance(ground);
+    let lit = 0;
+    let total = 0;
+    for (let y = margin; y < img.height - margin; y += 1)
+      for (let x = margin; x < img.width - margin; x += 1) {
+        const p = at(x, y);
+        total += 1;
+        if (Math.abs(luminance(t.hexOf([p[0], p[1], p[2]])) - gl) > 40) lit += 1;
+      }
+    return { lit: total ? lit / total : 0, total, ground };
   };
   const luminance = (hex) => {
     const n = parseInt(hex.slice(1), 16);
@@ -219,13 +348,30 @@ export async function run(t) {
   };
   /** A screenshot of a tile half: whether it draws anything against its own ground. */
   const halfLit = async (control) => {
-    const r = await t.rectOf(`[data-control="${control}"]`);
-    if (!r || r.w < 4 || r.h < 4) return null;
+    const inResults = `[data-control="dialog.logo.group.results"] [data-control="${control}"]`;
+    /* the results group scrolls: a tile below the fold is scrolled into view before its halves
+       are shot, else the shot reads the dialog's foot */
+    const el = page.locator(inResults).first();
+    if ((await el.count()) > 0) await el.scrollIntoViewIfNeeded().catch(() => undefined);
+    await t.sleep(250);
+    const r = (await t.rectOf(inResults)) ?? (await t.rectOf(`[data-control="${control}"]`));
+    if (!r || r.w < 12 || r.h < 12) return null;
+    /* the ground is the half's own background (the preselected tile draws a 3 px outline in its
+       text colour around each half, so a corner pixel reads the outline and not the ground); the
+       shot leaves the outline out (the integrator, ship one) */
+    const groundCss = await page.evaluate(
+      ([sel, c]) =>
+        getComputedStyle(
+          document.querySelector(sel) ?? document.querySelector(`[data-control="${c}"]`),
+        ).backgroundColor,
+      [inResults, control],
+    );
+    const inset = 4;
     const img = await t.shotPixels({
-      x: Math.round(r.x),
-      y: Math.round(r.y),
-      width: Math.round(r.w),
-      height: Math.round(r.h),
+      x: Math.round(r.x + inset),
+      y: Math.round(r.y + inset),
+      width: Math.round(r.w - 2 * inset),
+      height: Math.round(r.h - 2 * inset),
     });
     const total = img.width * img.height;
     const at = (x, y) =>
@@ -237,7 +383,12 @@ export async function run(t) {
             img.data[(y * img.width + x) * 4 + 2],
           ];
     const corner = at(1, 1);
-    const gl = luminance(t.hexOf([corner[0], corner[1], corner[2]]));
+    const groundRgb = groundCss?.match(/\d+/g)?.slice(0, 3).map(Number) ?? null;
+    const ground =
+      groundRgb && groundRgb.length === 3
+        ? t.hexOf(groundRgb)
+        : t.hexOf([corner[0], corner[1], corner[2]]);
+    const gl = luminance(ground);
     let lit = 0;
     let white = 0;
     for (let y = 0; y < img.height; y += 1)
@@ -250,7 +401,7 @@ export async function run(t) {
     return {
       lit: lit / total,
       white: white / total,
-      ground: t.hexOf([corner[0], corner[1], corner[2]]),
+      ground,
     };
   };
 
@@ -321,7 +472,7 @@ export async function run(t) {
       const first = results[0] ?? null;
       const before = await t.objectIds(L);
       await t.press('Enter');
-      const obj = await t.newObjectAfter(L, before, 20_000).catch(() => null);
+      const obj = await newPictureAfter(L, before);
       const closed = await t.waitGone('[data-control="dialog.logo"]', 8000);
       await t.settled();
       if (!obj) await closeLogo();
@@ -364,12 +515,22 @@ export async function run(t) {
       const o2 = await openLogo();
       let fraction = null;
       let obj = null;
+      let imgFacts = null;
       if (o2.open) {
         await search('vercel');
         obj = await insertTile(L, 'vercel');
         if (obj) {
           await t.clearAll();
           fraction = await litFraction(obj.id);
+          imgFacts = await page.evaluate((id) => {
+            const el = document.querySelector(
+              `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`,
+            );
+            const img = el?.tagName.toLowerCase() === 'img' ? el : el?.querySelector('img');
+            return img
+              ? `img ${img.currentSrc || img.getAttribute('src')} complete ${img.complete} natural ${img.naturalWidth}x${img.naturalHeight}`
+              : `no img in ${el?.tagName ?? 'no element'}`;
+          }, obj.id);
         }
       }
       const back = await t.pickAppearance('dark');
@@ -384,7 +545,7 @@ export async function run(t) {
           paper.white === 0 &&
           fraction !== null &&
           fraction.lit > 0.002,
-        observed: `ink half ${ink ? `lit ${(ink.lit * 100).toFixed(2)} percent on ${ink.ground}` : 'unread'}; paper half ${paper ? `lit ${(paper.lit * 100).toFixed(2)} percent, white ${(paper.white * 100).toFixed(2)} percent on ${paper.ground}` : 'unread'}; on the light deck (${JSON.stringify(got)}) the inserted mark ${obj ? `${obj.id} lit ${fraction ? (fraction.lit * 100).toFixed(2) : 'unread'} percent` : 'was not inserted'}; back to ${JSON.stringify(back)}`,
+        observed: `ink half ${ink ? `lit ${(ink.lit * 100).toFixed(2)} percent on ${ink.ground}` : 'unread'}; paper half ${paper ? `lit ${(paper.lit * 100).toFixed(2)} percent, white ${(paper.white * 100).toFixed(2)} percent on ${paper.ground}` : 'unread'}; on the light deck (${JSON.stringify(got)}) the inserted mark ${obj ? `${obj.id} lit ${fraction ? (fraction.lit * 100).toFixed(2) : 'unread'} percent (${imgFacts ?? 'img unread'})` : 'was not inserted'}; back to ${JSON.stringify(back)}`,
       };
     },
   );
@@ -458,6 +619,12 @@ export async function run(t) {
         chooser = await waiting;
       }
       const kitName = (await t.invoke('deck.info').catch(() => null))?.brand?.name ?? null;
+      /* Upload hands the chooser to the shell and the dialog closes (dialogs/Logo.tsx); the kit
+         name is searched in a reopened dialog */
+      if (!(await t.visible('dialog.logo'))) {
+        const again = await openLogo();
+        if (!again.open) return again.why;
+      }
       const r2 = await search('General Translation');
       const empty2 = await t.textOf('dialog.logo.empty');
       await closeLogo();
@@ -485,62 +652,105 @@ export async function run(t) {
     async () => {
       const o = await openLogo();
       if (!o.open) return o.why;
-      const foot = await t.textOf('dialog.logo.source');
-      const r = await search('figma');
-      const figma = r.tiles.find((x) => x.slug === 'figma');
-      if (figma && !figma.active) await t.clickControl('dialog.logo.tile.figma');
-      await t.sleep(300);
-      const licence = await t.textOf('dialog.logo.licence');
-      const link = await page.evaluate(() => {
-        const a = document.querySelector(
-          '[data-control="dialog.logo.licence.link"], [data-control="dialog.logo.licence"] a[href]',
-        );
-        return a ? { href: a.getAttribute('href'), text: (a.textContent ?? '').trim() } : null;
-      });
-      const tip = await t.hoverControl('dialog.logo.licence');
-      const identifiers = await page.evaluate(() => {
-        const root =
-          document.querySelector('[data-control="dialog.logo"]')?.closest('[role="dialog"]') ??
-          document.querySelector('[data-control="dialog.logo"]');
-        const text = root?.textContent ?? '';
-        return (
-          text.match(
-            /\b(CC0(-1\.0)?|CC-BY(-[A-Z]+)?(-\d\.\d)?|MIT|Apache-2\.0|BSD(-\d-Clause)?|ISC|Unlicense|GPL|MPL)\b/g,
-          ) ?? []
-        ).slice(0, 6);
-      });
-      const aws = await search('aws');
-      const awsBefore = aws.tiles.filter(
-        (x) => /^aws/.test(x.slug ?? '') || /aws/i.test(x.title),
-      ).length;
-      let awsAfter = null;
-      if (await t.visible('dialog.logo.includeCloud')) {
-        await t.clickControl('dialog.logo.includeCloud');
-        await t.sleep(600);
-        const again = await tiles();
-        awsAfter = again.filter((x) => /^aws/.test(x.slug ?? '') || /aws/i.test(x.title)).length;
-        await t.clickControl('dialog.logo.includeCloud').catch(() => undefined);
-      }
-      await closeLogo();
-      const footOk =
-        /thesvg\.org/.test(foot ?? '') &&
-        /\d{1,2} [A-Z][a-z]+ \d{4}|\d{4}-\d{2}-\d{2}/.test(foot ?? '');
-      const rowOk =
-        /Figma: Free to use/.test(licence ?? '') &&
-        link !== null &&
-        /guidelines|figma\.com/i.test(`${link?.text} ${link?.href}`);
-      const tipOk = /Recorded on thesvg\.org as CC0/.test(tip ?? '');
-      return {
-        ok:
-          footOk &&
-          rowOk &&
-          tipOk &&
-          identifiers.length === 0 &&
-          awsBefore === 0 &&
-          awsAfter !== null &&
-          awsAfter > 0,
-        observed: `foot "${foot ?? 'none'}"; Figma row "${licence ?? 'none'}" with link ${link ? `${link.text} -> ${link.href}` : 'none'}; tooltip "${tip ?? 'none'}"; identifiers drawn outside a tooltip ${identifiers.join(', ') || 'none'}; AWS tiles before the switch ${awsBefore}, after ${awsAfter ?? 'no Include cloud service icons row'}`,
+      let phase = 'the foot';
+      const at = (name) => {
+        phase = name;
       };
+      try {
+        const footAtOpen = await t.textOf('dialog.logo.source');
+        at('search figma');
+        const r = await search('figma');
+        /* the foot carries the index's date once the results have brought the index facts; before a
+           search it names the source alone (redrive 5 read "Logos from thesvg.org. Brand marks
+           belong to their owners" at the open and the dated line after the search) */
+        const foot = r.foot ?? footAtOpen;
+        /* the results group's Figma, not the Recents group's (the rows before inserted Figma, so a
+           Recents tile of the same slug lists first and is never the preselected one) */
+        const figma = r.tiles.find((x) => x.slug === 'figma' && x.group === 'results');
+        at('the preselected figma tile');
+        /* the first result is preselected once the results land (Logo.tsx `active`); a click on the
+           tile would insert it and close the dialog, so the driver waits for the mark instead of
+           clicking (the integrator, ship one: two re-drives lost the dialog here and timed out
+           on the next search) */
+        const selected = await t
+          .pollUntil(
+            async () =>
+              (await tiles()).find((x) => x.slug === 'figma' && x.group === 'results') ?? null,
+            (x) => x !== null && x.active,
+            4000,
+          )
+          .catch(() => figma ?? null);
+        await t.sleep(300);
+        at('the licence row');
+        const licence = await t.textOf('dialog.logo.licence');
+        const link = await page.evaluate(() => {
+          const a = document.querySelector(
+            '[data-control="dialog.logo.licence.link"], [data-control="dialog.logo.licence"] a[href]',
+          );
+          return a ? { href: a.getAttribute('href'), text: (a.textContent ?? '').trim() } : null;
+        });
+        at('the licence tooltip');
+        const tip = await t.hoverControl('dialog.logo.licence');
+        at('the identifiers');
+        const identifiers = await page.evaluate(() => {
+          const root =
+            document.querySelector('[data-control="dialog.logo"]')?.closest('[role="dialog"]') ??
+            document.querySelector('[data-control="dialog.logo"]');
+          const text = root?.textContent ?? '';
+          return (
+            text.match(
+              /\b(CC0(-1\.0)?|CC-BY(-[A-Z]+)?(-\d\.\d)?|MIT|Apache-2\.0|BSD(-\d-Clause)?|ISC|Unlicense|GPL|MPL)\b/g,
+            ) ?? []
+          ).slice(0, 6);
+        });
+        at('search aws');
+        const aws = await search('aws');
+        const awsBefore = aws.tiles.filter(
+          (x) => /^aws/.test(x.slug ?? '') || /aws/i.test(x.title),
+        ).length;
+        let awsAfter = null;
+        at('the More disclosure and the cloud switch');
+        await openMore();
+        if (await t.visible('dialog.logo.includeCloud')) {
+          await toggleCloud();
+          /* the switch re-runs the search; the tiles are read once an AWS tile is among the
+             results or 8 s pass (a read at the switch's click saw the results from before the
+             re-run: redrive 2 counted 0 after the switch) */
+          const again = await t
+            .pollUntil(
+              tiles,
+              (list) => list.some((x) => /^aws/.test(x.slug ?? '') || /aws/i.test(x.title)),
+              8000,
+            )
+            .catch(tiles);
+          awsAfter = again.filter((x) => /^aws/.test(x.slug ?? '') || /aws/i.test(x.title)).length;
+          at('the cloud switch off again');
+          await toggleCloud().catch(() => undefined);
+        }
+        at('close');
+        await closeLogo();
+        const footOk =
+          /thesvg\.org/.test(foot ?? '') &&
+          /\d{1,2} [A-Z][a-z]+ \d{4}|\d{4}-\d{2}-\d{2}/.test(foot ?? '');
+        const rowOk =
+          /Figma: Free to use/.test(licence ?? '') &&
+          link !== null &&
+          /guidelines|figma\.com/i.test(`${link?.text} ${link?.href}`);
+        const tipOk = /Recorded on thesvg\.org as CC0/.test(tip ?? '');
+        return {
+          ok:
+            footOk &&
+            rowOk &&
+            tipOk &&
+            identifiers.length === 0 &&
+            awsBefore === 0 &&
+            awsAfter !== null &&
+            awsAfter > 0,
+          observed: `foot "${foot ?? 'none'}" (at the open "${footAtOpen ?? 'none'}"); Figma row "${licence ?? 'none'}" with link ${link ? `${link.text} -> ${link.href}` : 'none'}; tooltip "${tip ?? 'none'}"; identifiers drawn outside a tooltip ${identifiers.join(', ') || 'none'}; Figma tile preselected ${selected?.active === true}; AWS tiles before the switch ${awsBefore}, after ${awsAfter ?? 'no Include cloud service icons row'}`,
+        };
+      } catch (error) {
+        throw new Error(`at ${phase}: ${String(error?.message ?? error).split('\n')[0]}`);
+      }
     },
   );
 
@@ -603,28 +813,38 @@ export async function run(t) {
     'read the inserted Figma mark against the body slot, its chip and the text runs',
     "at most 160 sheet px tall, centred in the body slot's free area, selected with the chip Logo, over no text run",
     async () => {
-      const id = t.deck.logoFigma;
-      if (!id) {
-        /* no mark to read: the rows before inserted none, because the dialog is not reachable
-           (the menu row is not on the build) or because their insert failed, which they recorded */
-        const reach = await t.reachRow('insert', 'insert.logo');
-        if (!reach.present)
-          return t.notBuilt(
-            'insert.logo',
-            MENU_LANE,
-            'no Figma mark was inserted by the rows before: the Insert menu has no Logo row',
-          );
-        return { ok: false, observed: 'no Figma mark was inserted by the rows before' };
+      /* a fresh Title and body slide, so the body slot's free area is the slot itself: the rows
+         before placed marks on the area's slide and the placement rule keeps a new mark out of
+         their boxes (the integrator, ship one) */
+      const fresh = await t.setupSlide(L, 'one-column').catch(() => null);
+      if (!fresh) return { ok: false, observed: 'no fresh Title and body slide for the read' };
+      await t.clickCard(fresh);
+      await t.clearAll();
+      /* the area the placement centres the mark in, read before the insert (the first reading took
+         the slot's centre and read the mark 279 px left of it: the layout's empty paragraph is the
+         column the mark goes into, picture-place.ts pictureInsertArea) */
+      const slot = await bodySlot(fresh);
+      const area = await emptyParagraphColumn(fresh, slot);
+      const o = await openLogo();
+      if (!o.open) return o.why;
+      await search('figma');
+      const inserted = await insertTile(fresh, 'figma');
+      if (!inserted) {
+        await closeLogo();
+        return {
+          ok: false,
+          observed: 'the Figma mark was not inserted on the fresh slide within 20 s',
+        };
       }
-      const obj = (await pictures(L)).find((o) => o.id === id) ?? null;
+      const id = inserted.id;
+      const obj = (await pictures(fresh)).find((o) => o.id === id) ?? null;
       if (!obj) return { ok: false, observed: `the mark ${id} is not on the slide` };
       await t.clearAll();
       const facts = await t.clickSelect(id);
-      const slot = await bodySlot(L);
       const cx = obj.pos.x + obj.pos.w / 2;
       const cy = obj.pos.y + obj.pos.h / 2;
       const centred =
-        Math.abs(cx - (slot.x + slot.w / 2)) < 12 && Math.abs(cy - (slot.y + slot.h / 2)) < 60;
+        Math.abs(cx - (area.x + area.w / 2)) < 12 && Math.abs(cy - (area.y + area.h / 2)) < 60;
       const runs = await page.evaluate(() =>
         [
           ...document.querySelectorAll(
@@ -650,6 +870,7 @@ export async function run(t) {
             .map((r) => r.run)
         : [];
       await t.clearAll();
+      await t.clickCard(L);
       return {
         ok:
           obj.pos.h <= SYMBOL_HEIGHT + 1 &&
@@ -657,24 +878,47 @@ export async function run(t) {
           facts.facts.chip === 'Logo' &&
           facts.facts.selected &&
           overlaps.length === 0,
-        observed: `${t.posStr(obj.pos)} (height under ${SYMBOL_HEIGHT} ${obj.pos.h <= SYMBOL_HEIGHT + 1}); body slot ${JSON.stringify(slot)}, centred ${centred}; ${t.describeSelection(facts.facts)}; text runs under it ${overlaps.join(', ') || 'none'}`,
+        observed: `${t.posStr(obj.pos)} (height under ${SYMBOL_HEIGHT} ${obj.pos.h <= SYMBOL_HEIGHT + 1}); body slot ${JSON.stringify(slot)}, placement area ${JSON.stringify(area)}, centred ${centred}; ${t.describeSelection(facts.facts)}; text runs under it ${overlaps.join(', ') || 'none'}`,
       };
     },
   );
 
   await t.step(
     'logos.insert.mono-tint',
-    'on the dark deck insert the GitHub mark; read its variant and the fills of its source file; then AWS with the cloud switch on',
-    "GitHub inserts as its mono variant with every fill the kit's text colour and the twin lit on ink; AWS carries its file unmodified",
+    "on the dark deck insert the Stripe mark's mono (asked for through the window API); read its variant and the fills of its source file; then AWS through the dialog with the cloud switch on",
+    "Stripe's mono has every fill the kit's text colour and the twin lit on ink; AWS carries its file unmodified",
     async () => {
       const appearance = await t.appearance();
       const o = await openLogo();
       if (!o.open) return o.why;
-      await search('github');
-      const obj = await insertTile(L, 'github');
+      /* Stripe has a mono and no light and dark pair, so the appearance rule reaches the tint;
+         GitHub, the row's first example, carries its own light file, which the rule prefers to a
+         tint (docs/FEATURES.md 4.3; build/b6.md section 5) */
+      await closeLogo();
+      /* the mono is asked for, the way the P1 Mono control (docs/FEATURES.md 4.11) and an agent
+         ask: the ten mark fixture holds no mark whose default fails on ink and whose mono may be
+         tinted without a pair of its own (Stripe's default reads on ink, so the appearance rule
+         picks it), and the tint is the server's on any variant asked for */
+      const s0 = await t.settled();
+      const before = await t.objectIds(L);
+      let insertError = null;
+      await t
+        .invoke('logo.insert', {
+          slug: 'stripe',
+          variant: 'mono',
+          slideId: L,
+          baseRevision: s0.revision,
+        })
+        .catch((error) => {
+          insertError = String(error?.message ?? error).split('\n')[0];
+        });
+      const obj = insertError === null ? await newPictureAfter(L, before) : null;
+      await t.settled();
       if (!obj) {
-        await closeLogo();
-        return { ok: false, observed: 'the GitHub mark was not inserted within 20 s' };
+        return {
+          ok: false,
+          observed: `the Stripe mono was not inserted within 20 s${insertError ? ` (${insertError})` : ''}`,
+        };
       }
       const asset = obj.block.asset ? await assetOf(obj.block.asset) : null;
       const textColour =
@@ -683,8 +927,9 @@ export async function run(t) {
         (await t.sheetVar('--paper'));
       const fills = async (record) => {
         if (!record?.sourceFile) return null;
+        const deckId = (await t.state()).deckId;
         const res = await page.request
-          .get(`${BASE}/${String(record.sourceFile).replace(/^\//, '')}`, {
+          .get(`${BASE}/decks/${deckId}/${String(record.sourceFile).replace(/^\//, '')}`, {
             headers: t.headers,
             maxRedirects: 0,
           })
@@ -710,10 +955,8 @@ export async function run(t) {
       let aws = null;
       let awsFills = null;
       if (o2.open) {
-        if (await t.visible('dialog.logo.includeCloud')) {
-          await t.clickControl('dialog.logo.includeCloud');
-          await t.sleep(400);
-        }
+        await openMore();
+        if (await t.visible('dialog.logo.includeCloud')) await toggleCloud();
         const r = await search('aws');
         const tile =
           r.tiles.find((x) => x.slug === 'aws') ?? r.tiles.find((x) => /^aws/.test(x.slug ?? ''));
@@ -737,7 +980,7 @@ export async function run(t) {
           fraction !== null &&
           fraction.lit > 0.002 &&
           awsUnmodified,
-        observed: `deck appearance ${appearance.deck}; GitHub asset ${asset ? `variant ${asset.source?.variant}, licence ${asset.source?.license}` : 'no record'}; the source file's fills ${gh ? `${gh.status}: ${gh.fills.join(', ') || 'none'}` : 'unread'} against the kit's text colour ${want ?? 'unread'} (tinted ${tinted}); the twin lit ${fraction ? (fraction.lit * 100).toFixed(2) : 'unread'} percent; AWS ${aws ? `${aws.id} variant ${aws.asset?.source?.variant}, licence ${aws.asset?.source?.license}, sanitized ${JSON.stringify(aws.asset?.source?.sanitized ?? null)}, fills ${awsFills?.fills.join(', ') || 'none'} (unmodified ${awsUnmodified})` : 'no AWS tile with the cloud switch'}`,
+        observed: `deck appearance ${appearance.deck}; Stripe asset ${asset ? `variant ${asset.source?.variant}, licence ${asset.source?.license}` : 'no record'}; the source file's fills ${gh ? `${gh.status}: ${gh.fills.join(', ') || 'none'}` : 'unread'} against the kit's text colour ${want ?? 'unread'} (tinted ${tinted}); the twin lit ${fraction ? (fraction.lit * 100).toFixed(2) : 'unread'} percent; AWS ${aws ? `${aws.id} variant ${aws.asset?.source?.variant}, licence ${aws.asset?.source?.license}, sanitized ${JSON.stringify(aws.asset?.source?.sanitized ?? null)}, fills ${awsFills?.fills.join(', ') || 'none'} (unmodified ${awsUnmodified})` : 'no AWS tile with the cloud switch'}`,
       };
     },
   );
@@ -779,6 +1022,17 @@ export async function run(t) {
       await t.clickControl('dialog.logo.everySlide');
       await t.sleep(200);
       const checked = (await readCheck())?.checked === true;
+      /* the blank slide whose footer is read is made before the insert: a slide.new through the
+         window API is a write of this seller's and Cmd+Z takes back the last one (the integrator,
+         ship one; the run that made it after the insert undid the slide, not the logo) */
+      await closeLogo();
+      const fresh = await t.setupSlide(t.deck.titleSlide, 'blank').catch(() => null);
+      await t.clickCard(L);
+      await t.clearAll();
+      const o1 = await openLogo();
+      if (!o1.open) return o1.why;
+      await t.clickControl('dialog.logo.everySlide');
+      await t.sleep(200);
       const rev0 = (await t.state()).revision;
       await search('figma');
       const obj = await insertTile(L, 'figma');
@@ -803,7 +1057,6 @@ export async function run(t) {
       await t.clickCard(t.deck.titleSlide);
       await t.sleep(400);
       const title = await drawnLogo();
-      const fresh = await t.setupSlide(t.deck.titleSlide, 'blank').catch(() => null);
       let footer = { mark: false, footer: false };
       if (fresh) {
         await t.clickCard(fresh);
@@ -816,6 +1069,9 @@ export async function run(t) {
         await t.press('Meta+z');
         await t.sleep(600);
         await t.settled();
+        /* the room acknowledges the undo about two seconds after the chord on the memory tier
+           (build/b3.md R7); the kit is read once it has */
+        await t.waitRevision(revAfter + 1, 15_000).catch(() => undefined);
       }
       const rev2 = (await t.state()).revision;
       await t.clickCard(t.deck.titleSlide);
@@ -830,8 +1086,8 @@ export async function run(t) {
       return {
         ok:
           check.checked === false &&
-          /Use as this presentation's logo on every slide/.test(check.label) &&
-          /Replaces the brand kit's logo on the title slide and in every footer/.test(
+          /Use as this presentation['\u2019]s logo on every slide/.test(check.label) &&
+          /Replaces the brand kit['\u2019]s logo on the title slide and in every footer/.test(
             `${check.label} ${check.line}`,
           ) &&
           checked &&
@@ -934,6 +1190,7 @@ export async function run(t) {
         );
       }
       const label = await t.textOf('dialog.tailor.logo.find');
+      const revStore = (await t.state()).revision;
       await t.clickControl('dialog.tailor.logo.find');
       const stored = await t
         .pollUntil(
@@ -959,6 +1216,11 @@ export async function run(t) {
         const found = document.querySelector('[data-control="dialog.tailor.logo.found"]');
         return Boolean(found?.querySelector('img, svg, canvas'));
       });
+      /* the store is one write the room acknowledges about two seconds after the button's answer
+         on the memory tier (build/b3.md R7): Apply's one revision is counted from after it */
+      if (stored !== null && storeError === null)
+        await t.waitRevision(revStore + 1, 15_000).catch(() => undefined);
+      await t.settled();
       const rev0 = (await t.state()).revision;
       const apply = (await t.visible('dialog.tailor.apply')) ? 'dialog.tailor.apply' : null;
       if (apply) await t.clickControl(apply);
@@ -1005,11 +1267,19 @@ export async function run(t) {
     async () => {
       await t.clickCard(L);
       await t.clearAll();
+      let placeError = null;
       const placed = await t
         .placePicture(L, { x: 900, y: 200, w: 240, h: 160 }, 'replace-target')
-        .catch(() => null);
+        .catch((error) => {
+          placeError = String(error?.message ?? error).split('\n')[0];
+          return null;
+        });
       const id = placed?.id ?? null;
-      if (!id) return { ok: false, observed: 'the picture could not be placed' };
+      if (!id)
+        return {
+          ok: false,
+          observed: `the picture could not be placed${placeError ? `: ${placeError}` : ''}`,
+        };
       const before = (await t.objectsOf(L)).find((o) => o.id === id);
       await t.selectObject(id);
       const b = await t.boxOf(id);
@@ -1254,7 +1524,9 @@ export async function run(t) {
           'asset.add',
           {
             id: 'wikimedia-by-url',
-            url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/240px-PNG_transparency_demonstration_1.png',
+            /* the file itself: the thumb path of this file answers 400 to every caller, with or
+               without the server's User-Agent (measured with curl on 2026-09-22) */
+            url: 'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png',
             role: 'capture',
             alt: 'A Wikimedia PNG',
             baseRevision: s2.revision,

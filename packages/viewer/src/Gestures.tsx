@@ -1391,6 +1391,15 @@ export function actionForMutations(
   if (slideId === undefined)
     throw new RangeError('actionForMutations: the first mutation names no slide');
   for (const mutation of mutations) {
+    /* the brand kit's slots may ride with the slide's mutations (the features round, docs/FEATURES.md
+       4.4: a logo placed and set as the kit's mark and footer in one write, one Undo); the store's
+       slide.update admits the same writes (store-actions.ts checkSlideMutations) */
+    if (
+      mutation.op === 'deck.set' &&
+      typeof (mutation as { path?: unknown }).path === 'string' &&
+      /^\/brand(\/|$)/.test((mutation as { path: string }).path)
+    )
+      continue;
     if (!('slideId' in mutation) || mutation.slideId !== slideId) {
       throw new RangeError('actionForMutations: every mutation must name the same slide');
     }

@@ -368,10 +368,23 @@ async function logoGridFacts(page: Page) {
         e.matches('button, [role="option"]') &&
         !/\.(paper|ink|pair|variants)$/.test(e.getAttribute('data-control') ?? ''),
     );
-    const firstTop = tiles[0] ? Math.round(tiles[0].getBoundingClientRect().top) : null;
-    const perRow = tiles.filter(
-      (e) => Math.round(e.getBoundingClientRect().top) === firstTop,
-    ).length;
+    /* the tiles a row holds, read inside one group: the widest row of the results (or of the
+       largest group), never the Your brand group's one or two tiles at the top of the dialog */
+    const byGroup = new Map<string, Element[]>();
+    for (const e of tiles) {
+      const group =
+        e.closest('[data-control^="dialog.logo.group."]')?.getAttribute('data-control') ?? '';
+      byGroup.set(group, [...(byGroup.get(group) ?? []), e]);
+    }
+    let perRow = 0;
+    for (const members of byGroup.values()) {
+      const tops = new Map<number, number>();
+      for (const e of members) {
+        const top = Math.round(e.getBoundingClientRect().top);
+        tops.set(top, (tops.get(top) ?? 0) + 1);
+      }
+      perRow = Math.max(perRow, ...tops.values());
+    }
     const scrollers = [card, ...card.querySelectorAll('*')].filter(
       (el) =>
         el.scrollWidth > el.clientWidth + 1 && /auto|scroll/.test(getComputedStyle(el).overflowX),

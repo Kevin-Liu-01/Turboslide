@@ -487,6 +487,10 @@ test(title('export.print.download-pdf-follows-preview'), async () => {
   await menuPath(page, 'file', 'file.printPreview');
   await page.waitForURL(/\/print\//, { timeout: 20_000 });
   await ctl(page, 'print.page').waitFor({ timeout: 20_000 });
+  /* the page is server rendered and announces hydration (`data-hydrated`, the home page's
+     convention): a click on the check before React attaches its handler toggles nothing (the
+     integrator's three re-runs of this file alone read data-count 3 after the click) */
+  await page.waitForSelector('[data-control="print.page"][data-hydrated]', { timeout: 20_000 });
   const skipped = ctl(page, 'print.skipped');
   const input = skipped.locator('input').first();
   await ((await input.count()) > 0 ? input : skipped).click({ force: true });
@@ -1668,7 +1672,9 @@ test(title('logos.export.pdf-pptx-crisp'), async () => {
   /* the first page carries the mark: an image object in the first page's resources */
   expect(imagesBefore, 'the PDF carries image objects').toBeGreaterThan(0);
   const sizes: Record<string, { width: number; height: number }[]> = {};
-  for (const mode of ['native', 'perfect'] as const) {
+  /* the dialog's two modes are its controls dialog.download.mode.native and .flatten (the
+     Perfect file is the flatten mode) */
+  for (const mode of ['native', 'flatten'] as const) {
     await openPptx(page);
     await ctl(page, `dialog.download.mode.${mode}`).click({ force: true });
     const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 120_000);
@@ -1686,7 +1692,7 @@ test(title('logos.export.pdf-pptx-crisp'), async () => {
       .filter((x): x is { width: number; height: number } => x !== null);
   }
   test.info().annotations.push({ type: 'media', description: JSON.stringify(sizes).slice(0, 400) });
-  for (const mode of ['native', 'perfect'] as const) {
+  for (const mode of ['native', 'flatten'] as const) {
     const list = sizes[mode] ?? [];
     expect(
       list.some((p) => p.width >= 396 && p.height >= 252),

@@ -449,10 +449,11 @@ describe('LogoDialog', () => {
       await Promise.resolve();
     });
     await waitFor(() => expect(closeDialog).toHaveBeenCalledTimes(1));
+    /* the handler stores the asset alone: the editor's handle carries insertLogoAsset, so the
+       placement, the kit's slots and the Undo are the editor's one commit (build/b6.md R10) */
     expect(insertRequest(dispatch, calls)).toEqual({
       slug: 'figma',
       variant: 'default',
-      slideId: 'content-rule',
       baseRevision: 412,
     });
     /* the stored asset is placed by the editor at the logo size */
@@ -474,8 +475,10 @@ describe('LogoDialog', () => {
       </Host>,
     );
     await search('vercel');
-    expect(control('dialog.logo.tile.vercel.paper')?.getAttribute('data-variant')).toBe('dark');
-    expect(control('dialog.logo.tile.vercel.ink')?.getAttribute('data-variant')).toBe('light');
+    /* thesvg names a variant after the ground it is drawn for: the paper half draws `light` (the
+       black triangle), the ink half `dark` (the white one) */
+    expect(control('dialog.logo.tile.vercel.paper')?.getAttribute('data-variant')).toBe('light');
+    expect(control('dialog.logo.tile.vercel.ink')?.getAttribute('data-variant')).toBe('dark');
     await search('github');
     const ink = control('dialog.logo.tile.github.ink');
     expect(ink?.getAttribute('data-variant')).toBe('mono');
@@ -586,11 +589,10 @@ describe('LogoDialog', () => {
       await Promise.resolve();
     });
     await waitFor(() => expect(insertLogoAsset).toHaveBeenCalledTimes(1));
+    /* the every slide write rides in the editor's commit, not in the handler's store */
     expect(insertRequest(dispatch, calls)).toEqual({
       slug: 'figma',
       variant: 'default',
-      slideId: 'content-rule',
-      everySlide: true,
       baseRevision: 412,
     });
     expect(insertLogoAsset).toHaveBeenCalledWith(
@@ -641,11 +643,10 @@ describe('LogoDialog', () => {
       await Promise.resolve();
     });
     await waitFor(() => expect(insertLogoAsset).toHaveBeenCalledTimes(1));
+    /* the swap of the block's asset is the editor's, with the box kept and Undo */
     expect(insertRequest(dispatch, calls)).toEqual({
       slug: 'figma',
       variant: 'default',
-      slideId: 'content-rule',
-      blockId: 'pic-old',
       baseRevision: 412,
     });
     expect(insertLogoAsset).toHaveBeenCalledWith(

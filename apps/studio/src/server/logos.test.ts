@@ -792,7 +792,8 @@ describe('the insert (4.4, 4.11)', () => {
     const awsSource = readFileSync(join(dir, aws.asset.sourceFile as string), 'utf8');
     expect(awsSource).toContain('#ED7100');
     expect(awsSource).not.toContain('#f2f2f0');
-    /* the paired light and dark files become the twins the other way round */
+    /* the paired files become the twins by the ground each is drawn for: GitHub on the dark deck
+       takes its `dark` file (the white mark), and the `light` file is the light twin */
     const github = await logoInsert(
       { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
       ctx,
@@ -801,7 +802,7 @@ describe('the insert (4.4, 4.11)', () => {
         baseRevision: (await store.read()).document.deck.revision,
       },
     );
-    expect(github.variant).toBe('light');
+    expect(github.variant).toBe('dark');
     expect('light' in github.asset.twins).toBe(true);
   });
 
@@ -977,8 +978,9 @@ describe('the insert (4.4, 4.11)', () => {
       },
       ctx,
     )) as { asset: Asset; blockId?: string; variant: string };
-    /* a light deck takes the dark Vercel triangle, the white default being invisible on paper */
-    expect(inserted.variant).toBe('dark');
+    /* a light deck takes Vercel's `light` file (the black triangle, drawn for a light ground), the
+       white default being invisible on paper */
+    expect(inserted.variant).toBe('light');
     expect(inserted.asset.role).toBe('logo');
     expect(inserted.blockId).toBe('logo');
     await expect(

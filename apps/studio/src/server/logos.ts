@@ -653,21 +653,26 @@ async function pickMark(
   return { answer, variant, tint };
 }
 
-/** The paired variant that draws on the other ground, when the brand has one (4.4). */
+/**
+ * The variant drawn for a ground, when the brand has one (4.4): thesvg.org names a variant after
+ * the ground it is drawn for (`light.svg` is the mark for a light ground, `dark.svg` the one for a
+ * dark ground; logo-model.ts `chooseVariant`), so the light twin is the `light` file and the dark
+ * twin the `dark` file.
+ */
 function pairedVariant(row: LogoRow, variant: string, ground: 'light' | 'dark'): string | null {
   const wanted = variant.startsWith('wordmark')
     ? ground === 'light'
-      ? 'wordmarkDark'
-      : 'wordmarkLight'
+      ? 'wordmarkLight'
+      : 'wordmarkDark'
     : ground === 'light'
-      ? 'dark'
-      : 'light';
+      ? 'light'
+      : 'dark';
   return variantAvailable(row, wanted) ? wanted : null;
 }
 
 /**
  * `logo.insert` (4.4, 4.11): the mark fetched once through the service (the cache rule applies),
- * the twins at 3x of the logo size (the `dark` variant as the light twin and the `light` variant as
+ * the twins at 3x of the logo size (the `light` variant as the light twin and the `dark` variant as
  * the dark twin when the pair exists, a tinted mono per appearance, else one neutral file), the
  * asset with its `logo` source and the sanitized `sourceFile`, then one write: the record, the
  * picture block at the logo size when `slideId` names a slide (a slide that is not a canvas

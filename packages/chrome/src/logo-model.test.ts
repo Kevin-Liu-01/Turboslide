@@ -205,9 +205,9 @@ describe('the appearance rule (4.3, 4.4)', () => {
     readsOnInk: false,
   });
 
-  it('picks dark on paper and light on ink when the pair exists', () => {
-    expect(chooseVariant(vercel, 'light')).toEqual({ variant: 'dark', tint: false });
-    expect(chooseVariant(vercel, 'dark')).toEqual({ variant: 'light', tint: false });
+  it('picks light on paper and dark on ink when the pair exists (thesvg names a variant after its ground)', () => {
+    expect(chooseVariant(vercel, 'light')).toEqual({ variant: 'light', tint: false });
+    expect(chooseVariant(vercel, 'dark')).toEqual({ variant: 'dark', tint: false });
   });
 
   it('picks the default when it reads, else the tinted mono, else the plate line', () => {
@@ -244,11 +244,11 @@ describe('the appearance rule (4.3, 4.4)', () => {
 
   it('answers the wordmark keys for the Wordmark kind and null where the brand has none', () => {
     expect(chooseVariant(vercel, 'light', { kind: 'wordmark' })).toEqual({
-      variant: 'wordmarkDark',
+      variant: 'wordmarkLight',
       tint: false,
     });
     expect(chooseVariant(vercel, 'dark', { kind: 'wordmark' })).toEqual({
-      variant: 'wordmarkLight',
+      variant: 'wordmarkDark',
       tint: false,
     });
     expect(chooseVariant(figma, 'dark', { kind: 'wordmark' })).toEqual({
@@ -265,7 +265,7 @@ describe('the appearance rule (4.3, 4.4)', () => {
   it('skips a variant marked unavailable', () => {
     const broken = {
       ...vercel,
-      unavailable: { dark: { at: '2026-09-22T06:00:00Z', status: 404 } },
+      unavailable: { light: { at: '2026-09-22T06:00:00Z', status: 404 } },
     };
     expect(chooseVariant(broken, 'light')).toEqual({ variant: 'mono', tint: true });
   });

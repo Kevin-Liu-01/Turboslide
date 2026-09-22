@@ -1368,7 +1368,17 @@ async function featuresRound(t, S, h) {
   const LANE = 'B3';
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   /** A typed table: the header cells H1.., the body cells R<r>C<c> (0 based, the matrix's numbering). */
-  const typedTable = (id, columns, rows, pos, { empty = false, header = true } = {}) => ({
+  /* `size` names a rung of the table's own ladder (schema blocks/table.ts TABLE_SIZES, 20 down to
+     15, 20 when absent): the typed 3 by 4 table sits at 18 so "the size step up" of
+     tables.range.size-color has a rung above it, the ladder's top being the default (the
+     integrator, ship one; build/b3.md R7) */
+  const typedTable = (
+    id,
+    columns,
+    rows,
+    pos,
+    { empty = false, header = true, size = undefined } = {},
+  ) => ({
     id,
     type: 'table',
     columns: Array.from({ length: columns }, () => ({})),
@@ -1379,6 +1389,7 @@ async function featuresRound(t, S, h) {
       ...(r === 0 && header && !empty ? { header: true } : {}),
     })),
     pos,
+    ...(size !== undefined ? { size } : {}),
   });
   const S2 = await t
     .setup(
@@ -1459,6 +1470,18 @@ async function featuresRound(t, S, h) {
         if (!el) return null;
         const inner = el.querySelector('b, strong, i, em, [data-mark], span') ?? el;
         const cs = getComputedStyle(inner);
+        /* the colour where the glyphs draw: the element around the run's first text, so a colour
+           mark's span inside the paragraph is read and not the paragraph's own colour (the
+           integrator, ship one; build/b3.md R7: the cells held [H0]{c:green} and the paragraph
+           still computed the header's colour) */
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        let textNode = null;
+        for (let node = walker.nextNode(); node; node = walker.nextNode())
+          if ((node.textContent ?? '').trim() !== '') {
+            textNode = node;
+            break;
+          }
+        const glyphs = textNode?.parentElement ?? inner;
         const td = el.closest('.td');
         return {
           bold:
@@ -1467,8 +1490,8 @@ async function featuresRound(t, S, h) {
           italic:
             el.querySelectorAll('i, em, [data-mark="italic"], [data-mark="em"]').length > 0 ||
             cs.fontStyle === 'italic',
-          size: parseFloat(getComputedStyle(el).fontSize),
-          color: cs.color,
+          size: parseFloat(getComputedStyle(glyphs).fontSize),
+          color: getComputedStyle(glyphs).color,
           align: getComputedStyle(el).textAlign,
           numeric: td
             ? getComputedStyle(td).fontVariantNumeric
@@ -1582,7 +1605,10 @@ async function featuresRound(t, S, h) {
     'a typed 3 by 4 table for the caret, range and mark rows',
     'block.insert through the window API',
     async () => {
-      const obj = await t.placeBlock(S2, typedTable(T3, 4, 3, { x: 80, y: 420, w: 900, h: 240 }));
+      const obj = await t.placeBlock(
+        S2,
+        typedTable(T3, 4, 3, { x: 80, y: 420, w: 900, h: 240 }, { size: 18 }),
+      );
       return { ok: Boolean(obj), observed: obj?.id ?? 'none' };
     },
   );

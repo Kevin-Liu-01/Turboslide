@@ -860,15 +860,15 @@ test(title('logos.intake.svg-sentence'), async () => {
   });
   if (landed !== null) {
     /* the raster path: PNG twins, the source kept */
-    const doc = JSON.parse((await invoke(page, 'source.read', {})) as string) as {
-      assets?:
-        | Record<string, { twins?: unknown; sourceFile?: string }>
-        | { id: string; twins?: unknown; sourceFile?: string }[];
-    };
-    const assets = doc.assets ?? {};
+    /* the deck's asset table as describe().state.assets carries it (source.read answers the
+       active slide's source, which holds no assets) */
+    const assets = ((await state(page)) as { assets?: unknown }).assets as
+      | Record<string, { twins?: unknown; sourceFile?: string }>
+      | { id: string; twins?: unknown; sourceFile?: string }[]
+      | undefined;
     const record = Array.isArray(assets)
       ? assets.find((a) => a.id === landed!.block['asset'])
-      : assets[landed.block['asset'] as string];
+      : assets?.[landed.block['asset'] as string];
     const twins = JSON.stringify(record?.twins ?? '');
     expect(twins, 'PNG twins').toMatch(/\.png/);
     expect(twins, 'no svg twin').not.toMatch(/\.svg/);

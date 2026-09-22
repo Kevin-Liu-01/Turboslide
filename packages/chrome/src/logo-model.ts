@@ -305,12 +305,19 @@ function readsOn(row: LogoRow, appearance: KitAppearance): boolean {
 }
 
 /**
- * The variant for the deck's appearance (4.3): on a light deck `dark`, else `default` when it reads
- * on paper, else `mono` tinted; on a dark deck `light`, else `default` when it reads on ink, else
- * `mono` tinted; the tint only where the licence allows it (question 2); a mark with no readable
- * variant and no mono is the default on a plate with the line. A wordmark asks the same of the
- * wordmark keys (`wordmarkDark`, `wordmarkLight`, `wordmark`); Mono asks for the tinted mono first.
- * Null when the row has nothing of the kind asked for.
+ * The variant for the deck's appearance (4.3): on a light deck `light`, else `default` when it
+ * reads on paper, else `mono` tinted; on a dark deck `dark`, else `default` when it reads on ink,
+ * else `mono` tinted; the tint only where the licence allows it (question 2); a mark with no
+ * readable variant and no mono is the default on a plate with the line. A wordmark asks the same of
+ * the wordmark keys (`wordmarkLight`, `wordmarkDark`, `wordmark`); Mono asks for the tinted mono
+ * first. Null when the row has nothing of the kind asked for.
+ *
+ * thesvg.org names a variant after the ground it is drawn for, not after its ink: Vercel's
+ * `light.svg` is the black triangle and its `dark.svg` the white one, GitHub's `light.svg` fills
+ * `#1b1f23` and its `dark.svg` `#ffffff` (the files served on 2026-09-22, verbatim in the fixture
+ * upstream). The first form of this rule read the names as ink colours and chose the invisible
+ * file on each ground (the integrator's gate run, row `logos.picker.paper-and-ink`: both tile
+ * halves and the inserted light twin read 0 percent lit).
  */
 export function chooseVariant(
   row: LogoRow,
@@ -320,7 +327,7 @@ export function chooseVariant(
   const has = (key: string): boolean => variantAvailable(row, key);
   const tintable = tintAllowed(row.license);
   if (options.kind === 'wordmark') {
-    const paired = appearance === 'light' ? 'wordmarkDark' : 'wordmarkLight';
+    const paired = appearance === 'light' ? 'wordmarkLight' : 'wordmarkDark';
     if (options.tone === 'mono' && tintable && has('wordmarkMono'))
       return { variant: 'wordmarkMono', tint: true };
     if (has(paired)) return { variant: paired, tint: false };
@@ -333,7 +340,7 @@ export function chooseVariant(
     if (tintable && has('mono')) return { variant: 'mono', tint: true };
     // a licence that forbids the tint offers the untinted mark alone (4.10)
   }
-  const paired = appearance === 'light' ? 'dark' : 'light';
+  const paired = appearance === 'light' ? 'light' : 'dark';
   if (has(paired)) return { variant: paired, tint: false };
   if (has('default') && readsOn(row, appearance)) return { variant: 'default', tint: false };
   if (tintable && has('mono')) return { variant: 'mono', tint: true };

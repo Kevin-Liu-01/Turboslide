@@ -2018,6 +2018,32 @@ export function createEditorController(init: {
   let draftInFlight = false;
   const draftQueue: DraftQueued[] = [];
 
+  /**
+   * A write the local document refuses (`applyMutations` throws before the room sees it).
+   * When the refusal is that the write's slide or block is gone, another browser's Delete slide
+   * landed under this gesture and the write is the loser of a structural race: the refusal is
+   * shown as the loser's card with the reducer's sentence and Discard, the way the room's own
+   * reject of the same write is shown (docs/SYNC.md 6.1 `sync.structural.concurrent`: the drag
+   * released after B's delete posted nothing and no card showed; the integrator, ship one). Any
+   * other local refusal (a malformed write through the window API) stays a sentence in `error`.
+   */
+  let localRefusals = 0;
+  const publishLocalRefusal = (error: unknown, mutations: Mutation[]): void => {
+    const message = errorMessage(error);
+    if (!/^No (slide|block) "/.test(message)) {
+      publish({ error: message });
+      return;
+    }
+    localRefusals += 1;
+    const notice = rejectNoticeOf({
+      opId: `local-${localRefusals}`,
+      reason: 'invalid',
+      message,
+      mutations,
+    });
+    publish({ rejects: [...latest().rejects, notice], error: message });
+  };
+
   const draftEnqueue = (
     mutations: Mutation[],
     label: string,
@@ -2027,7 +2053,7 @@ export function createEditorController(init: {
     try {
       result = applyMutations(snapshot.document, mutations);
     } catch (error) {
-      publish({ error: errorMessage(error) });
+      publishLocalRefusal(error, mutations);
       return Promise.reject(error instanceof Error ? error : new TypeError(String(error)));
     }
     let entryId: number | null = null;
@@ -2233,7 +2259,7 @@ export function createEditorController(init: {
       const note = kind === 'edit' ? historyNoteOf(label) : undefined;
       applied = room.apply(mutations, label, undefined, note === undefined ? undefined : { note });
     } catch (error) {
-      publish({ error: errorMessage(error) });
+      publishLocalRefusal(error, mutations);
       return Promise.reject(error instanceof Error ? error : new TypeError(String(error)));
     }
     if (kind === 'edit') {
@@ -4005,6 +4031,10 @@ export function createEditorController(init: {
       // the focus round (docs/FOCUS.md 3.1): the shell's stored settings as the rows read them,
       // Tools > Advanced tools among them (`advancedTools`), so a driver reads the switch here
       settings: { ...shellSettings },
+      // the features round (docs/FEATURES.md 4.4; the integrator, ship one): the deck's asset
+      // records as the document holds them, so a driver or an agent reads a placed logo's role,
+      // source, twins and scale without an export (source.read is the active slide's source)
+      assets: snapshot.document.deck.assets,
       author: authorLabel(author),
       // round three (SPEC-3 3.10): the room's facts beside the document's
       sync: {

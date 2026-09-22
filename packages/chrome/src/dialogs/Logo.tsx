@@ -737,13 +737,21 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
     const run = async (): Promise<void> => {
       if (pick.kind === 'thesvg') {
         const choice = chooseVariant(pick.row, appearance);
+        /* the editor places the picture when its handle carries insertLogoAsset (build/b6.md R10):
+           one commit with the block, the kit's slots and the snackbar's Undo, so the handler
+           stores the asset alone; a handle without it lets the handler place and write the kit */
+        const editorPlaces = editor?.insertLogoAsset !== undefined;
         const answer = await insertLogo(
           {
             slug: pick.row.slug,
             ...(choice === null ? {} : { variant: choice.variant }),
-            slideId: where.slideId,
-            ...(where.kind === 'block' ? { blockId: where.blockId } : {}),
-            ...(everySlide && everySlideAvailable ? { everySlide: true } : {}),
+            ...(editorPlaces
+              ? {}
+              : {
+                  slideId: where.slideId,
+                  ...(where.kind === 'block' ? { blockId: where.blockId } : {}),
+                  ...(everySlide && everySlideAvailable ? { everySlide: true } : {}),
+                }),
             baseRevision: input.revision,
           },
           { dispatch: input.dispatch, deckId: input.deckId },

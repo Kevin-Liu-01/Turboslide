@@ -6457,12 +6457,12 @@
     {
       "id": "fonts.catalog.six-families",
       "feature": "fonts",
-      "interaction": "Instrument Sans, Manrope, Schibsted Grotesk, Bricolage Grotesque, Newsreader and Fraunces are rows in their categories; Fraunces on a heading computes the family and loads",
+      "interaction": "Instrument Sans, Manrope, Schibsted Grotesk and Bricolage Grotesque are rows under Sans serif and Newsreader and Fraunces under Serif, Google's categories at the pinned commit (the catalog's rule since the product round); Fraunces on a heading computes the family and loads",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-fonts 8 (candidates.md)",
       "setup": "block.insert of a text box through the window API",
-      "note": "Ship one P0; docs/FEATURES.md 3.2 (B2); question 7 of section 9 records the list Kevin may narrow"
+      "note": "Ship one P0; docs/FEATURES.md 3.2 (B2); question 7 of section 9 records the list Kevin may narrow; the integrator at the merge: FEATURES.md 3.2 wrote Bricolage Grotesque and Fraunces under Display, the fetch script records Google's category and the picker groups by it (build/b2.md 1.6, R3); question 7 of section 9 is where Kevin names a hand override"
     },
     {
       "id": "fonts.picker.specimen-rows",
@@ -6614,12 +6614,12 @@
     {
       "id": "logos.insert.mono-tint",
       "feature": "logos",
-      "interaction": "On a dark deck the GitHub mark (its default unreadable on ink) inserts as its mono variant with every path's fill in the stored sourceFile equal to the kit's text colour and the twin lit on ink; an AWS mark inserted with the cloud switch on carries its file unmodified",
+      "interaction": "On a dark deck the Stripe mark's mono, asked for through the window API the way the P1 Mono control and an agent ask (the appearance rule picks Stripe's default, which reads on ink), has every path's fill in the stored sourceFile equal to the kit's text colour and its twin lit on ink; an AWS mark inserted through the dialog with the cloud switch on carries its file unmodified",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 5, 6 (raster-check.json)",
       "parks": ["insert.logo"],
-      "note": "Ship one P0; docs/FEATURES.md 4.4 (B6: the tint rewrites every fill and stroke; off for CC BY-ND, Proprietary, Trademark and Unknown, question 2 of section 9)"
+      "note": "Ship one P0; docs/FEATURES.md 4.4 (B6: the tint rewrites every fill and stroke; off for CC BY-ND, Proprietary, Trademark and Unknown, question 2 of section 9); the integrator at the merge: Stripe (a mono and no pair) in place of GitHub, whose own light and dark files the appearance rule prefers to a tint (build/b6.md section 5); the tint half through logo.insert { variant: 'mono' } because the ten mark fixture holds no mark whose default fails on ink with a tintable mono and no pair"
     },
     {
       "id": "logos.insert.every-slide",

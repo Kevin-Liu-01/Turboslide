@@ -1314,6 +1314,16 @@ async function featuresRound(t) {
             `chart series swatches: ${list.slice(0, 6).join(', ') || 'none'} first (kit ${seriesKit.length} of 6)`,
           );
           await t.press('Escape');
+          if (seriesKit.length === 0) {
+            /* the same rule as the fill plate above: a plate with no kit role is the item not
+               built (docs/PRODUCT.md 8.1; the P1 item of FEATURES.md 2.3 item 4 moves whole) */
+            await t.clearAll();
+            return t.notBuilt(
+              'formatOptions.chart.swatches.primary',
+              'B3',
+              `the chart's series swatches list ${list.slice(0, 6).join(', ') || 'no swatch'} first and no kit role (P1, FEATURES.md 2.3 item 4); ${facts.join('; ')}`,
+            );
+          }
         } else facts.push('no series swatch on the chart grid');
         /* a new chart's first two series: a column chart inserted through the menu, a series added in the grid */
         const before = await t.objectIds(chartSlide);

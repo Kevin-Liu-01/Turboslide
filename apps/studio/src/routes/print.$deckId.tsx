@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { Link, createFileRoute, notFound } from '@tanstack/react-router';
 
@@ -114,6 +114,13 @@ function PrintPage() {
   const [pdf, setPdf] = useState<string | null>(null);
   const theme: Theme = search.theme ?? 'dark';
   const skipped = useMemo(() => new Set(payload.skipped), [payload.skipped]);
+  /* the page announces hydration (`data-hydrated`, the home page's convention): the server
+     renders the bar, and a click on Include skipped slides before React attaches its handler
+     toggles nothing, so a driver waits for the mark (core/export.spec.ts, the integrator) */
+  const root = useRef<HTMLElement>(null);
+  useEffect(() => {
+    root.current?.setAttribute('data-hydrated', '');
+  }, []);
 
   const slides = useMemo(
     () => payload.deck.slides.filter((slide) => includeSkipped || !skipped.has(slide.id)),
@@ -166,7 +173,13 @@ function PrintPage() {
   };
 
   return (
-    <main className="ts-print" data-layout={layout} data-theme={theme} data-control="print.page">
+    <main
+      ref={root}
+      className="ts-print"
+      data-layout={layout}
+      data-theme={theme}
+      data-control="print.page"
+    >
       {/* the theme's sprite once per document, so the frames' <use href="#gt-mark"> resolve (DeckViewer does the same) */}
       <div
         className="ts-sprite"

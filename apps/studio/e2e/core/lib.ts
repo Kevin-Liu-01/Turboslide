@@ -604,12 +604,43 @@ export async function teardown(page: Page, deckId: string): Promise<void> {
   try {
     await deleteForever(page, deckId);
   } catch {
+    // the record is removed through the actions API below
+  }
+  /* the trash page's Delete forever carries the revision its listing read and hides the card
+     before the answer; a checkpoint landing between the listing and the click (the room writes
+     2 s after the last op) moves the revision and the removal is refused as stale ("baseRevision
+     5 is stale; <id> is at revision 6. Reload the page and try again", the integrator's re-runs
+     of core/sync.spec.ts, ship one: the offline replay row's teardown), so a deck that still
+     answers after the page's delete is removed through the action with a fresh revision */
+  const goneSoon = await expect
+    .poll(() => statusOf(page, `/edit/${deckId}`), { timeout: 6000, intervals: [1000] })
+    .toBe(404)
+    .then(() => true)
+    .catch(() => false);
+  if (!goneSoon) {
+    /* the trash page's second listing carries the revision the checkpoint moved the deck to */
     try {
-      await openEditor(page, deckId);
-      const info = await invoke<{ revision: number }>(page, 'deck.info');
-      await invoke(page, 'deck.remove', { id: deckId, baseRevision: info.revision, confirm: true });
+      await deleteForever(page, deckId);
     } catch {
-      // the 404 below tells the truth
+      // the action below
+    }
+    const goneNow = await expect
+      .poll(() => statusOf(page, `/edit/${deckId}`), { timeout: 6000, intervals: [1000] })
+      .toBe(404)
+      .then(() => true)
+      .catch(() => false);
+    if (!goneNow) {
+      try {
+        await openEditor(page, deckId);
+        const info = await invoke<{ revision: number }>(page, 'deck.info');
+        await invoke(page, 'deck.remove', {
+          id: deckId,
+          baseRevision: info.revision,
+          confirm: true,
+        });
+      } catch {
+        // the 404 below tells the truth
+      }
     }
   }
   await expect

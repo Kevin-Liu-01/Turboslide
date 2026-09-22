@@ -35,6 +35,14 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'section',
   'after',
   'to',
+  // the logo commands (docs/FEATURES.md 4.11; commands/logo.ts): `--host` reads as `--to`, the
+  // search's limit and collection, the insert's variant, slide and block
+  'host',
+  'limit',
+  'collection',
+  'variant',
+  'slide',
+  'block',
   'quality',
   'format',
   'tables',

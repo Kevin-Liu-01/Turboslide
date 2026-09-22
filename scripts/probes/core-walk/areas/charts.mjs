@@ -1078,12 +1078,16 @@ async function featuresRound(t, S, h) {
         page.evaluate(() => {
           const panel = document.querySelector('[data-control="panel.formatOptions"]');
           const visible = (el) => el.getClientRects().length > 0;
-          const labels = [
+          /* a field is one control: a <label> and the .ts-chart-label span inside it name the same
+             field, so only the innermost of the nested matches is counted (the integrator, ship
+             one; build/b3.md R7: "Title" was counted twice) */
+          const matches = [
             ...(panel?.querySelectorAll(
               'label, .ts-chart-label, .ts-inspector-label, .ts-field-label',
             ) ?? []),
-          ]
-            .filter(visible)
+          ].filter(visible);
+          const labels = matches
+            .filter((l) => !matches.some((other) => other !== l && l.contains(other)))
             .map((l) => (l.textContent ?? '').trim());
           const typeGroups = new Set(
             [...(panel?.querySelectorAll('[data-control^="formatOptions.chart.type."]') ?? [])]
@@ -1106,9 +1110,16 @@ async function featuresRound(t, S, h) {
             kindControls,
             titles: labels.filter((l) => /^Title$/i.test(l)).length,
             legends: labels.filter((l) => /^Legend$/i.test(l)).length,
-            textareas: [...(panel?.querySelectorAll('textarea') ?? [])].filter(visible).length,
-            json: [...(panel?.querySelectorAll('textarea, pre, code') ?? [])].filter(visible)
-              .length,
+            /* the JSON view lives in the chart's own section; the Alt text section's Description
+               field is a textarea of another section (docs/PRODUCT.md section 5) */
+            textareas: [
+              ...(panel?.querySelectorAll('[data-section="chart"] textarea') ?? []),
+            ].filter(visible).length,
+            json: [
+              ...(panel?.querySelectorAll(
+                '[data-section="chart"] textarea, [data-section="chart"] pre, [data-section="chart"] code',
+              ) ?? []),
+            ].filter(visible).length,
           };
         });
       const off = await count();

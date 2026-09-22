@@ -804,7 +804,7 @@ async function featuresRound(t, h) {
   await t.step(
     'fonts.catalog.six-families',
     'read the six rows and their groups; Fraunces on the title heading',
-    'Instrument Sans, Manrope, Schibsted Grotesk under Sans serif, Bricolage Grotesque and Fraunces under Display, Newsreader under Serif; the heading computes Fraunces and it loads',
+    "Instrument Sans, Manrope, Schibsted Grotesk and Bricolage Grotesque under Sans serif, Newsreader and Fraunces under Serif (Google's categories, the catalog's rule); the heading computes Fraunces and it loads",
     async () => {
       await t.clickCard(F);
       const f = await h.openDropdown();
@@ -814,8 +814,11 @@ async function featuresRound(t, h) {
         'instrument-sans': 'sans',
         manrope: 'sans',
         'schibsted-grotesk': 'sans',
-        'bricolage-grotesque': 'display',
-        fraunces: 'display',
+        /* Google's METADATA.pb categories at the pinned commit, the catalog's rule since the product
+           round (build/b2.md 1.6, R3): Bricolage Grotesque is sans and Fraunces serif, not the
+           Display group docs/FEATURES.md 3.2 wrote them under */
+        'bricolage-grotesque': 'sans',
+        fraunces: 'serif',
         newsreader: 'serif',
       };
       const found = Object.entries(want).map(([id, group]) => {

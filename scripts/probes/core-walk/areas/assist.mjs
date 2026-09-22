@@ -84,13 +84,35 @@ export async function run(t) {
     let acmeSlides = 0;
     let globex = 0;
     for (const id of ids) {
-      const json = JSON.stringify(await t.slideJson(id));
-      acme += (json.match(/Acme/g) ?? []).length;
-      if (/Acme/.test(json)) acmeSlides += 1;
-      globex += (json.match(/Globex/g) ?? []).length;
+      /* the texts the rename writes (store-actions.ts textTargets: the fixed fields, the block
+         texts, the notes), never a picture's alt or an id: the logos area leaves a picture whose
+         alt names Acme on its slide (the integrator, ship one) */
+      const json = JSON.stringify(await t.slideJson(id), (key, value) =>
+        ['id', 'type', 'asset', 'assets', 'pos', 'ext', 'link', 'name', 'alt'].includes(key)
+          ? undefined
+          : value,
+      );
+      /* the dialog's count is case-insensitive (dialogs/FindReplace.tsx countMatches with matchCase false) */
+      acme += (json.match(/acme/gi) ?? []).length;
+      if (/acme/i.test(json)) acmeSlides += 1;
+      globex += (json.match(/globex/gi) ?? []).length;
     }
     const skipped = (await t.cards()).find((c) => c.id === PRICING)?.skipped ?? null;
-    return { acme, acmeSlides, globex, skipped };
+    /* every case-insensitive acme with its path, for the observed line (the dialog's count is case-insensitive over slideStrings) */
+    const paths = [];
+    for (const id of ids) {
+      const walk = (value, path) => {
+        if (typeof value === 'string') {
+          if (/acme/i.test(value)) paths.push(`${id}${path}`);
+          return;
+        }
+        if (Array.isArray(value)) value.forEach((v, i) => walk(v, `${path}/${i}`));
+        else if (value && typeof value === 'object')
+          for (const [k, v] of Object.entries(value)) walk(v, `${path}/${k}`);
+      };
+      walk(await t.slideJson(id), '');
+    }
+    return { acme, acmeSlides, globex, skipped, paths };
   };
   const snackbarUndo = async (ms = 6000) => {
     const said = await t.snackbarWithin(ms).catch(() => null);
@@ -254,6 +276,9 @@ export async function run(t) {
         .pollUntil(deckFacts, (f) => f.acme === before.acme && f.skipped === before.skipped, 15_000)
         .catch(deckFacts);
       await t.settled();
+      /* the room acknowledges the undo about two seconds after the chord on the memory tier
+         (build/b3.md R7): the next row's HTTP tailor reads the server, so the undo lands first */
+      await t.waitRevision(revAfter + 1, 15_000).catch(() => undefined);
       const revUndo = (await t.state()).revision;
       await t.advancedBack('Tools > Tailor for a customer');
       return {
@@ -270,7 +295,7 @@ export async function run(t) {
           undo &&
           restored.acme === before.acme &&
           restored.skipped === before.skipped,
-        observed: `count "${count ?? 'none'}"; skip box ${hasSkip}; Acme ${before.acme} -> ${after.acme} -> ${restored.acme}; Globex ${before.globex} -> ${after.globex} -> ${restored.globex}; pricing skipped ${before.skipped} -> ${after.skipped} -> ${restored.skipped}; revision ${revBefore} -> ${revAfter} -> ${revUndo}; snackbar "${said ?? 'none'}" with Undo ${undo}`,
+        observed: `count "${count ?? 'none'}" (acme at ${before.paths.join(', ')}); skip box ${hasSkip}; Acme ${before.acme} -> ${after.acme} -> ${restored.acme}; Globex ${before.globex} -> ${after.globex} -> ${restored.globex}; pricing skipped ${before.skipped} -> ${after.skipped} -> ${restored.skipped}; revision ${revBefore} -> ${revAfter} -> ${revUndo}; snackbar "${said ?? 'none'}" with Undo ${undo}`,
       };
     },
   );

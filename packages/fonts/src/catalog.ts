@@ -63,7 +63,7 @@ export type FontSource = {
  * block set to any inspector weight renders in a real cut.
  */
 export const FONT_SOURCES: readonly FontSource[] = [
-  { id: 'inter', directory: 'rsms/inter v4.001 web/', take: { kind: 'present' } },
+  { id: 'inter', directory: 'rsms/inter v4.1 web/', take: { kind: 'present' } },
   { id: 'roboto', directory: 'ofl/roboto', take: { kind: 'variable' } },
   { id: 'open-sans', directory: 'ofl/opensans', take: { kind: 'variable' } },
   {
@@ -101,6 +101,16 @@ export const FONT_SOURCES: readonly FontSource[] = [
     take: { kind: 'static', weights: [300, 400, 500, 600, 700] },
   },
   { id: 'fira-code', directory: 'ofl/firacode', take: { kind: 'variable' } },
+  /* the features round's eight (docs/FEATURES.md 3.2; audit-fonts 3 and 8, candidates.md): every
+     one a variable file, OFL 1.1 with no Reserved Font Name at GOOGLE_FONTS_COMMIT */
+  { id: 'geist', directory: 'ofl/geist', take: { kind: 'variable' } },
+  { id: 'geist-mono', directory: 'ofl/geistmono', take: { kind: 'variable' } },
+  { id: 'instrument-sans', directory: 'ofl/instrumentsans', take: { kind: 'variable' } },
+  { id: 'manrope', directory: 'ofl/manrope', take: { kind: 'variable' } },
+  { id: 'bricolage-grotesque', directory: 'ofl/bricolagegrotesque', take: { kind: 'variable' } },
+  { id: 'schibsted-grotesk', directory: 'ofl/schibstedgrotesk', take: { kind: 'variable' } },
+  { id: 'newsreader', directory: 'ofl/newsreader', take: { kind: 'variable' } },
+  { id: 'fraunces', directory: 'ofl/fraunces', take: { kind: 'variable' } },
 ];
 
 /** One row of the catalog: the facts every surface reads (A5 item 2). */

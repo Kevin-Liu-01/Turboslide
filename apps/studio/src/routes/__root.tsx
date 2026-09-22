@@ -44,6 +44,13 @@ const NOINDEX_ROUTES: ReadonlySet<string> = new Set([
 ]);
 
 /**
+ * The routes that preload the Inter italic beside the upright (docs/FEATURES.md 3.1, the P1 fonts
+ * item, row `fonts.preload.italic-on-edit-only`): the editor, where Cmd+I is likely. Every other
+ * route carries one font preload and the italic loads on first use through `font-display: swap`.
+ */
+const ITALIC_PRELOAD_ROUTES: ReadonlySet<string> = new Set(['/edit/$deckId']);
+
+/**
  * The theme boot script of the product round (docs/PRODUCT.md 3.1.1; audit-interface 12): the
  * stored `gt-theme`, then the deck's older `gt-deck-theme`, then on a first visit the operating
  * system's appearance through `prefers-color-scheme`, dark only when the system says dark, so a
@@ -82,6 +89,7 @@ export const Route = createRootRoute({
   head: ({ matches }) => {
     const leaf = matches[matches.length - 1];
     const noindex = leaf !== undefined && NOINDEX_ROUTES.has(leaf.routeId);
+    const editor = leaf !== undefined && ITALIC_PRELOAD_ROUTES.has(leaf.routeId);
     /* the card's absolute address (R02 4.1): TURBOSLIDE_PUBLIC_ORIGIN when the deployment sets
        it, else production; a route with a loader may set its own og:url from its request */
     const card = `${SITE.origin()}${SITE.card.path}`;
@@ -119,22 +127,29 @@ export const Route = createRootRoute({
         { rel: 'icon', href: SITE.icons.svg, type: 'image/svg+xml' },
         { rel: 'apple-touch-icon', href: SITE.icons.touch },
         { rel: 'manifest', href: SITE.icons.manifest },
-        /* both Inter faces start with the HTML (SPEC-3 9.2 G1): the request no longer waits for
-           the stylesheet, and the metric matched fallback face of inter.css covers the swap */
+        /* the upright starts with the HTML on every route (SPEC-3 9.2 G1): the request no longer
+           waits for the stylesheet, and the metric matched fallback face of inter.css covers the
+           swap; the italic is preloaded on the editor alone (docs/FEATURES.md 3.1, the fonts P1
+           item; audit-fonts 12: /decks, /deck and /present painted none and downloaded it), and
+           loads through `font-display: swap` where a page first draws it */
         {
           rel: 'preload',
           href: interWoff2,
           as: 'font',
           type: 'font/woff2',
-          crossOrigin: 'anonymous',
+          crossOrigin: 'anonymous' as const,
         },
-        {
-          rel: 'preload',
-          href: interItalicWoff2,
-          as: 'font',
-          type: 'font/woff2',
-          crossOrigin: 'anonymous',
-        },
+        ...(editor
+          ? [
+              {
+                rel: 'preload',
+                href: interItalicWoff2,
+                as: 'font',
+                type: 'font/woff2',
+                crossOrigin: 'anonymous' as const,
+              },
+            ]
+          : []),
         { rel: 'stylesheet', href: interCss },
         { rel: 'stylesheet', href: tokensCss },
         /* the identity tokens after the chrome tokens they read (SPEC-4 0.8) */

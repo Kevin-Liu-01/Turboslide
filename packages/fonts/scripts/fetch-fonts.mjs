@@ -12,8 +12,17 @@
 // The check chain never runs this: the assets and the generated table are committed, and
 // catalog.test.ts compares the files with the table.
 //
+// The features round (docs/FEATURES.md 3.1 items 2 and 4; 3.2): every family records `features`
+// (the GSUB feature tags of its upright file) and `tnum` (whether the face has tabular figures,
+// so the Tabular figures row of Format options can say "This face has no tabular figures"); a
+// `--only` run reads the two from the committed woff2 files of the families it does not fetch,
+// so a partial run leaves no row without them; and every family's licence URL (summary.ts
+// `licenceUrl`, the link More fonts carries) is checked to answer 200 at fetch time, never in the
+// check chain (audit-fonts 5: the Inter link answered 404 for a round).
+//
 //   node packages/fonts/scripts/fetch-fonts.mjs [--only roboto,lato] [--python <bin>]
 //                                               [--commit <sha>] [--dry-run] [--keep-ttf <dir>]
+//                                               [--skip-licence-check]
 //
 // Exit 1 when a family could not be fetched or converted; the families that succeeded are
 // written and listed, so a refused network ships what it could (the orchestrator's ruling 3).
@@ -33,6 +42,7 @@ const GENERATED = join(PACKAGE, 'src', 'catalog-files.ts');
 const { FONT_SOURCES, GOOGLE_FONTS_COMMIT, GOOGLE_FONTS_REPOSITORY } =
   await import('../src/catalog.ts');
 const { INTER, INTER_ITALIC } = await import('../src/inter.ts');
+const { fontAssetPath, licenceUrl } = await import('../src/summary.ts');
 
 const argv = process.argv.slice(2);
 const arg = (name, fallback) => {
@@ -48,6 +58,7 @@ const PYTHON = arg('python', join(ROOT, '.turboslide', 'venv', 'bin', 'python'))
 const COMMIT = arg('commit', GOOGLE_FONTS_COMMIT);
 const DRY = flag('dry-run');
 const KEEP_TTF = arg('keep-ttf', null);
+const SKIP_LICENCE_CHECK = flag('skip-licence-check');
 const RAW = `https://raw.githubusercontent.com/google/fonts/${COMMIT}`;
 
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -130,6 +141,10 @@ for job in json.load(sys.stdin):
     if "fvar" in font:
         facts["axes"] = {a.axisTag: [a.minValue, a.maxValue] for a in font["fvar"].axes}
     facts["upm"] = font["head"].unitsPerEm
+    # the GSUB feature tags, sorted and unique: tnum decides the Tabular figures row
+    facts["features"] = []
+    if "GSUB" in font and font["GSUB"].table.FeatureList is not None:
+        facts["features"] = sorted({r.FeatureTag for r in font["GSUB"].table.FeatureList.FeatureRecord})
     out.append(facts)
 json.dump(out, sys.stdout)
 `;
@@ -140,6 +155,47 @@ json.dump(out, sys.stdout)
   });
   if (run.status !== 0) throw new Error(`fontTools failed: ${run.stderr.trim()}`);
   return JSON.parse(run.stdout);
+}
+
+/** The feature tags of a family: the upright file's GSUB tags (the first upright, else the first file). */
+function familyFeatures(facts) {
+  const upright = facts.find((f) => !f.italic) ?? facts[0];
+  return upright?.features ?? [];
+}
+
+/**
+ * The licence link More fonts carries answers 200 (docs/FEATURES.md 3.1 item 2): GitHub's blob
+ * page for the family's OFL.txt at the pinned commit, or Inter's release licence. A miss is a
+ * failure of the run, listed at the end, and never stops the files being written.
+ */
+async function checkLicenceUrl(id, directory) {
+  const url = licenceUrl(id, directory, COMMIT);
+  const response = await fetch(url, {
+    method: 'GET',
+    redirect: 'follow',
+    headers: { 'user-agent': 'turboslide-fetch-fonts' },
+  });
+  return { url, status: response.status };
+}
+
+/**
+ * The `features` and `tnum` of a family this run did not fetch, read from its committed woff2
+ * files (a --only run keeps the other rows, and a row written before the features round has
+ * neither field). Returns the row unchanged when it already carries them or has no files on disk.
+ */
+function withLocalFeatures(row) {
+  if (Array.isArray(row.features) && typeof row.tnum === 'boolean') return row;
+  const files = row.files.filter((f) => existsSync(join(PACKAGE, fontAssetPath(row.id, f.file))));
+  if (files.length === 0) return row;
+  const facts = convert(
+    files.map((f) => ({
+      src: join(PACKAGE, fontAssetPath(row.id, f.file)),
+      dst: '',
+      convert: false,
+    })),
+  );
+  const features = familyFeatures(facts);
+  return { ...row, features, tnum: features.includes('tnum') };
 }
 
 /** The woff2 name of a fetched file: `<id>[-<weight>][-italic].woff2`. */
@@ -164,6 +220,7 @@ mkdirSync(work, { recursive: true });
 const rows = [];
 const failures = [];
 const sizes = [];
+const licenceChecks = [];
 
 for (const source of FONT_SOURCES) {
   if (ONLY.length > 0 && !ONLY.includes(source.id)) continue;
@@ -205,10 +262,13 @@ for (const source of FONT_SOURCES) {
         reservedFontName: null,
         copyright: 'Copyright (c) 2016 The Inter Project Authors (https://github.com/rsms/inter)',
         axes: facts[0].axes,
+        features: familyFeatures(facts),
+        tnum: familyFeatures(facts).includes('tnum'),
         files,
       });
       for (const f of files) sizes.push([id, f.file, f.sourceBytes, f.bytes]);
       console.log(`${id}: present, ${files.length} file(s) recorded`);
+      if (!SKIP_LICENCE_CHECK) licenceChecks.push(checkLicenceUrl(id, source.directory));
       continue;
     }
 
@@ -294,11 +354,14 @@ for (const source of FONT_SOURCES) {
       reservedFontName: reservedFontName(licenceText),
       copyright: picked[0].copyright ?? '',
       axes: facts.find((x) => !x.italic)?.axes ?? facts[0].axes ?? null,
+      features: familyFeatures(facts),
+      tnum: familyFeatures(facts).includes('tnum'),
       files,
     });
     console.log(
-      `${id}: ${metadata.name} (${category}, ${licence}${rows.at(-1).reservedFontName ? `, RFN ${rows.at(-1).reservedFontName}` : ''}), ${files.length} file(s), ${files.reduce((n, f) => n + f.bytes, 0)} B woff2`,
+      `${id}: ${metadata.name} (${category}, ${licence}${rows.at(-1).reservedFontName ? `, RFN ${rows.at(-1).reservedFontName}` : ''}), ${files.length} file(s), ${files.reduce((n, f) => n + f.bytes, 0)} B woff2, tnum ${rows.at(-1).tnum ? 'yes' : 'no'}`,
     );
+    if (!SKIP_LICENCE_CHECK) licenceChecks.push(checkLicenceUrl(id, source.directory));
   } catch (error) {
     failures.push({ id, error: error instanceof Error ? error.message : String(error) });
     console.error(`${id}: FAILED ${failures.at(-1).error}`);
@@ -318,7 +381,7 @@ if (!DRY) {
     }
   }
   const ids = new Set(rows.map((r) => r.id));
-  const merged = [...previous.filter((r) => !ids.has(r.id)), ...rows];
+  const merged = [...previous.filter((r) => !ids.has(r.id)).map(withLocalFeatures), ...rows];
   const order = FONT_SOURCES.map((s) => s.id);
   merged.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
   const header = `// Generated by packages/fonts/scripts/fetch-fonts.mjs from ${GOOGLE_FONTS_REPOSITORY} at
@@ -353,6 +416,10 @@ export type CatalogFamilyFacts = {
   copyright: string;
   /** the variable axes of the upright file, tag to [min, max]; null for a static family */
   axes: Record<string, [number, number]> | null;
+  /** the GSUB feature tags of the upright file, sorted (docs/FEATURES.md 3.1 item 4) */
+  features: string[];
+  /** true when the face has tabular figures (\`tnum\`), so the Tabular figures row is enabled for it */
+  tnum: boolean;
   files: CatalogFile[];
 };
 
@@ -369,6 +436,17 @@ export const CATALOG_FILES: readonly CatalogFamilyFacts[] = ${JSON.stringify(mer
   );
   if (prettier.status !== 0) console.error(`prettier: ${prettier.stderr.trim()}`);
   console.log(`wrote ${GENERATED} with ${merged.length} famil${merged.length === 1 ? 'y' : 'ies'}`);
+}
+
+if (licenceChecks.length > 0) {
+  const results = await Promise.all(
+    licenceChecks.map((p) => p.catch((error) => ({ url: '?', status: String(error) }))),
+  );
+  console.log(`\n${results.length} licence URL(s) checked:`);
+  for (const r of results) {
+    console.log(`  ${String(r.status).padStart(3)} ${r.url}`);
+    if (r.status !== 200) failures.push({ id: 'licence', error: `${r.url} answered ${r.status}` });
+  }
 }
 
 const totalTtf = sizes.reduce((n, s) => n + s[2], 0);

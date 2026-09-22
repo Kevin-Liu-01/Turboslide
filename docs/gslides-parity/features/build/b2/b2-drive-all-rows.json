@@ -1,0 +1,78 @@
+{
+  "base": "http://localhost:4412",
+  "at": "2026-09-22T13:42:14.272Z",
+  "deckId": "untitled-20260922-2tqa",
+  "rows": [
+    {
+      "id": "fonts.preload.italic-on-edit-only",
+      "ok": true,
+      "observed": "/decks 1 font preload(s) (InterVariable.woff2); /edit 2 (InterVariable.woff2, InterVariable-Italic.woff2)",
+      "ms": 35
+    },
+    {
+      "id": "fonts.inter.italic-release",
+      "ok": true,
+      "observed": "InterVariable-Italic.woff2 387976 B sha256 e564f652… name version \"Version 4.001;git-9221beed3\"; Cmd+I run I italic in Inter; italic FontFace loaded",
+      "ms": 2904
+    },
+    {
+      "id": "fonts.fallback.in-stack",
+      "ok": true,
+      "observed": "sheet root font-family: ts-stagewrap.ts-sheet: Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif; document.fonts Inter Fallback loaded",
+      "ms": 1
+    },
+    {
+      "id": "fonts.display-features.inter-only",
+      "ok": true,
+      "observed": "base \"cv11\", \"ss01\"; Playfair Display normal (\"Playfair Display\"); back to Inter \"cv11\", \"ss01\"; kit display Fraunces: 1 heading(s) normal (Fraunces); kit cleared \"cv11\", \"ss01\"",
+      "ms": 8202
+    },
+    {
+      "id": "tables.cells.tabular-figures",
+      "ok": true,
+      "observed": "td font-variant-numeric tabular-nums; cell \"1111\" 36.51 px, \"0000\" 36.51 px; paragraph normal: \"1111\" 24.01 px, \"0000\" 38.65 px",
+      "ms": 2
+    },
+    {
+      "id": "formatting.numerals.tabular-row",
+      "ok": false,
+      "observed": "sentence \"Every digit takes the same width, so numbers line up in a column\" (tip set); Inter enabled true; on: numerals=tabular, computed tabular-nums, \"1111\" 28.75 px vs \"0000\" 28.75 px; Bebas Neue disabled false (available yes); Playfair Display disabled true \"This face has no tabular figures\"; Search the menus \"line up numbers\" rows: none (Tabular figures listed: false)",
+      "ms": 10586
+    },
+    {
+      "id": "fonts.catalog.geist",
+      "ok": true,
+      "observed": "Geist under sans true, Geist Mono under mono true; pick wrote family geist; computed Geist; Geist faces normal:loaded, italic:unloaded, normal:loaded, italic:unloaded",
+      "ms": 2658
+    },
+    {
+      "id": "fonts.catalog.six-families",
+      "ok": true,
+      "observed": "instrument-sans: sans, manrope: sans, schibsted-grotesk: sans, bricolage-grotesque: sans, newsreader: serif, fraunces: serif; Fraunces on the heading computes Fraunces, faces normal:loaded, italic:unloaded",
+      "ms": 2394
+    },
+    {
+      "id": "fonts.links.licence-v4-1",
+      "ok": true,
+      "observed": "Inter licence href https://github.com/rsms/inter/blob/v4.1/LICENSE.txt; 0 href(s) with v4.001; 34 rows listed",
+      "ms": 1223
+    },
+    {
+      "id": "fonts.export.pdf-face (Geist, Fraunces)",
+      "ok": true,
+      "observed": "Fonts round B2 drive.pdf 76722 B; fonts: AAAAAA+Fraunces-9ptBlack_opsz580000_wght1F40000_SOFT_WONK, BAAAAA+InterVariable, CAAAAA+InterVariable_opsz140000_wght1F40000, DAAAAA+InterVariable_opsz140000_wght, EAAAAA+InterVariable_opsz160000_wght, FAAAAA+Geist-Regular",
+      "ms": 4162
+    },
+    {
+      "id": "fonts.export.editable-names-face (Geist, Fraunces, Inter italic embedded)",
+      "ok": false,
+      "observed": "threw: locator.click: Timeout 20000ms exceeded.",
+      "ms": 20535
+    },
+    {
+      "id": "teardown",
+      "ok": true,
+      "observed": "/edit/untitled-20260922-2tqa answers 404"
+    }
+  ]
+}

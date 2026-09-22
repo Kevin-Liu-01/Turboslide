@@ -41,8 +41,10 @@ describe('fontsCss', () => {
     );
     expect(css.indexOf("'Roboto'")).toBeLessThan(css.indexOf("'Lora'"));
     expect(css).toContain('font-display: swap;');
-    expect(css).toContain("--ts-font-roboto: 'Roboto', sans-serif;");
-    expect(css).toContain("--ts-font-lora: 'Lora', serif;");
+    // one stack per face for the block path and the kit path (docs/FEATURES.md 3.5; audit-fonts
+    // 16): the name, then the base sheet's fallbacks for the category
+    expect(css).toContain("--ts-font-roboto: 'Roboto', 'Helvetica Neue', Arial, sans-serif;");
+    expect(css).toContain("--ts-font-lora: 'Lora', Georgia, 'Times New Roman', serif;");
     expect(css.trim().endsWith('}')).toBe(true);
   });
 

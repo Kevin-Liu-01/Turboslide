@@ -1,0 +1,36 @@
+{
+  "base": "http://localhost:4412",
+  "at": "2026-09-22T13:44:33.502Z",
+  "deckId": "untitled-20260922-s41b",
+  "rows": [
+    {
+      "id": "fonts.catalog.geist",
+      "ok": true,
+      "observed": "Geist under sans true, Geist Mono under mono true; pick wrote family geist; computed Geist; Geist faces normal:loaded, italic:unloaded, normal:loaded, italic:unloaded",
+      "ms": 2438
+    },
+    {
+      "id": "fonts.catalog.six-families",
+      "ok": true,
+      "observed": "instrument-sans: sans, manrope: sans, schibsted-grotesk: sans, bricolage-grotesque: sans, newsreader: serif, fraunces: serif; Fraunces on the heading computes Fraunces, faces normal:loaded, italic:unloaded",
+      "ms": 2421
+    },
+    {
+      "id": "fonts.export.pdf-face (Geist, Fraunces)",
+      "ok": true,
+      "observed": "Fonts round B2 drive.pdf 76737 B; fonts: AAAAAA+Fraunces-9ptBlack_opsz580000_wght1F40000_SOFT_WONK, BAAAAA+InterVariable, CAAAAA+InterVariable_opsz140000_wght1F40000, DAAAAA+InterVariable_opsz140000_wght, EAAAAA+InterVariable_opsz160000_wght, FAAAAA+Geist-Regular",
+      "ms": 2452
+    },
+    {
+      "id": "fonts.export.editable-names-face (Geist, Fraunces, Inter italic embedded)",
+      "ok": true,
+      "observed": "Fonts round B2 drive (editable).pptx 1394702 B; 2 slide(s); Embed fonts on; a:latin faces Fraunces, GT Inter Text 14, GT Inter Text 22, GT Inter Text 20 Medium, GT Inter Text 20, Geist; 4 .fntdata part(s), 0 italic (font1.fntdata, font2.fntdata, font3.fntdata, font4.fntdata)",
+      "ms": 2610
+    },
+    {
+      "id": "teardown",
+      "ok": true,
+      "observed": "/edit/untitled-20260922-s41b answers 404"
+    }
+  ]
+}

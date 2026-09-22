@@ -106,8 +106,10 @@
      (PreviewLayer.css reads it with a 6px fallback). Every other box in the
      shell stays square. */
   --pt-radius: 6px;
-  --pt-display: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  --pt-text: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  /* 'Inter Fallback' second (docs/FEATURES.md 3.1 item 3): inter.css's metric matched local
+     Arial, so the chrome's first paint holds Inter's line boxes until the woff2 lands */
+  --pt-display: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --pt-text: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
   --pt-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   /* Motion (directive 7.4). Every transition and animation in the shell

@@ -232,8 +232,19 @@ export const LADDER = {
 
 export type LadderStep = keyof typeof LADDER;
 
-/** Display faces: weight 500, tracking -0.025em, balance and the cv11 and ss01 alternates (head:58). */
+/**
+ * Display faces: weight 500, tracking -0.025em, balance and the cv11 and ss01 alternates
+ * (head:58). The sheet reads the features through `--display-features` on its root
+ * (`DISPLAY_FEATURES_TOKEN`), which holds `features` for Inter and `normal` when a brand kit sets
+ * another display face (docs/FEATURES.md 3.1 item 5; packages/render theme-css.ts writes it).
+ */
 export const DISPLAY = { weight: 500, tracking: '-0.025em', features: "'cv11', 'ss01'" } as const;
+
+/** The custom property the display rules read their features from. */
+export const DISPLAY_FEATURES_TOKEN = 'display-features';
+
+/** The value of `--display-features` when the display face is not Inter: no stylistic set of another family. */
+export const DISPLAY_FEATURES_OFF = 'normal';
 
 /** Display weight is capped at 500 (DECK-GRAMMAR.md:20). */
 export const WEIGHT_CAP = 500;
@@ -260,10 +271,14 @@ export const PLATES = {
 /** The slide cut, 140 ms behind prefers-reduced-motion (head:174-175). */
 export const MOTION = { cut: 140 } as const;
 
-/** Font stacks (head:21-26). */
+/**
+ * Font stacks (head:21-26), with the metric matched fallback face second in the two Inter stacks
+ * (docs/FEATURES.md 3.1 item 3; inter.css declares 'Inter Fallback' as local Arial with
+ * size-adjust and the overrides, so the first paint holds Inter's line boxes).
+ */
 export const FONTS = {
-  display: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-  text: "'Inter', 'Helvetica Neue', Arial, sans-serif",
+  display: "'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif",
+  text: "'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif",
   mono: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
   cjk: "'Hiragino Sans', 'Noto Sans CJK JP', 'Noto Sans JP', 'PingFang SC', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif",
   arabic: "'Noto Naskh Arabic', 'Geeza Pro', 'Noto Sans Arabic', sans-serif",

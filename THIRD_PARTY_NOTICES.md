@@ -6,16 +6,22 @@ The CLI and studio distributions carry this file.
 
 ## Inter (SIL Open Font License 1.1)
 
-What: `packages/fonts/assets/InterVariable.woff2`, InterVariable 4.001 with opsz 14 to 32 and
-wght 100 to 900, decoded from the GT deck's `fonts/deck-fonts.css`; from M2, static instances cut
-from it for PPTX embedding (SPEC 8.4); and, from the Google Slides parity round two (SPEC-2 7.1),
+What: `packages/fonts/assets/InterVariable.woff2`, InterVariable from Rasmus Andersson's Inter
+4.1 release of 2024-11-16 (the release asset `Inter-4.1.zip`, path `web/InterVariable.woff2`,
+https://github.com/rsms/inter/releases/tag/v4.1; sha256
+`693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3`, 352240 bytes; the name table
+reads "Version 4.001;git-9221beed3") with opsz 14 to 32 and wght 100 to 900, decoded from the GT
+deck's `fonts/deck-fonts.css`; from M2, static instances cut from it for PPTX embedding (SPEC 8.4);
+and, from the Google Slides parity round two (SPEC-2 7.1),
 `packages/fonts/assets/InterVariable-Italic.woff2`, the italic companion from the same release
-(the rsms/inter release asset `Inter-4.001.zip`, path `web/InterVariable-Italic.woff2`,
-https://github.com/rsms/inter/releases/tag/v4.001; sha256
-`0470791f15efd2987bdb50b24027c3f584a2cf9b7b63fbf86012c5f2e9abcc05`, 380904 bytes; its own name table reads
-"Version 4.000;git-a52131595"), with an italic twin of every static instance cut from it. Source:
-https://rsms.me/inter/ and https://github.com/rsms/inter. Inter 4.001 declares no Reserved Font
-Name (name IDs 0, 7, 13 and 14 of both files, read by `reserved_font_name` in
+(path `web/InterVariable-Italic.woff2`; sha256
+`e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a`, 387976 bytes; the same
+"Version 4.001;git-9221beed3"), with an italic twin of every static instance cut from it. The
+features round (docs/FEATURES.md 3.1) replaced the italic file the parity round shipped, which was
+the 4.0 release's ("Version 4.000;git-a52131595"), and corrected the release named here from a tag
+that does not exist to v4.1. Licence text: https://github.com/rsms/inter/blob/v4.1/LICENSE.txt.
+Source: https://rsms.me/inter/ and https://github.com/rsms/inter. Inter 4.1 declares no Reserved
+Font Name (name IDs 0, 7, 13 and 14 of both files, read by `reserved_font_name` in
 `scripts/build-fonts.py` on every build), so the renamed instances ship under the OFL; the check
 is recorded in `packages/fonts/export/fonts.json` `license`.
 
@@ -590,6 +596,31 @@ structural similarity for image quality assessment", 2003), written from the pap
 the dssim source, with the `1 / ssim - 1` output convention. `docs/native.md` records the
 definition; adopting the dssim crate is Kevin's licensing decision.
 
+## thesvg.org (MIT code; brand marks under their recorded licences)
+
+What: the logo picker (docs/FEATURES.md section 4; `apps/studio/src/server/logos.ts`,
+`logo-index.ts`, `logo-sanitize.ts`, `packages/chrome/src/logo-model.ts`) reads thesvg.org's icon
+manifest (`src/data/icons.json` of https://github.com/glincker/thesvg, through the jsDelivr mirror)
+into a cached index and fetches a mark's SVG file from thesvg.org or the mirror when a seller
+inserts it. The repository's code is MIT (https://github.com/glincker/thesvg/blob/main/LICENSE);
+nothing of that code is copied here. The marks are the property of their respective owners and
+are shown to identify a brand, never to imply endorsement (thesvg's TRADEMARK.md and DISCLAIMER.md);
+each mark carries the licence string thesvg recorded for it verbatim in the asset's `source.license`
+and the picker reads a seller's sentence for it ("Free to use", "Free to use with credit", "Free
+to use unchanged", "Free to use under an open licence", "The brand's own terms"). What this
+repository redistributes: the server keeps a sanitized copy of a mark in its public store only
+when the recorded licence is CC0, MIT, Apache, BSD, ISC or Unlicense, with the attribution written
+into the file as its `<desc>` ("<Title> logo, from thesvg.org under <licence>; the mark belongs to
+its owner"), and drops it within a day of the mark leaving thesvg.org; every other mark is fetched
+per insert, sanitized in the function and never written to the store, so the only copy Turboslide
+keeps of it is the deck the seller inserted it into. A mark under a licence that forbids
+derivative works (CC BY-ND, the AWS collection) is inserted unmodified; the mono tint applies to
+open, credit and copyleft licences alone. The ten mark fixture under
+`apps/studio/src/server/logo-fixtures/` carries the files of eight marks as thesvg.org served them
+on 2026-09-22 (Figma, Vercel, GitHub, Stripe and Anthropic under CC0-1.0, OpenAI under MIT, Amazon
+EC2 under CC-BY-ND-2.0 from AWS's own package) and three drawings of Turboslide's own for the
+tests (Acme, Gradientco, Northwind), so the tests and the preview run without the network.
+
 ## Everything else
 
 The remaining dependencies are listed with their licenses by `pnpm licenses list` from the repo
@@ -598,12 +629,14 @@ redistributed by this repository.
 
 ## The font catalog (SIL Open Font License 1.1, per family)
 
-What: the woff2 files under `packages/fonts/assets/<id>/` for the twenty five families the Font
+What: the woff2 files under `packages/fonts/assets/<id>/` for the thirty three families the Font
 menu offers beside Inter (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2;
-`packages/fonts/src/catalog.ts`): Roboto, Open Sans, Lato, Montserrat, Poppins, Source Sans 3,
-Source Serif 4, Merriweather, Playfair Display, Lora, PT Serif, Libre Baskerville, EB Garamond,
-Nunito, Raleway, Work Sans, DM Sans, Space Grotesk, Oswald, Bebas Neue, Roboto Mono, JetBrains
-Mono, IBM Plex Sans, IBM Plex Mono and Fira Code. Source: the Google Fonts repository
+docs/FEATURES.md 3.2; `packages/fonts/src/catalog.ts`): Roboto, Open Sans, Lato, Montserrat,
+Poppins, Source Sans 3, Source Serif 4, Merriweather, Playfair Display, Lora, PT Serif, Libre
+Baskerville, EB Garamond, Nunito, Raleway, Work Sans, DM Sans, Space Grotesk, Oswald, Bebas Neue,
+Roboto Mono, JetBrains Mono, IBM Plex Sans, IBM Plex Mono and Fira Code (the product round), and
+Geist, Geist Mono, Instrument Sans, Manrope, Bricolage Grotesque, Schibsted Grotesk, Newsreader
+and Fraunces (the features round, each named below). Source: the Google Fonts repository
 (https://github.com/google/fonts) at commit `1ac2012c34919f5fa2675aacf723fa98edb30b5f`, the file
 named per face in `packages/fonts/src/catalog-files.ts` with its sha256. Each woff2 is a fontTools
 format conversion of the TrueType file, nothing subset, renamed or instanced, so every family keeps
@@ -614,3 +647,42 @@ family's own licence text, with its copyright statement and Reserved Font Names,
 verbatim as `packages/fonts/assets/<id>/LICENSE` beside its files (the OFL text itself is the one
 reproduced under Inter above). The fetch is `packages/fonts/scripts/fetch-fonts.mjs`; the check
 chain never fetches.
+
+The eight families the features round added (docs/FEATURES.md 3.2), each a variable TrueType file
+of the repository at the same commit converted to woff2, none declaring a Reserved Font Name:
+
+Geist: `ofl/geist/Geist[wght].ttf` and `Geist-Italic[wght].ttf` as `packages/fonts/assets/geist/`
+(69,840 and 73,056 bytes). Copyright 2024 The Geist Project Authors
+(https://github.com/vercel/geist-font). SIL Open Font License 1.1.
+
+Geist Mono: `ofl/geistmono/GeistMono[wght].ttf` and `GeistMono-Italic[wght].ttf` as
+`packages/fonts/assets/geist-mono/` (71,120 and 78,736 bytes). Copyright 2024 The Geist Project
+Authors (https://github.com/vercel/geist-font). SIL Open Font License 1.1.
+
+Instrument Sans: `ofl/instrumentsans/InstrumentSans[wdth,wght].ttf` and
+`InstrumentSans-Italic[wdth,wght].ttf` as `packages/fonts/assets/instrument-sans/` (89,024 and
+94,780 bytes). Copyright 2022 The Instrument Sans Project Authors
+(https://github.com/Instrument/instrument-sans). SIL Open Font License 1.1.
+
+Manrope: `ofl/manrope/Manrope[wght].ttf` as `packages/fonts/assets/manrope/` (53,732 bytes; no
+italic ships). Copyright 2019 The Manrope Project Authors (https://github.com/sharanda/manrope).
+SIL Open Font License 1.1.
+
+Bricolage Grotesque: `ofl/bricolagegrotesque/BricolageGrotesque[opsz,wdth,wght].ttf` as
+`packages/fonts/assets/bricolage-grotesque/` (205,036 bytes; no italic ships). Copyright 2022 The
+Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage). SIL Open Font
+License 1.1.
+
+Schibsted Grotesk: `ofl/schibstedgrotesk/SchibstedGrotesk[wght].ttf` and
+`SchibstedGrotesk-Italic[wght].ttf` as `packages/fonts/assets/schibsted-grotesk/` (70,084 and
+74,940 bytes). Copyright 2023 The Schibsted-Grotesk Project Authors
+(https://github.com/schibsted/schibsted-grotesk). SIL Open Font License 1.1.
+
+Newsreader: `ofl/newsreader/Newsreader[opsz,wght].ttf` and `Newsreader-Italic[opsz,wght].ttf` as
+`packages/fonts/assets/newsreader/` (214,916 and 239,064 bytes). Copyright 2020 The Newsreader
+Project Authors (http://github.com/productiontype/Newsreader). SIL Open Font License 1.1.
+
+Fraunces: `ofl/fraunces/Fraunces[SOFT,WONK,opsz,wght].ttf` and
+`Fraunces-Italic[SOFT,WONK,opsz,wght].ttf` as `packages/fonts/assets/fraunces/` (194,936 and
+235,660 bytes). Copyright 2020 The Fraunces Project Authors (github.com/undercasetype/Fraunces).
+SIL Open Font License 1.1.

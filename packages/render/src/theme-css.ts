@@ -19,10 +19,18 @@ import type { BrandKit, KitColor } from '@turboslide/schema/brand';
 import { KIT_COLORS, KIT_COLOR_TOKENS } from '@turboslide/schema/brand';
 import type { Deck } from '@turboslide/schema/deck';
 import type { FontId } from '@turboslide/schema/fonts';
-import { CATEGORY_GENERIC, FONT_NAMES } from '@turboslide/fonts/names';
-import { lightFamily } from '@turboslide/fonts/summary';
+import { DEFAULT_FONT_ID } from '@turboslide/schema/fonts';
+import { fontFamilyStack } from '@turboslide/fonts/summary';
 import type { ThemeName } from '@turboslide/theme/tokens';
-import { TOKENS, parseHex, parseRgba, toHex } from '@turboslide/theme/tokens';
+import {
+  DISPLAY,
+  DISPLAY_FEATURES_OFF,
+  DISPLAY_FEATURES_TOKEN,
+  TOKENS,
+  parseHex,
+  parseRgba,
+  toHex,
+} from '@turboslide/theme/tokens';
 
 /** The selector the override sheet scopes to: every sheet root but a base tile. */
 export const THEME_CSS_SCOPE = '.ts-sheet:not([data-theme-base])';
@@ -42,16 +50,22 @@ export const THEME_DERIVED_TOKENS = ['hair', 'hair-soft', 'cross', 'edge', 'thum
 /** The tokens that are alpha forms of the paper, recomputed from an edited background colour. */
 const PAPER_DERIVED_TOKENS = ['plate'] as const;
 
-const GENERIC_STACKS: Readonly<Record<string, string>> = {
-  'sans-serif': "'Helvetica Neue', Arial, sans-serif",
-  serif: "Georgia, 'Times New Roman', serif",
-  monospace: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
-};
-
-/** The CSS font stack of a catalog face: its name first, then the base sheet's fallbacks for its category. */
+/**
+ * The CSS font stack of a catalog face: its name first, then the base sheet's fallbacks for its
+ * category. One definition for the kit path here and the block path (`--ts-font-<id>`, fonts.ts):
+ * `@turboslide/fonts/summary` `fontFamilyStack` (docs/FEATURES.md 3.5; audit-fonts 16, two stacks
+ * for one face fell back to different faces before it loaded).
+ */
 export function fontStack(id: FontId): string {
-  const generic = CATEGORY_GENERIC[lightFamily(id).category];
-  return `'${FONT_NAMES[id].replace(/'/g, "\\'")}', ${GENERIC_STACKS[generic] ?? generic}`;
+  return fontFamilyStack(id);
+}
+
+/**
+ * The value of `--display-features` for a display face (docs/FEATURES.md 3.1 item 5): Inter's
+ * cv11 and ss01, and `normal` for every other family, whose own ss01 means something else.
+ */
+export function displayFeatures(display: FontId): string {
+  return display === DEFAULT_FONT_ID ? DISPLAY.features : DISPLAY_FEATURES_OFF;
 }
 
 /** True when the deck carries a record that changes what the sheet draws. */
@@ -175,7 +189,12 @@ export function themeCss(deck: Pick<Deck, 'brand'>): string {
 
   const root: string[] = [];
   const fonts = kit.fonts;
-  if (fonts?.display !== undefined) root.push(`--display: ${fontStack(fonts.display)}`);
+  if (fonts?.display !== undefined) {
+    root.push(`--display: ${fontStack(fonts.display)}`);
+    // the display features travel with the face (3.1 item 5): a kit in Fraunces or Playfair
+    // Display computes `normal` on every heading, a kit that names Inter keeps cv11 and ss01
+    root.push(`--${DISPLAY_FEATURES_TOKEN}: ${displayFeatures(fonts.display)}`);
+  }
   if (fonts?.text !== undefined) root.push(`--text: ${fontStack(fonts.text)}`);
   if (root.length > 0) rules.push({ selector: scope, declarations: root });
 

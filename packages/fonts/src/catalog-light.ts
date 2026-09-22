@@ -1,6 +1,6 @@
 // The light half of the catalog for the browser (docs/PRODUCT.md 4.2; SPEC-5-amendments A5
-// items 3 and 4): per family the name, the category, the licence and the woff2 files with their
-// style and weight, generated from catalog-files.ts by `node packages/fonts/scripts/catalog-light.mjs`
+// items 3 and 4): per family the name, the category, the licence, the tabular figures flag and
+// the woff2 files with their style and weight, generated from catalog-files.ts by `node packages/fonts/scripts/catalog-light.mjs`
 // and pinned equal to it by catalog.test.ts. The renderer's @font-face emission
 // (@turboslide/render/fonts) and font.list read this table, so the digests and source facts of
 // catalog-files.ts (about 20 KB) stay out of the client graph. Do not edit by hand.
@@ -18,6 +18,8 @@ export type LightFamily = {
   name: string;
   category: FontCategory;
   licence: FontLicence;
+  /** true when the face has tabular figures (docs/FEATURES.md 3.1 item 4), read by the Tabular figures row */
+  tnum: boolean;
   files: LightFile[];
 };
 
@@ -27,6 +29,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Inter',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [
       { file: 'InterVariable.woff2', style: 'normal', weight: [100, 900] },
       { file: 'InterVariable-Italic.woff2', style: 'italic', weight: [100, 900] },
@@ -37,6 +40,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Roboto',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [
       { file: 'roboto.woff2', style: 'normal', weight: [100, 900] },
       { file: 'roboto-italic.woff2', style: 'italic', weight: [100, 900] },
@@ -47,6 +51,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Open Sans',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [
       { file: 'open-sans.woff2', style: 'normal', weight: [300, 800] },
       { file: 'open-sans-italic.woff2', style: 'italic', weight: [300, 800] },
@@ -57,6 +62,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Lato',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [
       { file: 'lato-300.woff2', style: 'normal', weight: 300 },
       { file: 'lato-300-italic.woff2', style: 'italic', weight: 300 },
@@ -75,6 +81,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Montserrat',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [
       { file: 'montserrat.woff2', style: 'normal', weight: [100, 900] },
       { file: 'montserrat-italic.woff2', style: 'italic', weight: [100, 900] },
@@ -85,6 +92,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Poppins',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'poppins-300.woff2', style: 'normal', weight: 300 },
       { file: 'poppins-300-italic.woff2', style: 'italic', weight: 300 },
@@ -103,6 +111,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Source Sans 3',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'source-sans-3.woff2', style: 'normal', weight: [200, 900] },
       { file: 'source-sans-3-italic.woff2', style: 'italic', weight: [200, 900] },
@@ -113,6 +122,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Source Serif 4',
     category: 'serif',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [
       { file: 'source-serif-4.woff2', style: 'normal', weight: [200, 900] },
       { file: 'source-serif-4-italic.woff2', style: 'italic', weight: [200, 900] },
@@ -123,6 +133,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Merriweather',
     category: 'serif',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [
       { file: 'merriweather.woff2', style: 'normal', weight: [300, 900] },
       { file: 'merriweather-italic.woff2', style: 'italic', weight: [300, 900] },
@@ -133,6 +144,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Playfair Display',
     category: 'serif',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'playfair-display.woff2', style: 'normal', weight: [400, 900] },
       { file: 'playfair-display-italic.woff2', style: 'italic', weight: [400, 900] },
@@ -143,6 +155,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Lora',
     category: 'serif',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [
       { file: 'lora.woff2', style: 'normal', weight: [400, 700] },
       { file: 'lora-italic.woff2', style: 'italic', weight: [400, 700] },
@@ -153,6 +166,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'PT Serif',
     category: 'serif',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'pt-serif-400.woff2', style: 'normal', weight: 400 },
       { file: 'pt-serif-400-italic.woff2', style: 'italic', weight: 400 },
@@ -165,6 +179,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Libre Baskerville',
     category: 'serif',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'libre-baskerville.woff2', style: 'normal', weight: [400, 700] },
       { file: 'libre-baskerville-italic.woff2', style: 'italic', weight: [400, 700] },
@@ -175,6 +190,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'EB Garamond',
     category: 'serif',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [
       { file: 'eb-garamond.woff2', style: 'normal', weight: [400, 800] },
       { file: 'eb-garamond-italic.woff2', style: 'italic', weight: [400, 800] },
@@ -185,6 +201,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Nunito',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'nunito.woff2', style: 'normal', weight: [200, 1000] },
       { file: 'nunito-italic.woff2', style: 'italic', weight: [200, 1000] },
@@ -195,6 +212,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Raleway',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'raleway.woff2', style: 'normal', weight: [100, 900] },
       { file: 'raleway-italic.woff2', style: 'italic', weight: [100, 900] },
@@ -205,6 +223,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Work Sans',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [
       { file: 'work-sans.woff2', style: 'normal', weight: [100, 900] },
       { file: 'work-sans-italic.woff2', style: 'italic', weight: [100, 900] },
@@ -215,6 +234,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'DM Sans',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'dm-sans.woff2', style: 'normal', weight: [100, 1000] },
       { file: 'dm-sans-italic.woff2', style: 'italic', weight: [100, 1000] },
@@ -225,6 +245,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Space Grotesk',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [{ file: 'space-grotesk.woff2', style: 'normal', weight: [300, 700] }],
   },
   {
@@ -232,6 +253,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Oswald',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [{ file: 'oswald.woff2', style: 'normal', weight: [200, 700] }],
   },
   {
@@ -239,6 +261,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Bebas Neue',
     category: 'display',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [{ file: 'bebas-neue-400.woff2', style: 'normal', weight: 400 }],
   },
   {
@@ -246,6 +269,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Roboto Mono',
     category: 'mono',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'roboto-mono.woff2', style: 'normal', weight: [100, 700] },
       { file: 'roboto-mono-italic.woff2', style: 'italic', weight: [100, 700] },
@@ -256,6 +280,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'JetBrains Mono',
     category: 'mono',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'jetbrains-mono.woff2', style: 'normal', weight: [100, 800] },
       { file: 'jetbrains-mono-italic.woff2', style: 'italic', weight: [100, 800] },
@@ -266,6 +291,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'IBM Plex Sans',
     category: 'sans',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'ibm-plex-sans.woff2', style: 'normal', weight: [100, 700] },
       { file: 'ibm-plex-sans-italic.woff2', style: 'italic', weight: [100, 700] },
@@ -276,6 +302,7 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'IBM Plex Mono',
     category: 'mono',
     licence: 'OFL 1.1',
+    tnum: false,
     files: [
       { file: 'ibm-plex-mono-300.woff2', style: 'normal', weight: 300 },
       { file: 'ibm-plex-mono-300-italic.woff2', style: 'italic', weight: 300 },
@@ -294,6 +321,89 @@ export const CATALOG_LIGHT: readonly LightFamily[] = [
     name: 'Fira Code',
     category: 'mono',
     licence: 'OFL 1.1',
+    tnum: true,
     files: [{ file: 'fira-code.woff2', style: 'normal', weight: [300, 700] }],
+  },
+  {
+    id: 'geist',
+    name: 'Geist',
+    category: 'sans',
+    licence: 'OFL 1.1',
+    tnum: true,
+    files: [
+      { file: 'geist.woff2', style: 'normal', weight: [100, 900] },
+      { file: 'geist-italic.woff2', style: 'italic', weight: [100, 900] },
+    ],
+  },
+  {
+    id: 'geist-mono',
+    name: 'Geist Mono',
+    category: 'mono',
+    licence: 'OFL 1.1',
+    tnum: false,
+    files: [
+      { file: 'geist-mono.woff2', style: 'normal', weight: [100, 900] },
+      { file: 'geist-mono-italic.woff2', style: 'italic', weight: [100, 900] },
+    ],
+  },
+  {
+    id: 'instrument-sans',
+    name: 'Instrument Sans',
+    category: 'sans',
+    licence: 'OFL 1.1',
+    tnum: true,
+    files: [
+      { file: 'instrument-sans.woff2', style: 'normal', weight: [400, 700] },
+      { file: 'instrument-sans-italic.woff2', style: 'italic', weight: [400, 700] },
+    ],
+  },
+  {
+    id: 'manrope',
+    name: 'Manrope',
+    category: 'sans',
+    licence: 'OFL 1.1',
+    tnum: true,
+    files: [{ file: 'manrope.woff2', style: 'normal', weight: [200, 800] }],
+  },
+  {
+    id: 'bricolage-grotesque',
+    name: 'Bricolage Grotesque',
+    category: 'sans',
+    licence: 'OFL 1.1',
+    tnum: true,
+    files: [{ file: 'bricolage-grotesque.woff2', style: 'normal', weight: [200, 800] }],
+  },
+  {
+    id: 'schibsted-grotesk',
+    name: 'Schibsted Grotesk',
+    category: 'sans',
+    licence: 'OFL 1.1',
+    tnum: true,
+    files: [
+      { file: 'schibsted-grotesk.woff2', style: 'normal', weight: [400, 900] },
+      { file: 'schibsted-grotesk-italic.woff2', style: 'italic', weight: [400, 900] },
+    ],
+  },
+  {
+    id: 'newsreader',
+    name: 'Newsreader',
+    category: 'serif',
+    licence: 'OFL 1.1',
+    tnum: true,
+    files: [
+      { file: 'newsreader.woff2', style: 'normal', weight: [200, 800] },
+      { file: 'newsreader-italic.woff2', style: 'italic', weight: [200, 800] },
+    ],
+  },
+  {
+    id: 'fraunces',
+    name: 'Fraunces',
+    category: 'serif',
+    licence: 'OFL 1.1',
+    tnum: false,
+    files: [
+      { file: 'fraunces.woff2', style: 'normal', weight: [100, 900] },
+      { file: 'fraunces-italic.woff2', style: 'italic', weight: [100, 900] },
+    ],
   },
 ];

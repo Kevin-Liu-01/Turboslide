@@ -7,6 +7,16 @@
 // here to the generated facts and the version to GOOGLE_FONTS_COMMIT, so the two halves agree.
 import type { FontCategory, FontId } from '@turboslide/schema/fonts';
 
+/**
+ * The rsms/inter release both Inter files come from: the tag `v4.1` of 2024-11-16 (the fonts'
+ * own name table reads "Version 4.001;git-9221beed3"; docs/FEATURES.md 3.1, audit-fonts 4 and 5).
+ * Here in the browser half so the picker's licence link and inter.ts read one constant.
+ */
+export const INTER_RELEASE = 'https://github.com/rsms/inter/releases/tag/v4.1';
+
+/** The licence text of that release, the link More fonts carries (docs/FEATURES.md 3.1 item 2). */
+export const INTER_LICENCE_URL = 'https://github.com/rsms/inter/blob/v4.1/LICENSE.txt';
+
 /** The family name PowerPoint and Google Slides use, per id (the generated facts' `name`). */
 export const FONT_NAMES: Readonly<Record<FontId, string>> = {
   inter: 'Inter',
@@ -35,6 +45,14 @@ export const FONT_NAMES: Readonly<Record<FontId, string>> = {
   'ibm-plex-sans': 'IBM Plex Sans',
   'ibm-plex-mono': 'IBM Plex Mono',
   'fira-code': 'Fira Code',
+  geist: 'Geist',
+  'geist-mono': 'Geist Mono',
+  'instrument-sans': 'Instrument Sans',
+  manrope: 'Manrope',
+  'bricolage-grotesque': 'Bricolage Grotesque',
+  'schibsted-grotesk': 'Schibsted Grotesk',
+  newsreader: 'Newsreader',
+  fraunces: 'Fraunces',
 };
 
 /** The generic family a category falls back to before a face has loaded. */

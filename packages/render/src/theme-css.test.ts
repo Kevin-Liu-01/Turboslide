@@ -15,11 +15,16 @@ import {
   THEME_CSS_CLASS,
   THEME_CSS_SCOPE,
   THEME_CSS_STYLE_ID,
+  displayFeatures,
   fontStack,
   hasKitOverrides,
   kitDrawsFooter,
   themeCss,
 } from './theme-css.ts';
+import { fontVariablesRule } from './fonts.ts';
+import { fontFamilyStack } from '@turboslide/fonts/summary';
+import { typographyDeclarations } from '@turboslide/schema/typography';
+import { DISPLAY } from '@turboslide/theme/tokens';
 
 const LIGHT = `${THEME_CSS_SCOPE}:not([data-theme='dark'])`;
 const DARK = `${THEME_CSS_SCOPE}[data-theme='dark']`;
@@ -157,7 +162,62 @@ describe('themeCss', () => {
     );
     expect(rules[0]?.declarations['--text']).toBe("'Roboto', 'Helvetica Neue', Arial, sans-serif");
     expect(fontStack('jetbrains-mono')).toContain('monospace');
-    expect(fontStack('inter')).toBe("'Inter', 'Helvetica Neue', Arial, sans-serif");
+    // the sheet's own stack with the metric matched fallback second (docs/FEATURES.md 3.1 item 3)
+    expect(fontStack('inter')).toBe(
+      "'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif",
+    );
+    // one definition for the kit path and the block path (3.5; audit-fonts 16)
+    expect(fontStack('roboto')).toBe(fontFamilyStack('roboto'));
+    expect(fontStack('fraunces')).toBe(fontFamilyStack('fraunces'));
+    expect(fontVariablesRule(['roboto'])).toContain(`--ts-font-roboto: ${fontStack('roboto')};`);
+  });
+
+  it('writes --display-features beside the display face: Inter keeps cv11 and ss01, another family reads normal (docs/FEATURES.md 3.1 item 5)', () => {
+    const fraunces = parseCss(themeCss(deck({ fonts: { display: 'fraunces' } })));
+    expect(fraunces[0]?.declarations['--display']).toBe(fontStack('fraunces'));
+    expect(fraunces[0]?.declarations['--display-features']).toBe('normal');
+    const playfair = parseCss(themeCss(deck({ fonts: { display: 'playfair-display' } })));
+    expect(playfair[0]?.declarations['--display-features']).toBe('normal');
+    const inter = parseCss(themeCss(deck({ fonts: { display: 'inter' } })));
+    expect(inter[0]?.declarations['--display-features']).toBe("'cv11', 'ss01'");
+    expect(displayFeatures('inter')).toBe(DISPLAY.features);
+    expect(displayFeatures('geist')).toBe('normal');
+    // the text role alone leaves the display features to the sheet's base value
+    const text = parseCss(themeCss(deck({ fonts: { text: 'roboto' } })));
+    expect(text[0]?.declarations['--display-features']).toBeUndefined();
+    expect(text[0]?.declarations['--text']).toBe(fontStack('roboto'));
+    // the rendered slide carries the same declaration
+    const html = renderSlide(deck({ fonts: { display: 'fraunces', text: 'fraunces' } }), title, {
+      theme: 'light',
+      chrome: false,
+      assetBase: 'decks/acme/',
+      blockAttrs: false,
+      gtWord: true,
+    }).html;
+    expect(html).toContain('--display-features: normal');
+    expect(html).toContain(`--display: ${fontStack('fraunces')}`);
+  });
+
+  it('emits the block declarations of a family and of tabular figures (docs/FEATURES.md 3.1 items 4 and 5)', () => {
+    // a block in another family drops the sheet's display features; Inter and an absent family keep them
+    expect(typographyDeclarations({ family: 'playfair-display' })).toEqual([
+      'font-family:var(--ts-font-playfair-display, inherit)',
+      'font-feature-settings:normal',
+    ]);
+    expect(typographyDeclarations({ family: 'inter' })).toEqual([
+      'font-family:var(--ts-font-inter, inherit)',
+    ]);
+    expect(typographyDeclarations({ size: 22 })).toEqual(['font-size:22px']);
+    // tabular figures ride as font-variant-numeric, independent of the feature settings
+    expect(typographyDeclarations({ numerals: 'tabular' })).toEqual([
+      'font-variant-numeric:tabular-nums',
+    ]);
+    expect(typographyDeclarations({ family: 'geist', numerals: 'tabular' })).toEqual([
+      'font-family:var(--ts-font-geist, inherit)',
+      'font-feature-settings:normal',
+      'font-variant-numeric:tabular-nums',
+    ]);
+    expect(typographyDeclarations({})).toEqual([]);
   });
 
   it('hides the rails, the rules and the crosses the record turns off', () => {

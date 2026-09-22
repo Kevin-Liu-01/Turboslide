@@ -14,6 +14,7 @@ const rows = CATALOG_FILES.map((row) => ({
   name: row.name,
   category: row.category,
   licence: row.licence,
+  tnum: row.tnum === true,
   files: row.files.map((file) => ({ file: file.file, style: file.style, weight: file.weight })),
 }));
 
@@ -26,8 +27,8 @@ const literal = (value) =>
     .replace(/\}/g, ' }');
 
 const out = `// The light half of the catalog for the browser (docs/PRODUCT.md 4.2; SPEC-5-amendments A5
-// items 3 and 4): per family the name, the category, the licence and the woff2 files with their
-// style and weight, generated from catalog-files.ts by \`node packages/fonts/scripts/catalog-light.mjs\`
+// items 3 and 4): per family the name, the category, the licence, the tabular figures flag and
+// the woff2 files with their style and weight, generated from catalog-files.ts by \`node packages/fonts/scripts/catalog-light.mjs\`
 // and pinned equal to it by catalog.test.ts. The renderer's @font-face emission
 // (@turboslide/render/fonts) and font.list read this table, so the digests and source facts of
 // catalog-files.ts (about 20 KB) stay out of the client graph. Do not edit by hand.
@@ -41,6 +42,8 @@ export type LightFamily = {
   name: string;
   category: FontCategory;
   licence: FontLicence;
+  /** true when the face has tabular figures (docs/FEATURES.md 3.1 item 4), read by the Tabular figures row */
+  tnum: boolean;
   files: LightFile[];
 };
 

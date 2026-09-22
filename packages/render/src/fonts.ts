@@ -30,6 +30,10 @@ import { usedFontIds } from '@turboslide/fonts/used';
 // the schema only half lives in @turboslide/fonts/used so the editor page decides whether the
 // sheet needs the faces without loading the catalog's file table
 export { blockFamilies, usedFontIds } from '@turboslide/fonts/used';
+// the tabular figures flag per face (docs/FEATURES.md 3.1 item 4): the chrome's Tabular figures
+// row reads it through this package, the chrome depending on the renderer and not on the fonts
+// package (the rule fontRows below states)
+export { hasTabularFigures } from '@turboslide/fonts/summary';
 
 /** Where a file's bytes come from: a URL the document can fetch, or a data URI. */
 export type FontSrc = (id: FontId, file: LightFile) => string;

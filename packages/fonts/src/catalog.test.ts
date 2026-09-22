@@ -42,7 +42,13 @@ import {
 } from './names.ts';
 import { usedFontIds } from './used.ts';
 import { CATALOG_LIGHT } from './catalog-light.ts';
-import { catalogSummary as lightSummary, lightFamily } from './summary.ts';
+import {
+  GENERIC_STACKS,
+  catalogSummary as lightSummary,
+  hasTabularFigures,
+  lightFamily,
+} from './summary.ts';
+import { woff2Facts } from './woff2-names.ts';
 
 const sha256 = (bytes: Buffer): string => createHash('sha256').update(bytes).digest('hex');
 
@@ -52,8 +58,71 @@ describe('the font catalog (gslides-parity SPEC-5-amendments A5 item 2)', () => 
     expect(FONT_SOURCES.map((row) => row.id)).toEqual([...FONT_IDS]);
     expect(CATALOG_FILES.map((row) => row.id)).toEqual([...FONT_IDS]);
     for (const row of FONT_CATALOG) expect(isFontId(row.id)).toBe(true);
-    expect(FONT_IDS).toHaveLength(26);
+    // the product round's 26 and the features round's eight (docs/FEATURES.md 3.2)
+    expect(FONT_IDS).toHaveLength(34);
+    expect(FONT_IDS.slice(26)).toEqual([
+      'geist',
+      'geist-mono',
+      'instrument-sans',
+      'manrope',
+      'bricolage-grotesque',
+      'schibsted-grotesk',
+      'newsreader',
+      'fraunces',
+    ]);
     expect(GOOGLE_FONTS_COMMIT).toMatch(/^[0-9a-f]{40}$/);
+  });
+
+  it('carries the eight families of docs/FEATURES.md 3.2 as variable files under OFL 1.1 with no Reserved Font Name', () => {
+    const eight = FONT_IDS.slice(26);
+    for (const id of eight) {
+      const row = catalogFont(id);
+      expect(row.source.take.kind, id).toBe('variable');
+      expect(row.licence, id).toBe('OFL 1.1');
+      expect(row.reservedFontName, id).toBeNull();
+      expect(row.licenceUrl).toBe(
+        `https://github.com/google/fonts/blob/${GOOGLE_FONTS_COMMIT}/${row.source.directory}/OFL.txt`,
+      );
+      expect(existsSync(fileURLToPath(new URL(`../assets/${id}/LICENSE`, import.meta.url)))).toBe(
+        true,
+      );
+    }
+    expect(catalogFont('geist').name).toBe('Geist');
+    expect(catalogFont('geist').category).toBe('sans');
+    expect(catalogFont('geist').italic).toBe(true);
+    expect(catalogFont('geist').weights).toEqual([100, 200, 300, 400, 500, 600, 700, 800, 900]);
+    expect(catalogFont('geist-mono').name).toBe('Geist Mono');
+    expect(catalogFont('geist-mono').category).toBe('mono');
+    expect(catalogFont('instrument-sans').category).toBe('sans');
+    expect(catalogFont('manrope').italic).toBe(false);
+    expect(catalogFont('bricolage-grotesque').italic).toBe(false);
+    expect(catalogFont('schibsted-grotesk').weights).toEqual([400, 500, 600, 700, 800, 900]);
+    expect(catalogFont('newsreader').category).toBe('serif');
+    expect(catalogFont('fraunces').category).toBe('serif');
+    // the size budget of 3.3: the eight add about 1.76 MB of woff2 (the exact bytes are the table's)
+    const bytes = eight.flatMap((id) => catalogFont(id).files).reduce((n, f) => n + f.bytes, 0);
+    expect(bytes).toBeGreaterThan(1_700_000);
+    expect(bytes).toBeLessThan(1_850_000);
+  });
+
+  it('records the tabular figures flag per family from the GSUB tables (docs/FEATURES.md 3.1 item 4)', () => {
+    for (const row of CATALOG_FILES) {
+      expect(typeof row.tnum, row.id).toBe('boolean');
+      expect(Array.isArray(row.features), row.id).toBe(true);
+      expect(row.tnum, row.id).toBe(row.features.includes('tnum'));
+      // the flag agrees with the committed upright file's own GSUB table
+      const upright = row.files.find((file) => file.style === 'normal') ?? row.files[0]!;
+      const facts = woff2Facts(fontFileBytes(row.id, upright.file));
+      expect(facts.features.includes('tnum'), `${row.id} tnum`).toBe(row.tnum);
+      expect(lightFamily(row.id).tnum, row.id).toBe(row.tnum);
+      expect(hasTabularFigures(row.id), row.id).toBe(row.tnum);
+    }
+    expect(hasTabularFigures('inter')).toBe(true);
+    expect(hasTabularFigures('bebas-neue')).toBe(true);
+    expect(hasTabularFigures('geist')).toBe(true);
+    expect(hasTabularFigures('playfair-display')).toBe(false);
+    expect(hasTabularFigures('fraunces')).toBe(false);
+    expect(hasTabularFigures('geist-mono')).toBe(false);
   });
 
   it('names every face the way PowerPoint and Google Slides do, with a category, weights, italic and a licence', () => {
@@ -168,10 +237,21 @@ describe('the font catalog (gslides-parity SPEC-5-amendments A5 item 2)', () => 
   });
 
   it('writes the font-family stack, the custom property and the asset path per face', () => {
-    expect(fontFamilyStack('roboto')).toBe("'Roboto', sans-serif");
-    expect(fontFamilyStack('merriweather')).toBe("'Merriweather', serif");
-    expect(fontFamilyStack('jetbrains-mono')).toBe("'JetBrains Mono', monospace");
-    expect(fontFamilyStack('bebas-neue')).toBe("'Bebas Neue', sans-serif");
+    // the name, then the base sheet's fallbacks for the category, ending in the generic family
+    // (docs/FEATURES.md 3.5; audit-fonts 16: one stack for the block path and the kit path)
+    expect(fontFamilyStack('roboto')).toBe("'Roboto', 'Helvetica Neue', Arial, sans-serif");
+    expect(fontFamilyStack('merriweather')).toBe(
+      "'Merriweather', Georgia, 'Times New Roman', serif",
+    );
+    expect(fontFamilyStack('jetbrains-mono')).toBe(
+      "'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+    );
+    expect(fontFamilyStack('bebas-neue')).toBe("'Bebas Neue', 'Helvetica Neue', Arial, sans-serif");
+    expect(fontFamilyStack('inter')).toBe(
+      "'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif",
+    );
+    for (const generic of Object.values(CATEGORY_GENERIC))
+      expect(GENERIC_STACKS[generic]?.endsWith(generic), generic).toBe(true);
     expect(CATEGORY_GENERIC.mono).toBe('monospace');
     expect(fontFamilyVariable('open-sans')).toBe('--ts-font-open-sans');
     expect(fontAssetPath('roboto', 'roboto.woff2')).toBe('assets/roboto/roboto.woff2');
@@ -184,6 +264,7 @@ describe('the font catalog (gslides-parity SPEC-5-amendments A5 item 2)', () => 
       'jetbrains-mono',
       'ibm-plex-mono',
       'fira-code',
+      'geist-mono',
     ]);
   });
 
@@ -226,6 +307,7 @@ describe('the light table (catalog-light.ts, generated by scripts/catalog-light.
         name: row.name,
         category: row.category,
         licence: row.licence,
+        tnum: row.tnum,
         files: row.files.map((file) => ({
           file: file.file,
           style: file.style,
@@ -241,6 +323,7 @@ describe('the light table (catalog-light.ts, generated by scripts/catalog-light.
       expect(row.licenceUrl).toMatch(/^https:\/\/github\.com\//);
       if (row.id !== 'inter')
         expect(row.licenceUrl).toContain(`/${GOOGLE_FONTS_COMMIT}/${row.source.directory}/OFL.txt`);
+      else expect(row.licenceUrl).toBe('https://github.com/rsms/inter/blob/v4.1/LICENSE.txt');
     }
   });
 });
@@ -250,7 +333,8 @@ describe('the browser half of the catalog (A5 items 3 and 4; names.ts, used.ts)'
     for (const row of FONT_CATALOG) {
       expect(FONT_NAMES[row.id], row.id).toBe(row.name);
       expect(fontFamilyName(row.id)).toBe(row.name);
-      expect(CATEGORY_GENERIC[row.category]).toBe(fontFamilyStack(row.id).split(', ')[1]);
+      expect(fontFamilyStack(row.id).endsWith(CATEGORY_GENERIC[row.category]), row.id).toBe(true);
+      expect(fontFamilyStack(row.id).startsWith(`'${row.name}'`), row.id).toBe(true);
     }
     expect(Object.keys(FONT_NAMES).sort()).toEqual([...FONT_IDS].sort());
     expect(FONT_CATALOG_VERSION).toBe(GOOGLE_FONTS_COMMIT);

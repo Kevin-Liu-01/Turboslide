@@ -14,7 +14,8 @@ every instance its own family name:
   Inter, Inter Medium              opsz 14, wght 400 and 500: the --fonts standard set
 
 The parity round two adds an italic twin of every face (SPEC-2 7.1) cut from
-InterVariable-Italic.woff2 of the same release: the same family, style Italic, the
+InterVariable-Italic.woff2 of the same release (the rsms/inter tag v4.1; the features round
+replaced the 4.0 italic file with the 4.1 one, docs/FEATURES.md 3.1 item 1): the same family, style Italic, the
 OS/2 and head italic bits set, post.italicAngle from the source, so PowerPoint and LibreOffice
 find the Italic style under the family name a run travels under.
 
@@ -463,7 +464,7 @@ def build(source_path: Path, italic_path: Path, out: Path, prefix: str) -> tuple
             "italic": {
                 **source_record(italic_path, italic, italic_bytes),
                 "italicAngle": italic_angle,
-                "release": "https://github.com/rsms/inter/releases/tag/v4.001",
+                "release": "https://github.com/rsms/inter/releases/tag/v4.1",
                 "path": "web/InterVariable-Italic.woff2",
             },
         },

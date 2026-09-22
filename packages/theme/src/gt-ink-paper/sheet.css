@@ -27,8 +27,17 @@
      --accent the second colour, the same value until a kit sets it apart */
   --blue: #2f5ce0;
   --accent: #2f5ce0;
-  --display: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  --text: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  /* the metric matched fallback face second in both stacks (docs/FEATURES.md 3.1 item 3;
+     audit-fonts 6): 'Inter Fallback' is inter.css's local Arial with size-adjust and the three
+     overrides, so a first paint holds Inter's line boxes until the woff2 lands */
+  --display: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --text: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
+  /* the display features beside the display face (docs/FEATURES.md 3.1 item 5; audit-fonts 7):
+     cv11 and ss01 are Inter's alternates (docs/brand.md section 3) and 17 catalog families carry
+     an ss01 of their own with another meaning, so a brand kit that sets another display face
+     writes `normal` here (packages/render theme-css.ts) and a block in another family writes
+     `font-feature-settings: normal` inline (packages/schema typography.ts) */
+  --display-features: 'cv11', 'ss01';
   --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --cjk:
     'Hiragino Sans', 'Noto Sans CJK JP', 'Noto Sans JP', 'PingFang SC', 'Apple SD Gothic Neo',
@@ -247,7 +256,8 @@
   height: 100%;
 }
 
-/* type: the display face is capped at weight 500, the way the shipped site caps it */
+/* type: the display face is capped at weight 500, the way the shipped site caps it; the features
+   read the root's --display-features so they apply to Inter alone (FEATURES.md 3.1 item 5) */
 .ts-sheet h1,
 .ts-sheet h2,
 .ts-sheet .big {
@@ -256,7 +266,7 @@
   letter-spacing: -0.025em;
   text-wrap: balance;
   font-weight: 500;
-  font-feature-settings: 'cv11', 'ss01';
+  font-feature-settings: var(--display-features);
 }
 .ts-sheet h1 {
   font-size: 88px;
@@ -863,10 +873,13 @@
 /* gslides-parity SPEC 7.3: the table block as a grid in the ruled rows idiom: a hairline above, a
    rule under every row, the header row at display weight 500 with an ink rule under it,
    text-align per column, a plate fill per column, the vertical alignment through align-items, the
-   .rows size ladder (packages/render blocks/table.ts). The numerals are proportional, not the
-   tabular ones of the .rows idiom: a PPTX run carries no OpenType feature, so the a:tbl the
-   Editable text export writes renders proportional digits in every viewer, and a tabular "1" in
-   a right aligned cell measured 4 to 6 px outside the 3 px cell budget (b2.md, fix round). */
+   .rows size ladder (packages/render blocks/table.ts). The cells take tabular figures (the rule
+   below; docs/FEATURES.md 3.1 item 4, audit-fonts 2: a column of amounts did not align, "1111"
+   34.81 px against "0000" 56.01 px at 22 px). The parity fix round had kept them proportional
+   because a PPTX run carries no OpenType feature, so the a:tbl of the Editable text export draws
+   proportional digits and a tabular "1" in a right aligned cell measured 4 to 6 px outside the
+   3 px cell budget (focus b2.md); that export difference stands and is recorded in
+   docs/gslides-parity/features/build/b2.md, the sheet's alignment wins. */
 .ts-sheet .table {
   display: flex;
   flex-direction: column;
@@ -910,6 +923,24 @@
 }
 .ts-sheet .table.table-15 {
   font-size: 15px;
+}
+
+/* Tabular figures where numbers align (docs/FEATURES.md 3.1 item 4; audit-fonts 2): every table
+   cell (the block's .td spans and an imported block's td and th), the chart's value axis, category
+   and value labels, and the status board's state and address cells; running text stays
+   proportional. A block's Tabular figures row writes the same declaration inline
+   (typography.numerals, packages/schema typography.ts). The chart and board rules sit here beside
+   the sheet's own tokens so the tnum rules are one place; their layout rules stay in
+   packages/render block-css.ts. */
+.ts-sheet .table .td,
+.ts-sheet td,
+.ts-sheet th,
+.ts-sheet svg.chart .grid text,
+.ts-sheet svg.chart .categories text,
+.ts-sheet svg.chart .value,
+.ts-sheet .board .state,
+.ts-sheet .board .who small {
+  font-variant-numeric: tabular-nums;
 }
 
 /* gslides-parity SPEC-2 7.2: the mark span's elements. An underline is a 1 px rule 3 px under the

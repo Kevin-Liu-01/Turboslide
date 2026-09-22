@@ -13,6 +13,8 @@ import {
   COUNTER,
   CROSS,
   DISPLAY,
+  DISPLAY_FEATURES_OFF,
+  DISPLAY_FEATURES_TOKEN,
   DITHER_HEIGHT,
   FLOOR,
   FONTS,
@@ -62,7 +64,7 @@ describe('tokens agree with sheet.css', () => {
     ).toEqual([...TOKEN_NAMES].sort());
   });
 
-  it('declares the font stacks', () => {
+  it('declares the font stacks, with the metric matched fallback face second (docs/FEATURES.md 3.1 item 3)', () => {
     const light = customProperties(sheet, '.ts-sheet');
     expect(light.display).toBe(FONTS.display);
     expect(light.text).toBe(FONTS.text);
@@ -70,6 +72,52 @@ describe('tokens agree with sheet.css', () => {
     expect(light.cjk).toBe(FONTS.cjk);
     expect(light.arabic).toBe(FONTS.arabic);
     expect(light.indic).toBe(FONTS.indic);
+    // the sheet's computed stack: Inter, then inter.css's 'Inter Fallback' (local Arial with
+    // size-adjust and the overrides), then the deck's Helvetica Neue and Arial (audit-fonts 6)
+    for (const stack of [light.display, light.text]) {
+      const families = (stack ?? '').split(', ');
+      expect(families[0]).toBe("'Inter'");
+      expect(families[1]).toBe("'Inter Fallback'");
+      expect(families.slice(2)).toEqual(["'Helvetica Neue'", 'Arial', 'sans-serif']);
+    }
+  });
+
+  it('gates the display features on Inter through --display-features (docs/FEATURES.md 3.1 item 5)', () => {
+    const light = customProperties(sheet, '.ts-sheet');
+    expect(light[DISPLAY_FEATURES_TOKEN]).toBe(DISPLAY.features);
+    expect(DISPLAY.features).toBe("'cv11', 'ss01'");
+    expect(DISPLAY_FEATURES_OFF).toBe('normal');
+    // the heading rules read the variable, never the literal, so a kit's `normal` reaches them
+    for (const selector of ['.ts-sheet h1', '.ts-sheet h2', '.ts-sheet .big'])
+      expect(declarationsOf(sheet, selector)['font-feature-settings'], selector).toBe(
+        `var(--${DISPLAY_FEATURES_TOKEN})`,
+      );
+    const literal = sheet.filter(
+      (rule) =>
+        !rule.selector.startsWith('.ts-sheet .gt') &&
+        rule.declarations['font-feature-settings']?.includes('cv11'),
+    );
+    expect(literal.map((rule) => rule.selector)).toEqual([]);
+  });
+
+  it('sets tabular figures on table cells, chart labels and the board, never on running text (docs/FEATURES.md 3.1 item 4)', () => {
+    const tabular = sheet.filter(
+      (rule) => rule.declarations['font-variant-numeric'] === 'tabular-nums',
+    );
+    const selectors = tabular.flatMap((rule) => rule.selector.split(',').map((s) => s.trim()));
+    for (const selector of [
+      '.ts-sheet .table .td',
+      '.ts-sheet td',
+      '.ts-sheet th',
+      '.ts-sheet svg.chart .grid text',
+      '.ts-sheet svg.chart .categories text',
+      '.ts-sheet svg.chart .value',
+      '.ts-sheet .board .state',
+    ])
+      expect(selectors, selector).toContain(selector);
+    for (const selector of ['.ts-sheet p', '.ts-sheet', '.ts-sheet .lead', '.ts-sheet h1'])
+      expect(selectors, selector).not.toContain(selector);
+    expect(declarationsOf(sheet, '.ts-sheet p')['font-variant-numeric']).toBeUndefined();
   });
 
   it('puts the semantic hues on icons only, the info hue through the kit’s primary token', () => {
@@ -217,7 +265,9 @@ describe('the type ladder agrees with the CSS', () => {
       const declarations = declarationsOf(sheet, selector);
       expect(declarations['font-weight']).toBe(String(DISPLAY.weight));
       expect(declarations['letter-spacing']).toBe(DISPLAY.tracking);
-      expect(declarations['font-feature-settings']).toBe(DISPLAY.features);
+      // the features through the root's variable, whose base value is DISPLAY.features (3.1 item 5)
+      expect(declarations['font-feature-settings']).toBe(`var(--${DISPLAY_FEATURES_TOKEN})`);
+      expect(customProperties(sheet, '.ts-sheet')[DISPLAY_FEATURES_TOKEN]).toBe(DISPLAY.features);
       expect(declarations['text-wrap']).toBe('balance');
     }
     expect(DISPLAY.weight).toBe(WEIGHT_CAP);

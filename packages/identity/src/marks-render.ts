@@ -341,7 +341,7 @@ export function renderMarkSvg(
   if (spec.variant === 'initials' && spec.initials.length > 0) {
     const fontSize = initialsFontSize(size);
     parts.push(
-      `<text class="ts-mark-initials" x="${size / 2}" y="${size / 2}" text-anchor="middle" dominant-baseline="central" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="${fontSize}" style="font-feature-settings:'cv11','ss01'" fill="${colors.ink}">${escapeText(spec.initials)}</text>`,
+      `<text class="ts-mark-initials" x="${size / 2}" y="${size / 2}" text-anchor="middle" dominant-baseline="central" font-family="Inter, 'Inter Fallback', system-ui, sans-serif" font-weight="500" font-size="${fontSize}" style="font-feature-settings:'cv11','ss01'" fill="${colors.ink}">${escapeText(spec.initials)}</text>`,
     );
   }
   const border = spec.self ? colors.ink : colors.edge;

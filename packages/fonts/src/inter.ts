@@ -1,10 +1,16 @@
-// The deck's face (SPEC 2.1, 8.4): InterVariable 4.001 with opsz 14 to 32 and wght 100 to 900,
-// decoded by the scaffold from Prototemplate/deck/fonts/deck-fonts.css (pptx report section
-// 4.10), and its italic companion InterVariable-Italic from the same release (gslides-parity
-// SPEC-2 7.1), so the sheet renders true italics for the mark span rule. The static export
-// instances and fonts.json come from scripts/build-fonts.py. License: SIL OFL 1.1, see
-// THIRD_PARTY_NOTICES.md.
+// The deck's face (SPEC 2.1, 8.4): InterVariable from Rasmus Andersson's Inter 4.1 release of
+// 2024-11-16 (the font's own name table reads "Version 4.001;git-9221beed3"; the release tag is
+// v4.1), with opsz 14 to 32 and wght 100 to 900, decoded by the scaffold from
+// Prototemplate/deck/fonts/deck-fonts.css (pptx report section 4.10), and its italic companion
+// InterVariable-Italic from the same release (gslides-parity SPEC-2 7.1; docs/FEATURES.md 3.1
+// item 1 replaced the 4.0 italic with the 4.1 file), so the sheet renders true italics for the
+// mark span rule. The static export instances and fonts.json come from scripts/build-fonts.py.
+// License: SIL OFL 1.1, see THIRD_PARTY_NOTICES.md.
 import { readFileSync } from 'node:fs';
+
+import { INTER_LICENCE_URL, INTER_RELEASE } from './names.ts';
+
+export { INTER_LICENCE_URL, INTER_RELEASE };
 
 export const INTER = {
   family: 'Inter',
@@ -17,24 +23,34 @@ export const INTER = {
   opticalSize: [14, 32],
   style: 'normal',
   license: 'SIL OFL 1.1',
+  /** the release the file comes from and its path inside the zip (`Inter-4.1.zip`) */
+  release: INTER_RELEASE,
+  path: 'web/InterVariable.woff2',
 } as const;
 
-/** The italic companion (gslides-parity SPEC-2 7.1): the rsms/inter 4.001 release asset `web/InterVariable-Italic.woff2`. */
+/**
+ * The italic companion (gslides-parity SPEC-2 7.1): the rsms/inter 4.1 release asset
+ * `web/InterVariable-Italic.woff2` (docs/FEATURES.md 3.1 item 1; audit-fonts 4: the file this
+ * replaced was the 4.0 release's, "Version 4.000;git-a52131595", 380,904 bytes).
+ */
 export const INTER_ITALIC = {
   family: 'Inter',
   file: 'InterVariable-Italic.woff2',
   version: '4.001',
   format: 'woff2',
-  bytes: 380904,
-  sha256: '0470791f15efd2987bdb50b24027c3f584a2cf9b7b63fbf86012c5f2e9abcc05',
+  bytes: 387976,
+  sha256: 'e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a',
   weight: [100, 900],
   opticalSize: [14, 32],
   style: 'italic',
   license: 'SIL OFL 1.1',
   /** the release the file comes from and its path inside the zip */
-  release: 'https://github.com/rsms/inter/releases/tag/v4.001',
+  release: INTER_RELEASE,
   path: 'web/InterVariable-Italic.woff2',
 } as const;
+
+/** The name table's version string of both 4.1 files (name ID 5), what inter.test.ts reads from the bytes. */
+export const INTER_NAME_VERSION = 'Version 4.001;git-9221beed3';
 
 /** Absolute file URL of the variable font, for Node callers (the standalone build, the exporter). */
 export const INTER_VARIABLE_WOFF2 = new URL('../assets/InterVariable.woff2', import.meta.url);
@@ -45,7 +61,7 @@ export const INTER_ITALIC_WOFF2 = new URL('../assets/InterVariable-Italic.woff2'
 /** Absolute file URL of the @font-face stylesheet. */
 export const INTER_CSS = new URL('./inter.css', import.meta.url);
 
-/** The deck's font family stack for display and text (head:21-22). */
+/** The deck's font family stack for display and text before the fallback face joined it (head:21-22). */
 export const FONT_FAMILY = "'Inter', 'Helvetica Neue', Arial, sans-serif";
 
 /**
@@ -59,13 +75,20 @@ export const FONT_FAMILY = "'Inter', 'Helvetica Neue', Arial, sans-serif";
 export const INTER_FALLBACK = {
   family: 'Inter Fallback',
   local: 'Arial',
+  /** the second `local()` source for a machine without Arial (docs/FEATURES.md 3.1 item 3): metric compatible with Arial */
+  localSecond: 'Liberation Sans',
   sizeAdjust: '107.4724%',
   ascentOverride: '90.1394%',
   descentOverride: '22.444%',
   lineGapOverride: '0%',
 } as const;
 
-/** The stack with the fallback face in place: what a chrome or sheet rule that must not shift on the first paint uses. */
+/**
+ * The stack with the fallback face in place (docs/FEATURES.md 3.1 item 3): the sheet's
+ * `--display` and `--text` (sheet.css, tokens.ts FONTS), the chrome's `--pt-display` and
+ * `--pt-text` (tokens.css) and the identity's initials (marks-render.ts) all read this order, so
+ * a first paint takes Inter's metrics before the woff2 arrives and nothing moves when it does.
+ */
 export const FONT_FAMILY_WITH_FALLBACK =
   "'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif";
 
@@ -74,7 +97,7 @@ export function fallbackFontFaceCss(): string {
   return [
     '@font-face {',
     `  font-family: '${INTER_FALLBACK.family}';`,
-    `  src: local('${INTER_FALLBACK.local}');`,
+    `  src: local('${INTER_FALLBACK.local}'), local('${INTER_FALLBACK.localSecond}');`,
     `  size-adjust: ${INTER_FALLBACK.sizeAdjust};`,
     `  ascent-override: ${INTER_FALLBACK.ascentOverride};`,
     `  descent-override: ${INTER_FALLBACK.descentOverride};`,

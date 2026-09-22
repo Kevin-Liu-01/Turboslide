@@ -24,9 +24,9 @@
     "italic": {
       "file": "packages/fonts/assets/InterVariable-Italic.woff2",
       "family": "Inter Variable",
-      "version": "Version 4.000;git-a52131595",
-      "sha256": "0470791f15efd2987bdb50b24027c3f584a2cf9b7b63fbf86012c5f2e9abcc05",
-      "bytes": 380904,
+      "version": "Version 4.001;git-9221beed3",
+      "sha256": "e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a",
+      "bytes": 387976,
       "fsType": 0,
       "axes": {
         "opsz": [
@@ -41,7 +41,7 @@
         ]
       },
       "italicAngle": -9.399993896484375,
-      "release": "https://github.com/rsms/inter/releases/tag/v4.001",
+      "release": "https://github.com/rsms/inter/releases/tag/v4.1",
       "path": "web/InterVariable-Italic.woff2"
     }
   },
@@ -518,8 +518,8 @@
         "exact",
         "standard"
       ],
-      "bytes": 339152,
-      "sha256": "772e74068a1ab7474224ac75c35d2f3a0a73fe1a36c482bfe678597da9ad0af8"
+      "bytes": 346036,
+      "sha256": "1ac6768e37d3ae71ee75dc23b640a5ff16bcd4033191082d14009a42229a9475"
     },
     {
       "file": "GTInterText26-Italic.ttf",
@@ -538,8 +538,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338744,
-      "sha256": "0fd2eefa4cc96189f7bddd7b30dd51406f7d6476c834dde03644442ca2d0e620"
+      "bytes": 345664,
+      "sha256": "bc54f24224b1a367514952c6c88040f97f63f979d7f9e92e05202fb9bd35b341"
     },
     {
       "file": "GTInterText26Medium-Italic.ttf",
@@ -558,8 +558,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339180,
-      "sha256": "0bc82ecaec5a9da0c7d33c7b80081b09ac7803dc7dd74145e4235b014373ee93"
+      "bytes": 346136,
+      "sha256": "8f79eb4dde252b71ca87e2db36824c1dfd4d7a4932c5b62a64c23660d0b68963"
     },
     {
       "file": "GTInterText24-Italic.ttf",
@@ -578,8 +578,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338868,
-      "sha256": "ae79a70af9a31ab2fddff2b9a282bbbcbee8408bb0918510bf04e913cccb1698"
+      "bytes": 345788,
+      "sha256": "a740f1c7ab38a58a3eee4de25932734cc2ba4460bdb63d9f497730b5aee23319"
     },
     {
       "file": "GTInterText24Medium-Italic.ttf",
@@ -598,8 +598,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339392,
-      "sha256": "77a0c767602c16108eeb9b7b1fb64366279e397caf58fe88a3cb55dd38aa94f9"
+      "bytes": 346360,
+      "sha256": "b7dac8fe297d0b5366c7bb668789fecb36194d8667c5949bf69b60834af84c79"
     },
     {
       "file": "GTInterText22-Italic.ttf",
@@ -618,8 +618,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338880,
-      "sha256": "5aef1473cc9e5ef666b5048ffe37fb7b66330ba05780e2a6dfb335cbdd696aaf"
+      "bytes": 345780,
+      "sha256": "9665673831dbe71a60eecb35df3b463342e9a153c4c9ec787164997e6658e018"
     },
     {
       "file": "GTInterText22Medium-Italic.ttf",
@@ -638,8 +638,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339340,
-      "sha256": "d74d93fd53f83e86b2788add4ede815385a04a75e78609650cad53ff08f8d7bc"
+      "bytes": 346284,
+      "sha256": "b9fb905be58f30f10a5199fa9ff43ba3fd2fcc430e30b00862459907399c1ed1"
     },
     {
       "file": "GTInterText20-Italic.ttf",
@@ -658,8 +658,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338784,
-      "sha256": "32c9ff728a9682ce4e4574b1ce3a3e8274d0e3318bb811e3a5fa87203460931e"
+      "bytes": 345716,
+      "sha256": "24a64db26a99ddb0d4afa55ac9985ef94dcd88e4b6b75a64ee65c06a89d48064"
     },
     {
       "file": "GTInterText20Medium-Italic.ttf",
@@ -678,8 +678,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339268,
-      "sha256": "5fb6a614adfc5f4cd4d5294c331c2c86f372197e8bd9f843e6271a3a84d6c738"
+      "bytes": 346268,
+      "sha256": "f3e283e017b07c1e1d6708e956ac24c5a1de97862cca8283457790b91cc677ab"
     },
     {
       "file": "GTInterText18-Italic.ttf",
@@ -698,8 +698,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338756,
-      "sha256": "6eebbfbf8db74695351e1d4ce8a6e10941b2a807d2edac3dd84050b841574f19"
+      "bytes": 345684,
+      "sha256": "a39a62b6275d7e65e4e5ba62d1bb6c3e43edc2d20b627df04b74004d8d905614"
     },
     {
       "file": "GTInterText18Medium-Italic.ttf",
@@ -718,8 +718,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339288,
-      "sha256": "8d6a73fe32d59d59f1f985a824686e541e38036b78bbf18b9626b01dd85a61b1"
+      "bytes": 346212,
+      "sha256": "4e4a8f25d6482a1e71c12fdd933d29f1ef348a567f53fa35eff9c573dd8e404e"
     },
     {
       "file": "GTInterText15-Italic.ttf",
@@ -738,8 +738,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338672,
-      "sha256": "a504484cbf3082b7b6a121efe581464cedad070a5b472aa9fa04774511329264"
+      "bytes": 345636,
+      "sha256": "e3a5c56a644ed1c4ddfd428dc5c0f8408fee9a7d62063a6b349e4a8ee1975e0b"
     },
     {
       "file": "GTInterText15Medium-Italic.ttf",
@@ -758,8 +758,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339264,
-      "sha256": "db97e2981fe394b62437f766ebad22483788d2ceeb344f34ac73be9e2c6886f8"
+      "bytes": 346208,
+      "sha256": "df0c88e7200af19ab5cb78818e66a45417801cf9059a14ff88c6098f127a795f"
     },
     {
       "file": "GTInterText14-Italic.ttf",
@@ -778,8 +778,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338440,
-      "sha256": "0ae60158752ad0674e47abc4665a30b4490697552f2e27301d897848752896e4"
+      "bytes": 345456,
+      "sha256": "70a0d80bb046507c3fb7d11f4933a632813e94bef667f4f8d4861a08dee6180c"
     },
     {
       "file": "GTInterText14Medium-Italic.ttf",
@@ -798,8 +798,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339060,
-      "sha256": "517506032652530f0783c84180dbfb1daaa9166d7855dbabf695276b85ea8955"
+      "bytes": 346080,
+      "sha256": "320177f5d2b5b9ef0d9f04ea9128a4fa93ab7b035424d0731c5f1c6ec8758d1b"
     },
     {
       "file": "Inter-Italic.ttf",
@@ -824,8 +824,8 @@
       "sets": [
         "standard"
       ],
-      "bytes": 338328,
-      "sha256": "2447b97e92b266915f53f070ce3d23398f043e2478707861c33872a096b31865"
+      "bytes": 345340,
+      "sha256": "232ec9a7ff2fa059f1f781885c13879490bbea04bd89a763d65d3ed8ed1df114"
     },
     {
       "file": "InterMedium-Italic.ttf",
@@ -850,8 +850,8 @@
       "sets": [
         "standard"
       ],
-      "bytes": 338944,
-      "sha256": "3a82f36cad219a3e252b369260ded3815a48f2bf213d5ded60e901adbfcd1c3e"
+      "bytes": 345968,
+      "sha256": "94ac8dbf928c93e00e180960e2ba6d625b5ebe5d5e0ffb1c56ba1c3f7a6bf511"
     }
   ],
   "families": [
@@ -1236,8 +1236,8 @@
         "exact",
         "standard"
       ],
-      "bytes": 339152,
-      "sha256": "772e74068a1ab7474224ac75c35d2f3a0a73fe1a36c482bfe678597da9ad0af8"
+      "bytes": 346036,
+      "sha256": "1ac6768e37d3ae71ee75dc23b640a5ff16bcd4033191082d14009a42229a9475"
     },
     {
       "file": "GTInterText26-Italic.ttf",
@@ -1256,8 +1256,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338744,
-      "sha256": "0fd2eefa4cc96189f7bddd7b30dd51406f7d6476c834dde03644442ca2d0e620"
+      "bytes": 345664,
+      "sha256": "bc54f24224b1a367514952c6c88040f97f63f979d7f9e92e05202fb9bd35b341"
     },
     {
       "file": "GTInterText26Medium-Italic.ttf",
@@ -1276,8 +1276,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339180,
-      "sha256": "0bc82ecaec5a9da0c7d33c7b80081b09ac7803dc7dd74145e4235b014373ee93"
+      "bytes": 346136,
+      "sha256": "8f79eb4dde252b71ca87e2db36824c1dfd4d7a4932c5b62a64c23660d0b68963"
     },
     {
       "file": "GTInterText24-Italic.ttf",
@@ -1296,8 +1296,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338868,
-      "sha256": "ae79a70af9a31ab2fddff2b9a282bbbcbee8408bb0918510bf04e913cccb1698"
+      "bytes": 345788,
+      "sha256": "a740f1c7ab38a58a3eee4de25932734cc2ba4460bdb63d9f497730b5aee23319"
     },
     {
       "file": "GTInterText24Medium-Italic.ttf",
@@ -1316,8 +1316,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339392,
-      "sha256": "77a0c767602c16108eeb9b7b1fb64366279e397caf58fe88a3cb55dd38aa94f9"
+      "bytes": 346360,
+      "sha256": "b7dac8fe297d0b5366c7bb668789fecb36194d8667c5949bf69b60834af84c79"
     },
     {
       "file": "GTInterText22-Italic.ttf",
@@ -1336,8 +1336,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338880,
-      "sha256": "5aef1473cc9e5ef666b5048ffe37fb7b66330ba05780e2a6dfb335cbdd696aaf"
+      "bytes": 345780,
+      "sha256": "9665673831dbe71a60eecb35df3b463342e9a153c4c9ec787164997e6658e018"
     },
     {
       "file": "GTInterText22Medium-Italic.ttf",
@@ -1356,8 +1356,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339340,
-      "sha256": "d74d93fd53f83e86b2788add4ede815385a04a75e78609650cad53ff08f8d7bc"
+      "bytes": 346284,
+      "sha256": "b9fb905be58f30f10a5199fa9ff43ba3fd2fcc430e30b00862459907399c1ed1"
     },
     {
       "file": "GTInterText20-Italic.ttf",
@@ -1376,8 +1376,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338784,
-      "sha256": "32c9ff728a9682ce4e4574b1ce3a3e8274d0e3318bb811e3a5fa87203460931e"
+      "bytes": 345716,
+      "sha256": "24a64db26a99ddb0d4afa55ac9985ef94dcd88e4b6b75a64ee65c06a89d48064"
     },
     {
       "file": "GTInterText20Medium-Italic.ttf",
@@ -1396,8 +1396,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339268,
-      "sha256": "5fb6a614adfc5f4cd4d5294c331c2c86f372197e8bd9f843e6271a3a84d6c738"
+      "bytes": 346268,
+      "sha256": "f3e283e017b07c1e1d6708e956ac24c5a1de97862cca8283457790b91cc677ab"
     },
     {
       "file": "GTInterText18-Italic.ttf",
@@ -1416,8 +1416,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338756,
-      "sha256": "6eebbfbf8db74695351e1d4ce8a6e10941b2a807d2edac3dd84050b841574f19"
+      "bytes": 345684,
+      "sha256": "a39a62b6275d7e65e4e5ba62d1bb6c3e43edc2d20b627df04b74004d8d905614"
     },
     {
       "file": "GTInterText18Medium-Italic.ttf",
@@ -1436,8 +1436,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339288,
-      "sha256": "8d6a73fe32d59d59f1f985a824686e541e38036b78bbf18b9626b01dd85a61b1"
+      "bytes": 346212,
+      "sha256": "4e4a8f25d6482a1e71c12fdd933d29f1ef348a567f53fa35eff9c573dd8e404e"
     },
     {
       "file": "GTInterText15-Italic.ttf",
@@ -1456,8 +1456,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338672,
-      "sha256": "a504484cbf3082b7b6a121efe581464cedad070a5b472aa9fa04774511329264"
+      "bytes": 345636,
+      "sha256": "e3a5c56a644ed1c4ddfd428dc5c0f8408fee9a7d62063a6b349e4a8ee1975e0b"
     },
     {
       "file": "GTInterText15Medium-Italic.ttf",
@@ -1476,8 +1476,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339264,
-      "sha256": "db97e2981fe394b62437f766ebad22483788d2ceeb344f34ac73be9e2c6886f8"
+      "bytes": 346208,
+      "sha256": "df0c88e7200af19ab5cb78818e66a45417801cf9059a14ff88c6098f127a795f"
     },
     {
       "file": "GTInterText14-Italic.ttf",
@@ -1496,8 +1496,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 338440,
-      "sha256": "0ae60158752ad0674e47abc4665a30b4490697552f2e27301d897848752896e4"
+      "bytes": 345456,
+      "sha256": "70a0d80bb046507c3fb7d11f4933a632813e94bef667f4f8d4861a08dee6180c"
     },
     {
       "file": "GTInterText14Medium-Italic.ttf",
@@ -1516,8 +1516,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 339060,
-      "sha256": "517506032652530f0783c84180dbfb1daaa9166d7855dbabf695276b85ea8955"
+      "bytes": 346080,
+      "sha256": "320177f5d2b5b9ef0d9f04ea9128a4fa93ab7b035424d0731c5f1c6ec8758d1b"
     },
     {
       "file": "Inter-Italic.ttf",
@@ -1542,8 +1542,8 @@
       "sets": [
         "standard"
       ],
-      "bytes": 338328,
-      "sha256": "2447b97e92b266915f53f070ce3d23398f043e2478707861c33872a096b31865"
+      "bytes": 345340,
+      "sha256": "232ec9a7ff2fa059f1f781885c13879490bbea04bd89a763d65d3ed8ed1df114"
     },
     {
       "file": "InterMedium-Italic.ttf",
@@ -1568,8 +1568,8 @@
       "sets": [
         "standard"
       ],
-      "bytes": 338944,
-      "sha256": "3a82f36cad219a3e252b369260ded3815a48f2bf213d5ded60e901adbfcd1c3e"
+      "bytes": 345968,
+      "sha256": "94ac8dbf928c93e00e180960e2ba6d625b5ebe5d5e0ffb1c56ba1c3f7a6bf511"
     }
   ]
 }

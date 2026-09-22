@@ -91,7 +91,7 @@ describe('the export font set', () => {
     // the italic source is recorded with its provenance
     expect(fonts.source.italic.file).toBe('packages/fonts/assets/InterVariable-Italic.woff2');
     expect(fonts.source.italic.sha256).toMatch(/^[0-9a-f]{64}$/);
-    expect(fonts.source.italic.release).toContain('rsms/inter/releases/tag/v4.001');
+    expect(fonts.source.italic.release).toContain('rsms/inter/releases/tag/v4.1');
     expect(fonts.source.italic.path).toBe('web/InterVariable-Italic.woff2');
     expect(fonts.source.italic.italicAngle).toBeLessThan(0);
   });

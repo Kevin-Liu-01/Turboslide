@@ -8,7 +8,7 @@ import { FONT_IDS } from '@turboslide/schema/fonts';
 
 import type { LightFamily, LightFile } from './catalog-light.ts';
 import { CATALOG_LIGHT } from './catalog-light.ts';
-import { CATEGORY_GENERIC } from './names.ts';
+import { CATEGORY_GENERIC, INTER_LICENCE_URL } from './names.ts';
 
 /** The weights the picker can name (CSS's nine); a family carries the ones its files cover. */
 export const STANDARD_WEIGHTS = [100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
@@ -63,10 +63,41 @@ export function catalogSummary(): { fonts: FontListRow[] } {
   };
 }
 
-/** The `font-family` value of a face: its name quoted, then the category's generic family. */
+/**
+ * The base sheet's fallbacks per generic family (sheet.css `--display`, `--text` and `--mono`):
+ * what a catalog face falls back to before its file loads, the same list on the block path
+ * (`--ts-font-<id>`, @turboslide/render/fonts) and the kit path (`--display` and `--text`,
+ * @turboslide/render/theme-css), so a heading set by the kit and a text box set by the block
+ * fall back to one face (docs/FEATURES.md 3.5; audit-fonts 16).
+ */
+export const GENERIC_STACKS: Readonly<Record<string, string>> = {
+  'sans-serif': "'Helvetica Neue', Arial, sans-serif",
+  serif: "Georgia, 'Times New Roman', serif",
+  monospace: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+};
+
+/**
+ * The `font-family` value of a face: its name quoted, then the base sheet's fallbacks for its
+ * category (GENERIC_STACKS, ending in the generic family). Inter answers the sheet's own stack
+ * with the metric matched fallback face second (docs/FEATURES.md 3.1 item 3).
+ */
 export function fontFamilyStack(id: FontId): string {
+  if (id === 'inter') return INTER_STACK;
   const row = lightFamily(id);
-  return `'${row.name.replace(/'/g, "\\'")}', ${CATEGORY_GENERIC[row.category]}`;
+  const generic = CATEGORY_GENERIC[row.category];
+  return `'${row.name.replace(/'/g, "\\'")}', ${GENERIC_STACKS[generic] ?? generic}`;
+}
+
+/** The sheet's Inter stack (sheet.css `--text`; tokens.ts FONTS.text), here so the browser half needs no theme import. */
+export const INTER_STACK = "'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif";
+
+/**
+ * True when a face has tabular figures (`tnum`; docs/FEATURES.md 3.1 item 4), read from the
+ * flag the fetch script recorded: the Tabular figures row is enabled for it and disabled with
+ * "This face has no tabular figures" otherwise. Inter has them.
+ */
+export function hasTabularFigures(id: FontId): boolean {
+  return lightFamily(id).tnum;
 }
 
 /** The custom property a block's `font-family` reads for a face (`--ts-font-<id>`). */
@@ -82,8 +113,8 @@ export function fontAssetPath(id: FontId, file: string): string {
   return id === 'inter' ? `assets/${file}` : `assets/${id}/${file}`;
 }
 
-/** The licence text's address in the Google Fonts repository at the pinned commit, or Inter's release. */
+/** The licence text's address in the Google Fonts repository at the pinned commit, or Inter's v4.1 release (docs/FEATURES.md 3.1 item 2). */
 export function licenceUrl(id: FontId, directory: string, commit: string): string {
-  if (id === 'inter') return 'https://github.com/rsms/inter/blob/v4.001/LICENSE.txt';
+  if (id === 'inter') return INTER_LICENCE_URL;
   return `https://github.com/google/fonts/blob/${commit}/${directory}/OFL.txt`;
 }

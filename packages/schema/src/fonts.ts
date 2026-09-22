@@ -7,7 +7,9 @@
 // ids alone so `packages/schema` stays at the bottom of the one way dependency direction (SPEC
 // 3.3 item 3): the fonts package depends on the schema, never the reverse. Membership is Kevin's
 // list (SPEC-5 17, the row A7 adds): a face joins or leaves as one id here, one catalog row and
-// one asset folder.
+// one asset folder. The features round (docs/FEATURES.md 3.2) added the eight ids after
+// `fira-code`: Geist, Geist Mono, Instrument Sans, Manrope, Bricolage Grotesque, Schibsted
+// Grotesk, Newsreader and Fraunces, each OFL 1.1 with no Reserved Font Name at the pinned commit.
 export const FONT_IDS = [
   'inter',
   'roboto',
@@ -35,6 +37,14 @@ export const FONT_IDS = [
   'ibm-plex-sans',
   'ibm-plex-mono',
   'fira-code',
+  'geist',
+  'geist-mono',
+  'instrument-sans',
+  'manrope',
+  'bricolage-grotesque',
+  'schibsted-grotesk',
+  'newsreader',
+  'fraunces',
 ] as const;
 export type FontId = (typeof FONT_IDS)[number];
 

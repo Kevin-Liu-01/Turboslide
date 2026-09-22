@@ -46,3 +46,36 @@
   color: var(--pt-titanium);
   min-width: 18px;
 }
+
+/* The Tabular figures row (docs/FEATURES.md 3.1 item 4): the label stacks its sentence under the
+   word in 11px titanium, so the row reads as a seller's sentence and not a typographer's term;
+   the check row at the right is the check control's own (check.css). A disabled row (a face
+   without tnum) keeps the sentence, which then names the reason. */
+.ts-ctl-typo-numerals {
+  align-items: flex-start;
+  padding: 4px 0;
+}
+
+.ts-ctl-typo-label-stack {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  white-space: normal;
+}
+
+.ts-ctl-typo-label-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ts-ctl-typo-sentence {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--pt-titanium);
+  max-width: 200px;
+}
+
+.ts-ctl-typo-numerals[data-available='no'] .ts-ctl-typo-label-line {
+  color: var(--pt-titanium);
+}

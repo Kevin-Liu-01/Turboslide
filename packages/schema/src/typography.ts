@@ -45,6 +45,14 @@ export const TYPE_LEADING = [
 /** Google's line spacing menu (SPEC-2 0.20): Single, 1.15, 1.5, Double. */
 export const LINE_SPACING_PRESETS = [1, 1.15, 1.5, 2] as const;
 
+/**
+ * The numeral spacing a block may ask for (docs/FEATURES.md 3.1 item 4; audit-fonts 2): `tabular`
+ * gives every digit the same width so numbers line up in a column; absent keeps the face's
+ * proportional digits. One value today; the type is a union so `oldstyle` can join later.
+ */
+export const TYPE_NUMERALS = ['tabular'] as const;
+export type TypeNumerals = (typeof TYPE_NUMERALS)[number];
+
 /** The column counts a text container takes (SPEC-2 2.2.10). */
 export const TYPE_COLUMNS = [1, 2, 3] as const;
 export type TypeColumns = (typeof TYPE_COLUMNS)[number];
@@ -77,6 +85,8 @@ export type Typography = {
   indent?: number;
   /** The face by catalog id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme's face when absent. */
   family?: FontId;
+  /** Tabular figures (docs/FEATURES.md 3.1 item 4): every digit the same width; proportional when absent. */
+  numerals?: TypeNumerals;
 };
 
 export const typographyObjectSchema = z.strictObject({
@@ -149,7 +159,20 @@ export const typographyObjectSchema = z.strictObject({
     group: 'Text',
     help: 'A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.',
   }),
+  numerals: annotate(z.enum(TYPE_NUMERALS).optional(), {
+    label: 'Tabular figures',
+    control: 'toggle',
+    snap: TYPE_NUMERALS,
+    group: 'Text',
+    help: 'Every digit takes the same width, so numbers line up in a column',
+  }),
 }) satisfies z.ZodType<Typography>;
+
+/** The sentence under the Tabular figures row and in its tooltip (docs/FEATURES.md 3.1 item 4; judge-seller addition 10). */
+export const NUMERALS_SENTENCE = 'Every digit takes the same width, so numbers line up in a column';
+
+/** The reason the Tabular figures row is disabled on a face without `tnum` (docs/FEATURES.md 3.1 item 4). */
+export const NUMERALS_UNAVAILABLE = 'This face has no tabular figures';
 
 /** The typography group as one inspector control (control `typography`, SPEC 6.5). */
 export const typographySchema = annotate(typographyObjectSchema.optional(), {
@@ -199,5 +222,13 @@ export function typographyDeclarations(typography: Typography | undefined): stri
   // family whose faces are not loaded inherits the sheet's face
   if (typography.family !== undefined)
     out.push(`font-family:var(--ts-font-${typography.family}, inherit)`);
+  // the display features are Inter's (docs/FEATURES.md 3.1 item 5; audit-fonts 7): a block in
+  // another family drops the sheet's cv11 and ss01, whose ss01 would mean something else in 17 of
+  // the catalog's families; Inter itself keeps the sheet's rule (the heading rules read
+  // --display-features, which the kit sets)
+  if (typography.family !== undefined && typography.family !== 'inter')
+    out.push('font-feature-settings:normal');
+  // tabular figures (3.1 item 4): every digit the same width, so a column of numbers aligns
+  if (typography.numerals === 'tabular') out.push('font-variant-numeric:tabular-nums');
   return out;
 }

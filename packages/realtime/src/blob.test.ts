@@ -18,6 +18,7 @@ import { applyAndPush, localIndexEtag, watchSidecarIndex } from '@turboslide/sto
 import { openFileStore } from '@turboslide/store/file-store';
 import type { FileStore } from '@turboslide/store/file-store';
 import { sharedPresence } from '@turboslide/store/presence-store';
+import { RECORD_ORIGIN_WRITES } from '@turboslide/store/versions';
 import {
   HOSTED_POLL_MS,
   POLL_CALLS_PER_MINUTE_MAX,
@@ -362,9 +363,13 @@ describe('blobChannel', () => {
       const result = await a.append('gt-brand', 412, [editEntry(CLIENT_A, 1, kevin, 22)]);
       expect(result.ok).toBe(true);
       await until(() => seen.some((event) => event.type === 'checkpoint'), 4000);
+      // the record travels with its writer's client id and the op ids it covers once the
+      // deployment writes the origin (docs/SYNC.md 3.2, deployment N plus 1); as `store` before
       expect(seen.find((event) => event.type === 'op')).toMatchObject({
         type: 'op',
-        entry: { seq: 413, clientId: 'store' },
+        entry: RECORD_ORIGIN_WRITES
+          ? { seq: 413, clientId: CLIENT_A, covers: [`${CLIENT_A}:1`] }
+          : { seq: 413, clientId: 'store' },
       });
       // a presence write on a reaches b's listeners through the same poll
       await a.presence.set('gt-brand', CLIENT_A, rosterEntry(CLIENT_A, 1, 'Titanium 471'), 120_000);

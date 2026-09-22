@@ -27,7 +27,7 @@ export const VERSIONS_DIR = 'versions';
  * 1 therefore lands on a reader that parses what N plus 1 wrote, never earlier. The blob store
  * reads it as the default of `BlobStoreOptions.writeOrigin`; the tests pass `true`.
  */
-export const RECORD_ORIGIN_WRITES = false;
+export const RECORD_ORIGIN_WRITES = true;
 
 /** `{ clientId, opIds }` as the record stores it (store.ts WriteOrigin). Strict, both fields plain strings. */
 export const writeOriginSchema = z.strictObject({

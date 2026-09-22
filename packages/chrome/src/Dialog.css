@@ -622,3 +622,17 @@
   color: var(--pt-ink-2);
   font-size: 12.5px;
 }
+
+/* Tailor for a customer's Find the logo slot (dialogs/Tailor.tsx; docs/FEATURES.md 4.5): the
+   button beside the mark drawn on paper and on ink (the Logo dialog's pair), the stored sentence
+   under them */
+.ts-tailor-find {
+  display: grid;
+  grid-template-columns: auto 96px;
+  gap: 8px 12px;
+  align-items: center;
+}
+
+.ts-tailor-find .ts-dialog-hint {
+  grid-column: 1 / -1;
+}

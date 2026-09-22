@@ -1,15 +1,19 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { DeckDocument } from '@turboslide/schema/deck';
-import { slideOrder, slideTitle } from '@turboslide/schema/deck';
+import { deckAppearance, slideOrder, slideTitle } from '@turboslide/schema/deck';
 import { fileToDataUrl } from '@turboslide/viewer/clipboard';
 
 import { Dialog, DialogCheck, DialogField } from '../Dialog';
+import type { EditorShellInput } from '../editor-shell';
 import { useEditorShell } from '../editor-shell-context';
 import { useMountEffect } from '../lib/useMountEffect';
+import { findCustomerLogo, logoMatchFor } from '../logo-model';
+import type { LogoRow } from '../logo-model';
 import { TAILOR } from '../panels/assist-strings';
 import { tipProps } from '../Tooltip';
 import { countMatches, slideStrings } from './FindReplace';
+import { LogoMarkPair, insertLogo, kitGrounds, searchLogos } from './Logo';
 
 /**
  * Tools > Tailor for a customer (docs/PRODUCT.md section 5; audit-gaps 16; research 07): the
@@ -23,6 +27,17 @@ import { countMatches, slideStrings } from './FindReplace';
  * with Undo. The Assist panel's first starter card opens this same dialog (6.1). A chosen
  * picture is added with `asset.add` first (its own record, as every upload), then named in the
  * pass, so the text, the skips and the swaps stay one undo step.
+ *
+ * The features round (docs/FEATURES.md 4.5; audit-logos 3): the Logo step gains "Find the <To>
+ * logo" (`dialog.tailor.logo.find`) beside the chooser, drawn once the To field names a brand the
+ * server's cache knows by title or alias, showing the mark on paper and on ink (the Logo dialog's
+ * pair); a click stores the mark through `logo.insert` and the stored asset feeds `deck.tailor`'s
+ * `logo` in the one Tailor commit, one undo step as before. The slot and its words are this
+ * lane's (B1); the match and the store are B6's rules in logo-model.ts (`logoMatchFor` over the
+ * rows `GET /api/logo/search?q=<to>&limit=5` answers, `findCustomerLogo` over `logo.insert` with
+ * no slide and no kit write; build/b6.md R7), wired here as the default `TailorLogoFinder`; a
+ * test passes its own. The chooser lists the four raster types alone until the svg intake of 4.7
+ * lands (4.5).
  */
 
 /** How many times `from` occurs across the deck and on how many slides, the dialog's live count. */
@@ -43,15 +58,83 @@ export function tailorCounts(
   return { places, slides };
 }
 
-const PICTURE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'image/gif'];
+/** The four raster types the hosted intake accepts (docs/FEATURES.md 4.5; audit-logos 4). */
+const PICTURE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
-export function TailorDialog() {
+/** The words of the Find the logo slot (FEATURES.md 4.5; strings.ts takes them at the merge, b1.md R3). */
+export const TAILOR_LOGO = {
+  find: (to: string) => `Find the ${to} logo`,
+  findDoc: 'Shows the logo thesvg.org has for this name; a click stores it for Apply',
+  found: (title: string) => `The ${title} logo is ready; Apply puts it where the old logo was`,
+  storing: 'Storing the logo',
+} as const;
+
+/** How long the To field rests before the cache is asked whether it knows the name. */
+export const FIND_LOGO_PAUSE_MS = 300;
+
+/**
+ * The Find the logo seam (FEATURES.md 4.5; section 6 "Tailor.tsx: B1 the slot, B6 the handler
+ * and the cache match"): the match of the To field against the cache by title or alias, and the
+ * store of the mark through `logo.insert`, answering the asset id `deck.tailor` takes. The
+ * dialog builds the default from logo-model.ts's rules over the shell's input; a test passes
+ * its own; `null` draws no button.
+ */
+export type TailorLogoFinder = {
+  match: (name: string) => Promise<LogoRow | null>;
+  store: (row: LogoRow) => Promise<{ assetId: string }>;
+};
+
+/** The finder over the product's routes and rules (build/b6.md R7). */
+export function defaultLogoFinder(input: {
+  deckId: string;
+  revision: number;
+  dispatch: EditorShellInput['dispatch'];
+  document: DeckDocument;
+}): TailorLogoFinder {
+  return {
+    match: async (name) => {
+      const answer = await searchLogos(name, { limit: 5 });
+      return logoMatchFor(answer.logos, name);
+    },
+    store: async (row) => {
+      const stored = await findCustomerLogo(
+        row,
+        deckAppearance(input.document.deck),
+        (request) =>
+          insertLogo(request, { dispatch: input.dispatch, deckId: input.deckId }).then(
+            (answer) => ({ asset: { id: answer.asset.id } }),
+          ),
+        input.revision,
+      );
+      if (stored === null) throw new Error(`${row.title} has no variant that reads on this deck`);
+      return { assetId: stored.assetId };
+    },
+  };
+}
+
+export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | null } = {}) {
   const shell = useEditorShell();
   const { input } = shell;
+  const finder = useMemo<TailorLogoFinder | null>(
+    () =>
+      logoFinder === undefined
+        ? defaultLogoFinder({
+            deckId: input.deckId,
+            revision: input.revision,
+            dispatch: input.dispatch,
+            document: input.document,
+          })
+        : logoFinder,
+    [input.deckId, input.dispatch, input.document, input.revision, logoFinder],
+  );
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [replaceAlt, setReplaceAlt] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  /* the Find the logo slot: the cache's match for the To field, and the mark stored by a click */
+  const [foundLogo, setFoundLogo] = useState<LogoRow | null>(null);
+  const [storedLogo, setStoredLogo] = useState<{ assetId: string; title: string } | null>(null);
+  const [storing, setStoring] = useState(false);
   const [skip, setSkip] = useState<Set<string>>(() => new Set());
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -68,9 +151,57 @@ export function TailorDialog() {
   const order = useMemo(() => slideOrder(input.document.deck), [input.document]);
   const counts = useMemo(() => tailorCounts(input.document, from), [input.document, from]);
   const hasName = from.trim() !== '' && counts.places > 0;
-  const hasLogo = replaceAlt && file !== null && from.trim() !== '';
+  const hasLogo = replaceAlt && (file !== null || storedLogo !== null) && from.trim() !== '';
   const hasSkip = skip.size > 0;
-  const canApply = (hasName || hasLogo || hasSkip) && busy === null;
+  const canApply = (hasName || hasLogo || hasSkip) && busy === null && !storing;
+  const grounds = useMemo(() => kitGrounds(input.document.deck.brand), [input.document]);
+
+  /* the To field rests, then the cache is asked; a stored mark of another name is dropped */
+  useEffect(() => {
+    if (finder === null) return undefined;
+    const name = to.trim();
+    if (name === '') {
+      setFoundLogo(null);
+      return undefined;
+    }
+    let live = true;
+    const timer = window.setTimeout(() => {
+      finder
+        .match(name)
+        .then((row) => {
+          if (live) setFoundLogo(row);
+        })
+        .catch(() => {
+          if (live) setFoundLogo(null);
+        });
+    }, FIND_LOGO_PAUSE_MS);
+    return () => {
+      live = false;
+      window.clearTimeout(timer);
+    };
+  }, [finder, to]);
+  useEffect(() => {
+    if (
+      storedLogo !== null &&
+      storedLogo.title.toLocaleLowerCase() !== to.trim().toLocaleLowerCase()
+    )
+      setStoredLogo(null);
+  }, [storedLogo, to]);
+
+  const findLogo = async () => {
+    if (finder === null || foundLogo === null || storing) return;
+    setStoring(true);
+    setError(null);
+    try {
+      const stored = await finder.store(foundLogo);
+      setStoredLogo({ assetId: stored.assetId, title: foundLogo.title });
+      setReplaceAlt(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setStoring(false);
+    }
+  };
 
   const toggleSkip = (id: string, on: boolean) => {
     setSkip((current) => {
@@ -86,7 +217,10 @@ export function TailorDialog() {
     setError(null);
     try {
       let logo: { assetId: string; replaceAlt: string } | undefined;
-      if (file !== null && hasLogo) {
+      if (storedLogo !== null && hasLogo) {
+        /* the mark Find the logo stored (4.5): named in the pass, so the swap is one undo step */
+        logo = { assetId: storedLogo.assetId, replaceAlt: from.trim() };
+      } else if (file !== null && hasLogo) {
         setBusy(TAILOR.uploading);
         const dataUrl = await fileToDataUrl(file);
         const asset = (await input.dispatch('asset.add', {
@@ -166,6 +300,30 @@ export function TailorDialog() {
         {from === '' ? ' ' : TAILOR.count(counts.places, counts.slides)}
       </p>
       <p className="ts-dialog-field-label">{TAILOR.logoHead}</p>
+      {finder !== null && foundLogo !== null && to.trim() !== '' ? (
+        <div className="ts-tailor-find" data-control="dialog.tailor.logo.found">
+          <button
+            type="button"
+            className="pt-ib is-text ts-dialog-btn ts-tailor-find-button"
+            data-control="dialog.tailor.logo.find"
+            data-slug={foundLogo.slug}
+            disabled={storing || busy !== null}
+            aria-pressed={storedLogo !== null}
+            onClick={() => void findLogo()}
+            {...tipProps({ name: TAILOR_LOGO.find(to.trim()), doc: TAILOR_LOGO.findDoc })}
+          >
+            <span className="pt-lb">
+              {storing ? TAILOR_LOGO.storing : TAILOR_LOGO.find(to.trim())}
+            </span>
+          </button>
+          <LogoMarkPair row={foundLogo} grounds={grounds} control="dialog.tailor.logo.find" />
+          {storedLogo !== null ? (
+            <span className="ts-dialog-hint" data-control="dialog.tailor.logo.stored">
+              {TAILOR_LOGO.found(storedLogo.title)}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       <DialogCheck
         label={TAILOR.logoEverySlide}
         checked={false}

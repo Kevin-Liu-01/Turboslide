@@ -34,6 +34,10 @@ export const FONT_PICKER = {
   searchDoc: 'Type part of a family name',
   brand: 'Brand',
   inThisPresentation: 'In this presentation',
+  /* the features round (docs/FEATURES.md 3.5, P1): the Recent group and its foot row */
+  recent: 'Recent',
+  clearRecent: 'Clear recent',
+  clearRecentDoc: 'Forgets the faces this browser picked lately',
   themeFace: 'Theme font',
   moreFonts: 'More fonts',
   moreFontsDoc: 'Every face of the catalog with its category and licence',
@@ -170,19 +174,35 @@ export function brandFamilies(kit: BrandKit | undefined): FontId[] {
   return text === display ? [display] : [display, text];
 }
 
-/** The rows whose name contains the query, case folded; every row for an empty query. */
+/**
+ * The rows the query matches, case folded; every row for an empty query. The features round
+ * (docs/FEATURES.md 3.5, audit-fonts 11, row `fonts.picker.search-category`): the query matches
+ * the name, the category's label ("mono" lists the monospace families, "serif" the serifs and,
+ * as a word inside it, the sans serifs) and the id ("dm-sans"), so a seller who types the kind
+ * of face and not a name finds it.
+ */
 export function filterRows(rows: readonly FontRow[], query: string): FontRow[] {
   const needle = query.trim().toLocaleLowerCase();
   if (needle === '') return [...rows];
-  return rows.filter((row) => row.name.toLocaleLowerCase().includes(needle));
+  return rows.filter(
+    (row) =>
+      row.name.toLocaleLowerCase().includes(needle) ||
+      FONT_CATEGORY_LABELS[row.category].toLocaleLowerCase().includes(needle) ||
+      row.id.includes(needle),
+  );
 }
 
-export type FontGroup = { id: 'brand' | 'used' | FontCategory; title: string; rows: FontRow[] };
+export type FontGroup = {
+  id: 'brand' | 'used' | 'recent' | FontCategory;
+  title: string;
+  rows: FontRow[];
+};
 
 /**
  * The picker's groups (docs/PRODUCT.md 4.2): the kit's faces under Brand, the families this
- * presentation uses, then the catalog by category in Google's order (Sans serif, Serif, Display,
- * Monospace). A used family stays in its category too, so the catalog reads whole. Every group
+ * presentation uses, the faces this browser picked lately (docs/FEATURES.md 3.5, P1; audit-fonts
+ * 10) then the catalog by category in Google's order (Sans serif, Serif, Display, Monospace). A
+ * used or recent family stays in its category too, so the catalog reads whole. Every group
  * filters by the query; empty groups are dropped.
  */
 export function groupRows(
@@ -190,6 +210,7 @@ export function groupRows(
   used: readonly FontId[],
   query = '',
   brand: readonly FontId[] = [],
+  recent: readonly FontId[] = [],
 ): FontGroup[] {
   const shown = filterRows(rows, query);
   const groups: FontGroup[] = [];
@@ -200,12 +221,64 @@ export function groupRows(
   const usedRows = shown.filter((row) => used.includes(row.id));
   if (usedRows.length > 0)
     groups.push({ id: 'used', title: FONT_PICKER.inThisPresentation, rows: usedRows });
+  const recentRows = recent
+    .map((id) => shown.find((row) => row.id === id))
+    .filter((row): row is FontRow => row !== undefined);
+  if (recentRows.length > 0)
+    groups.push({ id: 'recent', title: FONT_PICKER.recent, rows: recentRows });
   for (const category of FONT_CATEGORIES) {
     const inCategory = shown.filter((row) => row.category === category);
     if (inCategory.length > 0)
       groups.push({ id: category, title: FONT_CATEGORY_LABELS[category], rows: inCategory });
   }
   return groups;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Recent, per browser (docs/FEATURES.md 3.5, P1; audit-fonts 10; question 6 of section 9)
+
+/** The `localStorage` key of the faces this browser picked lately. */
+export const FONTS_RECENT_STORAGE = 'turboslide.fonts.recent';
+/** The Recent group lists at most this many faces. */
+export const FONTS_RECENT_MAX = 5;
+
+/** The recent ids a store holds, the catalog's alone, at most five; nothing on a broken store. */
+export function readRecentFonts(storage: Storage | null): FontId[] {
+  if (storage === null) return [];
+  try {
+    const raw = storage.getItem(FONTS_RECENT_STORAGE);
+    const parsed: unknown = raw === null ? [] : JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const out: FontId[] = [];
+    for (const each of parsed)
+      if (typeof each === 'string' && isFontId(each) && !out.includes(each)) out.push(each);
+    return out.slice(0, FONTS_RECENT_MAX);
+  } catch {
+    return [];
+  }
+}
+
+/** The list with `id` first and no repeat, at most five; the theme's face is never remembered. Written back when a store exists. */
+export function pushRecentFont(
+  recent: readonly FontId[],
+  id: FontId | null,
+  storage: Storage | null,
+): FontId[] {
+  if (id === null || id === DEFAULT_FONT_ID) return [...recent];
+  const next = [id, ...recent.filter((each) => each !== id)].slice(0, FONTS_RECENT_MAX);
+  writeRecentFonts(next, storage);
+  return next;
+}
+
+/** Writes the list, or removes the key for an empty one (Clear recent). */
+export function writeRecentFonts(recent: readonly FontId[], storage: Storage | null): void {
+  if (storage === null) return;
+  try {
+    if (recent.length === 0) storage.removeItem(FONTS_RECENT_STORAGE);
+    else storage.setItem(FONTS_RECENT_STORAGE, JSON.stringify(recent));
+  } catch {
+    // private mode: the group holds for the session
+  }
 }
 
 /** The flat row order of the groups, for the arrow keys (a row in two groups walks twice, once per group). */
@@ -254,10 +327,27 @@ const DIRECTORIES: Readonly<Record<FontId, string>> = {
   'ibm-plex-sans': 'ofl/ibmplexsans',
   'ibm-plex-mono': 'ofl/ibmplexmono',
   'fira-code': 'ofl/firacode',
+  /* the features round's eight families (docs/FEATURES.md 3.2; B2's catalog rows) */
+  geist: 'ofl/geist',
+  'geist-mono': 'ofl/geistmono',
+  'instrument-sans': 'ofl/instrumentsans',
+  manrope: 'ofl/manrope',
+  'bricolage-grotesque': 'ofl/bricolagegrotesque',
+  'schibsted-grotesk': 'ofl/schibstedgrotesk',
+  newsreader: 'ofl/newsreader',
+  fraunces: 'ofl/fraunces',
 };
+
+/**
+ * The Inter release the bundled files come from (docs/FEATURES.md 3.1 items 1 and 2; audit-fonts
+ * 4 and 5): rsms/inter tags the release `v4.1` while the font's internal version reads 4.001, and
+ * the `v4.001` tag does not exist, so the licence link a marketer clicks from More fonts answered
+ * 404 (B2's row `fonts.links.licence-v4-1`, the one line in this file by B2's request).
+ */
+export const INTER_RELEASE_TAG = 'v4.1';
 
 /** The licence text's address: the family's OFL.txt in the Google Fonts repository at the pinned commit, Inter's release licence. */
 export function licenceUrlOf(id: FontId): string {
-  if (id === 'inter') return 'https://github.com/rsms/inter/blob/v4.001/LICENSE.txt';
+  if (id === 'inter') return `https://github.com/rsms/inter/blob/${INTER_RELEASE_TAG}/LICENSE.txt`;
   return `https://github.com/google/fonts/blob/${GOOGLE_FONTS_COMMIT}/${DIRECTORIES[id]}/OFL.txt`;
 }

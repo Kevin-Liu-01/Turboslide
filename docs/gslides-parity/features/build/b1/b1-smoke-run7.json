@@ -1,0 +1,147 @@
+{
+  "base": "http://localhost:4411",
+  "at": "2026-09-22T14:04:14.203Z",
+  "rows": [
+    {
+      "n": 1,
+      "step": "the editor boots on /new",
+      "expected": "window.turboslide.studio and a slide",
+      "observed": "slide title",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "the Font control on the text tail",
+      "expected": "toolbar.font visible",
+      "observed": "true",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "\"mono\" lists the monospace families alone",
+      "expected": "one group mono with jetbrains-mono and geist-mono",
+      "observed": "[[\"mono\",[\"roboto-mono\",\"jetbrains-mono\",\"ibm-plex-mono\",\"fira-code\",\"geist-mono\"]]]",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "\"serif\" lists the serifs and the sans serifs, no monospace",
+      "expected": "groups serif and sans, not mono",
+      "observed": "[\"brand\",\"sans\",\"serif\"]",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "no Recent group before a pick",
+      "expected": "no group recent",
+      "observed": "[\"brand\",\"sans\",\"serif\",\"display\",\"mono\"]",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "the pick writes the family",
+      "expected": "Roboto in the computed family",
+      "observed": "Roboto, \"Helvetica Neue\", Arial, sans-serif",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "the pick is remembered per browser",
+      "expected": "[\"roboto\"] in turboslide.fonts.recent",
+      "observed": "[\"roboto\"]",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "Recent lists Roboto after Used and before the catalog",
+      "expected": "recent with roboto between used and sans",
+      "observed": "[\"brand\",\"used\",\"recent\",\"sans\",\"serif\",\"display\",\"mono\"]",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "Clear recent at the group foot",
+      "expected": "toolbar.font.clearRecent visible",
+      "observed": "true",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "Clear recent empties the group",
+      "expected": "no group recent",
+      "observed": "[\"brand\",\"used\",\"sans\",\"serif\",\"display\",\"mono\"]",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "the store is emptied",
+      "expected": "null",
+      "observed": "null",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "Tools > Tailor opens the dialog",
+      "expected": "dialog.tailor",
+      "observed": "true",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "the Find the Figma logo slot follows the search route",
+      "expected": "the button when /api/logo/search answers 200, none when it does not",
+      "observed": "route 200; button count 1",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "Find the Figma logo stores the mark or says why not",
+      "expected": "dialog.tailor.logo.stored, or one sentence in dialog.tailor.error",
+      "observed": "not stored; logo.insert is declared in the action table and lands in P1",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "the chooser lists the four raster types",
+      "expected": "image/png,image/jpeg,image/webp,image/gif",
+      "observed": "image/png,image/jpeg,image/webp,image/gif",
+      "ok": true
+    },
+    {
+      "n": 16,
+      "step": "Escape closes the dialog",
+      "expected": "no dialog.tailor",
+      "observed": "true",
+      "ok": true
+    },
+    {
+      "n": 17,
+      "step": "Insert > Logo in the menu model",
+      "expected": "insert.logo present once the integrator lands the rows (request R1)",
+      "observed": "absent (not driven)",
+      "ok": true
+    },
+    {
+      "n": 18,
+      "step": "no console or page error from this lane’s modules",
+      "expected": "none",
+      "observed": "none",
+      "ok": true
+    },
+    {
+      "n": 19,
+      "step": "the scratch deck is trashed and removed",
+      "expected": "404 on /edit/<id>",
+      "observed": "404 (untitled-20260922-6yor)",
+      "ok": true
+    }
+  ],
+  "errors": [
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4411/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 181480",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4411/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ucqw2vw-cb75e7 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4411/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ucqw2vw-cb75e7 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4411/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ucqw2vw-cb75e7 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4411/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ucqw2vw-cb75e7 rend",
+    "console: Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

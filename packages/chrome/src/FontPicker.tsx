@@ -10,6 +10,7 @@ import { fontRows } from '@turboslide/render/fonts';
 import { MoreFontsDialog } from './dialogs/MoreFonts';
 import { useEditorShell } from './editor-shell-context';
 import {
+  FONT_CATEGORY_LABELS,
   FONT_PICKER,
   brandFamilies,
   controlLabel,
@@ -18,10 +19,13 @@ import {
   flatRows,
   fontsStylesheetHref,
   groupRows,
+  pushRecentFont,
+  readRecentFonts,
   rowFamilyStack,
   takesFamily,
   typographyWithFamily,
   usedFamilies,
+  writeRecentFonts,
 } from './font-picker-model';
 import type { FontGroup, FontRow } from './font-picker-model';
 import { Icon } from './icons';
@@ -47,8 +51,13 @@ import './FontPicker.css';
  * inside it), so opening the picker costs nothing until a row shows. The Brand kit panel's two
  * Fonts controls are the same dropdown (`FontDropdown`) with their own control ids.
  *
- * Ids (PRODUCT.md 7.1): `<control>.search`, `<control>.group.<brand|used|sans|serif|display|mono>`,
- * `<control>.row.<id>`, `<control>.more`.
+ * The features round (docs/FEATURES.md 3.5, P1; audit-fonts 10, 11, 17): a Recent group of up to
+ * five faces per browser after Used, written on every pick, with Clear recent at its foot; the
+ * search matches the name, the category label and the id; a row's tooltip names the face and its
+ * category, and the licence stays in More fonts.
+ *
+ * Ids (PRODUCT.md 7.1): `<control>.search`, `<control>.group.<brand|used|recent|sans|serif|display|mono>`,
+ * `<control>.row.<id>`, `<control>.clearRecent`, `<control>.more`.
  */
 
 /** The catalog's rows, read once from the renderer's light table (the same rows `font.list` answers). */
@@ -80,6 +89,15 @@ export function ensureFontFaceLink(id: FontId, doc: Document = document): void {
 /** For the tests: forget which faces were linked. */
 export function resetFontFaceLinks(): void {
   linked.clear();
+}
+
+/** The browser's store for the Recent group; null where none is at hand (a server render, a blocked store). */
+function storageOf(): Storage | null {
+  try {
+    return typeof localStorage === 'undefined' ? null : localStorage;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -122,6 +140,10 @@ export type FontListProps = {
   brand: readonly FontId[];
   /** the families the presentation uses (the second group) */
   used: readonly FontId[];
+  /** the faces this browser picked lately (the Recent group, after Used) */
+  recent?: readonly FontId[];
+  /** Clear recent at the Recent group's foot */
+  onClearRecent?: () => void;
   /** the family shown as picked; null for the theme's face */
   picked: FontId | null;
   onPick: (id: FontId | null) => void;
@@ -141,6 +163,8 @@ export function FontList({
   rows,
   brand,
   used,
+  recent = [],
+  onClearRecent,
   picked,
   onPick,
   query = '',
@@ -149,7 +173,10 @@ export function FontList({
   onMore,
 }: FontListProps) {
   const root = useRef<HTMLDivElement>(null);
-  const groups = useMemo(() => groupRows(rows, used, query, brand), [rows, used, query, brand]);
+  const groups = useMemo(
+    () => groupRows(rows, used, query, brand, recent),
+    [rows, used, query, brand, recent],
+  );
   const flat = useMemo(() => flatRows(groups), [groups]);
   const moreShown = onMore !== undefined && query.trim() === '';
   type Walked = { group: FontGroup['id']; row: FontRow } | 'more';
@@ -210,9 +237,10 @@ export function FontList({
     const at = walked;
     const isPicked = (picked ?? DEFAULT_FONT_ID) === row.id;
     const entry: Walked = { group, row };
+    /* the tooltip names the face and its category; the licence stays in More fonts (audit-fonts 17) */
     const { onMouseEnter: rowEnter, ...rowTip } = tipProps({
       name: row.name,
-      doc: `${FONT_PICKER.dialog.licenceLine(row.licence)}; Enter picks it`,
+      doc: `${FONT_CATEGORY_LABELS[row.category]}; Enter picks it`,
     });
     return (
       <div
@@ -263,6 +291,17 @@ export function FontList({
         >
           <h4 className="ts-picker-title">{group.title}</h4>
           {group.rows.map((row) => rowNode(row, group.id))}
+          {group.id === 'recent' && onClearRecent !== undefined ? (
+            <button
+              type="button"
+              className="ts-font-clear"
+              data-control={`${control}.clearRecent`}
+              onClick={onClearRecent}
+              {...tipProps({ name: FONT_PICKER.clearRecent, doc: FONT_PICKER.clearRecentDoc })}
+            >
+              {FONT_PICKER.clearRecent}
+            </button>
+          ) : null}
         </div>
       ))}
       {flat.length === 0 ? <p className="ts-font-empty">{FONT_PICKER.noMatch}</p> : null}
@@ -322,6 +361,8 @@ export function FontPickerPlate({
   const root = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState('');
   const [more, setMore] = useState(false);
+  /* the Recent group (FEATURES.md 3.5, P1): read on open, written on every pick, per browser */
+  const [recent, setRecent] = useState<FontId[]>(() => readRecentFonts(storageOf()));
   const at = anchoredAt(anchor, 280, 420);
   useEffect(() => {
     const onDown = (event: MouseEvent) => {
@@ -335,9 +376,16 @@ export function FontPickerPlate({
     return () => document.removeEventListener('mousedown', onDown);
   }, [anchor, more, onClose]);
   const pick = (id: FontId | null) => {
+    /* written before the plate closes: a state updater would never run on the unmounted plate,
+       and the store write lives in the push (measured on 4411: no Recent group after a pick) */
+    setRecent(pushRecentFont(recent, id, storageOf()));
     onPick(id);
     onClose();
     anchor.focus();
+  };
+  const clearRecent = () => {
+    writeRecentFonts([], storageOf());
+    setRecent([]);
   };
   return (
     <>
@@ -388,6 +436,8 @@ export function FontPickerPlate({
             rows={rows}
             brand={brand}
             used={used}
+            recent={recent}
+            onClearRecent={clearRecent}
             picked={picked}
             query={query}
             onPick={pick}

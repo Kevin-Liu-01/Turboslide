@@ -61,3 +61,7 @@ docs/gslides-parity/product/build/*/**/*.json
 # The features round: the lanes' run JSON under their evidence folders (build/b1/ to build/b4/,
 # build/integrator/); the notes beside them stay under the formatter (build/b4.md section 6)
 docs/gslides-parity/features/build/*/**/*.json
+# The features round's gate ledgers beside the run JSON (core-matrix.md, core-walk.md, written by
+# core-gate.mjs and editor-walk-probe.mjs); the notes beside them stay under the formatter
+docs/gslides-parity/features/build/*/**/*-core-matrix.md
+docs/gslides-parity/features/build/*/**/*-core-walk.md

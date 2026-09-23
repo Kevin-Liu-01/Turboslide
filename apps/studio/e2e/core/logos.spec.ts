@@ -499,20 +499,8 @@ test.describe('the fixture upstream project (docs/FEATURES.md 4.9, 7.2)', () => 
       'figma from the cache',
     ).toContain('figma');
     expect(search.body?.['lastError'], 'the failure is recorded').toBeDefined();
-    /* the foot names the date and the failure */
-    const opened = await openLogo(page);
-    if (opened.open) {
-      const foot = await ctl(page, 'dialog.logo.source')
-        .textContent()
-        .catch(() => null);
-      await page.keyboard.press('Escape');
-      test.info().annotations.push({ type: 'foot', description: foot ?? 'none' });
-      expect(foot ?? '', 'the foot names thesvg.org').toMatch(/thesvg\.org/);
-      expect(foot ?? '', 'the foot names the failure').toMatch(/did not answer/);
-      if (opened.switched)
-        await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
-    }
-    /* a cached mark inserts */
+    /* a cached mark inserts (read before the foot, so the outage's core claim is driven whatever the
+       foot says) */
     const slideId = (await state(page)).slideId;
     const before = (await pictures(page, slideId)).length;
     const insert = await insertLogo({ slug: 'figma', slideId });
@@ -524,6 +512,23 @@ test.describe('the fixture upstream project (docs/FEATURES.md 4.9, 7.2)', () => 
     await expect
       .poll(async () => (await pictures(page, slideId)).length, { timeout: 30_000 })
       .toBe(before + 1);
+    /* the foot names the date and the failure once a search has brought the index facts (the
+       dialog reads updatedAt and lastError from logo.search's answer; at the open it names the
+       source alone: the outage preview's first run read "Logos from thesvg.org. Brand marks
+       belong to their owners" before any search, the integrator, ship one) */
+    const opened = await openLogo(page);
+    if (opened.open) {
+      await searchInDialog(page, 'figma').catch(() => undefined);
+      const foot = await ctl(page, 'dialog.logo.source')
+        .textContent()
+        .catch(() => null);
+      await page.keyboard.press('Escape');
+      test.info().annotations.push({ type: 'foot', description: foot ?? 'none' });
+      expect(foot ?? '', 'the foot names thesvg.org').toMatch(/thesvg\.org/);
+      expect(foot ?? '', 'the foot names the failure').toMatch(/did not answer/);
+      if (opened.switched)
+        await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
+    }
   });
 });
 

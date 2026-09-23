@@ -1,0 +1,7 @@
+{
+  "commit": "f1afe1e",
+  "renderedFrom": [],
+  "rule": "docs/FEATURES.md 7.2: the features round’s ship one list, committed before the runs with parkedFeatures and parkedRows empty, so nothing is pre forgiven and the two enforce preview runs and the production run say what parks; the ship step renders parkedFeatures and parkedRows from the runs’ wouldParkRows and rewrites packages/chrome/src/parked-controls.ts with core-matrix.mjs --emit-parked. Named after f1afe1e, the fixes commit whose tree the ship’s enforce preview and its two runs of record read (the fix round’s items and the cross lane requests landed by the ship step; ship-39ae62e.json was this list’s name before the fix round). The previous ship’s list (ship-7ea3db9.json: inbox and templates parked, view.live-pointers.second-browser, versions.show-changes-marks and collab.roster.go-to-slide as parked rows) still stands in the menu model’s advanced flags and is read against the runs by the ship note, never by this empty list",
+  "parkedFeatures": [],
+  "parkedRows": []
+}

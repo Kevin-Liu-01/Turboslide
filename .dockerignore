@@ -15,3 +15,8 @@
 apps/studio/src/routeTree.gen.ts
 .env
 **/*.local
+# The Rust crate's build output (docs/native.md; gitignored, 588 MB) and the documents with their
+# evidence pictures (409 MB): nothing in the image reads either, and together they were a gigabyte
+# of the context (the features round, ship one, check step 25).
+crates/*/target
+docs

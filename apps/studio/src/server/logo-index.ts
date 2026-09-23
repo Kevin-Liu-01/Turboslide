@@ -259,8 +259,21 @@ export function fixtureUpstream(currentIndex: () => LogoIndex | null): LogoUpstr
       };
     },
     mark: async (path) => {
-      const text = FIXTURE_MARKS[path.startsWith('/') ? path : `/${path}`];
-      if (text === undefined)
+      const named = path.startsWith('/') ? path : `/${path}`;
+      const text = FIXTURE_MARKS[named];
+      // the takedown removes the files too (TRADEMARK.md): once a built index no longer holds the
+      // dropped slug (the refresh above took it down) its files answer 404, as thesvg.org's do
+      // after a removal; while the index holds it, or before the first build, the files serve
+      const index = currentIndex();
+      const dropped =
+        index !== null &&
+        index.icons.length > 0 &&
+        !index.icons.some((row) => row.slug === FIXTURE_DROPPED_SLUG) &&
+        FIXTURE_ICONS.some(
+          (icon) =>
+            icon.slug === FIXTURE_DROPPED_SLUG && Object.values(icon.variants).includes(named),
+        );
+      if (text === undefined || dropped)
         return {
           ok: false,
           status: 404,

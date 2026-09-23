@@ -12,6 +12,12 @@
 #     --out /work/.turboslide/export
 #   docker run --rm -p 4322:4322 -v "$PWD:/work" turboslide-render-worker
 #
+# The build context is the sources: ../.dockerignore (the classic builder) and
+# render-worker.Dockerfile.dockerignore (BuildKit) hold one list and leave out node_modules, the
+# crate's target and docs/, which nothing in the image reads. Check step 25 rebuilds this image, and
+# a rebuild leaves the superseded image untagged in the daemon's store; `docker image prune`
+# reclaims it.
+#
 # LibreOffice: the milestone names 26.8. The Document Foundation ships Linux builds for x86_64
 # only, and this image is built for the host's architecture (arm64 on Kevin's Mac), so the version
 # is the newest in the base image's repositories, Debian 13 (trixie): 25.2 at build time. The exact

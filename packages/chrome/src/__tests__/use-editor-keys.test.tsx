@@ -34,6 +34,7 @@ function Host({ context, handlers }: { context: MenuContext; handlers: EditorKey
       </div>
       <aside className="ts-panel">
         <input data-testid="field" aria-label="Width" />
+        <input type="checkbox" data-testid="check" aria-label="Tabular figures" />
       </aside>
       <div className="ts-stagewrap ts-sheet ts-editor ts-stage">
         <p data-block="p">
@@ -181,6 +182,30 @@ describe('useEditorKeys and the indent chords', () => {
     fireEvent.keyDown(document.body, { key: 'b', metaKey: true });
     expect(runItem).toHaveBeenCalledTimes(1);
     expect((runItem.mock.calls[0]?.[0] as MenuItem).id).toBe('format.text.bold');
+  });
+
+  it('runs Cmd+Z from a Format options checkbox and still leaves Cmd+B to a text field (the features round, F7)', () => {
+    /* a checkbox takes no text, so it is not a field: the undo chord reaches the key table from
+       it as it does from the stage (build/b1.md R6); a text input keeps the browser's own keys */
+    const runItem = vi.fn();
+    const undoable: MenuContext = { ...withText, history: { undo: true, redo: false } };
+    const view = render(<Host context={undoable} handlers={handlers(runItem)} />);
+    const check = view.getByTestId('check');
+    check.focus();
+    const undo = new KeyboardEvent('keydown', {
+      key: 'z',
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    check.dispatchEvent(undo);
+    expect(undo.defaultPrevented).toBe(true);
+    expect(runItem).toHaveBeenCalledTimes(1);
+    expect((runItem.mock.calls[0]?.[0] as MenuItem).id).toBe('edit.undo');
+    const field = view.getByTestId('field');
+    field.focus();
+    fireEvent.keyDown(field, { key: 'b', metaKey: true });
+    expect(runItem).toHaveBeenCalledTimes(1);
   });
 });
 

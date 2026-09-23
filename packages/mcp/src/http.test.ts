@@ -36,12 +36,17 @@ function handlerWith(
     /** The API key record a bearer resolves to (SPEC-3 3.10); `null` for the static bearer. */
     resolveKey?: (request: Request) => KeyBinding | null;
     sessionsPerKey?: number;
+    /** JSON answers instead of SSE, so a raw request's body reads as one object. */
+    enableJsonResponse?: boolean;
   } = {},
 ) {
   const created: string[] = [];
   const handler = createMcpHttpHandler({
     ...(options.resolveKey !== undefined ? { resolveKey: options.resolveKey } : {}),
     ...(options.sessionsPerKey !== undefined ? { sessionsPerKey: options.sessionsPerKey } : {}),
+    ...(options.enableJsonResponse !== undefined
+      ? { enableJsonResponse: options.enableJsonResponse }
+      : {}),
     authorize: options.denyToken
       ? (request) =>
           request.headers.get('authorization') === 'Bearer secret'
@@ -135,7 +140,7 @@ describe('createMcpHttpHandler', () => {
     expect(result.structuredContent).toMatchObject({ slideId: 'thesis', mode: 'slide' });
   });
 
-  it('refuses a non-initialize request without a session, an unknown session and an unknown deck', async () => {
+  it('refuses a non-initialize request without a session, an unknown session on GET or an unknown deck, and an unknown deck', async () => {
     const { handler } = handlerWith();
     const noSession = await handler.handle(
       new Request('http://localhost:4321/mcp', {
@@ -148,8 +153,16 @@ describe('createMcpHttpHandler', () => {
       }),
     );
     expect(noSession.status).toBe(400);
-    const unknown = await handler.handle(
+    /* a POST with an unknown session is rebuilt from the request (the resume below), so the 404
+       stands where the rebuild cannot: a GET, and a request naming a deck this host lacks */
+    const unknownGet = await handler.handle(
       new Request('http://localhost:4321/mcp', {
+        headers: { 'mcp-session-id': 'nope', accept: 'text/event-stream' },
+      }),
+    );
+    expect(unknownGet.status).toBe(404);
+    const unknownDeck = await handler.handle(
+      new Request('http://localhost:4321/mcp?deck=missing', {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
@@ -159,12 +172,93 @@ describe('createMcpHttpHandler', () => {
         body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
       }),
     );
-    expect(unknown.status).toBe(404);
+    expect(unknownDeck.status).toBe(404);
+    expect(handler.sessions()).toHaveLength(0);
     const get = await handler.handle(new Request('http://localhost:4321/mcp'));
     expect(get.status).toBe(400);
     await expect(connect(handler, '/mcp?deck=missing')).rejects.toThrow(/404|No deck/);
     expect(isInitializeBody({ jsonrpc: '2.0', method: 'initialize' })).toBe(true);
     expect(isInitializeBody([{ method: 'tools/list' }])).toBe(false);
+  });
+
+  it('rebuilds a session another instance opened when its POST lands here (the features round, F5)', async () => {
+    /* two handlers stand for two instances of one deployment: initialize answered on the first,
+       a tools/list with its session id landed on the second (build/b6.md R16) */
+    const first = handlerWith({ enableJsonResponse: true });
+    const second = handlerWith({ enableJsonResponse: true });
+    const { transport } = await connect(first.handler, '/mcp?deck=fixture');
+    const sessionId = transport.sessionId;
+    expect(sessionId).toBeDefined();
+    const headers = {
+      'content-type': 'application/json',
+      accept: 'application/json, text/event-stream',
+      'mcp-session-id': sessionId!,
+      'mcp-protocol-version': '2025-03-26',
+    };
+    const list = await second.handler.handle(
+      new Request('http://localhost:4321/mcp?deck=fixture', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ jsonrpc: '2.0', id: 7, method: 'tools/list' }),
+      }),
+    );
+    expect(list.status).toBe(200);
+    const body = (await list.json()) as { id: number; result: { tools: { name: string }[] } };
+    expect(body.id).toBe(7);
+    expect(body.result.tools.map((tool) => tool.name)).toEqual(['deck_get_info']);
+    expect(second.created).toEqual([sessionId]);
+    expect(second.handler.sessions()).toHaveLength(1);
+    expect(second.handler.sessions()[0]).toMatchObject({
+      id: sessionId,
+      facts: { deck: 'fixture', tools: 1, resumed: true },
+    });
+    /* the second instance answers the next call on the rebuilt session without another rebuild */
+    const call = await second.handler.handle(
+      new Request('http://localhost:4321/mcp?deck=fixture', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 8,
+          method: 'tools/call',
+          params: { name: 'deck_get_info', arguments: {} },
+        }),
+      }),
+    );
+    expect(call.status).toBe(200);
+    const called = (await call.json()) as { result: { structuredContent: { revision: number } } };
+    expect(called.result.structuredContent).toMatchObject({ id: 'fixture', revision: 3 });
+    expect(second.created).toHaveLength(1);
+    /* the notification stream is not rebuilt: the client opens it again after the 404 */
+    const third = handlerWith();
+    const stream = await third.handler.handle(
+      new Request('http://localhost:4321/mcp?deck=fixture', {
+        headers: { 'mcp-session-id': sessionId!, accept: 'text/event-stream' },
+      }),
+    );
+    expect(stream.status).toBe(404);
+    expect(third.handler.sessions()).toHaveLength(0);
+  });
+
+  it('holds a key to its session cap on a rebuilt session as on initialize', async () => {
+    const key: KeyBinding = { tokenId: 'k1', ownerId: 'o1', scopes: ['deck:write'], name: 'k' };
+    const { handler } = handlerWith({ resolveKey: () => key, sessionsPerKey: 1 });
+    await connect(handler, '/mcp?deck=fixture');
+    expect(handler.sessions()).toHaveLength(1);
+    const over = await handler.handle(
+      new Request('http://localhost:4321/mcp?deck=fixture', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          accept: 'application/json, text/event-stream',
+          'mcp-session-id': 'opened-elsewhere',
+        },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
+      }),
+    );
+    expect(over.status).toBe(429);
+    expect(over.headers.get('retry-after')).toBe('60');
+    expect(handler.sessions()).toHaveLength(1);
   });
 
   it('runs the authorize hook before the transport', async () => {

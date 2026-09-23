@@ -1,0 +1,210 @@
+{
+  "config": {
+    "argv": [
+      "/Users/kevinliu/.nvm/versions/node/v24.13.0/bin/node",
+      "/Users/kevinliu/repos/Turboslide/node_modules/@playwright/test/cli.js",
+      "test",
+      "apps/studio/e2e/core/documents.spec.ts",
+      "--grep",
+      "tables.paste",
+      "--reporter=json"
+    ],
+    "configFile": "/Users/kevinliu/repos/Turboslide/playwright.config.ts",
+    "rootDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "core/documents.spec.ts",
+      "file": "core/documents.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "tables.paste.tsv-makes-table: Three tab separated rows pasted with nothing selected insert a 3 by 3 table with a header row; the snackbar \"Table pasted\" carries Undo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "paste",
+                  "description": "new objects heading:h, paragraph:p1, table:table; snackbar \"Table pastedUndo\" with Undo true; revision 2 -> 3"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5258,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-23T06:56:16.685Z",
+                  "annotations": [
+                    {
+                      "type": "paste",
+                      "description": "new objects heading:h, paragraph:p1, table:table; snackbar \"Table pastedUndo\" with Undo true; revision 2 -> 3"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f7c629ccaf3f58f4de1b-062fcfe543c760eeed38",
+          "file": "core/documents.spec.ts",
+          "line": 157,
+          "column": 1
+        },
+        {
+          "title": "tables.paste.into-cell-spreads: The same rows pasted into an open cell 2,1 fill the cells from there and add the rows needed",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "spread",
+                  "description": "5 rows by 4 columns: [[\"A\",\"B\",\"C\",\"\"],[\"a1\",\"b1\",\"c1\",\"\"],[\"a2\",\"Region\",\"Q1\",\"Q2\"],[\"\",\"East\",\"120\",\"140\"],[\"\",\"West\",\"80\",\"95\"]]; revision 5 -> 6"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7420,
+                  "error": {
+                    "message": "Error: the row above is untouched\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 0\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Array [\u001b[22m\n\u001b[2m    \"a1\",\u001b[22m\n\u001b[2m    \"b1\",\u001b[22m\n\u001b[2m    \"c1\",\u001b[22m\n\u001b[31m+   \"\",\u001b[39m\n\u001b[2m  ]\u001b[22m",
+                    "stack": "Error: the row above is untouched\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 0\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Array [\u001b[22m\n\u001b[2m    \"a1\",\u001b[22m\n\u001b[2m    \"b1\",\u001b[22m\n\u001b[2m    \"c1\",\u001b[22m\n\u001b[31m+   \"\",\u001b[39m\n\u001b[2m  ]\u001b[22m\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/documents.spec.ts:270:49",
+                    "location": {
+                      "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/documents.spec.ts",
+                      "column": 49,
+                      "line": 270
+                    },
+                    "snippet": "  268 |   expect(grid[3]?.slice(1)).toEqual(['East', '120', '140']);\n  269 |   expect(grid[4]?.slice(1)).toEqual(['West', '80', '95']);\n> 270 |   expect(grid[1], 'the row above is untouched').toEqual(['a1', 'b1', 'c1']);\n      |                                                 ^\n  271 | });\n  272 |\n  273 | coverage(import.meta.filename, ["
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/documents.spec.ts",
+                        "column": 49,
+                        "line": 270
+                      },
+                      "message": "Error: the row above is untouched\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 0\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Array [\u001b[22m\n\u001b[2m    \"a1\",\u001b[22m\n\u001b[2m    \"b1\",\u001b[22m\n\u001b[2m    \"c1\",\u001b[22m\n\u001b[31m+   \"\",\u001b[39m\n\u001b[2m  ]\u001b[22m\n\n  268 |   expect(grid[3]?.slice(1)).toEqual(['East', '120', '140']);\n  269 |   expect(grid[4]?.slice(1)).toEqual(['West', '80', '95']);\n> 270 |   expect(grid[1], 'the row above is untouched').toEqual(['a1', 'b1', 'c1']);\n      |                                                 ^\n  271 | });\n  272 |\n  273 | coverage(import.meta.filename, [\n    at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/documents.spec.ts:270:49"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-23T06:56:25.092Z",
+                  "annotations": [
+                    {
+                      "type": "spread",
+                      "description": "5 rows by 4 columns: [[\"A\",\"B\",\"C\",\"\"],[\"a1\",\"b1\",\"c1\",\"\"],[\"a2\",\"Region\",\"Q1\",\"Q2\"],[\"\",\"East\",\"120\",\"140\"],[\"\",\"West\",\"80\",\"95\"]]; revision 5 -> 6"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright/core-documents-tables-past-f0b9c-ere-and-add-the-rows-needed/error-context.md"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright/core-documents-tables-past-f0b9c-ere-and-add-the-rows-needed/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/playwright/core-documents-tables-past-f0b9c-ere-and-add-the-rows-needed/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e/core/documents.spec.ts",
+                    "column": 49,
+                    "line": 270
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "f7c629ccaf3f58f4de1b-b838d70e6d6e79431b5a",
+          "file": "core/documents.spec.ts",
+          "line": 217,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-23T06:56:16.462Z",
+    "duration": 18316.674,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

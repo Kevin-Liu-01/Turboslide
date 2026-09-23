@@ -1,7 +1,7 @@
 // dither, mark, markSizes and matrix.
-import { el, escapeText, escapeAttr } from '../html.ts';
+import { attrs, classes, el, escapeText, escapeAttr } from '../html.ts';
 import type { BlockOf } from '@turboslide/schema/blocks';
-import { dataAttrs, markSvg, raster, rootAttrs, runAttr } from './context.ts';
+import { dataAttrs, markSvg, raster, rootAttrs, runAttr, twinAttrs } from './context.ts';
 import type { BlockContext } from './context.ts';
 import { renderTextOrPrompt } from './prompt.ts';
 
@@ -34,6 +34,31 @@ export function renderMark(block: BlockOf<'mark'>, ctx: BlockContext): string {
   const extra: Record<string, string> = {};
   for (const [name, value] of Object.entries(attributes))
     if (value !== undefined) extra[name] = value;
+  // the canvas title's mark slot follows the brand kit as the slot did before the conversion
+  // (slide.ts titleMarkSlot): the kit's picture fitted into the block's box, nothing for none, the
+  // GT glyph for default and for a picture whose asset the deck lacks (the fix round, F1)
+  const slot = ctx.titleMark;
+  if (slot !== undefined && slot.blockId === block.id && block.pos !== undefined) {
+    const kind = slot.mark?.kind ?? 'default';
+    if (kind === 'none')
+      return `<div${dataAttrs({
+        ...extra,
+        class: classes(extra['class'], 'mark-block', 'is-none') ?? 'mark-block is-none',
+        'data-slot': 'mark',
+      })} aria-hidden="true"></div>`;
+    const assetId = slot.mark?.assetId;
+    const image = kind === 'picture' && assetId !== undefined ? ctx.image(assetId) : undefined;
+    if (image !== undefined)
+      return `<img${dataAttrs({
+        ...extra,
+        class:
+          classes(extra['class'], 'mark', 'mark-picture', 'mark-block') ??
+          'mark mark-picture mark-block',
+        'data-slot': 'mark',
+      })} src="${escapeAttr(image.src)}"${attrs(twinAttrs(image))} alt="${escapeAttr(
+        image.alt,
+      )}"${dataAttrs(raster(ctx, block.id, 'mark', true))}>`;
+  }
   return markSvg(ctx, block.id, block.w, block.h, extra, block.pos === undefined);
 }
 

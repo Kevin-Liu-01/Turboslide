@@ -41,7 +41,7 @@ import { formatChartNumber } from '@turboslide/schema/blocks/chart';
 import type { TableBlock, TableCommand } from '@turboslide/schema/blocks/table';
 import { applyTableCommand } from '@turboslide/schema/blocks/table';
 import type { GuidesInput } from '@turboslide/schema/canvas';
-import { GUIDE_CENTRE } from '@turboslide/schema/canvas';
+import { GUIDE_CENTRE, grammarRecordOf } from '@turboslide/schema/canvas';
 import { isMultilinePath, isMultilineType } from '@turboslide/schema/catalog';
 import type { Color } from '@turboslide/schema/color';
 import { detachConnectors, followConnectors } from '@turboslide/schema/connect';
@@ -179,6 +179,7 @@ import {
   textFromNode,
 } from './InlineText';
 import {
+  BODY_SLOT,
   PICTURE_MARGIN,
   pictureInsertArea,
   pictureInsertBox,
@@ -257,8 +258,15 @@ import type {
   TableRangeShape,
 } from './table-range';
 import { isTableSeamHandle, tableSeamHandles, tableSeamMutation } from './table-seam';
-import { movedCellPointer, tableShapeOf } from './table-session';
-import type { TableShape } from './table-session';
+import {
+  movedCellPointer,
+  parseTablePaste,
+  pastedTableBlock,
+  pastedTableSize,
+  tableShapeOf,
+  tableWithPastedGrid,
+} from './table-session';
+import type { PastedGrid, TableShape } from './table-session';
 import { fitSheetAt, Sheet, SHEET_PAD } from './Sheet';
 import type { SheetZoom } from './Sheet';
 import { boxSnapLines, deckGuideLines, sheetEdgeLines, sheetSnapLines } from './snap';
@@ -3063,6 +3071,13 @@ export function Editor({
         document.execCommand('insertText', false, text);
         return;
       }
+      /* a spreadsheet's rows with no session open make a table (docs/FEATURES.md 2.3 item 5);
+         Paste without formatting keeps them as text, the chord's own promise */
+      const grid = payload.kind === 'text' && !plain ? parseTablePaste(text) : null;
+      if (grid !== null) {
+        await insertPastedTable(grid);
+        return;
+      }
       insertTextBlock(text);
       return;
     }
@@ -3071,6 +3086,67 @@ export function Editor({
       return;
     }
     await pasteSlides(payload);
+  };
+
+  /**
+   * Two or more tab separated rows pasted with no session open (docs/FEATURES.md 2.3 item 5;
+   * audit-objects 12): a table with one cell per pasted cell, a header row when the first row has
+   * no numbers, its box sized to the rows and placed like an insert (centred, on top of the
+   * stack, the slide converted first when it is not a canvas yet), in one commit. The snackbar
+   * "Table pasted" carries Undo because the table lands under no pointer. Whatever stands
+   * selected, a table included, is left alone: the rows make their own table.
+   */
+  const insertPastedTable = async (grid: PastedGrid): Promise<void> => {
+    const block = pastedTableBlock('table', grid);
+    const size = pastedTableSize(block.rows.length, block.columns.length);
+    await insertObject(block as Block, { box: centredBox(size) });
+    notice('Table pasted', true);
+  };
+
+  /**
+   * A spreadsheet's rows pasted into an open table cell (docs/FEATURES.md 2.3 item 5): the cells
+   * fill right and down from that cell, the rows and columns they need added at the edges, at
+   * most 20 by 20 (table-session.ts tableWithPastedGrid), in one commit of the rows and columns.
+   * The session ends first, so its last keystrokes land before the grid and never over it, and
+   * the caret comes back to the same cell on the grid the write draws, through the layout effect
+   * Tab uses. False for anything but a grid in a table cell, which the session inserts as text as
+   * before (InlineText onPaste).
+   */
+  const pasteIntoCell = (text: string): boolean => {
+    const current = editingRef.current;
+    const slideNow = slideRef.current;
+    if (!current || !slideNow) return false;
+    const block = blockById(slideNow, current.blockId);
+    if (block?.type !== 'table') return false;
+    const cell = cellPointer(current.pointer);
+    if (cell === null) return false;
+    const grid = parseTablePaste(text);
+    if (grid === null) return false;
+    const table = block as TableBlock;
+    const edited = tableWithPastedGrid(table, cell, grid);
+    if (edited === null) return false;
+    inlineRef.current?.end('blur');
+    const mutations: Mutation[] = [];
+    if (!jsonEqual(edited.rows, table.rows))
+      mutations.push({
+        op: 'block.set',
+        slideId: slideNow.id,
+        blockId: table.id,
+        path: '/rows',
+        value: edited.rows,
+      });
+    if (!jsonEqual(edited.columns, table.columns))
+      mutations.push({
+        op: 'block.set',
+        slideId: slideNow.id,
+        blockId: table.id,
+        path: '/columns',
+        value: edited.columns,
+      });
+    if (mutations.length === 0) return true;
+    pendingEdit.current = { blockId: table.id, pointer: current.pointer, caret: 'end' };
+    commit(mutations);
+    return true;
   };
 
   /**
@@ -3408,8 +3484,8 @@ export function Editor({
        */
       place?: (canvas: Slide) => { box: Box; remove?: ReadonlyArray<string> };
     } = {},
-  ) => {
-    void commitCanvas(
+  ): Promise<void> =>
+    commitCanvas(
       (canvas) => {
         const taken = takenBlockIds(canvas);
         const id = freeId(block.id, taken);
@@ -3462,7 +3538,6 @@ export function Editor({
       },
       { autofit: false },
     );
-  };
 
   /** The natural size of a picture file, read from the browser's decoder; undefined when it cannot be decoded in time. */
   const pictureSizeOf = (url: string): Promise<readonly [number, number] | undefined> =>
@@ -3606,9 +3681,13 @@ export function Editor({
    * the largest fit: a symbol 160 sheet px tall, a wordmark (a `wordmark*`, `lockup` or
    * `horizontal` variant) 320 wide, both at the mark's own ratio, scaled down when the free area
    * of the body slot is smaller and never up, centred in that area (the picture rule's
-   * `pictureInsertArea`, so the empty body placeholder it fills leaves in the same write). The
-   * same rule lives in packages/chrome/src/logo-model.ts for the server's placement; the viewer
-   * cannot import the chrome, so the numbers are repeated here. `blockId` swaps that picture's
+   * `pictureInsertArea`, so the empty body placeholder it fills leaves in the same write). On a
+   * title slide that has become a canvas the mark lands beside the brand's mark on the mark
+   * slot's row, scaled to its height (logo-model.ts `logoTitleArea`): the title layout has no
+   * body slot and its empty lead read as a placeholder for the whole content box, which put the
+   * customer's mark over the heading's words (the verifier's pass 1, F3); the title's placeholders
+   * are never removed. The same rules live in packages/chrome/src/logo-model.ts for the server's
+   * placement; the viewer cannot import the chrome, so the numbers are repeated here. `blockId` swaps that picture's
    * asset in place with its box kept (Replace image > Logo). `everySlide` adds the kit's three
    * writes to the same commit (the plan of packages/chrome/src/brand/UseOnEverySlide.tsx, made
    * here with the schema's `brandWriteMutation` because the viewer does not import the chrome), so
@@ -3697,10 +3776,39 @@ export function Editor({
         h,
       ];
     };
+    /* the title rule (logo-model.ts logoTitleArea, logoBoxAtStart): the mark slot's row to the
+       right of the mark block, past any object already on it, 40 px from each; the logo scaled to
+       the row's height at the area's left edge */
+    const titleGap = 40;
+    const titleArea = (canvas: Slide): Box | null => {
+      if (grammarRecordOf(canvas)?.kind !== 'title') return null;
+      const objects = freeformBlocks(canvas);
+      const mark = objects.find((block) => block.type === 'mark' && block.pos !== undefined);
+      const pos = mark?.pos;
+      if (pos === undefined) return null;
+      let left = pos.x + pos.w + titleGap;
+      const right = BODY_SLOT[0] + BODY_SLOT[2] - titleGap;
+      for (const block of objects) {
+        if (block === mark || block.pos === undefined || block.type === 'picture') continue;
+        const own = block.pos;
+        if (own.y >= pos.y + pos.h || own.y + own.h <= pos.y) continue;
+        if (own.x + own.w <= pos.x + pos.w || own.x >= right) continue;
+        left = Math.max(left, own.x + own.w + titleGap);
+      }
+      return right - left < 8 ? null : [left, pos.y, right - left, pos.h];
+    };
+    const logoBoxAtStart = (area: Box): Box => {
+      const scale = Math.min(1, area[2] / wanted[0], area[3] / wanted[1]);
+      const w = Math.max(8, Math.round(wanted[0] * scale));
+      const h = Math.max(8, Math.round(wanted[1] * scale));
+      return [Math.round(area[0]), Math.round(area[1] + (area[3] - h) / 2), w, h];
+    };
     await commitCanvas(
       (canvas) => {
-        const placed = pictureInsertArea(canvas, natural);
-        const box = logoBox(placed.area);
+        const onTitle = titleArea(canvas);
+        const placed =
+          onTitle !== null ? { area: onTitle, replaces: [] } : pictureInsertArea(canvas, natural);
+        const box = onTitle !== null ? logoBoxAtStart(onTitle) : logoBox(placed.area);
         const taken = takenBlockIds(canvas);
         const id = freeId('logo', taken);
         const removed = new Set(placed.replaces);
@@ -4773,7 +4881,9 @@ export function Editor({
       if (e.type === 'cut') removeSelected();
     };
     const onPaste = (e: ClipboardEvent) => {
-      if (!stageOwns(e)) return;
+      /* a paste a session, a grid or a field already took (its default prevented) is not the
+         stage's, whatever the target reads as by the time the event reaches the document */
+      if (e.defaultPrevented || !stageOwns(e)) return;
       const plain = plainPasteArmed.current;
       plainPasteArmed.current = false;
       const files = imageFilesOf(e.clipboardData);
@@ -6473,6 +6583,7 @@ export function Editor({
             onIndent={onIndent}
             onCaret={onCaretInfo}
             onInput={measure}
+            onPaste={pasteIntoCell}
             onUndo={() => onUndoRef.current?.()}
             onRedo={() => onRedoRef.current?.()}
             handle={(inline) => {

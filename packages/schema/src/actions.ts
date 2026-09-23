@@ -4088,6 +4088,12 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .describe(
           'brands (the default) is the brand and community marks; all adds the cloud service icons and the auth badges',
         ),
+      since: z
+        .string()
+        .optional()
+        .describe(
+          'A refresh’s builtAt: the answer comes from an index at least as new when the store holds one',
+        ),
     }),
     output: z.strictObject({
       logos: z.array(logoRowSchema.extend({ licenceSentence: z.string() })),
@@ -4103,7 +4109,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     }),
     cli: {
       usage:
-        'turboslide logo search <query> --limit <limit> --kind <kind> --collection <collection>',
+        'turboslide logo search <query> --limit <limit> --kind <kind> --collection <collection> --since <builtAt>',
     },
     mcp: 'deck_logo_search',
     example: { query: 'figma', limit: 5 },

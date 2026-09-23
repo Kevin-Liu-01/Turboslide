@@ -222,6 +222,7 @@ export const BLOCK_CSS = `
    block attributes (the deck build, the present surface, a flatten sheet) writes no data-type, and
    an unsized svg no rule reaches draws at 300 by 150 (hotfix-4 section 3) */
 .ts-sheet .free > svg.mark-block, .ts-sheet .free > .link > svg.mark-block { display: block; fill: currentColor; width: 100%; height: 100%; }
+.ts-sheet .free > img.mark-block, .ts-sheet .free > .link > img.mark-block { display: block; width: 100%; height: 100%; object-fit: contain; object-position: left center; }
 .ts-sheet .free > .panel, .ts-sheet .free > .link > .panel { box-sizing: border-box; height: 100%; }
 .ts-sheet .free > .panel.term > svg.mark-s, .ts-sheet .free > .link > .panel.term > svg.mark-s { height: 50%; width: auto; }
 .ts-sheet .free > .panel.term > svg.mark-l, .ts-sheet .free > .link > .panel.term > svg.mark-l { height: 100%; width: auto; }

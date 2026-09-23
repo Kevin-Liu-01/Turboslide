@@ -1427,6 +1427,13 @@ export type InlineTextProps = {
   onListBackspace?: () => boolean;
   /** called on every input so the Editor can re-measure the run's box */
   onInput?: () => void;
+  /**
+   * the clipboard's plain text before the session inserts it: true when the Editor took the
+   * whole paste itself (a spreadsheet's rows into a table cell spread over the grid,
+   * docs/FEATURES.md 2.3 item 5) and the session inserts nothing; the session may have ended
+   * inside the call
+   */
+  onPaste?: (text: string) => boolean;
   /** Cmd Z and Cmd Shift Z end the session and run the page's history */
   onUndo?: () => void;
   onRedo?: () => void;
@@ -1482,6 +1489,7 @@ export function InlineText({
   onListEnter,
   onListBackspace,
   onInput,
+  onPaste,
   onUndo,
   onRedo,
   onCaret,
@@ -1524,6 +1532,7 @@ export function InlineText({
     onListEnter,
     onListBackspace,
     onInput,
+    onPaste,
     onUndo,
     onRedo,
     onCaret,
@@ -1538,6 +1547,7 @@ export function InlineText({
     onListEnter,
     onListBackspace,
     onInput,
+    onPaste,
     onUndo,
     onRedo,
     onCaret,
@@ -2290,6 +2300,13 @@ export function InlineText({
       // pointer and a space elsewhere (SPEC 4.2; gslides-parity SPEC 7.4)
       e.preventDefault();
       const raw = e.clipboardData?.getData('text/plain') ?? '';
+      /* the Editor takes a spreadsheet's rows whole (a table cell, docs/FEATURES.md 2.3 item 5)
+         and may end this session doing so; the event goes no further, or the stage's own paste
+         listener would read the same rows against a stage with no session and make a table */
+      if (callbacks.current.onPaste?.(raw) === true) {
+        e.stopPropagation();
+        return;
+      }
       const text = options.current.multiline
         ? raw.replace(/\r\n?/g, '\n')
         : raw.replace(/\s*[\n\r]+\s*/g, ' ');

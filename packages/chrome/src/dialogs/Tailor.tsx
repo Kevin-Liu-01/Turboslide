@@ -77,13 +77,22 @@ export type TailorLogoFinder = {
   store: (row: LogoRow) => Promise<{ assetId: string }>;
 };
 
-/** The finder over the product's routes and rules (build/b6.md R7). */
+/**
+ * The finder over the product's routes and rules (build/b6.md R7). `store` answers only once the
+ * live document holds the stored mark (`findCustomerLogo`'s wait over `documentNow`), because
+ * Apply plans `deck.tailor` in the page over the tab's document and on the blob tier the record
+ * comes back over the channel after the server's answer (the fix round, VERIFICATION.md pass 1
+ * F2; b6.md R14).
+ */
 export function defaultLogoFinder(input: {
   deckId: string;
   revision: number;
   dispatch: EditorShellInput['dispatch'];
   document: DeckDocument;
+  /** the document as it stands when asked, so the wait for the stored mark reads the live one */
+  documentNow?: () => DeckDocument;
 }): TailorLogoFinder {
+  const current = input.documentNow ?? (() => input.document);
   return {
     match: async (name) => {
       const answer = await searchLogos(name, { limit: 5 });
@@ -98,16 +107,30 @@ export function defaultLogoFinder(input: {
             (answer) => ({ asset: { id: answer.asset.id } }),
           ),
         input.revision,
+        { landed: (assetId) => current().deck.assets[assetId] !== undefined },
       );
       if (stored === null) throw new Error(`${row.title} has no variant that reads on this deck`);
+      if (!stored.landed)
+        throw new Error(
+          `The ${row.title} logo is stored but has not reached this presentation yet; try again in a moment`,
+        );
       return { assetId: stored.assetId };
     },
   };
 }
 
+/** A refusal's message without its action id, so the sheet never reads `deck.tailor:` (the copy rule). */
+function refusalSentence(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  return message.replace(/^[a-z]+\.[a-zA-Z.]+: /, '');
+}
+
 export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | null } = {}) {
   const shell = useEditorShell();
   const { input } = shell;
+  /* the live document for the finder's wait: the memo keeps its dependencies and the ref follows every render */
+  const documentRef = useRef(input.document);
+  documentRef.current = input.document;
   const finder = useMemo<TailorLogoFinder | null>(
     () =>
       logoFinder === undefined
@@ -116,6 +139,7 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
             revision: input.revision,
             dispatch: input.dispatch,
             document: input.document,
+            documentNow: () => documentRef.current,
           })
         : logoFinder,
     [input.deckId, input.dispatch, input.document, input.revision, logoFinder],
@@ -190,7 +214,7 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
       setStoredLogo({ assetId: stored.assetId, title: foundLogo.title });
       setReplaceAlt(true);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(refusalSentence(err));
     } finally {
       setStoring(false);
     }
@@ -234,7 +258,7 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
       });
       closeRef.current();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(refusalSentence(err));
     } finally {
       setBusy(null);
     }

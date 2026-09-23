@@ -1,15 +1,21 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
+import type { Block } from '@turboslide/schema/blocks';
+
 import {
   FONTS_RECENT_MAX,
   FONTS_RECENT_STORAGE,
   FONT_PICKER,
   INTER_RELEASE_TAG,
   filterRows,
+  fixedFieldDoc,
+  fixedFieldFamily,
+  fixedFieldRole,
   groupRows,
   licenceUrlOf,
   pushRecentFont,
   readRecentFonts,
+  takesFamily,
   writeRecentFonts,
 } from '../font-picker-model';
 import type { FontRow } from '../font-picker-model';
@@ -172,5 +178,45 @@ describe('the Recent group', () => {
     expect(readRecentFonts(storage)).toEqual([]);
     writeRecentFonts([], storage);
     expect(storage.getItem(FONTS_RECENT_STORAGE)).toBeNull();
+  });
+});
+
+describe('the fixed fields', () => {
+  // The features round's fix round (docs/gslides-parity/focus/VERIFICATION.md F.5 F8): a fixed
+  // kind's field carries no typography, so the Font control reads the kit's face for the field's
+  // role and its sentence names the kit path; the fields still take no family (Kevin's call,
+  // F.10 item 5).
+  const heading: Block = { id: 'heading', type: 'heading', level: 'h1', text: 'Renewals' };
+  const lead: Block = { id: 'lead', type: 'paragraph', role: 'lead', tone: 'muted', text: '' };
+  const plate: Block = { id: 'plate', type: 'box', fill: 'paper', strokeWidth: 0 };
+
+  it('reads the Display role on a heading and the Text role on the rest', () => {
+    expect(fixedFieldRole(heading)).toBe('display');
+    expect(fixedFieldRole({ ...heading, level: 'big' })).toBe('display');
+    expect(fixedFieldRole(lead)).toBe('text');
+    expect(fixedFieldRole(plate)).toBe('text');
+    /* nothing to write a family into: the fields stay off */
+    expect(takesFamily(undefined)).toBe(false);
+  });
+
+  it("reads the kit's face for the role and the theme's face when the kit is silent", () => {
+    expect(fixedFieldFamily(undefined, 'display')).toBeNull();
+    expect(fixedFieldFamily({ fonts: { display: 'inter' } }, 'display')).toBeNull();
+    expect(fixedFieldFamily({ fonts: { display: 'fraunces' } }, 'display')).toBe('fraunces');
+    expect(fixedFieldFamily({ fonts: { display: 'fraunces' } }, 'text')).toBeNull();
+    expect(fixedFieldFamily({ fonts: { display: 'fraunces', text: 'geist' } }, 'text')).toBe(
+      'geist',
+    );
+  });
+
+  it('names the kit face and the menu path in the disabled sentence', () => {
+    expect(fixedFieldDoc('display')).toBe(FONT_PICKER.fixedDisplayDoc);
+    expect(fixedFieldDoc('text')).toBe(FONT_PICKER.fixedTextDoc);
+    expect(fixedFieldDoc('display')).toContain('Display face');
+    expect(fixedFieldDoc('text')).toContain('Text face');
+    for (const role of ['display', 'text'] as const) {
+      expect(fixedFieldDoc(role)).toContain('Slide > Edit theme');
+      expect(fixedFieldDoc(role)).not.toMatch(/[.—]$/);
+    }
   });
 });

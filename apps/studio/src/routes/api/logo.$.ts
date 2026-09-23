@@ -28,9 +28,11 @@ import { createStoredDeck, deckDir, isUnsavedDraft, openDeckStore } from '../../
 //                                              and an hour of cache; from the store cache for an
 //                                              open licence mark, from a fetch in the function
 //                                              otherwise (4.2, 4.7)
-//   GET  /api/logo/search?q=&limit=&kind=&collection=
+//   GET  /api/logo/search?q=&limit=&kind=&collection=&since=
 //                                              the `logo.search` answer for the dialog (a read of
-//                                              public data; the same origin page or any caller)
+//                                              public data; the same origin page or any caller);
+//                                              `since` names a refresh's `builtAt` the answering
+//                                              instance adopts when its copy is older (4.2)
 //   POST /api/logo/refresh { dryRun? }         the index rebuild: the agent bearer or
 //                                              `Authorization: Bearer <CRON_SECRET>` (what a Vercel
 //                                              cron sends), else 401 (4.2)
@@ -172,8 +174,14 @@ async function serveSearch(request: Request): Promise<Response> {
     kind?: 'symbol' | 'wordmark';
     collection?: 'brands' | 'all';
   };
+  // `since`, the build a refresh answered (`builtAt`): the instance answering adopts that build
+  // when its copy is older (server/logos.ts `SEARCH_REVALIDATE_MS`); read beside the table's
+  // input, so the route carries it before the table names it
+  const since = url.searchParams.get('since');
   try {
-    const answer = await (await logoService()).search(query, options);
+    const answer = await (
+      await logoService()
+    ).search(query, options, since === null || since === '' ? {} : { since });
     return jsonResponse(answer);
   } catch (error) {
     return errorResponse(error, 'logo.search');

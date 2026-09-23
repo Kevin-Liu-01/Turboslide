@@ -413,6 +413,66 @@ export function logoBoxIn(
   return [Math.round(area[0] + (area[2] - w) / 2), Math.round(area[1] + (area[3] - h) / 2), w, h];
 }
 
+/** The room kept between the title's mark slot, a logo placed beside it and the content box's edge, in sheet px. */
+export const LOGO_TITLE_GAP = 40;
+
+/** What the title rule reads of a canvas object: its kind and its box. */
+export type LogoPlacedObject = {
+  type: string;
+  pos?: { x: number; y: number; w: number; h: number } | undefined;
+};
+
+/**
+ * Where a logo lands on a title slide that has become a canvas (4.4; the verifier's pass 1, F3):
+ * the title layout has no body slot, its mark, heading and lead are one stack in the middle of
+ * the sheet, and its empty lead reads to the picture rule as a placeholder standing for the whole
+ * content box, so the customer's mark landed over the heading's words at the slot's centre. The
+ * rule here: the mark slot's row, to the right of the mark block (the brand's own mark), from the
+ * mark's right edge plus the gap to the content box's right edge minus the gap, at the mark's
+ * height; an object already on that row (a second logo) moves the area's left edge past it. Null
+ * when the slide is not a converted title, carries no mark block, or the row is full, so the
+ * general rule decides. The viewer repeats the rule (Editor.tsx `insertLogoAsset`) because it
+ * cannot import this package; the numbers are these.
+ */
+export function logoTitleArea(
+  kind: string | undefined,
+  objects: ReadonlyArray<LogoPlacedObject>,
+  content: LogoBox,
+): LogoBox | null {
+  if (kind !== 'title') return null;
+  const mark = objects.find((block) => block.type === 'mark' && block.pos !== undefined);
+  const pos = mark?.pos;
+  if (pos === undefined) return null;
+  const top = pos.y;
+  const bottom = pos.y + pos.h;
+  let left = pos.x + pos.w + LOGO_TITLE_GAP;
+  const right = content[0] + content[2] - LOGO_TITLE_GAP;
+  for (const block of objects) {
+    if (block === mark || block.pos === undefined || block.type === 'picture') continue;
+    const own = block.pos;
+    // an object on the mark's row (its box crosses the row) with its left edge at or past the
+    // mark's right edge takes the row up to its right edge plus the gap
+    if (own.y >= bottom || own.y + own.h <= top) continue;
+    if (own.x + own.w <= pos.x + pos.w) continue;
+    if (own.x >= right) continue;
+    left = Math.max(left, own.x + own.w + LOGO_TITLE_GAP);
+  }
+  if (right - left < 8) return null;
+  return [left, top, right - left, pos.h];
+}
+
+/**
+ * The box a logo takes beside the title's mark (4.4): the logo size scaled down to the area's
+ * height and width, never up, at the area's left edge and centred on its height, so the
+ * customer's mark sits beside the brand's mark on one row.
+ */
+export function logoBoxAtStart(area: LogoBox, size: readonly [number, number]): LogoBox {
+  const scale = Math.min(1, area[2] / size[0], area[3] / size[1]);
+  const w = Math.max(8, Math.round(size[0] * scale));
+  const h = Math.max(8, Math.round(size[1] * scale));
+  return [Math.round(area[0]), Math.round(area[1] + (area[3] - h) / 2), w, h];
+}
+
 /**
  * The pixel size the twins are rasterized at (4.4; audit-logos 2): 3x of the logo size, the long
  * side at least 384 and at most 1536 px, the aspect kept.
@@ -533,11 +593,33 @@ export function logoMarkPath(slug: string, variant: string): string {
   return `${LOGO_ROUTE}/mark/${encodeURIComponent(slug)}/${encodeURIComponent(variant)}.svg`;
 }
 
+/** How long the Tailor handler waits for the stored mark to reach the deck's document, and how often it looks (4.5). */
+export const FIND_LOGO_LANDED_MS = 15_000;
+export const FIND_LOGO_LANDED_INTERVAL_MS = 100;
+
+/**
+ * How the Tailor handler learns the stored mark has reached the deck's document (the verifier's
+ * pass 1, F2): `landed` reads the document the dialog's `deck.tailor` will plan over and answers
+ * true once it holds the asset. On the blob tier the record of an asset only write reaches the
+ * tab through the channel's head poll and a resync, seconds after the server's answer, while the
+ * memory tier's room streams it within milliseconds; `deck.tailor` runs in the page over the
+ * tab's document, so an Apply before the record arrived was refused with "no asset" and nothing
+ * was renamed. Without `landed` the handler answers as the server does.
+ */
+export type FindLogoLanded = {
+  landed: (assetId: string) => Promise<boolean> | boolean;
+  timeoutMs?: number;
+  intervalMs?: number;
+  sleep?: (ms: number) => Promise<void>;
+};
+
 /**
  * The Tailor handler (4.5): the mark is stored through `logo.insert` with no slide and no kit write
  * (an asset alone), and the asset id is what `deck.tailor { logo: { assetId, replaceAlt } }`
  * names in the one Tailor commit. `insert` is the transport the dialog has (the window action, or
- * the same origin route until it lands).
+ * the same origin route until it lands). With `wait` the handler answers only once the deck's
+ * document holds the asset, or after the bound with `landed: false`, so the dialog's "ready" line
+ * is true when it reads and Apply finds the asset it names.
  */
 export async function findCustomerLogo(
   row: LogoRow,
@@ -548,9 +630,20 @@ export async function findCustomerLogo(
     baseRevision: number;
   }) => Promise<{ asset: { id: string } }>,
   baseRevision: number,
-): Promise<{ assetId: string; variant: string } | null> {
+  wait?: FindLogoLanded,
+): Promise<{ assetId: string; variant: string; landed: boolean } | null> {
   const choice = chooseVariant(row, appearance);
   if (choice === null) return null;
   const answer = await insert({ slug: row.slug, variant: choice.variant, baseRevision });
-  return { assetId: answer.asset.id, variant: choice.variant };
+  const assetId = answer.asset.id;
+  if (wait === undefined) return { assetId, variant: choice.variant, landed: true };
+  const sleep = wait.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const until = Date.now() + (wait.timeoutMs ?? FIND_LOGO_LANDED_MS);
+  const interval = Math.max(1, wait.intervalMs ?? FIND_LOGO_LANDED_INTERVAL_MS);
+  let landed = await wait.landed(assetId);
+  while (!landed && Date.now() < until) {
+    await sleep(interval);
+    landed = await wait.landed(assetId);
+  }
+  return { assetId, variant: choice.variant, landed };
 }

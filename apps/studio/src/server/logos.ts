@@ -28,9 +28,11 @@ import {
   isOpenLicence,
   kitTextColour,
   logoAssetId,
+  logoBoxAtStart,
   logoBoxIn,
   logoInsertSize,
   logoRasterSize,
+  logoTitleArea,
   monoOffered,
   rankLogos,
   searchRowOf,
@@ -48,6 +50,7 @@ import type { Asset, AssetTwins, LogoAssetSource } from '@turboslide/schema/asse
 import type { Block } from '@turboslide/schema/blocks';
 import type { BrandKit, KitAppearance } from '@turboslide/schema/brand';
 import { brandWriteMutation } from '@turboslide/schema/brand';
+import { grammarRecordOf } from '@turboslide/schema/canvas';
 import type { Deck, DeckDocument, Slide } from '@turboslide/schema/deck';
 import {
   canvasObjects,
@@ -59,6 +62,7 @@ import {
 import { ConflictError } from '@turboslide/schema/errors';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import type { Box } from '@turboslide/schema/render';
+import { CONTENT_BOX } from '@turboslide/schema/render';
 import type { DeckStore } from '@turboslide/store/store';
 
 import { bodyRect, freeRectangles, occupiedRects } from '../editor/place-insert';
@@ -94,6 +98,14 @@ import { exportBlobClient, isHosted, stateDir } from './root';
 
 /** How long an instance keeps the index it read before it asks the store for the version again. */
 export const INDEX_REVALIDATE_MS = 60 * 60 * 1000;
+/**
+ * How often at most an instance asks the store for the version because a search named a build it
+ * does not hold (`since`, the refresh answer's `builtAt`; the verifier's pass 1, F4): a refresh
+ * made on another instance is adopted by the instance that answers the next search that names
+ * it, in place of waiting out the hour above. One head per instance per this interval at most,
+ * on a request, never on a timer (docs/SYNC.md 4).
+ */
+export const SEARCH_REVALIDATE_MS = 2 * 1000;
 /** How often an instance persists a discovery (an unavailable variant, a newly cached mark) at most. */
 export const PERSIST_THROTTLE_MS = 60 * 1000;
 /** A mark that is not open is kept in memory this long between fetches (a tile drawn twice, a scroll back). */
@@ -139,12 +151,28 @@ export class LogoUpstreamError extends Error {
   }
 }
 
+/**
+ * What a search may name beside its options (4.2; F4): `since`, the `builtAt` a refresh answered,
+ * so the instance answering the search adopts that build when its copy is older (the CLI's
+ * `turboslide logo refresh` then `logo search --since <builtAt>`, and the fixture spec's takedown
+ * read); the dialog names nothing and reads the instance's copy.
+ */
+export type LogoSearchExtra = {
+  since?: string;
+};
+
 export type LogoService = {
   readonly deps: LogoServiceDeps;
   /** the index this instance holds, read from the store once and revalidated by version at most hourly */
   index: () => Promise<LogoIndex>;
+  /** asks the store for the version now and adopts a newer index; the held index when unchanged */
+  revalidate: () => Promise<LogoIndex>;
   facts: () => Promise<LogoIndexFacts>;
-  search: (query: string, options?: LogoSearchOptions) => Promise<LogoSearchAnswer>;
+  search: (
+    query: string,
+    options?: LogoSearchOptions,
+    extra?: LogoSearchExtra,
+  ) => Promise<LogoSearchAnswer>;
   refresh: (options?: { dryRun?: boolean }) => Promise<RefreshCounts>;
   /** the sanitized file of a variant by the cache rule of 4.2 */
   mark: (slug: string, variant: string) => Promise<MarkAnswer>;
@@ -189,24 +217,54 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
     return held;
   };
 
+  /** One head, on this request (never a timer): a refresh made elsewhere is adopted when the version moved. */
+  const revalidate = async (): Promise<LogoIndex> => {
+    if (held === null) return index();
+    const version = await deps.store.indexVersion().catch(() => heldVersion);
+    heldAt = Date.now();
+    if (version === heldVersion) return held;
+    const stored = await deps.store.readIndex().catch(() => null);
+    if (stored !== null) {
+      held = stored;
+      heldVersion = version;
+    }
+    return held;
+  };
+
   const index = async (): Promise<LogoIndex> => {
     if (held !== null) {
       if (Date.now() - heldAt < INDEX_REVALIDATE_MS) return held;
       // one head at most an hour, on this request (never a timer): a refresh elsewhere is adopted
-      const version = await deps.store.indexVersion().catch(() => heldVersion);
-      heldAt = Date.now();
-      if (version === heldVersion) return held;
-      const stored = await deps.store.readIndex().catch(() => null);
-      if (stored !== null) {
-        held = stored;
-        heldVersion = version;
-      }
-      return held;
+      return revalidate();
     }
     loading ??= load().finally(() => {
       loading = null;
     });
     return loading;
+  };
+
+  /** True when the held index is the build the caller names, or a newer one (ISO times compare as strings). */
+  const holdsBuild = (current: LogoIndex, since: string): boolean =>
+    current.builtAt !== null && current.builtAt >= since;
+
+  let checkedAt = 0;
+  /** One head now unless one ran inside SEARCH_REVALIDATE_MS on this instance; the held copy otherwise. */
+  const revalidateSoon = async (current: LogoIndex): Promise<LogoIndex> => {
+    if (Date.now() - checkedAt < SEARCH_REVALIDATE_MS) return current;
+    checkedAt = Date.now();
+    return revalidate();
+  };
+
+  /**
+   * The index for a search that names a build (`since`): the held copy when it is that build or
+   * newer, else one head now (at most once per SEARCH_REVALIDATE_MS per instance) and the store's
+   * index when the version moved. A `since` the store never wrote (a clock ahead, a typo) costs
+   * the one head and answers the held copy.
+   */
+  const indexSince = async (since: string | undefined): Promise<LogoIndex> => {
+    const current = await index();
+    if (since === undefined || since === '' || holdsBuild(current, since)) return current;
+    return revalidateSoon(current);
   };
 
   /** Writes the held index when a discovery changed it, at most once a minute per instance. */
@@ -247,8 +305,22 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
   };
 
   const mark = async (slug: string, variant: string): Promise<MarkAnswer> => {
-    const entry = await row(slug);
+    let entry = await row(slug);
     if (entry === null) return { ok: false, status: 404, message: LOGO_WORDS.unknown(slug) };
+    if (isOpenLicence(entry.license)) {
+      // a first fetch of an open licence mark on this instance (nothing cached for it in the
+      // index this instance holds): one head first, at most every SEARCH_REVALIDATE_MS, so a
+      // refresh made elsewhere that took the mark down is adopted before its file is fetched and
+      // written to the store again (4.2; the verifier's pass 1, F4). A cached mark costs no head.
+      const held = await index();
+      if (held.cached[cachedMarkKey(slug, variant)] === undefined) {
+        const fresh = await revalidateSoon(held);
+        if (fresh !== held) {
+          entry = fresh.icons.find((each) => each.slug === slug) ?? null;
+          if (entry === null) return { ok: false, status: 404, message: LOGO_WORDS.unknown(slug) };
+        }
+      }
+    }
     const path = entry.variants[variant];
     if (path === undefined)
       return { ok: false, status: 404, message: LOGO_WORDS.noVariant(entry.title, variant) };
@@ -274,6 +346,24 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
             return { ok: true, svg: sanitized.svg, row: entry, variant, sanitized, cached: true };
           } catch {
             // a cached file that no longer parses is fetched again below
+          }
+        } else {
+          // the file this instance's index says is cached is gone from the store: a refresh made
+          // on another instance took the mark down or evicted it (4.2; the verifier's pass 1, F4),
+          // so the index is read again before anything is fetched, and a slug that left it
+          // answers 404 instead of a fresh copy of a file the source removed
+          const fresh = await revalidate();
+          if (fresh !== current) {
+            const still = fresh.icons.find((row) => row.slug === slug);
+            if (still === undefined)
+              return { ok: false, status: 404, message: LOGO_WORDS.unknown(slug) };
+            if (still.variants[variant] === undefined)
+              return {
+                ok: false,
+                status: 404,
+                message: LOGO_WORDS.noVariant(still.title, variant),
+              };
+            return mark(slug, variant);
           }
         }
         delete current.cached[key];
@@ -341,8 +431,9 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
   const search = async (
     query: string,
     options: LogoSearchOptions = {},
+    extra: LogoSearchExtra = {},
   ): Promise<LogoSearchAnswer> => {
-    const current = await index();
+    const current = await indexSince(extra.since);
     const rows = rankLogos(current.icons, query, options);
     const indexed = current.icons.filter(
       (entry) =>
@@ -363,6 +454,11 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
       const lastError = memoryError ?? counts.lastError;
       return { ...counts, ...(lastError !== undefined ? { lastError } : {}) };
     }
+    // the store's index first, on every instance: the fixture upstream decides its takedown from
+    // the index this instance holds (4.9), and a held copy older than another instance's refresh
+    // would re list what that refresh dropped (the verifier's pass 2 F.5 finding 3), so the
+    // refresh heads the store's version and adopts its index before the manifest is asked
+    await revalidate();
     if (dirty && held !== null) await deps.store.writeIndex(held).catch(() => undefined);
     const counts = await refreshLogoIndex({
       store: deps.store,
@@ -382,6 +478,7 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
   return {
     deps,
     index,
+    revalidate,
     facts,
     search,
     refresh,
@@ -563,8 +660,16 @@ function tintColours(deck: Deck): { light: string; dark: string } {
   return { light: kitTextColour(deck.brand, 'light'), dark: kitTextColour(deck.brand, 'dark') };
 }
 
-/** The box for a logo on a canvas slide: the free rectangle rule of the product round (place-insert.ts), the logo size inside it. */
+/**
+ * The box for a logo on a canvas slide: on a converted title slide the mark slot's row beside the
+ * brand's mark (logo-model.ts `logoTitleArea`; the title layout has no body slot and its stack
+ * sits in the middle of the sheet, so the general rule landed the mark over the heading's words);
+ * elsewhere the free rectangle rule of the product round (place-insert.ts) with the logo size
+ * inside it.
+ */
 export function logoPlacementOn(slide: Slide, size: [number, number]): Box {
+  const titleArea = logoTitleArea(grammarRecordOf(slide)?.kind, canvasObjects(slide), CONTENT_BOX);
+  if (titleArea !== null) return logoBoxAtStart(titleArea, size);
   const body = bodyRect(slide);
   const occupied = occupiedRects(slide, body);
   let best: { rect: Box; area: number } | null = null;
@@ -925,9 +1030,11 @@ export function registerLogoActions(dispatcher: Dispatcher, deps: LogoActionDeps
       limit?: number;
       kind?: 'symbol' | 'wordmark';
       collection?: 'brands' | 'all';
+      /** the build a refresh answered (`builtAt`), once the table's input names it (build/b6.md, the fix round) */
+      since?: string;
     };
-    const { query, ...options } = request;
-    return (await service()).search(query, options);
+    const { query, since, ...options } = request;
+    return (await service()).search(query, options, since === undefined ? {} : { since });
   });
   dispatcher.register('logo.insert', async (input, ctx: ActionContext) =>
     logoInsert(

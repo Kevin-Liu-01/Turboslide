@@ -928,10 +928,12 @@ export async function run(t) {
       const fills = async (record) => {
         if (!record?.sourceFile) return null;
         const deckId = (await t.state()).deckId;
+        /* the source file follows its redirect: the blob tier answers the deck's files with a 302
+           to the store, which a fetch that stops at the first answer read as no file (the
+           verifier's pass 1 F10) */
         const res = await page.request
           .get(`${BASE}/decks/${deckId}/${String(record.sourceFile).replace(/^\//, '')}`, {
             headers: t.headers,
-            maxRedirects: 0,
           })
           .catch(() => null);
         if (!res || res.status() !== 200) return { status: res?.status() ?? 0, fills: [] };
@@ -1216,10 +1218,9 @@ export async function run(t) {
         const found = document.querySelector('[data-control="dialog.tailor.logo.found"]');
         return Boolean(found?.querySelector('img, svg, canvas'));
       });
-      /* the store is one write the room acknowledges about two seconds after the button's answer
-         on the memory tier (build/b3.md R7): Apply's one revision is counted from after it */
-      if (stored !== null && storeError === null)
-        await t.waitRevision(revStore + 1, 15_000).catch(() => undefined);
+      /* Apply as soon as the stored line reads, the seller's gesture: the store's own answer
+         waits until the record has come back over the channel (`logo.insert` announces,
+         controller.tsx; the fix round's R13 and R17), so no wait for the revision sits here */
       await t.settled();
       const rev0 = (await t.state()).revision;
       const apply = (await t.visible('dialog.tailor.apply')) ? 'dialog.tailor.apply' : null;

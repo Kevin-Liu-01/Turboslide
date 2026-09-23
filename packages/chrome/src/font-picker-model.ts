@@ -8,7 +8,16 @@
 // the toolbar needs before the answer (the family names, the generic families, the route) are
 // spelled here; packages/fonts/src/catalog.test.ts pins the names to the catalog. No React, no
 // DOM: font-picker-model.test.ts runs in Node.
-import type { BrandKit } from '@turboslide/schema/brand';
+//
+// The fixed kinds' fields (the cover's heading and lead, a statement's big line, a picture kind's
+// plate; editor-shell.ts pseudoBlockOf) carry no `typography`: the brand kit's Display face draws
+// the heading and its Text face the rest (packages/render/src/theme-css.ts writes `--display` and
+// `--text` from the kit), so the Font control on such a field reads the kit's face for the
+// field's role and says where it is set, instead of reading the theme's face and opening nothing
+// (the features round's fix round, docs/gslides-parity/focus/VERIFICATION.md F.5 F8). Whether the
+// fields take a typography of their own is Kevin's call (F.10 item 5); until then the control is
+// honest about the kit path.
+import type { BrandKit, KitFonts } from '@turboslide/schema/brand';
 import type { Block } from '@turboslide/schema/blocks';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
@@ -30,6 +39,9 @@ export const FONT_PICKER = {
   control: 'Font',
   doc: 'The face of the selected text; More fonts lists every face with its licence',
   tableDoc: 'A table takes one size; its face is the theme’s',
+  /* a fixed kind's field (the cover's heading and lead): the kit's face for its role draws it */
+  fixedDisplayDoc: 'This heading takes the brand kit’s Display face; Slide > Edit theme changes it',
+  fixedTextDoc: 'This text takes the brand kit’s Text face; Slide > Edit theme changes it',
   search: 'Search fonts',
   searchDoc: 'Type part of a family name',
   brand: 'Brand',
@@ -129,6 +141,32 @@ export function familyOf(block: Block | undefined): FontId | null {
 export function takesFamily(block: Block | undefined): boolean {
   if (block === undefined) return false;
   return block.type !== 'table';
+}
+
+/** A role of the kit's fonts: `display` for every heading, `text` for the body text. */
+export type KitFontRole = keyof KitFonts;
+
+/**
+ * The kit role a fixed kind's field draws in (editor-shell.ts pseudoBlockOf): the cover's heading
+ * and a statement's big line are headings and take the Display face (sheet.css `h1, h2, .big`);
+ * the lead and a picture kind's plate take the Text face (the sheet root's `--text`).
+ */
+export function fixedFieldRole(field: Block): KitFontRole {
+  return field.type === 'heading' ? 'display' : 'text';
+}
+
+/**
+ * The family a fixed field draws in, as `familyOf` spells it: the kit's face for the role, or
+ * null for the theme's face when the kit is silent or names the theme's own (`inter`).
+ */
+export function fixedFieldFamily(kit: BrandKit | undefined, role: KitFontRole): FontId | null {
+  const family = kit?.fonts?.[role];
+  return family !== undefined && family !== DEFAULT_FONT_ID ? family : null;
+}
+
+/** The disabled control's sentence on a fixed field: which kit face draws it and where that is set. */
+export function fixedFieldDoc(role: KitFontRole): string {
+  return role === 'display' ? FONT_PICKER.fixedDisplayDoc : FONT_PICKER.fixedTextDoc;
 }
 
 /** The label the toolbar control shows for a block: the family name, else the theme's face. */

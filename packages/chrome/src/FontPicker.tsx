@@ -8,6 +8,7 @@ import { DEFAULT_FONT_ID, isFontId } from '@turboslide/schema/fonts';
 import { fontRows } from '@turboslide/render/fonts';
 
 import { MoreFontsDialog } from './dialogs/MoreFonts';
+import { pseudoBlockOf } from './editor-shell';
 import { useEditorShell } from './editor-shell-context';
 import {
   FONT_CATEGORY_LABELS,
@@ -16,6 +17,9 @@ import {
   controlLabel,
   familyLabel,
   familyOf,
+  fixedFieldDoc,
+  fixedFieldFamily,
+  fixedFieldRole,
   flatRows,
   fontsStylesheetHref,
   groupRows,
@@ -548,6 +552,14 @@ export function FontDropdown({
  * `op: 'font'`): the selected block's family name with a chevron; the plate on a click. With the
  * catalog parked by the ship's rule (`FONTS_PARKED`, docs/PRODUCT.md 3.4) the control draws the
  * family as a read only value with the same tooltip and no chevron.
+ *
+ * A fixed kind's field (the cover's heading and lead, a statement's big line, a picture kind's
+ * plate) reaches the text tail as a pseudo block (editor-shell.ts `tailKindOf`) and this control
+ * as no block at all (ToolbarTail's `selectedBlock` walks the slide's blocks alone), and it
+ * carries no `typography`: the kit's Display face draws the heading and its Text face the rest.
+ * The control reads that face and its tooltip says where it is set, disabled, instead of reading
+ * the theme's face and opening nothing on a click (docs/gslides-parity/focus/VERIFICATION.md F.5
+ * F8; b1.md, the fix round). A typography of the fields' own is Kevin's call (F.10 item 5).
  */
 export function FontField({
   control,
@@ -562,15 +574,27 @@ export function FontField({
   const { input } = shell;
   const takes = takesFamily(block);
   const enabled = control.status === 'now' && evaluate(control.enabled, shell.menuContext) && takes;
+  /* the fixed field under the selection, when the tail has no block for it */
+  const slide = input.document.slides[input.slideId];
+  const fixed =
+    block === undefined && slide !== undefined && input.selection?.blockId !== undefined
+      ? pseudoBlockOf(slide, input.selection.blockId)
+      : undefined;
+  const role = fixed === undefined ? null : fixedFieldRole(fixed);
   const tip = controlTip(
     {
       ...control,
-      ...(block !== undefined && !takes ? { disabledReason: FONT_PICKER.tableDoc } : {}),
+      ...(block !== undefined && !takes
+        ? { disabledReason: FONT_PICKER.tableDoc }
+        : role !== null
+          ? { disabledReason: fixedFieldDoc(role) }
+          : {}),
     },
     shell.platform,
     enabled,
   );
-  const family = familyOf(block);
+  const family =
+    role !== null ? fixedFieldFamily(input.document.deck.brand, role) : familyOf(block);
   const apply = (next: FontId | null) => {
     if (block === undefined) return;
     const typography =
@@ -600,7 +624,9 @@ export function FontField({
           aria-disabled="true"
           {...tipProps(tip)}
         >
-          <span className="pt-lb ts-font-label">{controlLabel(block)}</span>
+          <span className="pt-lb ts-font-label">
+            {role !== null ? familyLabel(family ?? DEFAULT_FONT_ID) : controlLabel(block)}
+          </span>
         </span>
       </span>
     );

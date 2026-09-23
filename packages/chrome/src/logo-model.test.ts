@@ -5,24 +5,27 @@ import {
   LOGO_PLATE_LINES,
   LOGO_WORDS,
   chooseVariant,
+  findCustomerLogo,
   isOpenLicence,
   kitTextColour,
   licenceClassOf,
   licenceSentenceOf,
   licenceTooltipOf,
   logoAssetId,
+  logoBoxAtStart,
   logoBoxIn,
   logoIndexDate,
   logoInsertSize,
   logoMatchFor,
   logoRasterSize,
+  logoTitleArea,
   monoOffered,
   normalizeLogoText,
   rankLogos,
   tintAllowed,
   variantKindOf,
 } from './logo-model';
-import type { LogoRow } from './logo-model';
+import type { LogoBox, LogoPlacedObject, LogoRow } from './logo-model';
 
 // The logo picker's pure rules (docs/FEATURES.md 7.3, the B6 test in packages/chrome): the
 // appearance rule picks `dark`, `default`, `mono` tinted or the plate line for the fixture marks on
@@ -414,5 +417,88 @@ describe('the words and the ids (4.3, 4.6)', () => {
     expect(logoAssetId('figma', new Set())).toBe('figma');
     expect(logoAssetId('figma', new Set(['figma']))).toBe('figma-2');
     expect(logoAssetId('figma', new Set(['figma', 'figma-2']))).toBe('figma-3');
+  });
+});
+
+describe('the Tailor handler (4.5)', () => {
+  const figma = row({ slug: 'figma', title: 'Figma', readsOnPaper: true, readsOnInk: true });
+  const insert = async () => ({ asset: { id: 'figma' } });
+
+  it('answers once the deck’s document holds the stored mark, and says when it never arrived', async () => {
+    let looks = 0;
+    const sleeps: number[] = [];
+    const landed = await findCustomerLogo(figma, 'light', insert, 4, {
+      landed: () => {
+        looks += 1;
+        return looks >= 3;
+      },
+      timeoutMs: 1000,
+      intervalMs: 10,
+      sleep: async (ms) => {
+        sleeps.push(ms);
+      },
+    });
+    expect(landed).toEqual({ assetId: 'figma', variant: 'default', landed: true });
+    expect(looks).toBe(3);
+    expect(sleeps).toEqual([10, 10]);
+    /* the record never reaches the document inside the bound: the answer says so */
+    const late = await findCustomerLogo(figma, 'light', insert, 4, {
+      landed: () => false,
+      timeoutMs: 30,
+      intervalMs: 5,
+    });
+    expect(late).toEqual({ assetId: 'figma', variant: 'default', landed: false });
+    /* without a wait the server's answer stands, as before */
+    expect(await findCustomerLogo(figma, 'light', insert, 4)).toEqual({
+      assetId: 'figma',
+      variant: 'default',
+      landed: true,
+    });
+  });
+});
+
+describe('the title rule (4.4)', () => {
+  const content: LogoBox = [137, 129, 1326, 642];
+  const objects: LogoPlacedObject[] = [
+    { type: 'mark', pos: { x: 137, y: 370, w: 132, h: 84 } },
+    { type: 'heading', pos: { x: 137, y: 498, w: 1326, h: 60 } },
+    { type: 'paragraph', pos: { x: 137, y: 584, w: 1326, h: 40 } },
+  ];
+
+  it('puts the logo beside the mark on a converted title slide and leaves every other slide to the general rule', () => {
+    expect(logoTitleArea('title', objects, content)).toEqual([309, 370, 1114, 84]);
+    expect(logoTitleArea('content', objects, content)).toBeNull();
+    expect(logoTitleArea(undefined, objects, content)).toBeNull();
+    expect(logoTitleArea('title', objects.slice(1), content)).toBeNull();
+    /* an object already on the row moves the area's left edge past it */
+    expect(
+      logoTitleArea(
+        'title',
+        [...objects, { type: 'shot', pos: { x: 309, y: 370, w: 57, h: 84 } }],
+        content,
+      ),
+    ).toEqual([406, 370, 1017, 84]);
+    /* a background picture takes no room; a full row leaves the general rule to decide */
+    expect(
+      logoTitleArea(
+        'title',
+        [...objects, { type: 'picture', pos: { x: 0, y: 0, w: 1600, h: 900 } }],
+        content,
+      ),
+    ).toEqual([309, 370, 1114, 84]);
+    expect(
+      logoTitleArea(
+        'title',
+        [...objects, { type: 'shot', pos: { x: 309, y: 380, w: 1200, h: 60 } }],
+        content,
+      ),
+    ).toBeNull();
+  });
+
+  it('scales the logo to the row and sits it at the area’s left edge, centred on the row’s height', () => {
+    expect(logoBoxAtStart([309, 370, 1114, 84], [108, 160])).toEqual([309, 370, 57, 84]);
+    expect(logoBoxAtStart([309, 370, 1114, 84], [320, 64])).toEqual([309, 380, 320, 64]);
+    expect(logoBoxAtStart([309, 370, 100, 84], [320, 64])).toEqual([309, 402, 100, 20]);
+    expect(logoBoxAtStart([309, 370, 1114, 200], [108, 160])).toEqual([309, 390, 108, 160]);
   });
 });

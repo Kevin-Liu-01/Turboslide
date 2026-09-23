@@ -1,0 +1,119 @@
+{
+  "base": "http://localhost:4411",
+  "at": "2026-09-23T06:58:16.034Z",
+  "rows": [
+    {
+      "n": 1,
+      "step": "the editor boots on /new with a title slide",
+      "expected": "kind 'title'",
+      "observed": "slide title, kind title, state keys deckId,revision,serverRevision,pending,slideId,blockId,mode,theme,zoom,settings,assets,author,sync,presence,access,account,comments,inbox",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "the Font control on the cover heading, kit silent",
+      "expected": "Inter; aria-disabled true; data-font theme; the Display sentence",
+      "observed": "{\"id\":\"toolbar.font\",\"words\":\"Inter\",\"disabled\":\"true\",\"font\":\"theme\",\"tip\":\"Font: This heading takes the brand kit’s Display face; Slide > Edit theme changes it.\"}",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "a click on the disabled control",
+      "expected": "no plate",
+      "observed": "0 plate(s)",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "the cover heading with the kit Display face Fraunces",
+      "expected": "Fraunces; disabled; data-font fraunces; the Display sentence",
+      "observed": "{\"id\":\"toolbar.font\",\"words\":\"Fraunces\",\"disabled\":\"true\",\"font\":\"fraunces\",\"tip\":\"Font: This heading takes the brand kit’s Display face; Slide > Edit theme changes it.\"}",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "the heading computes the kit face the control names",
+      "expected": "Fraunces first in the computed stack",
+      "observed": "Fraunces, Georgia, \"Times New Roman\", serif",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "the cover lead with the kit Text face Geist",
+      "expected": "Geist; disabled; data-font geist; the Text sentence",
+      "observed": "{\"id\":\"toolbar.font\",\"words\":\"Geist\",\"disabled\":\"true\",\"font\":\"geist\",\"tip\":\"Font: This text takes the brand kit’s Text face; Slide > Edit theme changes it.\"}",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "the Font control on a text block",
+      "expected": "Inter; enabled; the picker sentence",
+      "observed": "{\"id\":\"toolbar.font\",\"words\":\"Inter\",\"disabled\":null,\"font\":\"theme\",\"tip\":\"Font: The face of the selected text; More fonts lists every face with its licence.\"}",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "a click on the text block control",
+      "expected": "the plate opens",
+      "observed": "toolbar.font.plate present",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "Tabular figures toggled on from the row",
+      "expected": "tabular-nums computed, the focus on the checkbox",
+      "observed": "revision 5 to 5; tabular-nums; focus input[type=checkbox] formatOptions.typography.numerals",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "F7 mechanism: Cmd+Z with the focus on the checkbox",
+      "expected": "the finding: nothing changes (the request in b1.md fixes it)",
+      "observed": "tabular-nums; focus input[type=checkbox] formatOptions.typography.numerals; revision 5",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "Cmd+Z from the stage after a click on the block",
+      "expected": "the toggle undone: proportional figures",
+      "observed": "normal; revision 6",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "F7 asymmetry: Cmd+Shift+Z with the focus on the checkbox",
+      "expected": "read as it is: redo from the checkbox passes the gate that stops undo",
+      "observed": "focus input[type=checkbox] formatOptions.typography.numerals; tabular-nums; revision 6",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "F7 verdict on this tree",
+      "expected": "the finding reproduces until the useEditorKeys.ts request lands",
+      "observed": "Cmd+Z from the checkbox changed nothing; the stage undid it (the finding reproduces)",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "no console or page error from this lane’s modules",
+      "expected": "none",
+      "observed": "none",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "the scratch deck is trashed and removed",
+      "expected": "404 on /edit/<id>",
+      "observed": "404 (untitled-20260923-j4ti)",
+      "ok": true
+    }
+  ],
+  "errors": [
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4411/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 163707",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4411/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker udr3z4s-090479 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4411/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker udr3z4s-090479 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4411/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker udr3z4s-090479 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4411/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker udr3z4s-090479 rend",
+    "console: Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

@@ -79,6 +79,8 @@ type Counts = {
   upstream?: string;
   dropped?: string[];
   dryRun?: boolean;
+  /** the build a refresh made, which a search names as `since` to read an index at least as new */
+  builtAt?: string | null;
 };
 /** The refresh route's answer; `dryRun` reads the counts with no upstream fetch (4.2). */
 async function refresh(
@@ -103,8 +105,16 @@ async function routeOnBuild(): Promise<{ on: boolean; status: number; body: Coun
   return { on: r.status !== 404 && r.status !== 0, status: r.status, body: r.body };
 }
 const NOT_BUILT_ROUTE = 'not on this build: /api/logo (docs/FEATURES.md 4.2, B6)';
-/** `logo.search` over the dialog's own route. */
-async function searchHttp(query: string): Promise<{
+/**
+ * `logo.search` over the dialog's own route. `since` names a refresh's `builtAt`: the answering
+ * instance adopts the store's index when its held copy is older (docs/FEATURES.md 4.2; the fix
+ * round's R17), so a read after a takedown measures the same day promise through the mechanism
+ * the product offers and not the hour long hold of one instance.
+ */
+async function searchHttp(
+  query: string,
+  since?: string | null,
+): Promise<{
   status: number;
   logos: {
     slug: string;
@@ -114,10 +124,13 @@ async function searchHttp(query: string): Promise<{
   }[];
   body: Record<string, unknown> | null;
 }> {
-  const res = await page.request.get(`/api/logo/search?q=${encodeURIComponent(query)}&limit=10`, {
-    headers: extraHTTPHeaders,
-    maxRedirects: 0,
-  });
+  const res = await page.request.get(
+    `/api/logo/search?q=${encodeURIComponent(query)}&limit=10${since ? `&since=${encodeURIComponent(since)}` : ''}`,
+    {
+      headers: extraHTTPHeaders,
+      maxRedirects: 0,
+    },
+  );
   const body = (await res.json().catch(() => null)) as Record<string, unknown> | null;
   const logos = (body?.['logos'] as { slug: string; title: string }[] | undefined) ?? [];
   return { status: res.status(), logos, body };
@@ -459,7 +472,8 @@ test.describe('the fixture upstream project (docs/FEATURES.md 4.9, 7.2)', () => 
     }
     const takenDown = dropped || (second?.body?.dropped ?? []).includes('northwind');
     expect(takenDown, 'a refresh after the fixture dropped the slug reports it dropped').toBe(true);
-    const after = await searchHttp('northwind');
+    /* the read names the takedown's build, so an instance holding an older copy adopts it (R17) */
+    const after = await searchHttp('northwind', (second ?? first).body?.builtAt ?? null);
     test.info().annotations.push({
       type: 'northwind',
       description: `after the takedown: ${after.logos.map((r) => r.slug).join(', ') || 'no row'}`,

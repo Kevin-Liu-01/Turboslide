@@ -3103,6 +3103,8 @@ export function createEditorController(init: {
         return `The dither could not be made: ${reason}`;
       case 'material.capture':
         return `The capture did not finish: ${reason}`;
+      case 'logo.insert':
+        return `The logo could not be added: ${reason}`;
       default:
         return `The change did not go through: ${reason}`;
     }
@@ -3635,8 +3637,13 @@ export function createEditorController(init: {
      collection's templates folder, so every one runs on the server through runDeckAction */
   for (const id of SERVER_SIDE_WINDOW_ACTIONS_P1) serverSide(id);
   /* the logo picker's ids of the features round (docs/FEATURES.md 4.11; build/b6.md R3): the
-     index and the store live on the server, so the search, the insert and the refresh run there */
-  for (const id of SERVER_SIDE_WINDOW_ACTIONS_F1) serverSide(id);
+     index and the store live on the server, so the search, the insert and the refresh run there.
+     `logo.insert` writes this deck (the asset record, the kit's slots), so it announces as
+     `asset.add` does: the answer waits until the write has come back over the channel (a resync
+     at once on the blob tier), and Tailor's Apply, which plans in the page over the tab's
+     document, finds the asset it names (the fix round; VERIFICATION.md pass 1 F2, b6.md R13) */
+  for (const id of SERVER_SIDE_WINDOW_ACTIONS_F1)
+    serverSide(id, id === 'logo.insert' ? { announce: true } : {});
   /* Forget this browser (SPEC-3 7.4; VERIFICATION-3 finding 12): the server mints the new
      anonymous principal and its cookie (the response's Set-Cookie replaces the old one), then
      this page clears the localStorage and IndexedDB mirrors together and reloads as the new

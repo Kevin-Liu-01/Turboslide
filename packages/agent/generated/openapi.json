@@ -56878,6 +56878,10 @@
               "brands",
               "all"
             ]
+          },
+          "since": {
+            "description": "A refresh’s builtAt: the answer comes from an index at least as new when the store holds one",
+            "type": "string"
           }
         },
         "required": [

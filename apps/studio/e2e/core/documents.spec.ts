@@ -267,7 +267,14 @@ test(title('tables.paste.into-cell-spreads'), async () => {
   ]);
   expect(grid[3]?.slice(1)).toEqual(['East', '120', '140']);
   expect(grid[4]?.slice(1)).toEqual(['West', '80', '95']);
-  expect(grid[1], 'the row above is untouched').toEqual(['a1', 'b1', 'c1']);
+  /* every row carries one cell per column (packages/schema/src/blocks/table.ts tableSizeProblem),
+     so the untouched row gains the empty cell of the column the paste added (build/b3.md R9) */
+  expect(grid[1], 'the row above is untouched but for the added column').toEqual([
+    'a1',
+    'b1',
+    'c1',
+    '',
+  ]);
 });
 
 coverage(import.meta.filename, [

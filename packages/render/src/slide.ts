@@ -18,6 +18,7 @@ import { normalizeRotation } from '@turboslide/schema/position';
 import type { Box, Theme } from '@turboslide/schema/render';
 import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 import { importResidual } from '@turboslide/schema/ext';
+import { grammarRecordOf } from '@turboslide/schema/canvas';
 import type { SlotPosition } from '@turboslide/schema/brand';
 import type { FontSrc } from './fonts.ts';
 import { deckFontsCss, routeFontSrc } from './fonts.ts';
@@ -161,6 +162,18 @@ function assetSizeResolver(deck: Deck): (path: string) => [number, number] | und
   };
 }
 
+/**
+ * The canvas title's mark slot: the first block of the record's main slot and the kit's mark
+ * record, so `renderMark` draws the kit's picture there as `titleMarkSlot` did before the
+ * conversion (the features round's fix round, F1; build/b6.md R15). Undefined on every other slide.
+ */
+function titleMarkOf(deck: Deck, slide: Slide): BlockContext['titleMark'] {
+  const record = grammarRecordOf(slide);
+  if (record === null || record.kind !== 'title') return undefined;
+  const blockId = record.slots?.main?.[0];
+  return blockId === undefined ? undefined : { blockId, mark: deck.brand?.mark };
+}
+
 export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): RenderedSlide {
   const ctx: BlockContext = {
     slideId: slide.id,
@@ -181,6 +194,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
       kind: slide.kind,
       ...(slide.template !== undefined ? { template: slide.template } : {}),
     },
+    ...(titleMarkOf(deck, slide) !== undefined ? { titleMark: titleMarkOf(deck, slide) } : {}),
     rasters: [],
     warnings: [],
     rasterCount: 0,

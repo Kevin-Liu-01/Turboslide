@@ -10,8 +10,10 @@ import { LOGO_WORDS, chooseVariant, rankLogos } from '@turboslide/chrome/logo-mo
 import type { LogoRow } from '@turboslide/chrome/logo-model';
 import type { Asset } from '@turboslide/schema/assets';
 import { assetSchema } from '@turboslide/schema/assets';
+import type { Block } from '@turboslide/schema/blocks';
+import { grammarRecordOf, toCanvas } from '@turboslide/schema/canvas';
 import type { Deck, Slide } from '@turboslide/schema/deck';
-import { FREEFORM_SLIDE, WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
+import { FREEFORM_SLIDE, TITLE, WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
 import { canonicalJson } from '@turboslide/schema/json';
 import { openFileStore, slidePath } from '@turboslide/store/file-store';
 
@@ -635,6 +637,113 @@ describe('the refresh (4.2, 4.9)', () => {
     expect(rankLogos(rows, 'hub')[0]?.slug).toBe('github');
   });
 
+  it('adopts another instance’s refresh when a search names its build, and answers 404 for a taken down slug on a stale copy', async () => {
+    /* two instances over one store (the fix round, the verifier's pass 1 F4): the hour long hold
+       of the index is the design, the search that names the refresh's `builtAt` is how the
+       instance that answers it adopts the build, and a mark whose cached file left the store
+       reads the index again before it fetches */
+    const store = memoryLogoStore();
+    let clock = NOW.getTime();
+    const now = () => new Date(clock);
+    let aHeld: () => LogoIndex | null = () => null;
+    const a = createLogoService({
+      store,
+      upstream: fixtureUpstream(() => aHeld()),
+      rasterize: fakeRasterizer,
+      now,
+    });
+    aHeld = () => a.held();
+    await a.index();
+    expect((await a.mark(FIXTURE_DROPPED_SLUG, 'default')).ok).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect((await store.readIndex())?.cached[`${FIXTURE_DROPPED_SLUG}/default`]).toBeDefined();
+    let bHeld: () => LogoIndex | null = () => null;
+    const b = createLogoService({
+      store,
+      upstream: fixtureUpstream(() => bHeld()),
+      rasterize: fakeRasterizer,
+      now,
+    });
+    bHeld = () => b.held();
+    await b.index();
+    let cHeld: () => LogoIndex | null = () => null;
+    const c = createLogoService({
+      store,
+      upstream: fixtureUpstream(() => cHeld()),
+      rasterize: fakeRasterizer,
+      now,
+    });
+    cHeld = () => c.held();
+    await c.index();
+    clock += 60_000;
+    const counts = await a.refresh();
+    expect(counts.dropped).toEqual([FIXTURE_DROPPED_SLUG]);
+    expect(counts.builtAt).toBe(now().toISOString());
+    /* b holds its copy for the hour: the plain search still lists the slug */
+    expect((await b.search(FIXTURE_DROPPED_SLUG)).logos.map((r) => r.slug)).toContain(
+      FIXTURE_DROPPED_SLUG,
+    );
+    /* the search that names the build reads the store's version and adopts the refresh */
+    const since = counts.builtAt as string;
+    expect((await b.search(FIXTURE_DROPPED_SLUG, {}, { since })).logos).toEqual([]);
+    expect((await b.search(FIXTURE_DROPPED_SLUG, {}, { since })).logos).toEqual([]);
+    expect(await b.mark(FIXTURE_DROPPED_SLUG, 'default')).toEqual({
+      ok: false,
+      status: 404,
+      message: LOGO_WORDS.unknown(FIXTURE_DROPPED_SLUG),
+    });
+    /* a build the store never wrote costs one head and answers the held copy */
+    expect(
+      (await b.search('figma', {}, { since: '2099-01-01T00:00:00.000Z' })).logos[0]?.slug,
+    ).toBe('figma');
+    /* c never searched: its cached file is gone from the store, so the mark route reads the
+       index again and answers 404 instead of fetching a fresh copy of a removed file */
+    expect((await c.index()).cached[`${FIXTURE_DROPPED_SLUG}/default`]).toBeDefined();
+    expect(await c.mark(FIXTURE_DROPPED_SLUG, 'default')).toEqual({
+      ok: false,
+      status: 404,
+      message: LOGO_WORDS.unknown(FIXTURE_DROPPED_SLUG),
+    });
+    expect((await c.index()).icons.some((row) => row.slug === FIXTURE_DROPPED_SLUG)).toBe(false);
+  });
+
+  it('refuses the dropped slug’s file once a built index no longer holds it, and a fresh instance’s refresh reads the store’s index first', async () => {
+    const store = memoryLogoStore();
+    await refreshLogoIndex({
+      store,
+      upstream: fixtureUpstream(() => null),
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+    });
+    const holding = await store.readIndex();
+    expect(holding?.icons.some((row) => row.slug === FIXTURE_DROPPED_SLUG)).toBe(true);
+    const path = FIXTURE_ICONS.find((icon) => icon.slug === FIXTURE_DROPPED_SLUG)?.variants
+      .default as string;
+    /* before the first build and while the index holds the slug the file serves */
+    expect((await fixtureUpstream(() => null).mark(path, 'single')).ok).toBe(true);
+    expect((await fixtureUpstream(() => holding).mark(path, 'single')).ok).toBe(true);
+    /* the fresh instance: the fixture decides its takedown from the index the instance holds, so
+       the refresh reads the store's index before the manifest and drops the slug at once */
+    let held: () => LogoIndex | null = () => null;
+    const fresh = createLogoService({
+      store,
+      upstream: fixtureUpstream(() => held()),
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+    });
+    held = () => fresh.held();
+    expect(fresh.held()).toBeNull();
+    const counts = await fresh.refresh();
+    expect(counts.dropped).toEqual([FIXTURE_DROPPED_SLUG]);
+    expect(counts.icons).toBe(9);
+    /* after the takedown the files are gone too, as thesvg.org's are after a removal */
+    const after = await store.readIndex();
+    expect((await fixtureUpstream(() => after).mark(path, 'single')).ok).toBe(false);
+    expect((await fixtureUpstream(() => after).mark('/icons/figma/default.svg', 'single')).ok).toBe(
+      true,
+    );
+  });
+
   it('accepts the agent bearer and the cron secret for the refresh and refuses neither and a wrong secret', () => {
     const env = { CRON_SECRET: 'cron-secret-for-the-test-0000000000' };
     const req = (bearer?: string) =>
@@ -932,6 +1041,52 @@ describe('the insert (4.4, 4.11)', () => {
     expect(box[0] + box[2]).toBeLessThanOrEqual(137 + 1326);
     expect(box[1]).toBeGreaterThan(129 + 56);
     expect(box[1] + box[3]).toBeLessThanOrEqual(129 + 642);
+  });
+
+  it('places a logo beside the brand’s mark on a converted title slide, never over the heading’s words', () => {
+    /* the title slide as the stage converts it (schema/canvas.ts toCanvas): the mark at 132 by 84,
+       the h1 and the lead under it, one stack in the middle of the sheet; the lead is empty, the
+       placeholder the picture rule would take the whole content box for (the fix round, F3) */
+    const title = TITLE as Extract<Slide, { kind: 'title' }>;
+    const converted = toCanvas(
+      { ...title, lead: '' },
+      {
+        blocks: { heading: [137, 498, 1326, 60], lead: [137, 584, 1326, 40] },
+        mark: [137, 370, 132, 84],
+        prompted: ['lead'],
+      },
+    );
+    expect(converted).not.toBeNull();
+    const slide = converted?.slide as Slide;
+    expect(grammarRecordOf(slide)?.kind).toBe('title');
+    /* a symbol: beside the mark, scaled to the row's height */
+    expect(logoPlacementOn(slide, [108, 160])).toEqual([309, 370, 57, 84]);
+    /* a wordmark: 320 wide fits the row, centred on its height */
+    expect(logoPlacementOn(slide, [320, 64])).toEqual([309, 380, 320, 64]);
+    /* a second logo lands to the right of the first */
+    const main = (slide as { slots: { main: Block[] } }).slots.main;
+    const withOne = {
+      ...slide,
+      slots: {
+        main: [
+          ...main,
+          {
+            id: 'logo',
+            type: 'shot',
+            asset: 'figma',
+            pos: { x: 309, y: 370, w: 57, h: 84, z: 5 },
+          } as Block,
+        ],
+      },
+    } as Slide;
+    expect(logoPlacementOn(withOne, [108, 160])).toEqual([406, 370, 57, 84]);
+    /* no mark block (the seller removed it): the general rule, and the heading's words are clear */
+    const withoutMark = {
+      ...slide,
+      slots: { main: main.filter((block) => block.type !== 'mark') },
+    } as Slide;
+    const general = logoPlacementOn(withoutMark, [108, 160]);
+    expect(general[1] + general[3] <= 498 || general[1] >= 558).toBe(true);
   });
 
   it('rasterizes the sanitized SVG with sharp to a PNG of the size asked for', async () => {

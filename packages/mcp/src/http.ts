@@ -7,6 +7,9 @@
 // attached) at initialize, so the tool list a client reads is the one it can call. This module is
 // framework free: it takes a web-standard Request and returns a Response, so the studio route is
 // an adapter and the tests drive it through the SDK client with a fetch that calls handle().
+// On a deployment of several instances a POST may land on an instance that never saw the
+// session's initialize: the session is rebuilt there under the same id from the request itself
+// (`resume`), so a tool call after an initialize answered elsewhere no longer reads 404.
 //
 // Round three binds a session to the API key record the request carries (gslides-parity SPEC-3
 // 3.10, 7.7, 0.23): the host's `resolveKey` answers the key's record (B3's resolver over the
@@ -198,6 +201,93 @@ export function createMcpHttpHandler(options: McpHttpOptions): McpHttpHandler {
     return transport.handleRequest(request, { parsedBody: body });
   };
 
+  /**
+   * A session another instance opened (a deployment of several instances: `initialize` answered
+   * there and this POST landed here): rebuilt under the same id from the request, which carries
+   * everything `createServer` binds (the deck in the query, the author in its header, the key from
+   * the bearer), so nothing is lost but this instance's count for the key. The transport answers
+   * only after its own initialize, so one is fed to it first and its answer discarded. POST alone:
+   * the notification stream (GET) is opened again by the client after a 404, and a DELETE of an
+   * unknown session names one that is closed here already. Null leaves the 404 as it was; a key
+   * at its session cap answers the same 429 as `start` (the features round's fix round,
+   * VERIFICATION.md pass 1 F5; build/b6.md R16).
+   */
+  const resume = async (
+    request: Request,
+    sessionId: string,
+    key: KeyBinding | null,
+  ): Promise<Entry | Response | null> => {
+    if (request.method !== 'POST') return null;
+    if (key !== null) {
+      const open = [...entries.values()].filter(
+        (entry) => entry.session.key?.tokenId === key.tokenId,
+      ).length;
+      if (open >= (options.sessionsPerKey ?? SESSIONS_PER_KEY)) {
+        const response = rpcError(
+          429,
+          -32000,
+          `this key holds ${open} open MCP sessions; close one or wait for the idle timeout`,
+        );
+        response.headers.set('retry-after', '60');
+        return response;
+      }
+    }
+    let created: CreatedSession;
+    try {
+      created = await options.createServer(request, sessionId, key);
+    } catch {
+      return null;
+    }
+    const transport = new WebStandardStreamableHTTPServerTransport({
+      sessionIdGenerator: () => sessionId,
+      ...(options.enableJsonResponse !== undefined
+        ? { enableJsonResponse: options.enableJsonResponse }
+        : {}),
+      onsessionclosed: (closed) => {
+        const entry = entries.get(closed);
+        if (entry) void closeEntry(entry);
+      },
+    });
+    const entry: Entry = {
+      session: {
+        id: sessionId,
+        createdAt: stamp(),
+        lastSeenAt: stamp(),
+        facts: { ...(created.facts ?? {}), resumed: true },
+        ...(key !== null ? { key } : {}),
+      },
+      transport,
+      server: created.server,
+    };
+    entries.set(sessionId, entry);
+    transport.onclose = () => {
+      if (entries.get(sessionId) === entry) void closeEntry(entry);
+    };
+    await created.server.connect(transport);
+    const protocolVersion = request.headers.get('mcp-protocol-version') ?? '2025-03-26';
+    const handshake = new Request(request.url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json, text/event-stream',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: `resume-${sessionId}`,
+        method: 'initialize',
+        params: {
+          protocolVersion,
+          capabilities: {},
+          clientInfo: { name: 'resumed', version: '0' },
+        },
+      }),
+    });
+    const answer = await transport.handleRequest(handshake);
+    await answer.body?.cancel().catch(() => undefined);
+    log(`mcp http: session ${sessionId} resumed here (${JSON.stringify(entry.session.facts)})`);
+    return entry;
+  };
+
   const handler: McpHttpHandler = {
     async handle(request) {
       const denied = await options.authorize?.(request);
@@ -206,7 +296,12 @@ export function createMcpHttpHandler(options: McpHttpOptions): McpHttpHandler {
       const key = (await options.resolveKey?.(request)) ?? null;
       const sessionId = request.headers.get(SESSION_HEADER);
       if (sessionId) {
-        const entry = entries.get(sessionId);
+        let entry = entries.get(sessionId);
+        if (!entry) {
+          const resumed = await resume(request, sessionId, key);
+          if (resumed instanceof Response) return resumed;
+          entry = resumed ?? undefined;
+        }
         if (!entry)
           return rpcError(404, -32001, `Unknown MCP session ${sessionId}; initialize again`);
         if (

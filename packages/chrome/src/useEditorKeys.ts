@@ -44,10 +44,33 @@ export type EditorKeyState = {
   enabled: boolean;
 };
 
+/** The input types that take text; a checkbox, a radio, a range or a colour has no editing keys of its own. */
+const TEXT_INPUT_TYPES: ReadonlySet<string> = new Set([
+  'text',
+  'search',
+  'url',
+  'tel',
+  'email',
+  'password',
+  'number',
+  'date',
+  'datetime-local',
+  'month',
+  'time',
+  'week',
+]);
+
+/**
+ * A chrome field keeps the browser's own editing keys, so the chords return early inside one. A
+ * control that takes no text (the Tabular figures checkbox of Format options, a radio, a range)
+ * is not a field: Cmd+Z from it reaches `edit.undo` through the key table, Google's behaviour
+ * from the sidebar (the features round's fix round, VERIFICATION.md pass 1 F7; build/b1.md R6).
+ * A `<select>` stays a field because its arrow keys are its own.
+ */
 function isChromeField(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
-  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')
-    return true;
+  if (target instanceof HTMLInputElement) return TEXT_INPUT_TYPES.has(target.type);
+  if (target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return true;
   if (target.isContentEditable && target.closest('.ts-sheet, .ts-stage') === null) return true;
   return false;
 }

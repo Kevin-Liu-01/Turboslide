@@ -4530,7 +4530,7 @@
     },
     {
       "action": "logo.search",
-      "usage": "turboslide logo search <query> --limit <limit> --kind <kind> --collection <collection>",
+      "usage": "turboslide logo search <query> --limit <limit> --kind <kind> --collection <collection> --since <builtAt>",
       "command": [
         "logo",
         "search"
@@ -4567,9 +4567,21 @@
             "brands",
             "all"
           ]
+        },
+        {
+          "key": "since",
+          "flag": "--since",
+          "type": "string",
+          "required": false,
+          "description": "A refresh’s builtAt: the answer comes from an index at least as new when the store holds one"
         }
       ],
-      "custom": [],
+      "custom": [
+        {
+          "flag": "--since",
+          "template": "<builtAt>"
+        }
+      ],
       "mutates": false,
       "milestone": "P1"
     },

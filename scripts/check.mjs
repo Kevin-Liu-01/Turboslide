@@ -102,7 +102,12 @@ const PARITY_AUDIT = 'scripts/gslides-parity-audit.mjs';
 // that scripts/build-fonts.py documents; without it the step is skipped, never a silent pass.
 const FONTS_VENV = '.turboslide/venv';
 // Step 25 (SPEC-2 11.3, optional): the container verification in the render worker image runs
-// when a Docker daemon answers; the verifier records its numbers in VERIFICATION-2.md.
+// when a Docker daemon answers; the verifier records its numbers in VERIFICATION-2.md. The build
+// context is the sources alone (.dockerignore and docker/render-worker.Dockerfile.dockerignore
+// leave out node_modules, the crate's target and docs/), and each rebuild leaves the superseded
+// image untagged in the daemon's store, a few GB each; `docker image prune` reclaims them. The
+// features round, ship one (VERIFICATION.md F11) read the step failing at `COPY . .` with "no
+// space left on device" on a full Docker disk while the host had 165 GB free.
 const CONTAINER_IMAGE = 'turboslide-render-worker';
 // The export batch size the dev server the runner starts advertises (SPEC-2 8.1): small, so
 // apps/studio/e2e/export-batch.spec.ts drives the plan, the batches and the merge over the 27

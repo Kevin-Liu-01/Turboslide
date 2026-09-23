@@ -10,7 +10,7 @@ import { awaitAcknowledged } from './ack-wait';
 import { slideToConvertFor } from './convert-first';
 import { createExportModeGate } from './export-mode';
 import { refusalSentence } from './refusal';
-import { resyncBroughtUnseen } from './resync-history';
+import { acknowledgeAnswered, resyncBroughtUnseen } from './resync-history';
 import { placeInsert, wantsPlacement } from './place-insert';
 import { SELECT_OBJECTS_EVENT, keepsPlace, originOf } from './select-after-write';
 import type { SelectObjectsDetail, StudioActionContext } from './select-after-write';
@@ -3084,6 +3084,14 @@ export function createEditorController(init: {
           room !== null &&
           (latest().sync?.tier ?? init.payload.room?.tier) === 'blob'
         ) {
+          // the answer names the revision the store committed for this tab's own write: counted
+          // as acknowledged before the reload, a reload landing at it brings nothing the tab has
+          // not asked for (onResync keeps the undo history and shows no banner), while one landing
+          // above it still brought another writer's entries (resync-history.ts acknowledgeAnswered;
+          // the features round, ship one: the banner "Revision rN arrived from outside this
+          // editor" and the cleared history after asset.add and logo.insert on the blob tier)
+          const acknowledged = acknowledgeAnswered(latest().serverRevision, revision);
+          if (acknowledged !== latest().serverRevision) publish({ serverRevision: acknowledged });
           await room.resync().catch(() => undefined);
         }
         const until = Date.now() + 15_000;

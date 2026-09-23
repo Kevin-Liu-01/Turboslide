@@ -24,3 +24,21 @@
 export function resyncBroughtUnseen(fresh: number, known: number): boolean {
   return fresh > known;
 }
+
+/**
+ * The revision a tab counts as acknowledged once the store has answered its own server side write
+ * (asset.add, asset.dither, material.capture, logo.insert: the write runs on the server and the
+ * answer carries the revision it committed). On the blob tier the tab reloads at once for that
+ * write instead of waiting for the channel's poll, and the reload lands at the answered revision:
+ * counted as acknowledged before the reload, it is nothing the tab has not asked for, so
+ * `resyncBroughtUnseen` keeps the undo history and shows no banner naming the tab's own write as
+ * one that arrived from outside (the features round, ship one: the banner "Revision rN arrived
+ * from outside this editor" after asset.add and logo.insert). A reload that lands above it still
+ * brought another writer's entries. An answer without a revision, or one below what the tab
+ * already acknowledged (a mirror's number), changes nothing.
+ */
+export function acknowledgeAnswered(known: number, answered: unknown): number {
+  return typeof answered === 'number' && Number.isFinite(answered) && answered > known
+    ? answered
+    : known;
+}

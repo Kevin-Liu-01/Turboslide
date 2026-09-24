@@ -20,7 +20,15 @@ import {
 import { familyFor, textRuns } from './pptx/text.ts';
 import type { TextEmitOptions } from './pptx/text.ts';
 import type { SceneText } from './scene/types.ts';
-import { buildReport, mergeReports } from './report.ts';
+import {
+  SHADER_REPORT_PREFIX,
+  buildReport,
+  mergeReports,
+  shaderFrameSentence,
+  shaderReportRow,
+  shaderRowOf,
+  withShaderRow,
+} from './report.ts';
 
 describe('the export font set (SPEC 8.4)', () => {
   test('display text goes to the display instance, text to per-size instances', () => {
@@ -253,5 +261,34 @@ describe('ExportReport (SPEC 4.2 export)', () => {
     expect(mergeReports([light, { ...dark, perfect: false }]).perfect).toBe(false);
     expect(merged.residual[0]).toContain('merged report over light and dark');
     expect(mergeReports([light])).toBe(light);
+  });
+});
+
+describe('the shader frame row (docs/FEATURES.md 5.5; audit-shaders 9)', () => {
+  test('writes the count and, when the export waited, the seconds, in the seller’s words', () => {
+    expect(shaderFrameSentence(0)).toBeNull();
+    expect(shaderFrameSentence(-1)).toBeNull();
+    expect(shaderFrameSentence(1)).toBe('1 shader had no frame');
+    expect(shaderFrameSentence(2)).toBe('2 shaders had no frame');
+    expect(shaderFrameSentence(2, 8_000)).toBe('2 shaders had no frame; the export waited 8 s for them');
+    expect(shaderFrameSentence(1, 2_400)).toBe('1 shader had no frame; the export waited 2 s for it');
+    expect(shaderFrameSentence(1, 400)).toBe('1 shader had no frame');
+    expect(shaderReportRow(2, 8_000)).toBe(`${SHADER_REPORT_PREFIX}2 shaders had no frame; the export waited 8 s for them`);
+    expect(shaderReportRow(0)).toBeNull();
+    expect(SHADER_REPORT_PREFIX).toBe('shaders: ');
+  });
+
+  test('replaces the exporter’s own row with the wait’s and reads it back; a null row changes nothing', () => {
+    const report = { residual: ['renderer: x', 'shaders: 1 shader had no frame', 'skipped: none'] };
+    const replaced = withShaderRow(report, shaderReportRow(1, 3_000));
+    expect(replaced.residual).toEqual([
+      'renderer: x',
+      'skipped: none',
+      'shaders: 1 shader had no frame; the export waited 3 s for it',
+    ]);
+    expect(shaderRowOf(replaced)).toBe('1 shader had no frame; the export waited 3 s for it');
+    expect(shaderRowOf({ residual: ['renderer: x'] })).toBeNull();
+    expect(withShaderRow(report, null)).toBe(report);
+    expect(withShaderRow({ residual: [] }, shaderReportRow(2)).residual).toEqual(['shaders: 2 shaders had no frame']);
   });
 });

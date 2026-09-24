@@ -9,7 +9,12 @@
 // is the report's `page.fraction`. The pptxgenjs buffer then goes through the OOXML post-process:
 // the repair-risk strip (kern, empty ext lists), row groups, the slide name and the hidden title
 // placeholder per slide, the content types clean, the app.xml titles, embedded fonts (native mode
-// under `embedFonts` only), stored media, and the package validation the report fails on.
+// under `embedFonts` only), stored media, and the package validation the report fails on. Since the
+// features round's ship two a shader block's frame travels as its own picture in both modes
+// (docs/FEATURES.md 5.5; audit-shaders 9): the frame file (the long side 3200) at the block's box,
+// named `ts:<slide>#<block>` with the recipe in `descr`, over the sheet raster in Perfect the way the
+// kit's picture logos sit, over the block's own 2x raster in Editable text; a shader whose frame
+// was missing or stale is the report's one `shaders:` row.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -37,7 +42,10 @@ import { validatePackage } from '../ooxml/validate.ts';
 import type { PackageValidation } from '../ooxml/validate.ts';
 import { openPackage, readPart, slideParts, writePackage, writePart } from '../ooxml/zip.ts';
 import { KIT_LOGO_BLOCK_IDS } from '../scene/kit-logos.ts';
-import type { Scene, SceneText } from '../scene/types.ts';
+import { pendingShadersOf, shadersOf } from '../scene/shaders.ts';
+import type { SceneShader } from '../scene/shaders.ts';
+import { shaderReportRow } from '../report.ts';
+import type { Scene, SceneRaster, SceneText } from '../scene/types.ts';
 import { PAGE_EMU, PAGE_IN, compositeHex, parseCssColor, pxToEmu, szOf } from '../units.ts';
 import { addSceneChart } from './chart.ts';
 import type { FontSet, FontsCatalog } from './fonts-map.ts';
@@ -377,6 +385,9 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         if (!KIT_LOGO_BLOCK_IDS.has(raster.blockId) || raster.file === undefined) continue;
         if (existsSync(raster.file)) addRaster(slide, raster, namePrefix);
       }
+      // the shader frames over the sheet raster at their boxes (docs/FEATURES.md 5.5): the sheet
+      // draws them at 2x, and this object is the frame's own pixels, the long side 3200
+      addShaderFrames(slide, scene, namePrefix, residual);
       // a linked block is an invisible hit target over its box, above the cover (SPEC 7.2.7)
       for (const block of scene.blocks) {
         if (block.link === undefined) continue;
@@ -591,6 +602,9 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         if (!addRaster(slide, raster, namePrefix, undefined, blockLink(raster.blockId)))
           warnings.push(`${scene.slideId}#${raster.blockId}: raster ${raster.id} has no file`);
       }
+      // the shader frames over the blocks' own rasters (docs/FEATURES.md 5.5): the picture the
+      // verifier reads as `ts:<slide>#<block>`, the long side 3200, the recipe in descr
+      addShaderFrames(slide, scene, namePrefix, residual);
 
       if (scene.texts.some((t) => t.style.mono))
         residual.add(
@@ -608,6 +622,12 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     });
     for (const w of scene.warnings) warnings.push(`${scene.slideId}: ${w}`);
   }
+
+  // the one shader row (5.5): the shaders whose frame was missing or stale at export time; the
+  // studio's wait replaces it with the count it waited for and the seconds (server/download.ts)
+  const pendingShaders = pendingShadersOf(scenes);
+  const shaderRow = shaderReportRow(pendingShaders.length);
+  if (shaderRow !== null) residual.add(shaderRow);
 
   const raw = (await pptx.write({ outputType: 'nodebuffer' })) as Buffer;
   const zip = await openPackage(new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength));
@@ -751,6 +771,42 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
 }
 
 /** The families a font set names for the deck's ladder, for the report when nothing was rendered. */
+/**
+ * The shader frames of a scene as pictures at their boxes (docs/FEATURES.md 5.5): the frame file
+ * itself, the long side 3200, named `ts:<slide>#<block>` (no rid suffix: the verifier and the row
+ * read the block's name), the recipe as the picture's `descr`, opaque. A shader with no frame on
+ * disk or no measured box is left to the sheet or the block raster and the report's row.
+ */
+export function addShaderFrames(
+  slide: PptxGenJS.Slide,
+  scene: Scene,
+  namePrefix: string,
+  residual: Set<string>,
+): SceneShader[] {
+  const placed: SceneShader[] = [];
+  for (const shader of shadersOf(scene)) {
+    if (shader.file === undefined || shader.box === undefined || !existsSync(shader.file)) continue;
+    const bytes = readFileSync(shader.file);
+    const raster: SceneRaster = {
+      id: shader.blockId,
+      blockId: shader.blockId,
+      kind: 'material',
+      selector: '',
+      box: shader.box,
+      alpha: false,
+      scale: 2,
+      alt: JSON.stringify(shader.recipe),
+    };
+    if (!addRaster(slide, raster, namePrefix, bytes)) continue;
+    placed.push(shader);
+    const size = shader.size === undefined ? '' : ` (${shader.size[0]} by ${shader.size[1]})`;
+    residual.add(
+      `shader: ${scene.slideId}#${shader.blockId} travels as its frame${size} at the block's box with the recipe in descr${shader.stale ? '; the frame predates its recipe and is drawn as it is' : ''} (docs/FEATURES.md 5.5)`,
+    );
+  }
+  return placed;
+}
+
 export function familiesOfLadder(set: FontSet): string[] {
   const picks = [
     [88, 500],

@@ -164,11 +164,47 @@ export const SERVER_SIDE_WINDOW_ACTIONS_F1: ReadonlyArray<ActionId> = (
   SERVER_SIDE_WINDOW_ACTIONS_F1_IDS as readonly string[]
 ).filter(isActionId);
 
+/**
+ * The features round, ship two (docs/FEATURES.md 5.5, 5.8; B5's handlers, B7's registration): the
+ * shader library's ids. `shader.list` reads the catalog with its thumbnails and control ranges,
+ * `shader.insert` and `shader.set` write the block through the materials package (the page's
+ * dispatcher carries no materials handler), `shader.frame` is the client capture's write (the
+ * file to the store, the block's `/asset` and the superseded frame in one revision, server/
+ * shader-frames.ts), `shader.capture` is the hosted Chromium capture, `shader.render` answers PNG
+ * bytes for an agent, and `slide.setBackgroundShader` is the kit's background slot (P1). Every
+ * one needs Node or the store, so the window handler runs through runDeckAction. Written as
+ * strings and filtered through `isActionId`, the pattern of `SERVER_SIDE_WINDOW_ACTIONS_F1`, so
+ * this file typechecks and answers on a tree where B5's entries in `packages/schema/src/actions.ts`
+ * are not merged yet; `agent-actions.test.ts` reads them on both lists once they are.
+ */
+export const SERVER_SIDE_WINDOW_ACTIONS_F2_IDS = [
+  'shader.list',
+  'shader.insert',
+  'shader.set',
+  'shader.frame',
+  'shader.capture',
+  'shader.render',
+  'slide.setBackgroundShader',
+] as const;
+export const SERVER_SIDE_WINDOW_ACTIONS_F2: ReadonlyArray<ActionId> = (
+  SERVER_SIDE_WINDOW_ACTIONS_F2_IDS as readonly string[]
+).filter(isActionId);
+
+/** The shader ids that write this deck's document, so a shader can be the first thing on a /new draft. */
+export const SHADER_DRAFT_CREATING_IDS: ReadonlySet<string> = new Set([
+  'shader.insert',
+  'shader.set',
+  'shader.frame',
+  'shader.capture',
+  'slide.setBackgroundShader',
+]);
+
 export const SERVER_SIDE_WINDOW_ACTIONS: ReadonlyArray<ActionId> = [
   ...SERVER_SIDE_WINDOW_ACTIONS_GS2,
   ...SERVER_SIDE_WINDOW_ACTIONS_GS3,
   ...SERVER_SIDE_WINDOW_ACTIONS_P1,
   ...SERVER_SIDE_WINDOW_ACTIONS_F1,
+  ...SERVER_SIDE_WINDOW_ACTIONS_F2,
 ];
 
 export type ServerSideWindowAction = ActionId;
@@ -211,6 +247,9 @@ export const DRAFT_CREATING_ACTIONS: ReadonlyArray<ActionId> = [
   // the logo picker's write (docs/FEATURES.md 4.11): a customer's mark can be the first thing a
   // seller puts on a new presentation, so it creates the draft's deck as asset.add does
   ...SERVER_SIDE_WINDOW_ACTIONS_F1.filter((id) => id === 'logo.insert'),
+  // the shader library's writes (docs/FEATURES.md 5.8): a shader inserted on a fresh draft, its
+  // frame and its background slot write the deck the same way
+  ...SERVER_SIDE_WINDOW_ACTIONS_F2.filter((id) => SHADER_DRAFT_CREATING_IDS.has(id)),
 ];
 
 /** True when an action run on an unsaved draft must create the deck before it runs. */

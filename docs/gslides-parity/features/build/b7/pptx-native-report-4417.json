@@ -1,0 +1,54 @@
+{
+  "deckId": "untitled-20260924-s6ku",
+  "revision": 3,
+  "format": "pptx",
+  "mode": "native",
+  "theme": "light",
+  "fontSet": "exact",
+  "fontSetVersion": "4.001+gt.2",
+  "files": [
+    {
+      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b7/tmp/turboslide/.turboslide/worker/jobs/mufq5tbg-d9310d/export/untitled-20260924-s6ku-light.pptx",
+      "bytes": 621608,
+      "sha256": "4b3e0180afc103985188e99ef16bd234e04267b34ce9c9482cd86488b3d6c132"
+    }
+  ],
+  "fonts": {
+    "embedded": [],
+    "requiredOnViewer": [
+      "GT Inter Text 14"
+    ],
+    "substitutedIn": [
+      "every viewer"
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "title",
+      "theme": "light",
+      "native": [
+        "heading",
+        "lead"
+      ],
+      "raster": [
+        "mark",
+        "sh1"
+      ]
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": false,
+  "passed": true,
+  "residual": [
+    "renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "native (editable text): text boxes at the browser boxes, layout within 3 px; the glyph antialiasing is the viewer's",
+    "rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x",
+    "package: 28 parts, 26 relationships, valid against the content types and relationships",
+    "skipped: none; every slide of the deck is in the file",
+    "shader: title#sh1 travels as its frame (3200 by 1800) at the block's box with the recipe in descr; the frame predates its recipe and is drawn as it is (docs/FEATURES.md 5.5)",
+    "package: 1 kern=\"0\" attribute(s) and 0 empty ext list(s) removed; 0 custGeom",
+    "notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)",
+    "fonts not embedded: GT Inter Text 14; a viewer without them installed substitutes (SPEC 8.4); --embed-fonts embeds them",
+    "shaders: 1 shader had no frame; the export waited 8 s for it"
+  ]
+}

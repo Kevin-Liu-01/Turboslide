@@ -119,8 +119,12 @@ const PACKAGES_DIR = `${REPO}packages`;
 // PowerPoint's `a:latin typeface` and embeds its subset in the PDF; on a tree without the
 // folders the glob matches nothing and the group is the 6.1 MB it was. The group's size after
 // the port is measured on the first preview deploy and recorded in build/b7.md, never typed here.
+// The shader gallery's stills of the features round's ship two (docs/FEATURES.md 5.4;
+// `packages/materials/previews/*`, about 600 KB of webp once B5's `build-shader-previews.mjs`
+// commits them) join the group so a server route that serves a still from the workspace finds the
+// file in the function; on a tree without the folder the glob matches nothing.
 const PACKAGES_PATTERN =
-  '{theme/src/gt-ink-paper/*.css,theme/assets/sprite.svg,fonts/src/inter.css,fonts/assets/InterVariable.woff2,fonts/assets/*/*,fonts/export/*,export/src/calibration/calibration.json}';
+  '{theme/src/gt-ink-paper/*.css,theme/assets/sprite.svg,fonts/src/inter.css,fonts/assets/InterVariable.woff2,fonts/assets/*/*,fonts/export/*,export/src/calibration/calibration.json,materials/previews/*}';
 
 // Vercel Functions (docs/hosting.md, section limits): the base function keeps the project's
 // duration default written out; the routes that render or export (and the server functions, which

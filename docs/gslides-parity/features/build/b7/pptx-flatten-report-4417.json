@@ -1,0 +1,63 @@
+{
+  "deckId": "untitled-20260924-s6ku",
+  "revision": 3,
+  "format": "pptx",
+  "mode": "flatten",
+  "theme": "light",
+  "fontSet": "exact",
+  "fontSetVersion": "4.001+gt.2",
+  "files": [
+    {
+      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b7/tmp/turboslide/.turboslide/worker/jobs/mufq6187-e24cb5/export/untitled-20260924-s6ku-light.pptx",
+      "bytes": 576711,
+      "sha256": "0e7d254432d5a7e34321d3a571309f4aa1ec8bb8273c8cc1781f5fe2c52c6f31"
+    }
+  ],
+  "fonts": {
+    "embedded": [],
+    "requiredOnViewer": [
+      "GT Inter Text 14"
+    ],
+    "substitutedIn": [
+      "every viewer"
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "title",
+      "theme": "light",
+      "native": [
+        "heading",
+        "lead"
+      ],
+      "raster": [
+        "mark",
+        "sh1"
+      ],
+      "sheet": "work/sheets/light/01-title@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 34809,
+        "colors": 4097,
+        "mismatch": 1,
+        "fraction": 1.7361111111111112e-7
+      }
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": true,
+  "passed": true,
+  "residual": [
+    "renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "flatten (perfect): the slide is a 2x raster of the sheet under the page raster policy; text is an invisible native layer; the slide title is the slide name and a hidden title placeholder",
+    "rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x",
+    "package: 27 parts, 25 relationships, valid against the content types and relationships",
+    "skipped: none; every slide of the deck is in the file",
+    "shader: title#sh1 travels as its frame (3200 by 1800) at the block's box with the recipe in descr; the frame predates its recipe and is drawn as it is (docs/FEATURES.md 5.5)",
+    "package: 1 kern=\"0\" attribute(s) and 0 empty ext list(s) removed; 0 custGeom",
+    "pages: 1 png-palette; 0.03 MiB of page rasters; worst decoded mismatch 0.000 percent at threshold 0.1 (perfect budget 0.1)",
+    "notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)",
+    "fonts not embedded: GT Inter Text 14; the text layer is invisible, so no viewer draws them (docs/pptx.md)",
+    "shaders: 1 shader had no frame; the export waited 8 s for it"
+  ]
+}

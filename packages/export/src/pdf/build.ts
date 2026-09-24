@@ -20,6 +20,11 @@
 // pictures and `pictureFraction` inside them, and `residual` names the rasterizer, the budget and
 // the worst page.
 //
+// A shader block's frame reaches the page through the print document's own `<img>` at the block's
+// box (the renderer, docs/FEATURES.md 5.5), so the PDF carries the frame's pixels with nothing
+// drawn here; a shader whose frame was missing or stale at export time is the report's one
+// `shaders:` row, the same row the PowerPoint builder writes (scene/shaders.ts, report.ts).
+//
 // SPEC 7.6 names `pdftoppm -r 144`; the diff needs the page on the same pixel grid as the 2x
 // render, so the rasterizer runs with `-scale-to-x 3200 -scale-to-y 1800` (240 dpi on this page)
 // instead, and the report says which binary ran. That reading, the picture regions and the print
@@ -49,7 +54,8 @@ import { PAGE_RASTER_BUDGETS, exportReportSchema } from '@turboslide/schema/expo
 import type { Box, Theme } from '@turboslide/schema/render';
 
 import { playList } from '../export-pptx.ts';
-import { fileEntry } from '../report.ts';
+import { fileEntry, shaderReportRow } from '../report.ts';
+import { sceneShadersOf } from '../scene/shaders.ts';
 import { READY_SELECTOR } from '../scene/extract.ts';
 import { diffImagesOutside, readPng, writePng } from '../verify/diff.ts';
 import { resolveTools, toolVersions } from '../verify/libreoffice.ts';
@@ -300,6 +306,17 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
       ? `skipped: ${omitted.length} slide(s) left out (${omitted.join(', ')}); pass includeSkipped to carry them`
       : 'skipped: none; every slide of the deck is in the file',
   );
+  // the one shader row (docs/FEATURES.md 5.5): the shaders of the exported slides whose frame was
+  // missing or stale at export time; the page draws what the renderer drew for them
+  const pendingShaders = ids.flatMap((slideId) => {
+    const slide = slides[slideId];
+    if (slide === undefined) return [];
+    return sceneShadersOf(slide, deck, options.deckDir)
+      .filter((shader) => shader.missing || shader.stale)
+      .map((shader) => `${slideId}#${shader.blockId}`);
+  });
+  const shaderRow = shaderReportRow(pendingShaders.length);
+  if (shaderRow !== null) residual.push(shaderRow);
   if (gate === 'raster' && rasterizer) {
     residual.push(
       `pdf gate: ${rasterizer} at ${PDF_RASTER.width} by ${PDF_RASTER.height} against the 2x web render, pixelmatch threshold ${PDF_GATE.threshold}, the picture regions (img, canvas, raster elements) compared separately; target ${PDF_GATE.target * 100} percent per page, fail over ${PDF_GATE.fail * 100}; ${measured.length} page(s) measured, ${overTarget.length} over the target, ${overFail.length} over the fail line`,

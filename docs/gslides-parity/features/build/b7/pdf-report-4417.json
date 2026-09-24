@@ -1,0 +1,42 @@
+{
+  "deckId": "untitled-20260924-s6ku",
+  "revision": 3,
+  "format": "pdf",
+  "mode": "flatten",
+  "theme": "light",
+  "fontSet": "exact",
+  "fontSetVersion": "inter-variable",
+  "files": [
+    {
+      "path": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/b7/tmp/turboslide/.turboslide/worker/jobs/mufq5lhy-b7d2d3/export/untitled-20260924-s6ku-light.pdf",
+      "bytes": 738148,
+      "sha256": "6ac396a1214a63645cc0c5022a2e4a60b23563d7adc71457cbbd346ff498ece6"
+    }
+  ],
+  "fonts": {
+    "embedded": [
+      "Inter"
+    ],
+    "requiredOnViewer": [],
+    "substitutedIn": []
+  },
+  "slides": [
+    {
+      "slideId": "title",
+      "theme": "light",
+      "native": [],
+      "raster": []
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": false,
+  "passed": true,
+  "residual": [
+    "renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "pdf: 1 page(s) at 960 by 540 pt (13.333 by 7.5 in), 738148 bytes, light; the text is vector and searchable; notes never travel",
+    "pdf gate: the file holds 1 page(s) for 1 slide(s)",
+    "pdf: the first page measures 960 by 540 pt",
+    "skipped: none; every slide of the deck is in the file",
+    "shaders: 1 shader had no frame; the export waited 8 s for it"
+  ]
+}

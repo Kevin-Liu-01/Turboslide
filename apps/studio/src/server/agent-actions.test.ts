@@ -14,6 +14,9 @@ import {
   SERVER_SIDE_WINDOW_ACTIONS,
   SERVER_SIDE_WINDOW_ACTIONS_F1,
   SERVER_SIDE_WINDOW_ACTIONS_F1_IDS,
+  SERVER_SIDE_WINDOW_ACTIONS_F2,
+  SERVER_SIDE_WINDOW_ACTIONS_F2_IDS,
+  SHADER_DRAFT_CREATING_IDS,
   createsDraft,
   outputAccepts,
   registerStoreStatusActions,
@@ -48,6 +51,40 @@ describe('createsDraft', () => {
       expect(createsDraft(id)).toBe(id === 'logo.insert');
       if (id === 'logo.insert') expect(ACTIONS[id].mutates).toBe(true);
     }
+  });
+
+  it('carries the shader library’s ids once the action table names them (docs/FEATURES.md 5.8)', () => {
+    // the same filter as the logo ids: empty on a tree before B5's entries land, every named id
+    // on both lists once they do, the writes creating a /new draft's deck
+    expect([...SERVER_SIDE_WINDOW_ACTIONS_F2_IDS]).toEqual([
+      'shader.list',
+      'shader.insert',
+      'shader.set',
+      'shader.frame',
+      'shader.capture',
+      'shader.render',
+      'slide.setBackgroundShader',
+    ]);
+    // the ids as strings: a literal outside the table narrows to never under `isActionId`
+    const named: readonly string[] = SERVER_SIDE_WINDOW_ACTIONS_F2_IDS;
+    for (const id of named) {
+      if (!isActionId(id)) {
+        expect(SERVER_SIDE_WINDOW_ACTIONS_F2).not.toContain(id);
+        continue;
+      }
+      expect(SERVER_SIDE_WINDOW_ACTIONS_F2).toContain(id);
+      expect(SERVER_SIDE_WINDOW_ACTIONS).toContain(id);
+      const writes = SHADER_DRAFT_CREATING_IDS.has(id);
+      expect(createsDraft(id)).toBe(writes);
+      expect(ACTIONS[id].mutates).toBe(writes);
+    }
+    expect([...SHADER_DRAFT_CREATING_IDS]).toEqual([
+      'shader.insert',
+      'shader.set',
+      'shader.frame',
+      'shader.capture',
+      'slide.setBackgroundShader',
+    ]);
   });
 
   it('leaves the collection actions and the reads alone', () => {

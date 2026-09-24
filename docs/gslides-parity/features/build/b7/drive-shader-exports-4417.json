@@ -1,0 +1,36 @@
+{
+  "base": "http://localhost:4417",
+  "at": "2026-09-24T16:07:32.034Z",
+  "rows": [
+    {
+      "id": "shaders.export.pdf-frame",
+      "result": "passed",
+      "detail": "image 3200x1800 in the PDF: true; mean colour over the box on the page 167,167,170 vs the frame 166,166,169 (max channel diff 1); no label text: true; shaders row absent (needs B5's frameKey on the capture): false; 9884 ms"
+    },
+    {
+      "id": "shaders.export.pptx-frame (native)",
+      "result": "passed",
+      "detail": "picture ts:title#sh1: true; recipe in descr: true; a media part with the long side 3200: true; residual: shader: title#sh1 travels as its frame (3200 by 1800) at the block's box with the recipe in descr; the frame predates its recipe and is drawn as it is (docs/FEATURES.md 5.5); no shaders row: false; 10103 ms"
+    },
+    {
+      "id": "shaders.export.pptx-frame (flatten)",
+      "result": "passed",
+      "detail": "picture ts:title#sh1: true; recipe in descr: true; a media part with the long side 3200: true; residual: shader: title#sh1 travels as its frame (3200 by 1800) at the block's box with the recipe in descr; the frame predates its recipe and is drawn as it is (docs/FEATURES.md 5.5); no shaders row: false; 10552 ms"
+    },
+    {
+      "id": "shaders.export.html-frame",
+      "result": "passed",
+      "detail": "frame img inlined: true; no canvas: true; no label: true; no data-live: true; 750894 bytes in 8775 ms"
+    },
+    {
+      "id": "shaders.export.missing-frame-row",
+      "result": "passed",
+      "detail": "row: shaders: 1 shader had no frame; the export waited 8 s for it; export 9711 ms, started at once after the recipe change"
+    },
+    {
+      "id": "shaders.background.place-answers (window API half)",
+      "result": "passed",
+      "detail": "slide.setBackgroundMaterial answered in 1828 ms: picture background asset gem-smoke"
+    }
+  ]
+}

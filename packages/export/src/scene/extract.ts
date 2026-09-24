@@ -12,7 +12,10 @@
 // single-process close guard cover all of them: the 3x page used to be opened raw here and its
 // close killed chrome-headless-shell on every hosted native export (docs/hosting-chromium.md
 // section 3b). Nothing here knows about pptxgenjs; the scenes and the PNG paths are the contract
-// the PPTX builder reads.
+// the PPTX builder reads. Since the features round's ship two every scene carries its shaders
+// (scene/shaders.ts, docs/FEATURES.md 5.5): each material block's recipe, its frame file under the
+// deck's `assets/` and the frame's box measured on the 1x page, so the builder draws the frame
+// itself at the block's box and the report names a frame that was missing.
 import { existsSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -41,6 +44,8 @@ import { MEASURE_CLASS } from '@turboslide/render/measure-dom';
 
 import { enrichScene } from './enrich.ts';
 import { KIT_LOGO_BLOCK_IDS, kitHasPictureLogo, logoBlockIds } from './kit-logos.ts';
+import { sceneShadersOf } from './shaders.ts';
+import type { SceneShader, ShaderScene } from './shaders.ts';
 import {
   DEFAULT_SHEET_SELECTOR,
   DEFAULT_SLIDE_SELECTOR,
@@ -181,7 +186,8 @@ export type ExtractOptions = {
 };
 
 export type ExtractResult = {
-  scenes: Scene[];
+  /** The measured scenes, each with its shaders (scene/shaders.ts). */
+  scenes: ShaderScene[];
   renderer: string;
   /** The wordmark PNG at 2x per theme. */
   wordmark: Partial<Record<Theme, string>>;
@@ -284,6 +290,51 @@ async function setTransparentGround(page: Page, on: boolean): Promise<void> {
   }, on);
 }
 
+/**
+ * The frame box of each shader on the shown slide, in sheet px off the 1x page: the `.material`
+ * element inside the block's root, relative to the sheet, snapped to whole pixels the way every
+ * raster box is. A block the page does not draw keeps no box and the builder leaves it alone.
+ */
+export async function measureShaderBoxes(
+  page: Page,
+  shaders: ReadonlyArray<SceneShader>,
+): Promise<SceneShader[]> {
+  if (shaders.length === 0) return [];
+  const boxes = (await page.evaluate(
+    ({ ids, slideSelector, sheetSelector }) => {
+      const firstOf = (list: string): Element | null => {
+        for (const sel of list.split(',')) {
+          const el = document.querySelector(sel.trim());
+          if (el) return el;
+        }
+        return null;
+      };
+      const sheetEl = firstOf(sheetSelector) ?? document.body;
+      const slide = firstOf(slideSelector) ?? sheetEl;
+      const origin = sheetEl.getBoundingClientRect();
+      const out: Record<string, [number, number, number, number]> = {};
+      for (const id of ids) {
+        const root = slide.querySelector(`[data-block="${id}"]`);
+        const frame = root?.querySelector('.material') ?? root;
+        if (frame === null || frame === undefined) continue;
+        const r = frame.getBoundingClientRect();
+        if (r.width < 1 || r.height < 1) continue;
+        out[id] = [r.left - origin.left, r.top - origin.top, r.width, r.height];
+      }
+      return out;
+    },
+    {
+      ids: shaders.map((shader) => shader.blockId),
+      slideSelector: DEFAULT_SLIDE_SELECTOR,
+      sheetSelector: DEFAULT_SHEET_SELECTOR,
+    },
+  )) as Record<string, [number, number, number, number]>;
+  return shaders.map((shader) => {
+    const box = boxes[shader.blockId];
+    return box === undefined ? shader : { ...shader, box: snapRasterBox(box) };
+  });
+}
+
 export async function extractScenes(options: ExtractOptions): Promise<ExtractResult> {
   const { deck, slides } = options.document;
   const order = slideOrder(deck);
@@ -296,7 +347,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
   const bundle = loadThemeBundle();
   const assetBase = fileUrl(options.deckDir, true);
   const tmp = await mkdtemp(join(tmpdir(), 'turboslide-export-'));
-  const scenes: Scene[] = [];
+  const scenes: ShaderScene[] = [];
   const warnings: string[] = [];
   const wordmark: Partial<Record<Theme, string>> = {};
   const nativeTypes: readonly string[] = options.nativeTypes ?? [...NATIVE_BLOCK_TYPES];
@@ -555,7 +606,14 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
             }
             const errors = measurePage.takeErrors();
             scene.warnings.push(...errors.pageErrors.map((e) => `page error: ${e}`));
-            scenes.push(scene);
+            // the slide's shaders with their frame boxes off the 1x page (docs/FEATURES.md 5.5)
+            const shaded: ShaderScene = scene;
+            const shaders = await measureShaderBoxes(
+              measurePage.page,
+              sceneShadersOf(slide, deck, options.deckDir),
+            );
+            if (shaders.length > 0) shaded.shaders = shaders;
+            scenes.push(shaded);
             options.onSlide?.(scene, Math.round(performance.now() - t0));
           }
         } finally {

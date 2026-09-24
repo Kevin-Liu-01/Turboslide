@@ -20,13 +20,16 @@ import { labelFor } from '@turboslide/identity/labels';
 import { normalizeName } from '@turboslide/identity/names';
 import type { DeckSource } from '@turboslide/mcp/resources';
 import { parseJsonResult, runTurboslide } from '@turboslide/render-worker/cli';
-import { createWorkerClient } from '@turboslide/render-worker/client';
+import { clientPaths, createWorkerClient, localQueue } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
+import type { Queue } from '@turboslide/render-worker/queue';
 import type { SheetJobResult } from '@turboslide/render-worker/jobs/sheet';
 import { cacheDir, defaultPaths } from '@turboslide/render-worker/paths';
 import type { Asset } from '@turboslide/schema/assets';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
-import type { DeckDocument } from '@turboslide/schema/deck';
+import type { DeckDocument, Slide } from '@turboslide/schema/deck';
+import { isActionId } from '@turboslide/schema/actions';
+import type { ActionId } from '@turboslide/schema/actions';
 import { makeDiagram } from '@turboslide/schema/diagrams';
 import { ConflictError, ForbiddenError, GoneError } from '@turboslide/schema/errors';
 import type { ExportReport } from '@turboslide/schema/export';
@@ -65,6 +68,8 @@ import {
   TOKENS,
 } from '@turboslide/theme/tokens';
 
+import { INSERT_MIN_SIZE, placeInsert } from '../editor/place-insert';
+import type { PlacedKind } from '../editor/place-insert';
 import { hostedAccessHooks } from './access';
 import { registerStoreStatusActions } from './agent-actions';
 import { registerAssistActions } from './assist';
@@ -105,6 +110,7 @@ import {
   deckDir,
   ensureDeckAssets,
   ensureDecks,
+  exportBlobClient,
   isHosted,
   openDeckStore,
   repoRoot,
@@ -113,6 +119,8 @@ import {
   workerClientOptions,
 } from './root';
 import { studioSessions } from './sessions';
+import { boundedCapture, frameFileLister, scheduleFramePrune } from './shader-frames';
+import type { FramePruneDeps } from './shader-frames';
 import { deleteUpload, readUpload } from './upload';
 
 /**
@@ -428,6 +436,69 @@ const ASSET_ACTION_IDS = [
 ] as const;
 
 /**
+ * The shader library's ids the materials package registers (docs/FEATURES.md 5.8; B5's
+ * `registerAssetActions`): the catalog with thumbnails and the control ranges, the insert, the
+ * block write, the client capture's frame write, the hosted capture, the PNG render for an agent,
+ * and the kit's background slot (P1). Written as strings and filtered through `isActionId` (the
+ * pattern of agent-actions.ts `SERVER_SIDE_WINDOW_ACTIONS_F1`), so this module typechecks and
+ * answers on a tree where B5's entries in `packages/schema/src/actions.ts` are not merged yet;
+ * once they are, each id answers through the lazily loaded materials dispatcher like
+ * `material.capture` does. `shader.frame` is one implementation on every transport (SPEC 7.1; the
+ * materials package's `shaderFrame`, with the presigned upload a frame over the body cap needs);
+ * what the studio adds around it is the orphan prune behind the response (5.5; `FRAME_WRITE_IDS`).
+ */
+const SHADER_ASSET_ACTION_IDS: ReadonlyArray<ActionId> = (
+  [
+    'shader.list',
+    'shader.insert',
+    'shader.set',
+    'shader.frame',
+    'shader.capture',
+    'shader.render',
+    'slide.setBackgroundShader',
+  ] as readonly string[]
+).filter(isActionId);
+
+/** The ids whose write leaves a frame behind, after which the orphan prune is due (5.5). */
+const FRAME_WRITE_IDS: ReadonlyArray<ActionId> = (
+  ['shader.frame', 'shader.capture'] as readonly string[]
+).filter(isActionId);
+
+/**
+ * The ids whose handler launches the hosted capture browser (docs/FEATURES.md 5.5; audit-shaders
+ * 1): each runs under `boundedCapture`, through the render worker's local queue, and answers
+ * `RenderError` with the one sentence after 30 s or on a browser failure.
+ */
+const CAPTURE_ACTION_IDS: ReadonlyArray<ActionId> = (
+  [
+    'material.capture',
+    'shader.capture',
+    'slide.setBackgroundMaterial',
+    'slide.setBackgroundShader',
+  ] as readonly string[]
+).filter(isActionId);
+
+/** The render worker's local queue of this process, the one the captures share with the renders (one browser at a time). */
+function captureQueue(): Queue | undefined {
+  try {
+    return localQueue(clientPaths(process.env), (line) => {
+      if (process.env.TURBOSLIDE_AGENT_LOG === '1') console.error(`worker: ${line}`);
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+/** A hosted capture under the 30 s bound (5.5), through the worker's queue when this process has one. */
+function boundedHostedCapture<T>(deckId: string, id: string, run: () => Promise<T>): Promise<T> {
+  return boundedCapture(run, {
+    queue: captureQueue(),
+    label: `${deckId} ${id}`,
+    log: (line) => console.error(`turboslide ${line}`),
+  });
+}
+
+/**
  * Registers asset.add, asset.dither, asset.capture, material.capture and material.list with
  * handlers that load @turboslide/materials/actions on first call. The module is loaded lazily,
  * not imported at the top, because the route files that import this module (routes/mcp.ts,
@@ -461,6 +532,16 @@ function assetDispatcherLoader(
         allowPaths: false,
         hosted: isHosted(),
         readUpload,
+        // the largest free rectangle for an agent's shader.insert (docs/FEATURES.md section 1,
+        // the placement decision; build/b5.md R5, the studio half): the same rule the gallery's
+        // insert follows in the controller, once the integrator's R5 gives place-insert.ts the
+        // `material` kind; until then the materials package falls back to the sheet's centre
+        ...(Object.hasOwn(INSERT_MIN_SIZE, 'material')
+          ? {
+              placeInsert: (slide: Slide, size: readonly [number, number]) =>
+                placeInsert(slide, 'material' as PlacedKind, size).pos,
+            }
+          : {}),
         dispatch: (id, input, context) => dispatcher.dispatch(id, input, context),
         log: (line) => {
           if (process.env.TURBOSLIDE_AGENT_LOG === '1') console.error(`agent ${deckId}: ${line}`);
@@ -502,14 +583,29 @@ function registerLogoActionsLazily(
     dispatcher.register(id, async (input, context) => (await load()).dispatch(id, input, context));
 }
 
-/** Registers the asset ids over the lazily loaded materials dispatcher. */
-function registerAssetActionsLazily(dispatcher: Dispatcher, load: () => Promise<Dispatcher>): void {
-  for (const id of ASSET_ACTION_IDS) {
+/**
+ * Registers the asset ids over the lazily loaded materials dispatcher, and the shader ids once
+ * the action table names them. A capture id runs under the 30 s bound (docs/FEATURES.md 5.5).
+ */
+function registerAssetActionsLazily(
+  dispatcher: Dispatcher,
+  deckId: string,
+  load: () => Promise<Dispatcher>,
+  frames: FramePruneDeps,
+): void {
+  for (const id of [...ASSET_ACTION_IDS, ...SHADER_ASSET_ACTION_IDS]) {
     dispatcher.register(id, async (input, context) => {
-      const output = await (await load()).dispatch(id, input, context);
-      // a presigned upload is consumed by the commit it fed (SPEC-3 8.5; b4.md request 2.4.4)
+      const run = async (): Promise<unknown> => (await load()).dispatch(id, input, context);
+      const output = CAPTURE_ACTION_IDS.includes(id)
+        ? await boundedHostedCapture(deckId, id, run)
+        : await run();
+      // a presigned upload is consumed by the commit it fed (SPEC-3 8.5; b4.md request 2.4.4);
+      // a frame's upload the same way once its write has read it
       const upload = (input as { upload?: unknown } | null)?.upload;
-      if (id === 'asset.add' && typeof upload === 'string') deleteUpload(upload);
+      if ((id === 'asset.add' || (id as string) === 'shader.frame') && typeof upload === 'string')
+        deleteUpload(upload);
+      // the orphan prune behind a frame write's response (docs/FEATURES.md 5.5), once a minute
+      if (FRAME_WRITE_IDS.includes(id)) scheduleFramePrune(frames);
       return output;
     });
   }
@@ -738,19 +834,20 @@ function registerRecordActionsFor(
     addAsset: async (request, ctx, baseRevision) =>
       (await (await assets()).dispatch('asset.add', { ...request, baseRevision }, ctx)) as Asset,
     captureMaterial: async (request, ctx, baseRevision) => {
-      const captured = await (
-        await assets()
-      ).dispatch(
-        'material.capture',
-        {
-          materialId: request.materialId,
-          ...(request.preset !== undefined ? { preset: request.preset } : {}),
-          ...(request.uniforms !== undefined ? { uniforms: request.uniforms } : {}),
-          anchors: [request.anchor ?? 5500],
-          role: 'frame',
-          baseRevision,
-        },
-        ctx,
+      // the hosted capture under its 30 s bound and its one sentence (docs/FEATURES.md 5.5)
+      const captured = await boundedHostedCapture(deckId, 'material.capture', async () =>
+        (await assets()).dispatch(
+          'material.capture',
+          {
+            materialId: request.materialId,
+            ...(request.preset !== undefined ? { preset: request.preset } : {}),
+            ...(request.uniforms !== undefined ? { uniforms: request.uniforms } : {}),
+            anchors: [request.anchor ?? 5500],
+            role: 'frame',
+            baseRevision,
+          },
+          ctx,
+        ),
       );
       const frame = (Array.isArray(captured) ? captured[0] : captured) as Asset | undefined;
       if (frame === undefined) throw new Error('material.capture produced no frame');
@@ -1166,8 +1263,16 @@ export async function deckDispatcher(
   }
   registerMigrateStorage(dispatcher);
   // the asset ids last, so the materials package's picture.materialize replaces the store
-  // actions' handler of the same id
-  registerAssetActionsLazily(dispatcher, assets);
+  // actions' handler of the same id; the shader library's ids ride with them, the frame writes
+  // scheduling the orphan prune behind their response over the deck's `assets/` listing (5.5)
+  registerAssetActionsLazily(dispatcher, deckId, assets, {
+    deckId,
+    store: deckStore,
+    listFrameFiles: frameFileLister(deckId, store.dir, exportBlobClient),
+    log: (line) => {
+      if (process.env.TURBOSLIDE_AGENT_LOG === '1') console.error(`agent ${deckId}: ${line}`);
+    },
+  });
   registerWorkerActions(dispatcher, deckId, store);
   registerAdminActions(dispatcher);
   const session = options.withView ? studioSessions().attached(deckId, 'view.goto') : undefined;

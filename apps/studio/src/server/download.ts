@@ -18,7 +18,15 @@ import type { ExportJobDownload, ExportJobPoll } from './export-jobs';
 import { SYNC_PROGRESS_JOB_PATTERN } from './export-jobs';
 import type { jsonBody } from './export-sync';
 import type { QuotaContext } from './ratelimit';
-import { deckDir, ensureDeckAssets, exportBlobClient, isHosted, workerClientOptions } from './root';
+import {
+  deckDir,
+  ensureDeckAssets,
+  exportBlobClient,
+  isHosted,
+  openDeckStore,
+  workerClientOptions,
+} from './root';
+import type { ShaderFrameWait } from './shader-frames';
 import { buildsDir, downloadUrl, signDownloadToken } from './tokens';
 
 /**
@@ -52,6 +60,19 @@ const CANCEL_TOKEN_QUERY = 'ct';
  * origin under the CSRF middleware, so the route can require TURBOSLIDE_TOKEN (SPEC 11) without
  * the page holding the token (docs/hosting.md section 6). createServerFn appears only under
  * apps/studio/src/server.
+ *
+ * The shader frames (docs/FEATURES.md 5.5, the exporters; the features round's ship two): every
+ * export and the web page build first bring the room's pending entries into the store and then
+ * wait, up to ten seconds in two second reads, for a shader whose frame is missing or stale
+ * (server/shader-frames.ts `waitForShaderFrames`), so a download started within 800 ms of a
+ * recipe change carries the frame the capture is writing; the count waited for and the seconds
+ * become the report's one `shaders:` row (@turboslide/export/report `shaderReportRow`), which
+ * replaces the exporter's own row where this module has the report in hand: the synchronous
+ * answer, the poll of a queued job and the merge of a batched one (the two step paths remember the
+ * wait by job id in this process; a checkout runs in one process, and the hosted studio exports
+ * synchronously). The web page build waits the same way and carries the frame as the block's
+ * picture with no live shader (the standalone file mounts nothing; the label never renders once
+ * the frame exists).
  */
 
 /** How often the editor polls a running job. */
@@ -115,6 +136,72 @@ async function requireDeck(deckId: string): Promise<string> {
   const dir = deckDir(deckId);
   if (!existsSync(join(dir, 'deck.json'))) throw new RangeError(`No deck ${deckId} under decks/`);
   return dir;
+}
+
+/**
+ * The export's wait for a shader frame on its way (docs/FEATURES.md 5.5): the room's pending
+ * entries into the store first (the recipe change the frame answers may still be in the stream),
+ * then the head read again every two seconds while a shader of the exported slides has no fresh
+ * frame, ten seconds at most. Null when nothing was pending; a failure to read never stops the
+ * export (the file then carries what the renderer draws and the exporter's own row names it).
+ */
+async function awaitShaderFrames(
+  deckId: string,
+  slideIds?: 'all' | string[],
+): Promise<ShaderFrameWait | null> {
+  try {
+    const { flushRoom } = await import('./room');
+    await flushRoom(deckId).catch(() => undefined);
+    const { waitForShaderFrames } = await import('./shader-frames');
+    const store = await openDeckStore(deckId);
+    return await waitForShaderFrames(async () => (await store.read()).document, {
+      ...(Array.isArray(slideIds) ? { slideIds } : {}),
+      log: (line) => {
+        if (process.env.TURBOSLIDE_AGENT_LOG === '1') console.error(`export ${deckId}: ${line}`);
+      },
+    });
+  } catch (error) {
+    console.error(
+      `turboslide export ${deckId}: the shader frame wait did not run: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return null;
+  }
+}
+
+/** The waits of the two step paths by job id, read back when the report is in hand (one process). */
+const shaderWaits = new Map<string, ShaderFrameWait>();
+
+function rememberShaderWait(jobId: string, wait: ShaderFrameWait | null): void {
+  if (wait !== null) shaderWaits.set(jobId, wait);
+}
+
+/** The report with the wait's row in place of the exporter's; the report itself when nothing was pending. */
+async function reportWithShaderWait<T extends { residual: string[] }>(
+  report: T,
+  wait: ShaderFrameWait | null | undefined,
+): Promise<T> {
+  if (wait === null || wait === undefined) return report;
+  const { shaderReportRow, withShaderRow } = await import('@turboslide/export/report');
+  return withShaderRow(report, shaderReportRow(wait.pending, wait.waitedMs));
+}
+
+/**
+ * One row of the Download dialog's report (build/b1.md R6; the row `shaders.export.missing-frame-row`):
+ * an id in a control's shape (`dialog.download.report.<id>`) and one sentence in the seller's words.
+ * The dialog reads them off `progress.rows` while the export runs and says each once on the direct
+ * path; the controller copies them from the poll's answer and the batched progress (request R1 of
+ * build/b7.md, ship two).
+ */
+export type ExportReportRowEntry = { id: string; text: string };
+
+/** The wait's row for the dialog, or none when nothing was pending. */
+async function shaderRowsOf(
+  wait: ShaderFrameWait | null | undefined,
+): Promise<ExportReportRowEntry[]> {
+  if (wait === null || wait === undefined) return [];
+  const { shaderFrameSentence } = await import('@turboslide/export/report');
+  const text = shaderFrameSentence(wait.pending, wait.waitedMs);
+  return text === null ? [] : [{ id: 'shaders', text }];
 }
 
 export type ExportCapabilities = {
@@ -201,12 +288,15 @@ const startExportFn = createServerFn({ method: 'POST' })
   .validator(validateExportRun)
   .handler(async ({ data }): Promise<StartExportResult> => {
     await authorizeExport(data.deckId, data.input, 'export.run');
+    // the room's pending entries into the store and the wait for a pending shader frame
+    // (docs/FEATURES.md 5.5), before the folder the worker reads is brought current (R-F1)
+    const wait = await awaitShaderFrames(data.deckId, data.input.slideIds);
     await requireDeck(data.deckId);
     const client = await worker();
-    // the room's pending entries into the store before the worker reads the folder (R-F1)
     const { flushRoom } = await import('./room');
     await flushRoom(data.deckId).catch(() => undefined);
     const job = await client.submit('export', { deckId: data.deckId, ...data.input });
+    rememberShaderWait(job.id, wait);
     // the job's record at queue time, with the deck's title for the file names (the product
     // round, rank 7), and the job followed to its end after the response, so a poll on any
     // instance reads the outcome (C3S-F7; loaded here for the reason worker() gives)
@@ -235,6 +325,10 @@ const syncExportFn = createServerFn({ method: 'POST' })
   .validator(validateExportRun)
   .handler(async ({ data }): Promise<SyncExportAnswer> => {
     const { quota } = await authorizeExport(data.deckId, data.input, 'export.run');
+    // the wait for a pending shader frame (docs/FEATURES.md 5.5) before the folder is synced; the
+    // polls beside the call read the row by the page's progress id while the export runs
+    const wait = await awaitShaderFrames(data.deckId, data.input.slideIds);
+    if (data.progressJobId !== undefined) rememberShaderWait(data.progressJobId, wait);
     await requireDeck(data.deckId);
     // one export at a time per identity (SPEC-3 8.3 concurrency 1 / 1 / 2)
     const { assertQuota, releaseQuota } = await import('./ratelimit');
@@ -243,15 +337,18 @@ const syncExportFn = createServerFn({ method: 'POST' })
       // loaded here for the same reason worker() is: export-sync imports the worker client statically
       const { jsonBody: body, runSyncExport } = await import('./export-sync');
       const client = await worker();
-      if (data.progressJobId === undefined)
-        return body(await runSyncExport(data.deckId, data.input, { client }));
-      // the progress record beside the call (export-batch.ts): the page polls it by the id it
-      // minted while this call runs, the row export.download.progress-per-slide
-      const { runSyncExportWithProgress } = await import('./export-batch');
-      return body(
-        await runSyncExportWithProgress(client, data.progressJobId, data.deckId, data.input),
-      );
+      const produced =
+        data.progressJobId === undefined
+          ? await runSyncExport(data.deckId, data.input, { client })
+          : // the progress record beside the call (export-batch.ts): the page polls it by the id
+            // it minted while this call runs, the row export.download.progress-per-slide
+            await (
+              await import('./export-batch')
+            ).runSyncExportWithProgress(client, data.progressJobId, data.deckId, data.input);
+      // the wait's row replaces the exporter's own in the report the dialog reads (5.5)
+      return body({ ...produced, report: await reportWithShaderWait(produced.report, wait) });
     } finally {
+      if (data.progressJobId !== undefined) shaderWaits.delete(data.progressJobId);
       await releaseQuota('exportConcurrency', quota);
     }
   });
@@ -272,19 +369,29 @@ export async function syncExport(input: StartExportInput): Promise<SyncExportAns
 // server/export-batch.ts, loaded inside the handlers for the reason worker() gives, and the
 // client function the Download dialog calls.
 
+/** The plan with the wait's row for the dialog when a frame was waited for (build/b1.md R6). */
+export type StartBatchedExportAnswer = StartBatchedExportResult & {
+  rows?: ReadonlyArray<ExportReportRowEntry>;
+};
+
 const startBatchedExportFn = createServerFn({ method: 'POST' })
   .validator(validateExportRun)
-  .handler(async ({ data }): Promise<StartBatchedExportResult> => {
+  .handler(async ({ data }): Promise<StartBatchedExportAnswer> => {
     await authorizeExport(data.deckId, data.input, 'export.run');
+    // the wait for a pending shader frame (docs/FEATURES.md 5.5) before the plan reads the deck
+    const wait = await awaitShaderFrames(data.deckId, data.input.slideIds);
     await requireDeck(data.deckId);
     const { startBatchedExport: start } = await import('./export-batch');
-    return start(data.deckId, data.input);
+    const started = await start(data.deckId, data.input);
+    rememberShaderWait(started.jobId, wait);
+    const rows = await shaderRowsOf(wait);
+    return rows.length > 0 ? { ...started, rows } : started;
   });
 
 /** Step one: the plan (the revision, the batches, the pinned asset hashes) under a job id. */
 export async function startBatchedExport(
   input: StartExportInput,
-): Promise<StartBatchedExportResult> {
+): Promise<StartBatchedExportAnswer> {
   return startBatchedExportFn({ data: input });
 }
 
@@ -326,7 +433,11 @@ const mergeExportFn = createServerFn({ method: 'POST' })
     await authorizeExport(data.deckId, {}, 'export.run', null);
     await requireDeck(data.deckId);
     const { mergeExport: run } = await import('./export-batch');
-    return run(data.deckId, data.jobId);
+    const merged = await run(data.deckId, data.jobId);
+    // the plan's wait, when this process took it (docs/FEATURES.md 5.5)
+    const wait = shaderWaits.get(data.jobId);
+    shaderWaits.delete(data.jobId);
+    return { ...merged, report: await reportWithShaderWait(merged.report, wait) };
   });
 
 /** Step three: the file from the stored parts, with the merge's peak memory. */
@@ -350,11 +461,15 @@ export async function cancelBatchedExport(
   return cancelBatchedExportFn({ data: input });
 }
 
-/** What the Download dialog shows while a batched export runs (SPEC-2 8.1 item 4). */
-export type BatchedExportProgress =
+/**
+ * What the Download dialog shows while a batched export runs (SPEC-2 8.1 item 4), with the report
+ * rows the plan carried (build/b1.md R6: the wait's "2 shaders had no frame; ..." row).
+ */
+export type BatchedExportProgress = (
   | { phase: 'preparing'; slide: number; total: number; secondsLeft: number | null }
   | { phase: 'merging' }
-  | { phase: 'ready' };
+  | { phase: 'ready' }
+) & { rows?: ReadonlyArray<ExportReportRowEntry> };
 
 /** The sentence of a progress step, in the Download dialog's words. */
 export function batchedProgressLabel(progress: BatchedExportProgress): string {
@@ -432,6 +547,8 @@ export async function runBatchedExport(
     throwIfCancelled();
     const started = await startBatchedExport({ deckId, input });
     const stopPagehide = cancelOnPagehide(deckId, started.jobId, started.cancelToken);
+    // the wait's row rides on every progress step (build/b1.md R6)
+    const rows = started.rows !== undefined && started.rows.length > 0 ? { rows: started.rows } : {};
     let stale: 'revision' | 'asset' | null = null;
     try {
       const timings: { slides: number; ms: number }[] = [];
@@ -441,6 +558,7 @@ export async function runBatchedExport(
         slide: Math.min(1, started.total),
         total: started.total,
         secondsLeft: null,
+        ...rows,
       });
       for (let index = 0; index < started.batches.length; index += 1) {
         throwIfCancelled();
@@ -468,13 +586,14 @@ export async function runBatchedExport(
           slide: Math.min(done, started.total),
           total: started.total,
           secondsLeft: secondsLeft(done, started.total, timings),
+          ...rows,
         });
       }
       if (stale === null) {
         throwIfCancelled();
-        onProgress({ phase: 'merging' });
+        onProgress({ phase: 'merging', ...rows });
         const merged = await mergeExport({ deckId, jobId: started.jobId });
-        onProgress({ phase: 'ready' });
+        onProgress({ phase: 'ready', ...rows });
         return merged;
       }
     } catch (error) {
@@ -500,8 +619,12 @@ export async function runBatchedExport(
 
 export type ExportDownloadLink = ExportJobDownload;
 
-/** The poll's answer (export-jobs.ts `ExportJobPoll`): the status, the worker's last line, and the report with its download URLs once done. */
-export type ExportPoll = ExportJobPoll;
+/**
+ * The poll's answer (export-jobs.ts `ExportJobPoll`): the status, the worker's last line, the
+ * report with its download URLs once done, and the report rows of the export's wait (build/b1.md
+ * R6) while this process remembers it, for the controller to hand the dialog as `progress.rows`.
+ */
+export type ExportPoll = ExportJobPoll & { rows?: ReadonlyArray<ExportReportRowEntry> };
 
 const pollExportFn = createServerFn({ method: 'POST' })
   .validator((raw: { jobId: string }) => {
@@ -514,7 +637,7 @@ const pollExportFn = createServerFn({ method: 'POST' })
     // instance wrote, else the refusal the page shows (C3S-F7: never a thrown "No export job")
     const { pollExportJob } = await import('./export-batch');
     const { authorizeRequest } = await import('./authorize');
-    return pollExportJob(await worker(), data.jobId, {
+    const poll = await pollExportJob(await worker(), data.jobId, {
       // the job names its deck; the poll needs the export right on it
       authorize: async (deckId) => {
         await authorizeRequest(deckId, 'export', { action: 'export.poll' });
@@ -529,6 +652,16 @@ const pollExportFn = createServerFn({ method: 'POST' })
           }),
         ),
     });
+    // the wait this process took for the job (the queued path by the worker's id, the sync path
+    // by the page's progress id; docs/FEATURES.md 5.5): its row on every answer while the export
+    // runs, and in the report once the job is done
+    const wait = shaderWaits.get(data.jobId);
+    if (wait === undefined) return poll;
+    const rows = await shaderRowsOf(wait);
+    const withRows: ExportPoll = rows.length > 0 ? { ...poll, rows } : poll;
+    if (poll.report === undefined) return withRows;
+    shaderWaits.delete(data.jobId);
+    return { ...withRows, report: await reportWithShaderWait(poll.report, wait) };
   });
 
 /** export.run, step two: the job's state, and the report with its download URLs once done. */
@@ -634,6 +767,9 @@ const runBuildFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }): Promise<RunBuildResult> => {
     // a standalone file carries no notes and no skipped slides; the export right and its own quota
     await authorizeExport(data.deckId, {}, 'build.run', 'standaloneBuildsPerDay');
+    // the web page carries a shader's frame as the block's picture and mounts no live shader
+    // (docs/FEATURES.md 5.5): the frame on its way is waited for before the folder is synced
+    await awaitShaderFrames(data.deckId);
     const dir = await requireDeck(data.deckId);
     const outDir = buildsDir(data.deckId);
     mkdirSync(outDir, { recursive: true });

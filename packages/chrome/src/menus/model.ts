@@ -769,10 +769,12 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
       }),
       now('title.presence.goTo', 'Go to slide', client('goToClient'), {
         turboslide: true,
-        /* re-parked at the return round's ship: the matrix row collab.roster.go-to-slide carries
-           `parks` naming this id and read red in both preview runs of the ship's tree (docs/RETURN.md
-           section 1 rule 2; VERIFICATION.md R2-F1); the chips stay drawn and a click still jumps */
-        advanced: true,
+        /* back in the default view at the features round's ship one: the matrix row
+           collab.roster.go-to-slide (whose `parks` names this id) read green in both preview runs
+           of record and on production at the sync round's ship, so it leaves the parked list
+           (docs/gslides-parity/focus/ship-f1afe1e.json `leaves`; docs/FEATURES.md 7.2). It was
+           re-parked at the return round's ship when the row read red in both runs (docs/RETURN.md
+           section 1 rule 2; VERIFICATION.md R2-F1). */
         doc: 'A one time jump to the slide that person has open',
       }),
       later('title.presence.joinChat', 'Join chat', CHAT_LATER, { dividerBefore: true }),

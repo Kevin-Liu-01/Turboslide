@@ -27,11 +27,13 @@ import type { ViewerFacts } from './presence-model';
  * disabled with its clause. Enter on a row jumps to that person's slide (01 G5). It is the
  * Collaborators list of 4.9: the menu's accessible name says so.
  *
- * The focus round (docs/FOCUS.md 3.1, 3.2; b6's FR2): the rows `title.presence.follow` and
- * `title.presence.goTo` and the Later stub `title.presence.joinChat` are parked, so the Follow and
- * Go to slide words and the Join chat footer are drawn only while `isPresent` says so for the
- * menu context; the rows themselves, the chips, the names and the slide numbers stay, and Enter
- * or a click on a row still jumps (the chips stay drawn, 3.2).
+ * The focus round (docs/FOCUS.md 3.1, 3.2; b6's FR2): the row `title.presence.follow` and the
+ * Later stub `title.presence.joinChat` are parked, so the Follow word and the Join chat footer
+ * are drawn only while `isPresent` says so for the menu context; the rows themselves, the chips,
+ * the names and the slide numbers stay, and Enter or a click on a row still jumps (the chips stay
+ * drawn, 3.2). The Go to slide word (`title.presence.goTo`) reads the same predicate and is in the
+ * default view since the features round's ship one, when its row collab.roster.go-to-slide read
+ * green in both preview runs of record (docs/gslides-parity/focus/ship-f1afe1e.json `leaves`).
  */
 export type RosterMenuProps = {
   anchor: HTMLElement;

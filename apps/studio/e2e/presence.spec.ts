@@ -178,8 +178,10 @@ async function scratchDeck(browser: Browser): Promise<void> {
 
 /**
  * Tools > Advanced tools, flipped through the product's own row (docs/FOCUS.md 3.1) and read back
- * from describe().state.settings; the roster's Go to slide is a parked row since the focus round
- * (3.2: `title.presence.goTo` carries `advanced: true`), so it is asserted behind the switch.
+ * from describe().state.settings; the roster's own row and Join chat stub are parked (3.2), so
+ * they are asserted behind the switch. The Go to slide word is in the default view since the
+ * features round's ship one (docs/gslides-parity/focus/ship-f1afe1e.json `leaves`) and is drawn
+ * in both states.
  */
 async function setAdvancedTools(page: Page, on: boolean): Promise<void> {
   const read = () =>
@@ -293,10 +295,12 @@ test('a second person appears as a chip without moving the row; the roster lists
   const bClient = others[0]!.clientId;
 
   /* the roster: B's row with Go to slide (a label cannot be followed, 4.4), the own row, Join chat
-     disabled. Since the focus round the roster's rows `title.presence.goTo` and `title.presence.me`
-     and the Later stub `title.presence.joinChat` are parked (docs/FOCUS.md 3.2, 3.1) and so is the
-     pointer toggle `toolbar.pointer` of the tail's end (3.3), so this part and the toggle run
-     behind Tools > Advanced tools; the switch goes back off before the default view rows below */
+     disabled. Since the focus round the roster's row `title.presence.me` and the Later stub
+     `title.presence.joinChat` are parked (docs/FOCUS.md 3.2, 3.1) and so is the pointer toggle
+     `toolbar.pointer` of the tail's end (3.3), so this part and the toggle run behind Tools >
+     Advanced tools; the Go to slide word is in the default view since the features round's ship
+     one and would read the same with the switch off; the switch goes back off before the default
+     view rows below */
   await setAdvancedTools(pageA, true);
   await pageA.locator('[data-control="presence.more"]').click();
   const roster = pageA.locator('#ts-menu-roster');

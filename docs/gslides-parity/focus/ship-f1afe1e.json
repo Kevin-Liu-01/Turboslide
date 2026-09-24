@@ -1,7 +1,77 @@
 {
   "commit": "f1afe1e",
-  "renderedFrom": [],
-  "rule": "docs/FEATURES.md 7.2: the features round’s ship one list, committed before the runs with parkedFeatures and parkedRows empty, so nothing is pre forgiven and the two enforce preview runs and the production run say what parks; the ship step renders parkedFeatures and parkedRows from the runs’ wouldParkRows and rewrites packages/chrome/src/parked-controls.ts with core-matrix.mjs --emit-parked. Named after f1afe1e, the fixes commit whose tree the ship’s enforce preview and its two runs of record read (the fix round’s items and the cross lane requests landed by the ship step; ship-39ae62e.json was this list’s name before the fix round). The previous ship’s list (ship-7ea3db9.json: inbox and templates parked, view.live-pointers.second-browser, versions.show-changes-marks and collab.roster.go-to-slide as parked rows) still stands in the menu model’s advanced flags and is read against the runs by the ship note, never by this empty list",
-  "parkedFeatures": [],
-  "parkedRows": []
+  "renderedFrom": [
+    "docs/gslides-parity/focus/verification/features-one-ship-preview-run3.json",
+    "docs/gslides-parity/focus/verification/features-one-ship-preview-run4.json"
+  ],
+  "rule": "docs/FEATURES.md 7.2 and docs/RETURN.md section 1 rule 2: parkedFeaturesOf over the last readings of the two gate runs of record on the enforce preview https://turboslide-2kbrkgcbc-kl01s-projects.vercel.app built from 0fc0cfa; a row carrying parks red in both runs parks the controls it names, a parkable feature red through a row without parks in both runs is parked whole, a row of a feature parked whole is not listed a second time, and a row or feature red in one run and green in the other is flaky and is not listed; the previous ship's list (ship-7ea3db9.json) is carried forward where its rows did not read green in both runs, since the menu model's advanced flags follow this list, and a carried row green in both runs leaves it (leaves); the exceptions the ship rule makes over the gate's mechanical wouldPark are in notParked, each with its reason",
+  "parkedFeatures": ["inbox", "templates"],
+  "parkedRows": [
+    {
+      "id": "arrange.group.tail-text-controls",
+      "parks": ["toolbar.group.text"]
+    },
+    {
+      "id": "logos.kit.find-a-logo",
+      "parks": ["panel.brand.logo.find"]
+    },
+    {
+      "id": "logos.picker.variants",
+      "parks": ["dialog.logo.kind.wordmark", "dialog.logo.tone.mono"]
+    },
+    {
+      "id": "tables.bar.row-column-buttons",
+      "parks": ["bar.table"]
+    },
+    {
+      "id": "tables.edge.add-row-column",
+      "parks": ["handle.table.add.column", "handle.table.add.row"]
+    },
+    {
+      "id": "tables.heads.select-row-column",
+      "parks": ["handle.table.head.column", "handle.table.head.row"]
+    },
+    {
+      "id": "tables.seam.row-drag",
+      "parks": ["handle.table.row"]
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "parks": ["file.versionHistory.showChanges"]
+    },
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": ["view.livePointers.mine", "view.livePointers.collaborators"]
+    },
+    {
+      "id": "wordart.tail.fill-outline",
+      "parks": ["toolbar.wordart.outline"]
+    }
+  ],
+  "notParked": [
+    {
+      "feature": "brand",
+      "why": "the gate's wouldPark names it; brand.logo.remove is green in both runs and brand.objects.kit-colours-first is a P1 row not on the build (FEATURES.md section 1: a P1 item that misses the condition moves to the round after whole, its rows recorded not driven); brand.appearance.default was red once (run 4, the editor load's 90 s stall, pass 2 F9's class)"
+    },
+    {
+      "feature": "fonts",
+      "why": "the gate's wouldPark names it; its entries fonts.picker.specimen-rows and fonts.table.takes-family are P1 rows not on the build (FEATURES.md section 1); every fonts row on the build is green in both runs"
+    },
+    {
+      "feature": "assist",
+      "why": "the gate's wouldPark names it; assist.rewrite.card-accept-undo and assist.notes.draft are green in both runs (panel.assist.starter.shorter is not parked); assist.quota.429 is not driven with no Upstash on the preview, which PRODUCT.md 8.2 exempts as the environment's"
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "controls": ["insert.logo"],
+      "why": "not driven by design on the deployment of record (TURBOSLIDE_LOGO_UPSTREAM=fixture, not the outage; ship.md 4.3 and 4.8); the unit test apps/studio/src/server/logos.test.ts is named; parking insert.logo would hide Insert > Logo for a row the fixture preview cannot drive"
+    }
+  ],
+  "leaves": [
+    {
+      "id": "collab.roster.go-to-slide",
+      "controls": ["title.presence.goTo"],
+      "why": "read green in every run of this ship"
+    }
+  ]
 }

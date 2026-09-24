@@ -15,8 +15,8 @@ import { hideTooltip } from './Tooltip';
 
 // The parked controls (docs/FEATURES.md 7.2, 7.3): an id in the set is not drawn by the surfaces
 // that read the module; the same id is drawn when the Advanced tools setting is on; an empty set
-// draws everything. The pure rule is pinned over its own set (the committed set is empty until a
-// ship parks a control), and the Logo dialog is the surface this lane owns; Overlay.tsx (the
+// draws everything. The pure rule is pinned over its own set, the committed set is pinned to the
+// parked list of the ship (ship-f1afe1e.json), and the Logo dialog is the surface this lane owns; Overlay.tsx (the
 // handles and the bar, B3) and the Shader gallery and section (B5, ship two) pin their reads in
 // their own lanes' tests, as 7.3 lists them.
 
@@ -50,12 +50,38 @@ describe('isParkedIn', () => {
     expect(isParkedIn('dialog.logo.everySlide', set, { advancedTools: 'true' })).toBe(true);
   });
 
-  it('binds the committed set, which is empty until a ship parks a control', async () => {
-    /* the module is mocked below for the dialog's surface; the committed module is read here */
+  it('binds the committed set, the parked list of the features round, ship one', async () => {
+    /* the module is mocked below for the dialog's surface; the committed module is read here. The
+       set is what core-matrix.mjs --emit-parked wrote from docs/gslides-parity/focus/ship-f1afe1e.json:
+       the union of the `parks` of its ten parkedRows (the two carried rows of the earlier ships and
+       the eight P1 rows of ship one whose controls are not on the build), sorted */
     const real = await vi.importActual<typeof import('./parked-controls')>('./parked-controls');
-    expect(real.PARKED_CONTROLS.size).toBe(0);
+    expect([...real.PARKED_CONTROLS].sort()).toEqual([
+      'bar.table',
+      'dialog.logo.kind.wordmark',
+      'dialog.logo.tone.mono',
+      'file.versionHistory.showChanges',
+      'handle.table.add.column',
+      'handle.table.add.row',
+      'handle.table.head.column',
+      'handle.table.head.row',
+      'handle.table.row',
+      'panel.brand.logo.find',
+      'toolbar.group.text',
+      'toolbar.wordart.outline',
+      'view.livePointers.collaborators',
+      'view.livePointers.mine',
+    ]);
+    /* a P1 family and a carried row are parked while the switch is off, and drawn while it is on */
+    expect(real.isParked('handle.table.row.1', { advancedTools: false })).toBe(true);
+    expect(real.isParked('bar.table.insertRowBelow', DEFAULT_SETTINGS)).toBe(true);
+    expect(real.isParked('view.livePointers.mine', DEFAULT_SETTINGS)).toBe(true);
+    expect(real.isParked('handle.table.row.1', { advancedTools: true })).toBe(false);
+    /* a control of the picker that ships is not in the set; the Go to slide word left the list */
     expect(real.isParked('dialog.logo.everySlide', DEFAULT_SETTINGS)).toBe(false);
-    expect(real.isParked('handle.table.row.1', { advancedTools: false })).toBe(false);
+    expect(real.isParked('dialog.logo.search', DEFAULT_SETTINGS)).toBe(false);
+    expect(real.isParked('bar.chart.editData', DEFAULT_SETTINGS)).toBe(false);
+    expect(real.isParked('title.presence.goTo', DEFAULT_SETTINGS)).toBe(false);
     /* the mocked set the dialog tests read */
     expect(PARKED_CONTROLS.size).toBe(2);
     expect(isParked('dialog.logo.everySlide', DEFAULT_SETTINGS)).toBe(true);

@@ -172,15 +172,17 @@ describe('the title row slots', () => {
     ).toBe(false);
   });
 
-  it("draws four chips and +16 for twenty people, the roster with every row; the Go to slide word, the own row and the Join chat stub stay behind Tools > Advanced tools (the word re-parked at the return round's ship)", () => {
+  it("draws four chips and +16 for twenty people, the roster with every row; the own row and the Join chat stub stay behind Tools > Advanced tools, and the Go to slide word is in the default view since the features round's ship one", () => {
     const others = Array.from({ length: 20 }, (_, i) => person(i + 1));
     const self = person(0, { clientId: 'me', name: 'Kevin', trust: 'guest' });
     const onFollow = vi.fn();
     const onGoTo = vi.fn();
     /* the default view first: the rows and chips stay, the own row and the stub are absent
-       (docs/FOCUS.md 3.1, 3.2; b6's FR2) and the Go to slide word is parked again: the matrix row
-       collab.roster.go-to-slide read red in both preview runs of the ship's tree and its `parks`
-       name title.presence.goTo (docs/RETURN.md section 1 rule 2; VERIFICATION.md R2-F1) */
+       (docs/FOCUS.md 3.1, 3.2; b6's FR2) and the Go to slide word is drawn: the matrix row
+       collab.roster.go-to-slide, whose `parks` name title.presence.goTo, read green in both preview
+       runs of record of the features round's ship one and left the parked list
+       (docs/gslides-parity/focus/ship-f1afe1e.json `leaves`; re-parked at the return round's ship
+       when it read red, docs/RETURN.md section 1 rule 2, VERIFICATION.md R2-F1) */
     const plain = render(
       <Harness
         input={input({ presence: { self, others, onFollow, onGoTo } })}
@@ -193,12 +195,12 @@ describe('the title row slots', () => {
     expect(plainRoster.querySelectorAll('[data-control^="presence.roster."]')).toHaveLength(20);
     expect(plainRoster.querySelector('[data-control="presence.roster.me"]')).toBeNull();
     expect(plainRoster.querySelector('[data-menu-item="title.presence.joinChat"]')).toBeNull();
-    expect(
-      plainRoster.querySelector('[data-control="presence.roster.c1"]')?.textContent,
-    ).not.toContain('Go to slide');
+    expect(plainRoster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
+      'Go to slide',
+    );
     fireEvent.keyDown(plainRoster, { key: 'Escape' });
     plain.unmount();
-    /* the switch on, remembered per browser: the words and the stub return */
+    /* the switch on, remembered per browser: the own row and the stub return, the word stays */
     localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container } = render(
       <Harness
@@ -409,8 +411,8 @@ describe('the title row slots', () => {
     );
     const more = container.querySelector('[data-control="presence.more"]')!;
     /* one collaborator: the chip fits, no +N, yet the opener is drawn (a people glyph) and opens
-       the roster with that person's row; the Go to slide word is parked again at the return
-       round's ship (title.presence.goTo behind the switch), the row itself stays */
+       the roster with that person's row and the Go to slide word (title.presence.goTo, in the
+       default view since the features round's ship one) */
     expect(more.classList.contains('is-empty')).toBe(false);
     expect(more.textContent).toBe('');
     expect(more.querySelector('svg')).not.toBeNull();
@@ -420,7 +422,7 @@ describe('the title row slots', () => {
     expect(roster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
       person(1).label,
     );
-    expect(roster.querySelector('[data-control="presence.roster.c1"]')?.textContent).not.toContain(
+    expect(roster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
       'Go to slide',
     );
     fireEvent.keyDown(roster, { key: 'Escape' });

@@ -24,8 +24,23 @@
 // return (docs/FOCUS.md section 8).
 
 /* parked-controls:begin */
-// written by scripts/probes/core-matrix.mjs --emit-parked from ship-f1afe1e.json; 0 controls
-export const PARKED_CONTROLS: ReadonlySet<string> = new Set<string>([]);
+// written by scripts/probes/core-matrix.mjs --emit-parked from ship-f1afe1e.json; 14 controls
+export const PARKED_CONTROLS: ReadonlySet<string> = new Set<string>([
+  'bar.table',
+  'dialog.logo.kind.wordmark',
+  'dialog.logo.tone.mono',
+  'file.versionHistory.showChanges',
+  'handle.table.add.column',
+  'handle.table.add.row',
+  'handle.table.head.column',
+  'handle.table.head.row',
+  'handle.table.row',
+  'panel.brand.logo.find',
+  'toolbar.group.text',
+  'toolbar.wordart.outline',
+  'view.livePointers.collaborators',
+  'view.livePointers.mine',
+]);
 /* parked-controls:end */
 
 /**

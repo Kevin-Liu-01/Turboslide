@@ -2801,13 +2801,19 @@ describe('the return round: the flags of the returned and the parked rows (docs/
     }
   });
 
+  it('draws the Go to slide word in the default view since the features round, ship one', () => {
+    /* collab.roster.go-to-slide carries `parks` naming the row; it read green in both preview
+       runs of record of ship one and left the parked list (docs/gslides-parity/focus/ship-f1afe1e.json
+       `leaves`), so the flag the return round's ship put back is lifted */
+    const item = itemById('title.presence.goTo');
+    expect(item.advanced).toBeUndefined();
+    expect(item.status).toBe('now');
+    expect(isPresent(item, OFF)).toBe(true);
+  });
+
   it('keeps the flag on every row RETURN.md leaves parked', () => {
     for (const id of [
       'file.versionHistory.showChanges',
-      /* re-parked at the return round's ship: collab.roster.go-to-slide carries `parks` naming
-         the row and read red in both preview runs (docs/RETURN.md section 1 rule 2;
-         VERIFICATION.md R2-F1); the chips stay drawn and a click still jumps */
-      'title.presence.goTo',
       /* the return round's integration parked the Live pointers rows again: the matrix row
          view.live-pointers.second-browser carries `parks` naming them and was red on both tiers
          (docs/RETURN.md section 1 rule 2; build/integrator.md) */

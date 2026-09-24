@@ -49,11 +49,14 @@ export function shaderPreviewFile(materialId: string, preset?: string): string {
 /**
  * The URL of a still: in the browser Vite rewrites `new URL(..., import.meta.url)` to the built
  * asset, in Node it is the file URL under the package. A gallery card draws it in an `<img>` and
- * mounts no canvas.
+ * mounts no canvas. The template keeps the folder and the extension inline around one variable,
+ * the one shape Vite's build turns into a glob of `../previews/*.webp` and emits as assets; with
+ * the folder in a constant the build left the call alone and the preview of the features round's
+ * ship two answered 404 for every still (build/integrator.md, the findings).
  */
 export function shaderPreviewUrl(materialId: string, preset?: string): string {
-  return new URL(`${SHADER_PREVIEWS_DIR}${shaderPreviewFile(materialId, preset)}`, import.meta.url)
-    .href;
+  const name = shaderPreviewFile(materialId, preset).replace(/\.webp$/, '');
+  return new URL(`../previews/${name}.webp`, import.meta.url).href;
 }
 
 /** The index the build script writes beside the files. */

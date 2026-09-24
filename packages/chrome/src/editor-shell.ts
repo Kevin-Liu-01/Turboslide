@@ -1189,6 +1189,8 @@ export function tailKindOf(
   if (family === 'image') return 'image';
   if (family === 'line') return 'line';
   if (family === 'chart') return 'chart';
+  /* the features round, ship two (docs/FEATURES.md 5.3): a shader's tail is Format options */
+  if (block.type === 'material') return 'material';
   return 'other';
 }
 

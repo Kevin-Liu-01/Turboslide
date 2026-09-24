@@ -3147,6 +3147,10 @@ export function createEditorController(init: {
         await settleOwnWrite(revision, landed);
         // no snackbar on success (rank 14): the picture is on the sheet and selected; the ids
         // are in the answer for the agent transports
+        /* a server side write of this tab (shader.insert, shader.set, a kit colour through the
+           agent) is this tab's own commit to the resting rule (docs/FEATURES.md 5.5): the shader
+           blocks it left stale capture their still, one block at a time */
+        shaderFrames.scheduleStale();
       }
       return output;
     });

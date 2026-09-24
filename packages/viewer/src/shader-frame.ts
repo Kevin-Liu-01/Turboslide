@@ -52,16 +52,26 @@ export type ShaderFrameCapture = {
   frameKey: string;
 };
 
-/** True when this browser can draw a frame itself; false sends the block to the hosted `shader.capture`. */
+let canCaptureAnswer: boolean | null = null;
+
+/**
+ * True when this browser can draw a frame itself; false sends the block to the hosted
+ * `shader.capture`. Read once per page and the probe's context released: Chromium keeps at most
+ * sixteen live WebGL contexts and loses the oldest past that, so a probe per capture would in time
+ * take down the stage's own mount (the integrator's note of ship two).
+ */
 export function clientCanCapture(): boolean {
   if (typeof document === 'undefined') return false;
+  if (canCaptureAnswer !== null) return canCaptureAnswer;
   try {
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl2');
-    return gl !== null;
+    canCaptureAnswer = gl !== null;
+    (gl?.getExtension('WEBGL_lose_context') as { loseContext: () => void } | null)?.loseContext();
   } catch {
-    return false;
+    canCaptureAnswer = false;
   }
+  return canCaptureAnswer;
 }
 
 /** The GPU's renderer string as WebGL reports it, or 'webgl2' when the extension is hidden. */

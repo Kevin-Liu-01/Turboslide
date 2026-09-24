@@ -1480,12 +1480,18 @@ export async function run(t) {
         await t.sleep(400);
         optionRow = await page.evaluate(
           () =>
-            [...document.querySelectorAll('[data-control^="present.options."]')]
+            /* Menu.tsx draws a row as data-control="menu.<id>" with data-menu-item="<id>" (build/b1.md
+               R5), so the show's rows read by their menu item id */
+            [
+              ...document.querySelectorAll(
+                '[data-menu-item^="present.options."], [data-control^="present.options."]',
+              ),
+            ]
               .filter(
                 (e) => e.getClientRects().length > 0 && /play shaders/i.test(e.textContent ?? ''),
               )
               .map((e) => ({
-                id: e.getAttribute('data-control'),
+                id: e.getAttribute('data-menu-item') ?? e.getAttribute('data-control'),
                 text: (e.textContent ?? '').replace(/\s+/g, ' ').trim(),
               }))[0] ?? null,
         );

@@ -30,7 +30,17 @@ import { TOOLBAR_TAIL_DEFAULT, shortcut } from './model.ts';
  * stays visible and disabled as the one exception (FOCUS.md 3.1).
  */
 export type TailKind =
-  'default' | 'text' | 'shape' | 'image' | 'line' | 'table' | 'chart' | 'group' | 'other';
+  | 'default'
+  | 'text'
+  | 'shape'
+  | 'image'
+  | 'line'
+  | 'table'
+  | 'chart'
+  | 'group'
+  /* the features round, ship two (docs/FEATURES.md 5.3): a shader block's tail */
+  | 'material'
+  | 'other';
 
 export type TailOp =
   | 'fillColor'
@@ -602,7 +612,14 @@ const CHART_TAIL: TailControl[] = [
 /** SPEC-2 4.2: a group selected; the object controls that apply to every member at once. Parked whole by docs/FOCUS.md 3.3, returned with Group and Ungroup by docs/RETURN.md 2.12. */
 const GROUP_TAIL: TailControl[] = [...fillAndBorder('group'), FORMAT_OPTIONS];
 
-/** 3.8: icons, materials and the other blocks. Parked whole (docs/FOCUS.md 3.3). */
+/**
+ * The features round, ship two (docs/FEATURES.md 5.3, 5.10): a shader is an object in the default
+ * view whose one home is the Shader section of Format options, so its tail carries Format options
+ * as a chart's and a table's do; the other tail below stays parked for the icons and the rest.
+ */
+const MATERIAL_TAIL: TailControl[] = [FORMAT_OPTIONS];
+
+/** 3.8: icons and the other blocks. Parked whole (docs/FOCUS.md 3.3). */
 const OTHER_TAIL: TailControl[] = parkedTail([
   { ...FORMAT_OPTIONS, dividerBefore: true },
   {
@@ -629,6 +646,7 @@ export const TOOLBAR_TAILS: Readonly<Record<TailKind, ReadonlyArray<TailControl>
   table: TABLE_TAIL,
   chart: CHART_TAIL,
   group: GROUP_TAIL,
+  material: MATERIAL_TAIL,
   other: OTHER_TAIL,
 };
 

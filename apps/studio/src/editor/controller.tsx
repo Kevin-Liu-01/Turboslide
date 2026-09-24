@@ -10,7 +10,13 @@ import { awaitAcknowledged } from './ack-wait';
 import { slideToConvertFor } from './convert-first';
 import { createExportModeGate } from './export-mode';
 import { refusalSentence } from './refusal';
-import { acknowledgeAnswered, resyncBroughtUnseen } from './resync-history';
+import {
+  OWN_WRITE_LANDED_MAX_MS,
+  OWN_WRITE_STREAM_WAIT_MS,
+  acknowledgeAnswered,
+  resyncBroughtUnseen,
+  resyncsForOwnWrite,
+} from './resync-history';
 import { placeInsert, wantsPlacement } from './place-insert';
 import { SELECT_OBJECTS_EVENT, keepsPlace, originOf } from './select-after-write';
 import type { SelectObjectsDetail, StudioActionContext } from './select-after-write';
@@ -2444,12 +2450,16 @@ export function createEditorController(init: {
       throw error;
     }
     const revision = typeof answer.revision === 'number' ? answer.revision : base + 1;
-    /* the stream brings the entry back within a moment: the history takes it once the local
-       document carries the write (so Cmd+Z right after applies against the written document),
-       and before the answer, so the panel's snackbar and the seller's Cmd+Z find the entry (the
-       acknowledgement alone trails the reported revision on the memory tier) */
-    const until = Date.now() + 5000;
-    while (client.document() === before && Date.now() < until) await sleep(20);
+    /* the stream brings the entry back within a moment when the route's write committed on this
+       tab's stream instance; when it committed elsewhere the tab reloads at once past the short
+       wait, with the answered revision acknowledged so the reload keeps the history and shows no
+       banner (settleOwnWrite; the features round, ship one: the record reached the stream 7 s
+       after the route answered, past a 5 s wait here, and assist.rewrite.card-accept-undo read
+       the body unchanged). The history takes the entry once the local document carries the write
+       (so Cmd+Z right after applies against the written document), and before the answer, so the
+       panel's snackbar and the seller's Cmd+Z find the entry (the acknowledgement alone trails
+       the reported revision on the memory tier) */
+    await settleOwnWrite(revision, () => client.document() !== before);
     lastTyping = null;
     const entry = history.push({ mutations: plan.mutations, inverse, label });
     revisionOf.set(entry.id, revision);
@@ -2939,18 +2949,6 @@ export function createEditorController(init: {
     init.onDeckCreated?.(created.deckId);
     return created;
   });
-  /* a server side write comes back over the watch channel; a caller that reads the revision it
-     answered can address the result at once (slide.import, and asset.add before a block.insert
-     that names the asset: the store action validates the block against the local document, so
-     the asset has to be there first) */
-  const awaitRevision = async (revision: number, ms: number): Promise<boolean> => {
-    const until = Date.now() + ms;
-    while (latest().document.deck.revision < revision) {
-      if (Date.now() > until) return false;
-      await sleep(40);
-    }
-    return true;
-  };
   /**
    * A server side action created the deck (docs/FOCUS.md rank 6: a picture as the first action
    * on a /new draft): the server's document is the room's base, exactly as after the draft's
@@ -2998,6 +2996,38 @@ export function createEditorController(init: {
     refreshVersionsSoon();
   };
 
+  /**
+   * The tail of a write of this tab that ran on the server and answered (asset.add, asset.dither,
+   * material.capture, logo.insert, slide.import; the assist's Accept through its route): the entry
+   * comes back over the channel, and on the blob tier the record may have committed on another
+   * instance, whose tick this tab's stream instance reads at the two paced cadence (2 s, 10 s
+   * when the tab is alone; store/pulse.ts). So the tab waits OWN_WRITE_STREAM_WAIT_MS for the
+   * stream (a commit on its own instance arrives within it), then counts the answered revision as
+   * acknowledged (acknowledgeAnswered: a reload landing at it brings nothing unseen, so onResync
+   * keeps the undo history and shows no banner naming the tab's own write as external, while one
+   * landing above it still brought another writer's entries) and reloads at once (room.resync)
+   * instead of sitting on the tick (resync-history.ts resyncsForOwnWrite; b3.md R21 for the
+   * pictures; the features round, ship one for the assist's Accept, which sat on a 5 s wait while
+   * the record reached the stream 7 s after the route answered). The memory tier's follower
+   * streams the write within milliseconds and a reload there would clear nothing but cost a read,
+   * so it keeps the wait alone. Then waits for the entry up to OWN_WRITE_LANDED_MAX_MS.
+   */
+  const settleOwnWrite = async (revision: unknown, landed: () => boolean): Promise<void> => {
+    const started = Date.now();
+    while (!landed() && Date.now() - started < OWN_WRITE_STREAM_WAIT_MS) await sleep(20);
+    const client = room;
+    const tier = latest().sync?.tier ?? init.payload.room?.tier;
+    if (
+      client !== null &&
+      resyncsForOwnWrite({ landed: landed(), tier, waitedMs: Date.now() - started })
+    ) {
+      const acknowledged = acknowledgeAnswered(latest().serverRevision, revision);
+      if (acknowledged !== latest().serverRevision) publish({ serverRevision: acknowledged });
+      await client.resync().catch(() => undefined);
+    }
+    const until = started + OWN_WRITE_LANDED_MAX_MS;
+    while (!landed() && Date.now() < until) await sleep(40);
+  };
   /* asset.add, asset.dither, material.capture and material.list run on the server (sharp, the
      capture browser, the catalog); the write they end in comes back over the watch channel, and
      the handler waits for that revision before it answers */
@@ -3074,28 +3104,16 @@ export function createEditorController(init: {
           (typeof revision === 'number' && latest().document.deck.revision >= revision) ||
           (ids.length > 0 &&
             ids.every((asset) => latest().document.deck.assets[asset] !== undefined));
-        // on the blob tier the write comes back through the channel's one second head poll and
-        // a resync (packages/realtime/src/blob.ts); the answer says the write committed, so the
-        // tab reloads at once instead of waiting for the poll (b3.md R21). The memory tier's
-        // follower streams the write within milliseconds, and a resync there would clear the
-        // undo history (onResync), so it keeps the wait alone
-        if (
-          !landed() &&
-          room !== null &&
-          (latest().sync?.tier ?? init.payload.room?.tier) === 'blob'
-        ) {
-          // the answer names the revision the store committed for this tab's own write: counted
-          // as acknowledged before the reload, a reload landing at it brings nothing the tab has
-          // not asked for (onResync keeps the undo history and shows no banner), while one landing
-          // above it still brought another writer's entries (resync-history.ts acknowledgeAnswered;
-          // the features round, ship one: the banner "Revision rN arrived from outside this
-          // editor" and the cleared history after asset.add and logo.insert on the blob tier)
-          const acknowledged = acknowledgeAnswered(latest().serverRevision, revision);
-          if (acknowledged !== latest().serverRevision) publish({ serverRevision: acknowledged });
-          await room.resync().catch(() => undefined);
-        }
-        const until = Date.now() + 15_000;
-        while (!landed() && Date.now() < until) await sleep(40);
+        // on the blob tier the write comes back through the channel's pulse tick when it
+        // committed on another instance; the answer says the write committed, so the tab reloads
+        // at once past the short wait for the stream instead of waiting for the tick (b3.md R21;
+        // settleOwnWrite), the answered revision acknowledged first so the reload names no
+        // banner and keeps the undo history (the features round, ship one: the banner "Revision
+        // rN arrived from outside this editor" after asset.add and logo.insert; asset.add's
+        // answer carries no revision, so its reload still lands one above what the tab
+        // acknowledged, Kevin's list). The memory tier's follower streams the write within
+        // milliseconds, so it keeps the wait alone
+        await settleOwnWrite(revision, landed);
         // no snackbar on success (rank 14): the picture is on the sheet and selected; the ids
         // are in the answer for the agent transports
       }
@@ -3967,7 +3985,10 @@ export function createEditorController(init: {
   });
   /* slide.import reads another deck, so it runs on the server (server/actions.ts) and its write
      comes back over the watch channel; the handler waits for that revision so a caller can address
-     the imported slides at once, then selects the first of them */
+     the imported slides at once, then selects the first of them. On the blob tier the tab reloads
+     at once past the short wait for the stream, the answered revision acknowledged
+     (settleOwnWrite), instead of the 5 s wait and the reload it had; the reload stays as the
+     last resort for a stream that never brought the entry */
   on<{
     sourceDeckId: string;
     slideIds: string[];
@@ -3981,7 +4002,9 @@ export function createEditorController(init: {
       input,
       author,
     })) as { slides: Slide[]; revision: number };
-    if (!(await awaitRevision(output.revision, 5000))) await reload();
+    const landed = (): boolean => latest().document.deck.revision >= output.revision;
+    await settleOwnWrite(output.revision, landed);
+    if (!landed()) await reload();
     const first = output.slides[0];
     if (first !== undefined && latest().document.slides[first.id] !== undefined)
       shell?.select(first.id);

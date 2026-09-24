@@ -129,6 +129,12 @@ type DeckState = {
   ownClients: Map<string, number>;
   /** the store poll (the pulse loop with `shared`, the store's own watch without); running while a client stream is open here */
   watching: Promise<() => void> | undefined;
+  /**
+   * reads the roster once and re-arms the running pulse poll's tick from it (`startPulsePoll`):
+   * a stream that opens while the poll runs at the quiet pace is company, and its first words
+   * would otherwise wait for the quiet tick; undefined without a running pulse poll
+   */
+  wake: (() => void) | undefined;
   store: Promise<DeckStore> | undefined;
   /** the client streams subscribed on this instance; the poll runs while there is one */
   listeners: number;
@@ -296,6 +302,7 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
         lastSeq: -1,
         ownClients: new Map(),
         watching: undefined,
+        wake: undefined,
         store: undefined,
         listeners: 0,
         commits: 0,
@@ -507,17 +514,52 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
       const ownRows = roster.filter((row) => own(row.clientId)).length;
       const otherRows = roster.length - ownRows;
       // company: a row of another instance's tab, a second row of this instance's tabs, or a
-      // second stream open here (a stream whose tab has not pushed its row yet counts as well)
+      // second stream open here (a stream whose tab has not pushed its row yet counts as well).
+      // A roster that is not a reading of the record yet (the record's body could not be read,
+      // presence-store.ts readRemote) never counts the tab alone: the active tick holds until
+      // a read proves it (the features round, ship one: a fresh viewer's instance read an empty
+      // roster at its first tick and waited a quiet tick for the editor's first word)
       return pollTickMs({
         now: t,
         lastOpAt: state.lastOpAt,
         others: otherRows + Math.max(0, ownRows - 1, state.listeners - 1),
         activeMs: pollMs,
         quietMs: quietPollMs,
+        rosterKnown: shared.presence.proven(deckId),
       });
     };
     let stopped = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    /** when the armed timer fires, in the clock's ms; +Infinity while a tick runs (it arms the next one itself) */
+    let dueAt = Number.POSITIVE_INFINITY;
+    const arm = (wait: number): void => {
+      if (timer !== undefined) clearTimeout(timer);
+      dueAt = now() + wait;
+      timer = setTimeout(() => {
+        timer = undefined;
+        dueAt = Number.POSITIVE_INFINITY;
+        void tick();
+      }, wait);
+      timer.unref?.();
+    };
+    /**
+     * A stream opened while this poll runs (`subscribe`): one read of the record now, the one
+     * extra store call of a stream open, then the tick re-armed from the fresh roster when it
+     * is sooner than the armed one. The new stream is company (`nextTickMs` counts the open
+     * streams), so a poll at the quiet pace returns to the active pace at once instead of at
+     * its next quiet tick, up to 10 s away (the features round, ship one: a viewer joining an
+     * editor's deck read the first word past the 5 s bound on the preview). A tick in flight
+     * arms the next wait from the same fresh roster itself. Nothing periodic is added.
+     */
+    state.wake = (): void => {
+      if (stopped) return;
+      void (async () => {
+        await shared.presence.poll(deckId);
+        if (stopped || dueAt === Number.POSITIVE_INFINITY) return;
+        const wait = await nextTickMs();
+        if (now() + wait < dueAt) arm(wait);
+      })().catch((error: unknown) => onError(error, `blob: waking the poll of ${deckId} failed`));
+    };
     state.comments = shared.watchComments?.(deckId, (change) => {
       // a moved comments index becomes the checkpoint frame with `comments` the memory tier's
       // checkpointer sends, at the revision this instance announced last, so every tab reads
@@ -589,13 +631,13 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
         onError(error, `blob: polling ${deckId} failed`);
       }
       if (stopped) return;
-      timer = setTimeout(() => void tick(), wait);
-      timer.unref?.();
+      arm(wait);
     };
     void tick();
     return () => {
       stopped = true;
       if (timer !== undefined) clearTimeout(timer);
+      state.wake = undefined;
       state.comments?.stop();
       state.comments = undefined;
     };
@@ -759,6 +801,12 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
             : startPulsePoll(deckId, deps.shared);
         });
         state.watching.catch((error: unknown) => onError(error, `blob: watching ${deckId} failed`));
+      } else if (deps.shared !== undefined) {
+        // a stream opened while the pulse poll runs: the roster is read once now and the tick
+        // re-armed at the active pace, this stream being company, instead of at the running
+        // poll's next tick, up to 10 s away when the tab before it was alone (startPulsePoll
+        // `wake`; the features round, ship one)
+        void state.watching.then(() => state.wake?.()).catch(() => undefined);
       }
       let released = false;
       return () => {

@@ -57,13 +57,21 @@ export type PollTickInput = {
   quietMs?: number;
   /** the window an op keeps the deck in use for; POLL_ACTIVE_WINDOW_MS by default */
   activeWindowMs?: number;
+  /**
+   * whether `others` is a reading of the record: a proven read of the presence record, or of its
+   * absence (presence-store.ts `proven`). False before the first read and while the record's
+   * body cannot be read (the public store's edge on a just written record answers 403 for a
+   * while, and the read used to count as an empty record): a tab whose company is unknown is
+   * never counted alone. Absent, the roster is taken as read.
+   */
+  rosterKnown?: boolean;
 };
 
 /**
  * The wait before the next poll of one deck on one instance (docs/SYNC.md 3.10): the active tick
- * while an op landed here inside the window or the deck has company (`others`: another
- * instance's row, a second own row, or a second stream on this instance), the quiet tick
- * otherwise. Both stay under
+ * while an op landed here inside the window, the deck has company (`others`: another
+ * instance's row, a second own row, or a second stream on this instance) or the roster is not
+ * known yet (`rosterKnown` false), the quiet tick otherwise. Both stay under
  * POLL_CALLS_PER_MINUTE_MAX, one call per tick (pulse.test.ts pins the arithmetic).
  */
 export function pollTickMs(input: PollTickInput): number {
@@ -73,7 +81,8 @@ export function pollTickMs(input: PollTickInput): number {
   const lastOpAt = input.lastOpAt ?? 0;
   const inUse = lastOpAt > 0 && input.now - lastOpAt < windowMs;
   const company = input.others > 0;
-  return inUse || company ? activeMs : Math.max(activeMs, quietMs);
+  const unknown = input.rosterKnown === false;
+  return inUse || company || unknown ? activeMs : Math.max(activeMs, quietMs);
 }
 
 export const PULSE_FILE = 'pulse.json';

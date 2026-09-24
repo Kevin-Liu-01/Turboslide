@@ -42,3 +42,31 @@ export function acknowledgeAnswered(known: number, answered: unknown): number {
     ? answered
     : known;
 }
+
+/**
+ * How long a tab waits for the channel to bring back its own server side write before it reloads
+ * on the blob tier. The write (asset.add, asset.dither, material.capture, logo.insert, slide.import;
+ * the assist's Accept through its route) commits on whichever instance answered the POST, and the
+ * instance holding this tab's stream learns of a commit made elsewhere at its pulse tick: 2 s
+ * while the deck is in use there, 10 s when the tab is alone (store/pulse.ts). A commit made on
+ * the tab's own instance reaches the stream within milliseconds, inside this wait, and costs no
+ * reload; past it the tab reloads at once (room.resync) instead of sitting on the tick (the
+ * features round, ship one: assist.rewrite.card-accept-undo read the accepted body 7 s after the
+ * route answered, behind a 5 s wait for the entry, on the preview). Under a second, never 5 s.
+ */
+export const OWN_WRITE_STREAM_WAIT_MS = 250;
+/** The most a tab waits for its own server side write to land before it answers anyway. */
+export const OWN_WRITE_LANDED_MAX_MS = 15_000;
+
+/**
+ * Whether the tab reloads now for its own server side write: the entry has not landed, the room
+ * runs on the blob tier (the memory tier's follower streams the write within milliseconds, and a
+ * reload there is a read for nothing) and the short wait has run out.
+ */
+export function resyncsForOwnWrite(input: {
+  landed: boolean;
+  tier: string | undefined;
+  waitedMs: number;
+}): boolean {
+  return !input.landed && input.tier === 'blob' && input.waitedMs >= OWN_WRITE_STREAM_WAIT_MS;
+}

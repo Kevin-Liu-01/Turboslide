@@ -17,7 +17,7 @@ import { openBlobStore, pushDeckDir } from '@turboslide/store/blob-store';
 import { applyAndPush, localIndexEtag, watchSidecarIndex } from '@turboslide/store/comments-store';
 import { openFileStore } from '@turboslide/store/file-store';
 import type { FileStore } from '@turboslide/store/file-store';
-import { sharedPresence } from '@turboslide/store/presence-store';
+import { presenceCopyPath, presencePath, sharedPresence } from '@turboslide/store/presence-store';
 import { RECORD_ORIGIN_WRITES } from '@turboslide/store/versions';
 import {
   HOSTED_POLL_MS,
@@ -272,9 +272,18 @@ describe('blobChannel', () => {
       await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
       const client = options.client === undefined ? fake : options.client(fake);
       const errors: string[] = [];
+      /** the shared presence behind each instance's channel, for the reads the channel does not expose */
+      const shared = new Map<string, ReturnType<typeof sharedPresence<RosterEntry>>>();
       const instance = (name: string) => {
         const mirror = join(root, name, 'decks', 'gt-brand');
-        const channel = blobChannel({
+        const presence = sharedPresence<RosterEntry>({
+          client,
+          publish: (deckId, event) => void channel.publish(deckId, event),
+          pushSpacingMs: 0,
+          proven,
+        });
+        shared.set(name, presence);
+        const channel: ReturnType<typeof blobChannel> = blobChannel({
           open: async () =>
             openBlobStore({
               client,
@@ -285,12 +294,7 @@ describe('blobChannel', () => {
             }),
           minWriteSpacingMs: 0,
           shared: {
-            presence: sharedPresence<RosterEntry>({
-              client,
-              publish: (deckId, event) => void channel.publish(deckId, event),
-              pushSpacingMs: 0,
-              proven,
-            }),
+            presence,
             pulse: (deckId) => headPulse(client, deckId),
             watchComments: (deckId, onChange) =>
               watchSidecarIndex(client, deckId, onChange, {
@@ -310,7 +314,8 @@ describe('blobChannel', () => {
       };
       const calls = (op?: string): number =>
         fake.calls.filter((call) => op === undefined || call.op === op).length;
-      return { fake, instance, errors, calls };
+      const presenceOf = (name: string) => shared.get(name)!;
+      return { fake, instance, errors, calls, presenceOf };
     };
 
     it('makes one head of the pulse per tick while a stream is open, none for a passive listener, and none once the last stream closed', async () => {
@@ -471,6 +476,69 @@ describe('blobChannel', () => {
       stopOne();
       expect(errors).toEqual([]);
       await a.close();
+    });
+
+    it("reads the roster once and returns to the active pace when a second stream opens while the poll is at the quiet pace, instead of at the quiet tick (the features round, ship one: a viewer's first word)", async () => {
+      const { fake, instance, errors } = await setup({ pollMs: 20, quietPollMs: 600 });
+      const a = instance('a');
+      const pulseHeads = (): number =>
+        fake.calls.filter((call) => call.op === 'head' && call.pathname === pulsePath('gt-brand'))
+          .length;
+      const presenceHeads = (): number =>
+        fake.calls.filter(
+          (call) => call.op === 'head' && call.pathname === presencePath('gt-brand'),
+        ).length;
+      const stopOne = a.subscribe('gt-brand', () => undefined);
+      await until(() => pulseHeads() >= 1, 2000);
+      // the first tick's reads settle; alone and quiet, the next tick is up to 600 ms away
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      const before = pulseHeads();
+      const presenceBefore = presenceHeads();
+      // a second stream opens here: the record is read once at the open and the tick re-arms at
+      // 20 ms, so the next 200 ms hold several heads and not the quiet tick's none
+      const stopTwo = a.subscribe('gt-brand', () => undefined);
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      expect(pulseHeads() - before).toBeGreaterThanOrEqual(4);
+      expect(presenceHeads()).toBeGreaterThanOrEqual(presenceBefore + 1);
+      stopTwo();
+      stopOne();
+      expect(errors).toEqual([]);
+      await a.close();
+    });
+
+    it("keeps the active pace while the presence record's body cannot be read (the edge's window on a fresh record), instead of counting the tab alone on an empty read", async () => {
+      const { fake, instance, errors, presenceOf } = await setup({ pollMs: 20, quietPollMs: 600 });
+      const b = instance('b');
+      const a = instance('a');
+      // a colleague's row is in the record, written through another instance
+      await b.presence.set('gt-brand', CLIENT_B, rosterEntry(CLIENT_B, 1, 'Cobalt 118'), 120_000);
+      const version = presenceOf('b').version('gt-brand');
+      expect(version).not.toBeNull();
+      // a's first read of the record fails on the body and its copy alike, as the public store's
+      // edge answers 403 for a while after a fresh put; the head answers
+      const forbidden = (): Error => new Error('Vercel Blob: Failed to fetch blob: 403 Forbidden');
+      fake.failNextGet(presencePath('gt-brand'), forbidden());
+      fake.failNextGet(presenceCopyPath('gt-brand', version!), forbidden());
+      const pulseHeads = (): number =>
+        fake.calls.filter((call) => call.op === 'head' && call.pathname === pulsePath('gt-brand'))
+          .length;
+      const stop = a.subscribe('gt-brand', () => undefined);
+      await until(() => pulseHeads() >= 1, 2000);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      // the roster read nothing and proved nothing: the deck's company is unknown, so the tick
+      // stays at 20 ms rather than the quiet 600 ms an empty roster would read as
+      expect(presenceOf('a').proven('gt-brand')).toBe(false);
+      const before = pulseHeads();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      expect(pulseHeads() - before).toBeGreaterThanOrEqual(6);
+      // the edge serves the record: the next read proves it and lists the colleague
+      await presenceOf('a').poll('gt-brand');
+      expect(presenceOf('a').proven('gt-brand')).toBe(true);
+      expect((await a.presence.roster('gt-brand')).map((row) => row.clientId)).toContain(CLIENT_B);
+      stop();
+      expect(errors).toEqual([]);
+      await a.close();
+      await b.close();
     });
 
     it('backs the poll off when the store refuses and tells the streams, then says the store answers again', async () => {

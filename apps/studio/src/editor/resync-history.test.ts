@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { acknowledgeAnswered, resyncBroughtUnseen } from './resync-history';
+import {
+  OWN_WRITE_LANDED_MAX_MS,
+  OWN_WRITE_STREAM_WAIT_MS,
+  acknowledgeAnswered,
+  resyncBroughtUnseen,
+  resyncsForOwnWrite,
+} from './resync-history';
 
 // The rule a resync applies to the tab's undo history (build-4/hotfix-4.md section 3.7): the
 // history and its clocks stay when the reloaded document lands at or below the revision this tab
@@ -52,5 +58,36 @@ describe('acknowledgeAnswered', () => {
   it("an answer below what the tab acknowledged (a mirror's number) never lowers it", () => {
     expect(acknowledgeAnswered(12, 11)).toBe(12);
     expect(acknowledgeAnswered(12, 12)).toBe(12);
+  });
+});
+
+describe('resyncsForOwnWrite', () => {
+  it('reloads on the blob tier once the short wait for the stream ran out without the entry', () => {
+    // the assist's Accept, asset.add or logo.insert answered on another instance: the tab's
+    // stream instance would announce the record at its tick (2 s, or 10 s when the tab is
+    // alone), so the tab reloads at once instead
+    expect(
+      resyncsForOwnWrite({ landed: false, tier: 'blob', waitedMs: OWN_WRITE_STREAM_WAIT_MS }),
+    ).toBe(true);
+    expect(resyncsForOwnWrite({ landed: false, tier: 'blob', waitedMs: 1000 })).toBe(true);
+  });
+
+  it('waits while the wait runs, the stream of the same instance bringing the entry within it', () => {
+    expect(resyncsForOwnWrite({ landed: false, tier: 'blob', waitedMs: 0 })).toBe(false);
+    expect(
+      resyncsForOwnWrite({ landed: false, tier: 'blob', waitedMs: OWN_WRITE_STREAM_WAIT_MS - 1 }),
+    ).toBe(false);
+  });
+
+  it('never reloads for an entry that landed, nor on the memory tier, whose follower streams the write', () => {
+    expect(resyncsForOwnWrite({ landed: true, tier: 'blob', waitedMs: 5000 })).toBe(false);
+    expect(resyncsForOwnWrite({ landed: false, tier: 'memory', waitedMs: 5000 })).toBe(false);
+    expect(resyncsForOwnWrite({ landed: false, tier: undefined, waitedMs: 5000 })).toBe(false);
+  });
+
+  it('bounds the wait under a second and never at the 5 s the assist path waited before', () => {
+    expect(OWN_WRITE_STREAM_WAIT_MS).toBeGreaterThan(0);
+    expect(OWN_WRITE_STREAM_WAIT_MS).toBeLessThanOrEqual(1000);
+    expect(OWN_WRITE_LANDED_MAX_MS).toBeGreaterThan(OWN_WRITE_STREAM_WAIT_MS);
   });
 });

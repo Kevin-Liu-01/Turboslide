@@ -127,4 +127,25 @@ describe('the deck pulse', () => {
     expect(Math.ceil(60_000 / HOSTED_POLL_QUIET_MS)).toBeLessThanOrEqual(POLL_CALLS_PER_MINUTE_MAX);
     expect(Math.ceil(60_000 / HOSTED_POLL_QUIET_MS)).toBe(6);
   });
+
+  it('keeps the active tick while the roster is not a reading of the record yet, and goes quiet once it is (the features round, ship one)', () => {
+    const t = 1_000_000;
+    // a stream just opened on this instance and the presence record's body could not be read
+    // (the edge's window on a fresh record): the tab's company is unknown, never "alone"
+    expect(pollTickMs({ now: t, others: 0, rosterKnown: false })).toBe(HOSTED_POLL_MS);
+    expect(pollTickMs({ now: t, others: 0, rosterKnown: false, activeMs: 20, quietMs: 400 })).toBe(
+      20,
+    );
+    // a proven read of the record, or of its absence, that names nobody else: the quiet tick
+    expect(pollTickMs({ now: t, others: 0, rosterKnown: true })).toBe(HOSTED_POLL_QUIET_MS);
+    // a caller that says nothing about the reading is read as before
+    expect(pollTickMs({ now: t, others: 0 })).toBe(HOSTED_POLL_QUIET_MS);
+    // company or an op of this instance stays active whatever the reading says
+    expect(pollTickMs({ now: t, others: 1, rosterKnown: true })).toBe(HOSTED_POLL_MS);
+    expect(pollTickMs({ now: t, others: 0, lastOpAt: t - 1000, rosterKnown: true })).toBe(
+      HOSTED_POLL_MS,
+    );
+    // the unknown tick is the active one: one call per tick, under the budget
+    expect(Math.ceil(60_000 / HOSTED_POLL_MS)).toBeLessThanOrEqual(POLL_CALLS_PER_MINUTE_MAX);
+  });
 });

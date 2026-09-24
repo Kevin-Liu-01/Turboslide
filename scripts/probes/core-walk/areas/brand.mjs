@@ -366,7 +366,18 @@ export async function run(t) {
       const title = await page.evaluate(() => {
         const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
         const mark = sheet?.querySelector('.mark, [data-slot="mark"]');
-        return { mark: Boolean(mark && mark.getClientRects().length > 0) };
+        /* drawn means content in the slot, as the show read below requires: the kit's picture is
+           the img itself (render/slide.ts, renderMark), the default glyph an svg. The canvas
+           title's mark block for a kit whose mark is none is an empty div.mark-block.is-none that
+           keeps the block's box for the editor's selection and measure (render/blocks/misc.ts
+           renderMark, the fix round's R15), so a client rect alone is the placeholder, not a
+           logo (the features round, ship one: this read counted it drawn on the preview) */
+        const drawn =
+          mark !== null &&
+          mark !== undefined &&
+          mark.getClientRects().length > 0 &&
+          (mark.matches('img, svg') || mark.querySelector('img, svg') !== null);
+        return { mark: drawn };
       });
       const footer = await footerLogo();
       /* the show */

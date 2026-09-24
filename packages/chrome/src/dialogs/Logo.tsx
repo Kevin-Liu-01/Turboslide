@@ -324,8 +324,6 @@ const APPEARANCE_OF: Readonly<Record<Ground, KitAppearance>> = { paper: 'light',
 /** The results, twenty more per scroll to the end, capped by the action's limit (4.11). */
 export const PAGE = LOGO_SEARCH_DEFAULT_LIMIT;
 export const LIMIT_MAX = LOGO_SEARCH_MAX_LIMIT;
-/** The pause after the last key before the search runs; the results then draw within the row's 300 ms (7.1). */
-export const SEARCH_PAUSE_MS = 200;
 
 function twinOf(asset: Asset, appearance: KitAppearance): string {
   return 'neutral' in asset.twins ? asset.twins.neutral : asset.twins[appearance];
@@ -589,7 +587,6 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const pause = useRef(0);
   const searchSeq = useRef(0);
   const brandGroup = useRef<HTMLDivElement>(null);
   const moreSentinel = useRef<HTMLDivElement>(null);
@@ -649,42 +646,43 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
     return out;
   }, [brandPicks, recentPicks, resultPicks, showBrand, showRecent, showResults]);
 
-  /* the search: 200 ms after the last key, twenty rows, brands alone unless the switch is on */
+  /* the search runs on the keystroke: twenty rows, brands alone unless the switch is on. The
+     answers land in any order and the last query's wins (searchSeq), so a slower earlier answer
+     never draws over a later one and a cleared field drops what is in flight. The row's 300 ms
+     from the last key (7.1) is spent on the round trip alone: a 200 ms pause before the request,
+     which the dialog had until the features round's ship, spent two thirds of it before the
+     request left (logos.picker.search read the tile 338 ms after the last key on the preview) */
   useEffect(() => {
-    window.clearTimeout(pause.current);
+    const seq = (searchSeq.current += 1);
     const q = query.trim();
     if (q === '') {
       setResults(null);
       setAnswered('');
       setSearching(false);
       setFailure(null);
-      return undefined;
+      return;
     }
     setSearching(true);
-    pause.current = window.setTimeout(() => {
-      const seq = (searchSeq.current += 1);
-      searchLogos(q, { limit, collection: includeCloud ? 'all' : 'brands' })
-        .then((answer) => {
-          if (seq !== searchSeq.current) return;
-          setResults(answer.logos);
-          setAnswered(q);
-          setFacts({
-            updatedAt: answer.updatedAt,
-            ...(answer.lastError === undefined ? {} : { lastError: answer.lastError }),
-          });
-          setFailure(null);
-        })
-        .catch((err: unknown) => {
-          if (seq !== searchSeq.current) return;
-          setResults([]);
-          setAnswered(q);
-          setFailure(err instanceof Error ? err.message : String(err));
-        })
-        .finally(() => {
-          if (seq === searchSeq.current) setSearching(false);
+    searchLogos(q, { limit, collection: includeCloud ? 'all' : 'brands' })
+      .then((answer) => {
+        if (seq !== searchSeq.current) return;
+        setResults(answer.logos);
+        setAnswered(q);
+        setFacts({
+          updatedAt: answer.updatedAt,
+          ...(answer.lastError === undefined ? {} : { lastError: answer.lastError }),
         });
-    }, SEARCH_PAUSE_MS);
-    return () => window.clearTimeout(pause.current);
+        setFailure(null);
+      })
+      .catch((err: unknown) => {
+        if (seq !== searchSeq.current) return;
+        setResults([]);
+        setAnswered(q);
+        setFailure(err instanceof Error ? err.message : String(err));
+      })
+      .finally(() => {
+        if (seq === searchSeq.current) setSearching(false);
+      });
   }, [includeCloud, limit, query]);
 
   /* a new query starts at the first page */

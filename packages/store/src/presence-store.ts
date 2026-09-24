@@ -162,6 +162,13 @@ export type SharedPresence<T extends PresenceRow> = {
   flush: (deckId: string) => Promise<void>;
   /** the last version of the record this instance read or wrote, null before the first read */
   version: (deckId: string) => string | null;
+  /**
+   * whether the roster this instance holds is a reading of the record: a proven read of it or
+   * of its absence. False before the first read and while the record exists but its body could
+   * not be read (`readRemote`: the public store's edge on a just written record); the pulse poll
+   * keeps its active tick then instead of counting the tab alone (realtime/blob.ts nextTickMs)
+   */
+  proven: (deckId: string) => boolean;
   close: () => Promise<void>;
 };
 
@@ -569,7 +576,19 @@ export function sharedPresence<T extends PresenceRow>(
       copyOf: (_pathname, version) => presenceCopyPath(deckId, version),
     });
     if (got === null) {
-      d.remote = { ...emptyRemote<T>(), readAt: t, proven: true };
+      // the head named a record whose body no read answered: the public store's edge answers 403
+      // on a just written file for a while (C3S-F4; the SDK's get throws, provenGet swallows it
+      // and tries the copy and the url past the CDN, all on the same edge), so the record is
+      // there and not empty. The rows this instance holds stand, the copy is unproven so the next
+      // roster question reads again once it is stale (roster, confirm) and a push waits for a
+      // proven base (pushNow) instead of trying to create over the record, and the pulse poll
+      // keeps its active tick while the deck's company is unknown (realtime/blob.ts nextTickMs).
+      // Before this the read counted as "no record", proven: a fresh viewer's instance read an
+      // empty roster at its first tick and went quiet for 10 s while the editor's first word
+      // waited (the features round, ship one, sync.viewer.live-updates), and every announced row
+      // left this instance's roster until the next read
+      d.remote = { ...d.remote, version: null, readAt: t, proven: false };
+      d.sawRecord = true;
       return;
     }
     const parsed = parsePresenceRecord<T>(got.bytes);
@@ -851,7 +870,9 @@ export function sharedPresence<T extends PresenceRow>(
     confirm(deckId) {
       const d = decks.get(deckId);
       if (d === undefined || d.remote.readAt <= 0) return;
-      d.remote.readAt = now();
+      // a copy no read proved (the record's body could not be read, readRemote) is not
+      // confirmed: the next roster question reads it again once it is stale
+      if (d.remote.proven) d.remote.readAt = now();
       // the rows that ran out since the last read leave now, on the tick: an expiry is the
       // clock's and needs no read, and a deck whose pulse stands still (nobody writes, the
       // collaborator's tab is gone) would otherwise announce its expiries only when the pulse
@@ -865,6 +886,10 @@ export function sharedPresence<T extends PresenceRow>(
 
     version(deckId) {
       return decks.get(deckId)?.remote.version ?? null;
+    },
+
+    proven(deckId) {
+      return decks.get(deckId)?.remote.proven ?? false;
     },
 
     async close() {

@@ -479,6 +479,62 @@ describe('the shared presence roster, two instances over one Blob store', () => 
     expect(heads()).toBe(h + 1);
   });
 
+  it("keeps the rows it holds and the copy unproven when the record is there but its body cannot be read, reads again once stale and pushes nothing over it (the edge's window on a fresh record; the features round, ship one)", async () => {
+    const client = memoryBlobClient();
+    const time = fakeClock();
+    const a = instance(client, time.now, { pushSpacingMs: 60_000 });
+    const b = instance(client, time.now, { pushSpacingMs: 60_000 });
+    await a.presence.set(DECK, C1, row(C1, 1, 'Titanium 471'), TTL);
+    await b.presence.poll(DECK);
+    expect(b.presence.proven(DECK)).toBe(true);
+    expect((await b.presence.roster(DECK)).map((r) => r.clientId)).toEqual([C1]);
+    // a second row lands in the record; b's next read meets the edge's 403 on the body and on
+    // the copy alike (the SDK's get throws; provenGet swallows it), the head answering
+    time.advance(1000);
+    await a.presence.set(DECK, C2, row(C2, 1, 'Cobalt 12'), TTL);
+    await a.presence.flush(DECK);
+    const version = a.presence.version(DECK)!;
+    expect(version).not.toBe(b.presence.version(DECK));
+    const forbidden = (): Error => new Error('Vercel Blob: Failed to fetch blob: 403 Forbidden');
+    client.failNextGet(presencePath(DECK), forbidden());
+    client.failNextGet(presenceCopyPath(DECK, version), forbidden());
+    const heads = (): number => client.calls.filter((call) => call.op === 'head').length;
+    time.advance(PRESENCE_POLL_MS + 1);
+    await b.presence.poll(DECK);
+    // the record was not read as empty: C1 stands, no leave was announced, the copy is unproven
+    expect(b.presence.proven(DECK)).toBe(false);
+    expect((await b.presence.roster(DECK)).map((r) => r.clientId)).toEqual([C1]);
+    expect(b.seen.filter((e) => e.type === 'leave')).toEqual([]);
+    expect(b.errors).toEqual([]);
+    // confirm() (the pulse did not move) does not count an unproven copy as fresh: once the
+    // interval has passed the roster question reads again, and the read proves the record
+    b.presence.confirm(DECK);
+    time.advance(PRESENCE_POLL_MS + 1);
+    const h = heads();
+    expect((await b.presence.roster(DECK)).map((r) => r.clientId).sort()).toEqual([C1, C2].sort());
+    expect(heads()).toBeGreaterThan(h);
+    expect(b.presence.proven(DECK)).toBe(true);
+    expect(b.seen.filter((e) => e.type === 'presence').map((e) => e.clientId)).toEqual([C1, C2]);
+    // a push while the copy is unproven waits for a proven base instead of creating over the record
+    client.failNextGet(presencePath(DECK), forbidden());
+    client.failNextGet(presenceCopyPath(DECK, version), forbidden());
+    const recordPuts = (): number =>
+      client.calls.filter((call) => call.op === 'put' && call.pathname === presencePath(DECK))
+        .length;
+    const putsBefore = recordPuts();
+    const c = instance(client, time.now, { pushSpacingMs: 60_000 });
+    await c.presence.set(
+      DECK,
+      'cccccccccccccccccccccccccccccccc',
+      row('cccccccccccccccccccccccccccccccc', 1, 'Amber 9'),
+      TTL,
+    );
+    expect(recordPuts()).toBe(putsBefore);
+    expect(c.errors).toEqual([
+      `presence: push: ${presencePath(DECK)}: no read proved the record; the push waits`,
+    ]);
+  });
+
   it('reads the record through its immutable copy while the store serves the overwritten body stale', async () => {
     const client = memoryBlobClient();
     const time = fakeClock();

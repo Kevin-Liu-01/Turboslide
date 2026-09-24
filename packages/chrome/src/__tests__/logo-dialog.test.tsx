@@ -29,7 +29,7 @@ import { LOGO_DIALOG } from '../menus/strings';
 import { hideTooltip } from '../Tooltip';
 
 // Insert > Logo (docs/FEATURES.md 4.3, 4.4, 4.6, 4.9; the rows logos.picker.* of 7.1): the search
-// field focused, the results after the pause with the first tile preselected and Enter inserting
+// field focused, the results on the keystroke with the first tile preselected and Enter inserting
 // it through `logo.insert` and the editor's placement; the tiles' paper and ink halves drawing the
 // variant logo-model.ts's appearance rule picks; the licence row as the seller's sentence with the
 // recorded string in the tooltip; the source sentence with the date and the failure; the empty
@@ -405,7 +405,74 @@ describe('LogoDialog', () => {
     noTitles();
   });
 
-  it('lists the results after the pause with the first tile preselected, and Enter inserts it and closes', async () => {
+  it('fetches on each keystroke and draws the last query’s answer whatever order the answers land (the features round, ship one)', async () => {
+    /* a route whose answers the test releases by hand, so the order they land in is chosen */
+    const pending: { q: string | null; resolve: (answer: LogoSearchAnswer) => void }[] = [];
+    const fetcher = vi.fn(
+      (input: string | URL | Request) =>
+        new Promise((resolve) => {
+          const url =
+            typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+          pending.push({
+            q: new URL(url, 'http://localhost').searchParams.get('q'),
+            resolve: (answer) =>
+              resolve({ ok: true, status: 200, json: () => Promise.resolve(answer) }),
+          });
+        }),
+    );
+    vi.stubGlobal('fetch', fetcher);
+    const { Host } = makeHost();
+    render(
+      <Host>
+        <LogoDialog />
+      </Host>,
+    );
+    const field = control('dialog.logo.search') as HTMLInputElement;
+    fireEvent.change(field, { target: { value: 'f' } });
+    fireEvent.change(field, { target: { value: 'fi' } });
+    fireEvent.change(field, { target: { value: 'fig' } });
+    /* one request per key, none held back by a pause */
+    await waitFor(() => expect(pending.map((p) => p.q)).toEqual(['f', 'fi', 'fig']));
+    expect(control('dialog.logo.groups')?.getAttribute('data-searching')).toBe('true');
+    const answer = (logos: LogoSearchRow[]): LogoSearchAnswer => ({
+      logos,
+      updatedAt: '2026-09-20T06:39:58Z',
+      source: 'thesvg.org',
+    });
+    /* the last query answers first: its tile draws and the search is over */
+    await act(async () => {
+      pending[2]!.resolve(answer([FIGMA]));
+      await Promise.resolve();
+    });
+    await waitFor(() =>
+      expect(control('dialog.logo.groups')?.getAttribute('data-query')).toBe('fig'),
+    );
+    expect(control('dialog.logo.tile.figma')).not.toBeNull();
+    expect(control('dialog.logo.groups')?.getAttribute('data-searching')).toBeNull();
+    /* the earlier queries answer late with other rows: nothing changes */
+    await act(async () => {
+      pending[0]!.resolve(answer([VERCEL, GITHUB]));
+      pending[1]!.resolve(answer([VERCEL]));
+      await Promise.resolve();
+    });
+    expect(control('dialog.logo.groups')?.getAttribute('data-query')).toBe('fig');
+    expect(control('dialog.logo.group.results')?.getAttribute('data-rows')).toBe('1');
+    expect(control('dialog.logo.tile.vercel')).toBeNull();
+    expect(control('dialog.logo.tile.figma')).not.toBeNull();
+    /* a cleared field drops what is in flight */
+    fireEvent.change(field, { target: { value: 'v' } });
+    await waitFor(() => expect(pending).toHaveLength(4));
+    fireEvent.change(field, { target: { value: '' } });
+    await act(async () => {
+      pending[3]!.resolve(answer([VERCEL]));
+      await Promise.resolve();
+    });
+    expect(control('dialog.logo.groups')?.getAttribute('data-query')).toBe('');
+    expect(control('dialog.logo.tile.vercel')).toBeNull();
+    noTitles();
+  });
+
+  it('lists the results on the keystroke with the first tile preselected, and Enter inserts it and closes', async () => {
     const { calls } = stubRoute();
     const insertLogoAsset = vi.fn(() => Promise.resolve());
     const { Host, closeDialog, dispatch } = makeHost({

@@ -1,0 +1,133 @@
+{
+  "base": "https://turboslide-qs5ps0cte-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-24T00:55:10.696Z",
+  "ms": 83393,
+  "parked": {
+    "commit": "f1afe1e",
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 83390,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship/gate-down-run6/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "rows": 7,
+  "passed": 5,
+  "failed": 1,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "commit": "2b1d851",
+  "origin": "https://turboslide-qs5ps0cte-kl01s-projects.vercel.app",
+  "date": "2026-09-24",
+  "results": {
+    "logos.picker.recents": "passed",
+    "logos.route.mark-headers": "passed",
+    "logos.index.refresh-dry-run": "passed",
+    "logos.cache.open-licence-only": "failed",
+    "logos.agent.search-insert": "passed",
+    "logos.index.refresh-fixture": "not driven",
+    "logos.index.cached-offline": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "logos.index.refresh-fixture",
+        "feature": "logos",
+        "result": "not driven"
+      },
+      {
+        "id": "logos.cache.open-licence-only",
+        "feature": "logos",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "logos.index.refresh-fixture",
+      "parks": [
+        "insert.logo"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "logos.cache.open-licence-only",
+      "parks": [
+        "insert.logo"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "logos.picker.recents",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.route.mark-headers",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.index.refresh-dry-run",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.index.refresh-fixture",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven: the index reads down, not the ten mark fixture (TURBOSLIDE_LOGO_UPSTREAM=fixture on a preview); the unit tests apps/studio/src/server/logos.test.ts cover the 404 marking and the takedown (docs/FEATURES.md 7.3)"
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.cache.open-licence-only",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "logos.agent.search-insert",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

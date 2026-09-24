@@ -1,0 +1,154 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-24T14:40:48.867Z",
+  "deck": "untitled-20260924-xobx",
+  "shots": [
+    "production-features-one-insert-menu-1440-light.jpg",
+    "production-features-one-logo-dialog-1440-light.jpg",
+    "production-features-one-logo-inserted-1440-light.jpg",
+    "production-features-one-replace-image-logo-1440-light.jpg",
+    "production-features-one-tailor-find-logo-1440-light.jpg",
+    "production-features-one-table-caret-1440-light.jpg",
+    "production-features-one-chart-edit-data-1440-light.jpg",
+    "production-features-one-chart-grid-1440-light.jpg",
+    "production-features-one-font-dropdown-1440-light.jpg",
+    "production-features-one-more-fonts-1440-light.jpg",
+    "production-features-one-insert-menu-1440-dark.jpg",
+    "production-features-one-logo-dialog-1440-dark.jpg",
+    "production-features-one-replace-image-logo-1440-dark.jpg",
+    "production-features-one-tailor-find-logo-1440-dark.jpg",
+    "production-features-one-table-caret-1440-dark.jpg",
+    "production-features-one-chart-edit-data-1440-dark.jpg",
+    "production-features-one-chart-grid-1440-dark.jpg",
+    "production-features-one-font-dropdown-1440-dark.jpg",
+    "production-features-one-more-fonts-1440-dark.jpg"
+  ],
+  "steps": [
+    {
+      "name": "draft on /new",
+      "observed": "id untitled-20260924-xobx",
+      "at": "2026-09-24T14:40:55.477Z"
+    },
+    {
+      "name": "appearance light",
+      "observed": "data-theme light",
+      "at": "2026-09-24T14:40:55.887Z"
+    },
+    {
+      "name": "shot production-features-one-insert-menu-1440-light.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:40:56.787Z"
+    },
+    {
+      "name": "shot production-features-one-logo-dialog-1440-light.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:00.127Z"
+    },
+    {
+      "name": "shot production-features-one-logo-inserted-1440-light.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:04.442Z"
+    },
+    {
+      "name": "shot production-features-one-replace-image-logo-1440-light.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:06.093Z"
+    },
+    {
+      "name": "shot production-features-one-tailor-find-logo-1440-light.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:09.571Z"
+    },
+    {
+      "name": "table caret light",
+      "observed": "a cell is editing after one click: false",
+      "at": "2026-09-24T14:41:13.551Z"
+    },
+    {
+      "name": "shot production-features-one-table-caret-1440-light.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:13.568Z"
+    },
+    {
+      "name": "shot production-features-one-chart-edit-data-1440-light.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:16.749Z"
+    },
+    {
+      "name": "shot production-features-one-chart-grid-1440-light.jpg",
+      "observed": "clip 336 by 828",
+      "at": "2026-09-24T14:41:17.737Z"
+    },
+    {
+      "name": "shot production-features-one-font-dropdown-1440-light.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:21.132Z"
+    },
+    {
+      "name": "shot production-features-one-more-fonts-1440-light.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:22.045Z"
+    },
+    {
+      "name": "appearance dark",
+      "observed": "data-theme dark",
+      "at": "2026-09-24T14:41:24.944Z"
+    },
+    {
+      "name": "shot production-features-one-insert-menu-1440-dark.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:25.843Z"
+    },
+    {
+      "name": "shot production-features-one-logo-dialog-1440-dark.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:29.161Z"
+    },
+    {
+      "name": "shot production-features-one-replace-image-logo-1440-dark.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:30.877Z"
+    },
+    {
+      "name": "shot production-features-one-tailor-find-logo-1440-dark.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:34.296Z"
+    },
+    {
+      "name": "table caret dark",
+      "observed": "a cell is editing after one click: false",
+      "at": "2026-09-24T14:41:36.095Z"
+    },
+    {
+      "name": "shot production-features-one-table-caret-1440-dark.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:36.115Z"
+    },
+    {
+      "name": "shot production-features-one-chart-edit-data-1440-dark.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:37.575Z"
+    },
+    {
+      "name": "shot production-features-one-chart-grid-1440-dark.jpg",
+      "observed": "clip 336 by 828",
+      "at": "2026-09-24T14:41:38.577Z"
+    },
+    {
+      "name": "shot production-features-one-font-dropdown-1440-dark.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:41.584Z"
+    },
+    {
+      "name": "shot production-features-one-more-fonts-1440-dark.jpg",
+      "observed": "1440 by 900",
+      "at": "2026-09-24T14:41:42.471Z"
+    },
+    {
+      "name": "scratch deck untitled-20260924-xobx",
+      "observed": "deleted; /edit answers 404",
+      "at": "2026-09-24T14:41:46.295Z"
+    }
+  ],
+  "teardown": "deleted; /edit answers 404"
+}

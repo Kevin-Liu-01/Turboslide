@@ -1,0 +1,706 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-24T14:20:18.707Z",
+  "ms": 1047003,
+  "parked": {
+    "commit": "f1afe1e",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "tables.edge.add-row-column",
+        "parks": [
+          "handle.table.add.column",
+          "handle.table.add.row"
+        ]
+      },
+      {
+        "id": "tables.heads.select-row-column",
+        "parks": [
+          "handle.table.head.column",
+          "handle.table.head.row"
+        ]
+      },
+      {
+        "id": "tables.seam.row-drag",
+        "parks": [
+          "handle.table.row"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      },
+      {
+        "id": "wordart.tail.fill-outline",
+        "parks": [
+          "toolbar.wordart.outline"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 1047001,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-c/gate-production-specs-rerun/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "rows": 56,
+  "passed": 42,
+  "failed": 8,
+  "notDriven": 6,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "commit": "9d21394",
+  "origin": "https://turboslide.vercel.app",
+  "date": "2026-09-24",
+  "results": {
+    "templates.save.as-template": "passed",
+    "templates.save.same-name-replaces": "passed",
+    "templates.card.rename-and-delete": "failed",
+    "templates.default.use-for-new": "failed",
+    "templates.deck.read-only": "failed",
+    "brand.logo.replace-every-slide": "not driven",
+    "fonts.budget.no-load-before-ready": "not driven",
+    "fonts.inter.italic-release": "not driven",
+    "fonts.picker.specimen-rows": "not driven",
+    "fonts.picker.recent-group": "not driven",
+    "fonts.preload.italic-on-edit-only": "not driven",
+    "images.insert.first-on-new-deck": "passed",
+    "images.insert.upload": "passed",
+    "images.insert.upload-while-pending": "passed",
+    "images.insert.drop": "passed",
+    "images.insert.paste": "passed",
+    "images.replace.upload": "passed",
+    "images.replace.drop-on-picture": "failed",
+    "images.background.upload-picture": "failed",
+    "images.background.remove-picture": "passed",
+    "images.insert.centred-in-body": "passed",
+    "images.insert.instant-preview": "passed",
+    "images.insert.menu-direct": "passed",
+    "images.upload.failure-snackbar": "passed",
+    "images.insert.by-url": "passed",
+    "logos.intake.svg-sentence": "passed",
+    "share.dialog.open": "passed",
+    "share.copy-view-link": "passed",
+    "share.copy-present-link": "passed",
+    "share.copy-edit-link": "passed",
+    "share.escape": "passed",
+    "share.file-menu-copy-link": "passed",
+    "share.view-link-lands-viewer": "passed",
+    "share.edit-link-lands-editor": "passed",
+    "share.view-link-cannot-edit": "passed",
+    "share.stranger-cannot-edit": "passed",
+    "collab.edit-from-second-browser": "passed",
+    "collab.edit-from-owner": "passed",
+    "collab.slide-added-appears": "failed",
+    "collab.presence-chips": "passed",
+    "collab.rename-reaches-second-browser": "passed",
+    "share.view-link-excludes-skipped-and-notes": "passed",
+    "share.present-link-excludes-skipped": "passed",
+    "comments.reaches-second-browser": "passed",
+    "versions.restore": "passed",
+    "collab.roster.go-to-slide": "passed",
+    "view.live-pointers.second-browser": "failed",
+    "inbox.notification-arrives": "failed",
+    "share.dialog.one-link": "passed",
+    "share.dialog.slideshow-checkbox": "passed",
+    "share.dialog.you-label": "passed",
+    "share.name-prompt.first-share": "passed",
+    "share.dialog.co-edit-from-copied-link": "passed",
+    "brand.colors.collab-rerender": "passed",
+    "brand.surfaces.viewer-and-show": "passed",
+    "assist.viewer.disabled": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "images.background.upload-picture",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "images.replace.drop-on-picture",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "collab.slide-added-appears",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "brand.logo.replace-every-slide",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "fonts.budget.no-load-before-ready",
+        "feature": "fonts",
+        "result": "not driven"
+      },
+      {
+        "id": "fonts.inter.italic-release",
+        "feature": "fonts",
+        "result": "not driven"
+      },
+      {
+        "id": "fonts.picker.specimen-rows",
+        "feature": "fonts",
+        "result": "not driven"
+      },
+      {
+        "id": "fonts.picker.recent-group",
+        "feature": "fonts",
+        "result": "not driven"
+      },
+      {
+        "id": "fonts.preload.italic-on-edit-only",
+        "feature": "fonts",
+        "result": "not driven"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [
+    "inbox",
+    "brand",
+    "fonts",
+    "templates"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": [
+        "view.livePointers.mine",
+        "view.livePointers.collaborators"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "templates.card.rename-and-delete",
+      "parks": [
+        "templates.card.menu"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "templates.default.use-for-new",
+      "parks": [
+        "panel.brand.template.useForNew"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "images.background.upload-picture",
+      "feature": "images",
+      "result": "failed"
+    },
+    {
+      "id": "images.replace.drop-on-picture",
+      "feature": "images",
+      "result": "failed"
+    },
+    {
+      "id": "collab.slide-added-appears",
+      "feature": "share",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "images.insert.first-on-new-deck",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.upload",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.upload-while-pending",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.drop",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.paste",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.replace.upload",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.background.upload-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "images.background.remove-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.replace.drop-on-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "share.dialog.open",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-view-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-edit-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.escape",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.file-menu-copy-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-lands-viewer",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.edit-link-lands-editor",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.stranger-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.edit-from-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.edit-from-owner",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.slide-added-appears",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "collab.presence-chips",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.rename-reaches-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-excludes-skipped-and-notes",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.present-link-excludes-skipped",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-present-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.reaches-second-browser",
+      "feature": "comments",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.restore",
+      "feature": "versions",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "view.live-pointers.second-browser",
+      "feature": "view",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the second browser's pointer is drawn on the first within 10 s"
+    },
+    {
+      "id": "inbox.notification-arrives",
+      "feature": "inbox",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the first browser's bell shows a count of 1 within 10 s"
+    },
+    {
+      "id": "collab.roster.go-to-slide",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.one-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.slideshow-checkbox",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.you-label",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.name-prompt.first-share",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.co-edit-from-copied-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "templates.save.as-template",
+      "feature": "templates",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "templates.save.same-name-replaces",
+      "feature": "templates",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "templates.card.rename-and-delete",
+      "feature": "templates",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the card reads the new name"
+    },
+    {
+      "id": "templates.default.use-for-new",
+      "feature": "templates",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the card is marked as used for new presentations"
+    },
+    {
+      "id": "templates.deck.read-only",
+      "feature": "templates",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 30000ms exceeded."
+    },
+    {
+      "id": "images.insert.centred-in-body",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.instant-preview",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.menu-direct",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.upload.failure-snackbar",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.by-url",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.logo.replace-every-slide",
+      "feature": "brand",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "brand.colors.collab-rerender",
+      "feature": "brand",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.surfaces.viewer-and-show",
+      "feature": "brand",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.budget.no-load-before-ready",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "assist.viewer.disabled",
+      "feature": "assist",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.inter.italic-release",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "fonts.picker.specimen-rows",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "fonts.picker.recent-group",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "fonts.preload.italic-on-edit-only",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "logos.intake.svg-sentence",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

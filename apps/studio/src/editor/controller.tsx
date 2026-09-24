@@ -1165,6 +1165,17 @@ export function createEditorController(init: {
   let findingsCache: { document: DeckDocument; findings: Finding[] } | null = null;
   let room: RoomClient | null = null;
   let draftChain: Promise<unknown> = Promise.resolve();
+  /**
+   * The highest revision a server side write of this tab answered (asset.add and the rest, the
+   * assist's Accept, slide.import): a resync that lands at or below it brought the tab's own write
+   * and nothing unseen, so `onResync` keeps the undo history and shows no banner (the features
+   * round, ship one; `settleOwnWrite` sets it before it resyncs). It only ever advances, so a
+   * later external write at a higher revision still shows the banner. Folded into the resync's
+   * `resyncBroughtUnseen` check instead of published as `serverRevision`, so the reported revision
+   * moves with the document, not ahead of it (assist.rewrite.card-accept-undo read the body
+   * unchanged after the revision moved on the preview).
+   */
+  let ownAnsweredRevision = 0;
   /* the typing group (SPEC 7.2.15): consecutive bursts on one Text inside 400 ms are one Cmd Z */
   let lastTyping: { entryId: number; key: string; at: number } | null = null;
   let versionsTimer: ReturnType<typeof setTimeout> | undefined;
@@ -1947,7 +1958,10 @@ export function createEditorController(init: {
         // mirror, is re-sent after it): the history and its clocks stay and no banner names the
         // tab's own write as external. One that lands above it brought entries the tab never
         // applied, past which no history entry can be transformed (build-4/hotfix-4.md 3.7)
-        if (resyncBroughtUnseen(fresh, latest().serverRevision)) {
+        // a reload at or below a revision a server side write of this tab answered brought the
+        // tab's own write, not another writer's, so the history stays and no banner shows
+        // (ownAnsweredRevision; the features round, ship one)
+        if (resyncBroughtUnseen(fresh, Math.max(latest().serverRevision, ownAnsweredRevision))) {
           history.clear();
           clockOf.clear();
           burstsOf.clear();
@@ -3002,15 +3016,21 @@ export function createEditorController(init: {
    * comes back over the channel, and on the blob tier the record may have committed on another
    * instance, whose tick this tab's stream instance reads at the two paced cadence (2 s, 10 s
    * when the tab is alone; store/pulse.ts). So the tab waits OWN_WRITE_STREAM_WAIT_MS for the
-   * stream (a commit on its own instance arrives within it), then counts the answered revision as
-   * acknowledged (acknowledgeAnswered: a reload landing at it brings nothing unseen, so onResync
-   * keeps the undo history and shows no banner naming the tab's own write as external, while one
-   * landing above it still brought another writer's entries) and reloads at once (room.resync)
-   * instead of sitting on the tick (resync-history.ts resyncsForOwnWrite; b3.md R21 for the
-   * pictures; the features round, ship one for the assist's Accept, which sat on a 5 s wait while
-   * the record reached the stream 7 s after the route answered). The memory tier's follower
-   * streams the write within milliseconds and a reload there would clear nothing but cost a read,
-   * so it keeps the wait alone. Then waits for the entry up to OWN_WRITE_LANDED_MAX_MS.
+   * stream (a commit on its own instance arrives within it), then resyncs at once past the wait
+   * (resync-history.ts resyncsForOwnWrite; b3.md R21 for the pictures; the features round, ship
+   * one for the assist's Accept, which sat on a 5 s wait while the record reached the stream 7 s
+   * after the route answered) instead of sitting on the tick. The resync carries the answered
+   * revision (`atLeast`, write.ts liveAtLeast), so the read force syncs the store to at least it
+   * and the reload brings the write itself, not a mirror behind it. The revision is folded into
+   * ownAnsweredRevision before the resync, so onResync keeps the undo history and shows no banner
+   * naming the tab's own write as external, but it is never published as serverRevision ahead of
+   * the reload: the reported revision moves with the document, so a driver that reads the revision
+   * then the body reads them consistent (the assist accept read the body unchanged after the
+   * revision moved when the revision was published early; the features round, ship one). An answer
+   * without a revision (asset.add) resyncs with no bound and its banner stays Kevin's list (4.6).
+   * The memory tier's follower streams the write within milliseconds and a reload there would
+   * clear nothing but cost a read, so it keeps the wait alone. Then waits for the entry up to
+   * OWN_WRITE_LANDED_MAX_MS.
    */
   const settleOwnWrite = async (revision: unknown, landed: () => boolean): Promise<void> => {
     const started = Date.now();
@@ -3021,9 +3041,9 @@ export function createEditorController(init: {
       client !== null &&
       resyncsForOwnWrite({ landed: landed(), tier, waitedMs: Date.now() - started })
     ) {
-      const acknowledged = acknowledgeAnswered(latest().serverRevision, revision);
-      if (acknowledged !== latest().serverRevision) publish({ serverRevision: acknowledged });
-      await client.resync().catch(() => undefined);
+      ownAnsweredRevision = acknowledgeAnswered(ownAnsweredRevision, revision);
+      const at = typeof revision === 'number' && Number.isFinite(revision) ? revision : undefined;
+      await client.resync(at).catch(() => undefined);
     }
     const until = started + OWN_WRITE_LANDED_MAX_MS;
     while (!landed() && Date.now() < until) await sleep(40);

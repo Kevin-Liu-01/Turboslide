@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { inflateRawSync } from 'node:zlib';
+import { deflateSync, inflateRawSync, inflateSync } from 'node:zlib';
 
 import { expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Download, Locator, Page } from '@playwright/test';
@@ -109,6 +109,8 @@ export type EditorState = {
     loaded?: boolean;
   };
   view?: { present: boolean };
+  /** the deck's asset records as the document holds them (the features round; `assetRecords` reads them) */
+  assets?: Record<string, unknown>;
 };
 
 export async function state(page: Page): Promise<EditorState> {
@@ -961,4 +963,690 @@ export async function windowActions(page: Page): Promise<Set<string>> {
 export function pngSize(bytes: Buffer): { width: number; height: number } | null {
   if (bytes.length < 24 || bytes.toString('latin1', 1, 4) !== 'PNG') return null;
   return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
+}
+
+// ---------------------------------------------------------------------------------------------
+// the shader library (the features round, ship two; docs/FEATURES.md section 5, 7.1): the shader
+// block on a slide, its frame asset, the Shader section's sliders, the stage's canvases and the
+// pixel samples the frame rows compare. Every read goes through the page; a PNG or a JPEG the
+// spec holds as bytes is decoded by the page's own canvas, so no image library is needed here.
+
+/** An asset record of the deck, as `describe().state.assets` holds it (the integrator, ship one). */
+export type AssetRecord = {
+  id: string;
+  role?: string;
+  twins?: { light?: string; dark?: string; neutral?: string };
+  source?: Record<string, unknown> & { kind?: string; frameKey?: string; backend?: string };
+  [key: string]: unknown;
+};
+
+/** The deck's asset records by id (`describe().state.assets`), or an empty record. */
+export async function assetRecords(page: Page): Promise<Record<string, AssetRecord>> {
+  const raw = await page.evaluate(
+    () =>
+      (window.turboslide!.studio.describe().state as unknown as { assets?: unknown }).assets ??
+      null,
+  );
+  if (raw === null || typeof raw !== 'object') return {};
+  if (Array.isArray(raw))
+    return Object.fromEntries((raw as AssetRecord[]).map((a) => [a.id, a] as const));
+  return raw as Record<string, AssetRecord>;
+}
+
+/** The material (shader) blocks of a slide. */
+export async function shaderBlocks(page: Page, slideId: string) {
+  return (await objectsOf(page, slideId)).filter((o) => o.type === 'material');
+}
+
+/** The assets of the deck whose source is a shader frame (`source.kind: 'material'`). */
+export async function frameAssets(page: Page): Promise<AssetRecord[]> {
+  return Object.values(await assetRecords(page)).filter((a) => a.source?.kind === 'material');
+}
+
+/**
+ * Opens Insert > Shader (the switch on when the row is parked); answers whether the gallery is
+ * drawn. A build whose Insert menu still lists Material answers `open: false` with `material: true`.
+ */
+export async function openShaderGallery(
+  page: Page,
+): Promise<{ open: boolean; switched: boolean; material: boolean }> {
+  const present = async (): Promise<'shader' | 'material' | null> => {
+    await ctl(page, 'menubar.insert').click();
+    await page.locator('#ts-menu-insert').waitFor({ timeout: 8000 });
+    const shader = await ctl(page, 'menu.insert.shader')
+      .isVisible()
+      .catch(() => false);
+    if (!shader) {
+      const material = await ctl(page, 'menu.insert.material')
+        .isVisible()
+        .catch(() => false);
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(150);
+      return material ? 'material' : null;
+    }
+    await ctl(page, 'menu.insert.shader').click();
+    return ctl(page, 'dialog.shader')
+      .waitFor({ timeout: 8000 })
+      .then(() => 'shader' as const)
+      .catch(() => null);
+  };
+  let got = await present();
+  if (got === 'shader') return { open: true, switched: false, material: false };
+  let switched = false;
+  if (got !== 'material' && (await state(page)).settings?.['advancedTools'] !== true) {
+    await menuPath(page, 'tools', 'tools.advancedTools');
+    await page.waitForTimeout(300);
+    switched = true;
+    got = await present();
+    if (got !== 'shader')
+      await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
+  }
+  return {
+    open: got === 'shader',
+    switched: got === 'shader' && switched,
+    material: got === 'material',
+  };
+}
+
+/** The gallery's top level cards: their control id, material, title and thumbnail state. */
+export async function shaderCards(
+  page: Page,
+): Promise<{ id: string; material: string | null; title: string; thumb: boolean }[]> {
+  return page.evaluate(() => {
+    const sel =
+      '[data-control^="dialog.shader.tile."], [data-control^="dialog.shader.card."], [data-control^="dialog.shader.pick."]';
+    const all = [...document.querySelectorAll(sel)].filter((e) => e.getClientRects().length > 0);
+    return all
+      .filter((e) => e.parentElement?.closest(sel) === null)
+      .map((e) => {
+        const img = e.querySelector('img');
+        return {
+          id: e.getAttribute('data-control') ?? '',
+          material: e.getAttribute('data-material') ?? e.getAttribute('data-id'),
+          title: (e.getAttribute('aria-label') ?? e.textContent ?? '').trim().slice(0, 60),
+          thumb: img ? img.complete && img.naturalWidth > 0 : false,
+        };
+      });
+  });
+}
+
+/**
+ * A shader block on a slide, the seller's way first: Insert > Shader and a click on Liquid metal
+ * when the gallery is on the build; else `shader.insert` on the window transport; else a
+ * `block.insert` of a material block (a setup write). Answers the block id and the way it landed.
+ */
+export async function ensureShader(
+  page: Page,
+  slideId: string,
+  options: {
+    materialId?: string;
+    preset?: string;
+    pos?: { x: number; y: number; w: number; h: number };
+  } = {},
+): Promise<{ id: string; how: string; block: Record<string, unknown> }> {
+  const materialId = options.materialId ?? 'paper:liquid-metal';
+  await clickCard(page, slideId);
+  const before = (await shaderBlocks(page, slideId)).map((o) => o.id);
+  const landed = async (how: string) => {
+    let found: { id: string; block: Record<string, unknown> } | null = null;
+    await expect
+      .poll(
+        async () => {
+          const list = (await shaderBlocks(page, slideId)).filter((o) => !before.includes(o.id));
+          found = list[0] ?? null;
+          return list.length;
+        },
+        { timeout: 20_000 },
+      )
+      .toBeGreaterThan(0);
+    await settled(page);
+    return { id: found!.id, how, block: found!.block };
+  };
+  const gallery = await openShaderGallery(page);
+  if (gallery.open) {
+    const cards = await shaderCards(page);
+    const want = new RegExp(materialId.replace(/^paper:/, '').replace(/-/g, '[ -]?'), 'i');
+    const card = cards.find((c) => want.test(c.title) || c.material === materialId) ?? cards[0];
+    if (card) {
+      await ctl(page, card.id).click();
+      const out = await landed(`Insert > Shader, the card ${card.title}`);
+      await expect(ctl(page, 'dialog.shader')).toHaveCount(0, { timeout: 10_000 });
+      if (gallery.switched)
+        await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
+      return out;
+    }
+    await page.keyboard.press('Escape');
+  }
+  const actions = await windowActions(page);
+  if (actions.has('shader.insert')) {
+    try {
+      const s = await settled(page);
+      await invoke(
+        page,
+        'shader.insert',
+        {
+          slideId,
+          materialId,
+          ...(options.preset ? { preset: options.preset } : {}),
+          baseRevision: s.revision,
+        },
+        60_000,
+      );
+      return await landed('shader.insert on the window transport');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!/NotImplemented|not implemented|lands in P1|unknown action/i.test(message)) throw error;
+    }
+  }
+  const s = await settled(page);
+  const id = `shader-${Date.now().toString(36)}`;
+  await invoke(page, 'block.insert', {
+    baseRevision: s.revision,
+    slideId,
+    slot: 'main',
+    block: {
+      id,
+      type: 'material',
+      materialId,
+      ...(options.preset
+        ? { preset: options.preset }
+        : materialId === 'paper:liquid-metal'
+          ? { preset: 'diamond' }
+          : {}),
+      alt: `The ${materialId.replace(/^paper:/, '').replace(/-/g, ' ')} shader`,
+      pos: options.pos ?? { x: 560, y: 400, w: 480, h: 272, z: 1 },
+    },
+  });
+  return landed('block.insert of a material block through the window API');
+}
+
+/** The block's frame asset id once it names one other than `not`, or null after `timeout`. */
+export async function waitFrame(
+  page: Page,
+  slideId: string,
+  blockId: string,
+  { not = null, timeout = 15_000 }: { not?: string | null; timeout?: number } = {},
+): Promise<{ asset: string | null; ms: number }> {
+  const t0 = Date.now();
+  const until = t0 + timeout;
+  for (;;) {
+    const block = (await shaderBlocks(page, slideId)).find((o) => o.id === blockId)?.block ?? null;
+    const asset = (block?.['asset'] as string | undefined) ?? null;
+    if (asset !== null && asset !== not) return { asset, ms: Date.now() - t0 };
+    if (Date.now() > until) return { asset: null, ms: Date.now() - t0 };
+    await page.waitForTimeout(200);
+  }
+}
+
+/**
+ * The frame the agent's route makes when the client's capture did not come (FEATURES.md 5.5: the
+ * hosted job is the fallback): `shader.capture` when the transport carries it, else
+ * `material.capture` at the block's anchor with the asset written into the block. Answers the
+ * asset id or null, with the way it was made.
+ */
+export async function captureFallback(
+  page: Page,
+  slideId: string,
+  blockId: string,
+): Promise<{ asset: string | null; how: string }> {
+  const block = (await shaderBlocks(page, slideId)).find((o) => o.id === blockId)?.block ?? null;
+  if (!block) return { asset: null, how: 'no block' };
+  const actions = await windowActions(page);
+  const s = await settled(page);
+  if (actions.has('shader.capture')) {
+    try {
+      await invoke(page, 'shader.capture', { slideId, blockId, baseRevision: s.revision }, 120_000);
+      const got = await waitFrame(page, slideId, blockId, { timeout: 10_000 });
+      return { asset: got.asset, how: 'shader.capture' };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!/NotImplemented|not implemented|lands in P1/i.test(message))
+        return { asset: null, how: `shader.capture refused: ${message.split('\n')[0]}` };
+    }
+  }
+  if (!actions.has('material.capture')) return { asset: null, how: 'no capture action' };
+  try {
+    const made = (await invoke(
+      page,
+      'material.capture',
+      {
+        materialId: block['materialId'],
+        ...(block['preset'] ? { preset: block['preset'] } : {}),
+        ...(block['uniforms'] ? { uniforms: block['uniforms'] } : {}),
+        anchors: [(block['anchor'] as number | undefined) ?? 5500],
+        id: `${blockId}-frame`,
+        role: 'frame',
+        alt: block['alt'],
+        baseRevision: s.revision,
+      },
+      180_000,
+    )) as { id?: string } | { id?: string }[];
+    const asset = Array.isArray(made) ? (made[0]?.id ?? null) : (made?.id ?? null);
+    if (asset === null) return { asset: null, how: 'material.capture answered no asset' };
+    const s2 = await settled(page);
+    await invoke(page, 'block.set', {
+      slideId,
+      blockId,
+      path: '/asset',
+      value: asset,
+      baseRevision: s2.revision,
+    });
+    await settled(page);
+    return { asset, how: 'material.capture and block.set /asset' };
+  } catch (error) {
+    return {
+      asset: null,
+      how: `material.capture refused: ${(error instanceof Error ? error.message : String(error)).split('\n')[0]}`,
+    };
+  }
+}
+
+/** The stage scale: CSS px per sheet px. */
+export async function sheetScale(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+    return sheet ? sheet.getBoundingClientRect().width / 1600 : 0;
+  });
+}
+
+/** The viewport box of a block's drawing on the stage, or null. */
+export async function blockRect(
+  page: Page,
+  blockId: string,
+): Promise<{ x: number; y: number; width: number; height: number } | null> {
+  return page.evaluate((id) => {
+    const inner = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`);
+    if (!inner) return null;
+    const el = inner.closest('.free') ?? inner;
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  }, blockId);
+}
+
+/**
+ * Resizes a selected block by one of its handles (`handle.<id>.resize.<dir>`) with a real drag of
+ * `dx`, `dy` CSS px; answers whether the handle was drawn (a build without it leaves the block as
+ * it was and the caller falls back to a write).
+ */
+export async function resizeByHandle(
+  page: Page,
+  blockId: string,
+  dir: 'se' | 'e' | 's' | 'ne' | 'nw' | 'sw' | 'n' | 'w',
+  dx: number,
+  dy: number,
+): Promise<boolean> {
+  await selectBlock(page, blockId);
+  const handle = page
+    .locator(`.ts-overlay [data-control="handle.${blockId}.resize.${dir}"]`)
+    .first();
+  if ((await handle.count()) === 0) return false;
+  const r = await handle.boundingBox();
+  if (!r) return false;
+  const from = { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  await page.mouse.move(from.x - 20, from.y - 12);
+  await page.mouse.move(from.x, from.y, { steps: 4 });
+  await page.mouse.down();
+  await page.waitForTimeout(80);
+  const steps = 14;
+  for (let i = 1; i <= steps; i += 1) {
+    await page.mouse.move(from.x + (dx * i) / steps, from.y + (dy * i) / steps);
+    await page.waitForTimeout(16);
+  }
+  await page.waitForTimeout(120);
+  await page.mouse.up();
+  await page.waitForTimeout(200);
+  await settled(page);
+  return true;
+}
+
+/**
+ * Selects a shader block and opens Format options at its Shader section; false when the section
+ * is not on the build (FEATURES.md 5.3, B5's `inspector/shader.tsx`).
+ */
+export async function openShaderSection(page: Page, blockId: string): Promise<boolean> {
+  await selectBlock(page, blockId);
+  if ((await ctl(page, 'panel.formatOptions').count()) === 0) {
+    if ((await ctl(page, 'toolbar.formatOptions').count()) > 0)
+      await ctl(page, 'toolbar.formatOptions').click();
+    else await menuPath(page, 'format', 'format.formatOptions').catch(() => undefined);
+    await ctl(page, 'panel.formatOptions')
+      .waitFor({ timeout: 8000 })
+      .catch(() => undefined);
+  }
+  /* the section's root: FormatOptions' section (data-section) or B5's own root (.ts-shader with
+     the section's id, inspector/shader.tsx); a collapsed section head is opened */
+  const section = page.locator(SHADER_SECTION_ROOT).first();
+  if ((await section.count()) === 0) return false;
+  const head = page
+    .locator('[data-section="shader"] > [data-control="formatOptions.shader"]')
+    .first();
+  if (
+    (await head.count()) > 0 &&
+    (await head.getAttribute('aria-expanded').catch(() => null)) === 'false'
+  ) {
+    await head.click();
+    await page.waitForTimeout(250);
+  }
+  await section.scrollIntoViewIfNeeded().catch(() => undefined);
+  return true;
+}
+/** The Shader section's root selector (lib.ts and the walk agree). */
+export const SHADER_SECTION_ROOT =
+  '[data-section="shader"], .ts-shader[data-control="formatOptions.shader"]';
+
+/** The headings of the Shader section's groups, in order, as the seller reads them. */
+export async function shaderGroupHeadings(page: Page): Promise<string[]> {
+  return page.evaluate((rootSelector) => {
+    const section = document.querySelector(rootSelector);
+    if (!section) return [];
+    const out: string[] = [];
+    /* the Shader group of 5.3 (the thumbnail, the name, Change) is the section's head: the
+       FormatOptions head's word, or B5's head block (inspector/shader.tsx .ts-shader-head) */
+    const head = section.querySelector('.ts-panel-section-head span');
+    if (head) out.push((head.textContent ?? '').replace(/\s+/g, ' ').trim());
+    else if (section.querySelector('.ts-shader-head')) out.push('Shader');
+    const nodes = [
+      ...section.querySelectorAll(
+        '.ts-shader-group-title, [data-group-title], [data-group] > :first-child, .ts-fo-group-title, .ts-fo-group > summary, .ts-fo-group > h3, .ts-fo-group > h4, h3, h4, legend, summary',
+      ),
+    ].filter((e) => e.getClientRects().length > 0);
+    for (const node of nodes) {
+      const group = node.closest('[data-group]');
+      const text =
+        group?.getAttribute('data-group-title') ??
+        node.getAttribute('data-group-title') ??
+        (node.textContent ?? '').replace(/\s+/g, ' ').trim();
+      if (text && !out.includes(text)) out.push(text);
+    }
+    return out;
+  }, SHADER_SECTION_ROOT);
+}
+
+/** A slider's facts: the range input under the control, its bounds and value, and its number field. */
+export async function sliderFacts(
+  page: Page,
+  control: string,
+): Promise<{
+  range: boolean;
+  number: boolean;
+  value: number | null;
+  min: number;
+  max: number;
+  step: number;
+} | null> {
+  return page.evaluate((c) => {
+    const el = document.querySelector(`[data-control="${c}"]`);
+    if (!el) return null;
+    /* B5's slider: the range is `<control>.slider` beside the number field `<control>` */
+    const beside = document.querySelector<HTMLInputElement>(
+      `input[type="range"][data-control="${c}.slider"]`,
+    );
+    const range =
+      beside ??
+      (el instanceof HTMLInputElement && el.type === 'range'
+        ? el
+        : el.querySelector<HTMLInputElement>('input[type="range"]'));
+    const number =
+      el instanceof HTMLInputElement && el.type === 'number'
+        ? el
+        : (el.querySelector<HTMLInputElement>('input[type="number"]') ??
+          el.parentElement?.querySelector<HTMLInputElement>('input[type="number"]') ??
+          null);
+    return {
+      range: range !== null,
+      number: number !== null,
+      value: range ? Number(range.value) : number ? Number(number.value) : null,
+      min: Number(range?.min ?? number?.min ?? 0),
+      max: Number(range?.max ?? number?.max ?? 100),
+      step: Number(range?.step ?? number?.step ?? 1),
+    };
+  }, control);
+}
+
+/**
+ * Sets a Shader section slider to a value the way a seller does, through its number field (fill
+ * and Enter, one commit); with no number field the range is focused and stepped with the arrow
+ * keys (Shift steps ten). Answers the value the control reads after.
+ */
+export async function setSliderNumber(
+  page: Page,
+  control: string,
+  value: number,
+): Promise<number | null> {
+  const root = ctl(page, control);
+  const own = (await root.getAttribute('type').catch(() => null)) === 'number';
+  let field = own ? root : root.locator('input[type="number"]').first();
+  if (!own && (await field.count()) === 0)
+    field = root.locator('xpath=..').locator('input[type="number"]').first();
+  if ((await field.count()) > 0) {
+    await field.click();
+    await page.keyboard.press('Meta+a');
+    await page.keyboard.type(String(value), { delay: 30 });
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(200);
+    await settled(page);
+    return (await sliderFacts(page, control))?.value ?? null;
+  }
+  const facts = await sliderFacts(page, control);
+  if (!facts || !facts.range) return null;
+  const beside = page.locator(`input[type="range"][data-control="${control}.slider"]`).first();
+  const range =
+    (await beside.count()) > 0
+      ? beside
+      : (await root.getAttribute('type').catch(() => null)) === 'range'
+        ? root
+        : root.locator('input[type="range"]').first();
+  await range.focus();
+  const steps = Math.round((value - (facts.value ?? 0)) / facts.step);
+  const key = steps > 0 ? 'ArrowRight' : 'ArrowLeft';
+  let left = Math.abs(steps);
+  while (left >= 10) {
+    await page.keyboard.press(`Shift+${key}`);
+    left -= 10;
+  }
+  for (let i = 0; i < left; i += 1) await page.keyboard.press(key);
+  await page.waitForTimeout(200);
+  await settled(page);
+  return (await sliderFacts(page, control))?.value ?? null;
+}
+
+/** The canvases of the stage: per recipe root with its frame img, and the page's total. */
+export async function stageCanvases(page: Page): Promise<{
+  roots: { block: string | null; canvas: number; img: boolean; imgDecoded: boolean }[];
+  stage: number;
+  page: number;
+}> {
+  return page.evaluate(() => {
+    const stage = '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)';
+    const roots = [...document.querySelectorAll(`${stage} [data-recipe]`)];
+    return {
+      roots: roots.map((r) => {
+        const img = r.querySelector('img');
+        return {
+          block:
+            r.getAttribute('data-block') ??
+            r.closest('[data-block]')?.getAttribute('data-block') ??
+            null,
+          canvas: r.querySelectorAll('canvas').length,
+          img: img !== null,
+          imgDecoded: img ? img.complete && img.naturalWidth > 0 : false,
+        };
+      }),
+      stage: document.querySelectorAll(`${stage} canvas`).length,
+      page: document.querySelectorAll('canvas').length,
+    };
+  });
+}
+
+/**
+ * Decodes a picture in the page (a PNG or JPEG as bytes, or a same origin URL) and samples it at
+ * relative points (0 to 1 across the picture); answers the RGB of each with the picture's size.
+ */
+export async function samplePicture(
+  page: Page,
+  source: Buffer | string,
+  points: readonly (readonly [number, number])[],
+): Promise<{ width: number; height: number; rgb: [number, number, number][] } | null> {
+  const src = Buffer.isBuffer(source)
+    ? `data:${source.subarray(1, 4).toString('latin1') === 'PNG' ? 'image/png' : 'image/jpeg'};base64,${source.toString('base64')}`
+    : source;
+  return page.evaluate(
+    async ([url, pts]) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = url as string;
+      try {
+        await img.decode();
+      } catch {
+        return null;
+      }
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      const g = c.getContext('2d');
+      if (!g) return null;
+      g.drawImage(img, 0, 0);
+      const rgb = (pts as [number, number][]).map(([fx, fy]) => {
+        const x = Math.min(c.width - 1, Math.max(0, Math.round(fx * (c.width - 1))));
+        const y = Math.min(c.height - 1, Math.max(0, Math.round(fy * (c.height - 1))));
+        const d = g.getImageData(x, y, 1, 1).data;
+        return [d[0]!, d[1]!, d[2]!] as [number, number, number];
+      });
+      return { width: c.width, height: c.height, rgb };
+    },
+    [src, points.map((p) => [p[0], p[1]])] as const,
+  );
+}
+
+/** Samples a screenshot of a viewport clip at relative points, through the page's canvas. */
+export async function sampleClip(
+  page: Page,
+  clip: { x: number; y: number; width: number; height: number },
+  points: readonly (readonly [number, number])[],
+): Promise<{ width: number; height: number; rgb: [number, number, number][] } | null> {
+  const shot = await page.screenshot({ clip, scale: 'css' });
+  return samplePicture(page, shot, points);
+}
+
+/** The largest channel distance between two RGB samples. */
+export function rgbDistance(a: readonly number[], b: readonly number[]): number {
+  return Math.max(Math.abs(a[0]! - b[0]!), Math.abs(a[1]! - b[1]!), Math.abs(a[2]! - b[2]!));
+}
+
+/**
+ * The largest image object of a PDF as a PNG the page can decode: Chromium writes a drawn PNG as
+ * a FlateDecode RGB (or gray) image, sometimes with PNG predictors, and a JPEG as DCTDecode;
+ * the raw rows are wrapped into a PNG file here (a filter byte per row) so one decoder reads
+ * both. Answers null when the PDF carries no image.
+ */
+export function largestPdfImage(bytes: Buffer): {
+  width: number;
+  height: number;
+  filter: string;
+  png: Buffer | null;
+  jpeg: Buffer | null;
+} | null {
+  const text = bytes.toString('latin1');
+  const re = /<<([^>]*?\/Subtype\s*\/Image[^>]*?)>>\s*stream\r?\n/g;
+  let best: { width: number; height: number; filter: string; start: number; dict: string } | null =
+    null;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const dict = m[1]!;
+    const width = Number(/\/Width\s+(\d+)/.exec(dict)?.[1] ?? 0);
+    const height = Number(/\/Height\s+(\d+)/.exec(dict)?.[1] ?? 0);
+    if (/\/ImageMask\s+true/.test(dict)) continue;
+    const filter = /\/Filter\s*\/(\w+)/.exec(dict)?.[1] ?? 'none';
+    /* the frame's soft mask (a gray image of the same size) never wins over the colour image */
+    const rgb = /\/DeviceRGB/.test(dict) ? 1 : 0;
+    const bestRgb = best === null ? -1 : /\/DeviceRGB/.test(best.dict) ? 1 : 0;
+    if (
+      best === null ||
+      width * height > best.width * best.height ||
+      (width * height === best.width * best.height && rgb > bestRgb)
+    )
+      best = { width, height, filter, start: m.index + m[0].length, dict };
+  }
+  if (best === null) return null;
+  const end = text.indexOf('endstream', best.start);
+  const raw = bytes.subarray(best.start, end);
+  if (best.filter === 'DCTDecode') return { ...best, png: null, jpeg: Buffer.from(raw) };
+  let data: Buffer;
+  try {
+    data = best.filter === 'FlateDecode' ? inflateSync(raw) : Buffer.from(raw);
+  } catch {
+    return { ...best, png: null, jpeg: null };
+  }
+  const gray = /\/DeviceGray/.test(best.dict);
+  const channels = gray ? 1 : 3;
+  const rowLen = best.width * channels;
+  let filtered: Buffer;
+  if (data.length === best.height * (rowLen + 1)) filtered = data;
+  else if (data.length === best.height * rowLen) {
+    filtered = Buffer.alloc(best.height * (rowLen + 1));
+    for (let y = 0; y < best.height; y += 1) {
+      filtered[y * (rowLen + 1)] = 0;
+      data.copy(filtered, y * (rowLen + 1) + 1, y * rowLen, (y + 1) * rowLen);
+    }
+  } else return { ...best, png: null, jpeg: null };
+  const chunk = (type: string, body: Buffer): Buffer => {
+    const len = Buffer.alloc(4);
+    len.writeUInt32BE(body.length);
+    const typed = Buffer.concat([Buffer.from(type, 'latin1'), body]);
+    const crc = Buffer.alloc(4);
+    crc.writeUInt32BE(crc32(typed) >>> 0);
+    return Buffer.concat([len, typed, crc]);
+  };
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(best.width, 0);
+  ihdr.writeUInt32BE(best.height, 4);
+  ihdr[8] = 8;
+  ihdr[9] = gray ? 0 : 2;
+  ihdr[10] = 0;
+  ihdr[11] = 0;
+  ihdr[12] = 0;
+  const png = Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', ihdr),
+    chunk('IDAT', deflateSync(filtered)),
+    chunk('IEND', Buffer.alloc(0)),
+  ]);
+  return { ...best, png, jpeg: null };
+}
+
+let crcTable: Uint32Array | null = null;
+function crc32(buf: Buffer): number {
+  if (crcTable === null) {
+    crcTable = new Uint32Array(256);
+    for (let n = 0; n < 256; n += 1) {
+      let c = n;
+      for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      crcTable[n] = c >>> 0;
+    }
+  }
+  let crc = 0xffffffff;
+  for (const byte of buf) crc = crcTable[(crc ^ byte) & 0xff]! ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+/**
+ * Wraps the page's requestAnimationFrame so the mount's loop can be counted (the hidden tab row of
+ * FEATURES.md 5.6): every later `requestAnimationFrame` call is counted in `window.__tsRaf`.
+ */
+export async function installRafCounter(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const w = window as unknown as { __tsRaf?: number; __tsRafWrapped?: boolean };
+    if (w.__tsRafWrapped) return;
+    w.__tsRaf = 0;
+    w.__tsRafWrapped = true;
+    const original = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = (cb: FrameRequestCallback) =>
+      original((time) => {
+        w.__tsRaf = (w.__tsRaf ?? 0) + 1;
+        cb(time);
+      });
+  });
+}
+export async function rafCount(page: Page): Promise<number> {
+  return page.evaluate(() => (window as unknown as { __tsRaf?: number }).__tsRaf ?? 0);
 }

@@ -46,6 +46,7 @@ import * as inbox from './areas/inbox.mjs';
 import * as lines from './areas/lines.mjs';
 import * as logos from './areas/logos.mjs';
 import * as shapes from './areas/shapes.mjs';
+import * as shaders from './areas/shaders.mjs';
 import * as share from './areas/share.mjs';
 import * as slides from './areas/slides.mjs';
 import * as surface from './areas/surface.mjs';
@@ -61,7 +62,8 @@ import * as wordart from './areas/wordart.mjs';
  * editor areas because its 900 px reads resize the viewport and put it back. The product round
  * (docs/PRODUCT.md 8.1) added the brand kit, the fonts and the assist after the View rows; a row
  * whose control a lane has not landed reads not driven with the control's id. The features round
- * (docs/FEATURES.md 7.1) added the logo picker after the fonts.
+ * (docs/FEATURES.md 7.1) added the logo picker after the fonts and, at ship two, the shader library
+ * after the logos.
  */
 export const AREAS = [
   decks,
@@ -84,6 +86,9 @@ export const AREAS = [
   fonts,
   /* the features round, ship one (docs/FEATURES.md 7.1): the logo picker after the fonts, on a Title and body slide */
   logos,
+  /* the features round, ship two (docs/FEATURES.md 7.1): the shader library after the logos, on a
+     Title slide and a Title and body slide of its own; its View row rides here too */
+  shaders,
   assist,
   inbox,
   chrome,

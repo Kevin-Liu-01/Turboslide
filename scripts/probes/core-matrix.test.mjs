@@ -398,10 +398,12 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
       expect(rowsForFeature(feature).length, feature).toBeGreaterThan(0);
     for (const driver of ['core/chrome.spec.ts', 'core/brand.spec.ts', 'core/assist.spec.ts'])
       expect(rowsForDriver(driver).length, driver).toBeGreaterThan(0);
-    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71);
+    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29);
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
       'export.download.large-deck-pptx',
+      /* the features round, ship two (docs/FEATURES.md 7.2): the editor's longest animation frame */
+      'shaders.perf.editor-frame',
     ]);
   });
 
@@ -522,10 +524,17 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
       'logos.export.pdf-pptx-crisp': 'export',
       'logos.intake.svg-sentence': 'images',
       'logos.intake.url-sentence': 'images',
+      'shaders.export.pdf-frame': 'export',
+      'shaders.export.pptx-frame': 'export',
+      'shaders.export.html-frame': 'export',
+      'shaders.export.missing-frame-row': 'export',
+      'shaders.view.play-setting': 'view',
     });
     for (const [id, feature] of Object.entries(ROW_FEATURE)) {
       expect(coreRow(id).feature).toBe(feature);
-      expect(isParkable(feature), id).toBe(false);
+      /* every exception but the View row lands on an unparkable feature; the View row parks its own control */
+      if (id !== 'shaders.view.play-setting') expect(isParkable(feature), id).toBe(false);
+      else expect(coreRow(id).parks, id).toEqual(['view.playShaders']);
     }
     expect(() =>
       validateCoreMatrix([
@@ -623,5 +632,112 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
       }),
     );
     expect(() => emitParked(bad, { out: module })).toThrow(/controls the row does not guard/);
+  });
+});
+
+describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () => {
+  const ship = CORE_MATRIX.filter((row) => /^Ship two P[01];/.test(row.note ?? ''));
+  const measure = CORE_MATRIX.find((row) => row.id === 'shaders.perf.editor-frame');
+
+  it('holds the shaders feature, the shaders spec and the 29 added rows with their tiers', () => {
+    expect(CORE_FEATURES).toContain('shaders');
+    expect(isParkable('shaders')).toBe(true);
+    expect(CORE_SPEC_DRIVERS).toContain('core/shaders.spec.ts');
+    expect(rowsForDriver('core/shaders.spec.ts').length).toBe(10);
+    expect(ship.length).toBe(29);
+    expect(ship.filter((row) => row.note.startsWith('Ship two P0')).length).toBe(22);
+    expect(ship.filter((row) => row.note.startsWith('Ship two P1')).length).toBe(7);
+    expect(ship.filter((row) => row.driver === PROBE_DRIVER).length).toBe(14);
+    /* the shaders feature holds the 24 rows whose area and feature agree; the export rows and the
+       View row count under their own features */
+    expect(rowsForFeature('shaders').length).toBe(24);
+    expect(ship.filter((row) => row.feature === 'export').length).toBe(4);
+    expect(ship.filter((row) => row.feature === 'view').length).toBe(1);
+    expect(ship.filter((row) => row.today === 'broken').length).toBe(11);
+    expect(ship.filter((row) => row.today === 'not driven').length).toBe(18);
+    /* every shaders row but the agent row carries parks (5.10); the export rows carry none and
+       block the ship, the measurement row carries none and never holds it */
+    for (const row of rowsForFeature('shaders'))
+      if (
+        row.id !== 'shaders.agent.list-insert-set-render' &&
+        row.id !== 'shaders.perf.editor-frame'
+      )
+        expect(row.parks, row.id).toBeDefined();
+    for (const row of ship.filter((r) => r.feature === 'export')) expect(row.parks).toBeUndefined();
+    expect(measure?.measure).toBe(true);
+    expect(measure?.parks).toBeUndefined();
+  });
+
+  it('parks the shaders controls a red row names, the feature on the agent row, and blocks on an export row', () => {
+    const results = {};
+    for (const id of CORE_IDS) results[id] = 'passed';
+    const gallery = parkedFeaturesOf({ ...results, 'shaders.insert.gallery-thumbnails': 'failed' });
+    expect(gallery.parked).toEqual([]);
+    expect(gallery.parkedRows).toEqual([
+      { id: 'shaders.insert.gallery-thumbnails', parks: ['insert.shader'], result: 'failed' },
+    ]);
+    const agent = parkedFeaturesOf({
+      ...results,
+      'shaders.agent.list-insert-set-render': 'not driven',
+    });
+    expect(agent.parked).toEqual(['shaders']);
+    const pdf = parkedFeaturesOf({ ...results, 'shaders.export.pdf-frame': 'failed' });
+    expect(pdf.parked).toEqual([]);
+    expect(pdf.blocking).toEqual([
+      { id: 'shaders.export.pdf-frame', feature: 'export', result: 'failed' },
+    ]);
+    /* the View row parks its own control alone, never view and never shaders */
+    const view = parkedFeaturesOf({ ...results, 'shaders.view.play-setting': 'not driven' });
+    expect(view.parked).toEqual([]);
+    expect(view.blocking).toEqual([]);
+    expect(view.parkedRows).toEqual([
+      { id: 'shaders.view.play-setting', parks: ['view.playShaders'], result: 'not driven' },
+    ]);
+    /* the measurement row is recorded and holds nothing */
+    const frame = parkedFeaturesOf({ ...results, 'shaders.perf.editor-frame': 'failed' });
+    expect(frame.parked).toEqual([]);
+    expect(frame.measured).toEqual([
+      { id: 'shaders.perf.editor-frame', feature: 'shaders', result: 'failed' },
+    ]);
+    expect(shipVerdict({ ...results, 'shaders.perf.editor-frame': 'failed' }).ok).toBe(true);
+  });
+
+  it('knows the declared ids of FEATURES.md 5.3 to 5.6 and writes them into the parked set', () => {
+    for (const id of [
+      'insert.shader',
+      'view.playShaders',
+      'dialog.background.shader',
+      'formatOptions.shader',
+      'formatOptions.shader.strength',
+      'formatOptions.shader.preset',
+      'formatOptions.shader.color',
+      'dialog.shader.hover',
+    ])
+      expect(isKnownControl(id), id).toBe(true);
+    const dir = mkdtempSync(join(tmpdir(), 'core-matrix-parked-two-'));
+    const module = join(dir, 'parked-controls.ts');
+    writeFileSync(
+      module,
+      `${PARKED_BEGIN}\nexport const PARKED_CONTROLS: ReadonlySet<string> = new Set<string>([]);\n${PARKED_END}\n`,
+    );
+    const list = join(dir, 'ship-shaders.json');
+    writeFileSync(
+      list,
+      JSON.stringify({
+        commit: 'def5678',
+        parkedFeatures: [],
+        parkedRows: [
+          { id: 'shaders.panel.preset-tiles', parks: ['formatOptions.shader.preset'] },
+          { id: 'shaders.view.play-setting', parks: ['view.playShaders'] },
+          { id: 'shaders.background.place-answers', parks: ['dialog.background.shader'] },
+        ],
+      }),
+    );
+    expect(emitParked(list, { out: module }).controls).toEqual([
+      'dialog.background.shader',
+      'formatOptions.shader.preset',
+      'view.playShaders',
+    ]);
+    expect(readFileSync(module, 'utf8')).toContain('from ship-def5678.json; 3 controls');
   });
 });

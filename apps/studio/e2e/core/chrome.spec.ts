@@ -5,13 +5,16 @@ import {
   Scratch,
   coverage,
   ctl,
+  ensureShader,
   extraHTTPHeaders,
   menuPath,
   newDeck,
   openEditor,
+  openShaderSection,
   placeBlock,
   selectBlock,
   settled,
+  shaderGroupHeadings,
   state,
   teardownAll,
   title,
@@ -466,10 +469,88 @@ test(title('logos.picker.chrome-1280'), async () => {
   expect(dark!.halves, 'every tile keeps its paper and ink halves').toBe(dark!.tiles);
 });
 
+/**
+ * The features round, ship two (docs/FEATURES.md 5.3; the row `shaders.panel.section-groups`): the
+ * Shader section's groups in order at both viewports with no field past the panel. The block lands
+ * through Insert > Shader when the gallery is on the build, else through the window API (lib.ts
+ * `ensureShader`, the matrix's setup); the groups are read by their headings inside
+ * `[data-section="shader"]`; the P1 groups Frame and Play in the show are recorded when drawn and
+ * judged by their own rows, never here.
+ */
+const SHADER_GROUPS = [
+  'Shader',
+  'Preset',
+  'Colors',
+  'Form',
+  'Light and texture',
+  'Orientation',
+  'Motion',
+  'Dither',
+  'Advanced',
+];
+async function shaderSectionFacts(page: Page) {
+  return page.evaluate(() => {
+    const panel = document.querySelector('[data-control="panel.formatOptions"]');
+    const section = document.querySelector('[data-section="shader"]');
+    if (!panel || !section) return null;
+    const pr = panel.getBoundingClientRect();
+    const fields = [...section.querySelectorAll('input, button, select, textarea')].filter(
+      (e) => e.getClientRects().length > 0,
+    );
+    const past = fields
+      .map((e) => e.getBoundingClientRect())
+      .filter((r) => r.right > pr.right + 1 || r.left < pr.left - 1).length;
+    const scrollers = [section, ...section.querySelectorAll('*')].filter(
+      (el) =>
+        el.scrollWidth > el.clientWidth + 1 && /auto|scroll/.test(getComputedStyle(el).overflowX),
+    ).length;
+    return {
+      fields: fields.length,
+      past,
+      scrollsX: scrollers,
+      panel: `${Math.round(pr.width)} wide`,
+      viewport: `${window.innerWidth} by ${window.innerHeight}`,
+    };
+  });
+}
+test(title('shaders.panel.section-groups'), async () => {
+  test.setTimeout(240_000);
+  const facts: string[] = [];
+  let skipped: string | null = null;
+  for (const person of [wide, laptop]) {
+    const { page, deck } = person;
+    await openEditor(page, deck);
+    const slideId = (await state(page)).slideId;
+    const made = await ensureShader(page, slideId);
+    if (!(await openShaderSection(page, made.id))) {
+      skipped = 'not on this build: formatOptions.shader (docs/FEATURES.md 5.3, B5)';
+      break;
+    }
+    const headings = await shaderGroupHeadings(page);
+    const section = await shaderSectionFacts(page);
+    /* the nine groups appear in order among the headings read (a subsequence) */
+    let at = 0;
+    for (const heading of headings) if (heading === SHADER_GROUPS[at]) at += 1;
+    const p1 = headings.filter((h) => /^frame$/i.test(h) || /play in the show/i.test(h));
+    facts.push(
+      `${section?.viewport ?? 'unread'}: ${made.how}; headings ${headings.join(' | ') || 'none'}; ${at} of ${SHADER_GROUPS.length} groups in order; ${section?.fields ?? 0} fields, ${section?.past ?? 'unread'} past the panel (${section?.panel ?? 'unread'}), ${section?.scrollsX ?? 'unread'} horizontal scrollers; P1 groups drawn: ${p1.join(', ') || 'none'}`,
+    );
+    expect(at, `the groups in order at ${section?.viewport}`).toBe(SHADER_GROUPS.length);
+    expect(section?.past, `no field past the panel at ${section?.viewport}`).toBe(0);
+    expect(section?.scrollsX, `no horizontal scroll at ${section?.viewport}`).toBe(0);
+  }
+  test
+    .info()
+    .annotations.push({ type: 'groups', description: (facts.join('; ') || skipped) ?? '' });
+  if (skipped !== null) test.skip(true, skipped);
+});
+
 coverage(import.meta.filename, [
   'slides.layout.plate-four-columns',
   'share.dialog.more-row',
   'chrome.toolbar.fold-any-width',
   /* the features round, ship one (docs/FEATURES.md 7.1) */
   'logos.picker.chrome-1280',
+  /* the features round, ship two (docs/FEATURES.md 7.1) */
+  'shaders.panel.section-groups',
 ]);

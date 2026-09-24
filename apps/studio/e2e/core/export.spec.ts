@@ -35,6 +35,13 @@ import {
   pngSize,
   windowActions,
   zipEntriesRaw,
+  captureFallback,
+  ensureShader,
+  largestPdfImage,
+  rgbDistance,
+  samplePicture,
+  shaderBlocks,
+  waitFrame,
 } from './lib';
 
 // Download and print, the file rows (docs/FOCUS.md 2.8, 6.4 `export.*`, `images.export.*` and
@@ -88,6 +95,10 @@ type Owner = {
   n: number;
   /** the fourth slide, with the documents of the return round */
   docsSlide?: string;
+  /** the features round, ship two: the slide with the shader block, the block and how it landed */
+  shaderSlide?: string;
+  shaderBlock?: string;
+  shaderHow?: string;
 };
 const owners: Owner[] = [];
 let browserRef: Browser;
@@ -1705,6 +1716,305 @@ test(title('logos.export.pdf-pptx-crisp'), async () => {
   }
 });
 
+// ---------------------------------------------------------------------------------------------
+// the features round, ship two (docs/FEATURES.md 5.5; the rows `shaders.export.*`): the shader's
+// frame in the PDF, the Editable PowerPoint and the web page, and the report row of an export
+// started before the frame. The shader lands on a fifth slide of the owner's deck the seller's way
+// when Insert > Shader is on the build, else through the window API (lib.ts `ensureShader`; the
+// matrix's setup), and its frame is awaited with the agent's route as the fallback. A build without
+// the frame pipeline fails these rows with the facts (the audit read them broken), never skips.
+
+/** The shader on the owner's deck, made once per owner (a setup, never a driven step). */
+async function shaderSetup(
+  owner: Owner,
+): Promise<{ slide: string; block: string; asset: string | null; how: string }> {
+  const { page } = owner;
+  if (owner.shaderSlide === undefined || owner.shaderBlock === undefined) {
+    await openEditor(page, owner.deck);
+    await clickCard(page, owner.docsSlide ?? (await slideOrder(page)).at(-1)!);
+    const slide = await addSlide(page);
+    const made = await ensureShader(page, slide);
+    let how = made.how;
+    const frame = await waitFrame(page, slide, made.id, { timeout: 15_000 });
+    if (frame.asset === null) {
+      const fallback = await captureFallback(page, slide, made.id);
+      how = `${how}; no frame within 15 s, ${fallback.how} made ${fallback.asset ?? 'none'}`;
+    } else how = `${how}; the frame ${frame.asset} came after ${frame.ms} ms`;
+    owner.shaderSlide = slide;
+    owner.shaderBlock = made.id;
+    owner.shaderHow = how;
+    owner.unskipped += 1;
+  }
+  const block = (await shaderBlocks(page, owner.shaderSlide)).find(
+    (o) => o.id === owner.shaderBlock,
+  );
+  return {
+    slide: owner.shaderSlide,
+    block: owner.shaderBlock,
+    asset: (block?.block['asset'] as string | undefined) ?? null,
+    how: owner.shaderHow ?? '',
+  };
+}
+/** The frame file the sheet draws for the shader block: its same origin src and its bytes. */
+async function shaderFrameFile(
+  page: Page,
+  blockId: string,
+): Promise<{ src: string; bytes: Buffer } | null> {
+  const src = await page.evaluate((id) => {
+    const root = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`);
+    const img = root?.querySelector('img');
+    return img ? img.currentSrc || img.getAttribute('src') : null;
+  }, blockId);
+  if (!src) return null;
+  const res = await page.request.get(src, { maxRedirects: 0 });
+  if (res.status() !== 200) return null;
+  return { src, bytes: Buffer.from(await res.body()) };
+}
+const SAMPLE_POINTS: readonly (readonly [number, number])[] = [
+  [0.5, 0.5],
+  [0.25, 0.5],
+  [0.75, 0.5],
+  [0.5, 0.25],
+  [0.5, 0.75],
+];
+const LABEL = /paper:|not captured/i;
+
+test(title('shaders.export.pdf-frame'), async () => {
+  test.setTimeout(300_000);
+  const owner = await withBudget(1);
+  const { page } = owner;
+  const made = await shaderSetup(owner);
+  await openEditor(page, owner.deck);
+  await clickCard(page, made.slide);
+  const file = await shaderFrameFile(page, made.block);
+  const pos = (await shaderBlocks(page, made.slide)).find((o) => o.id === made.block)?.pos ?? null;
+  await openPdf(page);
+  const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click(), 120_000);
+  await closeDialogs(page);
+  const image = largestPdfImage(pdf.bytes);
+  const decoded = image?.png ?? image?.jpeg ?? null;
+  const drawn = decoded ? await samplePicture(page, decoded, SAMPLE_POINTS) : null;
+  const frame = file ? await samplePicture(page, file.bytes, SAMPLE_POINTS) : null;
+  const distances =
+    drawn && frame ? SAMPLE_POINTS.map((_, i) => rgbDistance(drawn.rgb[i]!, frame.rgb[i]!)) : null;
+  const text = pdfText(pdf.bytes);
+  test.info().annotations.push({
+    type: 'pdf',
+    description: `${made.how}; frame ${made.asset ?? 'none'} (${file ? `${file.bytes.length} bytes` : 'no file'}); box ${pos ? `${pos.w} by ${pos.h}` : 'unread'}; the PDF's largest image ${image ? `${image.width} by ${image.height} ${image.filter}` : 'none'} (${pdfImages(pdf.bytes)} image objects); samples ${distances ? distances.join(', ') : 'unread'}; label text ${LABEL.test(text) ? 'present' : 'absent'}`,
+  });
+  expect(made.asset, 'the block has a frame').not.toBeNull();
+  expect(image, 'the PDF carries an image').not.toBeNull();
+  expect(pos, 'the block').not.toBeNull();
+  /* the image keeps the box's aspect within five percent */
+  expect(
+    Math.abs(image!.width / image!.height - pos!.w / pos!.h) / (pos!.w / pos!.h),
+    "the image's aspect is the box's",
+  ).toBeLessThan(0.05);
+  expect(distances, 'the pixels sampled').not.toBeNull();
+  expect(
+    distances!.filter((d) => d <= 48).length,
+    'at least four of five samples within 48 per channel',
+  ).toBeGreaterThanOrEqual(4);
+  expect(LABEL.test(text), 'no label text').toBe(false);
+});
+
+test(title('shaders.export.pptx-frame'), async () => {
+  test.setTimeout(300_000);
+  const owner = await withBudget(1);
+  const { page } = owner;
+  const made = await shaderSetup(owner);
+  await openEditor(page, owner.deck);
+  await clickCard(page, made.slide);
+  const block = (await shaderBlocks(page, made.slide)).find((o) => o.id === made.block) ?? null;
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 120_000);
+  await closeDialogs(page);
+  let entries = zipEntriesRaw(pptx.bytes);
+  const inner =
+    [...entries.keys()].find((n) => /\(light, editable\)\.pptx$/.test(n)) ??
+    [...entries.keys()].find((n) => n.endsWith('.pptx'));
+  if (inner !== undefined) entries = zipEntriesRaw(entries.get(inner)!());
+  const name = `ts:${made.slide}#${made.block}`;
+  const slidePart =
+    [...entries.keys()]
+      .filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+      .find((n) => entries.get(n)!().toString('utf8').includes(`name="${name}"`)) ?? null;
+  const xml = slidePart ? entries.get(slidePart)!().toString('utf8') : '';
+  const picMatch = new RegExp(
+    `<p:pic>(?:(?!</p:pic>).)*?name="${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"(?:(?!</p:pic>).)*?</p:pic>`,
+    's',
+  ).exec(xml);
+  const pic = picMatch?.[0] ?? '';
+  const descr = /descr="([^"]*)"/.exec(pic)?.[1] ?? '';
+  const embed = /r:embed="([^"]+)"/.exec(pic)?.[1] ?? null;
+  const rels = slidePart
+    ? (entries
+        .get(slidePart.replace('slides/', 'slides/_rels/') + '.rels')?.()
+        ?.toString('utf8') ?? '')
+    : '';
+  const target = embed
+    ? (new RegExp(`Id="${embed}"[^>]*Target="([^"]+)"`).exec(rels)?.[1] ?? null)
+    : null;
+  const media = target ? (entries.get(`ppt/${target.replace(/^\.\.\//, '')}`)?.() ?? null) : null;
+  const size = media ? pngSize(media) : null;
+  const off = /<a:off x="(\d+)" y="(\d+)"/.exec(pic);
+  const ext = /<a:ext cx="(\d+)" cy="(\d+)"/.exec(pic);
+  const sldSz = /<p:sldSz cx="(\d+)" cy="(\d+)"/.exec(
+    entries.get('ppt/presentation.xml')?.()?.toString('utf8') ?? '',
+  );
+  const emuPerPx = sldSz ? Number(sldSz[1]) / 1600 : null;
+  const drawnBox =
+    off && ext && emuPerPx
+      ? {
+          x: Number(off[1]) / emuPerPx,
+          y: Number(off[2]) / emuPerPx,
+          w: Number(ext[1]) / emuPerPx,
+          h: Number(ext[2]) / emuPerPx,
+        }
+      : null;
+  const pos = block?.pos ?? null;
+  const within = (a: number, b: number) => Math.abs(a - b) <= 32;
+  test.info().annotations.push({
+    type: 'pptx',
+    description: `${made.how}; inner ${inner ?? 'none'}; picture ${name} in ${slidePart ?? 'no slide part'}; descr "${descr.slice(0, 120)}"; media ${target ?? 'none'} ${size ? `${size.width} by ${size.height}` : 'unread'}; box ${drawnBox ? `${Math.round(drawnBox.x)},${Math.round(drawnBox.y)} ${Math.round(drawnBox.w)} by ${Math.round(drawnBox.h)}` : 'unread'} against ${pos ? `${pos.x},${pos.y} ${pos.w} by ${pos.h}` : 'unread'}`,
+  });
+  expect(slidePart, `a picture named ${name}`).not.toBeNull();
+  expect(descr, 'the recipe in descr').toContain(String(block?.block['materialId'] ?? 'paper:'));
+  expect(size, 'the media PNG').not.toBeNull();
+  expect(Math.max(size!.width, size!.height), 'the long side 3200').toBe(3200);
+  expect(drawnBox, 'the picture box').not.toBeNull();
+  expect(pos).not.toBeNull();
+  expect(
+    within(drawnBox!.x, pos!.x) &&
+      within(drawnBox!.y, pos!.y) &&
+      within(drawnBox!.w, pos!.w) &&
+      within(drawnBox!.h, pos!.h),
+    "the picture sits at the block's box within 2 percent of the sheet",
+  ).toBe(true);
+});
+
+test(title('shaders.export.html-frame'), async () => {
+  test.setTimeout(300_000);
+  const owner = await withBudget(1);
+  const { page, context } = owner;
+  const made = await shaderSetup(owner);
+  await openEditor(page, owner.deck);
+  await clickCard(page, made.slide);
+  const file = await shaderFrameFile(page, made.block);
+  const switched = await reachDownloadRow(page, 'file.download.html');
+  const html = await download(
+    page,
+    () => menuPath(page, 'file', 'file.download', 'file.download.html'),
+    60_000,
+  );
+  if (switched) await menuPath(page, 'tools', 'tools.advancedTools');
+  const text = html.bytes.toString('utf8');
+  /* the file loaded in a page of its own: the canvases, the visible words and the frame's pixels */
+  const viewer = await context.newPage();
+  let facts: { canvases: number; words: boolean; src: string | null; natural: number } | null =
+    null;
+  let drawn: { rgb: [number, number, number][] } | null = null;
+  try {
+    await viewer.setContent(text, { waitUntil: 'load' });
+    await viewer.waitForTimeout(1500);
+    facts = await viewer.evaluate((label) => {
+      const img = document.querySelector(
+        '.material img, [data-recipe] img, .material-frame',
+      ) as HTMLImageElement | null;
+      return {
+        canvases: document.querySelectorAll('canvas').length,
+        words: new RegExp(label, 'i').test(document.body.innerText),
+        src: img ? img.currentSrc || img.getAttribute('src') : null,
+        natural: img ? img.naturalWidth : 0,
+      };
+    }, LABEL.source);
+    if (facts.src && facts.src.startsWith('data:'))
+      drawn = await samplePicture(viewer, facts.src, SAMPLE_POINTS);
+  } finally {
+    await viewer.close();
+  }
+  const frame = file ? await samplePicture(page, file.bytes, SAMPLE_POINTS) : null;
+  const distances =
+    drawn && frame ? SAMPLE_POINTS.map((_, i) => rgbDistance(drawn!.rgb[i]!, frame.rgb[i]!)) : null;
+  test.info().annotations.push({
+    type: 'html',
+    description: `${made.how}; ${html.name} ${html.bytes.length} bytes in ${html.ms} ms; ${facts ? `${facts.canvases} canvas, label words ${facts.words}, frame img ${facts.src ? `${facts.src.slice(0, 40)}... natural ${facts.natural}` : 'none'}` : 'unread'}; samples ${distances ? distances.join(', ') : 'unread'}`,
+  });
+  expect(facts, 'the page loads').not.toBeNull();
+  expect(facts!.canvases, 'mounts no canvas').toBe(0);
+  expect(facts!.words, 'draws no label text').toBe(false);
+  expect(facts!.natural, 'the frame picture decodes').toBeGreaterThan(0);
+  expect(distances, "the frame's pixels are the file's own (a data URI)").not.toBeNull();
+  expect(
+    distances!.filter((d) => d <= 48).length,
+    'at least four of five samples within 48 per channel',
+  ).toBeGreaterThanOrEqual(4);
+});
+
+test(title('shaders.export.missing-frame-row'), async () => {
+  test.setTimeout(300_000);
+  const owner = await withBudget(1);
+  const { page } = owner;
+  const made = await shaderSetup(owner);
+  await openEditor(page, owner.deck);
+  await clickCard(page, made.slide);
+  await openPdf(page);
+  /* the recipe change with the dialog open, so OK follows it within 800 ms */
+  const s = await state(page);
+  const block = (await shaderBlocks(page, made.slide)).find((o) => o.id === made.block) ?? null;
+  const anchor = ((block?.block['anchor'] as number | undefined) ?? 5500) === 5500 ? 7000 : 5500;
+  const changed = Date.now();
+  await invoke(page, 'block.set', {
+    slideId: made.slide,
+    blockId: made.block,
+    path: '/anchor',
+    value: anchor,
+    baseRevision: s.revision,
+  });
+  const rows: string[] = [];
+  let stop = false;
+  const watching = (async () => {
+    while (!stop) {
+      const text = await page
+        .evaluate(() => {
+          const root =
+            document
+              .querySelector('[data-control="dialog.download.pdf"]')
+              ?.closest('[role="dialog"]') ??
+            document.querySelector('.ts-dialog-scrim [role="dialog"]');
+          return root ? (root.textContent ?? '').replace(/\s+/g, ' ') : '';
+        })
+        .catch(() => '');
+      const m = /([^.|]*\bshaders?\b[^.|]*\bframe[^.|]*)/i.exec(text);
+      if (m && !rows.includes(m[1]!.trim())) rows.push(m[1]!.trim());
+      await page.waitForTimeout(150);
+    }
+  })();
+  const gapBefore = Date.now() - changed;
+  const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click(), 150_000);
+  const gap = gapBefore;
+  await page.waitForTimeout(600);
+  stop = true;
+  await watching;
+  await closeDialogs(page);
+  const frame = await waitFrame(page, made.slide, made.block, { timeout: 10_000 });
+  test.info().annotations.push({
+    type: 'report',
+    description: `${made.how}; anchor -> ${anchor}, OK ${gap} ms after the change; report rows: ${rows.join(' | ') || 'none'}; ${pdf.name} ${pdf.bytes.length} bytes with ${pdfImages(pdf.bytes)} image objects; the block's frame after ${frame.asset ?? 'none'}`,
+  });
+  expect(gap, 'the export started within 800 ms of the change').toBeLessThan(800);
+  expect(
+    rows.length,
+    'one report row names the shaders whose frame was pending or stale',
+  ).toBeGreaterThan(0);
+  expect(
+    rows.some((r) => /\d/.test(r)),
+    'the row carries the count',
+  ).toBe(true);
+  expect(pdfImages(pdf.bytes), 'the file carries the frame').toBeGreaterThan(0);
+});
+
 coverage(import.meta.filename, [
   'export.zip.bundle',
   'export.html.web-page',
@@ -1739,7 +2049,13 @@ coverage(import.meta.filename, [
   'brand.export.pdf-logo',
   'fonts.export.editable-names-face',
   'fonts.export.pdf-face',
+
   /* the features round, ship one (docs/FEATURES.md 7.1) */
   'diagrams.export.step-label',
   'logos.export.pdf-pptx-crisp',
+  /* the features round, ship two (docs/FEATURES.md 5.5, 7.1) */
+  'shaders.export.pdf-frame',
+  'shaders.export.pptx-frame',
+  'shaders.export.html-frame',
+  'shaders.export.missing-frame-row',
 ]);

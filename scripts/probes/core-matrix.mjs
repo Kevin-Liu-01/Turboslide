@@ -36,7 +36,12 @@
 // (`DECLARED_CONTROL_IDS`), `ROW_FEATURE` (a row whose id area is a new feature while its measurement
 // belongs to an unparkable one carries that feature, so a red export or intake row blocks the ship
 // instead of parking the picker) and the `--emit-parked` step, which writes the set of
-// packages/chrome/src/parked-controls.ts (B1's module, 7.2) from a ship's `parkedRows`.
+// packages/chrome/src/parked-controls.ts (B1's module, 7.2) from a ship's `parkedRows`. Ship two
+// (docs/FEATURES.md section 5, 7.1) added the parkable feature `shaders`, the spec driver
+// `core/shaders.spec.ts`, the shaders area's export rows under `export` and its View row under
+// `view` (ROW_FEATURE), the Background dialog among the control sources and the ids FEATURES.md
+// 5.3 to 5.6 declare for the gallery, the Shader section and the View row before the lanes' files
+// hold them.
 //
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
@@ -91,9 +96,12 @@ export const CORE_FEATURES = Object.freeze([
   /* the sync and costs round (docs/SYNC.md 6.1): the write path's order and the calls per state */
   'sync',
   'cost',
-  /* the features round, ship one (docs/FEATURES.md 4.12): the logo picker over thesvg.org, parkable;
-     ship two adds `shaders` (5.10) with its rows */
+  /* the features round, ship one (docs/FEATURES.md 4.12): the logo picker over thesvg.org, parkable */
   'logos',
+  /* the features round, ship two (docs/FEATURES.md 5.10): the shader library, parkable; Insert >
+     Shader is in the default view on the ship's branch and the run's parked list moves it behind
+     Tools > Advanced tools if its rows are red */
+  'shaders',
   'surface',
 ]);
 
@@ -105,12 +113,19 @@ export const AREA_FEATURE = Object.freeze({ collab: 'share' });
  * area whose measurement belongs to an unparkable feature carries that feature, so a red one blocks
  * the ship instead of parking the new feature. The export row of the logos area is the exporters'
  * (B7, `export`), the two intake rows are the upload's (`images`). Ship two adds the shaders area's
- * export rows and its View row the same way. Every other row's feature is its area's.
+ * four export rows the same way (B7, `export`: the PDF, the Editable PowerPoint, the web page and
+ * the report row) and its View row (`view`: View > Play shaders parks its own control through
+ * `parks` and never the shader library). Every other row's feature is its area's.
  */
 export const ROW_FEATURE = Object.freeze({
   'logos.export.pdf-pptx-crisp': 'export',
   'logos.intake.svg-sentence': 'images',
   'logos.intake.url-sentence': 'images',
+  'shaders.export.pdf-frame': 'export',
+  'shaders.export.pptx-frame': 'export',
+  'shaders.export.html-frame': 'export',
+  'shaders.export.missing-frame-row': 'export',
+  'shaders.view.play-setting': 'view',
 });
 
 /** The four words of the audits for what production did; nothing else is a state. */
@@ -150,6 +165,10 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
   /* the features round, ship one (docs/FEATURES.md 7.1): the bearer rows, the network rows, the
      fixture upstream rows and the two browser rows of the logo picker */
   'core/logos.spec.ts',
+  /* the features round, ship two (docs/FEATURES.md 7.1): the frame rows (the second tab and the
+     second context), the reduced motion context, the WebGL rows, the measurement row and the
+     agent transports of the shader library */
+  'core/shaders.spec.ts',
 ]);
 
 export const CORE_DRIVERS = Object.freeze([PROBE_DRIVER, ...CORE_SPEC_DRIVERS, COST_PROBE_DRIVER]);
@@ -236,6 +255,9 @@ export const CONTROL_SOURCE_PATHS = Object.freeze(
     '../../packages/chrome/src/inspector/typography.tsx',
     '../../packages/chrome/src/Overlay.tsx',
     '../../packages/chrome/src/parked-controls.ts',
+    /* the features round, ship two (docs/FEATURES.md 5.4, 5.10): the Background dialog's Shader row
+       and its P1 Add to theme row */
+    '../../packages/chrome/src/dialogs/Background.tsx',
   ].map((rel) => fileURLToPath(new URL(rel, import.meta.url))),
 );
 
@@ -312,6 +334,28 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'toolbar.group.text',
   'toolbar.wordart.outline',
   'formatOptions.typography.numerals',
+  /* the features round, ship two (docs/FEATURES.md 5.3 to 5.6, 5.10): the ids the shaders rows'
+     `parks` name before the lanes' files hold them. The Insert row lands in model.ts by request
+     (B1 `insert.shader`, the `insert.material` row renamed and unflagged) and the P1 View row with
+     its setting (B1 `view.playShaders`); the Shader row of the Background dialog and its P1 Add to
+     theme row in dialogs/Background.tsx (B1); the Shader section and its controls in
+     inspector/shader.tsx (B5), where `formatOptions.shader` is the section's head and the
+     families `formatOptions.shader.preset` (`.preset.<id>`) and `formatOptions.shader.color`
+     (`.color.<role>`) name their tiles and swatches; the P1 engine chip and the P1 hover surface in
+     dialogs/ShaderGallery.tsx (B1). */
+  'insert.shader',
+  'view.playShaders',
+  'dialog.background.shader',
+  'dialog.background.shader.addToTheme',
+  'dialog.shader.engine.glyph',
+  'dialog.shader.hover',
+  'formatOptions.shader',
+  'formatOptions.shader.strength',
+  'formatOptions.shader.preset',
+  'formatOptions.shader.color',
+  'formatOptions.shader.play',
+  'formatOptions.shader.frame.scrubber',
+  'formatOptions.shader.frame.capture',
 ]);
 
 let controlSourceText = null;

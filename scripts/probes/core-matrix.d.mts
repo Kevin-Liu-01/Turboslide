@@ -33,6 +33,7 @@ export type CoreFeature =
   | 'sync'
   | 'cost'
   | 'logos'
+  | 'shaders'
   | 'surface';
 
 /** The four words of the audits for what production did on the day the matrix was written. */
@@ -54,7 +55,8 @@ export type CoreSpecDriver =
   | 'core/brand.spec.ts'
   | 'core/assist.spec.ts'
   | 'core/sync.spec.ts'
-  | 'core/logos.spec.ts';
+  | 'core/logos.spec.ts'
+  | 'core/shaders.spec.ts';
 
 /** The cost probe of docs/SYNC.md 6.3 (scripts/probes/sync-cost-probe.mjs), run by the gate. */
 export type CostProbeDriver = 'cost-probe';
@@ -111,7 +113,7 @@ export type ParkedList = {
 export const CORE_MATRIX_PATH: string;
 export const CORE_FEATURES: readonly CoreFeature[];
 export const AREA_FEATURE: Readonly<Record<string, CoreFeature>>;
-/** The rows whose feature is not their id's area (docs/FEATURES.md 7.1): the export and intake rows of the logos area. */
+/** The rows whose feature is not their id's area (docs/FEATURES.md 7.1): the export and intake rows of the logos area, the export rows and the View row of the shaders area. */
 export const ROW_FEATURE: Readonly<Record<string, CoreFeature>>;
 export const CORE_STATES: readonly CoreState[];
 export const RUN_RESULTS: readonly RunResult[];

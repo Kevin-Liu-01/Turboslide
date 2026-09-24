@@ -1,5 +1,5 @@
 {
-  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship.",
+  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The features round, ship two (docs/FEATURES.md 5, 7.1) added the 29 rows of the shader library on 2026-09-24 under the new parkable feature `shaders` and the existing export and view: `today` is what audit-shaders under docs/gslides-parity/features/ saw on production at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship two P0 or P1) with the lane and the FEATURES.md section, `parks` names the FEATURES.md control ids the row alone guards (a dialog or Shader section control is hidden through packages/chrome/src/parked-controls.ts), the four export rows of the shaders area carry the feature export and the View row the feature view (ROW_FEATURE), so a red one blocks the ship or parks its own control and never the shader library, and `shaders.perf.editor-frame` carries `measure` (7.2): its number is recorded and never holds the ship.",
   "rows": [
     {
       "id": "decks.home.new-presentation",
@@ -6761,6 +6761,318 @@
       "severity": 2,
       "evidence": "audit-logos 16 (logo-walk.json: \"host thesvg.org is not in the capture allowlist; pass --allow thesvg.org\")",
       "note": "Ship one P1; docs/FEATURES.md 4.7 (B7: shared.ts the sentence and the User-Agent); the feature is images (7.1), an unparkable feature, so a red row blocks the ship: the integrator decides at the ship whether B7's P1 landed or the sentence is today's"
+    },
+    {
+      "id": "shaders.insert.gallery-thumbnails",
+      "feature": "shaders",
+      "interaction": "Insert > Shader opens a grid titled Shader with the black and white sentence under the title; every card has a decoded thumbnail within 2 s; the search narrows to \"metal\" in one row; a category chip narrows the grid; no canvas is mounted in the dialog",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shaders 3 (s03-insert-material-dialog.png, s09b-background-material-list.png)",
+      "parks": ["insert.shader"],
+      "note": "Ship two P0; docs/FEATURES.md 5.4 (B1 the gallery dialogs/ShaderGallery.tsx, the row insert.shader in model.ts by request to the integrator; B5 the thumbnails under packages/materials/previews); the row measures the dialog's title and sentence too; a card is read as dialog.shader.tile.<id> with its data-material and the img inside it"
+    },
+    {
+      "id": "shaders.insert.selected-free-rectangle",
+      "feature": "shaders",
+      "interaction": "A click on Liquid metal inserts a shader block in the largest free rectangle of the body, selected (chip Shader, eight handles), overlapping no text box; the title slide keeps its kind",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-shaders 14 (s04-material-block-inserted.png, walk-run2.json row 5)",
+      "parks": ["insert.shader"],
+      "setup": "slide.new with the title layout through the window API, the slide the insert lands on; never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.4 (B5: insertBlockPlan's shader branch through the product round's free rectangle helper; B1 the gallery); the overlap is read against every text object of the slide after the insert converted it"
+    },
+    {
+      "id": "shaders.insert.words",
+      "feature": "shaders",
+      "interaction": "The Insert row, the chip, the section title and the alt text read Shader; no paper: id and no \"not captured\" is drawn on the sheet, the card, the viewer or the show",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-shaders 13 (s04-material-block-inserted.png, s05-material-selected.png, s03-insert-material-dialog.png)",
+      "parks": ["insert.shader"],
+      "note": "Ship two P0; docs/FEATURES.md 5.1, 5.4 (B5 whole: the chip in Selection.tsx by request to the integrator, the section title in inspector/shader.tsx, the alt in editor-shell.ts, the sheet label in render/blocks/material.ts); the filmstrip card is a rendered thumbnail, so the card's words are read on the sheet, the viewer (/deck) and the show, which the same renderer draws"
+    },
+    {
+      "id": "shaders.panel.section-groups",
+      "feature": "shaders",
+      "interaction": "Format options shows Shader, Preset, Colors, Form, Light and texture, Orientation, Motion, Dither, Advanced, in that order, at 1440 and 1280 with no field past the panel; Frame and Play in the show are present only when their P1 rows are green",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-shaders 4 (s06-format-options-material-1440.png, s07-format-options-material-1280.png)",
+      "parks": ["formatOptions.shader"],
+      "setup": "block.insert of a material block through the window API on each viewport's deck; never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.3 (B5 inspector/shader.tsx; format-sections.ts routes a material to the section); the spec reads the groups by their headings inside [data-section=\"shader\"] at both viewports; the P1 Frame and Play in the show groups are recorded when drawn and judged by their own rows"
+    },
+    {
+      "id": "shaders.panel.slider-live-undo",
+      "feature": "shaders",
+      "interaction": "Dragging Strength changes the live canvas during the drag and writes nothing; release writes one block.set; Cmd+Z restores the value and the canvas in one step",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shaders 4, 5 (walk-run2.json row 13: 0 range inputs)",
+      "parks": ["formatOptions.shader.strength"],
+      "note": "Ship two P0; docs/FEATURES.md 5.3 (B5); the live half is read from the block's pixels with the mount at rest: the walk emulates prefers-reduced-motion: reduce for the drag (5.6's speed 0) and puts it back, so the change read is the slider's and not the animation's"
+    },
+    {
+      "id": "shaders.panel.preset-tiles",
+      "feature": "shaders",
+      "interaction": "The Preset row lists every preset of the entry as a tile in sentence case; a click writes /preset and the canvas changes within 500 ms",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-shaders 7 (walk-run2.json row 15: selectOption('chrome') found no option)",
+      "parks": ["formatOptions.shader.preset"],
+      "note": "Ship two P0; docs/FEATURES.md 5.2, 5.3 (B5: formatOptions.shader.preset.<id> tiles labelled in sentence case); the canvas change is read as the mean luminance and the changed pixel fraction of the block's box before and after the click, against the entry's preset list from material.list"
+    },
+    {
+      "id": "shaders.panel.control-sentences",
+      "feature": "shaders",
+      "interaction": "The ten sliders' tooltips read the ten sentences of 5.3, Strength \"how strong the effect is\" through Speed \"how fast it plays in the show\"",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shaders 4, 5",
+      "parks": ["formatOptions.shader"],
+      "note": "Ship two P0; docs/FEATURES.md 5.3 (B5: the ten sentences in menus/strings.ts by request to the integrator); read from each control's tooltip plate on hover, else its data-tip"
+    },
+    {
+      "id": "shaders.panel.kit-colours",
+      "feature": "shaders",
+      "interaction": "The Colors row shows the kit's six swatches; brand.set /colors/light/primary '#0b3d91' changes the shader's colours and re captures its frame within 5 s with a new frameKey",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shaders 8 (material-list.json presets; no swatches drawn)",
+      "parks": ["formatOptions.shader.color"],
+      "note": "Ship two P0; docs/FEATURES.md 5.7 (B5: presets.ts computes the palette from the kit; formatOptions.shader.color.<role> the six swatches); the walk writes the role of the deck's current appearance (/colors/<light|dark>/primary; a /new deck opens dark) and records which; the frameKey is read from the block's asset record in describe().state.assets before and after"
+    },
+    {
+      "id": "shaders.panel.one-home",
+      "feature": "shaders",
+      "interaction": "Tools > Advanced > Pictures and materials has no Material section; the Background dialog's options link opens Format options at the Shader section",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-shaders 19 (s06-format-options-material-1440.png)",
+      "parks": ["formatOptions.shader"],
+      "note": "Ship two P0; docs/FEATURES.md 5.3 (B5: PicturesPanel.tsx drops Material, inspector/material.tsx removed; B1: the Background dialog's options link); the link is read on the slide whose ground shaders.background.place-answers set"
+    },
+    {
+      "id": "shaders.frame.auto-capture",
+      "feature": "shaders",
+      "interaction": "800 ms after the last recipe change the block has an asset whose PNG has the long side 3200, source.backend 'client', the renderer string and a frameKey equal to frameKeyOf(block, kit); the filmstrip card shows it",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-shaders 2 (s12-slideshow.png, s14-viewer.png, export-pdf-page-1.png, export-pptx-report.json)",
+      "parks": ["insert.shader"],
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5 the client capture shader-frame.ts, B7 the shader.frame handler); the frameKey's equality with frameKeyOf(block, kit) is read through the storage rule (the asset id frame-<first 16 hex of frameKey>) and a recipe change writing a new key; the function itself is pinned by packages/materials/src/capture.test.ts (7.3)"
+    },
+    {
+      "id": "shaders.frame.box-aspect",
+      "feature": "shaders",
+      "interaction": "A shader block resized to 600 by 150 sheet px has, after its capture, a frame of 3200 by 800, and the viewer's still matches the editor's live canvas at rest at four sample points within a tolerance",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shaders 2, 9 (export-pdf-page-1.png)",
+      "parks": ["insert.shader"],
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5: the capture canvas takes the box's aspect with the long side 3200); the resize is the se handle's drag (block.set /pos when the handle is not drawn, recorded); the editor's canvas at rest is read under prefers-reduced-motion: reduce (5.6's speed 0) and the viewer's still on /deck/<id>; the tolerance is 48 per channel"
+    },
+    {
+      "id": "shaders.frame.reuse-and-prune",
+      "feature": "shaders",
+      "interaction": "Strength dragged to 1.2 and back to its value adds no asset (the count of deck.assets is unchanged 2 s later); three distinct Strength commits 1 s apart leave one frame asset for the block 5 s after the third capture, the block naming it",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shaders 2",
+      "parks": ["insert.shader"],
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5 the storage rule; B7 the shader.frame handler's superseded frame removal and pruneFrameAssets behind the response); the Strength values are typed into the slider's number field and committed with Enter, one block.set each"
+    },
+    {
+      "id": "shaders.frame.one-capturer",
+      "feature": "shaders",
+      "interaction": "Two browser contexts on one deck: the second commits a Strength change; the first receives the entry and then the frame and runs no shader.frame write (its network log lists none); the deck carries one frame asset for the block",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shaders 2",
+      "parks": ["insert.shader"],
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5: the committing client captures from the shell's commit() path; B7 the write); the second context is the same person in a second browser (sameCookiesContext); the first page's requests are read for shader.frame in the address or the body"
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "feature": "shaders",
+      "interaction": "Change background > Shader > a tile > Place: the ground changes within 5 s, or one sentence names the failure and no log text appears in the dialog; Place reads \"Placing\" with the seconds while it waits",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-shaders 1 (s09c-background-material-chosen.png, s10-background-material-placed.png, walk-run2.json row 19)",
+      "parks": ["dialog.background.shader"],
+      "setup": "slide.new with the Title and body layout through the window API, the slide the ground is placed on; never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B7 the 30 s bound and the RenderError sentence; B1 the Shader row, the gallery, the Placing state and the sentence in dialogs/Background.tsx); on a build where the dialog still reads Material the walk drives that row and says so"
+    },
+    {
+      "id": "shaders.export.pdf-frame",
+      "feature": "export",
+      "interaction": "The PDF's page carries the frame's pixels at the block's box (a colour sample matches the asset within a tolerance) and no label text",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-shaders 9 (export-pdf-page-1.png, export-pdf-report.json)",
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B7: the scene carries shaders and the PDF draws the frame); the feature is export because the row measures the exporters (7.1), so a red row blocks the ship; the colour sample is the largest image object of the PDF against the asset's pixels, both decoded in the page, within 48 per channel"
+    },
+    {
+      "id": "shaders.export.pptx-frame",
+      "feature": "export",
+      "interaction": "The Editable PowerPoint carries a picture ts:<slide>#<block> with the long side 3200 at the block's box and the recipe in descr",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-shaders 9 (export-pptx-report.json)",
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B7: the Editable PowerPoint's picture named ts:<slide>#<block> with the recipe in descr); the feature is export (7.1); the box is read from the picture's a:off and a:ext against the block's pos at the slide size of presentation.xml, within 2 percent"
+    },
+    {
+      "id": "shaders.export.html-frame",
+      "feature": "export",
+      "interaction": "The web page download of a deck with a shader carries the frame's pixels at the block's box, mounts no canvas and draws no label text",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-shaders 2, 9 (s14-viewer.png, export-pdf-page-1.png)",
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B7: download.ts builds the web page with the frame and no live shader); the feature is export (7.1); the file is loaded in the spec's own page to count canvases, read the visible text and sample the frame"
+    },
+    {
+      "id": "shaders.export.missing-frame-row",
+      "feature": "export",
+      "interaction": "An export started within 800 ms of a recipe change shows one report row naming the count of shaders whose frame was pending or stale; the file carries the frame the export waited for",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shaders 9 (export-pdf-report.json: raster [] and no shader row)",
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B7 the report module's row; B1 dialogs/Download.tsx draws it by request); the feature is export (7.1); the Download dialog is opened first and the recipe change is block.set /anchor through the window API with the dialog open, so OK follows the change within 800 ms"
+    },
+    {
+      "id": "shaders.perf.one-context",
+      "feature": "shaders",
+      "interaction": "Two shader blocks on one slide: one canvas on the page; selecting the other swaps the mount within 500 ms; the first draws its frame",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shaders 15 (walk-run1.json row 9, walk-run2.json rows 9, 12, 21)",
+      "parks": ["insert.shader"],
+      "setup": "a second shader block placed through the window API (block.insert of a material block) beside the inserted one; never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.6 (B5: MaterialMount mounts the selected block alone); the canvases are counted inside the stage's recipe roots and on the whole page"
+    },
+    {
+      "id": "shaders.perf.hidden-pauses",
+      "feature": "shaders",
+      "interaction": "document.hidden (a second tab fronted) stops the rAF loop of the mount; the frame counter does not advance for 2 s; fronting the tab resumes it; under prefers-reduced-motion: reduce the editor's mount runs at speed 0 and two clips 900 ms apart are identical",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shaders 15, 17, section 7 (walk-run2.json row 25 not driven)",
+      "parks": ["insert.shader"],
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "note": "Ship two P0; docs/FEATURES.md 5.6 (B5); the frame counter wraps requestAnimationFrame in the page; the hidden half fronts a second tab and reads document.visibilityState, and when the headless browser never reads hidden (the cost probe's finding on cost.editor-hidden.calls) the driver sets the document's state itself, dispatches visibilitychange and records that it did; the reduced motion half is a second context with prefers-reduced-motion: reduce"
+    },
+    {
+      "id": "shaders.perf.editor-frame",
+      "feature": "shaders",
+      "interaction": "The longest animation frame with one shader on the stage is under 150 ms on the preview; the number is recorded in the run's JSON (measure: true; the SwiftShader numbers of the audit are software numbers)",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shaders 15, section 7 (44 to 48 rAF per second on SwiftShader, a software number)",
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "measure": true,
+      "note": "Ship two P0; docs/FEATURES.md 5.6 (B5). A measurement row (docs/PRODUCT.md 8.2; docs/FEATURES.md 7.2): the longest animation frame with one shader on the stage over 5 s, read through PerformanceObserver long-animation-frame entries (the largest gap between animation frames when the browser has none), is written into the run as the test's measure annotation with the WebGL renderer string; a red measurement never holds the ship and is the round after's first shader item"
+    },
+    {
+      "id": "shaders.agent.list-insert-set-render",
+      "feature": "shaders",
+      "interaction": "shader.list, shader.insert, shader.set and shader.render answer on the HTTP transport with the bearer; shader.render returns a PNG of 3200 by 1800 within 20 s; material.list still answers as an alias",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shaders 18 (material-list.json)",
+      "note": "Ship two P0; docs/FEATURES.md 5.8 (B5 packages/materials/src/actions.ts and the shader.* ids in actions.ts by request to the integrator; B7 agent-actions.ts registers them; pnpm generate:contracts at the merge); on localhost the agent surface is open to the checkout holder and no bearer is sent; a red row without parks parks the feature whole (5.10)"
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "feature": "shaders",
+      "interaction": "Add to theme writes the kit's background shader; New slide with the Section header layout shows it as the ground with no selectable picture object",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shaders 11 (s09-background-dialog.png, s10-background-material-placed.png)",
+      "parks": ["dialog.background.shader.addToTheme"],
+      "note": "Ship two P1; docs/FEATURES.md 5.2 item 1 (B5 the kit's background slot and slide.setBackgroundShader; B1 the Add to theme and Apply to all rows by request); lands only under the P1 condition of section 1"
+    },
+    {
+      "id": "shaders.library.glyph-engines-render",
+      "feature": "shaders",
+      "interaction": "With the P1 port, proto:studio-field inserts, animates, captures and exports like a paper:* entry, and glyph:mesh-gradient and glyph:dither-gradient do the same; without it the row is recorded not driven and its parks keep the engine chip behind the switch",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shaders 12 (material-list.json: the proto entries unavailable)",
+      "parks": ["dialog.shader.engine.glyph"],
+      "note": "Ship two P1; docs/FEATURES.md 5.2 item 2 (B5: engine.ts, proto.ts); the spec reads shader.list (material.list as the alias) for the three ids and records not driven while they are absent or unavailable; lands only under the P1 condition of section 1"
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "feature": "shaders",
+      "interaction": "The Frame scrubber moves the live canvas; Capture this frame writes /anchor and a new asset within 5 s",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shaders 6 (s06-format-options-material-1440.png)",
+      "parks": ["formatOptions.shader.frame.scrubber", "formatOptions.shader.frame.capture"],
+      "note": "Ship two P1; docs/FEATURES.md 5.2 item 3 (B5); lands only under the P1 condition of section 1"
+    },
+    {
+      "id": "shaders.view.play-setting",
+      "feature": "view",
+      "interaction": "View > Play shaders lists On, In the show only and Off with In the show only checked by default; the pick is stored per browser and describe().state.settings.playShaders reads it; the Slideshow's Options menu mirrors it",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shaders 17 (walk-run2.json row 25)",
+      "parks": ["view.playShaders"],
+      "note": "Ship two P1; docs/FEATURES.md 5.6 (B1: view.playShaders and its MenuSetting in model.ts by request to the integrator, the Slideshow Options row; B5 reads it); the feature is view (7.1), so the row parks its control alone through parks and never the shaders feature; the walk reads the submenu's rows by their labels and puts the default back"
+    },
+    {
+      "id": "shaders.show.plays-when-on",
+      "feature": "shaders",
+      "interaction": "With Play shaders on, the block's Play in the show on and no reduced motion, the show's title slide has one canvas and two clips 900 ms apart differ",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-shaders 10 (s12-slideshow.png, walk-run2.json row 22)",
+      "parks": ["view.playShaders", "formatOptions.shader.play"],
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "note": "Ship two P1; docs/FEATURES.md 5.6 (B5 present/ShaderLayer.tsx; B1 the View row); question 5 of section 9: motion.play 'show' on insert with the setting's default In the show only; the show is started from the slide the block is on"
+    },
+    {
+      "id": "shaders.show.frame-when-off",
+      "feature": "shaders",
+      "interaction": "With Play shaders off, or under prefers-reduced-motion: reduce, the show has no canvas and shows the frame",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shaders 17, section 7 (walk-run2.json row 25)",
+      "parks": ["view.playShaders"],
+      "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
+      "note": "Ship two P1; docs/FEATURES.md 5.6 (B5; B1 the View row); the reduced motion half is a second context with prefers-reduced-motion: reduce and the setting on"
+    },
+    {
+      "id": "shaders.insert.gallery-hover-live",
+      "feature": "shaders",
+      "interaction": "Hovering a card 400 ms mounts one canvas in the deck's kit colours and leaving disposes it; two cards never mount at once",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-shaders 3",
+      "parks": ["dialog.shader.hover"],
+      "note": "Ship two P1; docs/FEATURES.md 5.2 item 5, 5.4 (B1 with B5: the hovered card mounts one canvas in the kit's colours after 400 ms); the walk reads the P1 surface from data-hover-live on the gallery root or a dialog.shader.hover.<id> control and records not built while neither is drawn"
     }
   ]
 }

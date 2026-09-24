@@ -205,13 +205,20 @@ async function serve(request: Request, deckId: string): Promise<Response> {
         // between; an op the replay carried already is dropped from the queue, not written twice
         let replayedTo: number | null = null;
         const queued: RoomEvent[] = [];
-        unsubscribe = room.channel.subscribe(deckId, (event) => {
-          if (replayedTo === null) {
-            queued.push(event);
-            return;
-          }
-          deliver(event);
-        });
+        // the stream names its tab's client id, so the blob tier's pulse reads this tab's roster
+        // row as its own and every other row as company, exact by id (realtime/channel.ts
+        // SubscribeOptions.clientId; the features round, ship one hotfix)
+        unsubscribe = room.channel.subscribe(
+          deckId,
+          (event) => {
+            if (replayedTo === null) {
+              queued.push(event);
+              return;
+            }
+            deliver(event);
+          },
+          { clientId },
+        );
         const roster = await room.channel.presence.roster(deckId);
         const live = await room.live();
         const hello: RoomEvent = {

@@ -19,6 +19,7 @@ import {
   headPulse,
   isStoreBusy,
   pollBackoffMs,
+  pollCompany,
   pollTickMs,
   pulsePath,
   putPulse,
@@ -147,5 +148,39 @@ describe('the deck pulse', () => {
     );
     // the unknown tick is the active one: one call per tick, under the budget
     expect(Math.ceil(60_000 / HOSTED_POLL_MS)).toBeLessThanOrEqual(POLL_CALLS_PER_MINUTE_MAX);
+  });
+
+  it("reads the deck's company from the roster and the open streams, own exact by client id (the features round, ship one hotfix)", () => {
+    const A = 'a'.repeat(32);
+    const B = 'b'.repeat(32);
+    const t = 1_000_000;
+    // two editors on two instances: each instance holds one stream and reads both rows from the
+    // shared record, whichever instance's presence route set them; both tick at the active pace
+    expect(pollCompany({ roster: [A, B], streams: [A], listeners: 1 })).toBe(1);
+    expect(pollCompany({ roster: [A, B], streams: [B], listeners: 1 })).toBe(1);
+    expect(
+      pollTickMs({ now: t, others: pollCompany({ roster: [A, B], streams: [A], listeners: 1 }) }),
+    ).toBe(HOSTED_POLL_MS);
+    // one editor alone: the one row is the stream's own, wherever its presence POST landed
+    expect(pollCompany({ roster: [A], streams: [A], listeners: 1 })).toBe(0);
+    expect(
+      pollTickMs({ now: t, others: pollCompany({ roster: [A], streams: [A], listeners: 1 }) }),
+    ).toBe(HOSTED_POLL_QUIET_MS);
+    // the own row is exact by id: a row this instance's presence route set for a tab whose
+    // stream is elsewhere is company (before, it read as own and the instance counted itself
+    // alone, ship.md 13.5), and a stream whose own row has not landed yet claims no row
+    expect(pollCompany({ roster: [B], streams: [A], listeners: 1 })).toBe(1);
+    expect(pollCompany({ roster: [], streams: [A], listeners: 1 })).toBe(0);
+    // a second tab of this instance, by its row or by its stream, is company as before
+    expect(pollCompany({ roster: [A, B], streams: [A, B], listeners: 2 })).toBe(1);
+    expect(pollCompany({ roster: [A], streams: [A], listeners: 2 })).toBe(1);
+    expect(pollCompany({ roster: [A, B], streams: [A, B], listeners: 3 })).toBe(2);
+    // a stream that names no id (a test's) counts through listeners and claims no row
+    expect(pollCompany({ roster: [A], streams: [], listeners: 1 })).toBe(1);
+    expect(pollCompany({ roster: [], streams: [], listeners: 2 })).toBe(1);
+    expect(pollCompany({ roster: [], streams: [], listeners: 1 })).toBe(0);
+    // the two paces stay under the budget, one call per tick
+    expect(Math.ceil(60_000 / HOSTED_POLL_MS)).toBeLessThanOrEqual(POLL_CALLS_PER_MINUTE_MAX);
+    expect(Math.ceil(60_000 / HOSTED_POLL_QUIET_MS)).toBeLessThanOrEqual(POLL_CALLS_PER_MINUTE_MAX);
   });
 });

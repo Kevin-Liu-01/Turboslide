@@ -506,6 +506,104 @@ describe('blobChannel', () => {
       await a.close();
     });
 
+    it('ticks at the active pace on both instances while two editors work on two instances, each row set through its own instance (the features round, ship one hotfix; ship.md 13.5)', async () => {
+      const { fake, instance, errors } = await setup({ pollMs: 20, quietPollMs: 400 });
+      const a = instance('a');
+      const b = instance('b');
+      const pulseHeads = (): number =>
+        fake.calls.filter((call) => call.op === 'head' && call.pathname === pulsePath('gt-brand'))
+          .length;
+      // a holds A's stream and b holds B's; each tab's presence POST lands on its own instance
+      let stopA: (() => void) | undefined = a.subscribe('gt-brand', () => undefined, {
+        clientId: CLIENT_A,
+      });
+      let stopB: (() => void) | undefined = b.subscribe('gt-brand', () => undefined, {
+        clientId: CLIENT_B,
+      });
+      await a.presence.set('gt-brand', CLIENT_A, rosterEntry(CLIENT_A, 1, 'Titanium 471'), 120_000);
+      await b.presence.set('gt-brand', CLIENT_B, rosterEntry(CLIENT_B, 1, 'Cobalt 118'), 120_000);
+      // both read the record (the pushes moved the pulse) and list each other
+      await new Promise((resolve) => setTimeout(resolve, 450));
+      expect((await a.presence.roster('gt-brand')).map((row) => row.clientId).sort()).toEqual(
+        [CLIENT_A, CLIENT_B].sort(),
+      );
+      expect((await b.presence.roster('gt-brand')).map((row) => row.clientId).sort()).toEqual(
+        [CLIENT_A, CLIENT_B].sort(),
+      );
+      // a's cadence alone: b's stream closes (its row stays in the record for its life), and a
+      // reads one row of company, B's, beside its own; 400 ms at 20 ms a tick
+      stopB();
+      stopB = undefined;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      let before = pulseHeads();
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      expect(pulseHeads() - before).toBeGreaterThanOrEqual(8);
+      // and b's cadence alone, the mirror image: A's row is company on b
+      stopA();
+      stopA = undefined;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      stopB = b.subscribe('gt-brand', () => undefined, { clientId: CLIENT_B });
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      before = pulseHeads();
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      expect(pulseHeads() - before).toBeGreaterThanOrEqual(8);
+      stopB();
+      expect(errors).toEqual([]);
+      await a.close();
+      await b.close();
+    });
+
+    it("ticks at the quiet pace for one editor alone whose presence POST landed on another instance: the row is the stream's own by its client id (the features round, ship one hotfix)", async () => {
+      const { fake, instance, errors } = await setup({ pollMs: 20, quietPollMs: 200 });
+      const a = instance('a');
+      const b = instance('b');
+      const pulseHeads = (): number =>
+        fake.calls.filter((call) => call.op === 'head' && call.pathname === pulsePath('gt-brand'))
+          .length;
+      const stop = a.subscribe('gt-brand', () => undefined, { clientId: CLIENT_A });
+      // the platform landed the tab's presence POST on b, which holds no stream of the deck
+      await b.presence.set('gt-brand', CLIENT_A, rosterEntry(CLIENT_A, 1, 'Titanium 471'), 120_000);
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      expect((await a.presence.roster('gt-brand')).map((row) => row.clientId)).toEqual([CLIENT_A]);
+      // the one row is this stream's own: alone and quiet, about three heads in 600 ms, never the
+      // thirty of the active pace (before the hotfix a read the row as another instance's tab)
+      const before = pulseHeads();
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      const quiet = pulseHeads() - before;
+      expect(quiet).toBeGreaterThanOrEqual(2);
+      expect(quiet).toBeLessThanOrEqual(5);
+      stop();
+      expect(errors).toEqual([]);
+      await a.close();
+      await b.close();
+    });
+
+    it("reads a row its own presence route set for a tab whose stream is elsewhere as company, so the instance holding one editor's stream ticks at the active pace when the other editor's POST lands on it (the features round, ship one hotfix)", async () => {
+      const { fake, instance, errors } = await setup({ pollMs: 20, quietPollMs: 400 });
+      const a = instance('a');
+      const pulseHeads = (): number =>
+        fake.calls.filter((call) => call.op === 'head' && call.pathname === pulsePath('gt-brand'))
+          .length;
+      const stop = a.subscribe('gt-brand', () => undefined, { clientId: CLIENT_A });
+      await until(() => pulseHeads() >= 1, 2000);
+      // the first tick read an empty record: a is alone and quiet, its next tick 400 ms away
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      // B's stream is on another instance; the platform landed B's presence POST here, before A's
+      // own row has landed anywhere: the roster a reads is [B], and B is company, not own. The
+      // set re-arms the quiet poll at once (`nudge`), so the next 400 ms hold the active pace's
+      // heads and not the one head the quiet tick would have made
+      await a.presence.set('gt-brand', CLIENT_B, rosterEntry(CLIENT_B, 1, 'Cobalt 118'), 120_000);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect((await a.presence.roster('gt-brand')).map((row) => row.clientId)).toEqual([CLIENT_B]);
+      const before = pulseHeads();
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      // 400 ms at 20 ms a tick; before the hotfix the row read as own and a ticked once at 400 ms
+      expect(pulseHeads() - before).toBeGreaterThanOrEqual(8);
+      stop();
+      expect(errors).toEqual([]);
+      await a.close();
+    });
+
     it("keeps the active pace while the presence record's body cannot be read (the edge's window on a fresh record), instead of counting the tab alone on an empty read", async () => {
       const { fake, instance, errors, presenceOf } = await setup({ pollMs: 20, quietPollMs: 600 });
       const b = instance('b');

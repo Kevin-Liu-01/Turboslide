@@ -29,6 +29,7 @@ import {
   PULSE_SAFETY_TICKS,
   isStoreBusy,
   pollBackoffMs,
+  pollCompany,
   pollTickMs,
   storeRetryAfterMs,
 } from '@turboslide/store/pulse';
@@ -50,7 +51,7 @@ import type { FlagName } from './keys.ts';
 import { checkDeckId } from './keys.ts';
 import { memoryChannel } from './memory.ts';
 import type { MemoryChannel } from './memory.ts';
-import { PRESENCE_EXPIRY_MS, REPLAY_MAX_ENTRIES } from './protocol.ts';
+import { REPLAY_MAX_ENTRIES } from './protocol.ts';
 
 /** A watcher of the deck's comments index the channel drives: one read now, and the stop. */
 export type CommentsWatch = { poll: () => Promise<void>; stop: () => void };
@@ -121,12 +122,14 @@ type DeckState = {
   /** the last revision delivered to this instance's listeners */
   lastSeq: number;
   /**
-   * the client ids whose presence this instance's tabs set, with the time of the last set; the
-   * two paced tick reads its company from them and the roster (`nextTickMs`): a roster row not
-   * among them is another instance's tab, a second row among them is a second tab of this
-   * instance; an id no tab refreshed within PRESENCE_EXPIRY_MS is no longer own
+   * the client ids of the client streams open on this instance, with how many streams each id
+   * holds (a tab reconnecting can hold two for a moment); the two paced tick reads its company
+   * from them and the roster (`nextTickMs`, store/pulse.ts `pollCompany`): a roster row of an
+   * id here is this instance's own, every other row is another tab wherever its instance is.
+   * The stream route names the id at `subscribe` (channel.ts SubscribeOptions.clientId); the
+   * features round, ship one hotfix, in place of the rows this instance's presence route set
    */
-  ownClients: Map<string, number>;
+  streams: Map<string, number>;
   /** the store poll (the pulse loop with `shared`, the store's own watch without); running while a client stream is open here */
   watching: Promise<() => void> | undefined;
   /**
@@ -135,6 +138,14 @@ type DeckState = {
    * would otherwise wait for the quiet tick; undefined without a running pulse poll
    */
   wake: (() => void) | undefined;
+  /**
+   * re-arms the running pulse poll's tick from the roster copy this instance holds, with no
+   * store call of its own (`startPulsePoll`): a presence POST of a tab whose stream is elsewhere
+   * landed here, so the copy gained a row of company and a quiet poll returns to the active pace
+   * at once instead of at its next quiet tick (the features round, ship one hotfix); undefined
+   * without a running pulse poll
+   */
+  nudge: (() => void) | undefined;
   store: Promise<DeckStore> | undefined;
   /** the client streams subscribed on this instance; the poll runs while there is one */
   listeners: number;
@@ -300,9 +311,10 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
         lastWriteAt: 0,
         lastOpAt: 0,
         lastSeq: -1,
-        ownClients: new Map(),
+        streams: new Map(),
         watching: undefined,
         wake: undefined,
+        nudge: undefined,
         store: undefined,
         listeners: 0,
         commits: 0,
@@ -495,34 +507,36 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
      * instance. The platform routes every request on its own, so a tab's ops POST may commit on
      * an instance other than the one holding its stream, and every other tab of the deck then
      * learns of that commit through its own instance's tick. The tick is therefore active
-     * whenever the deck has more than one tab anywhere: a roster row another instance's tab
-     * set, a second row this instance's tabs set, or a second stream open here; it is quiet
-     * only for a tab that is alone. Before the sync and costs round's ship the rows this
-     * instance's tabs set never counted, so two tabs of one instance read each other's first
-     * words at the quiet tick (VERIFICATION.md "Sync and costs round, pass 2" F1).
+     * whenever the deck has more than one tab anywhere: a roster row of a tab whose stream is
+     * not here, whichever instance's presence route set it, a second row of this instance's
+     * own tabs, or a second stream open here; it is quiet only for a tab that is alone. Own is
+     * exact by client id since the features round's ship one hotfix (store/pulse.ts
+     * `pollCompany`: the stream route names its tab's id at `subscribe`); before it a row
+     * counted as own when this instance's presence route had set it, and an editor's row set
+     * through the instance holding only the other editor's stream read as that instance's own,
+     * so the instance counted itself alone and ticked at the quiet pace while the other editor
+     * worked (ship.md 7.3, 13.5: a slide added on another instance reached the owner 5 to 10 s
+     * later). Before the sync and costs round's ship the rows this instance's tabs set never
+     * counted, so two tabs of one instance read each other's first words at the quiet tick
+     * (VERIFICATION.md "Sync and costs round, pass 2" F1).
      */
     const nextTickMs = async (): Promise<number> => {
       const roster = await shared.presence.roster(deckId);
       const t = now();
-      const own = (clientId: string): boolean => {
-        const at = state.ownClients.get(clientId);
-        if (at === undefined) return false;
-        if (t - at < PRESENCE_EXPIRY_MS) return true;
-        state.ownClients.delete(clientId);
-        return false;
-      };
-      const ownRows = roster.filter((row) => own(row.clientId)).length;
-      const otherRows = roster.length - ownRows;
-      // company: a row of another instance's tab, a second row of this instance's tabs, or a
-      // second stream open here (a stream whose tab has not pushed its row yet counts as well).
-      // A roster that is not a reading of the record yet (the record's body could not be read,
-      // presence-store.ts readRemote) never counts the tab alone: the active tick holds until
-      // a read proves it (the features round, ship one: a fresh viewer's instance read an empty
-      // roster at its first tick and waited a quiet tick for the editor's first word)
+      // company: a row of a tab whose stream is not here, a second row of this instance's own
+      // tabs, or a second stream open here (a stream whose tab has not pushed its row yet counts
+      // as well). A roster that is not a reading of the record yet (the record's body could not
+      // be read, presence-store.ts readRemote) never counts the tab alone: the active tick holds
+      // until a read proves it (the features round, ship one: a fresh viewer's instance read an
+      // empty roster at its first tick and waited a quiet tick for the editor's first word)
       return pollTickMs({
         now: t,
         lastOpAt: state.lastOpAt,
-        others: otherRows + Math.max(0, ownRows - 1, state.listeners - 1),
+        others: pollCompany({
+          roster: roster.map((row) => row.clientId),
+          streams: [...state.streams.keys()],
+          listeners: state.listeners,
+        }),
         activeMs: pollMs,
         quietMs: quietPollMs,
         rosterKnown: shared.presence.proven(deckId),
@@ -559,6 +573,22 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
         const wait = await nextTickMs();
         if (now() + wait < dueAt) arm(wait);
       })().catch((error: unknown) => onError(error, `blob: waking the poll of ${deckId} failed`));
+    };
+    /**
+     * A presence POST of a tab whose stream is elsewhere landed on this instance (`presence.set`
+     * below): the roster copy holds its row already, so the tick is re-armed from the copy with
+     * no read of the record. A quiet poll (a tab alone) returns to the active pace at once, where
+     * it used to wait for its next quiet tick, up to 10 s, before it counted the colleague; a
+     * poll already at the active pace re-arms nothing sooner. The roster question costs a store
+     * call only when the copy is older than the presence poll interval (presence-store.ts
+     * `roster`), so at most one read per return from the quiet pace.
+     */
+    state.nudge = (): void => {
+      if (stopped || dueAt === Number.POSITIVE_INFINITY) return;
+      void (async () => {
+        const wait = await nextTickMs();
+        if (!stopped && now() + wait < dueAt) arm(wait);
+      })().catch((error: unknown) => onError(error, `blob: nudging the poll of ${deckId} failed`));
     };
     state.comments = shared.watchComments?.(deckId, (change) => {
       // a moved comments index becomes the checkpoint frame with `comments` the memory tier's
@@ -638,6 +668,7 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
       stopped = true;
       if (timer !== undefined) clearTimeout(timer);
       state.wake = undefined;
+      state.nudge = undefined;
       state.comments?.stop();
       state.comments = undefined;
     };
@@ -768,6 +799,11 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
       // deck is open on this instance, and never otherwise (the budget)
       if (options?.passive === true) return stop;
       state.listeners += 1;
+      // the stream's tab, by id: its roster row is this instance's own for the two paced tick
+      // and every other row is company (nextTickMs; store/pulse.ts pollCompany)
+      const clientId = options?.clientId;
+      if (clientId !== undefined)
+        state.streams.set(clientId, (state.streams.get(clientId) ?? 0) + 1);
       // a stream back inside the prune's wait (the lifetime's end, a reconnect): no prune
       if (state.pruneTimer !== undefined) {
         clearTimeout(state.pruneTimer);
@@ -814,6 +850,11 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
         released = true;
         stop();
         state.listeners -= 1;
+        if (clientId !== undefined) {
+          const left = (state.streams.get(clientId) ?? 1) - 1;
+          if (left <= 0) state.streams.delete(clientId);
+          else state.streams.set(clientId, left);
+        }
         if (state.listeners <= 0) {
           stopWatching(state);
           pruneAtClose(deckId);
@@ -833,17 +874,19 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
       deps.shared === undefined
         ? local.presence
         : {
-            set: (deckId, clientId, state, ttlMs) => {
-              // a row this instance's tab set is its own: the two paced tick reads its company
-              // from the rows that are not, and from a second own row (nextTickMs)
-              stateOf(deckId).ownClients.set(clientId, now());
-              return deps.shared!.presence.set(deckId, clientId, state, ttlMs);
+            // which rows are this instance's own is read from the open streams, never from the
+            // presence route that set a row: the platform lands a tab's POST on any instance
+            // (nextTickMs; the features round, ship one hotfix). A row of a tab whose stream is
+            // not here is company that just arrived in this instance's copy: a running poll
+            // re-arms its tick from the copy (startPulsePoll `nudge`)
+            set: async (deckId, clientId, state, ttlMs) => {
+              await deps.shared!.presence.set(deckId, clientId, state, ttlMs);
+              const deck = stateOf(deckId);
+              if (!deck.streams.has(clientId)) deck.nudge?.();
             },
             roster: (deckId) => deps.shared!.presence.roster(deckId),
-            leave: (deckId, clientId, clock) => {
-              stateOf(deckId).ownClients.delete(clientId);
-              return deps.shared!.presence.leave(deckId, clientId, clock);
-            },
+            leave: (deckId, clientId, clock) =>
+              deps.shared!.presence.leave(deckId, clientId, clock),
             // the client bindings stay per instance: the id's own MAC decides on another one
             // (apps/studio/src/server/room.ts clientBoundTo)
             bind: local.presence.bind,

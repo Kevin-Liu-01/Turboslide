@@ -12,7 +12,15 @@ import { authorFor, authorize, denialBody, requestContext } from '../../server/a
 import { assertFlag } from '../../server/flags';
 import { refuseForeignOrigin } from '../../server/headers';
 import { isLogoSlug, isLogoVariantKey } from '../../server/logo-index';
-import { LogoUpstreamError, logoInsert, logoService, refreshCredential } from '../../server/logos';
+import {
+  LOGO_STORE_BUSY_MESSAGE,
+  LOGO_STORE_RETRY_AFTER_S,
+  LogoUpstreamError,
+  isLogoStoreBusy,
+  logoInsert,
+  logoService,
+  refreshCredential,
+} from '../../server/logos';
 import type { LogoInsertInput } from '../../server/logos';
 import { flushRoom, readJsonBody, refuseCrossSite, refuseNonJson } from '../../server/room';
 import type { RouteRefusal } from '../../server/room';
@@ -48,6 +56,9 @@ import { createStoredDeck, deckDir, isUnsavedDraft, openDeckStore } from '../../
 // Every refusal is one JSON object in the shape of the agent surface's errors; nothing here prints
 // a token. The store budget of docs/SYNC.md 4 holds: a search reads the index this instance holds,
 // a tile is one store read for a cached open mark, an insert is the asset's puts and one write.
+// A store refusal under any of the four (the index read the public store's edge withholds after
+// the refresh wrote it, a 429, the deadline; server/logos.ts `LogoStoreBusyError`) is answered as
+// 503 with `retry-after` and the one sentence, never the framework's 500 (build/hotfix.md 2).
 
 export const Route = createFileRoute('/api/logo/$')({
   server: {
@@ -66,6 +77,28 @@ const MARK_PATH = /^mark\/([^/]+)\/([^/]+)\.svg$/;
 
 function notFound(message: string): Response {
   return jsonResponse({ error: { name: 'RangeError', status: 404, message } }, 404);
+}
+
+/**
+ * The store refuses a read for now (server/logos.ts `isLogoStoreBusy`): 503 with `retry-after`,
+ * the product's sentence and the action, so the dialog and an agent ask again instead of reading
+ * a 500; null for every other error, which stays the caller's to answer.
+ */
+function storeBusy(error: unknown, action: string): Response | null {
+  if (!isLogoStoreBusy(error)) return null;
+  return jsonResponse(
+    {
+      error: {
+        name: 'Error',
+        status: 503,
+        message: LOGO_STORE_BUSY_MESSAGE,
+        code: 'store_busy',
+        action,
+      },
+    },
+    503,
+    { 'retry-after': String(LOGO_STORE_RETRY_AFTER_S) },
+  );
 }
 
 /** A refusal of the room routes' rules as the agent surface's error body. */
@@ -116,7 +149,7 @@ async function serveMark(request: Request, slug: string, variant: string): Promi
   try {
     answer = await (await logoService()).mark(slug, variant);
   } catch (error) {
-    return errorResponse(error, 'logo.mark');
+    return storeBusy(error, 'logo.mark') ?? errorResponse(error, 'logo.mark');
   }
   if (!answer.ok) {
     return jsonResponse(
@@ -184,7 +217,7 @@ async function serveSearch(request: Request): Promise<Response> {
     ).search(query, options, since === null || since === '' ? {} : { since });
     return jsonResponse(answer);
   } catch (error) {
-    return errorResponse(error, 'logo.search');
+    return storeBusy(error, 'logo.search') ?? errorResponse(error, 'logo.search');
   }
 }
 
@@ -211,7 +244,7 @@ async function serveRefresh(request: Request): Promise<Response> {
     const counts = await (await logoService()).refresh({ dryRun });
     return jsonResponse({ ...counts, credential });
   } catch (error) {
-    return errorResponse(error, 'logo.refresh');
+    return storeBusy(error, 'logo.refresh') ?? errorResponse(error, 'logo.refresh');
   }
 }
 
@@ -286,6 +319,6 @@ async function serveInsert(request: Request): Promise<Response> {
         503,
         { 'retry-after': '60' },
       );
-    return errorResponse(error, 'logo.insert');
+    return storeBusy(error, 'logo.insert') ?? errorResponse(error, 'logo.insert');
   }
 }

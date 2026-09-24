@@ -15,6 +15,7 @@ import { grammarRecordOf, toCanvas } from '@turboslide/schema/canvas';
 import type { Deck, Slide } from '@turboslide/schema/deck';
 import { FREEFORM_SLIDE, TITLE, WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
 import { canonicalJson } from '@turboslide/schema/json';
+import { memoryBlobClient } from '@turboslide/store/blob-fake';
 import { openFileStore, slidePath } from '@turboslide/store/file-store';
 
 import {
@@ -24,7 +25,11 @@ import {
 } from './logo-fixtures/manifest';
 import { FIXTURE_MARKS } from './logo-fixtures/marks';
 import {
+  LOGO_DISCOVERIES_PATH,
   LOGO_DOWN_MESSAGE,
+  LOGO_INDEX_PATH,
+  LOGO_MARKS_PREFIX,
+  blobLogoStore,
   downUpstream,
   emptyLogoIndex,
   fixtureUpstream,
@@ -52,6 +57,9 @@ import {
   withAttribution,
 } from './logo-sanitize';
 import {
+  LOGO_STORE_BUSY_MESSAGE,
+  LOGO_STORE_RETRY_AFTER_S,
+  LogoStoreBusyError,
   createLogoService,
   kitLogoMutations,
   logoInsert,
@@ -656,7 +664,13 @@ describe('the refresh (4.2, 4.9)', () => {
     await a.index();
     expect((await a.mark(FIXTURE_DROPPED_SLUG, 'default')).ok).toBe(true);
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect((await store.readIndex())?.cached[`${FIXTURE_DROPPED_SLUG}/default`]).toBeDefined();
+    /* the discovery goes to the side record and never rewrites the index (build/hotfix.md 2);
+       the instances that load after it read the cached mark from the record */
+    expect((await store.readIndex())?.cached[`${FIXTURE_DROPPED_SLUG}/default`]).toBeUndefined();
+    expect(
+      (await store.readDiscoveries())?.cached[`${FIXTURE_DROPPED_SLUG}/default`],
+    ).toBeDefined();
+    expect(store.writes).toBe(1);
     let bHeld: () => LogoIndex | null = () => null;
     const b = createLogoService({
       store,
@@ -1150,5 +1164,194 @@ describe('the insert (4.4, 4.11)', () => {
       answers.push(await upstream.mark(icon.variants.default as string, 'bulk'));
     expect(answers.every((answer) => answer.ok)).toBe(true);
     expect((await upstream.mark(FIXTURE_MISSING_PATH, 'single')).ok).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// The store's busy window and the side record of discoveries (build/hotfix.md section 2; ship.md 13.4)
+
+describe("the store's busy window and the discoveries record (build/hotfix.md 2)", () => {
+  /** The SDK's sentence for the public store's edge on a just written file (store/pulse.ts isStoreBusy). */
+  const forbidden = (): Error => new Error('Vercel Blob: Failed to fetch blob: 403 Forbidden');
+  const markPath = (slug: string, variant: string): string =>
+    `${LOGO_MARKS_PREFIX}${slug}/${variant}.svg`;
+  let counter = 0;
+
+  /**
+   * One fake Blob store with the ten mark fixture index built into it; `instance` opens a store
+   * view with a mirror folder of its own (a function instance's disk), `service` a logo service
+   * over it; `puts` counts the writes of one pathname.
+   */
+  async function blobFixture() {
+    const fake = memoryBlobClient();
+    const instance = (name: string, mirrorDir?: string) =>
+      blobLogoStore(fake, mirrorDir ?? join(tmp, `blob-${name}-${(counter += 1)}`));
+    const service = (name: string, mirrorDir?: string) =>
+      createLogoService({
+        store: instance(name, mirrorDir),
+        upstream: fixtureUpstream(() => null),
+        rasterize: fakeRasterizer,
+        now: () => NOW,
+      });
+    await refreshLogoIndex({
+      store: instance('builder'),
+      upstream: fixtureUpstream(() => null),
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+    });
+    const puts = (pathname: string): number =>
+      fake.calls.filter((call) => call.op === 'put' && call.pathname === pathname).length;
+    return { fake, instance, service, puts };
+  }
+
+  it('answers a search from the held copy while the store refuses the index it was asked to adopt, and adopts it once the store serves it', async () => {
+    const { fake, instance, service } = await blobFixture();
+    const warm = service('warm');
+    expect((await warm.search('figma')).logos[0]?.slug).toBe('figma');
+    const before = warm.held()!.builtAt;
+    /* another instance's refresh moved the store's version, and the edge withholds the body */
+    const other = instance('other');
+    const moved: LogoIndex = { ...(await other.readIndex())!, builtAt: '2026-09-22T07:00:00.000Z' };
+    await other.writeIndex(moved);
+    fake.failNextGet(LOGO_INDEX_PATH, forbidden());
+    const answer = await warm.search('figma', {}, { since: moved.builtAt! });
+    expect(answer.logos[0]?.slug).toBe('figma');
+    expect(answer.indexed).toBeGreaterThan(0);
+    /* the held copy is still the earlier build, never taken for the store's version */
+    expect(warm.held()!.builtAt).toBe(before);
+    /* the window over: the next revalidation adopts the build */
+    expect((await warm.revalidate()).builtAt).toBe(moved.builtAt);
+  });
+
+  it('answers 503 with a retry of a few seconds on a cold instance with no copy, loads on the next request, and serves the disk mirror when it holds one', async () => {
+    const { fake, service } = await blobFixture();
+    const cold = service('cold');
+    fake.failNextGet(LOGO_INDEX_PATH, forbidden());
+    const refused = await cold.search('figma').catch((error: unknown) => error);
+    expect(refused).toBeInstanceOf(LogoStoreBusyError);
+    expect(refused).toMatchObject({
+      status: 503,
+      retryAfterS: LOGO_STORE_RETRY_AFTER_S,
+      message: LOGO_STORE_BUSY_MESSAGE,
+    });
+    expect(LOGO_STORE_RETRY_AFTER_S).toBeLessThanOrEqual(10);
+    expect(cold.held()).toBeNull();
+    /* the edge serves the file: the next request loads and answers */
+    expect((await cold.search('figma')).logos[0]?.slug).toBe('figma');
+    /* an instance whose disk holds its last read answers from it while the store refuses, with
+       the version unknown so the next revalidation reads the store again */
+    const mirrorDir = join(tmp, 'blob-mirror-shared');
+    await service('first', mirrorDir).index();
+    const second = service('second', mirrorDir);
+    fake.failNextGet(LOGO_INDEX_PATH, forbidden());
+    expect((await second.search('figma')).logos[0]?.slug).toBe('figma');
+    expect(second.held()).not.toBeNull();
+    /* a mark during the window answers the mark: the upstream's file, sanitized, and cached */
+    const vercel = await second.mark('vercel', 'dark');
+    expect(vercel.ok).toBe(true);
+    expect(vercel.ok && vercel.svg).toContain('<svg');
+    /* the revalidation after the window reads the store's index and the version */
+    await second.revalidate();
+    expect(second.held()!.builtAt).toBe(NOW.toISOString());
+  });
+
+  it('answers a cached mark from the upstream while the edge withholds its file, and writes nothing since the store holds it', async () => {
+    const { fake, service, puts } = await blobFixture();
+    const a = service('a');
+    const first = await a.mark('figma', 'default');
+    expect(first.ok && !first.cached).toBe(true);
+    expect(puts(markPath('figma', 'default'))).toBe(1);
+    expect((await a.index()).cached['figma/default']).toBeDefined();
+    /* the file is in the store by the index's word; the edge refuses it for this call */
+    fake.failNextGet(markPath('figma', 'default'), forbidden());
+    const withheld = await a.mark('figma', 'default');
+    expect(withheld.ok).toBe(true);
+    expect(withheld.ok && withheld.cached).toBe(false);
+    expect(withheld.ok && withheld.svg).toContain('<svg');
+    expect(puts(markPath('figma', 'default'))).toBe(1);
+    expect((await a.index()).cached['figma/default']).toBeDefined();
+    /* the edge serves it: the store's copy answers, cached */
+    const served = await a.mark('figma', 'default');
+    expect(served.ok && served.cached).toBe(true);
+  });
+
+  it('writes a discovery to the side record and never to the index; an instance loading after it reads the cached mark from the record', async () => {
+    const { fake, service, puts } = await blobFixture();
+    const a = service('a');
+    await a.index();
+    expect(puts(LOGO_INDEX_PATH)).toBe(1);
+    expect(puts(LOGO_DISCOVERIES_PATH)).toBe(0);
+    /* a cached mark and a missing variant, discovered on this instance */
+    expect((await a.mark('figma', 'default')).ok).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(puts(LOGO_INDEX_PATH)).toBe(1);
+    expect(puts(LOGO_DISCOVERIES_PATH)).toBe(1);
+    const stored = new TextDecoder().decode(fake.blobs.get(LOGO_DISCOVERIES_PATH)!.bytes);
+    expect(JSON.parse(stored)).toMatchObject({
+      v: 1,
+      cached: { 'figma/default': { at: NOW.toISOString() } },
+    });
+    /* the record is a few hundred bytes against the index */
+    expect(fake.blobs.get(LOGO_DISCOVERIES_PATH)!.bytes.byteLength).toBeLessThan(
+      fake.blobs.get(LOGO_INDEX_PATH)!.bytes.byteLength / 4,
+    );
+    /* the second discovery inside the minute stays pending on the instance (the throttle) */
+    expect((await a.mark('acme', 'wordmark')).ok).toBe(false);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(puts(LOGO_DISCOVERIES_PATH)).toBe(1);
+    expect(puts(LOGO_INDEX_PATH)).toBe(1);
+    expect((await a.row('acme'))?.unavailable?.wordmark?.status).toBe(404);
+    /* another instance loading now reads the cached mark from the record and fetches nothing */
+    const b = service('b');
+    expect((await b.index()).cached['figma/default']).toBeDefined();
+    const fromStore = await b.mark('figma', 'default');
+    expect(fromStore.ok && fromStore.cached).toBe(true);
+    /* the search answers from the held index alone; the record is read once at the load */
+    const gets = (): number =>
+      fake.calls.filter((call) => call.op === 'get' && call.pathname === LOGO_DISCOVERIES_PATH)
+        .length;
+    const before = gets();
+    await b.search('figma');
+    await b.search('vercel');
+    expect(gets()).toBe(before);
+  });
+
+  it('folds the side record and the pending discoveries into the index at the refresh, then clears the record', async () => {
+    const { fake, instance, service, puts } = await blobFixture();
+    const a = service('a');
+    expect((await a.mark('figma', 'default')).ok).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(puts(LOGO_DISCOVERIES_PATH)).toBe(1);
+    /* still pending on the instance inside the throttle */
+    expect((await a.mark('acme', 'wordmark')).ok).toBe(false);
+    /* the store's index holds neither discovery yet */
+    const stale = await instance('reader').readIndex();
+    expect(stale?.cached['figma/default']).toBeUndefined();
+    expect(stale?.icons.find((row) => row.slug === 'acme')?.unavailable).toBeUndefined();
+    const indexGets = (): number =>
+      fake.calls.filter((call) => call.op === 'get' && call.pathname === LOGO_INDEX_PATH).length;
+    const getsBefore = indexGets();
+    const counts = await a.refresh();
+    expect(counts.cachedMarks).toBe(1);
+    expect(counts.unavailable).toBe(1);
+    expect(puts(LOGO_INDEX_PATH)).toBe(2);
+    /* the refresh's one read of the previous index, and none after its put: the written index
+       is adopted from the refresh's own hand, never read back through the store's edge */
+    expect(indexGets() - getsBefore).toBe(1);
+    const refreshed = await instance('reader').readIndex();
+    expect(refreshed?.cached['figma/default']?.at).toBe(NOW.toISOString());
+    expect(refreshed?.icons.find((row) => row.slug === 'acme')?.unavailable?.wordmark).toEqual({
+      at: NOW.toISOString(),
+      status: 404,
+      reason: 'missing',
+    });
+    /* the record is cleared; the instance adopted the written index without a read back */
+    const record = await instance('reader').readDiscoveries();
+    expect(record === null || Object.keys(record.cached).length === 0).toBe(true);
+    expect(a.held()!.cached['figma/default']).toBeDefined();
+    /* a dry run reads the record and clears nothing */
+    const dry = await a.refresh({ dryRun: true });
+    expect(dry.cachedMarks).toBe(1);
+    expect(puts(LOGO_INDEX_PATH)).toBe(2);
   });
 });

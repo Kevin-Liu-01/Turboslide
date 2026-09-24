@@ -236,6 +236,14 @@ export type RoomListener = (event: RoomEvent) => void;
 export type SubscribeOptions = {
   /** a listener of the instance's own (the room's live document), never a client's stream */
   passive?: boolean;
+  /**
+   * the server issued client id of the tab whose stream this subscription is (the stream route
+   * names it; the features round, ship one hotfix): on the blob tier the channel reads a roster
+   * row of this id as the stream's own and every other row as company for the pulse's two paced
+   * tick (blob.ts `nextTickMs`, store/pulse.ts `pollCompany`), so own is exact by id instead of
+   * guessed from which instance's presence route set the row. The other tiers ignore it.
+   */
+  clientId?: string;
 };
 
 export type LockOptions = {

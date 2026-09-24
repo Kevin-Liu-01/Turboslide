@@ -85,6 +85,37 @@ export function pollTickMs(input: PollTickInput): number {
   return inUse || company || unknown ? activeMs : Math.max(activeMs, quietMs);
 }
 
+export type PollCompanyInput = {
+  /** the client ids of the deck's roster rows, whichever instance set them (the shared presence copy) */
+  roster: readonly string[];
+  /** the client ids of the client streams open on this instance (channel.ts `SubscribeOptions.clientId`) */
+  streams: readonly string[];
+  /** how many client streams of the deck are open on this instance, ids or not */
+  listeners: number;
+};
+
+/**
+ * `others` for `pollTickMs` (the features round, ship one hotfix; build/hotfix.md section 3): how
+ * many tabs keep the deck company on this instance. A roster row is this instance's own exactly
+ * when a stream of that client id is open here, and every other row is another tab wherever its
+ * instance is, so two editors on two instances both read one row of company; a second own row,
+ * or a second stream open here, is company as well (a tab's POST may commit on another
+ * instance). Before this the blob channel counted a row as own when this instance's presence
+ * route had set it, which read an editor's row as own on an instance holding only the other
+ * editor's stream (ship.md 7.3, 13.5). A stream without an id (a test's) counts through
+ * `listeners` alone and never claims a row.
+ */
+export function pollCompany(input: PollCompanyInput): number {
+  const own = new Set(input.streams);
+  let ownRows = 0;
+  let otherRows = 0;
+  for (const clientId of input.roster) {
+    if (own.has(clientId)) ownRows += 1;
+    else otherRows += 1;
+  }
+  return otherRows + Math.max(0, ownRows - 1, input.listeners - 1);
+}
+
 export const PULSE_FILE = 'pulse.json';
 
 /** What last moved the deck's pulse. */

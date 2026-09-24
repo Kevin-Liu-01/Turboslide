@@ -16,6 +16,17 @@
 // it); the upstream is the network, the ten mark fixture (`TURBOSLIDE_LOGO_UPSTREAM=fixture`) or
 // nothing at all (`down`), so the rows can be driven without thesvg.org. Framework free; the
 // rasterizer is injected so the tests run without sharp where they measure nothing.
+//
+// The hotfix of ship one (build/hotfix.md section 2; ship.md 13.4): the index's pathname is
+// written by the refresh alone. A discovery an instance makes between refreshes (a mark cached on
+// a first fetch, a variant found missing or broken) goes to the small side record
+// `system/logo-discoveries.json`, which every instance merges into the index it reads at its load
+// and the refresh folds into the file it writes, then clears. Before this every discovery
+// rewrote the 3.6 MB index, and the public store's edge refuses a just written pathname for two
+// to three minutes, so a seller's searches opened a window in which every logo route of a cold
+// instance answered 500. In that window the Blob store's `readIndex` answers this instance's disk
+// mirror when it holds one, and throws the store's own error otherwise, which logos.ts turns
+// into a 503 with `retry-after`; nothing here answers an empty index for a store condition.
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -488,17 +499,154 @@ export function cachedKeysOfSlug(index: LogoIndex, slug: string): string[] {
 
 export type LogoStore = {
   readonly kind: 'disk' | 'blob' | 'memory';
+  /**
+   * the stored index, or null when the store holds none; a read the store refuses for now (the
+   * public store's edge on a just written file, a 429, the deadline; store/pulse.ts
+   * `isStoreBusy`) throws the store's error, never answers null, so a caller can tell "not
+   * there" from "not now"
+   */
   readIndex: () => Promise<LogoIndex | null>;
+  /**
+   * the copy of the index this instance holds on disk from its last read or write (the Blob
+   * store's mirror folder, the disk store's own file); null when none. Read when the store
+   * refuses the index (logos.ts `load`), never in place of the store: its version is unknown
+   */
+  readMirror: () => Promise<LogoIndex | null>;
   /** the version of the stored index (an etag, an mtime), for a cheap revalidation; null when none */
   indexVersion: () => Promise<string | null>;
   writeIndex: (index: LogoIndex) => Promise<void>;
   readMark: (slug: string, variant: string) => Promise<Uint8Array | null>;
   writeMark: (slug: string, variant: string, bytes: Uint8Array) => Promise<void>;
   removeMarks: (keys: ReadonlyArray<string>) => Promise<void>;
+  /** the side record of the discoveries made since the last refresh (`LogoDiscoveries`); null when none */
+  readDiscoveries: () => Promise<LogoDiscoveries | null>;
+  writeDiscoveries: (record: LogoDiscoveries) => Promise<void>;
 };
+
+/**
+ * The discoveries the instances make between two refreshes (build/hotfix.md section 2): the
+ * marks cached on a first fetch and the variants found missing or broken, keyed as the index
+ * keys them. One small file for every instance, merged at each write (`mergeLogoDiscoveries`),
+ * merged into the index an instance loads (`applyLogoDiscoveries`) and folded into the index by
+ * the refresh alone, which then clears it. Under a hundred rows on a busy day, against the 3.6 MB
+ * index it used to rewrite.
+ */
+export type LogoDiscoveries = {
+  v: 1;
+  /** the time of the last write */
+  at: string;
+  cached: Record<string, CachedMark>;
+  unavailable: Record<string, Record<string, LogoUnavailable>>;
+};
+
+export function emptyLogoDiscoveries(at = new Date(0).toISOString()): LogoDiscoveries {
+  return { v: 1, at, cached: {}, unavailable: {} };
+}
+
+/** True when the record names nothing. */
+export function discoveriesEmpty(record: LogoDiscoveries): boolean {
+  return Object.keys(record.cached).length === 0 && Object.keys(record.unavailable).length === 0;
+}
+
+export function parseLogoDiscoveries(raw: unknown): LogoDiscoveries | null {
+  if (typeof raw !== 'object' || raw === null) return null;
+  const record = raw as Record<string, unknown>;
+  if (record.v !== 1) return null;
+  const out = emptyLogoDiscoveries(typeof record.at === 'string' ? record.at : undefined);
+  if (typeof record.cached === 'object' && record.cached !== null) {
+    for (const [key, value] of Object.entries(record.cached as Record<string, unknown>)) {
+      const [slug, variant] = key.split('/');
+      if (!isLogoSlug(slug) || !isLogoVariantKey(variant) || !isCachedMark(value)) continue;
+      out.cached[key] = { at: value.at, digest: value.digest, bytes: value.bytes };
+    }
+  }
+  if (typeof record.unavailable === 'object' && record.unavailable !== null) {
+    for (const [slug, marks] of Object.entries(record.unavailable as Record<string, unknown>)) {
+      if (!isLogoSlug(slug) || typeof marks !== 'object' || marks === null) continue;
+      const kept: Record<string, LogoUnavailable> = {};
+      for (const [variant, mark] of Object.entries(marks as Record<string, unknown>))
+        if (isLogoVariantKey(variant) && isUnavailable(mark)) kept[variant] = mark;
+      if (Object.keys(kept).length > 0) out.unavailable[slug] = kept;
+    }
+  }
+  return out;
+}
+
+function isCachedMark(value: unknown): value is CachedMark {
+  if (typeof value !== 'object' || value === null) return false;
+  const mark = value as Record<string, unknown>;
+  return (
+    typeof mark.at === 'string' && typeof mark.digest === 'string' && typeof mark.bytes === 'number'
+  );
+}
+
+export function logoDiscoveriesBytes(record: LogoDiscoveries): Uint8Array {
+  return new TextEncoder().encode(canonicalJson(record));
+}
+
+/** The union of two records; where both name one variant, the later mark stands. */
+export function mergeLogoDiscoveries(
+  base: LogoDiscoveries,
+  over: LogoDiscoveries,
+  at: string,
+): LogoDiscoveries {
+  const out: LogoDiscoveries = {
+    v: 1,
+    at,
+    cached: { ...base.cached },
+    unavailable: {},
+  };
+  for (const [key, mark] of Object.entries(over.cached)) {
+    const held = out.cached[key];
+    if (held === undefined || held.at <= mark.at) out.cached[key] = mark;
+  }
+  for (const record of [base, over]) {
+    for (const [slug, marks] of Object.entries(record.unavailable)) {
+      const kept = { ...(out.unavailable[slug] ?? {}) };
+      for (const [variant, mark] of Object.entries(marks)) {
+        const held = kept[variant];
+        if (held === undefined || held.at <= mark.at) kept[variant] = mark;
+      }
+      out.unavailable[slug] = kept;
+    }
+  }
+  return out;
+}
+
+/**
+ * Writes the record's discoveries into an index, in place: a cached mark whose slug and variant
+ * the index lists under an open licence, and an unavailable mark of a variant the row has, where
+ * the index does not already record one. What the record names and the index does not hold (a
+ * dropped slug) is left out, as the refresh's eviction leaves it out.
+ */
+export function applyLogoDiscoveries(index: LogoIndex, record: LogoDiscoveries): number {
+  const bySlug = new Map(index.icons.map((row) => [row.slug, row]));
+  let applied = 0;
+  for (const [key, mark] of Object.entries(record.cached)) {
+    if (index.cached[key] !== undefined) continue;
+    const [slug, variant] = key.split('/') as [string, string];
+    const row = bySlug.get(slug);
+    if (row === undefined || row.variants[variant] === undefined || !isOpenLicence(row.license))
+      continue;
+    index.cached[key] = mark;
+    applied += 1;
+  }
+  for (const [slug, marks] of Object.entries(record.unavailable)) {
+    const row = bySlug.get(slug);
+    if (row === undefined) continue;
+    for (const [variant, mark] of Object.entries(marks)) {
+      if (row.variants[variant] === undefined || row.unavailable?.[variant] !== undefined) continue;
+      row.unavailable = { ...(row.unavailable ?? {}), [variant]: mark };
+      applied += 1;
+    }
+  }
+  return applied;
+}
 
 /** The index and the sanitized marks under the store: `system/logo-index.json`, `system/logos/<slug>/<variant>.svg`. */
 export const LOGO_INDEX_PATH = 'system/logo-index.json';
+/** The side record of the discoveries between refreshes (build/hotfix.md section 2). */
+export const LOGO_DISCOVERIES_PATH = 'system/logo-discoveries.json';
 export const LOGO_MARKS_PREFIX = 'system/logos/';
 /** A cached mark leaves the store after a week (4.2). */
 export const LOGO_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
@@ -519,14 +667,20 @@ function readJson(path: string): unknown {
   }
 }
 
-/** The store of a checkout and the tmp backend: `<dir>/index.json` and `<dir>/marks/<slug>/<variant>.svg`. */
+/** The store of a checkout and the tmp backend: `<dir>/index.json`, `<dir>/discoveries.json` and `<dir>/marks/<slug>/<variant>.svg`. */
 export function diskLogoStore(dir: string): LogoStore {
   const indexPath = join(dir, 'index.json');
+  const discoveriesPath = join(dir, 'discoveries.json');
   const markPath = (slug: string, variant: string): string =>
     join(dir, 'marks', markPathname(slug, variant).slice(LOGO_MARKS_PREFIX.length));
   return {
     kind: 'disk',
     async readIndex() {
+      if (!existsSync(indexPath)) return null;
+      return parseLogoIndex(readJson(indexPath));
+    },
+    async readMirror() {
+      // the disk never refuses a read; its own file is the copy
       if (!existsSync(indexPath)) return null;
       return parseLogoIndex(readJson(indexPath));
     },
@@ -541,6 +695,14 @@ export function diskLogoStore(dir: string): LogoStore {
       rmSync(indexPath, { force: true });
       writeFileSync(indexPath, bytes);
       rmSync(`${indexPath}.part`, { force: true });
+    },
+    async readDiscoveries() {
+      if (!existsSync(discoveriesPath)) return null;
+      return parseLogoDiscoveries(readJson(discoveriesPath));
+    },
+    async writeDiscoveries(record) {
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(discoveriesPath, logoDiscoveriesBytes(record));
     },
     async readMark(slug, variant) {
       const path = markPath(slug, variant);
@@ -565,8 +727,12 @@ export function diskLogoStore(dir: string): LogoStore {
 /**
  * The public Blob store hosted (4.2, 4.10): the index under `system/logo-index.json` with
  * `overwrite`, each cached mark under `system/logos/<slug>/<variant>.svg` with its content type
- * and a week of `cacheControlMaxAge` and no other metadata (the attribution is inside the file).
- * A mirror folder keeps this instance's last read so a cold instance reads the index once.
+ * and a week of `cacheControlMaxAge` and no other metadata (the attribution is inside the file),
+ * the side record of the discoveries under `system/logo-discoveries.json`. A mirror folder keeps
+ * this instance's last read and write of the index (`readMirror`), so a read the store refuses
+ * for now (the edge's window after the refresh wrote the file, ship.md 13.4) has a copy to fall
+ * back on in logos.ts `load`; `readIndex` itself throws the store's error, so the service never
+ * takes the copy for the store's current version.
  */
 export function blobLogoStore(client: BlobClient, mirrorDir?: string): LogoStore {
   const mirror = mirrorDir === undefined ? null : diskLogoStore(mirrorDir);
@@ -579,6 +745,9 @@ export function blobLogoStore(client: BlobClient, mirrorDir?: string): LogoStore
       if (index !== null && mirror !== null) await mirror.writeIndex(index).catch(() => undefined);
       return index;
     },
+    async readMirror() {
+      return mirror === null ? null : mirror.readIndex().catch(() => null);
+    },
     async indexVersion() {
       const head = await client.head(LOGO_INDEX_PATH);
       return head?.version ?? null;
@@ -590,6 +759,18 @@ export function blobLogoStore(client: BlobClient, mirrorDir?: string): LogoStore
         cacheControlMaxAge: 60,
       });
       if (mirror !== null) await mirror.writeIndex(index).catch(() => undefined);
+    },
+    async readDiscoveries() {
+      const got = await client.get(LOGO_DISCOVERIES_PATH);
+      if (got === null) return null;
+      return parseLogoDiscoveries(JSON.parse(new TextDecoder().decode(got.bytes)) as unknown);
+    },
+    async writeDiscoveries(record) {
+      await client.put(LOGO_DISCOVERIES_PATH, logoDiscoveriesBytes(record), {
+        overwrite: true,
+        contentType: 'application/json',
+        cacheControlMaxAge: 60,
+      });
     },
     async readMark(slug, variant) {
       const got = await client.get(markPathname(slug, variant));
@@ -614,17 +795,26 @@ export function blobLogoStore(client: BlobClient, mirrorDir?: string): LogoStore
   };
 }
 
-/** An in memory store for the tests. */
-export function memoryLogoStore(): LogoStore & { marks: Map<string, Uint8Array>; writes: number } {
+/** An in memory store for the tests; `writes` counts the index writes, `discoveryWrites` the side record's. */
+export function memoryLogoStore(): LogoStore & {
+  marks: Map<string, Uint8Array>;
+  writes: number;
+  discoveryWrites: number;
+} {
   let index: LogoIndex | null = null;
+  let discoveries: LogoDiscoveries | null = null;
   let version = 0;
   const marks = new Map<string, Uint8Array>();
   const store = {
     kind: 'memory' as const,
     marks,
     writes: 0,
+    discoveryWrites: 0,
     async readIndex() {
       return index === null ? null : parseLogoIndex(JSON.parse(canonicalJson(index)) as unknown);
+    },
+    async readMirror() {
+      return null;
     },
     async indexVersion() {
       return index === null ? null : String(version);
@@ -633,6 +823,15 @@ export function memoryLogoStore(): LogoStore & { marks: Map<string, Uint8Array>;
       index = JSON.parse(canonicalJson(next)) as LogoIndex;
       version += 1;
       store.writes += 1;
+    },
+    async readDiscoveries() {
+      return discoveries === null
+        ? null
+        : parseLogoDiscoveries(JSON.parse(canonicalJson(discoveries)) as unknown);
+    },
+    async writeDiscoveries(record: LogoDiscoveries) {
+      discoveries = JSON.parse(canonicalJson(record)) as LogoDiscoveries;
+      store.discoveryWrites += 1;
     },
     async readMark(slug: string, variant: string) {
       return marks.get(cachedMarkKey(slug, variant)) ?? null;
@@ -776,6 +975,17 @@ export type RefreshDeps = {
   budgetMs?: number;
   concurrency?: number;
   log?: (line: string) => void;
+  /**
+   * the discoveries the caller holds beside the store's side record (the instance's own, made
+   * since its last persist; logos.ts `refresh`), folded into the index with the record's
+   */
+  discoveries?: LogoDiscoveries;
+  /**
+   * called with every index this refresh writes (the built one, or the previous with
+   * `lastError`), so the caller adopts it without reading the just written file back through
+   * the store's edge (build/hotfix.md section 2)
+   */
+  onWritten?: (index: LogoIndex) => void;
 };
 
 /** The counts a dry run answers and a refresh returns (4.2). */
@@ -901,7 +1111,11 @@ export async function measureRow(
  * `POST /api/logo/refresh` and `logo.refresh` (4.2): the manifest fetched once, the rows merged,
  * the dropped slugs' cached files removed, the stale cached marks evicted, the reads pass over the
  * brand rows without flags at the concurrency inside the budget, the file written (complete or
- * partial with `progress`). `dryRun` answers the counts with no upstream fetch and no write.
+ * partial with `progress`). `dryRun` answers the counts with no upstream fetch and no write. The
+ * discoveries since the last refresh (the store's side record and the caller's own) are folded
+ * into the previous index first, so the cached marks and the unavailable variants the instances
+ * found ride into the file, and the side record is cleared once the file is written
+ * (build/hotfix.md section 2); a dry run reads the record and clears nothing.
  */
 export async function refreshLogoIndex(
   deps: RefreshDeps,
@@ -909,6 +1123,11 @@ export async function refreshLogoIndex(
 ): Promise<RefreshCounts> {
   const now = deps.now ?? (() => new Date());
   const previous = (await deps.store.readIndex()) ?? emptyLogoIndex();
+  // the side record is small and best effort: a read the store refuses leaves the discoveries
+  // for the next refresh, and the caller's own copy still folds in
+  const recorded = await deps.store.readDiscoveries().catch(() => null);
+  if (recorded !== null) applyLogoDiscoveries(previous, recorded);
+  if (deps.discoveries !== undefined) applyLogoDiscoveries(previous, deps.discoveries);
   if (options.dryRun === true) return indexCounts(previous, deps.upstream.mode, true);
   const started = Date.now();
   const budgetMs = deps.budgetMs ?? REFRESH_BUDGET_MS;
@@ -916,6 +1135,10 @@ export async function refreshLogoIndex(
   const sanitize = deps.sanitize ?? ((bytes: Uint8Array) => sanitizeLogoSvg(bytes));
   const rasterize = deps.rasterize ?? sharpRasterizer();
   const log = deps.log ?? (() => undefined);
+  const write = async (index: LogoIndex): Promise<void> => {
+    await deps.store.writeIndex(index);
+    deps.onWritten?.(index);
+  };
 
   const manifest = await deps.upstream.manifest();
   if (!manifest.ok) {
@@ -924,7 +1147,7 @@ export async function refreshLogoIndex(
       builtAt: now().toISOString(),
       lastError: { at: now().toISOString(), status: manifest.status, message: manifest.message },
     };
-    await deps.store.writeIndex(failed);
+    await write(failed);
     log(
       `logo refresh: the manifest did not answer (${manifest.message}); the previous index stands`,
     );
@@ -943,7 +1166,7 @@ export async function refreshLogoIndex(
         message: `the manifest did not parse: ${error instanceof Error ? error.message : String(error)}`,
       },
     };
-    await deps.store.writeIndex(failed);
+    await write(failed);
     return indexCounts(failed, deps.upstream.mode, false);
   }
   if (upstreamRows.length === 0) {
@@ -952,7 +1175,7 @@ export async function refreshLogoIndex(
       builtAt: now().toISOString(),
       lastError: { at: now().toISOString(), status: 422, message: 'the manifest lists no icons' },
     };
-    await deps.store.writeIndex(failed);
+    await write(failed);
     return indexCounts(failed, deps.upstream.mode, false);
   }
 
@@ -1013,7 +1236,18 @@ export async function refreshLogoIndex(
     cached,
   };
   if (!complete) next.progress = { done: brandTotal - remaining, total: brandTotal };
-  await deps.store.writeIndex(next);
+  await write(next);
+  // the discoveries are in the file now: the record is cleared, best effort, so the next load
+  // and the next refresh fold nothing twice (a put the store refuses leaves a record whose
+  // entries the index already holds, which applyLogoDiscoveries skips)
+  if (recorded !== null && !discoveriesEmpty(recorded))
+    await deps.store
+      .writeDiscoveries(emptyLogoDiscoveries(stamp))
+      .catch((error: unknown) =>
+        log(
+          `logo refresh: the discoveries record did not clear (${error instanceof Error ? error.message : String(error)})`,
+        ),
+      );
   log(
     `logo refresh: ${rows.length} icons, ${brandTotal} brand marks, ${fetched} fetched, ${remaining} without flags, ${dropped.length} dropped, ${evict.length} cached files evicted${complete ? '' : ' (partial, the next refresh resumes)'} in ${Date.now() - started} ms`,
   );

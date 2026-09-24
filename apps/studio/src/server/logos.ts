@@ -13,6 +13,17 @@
 // drives every rule over fakes; `logoService()` binds the deployment's: the disk under the state
 // folder on a checkout and the tmp store, the public Blob store hosted, the upstream the variable
 // names. Server only: sharp, the store and node:fs are on its graph.
+//
+// The hotfix of ship one (build/hotfix.md section 2; ship.md 13.4): a read of the index the store
+// refuses for now (store/pulse.ts `isStoreBusy`: the public store's edge on the file the refresh
+// just wrote, a 429, the deadline) is answered from the copy this instance holds, or from its disk
+// mirror through the store, and only an instance that holds nothing answers 503 with a retry of a
+// few seconds (`LogoStoreBusyError`), so no logo route answers 500 for a store condition. A
+// discovery (a mark cached on a first fetch, a variant found missing or broken) no longer rewrites
+// the index: it is held in memory and persisted to the small side record of logo-index.ts
+// (`LogoDiscoveries`), which the refresh alone folds into the file. A cached mark whose file the
+// edge withholds is answered from the upstream for that call and nothing is written, since the
+// store holds the file already.
 import { timingSafeEqual } from 'node:crypto';
 import { join } from 'node:path';
 
@@ -63,26 +74,39 @@ import { ConflictError } from '@turboslide/schema/errors';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import type { Box } from '@turboslide/schema/render';
 import { CONTENT_BOX } from '@turboslide/schema/render';
+import { isStoreBusy } from '@turboslide/store/pulse';
 import type { DeckStore } from '@turboslide/store/store';
 
 import { bodyRect, freeRectangles, occupiedRects } from '../editor/place-insert';
 import { agentAuth } from './auth';
 import {
   LOGO_DOWN_MESSAGE,
+  applyLogoDiscoveries,
   blobLogoStore,
   cachedMarkKey,
   densityFor,
+  discoveriesEmpty,
   diskLogoStore,
   downUpstream,
+  emptyLogoDiscoveries,
   emptyLogoIndex,
   fixtureUpstream,
   logoDigest,
   logoUpstreamMode,
+  mergeLogoDiscoveries,
   networkUpstream,
   refreshLogoIndex,
   sharpRasterizer,
 } from './logo-index';
-import type { LogoIndex, LogoStore, LogoUpstream, Rasterizer, RefreshCounts } from './logo-index';
+import type {
+  CachedMark,
+  LogoDiscoveries,
+  LogoIndex,
+  LogoStore,
+  LogoUpstream,
+  Rasterizer,
+  RefreshCounts,
+} from './logo-index';
 import {
   LogoBrokenError,
   LogoTooLargeError,
@@ -151,6 +175,33 @@ export class LogoUpstreamError extends Error {
   }
 }
 
+/** The sentence a logo route answers while the store refuses the index and this instance holds no copy. */
+export const LOGO_STORE_BUSY_MESSAGE =
+  'The logo index is not readable right now; try again in a few seconds';
+/** The `retry-after` of that answer, in seconds: the edge's window is minutes, the caller asks again sooner. */
+export const LOGO_STORE_RETRY_AFTER_S = 5;
+
+/**
+ * The store refused the index read (store/pulse.ts `isStoreBusy`) and this instance holds no copy
+ * of it yet (build/hotfix.md section 2): the routes answer 503 with `retry-after`, never the
+ * framework's 500 and never an empty index. `storeError` is what the store threw, for the log.
+ */
+export class LogoStoreBusyError extends Error {
+  readonly status = 503;
+  readonly retryAfterS = LOGO_STORE_RETRY_AFTER_S;
+  readonly storeError: unknown;
+  constructor(storeError: unknown) {
+    super(LOGO_STORE_BUSY_MESSAGE);
+    this.name = 'LogoStoreBusyError';
+    this.storeError = storeError;
+  }
+}
+
+/** True for a store refusal the logo routes answer as 503 (the typed error above, or the store's own thrown under a read). */
+export function isLogoStoreBusy(error: unknown): error is LogoStoreBusyError | Error {
+  return error instanceof LogoStoreBusyError || isStoreBusy(error);
+}
+
 /**
  * What a search may name beside its options (4.2; F4): `since`, the `builtAt` a refresh answered,
  * so the instance answering the search adopts that build when its copy is older (the CLI's
@@ -191,29 +242,57 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
   let heldAt = 0;
   let loading: Promise<LogoIndex> | null = null;
   let persistedAt = 0;
-  let dirty = false;
+  /**
+   * the discoveries this instance made and has not persisted to the side record yet (a mark
+   * cached on a first fetch, a variant found missing or broken); the held index carries them in
+   * memory as well, so this instance's own answers read them at once
+   */
+  let pending: LogoDiscoveries = emptyLogoDiscoveries();
   /** the failure the instance saw since the index was written, for the foot (4.9) */
   let memoryError: LogoIndexFacts['lastError'] | undefined;
   const memoryMarks = new Map<string, { svg: string; sanitized: SanitizedSvg; at: number }>();
 
   const load = async (): Promise<LogoIndex> => {
-    const stored = await deps.store.readIndex();
-    heldVersion = await deps.store.indexVersion().catch(() => null);
+    let stored: LogoIndex | null;
+    let mirrored = false;
+    try {
+      stored = await deps.store.readIndex();
+    } catch (error) {
+      // the store refuses the read for now (the edge's window after the refresh wrote the file,
+      // a 429, the deadline): the copy this instance holds on disk from its last read stands in,
+      // its version left unknown so the next revalidation asks the store again; with no copy the
+      // routes answer 503 with a retry and the next request loads again (build/hotfix.md
+      // section 2; ship.md 13.4)
+      if (!isStoreBusy(error)) throw error;
+      stored = await deps.store.readMirror().catch(() => null);
+      if (stored === null) throw new LogoStoreBusyError(error);
+      mirrored = true;
+    }
+    heldVersion = mirrored ? null : await deps.store.indexVersion().catch(() => null);
     heldAt = Date.now();
     held = stored ?? emptyLogoIndex();
     if (stored === null && deps.upstream.mode === 'fixture') {
       // the fixture upstream is ten marks: a fresh instance builds its index inline so the spec
-      // project drives the picker without a refresh call first (4.9)
+      // project drives the picker without a refresh call first (4.9); the built index is adopted
+      // from the refresh's own hand, not read back through the store's edge
+      const written: { index: LogoIndex | null } = { index: null };
       await refreshLogoIndex({
         store: deps.store,
         upstream: deps.upstream,
         ...(deps.rasterize ? { rasterize: deps.rasterize } : {}),
         now,
         log,
+        onWritten: (index) => {
+          written.index = index;
+        },
       });
-      held = (await deps.store.readIndex()) ?? emptyLogoIndex();
+      held = written.index ?? (await deps.store.readIndex().catch(() => null)) ?? emptyLogoIndex();
       heldVersion = await deps.store.indexVersion().catch(() => null);
     }
+    // the discoveries other instances made since the last refresh, small and best effort: a
+    // read the store refuses leaves them to the refresh, and this instance discovers on its own
+    const recorded = await deps.store.readDiscoveries().catch(() => null);
+    if (recorded !== null) applyLogoDiscoveries(held, recorded);
     return held;
   };
 
@@ -267,23 +346,43 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
     return revalidateSoon(current);
   };
 
-  /** Writes the held index when a discovery changed it, at most once a minute per instance. */
-  const persistSoon = async (): Promise<void> => {
-    dirty = true;
-    if (held === null) return;
-    if (Date.now() - persistedAt < PERSIST_THROTTLE_MS) return;
+  /**
+   * Writes this instance's pending discoveries into the store's side record, merged over the
+   * record as read now; the index's pathname is never written here (build/hotfix.md section 2).
+   * A read or a put the store refuses puts the discoveries back into the pending record for the
+   * next persist or the refresh, which folds them either way.
+   */
+  const persistNow = async (): Promise<void> => {
+    if (discoveriesEmpty(pending)) return;
     persistedAt = Date.now();
-    dirty = false;
-    const snapshot = held;
+    const snapshot = pending;
+    pending = emptyLogoDiscoveries();
     try {
-      await deps.store.writeIndex(snapshot);
-      heldVersion = await deps.store.indexVersion().catch(() => heldVersion);
+      const recorded = await deps.store.readDiscoveries();
+      const at = now().toISOString();
+      const merged =
+        recorded === null ? { ...snapshot, at } : mergeLogoDiscoveries(recorded, snapshot, at);
+      await deps.store.writeDiscoveries(merged);
     } catch (error) {
-      dirty = true;
+      pending = mergeLogoDiscoveries(snapshot, pending, now().toISOString());
       log(
-        `logo index: the discovery did not persist (${error instanceof Error ? error.message : String(error)})`,
+        `logo index: the discoveries did not persist (${error instanceof Error ? error.message : String(error)})`,
       );
     }
+  };
+
+  /** Persists the pending discoveries at most once a minute per instance (the throttle persistSoon always had). */
+  const persistSoon = async (): Promise<void> => {
+    if (held === null) return;
+    if (Date.now() - persistedAt < PERSIST_THROTTLE_MS) return;
+    await persistNow();
+  };
+
+  /** A mark's sanitized file landed in the store: the held index and the pending record learn it. */
+  const recordCached = (key: string, mark: CachedMark): void => {
+    if (held !== null) held.cached[key] = mark;
+    pending.cached[key] = mark;
+    void persistSoon();
   };
 
   const facts = async (): Promise<LogoIndexFacts> => {
@@ -301,6 +400,10 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
 
   const markUnavailable = (entry: LogoRow, variant: string, mark: LogoUnavailable): void => {
     entry.unavailable = { ...(entry.unavailable ?? {}), [variant]: mark };
+    pending.unavailable[entry.slug] = {
+      ...(pending.unavailable[entry.slug] ?? {}),
+      [variant]: mark,
+    };
     void persistSoon();
   };
 
@@ -336,10 +439,20 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
       };
     const key = cachedMarkKey(slug, variant);
     const open = isOpenLicence(entry.license);
+    /** the store holds the file by the index's word and refuses to serve it right now (the edge's window) */
+    let withheld = false;
     if (open) {
       const current = await index();
       if (current.cached[key] !== undefined) {
-        const bytes = await deps.store.readMark(slug, variant).catch(() => null);
+        let bytes: Uint8Array | null = null;
+        try {
+          bytes = await deps.store.readMark(slug, variant);
+        } catch (error) {
+          // a mark another instance cached moments ago, its file not yet served by the public
+          // store's edge (build/hotfix.md section 2): the upstream answers this call and nothing
+          // is written or recorded, since the store holds the file already
+          if (isStoreBusy(error)) withheld = true;
+        }
         if (bytes !== null) {
           try {
             const sanitized = sanitizeLogoSvg(bytes);
@@ -347,7 +460,8 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
           } catch {
             // a cached file that no longer parses is fetched again below
           }
-        } else {
+          delete current.cached[key];
+        } else if (!withheld) {
           // the file this instance's index says is cached is gone from the store: a refresh made
           // on another instance took the mark down or evicted it (4.2; the verifier's pass 1, F4),
           // so the index is read again before anything is fetched, and a slug that left it
@@ -365,8 +479,8 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
               };
             return mark(slug, variant);
           }
+          delete current.cached[key];
         }
-        delete current.cached[key];
       }
     } else {
       const remembered = memoryMarks.get(key);
@@ -406,13 +520,13 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
       return { ok: false, status: 422, message: LOGO_WORDS.broken };
     }
     const svg = withAttribution(sanitized.svg, entry.title, entry.license);
-    if (open) {
+    if (open && withheld) {
+      // the store's copy stands; this call alone was answered from the upstream
+    } else if (open) {
       const bytes = new TextEncoder().encode(svg);
       try {
         await deps.store.writeMark(slug, variant, bytes);
-        const current = await index();
-        current.cached[key] = { at, digest: logoDigest(bytes), bytes: bytes.byteLength };
-        void persistSoon();
+        recordCached(key, { at, digest: logoDigest(bytes), bytes: bytes.byteLength });
       } catch (error) {
         log(
           `logo cache: ${key} did not persist (${error instanceof Error ? error.message : String(error)})`,
@@ -459,18 +573,33 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
     // would re list what that refresh dropped (the verifier's pass 2 F.5 finding 3), so the
     // refresh heads the store's version and adopts its index before the manifest is asked
     await revalidate();
-    if (dirty && held !== null) await deps.store.writeIndex(held).catch(() => undefined);
-    const counts = await refreshLogoIndex({
-      store: deps.store,
-      upstream: deps.upstream,
-      ...(deps.rasterize ? { rasterize: deps.rasterize } : {}),
-      now,
-      log,
-    });
-    held = (await deps.store.readIndex()) ?? emptyLogoIndex();
+    // this instance's pending discoveries ride into the refresh beside the store's side record
+    // (the flush of the index the refresh used to make); what lands while it runs stays pending
+    const own = pending;
+    pending = emptyLogoDiscoveries();
+    const written: { index: LogoIndex | null } = { index: null };
+    let counts: RefreshCounts;
+    try {
+      counts = await refreshLogoIndex({
+        store: deps.store,
+        upstream: deps.upstream,
+        ...(deps.rasterize ? { rasterize: deps.rasterize } : {}),
+        now,
+        log,
+        ...(discoveriesEmpty(own) ? {} : { discoveries: own }),
+        onWritten: (index) => {
+          written.index = index;
+        },
+      });
+    } catch (error) {
+      pending = mergeLogoDiscoveries(own, pending, now().toISOString());
+      throw error;
+    }
+    // the index the refresh wrote, from its own hand: a read back through the store's edge
+    // right after the put is what the window refuses (ship.md 13.4)
+    held = written.index ?? (await deps.store.readIndex().catch(() => held)) ?? emptyLogoIndex();
     heldVersion = await deps.store.indexVersion().catch(() => null);
     heldAt = Date.now();
-    dirty = false;
     if (counts.lastError === undefined) memoryError = undefined;
     return counts;
   };
@@ -497,11 +626,14 @@ function memoryOnly(index: LogoIndex): LogoStore {
   return {
     kind: 'memory',
     readIndex: async () => index,
+    readMirror: async () => null,
     indexVersion: async () => null,
     writeIndex: async () => undefined,
     readMark: async () => null,
     writeMark: async () => undefined,
     removeMarks: async () => undefined,
+    readDiscoveries: async () => null,
+    writeDiscoveries: async () => undefined,
   };
 }
 

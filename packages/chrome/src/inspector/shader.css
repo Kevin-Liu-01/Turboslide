@@ -1,0 +1,251 @@
+/* The Shader section of Format options (docs/FEATURES.md 5.3; inspector/shader.tsx): Glyphfield's
+   groups as labelled rows in the panel's grammar (fields.css draws the sliders, the number fields,
+   the swatches and the buttons). A thumbnail row at the top, the preset tiles as 96 by 60 stills,
+   the kit's six swatches, the collapsed Advanced group. Hairlines from the tokens, radius 0, no
+   decoration; Inter through the tokens. */
+.ts-shader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ts-shader-head {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 10px;
+  align-items: center;
+  margin: 4px 0 8px;
+}
+
+.ts-shader-thumb {
+  display: block;
+  width: 96px;
+  height: 60px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-plate);
+  object-fit: cover;
+}
+
+.ts-shader-thumb.is-missing {
+  background:
+    linear-gradient(
+      to top right,
+      transparent calc(50% - 1px),
+      var(--pt-hair) 50%,
+      transparent calc(50% + 1px)
+    ),
+    var(--pt-plate);
+}
+
+.ts-shader-name {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ts-shader-title {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--pt-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-shader-group {
+  padding: 6px 0 4px;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-shader-group-title {
+  margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--pt-titanium);
+}
+
+.ts-shader-group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--pt-titanium);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ts-shader-group-toggle > .ts-shader-group-title {
+  margin: 0;
+}
+
+.ts-shader-chev {
+  display: inline-flex;
+  transform: rotate(-90deg);
+  transition: transform 120ms ease-out;
+}
+
+.ts-shader-chev.is-open {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-shader-chev {
+    transition: none;
+  }
+}
+
+.ts-shader-group-toggle:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-shader-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 4px 0 6px;
+}
+
+.ts-shader-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.ts-shader-tile.is-on {
+  border-color: var(--pt-ink);
+  background: var(--pt-plate);
+}
+
+.ts-shader-tile:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-shader-tile-still {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: var(--pt-plate);
+}
+
+.ts-shader-tile-still.is-missing {
+  background:
+    linear-gradient(
+      to top right,
+      transparent calc(50% - 1px),
+      var(--pt-hair) 50%,
+      transparent calc(50% + 1px)
+    ),
+    var(--pt-plate);
+}
+
+.ts-shader-tile-word {
+  padding: 0 6px 5px;
+  font-size: 11px;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-shader .ts-fo-swatches {
+  grid-template-columns: repeat(6, 24px);
+}
+
+.ts-shader-custom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.ts-shader-slider.is-off {
+  opacity: 0.55;
+}
+
+.ts-shader-slider.is-off input {
+  cursor: default;
+}
+
+.ts-shader-uniform {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 6px;
+  margin: 3px 0;
+}
+
+.ts-shader-uniform > .ts-fo-field-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-shader-uniform.is-overridden > .ts-fo-field-label {
+  color: var(--pt-ink);
+}
+
+.ts-shader-number,
+.ts-shader-text,
+.ts-shader-select {
+  box-sizing: border-box;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px var(--pt-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-shader-number {
+  width: 84px;
+  text-align: right;
+}
+
+.ts-shader-text {
+  width: 132px;
+  font-family: var(--pt-mono);
+}
+
+.ts-shader-number:focus-visible,
+.ts-shader-text:focus-visible,
+.ts-shader-select:focus-visible {
+  outline: none;
+  border-color: var(--pt-ink);
+}
+
+.ts-shader-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-edge);
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.ts-shader-frame {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--pt-titanium);
+}

@@ -180,7 +180,10 @@ in `presets.ts` are Turboslide's uniform values, not a modification of the packa
 https://github.com/paper-design/shaders. Apache 2.0 permits shipping, modifying and selling renders
 and requires the LICENSE and NOTICE text below to travel with the distribution (pptx report section
 4.11); `packages/materials/NOTICE` repeats the NOTICE beside the code. Frames rendered from the
-materials carry the credit "Material: <name>, Paper Shaders, rendered in Turboslide".
+materials carry the credit "Material: <name>, Paper Shaders, rendered in Turboslide" (the M5
+capture) or "Shader: <name>, Paper Shaders, rendered in Turboslide" (a frame of the shader library,
+docs/FEATURES.md 5.5). The gallery's stills under `packages/materials/previews/` are renders of the
+same shaders at anchor 5500 (`scripts/build-shader-previews.mjs`).
 
 NOTICE:
 
@@ -454,7 +457,21 @@ https://github.com/TanStack. `apps/studio` was created with `@tanstack/cli` 0.71
 
 What: `window.turboslide.studio` in `@turboslide/agent` is `glyphfield/src/lib/studioAutomation.ts`
 copied with the names changed (SPEC 7.4, M3), and the skills, manifest and verification style follow
-Glyphfield's contracts (SPEC 2.2). Source: Kevin Liu's Glyphfield repository.
+Glyphfield's contracts (SPEC 2.2). The features round's ship two (docs/FEATURES.md 5.2, 5.3;
+audit-shaders 5, 23) ports the shader library's control model: `packages/materials/src/controls.ts`
+is Glyphfield's `LiveMaterialSettings` (`src/lib/liveMaterials.ts`), the published ranges of
+`src/lib/agentCatalog.ts` `AGENT_SHADER_LIBRARY.controls` and the mapping of `paperShaderControls.ts`
+`paperControlOverrides` onto the Paper families, rewritten against Turboslide's `u_*` uniform names
+with the three colours taken by the brand kit and one rotation axis; the Shader section's groups
+(`packages/chrome/src/inspector/shader.tsx`) follow `LiveMaterialControls.tsx`'s. The house
+renderers (`glyphfield-mesh-gradient`, `glyphfield-grain-gradient`, `glyphfield-dither-gradient`, the
+glyph field) are not ported in ship two (the P1 engine interface of docs/FEATURES.md 5.2 waits; this
+notice extends to them when they land). Not shipped, with the reason (audit-shaders, the summary):
+ShaderGradient (MIT, with three.js and React Three Fiber), Pavel Dobryakov's WebGL Fluid Simulation
+(MIT; a stateful simulation no timestamp reconstructs) and HoloCloth (MIT, Justin Levine; a pointer
+lit textile) stay in Glyphfield, and no code or asset of theirs is in this repository.
+Prototemplate's studio field (`Prototemplate/src/lib/studio-field.ts`) is Kevin Liu's own code and
+needs no third party notice when it lands (P1). Source: Kevin Liu's Glyphfield repository.
 
     MIT License
 

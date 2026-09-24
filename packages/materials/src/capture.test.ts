@@ -24,8 +24,24 @@ import type { LaunchedBrowser } from '@turboslide/headless/launch';
 import { readTwinBits } from '@turboslide/headless/capture/twins';
 import { assetSchema } from '@turboslide/schema/assets';
 
-import { captureDocument, captureMaterial, paperDistDir, parseRecipeFile } from './capture.ts';
-import { recipeKey } from './recipe-key.ts';
+import {
+  captureDocument,
+  captureMaterial,
+  frameSizeOf,
+  noiseTextureSrc,
+  paperDistDir,
+  parseRecipeFile,
+} from './capture.ts';
+import { frameAssetOf } from './actions.ts';
+import { requireMaterial } from './catalog.ts';
+import { LEGACY_SHADER_PALETTE, shaderPaletteOf } from './presets.ts';
+import {
+  frameIsStale,
+  frameKeyOf,
+  frameSizeFor,
+  materialAspectOf,
+  recipeKey,
+} from './recipe-key.ts';
 
 const REPO = join(import.meta.dirname, '..', '..', '..');
 const FIXTURE = join(REPO, 'packages/effects/fixtures/two-tone');
@@ -77,6 +93,79 @@ describe('the capture page', () => {
       treatment: { crop: [-1325, 105, 2709, 2374], black: 20 },
       plate: 'lower-left',
     });
+  });
+});
+
+describe('the frame key and the frame shape (docs/FEATURES.md 5.5)', () => {
+  test('a client frame and a hosted frame of one recipe carry one frameKey and both are fresh; the aspect and the kit move it, the pixel size does not', () => {
+    const entry = requireMaterial('paper:liquid-metal');
+    const block = {
+      id: 'shader',
+      type: 'material' as const,
+      materialId: 'paper:liquid-metal',
+      preset: 'diamond',
+      pos: { x: 100, y: 100, w: 480, h: 272 },
+      alt: 'The liquid metal shader',
+    };
+    const key = frameKeyOf(block);
+    const client = frameAssetOf(
+      entry,
+      block,
+      LEGACY_SHADER_PALETTE,
+      key,
+      [3200, 1814],
+      'assets/a@2x.png',
+      'client',
+      'ANGLE (Apple)',
+    );
+    const hosted = frameAssetOf(
+      entry,
+      block,
+      LEGACY_SHADER_PALETTE,
+      key,
+      [3200, 1814],
+      'assets/a@2x.png',
+      'swiftshader',
+      'SwiftShader',
+    );
+    expect(client.source.kind).toBe('material');
+    expect(hosted.source.kind).toBe('material');
+    if (client.source.kind !== 'material' || hosted.source.kind !== 'material') return;
+    expect(client.source.backend).toBe('client');
+    expect(hosted.source.backend).toBe('swiftshader');
+    expect(client.source.renderer).toBe('ANGLE (Apple)');
+    expect(client.source.frameKey).toBe(hosted.source.frameKey);
+    expect(client.source.recipeKey).not.toBe(hosted.source.recipeKey);
+    const assets = { [client.id]: client };
+    expect(frameIsStale({ ...block, asset: client.id }, assets)).toBe(false);
+    expect(frameIsStale({ ...block, asset: hosted.id }, { [hosted.id]: hosted })).toBe(false);
+    // a changed anchor, a changed kit colour and a changed box aspect each move the key
+    expect(frameKeyOf({ ...block, anchor: 4000 })).not.toBe(key);
+    expect(
+      frameKeyOf(block, shaderPaletteOf({ colors: { light: { primary: '#0b3d91' } } })),
+    ).not.toBe(key);
+    expect(frameKeyOf({ ...block, pos: { x: 0, y: 0, w: 600, h: 150 } })).not.toBe(key);
+    expect(frameIsStale({ ...block, anchor: 4000, asset: client.id }, assets)).toBe(true);
+    // a changed pixel size does not: the same aspect at 1600 by 900 and at 3200 by 1800 shares it
+    expect(frameKeyOf({ ...block, pos: { x: 0, y: 0, w: 1600, h: 906.6666667 } })).toBe(key);
+    // a frame with no key (captured before the round) is stale by that absence
+    const legacy = { ...client, source: { ...client.source } };
+    delete (legacy.source as { frameKey?: string }).frameKey;
+    expect(frameIsStale({ ...block, asset: client.id }, { [client.id]: legacy })).toBe(true);
+    // the capture canvas takes the box's aspect with the long side 3200
+    expect(frameSizeFor(materialAspectOf(block))).toEqual([3200, 1814]);
+    expect(frameSizeFor(materialAspectOf({ pos: { x: 0, y: 0, w: 600, h: 150 } }))).toEqual([
+      3200, 800,
+    ]);
+    expect(frameSizeFor(materialAspectOf({ pos: { x: 0, y: 0, w: 450, h: 800 } }))).toEqual([
+      1800, 3200,
+    ]);
+    expect(frameSizeOf(undefined)).toEqual([3200, 1800]);
+    expect(frameSizeOf([3200, 800])).toEqual([3200, 800]);
+    expect(() => frameSizeOf([1600, 800])).toThrow(RangeError);
+    expect(() => frameSizeOf([3200, 801])).toThrow(RangeError);
+    // the noise texture the capture job reads in Node is Paper's own data URI
+    expect(noiseTextureSrc()).toMatch(/^data:image\/png;base64,/);
   });
 });
 
@@ -148,6 +237,53 @@ describe.skipIf(skipBrowser)('material capture in the browser', () => {
     }
     expect(blue).toBeGreaterThan(100);
     expect(existsSync(join(dir, 'assets/smoke.recipe.json'))).toBe(true);
+  });
+
+  test('a frame at a box aspect takes the long side 3200, records its frameKey, and the diamond’s bytes are measured for the ship note', async () => {
+    if (browser === undefined) throw new Error('no browser');
+    const block = {
+      materialId: 'paper:liquid-metal',
+      preset: 'diamond',
+      pos: { x: 0, y: 0, w: 600, h: 150 },
+    };
+    const key = frameKeyOf(block);
+    const result = await captureMaterial(
+      {
+        materialId: 'paper:liquid-metal',
+        preset: 'diamond',
+        anchors: [5500],
+        id: 'band',
+        role: 'frame',
+        size: frameSizeFor(materialAspectOf(block)),
+        frameKey: key,
+      },
+      { deckDir: dir, browser },
+    );
+    const frame = result.frames[0];
+    if (frame === undefined) throw new Error('no frame');
+    expect(frame.asset.size).toEqual([3200, 800]);
+    if (frame.asset.source.kind !== 'material') throw new Error('not a material source');
+    expect(frame.asset.source.frameKey).toBe(key);
+    expect(frame.asset.source.size).toEqual([3200, 800]);
+    const decoded = await decodeImage(frame.frame);
+    expect([decoded.width, decoded.height]).toEqual([3200, 800]);
+    // the bytes per capture (docs/FEATURES.md 5.5: measured, written into the ship note, never typed)
+    const full = await captureMaterial(
+      {
+        materialId: 'paper:liquid-metal',
+        preset: 'diamond',
+        anchors: [5500],
+        id: 'diamond-full',
+        role: 'frame',
+      },
+      { deckDir: dir, browser },
+    );
+    const png = full.frames[0]?.frame;
+    if (png === undefined) throw new Error('no full frame');
+    expect(png.byteLength).toBeGreaterThan(10_000);
+    console.log(
+      `liquid metal diamond frame at 3200 by 1800 as PNG: ${png.byteLength} bytes (${browser.renderer})`,
+    );
   });
 
   test('the liquid metal diamond at the recorded recipe, two-tone, clears the opener plate', async () => {

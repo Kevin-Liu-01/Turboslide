@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "The material catalog (SPEC 5.4): Paper Shaders paper:* entries with uniform schemas and GT palette presets, the proto:* engines as unavailable entries (open question 9), recipe resolution and the recipe key, the main-thread mount for the editor's live preview, the headless capture of frozen frames at anchors (plain and two-tone) and the asset action handlers (asset.add, asset.dither, asset.capture, material.capture, material.list) every transport registers.",
+  "description": "The material catalog (SPEC 5.4): Paper Shaders paper:* entries with uniform schemas and GT palette presets, the proto:* engines as unavailable entries (open question 9), recipe resolution and the recipe key, the main-thread mount for the editor's live preview, the headless capture of frozen frames at anchors (plain and two-tone) and the asset action handlers (asset.add, asset.dither, asset.capture, material.capture, material.list) every transport registers. The features round adds the eleven common controls (controls.ts), the kit palette (presets.ts), the frame key (recipe-key.ts), the gallery stills (previews.ts, previews/) and the shader.* actions.",
   "scripts": {
     "test": "vitest run"
   },
@@ -12,6 +12,10 @@
     "./presets": "./src/presets.ts",
     "./recipe": "./src/recipe.ts",
     "./recipe-key": "./src/recipe-key.ts",
+    "./controls": "./src/controls.ts",
+    "./shader-writes": "./src/shader-writes.ts",
+    "./previews": "./src/previews.ts",
+    "./sha256": "./src/sha256.ts",
     "./paper": "./src/paper.ts",
     "./proto": "./src/proto.ts",
     "./mount": "./src/mount.ts",

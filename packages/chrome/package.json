@@ -49,6 +49,7 @@
     "./inspector/asset": "./src/inspector/asset.tsx",
     "./inspector/dither": "./src/inspector/dither.tsx",
     "./inspector/material": "./src/inspector/material.tsx",
+    "./inspector/shader": "./src/inspector/shader.tsx",
     "./inspector/sections": "./src/inspector/sections.ts",
     "./inspector/chart": "./src/inspector/chart.tsx",
     "./inspector/table": "./src/inspector/table.tsx",

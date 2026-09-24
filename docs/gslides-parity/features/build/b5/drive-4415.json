@@ -1,0 +1,69 @@
+{
+  "base": "http://localhost:4415",
+  "at": "2026-09-24T15:55:31.828Z",
+  "rows": [
+    {
+      "step": "block.insert of a material block with motion, controls and pos",
+      "expected": "accepted",
+      "observed": "{\"slide\":{\"schemaVersion\":1,\"id\":\"title\",\"template\":\"title\",\"grammar\":{\"kind\":\"title\",\"slots\":{\"main\":[\"mark\",\"heading\",\"lead\"]},\"boxes\":{\"mark\":{\"x\":137,\"y\":30",
+      "ok": true
+    },
+    {
+      "step": "the sheet draws the box with no label text",
+      "expected": "no .material-label, empty text",
+      "observed": "{\"label\":false,\"text\":\"\"}",
+      "ok": true
+    },
+    {
+      "step": "the live mount is one canvas over the box",
+      "expected": "canvas 1 in the box",
+      "observed": "box canvas 1; stage 1; page 1; mounted after 31 ms",
+      "ok": true
+    },
+    {
+      "step": "the recipe attribute rides the Speed control",
+      "expected": "speed 1.5 in data-recipe",
+      "observed": "{\"materialId\":\"paper:liquid-metal\",\"preset\":\"diamond\",\"speed\":1.5}",
+      "ok": true
+    },
+    {
+      "step": "the filmstrip card draws no label",
+      "expected": "no text on the card",
+      "observed": "{\"cardLabel\":false,\"cardText\":\"\"}",
+      "ok": true
+    },
+    {
+      "step": "the selected mount plays (two shots 900 ms apart differ)",
+      "expected": "differ",
+      "observed": "differ",
+      "ok": true
+    },
+    {
+      "step": "at Speed 0 the mount holds its frame (two shots 900 ms apart identical)",
+      "expected": "identical",
+      "observed": "identical",
+      "ok": true
+    },
+    {
+      "step": "the document keeps motion, controls and preset",
+      "expected": "preset diamond, motion.play show, controls.speed 0 after the set",
+      "observed": "{\"preset\":\"diamond\",\"motion\":{\"play\":\"show\"},\"controls\":{\"speed\":0}}",
+      "ok": true
+    },
+    {
+      "step": "shader.list on the window transport (not driven: the schema entry is request R1)",
+      "expected": "answers once the schema entry lands",
+      "observed": "{\"error\":\"Error: page.evaluate: RangeError: Unknown action \\\"shader.list\\\"\\n    at spec (http://localhost:4415/@fs/Users",
+      "ok": false
+    },
+    {
+      "step": "no console errors during the drive",
+      "expected": "none",
+      "observed": "none",
+      "ok": true
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

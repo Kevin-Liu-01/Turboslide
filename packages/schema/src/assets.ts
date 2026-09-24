@@ -33,11 +33,28 @@ export type AssetSource =
       kind: 'material';
       materialId: string;
       uniforms: Record<string, number | number[] | string>;
-      size: [3200, 1800];
+      /**
+       * The frame's pixels: 3200 by 1800 for the 16:9 box, and since the features round's ship two
+       * the box's own aspect with the long side 3200 (docs/FEATURES.md 5.5: 3200 by 800 for a 4:1
+       * band, 1800 by 3200 for a 9:16 box).
+       */
+      size: [number, number];
       timeMs: number;
-      backend: 'angle-metal' | 'swiftshader';
+      /**
+       * Where the frame was rendered: the hosted job's Metal or SwiftShader, or `client`, the
+       * editor's own WebGL (docs/FEATURES.md 5.5); `renderer` names the GPU string either way.
+       */
+      backend: 'angle-metal' | 'swiftshader' | 'client';
       renderer: string;
+      /** The capture's own identity: sha256 over materialId, uniforms, size, timeMs and backend. */
       recipeKey: string;
+      /**
+       * What decides staleness (docs/FEATURES.md 5.5): sha256 over the material, the preset, the
+       * resolved uniforms, the anchor, the six kit colours and the box's aspect, without the pixel
+       * size and the backend, so a client frame and a hosted frame of one recipe share it. Absent
+       * on a frame captured before the features round, which is stale by that absence.
+       */
+      frameKey?: string;
     }
   | {
       kind: 'capture';
@@ -182,11 +199,12 @@ export const assetSourceSchema = z.discriminatedUnion('kind', [
     kind: z.literal('material'),
     materialId: z.string().min(1),
     uniforms: z.record(z.string(), z.union([z.number(), z.array(z.number()), z.string()])),
-    size: z.tuple([z.literal(3200), z.literal(1800)]),
+    size: z.tuple([z.number().int().positive(), z.number().int().positive()]),
     timeMs: z.number().nonnegative(),
-    backend: z.enum(['angle-metal', 'swiftshader']),
+    backend: z.enum(['angle-metal', 'swiftshader', 'client']),
     renderer: z.string(),
     recipeKey: z.string(),
+    frameKey: z.string().optional(),
   }),
   z.strictObject({
     kind: z.literal('capture'),

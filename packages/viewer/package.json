@@ -30,6 +30,7 @@
     "./Editor": "./src/Editor.tsx",
     "./clipboard": "./src/clipboard.ts",
     "./MaterialMount": "./src/MaterialMount.tsx",
+    "./shader-frame": "./src/shader-frame.ts",
     "./canvas-measure": "./src/canvas-measure.ts",
     "./rotate": "./src/rotate.ts",
     "./crop": "./src/crop.ts",

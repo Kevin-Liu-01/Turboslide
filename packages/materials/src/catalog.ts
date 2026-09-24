@@ -5,16 +5,40 @@
 // kind, default, range and options, read from @paper-design/shaders 0.0.78's uniform docs and
 // the React wrapper's Default presets. The entry shape every transport reads (material.list) is
 // MaterialCatalogEntry in the schema package; the extra fields here drive paper.ts and mount.ts.
-// Browser safe.
+// The features round's ship two (docs/FEATURES.md 5.2, 5.4, 5.7) adds the gallery's five
+// categories (Glyphfield's `shaderLab.ts`: Fluid, Light, Metal, Gradient, Graphic), the featured
+// order the gallery lists first, the still entries whose frame has no time, the featured preset an
+// insert lands (the diamond for liquid metal, never `ink-paper`) and `entryWithPalette`, the entry
+// with its palette presets computed from a deck's kit (presets.ts). Browser safe.
 import type {
   MaterialCatalogEntry,
   MaterialUniformSpec,
   MaterialUniformValue,
 } from '@turboslide/schema/blocks/material';
 
-import type { PaletteRoles } from './presets.ts';
-import { presetsFor } from './presets.ts';
+import type { PaletteRoles, ShaderPalette } from './presets.ts';
+import { LEGACY_SHADER_PALETTE, presetsFor } from './presets.ts';
 import { PROTO_MATERIALS } from './proto.ts';
+
+/** The gallery's five chips (docs/FEATURES.md 5.4; Glyphfield's `shaderLab.ts` categories). */
+export const SHADER_CATEGORIES = [
+  { id: 'fluid', label: 'Fluid' },
+  { id: 'light', label: 'Light' },
+  { id: 'metal', label: 'Metal' },
+  { id: 'gradient', label: 'Gradient' },
+  { id: 'graphic', label: 'Graphic' },
+] as const;
+export type ShaderCategory = (typeof SHADER_CATEGORIES)[number]['id'];
+
+/** The entries the gallery lists first, in this order (5.4). */
+export const FEATURED_MATERIAL_IDS: ReadonlyArray<string> = [
+  'paper:liquid-metal',
+  'paper:gem-smoke',
+  'paper:god-rays',
+  'paper:mesh-gradient',
+  'paper:smoke-ring',
+  'paper:grain-gradient',
+];
 
 /** The @paper-design/shaders export that holds the fragment shader, without the `FragmentShader` suffix. */
 export type PaperShaderName =
@@ -45,6 +69,12 @@ export type MaterialEntry = MaterialCatalogEntry & {
   /** The shader masks by an uploaded image (u_image, u_isImage); a frame uses its shape instead. */
   imageMask: boolean;
   palette: PaletteRoles;
+  /** The gallery chip the entry sits under (5.4). */
+  category: ShaderCategory;
+  /** A still shader (dot grid, waves, the static gradients): its frame has no time, so the Frame row hides (5.2 P1 item 3). */
+  still: boolean;
+  /** The preset an insert lands (5.2): the recorded recipe where one exists, else the first palette preset. */
+  featuredPreset?: string;
 };
 
 const PAPER_CREDIT = 'Material: {label}, Paper Shaders';
@@ -129,11 +159,15 @@ function sizing(family: 'object' | 'pattern', scale = 1): MaterialUniformSpec[] 
   ];
 }
 
-type Base = Omit<MaterialEntry, 'family' | 'available' | 'credit' | 'license' | 'presets'>;
+type Base = Omit<
+  MaterialEntry,
+  'family' | 'available' | 'credit' | 'license' | 'presets' | 'still'
+> & { still?: boolean };
 
 function paper(base: Base): MaterialEntry {
   return {
     ...base,
+    still: base.still ?? false,
     family: 'paper',
     available: true,
     credit: PAPER_CREDIT.replace('{label}', base.label.toLowerCase()),
@@ -152,6 +186,8 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: true,
     palette: { back: 'u_colorBack', front: 'u_colorTint' },
+    category: 'metal',
+    featuredPreset: 'diamond',
     uniforms: [
       color('u_colorBack', 'Ground', '#aaaaac'),
       color('u_colorTint', 'Tint', '#ffffff', 'Color burn over the metal.'),
@@ -181,6 +217,8 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: true,
     palette: { back: 'u_colorBack', colors: 'u_colors', inner: 'u_colorInner' },
+    category: 'fluid',
+    featuredPreset: 'brand-blue',
     uniforms: [
       color('u_colorBack', 'Ground', '#f0efea'),
       colors('u_colors', 'Smoke colors', '#333333,#e7e6df', 6),
@@ -210,6 +248,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: true,
     imageMask: false,
     palette: { back: 'u_colorBack', colors: 'u_colors' },
+    category: 'fluid',
     uniforms: [
       color('u_colorBack', 'Ground', '#000000'),
       colors('u_colors', 'Ring colors', '#ffffff', 10),
@@ -230,6 +269,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: true,
     imageMask: false,
     palette: { back: 'u_colorBack', colors: 'u_colors', front: 'u_colorBloom' },
+    category: 'light',
     uniforms: [
       color('u_colorBack', 'Ground', '#000000'),
       color('u_colorBloom', 'Bloom', '#0000ff'),
@@ -252,6 +292,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: false,
     palette: { colors: 'u_colors' },
+    category: 'gradient',
     uniforms: [
       colors('u_colors', 'Colors', '#e0eaff,#241d9a,#f75092,#9f50d3', 10),
       f('u_distortion', 'Distortion', 0.8, 0, 1),
@@ -270,6 +311,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: false,
     palette: { colors: 'u_colors' },
+    category: 'gradient',
     uniforms: [
       colors('u_colors', 'Colors', '#4449cf,#ffd1e0,#f94446,#ffd36b,#ffffff', 10),
       int('u_stepsPerColor', 'Steps per color', 2, 1, 10),
@@ -286,6 +328,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: false,
     palette: { back: 'u_colorBack', colors: 'u_colors' },
+    category: 'fluid',
     uniforms: [
       color('u_colorBack', 'Ground', '#330000'),
       colors('u_colors', 'Band colors', '#ffd1d1,#ff8a8a,#660000', 10),
@@ -308,6 +351,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: false,
     palette: { back: 'u_colorBack', front: 'u_colorFront' },
+    category: 'graphic',
     uniforms: [
       color('u_colorBack', 'Ground', '#001429'),
       color('u_colorFront', 'Stroke', '#79d1ff'),
@@ -331,6 +375,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: true,
     imageMask: false,
     palette: { back: 'u_colorBack', colors: 'u_colors' },
+    category: 'gradient',
     uniforms: [
       color('u_colorBack', 'Ground', '#000000'),
       colors('u_colors', 'Colors', '#7300ff,#eba8ff,#00bfff,#2a00ff', 10),
@@ -358,6 +403,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: false,
     palette: { back: 'u_colorBack', front: 'u_colorFront' },
+    category: 'graphic',
     uniforms: [
       color('u_colorBack', 'Ground', '#000000'),
       color('u_colorFront', 'Front', '#00b2ff'),
@@ -384,6 +430,8 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: false,
     palette: { back: 'u_colorBack', colors: 'u_colors' },
+    category: 'gradient',
+    still: true,
     uniforms: [
       color('u_colorBack', 'Ground', '#000000'),
       colors('u_colors', 'Colors', '#00bbff,#00ffe1,#ffffff', 10),
@@ -409,6 +457,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: false,
     palette: { back: 'u_colorBack', front: 'u_colorFront' },
+    category: 'light',
     uniforms: [
       color('u_colorFront', 'Front', '#ffffff'),
       color('u_colorMid', 'Mid', '#47a6ff'),
@@ -427,6 +476,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: true,
     imageMask: false,
     palette: { back: 'u_colorBack', colors: 'u_colors' },
+    category: 'fluid',
     uniforms: [
       color('u_colorBack', 'Ground', '#000000'),
       colors('u_colors', 'Colors', '#6e33cc,#ff5500,#ffc105,#ffc800,#f585ff', 8),
@@ -444,6 +494,8 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: false,
     palette: { back: 'u_colorBack', front: 'u_colorFront' },
+    category: 'graphic',
+    still: true,
     uniforms: [
       color('u_colorFront', 'Front', '#ffbb00'),
       color('u_colorBack', 'Ground', '#000000'),
@@ -465,6 +517,8 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: false,
     palette: { back: 'u_colorBack', front: 'u_colorFill' },
+    category: 'graphic',
+    still: true,
     uniforms: [
       color('u_colorBack', 'Ground', '#000000'),
       color('u_colorFill', 'Fill', '#ffffff'),
@@ -488,6 +542,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: false,
     palette: { back: 'u_colorBack', front: 'u_colorFront' },
+    category: 'fluid',
     uniforms: [
       color('u_colorFront', 'Front', '#fccff7'),
       color('u_colorBack', 'Ground', '#632ad5'),
@@ -508,6 +563,8 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
     noiseTexture: false,
     imageMask: false,
     palette: { colors: 'u_colors' },
+    category: 'gradient',
+    still: true,
     uniforms: [
       colors('u_colors', 'Colors', '#ffad0a,#6200ff,#e2a3ff,#ff99fd', 10),
       f('u_positions', 'Positions seed', 2, 0, 100, 1),
@@ -525,8 +582,39 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
 
 export const MATERIAL_IDS: ReadonlyArray<string> = Object.keys(MATERIALS);
 
+/** The catalog ids in the gallery's order: the featured six first, then the rest in catalog order (5.4). */
+export const GALLERY_MATERIAL_IDS: ReadonlyArray<string> = [
+  ...FEATURED_MATERIAL_IDS.filter((id) => id in MATERIALS),
+  ...MATERIAL_IDS.filter((id) => !FEATURED_MATERIAL_IDS.includes(id)),
+];
+
 export function materialEntry(id: string): MaterialEntry | undefined {
   return MATERIALS[id];
+}
+
+/**
+ * The entry with its palette presets computed from a deck's shader palette (docs/FEATURES.md 5.7):
+ * the same entry when the palette is the legacy one, so a deck without a kit record reads the
+ * static catalog and today's pixels.
+ */
+export function entryWithPalette(entry: MaterialEntry, palette: ShaderPalette): MaterialEntry {
+  if (palette === LEGACY_SHADER_PALETTE) return entry;
+  return { ...entry, presets: presetsFor(entry.id, entry.palette, palette) };
+}
+
+/** The entry for a deck: `requireMaterial` over the deck's palette. */
+export function requireMaterialFor(id: string, palette: ShaderPalette): MaterialEntry {
+  return entryWithPalette(requireMaterial(id), palette);
+}
+
+/** The preset an insert lands (5.2): the entry's featured preset, else its first. */
+export function featuredPresetOf(entry: MaterialEntry): string | undefined {
+  return entry.featuredPreset ?? entry.presets[0]?.name;
+}
+
+/** The label of a category chip. */
+export function categoryLabel(category: ShaderCategory): string {
+  return SHADER_CATEGORIES.find((row) => row.id === category)?.label ?? category;
 }
 
 /** The entry, or a RangeError naming the ids that exist (the class SPEC 7.1 gives an unknown id). */
@@ -545,20 +633,15 @@ export function requireMaterial(id: string): MaterialEntry {
 }
 
 /** The catalog as every transport reads it (material.list): the paper entries, then the proto stubs. */
-export function listMaterials(filter?: string): MaterialCatalogEntry[] {
-  const paperEntries: MaterialCatalogEntry[] = Object.values(MATERIALS).map(
-    ({ id, family, label, doc, available, credit, license, uniforms, presets }) => ({
-      id,
-      family,
-      label,
-      doc,
-      available,
-      credit,
-      license,
-      uniforms,
-      presets,
-    }),
-  );
+export function listMaterials(
+  filter?: string,
+  palette: ShaderPalette = LEGACY_SHADER_PALETTE,
+): MaterialCatalogEntry[] {
+  const paperEntries: MaterialCatalogEntry[] = Object.values(MATERIALS).map((entry) => {
+    const { id, family, label, doc, available, credit, license, uniforms, presets } =
+      entryWithPalette(entry, palette);
+    return { id, family, label, doc, available, credit, license, uniforms, presets };
+  });
   const all = [...paperEntries, ...PROTO_MATERIALS];
   return filter === undefined ? all : all.filter((entry) => entry.id === filter);
 }

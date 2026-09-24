@@ -27,6 +27,7 @@
     "./blob-store": "./src/blob-store.ts",
     "./blob-templates": "./src/blob-templates.ts",
     "./snapshots": "./src/snapshots.ts",
+    "./frames": "./src/frames.ts",
     "./blob-fake": "./src/blob-fake.ts",
     "./blob-disk": "./src/blob-disk.ts",
     "./blob-vercel": "./src/blob-vercel.ts",

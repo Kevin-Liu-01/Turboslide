@@ -6,15 +6,16 @@ import type { EditorDispatch } from './dispatch';
 import { AssetCard, AssetIntake } from './inspector/asset';
 import { DitherSection } from './inspector/dither';
 import type { DitherWorkerLike } from './inspector/dither';
-import { MaterialSection } from './inspector/material';
 import { PANELS } from './menus/strings';
 import { Panel } from './Panel';
 
 /**
- * Tools > Advanced > Pictures and materials (gslides-parity SPEC 2.8, 3.9): the Inspector's
- * Asset, Material and Dither sections as a right panel, for the pictures the selected block or
- * the slide references, the shader recipe of a material block or picture, and the two-tone
- * treatment with its live preview. An advanced surface: its words are the grammar's.
+ * Tools > Advanced > Pictures and materials (gslides-parity SPEC 2.8, 3.9): the Inspector's Asset
+ * and Dither sections as a right panel, for the pictures the selected block or the slide
+ * references and the two-tone treatment with its live preview. An advanced surface: its words are
+ * the grammar's. The Material section left this panel in the features round's ship two
+ * (docs/FEATURES.md 5.3; audit-shaders 19): a shader's recipe has one home, the Shader section of
+ * Format options (inspector/shader.tsx).
  */
 export type PicturesPanelProps = {
   deck: Deck;
@@ -53,15 +54,7 @@ export function PicturesPanel({
     (asset) =>
       asset.treatment?.kind === 'two-tone' || asset.role === 'opener' || asset.role === 'mood',
   );
-  const materialBlock = selected?.type === 'material' ? selected : undefined;
-  const pictureAsset = 'picture' in slide ? deck.assets[slide.picture.asset] : undefined;
   const plateSide = 'plate' in slide ? slide.plate.side : undefined;
-  const materialPicture =
-    materialBlock === undefined &&
-    pictureAsset?.source.kind === 'material' &&
-    plateSide !== undefined
-      ? { asset: pictureAsset, plateSide }
-      : undefined;
   const intakeRole =
     slide.kind === 'mood' ? 'mood' : slide.kind === 'opener' ? 'opener' : 'capture';
 
@@ -94,35 +87,6 @@ export function PicturesPanel({
           />
         </div>
       </section>
-      {materialBlock !== undefined || materialPicture !== undefined ? (
-        <section className="ts-panel-section">
-          <div className="ts-panel-section-head is-static">
-            <span>Material</span>
-          </div>
-          <div className="ts-panel-section-body">
-            <MaterialSection
-              target={
-                materialBlock !== undefined
-                  ? { kind: 'block', slideId: slide.id, block: materialBlock }
-                  : {
-                      kind: 'picture',
-                      slideId: slide.id,
-                      asset: (materialPicture as { asset: (typeof assets)[number] }).asset,
-                      plateSide: (
-                        materialPicture as {
-                          plateSide: 'lower-left' | 'lower-right' | 'upper-left';
-                        }
-                      ).plateSide,
-                    }
-              }
-              revision={revision}
-              dispatch={dispatch}
-              busy={busy}
-              onNotice={onNotice}
-            />
-          </div>
-        </section>
-      ) : null}
       {dithered.length > 0 ? (
         <section className="ts-panel-section">
           <div className="ts-panel-section-head is-static">

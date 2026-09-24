@@ -1,0 +1,742 @@
+{
+  "generatedAt": "2026-09-24T15:50:30.749Z",
+  "anchor": 5500,
+  "size": [320, 200],
+  "tileSize": [96, 60],
+  "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+  "entries": [
+    {
+      "materialId": "paper:dithering",
+      "preset": "accent",
+      "file": "dithering--accent.webp",
+      "bytes": 314
+    },
+    {
+      "materialId": "paper:dithering",
+      "preset": "brand-blue",
+      "file": "dithering--brand-blue.webp",
+      "bytes": 490
+    },
+    {
+      "materialId": "paper:dithering",
+      "preset": "caption",
+      "file": "dithering--caption.webp",
+      "bytes": 430
+    },
+    {
+      "materialId": "paper:dithering",
+      "preset": "hint",
+      "file": "dithering--hint.webp",
+      "bytes": 372
+    },
+    {
+      "materialId": "paper:dithering",
+      "preset": "ink-paper",
+      "file": "dithering--ink-paper.webp",
+      "bytes": 476
+    },
+    {
+      "materialId": "paper:dithering",
+      "preset": "paper-ink",
+      "file": "dithering--paper-ink.webp",
+      "bytes": 478
+    },
+    {
+      "materialId": "paper:dithering",
+      "file": "dithering.webp",
+      "bytes": 4020
+    },
+    {
+      "materialId": "paper:dot-grid",
+      "preset": "accent",
+      "file": "dot-grid--accent.webp",
+      "bytes": 488
+    },
+    {
+      "materialId": "paper:dot-grid",
+      "preset": "brand-blue",
+      "file": "dot-grid--brand-blue.webp",
+      "bytes": 718
+    },
+    {
+      "materialId": "paper:dot-grid",
+      "preset": "caption",
+      "file": "dot-grid--caption.webp",
+      "bytes": 686
+    },
+    {
+      "materialId": "paper:dot-grid",
+      "preset": "hint",
+      "file": "dot-grid--hint.webp",
+      "bytes": 598
+    },
+    {
+      "materialId": "paper:dot-grid",
+      "preset": "ink-paper",
+      "file": "dot-grid--ink-paper.webp",
+      "bytes": 774
+    },
+    {
+      "materialId": "paper:dot-grid",
+      "preset": "paper-ink",
+      "file": "dot-grid--paper-ink.webp",
+      "bytes": 784
+    },
+    {
+      "materialId": "paper:dot-grid",
+      "file": "dot-grid.webp",
+      "bytes": 1814
+    },
+    {
+      "materialId": "paper:gem-smoke",
+      "preset": "accent",
+      "file": "gem-smoke--accent.webp",
+      "bytes": 428
+    },
+    {
+      "materialId": "paper:gem-smoke",
+      "preset": "brand-blue",
+      "file": "gem-smoke--brand-blue.webp",
+      "bytes": 554
+    },
+    {
+      "materialId": "paper:gem-smoke",
+      "preset": "caption",
+      "file": "gem-smoke--caption.webp",
+      "bytes": 478
+    },
+    {
+      "materialId": "paper:gem-smoke",
+      "preset": "default",
+      "file": "gem-smoke--default.webp",
+      "bytes": 488
+    },
+    {
+      "materialId": "paper:gem-smoke",
+      "preset": "fire",
+      "file": "gem-smoke--fire.webp",
+      "bytes": 1392
+    },
+    {
+      "materialId": "paper:gem-smoke",
+      "preset": "hint",
+      "file": "gem-smoke--hint.webp",
+      "bytes": 410
+    },
+    {
+      "materialId": "paper:gem-smoke",
+      "preset": "ink-paper",
+      "file": "gem-smoke--ink-paper.webp",
+      "bytes": 536
+    },
+    {
+      "materialId": "paper:gem-smoke",
+      "preset": "paper-ink",
+      "file": "gem-smoke--paper-ink.webp",
+      "bytes": 560
+    },
+    {
+      "materialId": "paper:gem-smoke",
+      "file": "gem-smoke.webp",
+      "bytes": 2224
+    },
+    {
+      "materialId": "paper:god-rays",
+      "preset": "accent",
+      "file": "god-rays--accent.webp",
+      "bytes": 912
+    },
+    {
+      "materialId": "paper:god-rays",
+      "preset": "brand-blue",
+      "file": "god-rays--brand-blue.webp",
+      "bytes": 1394
+    },
+    {
+      "materialId": "paper:god-rays",
+      "preset": "caption",
+      "file": "god-rays--caption.webp",
+      "bytes": 1230
+    },
+    {
+      "materialId": "paper:god-rays",
+      "preset": "hint",
+      "file": "god-rays--hint.webp",
+      "bytes": 784
+    },
+    {
+      "materialId": "paper:god-rays",
+      "preset": "ink-paper",
+      "file": "god-rays--ink-paper.webp",
+      "bytes": 1434
+    },
+    {
+      "materialId": "paper:god-rays",
+      "preset": "paper-ink",
+      "file": "god-rays--paper-ink.webp",
+      "bytes": 1236
+    },
+    {
+      "materialId": "paper:god-rays",
+      "file": "god-rays.webp",
+      "bytes": 7966
+    },
+    {
+      "materialId": "paper:grain-gradient",
+      "preset": "accent",
+      "file": "grain-gradient--accent.webp",
+      "bytes": 204
+    },
+    {
+      "materialId": "paper:grain-gradient",
+      "preset": "brand-blue",
+      "file": "grain-gradient--brand-blue.webp",
+      "bytes": 254
+    },
+    {
+      "materialId": "paper:grain-gradient",
+      "preset": "caption",
+      "file": "grain-gradient--caption.webp",
+      "bytes": 202
+    },
+    {
+      "materialId": "paper:grain-gradient",
+      "preset": "hint",
+      "file": "grain-gradient--hint.webp",
+      "bytes": 196
+    },
+    {
+      "materialId": "paper:grain-gradient",
+      "preset": "ink-paper",
+      "file": "grain-gradient--ink-paper.webp",
+      "bytes": 260
+    },
+    {
+      "materialId": "paper:grain-gradient",
+      "preset": "paper-ink",
+      "file": "grain-gradient--paper-ink.webp",
+      "bytes": 274
+    },
+    {
+      "materialId": "paper:grain-gradient",
+      "file": "grain-gradient.webp",
+      "bytes": 8984
+    },
+    {
+      "materialId": "paper:liquid-metal",
+      "preset": "accent",
+      "file": "liquid-metal--accent.webp",
+      "bytes": 374
+    },
+    {
+      "materialId": "paper:liquid-metal",
+      "preset": "brand-blue",
+      "file": "liquid-metal--brand-blue.webp",
+      "bytes": 432
+    },
+    {
+      "materialId": "paper:liquid-metal",
+      "preset": "caption",
+      "file": "liquid-metal--caption.webp",
+      "bytes": 338
+    },
+    {
+      "materialId": "paper:liquid-metal",
+      "preset": "chrome",
+      "file": "liquid-metal--chrome.webp",
+      "bytes": 294
+    },
+    {
+      "materialId": "paper:liquid-metal",
+      "preset": "diamond",
+      "file": "liquid-metal--diamond.webp",
+      "bytes": 302
+    },
+    {
+      "materialId": "paper:liquid-metal",
+      "preset": "hint",
+      "file": "liquid-metal--hint.webp",
+      "bytes": 268
+    },
+    {
+      "materialId": "paper:liquid-metal",
+      "preset": "ink-paper",
+      "file": "liquid-metal--ink-paper.webp",
+      "bytes": 348
+    },
+    {
+      "materialId": "paper:liquid-metal",
+      "preset": "noir",
+      "file": "liquid-metal--noir.webp",
+      "bytes": 224
+    },
+    {
+      "materialId": "paper:liquid-metal",
+      "preset": "paper-ink",
+      "file": "liquid-metal--paper-ink.webp",
+      "bytes": 296
+    },
+    {
+      "materialId": "paper:liquid-metal",
+      "preset": "sphere",
+      "file": "liquid-metal--sphere.webp",
+      "bytes": 382
+    },
+    {
+      "materialId": "paper:liquid-metal",
+      "file": "liquid-metal.webp",
+      "bytes": 1638
+    },
+    {
+      "materialId": "paper:mesh-gradient",
+      "preset": "accent",
+      "file": "mesh-gradient--accent.webp",
+      "bytes": 310
+    },
+    {
+      "materialId": "paper:mesh-gradient",
+      "preset": "brand-blue",
+      "file": "mesh-gradient--brand-blue.webp",
+      "bytes": 238
+    },
+    {
+      "materialId": "paper:mesh-gradient",
+      "preset": "caption",
+      "file": "mesh-gradient--caption.webp",
+      "bytes": 194
+    },
+    {
+      "materialId": "paper:mesh-gradient",
+      "preset": "hint",
+      "file": "mesh-gradient--hint.webp",
+      "bytes": 258
+    },
+    {
+      "materialId": "paper:mesh-gradient",
+      "preset": "ink-paper",
+      "file": "mesh-gradient--ink-paper.webp",
+      "bytes": 194
+    },
+    {
+      "materialId": "paper:mesh-gradient",
+      "preset": "paper-ink",
+      "file": "mesh-gradient--paper-ink.webp",
+      "bytes": 152
+    },
+    {
+      "materialId": "paper:mesh-gradient",
+      "file": "mesh-gradient.webp",
+      "bytes": 724
+    },
+    {
+      "materialId": "paper:metaballs",
+      "preset": "accent",
+      "file": "metaballs--accent.webp",
+      "bytes": 364
+    },
+    {
+      "materialId": "paper:metaballs",
+      "preset": "brand-blue",
+      "file": "metaballs--brand-blue.webp",
+      "bytes": 522
+    },
+    {
+      "materialId": "paper:metaballs",
+      "preset": "caption",
+      "file": "metaballs--caption.webp",
+      "bytes": 376
+    },
+    {
+      "materialId": "paper:metaballs",
+      "preset": "hint",
+      "file": "metaballs--hint.webp",
+      "bytes": 320
+    },
+    {
+      "materialId": "paper:metaballs",
+      "preset": "ink-paper",
+      "file": "metaballs--ink-paper.webp",
+      "bytes": 436
+    },
+    {
+      "materialId": "paper:metaballs",
+      "preset": "paper-ink",
+      "file": "metaballs--paper-ink.webp",
+      "bytes": 448
+    },
+    {
+      "materialId": "paper:metaballs",
+      "file": "metaballs.webp",
+      "bytes": 1544
+    },
+    {
+      "materialId": "paper:neuro-noise",
+      "preset": "accent",
+      "file": "neuro-noise--accent.webp",
+      "bytes": 122
+    },
+    {
+      "materialId": "paper:neuro-noise",
+      "preset": "brand-blue",
+      "file": "neuro-noise--brand-blue.webp",
+      "bytes": 150
+    },
+    {
+      "materialId": "paper:neuro-noise",
+      "preset": "caption",
+      "file": "neuro-noise--caption.webp",
+      "bytes": 190
+    },
+    {
+      "materialId": "paper:neuro-noise",
+      "preset": "hint",
+      "file": "neuro-noise--hint.webp",
+      "bytes": 124
+    },
+    {
+      "materialId": "paper:neuro-noise",
+      "preset": "ink-paper",
+      "file": "neuro-noise--ink-paper.webp",
+      "bytes": 222
+    },
+    {
+      "materialId": "paper:neuro-noise",
+      "preset": "paper-ink",
+      "file": "neuro-noise--paper-ink.webp",
+      "bytes": 200
+    },
+    {
+      "materialId": "paper:neuro-noise",
+      "file": "neuro-noise.webp",
+      "bytes": 944
+    },
+    {
+      "materialId": "paper:perlin-noise",
+      "preset": "accent",
+      "file": "perlin-noise--accent.webp",
+      "bytes": 1262
+    },
+    {
+      "materialId": "paper:perlin-noise",
+      "preset": "brand-blue",
+      "file": "perlin-noise--brand-blue.webp",
+      "bytes": 1856
+    },
+    {
+      "materialId": "paper:perlin-noise",
+      "preset": "caption",
+      "file": "perlin-noise--caption.webp",
+      "bytes": 1428
+    },
+    {
+      "materialId": "paper:perlin-noise",
+      "preset": "hint",
+      "file": "perlin-noise--hint.webp",
+      "bytes": 1232
+    },
+    {
+      "materialId": "paper:perlin-noise",
+      "preset": "ink-paper",
+      "file": "perlin-noise--ink-paper.webp",
+      "bytes": 1626
+    },
+    {
+      "materialId": "paper:perlin-noise",
+      "preset": "paper-ink",
+      "file": "perlin-noise--paper-ink.webp",
+      "bytes": 1662
+    },
+    {
+      "materialId": "paper:perlin-noise",
+      "file": "perlin-noise.webp",
+      "bytes": 4518
+    },
+    {
+      "materialId": "paper:simplex-noise",
+      "preset": "accent",
+      "file": "simplex-noise--accent.webp",
+      "bytes": 432
+    },
+    {
+      "materialId": "paper:simplex-noise",
+      "preset": "brand-blue",
+      "file": "simplex-noise--brand-blue.webp",
+      "bytes": 312
+    },
+    {
+      "materialId": "paper:simplex-noise",
+      "preset": "caption",
+      "file": "simplex-noise--caption.webp",
+      "bytes": 250
+    },
+    {
+      "materialId": "paper:simplex-noise",
+      "preset": "hint",
+      "file": "simplex-noise--hint.webp",
+      "bytes": 366
+    },
+    {
+      "materialId": "paper:simplex-noise",
+      "preset": "ink-paper",
+      "file": "simplex-noise--ink-paper.webp",
+      "bytes": 250
+    },
+    {
+      "materialId": "paper:simplex-noise",
+      "preset": "paper-ink",
+      "file": "simplex-noise--paper-ink.webp",
+      "bytes": 192
+    },
+    {
+      "materialId": "paper:simplex-noise",
+      "file": "simplex-noise.webp",
+      "bytes": 890
+    },
+    {
+      "materialId": "paper:smoke-ring",
+      "preset": "accent",
+      "file": "smoke-ring--accent.webp",
+      "bytes": 368
+    },
+    {
+      "materialId": "paper:smoke-ring",
+      "preset": "brand-blue",
+      "file": "smoke-ring--brand-blue.webp",
+      "bytes": 438
+    },
+    {
+      "materialId": "paper:smoke-ring",
+      "preset": "caption",
+      "file": "smoke-ring--caption.webp",
+      "bytes": 334
+    },
+    {
+      "materialId": "paper:smoke-ring",
+      "preset": "hint",
+      "file": "smoke-ring--hint.webp",
+      "bytes": 364
+    },
+    {
+      "materialId": "paper:smoke-ring",
+      "preset": "ink-paper",
+      "file": "smoke-ring--ink-paper.webp",
+      "bytes": 414
+    },
+    {
+      "materialId": "paper:smoke-ring",
+      "preset": "paper-ink",
+      "file": "smoke-ring--paper-ink.webp",
+      "bytes": 428
+    },
+    {
+      "materialId": "paper:smoke-ring",
+      "file": "smoke-ring.webp",
+      "bytes": 2520
+    },
+    {
+      "materialId": "paper:spiral",
+      "preset": "accent",
+      "file": "spiral--accent.webp",
+      "bytes": 1358
+    },
+    {
+      "materialId": "paper:spiral",
+      "preset": "brand-blue",
+      "file": "spiral--brand-blue.webp",
+      "bytes": 1984
+    },
+    {
+      "materialId": "paper:spiral",
+      "preset": "caption",
+      "file": "spiral--caption.webp",
+      "bytes": 1492
+    },
+    {
+      "materialId": "paper:spiral",
+      "preset": "hint",
+      "file": "spiral--hint.webp",
+      "bytes": 1276
+    },
+    {
+      "materialId": "paper:spiral",
+      "preset": "ink-paper",
+      "file": "spiral--ink-paper.webp",
+      "bytes": 1660
+    },
+    {
+      "materialId": "paper:spiral",
+      "preset": "paper-ink",
+      "file": "spiral--paper-ink.webp",
+      "bytes": 1640
+    },
+    {
+      "materialId": "paper:spiral",
+      "file": "spiral.webp",
+      "bytes": 6050
+    },
+    {
+      "materialId": "paper:static-mesh-gradient",
+      "preset": "accent",
+      "file": "static-mesh-gradient--accent.webp",
+      "bytes": 392
+    },
+    {
+      "materialId": "paper:static-mesh-gradient",
+      "preset": "brand-blue",
+      "file": "static-mesh-gradient--brand-blue.webp",
+      "bytes": 300
+    },
+    {
+      "materialId": "paper:static-mesh-gradient",
+      "preset": "caption",
+      "file": "static-mesh-gradient--caption.webp",
+      "bytes": 240
+    },
+    {
+      "materialId": "paper:static-mesh-gradient",
+      "preset": "hint",
+      "file": "static-mesh-gradient--hint.webp",
+      "bytes": 300
+    },
+    {
+      "materialId": "paper:static-mesh-gradient",
+      "preset": "ink-paper",
+      "file": "static-mesh-gradient--ink-paper.webp",
+      "bytes": 240
+    },
+    {
+      "materialId": "paper:static-mesh-gradient",
+      "preset": "paper-ink",
+      "file": "static-mesh-gradient--paper-ink.webp",
+      "bytes": 192
+    },
+    {
+      "materialId": "paper:static-mesh-gradient",
+      "file": "static-mesh-gradient.webp",
+      "bytes": 976
+    },
+    {
+      "materialId": "paper:static-radial-gradient",
+      "preset": "accent",
+      "file": "static-radial-gradient--accent.webp",
+      "bytes": 278
+    },
+    {
+      "materialId": "paper:static-radial-gradient",
+      "preset": "brand-blue",
+      "file": "static-radial-gradient--brand-blue.webp",
+      "bytes": 314
+    },
+    {
+      "materialId": "paper:static-radial-gradient",
+      "preset": "caption",
+      "file": "static-radial-gradient--caption.webp",
+      "bytes": 226
+    },
+    {
+      "materialId": "paper:static-radial-gradient",
+      "preset": "hint",
+      "file": "static-radial-gradient--hint.webp",
+      "bytes": 230
+    },
+    {
+      "materialId": "paper:static-radial-gradient",
+      "preset": "ink-paper",
+      "file": "static-radial-gradient--ink-paper.webp",
+      "bytes": 230
+    },
+    {
+      "materialId": "paper:static-radial-gradient",
+      "preset": "paper-ink",
+      "file": "static-radial-gradient--paper-ink.webp",
+      "bytes": 244
+    },
+    {
+      "materialId": "paper:static-radial-gradient",
+      "file": "static-radial-gradient.webp",
+      "bytes": 978
+    },
+    {
+      "materialId": "paper:swirl",
+      "preset": "accent",
+      "file": "swirl--accent.webp",
+      "bytes": 1636
+    },
+    {
+      "materialId": "paper:swirl",
+      "preset": "brand-blue",
+      "file": "swirl--brand-blue.webp",
+      "bytes": 1578
+    },
+    {
+      "materialId": "paper:swirl",
+      "preset": "caption",
+      "file": "swirl--caption.webp",
+      "bytes": 1186
+    },
+    {
+      "materialId": "paper:swirl",
+      "preset": "hint",
+      "file": "swirl--hint.webp",
+      "bytes": 1428
+    },
+    {
+      "materialId": "paper:swirl",
+      "preset": "ink-paper",
+      "file": "swirl--ink-paper.webp",
+      "bytes": 1294
+    },
+    {
+      "materialId": "paper:swirl",
+      "preset": "paper-ink",
+      "file": "swirl--paper-ink.webp",
+      "bytes": 1134
+    },
+    {
+      "materialId": "paper:swirl",
+      "file": "swirl.webp",
+      "bytes": 5150
+    },
+    {
+      "materialId": "paper:waves",
+      "preset": "accent",
+      "file": "waves--accent.webp",
+      "bytes": 1958
+    },
+    {
+      "materialId": "paper:waves",
+      "preset": "brand-blue",
+      "file": "waves--brand-blue.webp",
+      "bytes": 2706
+    },
+    {
+      "materialId": "paper:waves",
+      "preset": "caption",
+      "file": "waves--caption.webp",
+      "bytes": 2258
+    },
+    {
+      "materialId": "paper:waves",
+      "preset": "hint",
+      "file": "waves--hint.webp",
+      "bytes": 1926
+    },
+    {
+      "materialId": "paper:waves",
+      "preset": "ink-paper",
+      "file": "waves--ink-paper.webp",
+      "bytes": 2456
+    },
+    {
+      "materialId": "paper:waves",
+      "preset": "paper-ink",
+      "file": "waves--paper-ink.webp",
+      "bytes": 2470
+    },
+    {
+      "materialId": "paper:waves",
+      "file": "waves.webp",
+      "bytes": 9820
+    }
+  ]
+}

@@ -628,7 +628,7 @@ exports[`block catalog > renders material (mat) in light 1`] = `
 
 exports[`block catalog > renders material (mat-live) in dark 1`] = `
 {
-  "html": "<figure class="material-fig" data-block="mat-live" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:gem-smoke&quot;,&quot;preset&quot;:&quot;brand-blue&quot;}"><div class="material" style="height:300px;aspect-ratio:auto" role="img" aria-label="The gem smoke material in the brand blue" data-raster="material" data-rid="mat-live:1"><span class="material-label">paper:gem-smoke · brand-blue · not captured</span></div></figure>",
+  "html": "<figure class="material-fig" data-block="mat-live" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:gem-smoke&quot;,&quot;preset&quot;:&quot;brand-blue&quot;}"><div class="material" style="height:300px;aspect-ratio:auto" role="img" aria-label="The gem smoke material in the brand blue" data-raster="material" data-rid="mat-live:1"></div></figure>",
   "rasters": [
     {
       "alpha": false,
@@ -642,7 +642,7 @@ exports[`block catalog > renders material (mat-live) in dark 1`] = `
 
 exports[`block catalog > renders material (mat-live) in light 1`] = `
 {
-  "html": "<figure class="material-fig" data-block="mat-live" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:gem-smoke&quot;,&quot;preset&quot;:&quot;brand-blue&quot;}"><div class="material" style="height:300px;aspect-ratio:auto" role="img" aria-label="The gem smoke material in the brand blue" data-raster="material" data-rid="mat-live:1"><span class="material-label">paper:gem-smoke · brand-blue · not captured</span></div></figure>",
+  "html": "<figure class="material-fig" data-block="mat-live" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:gem-smoke&quot;,&quot;preset&quot;:&quot;brand-blue&quot;}"><div class="material" style="height:300px;aspect-ratio:auto" role="img" aria-label="The gem smoke material in the brand blue" data-raster="material" data-rid="mat-live:1"></div></figure>",
   "rasters": [
     {
       "alpha": false,

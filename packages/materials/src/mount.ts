@@ -10,8 +10,9 @@ import { ShaderMount, getShaderNoiseTexture } from '@paper-design/shaders';
 import type { MaterialRecipe, MaterialUniforms } from '@turboslide/schema/blocks/material';
 
 import type { MaterialEntry } from './catalog.ts';
-import { requireMaterial } from './catalog.ts';
+import { entryWithPalette, requireMaterial } from './catalog.ts';
 import { fragmentShaderFor, mipmapsFor, textureSources, toShaderUniforms } from './paper.ts';
+import type { ShaderPalette } from './presets.ts';
 import type { ResolvedRecipe } from './recipe.ts';
 import { resolveRecipe } from './recipe.ts';
 
@@ -30,6 +31,11 @@ export type MountOptions = {
   maxPixelCount?: number;
   /** WebGL context attributes; the capture page asks for preserveDrawingBuffer. */
   contextAttributes?: WebGLContextAttributes;
+  /**
+   * The deck's shader palette (docs/FEATURES.md 5.7): the palette presets of the entry are
+   * computed from it, so a kit's colours reach the live mount; the legacy palette when absent.
+   */
+  palette?: ShaderPalette;
 };
 
 export type MaterialHandle = {
@@ -42,6 +48,8 @@ export type MaterialHandle = {
   setSpeed: (speed: number) => void;
   /** The frame the shader shows, in ms. */
   frame: () => number;
+  /** The canvas Paper draws into, for a capture's `toBlob` and the perf rows' reads. */
+  canvas: () => HTMLCanvasElement;
   dispose: () => void;
 };
 
@@ -78,7 +86,10 @@ export async function mountMaterial(
   recipe: MaterialRecipe,
   options: MountOptions = {},
 ): Promise<MaterialHandle> {
-  const entry = requireMaterial(recipe.materialId);
+  const entry =
+    options.palette === undefined
+      ? requireMaterial(recipe.materialId)
+      : entryWithPalette(requireMaterial(recipe.materialId), options.palette);
   const resolved = resolveRecipe(entry, recipe);
   const uniforms = toShaderUniforms(entry, resolved.uniforms);
   const textures = await loadTextures(entry);
@@ -108,6 +119,7 @@ export async function mountMaterial(
     setFrame: (ms) => mount.setFrame(ms),
     setSpeed: (speed) => mount.setSpeed(speed),
     frame: () => mount.getCurrentFrame(),
+    canvas: () => mount.canvasElement,
     dispose: () => mount.dispose(),
   };
 }

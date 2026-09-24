@@ -1,0 +1,7 @@
+{
+  "commit": "e2c6a7a",
+  "renderedFrom": [],
+  "rule": "docs/FEATURES.md 7.2: the ship's parked list committed before the runs with parkedFeatures and parkedRows empty (the integrator's prompt for ship two); the ship step writes the list of record from the two enforce preview runs' wouldParkRows, the previous ship's list (ship-f1afe1e.json) carried forward where its rows did not read green in both runs, and runs node scripts/probes/core-matrix.mjs --emit-parked on it before the production deploy",
+  "parkedFeatures": [],
+  "parkedRows": []
+}

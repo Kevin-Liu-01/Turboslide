@@ -68,8 +68,7 @@ import {
   TOKENS,
 } from '@turboslide/theme/tokens';
 
-import { INSERT_MIN_SIZE, placeInsert } from '../editor/place-insert';
-import type { PlacedKind } from '../editor/place-insert';
+import { placeInsert } from '../editor/place-insert';
 import { hostedAccessHooks } from './access';
 import { registerStoreStatusActions } from './agent-actions';
 import { registerAssistActions } from './assist';
@@ -534,14 +533,9 @@ function assetDispatcherLoader(
         readUpload,
         // the largest free rectangle for an agent's shader.insert (docs/FEATURES.md section 1,
         // the placement decision; build/b5.md R5, the studio half): the same rule the gallery's
-        // insert follows in the controller, once the integrator's R5 gives place-insert.ts the
-        // `material` kind; until then the materials package falls back to the sheet's centre
-        ...(Object.hasOwn(INSERT_MIN_SIZE, 'material')
-          ? {
-              placeInsert: (slide: Slide, size: readonly [number, number]) =>
-                placeInsert(slide, 'material' as PlacedKind, size).pos,
-            }
-          : {}),
+        // insert follows in the controller (place-insert.ts's `material` kind)
+        placeInsert: (slide: Slide, size: readonly [number, number]) =>
+          placeInsert(slide, 'material', size).pos,
         dispatch: (id, input, context) => dispatcher.dispatch(id, input, context),
         log: (line) => {
           if (process.env.TURBOSLIDE_AGENT_LOG === '1') console.error(`agent ${deckId}: ${line}`);

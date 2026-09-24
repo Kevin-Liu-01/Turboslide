@@ -91,7 +91,10 @@ const dialogCanvases = () =>
   });
 const moveHuman = async (from, to, steps) => {
   for (let i = 1; i <= steps; i += 1) {
-    await page.mouse.move(from.x + ((to.x - from.x) * i) / steps, from.y + ((to.y - from.y) * i) / steps);
+    await page.mouse.move(
+      from.x + ((to.x - from.x) * i) / steps,
+      from.y + ((to.y - from.y) * i) / steps,
+    );
     await sleep(30);
   }
 };
@@ -105,17 +108,22 @@ const closeMenus = async () => {
 const openGallery = async () => {
   await control('menubar.insert').first().click();
   await sleep(400);
-  const row = (await control('menu.insert.shader').count()) > 0
-    ? 'menu.insert.shader'
-    : (await control('menu.insert.material').count()) > 0
-      ? 'menu.insert.material'
-      : null;
+  const row =
+    (await control('menu.insert.shader').count()) > 0
+      ? 'menu.insert.shader'
+      : (await control('menu.insert.material').count()) > 0
+        ? 'menu.insert.material'
+        : null;
   if (row === null) {
     await closeMenus();
     return { open: false, row: null };
   }
   await control(row).first().click();
-  const open = await pollUntil(() => visible('dialog.shader'), (x) => x, 8000);
+  const open = await pollUntil(
+    () => visible('dialog.shader'),
+    (x) => x,
+    8000,
+  );
   return { open, row };
 };
 let deckId = null;
@@ -127,7 +135,12 @@ try {
   let s = await state();
   deckId = s.deckId ?? (await invoke('deck.info')).id;
   const slideId = s.slideId ?? s.slide?.id ?? (await invoke('slide.list')).slides?.[0]?.id;
-  record('the editor boots on /new', 'window.turboslide.studio and a slide', `deck ${deckId}, slide ${slideId}`, Boolean(slideId));
+  record(
+    'the editor boots on /new',
+    'window.turboslide.studio and a slide',
+    `deck ${deckId}, slide ${slideId}`,
+    Boolean(slideId),
+  );
 
   /* shaders.insert.gallery-thumbnails */
   const opened = await openGallery();
@@ -140,7 +153,9 @@ try {
   if (!opened.open) throw new Error('the gallery did not open');
   const openedAt = Date.now();
   const words = await page.evaluate(() => {
-    const root = document.querySelector('[data-control="dialog.shader"]')?.closest('[role="dialog"]');
+    const root = document
+      .querySelector('[data-control="dialog.shader"]')
+      ?.closest('[role="dialog"]');
     return {
       title: root?.querySelector('h1, h2, h3')?.textContent?.trim() ?? null,
       sentence: root?.querySelector('[data-control="dialog.shader.sentence"]')?.textContent ?? null,
@@ -154,15 +169,28 @@ try {
     words.sentence,
     /black and white/i.test(words.sentence ?? '') && /brand kit/i.test(words.sentence ?? ''),
   );
-  record('the search field has the focus', 'dialog.shader.search', words.focus, words.focus === 'dialog.shader.search');
-  const all = await pollUntil(cards, (list) => list.length > 0 && list.every((c) => c.thumb), 2000, 100);
+  record(
+    'the search field has the focus',
+    'dialog.shader.search',
+    words.focus,
+    words.focus === 'dialog.shader.search',
+  );
+  const all = await pollUntil(
+    cards,
+    (list) => list.length > 0 && list.every((c) => c.thumb),
+    2000,
+    100,
+  );
   const decodedMs = Date.now() - openedAt;
   const decoded = all.filter((c) => c.thumb).length;
   const plates = all.filter((c) => c.plate).length;
   record(
     '17 cards in the featured order',
     'liquid metal, gem smoke, god rays, mesh gradient, smoke ring, grain gradient first; 17 in all',
-    `${all.length} cards: ${all.slice(0, 6).map((c) => c.title).join(', ')}; the first inserts ${all[0]?.preset}`,
+    `${all.length} cards: ${all
+      .slice(0, 6)
+      .map((c) => c.title)
+      .join(', ')}; the first inserts ${all[0]?.preset}`,
     all.length === 17 &&
       all[0]?.material === 'paper:liquid-metal' &&
       all[0]?.preset === 'diamond' &&
@@ -187,7 +215,9 @@ try {
     'the search narrows to "metal" in one row',
     'one card, Liquid metal',
     `${narrowed.length} (${narrowed.map((c) => c.title).join(', ')})`,
-    narrowed.length > 0 && narrowed.length <= perRow && narrowed.some((c) => /liquid metal/i.test(c.title)),
+    narrowed.length > 0 &&
+      narrowed.length <= perRow &&
+      narrowed.some((c) => /liquid metal/i.test(c.title)),
   );
   await page.keyboard.press('Meta+a');
   await page.keyboard.press('Backspace');
@@ -214,7 +244,12 @@ try {
 
   /* shaders.insert.gallery-hover-live (P1) */
   const surface = await page.evaluate(() =>
-    Boolean(document.querySelector('[data-control="dialog.shader"]')?.closest('[role="dialog"]')?.querySelector('[data-hover-live]')),
+    Boolean(
+      document
+        .querySelector('[data-control="dialog.shader"]')
+        ?.closest('[role="dialog"]')
+        ?.querySelector('[data-hover-live]'),
+    ),
   );
   const list = await cards();
   const a = list[0];
@@ -224,7 +259,10 @@ try {
   await sleep(400);
   const held = await dialogCanvases();
   const liveId = await page.evaluate(
-    () => document.querySelector('[data-control^="dialog.shader.hover."]')?.getAttribute('data-control') ?? null,
+    () =>
+      document
+        .querySelector('[data-control^="dialog.shader.hover."]')
+        ?.getAttribute('data-control') ?? null,
   );
   let peak = held;
   await moveHuman({ x: a.x, y: a.y }, { x: b.x, y: b.y }, 10);
@@ -246,10 +284,15 @@ try {
   const before = await state();
   /* the card through its locator: Playwright scrolls it into view first, as B4's clickControl does */
   await control(a.id).first().click();
-  const gone = await pollUntil(async () => (await control('dialog.shader').count()) === 0, (x) => x, 8000);
+  const gone = await pollUntil(
+    async () => (await control('dialog.shader').count()) === 0,
+    (x) => x,
+    8000,
+  );
   await sleep(600);
   const after = await state();
-  const slide = (await invoke('slide.get', { slideId })).slide ?? (await invoke('slide.get', { slideId }));
+  const slide =
+    (await invoke('slide.get', { slideId })).slide ?? (await invoke('slide.get', { slideId }));
   const blocks = JSON.stringify(slide);
   const inserted = /"type":"material"/.test(blocks);
   const material = (() => {
@@ -274,7 +317,11 @@ try {
     'a click on Liquid metal inserts the shader block and selects it (the placement is B5’s)',
     'dialog closed; one material block with materialId paper:liquid-metal, preset diamond, alt "The liquid metal shader", motion.play show; the selection names it',
     `closed ${gone}; block ${material ? `${material.id} ${material.materialId} ${material.preset} "${material.alt}" motion ${JSON.stringify(material.motion)} pos ${JSON.stringify(material.pos)}` : 'none'}; selection ${selected}; revision ${before.revision} -> ${after.revision}`,
-    gone && inserted && material?.materialId === 'paper:liquid-metal' && material?.preset === 'diamond' && selected === material?.id,
+    gone &&
+      inserted &&
+      material?.materialId === 'paper:liquid-metal' &&
+      material?.preset === 'diamond' &&
+      selected === material?.id,
   );
 
   /* shaders.background.place-answers: Slide > Change background > Shader > a card > Place */
@@ -282,22 +329,57 @@ try {
   await control('menubar.slide').first().click();
   await sleep(400);
   await control('menu.slide.changeBackground').first().click();
-  const bg = await pollUntil(() => visible('dialog.background'), (x) => x, 8000);
+  const bg = await pollUntil(
+    () => visible('dialog.background'),
+    (x) => x,
+    8000,
+  );
   record('Slide > Change background opens', 'dialog.background', bg, bg);
   const shaderRow = await visible('dialog.background.shader');
   const placeBefore = await control('dialog.background.shader.place').first().isDisabled();
-  record('the Shader row with Choose and a disabled Place', 'dialog.background.shader; Place disabled', `row ${shaderRow}; Place disabled ${placeBefore}`, shaderRow && placeBefore);
+  record(
+    'the Shader row with Choose and a disabled Place',
+    'dialog.background.shader; Place disabled',
+    `row ${shaderRow}; Place disabled ${placeBefore}`,
+    shaderRow && placeBefore,
+  );
   await control('dialog.background.shader').first().click();
-  const grid = await pollUntil(() => visible('dialog.shader'), (x) => x, 8000);
-  const compact = await page.evaluate(() => document.querySelector('[data-control="dialog.shader"]')?.classList.contains('is-compact') ?? false);
+  const grid = await pollUntil(
+    () => visible('dialog.shader'),
+    (x) => x,
+    8000,
+  );
+  const compact = await page.evaluate(
+    () =>
+      document.querySelector('[data-control="dialog.shader"]')?.classList.contains('is-compact') ??
+      false,
+  );
   const bgCards = await cards();
-  record('Choose opens the gallery grid inside the dialog', 'dialog.shader root, compact, 17 cards, no canvas', `root ${grid}, compact ${compact}, ${bgCards.length} cards, ${await dialogCanvases()} canvas`, grid && compact && bgCards.length === 17);
+  record(
+    'Choose opens the gallery grid inside the dialog',
+    'dialog.shader root, compact, 17 cards, no canvas',
+    `root ${grid}, compact ${compact}, ${bgCards.length} cards, ${await dialogCanvases()} canvas`,
+    grid && compact && bgCards.length === 17,
+  );
   const liquid = bgCards.find((c) => /liquid metal/i.test(c.title)) ?? bgCards[0];
   await control(liquid.id).first().click();
-  await pollUntil(async () => (await control('dialog.shader').count()) === 0, (x) => x, 4000);
+  await pollUntil(
+    async () => (await control('dialog.shader').count()) === 0,
+    (x) => x,
+    4000,
+  );
   const chooseText = await control('dialog.background.shader').first().textContent();
-  const chooseData = await control('dialog.background.shader').first().evaluate((e) => [e.getAttribute('data-material'), e.getAttribute('data-preset')]);
-  record('the Choose button reads the pick’s words', 'Liquid metal, Diamond', `"${chooseText}" ${JSON.stringify(chooseData)}`, chooseText === 'Liquid metal, Diamond' && chooseData[0] === 'paper:liquid-metal' && chooseData[1] === 'diamond');
+  const chooseData = await control('dialog.background.shader')
+    .first()
+    .evaluate((e) => [e.getAttribute('data-material'), e.getAttribute('data-preset')]);
+  record(
+    'the Choose button reads the pick’s words',
+    'Liquid metal, Diamond',
+    `"${chooseText}" ${JSON.stringify(chooseData)}`,
+    chooseText === 'Liquid metal, Diamond' &&
+      chooseData[0] === 'paper:liquid-metal' &&
+      chooseData[1] === 'diamond',
+  );
   const t0 = Date.now();
   await control('dialog.background.shader.place').first().click();
   let placingSeen = null;
@@ -310,7 +392,10 @@ try {
     });
   const read = async () => {
     const open = (await control('dialog.background').count()) > 0;
-    const button = open && (await control('dialog.background.shader.place').count()) > 0 ? await control('dialog.background.shader.place').first().textContent() : null;
+    const button =
+      open && (await control('dialog.background.shader.place').count()) > 0
+        ? await control('dialog.background.shader.place').first().textContent()
+        : null;
     if (button && /placing/i.test(button)) {
       placingSeen = placingSeen ?? button;
       if (/\d/.test(button)) secondsSeen = button;
@@ -320,7 +405,10 @@ try {
   const outcome = await pollUntil(read, (x) => !x.open || x.alert !== null, 65_000, 150);
   const ms = Date.now() - t0;
   const slideAfter = await invoke('slide.get', { slideId });
-  const covering = /"kind":"material"|"source":\{"kind":"material"/.test(JSON.stringify(await invoke('deck.info').catch(() => ({})))) || /"picture"/.test(JSON.stringify(slideAfter));
+  const covering =
+    /"kind":"material"|"source":\{"kind":"material"/.test(
+      JSON.stringify(await invoke('deck.info').catch(() => ({}))),
+    ) || /"picture"/.test(JSON.stringify(slideAfter));
   record(
     'Place reads "Placing" with the seconds while it waits',
     'Placing, then Placing, N s',
@@ -330,8 +418,13 @@ try {
   record(
     'the ground changes, or one sentence names the failure and no log text',
     'dialog closed with a covering picture within 5 s, or dialog.background.error with one sentence',
-    outcome.open ? `dialog open; sentence "${outcome.alert}" after ${ms} ms` : `dialog closed after ${ms} ms; covering picture ${covering}`,
-    (!outcome.open && ms <= 65_000) || (outcome.alert !== null && !/browser logs|<launching>|\n/i.test(outcome.alert) && outcome.alert.length <= 160),
+    outcome.open
+      ? `dialog open; sentence "${outcome.alert}" after ${ms} ms`
+      : `dialog closed after ${ms} ms; covering picture ${covering}`,
+    (!outcome.open && ms <= 65_000) ||
+      (outcome.alert !== null &&
+        !/browser logs|<launching>|\n/i.test(outcome.alert) &&
+        outcome.alert.length <= 160),
   );
   if (outcome.open) {
     await page.keyboard.press('Escape');
@@ -341,32 +434,66 @@ try {
   /* the parked set: nothing of the gallery is in the committed set */
   const parkedRead = await page.evaluate(() => {
     const d = window.turboslide.studio.describe();
-    return { advancedTools: d.state?.settings?.advancedTools ?? null, playShaders: d.state?.settings?.playShaders ?? null };
+    return {
+      advancedTools: d.state?.settings?.advancedTools ?? null,
+      playShaders: d.state?.settings?.playShaders ?? null,
+    };
   });
-  record('describe().state.settings reads the switch and the P1 play setting', 'advancedTools true; playShaders present once the integrator lands the MenuSetting', JSON.stringify(parkedRead), parkedRead.advancedTools === true);
+  record(
+    'describe().state.settings reads the switch and the P1 play setting',
+    'advancedTools true; playShaders present once the integrator lands the MenuSetting',
+    JSON.stringify(parkedRead),
+    parkedRead.advancedTools === true,
+  );
 } catch (error) {
-  record('the run', 'no exception', error instanceof Error ? `${error.message}` : String(error), false);
+  record(
+    'the run',
+    'no exception',
+    error instanceof Error ? `${error.message}` : String(error),
+    false,
+  );
 } finally {
   const mine = errors.filter((e) => /ShaderGallery|Background|Download|parked|shader/i.test(e));
-  record('no console or page error from this lane’s modules', 'none', mine.length === 0 ? 'none' : mine.join(' | '), mine.length === 0);
+  record(
+    'no console or page error from this lane’s modules',
+    'none',
+    mine.length === 0 ? 'none' : mine.join(' | '),
+    mine.length === 0,
+  );
   if (errors.length > 0) console.log('other console errors:', errors.length, errors.slice(0, 5));
   try {
     if (deckId) {
       const info = await invoke('deck.info').catch(() => null);
       if (info) {
-        await invoke('deck.trash', { id: deckId, baseRevision: info.revision }).catch(() => undefined);
+        await invoke('deck.trash', { id: deckId, baseRevision: info.revision }).catch(
+          () => undefined,
+        );
         const t = await invoke('deck.info').catch(() => null);
-        await invoke('deck.remove', { id: deckId, baseRevision: t?.revision ?? info.revision, confirm: true }).catch(() => undefined);
+        await invoke('deck.remove', {
+          id: deckId,
+          baseRevision: t?.revision ?? info.revision,
+          confirm: true,
+        }).catch(() => undefined);
       }
       let after = 0;
       for (let i = 0; i < 10 && after !== 404; i += 1) {
         after = await page.evaluate(async (id) => (await fetch(`/edit/${id}`)).status, deckId);
         if (after !== 404) await sleep(1000);
       }
-      record('the scratch deck is trashed and removed', '/edit/<id> answers 404', after, after === 404);
+      record(
+        'the scratch deck is trashed and removed',
+        '/edit/<id> answers 404',
+        after,
+        after === 404,
+      );
     }
   } catch (error) {
-    record('the teardown', 'trashed and removed', error instanceof Error ? error.message : String(error), false);
+    record(
+      'the teardown',
+      'trashed and removed',
+      error instanceof Error ? error.message : String(error),
+      false,
+    );
   }
   writeFileSync(out, JSON.stringify({ base, at: new Date().toISOString(), rows }, null, 2));
   console.log(`${rows.filter((r) => r.ok).length} of ${rows.length} ok; table ${out}`);

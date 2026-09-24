@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import {
-  SHADER_GALLERY,
-  ShaderGalleryGrid,
-  shaderFailureSentence,
-  shaderWordsOf,
-} from './ShaderGallery';
+import { ShaderGalleryGrid, shaderFailureSentence, shaderWordsOf } from './ShaderGallery';
 import type { ShaderPick } from './ShaderGallery';
 import {
   DITHER_PHOTOGRAPH_VALUE,
@@ -34,7 +29,7 @@ import { useEditorShell } from '../editor-shell-context';
 import type { FormatSectionId } from '../inspector/format-sections';
 import { swatchPaint } from '../inspector/palette';
 import { cn } from '../lib/cn';
-import { DIALOGS, DITHER } from '../menus/strings';
+import { DIALOGS, DITHER, SHADER_GALLERY } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 
 import '../pickers/Pickers.css';

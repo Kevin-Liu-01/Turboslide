@@ -25,15 +25,16 @@ import {
   patchDither,
 } from '../inspector/dither';
 import type { SectionWrite } from '../inspector/fields';
-import { MaterialSection } from '../inspector/material';
 import { DITHER } from '../menus/strings';
 import { TIP_DELAY_MS, hideTooltip, shownTooltipAnchor } from '../Tooltip';
 
 // The M5 editor surfaces (MILESTONES M5 items 1 to 3): the asset picker over the deck's twins,
-// the dither tool with its generated treatment controls and its two writes, the Material section
-// with its preset, uniform, anchor, two-tone and plate controls and its capture that ends in one
-// block.set of the frame, and the intake form that ends in one asset.add. Every control carries
-// the label and data-control id the window API matches (SPEC 6.5, 7.4).
+// the dither tool with its generated treatment controls and its two writes, and the intake form
+// that ends in one asset.add. Every control carries the label and data-control id the window API
+// matches (SPEC 6.5, 7.4). Round one's Material section left this panel in the features round,
+// ship two (docs/FEATURES.md 5.3): its one home is the Shader section of Format options
+// (__tests__/shader-section.test.tsx) and the Background dialog's Shader row is
+// __tests__/background-shader.test.tsx.
 
 afterEach(cleanup);
 
@@ -132,98 +133,6 @@ describe('DitherSection', () => {
   });
 });
 
-describe('MaterialSection', () => {
-  it('shows the preset, the uniforms, the anchor, two-tone and plate with labels and ids, and writes block.set', () => {
-    const dispatch = vi.fn<EditorDispatch>(async () => ({}));
-    render(
-      <MaterialSection
-        target={{ kind: 'block', slideId: 'mats', block }}
-        revision={7}
-        dispatch={dispatch}
-      />,
-    );
-    expect(screen.getByLabelText('mat: Preset').getAttribute('data-control')).toBe(
-      'block.mat.preset',
-    );
-    expect(screen.getByLabelText<HTMLSelectElement>('mat: Preset').value).toBe('diamond');
-    const scale = screen.getByLabelText<HTMLInputElement>('mat: Scale');
-    expect(scale.getAttribute('data-control')).toBe('block.mat.uniforms.u_scale');
-    expect(scale.value).toBe('0.5');
-    expect(screen.getByLabelText<HTMLSelectElement>('mat: Shape').value).toBe('diamond');
-    expect(screen.getByLabelText('mat: Anchor (ms)').getAttribute('data-control')).toBe(
-      'block.mat.anchor',
-    );
-    expect(screen.getByLabelText<HTMLInputElement>('mat: Two-tone').checked).toBe(true);
-    expect(screen.getByLabelText<HTMLSelectElement>('mat: Plate').value).toBe('lower-left');
-    fireEvent.change(screen.getByLabelText('mat: Preset'), { target: { value: 'sphere' } });
-    expect(dispatch).toHaveBeenCalledWith('block.set', {
-      slideId: 'mats',
-      blockId: 'mat',
-      path: '/preset',
-      value: 'sphere',
-      baseRevision: 7,
-    });
-    fireEvent.change(scale, { target: { value: '0.7' } });
-    expect(dispatch).toHaveBeenLastCalledWith('block.set', {
-      slideId: 'mats',
-      blockId: 'mat',
-      path: '/uniforms',
-      value: { u_scale: 0.7 },
-      baseRevision: 7,
-    });
-  });
-
-  it('captures the frame and points the block at it once the document moves past the capture revision', async () => {
-    const calls: { action: string; input: unknown }[] = [];
-    const dispatch: EditorDispatch = async (action, input) => {
-      calls.push({ action, input });
-      if (action === 'material.capture') return { id: 'mats-mat-5500' };
-      return {};
-    };
-    const view = render(
-      <MaterialSection
-        target={{ kind: 'block', slideId: 'mats', block }}
-        revision={7}
-        dispatch={dispatch}
-      />,
-    );
-    fireEvent.click(screen.getByRole('button', { name: /Capture frame/ }));
-    await Promise.resolve();
-    await new Promise((r) => setTimeout(r, 0));
-    expect(calls[0]).toMatchObject({
-      action: 'material.capture',
-      input: {
-        materialId: 'paper:liquid-metal',
-        preset: 'diamond',
-        anchors: [5500],
-        id: 'mats-mat-5500',
-        twoTone: true,
-        plate: 'lower-left',
-        role: 'frame',
-        baseRevision: 7,
-      },
-    });
-    view.rerender(
-      <MaterialSection
-        target={{ kind: 'block', slideId: 'mats', block }}
-        revision={8}
-        dispatch={dispatch}
-      />,
-    );
-    await new Promise((r) => setTimeout(r, 0));
-    expect(calls[1]).toMatchObject({
-      action: 'block.set',
-      input: {
-        slideId: 'mats',
-        blockId: 'mat',
-        path: '/asset',
-        value: 'mats-mat-5500',
-        baseRevision: 8,
-      },
-    });
-  });
-});
-
 describe('AssetIntake', () => {
   it('dispatches one asset.add with the license fields', async () => {
     const dispatch = vi.fn<EditorDispatch>(async () => ({ id: 'wave', role: 'mood' }));
@@ -258,13 +167,13 @@ describe('AssetIntake', () => {
 });
 
 describe('Inspector', () => {
-  it('shows the Material section for a selected material block and the intake in the Asset section', () => {
+  it('shows the intake in the Asset section for a selected material block and no Material section (its one home is the Shader section of Format options, docs/FEATURES.md 5.3)', () => {
     const dispatch = vi.fn<EditorDispatch>(async () => ({}));
     render(
       <Inspector deck={WORKED_DECK} slide={slide} blockId="mat" revision={5} dispatch={dispatch} />,
     );
-    expect(screen.getByRole('button', { name: 'Material · mat' })).toBeTruthy();
-    expect(screen.getByLabelText('mat: Preset')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Material · mat' })).toBeNull();
+    expect(screen.queryByLabelText('mat: Preset')).toBeNull();
     expect(screen.getByLabelText('asset intake: Alt text')).toBeTruthy();
   });
 });
@@ -275,9 +184,7 @@ describe('Inspector', () => {
 // field, the presets highlighted by equality and writing the three numbers, a slider previewing
 // through the editor's handle and committing once on release, Reset; the Background dialog's
 // Dither toggle writing the Photograph numbers on the covering picture, the Neutral chip, the
-// remembered toggle carried by one `slide.setBackgroundPicture` on a canvas slide, the Material
-// row's Place as one `slide.setBackgroundMaterial`; the Material section's object target with the
-// Dither toggle and Play.
+// remembered toggle carried by one `slide.setBackgroundPicture` on a canvas slide.
 const PHOTOGRAPH = { pattern: 'bayer8', black: 120, white: 230, gamma: 0.9 } as const;
 
 function pictureBlock(dither?: Record<string, unknown>): PictureBlock {
@@ -697,65 +604,5 @@ describe('the Background dialog’s dither rows', () => {
       dither: { pattern: 'bayer8', black: 120, white: 230, gamma: 0.9 },
       baseRevision: 9,
     });
-  });
-
-  it('the Material row: Choose lists the catalog, Place is one slide.setBackgroundMaterial with the dither', async () => {
-    const dispatch = vi.fn(() => Promise.resolve({ revision: 10 }));
-    render(
-      <Host
-        input={{
-          deckId: 'w',
-          document: canvasDocument(null),
-          slideId: 'cv',
-          revision: 9,
-          dispatch,
-        }}
-      >
-        <BackgroundDialog />
-      </Host>,
-    );
-    expect((control('dialog.background.material.place') as HTMLButtonElement).disabled).toBe(true);
-    fireEvent.click(control('dialog.background.material.choose'));
-    fireEvent.click(control('dialog.background.material.paper:liquid-metal.diamond'));
-    fireEvent.click(control('dialog.background.material.dither'));
-    fireEvent.click(control('dialog.background.material.place'));
-    expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(dispatch).toHaveBeenLastCalledWith('slide.setBackgroundMaterial', {
-      slideIds: ['cv'],
-      materialId: 'paper:liquid-metal',
-      preset: 'diamond',
-      anchor: 5500,
-      dither: { pattern: 'bayer8', black: 120, white: 230, gamma: 0.9 },
-      baseRevision: 9,
-    });
-  });
-});
-
-describe('the Material section’s object target', () => {
-  it('shows the Dither toggle and Play instead of Two-tone, writes the field on the object', () => {
-    const dispatch = vi.fn<EditorDispatch>(async () => ({}));
-    const object = { ...pictureBlock(), asset: LIQUID_METAL_DIAMOND.id } as PictureBlock;
-    render(
-      <MaterialSection
-        target={{ kind: 'object', slideId: 'cv', block: object, asset: LIQUID_METAL_DIAMOND }}
-        revision={9}
-        dispatch={dispatch}
-      />,
-    );
-    expect(control('block.bg.material.dither')).toBeTruthy();
-    expect(control('block.bg.material.play')).toBeTruthy();
-    expect(
-      document.querySelector('[data-control="block.bg.material.twoTone"]')?.closest('[hidden]'),
-    ).not.toBeNull();
-    fireEvent.click(control('block.bg.material.dither'));
-    expect(dispatch).toHaveBeenLastCalledWith('block.set', {
-      slideId: 'cv',
-      blockId: 'bg',
-      path: '/dither',
-      value: { pattern: 'bayer8' },
-      baseRevision: 9,
-    });
-    fireEvent.click(control('block.bg.material.play'));
-    expect(control('block.bg.material.play').getAttribute('aria-pressed')).toBe('true');
   });
 });

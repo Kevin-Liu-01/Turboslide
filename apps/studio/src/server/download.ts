@@ -548,7 +548,8 @@ export async function runBatchedExport(
     const started = await startBatchedExport({ deckId, input });
     const stopPagehide = cancelOnPagehide(deckId, started.jobId, started.cancelToken);
     // the wait's row rides on every progress step (build/b1.md R6)
-    const rows = started.rows !== undefined && started.rows.length > 0 ? { rows: started.rows } : {};
+    const rows =
+      started.rows !== undefined && started.rows.length > 0 ? { rows: started.rows } : {};
     let stale: 'revision' | 'asset' | null = null;
     try {
       const timings: { slides: number; ms: number }[] = [];

@@ -113,6 +113,12 @@
         "font.list",
         "logo.search",
         "logo.insert",
+        "shader.list",
+        "shader.insert",
+        "shader.set",
+        "shader.frame",
+        "shader.capture",
+        "shader.render",
         "presence.list",
         "presence.follow",
         "presence.unfollow",
@@ -326,6 +332,12 @@
     "font.list",
     "logo.search",
     "logo.insert",
+    "shader.list",
+    "shader.insert",
+    "shader.set",
+    "shader.frame",
+    "shader.capture",
+    "shader.render",
     "presence.list",
     "presence.follow",
     "presence.unfollow",
@@ -1171,6 +1183,48 @@
       "mutates": true,
       "milestone": "P1",
       "group": "asset"
+    },
+    "shader.list": {
+      "label": "List shaders",
+      "doc": "The shader library in the gallery’s order: every entry with its category, its featured preset, its stills (the file names under packages/materials/previews), its uniform schema and its palette presets computed from this deck’s brand kit, plus the eleven common controls with their ranges and sentences and the five category chips; material.list is the alias without the gallery fields.",
+      "mutates": false,
+      "milestone": "P1",
+      "group": "asset"
+    },
+    "shader.insert": {
+      "label": "Insert a shader",
+      "doc": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "block"
+    },
+    "shader.set": {
+      "label": "Set a shader field",
+      "doc": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; any other pointer (/anchor, /motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "block"
+    },
+    "shader.frame": {
+      "label": "Store a shader frame",
+      "doc": "The client capture’s write (the editor’s own WebGL): stores the PNG under assets/frame-<16 hex of frameKey>@2x.png, writes the block’s /asset and removes the block’s superseded frame in one revision; the key is checked against the block as the document reads now, so a recipe that moved on answers 409; the same bytes under the same id store nothing. The orphan prune runs behind the response.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "asset"
+    },
+    "shader.capture": {
+      "label": "Capture a shader’s frame",
+      "doc": "The hosted job for one shader block, the fallback when the editor has no WebGL and the agent’s route: the recipe rendered at the block’s box aspect with the long side 3200 in the capture browser, then the same write as shader.frame; bounded at 30 s hosted, answering one sentence.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "asset"
+    },
+    "shader.render": {
+      "label": "Render a shader",
+      "doc": "PNG bytes of a recipe for an agent or the CLI, no deck write and no browser of the caller’s: the material, a preset, uniforms or the common controls, the frame time and the pixels (3200 by 1800 unless a size with the long side 3200 is named); the deck’s brand kit colours the presets when the call names a deck.",
+      "mutates": false,
+      "milestone": "P1",
+      "group": "render"
     },
     "presence.list": {
       "label": "Collaborators",

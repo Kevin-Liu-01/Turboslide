@@ -997,7 +997,8 @@ describe('the Insert menu', () => {
       /* Insert > Table is a hover grid inside the menu (SPEC-2 0.26); run as a command it plans the default table */
       'insert.table': null,
       'insert.icon': { kind: 'picker', picker: 'icon' },
-      'insert.material': { kind: 'picker', picker: 'material' },
+      /* the features round, ship two (docs/FEATURES.md 5.4): Insert > Shader opens the gallery */
+      'insert.shader': { kind: 'picker', picker: 'shader' },
       'insert.image.upload': { kind: 'upload' },
       'insert.newSlide': null,
     };
@@ -1231,6 +1232,13 @@ describe('the retired letters, the ladder and the stored settings', () => {
     const written = writeStoredSettings({ ...DEFAULT_SETTINGS, advancedTools: true });
     expect(readStoredSettings(written).advancedTools).toBe(true);
     expect(readStoredSettings(writeStoredSettings(DEFAULT_SETTINGS)).advancedTools).toBe(false);
+  });
+  it('keeps View > Play shaders at In the show only by default and remembers it per browser (docs/FEATURES.md 5.6, question 5)', () => {
+    expect(DEFAULT_SETTINGS.playShaders).toBe('show');
+    expect(STORED_SETTINGS).toContain('playShaders');
+    const written = writeStoredSettings({ ...DEFAULT_SETTINGS, playShaders: 'off' });
+    expect(readStoredSettings(written).playShaders).toBe('off');
+    expect(readStoredSettings(writeStoredSettings(DEFAULT_SETTINGS)).playShaders).toBe('show');
   });
 });
 

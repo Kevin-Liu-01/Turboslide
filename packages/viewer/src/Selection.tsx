@@ -391,7 +391,8 @@ const DISPLAY_NAMES: Readonly<Partial<Record<string, string>>> = {
   pair: 'Images',
   tiles: 'Image grid',
   details: 'Detail grid',
-  material: 'Picture',
+  /* the features round, ship two (docs/FEATURES.md 5.1): a shader block reads Shader */
+  material: 'Shader',
   table: 'Table',
   rows: 'List',
   plain: 'List',

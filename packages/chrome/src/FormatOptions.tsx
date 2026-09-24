@@ -47,6 +47,7 @@ import { DitherFormatSection } from './inspector/dither';
 import { AdjustmentsSection, PictureSection } from './inspector/picture';
 import type { ControlContext } from './inspector/props';
 import { ShadowSection } from './inspector/shadow';
+import { ShaderSection } from './inspector/shader';
 import { ShapeSection } from './inspector/shape';
 import { TextMarksSection } from './inspector/text-marks';
 import { groupRows, layoutForType } from './Inspector';
@@ -114,6 +115,8 @@ export type FormatOptionsProps = {
   assetUrl?: (path: string) => string;
   /** the Layout section's Change button */
   onChangeLayout?: (anchor: HTMLElement) => void;
+  /** the Shader section's Change: opens the gallery for the selected block (docs/FEATURES.md 5.3) */
+  onChangeShader?: (anchor: HTMLElement) => void;
   onClose: () => void;
   busy?: boolean;
   className?: string;
@@ -260,6 +263,7 @@ export function FormatOptions({
   lintText,
   assetUrl,
   onChangeLayout,
+  onChangeShader,
   onClose,
   busy = false,
   className,
@@ -581,6 +585,9 @@ export function FormatOptions({
           return selected?.type === 'table' && !many;
         case 'chart':
           return selected?.type === 'chart' && !many;
+        case 'shader':
+          /* the features round, ship two (docs/FEATURES.md 5.3): one shader block's one home */
+          return selected?.type === 'material' && !many;
         case 'line':
           return selected?.type === 'shape' && isLineKind(selected.shape) && !many;
         case 'shape':
@@ -810,6 +817,22 @@ export function FormatOptions({
                     report,
                   }) ?? <p className="ts-fo-note">{FORMAT.chartSlot}</p>}
                   {renderGeneratedAdvanced('chart')}
+                </Section>
+              );
+            case 'shader':
+              /* the features round, ship two (docs/FEATURES.md 5.3; build/b5/integrator-hunks.md R3):
+                 the Shader section over the selected material block; the generated rows of the
+                 block stay behind Advanced tools as the chart's do */
+              return selected?.type !== 'material' ? null : (
+                <Section key={section.id} {...common}>
+                  <ShaderSection
+                    block={selected}
+                    deck={deck}
+                    write={write}
+                    settings={{ advancedTools }}
+                    onChange={onChangeShader}
+                  />
+                  {renderGeneratedAdvanced('shader')}
                 </Section>
               );
             case 'line':

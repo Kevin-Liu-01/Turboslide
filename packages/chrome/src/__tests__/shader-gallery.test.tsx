@@ -432,9 +432,13 @@ describe('the Shader gallery dialog', () => {
     cleanup();
     render(
       <Host
-        state={host(vi.fn(() => Promise.resolve({})), {}, {
-          settings: { ...DEFAULT_SETTINGS, playShaders: 'off' } as EditorShellState['settings'],
-        })}
+        state={host(
+          vi.fn(() => Promise.resolve({})),
+          {},
+          {
+            settings: { ...DEFAULT_SETTINGS, playShaders: 'off' } as EditorShellState['settings'],
+          },
+        )}
       >
         <ShaderGalleryDialog />
       </Host>,

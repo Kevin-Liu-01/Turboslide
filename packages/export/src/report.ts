@@ -76,7 +76,10 @@ export function shaderRowOf(report: Pick<ExportReport, 'residual'>): string | nu
  * leaves the report as it is. Pure over the report; the caller parses when it wants the schema's
  * word.
  */
-export function withShaderRow<T extends Pick<ExportReport, 'residual'>>(report: T, row: string | null): T {
+export function withShaderRow<T extends Pick<ExportReport, 'residual'>>(
+  report: T,
+  row: string | null,
+): T {
   if (row === null) return report;
   const rest = report.residual.filter((line) => !line.startsWith(SHADER_REPORT_PREFIX));
   return { ...report, residual: [...rest, row] };

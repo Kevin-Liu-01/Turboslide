@@ -208,6 +208,7 @@ import type { ToggleMark } from './marks';
 import { isMarquee, marqueeBox, marqueeHits } from './Marquee';
 import { blockTypeIn, boxContains, ringBoxFor } from './text-ring';
 import { MaterialMount } from './MaterialMount';
+import { shaderPaletteOfDeck } from '@turboslide/materials/presets';
 import { isPictureKind } from './model';
 import { flipMutations, ROTATE_READOUT_MS, rotateMutations } from './rotate';
 import { inchesLabel, rulerToSheet } from './rulers-model';
@@ -6189,6 +6190,9 @@ export function Editor({
 
   const selectedId = selectedBlockId(selection);
   const ids = selectedIds(selection, extra);
+  /* the deck's shader palette (5.7): the module constant for a deck without a kit, so the mount
+     does not remount per render */
+  const shaderPalette = useMemo(() => shaderPaletteOfDeck(doc.deck), [doc.deck]);
   const anchorBlock = slide && selectedId !== null ? blockById(slide, selectedId) : undefined;
   const anchorPos: Position | null =
     anchorBlock?.pos ??
@@ -6508,7 +6512,15 @@ export function Editor({
             dangerouslySetInnerHTML={{ __html: shownHtml }}
           />
           {/* the live shader over every material frame of the slide (SPEC 5.3, 5.4; M5): it re-mounts on every commit that moves or resizes an object (SPEC-2 0.94) */}
-          <MaterialMount body={body} html={shownHtml} onError={onError} />
+          {/* the features round, ship two (docs/FEATURES.md 5.6, 5.7; build/b5/integrator-hunks.md R6): one live mount per stage (the selected shader plays, the others show their frame), the deck's kit palette, 1x device pixels below zoom 100 */}
+          <MaterialMount
+            body={body}
+            html={shownHtml}
+            onError={onError}
+            selected={ids}
+            palette={shaderPalette}
+            scale={k}
+          />
         </Sheet>
       </div>
       {/* the overlay layer (SPEC 2.2 junction table): chrome, over the sheet's box, in CSS pixels; it follows the stage's scroll while zoomed.

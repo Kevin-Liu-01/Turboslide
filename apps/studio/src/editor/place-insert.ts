@@ -19,8 +19,12 @@ import { plainText } from '@turboslide/schema/text';
 
 export type Rect = { x: number; y: number; w: number; h: number };
 export type Size = readonly [number, number];
-/** The block kinds the chrome's menus insert through `block.insert` with a default box. */
-export type PlacedKind = 'table' | 'chart';
+/**
+ * The block kinds the chrome's menus insert through `block.insert` with a default box: a table, a
+ * chart and, since the features round's ship two (docs/FEATURES.md 5.4, section 1's placement
+ * decision), a shader.
+ */
+export type PlacedKind = 'table' | 'chart' | 'material';
 
 /** The room kept between a placed object, its neighbours and the head band, in sheet px. */
 export const INSERT_GAP = 40;
@@ -36,6 +40,8 @@ export const CHART_SHARED_SIZE: Size = [640, 360];
 export const INSERT_MIN_SIZE: Readonly<Record<PlacedKind, Size>> = {
   table: [480, 120],
   chart: [320, 160],
+  /* the features round, ship two (docs/FEATURES.md 5.4): a shader under 240 by 135 is a swatch */
+  material: [240, 135],
 };
 /** Headings whose top sits above this line make the head band (the top third of the sheet). */
 export const HEAD_BAND_LIMIT = SHEET_HEIGHT / 3;
@@ -261,5 +267,5 @@ export function wantsPlacement(input: InsertLike): input is InsertLike & {
   const { block } = input;
   if (block.pos === undefined || block.pos.z !== undefined) return false;
   if (input.after !== undefined) return false;
-  return block.type === 'table' || block.type === 'chart';
+  return block.type === 'table' || block.type === 'chart' || block.type === 'material';
 }

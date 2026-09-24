@@ -283,7 +283,10 @@ export type MenuSetting =
   | 'advancedTools'
   /* the product round (docs/PRODUCT.md section 2 rank 9): Tools > Preferences > Link detection,
      the one preference row; on by default, kept per browser; the Editor reads it as `linkDetection` */
-  | 'linkDetection';
+  | 'linkDetection'
+  /* the features round, ship two (docs/FEATURES.md 5.6): View > Play shaders, On, In the show only
+     or Off, per browser */
+  | 'playShaders';
 
 /** Client side handlers with no action of their own (SPEC 2.13: undo, redo, the clipboard, zoom). */
 export type MenuClientHandler =
@@ -1315,6 +1318,29 @@ const VIEW: Menu = {
       ],
       { dividerBefore: true, when: 'comment' },
     ),
+    /* the features round, ship two (docs/FEATURES.md 5.6; build/b1.md R1): three radios over one
+       per browser setting; the editor mount and the show read it, reduced motion forces Off */
+    sub(
+      'view.playShaders',
+      'Play shaders',
+      [
+        now('view.playShaders.on', 'On', toggle('playShaders', 'on'), {
+          doc: 'Shaders move on the slide while you edit and in the show',
+        }),
+        now('view.playShaders.show', 'In the show only', toggle('playShaders', 'show'), {
+          doc: 'Shaders hold their frame while you edit and move in the show',
+        }),
+        now('view.playShaders.off', 'Off', toggle('playShaders', 'off'), {
+          doc: 'Shaders show their frame everywhere',
+        }),
+      ],
+      {
+        turboslide: true,
+        icon: 'cube',
+        dividerBefore: true,
+        terms: ['shader', 'animation', 'motion', 'reduced motion'],
+      },
+    ),
     now('view.fullScreen', 'Full screen', toggle('compact'), {
       key: shortcut('Ctrl+Shift+F', 'Ctrl+Shift+F'),
       icon: 'fullscreen',
@@ -1580,11 +1606,13 @@ const INSERT: Menu = {
       dividerBefore: true,
       doc: 'One of the theme’s icons',
     }),
-    now('insert.material', 'Material', action('block.insert'), {
+    /* the features round, ship two (docs/FEATURES.md 5.4; build/b1.md R1): Insert > Shader in the
+       default view, the Material row renamed and unflagged; the gallery is dialogs/ShaderGallery.tsx */
+    now('insert.shader', 'Shader', action('block.insert'), {
       turboslide: true,
-      advanced: true,
       icon: 'cube',
-      doc: 'A captured picture from the theme',
+      doc: 'A moving shader in your brand kit’s colours; every export carries its still',
+      terms: ['shader', 'material', 'animation', 'gradient', 'motion'],
     }),
   ],
 };

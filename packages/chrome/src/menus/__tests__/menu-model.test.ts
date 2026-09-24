@@ -312,7 +312,7 @@ const SPEC_ROWS: Row[] = [
   row('insert', 'later', ['insert.buildingBlocks'], { was: 'omit' }),
   row('insert', 'omit', ['insert.speakerSpotlight']),
   row('insert', 'now', ['insert.icon']),
-  row('insert', 'now', ['insert.material']),
+  row('insert', 'now', ['insert.shader']),
   /* 2.5 Format */
   row('format', 'now', ['format.text.bold']),
   row('format', 'now', ['format.text.italic'], { was: 'later' }),
@@ -597,6 +597,13 @@ const OTHER_ROWS: Row[] = [
   row('arrange', 'now', ['arrange.regroup'], { was: 'omit' }),
   /* the focus round (docs/FOCUS.md 3.1): the one switch that shows the parked set, ours */
   row('tools', 'now', ['tools.advancedTools']),
+  /* the features round, ship two (docs/FEATURES.md 5.6): View > Play shaders, ours */
+  row('view', 'now', [
+    'view.playShaders',
+    'view.playShaders.on',
+    'view.playShaders.show',
+    'view.playShaders.off',
+  ]),
 ];
 
 /**
@@ -1006,7 +1013,7 @@ describe('the SPEC rows', () => {
       'view.appearance',
       'insert.image.fromThisPresentation',
       'insert.icon',
-      'insert.material',
+      'insert.shader',
       'tools.checkSlides',
       ...(itemById('tools.advanced').items ?? []).map((item) => item.id),
       'extensions.agentAccess',
@@ -2432,6 +2439,45 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
     expect(isEnabled(itemById('edit.paste'), { ...OFF, clipboard: 'empty' })).toBe(true);
   });
 
+  it('lists Insert > Shader where Material was, unflagged and in the default view, found by "shader" and "animation" (docs/FEATURES.md 5.4; build/b1.md R1)', () => {
+    const shader = itemById('insert.shader');
+    expect(shader.label).toBe('Shader');
+    expect(shader.status).toBe('now');
+    expect(shader.turboslide).toBe(true);
+    expect(shader.advanced).toBeUndefined();
+    expect(shader.effect).toEqual({ kind: 'action', id: 'block.insert' });
+    expect(shader.terms).toEqual(expect.arrayContaining(['shader', 'animation']));
+    expect(isPresent(shader, OFF)).toBe(true);
+    expect(ids(MENUS.find((m) => m.id === 'insert')!.items, OFF)).toContain('insert.shader');
+    expect(() => itemById('insert.material')).toThrow();
+  });
+
+  it('View > Play shaders is a submenu of three toggle rows over one per browser setting, In the show only checked by default (docs/FEATURES.md 5.6; build/b1.md R1)', () => {
+    const sub = itemById('view.playShaders');
+    expect(sub.label).toBe('Play shaders');
+    expect(sub.turboslide).toBe(true);
+    expect(sub.advanced).toBeUndefined();
+    expect((sub.items ?? []).map((item) => item.id)).toEqual([
+      'view.playShaders.on',
+      'view.playShaders.show',
+      'view.playShaders.off',
+    ]);
+    for (const value of ['on', 'show', 'off'] as const)
+      expect(itemById(`view.playShaders.${value}`).effect).toEqual({
+        kind: 'toggle',
+        setting: 'playShaders',
+        value,
+      });
+    const withDefault: MenuContext = {
+      ...OFF,
+      settings: { ...OFF.settings, playShaders: 'show' },
+    };
+    expect(isChecked(itemById('view.playShaders.show'), withDefault)).toBe(true);
+    expect(isChecked(itemById('view.playShaders.on'), withDefault)).toBe(false);
+    expect(isChecked(itemById('view.playShaders.off'), withDefault)).toBe(false);
+    expect(isPresent(sub, OFF)).toBe(true);
+  });
+
   it('returns Insert > Shape and Insert > Line whole to the default view with the named rows and the two connectors; the galleries and the freehand kinds stay parked (docs/RETURN.md 2.2, 2.3, 2.9, section 8)', () => {
     const insertOff = ids(MENUS.find((m) => m.id === 'insert')!.items, OFF);
     const insertOn = ids(MENUS.find((m) => m.id === 'insert')!.items, ON);
@@ -2470,7 +2516,6 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       'insert.line.scribble',
       'insert.specialCharacters',
       'insert.icon',
-      'insert.material',
       'insert.image.fromThisPresentation',
     ]) {
       expect(insertOff, `${id} parked`).not.toContain(id);
@@ -2840,7 +2885,6 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       'insert.line.scribble',
       'insert.specialCharacters',
       'insert.icon',
-      'insert.material',
       'format.bulletsNumbering.listOptions',
       'format.image.maskImage',
       'format.image.dither',

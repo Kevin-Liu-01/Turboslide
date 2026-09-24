@@ -216,8 +216,9 @@ describe('presentPaletteEntries', () => {
     }
     /* the default view's Insert group: the entries whose menu row is core (docs/FOCUS.md 2.3,
        2.4), the five shape and line entries, the table, the chart and the diagram that returned
-       with their rows in the return round (docs/RETURN.md 2.2 to 2.6), then the 21 New slide
-       rows; the Box, Rule, Icon and Material entries and the grammar blocks stand behind the switch */
+       with their rows in the return round (docs/RETURN.md 2.2 to 2.6) and the Shader of the
+       features round's ship two (docs/FEATURES.md 5.4), then the 21 New slide rows; the Box, Rule
+       and Icon entries and the grammar blocks stand behind the switch */
     const insert = off.filter((entry) => entry.group === 'insert');
     expect(insert.filter((entry) => entry.insert === 'primitive').map((entry) => entry.id)).toEqual(
       [
@@ -228,6 +229,7 @@ describe('presentPaletteEntries', () => {
         'insert:block:shape:arrow',
         'insert:block:text',
         'insert:block:image',
+        'insert:block:material',
       ],
     );
     expect(
@@ -256,8 +258,9 @@ describe('presentPaletteEntries', () => {
     expect(byId.get('insert:block:dia')?.row).toBe('insert.diagram');
     expect(byId.get('insert:block:icon')?.row).toBe('insert.icon');
     expect(byId.get('insert:block:icon')?.advanced).toBe(true);
-    expect(byId.get('insert:block:material')?.row).toBe('insert.material');
-    expect(byId.get('insert:block:material')?.advanced).toBe(true);
+    /* the features round, ship two (docs/FEATURES.md 5.4): Insert > Shader, in the default view */
+    expect(byId.get('insert:block:material')?.row).toBe('insert.shader');
+    expect(byId.get('insert:block:material')?.advanced).toBeUndefined();
     expect(byId.get('insert:block:rule')?.row).toBe('insert.line.rule');
     expect(byId.get('insert:block:rule')?.advanced).toBe(true);
     expect(byId.get('insert:block:plain')?.row).toBeUndefined();

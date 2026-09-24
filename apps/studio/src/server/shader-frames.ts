@@ -37,6 +37,7 @@ import { join } from 'node:path';
 
 import { waitUntil } from '@vercel/functions';
 
+import { SHADER_GALLERY } from '@turboslide/chrome/menus/strings';
 import { shaderPaletteOfDeck } from '@turboslide/materials/presets';
 import { frameIsStale } from '@turboslide/materials/recipe-key';
 import type { Queue } from '@turboslide/render-worker/queue';
@@ -54,9 +55,12 @@ import type { DeckStore } from '@turboslide/store/store';
 // ---------------------------------------------------------------------------------------------
 // The hosted capture's bound and its sentence
 
-/** The one sentence a failed or overlong hosted capture answers (5.5; the dialog shows it, never a log). */
-export const RENDER_ERROR_SENTENCE =
-  'The frame could not be rendered. Try again, or place the shader without a frame';
+/**
+ * The one sentence a failed or overlong hosted capture answers (5.5; the dialog shows it, never a
+ * log): the chrome's constant, so the Background dialog's fallback and the server's answer are one
+ * string (build/b7.md R4, build/b1.md R3).
+ */
+export const RENDER_ERROR_SENTENCE: string = SHADER_GALLERY.placeFailed;
 
 /** How long the hosted capture may take before the caller hears the sentence (5.5: "a 30 s bound"). */
 export const CAPTURE_BOUND_MS = 30_000;

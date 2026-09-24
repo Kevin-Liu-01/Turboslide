@@ -540,7 +540,7 @@ describe('the Insert menu, compact mode and the title row', () => {
       'insert.wordArt',
     ])
       expect(document.querySelector(`[data-menu-item="${kept}"]`), kept).not.toBeNull();
-    for (const parked of ['insert.specialCharacters', 'insert.icon', 'insert.material'])
+    for (const parked of ['insert.specialCharacters', 'insert.icon'])
       expect(document.querySelector(`[data-menu-item="${parked}"]`), parked).toBeNull();
     fireEvent.keyDown(document.body, { key: 'Escape' });
     for (const control of ['toolbar.insertShape', 'toolbar.insertLine'])
@@ -695,28 +695,29 @@ describe('the Insert menu, compact mode and the title row', () => {
     expect(screen.queryByRole('dialog', { name: 'Icon' })).toBeNull();
   });
 
-  it('Insert > Material lists the catalog; a row writes a material block with that recipe', async () => {
-    /* Insert > Material is parked (docs/FOCUS.md 3.2): asserted behind the switch */
-    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
+  it('Insert > Shader opens the gallery; a card writes a material block with the entry’s featured preset', async () => {
+    /* the features round, ship two (docs/FEATURES.md 5.4): Insert > Shader is in the default view */
     const { container } = render(<Harness input={input()} shell={shellState()} />);
-    clickMenuPath(container, 'insert', 'insert.material');
-    const dialog = await screen.findByRole('dialog', { name: 'Material' });
-    const rows = dialog.querySelectorAll<HTMLElement>(
-      '[data-control^="dialog.insertMaterial.pick."]',
-    );
-    expect(rows.length).toBeGreaterThan(0);
-    const first = rows[0] as HTMLElement;
-    const id = (first.dataset.control ?? '').replace('dialog.insertMaterial.pick.', '');
+    clickMenuPath(container, 'insert', 'insert.shader');
+    const dialog = await screen.findByRole('dialog', { name: 'Shader' });
+    const cards = dialog.querySelectorAll<HTMLElement>('[data-control^="dialog.shader.tile."]');
+    expect(cards.length).toBeGreaterThan(0);
+    const first = cards[0] as HTMLElement;
+    expect(first.dataset.material).toBe('paper:liquid-metal');
     fireEvent.click(first);
     await flush();
     expect(dispatch).toHaveBeenCalledWith(
       'block.insert',
       expect.objectContaining({
         slideId: SLIDE,
-        block: expect.objectContaining({ type: 'material', materialId: id }),
+        block: expect.objectContaining({
+          type: 'material',
+          materialId: 'paper:liquid-metal',
+          preset: 'diamond',
+        }),
       }),
     );
-    expect(screen.queryByRole('dialog', { name: 'Material' })).toBeNull();
+    expect(screen.queryByRole('dialog', { name: 'Shader' })).toBeNull();
   });
 
   it('Insert > Image > Upload from computer opens the file picker on the current slide; without one it says so', () => {

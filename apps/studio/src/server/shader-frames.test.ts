@@ -186,7 +186,9 @@ describe('the hosted capture’s bound (docs/FEATURES.md 5.5; audit-shaders 1)',
     expect(isCallerRefusal(new RangeError('no such material'))).toBe(true);
     expect(isCallerRefusal({ status: 429 })).toBe(true);
     expect(isCallerRefusal(new Error('the browser closed'))).toBe(false);
-    expect(await boundedCapture(async () => 'frame', { boundMs: 100, label: 'test' })).toBe('frame');
+    expect(await boundedCapture(async () => 'frame', { boundMs: 100, label: 'test' })).toBe(
+      'frame',
+    );
   });
 
   it('runs through the render worker’s queue: done answers, a failure is the sentence, the bound is the wait’s', async () => {

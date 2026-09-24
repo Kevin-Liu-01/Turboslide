@@ -270,10 +270,16 @@ describe('the shader frame row (docs/FEATURES.md 5.5; audit-shaders 9)', () => {
     expect(shaderFrameSentence(-1)).toBeNull();
     expect(shaderFrameSentence(1)).toBe('1 shader had no frame');
     expect(shaderFrameSentence(2)).toBe('2 shaders had no frame');
-    expect(shaderFrameSentence(2, 8_000)).toBe('2 shaders had no frame; the export waited 8 s for them');
-    expect(shaderFrameSentence(1, 2_400)).toBe('1 shader had no frame; the export waited 2 s for it');
+    expect(shaderFrameSentence(2, 8_000)).toBe(
+      '2 shaders had no frame; the export waited 8 s for them',
+    );
+    expect(shaderFrameSentence(1, 2_400)).toBe(
+      '1 shader had no frame; the export waited 2 s for it',
+    );
     expect(shaderFrameSentence(1, 400)).toBe('1 shader had no frame');
-    expect(shaderReportRow(2, 8_000)).toBe(`${SHADER_REPORT_PREFIX}2 shaders had no frame; the export waited 8 s for them`);
+    expect(shaderReportRow(2, 8_000)).toBe(
+      `${SHADER_REPORT_PREFIX}2 shaders had no frame; the export waited 8 s for them`,
+    );
     expect(shaderReportRow(0)).toBeNull();
     expect(SHADER_REPORT_PREFIX).toBe('shaders: ');
   });
@@ -289,6 +295,8 @@ describe('the shader frame row (docs/FEATURES.md 5.5; audit-shaders 9)', () => {
     expect(shaderRowOf(replaced)).toBe('1 shader had no frame; the export waited 3 s for it');
     expect(shaderRowOf({ residual: ['renderer: x'] })).toBeNull();
     expect(withShaderRow(report, null)).toBe(report);
-    expect(withShaderRow({ residual: [] }, shaderReportRow(2)).residual).toEqual(['shaders: 2 shaders had no frame']);
+    expect(withShaderRow({ residual: [] }, shaderReportRow(2)).residual).toEqual([
+      'shaders: 2 shaders had no frame',
+    ]);
   });
 });

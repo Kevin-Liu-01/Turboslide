@@ -145,7 +145,7 @@ export type EditorShellProps = {
 /** The dialog an Insert picker opens (SPEC 2.4); Insert > Table is a plate inside the menu (SPEC-2 0.26). */
 const PICKER_DIALOG: Readonly<Record<InsertPicker, DialogId>> = {
   icon: 'insertIcon',
-  material: 'insertMaterial',
+  shader: 'shaderGallery',
 };
 
 /**
@@ -184,8 +184,9 @@ const ImportSlidesDialog = lazyDialog(() =>
 const InsertIconDialog = lazyDialog(() =>
   import('./dialogs/InsertIcon').then((m) => m.InsertIconDialog),
 );
-const InsertMaterialDialog = lazyDialog(() =>
-  import('./dialogs/InsertMaterial').then((m) => m.InsertMaterialDialog),
+/* the features round, ship two (docs/FEATURES.md 5.4; build/b1.md R2): the Shader gallery */
+const ShaderGalleryDialog = lazyDialog(() =>
+  import('./dialogs/ShaderGallery').then((m) => m.ShaderGalleryDialog),
 );
 const LinkDialog = lazyDialog(() => import('./dialogs/Link').then((m) => m.LinkDialog));
 const MakeCopyDialog = lazyDialog(() => import('./dialogs/MakeCopy').then((m) => m.MakeCopyDialog));
@@ -238,7 +239,7 @@ const LAZY_DIALOGS = [
   ImageByUrlDialog,
   ImportSlidesDialog,
   InsertIconDialog,
-  InsertMaterialDialog,
+  ShaderGalleryDialog,
   LinkDialog,
   MakeCopyDialog,
   ForgetBrowserDialog,
@@ -1874,6 +1875,9 @@ export function EditorShell({
             onChangeLayout={(anchor) =>
               openLayoutGrid({ purpose: 'apply', anchor, returnFocusTo: anchor })
             }
+            /* the features round, ship two (docs/FEATURES.md 5.3; build/b5/integrator-hunks.md R3):
+               the Shader section's Change opens the gallery for the selected block */
+            onChangeShader={() => openDialog('shaderGallery')}
             onClose={closePanel}
           />
         );
@@ -2119,8 +2123,8 @@ export function EditorShell({
         return <LinkDialog.Component />;
       case 'insertIcon':
         return <InsertIconDialog.Component />;
-      case 'insertMaterial':
-        return <InsertMaterialDialog.Component />;
+      case 'shaderGallery':
+        return <ShaderGalleryDialog.Component />;
       /* round two (SPEC-2 4.1) */
       case 'background':
         return <BackgroundDialog.Component />;

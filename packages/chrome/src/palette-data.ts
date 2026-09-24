@@ -169,6 +169,8 @@ export const PRIMITIVE_ORDER: ReadonlyArray<BlockType> = [
 export function insertLabel(type: BlockType, variant?: ShapeKind): string {
   if (type === 'shape' && variant !== undefined) return `${SHAPE_WORD[variant]} shape`;
   if (type === 'shot') return 'Image';
+  /* the features round, ship two (docs/FEATURES.md 5.1): a shader reads Shader wherever a seller reads it */
+  if (type === 'material') return 'Shader';
   return CATALOG[type].label;
 }
 
@@ -203,7 +205,7 @@ const BLOCK_ROW: Readonly<Partial<Record<BlockType, string>>> = {
   rule: 'insert.line.rule',
   icon: 'insert.icon',
   shot: 'insert.image.upload',
-  material: 'insert.material',
+  material: 'insert.shader',
   table: 'insert.table',
   chart: 'insert.chart',
   dia: 'insert.diagram',

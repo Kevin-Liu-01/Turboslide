@@ -14273,6 +14273,808 @@
         }
       }
     },
+    "/api/actions/shader.list": {
+      "post": {
+        "operationId": "shader.list",
+        "summary": "List shaders",
+        "description": "The shader library in the gallery’s order: every entry with its category, its featured preset, its stills (the file names under packages/materials/previews), its uniform schema and its palette presets computed from this deck’s brand kit, plus the eleven common controls with their ranges and sentences and the five category chips; material.list is the alias without the gallery fields.",
+        "tags": [
+          "asset"
+        ],
+        "x-mutates": false,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShaderListInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShaderListOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/shader.insert": {
+      "post": {
+        "operationId": "shader.insert",
+        "summary": "Insert a shader",
+        "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
+        "tags": [
+          "block"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShaderInsertInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShaderInsertOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/shader.set": {
+      "post": {
+        "operationId": "shader.set",
+        "summary": "Set a shader field",
+        "description": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; any other pointer (/anchor, /motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
+        "tags": [
+          "block"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShaderSetInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShaderSetOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/shader.frame": {
+      "post": {
+        "operationId": "shader.frame",
+        "summary": "Store a shader frame",
+        "description": "The client capture’s write (the editor’s own WebGL): stores the PNG under assets/frame-<16 hex of frameKey>@2x.png, writes the block’s /asset and removes the block’s superseded frame in one revision; the key is checked against the block as the document reads now, so a recipe that moved on answers 409; the same bytes under the same id store nothing. The orphan prune runs behind the response.",
+        "tags": [
+          "asset"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShaderFrameInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShaderFrameOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/shader.capture": {
+      "post": {
+        "operationId": "shader.capture",
+        "summary": "Capture a shader’s frame",
+        "description": "The hosted job for one shader block, the fallback when the editor has no WebGL and the agent’s route: the recipe rendered at the block’s box aspect with the long side 3200 in the capture browser, then the same write as shader.frame; bounded at 30 s hosted, answering one sentence.",
+        "tags": [
+          "asset"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShaderCaptureInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShaderCaptureOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/shader.render": {
+      "post": {
+        "operationId": "shader.render",
+        "summary": "Render a shader",
+        "description": "PNG bytes of a recipe for an agent or the CLI, no deck write and no browser of the caller’s: the material, a preset, uniforms or the common controls, the frame time and the pixels (3200 by 1800 unless a size with the long side 3200 is named); the deck’s brand kit colours the presets when the call names a deck.",
+        "tags": [
+          "render"
+        ],
+        "x-mutates": false,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShaderRenderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShaderRenderOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/actions/presence.list": {
       "post": {
         "operationId": "presence.list",
@@ -35618,6 +36420,123 @@
                 "type": "string",
                 "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
               },
+              "motion": {
+                "title": "Motion",
+                "x-inspector": {
+                  "label": "Motion",
+                  "control": "json",
+                  "group": "Block",
+                  "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                },
+                "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+                "type": "object",
+                "properties": {
+                  "play": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "show"
+                    ]
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 2
+                  }
+                },
+                "required": [
+                  "play"
+                ],
+                "additionalProperties": false
+              },
+              "controls": {
+                "title": "Controls",
+                "x-inspector": {
+                  "label": "Controls",
+                  "control": "json",
+                  "group": "Block",
+                  "help": "The Shader section’s common controls (strength, detail, frequency, amplitude, density, brightness, grain, rotation, centerX, centerY, speed); the resolved uniforms sit beside them."
+                },
+                "description": "The Shader section’s common controls (strength, detail, frequency, amplitude, density, brightness, grain, rotation, centerX, centerY, speed); the resolved uniforms sit beside them.",
+                "type": "object",
+                "properties": {
+                  "strength": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 2
+                  },
+                  "detail": {
+                    "type": "number",
+                    "minimum": 0.5,
+                    "maximum": 8
+                  },
+                  "frequency": {
+                    "type": "number",
+                    "minimum": 0.2,
+                    "maximum": 10
+                  },
+                  "amplitude": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 8
+                  },
+                  "density": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 2
+                  },
+                  "brightness": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 2
+                  },
+                  "grain": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "rotation": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                  },
+                  "centerX": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "centerY": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 2
+                  }
+                },
+                "additionalProperties": false
+              },
+              "palette": {
+                "title": "Palette",
+                "x-inspector": {
+                  "label": "Palette",
+                  "control": "select",
+                  "snap": [
+                    "kit",
+                    "custom"
+                  ],
+                  "group": "Block",
+                  "help": "kit draws the brand kit’s six roles; custom records a deck that left the kit."
+                },
+                "description": "kit draws the brand kit’s six roles; custom records a deck that left the kit.",
+                "type": "string",
+                "enum": [
+                  "kit",
+                  "custom"
+                ]
+              },
               "height": {
                 "title": "Height",
                 "x-inspector": {
@@ -42720,12 +43639,14 @@
                     "type": "array",
                     "prefixItems": [
                       {
-                        "type": "number",
-                        "const": 3200
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
                       },
                       {
-                        "type": "number",
-                        "const": 1800
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
                       }
                     ],
                     "items": false,
@@ -42740,13 +43661,17 @@
                     "type": "string",
                     "enum": [
                       "angle-metal",
-                      "swiftshader"
+                      "swiftshader",
+                      "client"
                     ]
                   },
                   "renderer": {
                     "type": "string"
                   },
                   "recipeKey": {
+                    "type": "string"
+                  },
+                  "frameKey": {
                     "type": "string"
                   }
                 },
@@ -51998,12 +52923,14 @@
                     "type": "array",
                     "prefixItems": [
                       {
-                        "type": "number",
-                        "const": 3200
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
                       },
                       {
-                        "type": "number",
-                        "const": 1800
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
                       }
                     ],
                     "items": false,
@@ -52018,13 +52945,17 @@
                     "type": "string",
                     "enum": [
                       "angle-metal",
-                      "swiftshader"
+                      "swiftshader",
+                      "client"
                     ]
                   },
                   "renderer": {
                     "type": "string"
                   },
                   "recipeKey": {
+                    "type": "string"
+                  },
+                  "frameKey": {
                     "type": "string"
                   }
                 },
@@ -53325,6 +54256,11 @@
               "angle-metal",
               "swiftshader"
             ]
+          },
+          "frameKey": {
+            "description": "The frame key of 5.5 the record carries as source.frameKey",
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
           },
           "baseRevision": {
             "type": "integer",
@@ -57297,6 +58233,1915 @@
           "dropped",
           "dryRun",
           "upstream"
+        ],
+        "additionalProperties": false
+      },
+      "ShaderListInput": {
+        "$id": "#/components/schemas/ShaderListInput",
+        "type": "object",
+        "properties": {
+          "materialId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ShaderListOutput": {
+        "$id": "#/components/schemas/ShaderListOutput",
+        "type": "object",
+        "properties": {
+          "shaders": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "family": {
+                  "type": "string",
+                  "enum": [
+                    "paper",
+                    "proto"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                },
+                "doc": {
+                  "type": "string"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "credit": {
+                  "type": "string"
+                },
+                "license": {
+                  "type": "string"
+                },
+                "uniforms": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "float",
+                          "int",
+                          "color",
+                          "colors",
+                          "enum",
+                          "bool"
+                        ]
+                      },
+                      "default": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "min": {
+                        "type": "number"
+                      },
+                      "max": {
+                        "type": "number"
+                      },
+                      "step": {
+                        "type": "number"
+                      },
+                      "options": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "value": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "value"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "maxCount": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "help": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "label",
+                      "kind",
+                      "default"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "presets": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "doc": {
+                        "type": "string"
+                      },
+                      "uniforms": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              }
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "label",
+                      "doc",
+                      "uniforms"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "category": {
+                  "type": "string",
+                  "enum": [
+                    "fluid",
+                    "light",
+                    "metal",
+                    "gradient",
+                    "graphic"
+                  ]
+                },
+                "still": {
+                  "type": "boolean"
+                },
+                "featuredPreset": {
+                  "type": "string"
+                },
+                "preview": {
+                  "type": "string"
+                },
+                "presetPreviews": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "family",
+                "label",
+                "doc",
+                "available",
+                "credit",
+                "license",
+                "uniforms",
+                "presets",
+                "category",
+                "still",
+                "preview",
+                "presetPreviews"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "controls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "strength",
+                    "detail",
+                    "frequency",
+                    "amplitude",
+                    "density",
+                    "brightness",
+                    "grain",
+                    "rotation",
+                    "centerX",
+                    "centerY",
+                    "speed"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                },
+                "sentence": {
+                  "type": "string"
+                },
+                "group": {
+                  "type": "string",
+                  "enum": [
+                    "Form",
+                    "Light and texture",
+                    "Orientation",
+                    "Motion"
+                  ]
+                },
+                "default": {
+                  "type": "number"
+                },
+                "min": {
+                  "type": "number"
+                },
+                "max": {
+                  "type": "number"
+                },
+                "step": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "name",
+                "label",
+                "sentence",
+                "group",
+                "default",
+                "min",
+                "max",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "label"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "shaders",
+          "controls",
+          "categories"
+        ],
+        "additionalProperties": false
+      },
+      "ShaderInsertInput": {
+        "$id": "#/components/schemas/ShaderInsertInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "materialId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A catalog id from shader.list (paper:liquid-metal)"
+          },
+          "preset": {
+            "description": "A preset of the entry; its featured one when absent",
+            "type": "string"
+          },
+          "controls": {
+            "type": "object",
+            "properties": {
+              "strength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "detail": {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 8
+              },
+              "frequency": {
+                "type": "number",
+                "minimum": 0.2,
+                "maximum": 10
+              },
+              "amplitude": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8
+              },
+              "density": {
+                "type": "number",
+                "minimum": 0.1,
+                "maximum": 2
+              },
+              "brightness": {
+                "type": "number",
+                "minimum": 0.1,
+                "maximum": 2
+              },
+              "grain": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "rotation": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "centerX": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "centerY": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "speed": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              }
+            },
+            "additionalProperties": false
+          },
+          "at": {
+            "description": "The box in sheet px; the free rectangle when absent",
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number",
+                "title": "X",
+                "x-inspector": {
+                  "label": "X",
+                  "control": "number",
+                  "group": "Layout"
+                }
+              },
+              "y": {
+                "type": "number",
+                "title": "Y",
+                "x-inspector": {
+                  "label": "Y",
+                  "control": "number",
+                  "group": "Layout"
+                }
+              },
+              "w": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "title": "Width",
+                "x-inspector": {
+                  "label": "Width",
+                  "control": "number",
+                  "group": "Layout"
+                }
+              },
+              "h": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "title": "Height",
+                "x-inspector": {
+                  "label": "Height",
+                  "control": "number",
+                  "group": "Layout"
+                }
+              },
+              "z": {
+                "title": "Z order",
+                "x-inspector": {
+                  "label": "Z order",
+                  "control": "number",
+                  "group": "Layout",
+                  "help": "Higher draws over lower; block.order moves a block through the stack."
+                },
+                "description": "Higher draws over lower; block.order moves a block through the stack.",
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "rotate": {
+                "title": "Rotate",
+                "x-inspector": {
+                  "label": "Rotate",
+                  "control": "number",
+                  "snap": [
+                    0,
+                    15,
+                    30,
+                    45,
+                    90,
+                    180,
+                    270
+                  ],
+                  "group": "Layout",
+                  "help": "Degrees clockwise about the centre of the box, 0 up to 360 (gslides-parity SPEC-2 2.1.1)."
+                },
+                "description": "Degrees clockwise about the centre of the box, 0 up to 360 (gslides-parity SPEC-2 2.1.1).",
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMaximum": 360
+              },
+              "flip": {
+                "title": "Flip",
+                "x-inspector": {
+                  "label": "Flip",
+                  "control": "select",
+                  "snap": [
+                    "h",
+                    "v",
+                    "hv"
+                  ],
+                  "group": "Layout",
+                  "help": "h mirrors left to right, v top to bottom, hv both (gslides-parity SPEC-2 2.1.2)."
+                },
+                "description": "h mirrors left to right, v top to bottom, hv both (gslides-parity SPEC-2 2.1.2).",
+                "type": "string",
+                "enum": [
+                  "h",
+                  "v",
+                  "hv"
+                ]
+              },
+              "group": {
+                "title": "Group",
+                "x-inspector": {
+                  "label": "Group",
+                  "control": "readonly",
+                  "group": "Layout",
+                  "help": "The tag the members of one group share; Group and Ungroup write it (gslides-parity SPEC-2 2.1.3)."
+                },
+                "description": "The tag the members of one group share; Group and Ungroup write it (gslides-parity SPEC-2 2.1.3).",
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "w",
+              "h"
+            ],
+            "additionalProperties": false
+          },
+          "alt": {
+            "type": "string"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "materialId",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "ShaderInsertOutput": {
+        "$id": "#/components/schemas/ShaderInsertOutput",
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "blockId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "block": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$",
+                "title": "Id",
+                "x-inspector": {
+                  "label": "Id",
+                  "control": "readonly",
+                  "group": "Advanced"
+                }
+              },
+              "ext": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md; gslides-parity SPEC-2 section 1)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md; gslides-parity SPEC-2 section 1).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "rotate": {
+                    "title": "Rotate",
+                    "x-inspector": {
+                      "label": "Rotate",
+                      "control": "number",
+                      "snap": [
+                        0,
+                        15,
+                        30,
+                        45,
+                        90,
+                        180,
+                        270
+                      ],
+                      "group": "Layout",
+                      "help": "Degrees clockwise about the centre of the box, 0 up to 360 (gslides-parity SPEC-2 2.1.1)."
+                    },
+                    "description": "Degrees clockwise about the centre of the box, 0 up to 360 (gslides-parity SPEC-2 2.1.1).",
+                    "type": "number",
+                    "minimum": 0,
+                    "exclusiveMaximum": 360
+                  },
+                  "flip": {
+                    "title": "Flip",
+                    "x-inspector": {
+                      "label": "Flip",
+                      "control": "select",
+                      "snap": [
+                        "h",
+                        "v",
+                        "hv"
+                      ],
+                      "group": "Layout",
+                      "help": "h mirrors left to right, v top to bottom, hv both (gslides-parity SPEC-2 2.1.2)."
+                    },
+                    "description": "h mirrors left to right, v top to bottom, hv both (gslides-parity SPEC-2 2.1.2).",
+                    "type": "string",
+                    "enum": [
+                      "h",
+                      "v",
+                      "hv"
+                    ]
+                  },
+                  "group": {
+                    "title": "Group",
+                    "x-inspector": {
+                      "label": "Group",
+                      "control": "readonly",
+                      "group": "Layout",
+                      "help": "The tag the members of one group share; Group and Ungroup write it (gslides-parity SPEC-2 2.1.3)."
+                    },
+                    "description": "The tag the members of one group share; Group and Ungroup write it (gslides-parity SPEC-2 2.1.3).",
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
+              "link": {
+                "title": "Link",
+                "x-inspector": {
+                  "label": "Link",
+                  "control": "json",
+                  "group": "Block",
+                  "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+                },
+                "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "slide": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "next",
+                              "previous",
+                              "first",
+                              "last"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "slide"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "type": {
+                "type": "string",
+                "const": "material"
+              },
+              "materialId": {
+                "type": "string",
+                "minLength": 1,
+                "title": "Material",
+                "x-inspector": {
+                  "label": "Material",
+                  "control": "select",
+                  "group": "Block",
+                  "help": "A catalog id from `turboslide material list` (paper:liquid-metal, paper:gem-smoke)."
+                },
+                "description": "A catalog id from `turboslide material list` (paper:liquid-metal, paper:gem-smoke)."
+              },
+              "preset": {
+                "title": "Preset",
+                "x-inspector": {
+                  "label": "Preset",
+                  "control": "select",
+                  "group": "Block",
+                  "help": "A palette preset of the material (ink-paper, paper-ink, brand-blue, fire); uniforms override it."
+                },
+                "description": "A palette preset of the material (ink-paper, paper-ink, brand-blue, fire); uniforms override it.",
+                "type": "string",
+                "minLength": 1
+              },
+              "uniforms": {
+                "title": "Uniforms",
+                "x-inspector": {
+                  "label": "Uniforms",
+                  "control": "json",
+                  "group": "Block",
+                  "help": "Uniform overrides in the recipe’s u_* names; the Material section edits them one by one."
+                },
+                "description": "Uniform overrides in the recipe’s u_* names; the Material section edits them one by one.",
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "anchor": {
+                "title": "Anchor (ms)",
+                "x-inspector": {
+                  "label": "Anchor (ms)",
+                  "control": "number",
+                  "snap": [
+                    4000,
+                    5500,
+                    7000
+                  ],
+                  "group": "Block",
+                  "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                },
+                "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+                "type": "number",
+                "minimum": 0
+              },
+              "twoTone": {
+                "title": "Two-tone",
+                "x-inspector": {
+                  "label": "Two-tone",
+                  "control": "toggle",
+                  "group": "Block",
+                  "help": "Capture through the deck’s 8 by 8 Bayer screen as a light and dark twin pair (SPEC 5.4)."
+                },
+                "description": "Capture through the deck’s 8 by 8 Bayer screen as a light and dark twin pair (SPEC 5.4).",
+                "type": "boolean"
+              },
+              "plate": {
+                "title": "Plate",
+                "x-inspector": {
+                  "label": "Plate",
+                  "control": "select",
+                  "snap": [
+                    "lower-left",
+                    "lower-right",
+                    "upper-left"
+                  ],
+                  "group": "Block",
+                  "help": "The plate rectangle the two-tone metrics are screened against (OPENERS.md:105, 176)."
+                },
+                "description": "The plate rectangle the two-tone metrics are screened against (OPENERS.md:105, 176).",
+                "type": "string",
+                "enum": [
+                  "lower-left",
+                  "lower-right",
+                  "upper-left"
+                ]
+              },
+              "asset": {
+                "title": "Frame",
+                "x-inspector": {
+                  "label": "Frame",
+                  "control": "asset",
+                  "group": "Asset"
+                },
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "motion": {
+                "title": "Motion",
+                "x-inspector": {
+                  "label": "Motion",
+                  "control": "json",
+                  "group": "Block",
+                  "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                },
+                "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+                "type": "object",
+                "properties": {
+                  "play": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "show"
+                    ]
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 2
+                  }
+                },
+                "required": [
+                  "play"
+                ],
+                "additionalProperties": false
+              },
+              "controls": {
+                "title": "Controls",
+                "x-inspector": {
+                  "label": "Controls",
+                  "control": "json",
+                  "group": "Block",
+                  "help": "The Shader section’s common controls (strength, detail, frequency, amplitude, density, brightness, grain, rotation, centerX, centerY, speed); the resolved uniforms sit beside them."
+                },
+                "description": "The Shader section’s common controls (strength, detail, frequency, amplitude, density, brightness, grain, rotation, centerX, centerY, speed); the resolved uniforms sit beside them.",
+                "type": "object",
+                "properties": {
+                  "strength": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 2
+                  },
+                  "detail": {
+                    "type": "number",
+                    "minimum": 0.5,
+                    "maximum": 8
+                  },
+                  "frequency": {
+                    "type": "number",
+                    "minimum": 0.2,
+                    "maximum": 10
+                  },
+                  "amplitude": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 8
+                  },
+                  "density": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 2
+                  },
+                  "brightness": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 2
+                  },
+                  "grain": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "rotation": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                  },
+                  "centerX": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "centerY": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 2
+                  }
+                },
+                "additionalProperties": false
+              },
+              "palette": {
+                "title": "Palette",
+                "x-inspector": {
+                  "label": "Palette",
+                  "control": "select",
+                  "snap": [
+                    "kit",
+                    "custom"
+                  ],
+                  "group": "Block",
+                  "help": "kit draws the brand kit’s six roles; custom records a deck that left the kit."
+                },
+                "description": "kit draws the brand kit’s six roles; custom records a deck that left the kit.",
+                "type": "string",
+                "enum": [
+                  "kit",
+                  "custom"
+                ]
+              },
+              "height": {
+                "title": "Height",
+                "x-inspector": {
+                  "label": "Height",
+                  "control": "number",
+                  "group": "Layout"
+                },
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "caption": {
+                "title": "Caption",
+                "x-inspector": {
+                  "label": "Caption",
+                  "control": "textarea",
+                  "group": "Text"
+                },
+                "type": "string"
+              },
+              "captionSize": {
+                "title": "Caption size",
+                "x-inspector": {
+                  "label": "Caption size",
+                  "control": "select",
+                  "snap": [
+                    16,
+                    15
+                  ],
+                  "group": "Block"
+                },
+                "type": "number",
+                "enum": [
+                  16,
+                  15
+                ]
+              },
+              "alt": {
+                "type": "string",
+                "minLength": 1,
+                "title": "Alt text",
+                "x-inspector": {
+                  "label": "Alt text",
+                  "control": "text",
+                  "group": "Text"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "materialId",
+              "alt"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "revision",
+          "slideId",
+          "blockId",
+          "block"
+        ],
+        "additionalProperties": false
+      },
+      "ShaderSetInput": {
+        "$id": "#/components/schemas/ShaderSetInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "blockId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^\\/(preset|controls(\\/[a-zA-Z]+)?|uniforms(\\/[a-zA-Z_]+)?|anchor|motion|twoTone|plate|palette|alt|caption|captionSize|height)$",
+            "description": "A JSON pointer under the block"
+          },
+          "value": {
+            "description": "Absent removes the field"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "blockId",
+          "path",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "ShaderSetOutput": {
+        "$id": "#/components/schemas/ShaderSetOutput",
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "block": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$",
+                "title": "Id",
+                "x-inspector": {
+                  "label": "Id",
+                  "control": "readonly",
+                  "group": "Advanced"
+                }
+              },
+              "ext": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md; gslides-parity SPEC-2 section 1)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md; gslides-parity SPEC-2 section 1).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "rotate": {
+                    "title": "Rotate",
+                    "x-inspector": {
+                      "label": "Rotate",
+                      "control": "number",
+                      "snap": [
+                        0,
+                        15,
+                        30,
+                        45,
+                        90,
+                        180,
+                        270
+                      ],
+                      "group": "Layout",
+                      "help": "Degrees clockwise about the centre of the box, 0 up to 360 (gslides-parity SPEC-2 2.1.1)."
+                    },
+                    "description": "Degrees clockwise about the centre of the box, 0 up to 360 (gslides-parity SPEC-2 2.1.1).",
+                    "type": "number",
+                    "minimum": 0,
+                    "exclusiveMaximum": 360
+                  },
+                  "flip": {
+                    "title": "Flip",
+                    "x-inspector": {
+                      "label": "Flip",
+                      "control": "select",
+                      "snap": [
+                        "h",
+                        "v",
+                        "hv"
+                      ],
+                      "group": "Layout",
+                      "help": "h mirrors left to right, v top to bottom, hv both (gslides-parity SPEC-2 2.1.2)."
+                    },
+                    "description": "h mirrors left to right, v top to bottom, hv both (gslides-parity SPEC-2 2.1.2).",
+                    "type": "string",
+                    "enum": [
+                      "h",
+                      "v",
+                      "hv"
+                    ]
+                  },
+                  "group": {
+                    "title": "Group",
+                    "x-inspector": {
+                      "label": "Group",
+                      "control": "readonly",
+                      "group": "Layout",
+                      "help": "The tag the members of one group share; Group and Ungroup write it (gslides-parity SPEC-2 2.1.3)."
+                    },
+                    "description": "The tag the members of one group share; Group and Ungroup write it (gslides-parity SPEC-2 2.1.3).",
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
+              "link": {
+                "title": "Link",
+                "x-inspector": {
+                  "label": "Link",
+                  "control": "json",
+                  "group": "Block",
+                  "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+                },
+                "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "slide": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "next",
+                              "previous",
+                              "first",
+                              "last"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "slide"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "type": {
+                "type": "string",
+                "const": "material"
+              },
+              "materialId": {
+                "type": "string",
+                "minLength": 1,
+                "title": "Material",
+                "x-inspector": {
+                  "label": "Material",
+                  "control": "select",
+                  "group": "Block",
+                  "help": "A catalog id from `turboslide material list` (paper:liquid-metal, paper:gem-smoke)."
+                },
+                "description": "A catalog id from `turboslide material list` (paper:liquid-metal, paper:gem-smoke)."
+              },
+              "preset": {
+                "title": "Preset",
+                "x-inspector": {
+                  "label": "Preset",
+                  "control": "select",
+                  "group": "Block",
+                  "help": "A palette preset of the material (ink-paper, paper-ink, brand-blue, fire); uniforms override it."
+                },
+                "description": "A palette preset of the material (ink-paper, paper-ink, brand-blue, fire); uniforms override it.",
+                "type": "string",
+                "minLength": 1
+              },
+              "uniforms": {
+                "title": "Uniforms",
+                "x-inspector": {
+                  "label": "Uniforms",
+                  "control": "json",
+                  "group": "Block",
+                  "help": "Uniform overrides in the recipe’s u_* names; the Material section edits them one by one."
+                },
+                "description": "Uniform overrides in the recipe’s u_* names; the Material section edits them one by one.",
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "anchor": {
+                "title": "Anchor (ms)",
+                "x-inspector": {
+                  "label": "Anchor (ms)",
+                  "control": "number",
+                  "snap": [
+                    4000,
+                    5500,
+                    7000
+                  ],
+                  "group": "Block",
+                  "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                },
+                "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+                "type": "number",
+                "minimum": 0
+              },
+              "twoTone": {
+                "title": "Two-tone",
+                "x-inspector": {
+                  "label": "Two-tone",
+                  "control": "toggle",
+                  "group": "Block",
+                  "help": "Capture through the deck’s 8 by 8 Bayer screen as a light and dark twin pair (SPEC 5.4)."
+                },
+                "description": "Capture through the deck’s 8 by 8 Bayer screen as a light and dark twin pair (SPEC 5.4).",
+                "type": "boolean"
+              },
+              "plate": {
+                "title": "Plate",
+                "x-inspector": {
+                  "label": "Plate",
+                  "control": "select",
+                  "snap": [
+                    "lower-left",
+                    "lower-right",
+                    "upper-left"
+                  ],
+                  "group": "Block",
+                  "help": "The plate rectangle the two-tone metrics are screened against (OPENERS.md:105, 176)."
+                },
+                "description": "The plate rectangle the two-tone metrics are screened against (OPENERS.md:105, 176).",
+                "type": "string",
+                "enum": [
+                  "lower-left",
+                  "lower-right",
+                  "upper-left"
+                ]
+              },
+              "asset": {
+                "title": "Frame",
+                "x-inspector": {
+                  "label": "Frame",
+                  "control": "asset",
+                  "group": "Asset"
+                },
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "motion": {
+                "title": "Motion",
+                "x-inspector": {
+                  "label": "Motion",
+                  "control": "json",
+                  "group": "Block",
+                  "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                },
+                "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+                "type": "object",
+                "properties": {
+                  "play": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "show"
+                    ]
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 2
+                  }
+                },
+                "required": [
+                  "play"
+                ],
+                "additionalProperties": false
+              },
+              "controls": {
+                "title": "Controls",
+                "x-inspector": {
+                  "label": "Controls",
+                  "control": "json",
+                  "group": "Block",
+                  "help": "The Shader section’s common controls (strength, detail, frequency, amplitude, density, brightness, grain, rotation, centerX, centerY, speed); the resolved uniforms sit beside them."
+                },
+                "description": "The Shader section’s common controls (strength, detail, frequency, amplitude, density, brightness, grain, rotation, centerX, centerY, speed); the resolved uniforms sit beside them.",
+                "type": "object",
+                "properties": {
+                  "strength": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 2
+                  },
+                  "detail": {
+                    "type": "number",
+                    "minimum": 0.5,
+                    "maximum": 8
+                  },
+                  "frequency": {
+                    "type": "number",
+                    "minimum": 0.2,
+                    "maximum": 10
+                  },
+                  "amplitude": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 8
+                  },
+                  "density": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 2
+                  },
+                  "brightness": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 2
+                  },
+                  "grain": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "rotation": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                  },
+                  "centerX": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "centerY": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 2
+                  }
+                },
+                "additionalProperties": false
+              },
+              "palette": {
+                "title": "Palette",
+                "x-inspector": {
+                  "label": "Palette",
+                  "control": "select",
+                  "snap": [
+                    "kit",
+                    "custom"
+                  ],
+                  "group": "Block",
+                  "help": "kit draws the brand kit’s six roles; custom records a deck that left the kit."
+                },
+                "description": "kit draws the brand kit’s six roles; custom records a deck that left the kit.",
+                "type": "string",
+                "enum": [
+                  "kit",
+                  "custom"
+                ]
+              },
+              "height": {
+                "title": "Height",
+                "x-inspector": {
+                  "label": "Height",
+                  "control": "number",
+                  "group": "Layout"
+                },
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "caption": {
+                "title": "Caption",
+                "x-inspector": {
+                  "label": "Caption",
+                  "control": "textarea",
+                  "group": "Text"
+                },
+                "type": "string"
+              },
+              "captionSize": {
+                "title": "Caption size",
+                "x-inspector": {
+                  "label": "Caption size",
+                  "control": "select",
+                  "snap": [
+                    16,
+                    15
+                  ],
+                  "group": "Block"
+                },
+                "type": "number",
+                "enum": [
+                  16,
+                  15
+                ]
+              },
+              "alt": {
+                "type": "string",
+                "minLength": 1,
+                "title": "Alt text",
+                "x-inspector": {
+                  "label": "Alt text",
+                  "control": "text",
+                  "group": "Text"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "materialId",
+              "alt"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "revision",
+          "block"
+        ],
+        "additionalProperties": false
+      },
+      "ShaderFrameInput": {
+        "$id": "#/components/schemas/ShaderFrameInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "blockId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "frameKey": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "bytes": {
+            "description": "The PNG as base64",
+            "type": "string"
+          },
+          "upload": {
+            "description": "A presigned upload’s key instead of bytes (a frame over the body cap)",
+            "type": "string"
+          },
+          "renderer": {
+            "description": "The WebGL renderer string of the client",
+            "type": "string"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "blockId",
+          "frameKey",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "ShaderFrameOutput": {
+        "$id": "#/components/schemas/ShaderFrameOutput",
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "assetId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "existed": {
+            "type": "boolean"
+          },
+          "removed": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "size": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "required": [
+          "revision",
+          "assetId",
+          "existed",
+          "removed",
+          "size"
+        ],
+        "additionalProperties": false
+      },
+      "ShaderCaptureInput": {
+        "$id": "#/components/schemas/ShaderCaptureInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "blockId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "backend": {
+            "type": "string",
+            "enum": [
+              "angle-metal",
+              "swiftshader"
+            ]
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "blockId",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "ShaderCaptureOutput": {
+        "$id": "#/components/schemas/ShaderCaptureOutput",
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "assetId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "existed": {
+            "type": "boolean"
+          },
+          "removed": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "size": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "required": [
+          "revision",
+          "assetId",
+          "existed",
+          "removed",
+          "size"
+        ],
+        "additionalProperties": false
+      },
+      "ShaderRenderInput": {
+        "$id": "#/components/schemas/ShaderRenderInput",
+        "type": "object",
+        "properties": {
+          "materialId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "preset": {
+            "type": "string"
+          },
+          "uniforms": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "controls": {
+            "type": "object",
+            "properties": {
+              "strength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "detail": {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 8
+              },
+              "frequency": {
+                "type": "number",
+                "minimum": 0.2,
+                "maximum": 10
+              },
+              "amplitude": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8
+              },
+              "density": {
+                "type": "number",
+                "minimum": 0.1,
+                "maximum": 2
+              },
+              "brightness": {
+                "type": "number",
+                "minimum": 0.1,
+                "maximum": 2
+              },
+              "grain": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "rotation": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "centerX": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "centerY": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "speed": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              }
+            },
+            "additionalProperties": false
+          },
+          "size": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "timeMs": {
+            "type": "number",
+            "minimum": 0
+          },
+          "backend": {
+            "type": "string",
+            "enum": [
+              "angle-metal",
+              "swiftshader"
+            ]
+          }
+        },
+        "required": [
+          "materialId"
+        ],
+        "additionalProperties": false
+      },
+      "ShaderRenderOutput": {
+        "$id": "#/components/schemas/ShaderRenderOutput",
+        "type": "object",
+        "properties": {
+          "png": {
+            "type": "string",
+            "description": "The PNG as base64"
+          },
+          "width": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "height": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "renderer": {
+            "type": "string"
+          },
+          "backend": {
+            "type": "string",
+            "enum": [
+              "angle-metal",
+              "swiftshader"
+            ]
+          },
+          "ms": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "png",
+          "width",
+          "height",
+          "renderer",
+          "backend",
+          "ms"
         ],
         "additionalProperties": false
       },

@@ -78,7 +78,7 @@ describe('the primitives in the Insert group', () => {
       'Text box',
       'Icon',
       'Image',
-      'Material',
+      'Shader',
     ]);
     expect(insertLabel('shot')).toBe('Image');
   });
@@ -88,8 +88,9 @@ describe('the primitives in the Insert group', () => {
       (entry) => entry.group === 'insert',
     );
     /* the return round (docs/RETURN.md 2.2 to 2.6) brought the shapes, the lines, the table, the
-       chart and the diagram back with their rows; the Box (no row, question 5 of RETURN.md
-       section 9), Rule, Icon and Material stay behind the switch */
+       chart and the diagram back with their rows, and the features round's ship two brought the
+       Shader (docs/FEATURES.md 5.4); the Box (no row, question 5 of RETURN.md section 9), Rule and
+       Icon stay behind the switch */
     expect(
       plain.filter((entry) => entry.insert === 'primitive').map((entry) => entry.title),
     ).toEqual([
@@ -100,6 +101,7 @@ describe('the primitives in the Insert group', () => {
       'Arrow shape',
       'Text box',
       'Image',
+      'Shader',
     ]);
     for (const id of [
       'insert:block:shape:rectangle',
@@ -113,14 +115,14 @@ describe('the primitives in the Insert group', () => {
       expect(entry?.row, id).toMatch(/^insert\.(shape\.shapes|line)\./);
     }
     const plainIds = plain.map((entry) => entry.id);
-    for (const id of ['insert:block:table', 'insert:block:chart', 'insert:block:dia'])
-      expect(plainIds, id).toContain(id);
     for (const id of [
-      'insert:block:box',
-      'insert:block:rule',
-      'insert:block:icon',
+      'insert:block:table',
+      'insert:block:chart',
+      'insert:block:dia',
       'insert:block:material',
     ])
+      expect(plainIds, id).toContain(id);
+    for (const id of ['insert:block:box', 'insert:block:rule', 'insert:block:icon'])
       expect(plainIds, id).not.toContain(id);
     expect(plain.map((entry) => entry.row)).toContain('insert.textBox');
     expect(plain.map((entry) => entry.row)).toContain('insert.image.upload');

@@ -167,6 +167,8 @@
       "table.cellStyle",
       "shape.set",
       "line.set",
+      "shader.insert",
+      "shader.set",
       "picture.dither",
       "picture.materialize"
     ],
@@ -178,12 +180,16 @@
       "material.list",
       "logo.search",
       "logo.insert",
-      "logo.refresh"
+      "logo.refresh",
+      "shader.list",
+      "shader.frame",
+      "shader.capture"
     ],
     "render": [
       "render.slide",
       "render.sheet",
-      "font.list"
+      "font.list",
+      "shader.render"
     ],
     "lint": [
       "lint.run",
@@ -291,7 +297,7 @@
       "admin.mail.list"
     ]
   },
-  "actionCount": 186,
+  "actionCount": 192,
   "resources": [
     {
       "uri": "deck://manifest",

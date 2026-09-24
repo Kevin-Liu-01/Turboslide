@@ -40,6 +40,8 @@ import {
 import type { RunFlagKey, RunFlags, RunMarks } from '@turboslide/schema/text';
 import { INDENT_STEP_PX, TYPE_LADDER, TYPE_LEADING } from '@turboslide/schema/typography';
 import type { Theme } from '@turboslide/viewer/theme';
+import { FEATURED_MATERIAL_IDS, requireMaterial } from '@turboslide/materials/catalog';
+import { shaderBlockOf } from '@turboslide/materials/shader-writes';
 
 import type { SlideRenderer } from './LayoutGrid';
 
@@ -941,7 +943,9 @@ export const DIALOG_IDS = [
   /* the Insert pickers (SPEC 2.4): the symbol picker and the material list; the table size grid
      is a plate inside the Insert menu (SPEC-2 0.26) */
   'insertIcon',
-  'insertMaterial',
+  /* the features round, ship two (docs/FEATURES.md 5.4): the Shader gallery, where the Material
+     list was (build/b1.md R2) */
+  'shaderGallery',
   /* round two (SPEC-2 0.49): Slide > Change background, Custom spacing, Insert > Special characters */
   'background',
   'customSpacing',
@@ -1564,8 +1568,8 @@ export function factsOf(
 // ---------------------------------------------------------------------------------------------
 // The Insert menu (SPEC 2.4; SPEC-2 1.6, 6.2): what a row does before its write
 
-/** The picker an Insert row opens before its block.insert: the symbols, the materials. */
-export type InsertPicker = 'icon' | 'material';
+/** The picker an Insert row opens before its block.insert: the symbols, the shader gallery (docs/FEATURES.md 5.4). */
+export type InsertPicker = 'icon' | 'shader';
 
 /**
  * What an Insert row does before any write (SPEC 2.4, 3.1; SPEC-2 6.2): Text box, the shapes and
@@ -1594,7 +1598,7 @@ const DRAW_TOOL_OF: Readonly<Record<string, DrawTool>> = {
 /* Insert > Table is a hover grid inside the menu (SPEC-2 0.26), not a picker dialog */
 const PICKER_OF: Readonly<Record<string, InsertPicker>> = {
   'insert.icon': 'icon',
-  'insert.material': 'material',
+  'insert.shader': 'shader',
 };
 
 export function insertIntentOf(item: Pick<MenuItem, 'id' | 'effect'>): InsertIntent | null {
@@ -2624,8 +2628,18 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     }
     case 'insert.icon':
       return insertBlockPlan(facts, 'icon', (id) => CATALOG.icon.make(id), item.label);
-    case 'insert.material':
-      return insertBlockPlan(facts, 'material', (id) => CATALOG.material.make(id), item.label);
+    case 'insert.shader':
+      /* the features round, ship two (docs/FEATURES.md 5.2, 5.4; build/b5/integrator-hunks.md R4):
+         the row opens the gallery (PICKER_OF), so this branch is the palette's and the window API's
+         direct insert of the featured entry in its featured preset, placed by the controller in the
+         largest free rectangle (place-insert.ts) */
+      return insertBlockPlan(
+        facts,
+        'material',
+        (id) =>
+          shaderBlockOf(id, requireMaterial(FEATURED_MATERIAL_IDS[0] ?? 'paper:liquid-metal')),
+        'Shader',
+      );
     case 'edit.duplicate':
       if (target !== undefined)
         return {
@@ -3259,6 +3273,8 @@ export const STORED_SETTINGS: ReadonlyArray<MenuSetting> = [
   'advancedTools',
   /* the product round (docs/PRODUCT.md section 2 rank 9): Tools > Preferences > Link detection */
   'linkDetection',
+  /* the features round, ship two (docs/FEATURES.md 5.6): View > Play shaders, per browser */
+  'playShaders',
 ];
 
 /**
@@ -3296,6 +3312,8 @@ export const DEFAULT_SETTINGS: ShellSettings = {
   advancedTools: false,
   /* docs/PRODUCT.md section 2 rank 9: a typed address becomes a link unless the seller turns it off */
   linkDetection: true,
+  /* docs/FEATURES.md 5.6, question 5's default: shaders hold their frame while editing and move in the show */
+  playShaders: 'show',
 };
 
 /** The mode the shell is in: the route's word, else the round one Viewing flag, else Editing (SPEC-3 5.3). */

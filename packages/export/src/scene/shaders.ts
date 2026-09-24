@@ -86,7 +86,12 @@ export function sceneShadersOf(
 ): SceneShader[] {
   return materialBlocksOf(slide).map((block) => {
     const asset = frameAssetOf(block, deck);
-    const twin = asset === undefined ? undefined : 'neutral' in asset.twins ? asset.twins.neutral : asset.twins.light;
+    const twin =
+      asset === undefined
+        ? undefined
+        : 'neutral' in asset.twins
+          ? asset.twins.neutral
+          : asset.twins.light;
     const file = twin === undefined ? undefined : join(deckDir, ...twin.split('/'));
     const onDisk = file !== undefined && existsSync(file);
     return {
@@ -96,7 +101,10 @@ export function sceneShadersOf(
       ...(asset !== undefined ? { assetId: asset.id, size: asset.size } : {}),
       ...(onDisk ? { file } : {}),
       missing: !onDisk,
-      stale: asset !== undefined && asset.source.kind === 'material' && asset.source.frameKey === undefined,
+      stale:
+        asset !== undefined &&
+        asset.source.kind === 'material' &&
+        asset.source.frameKey === undefined,
     };
   });
 }

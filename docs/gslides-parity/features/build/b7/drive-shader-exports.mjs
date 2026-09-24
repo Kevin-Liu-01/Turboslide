@@ -50,7 +50,10 @@ const settled = async (timeout = 30_000) => {
   for (;;) {
     const s = await state();
     if (s.pending === 0 && s.serverRevision === s.revision) return s;
-    if (Date.now() - t0 > timeout) throw new Error(`not settled: ${JSON.stringify({ pending: s.pending, r: s.revision, sr: s.serverRevision })}`);
+    if (Date.now() - t0 > timeout)
+      throw new Error(
+        `not settled: ${JSON.stringify({ pending: s.pending, r: s.revision, sr: s.serverRevision })}`,
+      );
     await sleep(200);
   }
 };
@@ -70,7 +73,13 @@ try {
     baseRevision: s0.revision,
     slideId,
     slot: 'main',
-    block: { id: BLOCK, type: 'material', materialId: 'paper:liquid-metal', alt: 'The liquid metal shader', pos: POS },
+    block: {
+      id: BLOCK,
+      type: 'material',
+      materialId: 'paper:liquid-metal',
+      alt: 'The liquid metal shader',
+      pos: POS,
+    },
   });
   await page.waitForURL(/\/edit\//, { timeout: 30_000 }).catch(() => undefined);
   let s = await settled();
@@ -101,9 +110,17 @@ try {
     baseRevision: (await state()).revision,
   });
   const asset = Array.isArray(captured) ? captured[0] : captured;
-  log(`material.capture answered in ${Date.now() - t1} ms: ${asset.id} ${asset.size.join('x')} backend ${asset.source.backend} frameKey ${asset.source.frameKey ? 'set' : 'absent'}`);
+  log(
+    `material.capture answered in ${Date.now() - t1} ms: ${asset.id} ${asset.size.join('x')} backend ${asset.source.backend} frameKey ${asset.source.frameKey ? 'set' : 'absent'}`,
+  );
   s = await settled();
-  await invoke('block.set', { slideId, blockId: BLOCK, path: '/asset', value: asset.id, baseRevision: s.revision });
+  await invoke('block.set', {
+    slideId,
+    blockId: BLOCK,
+    path: '/asset',
+    value: asset.id,
+    baseRevision: s.revision,
+  });
   s = await settled();
   log(`block names the frame; revision ${s.revision}`);
 
@@ -111,7 +128,9 @@ try {
   const framePath = join(REPO, '.turboslide', 'dummy');
   const assets = (await state()).assets ?? {};
   const record = assets[asset.id];
-  log(`asset record: twins ${JSON.stringify(record?.twins)} frameKey ${record?.source?.frameKey === key ? 'equals the block key' : 'DIFFERS'}`);
+  log(
+    `asset record: twins ${JSON.stringify(record?.twins)} frameKey ${record?.source?.frameKey === key ? 'equals the block key' : 'DIFFERS'}`,
+  );
 
   const runExport = async (input) => {
     const t = Date.now();
@@ -123,11 +142,29 @@ try {
   {
     const { report, ms } = await runExport({ format: 'pdf', theme: ['light'] });
     const pdf = report.files[0]?.path;
-    log(`pdf in ${ms} ms: ${pdf} (${report.files[0]?.bytes} bytes); residual shaders row: ${report.residual.find((l) => l.startsWith('shaders:')) ?? 'none'}`);
+    log(
+      `pdf in ${ms} ms: ${pdf} (${report.files[0]?.bytes} bytes); residual shaders row: ${report.residual.find((l) => l.startsWith('shaders:')) ?? 'none'}`,
+    );
     const listing = execFileSync('pdfimages', ['-list', pdf], { encoding: 'utf8' });
     const has3200 = /\b3200\s+1800\b/.test(listing);
-    execFileSync('pdftoppm', ['-png', '-r', '120', '-f', '1', '-l', '1', '-scale-to-x', '1600', '-scale-to-y', '900', pdf, join(OUT, 'pdf-page')]);
-    const pageFile = existsSync(join(OUT, 'pdf-page-1.png')) ? join(OUT, 'pdf-page-1.png') : join(OUT, 'pdf-page-01.png');
+    execFileSync('pdftoppm', [
+      '-png',
+      '-r',
+      '120',
+      '-f',
+      '1',
+      '-l',
+      '1',
+      '-scale-to-x',
+      '1600',
+      '-scale-to-y',
+      '900',
+      pdf,
+      join(OUT, 'pdf-page'),
+    ]);
+    const pageFile = existsSync(join(OUT, 'pdf-page-1.png'))
+      ? join(OUT, 'pdf-page-1.png')
+      : join(OUT, 'pdf-page-01.png');
     const framePng = await fetchFrame();
     const sampleAt = async (file, x, y) => {
       const { data } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
@@ -142,18 +179,31 @@ try {
       if (region) img = img.extract(region);
       const { data } = await img.raw().toBuffer({ resolveWithObject: true });
       const sum = [0, 0, 0];
-      for (let i = 0; i < data.length; i += 4) { sum[0] += data[i]; sum[1] += data[i + 1]; sum[2] += data[i + 2]; }
+      for (let i = 0; i < data.length; i += 4) {
+        sum[0] += data[i];
+        sum[1] += data[i + 1];
+        sum[2] += data[i + 2];
+      }
       const n = data.length / 4;
       return sum.map((v) => Math.round(v / n));
     };
     const inset = 6;
-    const centre = await meanOf(pageFile, { left: POS.x + inset, top: POS.y + inset, width: POS.w - 2 * inset, height: POS.h - 2 * inset });
+    const centre = await meanOf(pageFile, {
+      left: POS.x + inset,
+      top: POS.y + inset,
+      width: POS.w - 2 * inset,
+      height: POS.h - 2 * inset,
+    });
     const frameCentre = await meanOf(framePng);
     const dist = Math.max(...centre.map((c, i) => Math.abs(c - frameCentre[i])));
     const text = execFileSync('pdftotext', ['-f', '1', '-l', '1', pdf, '-'], { encoding: 'utf8' });
     const noLabel = !/not captured/.test(text);
     const noRow = !report.residual.some((l) => l.startsWith('shaders:'));
-    row('shaders.export.pdf-frame', has3200 && dist <= 12 && noLabel, `image 3200x1800 in the PDF: ${has3200}; mean colour over the box on the page ${centre.join(',')} vs the frame ${frameCentre.join(',')} (max channel diff ${dist}); no label text: ${noLabel}; shaders row absent (needs B5's frameKey on the capture): ${noRow}; ${ms} ms`);
+    row(
+      'shaders.export.pdf-frame',
+      has3200 && dist <= 12 && noLabel,
+      `image 3200x1800 in the PDF: ${has3200}; mean colour over the box on the page ${centre.join(',')} vs the frame ${frameCentre.join(',')} (max channel diff ${dist}); no label text: ${noLabel}; shaders row absent (needs B5's frameKey on the capture): ${noRow}; ${ms} ms`,
+    );
     writeFileSync(join(OUT, 'pdf-report.json'), JSON.stringify(report, null, 2));
   }
 
@@ -177,23 +227,36 @@ try {
     const pptx = report.files.find((f) => f.path.endsWith('.pptx'))?.path;
     const zip = await JSZip.loadAsync(readFileSync(pptx));
     const slidePart = Object.keys(zip.files).find((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n));
-    if (!slidePart) throw new Error(`no slide part in ${pptx}: ${Object.keys(zip.files).slice(0, 20).join(', ')}`);
+    if (!slidePart)
+      throw new Error(
+        `no slide part in ${pptx}: ${Object.keys(zip.files).slice(0, 20).join(', ')}`,
+      );
     const slideXml = await zip.file(slidePart).async('string');
     const named = slideXml.includes(`name="ts:${slideId}#${BLOCK}"`);
-    const descrMatch = slideXml.match(new RegExp(`name="ts:${slideId}#${BLOCK}"[^>]*descr="([^"]*)"`));
+    const descrMatch = slideXml.match(
+      new RegExp(`name="ts:${slideId}#${BLOCK}"[^>]*descr="([^"]*)"`),
+    );
     const descr = descrMatch ? descrMatch[1].replace(/&quot;/g, '"') : null;
     const recipeOk = descr !== null && descr.includes('"materialId":"paper:liquid-metal"');
     // the media parts: one of them is 3200 by 1800
-    const media = Object.keys(zip.files).filter((n) => n.startsWith('ppt/media/') && !zip.files[n].dir);
+    const media = Object.keys(zip.files).filter(
+      (n) => n.startsWith('ppt/media/') && !zip.files[n].dir,
+    );
     let long3200 = false;
     for (const name of media) {
       const bytes = await zip.file(name).async('nodebuffer');
-      const meta = await sharp(bytes).metadata().catch(() => null);
+      const meta = await sharp(bytes)
+        .metadata()
+        .catch(() => null);
       if (meta && Math.max(meta.width, meta.height) === 3200) long3200 = true;
     }
     const noRow = !report.residual.some((l) => l.startsWith('shaders:'));
     const shaderLine = report.residual.find((l) => l.startsWith('shader:'));
-    row(`shaders.export.pptx-frame (${mode})`, named && recipeOk && long3200, `picture ts:${slideId}#${BLOCK}: ${named}; recipe in descr: ${recipeOk}; a media part with the long side 3200: ${long3200}; residual: ${shaderLine ?? 'no shader line'}; no shaders row: ${noRow}; ${ms} ms`);
+    row(
+      `shaders.export.pptx-frame (${mode})`,
+      named && recipeOk && long3200,
+      `picture ts:${slideId}#${BLOCK}: ${named}; recipe in descr: ${recipeOk}; a media part with the long side 3200: ${long3200}; residual: ${shaderLine ?? 'no shader line'}; no shaders row: ${noRow}; ${ms} ms`,
+    );
     writeFileSync(join(OUT, `pptx-${mode}-report.json`), JSON.stringify(report, null, 2));
   }
 
@@ -205,33 +268,69 @@ try {
     writeFileSync(join(OUT, 'b7-shader.html'), html);
     log(`web page ${built.path} copied to ${join(OUT, 'b7-shader.html')}`);
     const at = html.indexOf('material-fig');
-    log(`material markup: ${html.slice(Math.max(0, at - 40), at + 420).replace(/data:image\/png;base64,[A-Za-z0-9+/=]{40,}/g, 'data:image/png;base64,…')}`);
+    log(
+      `material markup: ${html.slice(Math.max(0, at - 40), at + 420).replace(/data:image\/png;base64,[A-Za-z0-9+/=]{40,}/g, 'data:image/png;base64,…')}`,
+    );
     // the build inlines every asset under its budget, a continuous tone frame as a JPEG (the CLI's
     // inlineAssets); the row reads the frame's pixels at the block's box, whatever the encoding
-    const frameImg = html.match(/<div class="material"[^>]*><img class="material-frame" src="data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)"/);
+    const frameImg = html.match(
+      /<div class="material"[^>]*><img class="material-frame" src="data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)"/,
+    );
     const hasFrameImg = frameImg !== null;
     if (frameImg) {
       const bytes = Buffer.from(frameImg[2], 'base64');
-      const meta = await sharp(bytes).metadata().catch(() => null);
-      log(`inlined frame: ${frameImg[1]} ${meta?.width}x${meta?.height}, ${bytes.byteLength} bytes`);
-      const mean = await (async () => { const { data } = await sharp(bytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true }); const sum=[0,0,0]; for (let i=0;i<data.length;i+=4){sum[0]+=data[i];sum[1]+=data[i+1];sum[2]+=data[i+2];} return sum.map((v)=>Math.round(v/(data.length/4))); })();
+      const meta = await sharp(bytes)
+        .metadata()
+        .catch(() => null);
+      log(
+        `inlined frame: ${frameImg[1]} ${meta?.width}x${meta?.height}, ${bytes.byteLength} bytes`,
+      );
+      const mean = await (async () => {
+        const { data } = await sharp(bytes)
+          .ensureAlpha()
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+        const sum = [0, 0, 0];
+        for (let i = 0; i < data.length; i += 4) {
+          sum[0] += data[i];
+          sum[1] += data[i + 1];
+          sum[2] += data[i + 2];
+        }
+        return sum.map((v) => Math.round(v / (data.length / 4)));
+      })();
       log(`inlined frame mean colour ${mean.join(',')}`);
     }
     const noCanvas = !/<canvas/.test(html);
     const noLabel = !/not captured/.test(html);
     const noLive = !/data-live=/.test(html);
-    row('shaders.export.html-frame', hasFrameImg && noCanvas && noLabel && noLive, `frame img inlined: ${hasFrameImg}; no canvas: ${noCanvas}; no label: ${noLabel}; no data-live: ${noLive}; ${built.bytes} bytes in ${Date.now() - t} ms`);
+    row(
+      'shaders.export.html-frame',
+      hasFrameImg && noCanvas && noLabel && noLive,
+      `frame img inlined: ${hasFrameImg}; no canvas: ${noCanvas}; no label: ${noLabel}; no data-live: ${noLive}; ${built.bytes} bytes in ${Date.now() - t} ms`,
+    );
   }
 
   // the missing frame row: the recipe moves (a new anchor, a new key) and the export starts at once
   {
     s = await settled();
-    await invoke('block.set', { slideId, blockId: BLOCK, path: '/anchor', value: 7000, baseRevision: s.revision });
+    await invoke('block.set', {
+      slideId,
+      blockId: BLOCK,
+      path: '/anchor',
+      value: 7000,
+      baseRevision: s.revision,
+    });
     const t = Date.now();
     const { report, ms } = await runExport({ format: 'pdf', theme: ['light'] });
     const line = report.residual.find((l) => l.startsWith('shaders:'));
-    const ok = line !== undefined && /^shaders: 1 shader had no frame; the export waited (8|9|10|11) s for it$/.test(line);
-    row('shaders.export.missing-frame-row', ok, `row: ${line ?? 'none'}; export ${ms} ms, started at once after the recipe change`);
+    const ok =
+      line !== undefined &&
+      /^shaders: 1 shader had no frame; the export waited (8|9|10|11) s for it$/.test(line);
+    row(
+      'shaders.export.missing-frame-row',
+      ok,
+      `row: ${line ?? 'none'}; export ${ms} ms, started at once after the recipe change`,
+    );
     writeFileSync(join(OUT, 'pdf-stale-report.json'), JSON.stringify(report, null, 2));
   }
 
@@ -250,7 +349,12 @@ try {
     const t = Date.now();
     let outcome;
     try {
-      outcome = await invoke('slide.setBackgroundMaterial', { slideIds: ['b7-ground'], materialId: 'paper:gem-smoke', anchor: 5500, baseRevision: s.revision });
+      outcome = await invoke('slide.setBackgroundMaterial', {
+        slideIds: ['b7-ground'],
+        materialId: 'paper:gem-smoke',
+        anchor: 5500,
+        baseRevision: s.revision,
+      });
     } catch (error) {
       outcome = { error: String(error?.message ?? error) };
     }
@@ -262,15 +366,21 @@ try {
     let ground;
     for (let i = 0; i < 50 && covering === undefined; i += 1) {
       ground = await invoke('slide.get', { slideId: 'b7-ground' });
-      covering = Object.values(ground.slide.slots ?? {}).flat().find((b) => b.type === 'picture');
+      covering = Object.values(ground.slide.slots ?? {})
+        .flat()
+        .find((b) => b.type === 'picture');
       if (covering === undefined) await sleep(200);
     }
     log(`ground slide: ${JSON.stringify(ground.slide).slice(0, 500)}`);
     const ok = outcome.error === undefined && covering !== undefined;
-    row('shaders.background.place-answers (window API half)', ok, `slide.setBackgroundMaterial answered in ${ms} ms: ${outcome.error ?? `picture ${covering?.id} asset ${covering?.asset}`}`);
+    row(
+      'shaders.background.place-answers (window API half)',
+      ok,
+      `slide.setBackgroundMaterial answered in ${ms} ms: ${outcome.error ?? `picture ${covering?.id} asset ${covering?.asset}`}`,
+    );
   }
 } catch (error) {
-  log(`drive failed: ${error instanceof Error ? error.stack ?? error.message : String(error)}`);
+  log(`drive failed: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`);
   rows.push({ id: 'drive', result: 'failed', detail: String(error?.message ?? error) });
 } finally {
   // every scratch deck of this lane on the tmp store: this run's and any an earlier run left
@@ -283,11 +393,17 @@ try {
       if (!/^untitled-2026/.test(d.id)) continue;
       for (let attempt = 0; attempt < 4; attempt += 1) {
         try {
-          const fresh = (await invoke('deck.list', { includeTrashed: true }));
-          const row = (Array.isArray(fresh) ? fresh : fresh.decks ?? []).find((x) => x.id === d.id);
+          const fresh = await invoke('deck.list', { includeTrashed: true });
+          const row = (Array.isArray(fresh) ? fresh : (fresh.decks ?? [])).find(
+            (x) => x.id === d.id,
+          );
           if (!row) break;
           if (!row.trashedAt) await invoke('deck.trash', { id: d.id, baseRevision: row.revision });
-          else { await invoke('deck.remove', { id: d.id, confirm: true, baseRevision: row.revision }); log(`deck ${d.id} trashed and removed`); break; }
+          else {
+            await invoke('deck.remove', { id: d.id, confirm: true, baseRevision: row.revision });
+            log(`deck ${d.id} trashed and removed`);
+            break;
+          }
         } catch (error) {
           if (attempt === 3) log(`cleanup ${d.id}: ${error?.message ?? error}`);
         }
@@ -297,6 +413,9 @@ try {
     log(`cleanup: ${error?.message ?? error}`);
   }
   await browser.close();
-  writeFileSync(join(OUT, 'rows.json'), JSON.stringify({ base: BASE, at: new Date().toISOString(), rows }, null, 2));
+  writeFileSync(
+    join(OUT, 'rows.json'),
+    JSON.stringify({ base: BASE, at: new Date().toISOString(), rows }, null, 2),
+  );
   log(`rows written to ${join(OUT, 'rows.json')}`);
 }

@@ -24,6 +24,7 @@ import { factsOf, insertBlockPlan } from '../editor-shell';
 import type { ShellSettings } from '../editor-shell';
 import { useEditorShell } from '../editor-shell-context';
 import { cn } from '../lib/cn';
+import { SHADER_GALLERY } from '../menus/strings';
 import { isParked } from '../parked-controls';
 import { tipProps } from '../Tooltip';
 
@@ -61,38 +62,9 @@ import './ShaderGallery.css';
  */
 
 // ---------------------------------------------------------------------------------------------
-// The words: one exported constant until menus/strings.ts takes it (build/b1.md R3)
+// The words live in menus/strings.ts (build/b1.md R3); re-exported for the dialog's readers
 
-export const SHADER_GALLERY = {
-  title: 'Shader',
-  sentence: 'Previews are in black and white. The shader takes your brand kit’s colours on the slide',
-  search: 'Search shaders',
-  searchDoc: 'The name, what it draws, or its engine',
-  categories: 'Categories',
-  all: 'All',
-  allDoc: 'Every shader of the library',
-  categoryDoc: (label: string) => `The ${label.toLowerCase()} shaders`,
-  engines: 'Engines',
-  engineDoc: (label: string) => `The shaders ${label} renders`,
-  empty: (query: string) => `No shader matches “${query}”`,
-  presetDoc: (label: string, preset: string) => `Inserts ${label} with the ${preset} preset`,
-  alt: (label: string) => `The ${label.toLowerCase()} shader`,
-  insertLabel: 'Shader',
-  /* the Background dialog's Shader row (5.4, 5.5) */
-  background: 'Shader',
-  backgroundDoc: 'A shader behind everything on the slide, still at one frame; Place writes it',
-  choose: 'Choose',
-  chooseDoc: 'The shader library: one click picks a shader, Place puts it behind the slide',
-  place: 'Place',
-  placeDoc: 'Renders the shader’s frame and places it behind the slide',
-  placing: (seconds: number) => (seconds > 0 ? `Placing, ${seconds} s` : 'Placing'),
-  options: 'Shader options',
-  optionsDoc: 'Opens Format options at the Shader section',
-  currentDoc: 'The shader behind this slide',
-  /* the one failure sentence of 5.5 (B7's RenderError answers the same words) */
-  placeFailed: 'The frame could not be rendered. Try again, or place the shader without a frame',
-  pickWords: (label: string, preset: string) => `${label}, ${preset}`,
-} as const;
+export { SHADER_GALLERY };
 
 // ---------------------------------------------------------------------------------------------
 // The catalog as the gallery reads it

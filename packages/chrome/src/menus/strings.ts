@@ -515,16 +515,12 @@ export const DIALOGS = {
   keyboardShortcuts: { title: 'Keyboard shortcuts', search: 'Search shortcuts' },
   imageByUrl: { title: 'Image by URL' },
   fromThisPresentation: { title: 'Pictures in this presentation' },
-  /* the Insert pickers (SPEC 2.4): the Icon and Material rows of the theme; Insert > Table is the
-     hover grid inside the menu (PICKERS.tableGrid, SPEC-2 0.26) */
+  /* the Insert pickers (SPEC 2.4): the Icon row of the theme; Insert > Table is the hover grid
+     inside the menu (PICKERS.tableGrid, SPEC-2 0.26); Insert > Shader's gallery reads SHADER_GALLERY
+     (the features round, ship two, docs/FEATURES.md 5.4) */
   insertIcon: {
     title: 'Icon',
     lead: 'One of the theme’s symbols; the tone is set in Format options',
-  },
-  insertMaterial: {
-    title: 'Material',
-    lead: 'A shader picture from the theme; its recipe is edited in Pictures and materials',
-    empty: 'No materials are available on this deployment',
   },
   /* round two (SPEC-2 section 10): the dialogs of Custom spacing, Background and Special characters */
   customSpacing: {
@@ -989,6 +985,45 @@ export const LOGO_DIALOG = {
 } as const;
 
 /** The words of Tailor's Find the logo slot (docs/FEATURES.md 4.5; build/b1.md R3). */
+/**
+ * The Shader gallery and the Background dialog's Shader row (the features round, ship two,
+ * docs/FEATURES.md 5.4, 5.5; build/b1.md R3): the title, the one sentence under it, the search
+ * field, the category chips, the empty state, the tile docs, the alt, the Background row's words
+ * and the one failure sentence of 5.5, which the server's RenderError answers byte for byte
+ * (apps/studio/src/server/shader-frames.ts imports it; build/b7.md R4).
+ */
+export const SHADER_GALLERY = {
+  title: 'Shader',
+  sentence:
+    'Previews are in black and white. The shader takes your brand kit’s colours on the slide',
+  search: 'Search shaders',
+  searchDoc: 'The name, what it draws, or its engine',
+  categories: 'Categories',
+  all: 'All',
+  allDoc: 'Every shader of the library',
+  categoryDoc: (label: string) => `The ${label.toLowerCase()} shaders`,
+  engines: 'Engines',
+  engineDoc: (label: string) => `The shaders ${label} renders`,
+  empty: (query: string) => `No shader matches “${query}”`,
+  presetDoc: (label: string, preset: string) => `Inserts ${label} with the ${preset} preset`,
+  alt: (label: string) => `The ${label.toLowerCase()} shader`,
+  insertLabel: 'Shader',
+  /* the Background dialog's Shader row (5.4, 5.5) */
+  background: 'Shader',
+  backgroundDoc: 'A shader behind everything on the slide, still at one frame; Place writes it',
+  choose: 'Choose',
+  chooseDoc: 'The shader library: one click picks a shader, Place puts it behind the slide',
+  place: 'Place',
+  placeDoc: 'Renders the shader’s frame and places it behind the slide',
+  placing: (seconds: number) => (seconds > 0 ? `Placing, ${seconds} s` : 'Placing'),
+  options: 'Shader options',
+  optionsDoc: 'Opens Format options at the Shader section',
+  currentDoc: 'The shader behind this slide',
+  /* the one failure sentence of 5.5 (the server's RenderError answers the same words) */
+  placeFailed: 'The frame could not be rendered. Try again, or place the shader without a frame',
+  pickWords: (label: string, preset: string) => `${label}, ${preset}`,
+} as const;
+
 export const TAILOR_LOGO = {
   find: (to: string) => `Find the ${to} logo`,
   findDoc: 'Shows the logo thesvg.org has for this name; a click stores it for Apply',

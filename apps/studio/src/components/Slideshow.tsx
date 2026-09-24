@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Icon } from '@turboslide/chrome/icons';
-import { SETTINGS_STORAGE, readStoredSettings } from '@turboslide/chrome/editor-shell';
+import {
+  SETTINGS_STORAGE,
+  readStoredSettings,
+  writeStoredSettings,
+} from '@turboslide/chrome/editor-shell';
 import { Menu } from '@turboslide/chrome/Menu';
 import { detectPlatform } from '@turboslide/chrome/menus/platform';
 import { DEFAULT_MENU_CONTEXT, shortcut } from '@turboslide/chrome/menus/model';
@@ -104,6 +108,19 @@ const ICONS: PresentIcons = {
 
 const tip: PresentTip = (content) => tipProps(content);
 
+/* the features round, ship two (docs/FEATURES.md 5.6; build/b1.md 2.5): the show's Options menu
+   mirrors View > Play shaders over the same per browser setting */
+const PLAY_SHADERS = {
+  label: 'Play shaders',
+  on: 'On',
+  show: 'In the show only',
+  off: 'Off',
+  doc: 'Whether the shaders on the slides move during the show',
+} as const;
+type PlayShaders = 'on' | 'show' | 'off';
+const isPlayShaders = (value: unknown): value is PlayShaders =>
+  value === 'on' || value === 'show' || value === 'off';
+
 /** The Options menu (SPEC 9.2's table), built per render so the two toggles read their state. */
 function optionsItems(state: { laser: boolean; fullscreen: boolean }): MenuItem[] {
   const run = { kind: 'client', handler: 'runAction' } as const;
@@ -138,6 +155,20 @@ function optionsItems(state: { laser: boolean; fullscreen: boolean }): MenuItem[
       effect: run,
       key: shortcut('Cmd+Shift+F', 'F11'),
       icon: state.fullscreen ? 'exit-fullscreen' : 'fullscreen',
+    },
+    {
+      id: 'present.options.playShaders',
+      label: PLAY_SHADERS.label,
+      status: 'now',
+      effect: { kind: 'submenu' },
+      icon: 'cube',
+      doc: PLAY_SHADERS.doc,
+      items: (['on', 'show', 'off'] as const).map((value) => ({
+        id: `present.options.playShaders.${value}`,
+        label: PLAY_SHADERS[value],
+        status: 'now' as const,
+        effect: { kind: 'toggle' as const, setting: 'playShaders' as const, value },
+      })),
     },
     {
       id: 'present.options.pen',
@@ -505,6 +536,11 @@ export function Slideshow({
       case 'present.options.exit':
         exit();
         break;
+      case 'present.options.playShaders.on':
+      case 'present.options.playShaders.show':
+      case 'present.options.playShaders.off':
+        pickPlayShaders(item.id.slice('present.options.playShaders.'.length) as PlayShaders);
+        break;
       default:
         break;
     }
@@ -515,22 +551,37 @@ export function Slideshow({
      it is on the client so its two Later stubs (Auto-play, More > Download as PDF) hide and show
      with the editor's rows. The Options menu is built only when opened, so no server markup reads it. */
   const [advancedTools, setAdvancedTools] = useState(false);
+  /* View > Play shaders (docs/FEATURES.md 5.6): read once on the client, written on a pick, so
+     the editor's View row reads the same record on its next open */
+  const [playShaders, setPlayShaders] = useState<PlayShaders>('show');
   useMountEffect(() => {
     try {
-      setAdvancedTools(
-        readStoredSettings(window.localStorage.getItem(SETTINGS_STORAGE)).advancedTools === true,
-      );
+      const stored = readStoredSettings(window.localStorage.getItem(SETTINGS_STORAGE));
+      setAdvancedTools(stored.advancedTools === true);
+      if (isPlayShaders(stored.playShaders)) setPlayShaders(stored.playShaders);
     } catch {
       // private mode or storage refused: the default view
     }
   });
+  const pickPlayShaders = (value: PlayShaders) => {
+    setPlayShaders(value);
+    try {
+      const stored = readStoredSettings(window.localStorage.getItem(SETTINGS_STORAGE));
+      window.localStorage.setItem(
+        SETTINGS_STORAGE,
+        writeStoredSettings({ ...stored, playShaders: value }),
+      );
+    } catch {
+      // private mode: the pick holds for the show
+    }
+  };
   const context: MenuContext = useMemo(
     () => ({
       ...DEFAULT_MENU_CONTEXT,
       platform,
-      settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools },
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools, playShaders },
     }),
-    [platform, advancedTools],
+    [platform, advancedTools, playShaders],
   );
 
   const classes = ['ts-slideshow'];

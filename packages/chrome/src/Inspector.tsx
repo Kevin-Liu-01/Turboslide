@@ -25,7 +25,6 @@ import { DitherSection } from './inspector/dither';
 import type { DitherWorkerLike } from './inspector/dither';
 import type { ArraySpec, ControlSpec, Generated } from './inspector/generate';
 import { blockControls, slideControls } from './inspector/generate';
-import { MaterialSection } from './inspector/material';
 import type { ControlContext } from './inspector/props';
 import {
   BLOCK_ICONS,
@@ -94,7 +93,11 @@ export type InspectorProps = {
   className?: string;
 };
 
-/** The material block fields the Material section edits (blocks/material.ts MaterialRecipe). */
+/**
+ * The material block fields the Format options Shader section edits (blocks/material.ts
+ * MaterialRecipe; the features round, ship two, docs/FEATURES.md 5.3): round one's Material
+ * section left this panel with the round, so the Block section keeps the rest alone.
+ */
 const MATERIAL_RECIPE_PATHS = new Set([
   '/materialId',
   '/preset',
@@ -406,7 +409,7 @@ export function Inspector({
     (spec) => sectionOfSlideControl(spec) === 'asset',
   );
   const blockGenerated = selected ? blockControls(selected, { freeform }) : undefined;
-  /* a material block's recipe fields belong to the Material section; the Block section keeps the rest */
+  /* a material block's recipe fields belong to the Shader section of Format options (5.3); the Block section keeps the rest */
   if (blockGenerated !== undefined && selected?.type === 'material') {
     blockGenerated.controls = blockGenerated.controls.filter(
       (spec) => !MATERIAL_RECIPE_PATHS.has(spec.path),
@@ -451,16 +454,7 @@ export function Inspector({
     (asset) =>
       asset.treatment?.kind === 'two-tone' || asset.role === 'opener' || asset.role === 'mood',
   );
-  /* the Material section's target: a selected material block, or a picture whose asset is a material */
-  const materialBlock = selected?.type === 'material' ? selected : undefined;
-  const pictureAsset = 'picture' in slide ? deck.assets[slide.picture.asset] : undefined;
   const plateSide = 'plate' in slide ? slide.plate.side : undefined;
-  const materialPicture =
-    materialBlock === undefined &&
-    pictureAsset?.source.kind === 'material' &&
-    plateSide !== undefined
-      ? { asset: pictureAsset, plateSide }
-      : undefined;
   const intakeRole =
     slide.kind === 'mood' ? 'mood' : slide.kind === 'opener' ? 'opener' : 'capture';
 
@@ -708,38 +702,6 @@ export function Inspector({
             ) : null}
           </Section>
         )}
-
-        {materialBlock !== undefined || materialPicture !== undefined ? (
-          <Section
-            id="material"
-            title={
-              materialBlock !== undefined ? `Material · ${materialBlock.id}` : 'Material · picture'
-            }
-            open={isOpen('material')}
-            onToggle={() => toggle('material')}
-          >
-            <MaterialSection
-              target={
-                materialBlock !== undefined
-                  ? { kind: 'block', slideId: slide.id, block: materialBlock }
-                  : {
-                      kind: 'picture',
-                      slideId: slide.id,
-                      asset: (materialPicture as { asset: (typeof assets)[number] }).asset,
-                      plateSide: (
-                        materialPicture as {
-                          plateSide: 'lower-left' | 'lower-right' | 'upper-left';
-                        }
-                      ).plateSide,
-                    }
-              }
-              revision={revision}
-              dispatch={dispatch}
-              busy={busy}
-              onNotice={onNotice}
-            />
-          </Section>
-        ) : null}
 
         <Section
           id="asset"

@@ -2070,16 +2070,16 @@ try {
     await settled(page);
     addKind('an icon (Insert > Icon)', obj, how);
   }
-  // a material
+  // a shader (the features round, ship two, docs/FEATURES.md 5.4: Insert > Shader opens the gallery)
   {
     const before = (await objectsOf(page, TITLE_SLIDE)).map((o) => o.id);
-    let how = 'menu Insert > Material';
+    let how = 'menu Insert > Shader';
     let obj = null;
     try {
       await openMenu(page, 'insert');
-      await clickRow(page, 'insert.material');
-      await page.locator('[data-control="dialog.insertMaterial"]').waitFor({ timeout: 8000 });
-      const pick = page.locator('[data-control^="dialog.insertMaterial.pick."]').first();
+      await clickRow(page, 'insert.shader');
+      await page.locator('[data-control="dialog.shader"]').waitFor({ timeout: 8000 });
+      const pick = page.locator('[data-control^="dialog.shader.tile."]').first();
       if (await pick.isVisible().catch(() => false)) {
         const r = await pick.boundingBox();
         await clickAt(page, r.x + r.width / 2, r.y + r.height / 2);
@@ -2087,11 +2087,10 @@ try {
       } else {
         const text = await page.evaluate(
           () =>
-            document
-              .querySelector('[data-control="dialog.insertMaterial"]')
-              ?.textContent?.slice(0, 160) ?? '',
+            document.querySelector('[data-control="dialog.shader"]')?.textContent?.slice(0, 160) ??
+            '',
         );
-        how += ` (no material rows; dialog: "${text}")`;
+        how += ` (no shader cards; dialog: "${text}")`;
       }
       if (!obj) await closeMenus(page);
     } catch (e) {
@@ -2099,8 +2098,8 @@ try {
     }
     await clearAll(page);
     await settled(page);
-    if (obj) addKind('a material (Insert > Material)', obj, how);
-    else skip('insert a material (Insert > Material)', 'a material object', how);
+    if (obj) addKind('a shader (Insert > Shader)', obj, how);
+    else skip('insert a shader (Insert > Shader)', 'a material object', how);
   }
   // a table from the hover grid
   {

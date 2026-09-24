@@ -3547,6 +3547,13 @@
           ]
         },
         {
+          "key": "frameKey",
+          "flag": "--frame-key",
+          "type": "string",
+          "required": false,
+          "description": "The frame key of 5.5 the record carries as source.frameKey"
+        },
+        {
           "key": "baseRevision",
           "flag": "--base-revision",
           "type": "integer",
@@ -4670,6 +4677,248 @@
       "custom": [
         {
           "flag": "--dry-run"
+        }
+      ],
+      "mutates": false,
+      "milestone": "P1"
+    },
+    {
+      "action": "shader.list",
+      "usage": "turboslide shader list",
+      "command": [
+        "shader",
+        "list"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "materialId",
+          "flag": "--material-id",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "P1"
+    },
+    {
+      "action": "shader.insert",
+      "usage": "turboslide shader insert <slideId> <materialId> --preset <preset> --controls <controls> --at <at>",
+      "command": [
+        "shader",
+        "insert"
+      ],
+      "positionals": [
+        "slideId",
+        "materialId"
+      ],
+      "options": [
+        {
+          "key": "preset",
+          "flag": "--preset",
+          "type": "string",
+          "required": false,
+          "description": "A preset of the entry; its featured one when absent"
+        },
+        {
+          "key": "controls",
+          "flag": "--controls",
+          "type": "object",
+          "required": false
+        },
+        {
+          "key": "at",
+          "flag": "--at",
+          "type": "object",
+          "required": false,
+          "description": "The box in sheet px; the free rectangle when absent"
+        },
+        {
+          "key": "alt",
+          "flag": "--alt",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "shader.set",
+      "usage": "turboslide shader set <slideId> <blockId> <path> <value>",
+      "command": [
+        "shader",
+        "set"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId",
+        "path",
+        "value"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "shader.frame",
+      "usage": "turboslide shader frame <slideId> <blockId> --frame-key <frameKey> < frame.png",
+      "command": [
+        "shader",
+        "frame"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId"
+      ],
+      "options": [
+        {
+          "key": "frameKey",
+          "flag": "--frame-key",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "bytes",
+          "flag": "--bytes",
+          "type": "string",
+          "required": false,
+          "description": "The PNG as base64"
+        },
+        {
+          "key": "upload",
+          "flag": "--upload",
+          "type": "string",
+          "required": false,
+          "description": "A presigned upload’s key instead of bytes (a frame over the body cap)"
+        },
+        {
+          "key": "renderer",
+          "flag": "--renderer",
+          "type": "string",
+          "required": false,
+          "description": "The WebGL renderer string of the client"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "shader.capture",
+      "usage": "turboslide shader capture <slideId> <blockId>",
+      "command": [
+        "shader",
+        "capture"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId"
+      ],
+      "options": [
+        {
+          "key": "backend",
+          "flag": "--backend",
+          "type": "\"angle-metal\" | \"swiftshader\"",
+          "required": false,
+          "enum": [
+            "angle-metal",
+            "swiftshader"
+          ]
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "shader.render",
+      "usage": "turboslide shader render <materialId> --preset <preset> --time <timeMs> --out <file>",
+      "command": [
+        "shader",
+        "render"
+      ],
+      "positionals": [
+        "materialId"
+      ],
+      "options": [
+        {
+          "key": "preset",
+          "flag": "--preset",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "uniforms",
+          "flag": "--uniforms",
+          "type": "record",
+          "required": false
+        },
+        {
+          "key": "controls",
+          "flag": "--controls",
+          "type": "object",
+          "required": false
+        },
+        {
+          "key": "size",
+          "flag": "--size",
+          "type": "[integer, integer]",
+          "required": false
+        },
+        {
+          "key": "timeMs",
+          "flag": "--time",
+          "type": "number",
+          "required": false
+        },
+        {
+          "key": "backend",
+          "flag": "--backend",
+          "type": "\"angle-metal\" | \"swiftshader\"",
+          "required": false,
+          "enum": [
+            "angle-metal",
+            "swiftshader"
+          ]
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--out",
+          "template": "<file>"
         }
       ],
       "mutates": false,

@@ -28,6 +28,8 @@ export type FormatSectionId =
   | 'adjustments'
   /** round three (gslides-parity SPEC-3 10.7): the deck's two tone screen over a picture */
   | 'dither'
+  /** the features round, ship two (docs/FEATURES.md 5.3): a shader block's one home */
+  | 'shader'
   | 'shadow'
   | 'table'
   | 'chart'
@@ -101,6 +103,14 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     doc: 'The deck’s two tone screen over the picture, kept live',
     advanced: true,
   },
+  /* the features round, ship two (docs/FEATURES.md 5.3, 5.10): the Shader section, a P0 section in
+     the default view; a parked control inside it is hidden through parked-controls.ts */
+  {
+    id: 'shader',
+    title: 'Shader',
+    icon: 'cube',
+    doc: 'The shader’s preset, your brand kit’s colours and Glyphfield’s controls',
+  },
   {
     id: 'shadow',
     title: 'Drop shadow',
@@ -165,6 +175,8 @@ export function presentFormatSections(
 export function leadingFormatSection(block: Block | undefined): FormatSectionId | null {
   if (block?.type === 'chart') return 'chart';
   if (block?.type === 'table') return 'table';
+  /* the features round, ship two (docs/FEATURES.md 5.3): a shader's controls lead its panel */
+  if (block?.type === 'material') return 'shader';
   return null;
 }
 
@@ -213,6 +225,15 @@ const PICTURE_FIELDS =
   /^(caption|caption size|crop|crop anchor|border|fit|aspect|width|asset|assets|picture|name|size|position)$/i;
 /** The round two fields the panel draws as its own sections, never as generated rows (SPEC-2 section 5). */
 const OWN_SECTION_PATHS: ReadonlySet<string> = new Set([
+  /* the features round, ship two (docs/FEATURES.md 5.3): the Shader section draws the recipe */
+  '/materialId',
+  '/uniforms',
+  '/anchor',
+  '/twoTone',
+  '/plate',
+  '/motion',
+  '/controls',
+  '/palette',
   '/pos',
   '/trim',
   '/mask',
@@ -300,7 +321,14 @@ export function formatSectionOfBlockControl(
     if (spec.kind === 'typography') return 'text';
     return 'table';
   }
-  if (block.type === 'material') return 'block';
+  if (block.type === 'material') {
+    /* the features round, ship two (docs/FEATURES.md 5.3): the recipe fields are the Shader
+       section's own; the caption is text, the height is the box, the asset is the frame */
+    if (spec.path === '/caption' || spec.path === '/captionSize') return 'text';
+    if (spec.path === '/height') return 'size';
+    if (spec.path === '/asset') return null;
+    return 'shader';
+  }
   if (LIST_TYPES.has(block.type)) {
     if (spec.kind === 'typography') return 'text';
     if (spec.kind === 'color' && !isItemControl(spec)) return 'colour';

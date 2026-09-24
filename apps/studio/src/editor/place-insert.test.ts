@@ -166,6 +166,18 @@ describe('placeInsert (docs/PRODUCT.md section 2 rank 1)', () => {
     expect(placed.pos.z).toBeUndefined();
   });
 
+  it('lands a shader under the head band, free of the title, at 480 by 272 (shaders.insert.selected-free-rectangle)', () => {
+    /* the features round, ship two (docs/FEATURES.md 5.4; build/b5/integrator-hunks.md R5) */
+    const slide = titleAndBody([], { title: 'A title', body: '' });
+    const placed = placeInsert(slide, 'material', [480, 272]);
+    expect(placed.how).toBe('free');
+    expect(placed.pos.w).toBe(480);
+    expect(placed.pos.h).toBe(272);
+    expect(placed.pos.y).toBeGreaterThanOrEqual(CY + 48 + INSERT_GAP);
+    expect(placed.pos.z).toBeUndefined();
+    expect(INSERT_MIN_SIZE.material).toEqual([240, 135]);
+  });
+
   it('lands a table on a Blank slide at the top of the content box at 960 by 320 (tables.insert.grid keeps its size)', () => {
     const placed = placeInsert(canvas([]), 'table', [960, 320]);
     expect(placed.pos).toEqual({ x: 320, y: CY, w: 960, h: 320 });
@@ -278,9 +290,11 @@ describe('placeInsert (docs/PRODUCT.md section 2 rank 1)', () => {
 
 describe('wantsPlacement', () => {
   const pos = { x: 320, y: 180, w: 960, h: 540 };
-  it('is the chrome insert of a table or a chart with a box on top of the stack', () => {
+  it('is the chrome insert of a table, a chart or a shader with a box on top of the stack', () => {
     expect(wantsPlacement({ slot: 'main', block: { type: 'chart', pos } })).toBe(true);
     expect(wantsPlacement({ slot: 'main', block: { type: 'table', pos } })).toBe(true);
+    /* the features round, ship two (docs/FEATURES.md 5.4): the gallery's insert */
+    expect(wantsPlacement({ slot: 'main', block: { type: 'material', pos } })).toBe(true);
   });
   it('leaves an insert with its own place, stack position or kind alone', () => {
     expect(wantsPlacement({ slot: 'main', block: { type: 'chart', pos: { ...pos, z: 4 } } })).toBe(

@@ -53,7 +53,12 @@ function makePng(width: number, height: number, shade = 0x80): Uint8Array {
   for (let y = 0; y < height; y += 1) raw[y * (width + 1)] = 0;
   const idat = new Uint8Array(deflateSync(raw));
   const signature = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-  return Buffer.concat([signature, chunk('IHDR', ihdr), chunk('IDAT', idat), chunk('IEND', new Uint8Array())]);
+  return Buffer.concat([
+    signature,
+    chunk('IHDR', ihdr),
+    chunk('IDAT', idat),
+    chunk('IEND', new Uint8Array()),
+  ]);
 }
 
 const frame: Asset = {
@@ -150,7 +155,12 @@ afterAll(() => {
 
 describe('the shaders of a slide (scene/shaders.ts)', () => {
   test('lists every material block, composites’ cells included, in document order', () => {
-    expect(materialBlocksOf(slide).map((block) => block.id)).toEqual(['fresh', 'bare', 'old', 'inner']);
+    expect(materialBlocksOf(slide).map((block) => block.id)).toEqual([
+      'fresh',
+      'bare',
+      'old',
+      'inner',
+    ]);
   });
 
   test('reads the recipe, the frame record, the file on disk and the two readings', () => {
@@ -160,7 +170,11 @@ describe('the shaders of a slide (scene/shaders.ts)', () => {
       mkdirSync(assets, { recursive: true });
       writeFileSync(join(assets, 'frame-0123456789abcdef@2x.png'), makePng(3200, 1800));
       writeFileSync(join(assets, 'liquid-metal@2x.png'), makePng(3200, 1800));
-      const shaders = sceneShadersOf(slide, { assets: { [frame.id]: frame, [legacy.id]: legacy } }, deck);
+      const shaders = sceneShadersOf(
+        slide,
+        { assets: { [frame.id]: frame, [legacy.id]: legacy } },
+        deck,
+      );
       expect(shaders.map((s) => s.blockId)).toEqual(['fresh', 'bare', 'old', 'inner']);
       const [fresh, bare, old, inner] = shaders;
       expect(fresh).toMatchObject({
@@ -172,7 +186,11 @@ describe('the shaders of a slide (scene/shaders.ts)', () => {
         stale: false,
         alt: 'The liquid metal shader',
       });
-      expect(bare).toMatchObject({ recipe: { materialId: 'paper:gem-smoke' }, missing: true, stale: false });
+      expect(bare).toMatchObject({
+        recipe: { materialId: 'paper:gem-smoke' },
+        missing: true,
+        stale: false,
+      });
       expect(bare?.assetId).toBeUndefined();
       expect(bare?.file).toBeUndefined();
       expect(old).toMatchObject({ assetId: legacy.id, missing: false, stale: true });
@@ -223,8 +241,22 @@ describe('the frame picture in a PowerPoint (pptx/build.ts addShaderFrames)', ()
           stale: false,
           box: [900, 300, 480, 272],
         },
-        { blockId: 'bare', recipe: { materialId: 'paper:gem-smoke' }, alt: '', missing: true, stale: false, box: [100, 100, 480, 272] },
-        { blockId: 'unmeasured', recipe: { materialId: 'paper:gem-smoke' }, alt: '', file, missing: false, stale: false },
+        {
+          blockId: 'bare',
+          recipe: { materialId: 'paper:gem-smoke' },
+          alt: '',
+          missing: true,
+          stale: false,
+          box: [100, 100, 480, 272],
+        },
+        {
+          blockId: 'unmeasured',
+          recipe: { materialId: 'paper:gem-smoke' },
+          alt: '',
+          file,
+          missing: false,
+          stale: false,
+        },
       ],
     } as unknown as ShaderScene;
     const placed = addShaderFrames(slideOut, scene, 'ts:s1', residual);
@@ -239,7 +271,9 @@ describe('the frame picture in a PowerPoint (pptx/build.ts addShaderFrames)', ()
     const xml = await readPart(zip, part);
     expect(xml).toContain('name="ts:s1#fresh"');
     expect(xml).not.toContain('ts:s1#bare');
-    expect(xml).toContain('descr="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;anchor&quot;:5500}"');
+    expect(xml).toContain(
+      'descr="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;anchor&quot;:5500}"',
+    );
     // the box in EMU: the sheet's px per inch, 914,400 EMU per inch
     const emu = (px: number): number => Math.round((px / PX_PER_IN) * 914400);
     expect(xml).toContain(`<a:off x="${emu(900)}" y="${emu(300)}"/>`);

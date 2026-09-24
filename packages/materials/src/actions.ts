@@ -69,7 +69,9 @@ import type { Position } from '@turboslide/schema/position';
 import { ConflictError } from '@turboslide/schema/errors';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
+import { isBlobExistsError } from '@turboslide/store/blob-store';
 import { assetDigest } from '@turboslide/store/file-store';
+import { AssetExistsError } from '@turboslide/store/store';
 import type { DeckStore } from '@turboslide/store/store';
 
 import {
@@ -1061,7 +1063,16 @@ export async function commitFrame(
     );
   const assetId = frameAssetId(frameKey);
   const relative = `assets/${assetId}@2x.png`;
-  const put = await deps.store.putAsset(relative, png, 'image/png');
+  let put: { relative: string; existed: boolean };
+  try {
+    put = await deps.store.putAsset(relative, png, 'image/png');
+  } catch (error) {
+    /* two clients rendering one key with different pixels (a renderer's rounding) resolve to one
+       asset: the first writer's file stands and this write records it and points the block at it
+       (docs/FEATURES.md 5.5: "a BlobExistsError on the put is success"; build/b7.md R2) */
+    if (!(error instanceof AssetExistsError) && !isBlobExistsError(error)) throw error;
+    put = { relative, existed: true };
+  }
   const asset = frameAssetOf(
     entry,
     block,

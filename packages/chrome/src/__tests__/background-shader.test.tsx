@@ -111,7 +111,8 @@ function canvasDocument(covering: PictureBlock | null, asset?: Asset): DeckDocum
       ],
     },
   };
-  const assets = asset === undefined ? base.deck.assets : { ...base.deck.assets, [asset.id]: asset };
+  const assets =
+    asset === undefined ? base.deck.assets : { ...base.deck.assets, [asset.id]: asset };
   return {
     deck: { ...base.deck, assets },
     slides: { ...base.slides, cv: canvas as never },

@@ -81,7 +81,6 @@ export const BLOCK_CSS = `
 .ts-sheet .material { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--plate); }
 .ts-sheet .material > img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .ts-sheet .material > canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.ts-sheet .material-label { position: absolute; left: 14px; bottom: 12px; font-size: 15px; line-height: 1.45; letter-spacing: 0.01em; color: var(--titanium); }
 .ts-sheet .pair.gap-40 { gap: 40px; } /* s76:5 */
 .ts-sheet .pair.cap-15 figcaption { font-size: 15px; } /* s63:5 */
 /* tiles: the reference and direction grids (s13:3-7, s69:3-7) and the engine grid (s72:6-10) */

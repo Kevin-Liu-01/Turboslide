@@ -217,10 +217,12 @@ import {
 import { isPictureKind } from '@turboslide/viewer/model';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { applyTheme, readTheme } from '@turboslide/viewer/theme';
+import { createShaderFrameCapturer } from '@turboslide/viewer/shader-frame';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import {
   SERVER_SIDE_WINDOW_ACTIONS_F1,
+  SERVER_SIDE_WINDOW_ACTIONS_F2,
   SERVER_SIDE_WINDOW_ACTIONS_GS3,
   SERVER_SIDE_WINDOW_ACTIONS_P1,
   runDeckAction,
@@ -238,7 +240,7 @@ import {
   startExport,
   syncExport,
 } from '../server/download';
-import type { ExportRunInput, SyncExportAnswer } from '../server/download';
+import type { ExportReportRowEntry, ExportRunInput, SyncExportAnswer } from '../server/download';
 import { lintSlides } from '../server/lint';
 import { renderSlideImages } from '../server/render';
 import { warmThumbnails } from '../server/warm';
@@ -1008,7 +1010,7 @@ function downloadUrlOf(url: string): string {
 async function runSyncExport(
   deckId: string,
   input: ExportRunInput,
-  onLine?: (line: string) => void,
+  onLine?: (line: string | undefined, rows?: ReadonlyArray<ExportReportRowEntry>) => void,
 ): Promise<Extract<ArtifactRun, { kind: 'export' }>> {
   /* the per slide progress beside the call (b7.md FR4; the row export.download.progress-per-slide):
      the page mints the progress record's id, the server writes "slide k of n" under it while the
@@ -1028,7 +1030,10 @@ async function runSyncExport(
       try {
         const answer = await pollExport({ jobId: progressJobId });
         if (settled) break;
-        if (answer.line) onLine(answer.line);
+        /* the report rows of the export's wait for a pending shader frame ride the same poll
+           (the features round, ship two, docs/FEATURES.md 5.5; build/b7.md R1) */
+        const rows = answer.rows !== undefined && answer.rows.length > 0 ? answer.rows : undefined;
+        if (answer.line || rows !== undefined) onLine(answer.line || undefined, rows);
       } catch {
         // a poll that fails is skipped; the export goes on
       }
@@ -2196,6 +2201,9 @@ export function createEditorController(init: {
       revisionOf.set(entry.id, result.document.deck.revision);
     }
     setDocument(result.document, changedBy(mutations));
+    /* a draft's own commit schedules its shader stills too; the frame write waits for the draft
+       chain, so the deck exists by the time it goes up (docs/FEATURES.md 5.5) */
+    shaderFrames.afterCommit(mutations);
     publish({ pending: snapshot.pending + 1 });
     draftInFlight = true;
     const run = draftChain.then(async () => {
@@ -2324,6 +2332,9 @@ export function createEditorController(init: {
     }
     setDocument(applied.document, changedBy(mutations));
     stopFollowing();
+    /* this tab's own commit, an undo or a redo included: the shader blocks it touched capture
+       their still after the rest (docs/FEATURES.md 5.5); an entry the room brings never does */
+    shaderFrames.afterCommit(mutations);
     return applied.settled.then(async (outcome) => {
       if ('rejected' in outcome) {
         throw new ConflictError(
@@ -3182,7 +3193,15 @@ export function createEditorController(init: {
         if (input.format !== 'pdf' && exportBatchSize > 0 && ids.length > exportBatchSize) {
           const merged = await runBatchedExport(deckId, input, (progress) =>
             publish({
-              artifact: { progress: { label: batchedProgressLabel(progress) }, run: null },
+              artifact: {
+                progress: {
+                  label: batchedProgressLabel(progress),
+                  ...(progress.rows !== undefined && progress.rows.length > 0
+                    ? { rows: progress.rows }
+                    : {}),
+                },
+                run: null,
+              },
             }),
           );
           const run: ArtifactRun = {
@@ -3202,9 +3221,16 @@ export function createEditorController(init: {
           if (first?.url !== undefined) await triggerDownload(downloadUrlOf(first.url));
           return run.report;
         }
-        const run = await runSyncExport(deckId, input, (line) =>
+        const run = await runSyncExport(deckId, input, (line, rows) =>
           publish({
-            artifact: { progress: { label: `Exporting ${label}`, line }, run: null },
+            artifact: {
+              progress: {
+                label: `Exporting ${label}`,
+                ...(line !== undefined ? { line } : {}),
+                ...(rows !== undefined ? { rows } : {}),
+              },
+              run: null,
+            },
           }),
         );
         publish({ artifact: { progress: null, run } });
@@ -3236,6 +3262,7 @@ export function createEditorController(init: {
             progress: {
               label: `${poll.status === 'queued' ? 'Queued' : 'Exporting'} ${label}`,
               ...(poll.line !== undefined ? { line: poll.line } : {}),
+              ...(poll.rows !== undefined && poll.rows.length > 0 ? { rows: poll.rows } : {}),
             },
             run: null,
           },
@@ -3690,6 +3717,12 @@ export function createEditorController(init: {
      document, finds the asset it names (the fix round; VERIFICATION.md pass 1 F2, b6.md R13) */
   for (const id of SERVER_SIDE_WINDOW_ACTIONS_F1)
     serverSide(id, id === 'logo.insert' ? { announce: true } : {});
+  /* the shader library's ids of the features round, ship two (docs/FEATURES.md 5.8; build/b7.md,
+     build/b5.md R8): the catalog, the insert, the set, the frame write, the hosted capture and the
+     render run on the server; the ones that write this deck announce as logo.insert does, so the
+     answer waits until the write has come back and the tab holds the frame it names */
+  for (const id of SERVER_SIDE_WINDOW_ACTIONS_F2)
+    serverSide(id, ACTIONS[id].mutates ? { announce: true } : {});
   /* Forget this browser (SPEC-3 7.4; VERIFICATION-3 finding 12): the server mints the new
      anonymous principal and its cookie (the response's Set-Cookie replaces the old one), then
      this page clears the localStorage and IndexedDB mirrors together and reloads as the new
@@ -4226,6 +4259,69 @@ export function createEditorController(init: {
     state: stateOf,
   });
 
+  /**
+   * The one capturer of the editor's shader frames (docs/FEATURES.md 5.5; build/b5.md R8): a commit
+   * of this tab that touches a shader block (a recipe field, the box, a kit colour) schedules its
+   * still 800 ms after the last change through `afterCommit` below, never from the document
+   * observer, so a follower draws the frame the room brings. The write is a system write: behind
+   * the seller's pending commits (`idle`), the acknowledged revision as its base, no history entry,
+   * and the tab reloads past the short wait for the stream once the answer names its revision
+   * (`settleOwnWrite`, the asset writes' rule). A 409 is the capturer's to re read; a browser
+   * without WebGL asks the hosted `shader.capture`.
+   */
+  const isConflictAnswer = (error: unknown): boolean => {
+    if (error instanceof ConflictError) return true;
+    if (typeof error !== 'object' || error === null) return false;
+    const { name, status } = error as { name?: unknown; status?: unknown };
+    return name === 'ConflictError' || status === 409;
+  };
+  const shaderFrames = createShaderFrameCapturer({
+    document: () => latest().document,
+    write: async (input) => {
+      await idle();
+      const before = latest().document.deck.revision;
+      try {
+        const answer = await runDeckActionDetailed({
+          deckId,
+          action: 'shader.frame',
+          input: { ...input, baseRevision: reportedRevision() },
+          author,
+        });
+        if (answer.created) await adoptCreatedDeck();
+        const revision = (answer.output as { revision?: unknown } | null)?.revision;
+        await settleOwnWrite(
+          revision,
+          () =>
+            latest().document.deck.revision > before ||
+            (typeof revision === 'number' && latest().document.deck.revision >= revision),
+        );
+        return {
+          ok: true,
+          revision: typeof revision === 'number' ? revision : latest().serverRevision,
+        };
+      } catch (error) {
+        if (isConflictAnswer(error)) return { ok: false, conflict: true };
+        return { ok: false, conflict: false, error };
+      }
+    },
+    captureHosted: async (slideId, blockId) => {
+      await idle();
+      const answer = await runDeckActionDetailed({
+        deckId,
+        action: 'shader.capture',
+        input: { slideId, blockId, baseRevision: reportedRevision() },
+        author,
+      });
+      if (answer.created) await adoptCreatedDeck();
+      const revision = (answer.output as { revision?: unknown } | null)?.revision;
+      await settleOwnWrite(
+        revision,
+        () => typeof revision === 'number' && latest().document.deck.revision >= revision,
+      );
+    },
+    onError: (error) => console.warn('shader frame', error),
+  });
+
   const controller: EditorController = {
     subscribe(listener) {
       listeners.add(listener);
@@ -4245,10 +4341,14 @@ export function createEditorController(init: {
           init.payload.room?.seq ?? 0,
           init.payload.room?.tier ?? 'memory',
         );
+        /* a deck opened with stale frames catches up one block at a time (docs/FEATURES.md 5.5;
+           build/b5.md R8), by an editor who can write it */
+        if (hasCapability('write')) shaderFrames.scheduleStale();
       }
     },
     stop() {
       alive = false;
+      shaderFrames.dispose();
       const client = room;
       room = null;
       if (client !== null) void client.stop();

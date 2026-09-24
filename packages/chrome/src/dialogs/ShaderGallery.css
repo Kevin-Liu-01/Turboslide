@@ -1,0 +1,179 @@
+/* The Shader gallery (dialogs/ShaderGallery.tsx; docs/FEATURES.md 5.4): the sentence under the
+   title, the search field, the category chips, then a grid of cards, each a 320 by 200 still in a
+   hairline frame with the name under it and the entry's presets as a row of 48 by 30 tiles. Two
+   columns fill the 720 px card's 672 px body at 1440 and at 1280 (2 by 320 plus a 32 px gap); the
+   Background dialog embeds the same grid compact, two fluid columns in its 392 px body. Inter,
+   hairlines in --pt-hair, the pointed or selected card in ink, radius 0, tokens only, nothing
+   decorative (docs/brand.md section 8: a dialog never draws a dither or a shader of its own; the
+   stills are content the seller is choosing). */
+.ts-shader {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.ts-shader-sentence {
+  margin: -6px 0 0;
+  color: var(--pt-ink-2);
+}
+
+.ts-shader-search {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.ts-shader-chips {
+  flex-wrap: wrap;
+}
+
+/* the cards scroll under the field and the chips */
+.ts-shader-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 320px);
+  gap: 16px 32px;
+  max-height: min(560px, calc(100vh - 300px));
+  min-height: 120px;
+  overflow-y: auto;
+  padding: 2px 2px 4px;
+  outline: none;
+}
+
+.ts-shader.is-compact .ts-shader-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  max-height: 336px;
+}
+
+/* one card is one option: the still, the name and the preset tiles in a hairline frame; the click
+   anywhere on it inserts the featured preset and a preset tile inserts its own; the ring is the
+   active state the arrows move and Enter inserts */
+.ts-shader-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  border: 1px solid var(--pt-hair);
+  background: none;
+  color: var(--pt-ink);
+  font: 13px/1.3 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+
+.ts-shader-card:hover {
+  border-color: var(--pt-edge);
+}
+
+.ts-shader-card.is-active,
+.ts-shader-card:focus-visible {
+  border-color: var(--pt-ink);
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+/* the still's frame: 320 by 200 in the dialog (16:10), fluid at the same aspect when compact */
+.ts-shader-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: var(--pt-plate);
+  overflow: hidden;
+}
+
+.ts-shader-still {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* no still yet (B5's build has not written the file): the plate ground and no text (5.5) */
+.ts-shader-still.is-plate {
+  background: var(--pt-plate);
+}
+
+/* the P1 hover live mount lays its canvas over the still; hidden until a mount is live */
+.ts-shader-hover {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+
+.ts-shader-hover.is-live {
+  display: block;
+}
+
+.ts-shader-hover canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ts-shader-name {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 8px 7px;
+  border-top: 1px solid var(--pt-hair-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* the presets under the name: small tiles, the featured one ringed */
+.ts-shader-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 8px 8px;
+}
+
+.ts-shader-preset {
+  appearance: none;
+  box-sizing: border-box;
+  width: 48px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-plate);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.ts-shader-preset:hover {
+  border-color: var(--pt-edge);
+}
+
+.ts-shader-preset.is-featured {
+  border-color: var(--pt-ink);
+}
+
+.ts-shader-preset:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-shader-preset img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ts-shader-preset-plate {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ts-shader-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--pt-ink-2);
+}

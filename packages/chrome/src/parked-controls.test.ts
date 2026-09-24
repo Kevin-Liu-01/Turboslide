@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { workedDocument } from '@turboslide/schema/fixtures';
 
 import { LogoDialog } from './dialogs/Logo';
+import { ShaderGalleryDialog } from './dialogs/ShaderGallery';
 import { DEFAULT_SETTINGS, buildMenuContext } from './editor-shell';
 import type { EditorShellInput, ShellSettings } from './editor-shell';
 import { EditorShellContext } from './editor-shell-context';
@@ -16,9 +17,9 @@ import { hideTooltip } from './Tooltip';
 // The parked controls (docs/FEATURES.md 7.2, 7.3): an id in the set is not drawn by the surfaces
 // that read the module; the same id is drawn when the Advanced tools setting is on; an empty set
 // draws everything. The pure rule is pinned over its own set, the committed set is pinned to the
-// parked list of the ship (ship-f1afe1e.json), and the Logo dialog is the surface this lane owns; Overlay.tsx (the
-// handles and the bar, B3) and the Shader gallery and section (B5, ship two) pin their reads in
-// their own lanes' tests, as 7.3 lists them.
+// parked list of the ship (ship-f1afe1e.json), and the Logo dialog and the Shader gallery (ship
+// two) are the surfaces this lane owns; Overlay.tsx (the handles and the bar, B3) and the Shader
+// section (B5, ship two) pin their reads in their own lanes' tests, as 7.3 lists them.
 
 afterEach(() => {
   hideTooltip();
@@ -83,17 +84,24 @@ describe('isParkedIn', () => {
     expect(real.isParked('bar.chart.editData', DEFAULT_SETTINGS)).toBe(false);
     expect(real.isParked('title.presence.goTo', DEFAULT_SETTINGS)).toBe(false);
     /* the mocked set the dialog tests read */
-    expect(PARKED_CONTROLS.size).toBe(2);
+    expect(PARKED_CONTROLS.size).toBe(4);
     expect(isParked('dialog.logo.everySlide', DEFAULT_SETTINGS)).toBe(true);
+    expect(isParked('dialog.shader.category.metal', DEFAULT_SETTINGS)).toBe(true);
   });
 });
 
-/* the Logo dialog's reads: the module is replaced with a set that parks the check and the brand
-   group, and the dialog is rendered with the switch off and on. The factory is hoisted, so the
+/* the Logo dialog's and the Shader gallery's reads: the module is replaced with a set that parks
+   the check and the brand group of the Logo dialog and the Metal chip and the hover mount of the
+   gallery, and each dialog is rendered with the switch off and on. The factory is hoisted, so the
    set is spelled inside it. */
 vi.mock('./parked-controls', async (importOriginal) => {
   const original = await importOriginal<typeof import('./parked-controls')>();
-  const set = new Set<string>(['dialog.logo.everySlide', 'dialog.logo.group.brand']);
+  const set = new Set<string>([
+    'dialog.logo.everySlide',
+    'dialog.logo.group.brand',
+    'dialog.shader.category.metal',
+    'dialog.shader.hover',
+  ]);
   return {
     ...original,
     PARKED_CONTROLS: set,
@@ -193,5 +201,37 @@ describe('the Logo dialog reads the parked set', () => {
   it.todo(
     'Overlay.tsx hides a parked handle and the bar (B3 pins it in overlay-component.test.tsx)',
   );
-  it.todo('the Shader gallery and the Shader section hide a parked control (B5, ship two)');
+  it.todo('the Shader section hides a parked formatOptions.shader.* control (B5, ship two)');
+});
+
+describe('the Shader gallery reads the parked set (ship two)', () => {
+  it('draws neither a parked chip nor the hover host while the switch is off', () => {
+    render(
+      createElement(
+        EditorShellContext,
+        { value: host({ ...DEFAULT_SETTINGS, advancedTools: false }) },
+        createElement(ShaderGalleryDialog, {}),
+      ),
+    );
+    expect(control('dialog.shader')).not.toBeNull();
+    expect(control('dialog.shader.search')).not.toBeNull();
+    expect(control('dialog.shader.category.fluid')).not.toBeNull();
+    expect(control('dialog.shader.category.metal')).toBeNull();
+    /* a parked hover mount leaves no host under any card */
+    expect(document.querySelectorAll('.ts-shader-hover')).toHaveLength(0);
+    /* an id the set does not name is drawn */
+    expect(control('dialog.shader.tile.paper:liquid-metal')).not.toBeNull();
+  });
+
+  it('draws both when Advanced tools is on', () => {
+    render(
+      createElement(
+        EditorShellContext,
+        { value: host({ ...DEFAULT_SETTINGS, advancedTools: true }) },
+        createElement(ShaderGalleryDialog, {}),
+      ),
+    );
+    expect(control('dialog.shader.category.metal')).not.toBeNull();
+    expect(document.querySelectorAll('.ts-shader-hover').length).toBeGreaterThan(0);
+  });
 });

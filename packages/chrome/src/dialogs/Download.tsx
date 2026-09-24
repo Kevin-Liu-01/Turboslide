@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { ExportMode } from '@turboslide/schema/export';
 import type { DeckDocument } from '@turboslide/schema/deck';
@@ -179,6 +179,28 @@ export function downloadFileNames(
   return [downloadFileName(title, deckId, format, { ...(mode === undefined ? {} : { mode }) })];
 }
 
+/** One row of the report an export in flight carries (docs/FEATURES.md 5.5; build/b1.md R6). */
+export type ExportReportRow = { id: string; text: string };
+
+/**
+ * The report rows of the route's progress (`progress.rows`, optional until B7's route fills it):
+ * each with an id in the shape of a control's last segment and one sentence a seller reads.
+ */
+export function exportReportRows(progress: unknown): ExportReportRow[] {
+  if (progress === null || typeof progress !== 'object') return [];
+  const rows = (progress as { rows?: unknown }).rows;
+  if (!Array.isArray(rows)) return [];
+  return rows.filter(
+    (row): row is ExportReportRow =>
+      typeof row === 'object' &&
+      row !== null &&
+      typeof (row as ExportReportRow).id === 'string' &&
+      /^[a-z][a-z0-9-]*$/i.test((row as ExportReportRow).id) &&
+      typeof (row as ExportReportRow).text === 'string' &&
+      (row as ExportReportRow).text.trim() !== '',
+  );
+}
+
 /** True when a deck holds a table or a chart on any slide (rank 8: the Perfect mode draws both as pictures). */
 export function deckHasTableOrChart(document: DeckDocument): boolean {
   return Object.values(document.slides).some((slide) =>
@@ -327,6 +349,22 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
     lastSaid.current = progressSentenceNow;
     sayRef.current(progressSentenceNow);
   }, [progressSentenceNow]);
+
+  /* the report rows of an export in flight (the features round, ship two, docs/FEATURES.md 5.5;
+     build/b1.md R6): the route's `progress.rows` name what the export waited for ("2 shaders had
+     no frame; the export waited 8 s for them"); the dialog draws each under the progress sentence
+     and the direct path says each new row once */
+  const reportRows = useMemo(() => exportReportRows(progress), [progress]);
+  const saidRows = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!direct || state !== 'running') return;
+    for (const row of reportRows) {
+      const key = `${row.id}:${row.text}`;
+      if (saidRows.current.has(key)) continue;
+      saidRows.current.add(key);
+      sayRef.current(row.text);
+    }
+  }, [direct, reportRows, state]);
 
   if (direct) return null;
 
@@ -497,6 +535,18 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
           {progressSentence(format, progress, slides)}
         </p>
       ) : null}
+      {running || state === 'failed'
+        ? reportRows.map((row) => (
+            <p
+              key={row.id}
+              className="ts-dialog-sentence"
+              role="status"
+              data-control={`dialog.download.report.${row.id}`}
+            >
+              {row.text}
+            </p>
+          ))
+        : null}
       {error !== null ? (
         <p className="ts-dialog-error" role="alert">
           {error}

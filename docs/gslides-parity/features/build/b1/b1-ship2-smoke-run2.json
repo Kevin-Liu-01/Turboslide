@@ -1,0 +1,153 @@
+{
+  "base": "http://localhost:4411",
+  "at": "2026-09-24T15:44:09.646Z",
+  "rows": [
+    {
+      "n": 1,
+      "step": "the editor boots on /new",
+      "expected": "window.turboslide.studio and a slide",
+      "observed": "deck untitled-20260924-z5p3, slide title",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "step": "Insert opens the Shader gallery",
+      "expected": "dialog.shader within 8 s from insert.shader, or from insert.material through the shim until R1",
+      "observed": "open from menu.insert.material",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "step": "the title reads Shader",
+      "expected": "Shader",
+      "observed": "Shader",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "step": "the black and white sentence under the title",
+      "expected": "Previews are in black and white. The shader takes your brand kit’s colours on the slide",
+      "observed": "Previews are in black and white. The shader takes your brand kit’s colours on the slide",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "step": "the search field has the focus",
+      "expected": "dialog.shader.search",
+      "observed": "dialog.shader.search",
+      "ok": true
+    },
+    {
+      "n": 6,
+      "step": "17 cards in the featured order",
+      "expected": "liquid metal, gem smoke, god rays, mesh gradient, smoke ring, grain gradient first; 17 in all",
+      "observed": "17 cards: Liquid metal, Gem smoke, God rays, Mesh gradient, Smoke ring, Grain gradient; the first inserts diamond",
+      "ok": true
+    },
+    {
+      "n": 7,
+      "step": "every card has a decoded thumbnail within 2 s",
+      "expected": "17 decoded (B5’s packages/materials/previews/*.webp on the build)",
+      "observed": "17 decoded, 0 plates with no text, 5 ms after the open; 2 a row",
+      "ok": true
+    },
+    {
+      "n": 8,
+      "step": "no canvas is mounted in the dialog",
+      "expected": "0",
+      "observed": "0",
+      "ok": true
+    },
+    {
+      "n": 9,
+      "step": "the search narrows to \"metal\" in one row",
+      "expected": "one card, Liquid metal",
+      "observed": "1 (Liquid metal)",
+      "ok": true
+    },
+    {
+      "n": 10,
+      "step": "a category chip narrows the grid",
+      "expected": "six chips, All checked first; Metal narrows to the metal shaders",
+      "observed": "6 chips (dialog.shader.category.all checked); Metal narrows to 1 (Liquid metal)",
+      "ok": true
+    },
+    {
+      "n": 11,
+      "step": "hovering a card 400 ms mounts one canvas; leaving disposes it; never two at once (P1)",
+      "expected": "surface data-hover-live; 1 after the hover, 1 at 400 ms, at most 1 while moving, 1 on the second card, 0 after leaving",
+      "observed": "surface true; 1 after the hover (dialog.shader.hover.paper:liquid-metal), 1 at 400 ms, peak 1, 1 on the second card, 0 after leaving",
+      "ok": true
+    },
+    {
+      "n": 12,
+      "step": "a click on Liquid metal inserts the shader block and selects it (the placement is B5’s)",
+      "expected": "dialog closed; one material block with materialId paper:liquid-metal, preset diamond, alt \"The liquid metal shader\", motion.play show; the selection names it",
+      "observed": "closed true; block material paper:liquid-metal diamond \"The liquid metal shader\" motion {\"play\":\"show\"} pos {\"x\":560,\"y\":314,\"w\":480,\"h\":272,\"z\":3}; selection material; revision 0 -> 1",
+      "ok": true
+    },
+    {
+      "n": 13,
+      "step": "Slide > Change background opens",
+      "expected": "dialog.background",
+      "observed": "true",
+      "ok": true
+    },
+    {
+      "n": 14,
+      "step": "the Shader row with Choose and a disabled Place",
+      "expected": "dialog.background.shader; Place disabled",
+      "observed": "row true; Place disabled true",
+      "ok": true
+    },
+    {
+      "n": 15,
+      "step": "Choose opens the gallery grid inside the dialog",
+      "expected": "dialog.shader root, compact, 17 cards, no canvas",
+      "observed": "root true, compact true, 17 cards, 0 canvas",
+      "ok": true
+    },
+    {
+      "n": 16,
+      "step": "the Choose button reads the pick’s words",
+      "expected": "Liquid metal, Diamond",
+      "observed": "\"Liquid metal, Diamond\" [\"paper:liquid-metal\",\"diamond\"]",
+      "ok": true
+    },
+    {
+      "n": 17,
+      "step": "Place reads \"Placing\" with the seconds while it waits",
+      "expected": "Placing, then Placing, N s",
+      "observed": "Placing; no seconds read (the write took 818 ms)",
+      "ok": true
+    },
+    {
+      "n": 18,
+      "step": "the ground changes, or one sentence names the failure and no log text",
+      "expected": "dialog closed with a covering picture within 5 s, or dialog.background.error with one sentence",
+      "observed": "dialog closed after 818 ms; covering picture false",
+      "ok": true
+    },
+    {
+      "n": 19,
+      "step": "describe().state.settings reads the switch and the P1 play setting",
+      "expected": "advancedTools true; playShaders present once the integrator lands the MenuSetting",
+      "observed": "{\"advancedTools\":true,\"playShaders\":null}",
+      "ok": true
+    },
+    {
+      "n": 20,
+      "step": "no console or page error from this lane’s modules",
+      "expected": "none",
+      "observed": "none",
+      "ok": true
+    },
+    {
+      "n": 21,
+      "step": "the scratch deck is trashed and removed",
+      "expected": "/edit/<id> answers 404",
+      "observed": "404",
+      "ok": true
+    }
+  ]
+}

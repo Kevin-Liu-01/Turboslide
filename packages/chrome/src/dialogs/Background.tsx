@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { insertableMaterials } from './InsertMaterial';
-import type { MaterialEntry } from '@turboslide/materials/catalog';
+import {
+  SHADER_GALLERY,
+  ShaderGalleryGrid,
+  shaderFailureSentence,
+  shaderWordsOf,
+} from './ShaderGallery';
+import type { ShaderPick } from './ShaderGallery';
 import {
   DITHER_PHOTOGRAPH_VALUE,
   DITHER_TOGGLE_VALUE,
@@ -26,6 +31,7 @@ import { MATERIAL_ANCHORS } from '@turboslide/schema/blocks/material';
 import { Dialog, DialogCheck, DialogField } from '../Dialog';
 import { BACKGROUND_PICTURE_POS, insertBlockPlan, factsOf } from '../editor-shell';
 import { useEditorShell } from '../editor-shell-context';
+import type { FormatSectionId } from '../inspector/format-sections';
 import { swatchPaint } from '../inspector/palette';
 import { cn } from '../lib/cn';
 import { DIALOGS, DITHER } from '../menus/strings';
@@ -55,14 +61,25 @@ import '../inspector/dither.css';
  * 230, midtones 0.9, the deck's recorded look) on the covering picture's `dither` field, or is
  * remembered for the picture the next Choose inserts through one `slide.setBackgroundPicture`
  * call on a canvas slide; beside it the Photograph and Neutral chips switch the three numbers, the
- * selected one read by equality (0.36, never stored). A Material row: Choose lists the catalog's
- * available entries, a Dither toggle beside it, and Place runs `slide.setBackgroundMaterial` at
- * the catalog's default anchor with the same preset rule; a covering material picture shows its
- * label and preset and a Material options link. Choose and Place are one write each; Done never
- * writes a picture. The reserved upload line carries "Uploading 6.2 MB" while the route's presigned
- * upload runs (8.5). The dither write is the field as `block.set /dither` in the page, what
- * `picture.dither` runs on the window transport (10.5).
+ * selected one read by equality (0.36, never stored). A Shader row (the features round, ship two,
+ * docs/FEATURES.md 5.4 and 5.5; audit-shaders 1, 3, 13, 19): Choose opens the Shader gallery's
+ * grid inside the dialog (`ShaderGalleryGrid`, compact), a card or a preset tile picks the shader
+ * and the Choose button reads its words ("Liquid metal, Diamond"); a Dither toggle beside it; Place
+ * runs `slide.setBackgroundMaterial` at the catalog's default anchor with the same preset rule and
+ * reads "Placing" with the elapsed seconds while it waits; a failure reads as one sentence, the
+ * rejection's when it is one and 5.5's otherwise, never a log (`shaderFailureSentence`). A
+ * covering material picture shows its shader's words and a Shader options link that opens Format
+ * options at the Shader section. Choose and Place are one write each; Done never writes a
+ * picture. The reserved upload line carries "Uploading 6.2 MB" while the route's presigned upload
+ * runs (8.5). The dither write is the field as `block.set /dither` in the page, what
+ * `picture.dither` runs on the window transport (10.5). Ids: `dialog.background.shader` (Choose),
+ * `dialog.background.shader.dither`, `dialog.background.shader.place`, `dialog.background.shader.current`,
+ * `dialog.background.shader.options`; the grid's own are `dialog.shader.*`. The P1 Add to theme and
+ * Apply to all rows of the background shader (5.2 item 1) land here by B5's request.
  */
+
+/** The Shader section of Format options (5.3, B5's `inspector/shader.tsx`); the id joins `FormatSectionId` with B5's format-sections.ts change. */
+const SHADER_SECTION: FormatSectionId | 'shader' = 'shader';
 export function BackgroundDialog() {
   const shell = useEditorShell();
   const { input } = shell;
@@ -77,11 +94,15 @@ export function BackgroundDialog() {
   /* the Dither toggle and preset remembered for the picture the next Choose inserts (10.6) */
   const [rememberedOn, setRememberedOn] = useState(false);
   const [rememberedPreset, setRememberedPreset] = useState<'photograph' | 'neutral'>('photograph');
-  /* the Material row: the chosen entry and preset, its Dither toggle, the open list */
-  const [material, setMaterial] = useState<{ entry: MaterialEntry; preset?: string } | null>(null);
-  const [materialDither, setMaterialDither] = useState(false);
-  const [materialsOpen, setMaterialsOpen] = useState(false);
+  /* the Shader row (5.4): the picked entry and preset, its Dither toggle, the open grid, and the
+     seconds Place has waited (5.5: "Placing" with the elapsed seconds) */
+  const [shader, setShader] = useState<ShaderPick | null>(null);
+  const [shaderDither, setShaderDither] = useState(false);
+  const [shaderOpen, setShaderOpen] = useState(false);
   const [placing, setPlacing] = useState(false);
+  const [placingSeconds, setPlacingSeconds] = useState(0);
+  const placingTimer = useRef(0);
+  useEffect(() => () => window.clearInterval(placingTimer.current), []);
   /* the presigned upload's reserved line (SPEC-3 8.5, 9.3): the route reports the size it is sending */
   const uploading = (input as { uploadingBytes?: number }).uploadingBytes;
 
@@ -106,6 +127,12 @@ export function BackgroundDialog() {
     picture?.type === 'picture' ? picture.dither : undefined;
   const coveringMaterial =
     pictureAsset?.source.kind === 'material' ? pictureAsset.source : undefined;
+  /* the preset the capture recorded on the asset (`ext.preset`), for the words of the current row */
+  const coveringPreset =
+    pictureAsset?.ext !== undefined &&
+    typeof (pictureAsset.ext as { preset?: unknown }).preset === 'string'
+      ? (pictureAsset.ext as { preset: string }).preset
+      : undefined;
   const pictures = Object.values(input.document.deck.assets);
   const canvas = slide !== undefined && isCanvasSlide(slide);
   const ditherOn = picture !== undefined ? pictureDither !== undefined : rememberedOn;
@@ -321,17 +348,33 @@ export function BackgroundDialog() {
       .catch(fail);
   };
 
-  /** Place: `slide.setBackgroundMaterial` at the catalog's default anchor, one call (10.6, 10.8). */
+  /**
+   * Place: `slide.setBackgroundMaterial` at the catalog's default anchor, one call (10.6, 10.8).
+   * The button reads "Placing" with the seconds while the frame renders (5.5; the walk's Place ran
+   * 93 s, audit-shaders 1), and a rejection reads as one sentence, never a log.
+   */
   const place = () => {
-    if (slide === undefined || material === null || placing) return;
+    if (slide === undefined || shader === null || placing) return;
     setPlacing(true);
+    setPlacingSeconds(0);
+    setError(null);
+    const started = Date.now();
+    window.clearInterval(placingTimer.current);
+    placingTimer.current = window.setInterval(
+      () => setPlacingSeconds(Math.floor((Date.now() - started) / 1000)),
+      250,
+    );
+    const stop = () => {
+      window.clearInterval(placingTimer.current);
+      placingTimer.current = 0;
+    };
     input
       .dispatch('slide.setBackgroundMaterial', {
         slideIds: [slide.id],
-        materialId: material.entry.id,
-        ...(material.preset !== undefined ? { preset: material.preset } : {}),
+        materialId: shader.entry.id,
+        ...(shader.preset !== undefined ? { preset: shader.preset.name } : {}),
         anchor: MATERIAL_ANCHORS[1],
-        ...(materialDither
+        ...(shaderDither
           ? {
               dither:
                 rememberedPreset === 'neutral' ? DITHER_TOGGLE_VALUE : DITHER_PHOTOGRAPH_VALUE,
@@ -339,11 +382,25 @@ export function BackgroundDialog() {
           : {}),
         baseRevision: input.revision,
       })
-      .then(() => shell.closeDialog())
+      .then(() => {
+        stop();
+        shell.closeDialog();
+      })
       .catch((err: unknown) => {
+        stop();
         setPlacing(false);
-        fail(err);
+        setError(shaderFailureSentence(err));
       });
+  };
+
+  /**
+   * Shader options (5.3, audit-shaders 19): Format options at the Shader section for the covering
+   * picture, selected first through the route's `onSelectBlock` as the Dither link does.
+   */
+  const openShaderOptions = () => {
+    if (picture !== undefined) input.onSelectBlock?.(picture.id);
+    shell.openPanel('formatOptions', { section: SHADER_SECTION as FormatSectionId });
+    shell.closeDialog();
   };
 
   /**
@@ -607,33 +664,29 @@ export function BackgroundDialog() {
           </div>
         ) : null}
       </DialogField>
-      <DialogField
-        label={DITHER.material}
-        doc="A shader material as the picture behind the slide, frozen at a frame"
-      >
+      <DialogField label={SHADER_GALLERY.background} doc={SHADER_GALLERY.backgroundDoc}>
         {coveringMaterial !== undefined ? (
-          <div className="ts-dialog-row" data-control="dialog.background.material.current">
+          <div
+            className="ts-dialog-row"
+            data-control="dialog.background.shader.current"
+            data-material={coveringMaterial.materialId}
+            data-preset={coveringPreset}
+            {...tipProps({
+              name: shaderWordsOf(coveringMaterial.materialId, coveringPreset),
+              doc: SHADER_GALLERY.currentDoc,
+            })}
+          >
             <span className="ts-dialog-row-title">
-              {coveringMaterial.materialId}
-              {pictureAsset?.ext !== undefined &&
-              typeof (pictureAsset.ext as { preset?: unknown }).preset === 'string'
-                ? ` · ${(pictureAsset.ext as { preset: string }).preset}`
-                : ''}
+              {shaderWordsOf(coveringMaterial.materialId, coveringPreset)}
             </span>
             <button
               type="button"
               className="ts-dialog-btn is-text"
-              data-control="dialog.background.materialOptions"
-              onClick={() => {
-                shell.openPanel('picturesMaterials');
-                shell.closeDialog();
-              }}
-              {...tipProps({
-                name: 'Material options',
-                doc: 'Opens Pictures and materials at the Material section',
-              })}
+              data-control="dialog.background.shader.options"
+              onClick={openShaderOptions}
+              {...tipProps({ name: SHADER_GALLERY.options, doc: SHADER_GALLERY.optionsDoc })}
             >
-              Material options
+              {SHADER_GALLERY.options}
             </button>
           </div>
         ) : null}
@@ -641,77 +694,51 @@ export function BackgroundDialog() {
           <button
             type="button"
             className="ts-dialog-btn"
-            data-control="dialog.background.material.choose"
-            aria-expanded={materialsOpen}
-            onClick={() => setMaterialsOpen((open) => !open)}
-            {...tipProps({ name: DITHER.choose, doc: 'The catalog’s materials and their presets' })}
+            data-control="dialog.background.shader"
+            aria-expanded={shaderOpen}
+            data-material={shader?.entry.id}
+            data-preset={shader?.preset?.name}
+            onClick={() => setShaderOpen((open) => !open)}
+            {...tipProps({ name: SHADER_GALLERY.choose, doc: SHADER_GALLERY.chooseDoc })}
           >
-            {material === null
-              ? DITHER.choose
-              : `${material.entry.label}${material.preset !== undefined ? ` · ${material.preset}` : ''}`}
+            {shader === null
+              ? SHADER_GALLERY.choose
+              : shader.preset === undefined
+                ? shader.entry.label
+                : SHADER_GALLERY.pickWords(shader.entry.label, shader.preset.label)}
           </button>
           <DialogCheck
             label={DITHER.dither}
-            checked={materialDither}
-            control="dialog.background.material.dither"
-            onChange={setMaterialDither}
+            checked={shaderDither}
+            control="dialog.background.shader.dither"
+            onChange={setShaderDither}
             doc={DITHER.help}
           />
           <button
             type="button"
-            className={cn('ts-dialog-btn', material !== null && !placing && 'is-solid')}
-            data-control="dialog.background.material.place"
-            disabled={material === null || placing}
+            className={cn('ts-dialog-btn', shader !== null && !placing && 'is-solid')}
+            data-control="dialog.background.shader.place"
+            data-placing={placing ? 'true' : undefined}
+            disabled={shader === null || placing}
             onClick={place}
-            {...tipProps({
-              name: DITHER.place,
-              doc: 'Captures the material at its default frame and places it behind the slide',
-            })}
+            {...tipProps({ name: SHADER_GALLERY.place, doc: SHADER_GALLERY.placeDoc })}
           >
-            {placing ? 'Placing' : DITHER.place}
+            {placing ? SHADER_GALLERY.placing(placingSeconds) : SHADER_GALLERY.place}
           </button>
         </div>
-        {materialsOpen ? (
-          <div className="ts-dialog-list" role="listbox" aria-label={DITHER.material}>
-            {insertableMaterials().flatMap((entry) =>
-              (entry.presets.length > 0 ? entry.presets.map((p) => p.name) : [undefined]).map(
-                (presetName) => (
-                  <button
-                    key={`${entry.id}:${presetName ?? ''}`}
-                    type="button"
-                    role="option"
-                    aria-selected={
-                      material?.entry.id === entry.id && material.preset === presetName
-                    }
-                    className={cn(
-                      'ts-dialog-row is-button',
-                      material?.entry.id === entry.id && material.preset === presetName && 'is-on',
-                    )}
-                    data-control={`dialog.background.material.${entry.id}${presetName !== undefined ? `.${presetName}` : ''}`}
-                    onClick={() => {
-                      setMaterial(
-                        presetName === undefined ? { entry } : { entry, preset: presetName },
-                      );
-                      setMaterialsOpen(false);
-                    }}
-                    {...tipProps({
-                      name: `${entry.label}${presetName !== undefined ? ` ${presetName}` : ''}`,
-                      doc: entry.doc,
-                    })}
-                  >
-                    <span className="ts-dialog-row-title">
-                      {entry.label}
-                      {presetName !== undefined ? ` · ${presetName}` : ''}
-                    </span>
-                  </button>
-                ),
-              ),
-            )}
-          </div>
+        {shaderOpen ? (
+          <ShaderGalleryGrid
+            compact
+            control="dialog.shader"
+            onPick={(pick) => {
+              setShader(pick);
+              setShaderOpen(false);
+            }}
+          />
         ) : null}
       </DialogField>
       {error !== null ? (
-        <p className="ts-dialog-error" role="alert">
+        <p className="ts-dialog-error" role="alert" data-control="dialog.background.error">
           {error}
         </p>
       ) : null}

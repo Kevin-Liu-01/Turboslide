@@ -697,7 +697,7 @@ export async function run(t) {
 
   await t.step(
     'shaders.panel.slider-live-undo',
-    'select the shader; drag Strength with the mount at rest; release; Cmd+Z',
+    'select the shader; drag Amplitude with the mount at rest (Strength maps to no uniform of liquid metal, build/integrator.md); release; Cmd+Z',
     'the canvas changes during the drag and nothing is written; release writes one block.set; Cmd+Z restores the value and the canvas',
     async () => {
       const id = t.deck.shaderBlock;
@@ -709,17 +709,17 @@ export async function run(t) {
           PANEL_LANE,
           'no Shader section in Format options (FEATURES.md 5.3)',
         );
-      const before = await sliderOf('formatOptions.shader.strength');
+      const before = await sliderOf('formatOptions.shader.amplitude');
       if (!before || !before.range)
         return t.notBuilt(
-          'formatOptions.shader.strength',
+          'formatOptions.shader.amplitude',
           PANEL_LANE,
-          `no Strength range input in the Shader section (${before ? 'the control has no range' : 'the control is absent'})`,
+          `no Amplitude range input in the Shader section (${before ? 'the control has no range' : 'the control is absent'})`,
         );
       try {
         const motion = await restMount(id);
         const s = await openShaderSection(id);
-        const slider = (await sliderOf('formatOptions.shader.strength')) ?? before;
+        const slider = (await sliderOf('formatOptions.shader.amplitude')) ?? before;
         const clip = await clipOf(id);
         const rest = await t.shotPixels(clip);
         const rev0 = (await t.state()).revision;
@@ -734,7 +734,7 @@ export async function run(t) {
           steps: 12,
           during: async () => ({
             revision: (await t.state()).revision,
-            value: await sliderValue('formatOptions.shader.strength'),
+            value: await sliderValue('formatOptions.shader.amplitude'),
             diff: diffOf(rest, await t.shotPixels(clip)),
           }),
         });
@@ -747,18 +747,18 @@ export async function run(t) {
           )
           .catch(async () => (await t.state()).revision);
         await t.settled();
-        const value1 = await sliderValue('formatOptions.shader.strength');
+        const value1 = await sliderValue('formatOptions.shader.amplitude');
         const block1 = (await t.blockOf(S, id))?.block ?? null;
         await t.press('Meta+z');
         await t.settled();
         const value2 = await t
           .pollUntil(
-            () => sliderValue('formatOptions.shader.strength'),
+            () => sliderValue('formatOptions.shader.amplitude'),
             (v) => v === slider.value,
             6000,
             100,
           )
-          .catch(() => sliderValue('formatOptions.shader.strength'));
+          .catch(() => sliderValue('formatOptions.shader.amplitude'));
         await t.sleep(500);
         const after = diffOf(rest, await t.shotPixels(clip));
         return {

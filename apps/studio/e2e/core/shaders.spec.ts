@@ -72,8 +72,12 @@ let browserRef: Browser;
 /** The shader block of the file and the way it landed (a setup, never a driven step). */
 let shader: { id: string; how: string } | null = null;
 const SECTION_LANE = 'not on this build: formatOptions.shader (docs/FEATURES.md 5.3, B5)';
-const STRENGTH_LANE = 'not on this build: formatOptions.shader.strength (docs/FEATURES.md 5.3, B5)';
-const KEY = /^[0-9a-f]{64}$/;
+/* Amplitude, not Strength: Strength maps to no uniform of liquid metal, the featured entry, so its
+   slider is disabled by design (controls.ts controlApplies; build/integrator.md, the findings) */
+const STRENGTH_LANE =
+  'not on this build: formatOptions.shader.amplitude (docs/FEATURES.md 5.3, B5)';
+/* the frame key as the schema spells it, `sha256:` then 64 hex (packages/schema/src/actions.ts shader.frame) */
+const KEY = /^(sha256:)?[0-9a-f]{64}$/;
 /** Four sample points across a picture, away from its edges. */
 const POINTS: readonly (readonly [number, number])[] = [
   [0.25, 0.5],
@@ -149,10 +153,10 @@ async function changeRecipe(
   anchor: number,
 ): Promise<string> {
   if (await openShaderSection(p, id)) {
-    const facts = await sliderFacts(p, 'formatOptions.shader.strength');
+    const facts = await sliderFacts(p, 'formatOptions.shader.amplitude');
     if (facts && (facts.range || facts.number)) {
-      await setSliderNumber(p, 'formatOptions.shader.strength', strength);
-      return `Strength ${strength} through the Shader section`;
+      await setSliderNumber(p, 'formatOptions.shader.amplitude', strength);
+      return `Amplitude ${strength} through the Shader section`;
     }
   }
   const s = await settled(p);
@@ -316,21 +320,21 @@ test(title('shaders.frame.reuse-and-prune'), async () => {
   expect(shader).not.toBeNull();
   const id = shader!.id;
   if (!(await openShaderSection(page, id))) test.skip(true, SECTION_LANE);
-  const facts = await sliderFacts(page, 'formatOptions.shader.strength');
+  const facts = await sliderFacts(page, 'formatOptions.shader.amplitude');
   if (!facts || !(facts.range || facts.number)) test.skip(true, STRENGTH_LANE);
   const v0 = facts!.value ?? 1;
   const asset0 = (await waitFrame(page, slideId, id, { timeout: 15_000 })).asset;
   const count0 = Object.keys(await assetRecords(page)).length;
-  await setSliderNumber(page, 'formatOptions.shader.strength', 1.2);
+  await setSliderNumber(page, 'formatOptions.shader.amplitude', 1.2);
   const up = await waitFrame(page, slideId, id, { not: asset0, timeout: 20_000 });
-  await setSliderNumber(page, 'formatOptions.shader.strength', v0);
+  await setSliderNumber(page, 'formatOptions.shader.amplitude', v0);
   const back = await waitFrame(page, slideId, id, { not: up.asset, timeout: 20_000 });
   await page.waitForTimeout(2000);
   const count1 = Object.keys(await assetRecords(page)).length;
   const blockBack = await block();
   test.info().annotations.push({
     type: 'reuse',
-    description: `Strength ${v0} -> 1.2 -> ${v0}: frames ${asset0 ?? 'none'} -> ${up.asset ?? 'none'} (${up.ms} ms) -> ${back.asset ?? 'none'} (${back.ms} ms); assets ${count0} -> ${count1}; the block names ${String(blockBack?.block['asset'])}`,
+    description: `Amplitude ${v0} -> 1.2 -> ${v0}: frames ${asset0 ?? 'none'} -> ${up.asset ?? 'none'} (${up.ms} ms) -> ${back.asset ?? 'none'} (${back.ms} ms); assets ${count0} -> ${count1}; the block names ${String(blockBack?.block['asset'])}`,
   });
   expect(up.asset, 'the 1.2 frame').not.toBeNull();
   expect(back.asset, 'the frame back at the value').not.toBeNull();
@@ -339,7 +343,7 @@ test(title('shaders.frame.reuse-and-prune'), async () => {
   /* three distinct commits 1 s apart leave one frame for the block */
   let last: string | null = back.asset;
   for (const value of [0.6, 0.9, 1.4]) {
-    await setSliderNumber(page, 'formatOptions.shader.strength', value);
+    await setSliderNumber(page, 'formatOptions.shader.amplitude', value);
     await page.waitForTimeout(1000);
   }
   const third = await waitFrame(page, slideId, id, { not: last, timeout: 20_000 });

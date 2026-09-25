@@ -1,0 +1,556 @@
+{
+  "base": "https://turboslide-1ncbsb9tb-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-25T06:03:16.622Z",
+  "ms": 1652763,
+  "parked": {
+    "commit": "f1afe1e",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "tables.edge.add-row-column",
+        "parks": [
+          "handle.table.add.column",
+          "handle.table.add.row"
+        ]
+      },
+      {
+        "id": "tables.heads.select-row-column",
+        "parks": [
+          "handle.table.head.column",
+          "handle.table.head.row"
+        ]
+      },
+      {
+        "id": "tables.seam.row-drag",
+        "parks": [
+          "handle.table.row"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      },
+      {
+        "id": "wordart.tail.fill-outline",
+        "parks": [
+          "toolbar.wordart.outline"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 1652743,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/vector/integrator/gate-preview2-export/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "rows": 41,
+  "passed": 36,
+  "failed": 5,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "export.download.large-deck-pdf",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "PDF: GT brand deck.pdf, 85 slides in 11.1 s, 0.13 s per slide",
+        "PDF: GT brand deck.pdf, 85 slides in 11.1 s, 0.13 s per slide"
+      ]
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "Editable text PowerPoint with Embed fonts: GT brand deck (editable).pptx, 85 slides in 196.4 s, 2.31 s per slide",
+        "Editable text PowerPoint with Embed fonts: GT brand deck (editable).pptx, 85 slides in 196.4 s, 2.31 s per slide"
+      ]
+    }
+  ],
+  "noStep": [],
+  "commit": "49d5f2f",
+  "origin": "https://turboslide-1ncbsb9tb-kl01s-projects.vercel.app",
+  "date": "2026-09-25",
+  "results": {
+    "export.pdf.file": "passed",
+    "export.pdf.include-skipped": "passed",
+    "export.pdf.notes-honest": "passed",
+    "export.pptx.perfect": "passed",
+    "export.pptx.editable": "passed",
+    "export.pptx.notes-and-skipped": "passed",
+    "images.export.pdf-with-picture": "passed",
+    "shapes.export.pdf": "passed",
+    "shapes.export.pptx": "passed",
+    "export.print.download-pdf-follows-preview": "passed",
+    "export.zip.bundle": "passed",
+    "export.html.web-page": "passed",
+    "export.jpg.current-slide": "passed",
+    "export.png.current-slide": "passed",
+    "tables.export.pdf": "passed",
+    "tables.export.pptx-editable": "passed",
+    "charts.export.pdf": "passed",
+    "charts.export.pptx-native": "passed",
+    "wordart.export.pdf": "passed",
+    "lines.connector.export-pptx": "passed",
+    "export.download.named-after-title": "passed",
+    "export.download.pdf-direct": "passed",
+    "export.download.pptx-direct": "passed",
+    "export.download.options-dialog": "passed",
+    "export.download.progress-per-slide": "failed",
+    "export.download.mode-sentence": "passed",
+    "export.download.large-deck-pdf": "passed",
+    "export.download.large-deck-pptx": "passed",
+    "brand.footer.text": "passed",
+    "brand.export.pdf-logo": "failed",
+    "fonts.export.editable-names-face": "passed",
+    "fonts.export.pdf-face": "passed",
+    "diagrams.export.step-label": "passed",
+    "logos.export.pdf-pptx-crisp": "passed",
+    "shapes.geometry.text-rect": "passed",
+    "shapes.geometry.export.pptx-prst-avlst": "passed",
+    "shapes.geometry.export.raster-modes": "failed",
+    "svg.export.pdf-vector": "failed",
+    "svg.export.pptx-svgblip": "failed",
+    "svg.export.pptx-fallback": "passed",
+    "svg.export.web-page": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "export.download.progress-per-slide",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "brand.export.pdf-logo",
+        "feature": "brand",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.geometry.export.raster-modes",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "svg.export.pdf-vector",
+        "feature": "svg",
+        "result": "failed"
+      },
+      {
+        "id": "svg.export.pptx-svgblip",
+        "feature": "svg",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [
+    "brand"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "shapes.geometry.export.raster-modes",
+      "parks": [
+        "insert.shape.gallery"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "svg.export.pdf-vector",
+      "parks": [
+        "export.svg.vector"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "svg.export.pptx-svgblip",
+      "parks": [
+        "export.svg.vector"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "export.download.progress-per-slide",
+      "feature": "export",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "images.export.pdf-with-picture",
+      "feature": "images",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.export.pdf",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.export.pptx",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.file",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.include-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.notes-honest",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.perfect",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.editable",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.notes-and-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.download-pdf-follows-preview",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.connector.export-pptx",
+      "feature": "lines",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.export.pdf",
+      "feature": "tables",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.export.pptx-editable",
+      "feature": "tables",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.export.pdf",
+      "feature": "charts",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.export.pptx-native",
+      "feature": "charts",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "wordart.export.pdf",
+      "feature": "wordart",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.zip.bundle",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.html.web-page",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.jpg.current-slide",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.png.current-slide",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.named-after-title",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.pdf-direct",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.pptx-direct",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.options-dialog",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.progress-per-slide",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: a six slide deck"
+    },
+    {
+      "id": "export.download.mode-sentence",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.large-deck-pdf",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.footer.text",
+      "feature": "brand",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.export.pdf-logo",
+      "feature": "brand",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: no GT wordmark with a picture logo"
+    },
+    {
+      "id": "fonts.export.editable-names-face",
+      "feature": "fonts",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.export.pdf-face",
+      "feature": "fonts",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.text-rect",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.export.pptx-prst-avlst",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.export.raster-modes",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "diagrams.export.step-label",
+      "feature": "diagrams",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.export.pdf-pptx-crisp",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.export.pdf-vector",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "svg.export.pptx-svgblip",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForEvent: Timeout 60000ms exceeded while waiting for event \"download\""
+    },
+    {
+      "id": "svg.export.pptx-fallback",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.export.web-page",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

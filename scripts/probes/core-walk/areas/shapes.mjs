@@ -270,9 +270,13 @@ export async function run(t) {
       };
     }, id);
   const insertShape = async (kind, at, dragTo = null) => {
+    /* the vector round (docs/VECTOR.md 2.6): the three named rows sit directly under Insert >
+       Shape (the Shapes container left) and the plate is the Shapes gallery's tile; the two
+       routes of the tree before the round hovered the container and read "neither route" on
+       every insert of the area (the integrator's gates of 2026-09-25) */
     const named = await t.insertByTool(
       S,
-      ['insert.shape', 'insert.shape.shapes', `insert.shape.shapes.${kind}`],
+      ['insert.shape', `insert.shape.shapes.${kind}`],
       at,
       dragTo,
       { text: null },
@@ -280,7 +284,7 @@ export async function run(t) {
     if (named.obj) return { ...named, route: 'the named row' };
     const plate = await t.insertByTool(
       S,
-      ['insert.shape', 'insert.shape.shapes', `insert.shape.shapes.pick.${PLATE[kind]}`],
+      ['insert.shape', 'insert.shape.gallery', `insert.shape.gallery.pick.${PLATE[kind]}`],
       at,
       dragTo,
       { text: null },

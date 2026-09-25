@@ -5,11 +5,14 @@ import { expect, test } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
 
 import {
+  PRODUCTION_WRITE_SKIP,
   Scratch,
   addSlide,
+  agentBearer,
   coverage,
   ctl,
   extraHTTPHeaders,
+  isProductionBase,
   headingRun,
   invoke,
   menuPath,
@@ -42,6 +45,9 @@ import {
 // PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/brand.spec.ts
 
 const scratch = new Scratch();
+/** The base the run drives (playwright.config.ts's baseURL); the production guard reads it. */
+const BASE = (process.env['PLAYWRIGHT_BASE_URL'] ?? '').replace(/\/$/, '');
+
 let context: BrowserContext;
 let page: Page;
 let deck = '';
@@ -59,13 +65,40 @@ test.beforeAll(async ({ browser }) => {
   deck = await newDeck(page, scratch, 'Brand spec deck');
   await addSlide(page);
 });
+/**
+ * The deployment's default back on Blank through the agent surface, with the bearer, before the
+ * page path: the page path timed out on 2026-09-25 and left a test deck as production's default
+ * for two hours (hotfix.md 16). Answers whether the API took it; no bearer answers false.
+ */
+async function resetDefaultThroughApi(): Promise<boolean> {
+  const bearer = agentBearer(BASE);
+  if (bearer === null && !/^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(BASE)) return false;
+  try {
+    const r = await fetch(new URL('/api/actions/template.setDefault', BASE), {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        ...(bearer === null ? {} : { authorization: `Bearer ${bearer}` }),
+        ...extraHTTPHeaders,
+      },
+      body: JSON.stringify({ id: 'blank' }),
+    });
+    if (!r.ok) return false;
+    const body = (await r.json()) as { default?: string };
+    return body.default === 'blank';
+  } catch {
+    return false;
+  }
+}
+
 test.afterAll(async () => {
   test.setTimeout(300_000);
   const failures: string[] = [];
   try {
     if (defaultSet) {
       try {
-        await restoreBlankDefault();
+        if (await resetDefaultThroughApi()) defaultSet = false;
+        else await restoreBlankDefault();
       } catch (error) {
         failures.push(
           `the deployment default: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
@@ -220,6 +253,7 @@ async function record(p: Page): Promise<Record<string, unknown> | null> {
 
 test(title('templates.save.as-template'), async () => {
   test.setTimeout(180_000);
+  if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
   await openEditor(page, deck);
   /* the deck carries a kit, so the template's copy proves it travels */
   const actions = await page.evaluate(() =>
@@ -276,6 +310,7 @@ test(title('templates.save.as-template'), async () => {
 
 test(title('templates.save.same-name-replaces'), async () => {
   test.setTimeout(180_000);
+  if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
   if (!(await reachRow(page, 'file', 'file.saveAsTemplate')))
     test.skip(true, 'not on this build: file.saveAsTemplate (docs/PRODUCT.md 7.1, B5b)');
   if (savedSlug === null) await saveAsTemplate();
@@ -294,6 +329,7 @@ test(title('templates.save.same-name-replaces'), async () => {
 
 test(title('templates.card.rename-and-delete'), async () => {
   test.setTimeout(180_000);
+  if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
   await gotoGallery();
   if (!(await drawn(page, 'templates.page')))
     test.skip(true, 'not on this build: templates.page (docs/PRODUCT.md 7.1, B5b)');
@@ -336,6 +372,7 @@ test(title('templates.card.rename-and-delete'), async () => {
 
 test(title('templates.default.use-for-new'), async () => {
   test.setTimeout(240_000);
+  if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
   await gotoGallery();
   if (!(await drawn(page, 'templates.page')))
     test.skip(true, 'not on this build: templates.page (docs/PRODUCT.md 7.1, B5b)');
@@ -387,6 +424,7 @@ test(title('templates.default.use-for-new'), async () => {
 
 test(title('templates.deck.read-only'), async () => {
   test.setTimeout(120_000);
+  if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
   const actions = await (async () => {
     await openEditor(page, deck);
     return page.evaluate(() =>

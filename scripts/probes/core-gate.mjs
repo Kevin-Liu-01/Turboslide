@@ -63,6 +63,7 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs';
+import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -404,6 +405,8 @@ function readSpecs(report, exit, ms) {
 // the merge and the verdict
 
 let probe = null;
+/** The deployment's default template after the drivers, and whether this run put Blank back (the templates rows' side effect on a shared store). */
+let defaultTemplate = null;
 let specs = null;
 let cost = null;
 /** Which drivers this run covers: every one, or the one `--only` names. */
@@ -463,6 +466,61 @@ if (REPORT !== null) {
     if (runs('cost')) cost = runCost();
   } finally {
     releaseLock(held);
+  }
+  defaultTemplate = await settleDefaultTemplate();
+}
+
+/**
+ * The deployment's default template after the drivers (a deployment base alone): a spec that
+ * drives templates.default.use-for-new sets it and its teardown can time out, which left a test
+ * deck as production's default for two hours on 2026-09-25 (hotfix.md 16); every preview shares
+ * production's store. Reads template.list with the bearer (TURBOSLIDE_TOKEN or the origin's row
+ * of ~/.config/turboslide/hosts.json, never printed) and puts Blank back through
+ * template.setDefault when the default is anything else; answers the reading for the summary.
+ */
+async function settleDefaultTemplate() {
+  if (LOCAL) return null;
+  let token = process.env.TURBOSLIDE_TOKEN ?? '';
+  if (token === '') {
+    try {
+      const file = join(homedir(), '.config', 'turboslide', 'hosts.json');
+      const hosts = existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')).hosts ?? {}) : {};
+      const row = hosts[BASE] ?? hosts[BASE.replace(/\/$/, '')] ?? null;
+      if (row && typeof row.token === 'string') token = row.token;
+    } catch {
+      token = '';
+    }
+  }
+  if (token === '') return { read: 'no bearer', reset: false };
+  const headers = {
+    'content-type': 'application/json',
+    authorization: `Bearer ${token}`,
+    ...(process.env.VERCEL_OIDC_TOKEN
+      ? { 'x-vercel-trusted-oidc-idp-token': process.env.VERCEL_OIDC_TOKEN }
+      : {}),
+  };
+  const post = async (action, input) => {
+    const r = await fetch(new URL(`/api/actions/${action}`, BASE), {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(input),
+    });
+    return { status: r.status, body: r.ok ? await r.json() : null };
+  };
+  try {
+    const list = await post('template.list', {});
+    const current = list.body?.default ?? null;
+    if (list.status !== 200 || current === null)
+      return { read: `template.list ${list.status}`, reset: false };
+    if (current === 'blank') return { read: 'blank', reset: false };
+    const set = await post('template.setDefault', { id: 'blank' });
+    const after = set.body?.default ?? null;
+    console.log(
+      `core-gate: the deployment's default template read ${current} after the drivers; template.setDefault blank answered ${set.status}${after ? ` (${after})` : ''}`,
+    );
+    return { read: current, reset: after === 'blank' };
+  } catch (error) {
+    return { read: `error ${String(error).slice(0, 120)}`, reset: false };
   }
 }
 
@@ -537,6 +595,7 @@ const exitCode =
 
 const summary = {
   base: BASE,
+  defaultTemplate,
   startedAt: new Date(startedAt).toISOString(),
   ms: Date.now() - startedAt,
   parked,

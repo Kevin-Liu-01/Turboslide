@@ -900,6 +900,33 @@ export function agentBearer(baseURL: string): string | null {
   }
 }
 
+/**
+ * True for a production base: not localhost and not a preview deployment (Vercel's preview
+ * hosts carry the nine character deployment hash after the project name, or a -git- branch
+ * segment). A row that writes a deployment wide record (the default template, a saved template)
+ * skips on production, where every seller would see the write: on 2026-09-25 a gate run on
+ * production set a test deck as the default for new presentations for two hours when the file's
+ * teardown timed out (docs/gslides-parity/features/build/hotfix.md 16). TURBOSLIDE_GATE_PRODUCTION=1
+ * names a base production by hand.
+ */
+export function isProductionBase(baseURL: string): boolean {
+  if (isLocalBase(baseURL)) return false;
+  if (process.env['TURBOSLIDE_GATE_PRODUCTION'] === '1') return true;
+  let host = '';
+  try {
+    host = new URL(baseURL).hostname;
+  } catch {
+    return false;
+  }
+  const preview =
+    /^[a-z0-9-]+-[a-z0-9]{9}-[a-z0-9-]+\.vercel\.app$/.test(host) || /-git-/.test(host);
+  return !preview;
+}
+
+/** The reason a deployment wide write skips on production, for test.skip. */
+export const PRODUCTION_WRITE_SKIP =
+  "not driven on production: the row writes a deployment wide record every seller would see (the default template or a saved template); its reading is the preview run's";
+
 /** True for a localhost base, where the agent surface is open without a bearer. */
 export function isLocalBase(baseURL: string): boolean {
   return /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(baseURL);

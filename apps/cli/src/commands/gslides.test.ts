@@ -23,18 +23,46 @@ import { join } from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
+import type { Asset, LogoAssetSource } from '@turboslide/schema/assets';
 import type { Slide } from '@turboslide/schema/deck';
 import { LAYOUT_IDS } from '@turboslide/schema/deck';
 import { WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
 import { canonicalJson } from '@turboslide/schema/json';
 
 import { runCli } from '../cli.ts';
-import { replaceInText } from '../store-actions.ts';
+import { assetFiles, replaceInText } from '../store-actions.ts';
 
 type Run = { code: number; stdout: string; stderr: string; json: unknown };
 
 const REPO_DECKS = join(import.meta.dirname, '..', '..', '..', '..', 'decks');
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
+/** An svg picture of the vector round in the worked deck (docs/VECTOR.md 4.1): its sanitized source beside its PNG twin. */
+const MARK_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 64"><rect width="96" height="64"/></svg>';
+const MARK_VECTOR = 'assets/mark.0123abcd.svg';
+const MARK_TWIN = 'assets/mark.0123abcd.png';
+const MARK_ASSET: Asset = {
+  id: 'mark',
+  role: 'detail',
+  alt: 'The mark',
+  kind: 'svg',
+  vector: { neutral: MARK_VECTOR },
+  twins: { neutral: MARK_TWIN },
+  size: [96, 64],
+  scale: 3,
+  source: { kind: 'file' },
+  inline: 'native',
+};
+/** The worked deck's production site slide with its shot on the svg picture. */
+const THE_MARK_SLIDE: Slide = (() => {
+  const site = WORKED_SLIDES.find((slide) => slide.id === 'the-production-site');
+  if (site === undefined) throw new Error('the worked deck lost the-production-site');
+  return JSON.parse(
+    JSON.stringify(site)
+      .replaceAll('"the-production-site"', '"the-mark"')
+      .replace('"site-home"', '"mark"'),
+  ) as Slide;
+})();
 
 let root: string;
 let decksDir: string;
@@ -79,11 +107,25 @@ function writeWorkedDeck(id: string): void {
   const dir = join(decksDir, id);
   mkdirSync(join(dir, 'slides'), { recursive: true });
   mkdirSync(join(dir, 'assets'), { recursive: true });
-  writeFileSync(join(dir, 'deck.json'), canonicalJson({ ...WORKED_DECK, id }));
-  for (const slide of WORKED_SLIDES)
+  writeFileSync(
+    join(dir, 'deck.json'),
+    canonicalJson({
+      ...WORKED_DECK,
+      id,
+      assets: { ...WORKED_DECK.assets, mark: MARK_ASSET },
+      sections: WORKED_DECK.sections.map((section) =>
+        section.id === 'website'
+          ? { ...section, slideIds: [...section.slideIds, 'the-mark'] }
+          : section,
+      ),
+    }),
+  );
+  for (const slide of [...WORKED_SLIDES, THE_MARK_SLIDE])
     writeFileSync(join(dir, 'slides', `${slide.id}.json`), canonicalJson(slide));
   for (const asset of Object.values(WORKED_DECK.assets))
     for (const twin of Object.values(asset.twins)) writeFileSync(join(dir, twin), PNG);
+  writeFileSync(join(dir, MARK_TWIN), PNG);
+  writeFileSync(join(dir, MARK_VECTOR), MARK_SVG);
 }
 
 describe('the Google Slides parity actions on a local decks folder', () => {
@@ -498,8 +540,68 @@ describe('the Google Slides parity actions on a local decks folder', () => {
     expect((production.json as { assets: string[] }).assets).toEqual(['site-home']);
     expect(existsSync(join(deckDir, 'assets', 'site-home-light.jpg'))).toBe(true);
     await validates();
+    // an svg picture's vector file travels beside its PNG twin (docs/VECTOR.md 4.1), so the
+    // imported picture draws the svg and not the twin
+    const mark = await run(['slide', 'import', 'worked', 'the-mark', '--deck', deckDir]);
+    expect(mark.code, mark.stderr).toBe(0);
+    expect((mark.json as { assets: string[] }).assets).toEqual(['mark']);
+    expect(readFileSync(join(deckDir, MARK_VECTOR), 'utf8')).toBe(MARK_SVG);
+    expect(existsSync(join(deckDir, MARK_TWIN))).toBe(true);
+    expect(manifest().sections[1]?.slideIds).toContain('the-mark');
+    await validates();
     const missing = await run(['slide', 'import', 'worked', 'ghost', '--deck', deckDir]);
     expect(missing.code).toBe(2);
+  });
+
+  test('assetFiles names the twins, the vector files and the source file once each', () => {
+    // an svg upload: the PNG twin and the sanitized source
+    expect(assetFiles(MARK_ASSET)).toEqual([MARK_TWIN, MARK_VECTOR]);
+    const logoSource: LogoAssetSource = {
+      kind: 'logo',
+      provider: 'thesvg',
+      slug: 'acme',
+      variant: 'default',
+      title: 'Acme',
+      license: 'Trademark of Acme',
+      fetchedAt: '2026-09-22T10:00:00Z',
+      digest: '0123abcd',
+    };
+    const logo: Asset = {
+      id: 'acme',
+      role: 'logo',
+      alt: 'Acme',
+      twins: { light: 'assets/acme-light.png', dark: 'assets/acme-dark.png' },
+      size: [240, 80],
+      scale: 3,
+      sourceFile: 'assets/acme.svg',
+      source: logoSource,
+      inline: 'native',
+    };
+    // a ship one logo: its untinted source is its vector file, named once
+    expect(assetFiles(logo)).toEqual([
+      'assets/acme-light.png',
+      'assets/acme-dark.png',
+      'assets/acme.svg',
+    ]);
+    // a tinted logo of the vector round: the two tinted files beside the twins and the source
+    expect(
+      assetFiles({
+        ...logo,
+        kind: 'svg',
+        vector: { light: 'assets/acme.0123abcd-light.svg', dark: 'assets/acme.0123abcd-dark.svg' },
+        source: { ...logoSource, tint: { light: '#111111', dark: '#eeeeee' } },
+      }),
+    ).toEqual([
+      'assets/acme-light.png',
+      'assets/acme-dark.png',
+      'assets/acme.0123abcd-light.svg',
+      'assets/acme.0123abcd-dark.svg',
+      'assets/acme.svg',
+    ]);
+    // a raster picture: the twins alone
+    const site = WORKED_DECK.assets['site-home'];
+    if (site === undefined) throw new Error('the worked deck lost site-home');
+    expect(assetFiles(site)).toEqual(['assets/site-home-light.jpg', 'assets/site-home-dark.jpg']);
   });
 
   test('deck copy <id> --name Copy makes a copy at revision 0, with slideIds and --remove-notes (deck.copy)', async () => {

@@ -1826,6 +1826,40 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
       running = live.document;
       return true;
     };
+    /**
+     * The record that names a fresh entry's op id when the reducer refused the entry (the vector
+     * round fix round; VERIFICATION.md "Vector round, pass 1" finding 1): the origin check of
+     * `splitReplayed` reads the records above the POST's base, and on preview 3 a star's
+     * `block.insert` came back "Block shape-6 already exists" while the store held the block from
+     * the first attempt, so the entry's own commit was in the live document and outside `landed`.
+     * A record that names the op id is that first admission whatever its seq (a tab mints an op
+     * id once), so the entry is answered from it as a resend is, never refused. The log is read
+     * from the mirror within the base window under the POST's base, once per placement and only
+     * on a refusal (`since` reads the mirror; no store call); when nothing names it and nothing
+     * was placed yet, the mirror is synced by force once (`freshLive`) and read again, since a
+     * commit can reach the document before its record reaches the log.
+     */
+    let recentLog: Entry[] | null = null;
+    const readWindow = async (): Promise<Entry[]> => {
+      const floor = Math.max(0, post.base.seq - BASE_SEQ_WINDOW);
+      const count = live.document.deck.revision - floor;
+      return count > 0 ? await room.channel.since(room.deckId, floor, count) : [];
+    };
+    const naming = (entries: ReadonlyArray<Entry>, opId: string): Entry | undefined => {
+      for (let i = entries.length - 1; i >= 0; i -= 1) {
+        const entry = entries[i];
+        if (entry?.covers?.includes(opId)) return entry;
+      }
+      return undefined;
+    };
+    const coveringEntry = async (opId: string): Promise<Entry | undefined> => {
+      if (recentLog === null) recentLog = await readWindow();
+      const found = naming(recentLog, opId);
+      if (found !== undefined) return found;
+      if (!(await freshLive())) return undefined;
+      recentLog = await readWindow();
+      return naming(recentLog, opId);
+    };
     for (const entry of fresh) {
       if (entry.kind === 'comment') {
         if (entry.comment !== undefined)
@@ -1866,6 +1900,13 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
         placed = landCandidate(running, { opId: entry.opId, kind: 'edit', mutations }, () => true);
       }
       if (!placed.ok) {
+        // the entry's own first admission, found by its op id: answered from the record, as a
+        // resend above the base is (docs/SYNC.md 3.2), and the refusal is not the tab's to read
+        const covering = await coveringEntry(entry.opId);
+        if (covering !== undefined) {
+          replayed.push(...synthesizeReplayed(covering, [entry.opId]));
+          continue;
+        }
         refusedUndo.push(...landedOwn(undoOfSplices(mutations)));
         const refusal = blobRefusal(post.base.seq, live.document.deck.revision, placed.rejected);
         if (refusal.kind === 'resync') return { kind: 'resync', head: live.document.deck.revision };
@@ -1885,12 +1926,17 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
         ...(entry.note === undefined ? {} : { note: entry.note }),
       });
     }
+    // a record found under the base (coveringEntry) sorts before the ones splitReplayed named
+    replayed.sort((a, b) => a.seq - b.seq);
     return { kind: 'placed', replayed, candidates, rejected };
   };
   void identity;
+  /** The seq of the first answered entry above the POST's base (an entry answered from a record at or under the base sits below what `between` would fill). */
+  const firstAbove = (entries: ReadonlyArray<Entry>): number | undefined =>
+    entries.find((entry) => entry.seq > post.base.seq)?.seq;
   const nothingToAppend = (placed: Extract<Placement, { kind: 'placed' }>): AdmissionResult => {
     const revision = live.document.deck.revision;
-    const first = placed.replayed[0]?.seq;
+    const first = firstAbove(placed.replayed);
     // a resend answered from the records alone: what landed under the record rides the answer
     const between =
       first !== undefined && first - post.base.seq > 1
@@ -1959,7 +2005,7 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
   // answer, so the tab settles its ops without a stream delivery under them (C3S-F8: the
   // second picture's insert waited 8.4 s on the gap watch for the first's commit). They are the
   // records the placement transformed past, read from the mirror above: no store call
-  const first = entries[0]?.seq ?? revision;
+  const first = firstAbove(entries) ?? revision;
   const between =
     first - post.base.seq > 1 ? betweenEntries(landed, post.base.seq, first) : undefined;
   return {

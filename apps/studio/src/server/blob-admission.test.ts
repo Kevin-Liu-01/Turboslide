@@ -405,6 +405,8 @@ describe('admitOnBlob and a resend (the focus round, cycle 3, VERIFICATION C2-F2
           appends.push({ base, opIds: entries.map((entry) => entry.opId) });
           return { ok: true, entries: entries.map((entry) => ({ ...entry, seq: base + 1 })) };
         },
+        // the log this mirror holds: nothing names the insert (the refusal's covering read)
+        since: async () => [],
       },
     } as unknown as Room;
     const insert = {
@@ -960,6 +962,99 @@ describe('the server transforms before it places, on the blob tier too (the sync
       { opId: 'c1:1', reason: 'stale', message: STALE_AFTER_REMOTE },
     ]);
     expect(appends).toEqual([]);
+  });
+
+  it('answers an entry the reducer refused from the record that names its op id, at or under the base and after one forced sync when the record reaches the log late, and keeps the sentence when no record names it (the vector round fix round; VERIFICATION.md "Vector round, pass 1" finding 1)', async () => {
+    // preview 3's star: the block is in the live document from the first attempt, so a second
+    // placement of the same op reads "already exists"
+    const insertAgain = {
+      op: 'block.insert',
+      slideId: 'content-rule',
+      slot: 'left',
+      block: { id: 'p1', type: 'paragraph', text: 'Again' },
+    } as unknown as Mutation;
+    const sentence = 'Block "p1" already exists on slide "content-rule"';
+    // the record sits at the base: the origin check above the base never reads it
+    const under = roomOf([landed(7, [insertAgain], ['c1:1'], 'c1')], [7]);
+    const answered = await admitOnBlob(
+      under.room,
+      input(7, [
+        { opId: 'c1:1', mutations: [insertAgain] },
+        { opId: 'c1:2', mutations: [splice(0, 0, 'g')] },
+      ]),
+    );
+    expect(answered.ok).toBe(true);
+    if (!answered.ok) throw new Error(answered.message);
+    expect(answered.rejected).toEqual([]);
+    expect(answered.entries.map((entry) => [entry.opId, entry.seq, entry.clientId])).toEqual([
+      ['c1:1', 7, 'c1'],
+      ['c1:2', 8, 'c1'],
+    ]);
+    expect(answered.entries[0]?.covers).toEqual(['c1:1']);
+    expect(answered.between).toBeUndefined();
+    // the fresh op alone was appended; the window under the base was read once, on the refusal
+    expect(under.appends).toEqual([{ base: 7, mutations: [[splice(0, 0, 'g')]] }]);
+    expect(under.sinces).toEqual([[0, 7]]);
+
+    // the commit reached the document before its record reached the log: the window reads
+    // nothing, one forced sync brings the record, and the entry is answered from it
+    const late = (() => {
+      let synced = false;
+      const record = landed(8, [insertAgain], ['c1:1'], 'c1');
+      const sinces: [number, number][] = [];
+      const appends: number[] = [];
+      const room = {
+        deckId: 'late-record-deck',
+        tier: 'blob',
+        live: async () => ({ seq: synced ? 8 : 7, document: documentAt(synced ? 8 : 7) }),
+        store: {
+          sync: async (force?: boolean) => {
+            if (force === true) synced = true;
+          },
+        },
+        channel: {
+          append: async (_deckId: string, base: number) => {
+            appends.push(base);
+            return { ok: true, entries: [] };
+          },
+          since: async (_deckId: string, seq: number, limit: number) => {
+            sinces.push([seq, limit]);
+            return synced ? [record].filter((entry) => entry.seq > seq).slice(0, limit) : [];
+          },
+        },
+      } as unknown as Room;
+      return { room, sinces, appends };
+    })();
+    const afterSync = await admitOnBlob(
+      late.room,
+      input(7, [{ opId: 'c1:1', mutations: [insertAgain] }]),
+    );
+    expect(afterSync.ok).toBe(true);
+    if (!afterSync.ok) throw new Error(afterSync.message);
+    expect(afterSync.rejected).toEqual([]);
+    expect(afterSync.entries.map((entry) => [entry.opId, entry.seq])).toEqual([['c1:1', 8]]);
+    expect(afterSync.revision).toBe(8);
+    expect(late.appends).toEqual([]);
+    expect(late.sinces).toEqual([
+      [0, 7],
+      [0, 8],
+    ]);
+
+    // no record names the op: the reducer's sentence, as before, after the one sync
+    const genuine = roomOf([], [7, 7]);
+    const refused = await admitOnBlob(
+      genuine.room,
+      input(7, [{ opId: 'c1:1', mutations: [insertAgain] }]),
+    );
+    expect(refused.ok).toBe(true);
+    if (!refused.ok) throw new Error(refused.message);
+    expect(refused.entries).toEqual([]);
+    expect(refused.rejected).toEqual([{ opId: 'c1:1', reason: 'invalid', message: sentence }]);
+    expect(genuine.appends).toEqual([]);
+    expect(genuine.sinces).toEqual([
+      [0, 7],
+      [0, 7],
+    ]);
   });
 
   it("delivers a viewer's stream every op with the notes stripped, as a commenter's (docs/SYNC.md 3.7, invariant 6)", () => {

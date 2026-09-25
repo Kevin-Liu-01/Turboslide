@@ -563,10 +563,15 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
             name: objectName(namePrefix, name, rect.userGroup, rect.group),
             alt: rect.alt,
           });
-        if (rect.preset !== undefined && rect.adjust !== undefined && rect.adjust.length > 0)
+        // the rounded rectangle travels as `shape: 'roundRect'` without `preset` (measure.ts keeps
+        // it in its legacy table), and pptxgenjs writes its `adj` from `rectRadius` alone, which a
+        // preset drawn as a path has not got; so its adjust reaches the file through the same
+        // rewrite as the other presets (the vector round's fix round, VERIFICATION.md finding 1)
+        const geometry = rect.preset ?? (rect.shape === 'roundRect' ? 'roundRect' : undefined);
+        if (geometry !== undefined && rect.adjust !== undefined && rect.adjust.length > 0)
           slideRewrites.adjusts.push({
             name: objectName(namePrefix, name, rect.userGroup, rect.group),
-            guides: shapeGuides(rect.preset),
+            guides: shapeGuides(geometry),
             values: rect.adjust,
           });
       });

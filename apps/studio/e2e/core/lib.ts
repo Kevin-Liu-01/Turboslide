@@ -1190,3 +1190,73 @@ export async function fetchBytes(
     contentType: res.headers()['content-type'] ?? '',
   };
 }
+
+/** How old a leftover template is before the sweep removes it: a run of the brand spec's template rows takes minutes, so a younger card is a run in flight beside this one. */
+export const TEMPLATE_LEFTOVER_MIN_AGE_MS = 30 * 60_000;
+
+/**
+ * The organisation templates earlier runs of a spec left on the store, removed through the agent
+ * surface (the vector round fix round; VERIFICATION.md "Vector round, pass 1" finding 3: a run cut
+ * between its save and its delete leaves "Core spec template <stamp>" cards under Your organisation
+ * for every deployment on the shared store, production included; the machine's sleep on 2026-09-25
+ * left ten). Every organisation template whose name starts with `prefix` and whose stamp (the word
+ * after the prefix: the base36 of Date.now() at that run's start) is older than `minAgeMs` goes
+ * through `template.delete`, and so does every card of the stamp `own` whatever its age (the
+ * running file's, which its card menu step misses on an instance whose index is behind the store:
+ * the fix round's run on a preview found the card absent and left it); a younger card of another
+ * stamp is a run in flight beside this one and stays. Best effort: a base without a bearer removes
+ * nothing and says so, a refusal is recorded, nothing throws. Answers the ids removed and the
+ * reason nothing was, if any.
+ */
+export async function sweepTemplateLeftovers(
+  baseURL: string,
+  prefix: string,
+  options: { own?: string; minAgeMs?: number } = {},
+): Promise<{ removed: string[]; reason: string | null }> {
+  const minAgeMs = options.minAgeMs ?? TEMPLATE_LEFTOVER_MIN_AGE_MS;
+  if (baseURL === '') return { removed: [], reason: 'no base' };
+  const bearer = agentBearer(baseURL);
+  if (bearer === null && !isLocalBase(baseURL)) return { removed: [], reason: 'no bearer' };
+  const headers = {
+    'content-type': 'application/json',
+    ...(bearer === null ? {} : { authorization: `Bearer ${bearer}` }),
+    ...extraHTTPHeaders,
+  };
+  const post = async (
+    action: string,
+    input: unknown,
+  ): Promise<{ status: number; body: unknown }> => {
+    try {
+      const r = await fetch(new URL(`/api/actions/${action}`, baseURL), {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(input),
+      });
+      return { status: r.status, body: r.ok ? await r.json().catch(() => null) : null };
+    } catch (error) {
+      return { status: 0, body: error instanceof Error ? error.message : String(error) };
+    }
+  };
+  type Row = { id: string; name: string; organisation?: true };
+  const list = await post('template.list', {});
+  if (list.status !== 200) return { removed: [], reason: `template.list ${list.status}` };
+  const raw = list.body as { templates?: Row[]; output?: { templates?: Row[] } } | null;
+  const templates = raw?.templates ?? raw?.output?.templates ?? [];
+  const removed: string[] = [];
+  const refused: string[] = [];
+  for (const row of templates) {
+    if (row.organisation !== true || !row.name.startsWith(prefix)) continue;
+    const stamp = row.name.slice(prefix.length).split(' ')[0] ?? '';
+    if (stamp === '') continue;
+    const startedAt = parseInt(stamp, 36);
+    const own = options.own !== undefined && stamp === options.own;
+    if (!own && (!Number.isFinite(startedAt) || Date.now() - startedAt < minAgeMs)) continue;
+    const gone = await post('template.delete', { id: row.id, confirm: true });
+    if (gone.status === 200) removed.push(row.id);
+    else refused.push(`${row.id} ${gone.status}`);
+  }
+  return {
+    removed,
+    reason: refused.length === 0 ? null : `template.delete refused ${refused.join(', ')}`,
+  };
+}

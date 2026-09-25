@@ -2,13 +2,16 @@
 // end only when its site index is one the target's preset lists in the file. A rectangle offers
 // eight sites in the product (the ECMA four then four corners, schema shapes.ts `rectSites`) and
 // the file indexes the first four alone, so an end on a corner is dropped and named; a hexagon's
-// six are its own list; a target without a preset geometry keeps the index as given.
+// six are its own list; a target without a preset geometry keeps the index as given. The adjust
+// rewrite (SPEC-2 2.3.2) fills the list pptxgenjs leaves empty on a rounded rectangle drawn as a
+// path (the vector round's fix round, VERIFICATION.md finding 1) and replaces the `adj` it writes
+// from a corner radius.
 import { describe, expect, test } from 'vitest';
 
-import { shapeAdjustDefaults, sites } from '@turboslide/schema/shapes';
+import { shapeAdjustDefaults, shapeGuides, sites } from '@turboslide/schema/shapes';
 
 import { countConnectors } from './shapes.ts';
-import { presetSiteCount, toConnector } from './shapes.ts';
+import { presetSiteCount, toConnector, writeAdjustValues } from './shapes.ts';
 
 const geom = (prst: string): string => `<a:prstGeom prst="${prst}"><a:avLst/></a:prstGeom>`;
 const shape = (id: number, name: string, body: string): string =>
@@ -35,6 +38,54 @@ describe('presetSiteCount', () => {
     );
     expect(presetSiteCount('bentConnector3')).toBeUndefined();
     expect(presetSiteCount('custGeom')).toBeUndefined();
+  });
+});
+
+describe('writeAdjustValues on a rounded rectangle (SPEC-2 2.3.2; VERIFICATION.md finding 1)', () => {
+  const rounded = (list: string): string =>
+    '<p:spTree>' +
+    shape(
+      2,
+      'ts:s#rounded',
+      `<a:prstGeom prst="roundRect"><a:avLst>${list}</a:avLst></a:prstGeom>`,
+    ) +
+    '</p:spTree>';
+
+  test('the list pptxgenjs writes empty for a path drawn preset gains the block adj under the guide the table names', () => {
+    expect(shapeGuides('roundRect')).toEqual(['adj']);
+    expect(shapeGuides('rounded')).toEqual(['adj']);
+    const out = writeAdjustValues(rounded(''), 'ts:s#rounded', shapeGuides('roundRect'), [50000]);
+    expect(out.written).toBe(true);
+    expect(out.xml).toContain(
+      '<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 50000"/></a:avLst></a:prstGeom>',
+    );
+  });
+
+  test('the self closed empty list and the adj pptxgenjs writes from a corner radius are replaced alike', () => {
+    const selfClosed = writeAdjustValues(
+      '<p:spTree>' + shape(2, 'ts:s#rounded', geom('roundRect')) + '</p:spTree>',
+      'ts:s#rounded',
+      ['adj'],
+      [50000],
+    );
+    expect(selfClosed.written).toBe(true);
+    expect(selfClosed.xml).toContain(
+      '<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 50000"/></a:avLst></a:prstGeom>',
+    );
+    const own = writeAdjustValues(
+      rounded('<a:gd name="adj" fmla="val 16667"/>'),
+      'ts:s#rounded',
+      ['adj'],
+      [50000],
+    );
+    expect(own.written).toBe(true);
+    expect(own.xml).toContain('<a:avLst><a:gd name="adj" fmla="val 50000"/></a:avLst>');
+    expect(own.xml).not.toContain('16667');
+  });
+
+  test('no values or a missing shape writes nothing', () => {
+    expect(writeAdjustValues(rounded(''), 'ts:s#rounded', ['adj'], []).written).toBe(false);
+    expect(writeAdjustValues(rounded(''), 'ts:s#other', ['adj'], [50000]).written).toBe(false);
   });
 });
 

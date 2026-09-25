@@ -46,6 +46,8 @@ export type SyncExportInput = {
   includeSkipped?: boolean;
   /** Carry the speaker notes (gslides-parity SPEC 7.2.13). */
   includeNotes?: boolean;
+  /** The svgBlip switch of docs/VECTOR.md 4.6; false writes the PNG blip alone. */
+  svgVector?: boolean;
 };
 
 export type SyncExportFile = {

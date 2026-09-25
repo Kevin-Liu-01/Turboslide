@@ -427,7 +427,11 @@ async function featuresRound(t, S, h) {
       const run1 = await sessionRun();
       const caret1 = run1 ? await t.caretFacts(run1).catch(() => null) : null;
       if (open1) {
-        await t.press('End');
+        /* the label's end by a select all and ArrowRight: End stops at the visual line's end, and
+           a rounded rectangle's label wraps earlier since it sits in its ECMA text rectangle
+           (docs/VECTOR.md 2.3; the five step process' "Step 1 plus" is two lines at 22 px) */
+        await t.press('Meta+a');
+        await t.press('ArrowRight');
         await t.typeHuman(' a');
         await t.sleep(200);
         await t.press('Escape');
@@ -448,7 +452,8 @@ async function featuresRound(t, S, h) {
         open2 = await t.editing();
       }
       if (open2) {
-        await t.press('End');
+        await t.press('Meta+a');
+        await t.press('ArrowRight');
         await t.typeHuman(' b');
         await t.sleep(200);
         await t.press('Escape');

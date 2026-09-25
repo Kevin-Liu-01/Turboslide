@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 
 import type { MaterialHandle, mountMaterial as mountMaterialFn } from '@turboslide/materials/mount';
@@ -28,14 +28,33 @@ import { MATERIAL_PLAY_EVENT } from './dither';
  *
  * The features round, ship two (docs/FEATURES.md 5.6; audit-shaders 15, 17): one live mount per
  * stage. With `selected` handed in, the selected shader block plays and every other shader block
- * shows its frame until selected; a block with no frame yet mounts at speed 0 so its plate is not
- * empty (the label is gone, 5.5). The editor caps the mount at 30 frames per second (`throttle`)
- * and at 1x device pixels below zoom 100 (`scale`); `prefers-reduced-motion: reduce` sets speed 0
- * (the anchor's still is the frame); `document.hidden` and an off screen stage pause through
- * Paper's own observers. The deck's shader palette (`palette`, 5.7) reaches the presets. Every
- * live handle is registered by block id so the Shader section previews a slider through
+ * shows its frame until selected; with no shader selected, the first block with no frame yet
+ * mounts at speed 0 so its plate is not empty (the label is gone, 5.5), and every other frameless
+ * block draws its plate until its frame lands 2 to 3 s after the insert, so the stage never holds
+ * two canvases while frames are pending (`planMounts`; the fix round of ship two, verification
+ * F.5 item 4, `shaders.perf.one-context`). The editor caps the mount at 30 frames per second
+ * (`throttle`) and at 1x device pixels below zoom 100 (`scale`); `prefers-reduced-motion: reduce`
+ * sets speed 0 (the anchor's still is the frame); `document.hidden` and an off screen stage pause
+ * through Paper's own observers. The deck's shader palette (`palette`, 5.7) reaches the presets.
+ * Every live handle is registered by block id so the Shader section previews a slider through
  * `previewShaderUniforms` while it is held and writes on the release alone (5.3). Without
  * `selected` the mount behaves as before the round: every root mounts.
+ *
+ * The canvas sits above the frame (the fix round of ship two, verification F.5 item 1): Paper's
+ * own stylesheet lays its canvas at `z-index: -1` inside the host, which it makes a stacking
+ * context, and the block's frame `<img>` stays in flow above it, so once a block had a frame the
+ * live canvas was never the element a seller saw; a held slider, a preset click and View > Play
+ * shaders all drew under the still. `raiseCanvas` sets the canvas's own z-index above the flow
+ * when the handle lands, and the frame stays painted under it, so the first paint and a lost
+ * WebGL context both show the frame instead of an empty plate (the frame contract).
+ *
+ * The mount survives a parent's render (the fix round of ship two, the same finding): the effect
+ * used to list `onError` and `palette` by reference, and the editor root hands the mount a new
+ * error arrow on every render, so every render of the root disposed the live mount and created
+ * another; a held slider's look went to a disposed handle whenever a render landed mid drag, and
+ * the stage paid a WebGL context per render. `onError` rides a ref and the palette is keyed by
+ * its colours, so only the body, the selection, the appearance, the zoom band and the motion
+ * setting remount.
  */
 export type MaterialMountProps = {
   /** the slide body the renderer's HTML was set on */
@@ -145,21 +164,45 @@ export function rootHasFrame(root: Element): boolean {
   return root.querySelector('.material > img') !== null;
 }
 
-/** What a root does under the one live mount rule (5.6). */
+/** What a root does under the one live mount rule (5.6): plays, mounts a still at speed 0, or draws its frame or plate. */
 export type MountPlan = 'play' | 'still' | 'frame';
 
+/** What `planMounts` reads off a root: its block id and whether it shows a frame already. */
+export type MountRootFacts = { id: string | null; hasFrame: boolean };
+
 /**
- * The rule of 5.6 for one root: selected plays; unselected with a frame shows the frame; unselected
- * without a frame mounts a still at speed 0; every root plays when the stage passes no selection.
+ * The one live mount rule of 5.6 over a stage's roots, pure: with no selection handed in every
+ * root plays (the behaviour before the round); otherwise the selected shader blocks play (one in
+ * practice), and when none is selected the first root without a frame mounts a still, so its
+ * plate is not empty, while every other root draws its frame or its plate. Two frameless blocks
+ * are one canvas, never two, and a block's still gives way to the selected block's mount; the
+ * frame lands through the capturer (shader-frame.ts) whether or not the block mounts.
  */
-export function mountPlanFor(
-  root: Element,
+export function planMounts(
+  roots: ReadonlyArray<MountRootFacts>,
   selected: ReadonlyArray<string> | null | undefined,
-): MountPlan {
-  if (selected === undefined) return 'play';
-  const id = blockIdOfRoot(root);
-  if (id !== null && selected !== null && selected.includes(id)) return 'play';
-  return rootHasFrame(root) ? 'frame' : 'still';
+): MountPlan[] {
+  if (selected === undefined) return roots.map(() => 'play');
+  const plans: MountPlan[] = roots.map(({ id }) =>
+    id !== null && selected !== null && selected.includes(id) ? 'play' : 'frame',
+  );
+  if (plans.includes('play')) return plans;
+  const still = roots.findIndex((root) => !root.hasFrame);
+  if (still !== -1) plans[still] = 'still';
+  return plans;
+}
+
+/**
+ * Places a mount's canvas above the frame it covers (the header's second paragraph): an inline
+ * z-index outranks Paper's layered `z-index: -1`, and the host's `overflow: hidden` keeps it in
+ * the box.
+ */
+export function raiseCanvas(handle: MaterialHandle): void {
+  try {
+    handle.canvas().style.zIndex = '0';
+  } catch {
+    /* a handle without a canvas (a test's fake) */
+  }
 }
 
 /** The `prefers-reduced-motion: reduce` read, false where matchMedia is missing (a test's jsdom). */
@@ -291,18 +334,33 @@ export function MaterialMount({
 
   const selectedKey = selected === undefined ? 'all' : (selected ?? []).join(' ');
   const lowRes = scale !== undefined && scale < 1;
+  /* the error callback and the palette by reference and by value (the header's third paragraph):
+     a parent's new arrow per render, or a palette object of the same colours, never remounts */
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
+  const paletteRef = useRef(palette);
+  paletteRef.current = palette;
+  const paletteKey = palette === undefined ? '' : JSON.stringify(palette);
 
   useLayoutEffect(() => {
     const root = body.current;
     if (!root || !enabled) return;
+    const palette = paletteRef.current;
+    const onError = onErrorRef.current;
     let alive = true;
     const handles: { id: string | null; handle: MaterialHandle }[] = [];
     const created: HTMLElement[] = [];
     const roots = [...root.querySelectorAll('[data-recipe]')].filter(
       (element) => !ditheredRoot(element, playing),
     );
-    const targets = roots.flatMap((element) => {
-      const plan = mountPlanFor(element, selected);
+    // one live mount per stage (5.6): the plans are decided over every root at once, so two
+    // frameless blocks never mount two stills and a selected block's mount stands alone
+    const plans = planMounts(
+      roots.map((element) => ({ id: blockIdOfRoot(element), hasFrame: rootHasFrame(element) })),
+      selected,
+    );
+    const targets = roots.flatMap((element, index) => {
+      const plan = plans[index] ?? 'frame';
       if (plan === 'frame') return [];
       const recipe = readRecipe(element);
       const target = hostFor(element);
@@ -331,6 +389,8 @@ export function MaterialMount({
                   handle.dispose();
                   return;
                 }
+                // the canvas above the frame it covers (the header's second paragraph)
+                raiseCanvas(handle);
                 if (plan === 'play' && fps > 0) throttleMount(handle, fps);
                 handles.push({ id, handle });
                 if (id !== null) LIVE.set(id, handle);
@@ -352,8 +412,9 @@ export function MaterialMount({
       }
       for (const host of created) host.remove();
     };
-    // selectedKey stands for `selected` so a new array of the same ids does not remount
+    // selectedKey stands for `selected` and paletteKey for `palette`, so a new array of the same
+    // ids or a palette of the same colours does not remount; onError rides its ref
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [body, html, enabled, speed, onError, playing, selectedKey, palette, lowRes, fps, reduced]);
+  }, [body, html, enabled, speed, playing, selectedKey, paletteKey, lowRes, fps, reduced]);
   return null;
 }

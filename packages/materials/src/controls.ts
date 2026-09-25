@@ -242,6 +242,10 @@ const AMPLITUDE_KEYS = [
   'radius',
   'size',
   'distortion',
+  /* liquid metal's distortion along the shape's edge (the fix round of ship two): its only other
+     amplitude key, u_distortion, moves the box under a tenth of a percent at rest, so Amplitude
+     read as no change on the featured entry (shaders.panel.slider-live-undo) */
+  'contour',
   'swirl',
   'stretch',
   'dotSize',

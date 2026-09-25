@@ -176,12 +176,23 @@
   margin-top: 4px;
 }
 
+/* a control the shader does not use (inspector/shader.tsx ControlSlider): dim, the pointer
+   refused by the handler and not by `disabled`, so the tooltip still fires on hover */
 .ts-shader-slider.is-off {
   opacity: 0.55;
 }
 
 .ts-shader-slider.is-off input {
   cursor: default;
+}
+
+.ts-shader-slider.is-off input[type='range']:focus-visible {
+  outline: none;
+}
+
+/* the one sentence over a placed ground's section (the second target of inspector/shader.tsx) */
+.ts-shader-ground-note {
+  margin: 0 0 6px;
 }
 
 .ts-shader-uniform {

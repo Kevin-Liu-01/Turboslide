@@ -530,10 +530,11 @@ export async function run(t) {
     for (const [name, seam] of Object.entries(seams)) {
       const thin = seam.runs.filter((r) => r.thickness >= 1 && r.thickness <= 4);
       const hairline = thin.filter((r) => (r.contrastToPrevious ?? 1) >= 1.2);
-      const wantNone = name === 'menu bar -> toolbar';
+      // every seam holds one hairline, the menu bar to toolbar seam included (Kevin, 2026-09-24:
+      // a line between the two rows; the menu bar draws it at its bottom edge)
       out[name] = {
         thin: thin.map((r) => `${r.color}x${r.thickness}`).join(' ') || 'none',
-        ok: wantNone ? hairline.length === 0 : hairline.length === 1 && hairline[0].thickness === 1,
+        ok: hairline.length === 1 && hairline[0].thickness === 1,
       };
     }
     if (width !== VIEWPORT.width) await page.setViewportSize(VIEWPORT);
@@ -543,7 +544,7 @@ export async function run(t) {
   await t.step(
     'chrome.separators.once',
     'read the nine seams from a 1x screenshot with the Comments panel open and the notes pane present, both appearances at 1440, and the horizontal seams at 900',
-    'each seam holds one 1 px run in --pt-hair, or none where the rule says none',
+    'each seam holds one 1 px run in --pt-hair',
     async () => {
       await t.clearAll();
       await ensureCommentsPanel();

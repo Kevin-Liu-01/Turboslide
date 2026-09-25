@@ -132,7 +132,12 @@
   background: var(--pt-hair);
 }
 
-/* a grip: the deck's 11px square on paper with a hairline */
+/* a grip: the deck's 11px square on paper with a hairline; it sits above the rotation stem and
+   the ring so nothing draws through its paper (Kevin, 2026-09-24: the top centre square) */
+.ts-handle[data-shape='square'] {
+  z-index: 2;
+}
+
 .ts-handle[data-shape='square']::before {
   inset: 0;
   border: 1px solid var(--pt-hair);
@@ -275,8 +280,15 @@
 }
 
 /* the rotation ring: a 12px ring on paper with a rule in the selection colour, filled while
-   dragged or hovered, joined to the object's top centre by a 1px line in the same colour drawn
-   through ::after (SPEC-2 6.1 row 11; ruling 1) */
+   dragged or hovered, joined to the top centre square by a 1px line in the same colour drawn
+   through ::after (SPEC-2 6.1 row 11; ruling 1). The ring's centre sits ROTATE_HANDLE_GAP_PX (24)
+   above the object's top, so its bottom edge is 18 px above it and the square's top edge 5.5 px
+   above it: the stem is 13.5 px, meets the square's border, and the square, drawn above it,
+   hides the overlap; nothing draws inside the square (Kevin, 2026-09-24). */
+.ts-handle[data-kind='free-rotate'] {
+  z-index: 1;
+}
+
 .ts-handle[data-kind='free-rotate']::before {
   inset: 0;
   border: 1px solid var(--pt-select);
@@ -290,7 +302,7 @@
   left: 50%;
   top: 100%;
   width: 1px;
-  height: 18px;
+  height: 13.5px;
   margin-left: -0.5px;
   background: var(--pt-select);
   pointer-events: none;

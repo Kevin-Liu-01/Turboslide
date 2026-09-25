@@ -1,8 +1,9 @@
 /* MenuBar (MenuBar.tsx): the second of the editor's rows (gslides-parity SPEC 1.1, 2.11), 28 px
    (--pt-menu-h), the ten titles left aligned in 13 px Inter with 12 px of horizontal padding
-   each; the row draws no rule (the title row above owns the seam, the toolbar below draws its
-   own bottom edge). An open title takes the plate ground and ink text; the focus ring is the
-   1 px ink outline inset. Radius 0; colors are tokens only. */
+   each; the row draws one hairline at its bottom edge, the seam between the menu bar and the
+   toolbar (the title row above owns its own seam, the toolbar below draws its own bottom edge;
+   Kevin, 2026-09-24: a line between the two rows). An open title takes the plate ground and ink
+   text; the focus ring is the 1 px ink outline inset. Radius 0; colors are tokens only. */
 .ts-menubar {
   grid-column: 1 / -1;
   grid-row: 2;
@@ -12,6 +13,7 @@
   align-items: center;
   padding: 0 6px;
   background: var(--pt-paper);
+  border-bottom: 1px solid var(--pt-hair);
   color: var(--pt-ink);
   font: 13px/1 var(--pt-text);
   min-width: 0;

@@ -4381,7 +4381,7 @@
     {
       "id": "chrome.separators.once",
       "feature": "chrome",
-      "interaction": "Read from a 1x screenshot at the nine seams of seamsFromShot (title to menu bar, menu bar to toolbar, toolbar to sheet, toolbar to filmstrip, filmstrip head to cards, stage to notes pane, filmstrip to sheet mid and upper, sheet to right panel with the Comments panel open; the two seams along the bottom bar left with the bar, docs/PRODUCT.md section 2 rank 25; the filmstrip head seam draws in the overlay strip alone, so eight read in the editor): each holds one 1 px run in --pt-hair, or none where the rule says none, in both appearances at 1440 and at 900",
+      "interaction": "Read from a 1x screenshot at the nine seams of seamsFromShot (title to menu bar, menu bar to toolbar, toolbar to sheet, toolbar to filmstrip, filmstrip head to cards, stage to notes pane, filmstrip to sheet mid and upper, sheet to right panel with the Comments panel open; the two seams along the bottom bar left with the bar, docs/PRODUCT.md section 2 rank 25; the filmstrip head seam draws in the overlay strip alone, so eight read in the editor): each holds one 1 px run in --pt-hair (the menu bar to toolbar seam included since 2026-09-24), in both appearances at 1440 and at 900",
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-chrome rows 4, 5, 7",

@@ -116,11 +116,35 @@ describe('the kept shape presets in the renderer (FOCUS.md section 4)', () => {
     expect(renderShape(bare, context('dark', false))).toContain('fill="none"');
   });
 
-  it('keeps the whole box as the text rectangle of every kind, so the layer and the PPTX insets agree', () => {
-    for (const shape of ['rectangle', 'rounded', 'ellipse', 'roundRect', 'hexagon'] as const) {
+  it('answers the preset’s ECMA text rectangle at the box (docs/VECTOR.md 2.3): the whole box for a rectangle, an inset for the curves', () => {
+    for (const shape of ['rectangle', 'rect'] as const) {
       const block = { id: 'a', type: 'shape', shape, text: 'A' } as BlockOf<'shape'>;
       expect(shapeTextRect(block, 240, 160), shape).toEqual({ x: 0, y: 0, w: 240, h: 160 });
     }
+    /* the rounded rectangle steps in by x1 times 29289 / 100000 on every side, the legacy id through its preset */
+    for (const shape of ['rounded', 'roundRect'] as const) {
+      const block = { id: 'a', type: 'shape', shape, text: 'A' } as BlockOf<'shape'>;
+      const rect = shapeTextRect(block, 240, 160);
+      expect(rect.x, shape).toBeCloseTo(7.81, 2);
+      expect(rect.y, shape).toBeCloseTo(7.81, 2);
+      expect(rect.x + rect.w, shape).toBeCloseTo(240 - 7.81, 2);
+      expect(rect.y + rect.h, shape).toBeCloseTo(160 - 7.81, 2);
+    }
+    /* the ellipse's is the rectangle inscribed at 45 degrees; the hexagon's its ECMA inset */
+    const ellipse = shapeTextRect(
+      { id: 'a', type: 'shape', shape: 'ellipse', text: 'A' } as BlockOf<'shape'>,
+      240,
+      160,
+    );
+    expect(ellipse.x).toBeCloseTo(120 - 120 * Math.SQRT1_2, 3);
+    expect(ellipse.y).toBeCloseTo(80 - 80 * Math.SQRT1_2, 3);
+    const hexagon = shapeTextRect(
+      { id: 'a', type: 'shape', shape: 'hexagon', text: 'A' } as BlockOf<'shape'>,
+      240,
+      160,
+    );
+    expect(hexagon.x).toBeGreaterThan(0);
+    expect(hexagon.x + hexagon.w).toBeLessThan(240);
   });
 });
 

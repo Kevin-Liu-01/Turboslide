@@ -2,17 +2,28 @@
 // Shapes, Arrows, Callouts and Equation categories, 135 presets, each with its label, its category,
 // its ECMA-376 `prstGeom` name and the names of its adjust guides, read from the committed
 // definitions file (shapes/definitions.ts, generated from presetShapeDefinitions.xml). The
-// geometry (`shapePath`, `textInset`, `sites`) is meant to be evaluated by the interpreter in
-// shapes/geometry.ts from the same file, so the sheet, the Perfect export and PowerPoint draw one
-// shape (SPEC-2 0.57). The interpreter has not landed. Until it does, the three kept presets of
-// the focus round (docs/FOCUS.md section 4: `rect`, `roundRect`, `ellipse`, DRAWN_PRESET_IDS) draw
-// their ECMA path by hand from the same guide formulas the definitions file holds, and every
-// other preset still answers the rectangle as its path. Every preset answers the whole box as the
-// text inset (the exporter's reason is on `textInset`) and the eight sites of a rectangle. The line kinds (SPEC-2
-// 2.4), the ten line decorations and the six dashes live here too, and the picker draws every
-// glyph from `shapePath(48, 36)`; nothing is copied from Google. Imports only the definitions
-// module, so blocks.ts and the chrome can import it without a cycle.
+// geometry (`shapePath`, `textInset`, `sites`, `shapeGeometry`) is evaluated by the interpreter
+// in shapes/geometry.ts from the same file (docs/VECTOR.md 2.1, 2.2; SPEC-2 0.57), so the sheet,
+// the picker's glyphs, the Perfect export and PowerPoint draw one shape: every preset answers its
+// own path list, its ECMA text rectangle and its own connection sites, and `rect` alone keeps the
+// eight sites of a rectangle (its four then the corners) so a stored `connect.site` keeps its
+// meaning. A line kind and an unknown kind answer the box, the whole box and the eight sites. The
+// line kinds (SPEC-2 2.4), the ten line decorations and the six dashes live here too, and the
+// picker draws every glyph from `shapePath(48, 36)`; nothing is copied from Google. Imports only
+// the definitions module and the interpreter, which imports the definitions module alone, so
+// blocks.ts and the chrome can import this file without a cycle.
 import { PRESET_DEFINITIONS } from './shapes/definitions.ts';
+import { presetGeometry } from './shapes/geometry.ts';
+import type { Box, ConnectionSite, Geometry } from './shapes/geometry.ts';
+
+export type {
+  AdjustHandlePoint,
+  Box,
+  ConnectionSite,
+  Geometry,
+  GeometryFill,
+  GeometryPath,
+} from './shapes/geometry.ts';
 
 export const SHAPE_CATEGORIES = ['shapes', 'arrows', 'callouts', 'equation'] as const;
 export type ShapeCategory = (typeof SHAPE_CATEGORIES)[number];
@@ -371,94 +382,13 @@ export const LINE_END_PPTX: Readonly<Record<LineEnd, { head: string; exact: bool
   openDiamond: { head: 'diamond', exact: false },
 };
 
-export type Box = { x: number; y: number; w: number; h: number };
-
-/** A connection site on a shape: a point on the outline and the angle a connector leaves at, in degrees. */
-export type ConnectionSite = { x: number; y: number; angle: number };
-
 function fmt(n: number): string {
   return String(Math.round(n * 2) / 2);
-}
-
-/**
- * The presets whose path and text rectangle are their own geometry today (docs/FOCUS.md section
- * 4): the rectangle, the rounded rectangle and the ellipse. Every other preset draws its box until
- * the interpreter lands, which is why the galleries are parked behind Tools > Advanced tools.
- */
-export const DRAWN_PRESET_IDS = ['rect', 'roundRect', 'ellipse'] as const;
-
-export function isDrawnPreset(kind: string): boolean {
-  const preset = presetOf(kind);
-  return preset !== undefined && (DRAWN_PRESET_IDS as ReadonlyArray<string>).includes(preset.id);
-}
-
-/** The ECMA default of roundRect's one guide, `adj`, as a fraction of 100000 (presetShapeDefinitions.xml). */
-const ROUND_RECT_ADJ = 16667;
-/** The largest `adj` roundRect takes: `pin 0 adj 50000`, half of the shorter side. */
-const ROUND_RECT_ADJ_MAX = 50000;
-/** The corner radius of a roundRect at a size: `x1 = ss * pin(0, adj, 50000) / 100000` with ss the shorter side. */
-export function roundRectRadius(w: number, h: number, adjust: ReadonlyArray<number> = []): number {
-  const raw = adjust[0] ?? ROUND_RECT_ADJ;
-  const adj = Math.min(
-    ROUND_RECT_ADJ_MAX,
-    Math.max(0, Number.isFinite(raw) ? raw : ROUND_RECT_ADJ),
-  );
-  return (Math.min(w, h) * adj) / 100000;
 }
 
 /** The box path, `M0,0 H{w} V{h} H0 Z`. */
 function boxPath(w: number, h: number): string {
   return `M0,0 H${fmt(w)} V${fmt(h)} H0 Z`;
-}
-
-/**
- * The SVG path data of a shape at a size, on the half pixel grid, with the adjust values applied.
- * `rect` is the box; `roundRect` is the ECMA path list (four quarter arcs of radius `x1` joined by
- * lines, presetShapeDefinitions.xml roundRect); `ellipse` is the ECMA path list (four quarter arcs
- * of `wd2` by `hd2`). Every other preset draws its box until shapes/geometry.ts evaluates the
- * preset's path list (SPEC-2 0.57), and an unknown kind draws the box too.
- */
-export function shapePath(
-  kind: string,
-  w: number,
-  h: number,
-  adjust: ReadonlyArray<number> = [],
-): string {
-  const preset = presetOf(kind);
-  if (preset?.id === 'roundRect') {
-    const r = roundRectRadius(w, h, adjust);
-    if (r <= 0) return boxPath(w, h);
-    const R = fmt(r);
-    return (
-      `M0,${R} A${R},${R} 0 0 1 ${R},0 H${fmt(w - r)} A${R},${R} 0 0 1 ${fmt(w)},${R} ` +
-      `V${fmt(h - r)} A${R},${R} 0 0 1 ${fmt(w - r)},${fmt(h)} H${R} A${R},${R} 0 0 1 0,${fmt(h - r)} Z`
-    );
-  }
-  if (preset?.id === 'ellipse') {
-    const rx = fmt(w / 2);
-    const ry = fmt(h / 2);
-    return `M0,${ry} A${rx},${ry} 0 0 1 ${rx},0 A${rx},${ry} 0 0 1 ${fmt(w)},${ry} A${rx},${ry} 0 0 1 ${rx},${fmt(h)} A${rx},${ry} 0 0 1 0,${ry} Z`;
-  }
-  return boxPath(w, h);
-}
-
-/**
- * The text rectangle of a shape at a size (SPEC-2 2.2.17): the whole box for every preset, the
- * kept three included. The ECMA text rectangles of roundRect (`il = x1 * 29289 / 100000` on every
- * side) and ellipse (the rectangle inscribed at 45 degrees) are not applied here yet on purpose:
- * the Editable PPTX export measures the `.shape-text` layer against the shape's box and writes
- * the difference as the body insets, while PowerPoint applies the preset's own text rectangle on
- * top, so a layer at the ECMA rectangle would inset the exported text twice until the exporter
- * subtracts the geometry (docs/gslides-parity/focus/build/b3.md, request to the export owner).
- */
-export function textInset(
-  kind: string,
-  w: number,
-  h: number,
-  _adjust: ReadonlyArray<number> = [],
-): Box {
-  void presetOf(kind);
-  return { x: 0, y: 0, w, h };
 }
 
 /** The eight sites of a rectangle: the four side midpoints, then the four corners (SPEC-2 2.4.7). */
@@ -475,19 +405,83 @@ export function rectSites(w: number, h: number): ConnectionSite[] {
   ];
 }
 
+/** The geometry of a box: one path, the whole box as the text rectangle, the eight sites, no handle. */
+function boxGeometry(w: number, h: number): Geometry {
+  return {
+    paths: [{ d: boxPath(w, h), fill: 'norm', stroke: true }],
+    textRect: { x: 0, y: 0, w, h },
+    sites: rectSites(w, h),
+    handles: [],
+  };
+}
+
+/**
+ * The whole geometry of a shape at a size with its adjust values (docs/VECTOR.md 2.2): the
+ * preset's evaluated definition, with `rect` alone keeping eight sites (the four of its ECMA list,
+ * whose order matches `rectSites`, then the four corners appended), so a stored `connect.site` on
+ * a rectangle keeps its meaning; a line kind and an unknown kind answer the box's geometry.
+ */
+export function shapeGeometry(
+  kind: string,
+  w: number,
+  h: number,
+  adjust: ReadonlyArray<number> = [],
+): Geometry {
+  const preset = presetOf(kind);
+  if (preset === undefined) return boxGeometry(w, h);
+  const geometry = presetGeometry(preset.prstGeom, w, h, adjust);
+  if (preset.id === 'rect')
+    return { ...geometry, sites: [...geometry.sites, ...rectSites(w, h).slice(4)] };
+  return geometry;
+}
+
+/**
+ * The SVG path data of a shape at a size, on the half pixel grid, with the adjust values applied:
+ * the `d` strings of every path of the preset's geometry joined by a space (the picker strokes the
+ * outline and a mask clips to the filled subpaths, so one string serves both); a line kind and an
+ * unknown kind draw the box.
+ */
+export function shapePath(
+  kind: string,
+  w: number,
+  h: number,
+  adjust: ReadonlyArray<number> = [],
+): string {
+  return shapeGeometry(kind, w, h, adjust)
+    .paths.map((path) => path.d)
+    .join(' ');
+}
+
+/**
+ * The text rectangle of a shape at a size (SPEC-2 2.2.17): the preset's ECMA `rect` evaluated
+ * with its adjust values (a rounded rectangle's steps in by `x1 * 29289 / 100000` on every side, a
+ * right arrow's is the shaft), the whole box for a line kind or an unknown kind. The `.shape-text`
+ * layer sits here; the Editable PPTX export subtracts this rectangle from the measured insets so
+ * PowerPoint, which applies the preset's own rectangle, does not inset the text twice
+ * (docs/VECTOR.md 2.3, 2.5).
+ */
+export function textInset(
+  kind: string,
+  w: number,
+  h: number,
+  adjust: ReadonlyArray<number> = [],
+): Box {
+  return shapeGeometry(kind, w, h, adjust).textRect;
+}
+
 /**
  * The connection sites of a shape at a size, in the order the definitions file lists them, which
- * `connect.site` indexes (SPEC-2 2.4.7). A box, a picture, a chart, a table or a text box uses
- * the eight sites of a rectangle; until the interpreter lands every preset does too.
+ * `connect.site` indexes (SPEC-2 2.4.7): the preset's `cxnLst` (`rect` with the four corners
+ * appended); a box, a picture, a chart, a table, a text box, a line kind or an unknown kind uses
+ * the eight sites of a rectangle.
  */
 export function sites(
   kind: string,
   w: number,
   h: number,
-  _adjust: ReadonlyArray<number> = [],
+  adjust: ReadonlyArray<number> = [],
 ): ConnectionSite[] {
-  void presetOf(kind);
-  return rectSites(w, h);
+  return shapeGeometry(kind, w, h, adjust).sites;
 }
 
 /**

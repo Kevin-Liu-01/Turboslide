@@ -1,0 +1,8 @@
+# The turboslide launch lines vercel logs delivered for the preview turboslide-bdmg7p2vl around the fix round HTTP shader.render readings of 17:01Z to 17:04Z (the CLI delivers a subset of an invocation's stderr lines; nothing else was kept)
+2026-09-25T14:27:47.399Z turboslide launch: browser killed
+2026-09-25T17:01:45.600Z turboslide launch: browser gone
+2026-09-25T17:01:45.600Z turboslide launch: executable sparticuz /tmp/chromium
+2026-09-25T17:01:45.600Z turboslide launch: inflated /tmp/chromium in 2677 ms
+2026-09-25T17:02:34.361Z turboslide launch: browser gone
+2026-09-25T17:02:34.361Z turboslide launch: executable sparticuz /tmp/chromium
+2026-09-25T17:03:19.632Z turboslide launch: executable sparticuz /tmp/chromium

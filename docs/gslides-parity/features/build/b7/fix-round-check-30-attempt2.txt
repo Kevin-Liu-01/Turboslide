@@ -1,0 +1,1202 @@
+check 30/32: NITRO_PRESET=vercel pnpm --filter @turboslide/studio build:deploy && node scripts/check-vercel-output.mjs
+packages/native/npm/darwin-x64           | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["darwin"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-arm64-gnu      | [WARN] Unsupported platform: wanted: {"cpu":["arm64"],"os":["linux"],"libc":["glibc"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-arm64-musl     | [WARN] Unsupported platform: wanted: {"cpu":["arm64"],"os":["linux"],"libc":["musl"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-x64-gnu        | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["linux"],"libc":["glibc"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-x64-musl       | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["linux"],"libc":["musl"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/win32-x64-msvc       | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["win32"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+$ vite build -c vite.deploy.config.ts
+[nitro:vercel] ℹ Using nodejs24.x runtime.
+[nitro:vercel] ℹ Using web entry format.
+vite v8.2.2 building client environment for production...
+transforming...
+
+[@tanstack/devtools-vite] Removed devtools code from: /src/routes/__root.tsx
+
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/agent/src/http/readers.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/agent/src/http/readers.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/versions.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/versions.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/blob-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:crypto" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/blob-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/blob-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:crypto" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/snapshots.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/watch.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/watch.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/hosted.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/seed.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/seed.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/tmp-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/tmp-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/blob-templates.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/blob-templates.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/hosted.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/file-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:crypto" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/file-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/file-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/access-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:crypto" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/access-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/access-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/templates.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/comments-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:crypto" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/comments-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/comments-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/templates.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/lint/src/rendered/bitmap.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/lint/src/rendered/bitmap.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/lease.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:os" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/select.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/select.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/lease.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/inbox.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/inbox.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:zlib" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/lint/src/rendered/png.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+✓ 1039 modules transformed.
+rendering chunks...
+computing gzip size...
+.vercel/output/static/assets/perlin-noise-HyUCU2qR.webp               4.51 kB
+.vercel/output/static/assets/swirl-BLfwsv68.webp                      5.15 kB
+.vercel/output/static/assets/spiral-BDGKaJPq.webp                     6.05 kB
+.vercel/output/static/assets/god-rays-BGhUncmu.webp                   7.96 kB
+.vercel/output/static/assets/grain-gradient-BJp0F6mb.webp             8.98 kB
+.vercel/output/static/assets/waves-C8ujZ9i0.webp                      9.82 kB
+.vercel/output/static/assets/dither.worker-DEdJgEjO.js               33.37 kB
+.vercel/output/static/assets/turboslide_native_bg-CWMXbtlx.wasm     273.86 kB │ gzip: 109.97 kB
+.vercel/output/static/assets/InterVariable-DiVDrmQJ.woff2           352.24 kB
+.vercel/output/static/assets/InterVariable-Italic-FCBEiFp6.woff2    387.97 kB
+.vercel/output/static/assets/LiveClone-BnJhlIrV.css                   0.20 kB │ gzip:   0.15 kB
+.vercel/output/static/assets/ToolButton-DBNw46-g.css                  0.46 kB │ gzip:   0.27 kB
+.vercel/output/static/assets/inter-DT2i1OZC.css                       0.47 kB │ gzip:   0.25 kB
+.vercel/output/static/assets/EditHtmlPanel-BbZJvipr.css               0.63 kB │ gzip:   0.31 kB
+.vercel/output/static/assets/Progress-Qh-4a0X0.css                    0.78 kB │ gzip:   0.30 kB
+.vercel/output/static/assets/stage-DAHOds8-.css                       0.93 kB │ gzip:   0.38 kB
+.vercel/output/static/assets/ShortcutsDialog-HaZkVnqW.css             0.95 kB │ gzip:   0.42 kB
+.vercel/output/static/assets/AgentAccess-DT-dK3F3.css                 1.24 kB │ gzip:   0.54 kB
+.vercel/output/static/assets/Snackbar-CFjz9Jl4.css                    1.39 kB │ gzip:   0.62 kB
+.vercel/output/static/assets/-access-page-Bzf3LuIb.css                1.74 kB │ gzip:   0.60 kB
+.vercel/output/static/assets/Menu-CPFMSIp5.css                        2.11 kB │ gzip:   0.81 kB
+.vercel/output/static/assets/DiagramPanel-Dkm_YTZJ.css                2.13 kB │ gzip:   0.65 kB
+.vercel/output/static/assets/SlideList-CUSumNaF.css                   2.15 kB │ gzip:   0.82 kB
+.vercel/output/static/assets/ShaderGallery-CkjcDbEu.css               2.17 kB │ gzip:   0.72 kB
+.vercel/output/static/assets/brand-Qt_Fkm7b.css                       2.71 kB │ gzip:   1.02 kB
+.vercel/output/static/assets/Logo-B8HgUbHu.css                        2.80 kB │ gzip:   0.90 kB
+.vercel/output/static/assets/accounts-tsfqZ105.css                    3.85 kB │ gzip:   1.18 kB
+.vercel/output/static/assets/styles-Loh7zZG9.css                      4.78 kB │ gzip:   1.45 kB
+.vercel/output/static/assets/share-ClEd22T6.css                       5.13 kB │ gzip:   1.30 kB
+.vercel/output/static/assets/present-D-FUgGc4.css                     5.36 kB │ gzip:   1.42 kB
+.vercel/output/static/assets/tokens-BwpglDww.css                      6.18 kB │ gzip:   1.80 kB
+.vercel/output/static/assets/IdentityChip-CaVJVyNv.css                7.64 kB │ gzip:   1.91 kB
+.vercel/output/static/assets/Dialog-6JIwnZDW.css                      8.82 kB │ gzip:   2.20 kB
+.vercel/output/static/assets/sheet-D_wgob7I.css                      14.88 kB │ gzip:   3.60 kB
+.vercel/output/static/assets/EditorRoot-BXCcUtiz.css                 26.82 kB │ gzip:   5.23 kB
+.vercel/output/static/assets/index-CW9Nk2ll.css                      32.06 kB │ gzip:   5.95 kB
+.vercel/output/static/assets/Slideshow-VeYoa1oS.css                 138.41 kB │ gzip:  20.80 kB
+.vercel/output/static/assets/dispatch-DXzh7h_O.js                     0.07 kB │ gzip:   0.09 kB
+.vercel/output/static/assets/-link-slot-CdIWpH_p.js                   0.11 kB │ gzip:   0.12 kB
+.vercel/output/static/assets/edit._deckId-Ci_YjY8L.js                 0.20 kB │ gzip:   0.17 kB
+.vercel/output/static/assets/edit._deckId-BJ6Xd3or.js                 0.20 kB │ gzip:   0.17 kB
+.vercel/output/static/assets/editor-shell-context-PtYb8q1u.js         0.23 kB │ gzip:   0.19 kB
+.vercel/output/static/assets/embed._deckId-N91qzb1R.js                0.28 kB │ gzip:   0.22 kB
+.vercel/output/static/assets/deck-BKX6Yrnj.js                         0.31 kB │ gzip:   0.23 kB
+.vercel/output/static/assets/useMountEffect-BW-_RHPN.js               0.32 kB │ gzip:   0.22 kB
+.vercel/output/static/assets/present._deckId-BYxZWjio.js              0.35 kB │ gzip:   0.25 kB
+.vercel/output/static/assets/routes-uNbgAtRu.js                       0.39 kB │ gzip:   0.26 kB
+.vercel/output/static/assets/print._deckId-FvitFYtJ.js                0.44 kB │ gzip:   0.29 kB
+.vercel/output/static/assets/bundle-ChOS1Cem.js                       0.48 kB │ gzip:   0.31 kB
+.vercel/output/static/assets/edit._deckId-BzRTN5zY.js                 0.56 kB │ gzip:   0.40 kB
+.vercel/output/static/assets/-restoring-DQHeA9fB.js                   0.72 kB │ gzip:   0.38 kB
+.vercel/output/static/assets/ToolButton-tQnkCqTj.js                   0.87 kB │ gzip:   0.53 kB
+.vercel/output/static/assets/AppBarBrand-CRqFLn-b.js                  0.88 kB │ gzip:   0.45 kB
+.vercel/output/static/assets/labels-BGNEGQSZ.js                       0.89 kB │ gzip:   0.61 kB
+.vercel/output/static/assets/ForgetBrowser-BfSq2VNf.js                0.91 kB │ gzip:   0.54 kB
+.vercel/output/static/assets/share-links-CVWTVLn8.js                  0.91 kB │ gzip:   0.49 kB
+.vercel/output/static/assets/InsertIcon-BFnrapaZ.js                   0.93 kB │ gzip:   0.56 kB
+.vercel/output/static/assets/LiveClone-CYFfGcj5.js                    0.96 kB │ gzip:   0.57 kB
+.vercel/output/static/assets/NameVersion-BB7JH3rc.js                  1.16 kB │ gzip:   0.65 kB
+.vercel/output/static/assets/Details-C0oLuahg.js                      1.20 kB │ gzip:   0.61 kB
+.vercel/output/static/assets/deck._deckId-CRYltXds.js                 1.21 kB │ gzip:   0.67 kB
+.vercel/output/static/assets/deck._deckId-CO6XWEO-.js                 1.33 kB │ gzip:   0.73 kB
+.vercel/output/static/assets/deck._deckId-DHJE75GP.js                 1.42 kB │ gzip:   0.77 kB
+.vercel/output/static/assets/new-CdUm-t1-.js                          1.56 kB │ gzip:   0.79 kB
+.vercel/output/static/assets/GtMark-C6u-M7hH.js                       1.61 kB │ gzip:   0.88 kB
+.vercel/output/static/assets/AgentAccess-CqIaccRs.js                  1.84 kB │ gzip:   0.87 kB
+.vercel/output/static/assets/FromThisPresentation-BMOgV24d.js         1.87 kB │ gzip:   0.92 kB
+.vercel/output/static/assets/Help-BRLMu86Z.js                         1.88 kB │ gzip:   0.99 kB
+.vercel/output/static/assets/NotificationSettings-BPFgPjF0.js         1.96 kB │ gzip:   0.93 kB
+.vercel/output/static/assets/SlideNumbers-BWQkLpdM.js                 2.01 kB │ gzip:   0.97 kB
+.vercel/output/static/assets/theme-CXHzHRf-.js                        2.02 kB │ gzip:   0.85 kB
+.vercel/output/static/assets/EditHtmlPanel-reF5LE7U.js                2.05 kB │ gzip:   0.91 kB
+.vercel/output/static/assets/RequestAccess-BSJu265k.js                2.05 kB │ gzip:   0.93 kB
+.vercel/output/static/assets/CustomSpacing-DFg_j_L6.js                2.20 kB │ gzip:   1.11 kB
+.vercel/output/static/assets/MakeCopy-DfRdNgCH.js                     2.25 kB │ gzip:   1.15 kB
+.vercel/output/static/assets/Link-D3BpDG7f.js                         2.35 kB │ gzip:   1.11 kB
+.vercel/output/static/assets/Frame-_aafmu4I.js                        2.66 kB │ gzip:   1.09 kB
+.vercel/output/static/assets/ShortcutsDialog-CiRDLp1f.js              2.99 kB │ gzip:   1.33 kB
+.vercel/output/static/assets/ImageByUrl-CFR4nq0J.js                   3.25 kB │ gzip:   1.53 kB
+.vercel/output/static/assets/Open-DrnMonjy.js                         3.54 kB │ gzip:   1.53 kB
+.vercel/output/static/assets/download-TsOyeXXo.js                     3.91 kB │ gzip:   1.85 kB
+.vercel/output/static/assets/SignIn-C_LOT6lD.js                       3.92 kB │ gzip:   1.43 kB
+.vercel/output/static/assets/IdentityChip-DtY4-uH3.js                 4.13 kB │ gzip:   1.82 kB
+.vercel/output/static/assets/SaveAsTemplate-mIp3GEqZ.js               4.33 kB │ gzip:   1.80 kB
+.vercel/output/static/assets/device-L7Sr04n0.js                       4.74 kB │ gzip:   1.66 kB
+.vercel/output/static/assets/-access-page-KQaRcnqh.js                 4.75 kB │ gzip:   1.71 kB
+.vercel/output/static/assets/FindReplace-CZesDBy9.js                  5.03 kB │ gzip:   2.06 kB
+.vercel/output/static/assets/Publish-C3kVvG08.js                      5.24 kB │ gzip:   1.93 kB
+.vercel/output/static/assets/AvatarBuilder-BAf3bydc.js                5.33 kB │ gzip:   2.13 kB
+.vercel/output/static/assets/Progress-BHFSRSOy.js                     5.34 kB │ gzip:   2.83 kB
+.vercel/output/static/assets/ImportSlides-BtbHzz9h.js                 5.68 kB │ gzip:   2.11 kB
+.vercel/output/static/assets/Dialog-B6jd2WC4.js                       5.72 kB │ gzip:   1.99 kB
+.vercel/output/static/assets/diagrams-Cpev3SC-.js                     5.79 kB │ gzip:   2.34 kB
+.vercel/output/static/assets/Profile-DqP1hg4N.js                      5.91 kB │ gzip:   1.75 kB
+.vercel/output/static/assets/DeckViewer-BZWusy_B.js                   5.98 kB │ gzip:   2.68 kB
+.vercel/output/static/assets/print._deckId-D7JbjceC.js                6.28 kB │ gzip:   2.43 kB
+.vercel/output/static/assets/decks.trash-Cdkl6OBK.js                  6.39 kB │ gzip:   2.37 kB
+.vercel/output/static/assets/DiagramPanel-DW4GRtd5.js                 6.48 kB │ gzip:   2.55 kB
+.vercel/output/static/assets/Tailor-D6L_t4Sb.js                       6.52 kB │ gzip:   2.60 kB
+.vercel/output/static/assets/decks.templates-Dwg6FhDw.js              7.81 kB │ gzip:   2.78 kB
+.vercel/output/static/assets/Download-BWqT7mZx.js                     8.69 kB │ gzip:   3.30 kB
+.vercel/output/static/assets/ShaderGallery-CFehXjCw.js                9.13 kB │ gzip:   3.59 kB
+.vercel/output/static/assets/Background-BKO4GCqI.js                  11.75 kB │ gzip:   3.95 kB
+.vercel/output/static/assets/present._deckId-DZSvQPDX.js             12.36 kB │ gzip:   4.23 kB
+.vercel/output/static/assets/Logo-B5hTlCeA.js                        20.85 kB │ gzip:   7.36 kB
+.vercel/output/static/assets/decks.index-Dp62qlvb.js                 22.03 kB │ gzip:   6.93 kB
+.vercel/output/static/assets/SpecialCharacters-C0yY_aJy.js           22.97 kB │ gzip:   8.13 kB
+.vercel/output/static/assets/recipe-07erwVK1.js                      23.18 kB │ gzip:   7.54 kB
+.vercel/output/static/assets/Share-D6h2CFPD.js                       29.22 kB │ gzip:   8.03 kB
+.vercel/output/static/assets/Snackbar-Qy8fBTzv.js                    46.26 kB │ gzip:  13.62 kB
+.vercel/output/static/assets/Menu-CKZJt_qD.js                        85.76 kB │ gzip:  24.27 kB
+.vercel/output/static/assets/home-ClFl3QeQ.js                        93.40 kB │ gzip:  29.53 kB
+.vercel/output/static/assets/mount-BW8RN5-q.js                      113.47 kB │ gzip:  40.49 kB
+.vercel/output/static/assets/SlideList-fIoBlg73.js                  115.77 kB │ gzip:  38.17 kB
+.vercel/output/static/assets/editor-BCnhQO7r.js                     389.90 kB │ gzip: 126.70 kB
+.vercel/output/static/assets/EditorRoot-DjgFq6WN.js                 479.67 kB │ gzip: 151.01 kB
+.vercel/output/static/assets/Slideshow-B17zBomU.js                  655.86 kB │ gzip: 251.73 kB
+.vercel/output/static/assets/index-C4LgJLNt.js                    1,089.21 kB │ gzip: 296.06 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.29s
+vite v8.2.2 building ssr environment for production...
+transforming...
+
+[@tanstack/devtools-vite] Removed devtools code from: /src/routes/__root.tsx
+
+✓ 1982 modules transformed.
+rendering chunks...
+computing gzip size...
+node_modules/.nitro/vite/services/ssr/assets/dither.worker-DEdJgEjO.js                        33.37 kB
+node_modules/.nitro/vite/services/ssr/assets/turboslide_native_bg-CWMXbtlx.wasm              273.86 kB │ gzip: 109.97 kB
+node_modules/.nitro/vite/services/ssr/assets/InterVariable-DiVDrmQJ.woff2                    352.24 kB
+node_modules/.nitro/vite/services/ssr/assets/InterVariable-Italic-FCBEiFp6.woff2             387.97 kB
+node_modules/.nitro/vite/services/ssr/assets/LiveClone-BnJhlIrV.css                            0.20 kB │ gzip:   0.15 kB
+node_modules/.nitro/vite/services/ssr/assets/ToolButton-DBNw46-g.css                           0.46 kB │ gzip:   0.27 kB
+node_modules/.nitro/vite/services/ssr/assets/inter-DT2i1OZC.css                                0.47 kB │ gzip:   0.25 kB
+node_modules/.nitro/vite/services/ssr/assets/EditHtmlPanel-BbZJvipr.css                        0.63 kB │ gzip:   0.31 kB
+node_modules/.nitro/vite/services/ssr/assets/Progress-Qh-4a0X0.css                             0.78 kB │ gzip:   0.30 kB
+node_modules/.nitro/vite/services/ssr/assets/stage-DAHOds8-.css                                0.93 kB │ gzip:   0.38 kB
+node_modules/.nitro/vite/services/ssr/assets/ShortcutsDialog-HaZkVnqW.css                      0.95 kB │ gzip:   0.42 kB
+node_modules/.nitro/vite/services/ssr/assets/Tooltip-g8Z8Au6o.css                              1.14 kB │ gzip:   0.55 kB
+node_modules/.nitro/vite/services/ssr/assets/AgentAccess-DT-dK3F3.css                          1.24 kB │ gzip:   0.54 kB
+node_modules/.nitro/vite/services/ssr/assets/EmptyFigure-DV_kquxv.css                          1.25 kB │ gzip:   0.52 kB
+node_modules/.nitro/vite/services/ssr/assets/Snackbar-CFjz9Jl4.css                             1.39 kB │ gzip:   0.62 kB
+node_modules/.nitro/vite/services/ssr/assets/-access-page-Bzf3LuIb.css                         1.74 kB │ gzip:   0.60 kB
+node_modules/.nitro/vite/services/ssr/assets/Menu-CPFMSIp5.css                                 2.11 kB │ gzip:   0.81 kB
+node_modules/.nitro/vite/services/ssr/assets/DiagramPanel-Dkm_YTZJ.css                         2.13 kB │ gzip:   0.65 kB
+node_modules/.nitro/vite/services/ssr/assets/SlideList-CUSumNaF.css                            2.15 kB │ gzip:   0.82 kB
+node_modules/.nitro/vite/services/ssr/assets/ShaderGallery-CkjcDbEu.css                        2.17 kB │ gzip:   0.72 kB
+node_modules/.nitro/vite/services/ssr/assets/brand-Qt_Fkm7b.css                                2.71 kB │ gzip:   1.02 kB
+node_modules/.nitro/vite/services/ssr/assets/Logo-B8HgUbHu.css                                 2.80 kB │ gzip:   0.90 kB
+node_modules/.nitro/vite/services/ssr/assets/accounts-tsfqZ105.css                             3.85 kB │ gzip:   1.18 kB
+node_modules/.nitro/vite/services/ssr/assets/styles-Loh7zZG9.css                               4.78 kB │ gzip:   1.45 kB
+node_modules/.nitro/vite/services/ssr/assets/share-ClEd22T6.css                                5.13 kB │ gzip:   1.30 kB
+node_modules/.nitro/vite/services/ssr/assets/present-D-FUgGc4.css                              5.36 kB │ gzip:   1.42 kB
+node_modules/.nitro/vite/services/ssr/assets/tokens-BwpglDww.css                               6.18 kB │ gzip:   1.80 kB
+node_modules/.nitro/vite/services/ssr/assets/IdentityChip-CaVJVyNv.css                         7.64 kB │ gzip:   1.91 kB
+node_modules/.nitro/vite/services/ssr/assets/decks-BW_D99ae.css                                7.82 kB │ gzip:   2.05 kB
+node_modules/.nitro/vite/services/ssr/assets/Dialog-6JIwnZDW.css                               8.82 kB │ gzip:   2.20 kB
+node_modules/.nitro/vite/services/ssr/assets/sheet-D_wgob7I.css                               14.88 kB │ gzip:   3.60 kB
+node_modules/.nitro/vite/services/ssr/assets/router-BzdfojcC.css                              21.83 kB │ gzip:   4.46 kB
+node_modules/.nitro/vite/services/ssr/assets/EditorRoot-BXCcUtiz.css                          26.82 kB │ gzip:   5.23 kB
+node_modules/.nitro/vite/services/ssr/assets/Slideshow-VeYoa1oS.css                          138.41 kB │ gzip:  20.80 kB
+node_modules/.nitro/vite/services/ssr/assets/kysely-adapter-j8_qiJzo.js                        0.12 kB │ gzip:   0.09 kB
+node_modules/.nitro/vite/services/ssr/assets/core-RrmWoKne.js                                  0.25 kB │ gzip:   0.18 kB
+node_modules/.nitro/vite/services/ssr/assets/cn-C4dh4tV1.js                                    0.28 kB │ gzip:   0.22 kB
+node_modules/.nitro/vite/services/ssr/assets/empty-plugin-adapters-5PvIP3d0.js                 0.31 kB │ gzip:   0.21 kB
+node_modules/.nitro/vite/services/ssr/assets/editor-shell-context-sCDelOs6.js                  0.39 kB │ gzip:   0.23 kB
+node_modules/.nitro/vite/services/ssr/assets/createServerRpc-DIobIZ3U.js                       0.46 kB │ gzip:   0.30 kB
+node_modules/.nitro/vite/services/ssr/assets/dispatch-I-MCcDRj.js                              0.47 kB │ gzip:   0.33 kB
+node_modules/.nitro/vite/services/ssr/assets/embed._deckId-2LjcbFYw.js                         0.52 kB │ gzip:   0.32 kB
+node_modules/.nitro/vite/services/ssr/assets/json-Dbx7FnjL.js                                  0.56 kB │ gzip:   0.32 kB
+node_modules/.nitro/vite/services/ssr/assets/createSsrRpc-BE1Vqe91.js                          0.59 kB │ gzip:   0.37 kB
+node_modules/.nitro/vite/services/ssr/assets/copy-DPZ85lU3.js                                  0.69 kB │ gzip:   0.44 kB
+node_modules/.nitro/vite/services/ssr/assets/present._deckId-CI23VPcP.js                       0.71 kB │ gzip:   0.39 kB
+node_modules/.nitro/vite/services/ssr/assets/health-B_vPnNIc.js                                0.73 kB │ gzip:   0.40 kB
+node_modules/.nitro/vite/services/ssr/assets/routes-D7ELzDFN.js                                0.74 kB │ gzip:   0.41 kB
+node_modules/.nitro/vite/services/ssr/assets/model-Drp5DeKq.js                                 0.76 kB │ gzip:   0.47 kB
+node_modules/.nitro/vite/services/ssr/assets/kysely-migration-tables-DFfmKhq--C5KbRCc3.js      0.94 kB │ gzip:   0.52 kB
+node_modules/.nitro/vite/services/ssr/assets/-link-slot-crIhcmp-.js                            1.23 kB │ gzip:   0.71 kB
+node_modules/.nitro/vite/services/ssr/assets/print._deckId-5dc-rsZH.js                         1.26 kB │ gzip:   0.70 kB
+node_modules/.nitro/vite/services/ssr/assets/lint-rendered-Cch2QlRf.js                         1.32 kB │ gzip:   0.65 kB
+node_modules/.nitro/vite/services/ssr/assets/useMountEffect-DsyJ14_r.js                        1.37 kB │ gzip:   0.69 kB
+node_modules/.nitro/vite/services/ssr/assets/EmptyFigure-BmmR3aF_.js                           1.49 kB │ gzip:   0.64 kB
+node_modules/.nitro/vite/services/ssr/assets/middleware-DXBzkFjX.js                            1.50 kB │ gzip:   0.70 kB
+node_modules/.nitro/vite/services/ssr/assets/ToolButton-BIvb_-nN.js                            1.53 kB │ gzip:   0.74 kB
+node_modules/.nitro/vite/services/ssr/assets/warm-bYHk1nx-.js                                  1.60 kB │ gzip:   0.76 kB
+node_modules/.nitro/vite/services/ssr/assets/decks.index-COeLt4Bk.js                           1.82 kB │ gzip:   0.90 kB
+node_modules/.nitro/vite/services/ssr/assets/bayer-CO_JZcR8.js                                 1.83 kB │ gzip:   0.91 kB
+node_modules/.nitro/vite/services/ssr/assets/ForgetBrowser-DYQVjqtb.js                         1.88 kB │ gzip:   0.94 kB
+node_modules/.nitro/vite/services/ssr/assets/rolldown-runtime-C5kaFYNG.js                      1.89 kB │ gzip:   0.85 kB
+node_modules/.nitro/vite/services/ssr/assets/errors-_xGNPB37.js                                1.94 kB │ gzip:   0.76 kB
+node_modules/.nitro/vite/services/ssr/assets/NameVersion-DoDcGh60.js                           2.00 kB │ gzip:   0.94 kB
+node_modules/.nitro/vite/services/ssr/assets/InsertIcon-DULtVqLE.js                            2.02 kB │ gzip:   1.00 kB
+node_modules/.nitro/vite/services/ssr/assets/bundle-CuALyW_x.js                                2.08 kB │ gzip:   1.03 kB
+node_modules/.nitro/vite/services/ssr/assets/GtMark-Cwcse0jH.js                                2.08 kB │ gzip:   1.18 kB
+node_modules/.nitro/vite/services/ssr/assets/Details-XqEHpJGN.js                               2.10 kB │ gzip:   0.93 kB
+node_modules/.nitro/vite/services/ssr/assets/AppBarBrand-BW-xDoxA.js                           2.18 kB │ gzip:   1.00 kB
+node_modules/.nitro/vite/services/ssr/assets/Frame-BBoylXVP.js                                 2.24 kB │ gzip:   0.72 kB
+node_modules/.nitro/vite/services/ssr/assets/TurboslideMark-BvjlUpp_.js                        2.25 kB │ gzip:   0.88 kB
+node_modules/.nitro/vite/services/ssr/assets/share-links-Du6hhyNe.js                           2.30 kB │ gzip:   0.92 kB
+node_modules/.nitro/vite/services/ssr/assets/dispatch-BDkgwp7s.js                              2.37 kB │ gzip:   1.09 kB
+node_modules/.nitro/vite/services/ssr/assets/refusal-CkjHhTmj.js                               2.47 kB │ gzip:   1.10 kB
+node_modules/.nitro/vite/services/ssr/assets/LiveClone-BcxVmNZf.js                             2.48 kB │ gzip:   1.24 kB
+node_modules/.nitro/vite/services/ssr/assets/Help-usPDypwN.js                                  2.63 kB │ gzip:   1.27 kB
+node_modules/.nitro/vite/services/ssr/assets/theme-node-DIeecYR8.js                            2.85 kB │ gzip:   1.29 kB
+node_modules/.nitro/vite/services/ssr/assets/deck._deckId-m1pY43BY.js                          2.91 kB │ gzip:   1.32 kB
+node_modules/.nitro/vite/services/ssr/assets/assist-fixtures-DZgTqGYr.js                       2.92 kB │ gzip:   1.31 kB
+node_modules/.nitro/vite/services/ssr/assets/token-B_Dq56FW.js                                 3.03 kB │ gzip:   1.13 kB
+node_modules/.nitro/vite/services/ssr/assets/metrics-Dl0RAbs3.js                               3.20 kB │ gzip:   1.43 kB
+node_modules/.nitro/vite/services/ssr/assets/FromThisPresentation-Dw4LigbG.js                  3.31 kB │ gzip:   1.36 kB
+node_modules/.nitro/vite/services/ssr/assets/log-CakFWyQ_.js                                   3.31 kB │ gzip:   1.54 kB
+node_modules/.nitro/vite/services/ssr/assets/deck._deckId-DIzXLkGX.js                          3.32 kB │ gzip:   1.46 kB
+node_modules/.nitro/vite/services/ssr/assets/EditHtmlPanel-Dore4AjJ.js                         3.32 kB │ gzip:   1.17 kB
+node_modules/.nitro/vite/services/ssr/assets/dither-walk-CMBP4aPt.js                           3.34 kB │ gzip:   1.43 kB
+node_modules/.nitro/vite/services/ssr/assets/-restoring-CPKKWinh.js                            3.35 kB │ gzip:   1.34 kB
+node_modules/.nitro/vite/services/ssr/assets/dither-values-B4DCtnzQ.js                         3.37 kB │ gzip:   1.29 kB
+node_modules/.nitro/vite/services/ssr/assets/Progress-DaZh98cg.js                              3.38 kB │ gzip:   1.57 kB
+node_modules/.nitro/vite/services/ssr/assets/lint-CnGLd5Q7.js                                  3.43 kB │ gzip:   1.62 kB
+node_modules/.nitro/vite/services/ssr/assets/AgentAccess-D6fvhXWp.js                           3.46 kB │ gzip:   1.41 kB
+node_modules/.nitro/vite/services/ssr/assets/NotificationSettings-Ccv5Otqp.js                  3.46 kB │ gzip:   1.37 kB
+node_modules/.nitro/vite/services/ssr/assets/deck._deckId-CTg9DR5N.js                          3.51 kB │ gzip:   1.58 kB
+node_modules/.nitro/vite/services/ssr/assets/RequestAccess-BoIuq9Pm.js                         3.80 kB │ gzip:   1.44 kB
+node_modules/.nitro/vite/services/ssr/assets/edit._deckId-BIT4t_54.js                          3.82 kB │ gzip:   1.81 kB
+node_modules/.nitro/vite/services/ssr/assets/CustomSpacing-YEqE7sj2.js                         3.90 kB │ gzip:   1.56 kB
+node_modules/.nitro/vite/services/ssr/assets/blob-disk-Byw1rcbZ.js                             3.93 kB │ gzip:   1.49 kB
+node_modules/.nitro/vite/services/ssr/assets/render-DpcQ3TA3.js                                3.93 kB │ gzip:   1.89 kB
+node_modules/.nitro/vite/services/ssr/assets/lint-CUPaj4Af.js                                  4.01 kB │ gzip:   1.80 kB
+node_modules/.nitro/vite/services/ssr/assets/edit._deckId-Bjhm_AKS.js                          4.08 kB │ gzip:   1.89 kB
+node_modules/.nitro/vite/services/ssr/assets/MakeCopy-CFRBEmPa.js                              4.09 kB │ gzip:   1.70 kB
+node_modules/.nitro/vite/services/ssr/assets/Link-C7PJHYNB.js                                  4.38 kB │ gzip:   1.69 kB
+node_modules/.nitro/vite/services/ssr/assets/bun-sqlite-dialect-C7ftEUSI-66JifPHS.js           4.66 kB │ gzip:   1.68 kB
+node_modules/.nitro/vite/services/ssr/assets/node-sqlite-dialect-getIrOEq.js                   4.66 kB │ gzip:   1.67 kB
+node_modules/.nitro/vite/services/ssr/assets/SlideNumbers-BeUJFBKe.js                          4.72 kB │ gzip:   1.94 kB
+node_modules/.nitro/vite/services/ssr/assets/bundle-BXiHzAZu.js                                4.75 kB │ gzip:   1.95 kB
+node_modules/.nitro/vite/services/ssr/assets/server-CP3ThdC3.js                                4.85 kB │ gzip:   1.59 kB
+node_modules/.nitro/vite/services/ssr/assets/edit._deckId-BDEvS1OK.js                          4.86 kB │ gzip:   2.22 kB
+node_modules/.nitro/vite/services/ssr/assets/-edit-search-FTmZDS7W.js                          4.97 kB │ gzip:   1.86 kB
+node_modules/.nitro/vite/services/ssr/assets/report-Bou5h80m.js                                5.06 kB │ gzip:   2.00 kB
+node_modules/.nitro/vite/services/ssr/assets/theme-Dv3XCuPc.js                                 5.18 kB │ gzip:   1.98 kB
+node_modules/.nitro/vite/services/ssr/assets/d1-sqlite-dialect-D4qp4-wW-D0JN204e.js            5.24 kB │ gzip:   1.88 kB
+node_modules/.nitro/vite/services/ssr/assets/ShortcutsDialog-DNeT69Lr.js                       5.58 kB │ gzip:   2.14 kB
+node_modules/.nitro/vite/services/ssr/assets/ImageByUrl-BBJnvuNh.js                            5.60 kB │ gzip:   2.14 kB
+node_modules/.nitro/vite/services/ssr/assets/labels-CgKVR5yo.js                                5.66 kB │ gzip:   2.54 kB
+node_modules/.nitro/vite/services/ssr/assets/Open-d0TzBecR.js                                  6.06 kB │ gzip:   2.19 kB
+node_modules/.nitro/vite/services/ssr/assets/SignIn-BawWg6ke.js                                6.30 kB │ gzip:   1.85 kB
+node_modules/.nitro/vite/services/ssr/assets/start-CDpSetm4.js                                 6.43 kB │ gzip:   2.77 kB
+node_modules/.nitro/vite/services/ssr/assets/export-DZumZvc2.js                                6.64 kB │ gzip:   2.31 kB
+node_modules/.nitro/vite/services/ssr/assets/card-thumb-B0Cd6eMG.js                            6.79 kB │ gzip:   2.80 kB
+node_modules/.nitro/vite/services/ssr/assets/cli-B0HteYfN.js                                   6.82 kB │ gzip:   2.67 kB
+node_modules/.nitro/vite/services/ssr/assets/deck._deckId-B8UNpeNS.js                          6.92 kB │ gzip:   2.88 kB
+node_modules/.nitro/vite/services/ssr/assets/render-CTZbiCTS.js                                7.19 kB │ gzip:   2.90 kB
+node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-D67KqUOJ.js            7.27 kB │ gzip:   1.48 kB
+node_modules/.nitro/vite/services/ssr/assets/flags-BhZItxeG.js                                 8.06 kB │ gzip:   3.25 kB
+node_modules/.nitro/vite/services/ssr/assets/device-CTw_WAOO.js                                8.28 kB │ gzip:   2.28 kB
+node_modules/.nitro/vite/services/ssr/assets/new-BWUZgMSy.js                                   8.44 kB │ gzip:   3.38 kB
+node_modules/.nitro/vite/services/ssr/assets/SaveAsTemplate-DoVzcpiv.js                        8.44 kB │ gzip:   2.79 kB
+node_modules/.nitro/vite/services/ssr/assets/useStudioSession-DwKa_Pnr.js                      8.49 kB │ gzip:   3.05 kB
+node_modules/.nitro/vite/services/ssr/assets/AvatarBuilder-wxJP9jc1.js                         8.92 kB │ gzip:   2.92 kB
+node_modules/.nitro/vite/services/ssr/assets/IdentityChip-7OraVj5v.js                          9.13 kB │ gzip:   3.08 kB
+node_modules/.nitro/vite/services/ssr/assets/sessions-D2sRSNGu.js                              9.18 kB │ gzip:   3.29 kB
+node_modules/.nitro/vite/services/ssr/assets/FindReplace-BT5mXiQ4.js                           9.29 kB │ gzip:   3.05 kB
+node_modules/.nitro/vite/services/ssr/assets/Dialog-Dog8uV42.js                                9.35 kB │ gzip:   2.71 kB
+node_modules/.nitro/vite/services/ssr/assets/Publish-CYJvc4n1.js                               9.42 kB │ gzip:   2.89 kB
+node_modules/.nitro/vite/services/ssr/assets/-access-page-C_T3efL2.js                          9.52 kB │ gzip:   3.10 kB
+node_modules/.nitro/vite/services/ssr/assets/agent-actions-BWR4XsTG.js                         9.62 kB │ gzip:   3.56 kB
+node_modules/.nitro/vite/services/ssr/assets/Tooltip-B9nUFJcS.js                               9.68 kB │ gzip:   3.47 kB
+node_modules/.nitro/vite/services/ssr/assets/-recent-B7rWpcA3.js                               9.77 kB │ gzip:   3.38 kB
+node_modules/.nitro/vite/services/ssr/assets/Profile-CTyzsGiW.js                              10.05 kB │ gzip:   2.64 kB
+node_modules/.nitro/vite/services/ssr/assets/ImportSlides-DxkCrrKY.js                         10.43 kB │ gzip:   3.32 kB
+node_modules/.nitro/vite/services/ssr/assets/secret-CNn5S_rW.js                               11.07 kB │ gzip:   3.95 kB
+node_modules/.nitro/vite/services/ssr/assets/decks-B1tmWewn.js                                11.09 kB │ gzip:   4.03 kB
+node_modules/.nitro/vite/services/ssr/assets/print._deckId-CWMOEPN4.js                        11.09 kB │ gzip:   3.75 kB
+node_modules/.nitro/vite/services/ssr/assets/bundle-core-0w7HrIR4.js                          11.16 kB │ gzip:   4.40 kB
+node_modules/.nitro/vite/services/ssr/assets/write-B27sr3Uf.js                                11.60 kB │ gzip:   4.54 kB
+node_modules/.nitro/vite/services/ssr/assets/protocol-jVKvPMER.js                             11.98 kB │ gzip:   4.19 kB
+node_modules/.nitro/vite/services/ssr/assets/DiagramPanel-BpxX3ABl.js                         12.09 kB │ gzip:   3.63 kB
+node_modules/.nitro/vite/services/ssr/assets/export-sync-DaIUYIgd.js                          12.20 kB │ gzip:   4.56 kB
+node_modules/.nitro/vite/services/ssr/assets/templates-D4yO9s3P.js                            13.44 kB │ gzip:   3.81 kB
+node_modules/.nitro/vite/services/ssr/assets/decks.trash-9L-NquZa.js                          13.56 kB │ gzip:   4.40 kB
+node_modules/.nitro/vite/services/ssr/assets/Tailor-3bxUffs3.js                               13.93 kB │ gzip:   4.69 kB
+node_modules/.nitro/vite/services/ssr/assets/DeckViewer-BtncwZ0H.js                           14.48 kB │ gzip:   5.34 kB
+node_modules/.nitro/vite/services/ssr/assets/auth-BH8o57mv.js                                 14.68 kB │ gzip:   5.19 kB
+node_modules/.nitro/vite/services/ssr/assets/dist-Dcsf1esu.js                                 14.69 kB │ gzip:   4.15 kB
+node_modules/.nitro/vite/services/ssr/assets/sessions-CKvJSQg4.js                             14.83 kB │ gzip:   5.06 kB
+node_modules/.nitro/vite/services/ssr/assets/decks.templates-DVbHsulk.js                      16.40 kB │ gzip:   4.86 kB
+node_modules/.nitro/vite/services/ssr/assets/Download-871viI2Z.js                             16.51 kB │ gzip:   5.07 kB
+node_modules/.nitro/vite/services/ssr/assets/download-BzW8fM4I.js                             18.02 kB │ gzip:   6.72 kB
+node_modules/.nitro/vite/services/ssr/assets/headers-nRJzoJEq.js                              18.22 kB │ gzip:   6.34 kB
+node_modules/.nitro/vite/services/ssr/assets/ratelimit-BAqVce3_.js                            18.48 kB │ gzip:   5.63 kB
+node_modules/.nitro/vite/services/ssr/assets/ShaderGallery-DQWH3kSy.js                        18.57 kB │ gzip:   5.84 kB
+node_modules/.nitro/vite/services/ssr/assets/apply-layout-epbXgTlH.js                         19.68 kB │ gzip:   5.40 kB
+node_modules/.nitro/vite/services/ssr/assets/logo-model-DvaYXyiL.js                           19.86 kB │ gzip:   7.33 kB
+node_modules/.nitro/vite/services/ssr/assets/thumbs-DtOdFm1q.js                               19.86 kB │ gzip:   6.53 kB
+node_modules/.nitro/vite/services/ssr/assets/tokens-DynoHrxR.js                               22.60 kB │ gzip:   7.90 kB
+node_modules/.nitro/vite/services/ssr/assets/present._deckId-B3JnIuM5.js                      23.46 kB │ gzip:   6.72 kB
+node_modules/.nitro/vite/services/ssr/assets/write-C0U54B1I.js                                23.62 kB │ gzip:   7.81 kB
+node_modules/.nitro/vite/services/ssr/assets/export-jobs-CIVE4PS_.js                          24.04 kB │ gzip:   8.44 kB
+node_modules/.nitro/vite/services/ssr/assets/authorize-ckIHtPo3.js                            24.46 kB │ gzip:   8.05 kB
+node_modules/.nitro/vite/services/ssr/assets/Background-teQJNxJC.js                           25.84 kB │ gzip:   7.30 kB
+node_modules/.nitro/vite/services/ssr/assets/access-DXJmnAc9.js                               26.47 kB │ gzip:   8.69 kB
+node_modules/.nitro/vite/services/ssr/assets/download-C0kdPTga.js                             26.64 kB │ gzip:   8.43 kB
+node_modules/.nitro/vite/services/ssr/assets/root-Dr6oOJ8b.js                                 27.00 kB │ gzip:   9.37 kB
+node_modules/.nitro/vite/services/ssr/assets/mount-CXDSBOpk.js                                27.40 kB │ gzip:   7.77 kB
+node_modules/.nitro/vite/services/ssr/assets/unpack-B7QhBVor.js                               28.76 kB │ gzip:   8.66 kB
+node_modules/.nitro/vite/services/ssr/assets/SpecialCharacters-mNgKBLEv.js                    29.95 kB │ gzip:   9.32 kB
+node_modules/.nitro/vite/services/ssr/assets/client-CytnTmZm.js                               30.41 kB │ gzip:   9.16 kB
+node_modules/.nitro/vite/services/ssr/assets/Logo-KjjnYKT7.js                                 30.51 kB │ gzip:   8.83 kB
+node_modules/.nitro/vite/services/ssr/assets/decks-DP148WGF.js                                31.07 kB │ gzip:   9.10 kB
+node_modules/.nitro/vite/services/ssr/assets/rules-CcXUTykR.js                                34.53 kB │ gzip:  11.22 kB
+node_modules/.nitro/vite/services/ssr/assets/sprite-C9kCxRrk.js                               36.66 kB │ gzip:  10.72 kB
+node_modules/.nitro/vite/services/ssr/assets/SlideList-BVzpg9zc.js                            37.84 kB │ gzip:  11.95 kB
+node_modules/.nitro/vite/services/ssr/assets/export-batch-FzoRT57L.js                         42.94 kB │ gzip:  13.26 kB
+node_modules/.nitro/vite/services/ssr/assets/shader-frames-BjwySYct.js                        43.03 kB │ gzip:  15.72 kB
+node_modules/.nitro/vite/services/ssr/assets/decks.index-B4LNMthG.js                          45.94 kB │ gzip:  12.94 kB
+node_modules/.nitro/vite/services/ssr/assets/Snackbar-Be44MJOQ.js                             49.70 kB │ gzip:  14.62 kB
+node_modules/.nitro/vite/services/ssr/assets/frames-B-NJju4W.js                               50.16 kB │ gzip:  15.16 kB
+node_modules/.nitro/vite/services/ssr/assets/ready-DS1-8bRC.js                                56.01 kB │ gzip:  17.97 kB
+node_modules/.nitro/vite/services/ssr/assets/Share-COCFrjc_.js                                56.07 kB │ gzip:  13.71 kB
+node_modules/.nitro/vite/services/ssr/assets/deck-BQPDxMp-.js                                 58.72 kB │ gzip:  17.64 kB
+node_modules/.nitro/vite/services/ssr/assets/findings-BSKEo63I.js                             64.86 kB │ gzip:  18.40 kB
+node_modules/.nitro/vite/services/ssr/assets/html-escape-BiqrpD2f.js                          83.76 kB │ gzip:  26.87 kB
+node_modules/.nitro/vite/services/ssr/assets/logos-CWzljmtL.js                                84.60 kB │ gzip:  25.88 kB
+node_modules/.nitro/vite/services/ssr/assets/home-BzfwTXrM.js                                 91.53 kB │ gzip:  26.48 kB
+node_modules/.nitro/vite/services/ssr/assets/run-BJ3libtt.js                                 131.25 kB │ gzip:  37.33 kB
+node_modules/.nitro/vite/services/ssr/assets/Menu-CUAs4kg0.js                                132.37 kB │ gzip:  34.49 kB
+node_modules/.nitro/vite/services/ssr/assets/templates-S1sDqPxp.js                           136.97 kB │ gzip:  35.04 kB
+node_modules/.nitro/vite/services/ssr/assets/slide-CW9lDmUy.js                               143.46 kB │ gzip:  41.29 kB
+node_modules/.nitro/vite/services/ssr/assets/blob-store-kt4FCsuy.js                          185.07 kB │ gzip:  51.64 kB
+node_modules/.nitro/vite/services/ssr/assets/actions-rzK9ytDW.js                             198.89 kB │ gzip:  46.34 kB
+node_modules/.nitro/vite/services/ssr/assets/room-CytLRzHq.js                                202.48 kB │ gzip:  58.38 kB
+node_modules/.nitro/vite/services/ssr/assets/ids-CO7S0fa-.js                                 204.02 kB │ gzip:  44.40 kB
+node_modules/.nitro/vite/services/ssr/index.js                                               250.46 kB │ gzip:  58.88 kB
+node_modules/.nitro/vite/services/ssr/assets/report-F1imleCK.js                              381.29 kB │ gzip:  96.44 kB
+node_modules/.nitro/vite/services/ssr/assets/factory-BSRuDhzR.js                             401.62 kB │ gzip:  70.80 kB
+node_modules/.nitro/vite/services/ssr/assets/server-PGNsHOhR.js                              452.20 kB │ gzip: 106.00 kB
+node_modules/.nitro/vite/services/ssr/assets/deck-CDP1v1aR.js                                461.78 kB │ gzip:  74.38 kB
+node_modules/.nitro/vite/services/ssr/assets/dispatch-BYrZ_Mfk.js                            503.20 kB │ gzip: 143.13 kB
+node_modules/.nitro/vite/services/ssr/assets/extract-BJd5i0k8.js                             626.61 kB │ gzip: 182.41 kB
+node_modules/.nitro/vite/services/ssr/assets/cli-hEdxPGgf.js                                 755.07 kB │ gzip: 196.46 kB
+node_modules/.nitro/vite/services/ssr/assets/editor-BpoAn5gh.js                              805.36 kB │ gzip: 214.59 kB
+node_modules/.nitro/vite/services/ssr/assets/EditorRoot-BIL2hWEj.js                          830.79 kB │ gzip: 230.10 kB
+node_modules/.nitro/vite/services/ssr/assets/Slideshow-Lay26-Ki.js                           946.99 kB │ gzip: 248.86 kB
+node_modules/.nitro/vite/services/ssr/assets/identity-CbqSvsvr.js                            953.41 kB │ gzip: 221.27 kB
+node_modules/.nitro/vite/services/ssr/assets/actions-oZZQeJIi.js                           1,468.56 kB │ gzip: 354.66 kB
+node_modules/.nitro/vite/services/ssr/assets/router-FE8Hcrgn.js                            2,903.67 kB │ gzip: 240.48 kB
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0m../../packages/agent/src/http/readers.ts is dynamically imported by src/server/agent-actions.ts but also statically imported by src/server/actions.ts, dynamic import will not move module into another chunk.
+
+✓ built in 2.25s
+
+[nitro] ◐ Building [Nitro] (preset: vercel, compatibility: 2026-09-20)
+[nitro] ✔ Generated public .vercel/output/static
+vite v8.2.2 building nitro environment for production...
+transforming...
+✓ 1641 modules transformed.
+ℹ Tracing dependencies:
+- playwright-core (1.62.1)
+- sharp (0.35.4)
+- @img/sharp-darwin-arm64 (0.35.4)
+- @img/colour (1.1.0)
+- semver (7.8.5)
+- detect-libc (2.1.2)
+- @img/sharp-libvips-darwin-arm64 (1.3.3)
+- fsevents (2.3.3)
+- @sparticuz/chromium (147.0.2)
+- @paper-design/shaders (0.0.78)
+- tar-fs (3.1.3)
+- tar-stream (3.2.1)
+- pump (3.0.4)
+- streamx (2.28.1)
+- b4a (1.8.1)
+- once (1.4.0)
+- end-of-stream (1.4.5)
+- fast-fifo (1.3.2)
+- events-universal (1.0.1)
+- text-decoder (1.2.7)
+- wrappy (1.0.2)
+- bare-fs (4.8.1)
+- bare-path (3.1.2)
+✔ Traced 23 dependencies (156 files) in 1827ms.
+ℹ Ensure your production environment matches the builder OS and architecture (darwin-arm64) to avoid native module issues.
+rendering chunks...
+computing gzip size...
+.vercel/output/functions/__server.func/_ssr/kysely-adapter-j8_qiJzo.mjs                          0.12 kB │ gzip:     0.09 kB
+.vercel/output/functions/__server.func/_ssr/empty-plugin-adapters-5PvIP3d0.mjs                   0.23 kB │ gzip:     0.16 kB
+.vercel/output/functions/__server.func/_chunks/render_resend.mjs                                 0.25 kB │ gzip:     0.18 kB
+.vercel/output/functions/__server.func/_ssr/core-RrmWoKne.mjs                                    0.25 kB │ gzip:     0.20 kB
+.vercel/output/functions/__server.func/_virtual/virtual_nitro-raw-helpers.mjs                    0.28 kB │ gzip:     0.20 kB
+.vercel/output/functions/__server.func/_virtual/thesis.json.mjs                                  0.33 kB │ gzip:     0.22 kB
+.vercel/output/functions/__server.func/_virtual/thesis2.json.mjs                                 0.34 kB │ gzip:     0.23 kB
+.vercel/output/functions/__server.func/_ssr/createServerRpc-DIobIZ3U.mjs                         0.37 kB │ gzip:     0.26 kB
+.vercel/output/functions/__server.func/_virtual/title2.json.mjs                                  0.38 kB │ gzip:     0.23 kB
+.vercel/output/functions/__server.func/_virtual/neuro-noise--hint.webp.mjs                       0.48 kB │ gzip:     0.37 kB
+.vercel/output/functions/__server.func/_virtual/neuro-noise--accent.webp.mjs                     0.48 kB │ gzip:     0.36 kB
+.vercel/output/functions/__server.func/_ssr/createSsrRpc-BE1Vqe91.mjs                            0.50 kB │ gzip:     0.32 kB
+.vercel/output/functions/__server.func/_virtual/title.json.mjs                                   0.51 kB │ gzip:     0.32 kB
+.vercel/output/functions/__server.func/_virtual/title3.json.mjs                                  0.52 kB │ gzip:     0.33 kB
+.vercel/output/functions/__server.func/_virtual/neuro-noise--brand-blue.webp.mjs                 0.53 kB │ gzip:     0.39 kB
+.vercel/output/functions/__server.func/_virtual/mesh-gradient--paper-ink.webp.mjs                0.53 kB │ gzip:     0.40 kB
+.vercel/output/functions/__server.func/_virtual/neuro-noise--caption.webp.mjs                    0.57 kB │ gzip:     0.44 kB
+.vercel/output/functions/__server.func/_virtual/grain-gradient--hint.webp.mjs                    0.58 kB │ gzip:     0.44 kB
+.vercel/output/functions/__server.func/_virtual/mesh-gradient--caption.webp.mjs                  0.58 kB │ gzip:     0.45 kB
+.vercel/output/functions/__server.func/_virtual/simplex-noise--paper-ink.webp.mjs                0.59 kB │ gzip:     0.45 kB
+.vercel/output/functions/__server.func/_virtual/mesh-gradient--ink-paper.webp.mjs                0.59 kB │ gzip:     0.45 kB
+.vercel/output/functions/__server.func/_virtual/neuro-noise--paper-ink.webp.mjs                  0.59 kB │ gzip:     0.45 kB
+.vercel/output/functions/__server.func/_virtual/grain-gradient--accent.webp.mjs                  0.60 kB │ gzip:     0.45 kB
+.vercel/output/functions/__server.func/_virtual/grain-gradient--caption.webp.mjs                 0.60 kB │ gzip:     0.45 kB
+.vercel/output/functions/__server.func/_ssr/json-Dbx7FnjL.mjs                                    0.60 kB │ gzip:     0.35 kB
+.vercel/output/functions/__server.func/_virtual/static-mesh-gradient--paper-ink.webp.mjs         0.61 kB │ gzip:     0.45 kB
+.vercel/output/functions/__server.func/_virtual/liquid-metal--noir.webp.mjs                      0.61 kB │ gzip:     0.47 kB
+.vercel/output/functions/__server.func/_virtual/neuro-noise--ink-paper.webp.mjs                  0.62 kB │ gzip:     0.48 kB
+.vercel/output/functions/__server.func/_virtual/static-radial-gradient--hint.webp.mjs            0.65 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_ssr/embed._deckId-2LjcbFYw.mjs                           0.65 kB │ gzip:     0.39 kB
+.vercel/output/functions/__server.func/_virtual/mesh-gradient--brand-blue.webp.mjs               0.65 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/static-radial-gradient--caption.webp.mjs         0.65 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_virtual/mesh-gradient--hint.webp.mjs                     0.66 kB │ gzip:     0.51 kB
+.vercel/output/functions/__server.func/_virtual/simplex-noise--caption.webp.mjs                  0.66 kB │ gzip:     0.51 kB
+.vercel/output/functions/__server.func/_virtual/static-mesh-gradient--caption.webp.mjs           0.66 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/static-radial-gradient--ink-paper.webp.mjs       0.66 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/simplex-noise--ink-paper.webp.mjs                0.67 kB │ gzip:     0.51 kB
+.vercel/output/functions/__server.func/_virtual/static-mesh-gradient--ink-paper.webp.mjs         0.67 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/liquid-metal--hint.webp.mjs                      0.67 kB │ gzip:     0.52 kB
+.vercel/output/functions/__server.func/_virtual/grain-gradient--brand-blue.webp.mjs              0.68 kB │ gzip:     0.51 kB
+.vercel/output/functions/__server.func/_virtual/grain-gradient--ink-paper.webp.mjs               0.68 kB │ gzip:     0.52 kB
+.vercel/output/functions/__server.func/_virtual/static-radial-gradient--paper-ink.webp.mjs       0.68 kB │ gzip:     0.51 kB
+.vercel/output/functions/__server.func/_virtual/grain-gradient--paper-ink.webp.mjs               0.70 kB │ gzip:     0.53 kB
+.vercel/output/functions/__server.func/_virtual/liquid-metal--chrome.webp.mjs                    0.71 kB │ gzip:     0.54 kB
+.vercel/output/functions/__server.func/_virtual/static-radial-gradient--accent.webp.mjs          0.72 kB │ gzip:     0.54 kB
+.vercel/output/functions/__server.func/_virtual/liquid-metal--paper-ink.webp.mjs                 0.72 kB │ gzip:     0.56 kB
+.vercel/output/functions/__server.func/_ssr/copy-DPZ85lU3.mjs                                    0.72 kB │ gzip:     0.47 kB
+.vercel/output/functions/__server.func/_virtual/liquid-metal--diamond.webp.mjs                   0.72 kB │ gzip:     0.56 kB
+.vercel/output/functions/__server.func/_virtual/dithering--accent.webp.mjs                       0.73 kB │ gzip:     0.56 kB
+.vercel/output/functions/__server.func/_virtual/metaballs--hint.webp.mjs                         0.73 kB │ gzip:     0.57 kB
+.vercel/output/functions/__server.func/_virtual/static-mesh-gradient--hint.webp.mjs              0.74 kB │ gzip:     0.56 kB
+.vercel/output/functions/__server.func/_virtual/mesh-gradient--accent.webp.mjs                   0.74 kB │ gzip:     0.57 kB
+.vercel/output/functions/__server.func/_virtual/simplex-noise--brand-blue.webp.mjs               0.75 kB │ gzip:     0.57 kB
+.vercel/output/functions/__server.func/_ssr/health-B_vPnNIc.mjs                                  0.75 kB │ gzip:     0.43 kB
+.vercel/output/functions/__server.func/_virtual/static-mesh-gradient--brand-blue.webp.mjs        0.75 kB │ gzip:     0.57 kB
+.vercel/output/functions/__server.func/_virtual/smoke-ring--caption.webp.mjs                     0.76 kB │ gzip:     0.59 kB
+.vercel/output/functions/__server.func/_virtual/liquid-metal--caption.webp.mjs                   0.77 kB │ gzip:     0.59 kB
+.vercel/output/functions/__server.func/_virtual/static-radial-gradient--brand-blue.webp.mjs      0.78 kB │ gzip:     0.58 kB
+.vercel/output/functions/__server.func/_ssr/model-Drp5DeKq.mjs                                   0.79 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_ssr/present._deckId-CI23VPcP.mjs                         0.79 kB │ gzip:     0.43 kB
+.vercel/output/functions/__server.func/_virtual/liquid-metal--ink-paper.webp.mjs                 0.79 kB │ gzip:     0.60 kB
+.vercel/output/functions/__server.func/_virtual/smoke-ring--hint.webp.mjs                        0.79 kB │ gzip:     0.62 kB
+.vercel/output/functions/__server.func/_virtual/metaballs--accent.webp.mjs                       0.80 kB │ gzip:     0.62 kB
+.vercel/output/functions/__server.func/_virtual/dithering--hint.webp.mjs                         0.80 kB │ gzip:     0.62 kB
+.vercel/output/functions/__server.func/_ssr/kysely-migration-tables-DFfmKhq--C5KbRCc3.mjs        0.80 kB │ gzip:     0.45 kB
+.vercel/output/functions/__server.func/_virtual/simplex-noise--hint.webp.mjs                     0.80 kB │ gzip:     0.62 kB
+.vercel/output/functions/__server.func/_virtual/smoke-ring--accent.webp.mjs                      0.80 kB │ gzip:     0.62 kB
+.vercel/output/functions/__server.func/_virtual/metaballs--caption.webp.mjs                      0.82 kB │ gzip:     0.64 kB
+.vercel/output/functions/__server.func/_virtual/liquid-metal--accent.webp.mjs                    0.82 kB │ gzip:     0.63 kB
+.vercel/output/functions/__server.func/_virtual/liquid-metal--sphere.webp.mjs                    0.83 kB │ gzip:     0.64 kB
+.vercel/output/functions/__server.func/_virtual/gem-smoke--hint.webp.mjs                         0.85 kB │ gzip:     0.67 kB
+.vercel/output/functions/__server.func/_virtual/static-mesh-gradient--accent.webp.mjs            0.87 kB │ gzip:     0.66 kB
+.vercel/output/functions/__server.func/_virtual/smoke-ring--ink-paper.webp.mjs                   0.87 kB │ gzip:     0.68 kB
+.vercel/output/functions/__server.func/_virtual/gem-smoke--accent.webp.mjs                       0.88 kB │ gzip:     0.69 kB
+.vercel/output/functions/__server.func/_virtual/dithering--caption.webp.mjs                      0.89 kB │ gzip:     0.69 kB
+.vercel/output/functions/__server.func/_virtual/smoke-ring--paper-ink.webp.mjs                   0.89 kB │ gzip:     0.70 kB
+.vercel/output/functions/__server.func/_virtual/simplex-noise--accent.webp.mjs                   0.90 kB │ gzip:     0.69 kB
+.vercel/output/functions/__server.func/_virtual/metaballs--ink-paper.webp.mjs                    0.90 kB │ gzip:     0.70 kB
+.vercel/output/functions/__server.func/_virtual/liquid-metal--brand-blue.webp.mjs                0.91 kB │ gzip:     0.70 kB
+.vercel/output/functions/__server.func/_virtual/smoke-ring--brand-blue.webp.mjs                  0.91 kB │ gzip:     0.70 kB
+.vercel/output/functions/__server.func/_virtual/metaballs--paper-ink.webp.mjs                    0.92 kB │ gzip:     0.72 kB
+.vercel/output/functions/__server.func/_ssr/routes-D7ELzDFN.mjs                                  0.92 kB │ gzip:     0.47 kB
+.vercel/output/functions/__server.func/_virtual/gem-smoke--caption.webp.mjs                      0.95 kB │ gzip:     0.74 kB
+.vercel/output/functions/__server.func/_virtual/dithering--ink-paper.webp.mjs                    0.95 kB │ gzip:     0.74 kB
+.vercel/output/functions/__server.func/_virtual/dithering--paper-ink.webp.mjs                    0.96 kB │ gzip:     0.74 kB
+.vercel/output/functions/__server.func/_virtual/dot-grid--accent.webp.mjs                        0.96 kB │ gzip:     0.75 kB
+.vercel/output/functions/__server.func/_virtual/gem-smoke--default.webp.mjs                      0.96 kB │ gzip:     0.74 kB
+.vercel/output/functions/__server.func/_virtual/dithering--brand-blue.webp.mjs                   0.98 kB │ gzip:     0.76 kB
+.vercel/output/functions/__server.func/_virtual/known-findings.json.mjs                          1.00 kB │ gzip:     0.53 kB
+.vercel/output/functions/__server.func/_virtual/mood-earth.json.mjs                              1.00 kB │ gzip:     0.48 kB
+.vercel/output/functions/__server.func/_virtual/mood-earth2.json.mjs                             1.01 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_virtual/opener-brand.json.mjs                            1.02 kB │ gzip:     0.45 kB
+.vercel/output/functions/__server.func/_virtual/metaballs--brand-blue.webp.mjs                   1.02 kB │ gzip:     0.79 kB
+.vercel/output/functions/__server.func/_virtual/closing.json.mjs                                 1.02 kB │ gzip:     0.46 kB
+.vercel/output/functions/__server.func/_virtual/opener-brand2.json.mjs                           1.03 kB │ gzip:     0.45 kB
+.vercel/output/functions/__server.func/_virtual/mood-rosetta.json.mjs                            1.03 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_virtual/gem-smoke--ink-paper.webp.mjs                    1.03 kB │ gzip:     0.80 kB
+.vercel/output/functions/__server.func/_virtual/closing2.json.mjs                                1.03 kB │ gzip:     0.46 kB
+.vercel/output/functions/__server.func/_virtual/mood-lighthouse.json.mjs                         1.03 kB │ gzip:     0.48 kB
+.vercel/output/functions/__server.func/_virtual/opener-website.json.mjs                          1.04 kB │ gzip:     0.45 kB
+.vercel/output/functions/__server.func/_virtual/mood-rosetta2.json.mjs                           1.04 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_virtual/mood-lighthouse2.json.mjs                        1.04 kB │ gzip:     0.48 kB
+.vercel/output/functions/__server.func/_virtual/opener-website2.json.mjs                         1.05 kB │ gzip:     0.46 kB
+.vercel/output/functions/__server.func/_virtual/mood-wave.json.mjs                               1.05 kB │ gzip:     0.51 kB
+.vercel/output/functions/__server.func/_chunks/ssr-renderer.mjs                                  1.05 kB │ gzip:     0.52 kB
+.vercel/output/functions/__server.func/_virtual/mood-wave2.json.mjs                              1.06 kB │ gzip:     0.51 kB
+.vercel/output/functions/__server.func/_virtual/gem-smoke--brand-blue.webp.mjs                   1.06 kB │ gzip:     0.82 kB
+.vercel/output/functions/__server.func/_virtual/mood-devanagari.json.mjs                         1.06 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/opener-blog.json.mjs                             1.06 kB │ gzip:     0.47 kB
+.vercel/output/functions/__server.func/_virtual/mood-compass.json.mjs                            1.06 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/gem-smoke--paper-ink.webp.mjs                    1.07 kB │ gzip:     0.83 kB
+.vercel/output/functions/__server.func/_virtual/mood-devanagari2.json.mjs                        1.07 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/opener-blog2.json.mjs                            1.07 kB │ gzip:     0.48 kB
+.vercel/output/functions/__server.func/_virtual/mood-cable.json.mjs                              1.07 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/mood-compass2.json.mjs                           1.07 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/mood-calligraphy.json.mjs                        1.08 kB │ gzip:     0.48 kB
+.vercel/output/functions/__server.func/_virtual/opener-status.json.mjs                           1.08 kB │ gzip:     0.48 kB
+.vercel/output/functions/__server.func/_virtual/mood-cable2.json.mjs                             1.08 kB │ gzip:     0.51 kB
+.vercel/output/functions/__server.func/_virtual/opener-design-system.json.mjs                    1.08 kB │ gzip:     0.47 kB
+.vercel/output/functions/__server.func/_virtual/mood-calligraphy2.json.mjs                       1.09 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_virtual/opener-status2.json.mjs                          1.09 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_virtual/mood-dictionary.json.mjs                         1.09 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/opener-design-system2.json.mjs                   1.09 kB │ gzip:     0.47 kB
+.vercel/output/functions/__server.func/_virtual/dot-grid--hint.webp.mjs                          1.10 kB │ gzip:     0.86 kB
+.vercel/output/functions/__server.func/_virtual/mood-dictionary2.json.mjs                        1.10 kB │ gzip:     0.51 kB
+.vercel/output/functions/__server.func/_virtual/opener-prototemplate.json.mjs                    1.15 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_virtual/compression.json.mjs                             1.15 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/opener-prototemplate2.json.mjs                   1.16 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_virtual/compression2.json.mjs                            1.16 kB │ gzip:     0.50 kB
+.vercel/output/functions/__server.func/_virtual/opener-developer-experience.json.mjs             1.16 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_virtual/opener-developer-experience2.json.mjs            1.17 kB │ gzip:     0.49 kB
+.vercel/output/functions/__server.func/_virtual/opener-documentation.json.mjs                    1.17 kB │ gzip:     0.51 kB
+.vercel/output/functions/__server.func/_virtual/opener-documentation2.json.mjs                   1.18 kB │ gzip:     0.52 kB
+.vercel/output/functions/__server.func/_libs/hookable.mjs                                        1.20 kB │ gzip:     0.53 kB
+.vercel/output/functions/__server.func/_virtual/dot-grid--caption.webp.mjs                       1.22 kB │ gzip:     0.95 kB
+.vercel/output/functions/__server.func/_virtual/mesh-gradient.webp.mjs                           1.26 kB │ gzip:     0.98 kB
+.vercel/output/functions/__server.func/_virtual/dot-grid--brand-blue.webp.mjs                    1.28 kB │ gzip:     0.99 kB
+.vercel/output/functions/__server.func/_virtual/pages-b.json.mjs                                 1.29 kB │ gzip:     0.54 kB
+.vercel/output/functions/__server.func/_virtual/pages-b2.json.mjs                                1.30 kB │ gzip:     0.54 kB
+.vercel/output/functions/__server.func/_ssr/-link-slot-crIhcmp-.mjs                              1.35 kB │ gzip:     0.78 kB
+.vercel/output/functions/__server.func/_virtual/dot-grid--ink-paper.webp.mjs                     1.35 kB │ gzip:     1.03 kB
+.vercel/output/functions/__server.func/_virtual/god-rays--hint.webp.mjs                          1.35 kB │ gzip:     1.05 kB
+.vercel/output/functions/__server.func/_virtual/mark.json.mjs                                    1.35 kB │ gzip:     0.57 kB
+.vercel/output/functions/__server.func/_virtual/horizon.json.mjs                                 1.36 kB │ gzip:     0.63 kB
+.vercel/output/functions/__server.func/_virtual/template.json.mjs                                1.36 kB │ gzip:     0.70 kB
+.vercel/output/functions/__server.func/_virtual/mark2.json.mjs                                   1.36 kB │ gzip:     0.58 kB
+.vercel/output/functions/__server.func/_virtual/templates.json.mjs                               1.36 kB │ gzip:     0.61 kB
+.vercel/output/functions/__server.func/_virtual/dot-grid--paper-ink.webp.mjs                     1.36 kB │ gzip:     1.05 kB
+.vercel/output/functions/__server.func/_ssr/lint-rendered-Cch2QlRf.mjs                           1.36 kB │ gzip:     0.69 kB
+.vercel/output/functions/__server.func/_virtual/horizon2.json.mjs                                1.37 kB │ gzip:     0.63 kB
+.vercel/output/functions/__server.func/_virtual/pages-a.json.mjs                                 1.39 kB │ gzip:     0.57 kB
+.vercel/output/functions/__server.func/_ssr/print._deckId-5dc-rsZH.mjs                           1.40 kB │ gzip:     0.77 kB
+.vercel/output/functions/__server.func/_virtual/pages-a2.json.mjs                                1.40 kB │ gzip:     0.58 kB
+.vercel/output/functions/__server.func/_virtual/site.json.mjs                                    1.44 kB │ gzip:     0.65 kB
+.vercel/output/functions/__server.func/_virtual/site2.json.mjs                                   1.45 kB │ gzip:     0.66 kB
+.vercel/output/functions/__server.func/_virtual/blog-index.json.mjs                              1.45 kB │ gzip:     0.65 kB
+.vercel/output/functions/__server.func/_virtual/blog-index2.json.mjs                             1.46 kB │ gzip:     0.66 kB
+.vercel/output/functions/__server.func/_virtual/simplex-noise.webp.mjs                           1.48 kB │ gzip:     1.15 kB
+.vercel/output/functions/__server.func/_virtual/blog-covers.json.mjs                             1.52 kB │ gzip:     0.69 kB
+.vercel/output/functions/__server.func/_virtual/god-rays--accent.webp.mjs                        1.52 kB │ gzip:     1.18 kB
+.vercel/output/functions/__server.func/_virtual/blog-covers2.json.mjs                            1.53 kB │ gzip:     0.69 kB
+.vercel/output/functions/__server.func/_virtual/dark-mode.json.mjs                               1.54 kB │ gzip:     0.61 kB
+.vercel/output/functions/__server.func/_virtual/dark-mode2.json.mjs                              1.55 kB │ gzip:     0.61 kB
+.vercel/output/functions/__server.func/_virtual/neuro-noise.webp.mjs                             1.55 kB │ gzip:     1.20 kB
+.vercel/output/functions/__server.func/_virtual/gem-smoke.json.mjs                               1.56 kB │ gzip:     0.61 kB
+.vercel/output/functions/__server.func/_virtual/lab.json.mjs                                     1.57 kB │ gzip:     0.69 kB
+.vercel/output/functions/__server.func/_virtual/gem-smoke2.json.mjs                              1.57 kB │ gzip:     0.62 kB
+.vercel/output/functions/__server.func/_virtual/lab2.json.mjs                                    1.58 kB │ gzip:     0.69 kB
+.vercel/output/functions/__server.func/_ssr/useMountEffect-DsyJ14_r.mjs                          1.58 kB │ gzip:     0.80 kB
+.vercel/output/functions/__server.func/_virtual/glyphfield.json.mjs                              1.60 kB │ gzip:     0.76 kB
+.vercel/output/functions/__server.func/_virtual/type.json.mjs                                    1.60 kB │ gzip:     0.67 kB
+.vercel/output/functions/__server.func/_virtual/glyphfield2.json.mjs                             1.61 kB │ gzip:     0.76 kB
+.vercel/output/functions/__server.func/_virtual/type2.json.mjs                                   1.61 kB │ gzip:     0.68 kB
+.vercel/output/functions/__server.func/_virtual/static-mesh-gradient.webp.mjs                    1.62 kB │ gzip:     1.25 kB
+.vercel/output/functions/__server.func/_virtual/static-radial-gradient.webp.mjs                  1.63 kB │ gzip:     1.24 kB
+.vercel/output/functions/__server.func/_ssr/warm-bYHk1nx-.mjs                                    1.63 kB │ gzip:     0.79 kB
+.vercel/output/functions/__server.func/_virtual/why.json.mjs                                     1.74 kB │ gzip:     0.67 kB
+.vercel/output/functions/__server.func/_virtual/off-the-site.json.mjs                            1.75 kB │ gzip:     0.73 kB
+.vercel/output/functions/__server.func/_virtual/why2.json.mjs                                    1.75 kB │ gzip:     0.67 kB
+.vercel/output/functions/__server.func/_virtual/off-the-site2.json.mjs                           1.76 kB │ gzip:     0.74 kB
+.vercel/output/functions/__server.func/_virtual/skills-marks.json.mjs                            1.77 kB │ gzip:     0.76 kB
+.vercel/output/functions/__server.func/_ssr/middleware-DXBzkFjX.mjs                              1.78 kB │ gzip:     0.76 kB
+.vercel/output/functions/__server.func/_virtual/skills-marks2.json.mjs                           1.78 kB │ gzip:     0.77 kB
+.vercel/output/functions/__server.func/_virtual/docs.json.mjs                                    1.81 kB │ gzip:     0.76 kB
+.vercel/output/functions/__server.func/_ssr/decks.index-COeLt4Bk.mjs                             1.81 kB │ gzip:     0.92 kB
+.vercel/output/functions/__server.func/_virtual/swirl--paper-ink.webp.mjs                        1.82 kB │ gzip:     1.40 kB
+.vercel/output/functions/__server.func/_virtual/docs2.json.mjs                                   1.82 kB │ gzip:     0.76 kB
+.vercel/output/functions/__server.func/_virtual/swirl--caption.webp.mjs                          1.88 kB │ gzip:     1.45 kB
+.vercel/output/functions/__server.func/_runtime.mjs                                              1.89 kB │ gzip:     0.85 kB
+.vercel/output/functions/__server.func/_ssr/rolldown-runtime-C5kaFYNG.mjs                        1.95 kB │ gzip:     0.89 kB
+.vercel/output/functions/__server.func/_virtual/god-rays--caption.webp.mjs                       1.95 kB │ gzip:     1.50 kB
+.vercel/output/functions/__server.func/_virtual/perlin-noise--hint.webp.mjs                      1.96 kB │ gzip:     1.50 kB
+.vercel/output/functions/__server.func/_virtual/god-rays--paper-ink.webp.mjs                     1.96 kB │ gzip:     1.51 kB
+.vercel/output/functions/__server.func/_ssr/errors-_xGNPB37.mjs                                  1.97 kB │ gzip:     0.78 kB
+.vercel/output/functions/__server.func/_virtual/shell-views.json.mjs                             1.97 kB │ gzip:     0.81 kB
+.vercel/output/functions/__server.func/_virtual/dossier.json.mjs                                 1.97 kB │ gzip:     0.74 kB
+.vercel/output/functions/__server.func/_virtual/shell-views2.json.mjs                            1.98 kB │ gzip:     0.81 kB
+.vercel/output/functions/__server.func/_virtual/dossier2.json.mjs                                1.98 kB │ gzip:     0.74 kB
+.vercel/output/functions/__server.func/_virtual/spiral--hint.webp.mjs                            2.00 kB │ gzip:     1.54 kB
+.vercel/output/functions/__server.func/_virtual/perlin-noise--accent.webp.mjs                    2.00 kB │ gzip:     1.54 kB
+.vercel/output/functions/__server.func/_virtual/books-and-templates.json.mjs                     2.01 kB │ gzip:     0.80 kB
+.vercel/output/functions/__server.func/_virtual/books-and-templates2.json.mjs                    2.02 kB │ gzip:     0.81 kB
+.vercel/output/functions/__server.func/_virtual/swirl--ink-paper.webp.mjs                        2.03 kB │ gzip:     1.57 kB
+.vercel/output/functions/__server.func/_virtual/inter.css.mjs                                    2.04 kB │ gzip:     1.03 kB
+.vercel/output/functions/__server.func/_virtual/values.json.mjs                                  2.10 kB │ gzip:     0.71 kB
+.vercel/output/functions/__server.func/_virtual/values2.json.mjs                                 2.11 kB │ gzip:     0.71 kB
+.vercel/output/functions/__server.func/_virtual/spiral--accent.webp.mjs                          2.11 kB │ gzip:     1.63 kB
+.vercel/output/functions/__server.func/_ssr/bundle-CuALyW_x.mjs                                  2.12 kB │ gzip:     1.06 kB
+.vercel/output/functions/__server.func/_virtual/archive.json.mjs                                 2.13 kB │ gzip:     0.89 kB
+.vercel/output/functions/__server.func/_virtual/archive2.json.mjs                                2.14 kB │ gzip:     0.89 kB
+.vercel/output/functions/__server.func/_ssr/ForgetBrowser-DYQVjqtb.mjs                           2.15 kB │ gzip:     1.04 kB
+.vercel/output/functions/__server.func/_virtual/gem-smoke--fire.webp.mjs                         2.16 kB │ gzip:     1.66 kB
+.vercel/output/functions/__server.func/_virtual/god-rays--brand-blue.webp.mjs                    2.18 kB │ gzip:     1.68 kB
+.vercel/output/functions/__server.func/_virtual/swirl--hint.webp.mjs                             2.19 kB │ gzip:     1.69 kB
+.vercel/output/functions/__server.func/_virtual/glyphfield-tools.json.mjs                        2.22 kB │ gzip:     0.84 kB
+.vercel/output/functions/__server.func/_virtual/perlin-noise--caption.webp.mjs                   2.22 kB │ gzip:     1.70 kB
+.vercel/output/functions/__server.func/_virtual/god-rays--ink-paper.webp.mjs                     2.23 kB │ gzip:     1.71 kB
+.vercel/output/functions/__server.func/_virtual/glyphfield-tools2.json.mjs                       2.23 kB │ gzip:     0.84 kB
+.vercel/output/functions/__server.func/_ssr/GtMark-Cwcse0jH.mjs                                  2.25 kB │ gzip:     1.27 kB
+.vercel/output/functions/__server.func/_virtual/two-registers.json.mjs                           2.26 kB │ gzip:     0.83 kB
+.vercel/output/functions/__server.func/_ssr/InsertIcon-DULtVqLE.mjs                              2.26 kB │ gzip:     1.08 kB
+.vercel/output/functions/__server.func/_ssr/Details-XqEHpJGN.mjs                                 2.27 kB │ gzip:     0.97 kB
+.vercel/output/functions/__server.func/_virtual/two-registers2.json.mjs                          2.27 kB │ gzip:     0.83 kB
+.vercel/output/functions/__server.func/_virtual/multilingual.json.mjs                            2.28 kB │ gzip:     0.82 kB
+.vercel/output/functions/__server.func/_virtual/ladder.json.mjs                                  2.29 kB │ gzip:     0.80 kB
+.vercel/output/functions/__server.func/_virtual/multilingual2.json.mjs                           2.29 kB │ gzip:     0.83 kB
+.vercel/output/functions/__server.func/_ssr/share-links-Du6hhyNe.mjs                             2.29 kB │ gzip:     0.93 kB
+.vercel/output/functions/__server.func/_virtual/spiral--caption.webp.mjs                         2.29 kB │ gzip:     1.76 kB
+.vercel/output/functions/__server.func/_virtual/ladder2.json.mjs                                 2.30 kB │ gzip:     0.80 kB
+.vercel/output/functions/__server.func/_ssr/NameVersion-DoDcGh60.mjs                             2.31 kB │ gzip:     1.03 kB
+.vercel/output/functions/__server.func/_virtual/character.json.mjs                               2.31 kB │ gzip:     0.71 kB
+.vercel/output/functions/__server.func/_virtual/character2.json.mjs                              2.32 kB │ gzip:     0.72 kB
+.vercel/output/functions/__server.func/_virtual/blog-vision.json.mjs                             2.33 kB │ gzip:     0.92 kB
+.vercel/output/functions/__server.func/_virtual/blog-vision2.json.mjs                            2.34 kB │ gzip:     0.92 kB
+.vercel/output/functions/__server.func/_virtual/metaballs.webp.mjs                               2.34 kB │ gzip:     1.79 kB
+.vercel/output/functions/__server.func/_virtual/content-rule.json.mjs                            2.40 kB │ gzip:     0.74 kB
+.vercel/output/functions/__server.func/_ssr/dispatch-BDkgwp7s.mjs                                2.40 kB │ gzip:     1.12 kB
+.vercel/output/functions/__server.func/_virtual/content-rule2.json.mjs                           2.41 kB │ gzip:     0.74 kB
+.vercel/output/functions/__server.func/_virtual/swirl--brand-blue.webp.mjs                       2.41 kB │ gzip:     1.85 kB
+.vercel/output/functions/__server.func/_ssr/AppBarBrand-BW-xDoxA.mjs                             2.42 kB │ gzip:     1.07 kB
+.vercel/output/functions/__server.func/_virtual/details.json.mjs                                 2.42 kB │ gzip:     0.90 kB
+.vercel/output/functions/__server.func/_virtual/details2.json.mjs                                2.43 kB │ gzip:     0.91 kB
+.vercel/output/functions/__server.func/_virtual/liquid-metal.webp.mjs                            2.48 kB │ gzip:     1.87 kB
+.vercel/output/functions/__server.func/_virtual/swirl--accent.webp.mjs                           2.48 kB │ gzip:     1.90 kB
+.vercel/output/functions/__server.func/_virtual/stage.css.mjs                                    2.48 kB │ gzip:     1.05 kB
+.vercel/output/functions/__server.func/_virtual/build-log.json.mjs                               2.49 kB │ gzip:     0.82 kB
+.vercel/output/functions/__server.func/_virtual/perlin-noise--ink-paper.webp.mjs                 2.49 kB │ gzip:     1.90 kB
+.vercel/output/functions/__server.func/_virtual/spiral--paper-ink.webp.mjs                       2.50 kB │ gzip:     1.91 kB
+.vercel/output/functions/__server.func/_virtual/build-log2.json.mjs                              2.50 kB │ gzip:     0.83 kB
+.vercel/output/functions/__server.func/_virtual/spiral--ink-paper.webp.mjs                       2.52 kB │ gzip:     1.94 kB
+.vercel/output/functions/__server.func/_virtual/perlin-noise--paper-ink.webp.mjs                 2.54 kB │ gzip:     1.94 kB
+.vercel/output/functions/__server.func/_virtual/reputation.json.mjs                              2.55 kB │ gzip:     0.87 kB
+.vercel/output/functions/__server.func/_virtual/reputation2.json.mjs                             2.56 kB │ gzip:     0.87 kB
+.vercel/output/functions/__server.func/_virtual/dot-grid.webp.mjs                                2.70 kB │ gzip:     1.32 kB
+.vercel/output/functions/__server.func/_virtual/cli.json.mjs                                     2.70 kB │ gzip:     0.94 kB
+.vercel/output/functions/__server.func/_virtual/cli2.json.mjs                                    2.71 kB │ gzip:     0.94 kB
+.vercel/output/functions/__server.func/_ssr/Frame-BBoylXVP.mjs                                   2.76 kB │ gzip:     0.79 kB
+.vercel/output/functions/__server.func/_virtual/avoid.json.mjs                                   2.77 kB │ gzip:     0.66 kB
+.vercel/output/functions/__server.func/_virtual/avoid2.json.mjs                                  2.78 kB │ gzip:     0.67 kB
+.vercel/output/functions/__server.func/_virtual/perlin-noise--brand-blue.webp.mjs                2.81 kB │ gzip:     2.14 kB
+.vercel/output/functions/__server.func/_ssr/LiveClone-BcxVmNZf.mjs                               2.83 kB │ gzip:     1.34 kB
+.vercel/output/functions/__server.func/_virtual/positioning.json.mjs                             2.85 kB │ gzip:     0.97 kB
+.vercel/output/functions/__server.func/_virtual/positioning2.json.mjs                            2.86 kB │ gzip:     0.98 kB
+.vercel/output/functions/__server.func/_virtual/waves--hint.webp.mjs                             2.86 kB │ gzip:     2.19 kB
+.vercel/output/functions/__server.func/_ssr/Help-usPDypwN.mjs                                    2.86 kB │ gzip:     1.32 kB
+.vercel/output/functions/__server.func/_virtual/voice.json.mjs                                   2.87 kB │ gzip:     1.00 kB
+.vercel/output/functions/__server.func/_virtual/voice2.json.mjs                                  2.88 kB │ gzip:     1.00 kB
+.vercel/output/functions/__server.func/_ssr/deck._deckId-m1pY43BY.mjs                            2.91 kB │ gzip:     1.34 kB
+.vercel/output/functions/__server.func/_virtual/waves--accent.webp.mjs                           2.91 kB │ gzip:     2.23 kB
+.vercel/output/functions/__server.func/_virtual/2.json.mjs                                       2.93 kB │ gzip:     1.05 kB
+.vercel/output/functions/__server.func/_virtual/5.json.mjs                                       2.94 kB │ gzip:     1.07 kB
+.vercel/output/functions/__server.func/_virtual/6.json.mjs                                       2.96 kB │ gzip:     1.06 kB
+.vercel/output/functions/__server.func/_virtual/spiral--brand-blue.webp.mjs                      2.96 kB │ gzip:     2.26 kB
+.vercel/output/functions/__server.func/_virtual/4.json.mjs                                       2.96 kB │ gzip:     1.06 kB
+.vercel/output/functions/__server.func/_ssr/token-B_Dq56FW.mjs                                   2.96 kB │ gzip:     1.09 kB
+.vercel/output/functions/__server.func/_ssr/assist-fixtures-DZgTqGYr.mjs                         2.96 kB │ gzip:     1.34 kB
+.vercel/output/functions/__server.func/_libs/vercel__oidc.mjs                                    3.01 kB │ gzip:     1.11 kB
+.vercel/output/functions/__server.func/_virtual/inspirations.json.mjs                            3.02 kB │ gzip:     1.02 kB
+.vercel/output/functions/__server.func/_virtual/inspirations2.json.mjs                           3.03 kB │ gzip:     1.02 kB
+.vercel/output/functions/__server.func/_ssr/theme-node-DIeecYR8.mjs                              3.11 kB │ gzip:     1.35 kB
+.vercel/output/functions/__server.func/_ssr/metrics-Dl0RAbs3.mjs                                 3.16 kB │ gzip:     1.44 kB
+.vercel/output/functions/__server.func/_virtual/iso.json.mjs                                     3.17 kB │ gzip:     1.14 kB
+.vercel/output/functions/__server.func/_virtual/iso2.json.mjs                                    3.18 kB │ gzip:     1.14 kB
+.vercel/output/functions/__server.func/_virtual/details-two.json.mjs                             3.20 kB │ gzip:     0.91 kB
+.vercel/output/functions/__server.func/_virtual/details-two2.json.mjs                            3.21 kB │ gzip:     0.92 kB
+.vercel/output/functions/__server.func/_virtual/gem-smoke.webp.mjs                               3.25 kB │ gzip:     2.49 kB
+.vercel/output/functions/__server.func/_virtual/audience.json.mjs                                3.26 kB │ gzip:     1.02 kB
+.vercel/output/functions/__server.func/_virtual/audience2.json.mjs                               3.27 kB │ gzip:     1.02 kB
+.vercel/output/functions/__server.func/_virtual/waves--caption.webp.mjs                          3.31 kB │ gzip:     2.53 kB
+.vercel/output/functions/__server.func/_ssr/deck._deckId-DIzXLkGX.mjs                            3.32 kB │ gzip:     1.48 kB
+.vercel/output/functions/__server.func/_ssr/dither-walk-CMBP4aPt.mjs                             3.37 kB │ gzip:     1.46 kB
+.vercel/output/functions/__server.func/_ssr/-restoring-CPKKWinh.mjs                              3.39 kB │ gzip:     1.37 kB
+.vercel/output/functions/__server.func/_ssr/dither-values-B4DCtnzQ.mjs                           3.39 kB │ gzip:     1.30 kB
+.vercel/output/functions/__server.func/_ssr/lint-CnGLd5Q7.mjs                                    3.48 kB │ gzip:     1.65 kB
+.vercel/output/functions/__server.func/_ssr/FromThisPresentation-Dw4LigbG.mjs                    3.53 kB │ gzip:     1.41 kB
+.vercel/output/functions/__server.func/_ssr/deck._deckId-CTg9DR5N.mjs                            3.55 kB │ gzip:     1.61 kB
+.vercel/output/functions/__server.func/_ssr/log-CakFWyQ_.mjs                                     3.56 kB │ gzip:     1.60 kB
+.vercel/output/functions/__server.func/_virtual/engines.json.mjs                                 3.58 kB │ gzip:     1.07 kB
+.vercel/output/functions/__server.func/_virtual/waves--ink-paper.webp.mjs                        3.58 kB │ gzip:     2.73 kB
+.vercel/output/functions/__server.func/_virtual/engines2.json.mjs                                3.59 kB │ gzip:     1.07 kB
+.vercel/output/functions/__server.func/_virtual/dither.json.mjs                                  3.59 kB │ gzip:     0.99 kB
+.vercel/output/functions/__server.func/_virtual/directions.json.mjs                              3.59 kB │ gzip:     1.00 kB
+.vercel/output/functions/__server.func/_virtual/waves--paper-ink.webp.mjs                        3.60 kB │ gzip:     2.74 kB
+.vercel/output/functions/__server.func/_virtual/dither2.json.mjs                                 3.60 kB │ gzip:     0.99 kB
+.vercel/output/functions/__server.func/_virtual/directions2.json.mjs                             3.60 kB │ gzip:     1.01 kB
+.vercel/output/functions/__server.func/_virtual/smoke-ring.webp.mjs                              3.65 kB │ gzip:     2.78 kB
+.vercel/output/functions/__server.func/_virtual/doubled-line.json.mjs                            3.65 kB │ gzip:     1.14 kB
+.vercel/output/functions/__server.func/_ssr/AgentAccess-D6fvhXWp.mjs                             3.66 kB │ gzip:     1.41 kB
+.vercel/output/functions/__server.func/_virtual/doubled-line2.json.mjs                           3.66 kB │ gzip:     1.14 kB
+.vercel/output/functions/__server.func/_ssr/Progress-DaZh98cg.mjs                                3.71 kB │ gzip:     1.66 kB
+.vercel/output/functions/__server.func/_virtual/state.json.mjs                                   3.73 kB │ gzip:     1.12 kB
+.vercel/output/functions/__server.func/_virtual/state2.json.mjs                                  3.74 kB │ gzip:     1.12 kB
+.vercel/output/functions/__server.func/_virtual/glyphfield-materials.json.mjs                    3.78 kB │ gzip:     1.18 kB
+.vercel/output/functions/__server.func/_virtual/glyphfield-materials2.json.mjs                   3.79 kB │ gzip:     1.18 kB
+.vercel/output/functions/__server.func/_virtual/lines.json.mjs                                   3.84 kB │ gzip:     1.12 kB
+.vercel/output/functions/__server.func/_virtual/lines2.json.mjs                                  3.85 kB │ gzip:     1.13 kB
+.vercel/output/functions/__server.func/_ssr/EditHtmlPanel-Dore4AjJ.mjs                           3.87 kB │ gzip:     1.27 kB
+.vercel/output/functions/__server.func/_ssr/NotificationSettings-Ccv5Otqp.mjs                    3.88 kB │ gzip:     1.47 kB
+.vercel/output/functions/__server.func/_virtual/dx.json.mjs                                      3.90 kB │ gzip:     1.16 kB
+.vercel/output/functions/__server.func/_virtual/dx2.json.mjs                                     3.91 kB │ gzip:     1.17 kB
+.vercel/output/functions/__server.func/_virtual/waves--brand-blue.webp.mjs                       3.92 kB │ gzip:     2.98 kB
+.vercel/output/functions/__server.func/_ssr/edit._deckId-BIT4t_54.mjs                            3.95 kB │ gzip:     1.87 kB
+.vercel/output/functions/__server.func/_ssr/blob-disk-Byw1rcbZ.mjs                               3.96 kB │ gzip:     1.51 kB
+.vercel/output/functions/__server.func/_ssr/render-DpcQ3TA3.mjs                                  3.98 kB │ gzip:     1.92 kB
+.vercel/output/functions/__server.func/_virtual/color.json.mjs                                   4.02 kB │ gzip:     1.20 kB
+.vercel/output/functions/__server.func/_virtual/color2.json.mjs                                  4.03 kB │ gzip:     1.20 kB
+.vercel/output/functions/__server.func/_ssr/lint-CUPaj4Af.mjs                                    4.04 kB │ gzip:     1.82 kB
+.vercel/output/functions/__server.func/_virtual/surfaces.json.mjs                                4.12 kB │ gzip:     0.96 kB
+.vercel/output/functions/__server.func/_virtual/surfaces2.json.mjs                               4.13 kB │ gzip:     0.96 kB
+.vercel/output/functions/__server.func/_ssr/edit._deckId-Bjhm_AKS.mjs                            4.21 kB │ gzip:     1.96 kB
+.vercel/output/functions/__server.func/_ssr/CustomSpacing-YEqE7sj2.mjs                           4.23 kB │ gzip:     1.65 kB
+.vercel/output/functions/__server.func/_ssr/RequestAccess-BoIuq9Pm.mjs                           4.33 kB │ gzip:     1.54 kB
+.vercel/output/functions/__server.func/_virtual/naming.json.mjs                                  4.35 kB │ gzip:     1.05 kB
+.vercel/output/functions/__server.func/_virtual/naming2.json.mjs                                 4.36 kB │ gzip:     1.05 kB
+.vercel/output/functions/__server.func/_libs/cluster-key-slot.mjs                                4.48 kB │ gzip:     1.83 kB
+.vercel/output/functions/__server.func/_ssr/MakeCopy-CFRBEmPa.mjs                                4.49 kB │ gzip:     1.79 kB
+.vercel/output/functions/__server.func/_ssr/bun-sqlite-dialect-C7ftEUSI-66JifPHS.mjs             4.54 kB │ gzip:     1.62 kB
+.vercel/output/functions/__server.func/_ssr/node-sqlite-dialect-getIrOEq.mjs                     4.54 kB │ gzip:     1.61 kB
+.vercel/output/functions/__server.func/_virtual/line-law.json.mjs                                4.60 kB │ gzip:     1.46 kB
+.vercel/output/functions/__server.func/_virtual/line-law2.json.mjs                               4.61 kB │ gzip:     1.46 kB
+.vercel/output/functions/__server.func/_virtual/language-as-material.json.mjs                    4.62 kB │ gzip:     1.29 kB
+.vercel/output/functions/__server.func/_virtual/language-as-material2.json.mjs                   4.63 kB │ gzip:     1.29 kB
+.vercel/output/functions/__server.func/_virtual/presenter-compare.json.mjs                       4.79 kB │ gzip:     1.07 kB
+.vercel/output/functions/__server.func/_virtual/presenter-compare2.json.mjs                      4.80 kB │ gzip:     1.08 kB
+.vercel/output/functions/__server.func/_ssr/Link-C7PJHYNB.mjs                                    4.81 kB │ gzip:     1.76 kB
+.vercel/output/functions/__server.func/_ssr/bundle-BXiHzAZu.mjs                                  4.87 kB │ gzip:     1.98 kB
+.vercel/output/functions/__server.func/_virtual/docs-for-agents.json.mjs                         4.88 kB │ gzip:     1.39 kB
+.vercel/output/functions/__server.func/_virtual/docs-for-agents2.json.mjs                        4.89 kB │ gzip:     1.40 kB
+.vercel/output/functions/__server.func/_ssr/server-CP3ThdC3.mjs                                  4.90 kB │ gzip:     1.63 kB
+.vercel/output/functions/__server.func/_ssr/SlideNumbers-BeUJFBKe.mjs                            5.05 kB │ gzip:     2.03 kB
+.vercel/output/functions/__server.func/_ssr/edit._deckId-BDEvS1OK.mjs                            5.06 kB │ gzip:     2.31 kB
+.vercel/output/functions/__server.func/_ssr/d1-sqlite-dialect-D4qp4-wW-D0JN204e.mjs              5.12 kB │ gzip:     1.83 kB
+.vercel/output/functions/__server.func/_virtual/shell-numbers.json.mjs                           5.15 kB │ gzip:     1.51 kB
+.vercel/output/functions/__server.func/_virtual/shell-numbers2.json.mjs                          5.16 kB │ gzip:     1.51 kB
+.vercel/output/functions/__server.func/_virtual/motion.json.mjs                                  5.18 kB │ gzip:     1.29 kB
+.vercel/output/functions/__server.func/_virtual/motion2.json.mjs                                 5.19 kB │ gzip:     1.30 kB
+.vercel/output/functions/__server.func/_virtual/3.json.mjs                                       5.28 kB │ gzip:     1.11 kB
+.vercel/output/functions/__server.func/_ssr/theme-Dv3XCuPc.mjs                                   5.36 kB │ gzip:     2.08 kB
+.vercel/output/functions/__server.func/_ssr/report-Bou5h80m.mjs                                  5.41 kB │ gzip:     2.07 kB
+.vercel/output/functions/__server.func/_virtual/template2.json.mjs                               5.42 kB │ gzip:     1.28 kB
+.vercel/output/functions/__server.func/_ssr/labels-CgKVR5yo.mjs                                  5.62 kB │ gzip:     2.55 kB
+.vercel/output/functions/__server.func/_virtual/dithering.webp.mjs                               5.64 kB │ gzip:     4.14 kB
+.vercel/output/functions/__server.func/_virtual/agent-api.json.mjs                               5.70 kB │ gzip:     1.62 kB
+.vercel/output/functions/__server.func/_virtual/agent-api2.json.mjs                              5.71 kB │ gzip:     1.62 kB
+.vercel/output/functions/__server.func/_virtual/identity-project.json.mjs                        5.77 kB │ gzip:     1.56 kB
+.vercel/output/functions/__server.func/_virtual/identity-project2.json.mjs                       5.78 kB │ gzip:     1.56 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE.mjs                                      6.05 kB │ gzip:     3.14 kB
+.vercel/output/functions/__server.func/_virtual/viewer-shell.json.mjs                            6.07 kB │ gzip:     1.70 kB
+.vercel/output/functions/__server.func/_ssr/ImageByUrl-BBJnvuNh.mjs                              6.07 kB │ gzip:     2.26 kB
+.vercel/output/functions/__server.func/_virtual/viewer-shell2.json.mjs                           6.08 kB │ gzip:     1.71 kB
+.vercel/output/functions/__server.func/_ssr/ShortcutsDialog-DNeT69Lr.mjs                         6.10 kB │ gzip:     2.22 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE20.mjs                                    6.11 kB │ gzip:     3.18 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE16.mjs                                    6.11 kB │ gzip:     3.17 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE24.mjs                                    6.11 kB │ gzip:     3.18 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE8.mjs                                     6.12 kB │ gzip:     3.17 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE21.mjs                                    6.12 kB │ gzip:     3.19 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE7.mjs                                     6.12 kB │ gzip:     3.18 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE6.mjs                                     6.12 kB │ gzip:     3.19 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE5.mjs                                     6.12 kB │ gzip:     3.19 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE28.mjs                                    6.12 kB │ gzip:     3.18 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE19.mjs                                    6.13 kB │ gzip:     3.18 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE27.mjs                                    6.13 kB │ gzip:     3.18 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE33.mjs                                    6.13 kB │ gzip:     3.19 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE4.mjs                                     6.13 kB │ gzip:     3.18 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE18.mjs                                    6.14 kB │ gzip:     3.19 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE13.mjs                                    6.14 kB │ gzip:     3.18 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE12.mjs                                    6.14 kB │ gzip:     3.19 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE31.mjs                                    6.14 kB │ gzip:     3.19 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE11.mjs                                    6.15 kB │ gzip:     3.19 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE2.mjs                                     6.15 kB │ gzip:     3.20 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE29.mjs                                    6.15 kB │ gzip:     3.20 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE15.mjs                                    6.16 kB │ gzip:     3.19 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE25.mjs                                    6.18 kB │ gzip:     3.21 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE17.mjs                                    6.19 kB │ gzip:     3.21 kB
+.vercel/output/functions/__server.func/_virtual/deck2.json.mjs                                   6.20 kB │ gzip:     1.64 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE23.mjs                                    6.21 kB │ gzip:     3.23 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE10.mjs                                    6.22 kB │ gzip:     3.24 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE9.mjs                                     6.22 kB │ gzip:     3.24 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE3.mjs                                     6.24 kB │ gzip:     3.24 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE22.mjs                                    6.24 kB │ gzip:     3.25 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE26.mjs                                    6.26 kB │ gzip:     3.25 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE32.mjs                                    6.27 kB │ gzip:     3.28 kB
+.vercel/output/functions/__server.func/_virtual/perlin-noise.webp.mjs                            6.32 kB │ gzip:     4.79 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE14.mjs                                    6.33 kB │ gzip:     3.29 kB
+.vercel/output/functions/__server.func/_virtual/LICENSE30.mjs                                    6.38 kB │ gzip:     3.32 kB
+.vercel/output/functions/__server.func/_ssr/start-CDpSetm4.mjs                                   6.63 kB │ gzip:     2.81 kB
+.vercel/output/functions/__server.func/_ssr/Open-d0TzBecR.mjs                                    6.67 kB │ gzip:     2.25 kB
+.vercel/output/functions/__server.func/_ssr/export-DZumZvc2.mjs                                  6.67 kB │ gzip:     2.33 kB
+.vercel/output/functions/__server.func/_libs/stablelib__base64.mjs                               6.76 kB │ gzip:     1.76 kB
+.vercel/output/functions/__server.func/_ssr/card-thumb-B0Cd6eMG.mjs                              6.84 kB │ gzip:     2.83 kB
+.vercel/output/functions/__server.func/_ssr/SignIn-BawWg6ke.mjs                                  6.99 kB │ gzip:     1.92 kB
+.vercel/output/functions/__server.func/_virtual/swirl.webp.mjs                                   7.14 kB │ gzip:     5.42 kB
+.vercel/output/functions/__server.func/_ssr/cli-B0HteYfN.mjs                                     7.20 kB │ gzip:     2.74 kB
+.vercel/output/functions/__server.func/_tanstack-start-manifest_v-D67KqUOJ.mjs                   7.33 kB │ gzip:     1.52 kB
+.vercel/output/functions/__server.func/_ssr/render-CTZbiCTS.mjs                                  7.38 kB │ gzip:     2.94 kB
+.vercel/output/functions/__server.func/_libs/upstash__core-analytics.mjs                         7.40 kB │ gzip:     2.59 kB
+.vercel/output/functions/__server.func/_virtual/knowledge-base.json.mjs                          7.43 kB │ gzip:     1.62 kB
+.vercel/output/functions/__server.func/_virtual/knowledge-base2.json.mjs                         7.44 kB │ gzip:     1.63 kB
+.vercel/output/functions/__server.func/_virtual/goals.json.mjs                                   7.51 kB │ gzip:     1.64 kB
+.vercel/output/functions/__server.func/_virtual/goals2.json.mjs                                  7.52 kB │ gzip:     1.65 kB
+.vercel/output/functions/__server.func/_virtual/nearest-page-routing.json.mjs                    7.67 kB │ gzip:     1.62 kB
+.vercel/output/functions/__server.func/_virtual/nearest-page-routing2.json.mjs                   7.68 kB │ gzip:     1.62 kB
+.vercel/output/functions/__server.func/_ssr/flags-BhZItxeG.mjs                                   8.11 kB │ gzip:     3.29 kB
+.vercel/output/functions/__server.func/_virtual/spiral.webp.mjs                                  8.34 kB │ gzip:     6.32 kB
+.vercel/output/functions/__server.func/_ssr/new-BWUZgMSy.mjs                                     8.60 kB │ gzip:     3.47 kB
+.vercel/output/functions/__server.func/_ssr/SaveAsTemplate-DoVzcpiv.mjs                          9.07 kB │ gzip:     2.89 kB
+.vercel/output/functions/__server.func/_libs/pixelmatch.mjs                                      9.14 kB │ gzip:     2.82 kB
+.vercel/output/functions/__server.func/_ssr/sessions-D2sRSNGu.mjs                                9.15 kB │ gzip:     3.31 kB
+.vercel/output/functions/__server.func/_ssr/device-CTw_WAOO.mjs                                  9.27 kB │ gzip:     2.39 kB
+.vercel/output/functions/__server.func/_ssr/agent-actions-BWR4XsTG.mjs                           9.73 kB │ gzip:     3.59 kB
+.vercel/output/functions/__server.func/_ssr/AvatarBuilder-wxJP9jc1.mjs                           9.79 kB │ gzip:     2.96 kB
+.vercel/output/functions/__server.func/_ssr/-recent-B7rWpcA3.mjs                                 9.81 kB │ gzip:     3.42 kB
+.vercel/output/functions/__server.func/_ssr/FindReplace-BT5mXiQ4.mjs                             9.89 kB │ gzip:     3.14 kB
+.vercel/output/functions/__server.func/_ssr/cn-C4dh4tV1.mjs                                     10.09 kB │ gzip:     3.69 kB
+.vercel/output/functions/__server.func/_ssr/Dialog-Dog8uV42.mjs                                 10.21 kB │ gzip:     2.80 kB
+.vercel/output/functions/__server.func/_ssr/Publish-CYJvc4n1.mjs                                10.37 kB │ gzip:     2.98 kB
+.vercel/output/functions/__server.func/_libs/fast-sha256.mjs                                    10.49 kB │ gzip:     3.11 kB
+.vercel/output/functions/__server.func/_ssr/-access-page-C_T3efL2.mjs                           10.52 kB │ gzip:     3.20 kB
+.vercel/output/functions/__server.func/_libs/tanstack__history.mjs                              10.88 kB │ gzip:     3.14 kB
+.vercel/output/functions/__server.func/_virtual/god-rays.webp.mjs                               10.91 kB │ gzip:     8.25 kB
+.vercel/output/functions/__server.func/_ssr/secret-CNn5S_rW.mjs                                 11.00 kB │ gzip:     3.95 kB
+.vercel/output/functions/__server.func/_virtual/diagrams.json.mjs                               11.16 kB │ gzip:     2.09 kB
+.vercel/output/functions/__server.func/_virtual/diagrams2.json.mjs                              11.17 kB │ gzip:     2.10 kB
+.vercel/output/functions/__server.func/_ssr/bundle-core-0w7HrIR4.mjs                            11.20 kB │ gzip:     4.44 kB
+.vercel/output/functions/__server.func/_ssr/Profile-CTyzsGiW.mjs                                11.23 kB │ gzip:     2.71 kB
+.vercel/output/functions/__server.func/_ssr/ImportSlides-DxkCrrKY.mjs                           11.36 kB │ gzip:     3.39 kB
+.vercel/output/functions/__server.func/_ssr/write-B27sr3Uf.mjs                                  11.65 kB │ gzip:     4.57 kB
+.vercel/output/functions/__server.func/_libs/denque.mjs                                         11.82 kB │ gzip:     2.69 kB
+.vercel/output/functions/__server.func/_ssr/protocol-jVKvPMER.mjs                               11.92 kB │ gzip:     4.20 kB
+.vercel/output/functions/__server.func/_ssr/print._deckId-CWMOEPN4.mjs                          12.18 kB │ gzip:     3.84 kB
+.vercel/output/functions/__server.func/_ssr/export-sync-DaIUYIgd.mjs                            12.24 kB │ gzip:     4.59 kB
+.vercel/output/functions/__server.func/_virtual/grain-gradient.webp.mjs                         12.28 kB │ gzip:     9.27 kB
+.vercel/output/functions/__server.func/_ssr/DiagramPanel-BpxX3ABl.mjs                           12.88 kB │ gzip:     3.70 kB
+.vercel/output/functions/__server.func/_virtual/waves.webp.mjs                                  13.37 kB │ gzip:    10.03 kB
+.vercel/output/functions/__server.func/_ssr/templates-D4yO9s3P.mjs                              13.91 kB │ gzip:     3.86 kB
+.vercel/output/functions/__server.func/_virtual/calibration.json.mjs                            14.20 kB │ gzip:     4.61 kB
+.vercel/output/functions/__server.func/_ssr/dist-Dcsf1esu.mjs                                   14.56 kB │ gzip:     4.08 kB
+.vercel/output/functions/__server.func/_ssr/decks.trash-9L-NquZa.mjs                            14.69 kB │ gzip:     4.42 kB
+.vercel/output/functions/__server.func/_ssr/sessions-CKvJSQg4.mjs                               14.86 kB │ gzip:     5.09 kB
+.vercel/output/functions/__server.func/_ssr/Tailor-3bxUffs3.mjs                                 14.90 kB │ gzip:     4.78 kB
+.vercel/output/functions/__server.func/_ssr/DeckViewer-BtncwZ0H.mjs                             15.06 kB │ gzip:     5.37 kB
+.vercel/output/functions/__server.func/_ssr/auth-BH8o57mv.mjs                                   15.45 kB │ gzip:     5.35 kB
+.vercel/output/functions/__server.func/_libs/unstorage.mjs                                      17.23 kB │ gzip:     4.41 kB
+.vercel/output/functions/__server.func/_virtual/fixed-points.json.mjs                           17.70 kB │ gzip:     1.85 kB
+.vercel/output/functions/__server.func/_virtual/fixed-points2.json.mjs                          17.71 kB │ gzip:     1.86 kB
+.vercel/output/functions/__server.func/_ssr/Download-871viI2Z.mjs                               17.73 kB │ gzip:     5.16 kB
+.vercel/output/functions/__server.func/_ssr/decks.templates-DVbHsulk.mjs                        17.77 kB │ gzip:     4.96 kB
+.vercel/output/functions/__server.func/_ssr/download-BzW8fM4I.mjs                               18.07 kB │ gzip:     6.75 kB
+.vercel/output/functions/__server.func/_ssr/headers-nRJzoJEq.mjs                                18.27 kB │ gzip:     6.37 kB
+.vercel/output/functions/__server.func/_ssr/ratelimit-BAqVce3_.mjs                              18.53 kB │ gzip:     5.66 kB
+.vercel/output/functions/__server.func/_virtual/import-ids.json.mjs                             19.00 kB │ gzip:     2.30 kB
+.vercel/output/functions/__server.func/_ssr/ShaderGallery-DQWH3kSy.mjs                          19.59 kB │ gzip:     5.91 kB
+.vercel/output/functions/__server.func/_ssr/thumbs-DtOdFm1q.mjs                                 20.00 kB │ gzip:     6.59 kB
+.vercel/output/functions/__server.func/_virtual/index.json.mjs                                  20.21 kB │ gzip:     1.84 kB
+.vercel/output/functions/__server.func/_libs/debug+[...].mjs                                    22.34 kB │ gzip:     6.86 kB
+.vercel/output/functions/__server.func/_ssr/tokens-DynoHrxR.mjs                                 23.52 kB │ gzip:     8.00 kB
+.vercel/output/functions/__server.func/_ssr/write-C0U54B1I.mjs                                  23.65 kB │ gzip:     7.84 kB
+.vercel/output/functions/__server.func/_ssr/export-jobs-CIVE4PS_.mjs                            24.08 kB │ gzip:     8.47 kB
+.vercel/output/functions/__server.func/_ssr/authorize-ckIHtPo3.mjs                              25.11 kB │ gzip:     8.11 kB
+.vercel/output/functions/__server.func/_ssr/present._deckId-B3JnIuM5.mjs                        25.36 kB │ gzip:     6.78 kB
+.vercel/output/functions/__server.func/_ssr/access-DXJmnAc9.mjs                                 26.51 kB │ gzip:     8.73 kB
+.vercel/output/functions/__server.func/_ssr/download-C0kdPTga.mjs                               27.02 kB │ gzip:     8.49 kB
+.vercel/output/functions/__server.func/_ssr/root-Dr6oOJ8b.mjs                                   27.04 kB │ gzip:     9.40 kB
+.vercel/output/functions/__server.func/_ssr/Background-teQJNxJC.mjs                             27.08 kB │ gzip:     7.38 kB
+.vercel/output/functions/__server.func/_virtual/sheet.css.mjs                                   27.13 kB │ gzip:     7.45 kB
+.vercel/output/functions/__server.func/_ssr/mount-CXDSBOpk.mjs                                  27.16 kB │ gzip:     7.74 kB
+.vercel/output/functions/__server.func/_ssr/unpack-B7QhBVor.mjs                                 28.67 kB │ gzip:     8.67 kB
+.vercel/output/functions/__server.func/_virtual/bebas-neue-400.woff2.mjs                        29.12 kB │ gzip:    21.95 kB
+.vercel/output/functions/__server.func/_ssr/client-CytnTmZm.mjs                                 30.42 kB │ gzip:     9.21 kB
+.vercel/output/functions/__server.func/_ssr/SpecialCharacters-mNgKBLEv.mjs                      30.53 kB │ gzip:     9.38 kB
+.vercel/output/functions/__server.func/_ssr/decks-DP148WGF.mjs                                  31.64 kB │ gzip:     9.17 kB
+.vercel/output/functions/__server.func/_ssr/Logo-KjjnYKT7.mjs                                   32.50 kB │ gzip:     8.91 kB
+.vercel/output/functions/__server.func/_ssr/rules-CcXUTykR.mjs                                  34.50 kB │ gzip:    11.24 kB
+.vercel/output/functions/__server.func/_ssr/sprite-C9kCxRrk.mjs                                 36.69 kB │ gzip:    10.75 kB
+.vercel/output/functions/__server.func/_ssr/SlideList-BVzpg9zc.mjs                              37.73 kB │ gzip:    11.95 kB
+.vercel/output/functions/__server.func/_virtual/fonts.json.mjs                                  42.15 kB │ gzip:     4.02 kB
+.vercel/output/functions/__server.func/_ssr/export-batch-FzoRT57L.mjs                           42.97 kB │ gzip:    13.28 kB
+.vercel/output/functions/__server.func/_ssr/shader-frames-BjwySYct.mjs                          43.10 kB │ gzip:    15.75 kB
+.vercel/output/functions/__server.func/_libs/resend+standardwebhooks.mjs                        45.07 kB │ gzip:     8.70 kB
+.vercel/output/functions/__server.func/_libs/vercel__functions.mjs                              45.46 kB │ gzip:     8.17 kB
+.vercel/output/functions/__server.func/_virtual/sprite.svg.mjs                                  46.60 kB │ gzip:    14.80 kB
+.vercel/output/functions/__server.func/_libs/h3+rou3+srvx.mjs                                   48.19 kB │ gzip:    12.77 kB
+.vercel/output/functions/__server.func/_ssr/decks.index-B4LNMthG.mjs                            49.59 kB │ gzip:    13.07 kB
+.vercel/output/functions/__server.func/_ssr/frames-B-NJju4W.mjs                                 49.82 kB │ gzip:    15.14 kB
+.vercel/output/functions/__server.func/_ssr/Snackbar-Be44MJOQ.mjs                               50.08 kB │ gzip:    14.69 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-mono-400.woff2.mjs                     52.49 kB │ gzip:    39.56 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-mono-300.woff2.mjs                     52.66 kB │ gzip:    39.66 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-mono-500.woff2.mjs                     53.79 kB │ gzip:    40.51 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-mono-700.woff2.mjs                     54.09 kB │ gzip:    40.73 kB
+.vercel/output/functions/__server.func/_ssr/ready-DS1-8bRC.mjs                                  55.17 kB │ gzip:    17.88 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-mono-600.woff2.mjs                     55.22 kB │ gzip:    41.56 kB
+.vercel/output/functions/__server.func/_libs/upstash__ratelimit.mjs                             55.44 kB │ gzip:    11.54 kB
+.vercel/output/functions/__server.func/_ssr/deck-BQPDxMp-.mjs                                   58.51 kB │ gzip:    17.64 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-mono-400-italic.woff2.mjs              58.59 kB │ gzip:    44.16 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-mono-300-italic.woff2.mjs              58.70 kB │ gzip:    44.23 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-mono-700-italic.woff2.mjs              59.28 kB │ gzip:    44.64 kB
+.vercel/output/functions/__server.func/_ssr/Share-COCFrjc_.mjs                                  59.79 kB │ gzip:    13.84 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-mono-500-italic.woff2.mjs              60.10 kB │ gzip:    45.24 kB
+.vercel/output/functions/__server.func/_virtual/import-report.json.mjs                          60.61 kB │ gzip:     4.13 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-mono-600-italic.woff2.mjs              60.96 kB │ gzip:    45.95 kB
+.vercel/output/functions/__server.func/_virtual/space-grotesk.woff2.mjs                         65.93 kB │ gzip:    49.66 kB
+.vercel/output/functions/__server.func/_virtual/poppins-500.woff2.mjs                           68.08 kB │ gzip:    51.33 kB
+.vercel/output/functions/__server.func/_virtual/poppins-700.woff2.mjs                           68.22 kB │ gzip:    51.44 kB
+.vercel/output/functions/__server.func/_virtual/poppins-300.woff2.mjs                           68.67 kB │ gzip:    51.77 kB
+.vercel/output/functions/__server.func/_virtual/poppins-600.woff2.mjs                           68.95 kB │ gzip:    51.98 kB
+.vercel/output/functions/__server.func/_virtual/poppins-400.woff2.mjs                           69.01 kB │ gzip:    52.03 kB
+.vercel/output/functions/__server.func/_virtual/manrope.woff2.mjs                               71.93 kB │ gzip:    54.19 kB
+.vercel/output/functions/__server.func/_virtual/poppins-500-italic.woff2.mjs                    77.04 kB │ gzip:    58.06 kB
+.vercel/output/functions/__server.func/_virtual/poppins-700-italic.woff2.mjs                    77.52 kB │ gzip:    58.43 kB
+.vercel/output/functions/__server.func/_virtual/poppins-600-italic.woff2.mjs                    78.31 kB │ gzip:    59.01 kB
+.vercel/output/functions/__server.func/_virtual/poppins-300-italic.woff2.mjs                    78.46 kB │ gzip:    59.13 kB
+.vercel/output/functions/__server.func/_virtual/poppins-400-italic.woff2.mjs                    78.65 kB │ gzip:    59.27 kB
+.vercel/output/functions/__server.func/_libs/ioredis__commands.mjs                              80.03 kB │ gzip:     9.65 kB
+.vercel/output/functions/__server.func/_virtual/libre-baskerville-italic.woff2.mjs              82.42 kB │ gzip:    61.93 kB
+.vercel/output/functions/__server.func/_ssr/logos-CWzljmtL.mjs                                  84.44 kB │ gzip:    25.87 kB
+.vercel/output/functions/__server.func/_ssr/html-escape-BiqrpD2f.mjs                            85.19 kB │ gzip:    27.38 kB
+.vercel/output/functions/__server.func/_virtual/libre-baskerville.woff2.mjs                     85.78 kB │ gzip:    64.54 kB
+.vercel/output/functions/__server.func/_virtual/1.json.mjs                                      85.90 kB │ gzip:    14.89 kB
+.vercel/output/functions/__server.func/_virtual/7.json.mjs                                      85.90 kB │ gzip:    14.89 kB
+.vercel/output/functions/__server.func/_libs/postal-mime.mjs                                    91.89 kB │ gzip:    25.75 kB
+.vercel/output/functions/__server.func/_virtual/geist.woff2.mjs                                 93.40 kB │ gzip:    70.37 kB
+.vercel/output/functions/__server.func/_virtual/schibsted-grotesk.woff2.mjs                     93.77 kB │ gzip:    70.61 kB
+.vercel/output/functions/__server.func/_virtual/geist-mono.woff2.mjs                            95.12 kB │ gzip:    71.68 kB
+.vercel/output/functions/__server.func/_ssr/home-BzfwTXrM.mjs                                   95.22 kB │ gzip:    26.55 kB
+.vercel/output/functions/__server.func/_virtual/jetbrains-mono.woff2.mjs                        95.91 kB │ gzip:    72.26 kB
+.vercel/output/functions/__server.func/_virtual/oswald.woff2.mjs                                96.28 kB │ gzip:    72.50 kB
+.vercel/output/functions/__server.func/_virtual/geist-italic.woff2.mjs                          97.70 kB │ gzip:    73.61 kB
+.vercel/output/functions/__server.func/_virtual/schibsted-grotesk-italic.woff2.mjs             100.26 kB │ gzip:    75.49 kB
+.vercel/output/functions/__server.func/_virtual/jetbrains-mono-italic.woff2.mjs                102.34 kB │ gzip:    77.13 kB
+.vercel/output/functions/__server.func/_virtual/geist-mono-italic.woff2.mjs                    105.30 kB │ gzip:    79.35 kB
+.vercel/output/functions/__server.func/_virtual/deck.json.mjs                                  106.23 kB │ gzip:    17.05 kB
+.vercel/output/functions/__server.func/_virtual/deck3.json.mjs                                 106.24 kB │ gzip:    17.05 kB
+.vercel/output/functions/__server.func/_virtual/lora.woff2.mjs                                 113.74 kB │ gzip:    85.53 kB
+.vercel/output/functions/__server.func/_libs/ws.mjs                                            116.25 kB │ gzip:    24.24 kB
+.vercel/output/functions/__server.func/_virtual/dm-sans.woff2.mjs                              118.60 kB │ gzip:    89.28 kB
+.vercel/output/functions/__server.func/_virtual/instrument-sans.woff2.mjs                      119.02 kB │ gzip:    89.64 kB
+.vercel/output/functions/__server.func/_virtual/pt-serif-700-italic.woff2.mjs                  121.88 kB │ gzip:    89.79 kB
+.vercel/output/functions/__server.func/_virtual/lora-italic.woff2.mjs                          122.39 kB │ gzip:    92.00 kB
+.vercel/output/functions/__server.func/_virtual/pt-serif-700.woff2.mjs                         122.75 kB │ gzip:    90.50 kB
+.vercel/output/functions/__server.func/_virtual/instrument-sans-italic.woff2.mjs               126.71 kB │ gzip:    95.44 kB
+.vercel/output/functions/__server.func/_ssr/run-BJ3libtt.mjs                                   129.43 kB │ gzip:    37.13 kB
+.vercel/output/functions/__server.func/_ssr/Menu-CUAs4kg0.mjs                                  133.43 kB │ gzip:    34.54 kB
+.vercel/output/functions/__server.func/_virtual/nunito.woff2.mjs                               134.91 kB │ gzip:   101.61 kB
+.vercel/output/functions/__server.func/_virtual/pt-serif-400.woff2.mjs                         137.04 kB │ gzip:   101.52 kB
+.vercel/output/functions/__server.func/_virtual/playfair-display-italic.woff2.mjs              139.15 kB │ gzip:   104.78 kB
+.vercel/output/functions/__server.func/_ssr/templates-S1sDqPxp.mjs                             139.36 kB │ gzip:    35.71 kB
+.vercel/output/functions/__server.func/_virtual/roboto-mono.woff2.mjs                          140.40 kB │ gzip:   105.77 kB
+.vercel/output/functions/__server.func/_ssr/slide-CW9lDmUy.mjs                                 141.73 kB │ gzip:    40.94 kB
+.vercel/output/functions/__server.func/_virtual/fira-code.woff2.mjs                            142.25 kB │ gzip:   107.16 kB
+.vercel/output/functions/__server.func/_virtual/playfair-display.woff2.mjs                     142.28 kB │ gzip:   106.62 kB
+.vercel/output/functions/__server.func/_virtual/pt-serif-400-italic.woff2.mjs                  146.73 kB │ gzip:   108.63 kB
+.vercel/output/functions/__server.func/_virtual/nunito-italic.woff2.mjs                        147.81 kB │ gzip:   111.30 kB
+.vercel/output/functions/__server.func/_libs/uncrypto+upstash__redis.mjs                       148.86 kB │ gzip:    26.20 kB
+.vercel/output/functions/__server.func/_virtual/dm-sans-italic.woff2.mjs                       150.09 kB │ gzip:   113.00 kB
+.vercel/output/functions/__server.func/_libs/pg.mjs                                            150.10 kB │ gzip:    34.50 kB
+.vercel/output/functions/__server.func/_virtual/roboto-mono-italic.woff2.mjs                   151.36 kB │ gzip:   114.04 kB
+.vercel/output/functions/__server.func/_virtual/work-sans-italic.woff2.mjs                     166.66 kB │ gzip:   124.01 kB
+.vercel/output/functions/__server.func/_virtual/raleway.woff2.mjs                              172.84 kB │ gzip:   129.94 kB
+.vercel/output/functions/__server.func/_virtual/work-sans.woff2.mjs                            175.09 kB │ gzip:   130.42 kB
+.vercel/output/functions/__server.func/_virtual/raleway-italic.woff2.mjs                       183.37 kB │ gzip:   137.92 kB
+.vercel/output/functions/__server.func/_virtual/source-sans-3-italic.woff2.mjs                 184.42 kB │ gzip:   138.89 kB
+.vercel/output/functions/__server.func/_virtual/opener-prototemplate-dark.jpg.mjs              185.83 kB │ gzip:    37.00 kB
+.vercel/output/functions/__server.func/_virtual/opener-prototemplate-light.jpg.mjs             185.92 kB │ gzip:    37.39 kB
+.vercel/output/functions/__server.func/_ssr/blob-store-kt4FCsuy.mjs                            186.59 kB │ gzip:    52.07 kB
+.vercel/output/functions/__server.func/_libs/zod.mjs                                           193.96 kB │ gzip:    42.38 kB
+.vercel/output/functions/__server.func/_ssr/room-CytLRzHq.mjs                                  202.10 kB │ gzip:    58.34 kB
+.vercel/output/functions/__server.func/_ssr/ids-CO7S0fa-.mjs                                   202.33 kB │ gzip:    44.13 kB
+.vercel/output/functions/__server.func/_virtual/source-sans-3.woff2.mjs                        226.54 kB │ gzip:   170.59 kB
+.vercel/output/functions/__server.func/_ssr/ssr.mjs                                            242.73 kB │ gzip:    57.97 kB
+.vercel/output/functions/__server.func/_virtual/fraunces.woff2.mjs                             260.20 kB │ gzip:   196.01 kB
+.vercel/output/functions/__server.func/_ssr/actions-rzK9ytDW.mjs                               262.88 kB │ gzip:    63.91 kB
+.vercel/output/functions/__server.func/_libs/ioredis+[...].mjs                                 270.33 kB │ gzip:    59.47 kB
+.vercel/output/functions/__server.func/_virtual/bricolage-grotesque.woff2.mjs                  273.72 kB │ gzip:   206.16 kB
+.vercel/output/functions/__server.func/_virtual/lato-300.woff2.mjs                             276.96 kB │ gzip:   207.13 kB
+.vercel/output/functions/__server.func/_virtual/lato-500.woff2.mjs                             277.69 kB │ gzip:   208.06 kB
+.vercel/output/functions/__server.func/_virtual/lato-700.woff2.mjs                             282.43 kB │ gzip:   211.23 kB
+.vercel/output/functions/__server.func/_virtual/lato-400.woff2.mjs                             282.79 kB │ gzip:   211.63 kB
+.vercel/output/functions/__server.func/_virtual/lato-600.woff2.mjs                             284.87 kB │ gzip:   213.13 kB
+.vercel/output/functions/__server.func/_virtual/newsreader.woff2.mjs                           286.85 kB │ gzip:   215.14 kB
+.vercel/output/functions/__server.func/_virtual/montserrat.woff2.mjs                           288.02 kB │ gzip:   216.93 kB
+.vercel/output/functions/__server.func/_virtual/lato-300-italic.woff2.mjs                      292.75 kB │ gzip:   219.27 kB
+.vercel/output/functions/__server.func/_virtual/roboto.woff2.mjs                               296.87 kB │ gzip:   223.62 kB
+.vercel/output/functions/__server.func/_virtual/lato-500-italic.woff2.mjs                      302.92 kB │ gzip:   227.02 kB
+.vercel/output/functions/__server.func/_virtual/lato-600-italic.woff2.mjs                      304.52 kB │ gzip:   228.08 kB
+.vercel/output/functions/__server.func/_virtual/lato-700-italic.woff2.mjs                      304.84 kB │ gzip:   228.47 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-sans.woff2.mjs                        307.14 kB │ gzip:   229.93 kB
+.vercel/output/functions/__server.func/_virtual/montserrat-italic.woff2.mjs                    307.68 kB │ gzip:   231.71 kB
+.vercel/output/functions/__server.func/_virtual/mood-earth-light.jpg.mjs                       309.67 kB │ gzip:   120.92 kB
+.vercel/output/functions/__server.func/_virtual/mood-earth-dark.jpg.mjs                        309.87 kB │ gzip:   121.66 kB
+.vercel/output/functions/__server.func/_virtual/lato-400-italic.woff2.mjs                      309.92 kB │ gzip:   232.10 kB
+.vercel/output/functions/__server.func/_virtual/fraunces-italic.woff2.mjs                      314.52 kB │ gzip:   236.94 kB
+.vercel/output/functions/__server.func/_virtual/newsreader-italic.woff2.mjs                    319.07 kB │ gzip:   239.54 kB
+.vercel/output/functions/__server.func/_virtual/opener-closing-dark.jpg.mjs                    336.85 kB │ gzip:    31.95 kB
+.vercel/output/functions/__server.func/_virtual/opener-closing-light.jpg.mjs                   336.95 kB │ gzip:    31.68 kB
+.vercel/output/functions/__server.func/_virtual/roboto-italic.woff2.mjs                        341.32 kB │ gzip:   257.11 kB
+.vercel/output/functions/__server.func/_virtual/ibm-plex-sans-italic.woff2.mjs                 350.30 kB │ gzip:   262.98 kB
+.vercel/output/functions/__server.func/_virtual/open-sans.woff2.mjs                            373.67 kB │ gzip:   281.42 kB
+.vercel/output/functions/__server.func/_ssr/report-F1imleCK.mjs                                374.88 kB │ gzip:    96.12 kB
+.vercel/output/functions/__server.func/_virtual/eb-garamond-italic.woff2.mjs                   381.90 kB │ gzip:   287.50 kB
+.vercel/output/functions/__server.func/_virtual/eb-garamond.woff2.mjs                          395.82 kB │ gzip:   297.57 kB
+.vercel/output/functions/__server.func/_virtual/open-sans-italic.woff2.mjs                     418.50 kB │ gzip:   315.22 kB
+.vercel/output/functions/__server.func/_ssr/server-PGNsHOhR.mjs                                441.90 kB │ gzip:   104.85 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText22-Regular.ttf.mjs                  456.12 kB │ gzip:   207.01 kB
+.vercel/output/functions/__server.func/_virtual/Inter-Regular.ttf.mjs                          456.18 kB │ gzip:   204.63 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText18-Regular.ttf.mjs                  456.29 kB │ gzip:   207.19 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText26-Regular.ttf.mjs                  456.30 kB │ gzip:   206.76 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText14-Regular.ttf.mjs                  456.31 kB │ gzip:   204.66 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText15-Regular.ttf.mjs                  456.34 kB │ gzip:   206.82 kB
+.vercel/output/functions/__server.func/_virtual/GTInterDisplay-Regular.ttf.mjs                 456.39 kB │ gzip:   208.13 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText24-Regular.ttf.mjs                  456.39 kB │ gzip:   206.84 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText20-Regular.ttf.mjs                  456.49 kB │ gzip:   207.32 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText26Medium-Regular.ttf.mjs            456.72 kB │ gzip:   209.26 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText22Medium-Regular.ttf.mjs            456.94 kB │ gzip:   209.49 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText24Medium-Regular.ttf.mjs            456.99 kB │ gzip:   209.50 kB
+.vercel/output/functions/__server.func/_virtual/InterMedium-Regular.ttf.mjs                    457.04 kB │ gzip:   207.91 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText14Medium-Regular.ttf.mjs            457.17 kB │ gzip:   207.98 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText20Medium-Regular.ttf.mjs            457.21 kB │ gzip:   209.58 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText18Medium-Regular.ttf.mjs            457.25 kB │ gzip:   209.23 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText15Medium-Regular.ttf.mjs            457.27 kB │ gzip:   209.23 kB
+.vercel/output/functions/__server.func/_virtual/Inter-Italic.ttf.mjs                           460.74 kB │ gzip:   212.49 kB
+.vercel/output/functions/__server.func/_ssr/deck-CDP1v1aR.mjs                                  460.82 kB │ gzip:    74.20 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText14-Italic.ttf.mjs                   460.92 kB │ gzip:   212.39 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText15-Italic.ttf.mjs                   461.16 kB │ gzip:   214.62 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText26-Italic.ttf.mjs                   461.20 kB │ gzip:   215.01 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText18-Italic.ttf.mjs                   461.22 kB │ gzip:   214.93 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText20-Italic.ttf.mjs                   461.26 kB │ gzip:   215.41 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText22-Italic.ttf.mjs                   461.35 kB │ gzip:   215.39 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText24-Italic.ttf.mjs                   461.36 kB │ gzip:   214.92 kB
+.vercel/output/functions/__server.func/_virtual/source-serif-4-italic.woff2.mjs                461.59 kB │ gzip:   347.65 kB
+.vercel/output/functions/__server.func/_virtual/InterMedium-Italic.ttf.mjs                     461.59 kB │ gzip:   215.19 kB
+.vercel/output/functions/__server.func/_virtual/GTInterDisplay-Italic.ttf.mjs                  461.70 kB │ gzip:   216.05 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText14Medium-Italic.ttf.mjs             461.77 kB │ gzip:   215.44 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText26Medium-Italic.ttf.mjs             461.84 kB │ gzip:   216.99 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText15Medium-Italic.ttf.mjs             461.94 kB │ gzip:   216.95 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText18Medium-Italic.ttf.mjs             461.94 kB │ gzip:   217.05 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText20Medium-Italic.ttf.mjs             462.02 kB │ gzip:   217.32 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText22Medium-Italic.ttf.mjs             462.04 kB │ gzip:   217.59 kB
+.vercel/output/functions/__server.func/_virtual/GTInterText24Medium-Italic.ttf.mjs             462.14 kB │ gzip:   217.31 kB
+.vercel/output/functions/__server.func/_libs/kysely.mjs                                        468.09 kB │ gzip:    75.40 kB
+.vercel/output/functions/__server.func/_virtual/InterVariable.woff2.mjs                        469.95 kB │ gzip:   353.73 kB
+.vercel/output/functions/__server.func/_ssr/dispatch-BYrZ_Mfk.mjs                              523.62 kB │ gzip:   148.78 kB
+.vercel/output/functions/__server.func/_virtual/source-serif-4.woff2.mjs                       570.45 kB │ gzip:   429.62 kB
+.vercel/output/functions/__server.func/_ssr/extract-BJd5i0k8.mjs                               624.72 kB │ gzip:   182.09 kB
+.vercel/output/functions/__server.func/index.mjs                                               664.64 kB │ gzip:   104.36 kB
+.vercel/output/functions/__server.func/_virtual/opener-brand-light.jpg.mjs                     687.03 kB │ gzip:    24.32 kB
+.vercel/output/functions/__server.func/_virtual/opener-brand-dark.jpg.mjs                      687.23 kB │ gzip:    24.39 kB
+.vercel/output/functions/__server.func/_libs/@tanstack/react-router+[...].mjs                  719.98 kB │ gzip:   150.68 kB
+.vercel/output/functions/__server.func/_ssr/cli-hEdxPGgf.mjs                                   748.08 kB │ gzip:   195.10 kB
+.vercel/output/functions/__server.func/_ssr/editor-BpoAn5gh.mjs                                803.60 kB │ gzip:   213.89 kB
+.vercel/output/functions/__server.func/_ssr/EditorRoot-BIL2hWEj.mjs                            842.97 kB │ gzip:   230.11 kB
+.vercel/output/functions/__server.func/_ssr/Slideshow-Lay26-Ki.mjs                             999.59 kB │ gzip:   252.86 kB
+.vercel/output/functions/__server.func/_libs/@vercel/blob+[...].mjs                          1,148.89 kB │ gzip:   252.79 kB
+.vercel/output/functions/__server.func/_ssr/identity-CbqSvsvr.mjs                            1,306.71 kB │ gzip:   286.31 kB
+.vercel/output/functions/__server.func/_ssr/actions-oZZQeJIi.mjs                             1,461.37 kB │ gzip:   359.14 kB
+.vercel/output/functions/__server.func/_ssr/router-FE8Hcrgn.mjs                              2,937.37 kB │ gzip:   250.37 kB
+.vercel/output/functions/__server.func/_virtual/merriweather-italic.woff2.mjs                3,306.61 kB │ gzip: 2,490.17 kB
+.vercel/output/functions/__server.func/_virtual/merriweather.woff2.mjs                       3,321.10 kB │ gzip: 2,501.16 kB
+
+✓ built in 5.23s
+[33m[PLUGIN_TIMINGS] [0mPlugin hooks ran for 4.6s of this 5.2s build (88%).
+The slowest hooks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - nitro:externals buildEnd (37%, 2.0s, 1 call)
+  - nitro:virtual load (36%, 1.9s, 8 calls)
+Additional hook time came from the hooks below and from hooks under 1s.
+4 hooks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:
+  - nitro:raw resolveId (769 calls)
+  - nitro:raw load (482 calls)
+  - nitro:virtual-deps resolveId (26 calls)
+  … and 1 more
+See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+
+ℹ Generated .vercel/output/nitro.json
+
+[nitro] ✔ You can preview this build using npx vite preview
+[nitro] ✔ You can deploy this build using npx nitro deploy --prebuilt
+
+ ╭────────── [Build Info] ─────────────╮
+ │                                     │
+ │  - Build Directory: .vercel/output  │
+ │  - Date: 9/25/2026, 10:11:32 AM     │
+ │  - Nitro Version: 3.0.260903-beta   │
+ │  - Nitro Preset: vercel             │
+ │                                     │
+ ╰─────────────────────────────────────╯
+
+[prerender] Prerendering pages...
+[prerender] Concurrency: 18
+[prerender] Crawling: /home
+turboslide room: realtime tier memory (TURBOSLIDE_REALTIME=memory)
+2026-09-25T17:11:33.318Z WARN [Better Auth]: [better-auth] Base URL is not set. Set the baseURL option or BETTER_AUTH_URL env, or use a dynamic baseURL with allowedHosts for multi-host setups. Without it the origin is derived from the incoming request, and callbacks and redirects may not work correctly.
+(node:27036) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[prerender] Prerendered 1 pages:
+[prerender] - /home
+ok   config    config.json present, version 3                   version 3, 23 routes
+ok   config    a handle: filesystem step                        route 12, 12 rule(s) before it
+ok   routes    header rule /favicon.ico                         src /favicon.ico; cache-control: public, max-age=86400, stale-while-revalidate=604800
+ok   routes    header rule /icon.svg                            src /icon.svg; cache-control: public, max-age=86400, stale-while-revalidate=604800
+ok   routes    header rule /apple-touch-icon.png                src /apple-touch-icon.png; cache-control: public, max-age=86400, stale-while-revalidate=604800
+ok   routes    header rule /og/turboslide.png                   src /og/turboslide.png; cache-control: public, max-age=86400, stale-while-revalidate=604800
+ok   routes    header rule /manifest.webmanifest                src /manifest.webmanifest; cache-control: public, max-age=86400
+ok   routes    header rule /icons/**                            src /icons/(.*); cache-control: public, max-age=604800, stale-while-revalidate=2592000
+ok   routes    header rule /brand/**                            src /brand/(.*); cache-control: public, max-age=86400, stale-while-revalidate=604800
+ok   routes    header rule /home/**                             src /home/(.*); cache-control: public, max-age=31536000, immutable
+ok   routes    header rule /decks/gt-brand/assets/**            src /decks/gt-brand/assets/(.*); cache-control: public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800
+ok   routes    redirect / -> /new (307, x-robots-tag)           status 307, Location /new, x-robots-tag noindex
+ok   static    favicon.ico                                      15086 B
+ok   static    icon.svg                                         957 B
+ok   static    apple-touch-icon.png                             753 B
+ok   static    icons/icon-192.png                               257 B
+ok   static    icons/icon-512.png                               460 B
+ok   static    icons/icon-mask-192.png                          292 B
+ok   static    icons/icon-mask-512.png                          422 B
+ok   static    icons/icon-mono-512.png                          3083 B
+ok   static    icons/icon-dark-192.png                          257 B
+ok   static    icons/icon-dark-512.png                          460 B
+ok   static    manifest.webmanifest                             971 B
+ok   static    robots.txt                                       99 B
+ok   static    og/turboslide.png                                29818 B
+ok   static    brand-manifest.json                              5726 B
+ok   static    brand/ pictures (8 in apps/studio/public/brand)  every file present
+ok   static    home/ pictures (48 in apps/studio/public/home)   every file present
+ok   static    /home prerendered                                static/home/index.html
+info static    static/ total                                    39.8 MB in 391 file(s)
+ok   functions function directories                             10 found
+ok   functions __server.func                                    151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions _serverFn/[...].func                             151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/assist/[...].func                            151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/assist.func                                  151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/decks/[...]/bundle.func                      151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/decks/bundle.func                            151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/export/[...].func                            151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/render/[...].func                            151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/x/export/[...].func                          151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/x/render/[...].func                          151.0 MB in 984 file(s), cap 250.0 MB
+check-vercel-output: 40 of 40 assertions met under /Users/kevinliu/repos/Turboslide/apps/studio/.vercel/output
+check 30/32: ok in 18.5 s
+check: all 1 selected step(s) passed in 18.5 s

@@ -1,0 +1,16 @@
+{
+  "base": "https://turboslide-bdmg7p2vl-kl01s-projects.vercel.app",
+  "deck": "gt-brand",
+  "status": 500,
+  "type": "application/json; charset=utf-8",
+  "ms": 9244,
+  "bytes": 2318,
+  "body": {
+    "error": {
+      "name": "Error",
+      "status": 500,
+      "message": "browserContext.close: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /tmp/chromium-nocore.sh --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --ash-no-nudges --disable-domain-reliability --disable-print-preview --disk-cache-size=33554432 --no-default-browser-check --no-pings --single-process --font-render-hinting=none --ignore-gpu-blocklist --in-process-gpu --allow-running-insecure-content --disable-setuid-sandbox --disable-site-isolation-trials --disable-web-security --no-zygote --user-data-dir=/tmp/playwright_chromiumdev_profile-nsxJRn --remote-debugging-pipe --no-startup-window\n<launched> pid=159",
+      "action": "shader.render"
+    }
+  }
+}

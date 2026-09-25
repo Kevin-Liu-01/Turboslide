@@ -1,0 +1,191 @@
+check 30/32: NITRO_PRESET=vercel pnpm --filter @turboslide/studio build:deploy && node scripts/check-vercel-output.mjs
+packages/native/npm/darwin-x64           | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["darwin"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-arm64-gnu      | [WARN] Unsupported platform: wanted: {"cpu":["arm64"],"os":["linux"],"libc":["glibc"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-arm64-musl     | [WARN] Unsupported platform: wanted: {"cpu":["arm64"],"os":["linux"],"libc":["musl"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-x64-gnu        | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["linux"],"libc":["glibc"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-x64-musl       | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["linux"],"libc":["musl"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/win32-x64-msvc       | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["win32"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+$ vite build -c vite.deploy.config.ts
+[nitro:vercel] ℹ Using nodejs24.x runtime.
+[nitro:vercel] ℹ Using web entry format.
+vite v8.2.2 building client environment for production...
+transforming...
+
+[@tanstack/devtools-vite] Removed devtools code from: /src/routes/__root.tsx
+
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/agent/src/http/readers.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/versions.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/agent/src/http/readers.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/versions.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/blob-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:crypto" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/blob-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/blob-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/watch.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/watch.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:crypto" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/snapshots.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/hosted.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/hosted.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/tmp-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/tmp-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/seed.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/seed.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/lint/src/rendered/bitmap.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/lint/src/rendered/bitmap.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/file-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:crypto" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/file-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/file-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/comments-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/blob-templates.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:crypto" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/comments-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/access-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/comments-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/blob-templates.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:crypto" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/access-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/access-store.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/templates.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/templates.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/inbox.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/inbox.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/lease.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/lease.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:zlib" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/lint/src/rendered/png.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:os" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/select.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/store/src/select.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+✓ 1039 modules transformed.
+rendering chunks...
+computing gzip size...
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.06s
+vite v8.2.2 building ssr environment for production...
+transforming...
+
+[@tanstack/devtools-vite] Removed devtools code from: /src/routes/__root.tsx
+
+✓ 1982 modules transformed.
+rendering chunks...
+computing gzip size...
+
+[INEFFECTIVE_DYNAMIC_IMPORT] ../../packages/agent/src/http/readers.ts is dynamically imported by src/server/agent-actions.ts but also statically imported by src/server/actions.ts, dynamic import will not move module into another chunk.
+
+✓ built in 1.63s
+
+[nitro] ◐ Building [Nitro] (preset: vercel, compatibility: 2026-09-20)
+[nitro] ✔ Generated public .vercel/output/static
+vite v8.2.2 building nitro environment for production...
+transforming...
+✓ 1641 modules transformed.
+ℹ Tracing dependencies:
+- playwright-core (1.62.1)
+- sharp (0.35.4)
+- @img/colour (1.1.0)
+- @img/sharp-darwin-arm64 (0.35.4)
+- detect-libc (2.1.2)
+- semver (7.8.5)
+- @img/sharp-libvips-darwin-arm64 (1.3.3)
+- fsevents (2.3.3)
+- @sparticuz/chromium (147.0.2)
+- @paper-design/shaders (0.0.78)
+- tar-fs (3.1.3)
+- tar-stream (3.2.1)
+- pump (3.0.4)
+- end-of-stream (1.4.5)
+- once (1.4.0)
+- streamx (2.28.1)
+- b4a (1.8.1)
+- fast-fifo (1.3.2)
+- wrappy (1.0.2)
+- events-universal (1.0.1)
+- text-decoder (1.2.7)
+- bare-fs (4.8.1)
+- bare-path (3.1.2)
+✔ Traced 23 dependencies (156 files) in 1471ms.
+ℹ Ensure your production environment matches the builder OS and architecture (darwin-arm64) to avoid native module issues.
+rendering chunks...
+computing gzip size...
+
+✓ built in 3.99s
+[PLUGIN_TIMINGS] Plugin hooks ran for 3.4s of this 4.0s build (86%).
+The slowest hooks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - nitro:externals buildEnd (39%, 1.5s, 1 call)
+  - nitro:virtual load (35%, 1.4s, 8 calls)
+Additional hook time came from the hooks below and from hooks under 1s.
+4 hooks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:
+  - nitro:raw resolveId (769 calls)
+  - nitro:raw load (482 calls)
+  - nitro:virtual-deps resolveId (26 calls)
+  … and 1 more
+See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+
+ℹ Generated .vercel/output/nitro.json
+
+[nitro] ✔ You can preview this build using npx vite preview
+[nitro] ✔ You can deploy this build using npx nitro deploy --prebuilt
+
+ ╭────────── [Build Info] ─────────────╮
+ │                                     │
+ │  - Build Directory: .vercel/output  │
+ │  - Date: 9/25/2026, 7:11:21 AM      │
+ │  - Nitro Version: 3.0.260903-beta   │
+ │  - Nitro Preset: vercel             │
+ │                                     │
+ ╰─────────────────────────────────────╯
+
+[prerender] Prerendering pages...
+[prerender] Concurrency: 18
+[prerender] Crawling: /home
+turboslide room: realtime tier memory (TURBOSLIDE_REALTIME=memory)
+2026-09-25T14:11:22.280Z WARN [Better Auth]: [better-auth] Base URL is not set. Set the baseURL option or BETTER_AUTH_URL env, or use a dynamic baseURL with allowedHosts for multi-host setups. Without it the origin is derived from the incoming request, and callbacks and redirects may not work correctly.
+(node:1423) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[prerender] Prerendered 1 pages:
+[prerender] - /home
+ok   config    config.json present, version 3                   version 3, 23 routes
+ok   config    a handle: filesystem step                        route 12, 12 rule(s) before it
+ok   routes    header rule /favicon.ico                         src /favicon.ico; cache-control: public, max-age=86400, stale-while-revalidate=604800
+ok   routes    header rule /icon.svg                            src /icon.svg; cache-control: public, max-age=86400, stale-while-revalidate=604800
+ok   routes    header rule /apple-touch-icon.png                src /apple-touch-icon.png; cache-control: public, max-age=86400, stale-while-revalidate=604800
+ok   routes    header rule /og/turboslide.png                   src /og/turboslide.png; cache-control: public, max-age=86400, stale-while-revalidate=604800
+ok   routes    header rule /manifest.webmanifest                src /manifest.webmanifest; cache-control: public, max-age=86400
+ok   routes    header rule /icons/**                            src /icons/(.*); cache-control: public, max-age=604800, stale-while-revalidate=2592000
+ok   routes    header rule /brand/**                            src /brand/(.*); cache-control: public, max-age=86400, stale-while-revalidate=604800
+ok   routes    header rule /home/**                             src /home/(.*); cache-control: public, max-age=31536000, immutable
+ok   routes    header rule /decks/gt-brand/assets/**            src /decks/gt-brand/assets/(.*); cache-control: public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800
+ok   routes    redirect / -> /new (307, x-robots-tag)           status 307, Location /new, x-robots-tag noindex
+ok   static    favicon.ico                                      15086 B
+ok   static    icon.svg                                         957 B
+ok   static    apple-touch-icon.png                             753 B
+ok   static    icons/icon-192.png                               257 B
+ok   static    icons/icon-512.png                               460 B
+ok   static    icons/icon-mask-192.png                          292 B
+ok   static    icons/icon-mask-512.png                          422 B
+ok   static    icons/icon-mono-512.png                          3083 B
+ok   static    icons/icon-dark-192.png                          257 B
+ok   static    icons/icon-dark-512.png                          460 B
+ok   static    manifest.webmanifest                             971 B
+ok   static    robots.txt                                       99 B
+ok   static    og/turboslide.png                                29818 B
+ok   static    brand-manifest.json                              5726 B
+ok   static    brand/ pictures (8 in apps/studio/public/brand)  every file present
+ok   static    home/ pictures (48 in apps/studio/public/home)   every file present
+ok   static    /home prerendered                                static/home/index.html
+info static    static/ total                                    39.8 MB in 391 file(s)
+ok   functions function directories                             10 found
+ok   functions __server.func                                    151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions _serverFn/[...].func                             151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/assist/[...].func                            151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/assist.func                                  151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/decks/[...]/bundle.func                      151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/decks/bundle.func                            151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/export/[...].func                            151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/render/[...].func                            151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/x/export/[...].func                          151.0 MB in 984 file(s), cap 250.0 MB
+ok   functions api/x/render/[...].func                          151.0 MB in 984 file(s), cap 250.0 MB
+check-vercel-output: 40 of 40 assertions met under /Users/kevinliu/repos/Turboslide/apps/studio/.vercel/output
+check 30/32: ok in 12.9 s
+check: all 1 selected step(s) passed in 12.9 s
+exit 0

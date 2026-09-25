@@ -151,7 +151,25 @@ const ASSIST = { maxDuration: 60 } as const;
 // it as an optional dependency too (measured without that: "nf3: could not resolve `traceInclude`
 // entry "@sparticuz/chromium" from any root" and no node_modules/@sparticuz in the function;
 // traceOpts.traceIncludeRoots is overwritten by Nitro's own root list and does not help).
-const TRACE_DEPS = ['@sparticuz/chromium*', ...(NATIVE_ADDON_PRESENT ? [NATIVE_ADDON] : [])];
+// @paper-design/shaders joined in the features round's ship two fix round (docs/FEATURES.md 5.5,
+// 5.8; VERIFICATION.md pass 1 F2): the hosted capture serves Paper's dist to its browser and
+// reads the noise texture out of it, so `packages/materials/src/capture.ts` `paperDistDir`
+// resolves the package at run time (`createRequire(import.meta.url).resolve`), while the server
+// bundle carried the modules inline and no `node_modules/@paper-design` at all. Measured on the
+// ship two preview: `shader.render` answered "Cannot find module '@paper-design/shaders'" in
+// about 140 ms, and `shader.capture`, `slide.setBackgroundMaterial` and the Background dialog's
+// Place answered the one render sentence for every material. With the full-trace suffix the
+// import stays external on the server and nf3 copies the whole package (dist/shaders included,
+// about 1 MB) beside the function, so the run time resolve finds it where the checkout would.
+// No package.json line is needed here: the import in capture.ts is a static specifier the
+// bundler resolves, so the traced path is known and the root lookup that @sparticuz/chromium's
+// variable specifier needs never runs. The client bundle is untouched (the plugin is the server
+// build's).
+const TRACE_DEPS = [
+  '@sparticuz/chromium*',
+  '@paper-design/shaders*',
+  ...(NATIVE_ADDON_PRESENT ? [NATIVE_ADDON] : []),
+];
 
 // The route rules Nitro compiles into the deployment's config.json (gslides-parity SPEC-4 0.43,
 // 1.6, 3.13; R02 section 8; scripts/check-vercel-output.mjs asserts one route per rule): the icon

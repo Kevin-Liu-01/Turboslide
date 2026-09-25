@@ -1,0 +1,59 @@
+{
+  "base": "https://turboslide-bdmg7p2vl-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-25T14:15:08.472Z",
+  "readings": {
+    "window shader.render paper:liquid-metal": {
+      "ok": false,
+      "error": "page.evaluate: Error: No deck untitled-20260925-1k91 in the Blob store",
+      "ms": 192
+    },
+    "window shader.render paper:gem-smoke": {
+      "ok": false,
+      "error": "page.evaluate: Error: No deck untitled-20260925-1k91 in the Blob store",
+      "ms": 239
+    },
+    "place paper:gem-smoke": {
+      "ok": false,
+      "error": "page.evaluate: Error: The frame could not be rendered. Try again, or place the shader without a frame",
+      "ms": 15848,
+      "ground": null,
+      "kind": "content"
+    },
+    "place paper:liquid-metal": {
+      "ok": false,
+      "error": "page.evaluate: Error: The frame could not be rendered. Try again, or place the shader without a frame",
+      "ms": 16722,
+      "ground": null,
+      "kind": "content"
+    },
+    "place paper:god-rays": {
+      "ok": false,
+      "error": "page.evaluate: Error: The frame could not be rendered. Try again, or place the shader without a frame",
+      "ms": 30372,
+      "ground": null,
+      "kind": "content"
+    },
+    "shader.capture": {
+      "ok": false,
+      "error": "page.evaluate: Error: The frame could not be rendered. Try again, or place the shader without a frame",
+      "ms": 12544,
+      "blockId": "shader"
+    },
+    "http shader.render": {
+      "status": 500,
+      "type": "application/json; charset=utf-8",
+      "ms": 11988,
+      "bytes": null,
+      "decoded": null,
+      "error": "{\"error\":{\"name\":\"Error\",\"status\":500,\"message\":\"browserContext.close: Target page, context or browser has been closed\\nBrowser logs:\\n\\n<launching> /tmp/chromium-nocore.sh --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occl"
+    },
+    "http material.list": {
+      "status": 200
+    }
+  },
+  "cleanup": {
+    "deckId": "untitled-20260925-1k91",
+    "status": 404
+  },
+  "finishedAt": "2026-09-25T14:16:53.978Z"
+}

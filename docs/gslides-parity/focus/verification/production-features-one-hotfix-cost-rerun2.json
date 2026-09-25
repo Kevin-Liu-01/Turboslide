@@ -1,0 +1,139 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "startedAt": "2026-09-25T07:38:45.309Z",
+  "ms": 370838,
+  "parked": {
+    "commit": "f1afe1e",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "tables.edge.add-row-column",
+        "parks": [
+          "handle.table.add.column",
+          "handle.table.add.row"
+        ]
+      },
+      {
+        "id": "tables.heads.select-row-column",
+        "parks": [
+          "handle.table.head.column",
+          "handle.table.head.row"
+        ]
+      },
+      {
+        "id": "tables.seam.row-drag",
+        "parks": [
+          "handle.table.row"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      },
+      {
+        "id": "wordart.tail.fill-outline",
+        "parks": [
+          "toolbar.wordart.outline"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": null,
+  "cost": {
+    "exit": 0,
+    "ms": 370835,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/hotfix-b/gate-production-cost-rerun2/cost-probe.json",
+    "minutes": 3,
+    "instances": [
+      "0b79bf00",
+      "04d48ad2",
+      "3af42394"
+    ]
+  },
+  "costOverCeiling": [],
+  "rows": 1,
+  "passed": 1,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "cost.show.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "function requests 0 in the window (ceiling 0)",
+        "the store did not settle within 156.49 s and the window started anyway (the last read before it: head 9, get 0, put 0, list 0, del 0, 6 of the heads the probe's own)",
+        "store calls at the first sample 1 (head 1, get 0, put 0, list 0, del 0), of which 1 the probe's own sync.status read(s) (one deck.json head each, b3.md R7 b); the page's 0 (ceiling 0)",
+        "function requests between the load and the window 0 (the settle, 156.49 s)",
+        "instances answering sync.status 3"
+      ],
+      "cost": true
+    }
+  ],
+  "noStep": [],
+  "commit": "3c1f18a",
+  "origin": "https://turboslide.vercel.app",
+  "date": "2026-09-25",
+  "results": {
+    "cost.show.calls": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "cost.show.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

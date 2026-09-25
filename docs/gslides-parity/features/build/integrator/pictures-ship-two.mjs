@@ -87,7 +87,12 @@ for (const width of WIDTHS) {
         await control('menubar.insert').click();
         await menuItem('insert.shader').click();
         await page.locator('[data-control="dialog.shader"]').waitFor();
-        await page.locator('[data-control="dialog.shader.tile.paper:liquid-metal.thumb"][data-decoded="true"]').waitFor({ timeout: 15_000 }).catch(() => undefined);
+        await page
+          .locator(
+            '[data-control="dialog.shader.tile.paper:liquid-metal.thumb"][data-decoded="true"]',
+          )
+          .waitFor({ timeout: 15_000 })
+          .catch(() => undefined);
         await page.waitForTimeout(400);
         await shot('gallery');
         // the first card inserts the liquid metal diamond and selects it (5.4)
@@ -130,7 +135,9 @@ for (const width of WIDTHS) {
         await menuItem('slide.changeBackground').click();
         await page.locator('[data-control="dialog.background"]').waitFor();
         await control('dialog.background.shader').click();
-        await page.locator('[data-control="dialog.background"] [data-control="dialog.shader"]').waitFor();
+        await page
+          .locator('[data-control="dialog.background"] [data-control="dialog.shader"]')
+          .waitFor();
         await page.waitForTimeout(800);
         await shot('background-shader');
         await closeAll();
@@ -188,7 +195,9 @@ for (const width of WIDTHS) {
       if (deckId) {
         try {
           await page.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' });
-          await page.waitForFunction(() => Boolean(window.turboslide?.studio), null, { timeout: 60_000 });
+          await page.waitForFunction(() => Boolean(window.turboslide?.studio), null, {
+            timeout: 60_000,
+          });
           const info = await invoke('deck.info', {}).catch(() => null);
           const rev = info?.revision ?? revision;
           await invoke('deck.trash', { id: deckId, baseRevision: rev }).catch(() => undefined);
@@ -206,7 +215,9 @@ for (const width of WIDTHS) {
             .catch(() => 'no response');
           console.log(`cleanup ${deckId}: trashed and removed; /deck answers ${gone}`);
         } catch (error) {
-          console.log(`cleanup ${deckId} failed: ${error instanceof Error ? error.message : String(error)}`);
+          console.log(
+            `cleanup ${deckId} failed: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
       }
       await context.close();

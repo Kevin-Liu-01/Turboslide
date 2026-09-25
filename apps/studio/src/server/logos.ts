@@ -24,6 +24,18 @@
 // (`LogoDiscoveries`), which the refresh alone folds into the file. A cached mark whose file the
 // edge withholds is answered from the upstream for that call and nothing is written, since the
 // store holds the file already.
+//
+// The second hotfix (build/hotfix.md section 9): the 503 left a cold instance with no disk copy
+// refusing every logo route for the length of the edge's window, so `load()` now serves a copy
+// that never passes through the edge before it answers 503: its order is the copy this instance
+// holds in memory, else its disk mirror (with one head to the store, so a mirror at the store's
+// version stands without a get), else the store's copy when the store answers, else the snapshot
+// bundled with the deployment (logo-index-snapshot.ts; the ten mark fixture built in memory under
+// `TURBOSLIDE_LOGO_UPSTREAM=fixture`, never written to the store). An answer served from the
+// snapshot carries its `builtAt` as `snapshotAt`, which the picker's foot names, and the instance
+// asks the store again at most every SNAPSHOT_REVALIDATE_MS on a request until the store
+// answers. The 503 stays for a route that needs the store itself: the refresh, and a mark whose
+// file the store withholds and the upstream does not serve.
 import { timingSafeEqual } from 'node:crypto';
 import { join } from 'node:path';
 
@@ -93,11 +105,13 @@ import {
   fixtureUpstream,
   logoDigest,
   logoUpstreamMode,
+  memoryLogoStore,
   mergeLogoDiscoveries,
   networkUpstream,
   refreshLogoIndex,
   sharpRasterizer,
 } from './logo-index';
+import { bundledLogoIndex } from './logo-index-snapshot';
 import type {
   CachedMark,
   LogoDiscoveries,
@@ -130,6 +144,13 @@ export const INDEX_REVALIDATE_MS = 60 * 60 * 1000;
  * on a request, never on a timer (docs/SYNC.md 4).
  */
 export const SEARCH_REVALIDATE_MS = 2 * 1000;
+/**
+ * How long an instance serving the bundled snapshot waits before it asks the store for the index
+ * again (build/hotfix.md section 9): the edge's window is minutes, the hourly interval above would
+ * leave a seller on a copy of the ship's day for the hour, and one head every half minute per
+ * instance on a request stays inside docs/SYNC.md 4.
+ */
+export const SNAPSHOT_REVALIDATE_MS = 30 * 1000;
 /** How often an instance persists a discovery (an unavailable variant, a newly cached mark) at most. */
 export const PERSIST_THROTTLE_MS = 60 * 1000;
 /** A mark that is not open is kept in memory this long between fetches (a tile drawn twice, a scroll back). */
@@ -142,6 +163,14 @@ export type LogoServiceDeps = {
   rasterize?: Rasterizer;
   now?: () => Date;
   log?: (line: string) => void;
+  /**
+   * the copy of the index that never passes through the store (build/hotfix.md section 9): the
+   * snapshot bundled with the deployment (logo-index-snapshot.ts), read when the store refuses
+   * the index and this instance holds no copy; absent on a checkout's disk store, whose reads are
+   * never refused. Under the fixture upstream the service builds its own from the ten marks and
+   * never reads this.
+   */
+  snapshot?: () => LogoIndex | null;
 };
 
 /** The answer of the mark route (4.7): the sanitized file as text, its row and whether the store held it. */
@@ -232,6 +261,11 @@ export type LogoService = {
   adopt: (index: LogoIndex) => void;
   /** the index this instance holds right now, without a read; null before the first load */
   held: () => LogoIndex | null;
+  /**
+   * the `builtAt` of the snapshot the held copy came from (build/hotfix.md section 9), while it
+   * stands; null when the held copy is the store's, the mirror's or nothing yet
+   */
+  snapshotAt: () => string | null;
 };
 
 export function createLogoService(deps: LogoServiceDeps): LogoService {
@@ -240,6 +274,10 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
   let held: LogoIndex | null = null;
   let heldVersion: string | null = null;
   let heldAt = 0;
+  /** the `builtAt` of the snapshot the held copy came from, until the store answers (section 9) */
+  let snapshotAt: string | null = null;
+  /** the ten mark fixture built in memory once per instance, the snapshot under that upstream */
+  let fixtureSnapshot: LogoIndex | null = null;
   let loading: Promise<LogoIndex> | null = null;
   let persistedAt = 0;
   /**
@@ -252,26 +290,110 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
   let memoryError: LogoIndexFacts['lastError'] | undefined;
   const memoryMarks = new Map<string, { svg: string; sanitized: SanitizedSvg; at: number }>();
 
-  const load = async (): Promise<LogoIndex> => {
-    let stored: LogoIndex | null;
-    let mirrored = false;
-    try {
-      stored = await deps.store.readIndex();
-    } catch (error) {
-      // the store refuses the read for now (the edge's window after the refresh wrote the file,
-      // a 429, the deadline): the copy this instance holds on disk from its last read stands in,
-      // its version left unknown so the next revalidation asks the store again; with no copy the
-      // routes answer 503 with a retry and the next request loads again (build/hotfix.md
-      // section 2; ship.md 13.4)
-      if (!isStoreBusy(error)) throw error;
-      stored = await deps.store.readMirror().catch(() => null);
-      if (stored === null) throw new LogoStoreBusyError(error);
-      mirrored = true;
+  /**
+   * The copy that never passes through the store (build/hotfix.md section 9): under the fixture
+   * upstream the ten marks built in memory through the refresh's own builder, once per instance
+   * (no store and no write, so no window opens on the shared index), served with `builtAt` left
+   * null so a search that names a refresh's build always asks the store for it; else the
+   * snapshot bundled with the deployment. `at` is what the answer names as `snapshotAt`.
+   */
+  const snapshotIndex = async (): Promise<{ index: LogoIndex; at: string } | null> => {
+    if (deps.upstream.mode === 'fixture') {
+      if (fixtureSnapshot === null) {
+        const built: { index: LogoIndex | null } = { index: null };
+        await refreshLogoIndex({
+          store: memoryLogoStore(),
+          upstream: deps.upstream,
+          ...(deps.rasterize ? { rasterize: deps.rasterize } : {}),
+          now,
+          log,
+          onWritten: (index) => {
+            built.index = index;
+          },
+        });
+        if (built.index === null) return null;
+        fixtureSnapshot = built.index;
+      }
+      const copy = JSON.parse(JSON.stringify(fixtureSnapshot)) as LogoIndex;
+      const at = copy.builtAt ?? now().toISOString();
+      copy.builtAt = null;
+      return { index: copy, at };
     }
-    heldVersion = mirrored ? null : await deps.store.indexVersion().catch(() => null);
+    const bundled = deps.snapshot?.() ?? null;
+    if (bundled === null) return null;
+    return { index: bundled, at: bundled.builtAt ?? bundled.updatedAt ?? now().toISOString() };
+  };
+
+  /**
+   * The index at a cold instance (build/hotfix.md sections 2 and 9), in this order: the disk
+   * mirror this instance wrote at its last read or write of the index, kept when one head reads
+   * the store at the mirror's version (no get) and kept with the version unknown when the store
+   * refuses the head or the get; else the store's copy when the store answers; else the snapshot
+   * that never passes through the edge (the bundled build, or the fixture's ten marks in memory),
+   * named on the answer; and with none of those the typed refusal the routes answer as 503 with
+   * a retry, so the next request loads again. A store that holds no index builds and writes the
+   * fixture's inline as before under that upstream (4.9), and serves the snapshot otherwise.
+   */
+  const load = async (): Promise<LogoIndex> => {
+    const mirror = await deps.store.readMirror().catch(() => null);
+    /** what the store answered: its index, null for none, undefined for a refusal */
+    let stored: LogoIndex | null | undefined;
+    let version: string | null = null;
+    let refusal: unknown = null;
+    const busy = (error: unknown): void => {
+      // the store refuses the read for now (the edge's window after the refresh wrote the file,
+      // a 429, the deadline); anything else is the caller's
+      if (!isStoreBusy(error)) throw error;
+      refusal = error;
+      stored = undefined;
+    };
+    if (mirror !== null) {
+      // one head decides: a mirror at the store's version stands without a get of the file
+      let storeVersion: string | null | undefined;
+      try {
+        storeVersion = await deps.store.indexVersion();
+      } catch (error) {
+        busy(error);
+        storeVersion = undefined;
+      }
+      if (storeVersion !== undefined && storeVersion !== null && storeVersion === mirror.version) {
+        stored = mirror.index;
+        version = storeVersion;
+      } else if (storeVersion !== undefined) {
+        try {
+          stored = await deps.store.readIndex();
+          version = storeVersion;
+        } catch (error) {
+          busy(error);
+        }
+      }
+    } else {
+      try {
+        stored = await deps.store.readIndex();
+      } catch (error) {
+        busy(error);
+      }
+      if (stored !== undefined) version = await deps.store.indexVersion().catch(() => null);
+    }
     heldAt = Date.now();
-    held = stored ?? emptyLogoIndex();
-    if (stored === null && deps.upstream.mode === 'fixture') {
+    if (stored === undefined) {
+      if (mirror !== null) {
+        // the copy this instance holds on disk stands in, its version left unknown so the next
+        // revalidation asks the store again and never takes the copy for the store's version
+        held = mirror.index;
+        heldVersion = null;
+        snapshotAt = null;
+      } else {
+        const snapshot = await snapshotIndex();
+        if (snapshot === null) throw new LogoStoreBusyError(refusal);
+        held = snapshot.index;
+        heldVersion = null;
+        snapshotAt = snapshot.at;
+        log(
+          `logo index: the store refused the index and this instance holds no copy; the snapshot of ${snapshot.at} stands`,
+        );
+      }
+    } else if (stored === null && deps.upstream.mode === 'fixture') {
       // the fixture upstream is ten marks: a fresh instance builds its index inline so the spec
       // project drives the picker without a refresh call first (4.9); the built index is adopted
       // from the refresh's own hand, not read back through the store's edge
@@ -288,6 +410,18 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
       });
       held = written.index ?? (await deps.store.readIndex().catch(() => null)) ?? emptyLogoIndex();
       heldVersion = await deps.store.indexVersion().catch(() => null);
+      snapshotAt = null;
+    } else if (stored === null) {
+      // a store that holds no index yet (before its first refresh): the snapshot answers the
+      // picker until a refresh writes, and the revalidation asks the store again by its interval
+      const snapshot = await snapshotIndex();
+      held = snapshot?.index ?? emptyLogoIndex();
+      heldVersion = null;
+      snapshotAt = snapshot?.at ?? null;
+    } else {
+      held = stored;
+      heldVersion = version;
+      snapshotAt = null;
     }
     // the discoveries other instances made since the last refresh, small and best effort: a
     // read the store refuses leaves them to the refresh, and this instance discovers on its own
@@ -306,14 +440,17 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
     if (stored !== null) {
       held = stored;
       heldVersion = version;
+      snapshotAt = null;
     }
     return held;
   };
 
   const index = async (): Promise<LogoIndex> => {
     if (held !== null) {
-      if (Date.now() - heldAt < INDEX_REVALIDATE_MS) return held;
-      // one head at most an hour, on this request (never a timer): a refresh elsewhere is adopted
+      // one head at most an hour, on this request (never a timer): a refresh elsewhere is
+      // adopted; an instance on the snapshot asks again every half minute until the store answers
+      const interval = snapshotAt === null ? INDEX_REVALIDATE_MS : SNAPSHOT_REVALIDATE_MS;
+      if (Date.now() - heldAt < interval) return held;
       return revalidate();
     }
     loading ??= load().finally(() => {
@@ -392,6 +529,8 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
       updatedAt: current.updatedAt,
       ...(lastError !== undefined ? { lastError } : {}),
       ...(current.progress !== undefined ? { progress: current.progress } : {}),
+      // the snapshot's builtAt while it stands, for the picker's foot (section 9)
+      ...(snapshotAt !== null ? { snapshotAt } : {}),
     };
   };
 
@@ -600,6 +739,8 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
     held = written.index ?? (await deps.store.readIndex().catch(() => held)) ?? emptyLogoIndex();
     heldVersion = await deps.store.indexVersion().catch(() => null);
     heldAt = Date.now();
+    // the refresh that lands replaces the snapshot at once (section 9)
+    snapshotAt = null;
     if (counts.lastError === undefined) memoryError = undefined;
     return counts;
   };
@@ -616,8 +757,10 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
     adopt: (next) => {
       held = next;
       heldAt = Date.now();
+      snapshotAt = null;
     },
     held: () => held,
+    snapshotAt: () => snapshotAt,
   };
 }
 
@@ -668,6 +811,8 @@ export async function logoService(): Promise<LogoService> {
       upstream,
       rasterize: sharpRasterizer(),
       log: (line) => console.error(`turboslide logos: ${line}`),
+      // the copy that never passes through the store's edge (section 9)
+      snapshot: bundledLogoIndex,
     });
     return service;
   })().catch((error: unknown) => {
@@ -1166,7 +1311,13 @@ export function registerLogoActions(dispatcher: Dispatcher, deps: LogoActionDeps
       since?: string;
     };
     const { query, since, ...options } = request;
-    return (await service()).search(query, options, since === undefined ? {} : { since });
+    const answer = await (
+      await service()
+    ).search(query, options, since === undefined ? {} : { since });
+    // the table's output is strict and names no snapshot: the foot's field rides the route's
+    // JSON alone (logo.$.ts serveSearch), never the action's answer (section 9)
+    const { snapshotAt: _snapshotAt, ...tabled } = answer;
+    return tabled;
   });
   dispatcher.register('logo.insert', async (input, ctx: ActionContext) =>
     logoInsert(

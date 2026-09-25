@@ -57,9 +57,11 @@ import {
   withAttribution,
 } from './logo-sanitize';
 import {
+  INDEX_REVALIDATE_MS,
   LOGO_STORE_BUSY_MESSAGE,
   LOGO_STORE_RETRY_AFTER_S,
   LogoStoreBusyError,
+  SNAPSHOT_REVALIDATE_MS,
   createLogoService,
   kitLogoMutations,
   logoInsert,
@@ -1223,29 +1225,35 @@ describe("the store's busy window and the discoveries record (build/hotfix.md 2)
     expect((await warm.revalidate()).builtAt).toBe(moved.builtAt);
   });
 
-  it('answers 503 with a retry of a few seconds on a cold instance with no copy, loads on the next request, and serves the disk mirror when it holds one', async () => {
+  it('answers the fixture’s ten marks from memory on a cold instance with no copy (the typed 503 stays for a build with no snapshot), adopts the store’s copy once served, and serves the disk mirror when it holds one', async () => {
     const { fake, service } = await blobFixture();
     const cold = service('cold');
     fake.failNextGet(LOGO_INDEX_PATH, forbidden());
-    const refused = await cold.search('figma').catch((error: unknown) => error);
-    expect(refused).toBeInstanceOf(LogoStoreBusyError);
-    expect(refused).toMatchObject({
-      status: 503,
-      retryAfterS: LOGO_STORE_RETRY_AFTER_S,
-      message: LOGO_STORE_BUSY_MESSAGE,
-    });
+    /* the second hotfix (section 9): the ten marks built in memory answer, named as a snapshot,
+       where the first hotfix threw the 503 the picker could not draw */
+    const first = await cold.search('figma');
+    expect(first.logos[0]?.slug).toBe('figma');
+    expect(typeof first.snapshotAt).toBe('string');
     expect(LOGO_STORE_RETRY_AFTER_S).toBeLessThanOrEqual(10);
-    expect(cold.held()).toBeNull();
-    /* the edge serves the file: the next request loads and answers */
-    expect((await cold.search('figma')).logos[0]?.slug).toBe('figma');
-    /* an instance whose disk holds its last read answers from it while the store refuses, with
-       the version unknown so the next revalidation reads the store again */
+    expect(cold.held()).not.toBeNull();
+    /* the edge serves the file: the next revalidation adopts the store's copy and the answer no
+       longer names the snapshot */
+    expect((await cold.revalidate()).builtAt).toBe(NOW.toISOString());
+    expect((await cold.search('figma')).snapshotAt).toBeUndefined();
+    /* an instance whose disk holds its last read answers from it: one head reads the store at the
+       mirror's version and no get is made, so a refused get is never met (the second hotfix's
+       order, build/hotfix.md 9); a refused head serves the copy with the version unknown */
     const mirrorDir = join(tmp, 'blob-mirror-shared');
     await service('first', mirrorDir).index();
     const second = service('second', mirrorDir);
+    const indexGets = (): number =>
+      fake.calls.filter((call) => call.op === 'get' && call.pathname === LOGO_INDEX_PATH).length;
+    const getsBefore = indexGets();
     fake.failNextGet(LOGO_INDEX_PATH, forbidden());
     expect((await second.search('figma')).logos[0]?.slug).toBe('figma');
     expect(second.held()).not.toBeNull();
+    expect(indexGets()).toBe(getsBefore);
+    expect(second.snapshotAt()).toBeNull();
     /* a mark during the window answers the mark: the upstream's file, sanitized, and cached */
     const vercel = await second.mark('vercel', 'dark');
     expect(vercel.ok).toBe(true);
@@ -1353,5 +1361,233 @@ describe("the store's busy window and the discoveries record (build/hotfix.md 2)
     const dry = await a.refresh({ dryRun: true });
     expect(dry.cachedMarks).toBe(1);
     expect(puts(LOGO_INDEX_PATH)).toBe(2);
+  });
+
+  // The second hotfix (build/hotfix.md section 9): the copy that never passes through the edge
+
+  /** A snapshot as the bundle carries one: a build of an earlier day, with a cached mark. */
+  const SNAPSHOT_AT = '2026-09-20T06:00:00.000Z';
+  async function snapshotOf(): Promise<LogoIndex> {
+    const store = memoryLogoStore();
+    await refreshLogoIndex({
+      store,
+      upstream: fixtureUpstream(() => null),
+      rasterize: fakeRasterizer,
+      now: () => new Date(SNAPSHOT_AT),
+    });
+    const built = (await store.readIndex())!;
+    built.cached['figma/default'] = { at: SNAPSHOT_AT, digest: 'deadbeef', bytes: 1 };
+    return built;
+  }
+
+  it('answers the bundled snapshot on a cold instance with no copy while the store refuses the index, names its builtAt, asks the store again by the shorter interval, and adopts the store’s copy once it answers', async () => {
+    const { fake, instance } = await blobFixture();
+    const snapshot = await snapshotOf();
+    const cold = createLogoService({
+      store: instance('cold'),
+      upstream: downUpstream(),
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+      snapshot: () => snapshot,
+    });
+    fake.failNextGet(LOGO_INDEX_PATH, forbidden());
+    const answer = await cold.search('figma');
+    expect(answer.logos[0]?.slug).toBe('figma');
+    expect(answer.snapshotAt).toBe(SNAPSHOT_AT);
+    expect(cold.snapshotAt()).toBe(SNAPSHOT_AT);
+    expect(cold.held()!.builtAt).toBe(SNAPSHOT_AT);
+    /* the foot names the snapshot's date, never the store's */
+    expect(LOGO_WORDS.source(answer)).toContain('Logos from thesvg.org as of 20 September 2026');
+    /* the instance asks again sooner than the hourly interval, on a request */
+    expect(SNAPSHOT_REVALIDATE_MS).toBeLessThan(INDEX_REVALIDATE_MS);
+    expect(SNAPSHOT_REVALIDATE_MS).toBeLessThanOrEqual(60_000);
+    /* the discoveries the holder makes never write into the module's copy */
+    expect(snapshot.cached['acme/wordmark']).toBeUndefined();
+    /* the window over: the store's copy is adopted and the snapshot is no longer named */
+    expect((await cold.revalidate()).builtAt).toBe(NOW.toISOString());
+    expect(cold.snapshotAt()).toBeNull();
+    expect((await cold.search('figma')).snapshotAt).toBeUndefined();
+  });
+
+  it('serves the snapshot when the store holds no index yet, and the typed refusal when there is no snapshot at all', async () => {
+    const seed = await snapshotOf();
+    const empty = createLogoService({
+      store: blobLogoStore(memoryBlobClient(), join(tmp, `blob-empty-${(counter += 1)}`)),
+      upstream: downUpstream(),
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+      snapshot: () => JSON.parse(JSON.stringify(seed)) as LogoIndex,
+    });
+    const answer = await empty.search('vercel');
+    expect(answer.logos[0]?.slug).toBe('vercel');
+    expect(answer.snapshotAt).toBe(SNAPSHOT_AT);
+    /* a deployment without the file (the first hotfix's behaviour) still answers 503 with the retry */
+    const { fake, instance } = await blobFixture();
+    const bare = createLogoService({
+      store: instance('bare'),
+      upstream: downUpstream(),
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+      snapshot: () => null,
+    });
+    fake.failNextGet(LOGO_INDEX_PATH, forbidden());
+    const refused = await bare.search('figma').catch((error: unknown) => error);
+    expect(refused).toBeInstanceOf(LogoStoreBusyError);
+    expect(refused).toMatchObject({
+      status: 503,
+      retryAfterS: LOGO_STORE_RETRY_AFTER_S,
+      message: LOGO_STORE_BUSY_MESSAGE,
+    });
+    expect(bare.held()).toBeNull();
+    /* the edge serves the file: the next request loads and answers */
+    expect((await bare.search('figma')).logos[0]?.slug).toBe('figma');
+  });
+
+  it('builds the fixture’s ten marks in memory as the snapshot under that upstream, writes nothing, and a search naming a refresh’s build asks the store', async () => {
+    const { fake, instance, service, puts } = await blobFixture();
+    const cold = service('cold');
+    const before = puts(LOGO_INDEX_PATH);
+    fake.failNextGet(LOGO_INDEX_PATH, forbidden());
+    const answer = await cold.search('figma');
+    expect(answer.logos[0]?.slug).toBe('figma');
+    expect(typeof answer.snapshotAt).toBe('string');
+    expect(puts(LOGO_INDEX_PATH)).toBe(before);
+    /* the held copy names no build, so `since` always asks the store */
+    expect(cold.held()!.builtAt).toBeNull();
+    expect(cold.held()!.icons.map((row) => row.slug)).toContain(FIXTURE_DROPPED_SLUG);
+    /* another instance's refresh takes the dropped slug down (its fixture upstream reads the
+       index it holds, as logoService() binds it); the cold one adopts the build by `since` */
+    let other: ReturnType<typeof createLogoService> | null = null;
+    other = createLogoService({
+      store: instance('other'),
+      upstream: fixtureUpstream(() => other?.held() ?? null),
+      rasterize: fakeRasterizer,
+      now: () => new Date('2026-09-22T07:00:00.000Z'),
+    });
+    await other.index();
+    const refreshed = await other.refresh();
+    expect(refreshed.dropped).toContain(FIXTURE_DROPPED_SLUG);
+    const after = await cold.search(FIXTURE_DROPPED_SLUG, {}, { since: refreshed.builtAt! });
+    expect(after.logos.map((row) => row.slug)).not.toContain(FIXTURE_DROPPED_SLUG);
+    expect(after.snapshotAt).toBeUndefined();
+    expect(cold.snapshotAt()).toBeNull();
+  });
+
+  it('replaces the held snapshot with the index a refresh writes, at once and from the refresh’s own hand', async () => {
+    const { fake, service, puts } = await blobFixture();
+    const cold = service('cold');
+    fake.failNextGet(LOGO_INDEX_PATH, forbidden());
+    await cold.search('figma');
+    expect(cold.snapshotAt()).not.toBeNull();
+    const before = puts(LOGO_INDEX_PATH);
+    const counts = await cold.refresh();
+    expect(counts.builtAt).toBe(NOW.toISOString());
+    expect(puts(LOGO_INDEX_PATH)).toBe(before + 1);
+    expect(cold.held()!.builtAt).toBe(NOW.toISOString());
+    expect(cold.snapshotAt()).toBeNull();
+    expect((await cold.search('figma')).snapshotAt).toBeUndefined();
+  });
+
+  it('answers a mark from the upstream while the held copy is the snapshot: a mark it lists as cached but the store withholds, and one it does not list, with the upstream’s failure as the 503 and never the store’s', async () => {
+    /* the fixture upstream serves: the mark is fetched, sanitized and written to the store */
+    const { fake, service, puts } = await blobFixture();
+    const cold = service('cold');
+    fake.failNextGet(LOGO_INDEX_PATH, forbidden());
+    await cold.search('vercel');
+    expect(cold.snapshotAt()).not.toBeNull();
+    const dark = await cold.mark('vercel', 'dark');
+    expect(dark.ok).toBe(true);
+    expect(dark.ok && dark.svg).toContain('<svg');
+    expect(puts(`${LOGO_MARKS_PREFIX}vercel/dark.svg`)).toBe(1);
+    /* the upstream down and the store withholding the cached file the snapshot names: the
+       upstream's sentence and its 503, not a store refusal thrown to the route */
+    const snapshot = await snapshotOf();
+    const down = createLogoService({
+      store: service('down').deps.store,
+      upstream: downUpstream(),
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+      snapshot: () => snapshot,
+    });
+    fake.failNextGet(LOGO_INDEX_PATH, forbidden());
+    await down.search('figma');
+    fake.failNextGet(`${LOGO_MARKS_PREFIX}figma/default.svg`, forbidden());
+    const withheld = await down.mark('figma', 'default');
+    expect(withheld).toMatchObject({ ok: false, status: 503, message: LOGO_WORDS.upstreamDown });
+    expect(puts(`${LOGO_MARKS_PREFIX}figma/default.svg`)).toBe(0);
+  });
+
+  it('serves a mirror at the store’s version with one head and no get, reads the store when the version moved, and keeps the copy with the version unknown when the head is refused', async () => {
+    const { fake, instance, service } = await blobFixture();
+    const mirrorDir = join(tmp, `blob-mirror-${(counter += 1)}`);
+    await service('first', mirrorDir).index();
+    const other = instance('other');
+    const moved: LogoIndex = { ...(await other.readIndex())!, builtAt: '2026-09-22T07:00:00.000Z' };
+    const calls = (op: 'get' | 'head'): number =>
+      fake.calls.filter((call) => call.op === op && call.pathname === LOGO_INDEX_PATH).length;
+    const gets = calls('get');
+    const heads = calls('head');
+    const second = service('second', mirrorDir);
+    expect((await second.index()).builtAt).toBe(NOW.toISOString());
+    expect(calls('get')).toBe(gets);
+    expect(calls('head')).toBe(heads + 1);
+    /* the store moved: the head differs from the mirror's version, so the copy is read */
+    await other.writeIndex(moved);
+    const third = service('third', mirrorDir);
+    expect((await third.index()).builtAt).toBe(moved.builtAt);
+    expect(calls('get')).toBe(gets + 1);
+    /* the head refused: the mirror stands with its version unknown, and the next revalidation
+       adopts the store's copy */
+    const refusing = { ...instance('fourth', mirrorDir) };
+    let refuse = true;
+    const heading = refusing.indexVersion;
+    refusing.indexVersion = async () => {
+      if (refuse) throw forbidden();
+      return heading();
+    };
+    const fourth = createLogoService({
+      store: refusing,
+      upstream: fixtureUpstream(() => null),
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+    });
+    const getsBefore = calls('get');
+    expect((await fourth.index()).builtAt).toBe(moved.builtAt);
+    expect(calls('get')).toBe(getsBefore);
+    expect(fourth.snapshotAt()).toBeNull();
+    refuse = false;
+    const newer: LogoIndex = { ...moved, builtAt: '2026-09-22T08:00:00.000Z' };
+    await other.writeIndex(newer);
+    expect((await fourth.revalidate()).builtAt).toBe(newer.builtAt);
+  });
+
+  it('strips the snapshot’s field from the action’s answer, which the table’s strict output does not name, and keeps it on the service’s', async () => {
+    const { fake, instance } = await blobFixture();
+    const snapshot = await snapshotOf();
+    const service = createLogoService({
+      store: instance('actions'),
+      upstream: downUpstream(),
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+      snapshot: () => snapshot,
+    });
+    fake.failNextGet(LOGO_INDEX_PATH, forbidden());
+    const dir = deckDir('snapshot-actions');
+    const dispatcher = createDispatcher();
+    registerLogoActions(dispatcher, {
+      store: openFileStore({ dir }),
+      deckId: 'gt-brand',
+      service,
+      now: () => NOW,
+      rasterizePng: fakePng,
+    });
+    const answer = (await dispatcher.dispatch(
+      'logo.search',
+      { query: 'figma', limit: 5 },
+      ctx,
+    )) as Record<string, unknown>;
+    expect(answer.logos).toBeDefined();
+    expect(answer.snapshotAt).toBeUndefined();
+    expect((await service.search('figma')).snapshotAt).toBe(SNAPSHOT_AT);
   });
 });

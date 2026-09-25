@@ -14,6 +14,11 @@ packages/fonts/assets
 packages/schema/src/rules.json
 packages/lint/fixtures/index.json
 
+# The logo index snapshot bundled with the deployment (docs/FEATURES.md 4.2; build/hotfix.md 9):
+# the store's canonical JSON of a few MB written by scripts/build-logo-index-snapshot.mjs, which
+# the formatter would take seconds over and must never reflow (the bytes are the builder's)
+apps/studio/src/server/logo-index.snapshot.json
+
 # The parity audit and the verifier write their evidence here; a regenerated report must not fail check step 19
 docs/gslides-parity/verification/**/*.json
 docs/gslides-parity/verification-2/**/*.json

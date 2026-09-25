@@ -57,7 +57,10 @@ import './Logo.css';
  * placed through `insertPictureAsset` (the logo size rule is the placement's); the default kit's
  * logo through `insertPictureFromUrl` when the kit names a picture and as a `mark` block when it
  * is the theme's mark. The empty state offers Upload, which runs the shell's chooser. While
- * thesvg.org did not answer the foot says so and the cached rows still insert (4.9). Every control
+ * thesvg.org did not answer the foot says so and the cached rows still insert (4.9); a route
+ * answer of 503 with `retry-after` (the store's busy window) is asked once more after that many
+ * seconds with the last results still drawn, and the foot names the bundled snapshot's date
+ * while an instance answers from it (build/hotfix.md section 9). Every control
  * carries its `data-control` id from 4.3 and a parked id is hidden through parked-controls.ts
  * (4.12, 7.2).
  *
@@ -122,7 +125,38 @@ async function routeError(response: Response): Promise<string> {
   return LOGO_DIALOG.routeFailed(response.status);
 }
 
-/** The rows for a query from the same origin route; rejects with one sentence. */
+/** The most the dialog waits for a route's `retry-after` before its one retry, in seconds. */
+export const SEARCH_RETRY_AFTER_MAX_S = 10;
+/** The wait when a 503 names none. */
+export const SEARCH_RETRY_AFTER_DEFAULT_S = 5;
+
+/**
+ * A route answer that was not 200 (build/hotfix.md section 9): the sentence for the empty state,
+ * the status, and for a 503 the seconds its `retry-after` named, so the dialog asks once more
+ * before it reads the empty state (the store's busy window answers 503 with a retry of a few
+ * seconds; the sentence alone would have drawn the empty state at once).
+ */
+export class LogoRouteError extends Error {
+  readonly status: number;
+  readonly retryAfterS: number | null;
+  constructor(message: string, status: number, retryAfterS: number | null) {
+    super(message);
+    this.name = 'LogoRouteError';
+    this.status = status;
+    this.retryAfterS = retryAfterS;
+  }
+}
+
+/** The seconds a 503's `retry-after` names, bounded; null for any other status. */
+export function retryAfterOf(response: Pick<Response, 'status' | 'headers'>): number | null {
+  if (response.status !== 503) return null;
+  const raw = response.headers?.get?.('retry-after') ?? null;
+  const seconds = raw === null || raw.trim() === '' ? Number.NaN : Number(raw);
+  if (!Number.isFinite(seconds) || seconds < 0) return SEARCH_RETRY_AFTER_DEFAULT_S;
+  return Math.min(SEARCH_RETRY_AFTER_MAX_S, seconds);
+}
+
+/** The rows for a query from the same origin route; rejects with one sentence (a `LogoRouteError` for a route answer). */
 export async function searchLogos(
   query: string,
   options: LogoSearchOptions = {},
@@ -132,13 +166,15 @@ export async function searchLogos(
     headers: { accept: 'application/json' },
     credentials: 'same-origin',
   });
-  if (!response.ok) throw new Error(await routeError(response));
+  if (!response.ok)
+    throw new LogoRouteError(await routeError(response), response.status, retryAfterOf(response));
   const answer = (await response.json()) as Partial<LogoSearchAnswer>;
   return {
     logos: Array.isArray(answer.logos) ? answer.logos : [],
     updatedAt: answer.updatedAt ?? null,
     ...(answer.lastError === undefined ? {} : { lastError: answer.lastError }),
     ...(answer.progress === undefined ? {} : { progress: answer.progress }),
+    ...(answer.snapshotAt === undefined ? {} : { snapshotAt: answer.snapshotAt }),
     ...(answer.source === undefined ? {} : { source: answer.source }),
   };
 }
@@ -660,29 +696,49 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
       setAnswered('');
       setSearching(false);
       setFailure(null);
-      return;
+      return undefined;
     }
     setSearching(true);
-    searchLogos(q, { limit, collection: includeCloud ? 'all' : 'brands' })
-      .then((answer) => {
-        if (seq !== searchSeq.current) return;
-        setResults(answer.logos);
-        setAnswered(q);
-        setFacts({
-          updatedAt: answer.updatedAt,
-          ...(answer.lastError === undefined ? {} : { lastError: answer.lastError }),
+    /* a 503 with retry-after (the store's busy window, build/hotfix.md section 9) is asked once
+       more after that many seconds with the last results still drawn and the search still on;
+       the empty state reads a failure only when the retry fails too. A later keystroke bumps the
+       sequence, so a retry in flight or waiting draws nothing over it */
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+    const options = { limit, collection: includeCloud ? 'all' : 'brands' } as const;
+    const ask = (retried: boolean): void => {
+      searchLogos(q, options)
+        .then((answer) => {
+          if (seq !== searchSeq.current) return;
+          setResults(answer.logos);
+          setAnswered(q);
+          setFacts({
+            updatedAt: answer.updatedAt,
+            ...(answer.lastError === undefined ? {} : { lastError: answer.lastError }),
+            ...(answer.snapshotAt === undefined ? {} : { snapshotAt: answer.snapshotAt }),
+          });
+          setFailure(null);
+          setSearching(false);
+        })
+        .catch((err: unknown) => {
+          if (seq !== searchSeq.current) return;
+          const retryAfterS = !retried && err instanceof LogoRouteError ? err.retryAfterS : null;
+          if (retryAfterS !== null) {
+            retryTimer = setTimeout(() => {
+              retryTimer = null;
+              if (seq === searchSeq.current) ask(true);
+            }, retryAfterS * 1000);
+            return;
+          }
+          setResults([]);
+          setAnswered(q);
+          setFailure(err instanceof Error ? err.message : String(err));
+          setSearching(false);
         });
-        setFailure(null);
-      })
-      .catch((err: unknown) => {
-        if (seq !== searchSeq.current) return;
-        setResults([]);
-        setAnswered(q);
-        setFailure(err instanceof Error ? err.message : String(err));
-      })
-      .finally(() => {
-        if (seq === searchSeq.current) setSearching(false);
-      });
+    };
+    ask(false);
+    return () => {
+      if (retryTimer !== null) clearTimeout(retryTimer);
+    };
   }, [includeCloud, limit, query]);
 
   /* a new query starts at the first page */

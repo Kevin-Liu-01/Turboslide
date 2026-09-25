@@ -70,6 +70,11 @@ export type LogoIndexFacts = {
   updatedAt: string | null;
   lastError?: { at: string; status?: number; message: string };
   progress?: { done: number; total: number };
+  /**
+   * the `builtAt` of the snapshot bundled with the deployment, set while an instance answers
+   * from it because the store refused the index (build/hotfix.md section 9); the foot names it
+   */
+  snapshotAt?: string;
 };
 
 /** One row of the `logo.search` answer (4.11): the index row with its licence sentence. */
@@ -549,10 +554,16 @@ export const LOGO_WORDS = {
   unknown: (slug: string) => `No logo named ${slug} on thesvg.org`,
   /** the sentence of a variant the mark does not have */
   noVariant: (title: string, variant: string) => `${title} has no ${variant} on thesvg.org`,
-  /** the foot sentence (4.6) */
+  /** the foot sentence (4.6); "as of" names the bundled snapshot's date while it stands (build/hotfix.md 9) */
   source: (facts: LogoIndexFacts) => {
+    const snapshot = logoIndexDate(facts.snapshotAt);
     const date = logoIndexDate(facts.updatedAt);
-    const head = date === '' ? 'Logos from thesvg.org' : `Logos from thesvg.org, updated ${date}`;
+    const head =
+      snapshot !== ''
+        ? `Logos from thesvg.org as of ${snapshot}`
+        : date === ''
+          ? 'Logos from thesvg.org'
+          : `Logos from thesvg.org, updated ${date}`;
     const tail =
       'Brand marks belong to their owners; use them to name the brand, not to imply endorsement';
     const failure =

@@ -24,9 +24,11 @@
 // and the refresh folds into the file it writes, then clears. Before this every discovery
 // rewrote the 3.6 MB index, and the public store's edge refuses a just written pathname for two
 // to three minutes, so a seller's searches opened a window in which every logo route of a cold
-// instance answered 500. In that window the Blob store's `readIndex` answers this instance's disk
-// mirror when it holds one, and throws the store's own error otherwise, which logos.ts turns
-// into a 503 with `retry-after`; nothing here answers an empty index for a store condition.
+// instance answered 500. In that window `readIndex` throws the store's own error and logos.ts
+// serves the copy it holds: the disk mirror this instance wrote at its last read or write of the
+// index (`readMirror`, with the store version it carried, so one head decides whether the store
+// moved), else the snapshot bundled with the deployment (logo-index-snapshot.ts, the second
+// hotfix, build/hotfix.md section 9); nothing here answers an empty index for a store condition.
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -508,10 +510,12 @@ export type LogoStore = {
   readIndex: () => Promise<LogoIndex | null>;
   /**
    * the copy of the index this instance holds on disk from its last read or write (the Blob
-   * store's mirror folder, the disk store's own file); null when none. Read when the store
-   * refuses the index (logos.ts `load`), never in place of the store: its version is unknown
+   * store's mirror folder, the disk store's own file) with the store version it carried then
+   * (null when the copy was written without one); null when none. logos.ts `load` reads it first
+   * and asks the store for its version with one head, so the copy stands without a get while the
+   * store's version is the same, and is never taken for a version the store did not confirm
    */
-  readMirror: () => Promise<LogoIndex | null>;
+  readMirror: () => Promise<{ index: LogoIndex; version: string | null } | null>;
   /** the version of the stored index (an etag, an mtime), for a cheap revalidation; null when none */
   indexVersion: () => Promise<string | null>;
   writeIndex: (index: LogoIndex) => Promise<void>;
@@ -680,9 +684,10 @@ export function diskLogoStore(dir: string): LogoStore {
       return parseLogoIndex(readJson(indexPath));
     },
     async readMirror() {
-      // the disk never refuses a read; its own file is the copy
+      // the disk never refuses a read; its own file is the copy, at its own version
       if (!existsSync(indexPath)) return null;
-      return parseLogoIndex(readJson(indexPath));
+      const index = parseLogoIndex(readJson(indexPath));
+      return index === null ? null : { index, version: String(statSync(indexPath).mtimeMs) };
     },
     async indexVersion() {
       if (!existsSync(indexPath)) return null;
@@ -729,36 +734,58 @@ export function diskLogoStore(dir: string): LogoStore {
  * `overwrite`, each cached mark under `system/logos/<slug>/<variant>.svg` with its content type
  * and a week of `cacheControlMaxAge` and no other metadata (the attribution is inside the file),
  * the side record of the discoveries under `system/logo-discoveries.json`. A mirror folder keeps
- * this instance's last read and write of the index (`readMirror`), so a read the store refuses
- * for now (the edge's window after the refresh wrote the file, ship.md 13.4) has a copy to fall
- * back on in logos.ts `load`; `readIndex` itself throws the store's error, so the service never
- * takes the copy for the store's current version.
+ * this instance's last read and write of the index with the store version it carried
+ * (`readMirror`: `index.json` beside `index.version`), so a read the store refuses for now (the
+ * edge's window after the refresh wrote the file, ship.md 13.4) has a copy to fall back on in
+ * logos.ts `load`, and a load that finds the copy asks the store for its version alone;
+ * `readIndex` itself throws the store's error, so the service never takes the copy for a version
+ * the store did not confirm.
  */
 export function blobLogoStore(client: BlobClient, mirrorDir?: string): LogoStore {
   const mirror = mirrorDir === undefined ? null : diskLogoStore(mirrorDir);
+  const versionPath = mirrorDir === undefined ? null : join(mirrorDir, 'index.version');
+  const mirrorWrite = async (index: LogoIndex, version: string | null): Promise<void> => {
+    if (mirror === null || versionPath === null) return;
+    try {
+      await mirror.writeIndex(index);
+      if (version === null) rmSync(versionPath, { force: true });
+      else writeFileSync(versionPath, version);
+    } catch {
+      // the mirror is best effort: a full or read only disk leaves the instance to the store
+    }
+  };
   return {
     kind: 'blob',
     async readIndex() {
       const got = await client.get(LOGO_INDEX_PATH);
       if (got === null) return null;
       const index = parseLogoIndex(JSON.parse(new TextDecoder().decode(got.bytes)) as unknown);
-      if (index !== null && mirror !== null) await mirror.writeIndex(index).catch(() => undefined);
+      if (index !== null) await mirrorWrite(index, got.entry.version);
       return index;
     },
     async readMirror() {
-      return mirror === null ? null : mirror.readIndex().catch(() => null);
+      if (mirror === null || versionPath === null) return null;
+      const copy = await mirror.readMirror().catch(() => null);
+      if (copy === null) return null;
+      let version: string | null = null;
+      try {
+        version = existsSync(versionPath) ? readFileSync(versionPath, 'utf8').trim() || null : null;
+      } catch {
+        version = null;
+      }
+      return { index: copy.index, version };
     },
     async indexVersion() {
       const head = await client.head(LOGO_INDEX_PATH);
       return head?.version ?? null;
     },
     async writeIndex(index) {
-      await client.put(LOGO_INDEX_PATH, logoIndexBytes(index), {
+      const entry = await client.put(LOGO_INDEX_PATH, logoIndexBytes(index), {
         overwrite: true,
         contentType: 'application/json',
         cacheControlMaxAge: 60,
       });
-      if (mirror !== null) await mirror.writeIndex(index).catch(() => undefined);
+      await mirrorWrite(index, entry.version);
     },
     async readDiscoveries() {
       const got = await client.get(LOGO_DISCOVERIES_PATH);

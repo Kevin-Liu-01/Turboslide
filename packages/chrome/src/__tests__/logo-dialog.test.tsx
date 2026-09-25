@@ -722,6 +722,109 @@ describe('LogoDialog', () => {
     );
   });
 
+  it('asks once more after a 503 with retry-after, keeping the last results drawn and the search on, and reads the empty state only when the retry fails too (build/hotfix.md 9)', async () => {
+    /* a route whose answers are scripted per call: 200, then 503 with a one second retry, then
+       200 again; then 503 twice for the same query */
+    const answer = (logos: LogoSearchRow[]): LogoSearchAnswer => ({
+      logos,
+      updatedAt: '2026-09-20T06:39:58Z',
+      source: 'thesvg.org',
+    });
+    const busy = (retryAfter: string) => ({
+      ok: false,
+      status: 503,
+      headers: { get: (name: string) => (name === 'retry-after' ? retryAfter : null) },
+      json: () =>
+        Promise.resolve({
+          error: {
+            message: 'The logo index is not readable right now; try again in a few seconds',
+            code: 'store_busy',
+          },
+        }),
+    });
+    const served = (logos: LogoSearchRow[]) => ({
+      ok: true,
+      status: 200,
+      headers: { get: () => null },
+      json: () => Promise.resolve(answer(logos)),
+    });
+    const script = [served([FIGMA]), busy('1'), served([FIGMA]), busy('0'), busy('0')];
+    const calls: string[] = [];
+    const fetcher = vi.fn((input: string | URL | Request) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+      calls.push(new URL(url, 'http://localhost').searchParams.get('q') ?? '');
+      return Promise.resolve(script.shift() ?? busy('0'));
+    });
+    vi.stubGlobal('fetch', fetcher);
+    const { Host } = makeHost();
+    render(
+      <Host>
+        <LogoDialog />
+      </Host>,
+    );
+    const field = control('dialog.logo.search') as HTMLInputElement;
+    fireEvent.change(field, { target: { value: 'fig' } });
+    await waitFor(() => expect(control('dialog.logo.tile.figma')).not.toBeNull());
+    /* the next query meets the busy window: the Figma tile stays drawn, the search stays on, no
+       empty state, and one retry lands after the second the route asked for */
+    fireEvent.change(field, { target: { value: 'figm' } });
+    await waitFor(() => expect(calls).toEqual(['fig', 'figm']));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(control('dialog.logo.tile.figma')).not.toBeNull();
+    expect(control('dialog.logo.empty')).toBeNull();
+    expect(control('dialog.logo.groups')?.getAttribute('data-searching')).toBe('true');
+    expect(control('dialog.logo.groups')?.getAttribute('data-query')).toBe('fig');
+    await waitFor(() => expect(calls).toEqual(['fig', 'figm', 'figm']), { timeout: 3000 });
+    await waitFor(() =>
+      expect(control('dialog.logo.groups')?.getAttribute('data-query')).toBe('figm'),
+    );
+    expect(control('dialog.logo.tile.figma')).not.toBeNull();
+    expect(control('dialog.logo.empty')).toBeNull();
+    expect(control('dialog.logo.groups')?.getAttribute('data-searching')).toBeNull();
+    /* the retry fails too: the empty state reads the route's sentence, once */
+    fireEvent.change(field, { target: { value: 'figma' } });
+    await waitFor(() => expect(calls).toEqual(['fig', 'figm', 'figm', 'figma', 'figma']), {
+      timeout: 3000,
+    });
+    await waitFor(() => expect(control('dialog.logo.empty')).not.toBeNull());
+    expect(control('dialog.logo.empty')?.textContent).toContain(
+      'The logo index is not readable right now',
+    );
+    expect(control('dialog.logo.tile.figma')).toBeNull();
+    expect(fetcher).toHaveBeenCalledTimes(5);
+  });
+
+  it('names the bundled snapshot’s date in the foot while the route answers from it (build/hotfix.md 9)', async () => {
+    const fetcher = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        headers: { get: () => null },
+        json: () =>
+          Promise.resolve({
+            logos: [FIGMA],
+            updatedAt: '2026-09-20T06:39:58Z',
+            snapshotAt: '2026-09-24T18:00:00.000Z',
+            source: 'thesvg.org',
+          }),
+      }),
+    );
+    vi.stubGlobal('fetch', fetcher);
+    const { Host } = makeHost();
+    render(
+      <Host>
+        <LogoDialog />
+      </Host>,
+    );
+    await search('fig');
+    expect(control('dialog.logo.source')?.textContent).toContain(
+      'Logos from thesvg.org as of 24 September 2026',
+    );
+    expect(control('dialog.logo.source')?.textContent).not.toContain('updated');
+  });
+
   it('shows a refused insert as one sentence and keeps the dialog open', async () => {
     const sentence = 'thesvg.org did not answer; try again in a minute';
     stubRoute({ insertFails: sentence });

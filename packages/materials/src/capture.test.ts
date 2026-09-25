@@ -19,7 +19,11 @@ import { decodeImage } from '@turboslide/effects/io';
 import { scaleNearest } from '@turboslide/effects/resample';
 import { toGray } from '@turboslide/effects/tone';
 import { twoTone } from '@turboslide/effects/two-tone';
-import { launchBrowser } from '@turboslide/headless/launch';
+import {
+  isSingleProcessBrowser,
+  launchBrowser,
+  markSingleProcessBrowser,
+} from '@turboslide/headless/launch';
 import type { LaunchedBrowser } from '@turboslide/headless/launch';
 import { readTwinBits } from '@turboslide/headless/capture/twins';
 import { assetSchema } from '@turboslide/schema/assets';
@@ -31,7 +35,9 @@ import {
   noiseTextureSrc,
   paperDistDir,
   parseRecipeFile,
+  renderMaterialFrames,
 } from './capture.ts';
+import type { MaterialCaptureRequest } from './capture.ts';
 import { frameAssetOf } from './actions.ts';
 import { requireMaterial } from './catalog.ts';
 import { LEGACY_SHADER_PALETTE, shaderPaletteOf } from './presets.ts';
@@ -238,6 +244,42 @@ describe.skipIf(skipBrowser)('material capture in the browser', () => {
     expect(blue).toBeGreaterThan(100);
     expect(existsSync(join(dir, 'assets/smoke.recipe.json'))).toBe(true);
   });
+
+  test('a browser flagged single-process keeps its capture context open and still answers the frame; an unflagged one closes it (b7.md R1, docs/hosting-chromium.md 3b)', async () => {
+    const request = (): MaterialCaptureRequest => ({
+      materialId: 'paper:gem-smoke',
+      preset: 'brand-blue',
+      anchors: [5500],
+      id: 'single',
+      role: 'opener',
+    });
+    // a browser of the test's own: the flag is a WeakSet, so the file's shared browser would stay flagged
+    const flagged = await launchBrowser();
+    try {
+      markSingleProcessBrowser(flagged.browser);
+      expect(isSingleProcessBrowser(flagged.browser)).toBe(true);
+      const before = flagged.browser.contexts().length;
+      const result = await renderMaterialFrames(request(), { browser: flagged });
+      expect(result.size).toEqual([3200, 1800]);
+      expect(result.frames).toHaveLength(1);
+      const contexts = flagged.browser.contexts();
+      expect(contexts).toHaveLength(before + 1);
+      expect(contexts.at(-1)?.pages()[0]?.viewportSize()).toEqual({ width: 1600, height: 900 });
+    } finally {
+      // Chrome for Testing closes cleanly; only the serverless shell is killed by pid
+      await flagged.close();
+    }
+    const plain = await launchBrowser();
+    try {
+      expect(isSingleProcessBrowser(plain.browser)).toBe(false);
+      const before = plain.browser.contexts().length;
+      const result = await renderMaterialFrames(request(), { browser: plain });
+      expect(result.frames).toHaveLength(1);
+      expect(plain.browser.contexts()).toHaveLength(before);
+    } finally {
+      await plain.close();
+    }
+  }, 120_000);
 
   test('a frame at a box aspect takes the long side 3200, records its frameKey, and the diamond’s bytes are measured for the ship note', async () => {
     if (browser === undefined) throw new Error('no browser');

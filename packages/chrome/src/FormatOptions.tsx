@@ -47,7 +47,7 @@ import { DitherFormatSection } from './inspector/dither';
 import { AdjustmentsSection, PictureSection } from './inspector/picture';
 import type { ControlContext } from './inspector/props';
 import { ShadowSection } from './inspector/shadow';
-import { ShaderSection } from './inspector/shader';
+import { ShaderSection, isShaderGround } from './inspector/shader';
 import { ShapeSection } from './inspector/shape';
 import { TextMarksSection } from './inspector/text-marks';
 import { groupRows, layoutForType } from './Inspector';
@@ -586,8 +586,9 @@ export function FormatOptions({
         case 'chart':
           return selected?.type === 'chart' && !many;
         case 'shader':
-          /* the features round, ship two (docs/FEATURES.md 5.3): one shader block's one home */
-          return selected?.type === 'material' && !many;
+          /* the features round, ship two (docs/FEATURES.md 5.3): one shader block's one home, and
+             the covering picture of a placed shader ground (the fix round; inspector/shader.tsx) */
+          return !many && (selected?.type === 'material' || isShaderGround(selected, deck));
         case 'line':
           return selected?.type === 'shape' && isLineKind(selected.shape) && !many;
         case 'shape':
@@ -821,9 +822,12 @@ export function FormatOptions({
               );
             case 'shader':
               /* the features round, ship two (docs/FEATURES.md 5.3; build/b5/integrator-hunks.md R3):
-                 the Shader section over the selected material block; the generated rows of the
-                 block stay behind Advanced tools as the chart's do */
-              return selected?.type !== 'material' ? null : (
+                 the Shader section over the selected material block, or over the covering picture
+                 of a placed shader ground (the fix round, b5.md R13); the generated rows of the
+                 block stay behind Advanced tools as the chart's do, a ground's picture rows are
+                 the picture sections' */
+              return selected === undefined ||
+                !(selected.type === 'material' || isShaderGround(selected, deck)) ? null : (
                 <Section key={section.id} {...common}>
                   <ShaderSection
                     block={selected}
@@ -832,7 +836,7 @@ export function FormatOptions({
                     settings={{ advancedTools }}
                     onChange={onChangeShader}
                   />
-                  {renderGeneratedAdvanced('shader')}
+                  {selected.type === 'material' ? renderGeneratedAdvanced('shader') : null}
                 </Section>
               );
             case 'line':

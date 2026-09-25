@@ -36,7 +36,7 @@ import {
   writeUnder,
 } from '@turboslide/headless/capture/shared';
 import type { PlateSide, TwoToneRequestParams } from '@turboslide/headless/capture/shared';
-import { launchBrowser } from '@turboslide/headless/launch';
+import { isSingleProcessBrowser, launchBrowser } from '@turboslide/headless/launch';
 import type { GpuBackend, LaunchOptions, LaunchedBrowser } from '@turboslide/headless/launch';
 import type { Asset } from '@turboslide/schema/assets';
 import type { MaterialUniforms } from '@turboslide/schema/blocks/material';
@@ -406,7 +406,10 @@ export async function renderMaterialFrames(
         frames.push({ anchor, png: await frameAt(page, anchor) });
       }
     } finally {
-      await context.close();
+      // the single-process serverless shell dies when a context is closed (headless launch.ts;
+      // docs/hosting-chromium.md 3b), so its context stays open until launched.close() kills the
+      // process; elsewhere a close error after the frames are read is not a render failure
+      if (!isSingleProcessBrowser(browser)) await context.close().catch(() => undefined);
     }
   } finally {
     if (launched !== undefined) await launched.close();

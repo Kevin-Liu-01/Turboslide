@@ -712,6 +712,16 @@ export async function run(t) {
           PANEL_LANE,
           'no Shader section in Format options (FEATURES.md 5.3)',
         );
+      /* the thumb's point is read off the range after the control is scrolled into view (the
+         control-sentences step's rule): on the panel at 900 px the Amplitude range sits below the
+         fold and a drag over the unscrolled point moves over nothing (the verifier's pass 2 F3) */
+      const scrollToAmplitude = () =>
+        page
+          .locator('[data-control="formatOptions.shader.amplitude"]')
+          .first()
+          .scrollIntoViewIfNeeded()
+          .catch(() => undefined);
+      await scrollToAmplitude();
       const before = await sliderOf('formatOptions.shader.amplitude');
       if (!before || !before.range)
         return t.notBuilt(
@@ -722,6 +732,8 @@ export async function run(t) {
       try {
         const motion = await restMount(id);
         const s = await openShaderSection(id);
+        await scrollToAmplitude();
+        await t.sleep(150);
         const slider = (await sliderOf('formatOptions.shader.amplitude')) ?? before;
         const clip = await clipOf(id);
         const rest = await t.shotPixels(clip);
@@ -752,7 +764,10 @@ export async function run(t) {
         await t.settled();
         const value1 = await sliderValue('formatOptions.shader.amplitude');
         const block1 = (await t.blockOf(S, id))?.block ?? null;
-        await t.press('Meta+z');
+        /* Cmd+Z takes the release's write alone: with nothing written the undo would take the
+           insert and leave the panel rows after this one with no block to read */
+        const undone = rev1 > rev0;
+        if (undone) await t.press('Meta+z');
         await t.settled();
         const value2 = await t
           .pollUntil(
@@ -776,7 +791,7 @@ export async function run(t) {
             value2 === slider.value &&
             after !== null &&
             after <= 0.01,
-          observed: `mount at rest ${motion === null ? 'unread' : `${(motion * 100).toFixed(2)} percent moving`}; during the drag the value read ${during.value} with ${during.diff === null ? 'no' : `${(during.diff * 100).toFixed(1)} percent of`} pixels changed and revision ${during.revision} (${rev0} before); release: revision ${rev1}, value ${slider.value} -> ${value1}${block1 ? ` (block controls ${JSON.stringify(block1.controls ?? null)})` : ''}; Cmd+Z: value ${value2}, ${after === null ? 'canvas unread' : `${(after * 100).toFixed(2)} percent of pixels differ from rest`}${s.section ? '' : '; the section closed'}`,
+          observed: `mount at rest ${motion === null ? 'unread' : `${(motion * 100).toFixed(2)} percent moving`}; during the drag the value read ${during.value} with ${during.diff === null ? 'no' : `${(during.diff * 100).toFixed(1)} percent of`} pixels changed and revision ${during.revision} (${rev0} before); release: revision ${rev1}, value ${slider.value} -> ${value1}${block1 ? ` (block controls ${JSON.stringify(block1.controls ?? null)})` : ''}; ${undone ? 'Cmd+Z' : 'no Cmd+Z (nothing was written)'}: value ${value2}, ${after === null ? 'canvas unread' : `${(after * 100).toFixed(2)} percent of pixels differ from rest`}${s.section ? '' : '; the section closed'}`,
         };
       } finally {
         await wakeMount();
@@ -828,7 +843,16 @@ export async function run(t) {
       const sentence = (label) =>
         /^[A-Z][a-z0-9]/.test(label) && !/[a-z]-[a-z]/.test(label) && label !== label.toUpperCase();
       const badLabels = tiles.filter((x) => !sentence(x.label)).map((x) => x.label);
-      const target = tiles.find((x) => !x.pressed) ?? null;
+      /* the tile clicked is one whose look differs from the pressed one by more than the row's
+         threshold: the entry's own Chrome first, then any tile that is not one of the two black
+         and white kit presets (Paper on ink and Ink on paper share the pressed Diamond's geometry
+         and move the canvas under the threshold, the verifier's pass 2 F4), then any unpressed */
+      const bw = /^(paper on ink|ink on paper)$/i;
+      const target =
+        tiles.find((x) => !x.pressed && /^chrome$/i.test(x.label)) ??
+        tiles.find((x) => !x.pressed && !bw.test(x.label)) ??
+        tiles.find((x) => !x.pressed) ??
+        null;
       let ms = null;
       let preset1 = null;
       let change = null;
@@ -993,6 +1017,32 @@ export async function run(t) {
             ? 'light'
             : 'dark';
       const path = `/colors/${appearance}/primary`;
+      /* the shader is put on the kit's Primary role first (a click on the Colors row's Primary
+         swatch, the write a seller makes before the kit's colour matters to the block): a block
+         left on a fixed preset by the preset step (Chrome, or a black and white kit preset) takes
+         no kit colour, so a brand write would re key its frame and move no pixel (the verifier's
+         pass 2 F.5 F5 and the run of record's 2.5); the click and its revision are recorded */
+      let primaryClick = 'no Primary swatch';
+      if (roles.includes('primary') && (await t.visible('formatOptions.shader.color.primary'))) {
+        const revP = (await t.state()).revision;
+        await page
+          .locator('[data-control="formatOptions.shader.color.primary"]')
+          .first()
+          .scrollIntoViewIfNeeded()
+          .catch(() => undefined);
+        await t.clickControl('formatOptions.shader.color.primary');
+        const revQ = await t
+          .pollUntil(
+            async () => (await t.state()).revision,
+            (r) => r > revP,
+            6000,
+            100,
+          )
+          .catch(async () => (await t.state()).revision);
+        await t.settled();
+        await t.sleep(600);
+        primaryClick = `the Primary swatch clicked (revision ${revP} -> ${revQ})`;
+      }
       const block0 = (await t.blockOf(S, id))?.block ?? null;
       const asset0 = await assetOf(block0?.asset);
       const key0 = asset0?.source?.frameKey ?? null;
@@ -1073,7 +1123,7 @@ export async function run(t) {
           recaptured.key !== null &&
           recaptured.key !== key0 &&
           ms <= 5000,
-        observed: `swatches ${swatches.join(', ')} (${roles.length} of the six roles); the sheet renders ${rendered ?? 'no data-theme'} (deck.info and the chrome read ${fallback}); brand.set ${path} ${refusal ? `refused: ${refusal}` : 'ok'}; frame ${block0?.asset ?? 'none'} (key ${key0 ? key0.slice(0, 12) : 'none'}) -> ${recaptured.asset ?? 'none'} (key ${recaptured.key ? recaptured.key.slice(0, 12) : 'none'}, backend ${recaptured.backend ?? 'none'}) ${ms} ms after the write; the new picture ${drawn ? `decoded ${pictureMs} ms later` : `not decoded ${pictureMs} ms later`}; the block's mean colour moved ${dist.toFixed(1)}`,
+        observed: `${primaryClick}; swatches ${swatches.join(', ')} (${roles.length} of the six roles); the sheet renders ${rendered ?? 'no data-theme'} (deck.info and the chrome read ${fallback}); brand.set ${path} ${refusal ? `refused: ${refusal}` : 'ok'}; frame ${block0?.asset ?? 'none'} (key ${key0 ? key0.slice(0, 12) : 'none'}) -> ${recaptured.asset ?? 'none'} (key ${recaptured.key ? recaptured.key.slice(0, 12) : 'none'}, backend ${recaptured.backend ?? 'none'}) ${ms} ms after the write; the new picture ${drawn ? `decoded ${pictureMs} ms later` : `not decoded ${pictureMs} ms later`}; the block's mean colour moved ${dist.toFixed(1)}`,
       };
     },
   );

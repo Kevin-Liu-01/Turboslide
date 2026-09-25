@@ -206,11 +206,15 @@ test(title('shaders.frame.auto-capture'), async () => {
   const file = got.asset ? await frameFile(page, id) : null;
   const size = file ? pngSize(file.bytes) : null;
   const key = String(asset?.source?.frameKey ?? '');
-  /* the filmstrip card shows the frame: the card's picture sampled where the block sits on the
-     slide against the frame's own centre, both over the same relative area of the block (the
+  /* the filmstrip card shows the frame: the card's 16:9 frame (`.ts-card-frame`, the clone of the
+     slide's HTML, Filmstrip.tsx) shot as a clip and sampled where the block sits on the slide,
+     against the frame file's own centre, both over the same relative area of the block (the
      card's patch is the frame's patch scaled to the block's share of the slide), read again every
-     500 ms for up to 10 s since the card's thumbnail is re rendered after the commit and the
-     hosted instance serves it after the frame; the time and the reads are recorded */
+     500 ms for up to 10 s since the card is re rendered after the commit and the hosted instance
+     serves the frame picture after the frame lands; the time and the reads are recorded. The clip
+     is read, not the card's `<img>` source: the clone's first picture is the block's own frame
+     served through the assets route, and its redirect to the store's host cannot be decoded by an
+     anonymous Image in the page (the runs of the verifier's pass 2 read no sample on it) */
   const pos = (b?.pos ?? null) as { x: number; y: number; w: number; h: number } | null;
   let cardSrc: string | null = null;
   let cardDistance: number | null = null;
@@ -220,15 +224,21 @@ test(title('shaders.frame.auto-capture'), async () => {
     const frameCentre = await samplePicture(page, file.bytes, [[0.5, 0.5]], PATCH);
     const t1 = Date.now();
     for (;;) {
-      cardSrc = await page.evaluate((sid) => {
-        const card = document.querySelector(`[data-control="filmstrip.slide.${sid}"] img`);
-        return card ? (card as HTMLImageElement).currentSrc || card.getAttribute('src') : null;
+      const cardRect = await page.evaluate((sid) => {
+        const frame = document.querySelector(
+          `[data-control="filmstrip.slide.${sid}"] .ts-card-frame`,
+        );
+        const r = frame?.getBoundingClientRect();
+        return r && r.width > 0 && r.height > 0
+          ? { x: r.x, y: r.y, width: r.width, height: r.height }
+          : null;
       }, slideId);
-      if (cardSrc) {
+      if (cardRect) {
+        cardSrc = 'the card frame clip';
         cardReads += 1;
-        const card = await samplePicture(
+        const card = await sampleClip(
           page,
-          cardSrc,
+          cardRect,
           [[(pos.x + pos.w / 2) / 1600, (pos.y + pos.h / 2) / 900]],
           (PATCH * pos.w) / 1600,
         );
@@ -241,7 +251,7 @@ test(title('shaders.frame.auto-capture'), async () => {
   }
   test.info().annotations.push({
     type: 'capture',
-    description: `${shader!.how}; setup frame ${first.asset ?? 'none'} after ${first.ms} ms; ${how}; frame ${got.asset ?? 'none'} ${ms} ms after the change; source ${JSON.stringify(asset?.source ?? null).slice(0, 300)}; file ${size ? `${size.width} by ${size.height} through the ${file?.via === 'redirect' ? "assets route's redirect" : 'assets route'}` : 'unread'}; card sample distance ${cardDistance ?? 'unread'} (${cardSrc ? `${cardReads} read(s) over ${cardMs} ms, a ${Math.round(PATCH * 200)} percent patch mean of the block` : 'no card picture'})`,
+    description: `${shader!.how}; setup frame ${first.asset ?? 'none'} after ${first.ms} ms; ${how}; frame ${got.asset ?? 'none'} ${ms} ms after the change; source ${JSON.stringify(asset?.source ?? null).slice(0, 300)}; file ${size ? `${size.width} by ${size.height} through the ${file?.via === 'redirect' ? "assets route's redirect" : 'assets route'}` : 'unread'}; card sample distance ${cardDistance ?? 'unread'} (${cardSrc ? `${cardReads} clip read(s) of the card frame over ${cardMs} ms, a ${Math.round(PATCH * 200)} percent patch mean of the block` : 'no card frame'})`,
   });
   expect(got.asset, 'the block has a frame asset after the recipe change').not.toBeNull();
   expect(ms, 'the frame arrives within 10 s of the change (800 ms plus the capture)').toBeLessThan(
@@ -306,7 +316,12 @@ test(title('shaders.frame.box-aspect'), async () => {
       const img = document.querySelector('.pt-slide [data-recipe] img, .pt-slide .material img');
       return img ? (img as HTMLImageElement).currentSrc || img.getAttribute('src') : null;
     });
-    still = src ? await samplePicture(viewer, src, POINTS, ASPECT_PATCH) : null;
+    /* the still's bytes come through the assets route (and its redirect to the store's host on a
+       hosted instance, followed once with no header), then are sampled as a data URI: an
+       anonymous Image on the redirected address cannot be decoded in the page (the verifier's
+       pass 2 read the still null in one run of two) */
+    const stillFile = src ? await fetchPageFile(viewer, src) : null;
+    still = stillFile ? await samplePicture(viewer, stillFile.bytes, POINTS, ASPECT_PATCH) : null;
   } finally {
     await viewer.close();
   }

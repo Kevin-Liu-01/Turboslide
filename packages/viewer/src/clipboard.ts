@@ -7,8 +7,12 @@
 // `block.insert` mutations onto the current slide, at the source box on a freeform slide and 16 px
 // right and down when the source is the same slide. Paint format (SPEC 3.1 row 6) is the second
 // clipboard here: the look of a block (typography, colour, fill, stroke, stroke width) copied once
-// and applied as one `block.set` per field the target takes. Everything is pure except the store,
-// which wraps `navigator.clipboard`; clipboard.test.ts pins the envelope and the planning.
+// and applied as one `block.set` per field the target takes. The vector round (docs/VECTOR.md
+// 4.3, 4.5) adds the svg forms: a copy of one svg picture writes its markup as `text/plain` and
+// the envelope inside a `text/html` comment (`encodeClipboardHtml`, `decodeClipboardHtml`), and a
+// paste reads svg markup off `text/plain` or `text/html` (`svgMarkupOf`) into a file for the
+// picture path. Everything is pure except the store, which wraps `navigator.clipboard`;
+// clipboard.test.ts pins the envelope and the planning.
 import type { Block, BlockType } from '@turboslide/schema/blocks';
 import { BLOCK_SCHEMAS } from '@turboslide/schema/blocks';
 import type { DeckDocument, Slide, SlotName } from '@turboslide/schema/deck';
@@ -54,6 +58,76 @@ export function decodeClipboard(text: string): ClipboardPayload | null {
   return { kind: 'text', text };
 }
 
+/**
+ * The envelope as a `text/html` comment before other markup (docs/VECTOR.md 4.5): what a copy of
+ * an svg picture writes beside the markup as `text/plain`, so the product's own paste across
+ * tabs still finds the payload while Figma, a text editor and a browser read the markup.
+ */
+export function encodeClipboardHtml(payload: ClipboardPayload, markup = ''): string {
+  /* a `--` inside the JSON would end the comment early; the escape keeps the comment whole */
+  const json = JSON.stringify(payload).replace(/--/g, '-\\u002d');
+  return `<!--${CLIPBOARD_PREFIX}${json}-->${markup}`;
+}
+
+/** The payload of a `text/html` clipboard text whose first node is the envelope comment; null otherwise. */
+export function decodeClipboardHtml(html: string): ClipboardPayload | null {
+  const match = /^\s*(?:<meta[^>]*>\s*)*<!--turboslide:v1:([\s\S]*?)-->/.exec(html);
+  if (match === null) return null;
+  try {
+    const parsed: unknown = JSON.parse(match[1] ?? '');
+    if (isPayload(parsed)) return parsed;
+  } catch {
+    // not ours after all
+  }
+  return null;
+}
+
+/**
+ * The product's own payload on a paste (4.3 item 4): the `text/plain` envelope first, then the
+ * `text/html` comment form of an svg copy; null when neither carries one.
+ */
+export function envelopeOf(data: DataTransfer | null | undefined): ClipboardPayload | null {
+  if (!data) return null;
+  const text = data.getData('text/plain');
+  if (text.startsWith(CLIPBOARD_PREFIX)) {
+    const decoded = decodeClipboard(text);
+    if (decoded !== null && decoded.kind !== 'text') return decoded;
+  }
+  return decodeClipboardHtml(data.getData('text/html'));
+}
+
+/**
+ * The sniff of an svg document in text (the intake's own rule, packages/headless shared.ts
+ * `sniffImage`: a BOM, white space, an XML prolog, comments and a doctype allowed before `<svg`),
+ * and the document must end with `</svg>`.
+ */
+const SVG_DOCUMENT =
+  /^\uFEFF?\s*(?:<\?xml[^>]*>\s*)?(?:<!--[\s\S]*?-->\s*)*(?:<!DOCTYPE[^>]*>\s*)?(?:<!--[\s\S]*?-->\s*)*<svg[\s>][\s\S]*<\/svg>\s*$/i;
+
+/** The svg markup a text holds whole (Figma's Copy as SVG with its prolog, a text editor's without), or null. */
+export function svgMarkupOfText(text: string): string | null {
+  if (text.length < 11 || !text.includes('<svg')) return null;
+  return SVG_DOCUMENT.test(text) ? text.replace(/^\uFEFF/, '').trim() : null;
+}
+
+/**
+ * The svg markup of a paste (docs/VECTOR.md 4.3 item 4): the `text/plain` text when it is an svg
+ * document, else the `text/html` text with the `<meta …>` prefix Chrome adds stripped; null for
+ * anything else (a text that merely mentions `<svg>` included).
+ */
+export function svgMarkupOf(data: DataTransfer | null | undefined): string | null {
+  if (!data) return null;
+  const plain = svgMarkupOfText(data.getData('text/plain'));
+  if (plain !== null) return plain;
+  const html = data.getData('text/html').replace(/^\s*(?:<meta[^>]*>\s*)+/i, '');
+  return svgMarkupOfText(html);
+}
+
+/** The markup as the file the picture path takes (`insertPicture`). */
+export function svgFileOf(markup: string, name = 'pasted.svg'): File {
+  return new File([markup], name, { type: 'image/svg+xml' });
+}
+
 function isPayload(value: unknown): value is ClipboardPayload {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
@@ -84,6 +158,12 @@ export type SystemClipboard = {
 export type ClipboardStore = {
   /** the in-page payload and the system text; a refused system write keeps the in-page copy */
   write: (payload: ClipboardPayload) => Promise<void>;
+  /**
+   * the in-page payload alone, with the text the copy event itself put on the system clipboard
+   * (an svg picture's markup, docs/VECTOR.md 4.5): no system write, so the event's text stands,
+   * and `read` answers the payload while the system text is still that markup
+   */
+  note: (payload: ClipboardPayload, systemText: string) => void;
   /** the system text when it is ours or plain text, else the in-page payload */
   read: () => Promise<ClipboardPayload | null>;
   /** the last payload this page wrote, without asking the system (the menu predicates read it) */
@@ -106,6 +186,8 @@ export function createClipboardStore(
   system: SystemClipboard | null = systemClipboard(),
 ): ClipboardStore {
   let last: ClipboardPayload | null = null;
+  /* the text a copy event wrote for `last` in place of the envelope (an svg picture's markup) */
+  let noted: string | null = null;
   const listeners = new Set<() => void>();
   const notify = () => {
     for (const listener of listeners) listener();
@@ -113,6 +195,7 @@ export function createClipboardStore(
   return {
     async write(payload) {
       last = payload;
+      noted = null;
       notify();
       try {
         await system?.writeText(encodeClipboard(payload));
@@ -120,11 +203,18 @@ export function createClipboardStore(
         // the system clipboard refused; the in-page payload still pastes in this tab
       }
     },
+    note(payload, systemText) {
+      last = payload;
+      noted = systemText;
+      notify();
+    },
     async read() {
       try {
         const text = (await system?.readText()) ?? '';
         /* the system clipboard wins whenever it can be read: our envelope from this or another
-           tab, or plain text copied anywhere */
+           tab, or plain text copied anywhere; the markup a copy of an svg picture wrote reads as
+           the payload it stood for while it is still there */
+        if (noted !== null && text === noted && last !== null) return last;
         const decoded = decodeClipboard(text);
         if (decoded !== null) return decoded;
       } catch {

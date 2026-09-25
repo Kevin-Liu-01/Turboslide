@@ -104,14 +104,15 @@ export const HOSTED_ALLOW_HOSTS: ReadonlyArray<string> = DEFAULT_ALLOW_HOSTS.fil
 export type IntakePolicy = {
   /** File paths as inputs; false refuses them with a TypeError. */
   allowPaths: boolean;
-  /** The hosted allowlist (no loopback) and the hosted format rule (no svg). */
+  /** The hosted allowlist (no loopback) and the hosted format rule (svg only through the sanitizer). */
   hosted: boolean;
   /**
-   * The hosted svg branch of the features round (docs/FEATURES.md 4.7; audit-logos 4): absent or
-   * false, a hosted intake refuses svg as before; set, an svg is passed through `sanitize` and
-   * rasterized by sharp into a PNG twin at 3x of a 264 by 168 box with the sanitized source kept
-   * (intake.ts). The studio sets it from `TURBOSLIDE_SVG_RASTER` with its logo sanitizer
-   * (apps/studio/src/server/actions.ts); a checkout's CLI keeps svg as it came either way.
+   * The hosted svg branch (docs/FEATURES.md 4.7; docs/VECTOR.md 4.2): the seam the host injects
+   * its sanitizer through. Set, a hosted intake passes an svg through `sanitize`, keeps the
+   * sanitized file as the asset's vector and rasterizes it by sharp into a PNG twin at 3x of an
+   * 800 by 450 box (intake.ts); absent or false, a hosted intake refuses svg, which no deployment
+   * does since the vector round (the studio always sets it, apps/studio/src/server/actions.ts).
+   * A checkout's CLI keeps svg as it came either way.
    */
   svgRaster?: SvgRasterPolicy | false;
 };
@@ -119,7 +120,7 @@ export type IntakePolicy = {
 /**
  * What the svg branch needs from its host: the sanitizer, an allowlist parser over the file that
  * answers the sanitized text and the names of the elements it dropped, and throws on a broken or
- * oversized file with a sentence a seller can read.
+ * oversized file with a sentence a seller can read (the upload's cap and words are the host's).
  */
 export type SvgRasterPolicy = {
   sanitize: (bytes: Uint8Array) => { svg: string; removed: string[] };
@@ -582,10 +583,17 @@ export async function readInput(input: string, options: ReadInputOptions = {}): 
   return { bytes, name: basename(path), origin: basename(path), kind: 'path' };
 }
 
-/** The formats an intake decodes: the four raster formats everywhere, svg on a checkout only (SPEC-3 0.28, 8.5). */
+/** The formats an intake decodes: the four raster formats everywhere, svg on a checkout as it came and hosted through the sanitizer (SPEC-3 0.28, 8.5; docs/VECTOR.md 4.2). */
 export type SniffedFormat = 'png' | 'jpeg' | 'webp' | 'gif' | 'svg';
 
-export const HOSTED_INPUT_FORMATS: ReadonlyArray<SniffedFormat> = ['png', 'jpeg', 'webp', 'gif'];
+/** What a hosted intake accepts: the four raster formats, and svg when the policy carries a sanitizer (`imageInfo`). */
+export const HOSTED_INPUT_FORMATS: ReadonlyArray<SniffedFormat> = [
+  'png',
+  'jpeg',
+  'webp',
+  'gif',
+  'svg',
+];
 
 /**
  * The format by magic bytes, before sharp sees the buffer (SPEC-3 8.5: "a magic byte sniff (png,
@@ -650,8 +658,11 @@ export type ImageInfo = { width: number; height: number; format: string; ext: st
 /**
  * Width, height and format of an image buffer through sharp, after the magic byte sniff: a buffer
  * that is none of png, jpeg, webp, gif or svg is refused before libvips opens it, svg is refused
- * on a hosted instance (SPEC-3 0.28), and sharp runs with the 64 megapixel budget and
- * `failOn: 'error'` (SPEC-3 8.5).
+ * on a hosted instance whose policy carries no sanitizer (SPEC-3 0.28; docs/VECTOR.md 4.2: every
+ * deployment carries one, and intake.ts hands this function the sanitized text, so sharp never
+ * reads an svg as it came hosted), and sharp runs with the 64 megapixel budget and
+ * `failOn: 'error'` (SPEC-3 8.5). For an svg the width and height are the file's intrinsic size
+ * (its `width` and `height`, else the `viewBox`) as librsvg reports it.
  */
 export async function imageInfo(
   bytes: Uint8Array,
@@ -661,10 +672,10 @@ export async function imageInfo(
   const sniffed = sniffImage(bytes);
   if (sniffed === null) throw new TypeError('not an image: expected png, jpeg, webp, gif or svg');
   const hosted = options.hosted ?? intakePolicy().hosted;
-  // the svg branch of the features round (docs/FEATURES.md 4.7): a hosted intake keeps an svg
-  // when the raster policy is set (intake.ts rasterizes it); the refusal's line is unchanged
-  const svgKept = sniffed === 'svg' && svgRasterPolicy(options.svgRaster) !== null;
-  if (hosted && !HOSTED_INPUT_FORMATS.includes(sniffed) && !svgKept)
+  // a hosted process without a sanitizer (none is deployed): the line it always had
+  if (hosted && sniffed === 'svg' && svgRasterPolicy(options.svgRaster) === null)
+    throw new TypeError('svg is not accepted here; send png, jpeg, webp or gif');
+  if (hosted && !HOSTED_INPUT_FORMATS.includes(sniffed))
     throw new TypeError(`${sniffed} is not accepted here; send png, jpeg, webp or gif`);
   const meta = await sharp(Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength), {
     limitInputPixels: LIMIT_INPUT_PIXELS,

@@ -87,7 +87,7 @@ import {
   runCommentAction,
 } from './comments';
 import type { NotificationCaller } from './comments';
-import { FLAG_DEFAULTS, assertFlag, flagOn, setFlag, svgRasterOn } from './flags';
+import { FLAG_DEFAULTS, assertFlag, flagOn, setFlag } from './flags';
 import type { FlagName } from './flags';
 import { lintLists } from './lint';
 import { sanitizeLogoSvg } from './logo-sanitize';
@@ -113,7 +113,7 @@ import {
   workerClientOptions,
 } from './root';
 import { studioSessions } from './sessions';
-import { deleteUpload, readUpload } from './upload';
+import { SVG_UPLOAD_MAX_BYTES, SVG_UPLOAD_WORDS, deleteUpload, readUpload } from './upload';
 
 /**
  * The dispatcher behind the hosted agent surface (SPEC 7.1 "one action table"; MILESTONES M4
@@ -381,25 +381,26 @@ function registerWorkerActions(dispatcher: Dispatcher, deckId: string, store: Fi
  * `turboslide mcp` over stdio run in their own process with the checkout policy. A fetch the
  * pinned lookup refuses (a name resolving to a private address) is one `ssrf.refused` line.
  *
- * The features round (docs/FEATURES.md 4.7; audit-logos 4): under `TURBOSLIDE_SVG_RASTER` the
- * hosted intake keeps an svg, sanitizes it with the logo route's own parser (logo-sanitize.ts, an
- * allowlist over elements and attributes) and rasterizes it into a PNG twin at 3x of a 264 by 168
- * box (packages/headless intake.ts); off, the svg refusal stands and the chrome reads
- * `UPLOAD_REASONS.notSvg`. The variable is read at each registration, so a preview that sets it
- * and production that does not run one code.
+ * The svg branch (docs/FEATURES.md 4.7; docs/VECTOR.md 4.2): the hosted intake always carries
+ * the logo route's own parser (logo-sanitize.ts, an allowlist over elements and attributes) under
+ * the upload's 2 MB cap with the upload's two sentences (upload.ts `SVG_UPLOAD_MAX_BYTES`,
+ * `SVG_UPLOAD_WORDS`); the intake sanitizes an svg before sharp reads it, keeps the sanitized
+ * file as the asset's vector and rasterizes a PNG twin (packages/headless intake.ts). The
+ * features round's `TURBOSLIDE_SVG_RASTER` is unread since the vector round (docs/VECTOR.md 4.7).
  */
 function setStudioIntakePolicy(): void {
   setIntakePolicy({
     allowPaths: false,
     hosted: isHosted(),
-    svgRaster: svgRasterOn()
-      ? {
-          sanitize: (bytes) => {
-            const sanitized = sanitizeLogoSvg(bytes);
-            return { svg: sanitized.svg, removed: sanitized.removed };
-          },
-        }
-      : false,
+    svgRaster: {
+      sanitize: (bytes) => {
+        const sanitized = sanitizeLogoSvg(bytes, {
+          maxBytes: SVG_UPLOAD_MAX_BYTES,
+          words: SVG_UPLOAD_WORDS,
+        });
+        return { svg: sanitized.svg, removed: sanitized.removed };
+      },
+    },
   });
   setSsrfReporter((event) =>
     logSecurityEvent({

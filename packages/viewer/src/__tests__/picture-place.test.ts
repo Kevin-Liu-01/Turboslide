@@ -13,6 +13,8 @@ import {
   pictureInsertBox,
   pictureNameOf,
   sniffPictureKind,
+  SVG_BROKEN_SENTENCE,
+  SVG_TOO_LARGE_SENTENCE,
   uploadFailureOf,
   uploadFailureSentence,
   urlFailureSentence,
@@ -235,6 +237,26 @@ describe('the failure sentence', () => {
     expect(uploadFailureOf(new Error('window API asset.add did not answer within 20 s'))).toBe(
       'did-not-finish',
     );
+  });
+
+  it('reads the sanitizer’s two svg sentences whole and never as a raster reason (docs/VECTOR.md 4.2)', () => {
+    expect(SVG_TOO_LARGE_SENTENCE).toBe('The SVG file is over 2 MB');
+    expect(SVG_BROKEN_SENTENCE).toBe('This SVG file could not be read');
+    /* the server's line carries the sentence with the action's prefix; "over 2 MB" must not read as the 25 MB refusal */
+    expect(uploadFailureOf(new Error('asset.add: The SVG file is over 2 MB'))).toBe(
+      'svg-too-large',
+    );
+    expect(uploadFailureOf(new Error('This SVG file could not be read'))).toBe('svg-broken');
+    expect(uploadFailureSentence('svg-too-large', 25)).toBe(
+      'The picture could not be uploaded: The SVG file is over 2 MB',
+    );
+    expect(uploadFailureSentence('svg-broken', 25)).toBe(
+      'The picture could not be uploaded: This SVG file could not be read',
+    );
+    /* the features round's sentence and reason are gone with the flag (docs/VECTOR.md 4.7) */
+    expect(
+      uploadFailureOf(new Error('svg is not accepted here; send png, jpeg, webp or gif')),
+    ).not.toMatch(/^svg-/);
   });
 });
 

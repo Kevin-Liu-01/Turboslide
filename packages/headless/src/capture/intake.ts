@@ -7,9 +7,13 @@
 // Dither section and `asset dither` can re-tone it, and the plate metrics recorded. The license
 // fields (title, artist, license, share-alike, source URL) become the photo provenance record,
 // and the credit line the plate needs is composed the way the deck writes it ("Photograph: Hans
-// Hillewaert, CC BY-SA 4.0"). The store write is the caller's. The features round adds the hosted
-// svg branch (docs/FEATURES.md 4.7): under the svg raster policy an svg is sanitized by the host's
-// parser and rasterized by sharp into one PNG twin at 3x of a 264 by 168 box, its source kept.
+// Hillewaert, CC BY-SA 4.0"). The store write is the caller's. The hosted svg branch
+// (docs/FEATURES.md 4.7; docs/VECTOR.md 4.1, 4.2): under the svg raster policy, which every
+// deployment carries, an svg is sanitized by the host's parser before sharp reads a byte of it,
+// the sanitized file is kept as the asset's vector (what the sheet, the PDF and the web page
+// draw), and sharp rasterizes it into one PNG twin at 3x of the svg fitted inside an 800 by 450
+// box for the surfaces that cannot take a vector; the record is `kind: 'svg'`, `size` the svg's
+// intrinsic size in sheet px, `scale` 3.
 import { createHash } from 'node:crypto';
 
 import sharp from 'sharp';
@@ -26,9 +30,11 @@ import {
   fullTreatment,
   imageInfo,
   inlineRuleFor,
+  intakePolicy,
   plateBoxFor,
   readInput,
   slugify,
+  sniffImage,
   svgRasterPolicy,
   treatmentParams,
   twinPaths,
@@ -89,7 +95,7 @@ export type AssetIntakeOptions = {
   reencode?: boolean;
   /** Names the twins by their content digest (`assets/<id>.<sha8>.<ext>`), so nothing is ever overwritten hosted. */
   digestNames?: boolean;
-  /** The hosted svg branch (docs/FEATURES.md 4.7); the process policy when absent (shared.ts `svgRasterPolicy`). */
+  /** The hosted svg branch (docs/FEATURES.md 4.7; docs/VECTOR.md 4.2); the process policy when absent (shared.ts `svgRasterPolicy`). */
   svgRaster?: SvgRasterPolicy | false;
 };
 
@@ -177,13 +183,18 @@ export function assetDigest(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex').slice(0, 8);
 }
 
-/** The box an uploaded svg is rasterized for (docs/FEATURES.md 4.7), in sheet px, and the twin's scale. */
-export const SVG_RASTER_BOX = { w: 264, h: 168 } as const;
+/**
+ * The box an svg's PNG twin is rasterized for (docs/VECTOR.md 4.2), in sheet px, and the twin's
+ * scale: half the sheet, so a picture up to half the sheet has a 3x twin and a full sheet one a
+ * 1.5x twin (the features round's 264 by 168 fitted a logo alone).
+ */
+export const SVG_RASTER_BOX = { w: 800, h: 450 } as const;
 export const SVG_RASTER_SCALE = 3 as const;
 
 /**
- * The pixel size of an svg's PNG twin: the mark fitted inside the 264 by 168 box at its own ratio,
- * at 3x (so a wide wordmark is 792 wide and a square symbol 504 tall), never under one pixel.
+ * The pixel size of an svg's PNG twin: the picture fitted inside the 800 by 450 box at its own
+ * ratio, at 3x (so a 200 by 50 wordmark is 2400 by 600 and a square mark 1350 by 1350), never
+ * under one pixel.
  */
 export function svgRasterSize(size: [number, number]): { width: number; height: number } {
   const [w, h] = size;
@@ -232,7 +243,8 @@ export async function rasterizeSvg(
 /**
  * A continuous asset re-encoded in its own format at the twin size (SPEC-3 8.5, 0.29): sharp
  * decodes with the pixel budget and writes fresh bytes, so no byte of the input survives into the
- * store; an animated GIF is flattened to its first frame; svg never reaches here (refused hosted).
+ * store; an animated GIF is flattened to its first frame; svg never reaches here (the hosted svg
+ * branch above takes it, and a checkout keeps it as it came).
  */
 export async function reencodeContinuous(
   bytes: Uint8Array,
@@ -302,7 +314,16 @@ export async function addAsset(
       maxBytes,
     });
   }
-  const info = await imageInfo(read.bytes, {
+  // the hosted svg branch (docs/VECTOR.md 4.2) sanitizes first, so sharp reads the sanitized
+  // text and never a byte of the file as it came, and a broken or oversized file answers the
+  // sanitizer's sentence before anything decodes it; a checkout keeps the bytes as they came
+  const hosted = options.hosted ?? intakePolicy().hosted;
+  const svgPolicy =
+    hosted && sniffImage(read.bytes) === 'svg' ? svgRasterPolicy(options.svgRaster) : null;
+  const sanitized = svgPolicy === null ? null : svgPolicy.sanitize(read.bytes);
+  const decoded =
+    sanitized === null ? read.bytes : new Uint8Array(Buffer.from(sanitized.svg, 'utf8'));
+  const info = await imageInfo(decoded, {
     ...(options.hosted !== undefined ? { hosted: options.hosted } : {}),
     ...(options.svgRaster !== undefined ? { svgRaster: options.svgRaster } : {}),
   });
@@ -373,22 +394,23 @@ export async function addAsset(
     return { asset, files, metrics: result.metrics, warnings };
   }
 
-  // the hosted svg branch of the features round (docs/FEATURES.md 4.7; audit-logos 4): the file
-  // sanitized by the host's parser, rasterized by sharp into one PNG twin at 3x of a 264 by 168
-  // box (SVG_RASTER_BOX), the sanitized source kept as `sourceFile`; the record reads like a logo
-  // insert's (scale 3, one neutral twin). A checkout with the policy off keeps the svg as it came,
-  // below, as it always did.
-  const svgPolicy = info.format === 'svg' ? svgRasterPolicy(options.svgRaster) : null;
-  if (svgPolicy !== null && (options.hosted ?? false)) {
-    const sanitized = svgPolicy.sanitize(read.bytes);
-    const svgBytes = new Uint8Array(Buffer.from(sanitized.svg, 'utf8'));
-    const raster = await rasterizeSvg(sanitized.svg, [info.width, info.height]);
-    const sourceFile = await place(
+  // the hosted svg branch (docs/VECTOR.md 4.1, 4.2; docs/FEATURES.md 4.7): the sanitized file is
+  // the asset's vector (`assets/<id>.<digest>.svg`), the PNG twin is sharp's raster at 3x of the
+  // svg fitted inside SVG_RASTER_BOX, `size` is the svg's intrinsic size in sheet px and the
+  // record is `kind: 'svg'` at scale 3; the elements the sanitizer dropped are recorded on a file
+  // source as `sanitized.removed`. A checkout keeps the svg as it came, below, as it always did.
+  if (sanitized !== null) {
+    const intrinsic: [number, number] = [
+      Math.max(1, Math.round(info.width)),
+      Math.max(1, Math.round(info.height)),
+    ];
+    const raster = await rasterizeSvg(sanitized.svg, intrinsic);
+    const vectorFile = await place(
       options,
-      digest ? `assets/${id}.source.${assetDigest(svgBytes)}.svg` : `assets/${id}.source.svg`,
-      svgBytes,
+      digest ? `assets/${id}.${assetDigest(decoded)}.svg` : `assets/${id}.svg`,
+      decoded,
     );
-    files.push(sourceFile);
+    files.push(vectorFile);
     const twin = await place(
       options,
       digest ? `assets/${id}.${assetDigest(raster.bytes)}.png` : `assets/${id}.png`,
@@ -401,11 +423,15 @@ export async function addAsset(
       id,
       role: request.role,
       alt: request.alt,
+      kind: 'svg',
+      vector: { neutral: vectorFile },
       twins: { neutral: twin },
-      size: [raster.width, raster.height],
+      size: intrinsic,
       scale: SVG_RASTER_SCALE,
-      source,
-      sourceFile,
+      source:
+        source.kind === 'file' && sanitized.removed.length > 0
+          ? { kind: 'file', sanitized: { removed: sanitized.removed } }
+          : source,
       ...(credit !== undefined ? { credit } : {}),
       inline: inlineRuleFor(request.role, false),
     };

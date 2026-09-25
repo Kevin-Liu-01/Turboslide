@@ -6,9 +6,10 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { setSecurityLogSink } from './log';
 import {
+  SVG_UPLOAD_MAX_BYTES,
+  SVG_UPLOAD_WORDS,
   UPLOAD_CONTENT_TYPES,
   UPLOAD_REASONS,
-  isSvgRefusal,
   receiveUpload,
   uploadFailureReason,
   verifyUploadToken,
@@ -61,22 +62,29 @@ describe('the seller’s reason of a refused upload', () => {
     for (const sentence of [UPLOAD_REASONS.notPicture, UPLOAD_REASONS.unfinished]) {
       expect(sentence).not.toMatch(/[—]|asset\.add|upload_refused|[A-Z]/);
     }
-    expect(UPLOAD_CONTENT_TYPES).toEqual(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
+    expect(UPLOAD_CONTENT_TYPES).toEqual([
+      'image/png',
+      'image/jpeg',
+      'image/webp',
+      'image/gif',
+      'image/svg+xml',
+    ]);
   });
 
-  it('names the svg sentence of the features round as a whole sentence, and reads the intake’s line', () => {
-    // docs/FEATURES.md 4.7; audit-logos 4: the seller's sentence while the raster path is off
-    expect(UPLOAD_REASONS.notSvg).toBe(
-      'SVG files are not accepted yet. Export the logo as a PNG and upload that',
-    );
-    expect(UPLOAD_REASONS.notSvg).not.toMatch(/[—]|asset\.add|svg is not accepted here|\.$/);
-    expect(uploadFailureReason({ code: 'not_svg', status: 400 })).toBe(UPLOAD_REASONS.notSvg);
-    expect(isSvgRefusal('svg is not accepted here; send png, jpeg, webp or gif')).toBe(true);
-    expect(
-      isSvgRefusal('The picture could not be uploaded: svg is not accepted here; send png'),
-    ).toBe(true);
-    expect(isSvgRefusal('not an image: expected png, jpeg, webp, gif or svg')).toBe(false);
-    expect(isSvgRefusal('the upload did not finish')).toBe(false);
+  it('names the two svg sentences of the vector round and the cap the sanitizer runs under; notSvg is gone', () => {
+    // docs/VECTOR.md 4.2, 4.7: the sanitizer's words for an upload, whole sentences with a capital
+    expect(SVG_UPLOAD_MAX_BYTES).toBe(2 * 1024 * 1024);
+    expect(UPLOAD_REASONS.svgTooLarge(SVG_UPLOAD_MAX_BYTES)).toBe('The SVG file is over 2 MB');
+    expect(UPLOAD_REASONS.svgBroken).toBe('This SVG file could not be read');
+    expect(SVG_UPLOAD_WORDS.tooLarge(SVG_UPLOAD_MAX_BYTES)).toBe('The SVG file is over 2 MB');
+    expect(SVG_UPLOAD_WORDS.broken).toBe('This SVG file could not be read');
+    for (const sentence of [
+      UPLOAD_REASONS.svgTooLarge(SVG_UPLOAD_MAX_BYTES),
+      UPLOAD_REASONS.svgBroken,
+    ])
+      expect(sentence).not.toMatch(/[—]|asset\.add|svg is not accepted here|\.$/);
+    expect((UPLOAD_REASONS as Record<string, unknown>)['notSvg']).toBeUndefined();
+    expect(uploadFailureReason({ code: 'not_svg', status: 400 })).toBe('the upload did not finish');
   });
 
   it('answers the unfinished sentence for a token the PUT cannot verify', async () => {

@@ -239,7 +239,8 @@ describe('the sniff and the sharp guard (SPEC-3 8.5, 0.28; report 04 F17)', () =
     expect(sniffImage(new Uint8Array(heif))).toBeNull();
     expect(sniffImage(new Uint8Array(Buffer.from('%PDF-1.4')))).toBeNull();
     expect(sniffImage(new Uint8Array(0))).toBeNull();
-    expect(HOSTED_INPUT_FORMATS).toEqual(['png', 'jpeg', 'webp', 'gif']);
+    /* svg joined the hosted list with the vector round; imageInfo still refuses it without a sanitizer (docs/VECTOR.md 4.2) */
+    expect(HOSTED_INPUT_FORMATS).toEqual(['png', 'jpeg', 'webp', 'gif', 'svg']);
   });
 
   test('imageInfo refuses what the sniff refuses, refuses svg hosted and keeps it on a checkout', async () => {

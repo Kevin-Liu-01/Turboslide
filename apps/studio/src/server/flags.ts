@@ -74,20 +74,8 @@ export function logoUpstreamMode(
   return 'network';
 }
 
-/**
- * `TURBOSLIDE_SVG_RASTER` (4.7; audit-logos 4): `1` turns the hosted intake's svg branch on, so
- * an uploaded SVG is sanitized and rasterized by sharp into PNG twins at 3x of a 264 by 168 box
- * with the source kept; off, the intake refuses an SVG as before and the chrome reads
- * `UPLOAD_REASONS.notSvg` (upload.ts). The flag drops once `logos.intake.svg-sentence` has passed
- * on production (docs/FEATURES.md section 8). A checkout's CLI accepts svg either way (SPEC-3 0.28).
- */
-export const SVG_RASTER_ENV = 'TURBOSLIDE_SVG_RASTER';
-export function svgRasterOn(
-  env: Readonly<Record<string, string | undefined>> = process.env,
-): boolean {
-  const value = env[SVG_RASTER_ENV]?.trim().toLowerCase();
-  return value === '1' || value === 'true' || value === 'on';
-}
+/* `TURBOSLIDE_SVG_RASTER` of the features round left with the vector round (docs/VECTOR.md 4.7):
+   the hosted intake's svg branch runs by default and the variable is unread. */
 
 /** The checkout's flag file under the state folder. */
 export const FLAGS_FILE = 'flags.json';

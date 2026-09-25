@@ -51,6 +51,7 @@ import {
   LogoTooLargeError,
   attributionOf,
   descOf,
+  isDataImageHref,
   sanitizeLogoSvg,
   tintLogoSvg,
   urlsAreLocal,
@@ -249,6 +250,89 @@ describe('the sanitizer (4.7)', () => {
       expect((error as Error).message).toBe(LOGO_WORDS.broken);
       expect((error as Error).message).toBe('This logo’s file is broken on thesvg.org');
     }
+  });
+
+  it('keeps an image whose href is a raster data URI and drops every other image (docs/VECTOR.md 4.2)', () => {
+    /* a 1 by 1 PNG, the way Figma's Copy as SVG embeds a raster fill */
+    const png =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+    const kept = sanitizeLogoSvg(
+      `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 8 8"><image href="${png}" width="8" height="8"/><rect width="2" height="2" fill="#000"/></svg>`,
+    );
+    expect(kept.svg).toContain('<image href="data:image/png;base64,iVBORw0KGgo');
+    expect(kept.svg).toContain('width="8" height="8"');
+    expect(kept.removed).toEqual([]);
+    expect(kept.draws).toBe(false);
+    /* the xlink form too, and a jpeg, gif or webp URI */
+    const xlink = sanitizeLogoSvg(
+      `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 8 8"><image xlink:href="data:image/jpeg;base64,/9j/4AAQ" width="8" height="8"/></svg>`,
+    );
+    expect(xlink.svg).toContain('xlink:href="data:image/jpeg;base64,/9j/4AAQ"');
+    expect(xlink.removed).toEqual([]);
+    expect(isDataImageHref('data:image/gif;base64,R0lGOD')).toBe(true);
+    expect(isDataImageHref('data:image/webp;base64,UklGR')).toBe(true);
+    /* an https href, a data URI of another type (svg included) and no href at all: dropped and named as a draw */
+    for (const href of [
+      'https://evil.example/x.png',
+      'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=',
+      'data:text/html;base64,PGh0bWw+',
+      'data:image/png,%89PNG',
+      'javascript:alert(1)',
+    ]) {
+      const dropped = sanitizeLogoSvg(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><image href="${href}" width="8" height="8"/><rect width="2" height="2"/></svg>`,
+      );
+      expect(dropped.svg, href).not.toContain('<image');
+      expect(dropped.removed, href).toEqual(['image']);
+      expect(dropped.draws, href).toBe(true);
+      expect(isDataImageHref(href), href).toBe(false);
+    }
+    const bare = sanitizeLogoSvg(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><image width="8" height="8"/></svg>',
+    );
+    expect(bare.svg).not.toContain('<image');
+    expect(bare.removed).toEqual(['image']);
+  });
+
+  it('runs under the caller’s cap with the caller’s words: the upload’s 2 MB and its two sentences', () => {
+    const words = {
+      tooLarge: (cap: number) => `The SVG file is over ${Math.round(cap / (1024 * 1024))} MB`,
+      broken: 'This SVG file could not be read',
+    };
+    const cap = 2 * 1024 * 1024;
+    const big = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="${'M0 0h1v1z'.repeat(240_000)}"/></svg>`;
+    expect(new TextEncoder().encode(big).byteLength).toBeGreaterThan(cap);
+    let caught: unknown;
+    try {
+      sanitizeLogoSvg(big, { maxBytes: cap, words });
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(LogoTooLargeError);
+    expect((caught as Error).message).toBe('The SVG file is over 2 MB');
+    expect((caught as LogoTooLargeError).capBytes).toBe(cap);
+    /* the same file is under the upload's cap and over the picker's: the picker's sentence stands there */
+    const mid = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="${'M0 0h1v1z'.repeat(40_000)}"/></svg>`;
+    expect(sanitizeLogoSvg(mid, { maxBytes: cap, words }).size).toEqual([8, 8]);
+    expect(() => sanitizeLogoSvg(mid)).toThrow(LOGO_WORDS.tooLarge(LOGO_MAX_BYTES));
+    /* a broken file answers the caller's sentence from the parser and from the walk alike */
+    for (const broken of [
+      '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0" fill="#000"/>',
+      'not xml at all',
+      '<html><svg viewBox="0 0 8 8"/></html>',
+      '<svg><path d="M0 0h1v1z"/></svg>',
+    ]) {
+      let error: unknown;
+      try {
+        sanitizeLogoSvg(broken, { maxBytes: cap, words });
+      } catch (e) {
+        error = e;
+      }
+      expect(error, broken).toBeInstanceOf(LogoBrokenError);
+      expect((error as Error).message, broken).toBe('This SVG file could not be read');
+    }
+    /* without options the picker's words and cap stand, byte for byte */
+    expect(() => sanitizeLogoSvg('not xml at all')).toThrow(LOGO_WORDS.broken);
   });
 
   it('adds a viewBox from width and height, and the attribution desc to a cached file', () => {
@@ -853,6 +937,9 @@ describe('the insert (4.4, 4.11)', () => {
     expect(asset.source.tint).toBeUndefined();
     expect(asset.sourceFile).toMatch(/^assets\/figma\.source\.[0-9a-f]{8}\.svg$/);
     expect('neutral' in asset.twins).toBe(true);
+    /* the vector round (docs/VECTOR.md 4.1): the insert writes the svg kind and the vector file */
+    expect(asset.kind).toBe('svg');
+    expect(asset.vector).toEqual({ neutral: asset.sourceFile });
     /* 3x of a 108 by 160 symbol */
     expect(asset.size).toEqual([324, 480]);
     expect(assetSchema.safeParse(asset).success).toBe(true);
@@ -901,6 +988,15 @@ describe('the insert (4.4, 4.11)', () => {
     /* the deck is dark, so the source carries the dark appearance's text colour */
     expect(source).toContain('fill="#f2f2f0"');
     expect(source).not.toContain('#070707');
+    /* the vector round (docs/VECTOR.md 4.1): the two tinted svg files, one per appearance */
+    expect(asset.kind).toBe('svg');
+    if (asset.vector === undefined || !('light' in asset.vector))
+      throw new Error('two vector files');
+    expect(asset.vector.light).toMatch(/^assets\/figma\.[0-9a-f]{8}-light\.svg$/);
+    expect(asset.vector.dark).toMatch(/^assets\/figma\.[0-9a-f]{8}-dark\.svg$/);
+    expect(readFileSync(join(dir, asset.vector.light), 'utf8')).toContain('fill="#070707"');
+    expect(readFileSync(join(dir, asset.vector.dark), 'utf8')).toContain('fill="#f2f2f0"');
+    expect(assetSchema.safeParse(asset).success).toBe(true);
     expect(output.blockId).toBeUndefined();
     /* an AWS mark with the cloud switch on carries its file unmodified */
     const aws = await logoInsert(

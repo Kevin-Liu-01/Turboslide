@@ -1,0 +1,403 @@
+{
+  "base": "http://localhost:4418",
+  "startedAt": "2026-09-24T21:52:43.872Z",
+  "ms": 618884,
+  "parked": {
+    "commit": "e2c6a7a",
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 618846,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/integrator/redrive/specs/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "rows": 27,
+  "passed": 18,
+  "failed": 6,
+  "notDriven": 3,
+  "manual": [],
+  "measured": [
+    {
+      "id": "shaders.perf.editor-frame",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "longest animation frame 80.3 ms over 5 s with one shader on the stage (535 animation frames; long-animation-frame; 1 canvas; renderer ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver))",
+        "longest animation frame 80.3 ms over 5 s with one shader on the stage (535 animation frames; long-animation-frame; 1 canvas; renderer ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver))"
+      ]
+    }
+  ],
+  "noStep": [],
+  "commit": "2f64bd8",
+  "origin": "http://localhost:4418",
+  "date": "2026-09-24",
+  "results": {
+    "assist.rewrite.card-accept-undo": "passed",
+    "assist.notes.draft": "passed",
+    "assist.free-ask.fallback-sentence": "passed",
+    "assist.mark.chip-and-history": "passed",
+    "assist.quota.429": "not driven",
+    "slides.layout.plate-four-columns": "passed",
+    "share.dialog.more-row": "passed",
+    "chrome.toolbar.fold-any-width": "passed",
+    "logos.picker.chrome-1280": "passed",
+    "shaders.panel.section-groups": "passed",
+    "logos.picker.recents": "passed",
+    "logos.route.mark-headers": "passed",
+    "logos.index.refresh-dry-run": "passed",
+    "logos.cache.open-licence-only": "passed",
+    "logos.agent.search-insert": "passed",
+    "logos.index.refresh-fixture": "passed",
+    "logos.index.cached-offline": "not driven",
+    "shaders.frame.auto-capture": "failed",
+    "shaders.frame.box-aspect": "failed",
+    "shaders.frame.reuse-and-prune": "failed",
+    "shaders.frame.one-capturer": "failed",
+    "shaders.perf.hidden-pauses": "passed",
+    "shaders.perf.editor-frame": "passed",
+    "shaders.agent.list-insert-set-render": "passed",
+    "shaders.library.glyph-engines-render": "not driven",
+    "shaders.show.plays-when-on": "failed",
+    "shaders.show.frame-when-off": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "assist.quota.429",
+        "feature": "assist",
+        "result": "not driven"
+      },
+      {
+        "id": "logos.index.cached-offline",
+        "feature": "logos",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.frame.auto-capture",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.frame.box-aspect",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.frame.reuse-and-prune",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.frame.one-capturer",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "feature": "shaders",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.show.plays-when-on",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.show.frame-when-off",
+        "feature": "shaders",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [
+    "assist"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "logos.index.cached-offline",
+      "parks": [
+        "insert.logo"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.frame.auto-capture",
+      "parks": [
+        "insert.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.frame.box-aspect",
+      "parks": [
+        "insert.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.frame.reuse-and-prune",
+      "parks": [
+        "insert.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.frame.one-capturer",
+      "parks": [
+        "insert.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.library.glyph-engines-render",
+      "parks": [
+        "dialog.shader.engine.glyph"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.show.plays-when-on",
+      "parks": [
+        "view.playShaders",
+        "formatOptions.shader.play"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.show.frame-when-off",
+      "parks": [
+        "view.playShaders"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "slides.layout.plate-four-columns",
+      "feature": "slides",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.more-row",
+      "feature": "share",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.toolbar.fold-any-width",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.rewrite.card-accept-undo",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.notes.draft",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.free-ask.fallback-sentence",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.mark.chip-and-history",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.quota.429",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven: the quota counts across instances only with Upstash and this base does not say which limiter it runs (GET /api/agent instance facts); the unit test apps/studio/src/server/ratelimit.test.ts covers the rows (PRODUCT.md 8.2)"
+    },
+    {
+      "id": "logos.picker.recents",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.chrome-1280",
+      "feature": "logos",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.route.mark-headers",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.index.refresh-dry-run",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.index.refresh-fixture",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven: the index reads fixture, not the outage (TURBOSLIDE_LOGO_UPSTREAM=down on a preview); the unit test apps/studio/src/server/logos.test.ts covers the cache during an outage (docs/FEATURES.md 7.3)"
+    },
+    {
+      "id": "logos.cache.open-licence-only",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.agent.search-insert",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.section-groups",
+      "feature": "shaders",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.frame.auto-capture",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the block has a frame asset after the recipe change"
+    },
+    {
+      "id": "shaders.frame.box-aspect",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: a frame after the resize"
+    },
+    {
+      "id": "shaders.frame.reuse-and-prune",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the 1.2 frame"
+    },
+    {
+      "id": "shaders.frame.one-capturer",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "shaders.perf.hidden-pauses",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.perf.editor-frame",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.agent.list-insert-set-render",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.library.glyph-engines-render",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: dialog.shader.engine.glyph (docs/FEATURES.md 5.2 item 2, B5, P1); the catalog lists none of proto:studio-field, glyph:mesh-gradient, glyph:dither-gradient"
+    },
+    {
+      "id": "shaders.show.plays-when-on",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: one canvas in the show"
+    },
+    {
+      "id": "shaders.show.frame-when-off",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the frame is shown"
+    }
+  ]
+}

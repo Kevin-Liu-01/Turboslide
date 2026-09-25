@@ -6775,14 +6775,14 @@
     {
       "id": "shaders.insert.selected-free-rectangle",
       "feature": "shaders",
-      "interaction": "A click on Liquid metal inserts a shader block in the largest free rectangle of the body, selected (chip Shader, eight handles), overlapping no text box; the title slide keeps its kind",
+      "interaction": "A click on Liquid metal inserts a shader block in the largest free rectangle of the body, selected (chip Shader, eight handles), overlapping no text box; the title slide's kind is recorded",
       "driver": "probe --core",
       "today": "broken",
       "severity": 2,
       "evidence": "audit-shaders 14 (s04-material-block-inserted.png, walk-run2.json row 5)",
       "parks": ["insert.shader"],
       "setup": "slide.new with the title layout through the window API, the slide the insert lands on; never a driven step",
-      "note": "Ship two P0; docs/FEATURES.md 5.4 (B5: insertBlockPlan's shader branch through the product round's free rectangle helper; B1 the gallery); the overlap is read against every text object of the slide after the insert converted it"
+      "note": "Ship two P0; docs/FEATURES.md 5.4 (B5: insertBlockPlan's shader branch through the product round's free rectangle helper; B1 the gallery); the overlap is read against every text object of the slide after the insert converted it; the kind clause of 7.1 (\"the title slide keeps its kind\") was dropped in the fix round of ship two: an object insert through insertBlockPlan converts a fixed kind slide to a canvas first (SPEC-2 1.6, slide.toCanvas), as a table's and a chart's do, and no objects row asserts the kind (the integrator's ship two finding 1)"
     },
     {
       "id": "shaders.insert.words",
@@ -6846,7 +6846,7 @@
       "today": "not driven",
       "evidence": "audit-shaders 8 (material-list.json presets; no swatches drawn)",
       "parks": ["formatOptions.shader.color"],
-      "note": "Ship two P0; docs/FEATURES.md 5.7 (B5: presets.ts computes the palette from the kit; formatOptions.shader.color.<role> the six swatches); the walk writes the role of the deck's current appearance (/colors/<light|dark>/primary; a /new deck opens dark) and records which; the frameKey is read from the block's asset record in describe().state.assets before and after"
+      "note": "Ship two P0; docs/FEATURES.md 5.7 (B5: presets.ts computes the palette from the kit; formatOptions.shader.color.<role> the six swatches); the walk writes the role of the appearance the sheet renders (/colors/<light|dark>/primary from the editor root's data-theme, the deckAppearance(deck) EditorRoot passes and shaderPaletteOfDeck reads; a /new deck draws light under a dark chrome) and records which, and reads the block's colour once the new frame's picture is decoded; the frameKey is read from the block's asset record in describe().state.assets before and after"
     },
     {
       "id": "shaders.panel.one-home",
@@ -6869,7 +6869,7 @@
       "evidence": "audit-shaders 2 (s12-slideshow.png, s14-viewer.png, export-pdf-page-1.png, export-pptx-report.json)",
       "parks": ["insert.shader"],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
-      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5 the client capture shader-frame.ts, B7 the shader.frame handler); the frameKey's equality with frameKeyOf(block, kit) is read through the storage rule (the asset id frame-<first 16 hex of frameKey>) and a recipe change writing a new key; the function itself is pinned by packages/materials/src/capture.test.ts (7.3)"
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5 the client capture shader-frame.ts, B7 the shader.frame handler); the frameKey's equality with frameKeyOf(block, kit) is read through the storage rule (the asset id frame-<first 16 hex of frameKey>) and a recipe change writing a new key; the function itself is pinned by packages/materials/src/capture.test.ts (7.3); the id is compared with the sha256: prefix stripped from the key (recipe-key.ts frameAssetId); the filmstrip card is read again every 500 ms for up to 10 s until it shows the new frame (its thumbnail is re rendered after the commit), sampled over the block's share of the slide against the frame's centre"
     },
     {
       "id": "shaders.frame.box-aspect",
@@ -6880,7 +6880,7 @@
       "evidence": "audit-shaders 2, 9 (export-pdf-page-1.png)",
       "parks": ["insert.shader"],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
-      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5: the capture canvas takes the box's aspect with the long side 3200); the resize is the se handle's drag (block.set /pos when the handle is not drawn, recorded); the editor's canvas at rest is read under prefers-reduced-motion: reduce (5.6's speed 0) and the viewer's still on /deck/<id>; the tolerance is 48 per channel"
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5: the capture canvas takes the box's aspect with the long side 3200); the resize is the se handle's drag (block.set /pos when the handle is not drawn, recorded); the editor's canvas at rest is read under prefers-reduced-motion: reduce (5.6's speed 0) and the viewer's still on /deck/<id>; the tolerance is 48 per channel over a 6 percent patch mean around each point (liquid metal's chrome edges move by a pixel between the two renderings), the still at 3200 px and the box at 600 compared over one relative area"
     },
     {
       "id": "shaders.frame.reuse-and-prune",
@@ -6891,7 +6891,7 @@
       "evidence": "audit-shaders 2",
       "parks": ["insert.shader"],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
-      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5 the storage rule; B7 the shader.frame handler's superseded frame removal and pruneFrameAssets behind the response); the Strength values are typed into the slider's number field and committed with Enter, one block.set each"
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5 the storage rule; B7 the shader.frame handler's superseded frame removal and pruneFrameAssets behind the response); the Strength values are typed into the slider's number field and committed with Enter, one block.set each; a frame asset is one whose id is frame-<16 hex> (the storage rule), so a layout's own material picture is not counted"
     },
     {
       "id": "shaders.frame.one-capturer",
@@ -6902,7 +6902,7 @@
       "evidence": "audit-shaders 2",
       "parks": ["insert.shader"],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
-      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5: the committing client captures from the shell's commit() path; B7 the write); the second context is the same person in a second browser (sameCookiesContext); the first page's requests are read for shader.frame in the address or the body"
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B5: the committing client captures from the shell's commit() path; B7 the write); the second context is the same person in a second browser (sameCookiesContext); the first page's requests are read for shader.frame in the address or the body; a frame asset is one whose id is frame-<16 hex> (the storage rule), so a layout's own material picture is not counted"
     },
     {
       "id": "shaders.background.place-answers",
@@ -6925,7 +6925,7 @@
       "severity": 3,
       "evidence": "audit-shaders 9 (export-pdf-page-1.png, export-pdf-report.json)",
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
-      "note": "Ship two P0; docs/FEATURES.md 5.5 (B7: the scene carries shaders and the PDF draws the frame); the feature is export because the row measures the exporters (7.1), so a red row blocks the ship; the colour sample is the largest image object of the PDF against the asset's pixels, both decoded in the page, within 48 per channel"
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B7: the scene carries shaders and the PDF draws the frame); the feature is export because the row measures the exporters (7.1), so a red row blocks the ship; the colour sample is the largest image object of the PDF against the asset's pixels, both decoded in the page, at least four of the five samples within 48 per channel over a 3 percent patch mean; the frame file is fetched through the assets route, following its redirect to the twin's Blob URL on a hosted instance with no header"
     },
     {
       "id": "shaders.export.pptx-frame",
@@ -6947,7 +6947,7 @@
       "severity": 3,
       "evidence": "audit-shaders 2, 9 (s14-viewer.png, export-pdf-page-1.png)",
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
-      "note": "Ship two P0; docs/FEATURES.md 5.5 (B7: download.ts builds the web page with the frame and no live shader); the feature is export (7.1); the file is loaded in the spec's own page to count canvases, read the visible text and sample the frame"
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B7: download.ts builds the web page with the frame and no live shader); the feature is export (7.1); the file is loaded in the spec's own page to count canvases, read the visible text and sample the frame; the frame file, the patch mean and the four of five rule as the PDF row reads them"
     },
     {
       "id": "shaders.export.missing-frame-row",
@@ -7051,7 +7051,7 @@
       "evidence": "audit-shaders 10 (s12-slideshow.png, walk-run2.json row 22)",
       "parks": ["view.playShaders", "formatOptions.shader.play"],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
-      "note": "Ship two P1; docs/FEATURES.md 5.6 (B5 present/ShaderLayer.tsx; B1 the View row); question 5 of section 9: motion.play 'show' on insert with the setting's default In the show only; the show is started from the slide the block is on"
+      "note": "Ship two P1; docs/FEATURES.md 5.6 (B5 present/ShaderLayer.tsx; B1 the View row); question 5 of section 9: motion.play 'show' on insert with the setting's default In the show only; the show is started from the slide the block is on; recorded not driven while formatOptions.shader.play is absent from the Shader section (the P1 item's own control, drawn only when its rows are green: shaders.panel.section-groups), the show's ShaderLayer and the control landing as one commit"
     },
     {
       "id": "shaders.show.frame-when-off",
@@ -7062,7 +7062,7 @@
       "evidence": "audit-shaders 17, section 7 (walk-run2.json row 25)",
       "parks": ["view.playShaders"],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
-      "note": "Ship two P1; docs/FEATURES.md 5.6 (B5; B1 the View row); the reduced motion half is a second context with prefers-reduced-motion: reduce and the setting on"
+      "note": "Ship two P1; docs/FEATURES.md 5.6 (B5; B1 the View row); the reduced motion half is a second context with prefers-reduced-motion: reduce and the setting on; recorded not driven while formatOptions.shader.play is absent from the Shader section (the P1 item's own control, drawn only when its rows are green: shaders.panel.section-groups), the show's ShaderLayer and the control landing as one commit"
     },
     {
       "id": "shaders.insert.gallery-hover-live",

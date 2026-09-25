@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { deflateSync, inflateRawSync, inflateSync } from 'node:zlib';
 
-import { expect, test } from '@playwright/test';
+import { expect, request, test } from '@playwright/test';
 import type { Browser, BrowserContext, Download, Locator, Page } from '@playwright/test';
 
 import { coreTitle, rowsOfSpec } from './matrix';
@@ -998,9 +998,54 @@ export async function shaderBlocks(page: Page, slideId: string) {
   return (await objectsOf(page, slideId)).filter((o) => o.type === 'material');
 }
 
-/** The assets of the deck whose source is a shader frame (`source.kind: 'material'`). */
+/** The id a frame write makes, `frame-<the first 16 hex of frameKey>` (recipe-key.ts frameAssetId). */
+export const FRAME_ASSET_ID = /^frame-[0-9a-f]{16}$/;
+/** `frame-<first 16 hex of the key>` for a frameKey with or without its `sha256:` prefix (5.5). */
+export function frameAssetIdOf(frameKey: string): string {
+  return `frame-${frameKey.replace(/^sha256:/, '').slice(0, 16)}`;
+}
+
+/**
+ * The frame assets of the deck: the material sourced assets a frame write made, by the id shape
+ * the storage rule gives them. A layout's own material picture (the seed's opener plate, a
+ * `material.capture` of the product round) is a material source too and is not a frame of a
+ * block, so it is not counted here (the integrator's ship two finding 22).
+ */
 export async function frameAssets(page: Page): Promise<AssetRecord[]> {
-  return Object.values(await assetRecords(page)).filter((a) => a.source?.kind === 'material');
+  return Object.values(await assetRecords(page)).filter(
+    (a) => a.source?.kind === 'material' && FRAME_ASSET_ID.test(a.id),
+  );
+}
+
+/**
+ * A file the page draws, fetched as bytes: the same origin address through the context (the
+ * preview's OIDC header rides along), and when the address answers a redirect (the assets route
+ * of a hosted instance sends a deck another instance wrote to its twin's Blob URL, `server/root.ts`)
+ * the target is fetched once more with no header at all, so the token never leaves the origin.
+ * `src` may be the `<img>`'s attribute, a path with no origin (the picture not yet loaded, so
+ * `currentSrc` is empty): it is resolved against the page's address first, so a relative
+ * `location` resolves too (the fix round's first preview run threw "Invalid URL" on that pair).
+ * Answers null on anything but a 200, with the status read.
+ */
+export async function fetchPageFile(
+  page: Page,
+  src: string,
+): Promise<{ bytes: Buffer; via: 'origin' | 'redirect'; status: number } | null> {
+  const address = new URL(src, page.url()).toString();
+  const first = await page.request.get(address, { maxRedirects: 0 });
+  const status = first.status();
+  if (status === 200) return { bytes: Buffer.from(await first.body()), via: 'origin', status };
+  const location = first.headers()['location'];
+  if (![301, 302, 303, 307, 308].includes(status) || !location) return null;
+  const target = new URL(location, address).toString();
+  const bare = await request.newContext();
+  try {
+    const second = await bare.get(target, { maxRedirects: 3 });
+    if (second.status() !== 200) return null;
+    return { bytes: Buffer.from(await second.body()), via: 'redirect', status: second.status() };
+  } finally {
+    await bare.dispose();
+  }
 }
 
 /**
@@ -1174,6 +1219,43 @@ export async function waitFrame(
     const asset = (block?.['asset'] as string | undefined) ?? null;
     if (asset !== null && asset !== not) return { asset, ms: Date.now() - t0 };
     if (Date.now() > until) return { asset: null, ms: Date.now() - t0 };
+    await page.waitForTimeout(200);
+  }
+}
+
+/**
+ * True once the sheet draws the block's frame picture for `asset` (the `<img>` under the block
+ * names the asset and is decoded), polled up to `timeout` ms; a 3200 px picture through the assets
+ * route, on a hosted instance through its redirect to the Blob store, is not decoded the moment
+ * the block names its new asset, so a clip or a sample taken before this reads the earlier frame.
+ * `ms` is the time it took.
+ */
+export async function waitFrameDrawn(
+  page: Page,
+  blockId: string,
+  asset: string,
+  timeout = 8_000,
+): Promise<{ drawn: boolean; ms: number }> {
+  const t0 = Date.now();
+  for (;;) {
+    const drawn = await page.evaluate(
+      ([id, a]) => {
+        const root = document.querySelector(
+          `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`,
+        );
+        const img = root?.querySelector('img') as HTMLImageElement | null;
+        return (
+          img !== null &&
+          img !== undefined &&
+          (img.currentSrc || img.getAttribute('src') || '').includes(a) &&
+          img.complete &&
+          img.naturalWidth > 0
+        );
+      },
+      [blockId, asset] as const,
+    );
+    const ms = Date.now() - t0;
+    if (drawn || ms > timeout) return { drawn, ms };
     await page.waitForTimeout(200);
   }
 }
@@ -1481,17 +1563,23 @@ export async function stageCanvases(page: Page): Promise<{
 /**
  * Decodes a picture in the page (a PNG or JPEG as bytes, or a same origin URL) and samples it at
  * relative points (0 to 1 across the picture); answers the RGB of each with the picture's size.
+ * `patch` is the half size of the box averaged around each point as a fraction of the picture's
+ * width and height (0 samples the one pixel): two renderings of one frame at different sizes
+ * (the viewer's still at 3200 px against the editor's box at 600, the PDF's re-encoded image
+ * against the frame file) are compared over the same relative area, so a sub pixel shift at a
+ * shader's edge does not read as a colour change at a single pixel.
  */
 export async function samplePicture(
   page: Page,
   source: Buffer | string,
   points: readonly (readonly [number, number])[],
+  patch = 0,
 ): Promise<{ width: number; height: number; rgb: [number, number, number][] } | null> {
   const src = Buffer.isBuffer(source)
     ? `data:${source.subarray(1, 4).toString('latin1') === 'PNG' ? 'image/png' : 'image/jpeg'};base64,${source.toString('base64')}`
     : source;
   return page.evaluate(
-    async ([url, pts]) => {
+    async ([url, pts, half]) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.src = url as string;
@@ -1506,15 +1594,35 @@ export async function samplePicture(
       const g = c.getContext('2d');
       if (!g) return null;
       g.drawImage(img, 0, 0);
+      const clamp = (v: number, max: number) => Math.min(max, Math.max(0, Math.round(v)));
       const rgb = (pts as [number, number][]).map(([fx, fy]) => {
-        const x = Math.min(c.width - 1, Math.max(0, Math.round(fx * (c.width - 1))));
-        const y = Math.min(c.height - 1, Math.max(0, Math.round(fy * (c.height - 1))));
-        const d = g.getImageData(x, y, 1, 1).data;
-        return [d[0]!, d[1]!, d[2]!] as [number, number, number];
+        const x = clamp(fx * (c.width - 1), c.width - 1);
+        const y = clamp(fy * (c.height - 1), c.height - 1);
+        const rx = Math.round((half as number) * c.width);
+        const ry = Math.round((half as number) * c.height);
+        const x0 = clamp(x - rx, c.width - 1);
+        const y0 = clamp(y - ry, c.height - 1);
+        const w = clamp(x + rx, c.width - 1) - x0 + 1;
+        const h = clamp(y + ry, c.height - 1) - y0 + 1;
+        const d = g.getImageData(x0, y0, w, h).data;
+        let r = 0;
+        let gg = 0;
+        let b = 0;
+        const n = w * h;
+        for (let i = 0; i < n; i += 1) {
+          r += d[i * 4]!;
+          gg += d[i * 4 + 1]!;
+          b += d[i * 4 + 2]!;
+        }
+        return [Math.round(r / n), Math.round(gg / n), Math.round(b / n)] as [
+          number,
+          number,
+          number,
+        ];
       });
       return { width: c.width, height: c.height, rgb };
     },
-    [src, points.map((p) => [p[0], p[1]])] as const,
+    [src, points.map((p) => [p[0], p[1]]), patch] as const,
   );
 }
 
@@ -1523,9 +1631,10 @@ export async function sampleClip(
   page: Page,
   clip: { x: number; y: number; width: number; height: number },
   points: readonly (readonly [number, number])[],
+  patch = 0,
 ): Promise<{ width: number; height: number; rgb: [number, number, number][] } | null> {
   const shot = await page.screenshot({ clip, scale: 'css' });
-  return samplePicture(page, shot, points);
+  return samplePicture(page, shot, points, patch);
 }
 
 /** The largest channel distance between two RGB samples. */
@@ -1537,7 +1646,12 @@ export function rgbDistance(a: readonly number[], b: readonly number[]): number 
  * The largest image object of a PDF as a PNG the page can decode: Chromium writes a drawn PNG as
  * a FlateDecode RGB (or gray) image, sometimes with PNG predictors, and a JPEG as DCTDecode;
  * the raw rows are wrapped into a PNG file here (a filter byte per row) so one decoder reads
- * both. Answers null when the PDF carries no image.
+ * both. The image dictionary may nest one (`/DecodeParms << … >>`) and name its filter as an
+ * array (`/Filter [ /FlateDecode ]`); the stream is cut by a direct `/Length` when it has one
+ * (a binary stream can hold the word endstream), else at the keyword. The colour space is read as
+ * gray for `/DeviceGray` or an ICC profile of one component and as RGB otherwise. Answers null
+ * when the PDF carries no image; `png` and `jpeg` both null when the image's encoding is not one
+ * this reader knows (the row then reads "samples unread" with the filter named).
  */
 export function largestPdfImage(bytes: Buffer): {
   width: number;
@@ -1547,7 +1661,7 @@ export function largestPdfImage(bytes: Buffer): {
   jpeg: Buffer | null;
 } | null {
   const text = bytes.toString('latin1');
-  const re = /<<([^>]*?\/Subtype\s*\/Image[^>]*?)>>\s*stream\r?\n/g;
+  const re = /<<((?:[^<>]|<<[^<>]*>>)*?\/Subtype\s*\/Image(?:[^<>]|<<[^<>]*>>)*?)>>\s*stream\r?\n/g;
   let best: { width: number; height: number; filter: string; start: number; dict: string } | null =
     null;
   let m: RegExpExecArray | null;
@@ -1556,10 +1670,11 @@ export function largestPdfImage(bytes: Buffer): {
     const width = Number(/\/Width\s+(\d+)/.exec(dict)?.[1] ?? 0);
     const height = Number(/\/Height\s+(\d+)/.exec(dict)?.[1] ?? 0);
     if (/\/ImageMask\s+true/.test(dict)) continue;
-    const filter = /\/Filter\s*\/(\w+)/.exec(dict)?.[1] ?? 'none';
+    const filter =
+      /\/Filter\s*\/(\w+)/.exec(dict)?.[1] ?? /\/Filter\s*\[\s*\/(\w+)/.exec(dict)?.[1] ?? 'none';
     /* the frame's soft mask (a gray image of the same size) never wins over the colour image */
-    const rgb = /\/DeviceRGB/.test(dict) ? 1 : 0;
-    const bestRgb = best === null ? -1 : /\/DeviceRGB/.test(best.dict) ? 1 : 0;
+    const rgb = /\/DeviceRGB|\/ICCBased/.test(dict) ? 1 : 0;
+    const bestRgb = best === null ? -1 : /\/DeviceRGB|\/ICCBased/.test(best.dict) ? 1 : 0;
     if (
       best === null ||
       width * height > best.width * best.height ||
@@ -1568,7 +1683,11 @@ export function largestPdfImage(bytes: Buffer): {
       best = { width, height, filter, start: m.index + m[0].length, dict };
   }
   if (best === null) return null;
-  const end = text.indexOf('endstream', best.start);
+  const length = Number(/\/Length\s+(\d+)(?!\s+\d+\s+R)/.exec(best.dict)?.[1] ?? NaN);
+  const end =
+    Number.isFinite(length) && length > 0 && best.start + length <= bytes.length
+      ? best.start + length
+      : text.indexOf('endstream', best.start);
   const raw = bytes.subarray(best.start, end);
   if (best.filter === 'DCTDecode') return { ...best, png: null, jpeg: Buffer.from(raw) };
   let data: Buffer;
@@ -1577,7 +1696,10 @@ export function largestPdfImage(bytes: Buffer): {
   } catch {
     return { ...best, png: null, jpeg: null };
   }
-  const gray = /\/DeviceGray/.test(best.dict);
+  const icc = /\/ICCBased\s+(\d+)\s+\d+\s+R/.exec(best.dict);
+  const iccGray =
+    icc !== null && new RegExp(`\\b${icc[1]}\\s+0\\s+obj\\s*<<[^>]*?/N\\s+1\\b`).test(text);
+  const gray = /\/DeviceGray/.test(best.dict) || iccGray;
   const channels = gray ? 1 : 3;
   const rowLen = best.width * channels;
   let filtered: Buffer;

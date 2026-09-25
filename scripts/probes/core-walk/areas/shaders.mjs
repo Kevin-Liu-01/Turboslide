@@ -547,7 +547,7 @@ export async function run(t) {
   await t.step(
     'shaders.insert.selected-free-rectangle',
     'Insert > Shader; click Liquid metal on the Title slide',
-    'a material block in the body free of every text box, selected with the chip Shader and eight handles; the slide keeps its kind',
+    'a material block in the body free of every text box, selected with the chip Shader and eight handles; the insert converts the layout slide to a canvas as every object insert does (the kind before and after is recorded, never judged)',
     async () => {
       await t.clickCard(S);
       const kindBefore = (await t.slideJson(S))?.kind ?? null;
@@ -580,6 +580,10 @@ export async function run(t) {
         obj.pos.y >= 0 &&
         obj.pos.x + obj.pos.w <= 1600 &&
         obj.pos.y + obj.pos.h <= 900;
+      /* the slide's kind is recorded, not judged: an object insert through insertBlockPlan on a
+         fixed kind slide converts it to a canvas first (SPEC-2 1.6 `slide.toCanvas`), as a
+         table's and a chart's do, and no objects row asserts the kind (the integrator's ship two
+         finding 1; the fix round dropped the clause) */
       const kindAfter = (await t.slideJson(S))?.kind ?? null;
       return {
         ok:
@@ -587,9 +591,8 @@ export async function run(t) {
           facts.resize === 8 &&
           facts.chip === 'Shader' &&
           hit.length === 0 &&
-          onSheet &&
-          kindBefore === kindAfter,
-        observed: `${card.title} inserted ${obj.id} at ${t.posStr(obj.pos)} (${obj.block.materialId}, preset ${obj.block.preset ?? 'none'}); ${t.describeSelection(facts)}; overlaps ${hit.join(', ') || 'no text box'} of ${texts.length}; kind ${kindBefore} -> ${kindAfter}`,
+          onSheet,
+        observed: `${card.title} inserted ${obj.id} at ${t.posStr(obj.pos)} (${obj.block.materialId}, preset ${obj.block.preset ?? 'none'}); ${t.describeSelection(facts)}; overlaps ${hit.join(', ') || 'no text box'} of ${texts.length}; kind ${kindBefore} -> ${kindAfter} (recorded)`,
       };
     },
   );
@@ -653,7 +656,7 @@ export async function run(t) {
       await t.waitGone('[data-control="present.show"]', 8000);
       /* the viewer, in a second page closed after the read */
       let viewerText = null;
-      const viewer = await context.newPage();
+      const viewer = await t.newPage();
       try {
         /* the viewer route redirects a fresh page once (the first smoke read net::ERR_ABORTED on
            the hash address): the address is committed, then the sheet is waited for */
@@ -974,8 +977,22 @@ export async function run(t) {
           'B5a (the product round)',
           'the window transport carries no brand.set',
         );
-      const appearance = (await t.appearance()).deck ?? 'dark';
-      const path = `/colors/${appearance === 'light' ? 'light' : 'dark'}/primary`;
+      /* the appearance the sheet renders is the palette's (FEATURES.md 5.7: the mount's palette is
+         shaderPaletteOfDeck, which reads deckAppearance(deck), the same value EditorRoot passes the
+         editor root as data-theme), not the chrome's theme and not deck.info's default: a /new
+         deck draws light under a dark chrome and its shader takes the light roles (the verifier's
+         pass 1 F4; the runs of record wrote the dark role and the shader kept its colour) */
+      const rendered = await page.evaluate(
+        () => document.querySelector('.ts-stagewrap.ts-editor')?.getAttribute('data-theme') ?? null,
+      );
+      const fallback = (await t.appearance()).deck ?? 'dark';
+      const appearance =
+        rendered === 'light' || rendered === 'dark'
+          ? rendered
+          : fallback === 'light'
+            ? 'light'
+            : 'dark';
+      const path = `/colors/${appearance}/primary`;
       const block0 = (await t.blockOf(S, id))?.block ?? null;
       const asset0 = await assetOf(block0?.asset);
       const key0 = asset0?.source?.frameKey ?? null;
@@ -1015,6 +1032,36 @@ export async function run(t) {
           };
         });
       const ms = Date.now() - t0;
+      /* the colour is read once the new frame's picture is decoded on the sheet (the sheet draws
+         the frame over the mount once the block has one; on a hosted instance a 3200 px picture
+         comes through the assets route's redirect), up to 8 s after the re capture, so the read
+         is of the re coloured shader and not of a picture still loading; the row's 5 s bound is
+         the re capture's and the picture's time is recorded */
+      const t1 = Date.now();
+      const drawn =
+        recaptured.asset && recaptured.asset !== (block0?.asset ?? null)
+          ? await t
+              .pollUntil(
+                () =>
+                  page.evaluate(
+                    ([stage, blockId, asset]) => {
+                      const img = document.querySelector(`${stage} [data-block="${blockId}"] img`);
+                      return (
+                        img !== null &&
+                        (img.currentSrc || img.getAttribute('src') || '').includes(asset) &&
+                        img.complete &&
+                        img.naturalWidth > 0
+                      );
+                    },
+                    [STAGE, id, recaptured.asset],
+                  ),
+                (x) => x === true,
+                8000,
+                250,
+              )
+              .catch(() => false)
+          : false;
+      const pictureMs = Date.now() - t1;
       await t.sleep(400);
       const after = meanOf(await t.shotPixels(clip));
       const dist = Math.hypot(...before.rgb.map((v, i) => v - after.rgb[i]));
@@ -1026,7 +1073,7 @@ export async function run(t) {
           recaptured.key !== null &&
           recaptured.key !== key0 &&
           ms <= 5000,
-        observed: `swatches ${swatches.join(', ')} (${roles.length} of the six roles); brand.set ${path} ${refusal ? `refused: ${refusal}` : 'ok'}; the canvas's mean colour moved ${dist.toFixed(1)}; frame ${block0?.asset ?? 'none'} (key ${key0 ? key0.slice(0, 12) : 'none'}) -> ${recaptured.asset ?? 'none'} (key ${recaptured.key ? recaptured.key.slice(0, 12) : 'none'}, backend ${recaptured.backend ?? 'none'}) ${ms} ms after the write`,
+        observed: `swatches ${swatches.join(', ')} (${roles.length} of the six roles); the sheet renders ${rendered ?? 'no data-theme'} (deck.info and the chrome read ${fallback}); brand.set ${path} ${refusal ? `refused: ${refusal}` : 'ok'}; frame ${block0?.asset ?? 'none'} (key ${key0 ? key0.slice(0, 12) : 'none'}) -> ${recaptured.asset ?? 'none'} (key ${recaptured.key ? recaptured.key.slice(0, 12) : 'none'}, backend ${recaptured.backend ?? 'none'}) ${ms} ms after the write; the new picture ${drawn ? `decoded ${pictureMs} ms later` : `not decoded ${pictureMs} ms later`}; the block's mean colour moved ${dist.toFixed(1)}`,
       };
     },
   );

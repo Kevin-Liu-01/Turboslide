@@ -37,6 +37,7 @@ import {
   zipEntriesRaw,
   captureFallback,
   ensureShader,
+  fetchPageFile,
   largestPdfImage,
   rgbDistance,
   samplePicture,
@@ -1755,21 +1756,30 @@ async function shaderSetup(
     how: owner.shaderHow ?? '',
   };
 }
-/** The frame file the sheet draws for the shader block: its same origin src and its bytes. */
+/**
+ * The frame file the sheet draws for the shader block: its same origin src and its bytes, fetched
+ * through the assets route and, on a hosted instance that answers a redirect to the twin's Blob
+ * URL, through that redirect with no header (lib.ts `fetchPageFile`; the fix round of ship two:
+ * the runs of record read "no file" on the 302 and never compared a sample).
+ */
 async function shaderFrameFile(
   page: Page,
   blockId: string,
-): Promise<{ src: string; bytes: Buffer } | null> {
+): Promise<{ src: string; bytes: Buffer; via: string } | null> {
   const src = await page.evaluate((id) => {
     const root = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`);
     const img = root?.querySelector('img');
     return img ? img.currentSrc || img.getAttribute('src') : null;
   }, blockId);
   if (!src) return null;
-  const res = await page.request.get(src, { maxRedirects: 0 });
-  if (res.status() !== 200) return null;
-  return { src, bytes: Buffer.from(await res.body()) };
+  const got = await fetchPageFile(page, src);
+  if (got === null) return null;
+  return { src, bytes: got.bytes, via: got.via };
 }
+/* the half size of the box averaged around each sample point, as a fraction of the picture: the
+   PDF's re-encoded image (3200 by 1734 for a 3200 by 1814 frame) and the frame file are compared
+   over the same relative area, not one pixel each */
+const SAMPLE_PATCH = 0.015;
 const SAMPLE_POINTS: readonly (readonly [number, number])[] = [
   [0.5, 0.5],
   [0.25, 0.5],
@@ -1793,14 +1803,14 @@ test(title('shaders.export.pdf-frame'), async () => {
   await closeDialogs(page);
   const image = largestPdfImage(pdf.bytes);
   const decoded = image?.png ?? image?.jpeg ?? null;
-  const drawn = decoded ? await samplePicture(page, decoded, SAMPLE_POINTS) : null;
-  const frame = file ? await samplePicture(page, file.bytes, SAMPLE_POINTS) : null;
+  const drawn = decoded ? await samplePicture(page, decoded, SAMPLE_POINTS, SAMPLE_PATCH) : null;
+  const frame = file ? await samplePicture(page, file.bytes, SAMPLE_POINTS, SAMPLE_PATCH) : null;
   const distances =
     drawn && frame ? SAMPLE_POINTS.map((_, i) => rgbDistance(drawn.rgb[i]!, frame.rgb[i]!)) : null;
   const text = pdfText(pdf.bytes);
   test.info().annotations.push({
     type: 'pdf',
-    description: `${made.how}; frame ${made.asset ?? 'none'} (${file ? `${file.bytes.length} bytes` : 'no file'}); box ${pos ? `${pos.w} by ${pos.h}` : 'unread'}; the PDF's largest image ${image ? `${image.width} by ${image.height} ${image.filter}` : 'none'} (${pdfImages(pdf.bytes)} image objects); samples ${distances ? distances.join(', ') : 'unread'}; label text ${LABEL.test(text) ? 'present' : 'absent'}`,
+    description: `${made.how}; frame ${made.asset ?? 'none'} (${file ? `${file.bytes.length} bytes through the ${file.via === 'redirect' ? "assets route's redirect" : 'assets route'}` : 'no file'}); box ${pos ? `${pos.w} by ${pos.h}` : 'unread'}; the PDF's largest image ${image ? `${image.width} by ${image.height} ${image.filter}${decoded ? '' : ' (not decoded)'}` : 'none'} (${pdfImages(pdf.bytes)} image objects); samples ${distances ? `${distances.join(', ')} (a ${Math.round(SAMPLE_PATCH * 200)} percent patch mean)` : `unread (${drawn ? '' : 'the PDF image undecoded'}${!drawn && !frame ? ', ' : ''}${frame ? '' : 'the frame file unread'})`}; label text ${LABEL.test(text) ? 'present' : 'absent'}`,
   });
   expect(made.asset, 'the block has a frame').not.toBeNull();
   expect(image, 'the PDF carries an image').not.toBeNull();
@@ -1930,16 +1940,16 @@ test(title('shaders.export.html-frame'), async () => {
       };
     }, LABEL.source);
     if (facts.src && facts.src.startsWith('data:'))
-      drawn = await samplePicture(viewer, facts.src, SAMPLE_POINTS);
+      drawn = await samplePicture(viewer, facts.src, SAMPLE_POINTS, SAMPLE_PATCH);
   } finally {
     await viewer.close();
   }
-  const frame = file ? await samplePicture(page, file.bytes, SAMPLE_POINTS) : null;
+  const frame = file ? await samplePicture(page, file.bytes, SAMPLE_POINTS, SAMPLE_PATCH) : null;
   const distances =
     drawn && frame ? SAMPLE_POINTS.map((_, i) => rgbDistance(drawn!.rgb[i]!, frame.rgb[i]!)) : null;
   test.info().annotations.push({
     type: 'html',
-    description: `${made.how}; ${html.name} ${html.bytes.length} bytes in ${html.ms} ms; ${facts ? `${facts.canvases} canvas, label words ${facts.words}, frame img ${facts.src ? `${facts.src.slice(0, 40)}... natural ${facts.natural}` : 'none'}` : 'unread'}; samples ${distances ? distances.join(', ') : 'unread'}`,
+    description: `${made.how}; ${html.name} ${html.bytes.length} bytes in ${html.ms} ms; ${facts ? `${facts.canvases} canvas, label words ${facts.words}, frame img ${facts.src ? `${facts.src.slice(0, 40)}... natural ${facts.natural}` : 'none'}` : 'unread'}; frame file ${file ? `${file.bytes.length} bytes through the ${file.via === 'redirect' ? "assets route's redirect" : 'assets route'}` : 'unread'}; samples ${distances ? `${distances.join(', ')} (a ${Math.round(SAMPLE_PATCH * 200)} percent patch mean)` : 'unread'}`,
   });
   expect(facts, 'the page loads').not.toBeNull();
   expect(facts!.canvases, 'mounts no canvas').toBe(0);

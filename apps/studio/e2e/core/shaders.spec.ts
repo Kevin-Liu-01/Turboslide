@@ -14,6 +14,8 @@ import {
   download,
   ensureShader,
   extraHTTPHeaders,
+  fetchPageFile,
+  frameAssetIdOf,
   frameAssets,
   installRafCounter,
   invoke,
@@ -40,6 +42,7 @@ import {
   teardownAll,
   title,
   waitFrame,
+  waitFrameDrawn,
 } from './lib';
 
 // The shader library's spec rows (docs/FEATURES.md 5.5, 5.6, 5.8, 7.1 `shaders.*` with the driver
@@ -119,8 +122,15 @@ test.afterAll(async () => {
 const base = (): string => new URL(page.url()).origin;
 const block = async (p: Page = page, id = shader?.id ?? '') =>
   (await shaderBlocks(p, slideId)).find((o) => o.id === id) ?? null;
-/** The frame img the sheet draws for the block, its src and the file's size, or null. */
-async function frameFile(p: Page, id: string): Promise<{ src: string; bytes: Buffer } | null> {
+/**
+ * The frame img the sheet draws for the block, its src and the file's bytes, or null: fetched
+ * through the assets route and, on a hosted instance that redirects a deck another instance wrote
+ * to its twin's Blob URL, through that redirect with no header (lib.ts `fetchPageFile`).
+ */
+async function frameFile(
+  p: Page,
+  id: string,
+): Promise<{ src: string; bytes: Buffer; via: string } | null> {
   const src = await p.evaluate((blockId) => {
     const root = document.querySelector(
       `.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`,
@@ -129,10 +139,18 @@ async function frameFile(p: Page, id: string): Promise<{ src: string; bytes: Buf
     return img ? img.currentSrc || img.getAttribute('src') : null;
   }, id);
   if (!src) return null;
-  const res = await p.request.get(src, { headers: extraHTTPHeaders, maxRedirects: 0 });
-  if (res.status() !== 200) return null;
-  return { src, bytes: Buffer.from(await res.body()) };
+  const got = await fetchPageFile(p, src);
+  return got === null ? null : { src, bytes: got.bytes, via: got.via };
 }
+/* the half size of the box averaged around each sample point, as a fraction of the picture (a
+   3 percent patch): the viewer's 3200 px still and the editor's box at rest are compared over
+   the same relative area, so a sub pixel shift at the shader's edge is not a colour change */
+const PATCH = 0.015;
+/* the box aspect row's patch (a 6 percent patch mean): the still at 3200 px and the box at 600 px
+   are two renderings of one shape, and liquid metal's chrome edges (the diamond's tip at the top
+   centre) move by a pixel between them; the runs of record read 82 and 83 on one channel at that
+   point with a 3 percent patch and 0 at the other three */
+const ASPECT_PATCH = 0.03;
 /** The WebGL renderer string of the page's browser, for the measurement row. */
 async function rendererString(p: Page): Promise<string> {
   return p.evaluate(() => {
@@ -189,25 +207,41 @@ test(title('shaders.frame.auto-capture'), async () => {
   const size = file ? pngSize(file.bytes) : null;
   const key = String(asset?.source?.frameKey ?? '');
   /* the filmstrip card shows the frame: the card's picture sampled where the block sits on the
-     slide against the frame's own centre */
+     slide against the frame's own centre, both over the same relative area of the block (the
+     card's patch is the frame's patch scaled to the block's share of the slide), read again every
+     500 ms for up to 10 s since the card's thumbnail is re rendered after the commit and the
+     hosted instance serves it after the frame; the time and the reads are recorded */
   const pos = (b?.pos ?? null) as { x: number; y: number; w: number; h: number } | null;
-  const cardSrc = await page.evaluate((sid) => {
-    const card = document.querySelector(`[data-control="filmstrip.slide.${sid}"] img`);
-    return card ? (card as HTMLImageElement).currentSrc || card.getAttribute('src') : null;
-  }, slideId);
-  let card: { rgb: [number, number, number][] } | null = null;
-  let frameCentre: { rgb: [number, number, number][] } | null = null;
-  if (cardSrc && pos && file) {
-    await page.waitForTimeout(1500);
-    card = await samplePicture(page, cardSrc, [
-      [(pos.x + pos.w / 2) / 1600, (pos.y + pos.h / 2) / 900],
-    ]);
-    frameCentre = await samplePicture(page, file.bytes, [[0.5, 0.5]]);
+  let cardSrc: string | null = null;
+  let cardDistance: number | null = null;
+  let cardMs = 0;
+  let cardReads = 0;
+  if (pos && file) {
+    const frameCentre = await samplePicture(page, file.bytes, [[0.5, 0.5]], PATCH);
+    const t1 = Date.now();
+    for (;;) {
+      cardSrc = await page.evaluate((sid) => {
+        const card = document.querySelector(`[data-control="filmstrip.slide.${sid}"] img`);
+        return card ? (card as HTMLImageElement).currentSrc || card.getAttribute('src') : null;
+      }, slideId);
+      if (cardSrc) {
+        cardReads += 1;
+        const card = await samplePicture(
+          page,
+          cardSrc,
+          [[(pos.x + pos.w / 2) / 1600, (pos.y + pos.h / 2) / 900]],
+          (PATCH * pos.w) / 1600,
+        );
+        if (card && frameCentre) cardDistance = rgbDistance(card.rgb[0]!, frameCentre.rgb[0]!);
+      }
+      cardMs = Date.now() - t1;
+      if ((cardDistance !== null && cardDistance <= 64) || cardMs > 10_000) break;
+      await page.waitForTimeout(500);
+    }
   }
-  const cardDistance = card && frameCentre ? rgbDistance(card.rgb[0]!, frameCentre.rgb[0]!) : null;
   test.info().annotations.push({
     type: 'capture',
-    description: `${shader!.how}; setup frame ${first.asset ?? 'none'} after ${first.ms} ms; ${how}; frame ${got.asset ?? 'none'} ${ms} ms after the change; source ${JSON.stringify(asset?.source ?? null).slice(0, 300)}; file ${size ? `${size.width} by ${size.height}` : 'unread'}; card sample distance ${cardDistance ?? 'unread'}`,
+    description: `${shader!.how}; setup frame ${first.asset ?? 'none'} after ${first.ms} ms; ${how}; frame ${got.asset ?? 'none'} ${ms} ms after the change; source ${JSON.stringify(asset?.source ?? null).slice(0, 300)}; file ${size ? `${size.width} by ${size.height} through the ${file?.via === 'redirect' ? "assets route's redirect" : 'assets route'}` : 'unread'}; card sample distance ${cardDistance ?? 'unread'} (${cardSrc ? `${cardReads} read(s) over ${cardMs} ms, a ${Math.round(PATCH * 200)} percent patch mean of the block` : 'no card picture'})`,
   });
   expect(got.asset, 'the block has a frame asset after the recipe change').not.toBeNull();
   expect(ms, 'the frame arrives within 10 s of the change (800 ms plus the capture)').toBeLessThan(
@@ -218,7 +252,7 @@ test(title('shaders.frame.auto-capture'), async () => {
   expect(String(asset?.source?.['renderer'] ?? ''), 'the renderer string').not.toBe('');
   expect(key, 'a frameKey').toMatch(KEY);
   expect(got.asset, 'the asset id is frame-<first 16 hex of frameKey> (5.5)').toBe(
-    `frame-${key.slice(0, 16)}`,
+    frameAssetIdOf(key),
   );
   expect(size, 'the PNG decodes').not.toBeNull();
   expect(Math.max(size!.width, size!.height), 'the long side 3200').toBe(3200);
@@ -272,11 +306,16 @@ test(title('shaders.frame.box-aspect'), async () => {
       const img = document.querySelector('.pt-slide [data-recipe] img, .pt-slide .material img');
       return img ? (img as HTMLImageElement).currentSrc || img.getAttribute('src') : null;
     });
-    still = src ? await samplePicture(viewer, src, POINTS) : null;
+    still = src ? await samplePicture(viewer, src, POINTS, ASPECT_PATCH) : null;
   } finally {
     await viewer.close();
   }
   let live: { rgb: [number, number, number][] } | null = null;
+  /* the editor draws the new frame before its box is read: the sheet's picture for the block is
+     the new asset and decoded (lib.ts waitFrameDrawn), else the clip reads the earlier frame */
+  const drawn = got.asset
+    ? await waitFrameDrawn(page, id, got.asset, 8_000)
+    : { drawn: false, ms: 0 };
   await page.emulateMedia({ reducedMotion: 'reduce' });
   try {
     await page.keyboard.press('Escape');
@@ -289,6 +328,7 @@ test(title('shaders.frame.box-aspect'), async () => {
         page,
         { x: rect.x + 2, y: rect.y + 2, width: rect.width - 4, height: rect.height - 4 },
         POINTS,
+        ASPECT_PATCH,
       );
   } finally {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
@@ -297,7 +337,7 @@ test(title('shaders.frame.box-aspect'), async () => {
     still && live ? POINTS.map((_, i) => rgbDistance(still!.rgb[i]!, live!.rgb[i]!)) : null;
   test.info().annotations.push({
     type: 'aspect',
-    description: `${how}; box ${after ? `${after.pos.w} by ${after.pos.h}` : 'unread'}; frame ${got.asset ?? 'none'} after ${got.ms} ms, ${size ? `${size.width} by ${size.height}` : 'unread'} (wanted 3200 by about ${want}); viewer against the editor at rest: ${distances ? distances.join(', ') : 'unread'}`,
+    description: `${how}; box ${after ? `${after.pos.w} by ${after.pos.h}` : 'unread'}; frame ${got.asset ?? 'none'} after ${got.ms} ms, ${size ? `${size.width} by ${size.height}` : 'unread'} (wanted 3200 by about ${want}); the editor drew it ${drawn.drawn ? `${drawn.ms} ms later` : `not within ${drawn.ms} ms`}; viewer against the editor at rest: ${distances ? `${distances.join(', ')} (a ${Math.round(ASPECT_PATCH * 200)} percent patch mean)` : 'unread'}`,
   });
   expect(after, 'the block').not.toBeNull();
   expect(
@@ -765,17 +805,46 @@ async function setPlayShaders(p: Page, want: RegExp): Promise<boolean> {
   await menuPath(p, 'view', 'view.playShaders', row.id);
   return true;
 }
-const showCanvases = (p: Page) =>
-  p.evaluate(() => {
-    const show = document.querySelector('[data-control="present.show"]');
-    const img = show?.querySelector('.material img, [data-recipe] img');
-    return {
-      canvases: show ? show.querySelectorAll('canvas').length : -1,
-      frame: img
-        ? (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0
-        : false,
-    };
-  });
+/**
+ * The show's canvases and whether the block's frame picture is decoded, polled for up to
+ * `timeout` ms until the frame is (a 3200 px picture through the assets route, on a hosted
+ * instance through its redirect to the Blob store, is not decoded 1.2 s after the show opens);
+ * `ms` is the time the frame took.
+ */
+async function showCanvases(
+  p: Page,
+  timeout = 10_000,
+): Promise<{ canvases: number; frame: boolean; ms: number }> {
+  const t0 = Date.now();
+  for (;;) {
+    const facts = await p.evaluate(() => {
+      const show = document.querySelector('[data-control="present.show"]');
+      const img = show?.querySelector('.material img, [data-recipe] img');
+      return {
+        canvases: show ? show.querySelectorAll('canvas').length : -1,
+        frame: img
+          ? (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0
+          : false,
+      };
+    });
+    const ms = Date.now() - t0;
+    if (facts.frame || ms > timeout) return { ...facts, ms };
+    await p.waitForTimeout(250);
+  }
+}
+/* the P1 item the two show rows measure (docs/FEATURES.md 5.2 item 4, 5.6): the show's
+   ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx) and the Shader section's Play in the
+   show control land as one commit, and the section draws Play in the show only when the item is
+   on the build (7.1 `shaders.panel.section-groups`), so the control's presence is the item's; a
+   build without it draws the frame in the show and the rows read not driven with the reason,
+   never a red row on a layer no lane built (the fix round of ship two, finding 5) */
+const SHOW_LANE =
+  "not on this build: formatOptions.shader.play and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; docs/FEATURES.md 5.6, B5 with B1, P1); the show draws the frame until they land";
+/** True when the Shader section draws Play in the show, the P1 item's own control. */
+async function showLayerBuilt(p: Page, id: string): Promise<boolean> {
+  if (!(await openShaderSection(p, id))) return false;
+  return (await ctl(p, 'formatOptions.shader.play').count()) > 0;
+}
 async function leaveShow(p: Page): Promise<void> {
   if ((await ctl(p, 'present.show').count()) > 0) {
     await p.keyboard.press('Escape');
@@ -795,33 +864,23 @@ test(title('shaders.show.plays-when-on'), async () => {
       true,
       'not on this build: view.playShaders (docs/FEATURES.md 5.6, B1 by request in model.ts, P1)',
     );
+  if (!(await showLayerBuilt(page, id))) test.skip(true, SHOW_LANE);
   await setPlayShaders(page, /^on$/i);
-  /* the block's Play in the show: the section's control when drawn, else the field (a setup) */
+  /* the block's Play in the show through the section's control */
   let playHow = 'formatOptions.shader.play';
-  if (
-    (await openShaderSection(page, id)) &&
-    (await ctl(page, 'formatOptions.shader.play').count()) > 0
-  ) {
+  {
+    await openShaderSection(page, id);
     const on = ctl(page, 'formatOptions.shader.play');
     const pressed =
       (await on.getAttribute('aria-pressed')) ?? (await on.getAttribute('aria-checked'));
-    if (pressed === 'false') await on.click();
-  } else {
-    const b = await block();
-    const motion = (b?.block['motion'] ?? null) as { play?: string } | null;
-    if (motion?.play !== 'show') {
-      const s = await settled(page);
-      await invoke(page, 'block.set', {
-        slideId,
-        blockId: id,
-        path: '/motion',
-        value: { play: 'show' },
-        baseRevision: s.revision,
-      });
-      await settled(page);
-      playHow =
-        "block.set /motion { play: 'show' } through the window API (no Play in the show control)";
-    } else playHow = "motion.play already 'show' (the insert's default)";
+    if (pressed === 'false') {
+      await on.click();
+      playHow = 'formatOptions.shader.play clicked on';
+    } else {
+      const b = await block();
+      const motion = (b?.block['motion'] ?? null) as { play?: string } | null;
+      playHow = `formatOptions.shader.play already on (motion.play ${motion?.play ?? 'unset'})`;
+    }
   }
   await waitFrame(page, slideId, id, { timeout: 15_000 });
   await page.keyboard.press('Escape');
@@ -829,7 +888,7 @@ test(title('shaders.show.plays-when-on'), async () => {
   await ctl(page, 'present.open').click();
   await expect(ctl(page, 'present.show')).toBeAttached({ timeout: 10_000 });
   await page.waitForTimeout(1200);
-  const facts = await showCanvases(page);
+  const facts = await showCanvases(page, 0);
   const rect = await page.evaluate(() => {
     const c = document.querySelector('[data-control="present.show"] canvas');
     if (!c) return null;
@@ -868,6 +927,7 @@ test(title('shaders.show.frame-when-off'), async () => {
       true,
       'not on this build: view.playShaders (docs/FEATURES.md 5.6, B1 by request in model.ts, P1)',
     );
+  if (!(await showLayerBuilt(page, id))) test.skip(true, SHOW_LANE);
   await waitFrame(page, slideId, id, { timeout: 15_000 });
   await setPlayShaders(page, /^off$/i);
   await page.keyboard.press('Escape');
@@ -885,7 +945,7 @@ test(title('shaders.show.frame-when-off'), async () => {
     reducedMotion: 'reduce',
     storageState: { cookies: (await context.storageState()).cookies, origins: [] },
   });
-  let motion = { canvases: -1, frame: false };
+  let motion = { canvases: -1, frame: false, ms: 0 };
   try {
     const p2 = await reduced.newPage();
     await openEditor(p2, deck);
@@ -902,7 +962,7 @@ test(title('shaders.show.frame-when-off'), async () => {
   }
   test.info().annotations.push({
     type: 'off',
-    description: `Play shaders off: ${off.canvases} canvas, frame drawn ${off.frame}; reduced motion with the setting on: ${motion.canvases} canvas, frame drawn ${motion.frame}`,
+    description: `Play shaders off: ${off.canvases} canvas, frame drawn ${off.frame} (${off.ms} ms after the show opened plus 1.2 s); reduced motion with the setting on: ${motion.canvases} canvas, frame drawn ${motion.frame} (${motion.ms} ms)`,
   });
   expect(off.canvases, 'no canvas with the setting off').toBe(0);
   expect(off.frame, 'the frame is shown').toBe(true);

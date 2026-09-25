@@ -114,6 +114,15 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
    * in the page and its late answer is not read.
    */
   t.INVOKE_TIMEOUT_MS = Number(process.env.TURBOSLIDE_WALK_INVOKE_TIMEOUT_MS) || 60_000;
+  /**
+   * A second page of the walk's own context (a viewer read beside the editor), announced to the
+   * walk's popup handler first so it is kept and not closed as a popup (index.mjs); the caller
+   * closes it. The walk's one page rule stands: the page is read and closed inside one step.
+   */
+  t.newPage = async () => {
+    options?.expectPage?.();
+    return context.newPage();
+  };
   /** The section running (`{ name, ids, driven }`) and the step running, for the stall record. */
   let current = null;
   let activeStep = null;

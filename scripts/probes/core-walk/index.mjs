@@ -169,9 +169,19 @@ export async function runCoreWalk({
     downloads.push({ url: d.url(), name: d.suggestedFilename() });
     d.cancel().catch(() => undefined);
   });
-  /** Popups (a new tab from a card menu, Presenter view) are closed; the two window rows live in the specs. */
+  /**
+   * Popups (a new tab from a card menu, Presenter view) are closed; the two window rows live in the
+   * specs. A page the walk opens itself (`t.newPage`: the viewer read of `shaders.insert.words`)
+   * is announced before it opens and kept, since the `page` event fires for it too (the fix round
+   * of ship two: the runs of record closed the viewer under the row's own read).
+   */
   const popups = [];
+  let ownPages = 0;
   context.on('page', (p) => {
+    if (ownPages > 0) {
+      ownPages -= 1;
+      return;
+    }
     popups.push(p.url());
     p.close().catch(() => undefined);
   });
@@ -184,7 +194,14 @@ export async function runCoreWalk({
     headers: extraHTTPHeaders,
     lib,
     report,
-    options: { downloads, popups, headed: HEADED },
+    options: {
+      downloads,
+      popups,
+      headed: HEADED,
+      expectPage: () => {
+        ownPages += 1;
+      },
+    },
   });
   /**
    * The shared state of the walk: the deck and the slides the areas made. `retired` holds the

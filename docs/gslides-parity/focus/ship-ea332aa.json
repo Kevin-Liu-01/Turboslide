@@ -1,0 +1,90 @@
+{
+  "commit": "ea332aa",
+  "renderedFrom": [
+    "docs/gslides-parity/focus/verification/vector-verify-p2-preview-run1.json",
+    "docs/gslides-parity/focus/verification/vector-verify-p2-preview-specs-rerun.json"
+  ],
+  "rule": "docs/VECTOR.md 6.2 and docs/RETURN.md section 1 rule 2: parkedFeaturesOf over the last readings of the one gate run of record and the once rerun of the spec files that carried a red row on the enforce preview https://turboslide-kltqit0j2-kl01s-projects.vercel.app built from 4061007 (ea332aa after the rebase onto origin/main at da00b5e, the same source); a row carrying parks red in both runs parks the controls it names, a parkable feature red through a row without parks in both runs is parked whole, a row of a feature parked whole is not listed a second time, and a row or feature red in one run and green in the other is flaky and is not listed; the previous ship's list (ship-f1afe1e.json) is carried forward where its rows did not read green in both runs, since the menu model's advanced flags follow this list, and a carried row green in both runs leaves it (leaves); the exceptions the ship rule makes over the gate's mechanical wouldPark are in notParked, each with its reason",
+  "parkedFeatures": ["inbox", "templates"],
+  "parkedRows": [
+    {
+      "id": "arrange.group.tail-text-controls",
+      "parks": ["toolbar.group.text"]
+    },
+    {
+      "id": "logos.kit.find-a-logo",
+      "parks": ["panel.brand.logo.find"]
+    },
+    {
+      "id": "logos.picker.variants",
+      "parks": ["dialog.logo.kind.wordmark", "dialog.logo.tone.mono"]
+    },
+    {
+      "id": "tables.bar.row-column-buttons",
+      "parks": ["bar.table"]
+    },
+    {
+      "id": "tables.edge.add-row-column",
+      "parks": ["handle.table.add.column", "handle.table.add.row"]
+    },
+    {
+      "id": "tables.heads.select-row-column",
+      "parks": ["handle.table.head.column", "handle.table.head.row"]
+    },
+    {
+      "id": "tables.seam.row-drag",
+      "parks": ["handle.table.row"]
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "parks": ["file.versionHistory.showChanges"]
+    },
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": ["view.livePointers.mine", "view.livePointers.collaborators"]
+    },
+    {
+      "id": "wordart.tail.fill-outline",
+      "parks": ["toolbar.wordart.outline"]
+    }
+  ],
+  "notParked": [
+    {
+      "feature": "fonts",
+      "why": "the gate's wouldPark names it; its entries fonts.picker.specimen-rows and fonts.table.takes-family are P1 rows not on the build (FEATURES.md section 1); fonts.budget.no-load-before-ready was red once in the run of record (the editor load's 90 s stall on the blob tier) and green on the specs rerun; every other fonts row on the build is green"
+    },
+    {
+      "feature": "formatting",
+      "why": "the gate's wouldPark names it; formatting.clear.inline-marks and formatting.persistence read red from one event in the walk of record (a block.set of the walk's own refused by an instance whose mirror lacked the slide the tab had just added, then the recover's reload; the blob tier's admission class, VERIFICATION.md V.5 finding 5) and both passed in the --only formatting rerun on the same preview and on the memory tier; recorded, not chased"
+    },
+    {
+      "feature": "brand",
+      "why": "the gate's wouldPark names it; brand.logo.replace-every-slide was red once in the run of record (the footer's picture not on every slide within 5 s, the asset put's timing) and green on the specs rerun; brand.objects.kit-colours-first is a P1 row not on the build (FEATURES.md section 1)"
+    },
+    {
+      "feature": "assist",
+      "why": "the gate's wouldPark names it; assist.quota.429 is not driven with no Upstash on the preview, which PRODUCT.md 8.2 exempts as the environment's; every other assist row is green"
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "controls": ["insert.logo"],
+      "why": "not driven by design on the deployment of record (TURBOSLIDE_LOGO_UPSTREAM=fixture, not the outage; features ship.md 4.3 and 4.8); the unit test apps/studio/src/server/logos.test.ts is named; parking insert.logo would hide Insert > Logo for a row the fixture preview cannot drive"
+    },
+    {
+      "id": "logos.index.refresh-fixture",
+      "controls": ["insert.logo"],
+      "why": "a fixture only row production never drives by its rule (the index reads thesvg.org there); red in both readings because the fixture's manifest is computed from the answering instance's copy of the index behind the store's version head (the CDN lag class recorded at ship one's 5.2 and its hotfix); parking insert.logo would hide Insert > Logo for a row production cannot drive"
+    },
+    {
+      "id": "svg.render.vector-at-zoom",
+      "controls": ["intake.svg.upload", "intake.svg.paste", "intake.svg.drop", "intake.svg.url"],
+      "why": "the blob tier's timing class, forgiven by VECTOR.md 6.2 and recorded by id: the viewer at /deck/<id> loaded right after the row's own twenty writes on the blob tier answered at a revision behind the tab's and drew no img of the picture, while the sheet at 100 and at 200 percent and the show drew the svg with no PNG request in the same reading; green twice on the memory tier and twice by hand on the same preview from a seller's session (VERIFICATION.md V.5 finding 6); the production gate reads it again"
+    },
+    {
+      "id": "svg.copy.markup",
+      "controls": ["picture.svg.copy"],
+      "why": "the harness's own mechanism on a protected preview, not the product's: the read ahead's fetch of the vector file follows the route's 302 to the public store host with the OIDC header the Playwright context stamps on every request, the store refuses that preflight, and the copy writes the envelope alone (VERIFICATION.md V.5 finding 7, pass 1's finding 2; B5's open request R for the header on the deployment's own origin alone); the markup and the envelope both on the clipboard on the memory tier twice (12 of 12 in the svg spec); production sends no header, so the production gate is the reading that rules, and a red there with a mechanism outside the forgiven classes re parks picture.svg.copy by a follow up commit of the parked list alone (VECTOR.md 6.2)"
+    }
+  ],
+  "leaves": []
+}

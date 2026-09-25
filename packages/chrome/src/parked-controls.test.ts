@@ -50,11 +50,13 @@ describe('isParkedIn', () => {
     expect(isParkedIn('dialog.logo.everySlide', set, { advancedTools: 'true' })).toBe(true);
   });
 
-  it('binds the committed set, the parked list of the features round, ship one', async () => {
+  it('binds the committed set, the parked list of the vector round', async () => {
     /* the module is mocked below for the dialog's surface; the committed module is read here. The
-       set is what core-matrix.mjs --emit-parked wrote from docs/gslides-parity/focus/ship-f1afe1e.json:
-       the union of the `parks` of its ten parkedRows (the two carried rows of the earlier ships and
-       the eight P1 rows of ship one whose controls are not on the build), sorted */
+       set is what core-matrix.mjs --emit-parked wrote from docs/gslides-parity/focus/ship-ea332aa.json,
+       which carries the features round's ship one list (ship-f1afe1e.json) forward unchanged: the
+       union of the `parks` of its ten parkedRows (the two carried rows of the earlier ships and the
+       eight P1 rows of ship one whose controls are not on the build), sorted; nothing of the vector
+       round is parked (docs/VECTOR.md section 7) */
     const real = await vi.importActual<typeof import('./parked-controls')>('./parked-controls');
     expect([...real.PARKED_CONTROLS].sort()).toEqual([
       'bar.table',

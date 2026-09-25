@@ -24,7 +24,7 @@
 // return (docs/FOCUS.md section 8).
 
 /* parked-controls:begin */
-// written by scripts/probes/core-matrix.mjs --emit-parked from ship-f1afe1e.json; 14 controls
+// written by scripts/probes/core-matrix.mjs --emit-parked from ship-ea332aa.json; 14 controls
 export const PARKED_CONTROLS: ReadonlySet<string> = new Set<string>([
   'bar.table',
   'dialog.logo.kind.wordmark',

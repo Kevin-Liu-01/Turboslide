@@ -895,6 +895,22 @@ is stated and left as written elsewhere.
   takes the type only under its `web ` prefix and Safari not at all; `text/plain` markup is what
   Figma and the editors read.
 
+The ship of 2026-09-24 (`docs/gslides-parity/focus/ship-ea332aa.json`, rendered from the gate run
+of record on the enforce preview built from the fixed tree and the once rerun of the spec files that
+carried a red row, 6.2): nothing of this round is parked. Every shapes, icons and svg row on the
+build read green but two, recorded by id in the list's `notParked` and never chased:
+`svg.render.vector-at-zoom` (the viewer loaded right after the row's own twenty writes on the blob
+tier answered at a revision behind the tab's; the sheet, the show and every hand reading drew the
+svg; the timing class 6.2 forgives) and `svg.copy.markup` (the harness's OIDC header rides on the
+read ahead's fetch to the public store host on a protected preview and the store refuses that
+preflight, so the copy wrote the envelope alone there; the markup and the envelope both on the
+clipboard on the memory tier twice; production sends no header). The production gate after the
+push is the reading that rules on both: a red there with a mechanism outside the forgiven classes
+re parks the ids the row names by a follow up commit of the parked list alone. The list carries
+ship one's forward unchanged (`inbox`, `templates`, the two carried rows and the eight P1 rows
+whose controls are not on the build), so `packages/chrome/src/parked-controls.ts` keeps its
+fourteen ids and no `advanced` flag moves.
+
 ## 8. Open questions for Kevin
 
 Each with the default the rows are written against.

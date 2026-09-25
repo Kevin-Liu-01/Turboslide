@@ -692,13 +692,18 @@ test(title('svg.render.picture-gestures'), async () => {
   const words = `${tip ?? ''} ${(await crop.getAttribute('title').catch(() => null)) ?? ''} ${(await crop.getAttribute('aria-description').catch(() => null)) ?? ''}`;
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
+  /* the two Escapes close the menu and drop the selection, and the picture tail with its Crop
+     button leaves with it: the block is selected again before the toolbar is read, and the read
+     is bounded (the integrator's gates of 2026-09-25: an unbounded read of the absent button
+     waited to the test's 300 s wall on every tier after every check had passed) */
+  await selectBlock(page, blockId);
   const toolbarCrop = await ctl(page, 'toolbar.cropImage')
-    .getAttribute('aria-disabled')
+    .getAttribute('aria-disabled', { timeout: 5000 })
     .catch(() => null);
   const toolbarDisabled =
     toolbarCrop === 'true' ||
     (await ctl(page, 'toolbar.cropImage')
-      .isDisabled()
+      .isDisabled({ timeout: 3000 })
       .catch(() => false));
   /* the toolbar Crop button stays a button whose click speaks the sentence through the snackbar
      (vector/build/b1.md R4); the row reads the menu row's state and the words either surface says */

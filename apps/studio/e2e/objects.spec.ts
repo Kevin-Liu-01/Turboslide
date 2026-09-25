@@ -280,8 +280,8 @@ test('a text box drawn on the Title slide converts it; move, rotate, flip, group
   log = await logLength(page);
   await page.locator('[data-control="menubar.insert"]').click();
   await page.locator('[data-menu-item="insert.shape"]').click();
-  await page.locator('[data-menu-item="insert.shape.shapes"]').click();
-  /* the rectangle: the Shapes submenu's named row, or the gallery plate's tile where the switch
+  /* the rectangle: the named row directly under Insert > Shape since the vector round
+     (docs/VECTOR.md 2.6: the Shapes container left), or the gallery plate's tile where the switch
      draws the plate instead (docs/FOCUS.md section 4, the `altEffect`; b1 R31). The core walk
      takes the same two routes in this order (scripts/probes/core-walk/areas/shapes.mjs) */
   await page

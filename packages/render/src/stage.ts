@@ -10,6 +10,7 @@
 // scaled to the asset's ratio), its corner, the footer text at the band's centre, and the
 // counter's format. A deck without a record answers the GT band, which renders byte for byte as
 // the stage did before the kit existed.
+import { assetTwin, assetVector } from '@turboslide/schema/assets';
 import type { BrandKit, CounterFormat, SlotPosition } from '@turboslide/schema/brand';
 import type { Deck } from '@turboslide/schema/deck';
 import { deckCounterFormat } from '@turboslide/schema/deck';
@@ -84,10 +85,11 @@ export type BandAssetResolver = (
 ) => { src: string; size: [number, number]; alt: string } | undefined;
 
 /**
- * The band's resolver over a deck's assets: the twin path of the appearance (the neutral twin
- * when the asset has one) through the caller's URL rule, the renderer's `assetSrc` or its
- * `assetBase` prefix. One helper, so the editor, the viewer, the print page, the standalone file
- * and the export capture resolve the footer logo the same way (docs/PRODUCT.md 4.1, 4.4).
+ * The band's resolver over a deck's assets: the vector file of the appearance when the asset
+ * draws one (docs/VECTOR.md 4.4, `assetVector`), else the twin path (the neutral twin when the
+ * asset has one), through the caller's URL rule, the renderer's `assetSrc` or its `assetBase`
+ * prefix. One helper, so the editor, the viewer, the print page, the standalone file and the
+ * export capture resolve the footer logo the same way (docs/PRODUCT.md 4.1, 4.4).
  */
 export function bandAssetResolver(
   deck: Pick<Deck, 'assets'>,
@@ -96,7 +98,7 @@ export function bandAssetResolver(
   return (assetId, theme) => {
     const asset = deck.assets[assetId];
     if (asset === undefined) return undefined;
-    const path = 'neutral' in asset.twins ? asset.twins.neutral : asset.twins[theme];
+    const path = assetVector(asset, theme) ?? assetTwin(asset, theme);
     return { src: url(assetId, theme, path), size: asset.size, alt: asset.alt };
   };
 }

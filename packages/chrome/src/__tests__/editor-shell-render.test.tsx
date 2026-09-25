@@ -558,7 +558,7 @@ describe('the Insert menu, compact mode and the title row', () => {
         gallery.container.querySelector(`[data-control="${control}"]`),
         control,
       ).not.toBeNull();
-    clickMenuPath(gallery.container, 'insert', 'insert.shape', 'insert.shape.shapes');
+    clickMenuPath(gallery.container, 'insert', 'insert.shape');
     expect(
       [...document.querySelectorAll('[data-menu-item^="insert.shape.shapes."]')].map((el) =>
         el.getAttribute('data-menu-item'),

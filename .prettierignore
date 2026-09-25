@@ -70,3 +70,9 @@ docs/gslides-parity/features/build/*/**/*.json
 # core-gate.mjs and editor-walk-probe.mjs); the notes beside them stay under the formatter
 docs/gslides-parity/features/build/*/**/*-core-matrix.md
 docs/gslides-parity/features/build/*/**/*-core-walk.md
+# The vector round: the lanes' run JSON, the icon contact sheets (rendered markup, written by a script)
+# and the gate ledgers under the evidence folders; the notes beside them stay under the formatter
+docs/gslides-parity/vector/build/*/**/*.json
+docs/gslides-parity/vector/build/*/**/*.html
+docs/gslides-parity/vector/build/*/**/*-core-matrix.md
+docs/gslides-parity/vector/build/*/**/*-core-walk.md

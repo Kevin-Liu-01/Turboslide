@@ -4007,7 +4007,7 @@
     },
     {
       "action": "export.run",
-      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --include-comments --verify --out <out>",
+      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --include-comments --no-svg-vector --verify --out <out>",
       "command": [
         "export"
       ],
@@ -4082,6 +4082,13 @@
           "type": "boolean",
           "required": false,
           "description": "Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)"
+        },
+        {
+          "key": "svgVector",
+          "flag": "--svg-vector",
+          "type": "boolean",
+          "required": false,
+          "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects"
         },
         {
           "key": "baseline",

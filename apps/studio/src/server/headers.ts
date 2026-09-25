@@ -70,9 +70,9 @@ const INLINE_TYPES: ReadonlyArray<string> = ['image/png', 'image/jpeg', 'image/w
  * file, `Cross-Origin-Resource-Policy: same-site` (8.8), and for `image/svg+xml`,
  * `application/json` and any type outside the raster four a `Content-Disposition: attachment`
  * with a sandboxing policy, so a navigation to the file cannot run script or CSS in the studio's
- * origin. The `<img>` tags the renderer emits never load an svg from this route on a hosted
- * instance (svg is refused at intake there), and a checkout's GT import keeps its svg files as
- * downloads.
+ * origin. Since the vector round the `<img>` tags the renderer emits do load an svg picture's
+ * file from this route (docs/VECTOR.md 4.4): an image fetch ignores `Content-Disposition`, so
+ * the headers stand as they are and a navigation to the file is still a download.
  */
 export function assetResponseHeaders(
   relative: string,

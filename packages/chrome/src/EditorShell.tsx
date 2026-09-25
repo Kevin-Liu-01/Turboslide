@@ -1201,7 +1201,11 @@ export function EditorShell({
       const effect = resolveEffect(item, menuContext);
       if (item.status !== 'now' || effect === undefined) return;
       if (!isEnabled(item, menuContext)) {
-        if (item.disabledReason !== undefined) say(item.disabledReason);
+        const reason =
+          typeof item.disabledReason === 'function'
+            ? item.disabledReason(menuContext)
+            : item.disabledReason;
+        if (reason !== undefined) say(reason);
         return;
       }
       setMenuOpen(null);

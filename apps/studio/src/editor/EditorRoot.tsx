@@ -44,6 +44,7 @@ import { tableFormatSlot } from '@turboslide/chrome/inspector/table';
 import { Overlay } from '@turboslide/chrome/Overlay';
 import { buildPaletteEntries } from '@turboslide/chrome/palette-data';
 import type { PaletteEntry } from '@turboslide/chrome/palette-data';
+import { isParked } from '@turboslide/chrome/parked-controls';
 import { usePtShell, usePtStage } from '@turboslide/chrome/shell-context';
 import type { ShellItem, ShellMode, ShellSection } from '@turboslide/chrome/shell-data';
 import { SourceDrawer } from '@turboslide/chrome/SourceDrawer';
@@ -413,14 +414,16 @@ async function uploadBundleFile(file: File): Promise<{ id: string }> {
   return { id: answer.deckId };
 }
 
-/** The OS file picker for one picture. */
-function pickPicture(onFile: (file: File) => void): void {
+/** The OS file picker for one picture; `svg` adds the vector type to the chooser. */
+function pickPicture(svg: boolean, onFile: (file: File) => void): void {
   const input = document.createElement('input');
   input.type = 'file';
-  /* the four raster types the hosted intake accepts (docs/FEATURES.md 4.7, 4.5; audit-logos 4):
-     an svg picked by another way meets the seller's sentence, and the raster path behind
-     TURBOSLIDE_SVG_RASTER adds the type when it leaves its flag */
-  input.accept = 'image/png,image/jpeg,image/webp,image/gif';
+  /* the four raster types the hosted intake accepts (docs/FEATURES.md 4.7, 4.5; audit-logos 4)
+     and, since the vector round, svg (docs/VECTOR.md 4.2, 4.3 item 1): the intake sanitizes it and
+     keeps the file as vector; the type is left out while intake.svg.upload is parked (4.8) */
+  input.accept = svg
+    ? 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg'
+    : 'image/png,image/jpeg,image/webp,image/gif';
   input.style.display = 'none';
   input.onchange = () => {
     const file = input.files?.[0];
@@ -1227,7 +1230,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
             : 'none';
 
   const uploadPicture = (target: PictureTarget): void => {
-    pickPicture((file) => {
+    pickPicture(!isParked('intake.svg.upload', shellSettings), (file) => {
       const handle = handleRef.current;
       if (!handle) {
         controller.say('Open a slide in Editing mode to add a picture');
@@ -1822,6 +1825,8 @@ function EditorStage({
           present={shell.present}
           narrow={shell.narrow}
           dispatch={controller.invoke}
+          /* the parked ways in of the vector round (docs/VECTOR.md 4.8): a parked way is off */
+          parked={(id) => isParked(id, editorShell.settings)}
           selection={toStageSelection(snap.selection, slide.id)}
           onSelectionChange={(next) => controller.select(fromStageSelection(next, slide.id))}
           onMultiSelectionChange={onMultiSelection}

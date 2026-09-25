@@ -2,6 +2,7 @@
 // details, board, logoPlates.
 import { classes, el, escapeText, px, style, voidEl } from '../html.ts';
 import { renderText } from '../text.ts';
+import { vectorOf } from '@turboslide/schema/assets';
 import type { BlockOf } from '@turboslide/schema/blocks';
 import {
   dataAttrs,
@@ -80,10 +81,15 @@ export function renderShot(block: BlockOf<'shot'>, ctx: BlockContext): string {
     dither !== undefined;
   // a trimmed, masked or dithered picture sits in the `.shot-crop` frame
   const framed = block.trim !== undefined || block.mask !== undefined || dither !== undefined;
+  // a vector asset (docs/VECTOR.md 4.4, `vectorOf`) shows whole at the box's aspect: contain
+  // inline, as picture.ts writes it, since the canvas rule of a shot is fill (block-css.ts)
+  const shotAsset = ctx.asset?.(block.asset);
+  const vector = shotAsset !== undefined && vectorOf(shotAsset) !== undefined;
   const imgStyle = style(
     block.aspect && `aspect-ratio:${block.aspect}`,
     block.aspect && 'object-fit:cover',
     block.aspect && `object-position:${block.crop ?? 'center'}`,
+    vector && 'object-fit:contain',
     block.border === false && 'border:0',
     block.frame !== undefined && !framed ? frameDeclarations(block.frame).join(';') : false,
     ...adjustDeclarations(block.adjust),

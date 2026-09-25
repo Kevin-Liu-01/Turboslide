@@ -2,7 +2,7 @@ import type { Capability, Role } from '@turboslide/schema/access';
 import type { ActionId } from '@turboslide/schema/actions';
 
 import type { IconName } from '../icons';
-import { STUB_PREFIX, stubClause } from './strings.ts';
+import { FORMAT as FORMAT_WORDS, STUB_PREFIX, stubClause } from './strings.ts';
 
 /**
  * The menu model of the Google Slides parity round (SPEC 2.13): every row of SPEC sections 2.0 to
@@ -397,6 +397,8 @@ export type MenuPredicate =
   | 'cellRangeSelected'
   | 'mergedCellSelected'
   | 'imageEdited'
+  /** a picture whose asset is a raster: crop applies (docs/VECTOR.md 4.4) */
+  | 'rasterPictureSelected'
   | 'chartSelected'
   | 'runSelected'
   | 'listLevelUp'
@@ -460,8 +462,8 @@ export type MenuItem = {
    * never disabled, so no tooltip has to name the person's role. Always when absent.
    */
   when?: MenuPredicate;
-  /** the tooltip sentence while the predicate says no */
-  disabledReason?: string;
+  /** the tooltip sentence while the predicate says no; a function answers per state, undefined for the doc */
+  disabledReason?: string | ((ctx: MenuContext) => string | undefined);
   /** one sentence for the tooltip beyond the label and the key */
   doc?: string;
   /**
@@ -662,14 +664,17 @@ function gate(
  */
 function replaceImageItems(prefix: string): MenuItem[] {
   return [
-    now(`${prefix}.upload`, 'Upload from computer', action('asset.add'), { icon: 'photo' }),
+    now(`${prefix}.upload`, 'Upload from computer', action('asset.add'), {
+      icon: 'arrow-up-tray',
+    }),
     /* docs/FOCUS.md 3.2 parked By URL and From this presentation with the Insert rows; By URL
        returned in the product round (docs/PRODUCT.md section 5) */
-    now(`${prefix}.byUrl`, 'By URL', dialog('Image by URL')),
+    now(`${prefix}.byUrl`, 'By URL', dialog('Image by URL'), { icon: 'link' }),
     /* the features round (docs/FEATURES.md 4.4; build/b6.md R1): Replace image > Logo swaps the
        picture's asset for a mark of thesvg.org and keeps the box */
     now(`${prefix}.logo`, 'Logo', dialog('Logo'), {
       turboslide: true,
+      icon: 'tag',
       doc: 'A company logo from thesvg.org in the same box',
       terms: ['logo', 'brand', 'company', 'mark'],
     }),
@@ -677,7 +682,7 @@ function replaceImageItems(prefix: string): MenuItem[] {
       `${prefix}.fromThisPresentation`,
       'From this presentation',
       dialog('Pictures in this presentation'),
-      { turboslide: true, advanced: true },
+      { turboslide: true, advanced: true, icon: 'document-duplicate' },
     ),
   ];
 }
@@ -1350,11 +1355,13 @@ const INSERT: Menu = {
       'Image',
       [
         now('insert.image.upload', 'Upload from computer', action('asset.add'), {
+          icon: 'arrow-up-tray',
           doc: 'Pictures up to 25 MB',
         }),
         /* the features round (docs/FEATURES.md 4.3; build/b1.md R1): the Logo picker in the submenu */
         now('insert.image.logo', 'Logo', dialog('Logo'), {
           turboslide: true,
+          icon: 'tag',
           doc: 'A company logo from thesvg.org, or your own',
           terms: ['logo', 'brand', 'company', 'mark'],
         }),
@@ -1368,12 +1375,12 @@ const INSERT: Menu = {
         /* docs/FOCUS.md 3.2 parked By URL (three stacked defects, audit-images rows 2 to 4) and
            From this presentation; Upload from computer is the core route. The product round
            returns By URL with its three defects fixed (docs/PRODUCT.md section 5; build/b2.md 1.12) */
-        now('insert.image.byUrl', 'By URL', dialog('Image by URL')),
+        now('insert.image.byUrl', 'By URL', dialog('Image by URL'), { icon: 'link' }),
         now(
           'insert.image.fromThisPresentation',
           'From this presentation',
           dialog('Pictures in this presentation'),
-          { turboslide: true, advanced: true },
+          { turboslide: true, advanced: true, icon: 'document-duplicate' },
         ),
       ],
       { icon: 'photo' },
@@ -1405,48 +1412,45 @@ const INSERT: Menu = {
        the default view for this ship. The rows stay, flagged, and return whole under FOCUS.md
        section 8 once the rows pass; nothing here is deleted. The return round (docs/RETURN.md
        2.2) returns Insert > Shape with its three named rows; All shapes, Arrows, Callouts and
-       Equation stay parked until the geometry interpreter draws their presets (2.9). */
+       Equation stay parked until the geometry interpreter draws their presets (2.9). The vector
+       round (docs/VECTOR.md 2.6, 3.2; vector/build/b1.md R1): the three named rows hoist out of
+       the Shapes container with their glyph icons, and Shapes (Google's row, once All shapes),
+       Arrows, Callouts and Equation follow them in the default view as glyph grids now that the
+       geometry interpreter draws every preset. */
     sub(
       'insert.shape',
       'Shape',
       [
-        sub('insert.shape.shapes', 'Shapes', [
-          now('insert.shape.shapes.rectangle', 'Rectangle', action('block.insert'), {
-            turboslide: true,
-            doc: 'Click to place a 240 by 160 rectangle, or drag to draw one',
-          }),
-          now('insert.shape.shapes.rounded', 'Rounded rectangle', action('block.insert'), {
-            turboslide: true,
-            doc: 'Click to place a rounded rectangle, or drag to draw one',
-          }),
-          now('insert.shape.shapes.ellipse', 'Ellipse', action('block.insert'), {
-            turboslide: true,
-            doc: 'Click to place an ellipse, or drag to draw one',
-          }),
-        ]),
-        now('insert.shape.gallery', 'All shapes', shapeGrid('shapes'), {
+        now('insert.shape.shapes.rectangle', 'Rectangle', action('block.insert'), {
           turboslide: true,
-          advanced: true,
-          doc: 'The gallery of shape presets; every tile places a shape or draws one by a drag',
+          icon: 'shape-rect',
+          doc: 'Click to place a 240 by 160 rectangle, or drag to draw one',
         }),
-        parked(
-          sub(
-            'insert.shape.arrows',
-            'Arrows',
-            [
-              now('insert.shape.arrows.arrow', 'Arrow', action('block.insert'), {
-                turboslide: true,
-              }),
-            ],
-            { effect: shapeGrid('arrows') },
-          ),
-        ),
+        now('insert.shape.shapes.rounded', 'Rounded rectangle', action('block.insert'), {
+          turboslide: true,
+          icon: 'shape-round-rect',
+          doc: 'Click to place a rounded rectangle, or drag to draw one',
+        }),
+        now('insert.shape.shapes.ellipse', 'Ellipse', action('block.insert'), {
+          turboslide: true,
+          icon: 'shape-ellipse',
+          doc: 'Click to place an ellipse, or drag to draw one',
+        }),
+        now('insert.shape.gallery', 'Shapes', shapeGrid('shapes'), {
+          icon: 'squares-2x2',
+          dividerBefore: true,
+          doc: 'Every shape preset; a tile places a shape, or drag to draw one',
+        }),
+        now('insert.shape.arrows', 'Arrows', shapeGrid('arrows'), {
+          icon: 'arrow-long-right',
+          doc: 'Block arrows; a tile places one, or drag to draw one',
+        }),
         now('insert.shape.callouts', 'Callouts', shapeGrid('callouts'), {
-          advanced: true,
-          doc: 'A shape with a pointer you can drag',
+          icon: 'chat-bubble-left',
+          doc: 'A shape with a pointer; set the pointer under Format options',
         }),
         now('insert.shape.equation', 'Equation', shapeGrid('equation'), {
-          advanced: true,
+          icon: 'variable',
           doc: 'Plus, minus, multiply, divide, equal and not equal',
         }),
       ],
@@ -1469,15 +1473,19 @@ const INSERT: Menu = {
       'Chart',
       [
         now('insert.chart.bar', 'Bar', action('block.insert', { chart: 'bar' }), {
+          icon: 'chart-bars',
           enabled: 'hasSlide',
         }),
         now('insert.chart.column', 'Column', action('block.insert', { chart: 'column' }), {
+          icon: 'chart-bar',
           enabled: 'hasSlide',
         }),
         now('insert.chart.line', 'Line', action('block.insert', { chart: 'line' }), {
+          icon: 'chart-line',
           enabled: 'hasSlide',
         }),
         now('insert.chart.pie', 'Pie', action('block.insert', { chart: 'pie' }), {
+          icon: 'chart-pie',
           enabled: 'hasSlide',
         }),
         omit('insert.chart.fromSheets', 'From Sheets', GOOGLE_SERVICE),
@@ -1490,6 +1498,7 @@ const INSERT: Menu = {
       doc: 'Grid, Hierarchy, Timeline, Process, Relationship or Cycle',
     }),
     now('insert.wordArt', 'Word art', client('wordArt'), {
+      icon: 'word-art',
       enabled: 'hasSlide',
       doc: 'Type your text and press Enter',
     }),
@@ -1504,34 +1513,40 @@ const INSERT: Menu = {
       'insert.line',
       'Line',
       [
-        now('insert.line.line', 'Line', action('block.insert')),
-        now('insert.line.arrow', 'Arrow', action('block.insert')),
+        now('insert.line.line', 'Line', action('block.insert'), { icon: 'line-line' }),
+        now('insert.line.arrow', 'Arrow', action('block.insert'), { icon: 'line-arrow' }),
         now('insert.line.rule', 'Rule', action('block.insert'), {
+          icon: 'line-rule',
           turboslide: true,
           advanced: true,
           doc: 'A hairline across the slot',
         }),
         now('insert.line.elbowConnector', 'Elbow connector', action('block.insert'), {
           google: 'Elbow Connector',
+          icon: 'line-elbow',
           enabled: 'hasSlide',
           doc: 'Turns a corner between two shapes and follows them when they move',
         }),
         now('insert.line.curvedConnector', 'Curved connector', action('block.insert'), {
           google: 'Curved Connector',
+          icon: 'line-curved',
           enabled: 'hasSlide',
           doc: 'Bends between two shapes and follows them when they move',
         }),
         now('insert.line.curve', 'Curve', action('block.insert'), {
+          icon: 'line-curve',
           advanced: true,
           enabled: 'hasSlide',
           doc: 'Click each point; double click to finish',
         }),
         now('insert.line.polyline', 'Polyline', action('block.insert'), {
+          icon: 'line-polyline',
           advanced: true,
           enabled: 'hasSlide',
           doc: 'Click each corner; double click to finish',
         }),
         now('insert.line.scribble', 'Scribble', action('block.insert'), {
+          icon: 'line-scribble',
           advanced: true,
           enabled: 'hasSlide',
           doc: 'Draw freehand',
@@ -1540,6 +1555,7 @@ const INSERT: Menu = {
       { icon: 'minus' },
     ),
     now('insert.specialCharacters', 'Special characters', dialog('Insert special characters'), {
+      icon: 'language',
       advanced: true,
       doc: 'Arrows, punctuation, currency, math, symbols and emoji, by name',
     }),
@@ -1568,7 +1584,7 @@ const INSERT: Menu = {
       dividerBefore: true,
       doc: 'After the current slide, with the same layout',
     }),
-    now('insert.slideNumbers', 'Slide numbers', dialog('Slide numbers')),
+    now('insert.slideNumbers', 'Slide numbers', dialog('Slide numbers'), { icon: 'hashtag' }),
     omit('insert.placeholder', 'Placeholder', 'Theme builder only'),
     later('insert.templates', 'Templates', START_FROM_GT),
     later('insert.buildingBlocks', 'Building blocks', START_FROM_GT),
@@ -1602,6 +1618,7 @@ const FORMAT: Menu = {
         now('format.text.bold', 'Bold', action('block.set'), {
           key: shortcut('Cmd+B'),
           enabled: 'textBlockSelected',
+          icon: 'bold',
         }),
         now('format.text.italic', 'Italic', action('text.style', { mark: 'i' }), {
           key: shortcut('Cmd+I'),
@@ -1693,18 +1710,22 @@ const FORMAT: Menu = {
       now('format.alignIndent.left', 'Left', action('block.set'), {
         key: shortcut('Cmd+Shift+L'),
         enabled: 'textBlockSelected',
+        icon: 'bars-3-bottom-left',
       }),
       now('format.alignIndent.center', 'Center', action('block.set'), {
         key: shortcut('Cmd+Shift+E'),
         enabled: 'textBlockSelected',
+        icon: 'bars-3-center-left',
       }),
       now('format.alignIndent.right', 'Right', action('block.set'), {
         key: shortcut('Cmd+Shift+R'),
         enabled: 'textBlockSelected',
+        icon: 'bars-3-bottom-right',
       }),
       now('format.alignIndent.justified', 'Justified', action('block.set'), {
         key: shortcut('Cmd+Shift+J'),
         enabled: 'textBlockSelected',
+        icon: 'bars-3',
       }),
       now(
         'format.alignIndent.increaseIndent',
@@ -1875,8 +1896,12 @@ const FORMAT: Menu = {
       'format.image',
       'Image',
       [
+        /* the vector round (docs/VECTOR.md 4.4): crop has no vector meaning, so an svg picture
+           disables the row with the one sentence; with nothing selected the row keeps its doc */
         now('format.image.cropImage', 'Crop image', client('cropMode'), {
-          enabled: 'imageSelected',
+          enabled: 'rasterPictureSelected',
+          disabledReason: (ctx) =>
+            ctx.selection.vector === true ? FORMAT_WORDS.picture.svgCrop : undefined,
           icon: 'viewfinder-circle',
           doc: 'Drag the handles to crop; press Enter to finish',
         }),
@@ -1884,16 +1909,17 @@ const FORMAT: Menu = {
           'format.image.maskImage',
           'Mask image',
           { kind: 'submenu', dynamic: 'shapes', action: 'block.mask' },
-          { advanced: true, enabled: 'imageSelected', doc: 'Shows the picture inside a shape' },
+          { icon: 'mask', enabled: 'imageSelected', doc: 'Shows the picture inside a shape' },
         ),
         sub(
           'format.image.replaceImage',
           'Replace image',
           replaceImageItems('format.image.replaceImage'),
-          { enabled: 'imageSelected' },
+          { icon: 'arrow-path', enabled: 'imageSelected' },
         ),
         /* the product round (docs/PRODUCT.md section 2 rank 10): the caption under a picture */
         now('format.image.addCaption', 'Add a caption', client('addCaption'), {
+          icon: 'bars-2',
           enabled: 'imageSelected',
           turboslide: true,
           doc: 'A caption under the picture; type it on the slide or in Image options',
@@ -1905,6 +1931,7 @@ const FORMAT: Menu = {
         }),
         /* the product round (docs/PRODUCT.md 4.4): the picture as the kit's logo on every slide */
         now('format.image.useOnEverySlide', 'Use on every slide', client('useOnEverySlide'), {
+          icon: 'slide',
           enabled: 'imageSelected',
           turboslide: true,
           doc: 'Makes this picture the logo on the title slide and in the footer of every slide',
@@ -1918,6 +1945,7 @@ const FORMAT: Menu = {
           doc: 'The deck’s two tone screen over the picture; change it under Format options',
         }),
         now('format.image.imageOptions', 'Image options', panel('Format options'), {
+          icon: 'adjustments',
           enabled: 'imageSelected',
         }),
       ],
@@ -1928,34 +1956,41 @@ const FORMAT: Menu = {
        is the shapes and lines feature's (docs/FOCUS.md 2.6) and leaves the default view with it
        under ruling (1) (build/b3.md R14); it returned with the two features in the return round
        (docs/RETURN.md 2.2, 2.3, 3.3). */
-    sub('format.bordersLines', 'Borders & lines', [
-      now('format.bordersLines.borderColor', 'Border color', client('borderColorPicker'), {
-        enabled: 'hasBorderField',
-        disabledReason: SELECT_BORDERED,
-      }),
-      now('format.bordersLines.borderWeight', 'Border weight', client('borderWeightPicker'), {
-        enabled: 'hasBorderField',
-        disabledReason: SELECT_BORDERED,
-      }),
-      sub(
-        'format.bordersLines.borderDash',
-        'Border dash',
-        dashItems('format.bordersLines.borderDash', 'blockSelected'),
-        { enabled: 'blockSelected' },
-      ),
-      sub(
-        'format.bordersLines.lineStart',
-        'Line start',
-        lineEndItems('format.bordersLines.lineStart', 'start'),
-        { enabled: 'lineSelected', dividerBefore: true },
-      ),
-      sub(
-        'format.bordersLines.lineEnd',
-        'Line end',
-        lineEndItems('format.bordersLines.lineEnd', 'end'),
-        { enabled: 'lineSelected' },
-      ),
-    ]),
+    sub(
+      'format.bordersLines',
+      'Borders & lines',
+      [
+        now('format.bordersLines.borderColor', 'Border color', client('borderColorPicker'), {
+          icon: 'swatch',
+          enabled: 'hasBorderField',
+          disabledReason: SELECT_BORDERED,
+        }),
+        now('format.bordersLines.borderWeight', 'Border weight', client('borderWeightPicker'), {
+          icon: 'line-weight',
+          enabled: 'hasBorderField',
+          disabledReason: SELECT_BORDERED,
+        }),
+        sub(
+          'format.bordersLines.borderDash',
+          'Border dash',
+          dashItems('format.bordersLines.borderDash', 'blockSelected'),
+          { icon: 'line-dash', enabled: 'blockSelected' },
+        ),
+        sub(
+          'format.bordersLines.lineStart',
+          'Line start',
+          lineEndItems('format.bordersLines.lineStart', 'start'),
+          { icon: 'line-start', enabled: 'lineSelected', dividerBefore: true },
+        ),
+        sub(
+          'format.bordersLines.lineEnd',
+          'Line end',
+          lineEndItems('format.bordersLines.lineEnd', 'end'),
+          { icon: 'line-end', enabled: 'lineSelected' },
+        ),
+      ],
+      { icon: 'line-weight' },
+    ),
     now('format.formatOptions', 'Format options', panel('Format options'), {
       icon: 'adjustments',
       dividerBefore: true,
@@ -1984,11 +2019,13 @@ const FORMAT: Menu = {
        is drawn in the Format menu as well as on the text block's right-click menu; Google keeps
        the section inside Format options alone, hence `turboslide` */
     now('format.textFitting', 'Text fitting', panel('Format options'), {
+      icon: 'arrows-pointing-in',
       enabled: 'textBlockSelected',
       turboslide: true,
       doc: 'Do not autofit, Shrink text on overflow, or Resize shape to fit text',
     }),
     now('format.dropShadow', 'Drop shadow', panel('Format options'), {
+      icon: 'shadow',
       advanced: true,
       enabled: 'blockSelected',
       contextOnly: true,
@@ -1999,9 +2036,10 @@ const FORMAT: Menu = {
       'format.changeShape',
       'Change shape',
       { kind: 'submenu', dynamic: 'shapes', action: 'shape.set' },
-      { advanced: true, enabled: 'shapeSelected', contextOnly: true, turboslide: true },
+      { icon: 'square-2-stack', enabled: 'shapeSelected', contextOnly: true, turboslide: true },
     ),
     now('format.editData', 'Edit data', panel('Format options'), {
+      icon: 'table-cells',
       enabled: 'chartSelected',
       contextOnly: true,
       turboslide: true,
@@ -2037,7 +2075,7 @@ const FORMAT: Menu = {
           doc: 'Keeps the first series',
         }),
       ],
-      { enabled: 'chartSelected', contextOnly: true, turboslide: true },
+      { icon: 'chart-bar', enabled: 'chartSelected', contextOnly: true, turboslide: true },
     ),
   ],
 };
@@ -3100,6 +3138,8 @@ export type MenuContext = {
     range?: [number, number];
     /** the selected picture is cropped, masked or adjusted */
     imageEdited?: boolean;
+    /** the selected picture draws a vector (svg) asset (docs/VECTOR.md 4.4): crop is refused with the sentence */
+    vector?: boolean;
     /** the selected text block carries an outline (word art) */
     outlined?: boolean;
     /** the selected list item's level, 1 to 9 */
@@ -3259,6 +3299,8 @@ export function evaluate(predicate: MenuPredicate | undefined, ctx: MenuContext)
       return selection.tableCell && selection.merged === true;
     case 'imageEdited':
       return selection.block === 'image' && selection.imageEdited === true;
+    case 'rasterPictureSelected':
+      return selection.block === 'image' && selection.vector !== true;
     case 'coversSheet':
       return selection.block === 'image' && selection.coversSheet === true;
     case 'hasGuides':
@@ -3397,8 +3439,11 @@ export function resolveLabel(item: MenuItem, ctx: MenuContext): string {
  */
 export function tooltipDoc(item: MenuItem, ctx: MenuContext): string | undefined {
   if (item.status === 'later') return stubClause(item.stubReason ?? '');
-  if (item.status === 'now' && !evaluate(item.enabled, ctx) && item.disabledReason !== undefined)
-    return item.disabledReason;
+  if (item.status === 'now' && !evaluate(item.enabled, ctx)) {
+    const reason =
+      typeof item.disabledReason === 'function' ? item.disabledReason(ctx) : item.disabledReason;
+    if (reason !== undefined) return reason;
+  }
   return item.doc;
 }
 

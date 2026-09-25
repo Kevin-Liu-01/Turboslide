@@ -983,7 +983,6 @@ describe('the Insert menu', () => {
       },
       'insert.shape.shapes.rounded': { kind: 'tool', tool: { kind: 'shape', shape: 'rounded' } },
       'insert.shape.shapes.ellipse': { kind: 'tool', tool: { kind: 'shape', shape: 'ellipse' } },
-      'insert.shape.arrows.arrow': { kind: 'tool', tool: { kind: 'line', line: 'arrow' } },
       'insert.line.line': { kind: 'tool', tool: { kind: 'line', line: 'line' } },
       'insert.line.arrow': { kind: 'tool', tool: { kind: 'line', line: 'arrow' } },
       'insert.line.rule': { kind: 'tool', tool: { kind: 'line', line: 'rule' } },

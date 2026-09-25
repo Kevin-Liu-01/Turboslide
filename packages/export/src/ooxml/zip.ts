@@ -47,8 +47,13 @@ export function slideNumber(path: string): number {
   return Number(/slide(\d+)\.xml$/.exec(path)?.[1] ?? 0);
 }
 
-/** True for a part that is already compressed data and is stored rather than deflated. */
+/**
+ * True for a part that is already compressed data and is stored rather than deflated. An svg
+ * media part (docs/VECTOR.md 4.6) is text and deflates by about three quarters, so it is the one
+ * media part that is deflated.
+ */
 export function isStoredPart(path: string): boolean {
+  if (/\.svg$/i.test(path)) return false;
   return /^ppt\/(media|fonts)\//.test(path) || /\.(png|jpe?g|gif|webp|fntdata)$/i.test(path);
 }
 

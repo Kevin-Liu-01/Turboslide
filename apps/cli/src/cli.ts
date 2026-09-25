@@ -192,7 +192,7 @@ Commands
   build --out <file> --budget 16    the standalone file under a byte budget; exit 1 over budget
   export pptx [ids|all] --mode flatten|native --theme light,dark|both --fonts exact|standard|embed
                                     [--embed-fonts] [--headings raster] [--raster-scale auto|2|3] [--picture-scale 2|3]
-                                    [--exclude-share-alike] [--baseline-target libreoffice|none] [--no-jpeg] [--verify] --out <dir>
+                                    [--exclude-share-alike] [--baseline-target libreoffice|none] [--no-jpeg] [--no-svg-vector] [--verify] --out <dir>
                                     PPTX per theme (flatten is perfect, native is editable text), <deckId>-both.zip for both
                                     themes, export-report.json; exit 1 when the report fails
   export pptx ... [--include-skipped] [--include-notes] [--include-comments] [--tables auto|table|rows]

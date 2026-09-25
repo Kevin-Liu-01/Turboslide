@@ -1007,9 +1007,20 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
               lines.push(segment);
             }
           } else {
-            const shapeEl = svg.querySelector('rect, ellipse, path');
+            // the vector round (docs/VECTOR.md 2.3; vector/build/b2.md request 4): a preset of
+            // several paths may open with one that has no stroke (the can's body) or no fill (the
+            // arc), so the fill is read from the first geometry path that has one and the stroke
+            // from the first that has one, the shade overlay (data-shade) skipped
+            const shapeEls = Array.from(svg.querySelectorAll('rect, ellipse, path')).filter(
+              (each) => !each.hasAttribute('data-shade'),
+            );
+            const shapeEl = shapeEls[0];
             if (shapeEl) {
-              const c = getComputedStyle(shapeEl);
+              const styles = shapeEls.map((each) => getComputedStyle(each));
+              const filled = styles.find((s) => s.fill !== 'none' && s.fill !== '');
+              const stroked = styles.find(
+                (s) => s.stroke !== 'none' && s.stroke !== '' && parseFloat(s.strokeWidth) > 0,
+              );
               const legacy: Record<string, SceneRect['shape']> = {
                 rectangle: 'rect',
                 rect: 'rect',
@@ -1019,7 +1030,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
               };
               const rect: SceneRect = {
                 box: toBox(svgRect),
-                fill: c.fill === 'none' || c.fill === '' ? 'rgba(0, 0, 0, 0)' : c.fill,
+                fill: filled === undefined ? 'rgba(0, 0, 0, 0)' : filled.fill,
                 blockId,
                 role: 'shape',
                 shape: legacy[kind] ?? 'rect',
@@ -1032,9 +1043,11 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
                 const rx = parseFloat(shapeEl.getAttribute('rx') ?? '');
                 if (Number.isFinite(rx) && rx > 0) rect.radius = round(rx * sx);
               }
-              const sw = parseFloat(c.strokeWidth);
-              if (c.stroke !== 'none' && c.stroke !== '' && sw > 0)
-                rect.line = { color: c.stroke, width: round(sw) };
+              if (stroked !== undefined)
+                rect.line = {
+                  color: stroked.stroke,
+                  width: round(parseFloat(stroked.strokeWidth)),
+                };
               rects.push(rect);
             }
           }

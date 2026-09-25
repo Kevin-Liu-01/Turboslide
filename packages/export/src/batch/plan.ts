@@ -75,6 +75,8 @@ export type BatchExportInput = {
   slideIds?: 'all' | string[];
   includeSkipped?: boolean;
   includeNotes?: boolean;
+  /** the svgBlip switch of docs/VECTOR.md 4.6; false writes the PNG blip alone */
+  svgVector?: boolean;
 };
 
 /** One asset twin the play list references, with the sha256 of its file when the plan was made. */

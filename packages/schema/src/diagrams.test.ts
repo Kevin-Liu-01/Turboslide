@@ -21,7 +21,7 @@ import {
 import type { DiagramKind, DiagramStyle } from './diagrams.ts';
 import { workedDocument } from './fixtures.ts';
 import type { Position } from './position.ts';
-import { rectSites } from './shapes.ts';
+import { siteCount } from './connect.ts';
 import { validateDocument } from './validate.ts';
 
 const BOX: Position = { x: 200, y: 150, w: 1200, h: 600 };
@@ -140,7 +140,9 @@ describe('DIAGRAM_TEMPLATES', () => {
               const target = ids.get(end?.block ?? '');
               expect(target?.type).toBe('shape');
               expect(end?.site).toBeGreaterThanOrEqual(0);
-              expect(end?.site).toBeLessThan(rectSites(1, 1).length);
+              /* the vector round (docs/VECTOR.md 2.2): the preset's own sites, a rounded
+                 rectangle's ECMA four, so the count is the target's */
+              expect(end?.site).toBeLessThan(target === undefined ? 0 : siteCount(target));
             }
           }
           /* the whole thing validates as a canvas slide of a deck */

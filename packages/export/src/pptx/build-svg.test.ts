@@ -170,7 +170,9 @@ describe('the Editable text file (native mode)', () => {
     });
     expect(built.validation.valid).toBe(true);
     expect(built.counts?.svgBlips).toBe(0);
-    expect(built.residual).toContain('svg: 1 vector picture(s) travel as PNG alone (svgVector false)');
+    expect(built.residual).toContain(
+      'svg: 1 vector picture(s) travel as PNG alone (svgVector false)',
+    );
     const { pic, svgPart, types } = await readPic(built.bytes, 'ts:s1#p1:1');
     expect(countSvgBlips(pic)).toBe(0);
     expect(svgPart).toBeUndefined();

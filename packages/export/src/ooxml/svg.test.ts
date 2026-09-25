@@ -77,14 +77,19 @@ const TYPES =
   '</Types>';
 
 /** A minimal package holding one slide with two PNG pictures and a shape, valid as it stands. */
-async function fixture(slide = slideXml(pic(2, 'ts:s#pic:1', 'rId1') + pic(3, 'ts:s#other:2', 'rId3') + SP)): Promise<{ zip: Package; xml: string }> {
+async function fixture(
+  slide = slideXml(pic(2, 'ts:s#pic:1', 'rId1') + pic(3, 'ts:s#other:2', 'rId3') + SP),
+): Promise<{ zip: Package; xml: string }> {
   const zip = new JSZip();
   zip.file('[Content_Types].xml', TYPES);
   zip.file(
     '_rels/.rels',
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/></Relationships>',
   );
-  zip.file('ppt/presentation.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:presentation ${NS}/>`);
+  zip.file(
+    'ppt/presentation.xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:presentation ${NS}/>`,
+  );
   zip.file('ppt/slides/slide1.xml', slide);
   zip.file('ppt/slides/_rels/slide1.xml.rels', RELS);
   zip.file('ppt/media/image-1-1.png', PNG);
@@ -101,7 +106,9 @@ describe('the helpers', () => {
     const enc = (s: string): Uint8Array => new TextEncoder().encode(s);
     expect(looksLikeSvg(SVG)).toBe(true);
     expect(looksLikeSvg(enc('<?xml version="1.0"?>\n<!-- Figma -->\n<svg xmlns="x"/>'))).toBe(true);
-    expect(looksLikeSvg(enc('﻿  <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "x"><svg>'))).toBe(true);
+    expect(looksLikeSvg(enc('﻿  <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "x"><svg>'))).toBe(
+      true,
+    );
     expect(looksLikeSvg(enc('<SVG xmlns="x"/>'))).toBe(true);
     expect(looksLikeSvg(enc('<svgx/>'))).toBe(false);
     expect(looksLikeSvg(enc('hello <svg/>'))).toBe(false);
@@ -131,8 +138,14 @@ describe('the helpers', () => {
     expect((twice.xml.match(/Extension="svg"/g) ?? []).length).toBe(1);
     const bare = addSvgDefault('<Types xmlns="x"></Types>');
     expect(bare.added).toBe(true);
-    expect(bare.xml).toBe('<Types xmlns="x"><Default Extension="svg" ContentType="image/svg+xml"/></Types>');
-    expect(addSvgDefault('<Types xmlns="x"><Default Extension="SVG" ContentType="image/svg+xml"/></Types>').added).toBe(false);
+    expect(bare.xml).toBe(
+      '<Types xmlns="x"><Default Extension="svg" ContentType="image/svg+xml"/></Types>',
+    );
+    expect(
+      addSvgDefault(
+        '<Types xmlns="x"><Default Extension="SVG" ContentType="image/svg+xml"/></Types>',
+      ).added,
+    ).toBe(false);
   });
 });
 
@@ -150,14 +163,20 @@ describe('writeSvgBlip (VECTOR.md 4.6, 6.3)', () => {
     expect(out.xml).toContain('<a:blip r:embed="rId3"></a:blip>');
     expect(out.xml).toContain(SP);
     expect(countSvgBlips(out.xml)).toBe(1);
-    expect(listShapes(out.xml).map((s) => s.name)).toEqual(['ts:s#pic:1', 'ts:s#other:2', 'ts:s#box']);
+    expect(listShapes(out.xml).map((s) => s.name)).toEqual([
+      'ts:s#pic:1',
+      'ts:s#other:2',
+      'ts:s#box',
+    ]);
     const rels = await readPart(zip, 'ppt/slides/_rels/slide1.xml.rels');
     expect(rels).toContain(
       '<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/ts-s-pic-1.svg"/></Relationships>',
     );
     expect(await readPartBytes(zip, 'ppt/media/ts-s-pic-1.svg')).toEqual(SVG);
     const types = await readPart(zip, '[Content_Types].xml');
-    expect((types.match(/<Default Extension="svg" ContentType="image\/svg\+xml"\/>/g) ?? []).length).toBe(1);
+    expect(
+      (types.match(/<Default Extension="svg" ContentType="image\/svg\+xml"\/>/g) ?? []).length,
+    ).toBe(1);
     writePart(zip, PART, out.xml);
     // the content types clean of the post-process keeps a used default
     await cleanContentTypes(zip);
@@ -193,10 +212,11 @@ describe('writeSvgBlip (VECTOR.md 4.6, 6.3)', () => {
     expect(second.xml).toContain('<a:blip r:embed="rId3"><a:extLst><a:ext uri=');
     expect(second.xml).toContain('r:embed="rId5"/>');
     expect(countSvgBlips(second.xml)).toBe(2);
-    expect(listParts(zip).filter((p) => p.endsWith('.svg')).sort()).toEqual([
-      'ppt/media/ts-s-other-2.svg',
-      'ppt/media/ts-s-pic-1.svg',
-    ]);
+    expect(
+      listParts(zip)
+        .filter((p) => p.endsWith('.svg'))
+        .sort(),
+    ).toEqual(['ppt/media/ts-s-other-2.svg', 'ppt/media/ts-s-pic-1.svg']);
     writePart(zip, PART, second.xml);
     expect((await validatePackage(zip)).valid).toBe(true);
   });
@@ -205,13 +225,16 @@ describe('writeSvgBlip (VECTOR.md 4.6, 6.3)', () => {
     const { zip, xml } = await fixture();
     expect((await writeSvgBlip(zip, PART, xml, 'ts:s#missing', SVG)).written).toBe(false);
     expect((await writeSvgBlip(zip, PART, xml, 'ts:s#box', SVG)).written).toBe(false);
-    expect((await writeSvgBlip(zip, 'ppt/slides/slide9.xml', xml, 'ts:s#pic:1', SVG)).written).toBe(false);
+    expect((await writeSvgBlip(zip, 'ppt/slides/slide9.xml', xml, 'ts:s#pic:1', SVG)).written).toBe(
+      false,
+    );
     expect(listParts(zip).filter((p) => p.endsWith('.svg'))).toEqual([]);
     expect(await readPart(zip, '[Content_Types].xml')).not.toContain('Extension="svg"');
   });
 
   test('a blip that already holds an ext list gains the ext inside it', async () => {
-    const inner = '<a:extLst><a:ext uri="{28A0092B-C50C-407E-A947-70E740481C1C}"><a14:useLocalDpi xmlns:a14="x" val="0"/></a:ext></a:extLst>';
+    const inner =
+      '<a:extLst><a:ext uri="{28A0092B-C50C-407E-A947-70E740481C1C}"><a14:useLocalDpi xmlns:a14="x" val="0"/></a:ext></a:extLst>';
     const { zip, xml } = await fixture(slideXml(pic(2, 'ts:s#pic:1', 'rId1', inner)));
     const out = await writeSvgBlip(zip, PART, xml, 'ts:s#pic:1', SVG);
     expect(out.written).toBe(true);

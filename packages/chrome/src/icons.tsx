@@ -1004,10 +1004,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
   'line-line': [{ d: 'M3,16 L17,4', stroke: true }],
   /* the line's angle is atan2(-12, 14); the head's three points at (17, 4), and the stroke stops
      at the head's base (5 back along the line) so its round cap stays under the head */
-  'line-arrow': [
-    { d: 'M3,16 L13.2,7.25', stroke: true },
-    { d: 'M17,4 L11.58,5.36 L14.83,9.15 Z' },
-  ],
+  'line-arrow': [{ d: 'M3,16 L13.2,7.25', stroke: true }, { d: 'M17,4 L11.58,5.36 L14.83,9.15 Z' }],
   'line-rule': [{ d: 'M2,10 H18', stroke: true }],
   'line-elbow': [{ d: 'M3,15 H10 V5 H17', stroke: true }],
   'line-curved': [{ d: 'M3,15 C10,15 10,5 17,5', stroke: true }],
@@ -1037,14 +1034,8 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
   'line-dash': [{ d: 'M2,10 H18', stroke: true, dash: '3 2' }],
   /* Line start and Line end: the rule with the filled head at the left, or the right; the
      stroke stops at the head's base */
-  'line-start': [
-    { d: 'M7,10 H18', stroke: true },
-    { d: 'M2,10 L7,12.5 L7,7.5 Z' },
-  ],
-  'line-end': [
-    { d: 'M2,10 H13', stroke: true },
-    { d: 'M18,10 L13,7.5 L13,12.5 Z' },
-  ],
+  'line-start': [{ d: 'M7,10 H18', stroke: true }, { d: 'M2,10 L7,12.5 L7,7.5 Z' }],
+  'line-end': [{ d: 'M2,10 H13', stroke: true }, { d: 'M18,10 L13,7.5 L13,12.5 Z' }],
   /* Mask image: a stroked square holding a filled ellipse */
   mask: [
     { d: 'M3,3 H17 V17 H3 Z', stroke: true },
@@ -1053,10 +1044,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
   /* Drop shadow: the filled square (6,6) to (17,17) behind a stroked square (3,3) to (14,14); the
      glyph draws in one colour, so the back square is written as the part of it the front square
      leaves visible (the L outside (14,14)), and the front square stays open */
-  shadow: [
-    { d: 'M14,6 H17 V17 H6 V14 H14 Z' },
-    { d: 'M3,3 H14 V14 H3 Z', stroke: true },
-  ],
+  shadow: [{ d: 'M14,6 H17 V17 H6 V14 H14 Z' }, { d: 'M3,3 H14 V14 H3 Z', stroke: true }],
 };
 
 export type IconProps = { name: IconName; size?: number };

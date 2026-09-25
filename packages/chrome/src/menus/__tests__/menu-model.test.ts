@@ -3126,9 +3126,9 @@ describe('the vector round: the seven Shape rows, the icons on the visual rows, 
     }
     expect(contextMenuIds('shape')).toContain('format.changeShape');
     expect(contextMenuIds('image')).toContain('format.image.maskImage');
-    expect(
-      presentControls(TOOLBAR_TAILS.shape, OFF).map((control) => control.control),
-    ).toContain('toolbar.changeShape');
+    expect(presentControls(TOOLBAR_TAILS.shape, OFF).map((control) => control.control)).toContain(
+      'toolbar.changeShape',
+    );
   });
 
   it('disables Crop image on an svg picture with the one sentence, and keeps the plain doc otherwise', () => {
@@ -3154,7 +3154,11 @@ describe('the vector round: the seven Shape rows, the icons on the visual rows, 
     expect(isEnabled(crop, OFF)).toBe(false);
     expect(tooltipDoc(crop, OFF)).toBe(crop.doc);
     /* the other picture rows keep working on an svg picture: mask, replace, reset, options */
-    for (const id of ['format.image.maskImage', 'format.image.replaceImage', 'format.image.imageOptions'])
+    for (const id of [
+      'format.image.maskImage',
+      'format.image.replaceImage',
+      'format.image.imageOptions',
+    ])
       expect(isEnabled(itemById(id), svg), id).toBe(true);
   });
 });

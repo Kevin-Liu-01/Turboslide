@@ -46,7 +46,11 @@ const deck = {
       vector: { light: 'assets/mono-light.svg', dark: 'assets/mono-dark.svg' },
     },
     // a ship one logo: the untinted sanitized source is the vector
-    figma: { ...base('figma', 'logo'), source: logoSource(), sourceFile: 'assets/figma.source.1234.svg' },
+    figma: {
+      ...base('figma', 'logo'),
+      source: logoSource(),
+      sourceFile: 'assets/figma.source.1234.svg',
+    },
     // a tinted ship one logo: no tinted svg on disk, PNG twins alone
     tinted: {
       ...base('tinted', 'logo'),
@@ -118,7 +122,10 @@ describe('vectorFilesOf', () => {
     expect([...out.keys()]).toEqual(['q1']);
     const gtMark = vectorFilesOf(
       opener,
-      { assets: deck.assets, brand: { mark: { kind: 'default' }, footer: { logo: 'none' } } } as unknown as Pick<Deck, 'assets' | 'brand'>,
+      {
+        assets: deck.assets,
+        brand: { mark: { kind: 'default' }, footer: { logo: 'none' } },
+      } as unknown as Pick<Deck, 'assets' | 'brand'>,
       'light',
       DIR,
     );

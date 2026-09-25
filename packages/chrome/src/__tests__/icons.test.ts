@@ -76,7 +76,10 @@ describe('the icon table', () => {
     const shared = ICON_NAMES.filter((name) => spriteIds.includes(`i-${name}`));
     expect(shared.length).toBeGreaterThan(20);
     for (const name of shared) {
-      expect(iconPaths(name).map((path) => path.d), name).toEqual(spritePaths(`i-${name}`));
+      expect(
+        iconPaths(name).map((path) => path.d),
+        name,
+      ).toEqual(spritePaths(`i-${name}`));
     }
     /* none of the round’s names is drawn by the sheet, so the sprite gains nothing (VECTOR.md 3.4) */
     for (const name of DRAWN) expect(spriteIds, name).not.toContain(`i-${name}`);

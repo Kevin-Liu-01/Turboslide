@@ -684,12 +684,16 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       for (const entry of slideRewrites.svgs) {
         const label = `${scene?.slideId ?? part}: ${entry.name}`;
         if (!existsSync(entry.file)) {
-          residual.add(`svg: ${label} names a vector file that is missing; the picture travels as PNG alone`);
+          residual.add(
+            `svg: ${label} names a vector file that is missing; the picture travels as PNG alone`,
+          );
           continue;
         }
         const bytes = readFileSync(entry.file);
         if (!looksLikeSvg(bytes)) {
-          residual.add(`svg: ${label} names a vector file that is not an svg; the picture travels as PNG alone`);
+          residual.add(
+            `svg: ${label} names a vector file that is not an svg; the picture travels as PNG alone`,
+          );
           continue;
         }
         const out = await writeSvgBlip(zip, part, xml, entry.name, bytes);
@@ -721,9 +725,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       `svg: ${counts.svgBlips} picture(s) carry asvg:svgBlip beside the PNG blip (docs/VECTOR.md 4.6); PowerPoint 2016 and later draw the vector, every other viewer the PNG fallback`,
     );
   if (vectorsLeftOut > 0)
-    residual.add(
-      `svg: ${vectorsLeftOut} vector picture(s) travel as PNG alone (svgVector false)`,
-    );
+    residual.add(`svg: ${vectorsLeftOut} vector picture(s) travel as PNG alone (svgVector false)`);
   if (counts.rotated > 0)
     residual.add(
       `rotation: ${counts.rotated} object(s) carry a rotation or a flip on their own xfrm; a rotated group is written per member (gslides-parity SPEC-2 2.1)`,

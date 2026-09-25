@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { BULLET_PRESETS, NUMBER_PRESETS } from '@turboslide/schema/text';
-import { DASHES, LINE_ENDS, SHAPE_PRESETS } from '@turboslide/schema/shapes';
+import { DASHES, LINE_ENDS, SHAPE_PRESETS, shapePath } from '@turboslide/schema/shapes';
 
 import { DashList } from '../pickers/DashList';
 import { LineEndPicker } from '../pickers/LineEndPicker';
@@ -43,6 +43,67 @@ describe('ShapePicker', () => {
       '[data-control="shapes.pick.rightArrow"]',
     ) as HTMLElement;
     expect(tile.getAttribute('aria-label')).toBe('Right arrow');
+    /* the vector round (docs/VECTOR.md 2.6): one category names the grid after itself */
+    const grid = arrows.container.querySelector('[role="grid"]') as HTMLElement;
+    expect(grid.getAttribute('aria-label')).toBe('Arrows');
+    expect(grid.getAttribute('data-category')).toBe('arrows');
+    expect(grid.getAttribute('data-tip')).toBe('Arrows');
+    cleanup();
+    const every = render(<ShapePicker onPick={() => undefined} control="format.changeShape" />);
+    const allGrid = every.container.querySelector('[role="grid"]') as HTMLElement;
+    expect(allGrid.getAttribute('aria-label')).toBe('Shapes');
+    expect(allGrid.getAttribute('data-category')).toBe('all');
+    expect(allGrid.getAttribute('data-control')).toBe('format.changeShape.grid');
+    expect(
+      every.container.querySelector('[data-control="format.changeShape.pick.hexagon"]'),
+    ).not.toBeNull();
+  });
+
+  it('draws every tile from the preset’s own outline: the rows shapes.insert.grid-* count the distinct glyphs (docs/VECTOR.md 6.1)', () => {
+    /* the glyph is `shapePath(id, 48, 36)` stroked once per tile; the rectangle's is the box; the
+       interpreter (B2, docs/VECTOR.md 2.1) answers every preset's own path, so the distinct count
+       per category is the row's: Shapes at least 95 of 100, Arrows 26, Callouts 4, Equation 6 */
+    const glyphs = (category: 'shapes' | 'arrows' | 'callouts' | 'equation') => {
+      const view = render(<ShapePicker category={category} onPick={() => undefined} />);
+      const ds = [...view.container.querySelectorAll('[role="gridcell"] svg path')].map((path) =>
+        path.getAttribute('d'),
+      );
+      cleanup();
+      return ds;
+    };
+    const shapes = glyphs('shapes');
+    expect(shapes).toHaveLength(shapeTiles('shapes').length);
+    expect(shapes).toHaveLength(99);
+    expect(shapes[0]).toBe(shapePath('rect', 48, 36));
+    expect(shapes[0]).toBe('M0,0 H48 V36 H0 Z');
+    /* 94 distinct of 99: the five flowchart presets whose ECMA geometry is another preset's
+       (Process is rect, Alternate process roundRect, Connector ellipse, Extract triangle, Decision
+       diamond) draw the same outline by definition, and no other pair does */
+    expect(new Set(shapes).size).toBe(94);
+    for (const [a, b] of [
+      ['rect', 'flowChartProcess'],
+      ['roundRect', 'flowChartAlternateProcess'],
+      ['ellipse', 'flowChartConnector'],
+      ['triangle', 'flowChartExtract'],
+      ['diamond', 'flowChartDecision'],
+    ] as const)
+      expect(shapePath(a, 48, 36), `${a} = ${b}`).toBe(shapePath(b, 48, 36));
+    for (const [category, count] of [
+      ['arrows', 26],
+      ['callouts', 4],
+      ['equation', 6],
+    ] as const) {
+      const ds = glyphs(category);
+      expect(ds, category).toHaveLength(count);
+      expect(new Set(ds).size, `${category} distinct`).toBe(count);
+    }
+    /* every glyph is one path stroked at the picker's weight, no fill */
+    const view = render(<ShapePicker category="equation" onPick={() => undefined} />);
+    for (const path of view.container.querySelectorAll('[role="gridcell"] svg path')) {
+      expect(path.getAttribute('fill')).toBe('none');
+      expect(path.getAttribute('stroke')).toBe('currentColor');
+      expect(path.getAttribute('stroke-width')).toBe('1.5');
+    }
   });
 
   it('picks on a click and on Enter, walks with the arrows, and leaves ArrowLeft on the first column to the menu', () => {

@@ -66,6 +66,14 @@
   overflow: visible;
 }
 
+/* the vector round (docs/VECTOR.md 2.6): the shape grids are 8 tiles of 40 px plus their gaps and
+   padding, 342 px, wider than the menu's 320 px, and the dynamic plate hides its overflow, so the
+   eighth column was clipped; a plate holding a shape grid takes the grid's own width and the
+   plate positions itself from that measurement (Menu.tsx DynamicPlate) */
+.ts-menu.is-dynamic:has(.ts-shapes) {
+  max-width: none;
+}
+
 .ts-picker-glyphs {
   display: inline-flex;
   gap: 6px;

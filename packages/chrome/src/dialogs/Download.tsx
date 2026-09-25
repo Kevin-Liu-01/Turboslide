@@ -10,6 +10,7 @@ import { Icon } from '../icons';
 import { cn } from '../lib/cn';
 import { DIALOGS } from '../menus/strings';
 import { useMountEffect } from '../lib/useMountEffect';
+import { isParked } from '../parked-controls';
 import { tipProps } from '../Tooltip';
 
 /**
@@ -211,7 +212,7 @@ export const DOWNLOAD_TYPES: ReadonlyArray<{ format: 'pptx' | 'pdf'; label: stri
 
 export function DownloadDialog({ format: rowFormat, options = false }: DownloadDialogProps) {
   const shell = useEditorShell();
-  const { input } = shell;
+  const { input, settings } = shell;
   const hasTableOrChart = deckHasTableOrChart(input.document);
   /* the one click path (rank 8): no dialog for a PDF, nor for a PowerPoint file of a deck without
      a table or a chart, unless the Download options row asked for the dialog */
@@ -276,6 +277,10 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
         ...(format === 'pptx' && chosen.raster ? { headings: 'raster' } : {}),
         ...(chosen.skipped ? { includeSkipped: true } : {}),
         ...(format === 'pptx' && chosen.notes ? { includeNotes: true } : {}),
+        /* the vector round (docs/VECTOR.md 4.6, 6.2): an svg picture exports as vector by the
+           header's default; the parked control alone selects the PNG blip, and no key is sent
+           otherwise so the header's default applies */
+        ...(isParked('export.svg.vector', settings) ? { svgVector: false } : {}),
         verify: false,
       })
       .then(() => {

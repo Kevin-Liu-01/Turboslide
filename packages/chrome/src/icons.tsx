@@ -18,7 +18,20 @@
  * from arrow-uturn-left on under their Heroicons names, copied from heroicons optimized/20/solid
  * on 2026-09-12; the theme sprite gains the same symbols through packages/theme add-icon when
  * the schema's ICON_NAMES takes them (a request to the integrator, docs/gslides-parity/build/b3.md).
+ * The vector round (docs/VECTOR.md 3.1, 3.4) adds two kinds of glyph for the Insert and Format
+ * rows that name a visual thing: three more Heroicons (arrow-long-right, chat-bubble-left,
+ * chart-pie, copied from heroicons 2.2.0 optimized/20/solid on 2026-09-24) and, where Heroicons
+ * has no symbol, a glyph drawn from the thing itself in the same weight: the three named shapes
+ * from the schema's own `shapePath` at 16 by 12 (filled, the outline the shape picker strokes),
+ * the eight line kinds from their own paths, the chart kinds, Word art, the border rows, Mask
+ * image and Drop shadow. A drawn entry with `stroke` renders `fill="none" stroke="currentColor"`
+ * at width 1.5 (the picker's weight, pickers/ShapePicker.tsx) with round caps and joins. The
+ * family rule stands: this is the only icon family in the chrome, every glyph one
+ * `<svg viewBox="0 0 20 20">` at 16 px, never an inline path elsewhere and never an `<img>`;
+ * __tests__/icons.test.ts pins the table against the theme sprite.
  */
+import { shapePath } from '@turboslide/schema/shapes';
+
 export type IconName =
   | 'sidebar'
   | 'prev'
@@ -92,6 +105,9 @@ export type IconName =
   | 'bars-3-center-left'
   | 'bars-3'
   | 'bars-3-bottom-right'
+  /* the vector round (docs/VECTOR.md 3.3): Format > Align & indent > Left, under its Heroicon
+     name; the same paths draw `sidebar` and `text` */
+  | 'bars-3-bottom-left'
   | 'bars-2'
   | 'list-bullet'
   | 'numbered-list'
@@ -140,9 +156,48 @@ export type IconName =
   | 'view-columns'
   /* round three (gslides-parity SPEC-3 4.2, 5.5): the inbox plate and Notification settings */
   | 'bell'
-  | 'inbox';
+  | 'inbox'
+  /* the vector round (docs/VECTOR.md 3.2, 3.3): the Arrows, Callouts and Pie rows */
+  | 'arrow-long-right'
+  | 'chat-bubble-left'
+  | 'chart-pie'
+  /* the vector round (docs/VECTOR.md 3.1): the glyphs drawn from the thing itself */
+  | 'shape-rect'
+  | 'shape-round-rect'
+  | 'shape-ellipse'
+  | 'line-line'
+  | 'line-arrow'
+  | 'line-rule'
+  | 'line-elbow'
+  | 'line-curved'
+  | 'line-curve'
+  | 'line-polyline'
+  | 'line-scribble'
+  | 'chart-bars'
+  | 'chart-line'
+  | 'word-art'
+  | 'line-weight'
+  | 'line-dash'
+  | 'line-start'
+  | 'line-end'
+  | 'mask'
+  | 'shadow';
 
-type IconPath = { d: string; evenodd?: boolean };
+/**
+ * One path of a glyph. A Heroicon entry is filled by the svg's `fill="currentColor"`; a drawn
+ * entry with `stroke` draws `fill="none" stroke="currentColor"` at `width` (1.5 when absent, the
+ * shape picker's weight) with round caps and joins and `dash` as its `stroke-dasharray`;
+ * `translate` moves the path on the 20 grid (the shape glyphs are `shapePath(id, 16, 12)` at
+ * (2, 4), docs/VECTOR.md 3.1).
+ */
+export type IconPath = {
+  d: string;
+  evenodd?: boolean;
+  stroke?: true;
+  width?: number;
+  dash?: string;
+  translate?: readonly [number, number];
+};
 
 /* bars-3-bottom-left: the list toggle, and the Text section's glyph */
 const BARS_3_BOTTOM_LEFT: readonly IconPath[] = [
@@ -162,6 +217,7 @@ const ARROWS_POINTING_OUT: readonly IconPath[] = [
 const PATHS: Record<IconName, readonly IconPath[]> = {
   sidebar: BARS_3_BOTTOM_LEFT,
   text: BARS_3_BOTTOM_LEFT,
+  'bars-3-bottom-left': BARS_3_BOTTOM_LEFT,
   /* chevron-left */
   prev: [
     {
@@ -913,22 +969,141 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       evenodd: true,
     },
   ],
+  /* the vector round (docs/VECTOR.md 3.2, 3.3): three more Heroicons, copied verbatim from
+     heroicons 2.2.0 optimized/20/solid on 2026-09-24 (Insert > Shape > Arrows and Callouts,
+     Insert > Chart > Pie) */
+  'arrow-long-right': [
+    {
+      d: 'M2 10a.75.75 0 0 1 .75-.75h12.59l-2.1-1.95a.75.75 0 1 1 1.02-1.1l3.5 3.25a.75.75 0 0 1 0 1.1l-3.5 3.25a.75.75 0 1 1-1.02-1.1l2.1-1.95H2.75A.75.75 0 0 1 2 10Z',
+      evenodd: true,
+    },
+  ],
+  'chat-bubble-left': [
+    {
+      d: 'M3.43 2.524A41.29 41.29 0 0 1 10 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.202 41.202 0 0 1-5.183.501.78.78 0 0 0-.528.224l-3.579 3.58A.75.75 0 0 1 6 17.25v-3.443a41.033 41.033 0 0 1-2.57-.33C1.993 13.244 1 11.986 1 10.573V5.426c0-1.413.993-2.67 2.43-2.902Z',
+      evenodd: true,
+    },
+  ],
+  'chart-pie': [
+    {
+      d: 'M12 9a1 1 0 0 1-1-1V3c0-.552.45-1.007.997-.93a7.004 7.004 0 0 1 5.933 5.933c.078.547-.378.997-.93.997h-5Z',
+    },
+    {
+      d: 'M8.003 4.07C8.55 3.994 9 4.449 9 5v5a1 1 0 0 0 1 1h5c.552 0 1.008.45.93.997A7.001 7.001 0 0 1 2 11a7.002 7.002 0 0 1 6.003-6.93Z',
+    },
+  ],
+  /* the vector round (docs/VECTOR.md 3.1): the glyphs drawn from the thing itself. The three
+     shapes are the schema's own `shapePath` at 16 by 12, filled, moved to (2, 4): the outline the
+     shape picker strokes at 48 by 36, so the row and the plate draw one geometry. The line kinds
+     are their own paths, stroked at the picker's weight; the arrow heads are
+     `lineEndPath('fillArrow', 5)` (`M0,0 L-5,-2.5 L-5,2.5 Z`, the tip at the origin pointing along
+     +x) rotated to the line's angle and placed at its end, written out on the grid. */
+  'shape-rect': [{ d: shapePath('rect', 16, 12), translate: [2, 4] }],
+  'shape-round-rect': [{ d: shapePath('roundRect', 16, 12), translate: [2, 4] }],
+  'shape-ellipse': [{ d: shapePath('ellipse', 16, 12), translate: [2, 4] }],
+  'line-line': [{ d: 'M3,16 L17,4', stroke: true }],
+  /* the line's angle is atan2(-12, 14); the head's three points at (17, 4), and the stroke stops
+     at the head's base (5 back along the line) so its round cap stays under the head */
+  'line-arrow': [
+    { d: 'M3,16 L13.2,7.25', stroke: true },
+    { d: 'M17,4 L11.58,5.36 L14.83,9.15 Z' },
+  ],
+  'line-rule': [{ d: 'M2,10 H18', stroke: true }],
+  'line-elbow': [{ d: 'M3,15 H10 V5 H17', stroke: true }],
+  'line-curved': [{ d: 'M3,15 C10,15 10,5 17,5', stroke: true }],
+  /* the Catmull-Rom curve of packages/render/src/blocks/primitives.ts `catmullRomPath` through
+     (3,14), (8,6), (12,13), (17,5), open: the tangents are a sixth of the chord to the neighbours,
+     the numbers written as its `px` writes them (three decimals, no trailing zeros) */
+  'line-curve': [
+    {
+      d: 'M3,14 C3.833,12.667 6.5,6.167 8,6 C9.5,5.833 10.5,13.167 12,13 C13.5,12.833 16.167,6.333 17,5',
+      stroke: true,
+    },
+  ],
+  'line-polyline': [{ d: 'M3,14 L8,6 L12,13 L17,5', stroke: true }],
+  'line-scribble': [{ d: 'M3,12 C5,4 7,18 10,10 S15,4 17,12', stroke: true }],
+  /* Insert > Chart > Bar: three filled horizontal bars of widths 14, 9 and 12 at height 3
+     (Heroicons chart-bar is the Column row's vertical one) */
+  'chart-bars': [{ d: 'M2,4 H16 V7 H2 Z M2,8.5 H11 V11.5 H2 Z M2,13 H14 V16 H2 Z' }],
+  'chart-line': [{ d: 'M3,15 L8,9 L12,12 L17,4', stroke: true }],
+  /* Word art: a stroked A at width 2 */
+  'word-art': [{ d: 'M4,17 L10,3 L16,17 M6.5,12 H13.5', stroke: true, width: 2 }],
+  /* Borders & lines and Border weight: three lines at widths 1, 2 and 3 */
+  'line-weight': [
+    { d: 'M3,5 H17', stroke: true, width: 1 },
+    { d: 'M3,10 H17', stroke: true, width: 2 },
+    { d: 'M3,15.5 H17', stroke: true, width: 3 },
+  ],
+  'line-dash': [{ d: 'M2,10 H18', stroke: true, dash: '3 2' }],
+  /* Line start and Line end: the rule with the filled head at the left, or the right; the
+     stroke stops at the head's base */
+  'line-start': [
+    { d: 'M7,10 H18', stroke: true },
+    { d: 'M2,10 L7,12.5 L7,7.5 Z' },
+  ],
+  'line-end': [
+    { d: 'M2,10 H13', stroke: true },
+    { d: 'M18,10 L13,7.5 L13,12.5 Z' },
+  ],
+  /* Mask image: a stroked square holding a filled ellipse */
+  mask: [
+    { d: 'M3,3 H17 V17 H3 Z', stroke: true },
+    { d: 'M6,10 A4,3 0 1 0 14,10 A4,3 0 1 0 6,10 Z' },
+  ],
+  /* Drop shadow: the filled square (6,6) to (17,17) behind a stroked square (3,3) to (14,14); the
+     glyph draws in one colour, so the back square is written as the part of it the front square
+     leaves visible (the L outside (14,14)), and the front square stays open */
+  shadow: [
+    { d: 'M14,6 H17 V17 H6 V14 H14 Z' },
+    { d: 'M3,3 H14 V14 H3 Z', stroke: true },
+  ],
 };
 
 export type IconProps = { name: IconName; size?: number };
 
-/** A solid glyph on the 20-unit grid, 16px by default. Size it from CSS on the parent (`.pt-ib svg`) or with size. */
+/** The names of the table, for the tests that walk every glyph. */
+export const ICON_NAMES: ReadonlyArray<IconName> = Object.keys(PATHS) as IconName[];
+
+/** The paths of one name, for the tests and the contact sheet; the renderer is `Icon`. */
+export function iconPaths(name: IconName): readonly IconPath[] {
+  return PATHS[name];
+}
+
+/**
+ * A glyph on the 20-unit grid, 16px by default. Size it from CSS on the parent (`.pt-ib svg`) or
+ * with size. A filled entry takes the svg's `fill="currentColor"`; a stroked entry (the drawn line
+ * glyphs of docs/VECTOR.md 3.1) draws its outline in the same colour at its width.
+ */
 export function Icon({ name, size = 16 }: IconProps) {
   return (
     <svg viewBox="0 0 20 20" width={size} height={size} fill="currentColor" aria-hidden="true">
-      {PATHS[name].map((path) => (
-        <path
-          key={path.d}
-          d={path.d}
-          fillRule={path.evenodd ? 'evenodd' : undefined}
-          clipRule={path.evenodd ? 'evenodd' : undefined}
-        />
-      ))}
+      {PATHS[name].map((path) => {
+        const transform =
+          path.translate === undefined
+            ? undefined
+            : `translate(${path.translate[0]} ${path.translate[1]})`;
+        return path.stroke === true ? (
+          <path
+            key={path.d}
+            d={path.d}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={path.width ?? 1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray={path.dash}
+            transform={transform}
+          />
+        ) : (
+          <path
+            key={path.d}
+            d={path.d}
+            fillRule={path.evenodd ? 'evenodd' : undefined}
+            clipRule={path.evenodd ? 'evenodd' : undefined}
+            transform={transform}
+          />
+        );
+      })}
     </svg>
   );
 }

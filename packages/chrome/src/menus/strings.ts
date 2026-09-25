@@ -699,6 +699,10 @@ export const FORMAT = {
     anchor: 'Crop anchor',
     top: 'Top',
     centre: 'Centre',
+    /* the vector round (docs/VECTOR.md 4.4): crop has no vector meaning, so the menu row, the
+       toolbar's Crop button and the viewer's double click refuse an svg picture with one sentence;
+       the viewer keeps its own copy of the words (it cannot import the chrome) and a test pins both */
+    svgCrop: 'An SVG picture cannot be cropped. Resize it instead',
   },
   adjustments: {
     transparency: 'Transparency',

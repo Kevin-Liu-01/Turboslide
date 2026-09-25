@@ -1,0 +1,39 @@
+--- a/packages/chrome/src/editor-shell.ts
++++ b/packages/chrome/src/editor-shell.ts
+@@ -1580,7 +1580,6 @@
+   'insert.shape.shapes.rectangle': { kind: 'shape', shape: 'rectangle' },
+   'insert.shape.shapes.rounded': { kind: 'shape', shape: 'rounded' },
+   'insert.shape.shapes.ellipse': { kind: 'shape', shape: 'ellipse' },
+-  'insert.shape.arrows.arrow': { kind: 'line', line: 'arrow' },
+   'insert.line.line': { kind: 'line', line: 'line' },
+   'insert.line.arrow': { kind: 'line', line: 'arrow' },
+   'insert.line.rule': { kind: 'line', line: 'rule' },
+@@ -2582,7 +2581,6 @@
+     case 'insert.shape.shapes.rectangle':
+     case 'insert.shape.shapes.rounded':
+     case 'insert.shape.shapes.ellipse':
+-    case 'insert.shape.arrows.arrow':
+     case 'insert.line.line':
+     case 'insert.line.arrow':
+     case 'insert.line.rule':
+--- a/packages/chrome/src/__tests__/editor-shell.test.ts
++++ b/packages/chrome/src/__tests__/editor-shell.test.ts
+@@ -983,7 +983,6 @@
+       },
+       'insert.shape.shapes.rounded': { kind: 'tool', tool: { kind: 'shape', shape: 'rounded' } },
+       'insert.shape.shapes.ellipse': { kind: 'tool', tool: { kind: 'shape', shape: 'ellipse' } },
+-      'insert.shape.arrows.arrow': { kind: 'tool', tool: { kind: 'line', line: 'arrow' } },
+       'insert.line.line': { kind: 'tool', tool: { kind: 'line', line: 'line' } },
+       'insert.line.arrow': { kind: 'tool', tool: { kind: 'line', line: 'arrow' } },
+       'insert.line.rule': { kind: 'tool', tool: { kind: 'line', line: 'rule' } },
+--- a/packages/chrome/src/__tests__/editor-shell-render.test.tsx
++++ b/packages/chrome/src/__tests__/editor-shell-render.test.tsx
+@@ -558,7 +558,7 @@
+         gallery.container.querySelector(`[data-control="${control}"]`),
+         control,
+       ).not.toBeNull();
+-    clickMenuPath(gallery.container, 'insert', 'insert.shape', 'insert.shape.shapes');
++    clickMenuPath(gallery.container, 'insert', 'insert.shape');
+     expect(
+       [...document.querySelectorAll('[data-menu-item^="insert.shape.shapes."]')].map((el) =>
+         el.getAttribute('data-menu-item'),

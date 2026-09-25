@@ -23,8 +23,12 @@ const tileTip = (name: string) => tipProps({ name });
  * nothing copied from Google. One category when the row names one (Insert > Shape > Arrows), all
  * four under their headings otherwise (Mask image, Change shape). The grid is one focusable
  * control with `gridcell` tiles named after the preset, the arrows walk it, Enter picks, and
- * ArrowLeft on the first column is left to the menu. Until the geometry interpreter lands
- * (merge 1b) every glyph is the preset's box.
+ * ArrowLeft on the first column is left to the menu. The vector round (docs/VECTOR.md 2.6): the
+ * geometry interpreter answers `shapePath` for every preset, so every tile draws its own outline;
+ * one `<path>` per tile still, since the joined `d` string carries every subpath of a multi path
+ * preset. The grid is named after its category when it draws one (Insert > Shape > Arrows reads
+ * Arrows) and Shapes when it draws all four (Change shape, Mask image). The control id is the
+ * caller's row (`insert.shape.gallery.grid`, `insert.shape.gallery.pick.hexagon`).
  */
 export type ShapePickerProps = {
   category?: ShapeCategory;
@@ -79,7 +83,9 @@ export function ShapePicker({
   }, [autoFocus]);
 
   const active = tiles[Math.min(index, tiles.length - 1)];
-  const tip = tipProps({ name: words.grid, doc: words.doc, key: 'Enter' });
+  /* one category names the grid after itself; all four take the picker's name */
+  const name = category === undefined ? words.grid : SHAPE_CATEGORY_LABELS[category];
+  const tip = tipProps({ name, doc: words.doc, key: 'Enter' });
   let offset = 0;
 
   return (
@@ -87,7 +93,8 @@ export function ShapePicker({
       ref={root}
       className="ts-picker ts-shapes"
       role="grid"
-      aria-label={words.grid}
+      aria-label={name}
+      data-category={category ?? 'all'}
       aria-activedescendant={active === undefined ? undefined : `ts-shape-${active.id}`}
       tabIndex={0}
       data-control={`${control}.grid`}

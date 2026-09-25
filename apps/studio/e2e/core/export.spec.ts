@@ -35,7 +35,12 @@ import {
   pngSize,
   windowActions,
   zipEntriesRaw,
+  agentHeaders,
+  fetchBytes,
+  objectsOf as objectsOfLib,
+  placeSvgPicture,
 } from './lib';
+import { shapeAdjustDefaults, textInset } from '@turboslide/schema/shapes';
 
 // Download and print, the file rows (docs/FOCUS.md 2.8, 6.4 `export.*`, `images.export.*` and
 // `shapes.export.*` with the driver core/export.spec.ts): the PDF and the PowerPoint files
@@ -67,6 +72,10 @@ import {
 // so the rows run as three owners, each with the same deck built for it, and `withBudget(n)`
 // hands a row the owner whose quota holds `n` more downloads (five per identity, never spent
 // past it). The quota is the product's decision and stays; the file just keeps within it.
+//
+// The vector round (docs/VECTOR.md 2.5, 4.6, 6.1) adds the geometry interpreter's two export rows
+// and the label rectangle row on a geometry deck of its own, and the svg picture's four export rows
+// on an svg deck of its own, each group under a fresh identity so no identity spends past the quota.
 //
 // PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/export.spec.ts
 
@@ -1705,6 +1714,624 @@ test(title('logos.export.pdf-pptx-crisp'), async () => {
   }
 });
 
+// ---------------------------------------------------------------------------------------------
+// the vector round (docs/VECTOR.md 2.5, 4.6, 6.1): the geometry in both modes and the svg
+// pictures' exports. Each row group runs as its own anonymous identity with a deck built for it
+// as setup writes (the matrix's setup convention), so no identity spends past its five downloads:
+// the geometry deck holds a hexagon, the star with Adjust 30 and a rectangular callout on one slide
+// and the two labelled shapes on another; the svg deck holds one slide whose only picture is the
+// svg fixture placed through asset.add and block.insert.
+
+/** One px of the 1600 by 900 sheet in EMU (13.333 in over 1600 px; lines.ts: a 1 px rule is w="7620"). */
+const EMU_PER_PX = 7620;
+type VectorOwner = Owner & { slides: Record<string, string>; blockId?: string; assetId?: string };
+const geometryOwners: VectorOwner[] = [];
+const svgOwners: VectorOwner[] = [];
+
+/** A fresh identity with the geometry deck: the reader of `n` downloads. */
+async function geometryOwner(n: number): Promise<VectorOwner> {
+  let owner = geometryOwners[geometryOwners.length - 1];
+  if (owner === undefined || owner.downloads + n > QUOTA) {
+    const { context, page } = await ownerContext(browserRef);
+    const scratch = new Scratch();
+    const deck = await newDeck(page, scratch, 'Geometry export deck');
+    const shapes = await addSlide(page);
+    await clickCard(page, shapes);
+    for (const block of [
+      {
+        id: 'geo-hexagon',
+        type: 'shape',
+        shape: 'hexagon',
+        fill: FILL,
+        stroke: 'ink',
+        pos: { x: 120, y: 160, w: 240, h: 160 },
+      },
+      {
+        id: 'geo-star',
+        type: 'shape',
+        shape: 'star5',
+        fill: FILL,
+        stroke: 'ink',
+        adjust: [30000, 105146, 110557],
+        pos: { x: 500, y: 140, w: 300, h: 300 },
+      },
+      {
+        id: 'geo-callout',
+        type: 'shape',
+        shape: 'wedgeRectCallout',
+        fill: FILL,
+        stroke: 'ink',
+        adjust: [-20833, 62500],
+        pos: { x: 960, y: 160, w: 300, h: 180 },
+      },
+    ]) {
+      const s = await state(page);
+      await invoke(page, 'block.insert', {
+        baseRevision: s.revision,
+        slideId: shapes,
+        slot: 'main',
+        block,
+      });
+      await settled(page);
+    }
+    const labelled = await addSlide(page);
+    await clickCard(page, labelled);
+    for (const block of [
+      {
+        id: 'geo-rounded',
+        type: 'shape',
+        shape: 'roundRect',
+        fill: 'plate',
+        stroke: 'ink',
+        text: 'Next step',
+        pos: { x: 200, y: 200, w: 240, h: 160 },
+      },
+      {
+        id: 'geo-arrow',
+        type: 'shape',
+        shape: 'rightArrow',
+        fill: 'plate',
+        stroke: 'ink',
+        text: 'Go',
+        pos: { x: 600, y: 200, w: 240, h: 160 },
+      },
+    ]) {
+      const s = await state(page);
+      await invoke(page, 'block.insert', {
+        baseRevision: s.revision,
+        slideId: labelled,
+        slot: 'main',
+        block,
+      });
+      await settled(page);
+    }
+    owner = {
+      context,
+      page,
+      scratch,
+      deck,
+      unskipped: 3,
+      downloads: 0,
+      n: owners.length + 1,
+      slides: { shapes, labelled },
+    };
+    geometryOwners.push(owner);
+    owners.push(owner);
+  }
+  owner.downloads += n;
+  return owner;
+}
+
+/** A fresh identity with the svg deck: a title slide and one slide whose only picture is the svg. */
+async function svgOwner(n: number): Promise<VectorOwner> {
+  let owner = svgOwners[svgOwners.length - 1];
+  if (owner === undefined || owner.downloads + n > QUOTA) {
+    const { context, page } = await ownerContext(browserRef);
+    const scratch = new Scratch();
+    const deck = await newDeck(page, scratch, 'SVG export deck');
+    const slide = await addSlide(page);
+    await clickCard(page, slide);
+    const placed = await placeSvgPicture(
+      page,
+      slide,
+      { x: 400, y: 200, w: 480, h: 320 },
+      'svg-picture',
+    );
+    owner = {
+      context,
+      page,
+      scratch,
+      deck,
+      unskipped: 2,
+      downloads: 0,
+      n: owners.length + 1,
+      slides: { svg: slide },
+      blockId: placed.blockId,
+      assetId: placed.assetId,
+    };
+    svgOwners.push(owner);
+    owners.push(owner);
+  }
+  owner.downloads += n;
+  return owner;
+}
+
+/** The inner Editable or Perfect .pptx of a download (the export answers a bundle of both themes since the product round). */
+function innerPptx(bytes: Buffer, mode: 'editable' | 'perfect'): Map<string, () => Buffer> {
+  let entries = zipEntriesRaw(bytes);
+  const names = [...entries.keys()];
+  const inner =
+    names.find((n) => new RegExp(`\\(light, ${mode}\\)\\.pptx$`).test(n)) ??
+    names.find((n) => /\(light[^)]*\)\.pptx$/.test(n)) ??
+    names.find((n) => n.endsWith('.pptx'));
+  if (inner !== undefined) entries = zipEntriesRaw(entries.get(inner)!());
+  return entries;
+}
+/** The slide parts of a raw entry map, joined, and each with its rels part. */
+function slidePartsOf(
+  entries: Map<string, () => Buffer>,
+): { name: string; xml: string; rels: string }[] {
+  return [...entries.keys()]
+    .filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+    .sort()
+    .map((name) => ({
+      name,
+      xml: entries.get(name)!().toString('utf8'),
+      rels:
+        entries
+          .get(name.replace(/slides\/(slide\d+\.xml)$/, 'slides/_rels/$1.rels'))?.()
+          .toString('utf8') ?? '',
+    }));
+}
+/** The target of a relationship id in a rels part. */
+function relTarget(rels: string, rId: string): string | null {
+  const m =
+    new RegExp(`<Relationship[^>]*Id="${rId}"[^>]*Target="([^"]+)"`).exec(rels) ??
+    new RegExp(`<Relationship[^>]*Target="([^"]+)"[^>]*Id="${rId}"`).exec(rels);
+  return m?.[1] ?? null;
+}
+/** A media part's bytes from a `../media/x` target. */
+function mediaBytes(entries: Map<string, () => Buffer>, target: string): Buffer | null {
+  const name = `ppt/${target.replace(/^\.\.\//, '')}`;
+  return entries.get(name)?.() ?? null;
+}
+/** The `<p:pic>` elements of a slide part, each with its blip and svgBlip ids. */
+function picsOf(xml: string): { pic: string; blip: string | null; svg: string | null }[] {
+  return (xml.match(/<p:pic>[\s\S]*?<\/p:pic>|<p:pic [\s\S]*?<\/p:pic>/g) ?? []).map((pic) => ({
+    pic,
+    blip: /<a:blip[^>]*r:embed="([^"]+)"/.exec(pic)?.[1] ?? null,
+    svg: /<asvg:svgBlip[^>]*r:embed="([^"]+)"/.exec(pic)?.[1] ?? null,
+  }));
+}
+/** The report of an export through the window API (mutates: false; the route's export in the page). */
+async function reportOf(
+  page: Page,
+  input: Record<string, unknown>,
+): Promise<{
+  perfect: boolean;
+  passed: boolean;
+  slides: { slideId: string; page?: { fraction: number }; verify?: { fraction: number } }[];
+  residual: string[];
+  files: { path: string; url?: string }[];
+}> {
+  const out = (await invoke(page, 'export.run', input, 240_000)) as {
+    report?: unknown;
+    perfect?: boolean;
+  };
+  return (out.report ?? out) as {
+    perfect: boolean;
+    passed: boolean;
+    slides: { slideId: string; page?: { fraction: number }; verify?: { fraction: number } }[];
+    residual: string[];
+    files: { path: string; url?: string }[];
+  };
+}
+
+test(title('shapes.geometry.text-rect'), async () => {
+  test.setTimeout(240_000);
+  const owner = await geometryOwner(1);
+  const { page, deck } = owner;
+  await openEditor(page, deck);
+  await clickCard(page, owner.slides['labelled']!);
+  /* the label layer's inset from the shape's box on the stage, in sheet px */
+  const layers = await page.evaluate(() => {
+    const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+    const k = sheet ? sheet.getBoundingClientRect().width / 1600 : 1;
+    const read = (id: string) => {
+      const inner = document.querySelector(
+        `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`,
+      );
+      const box = (inner?.closest('.free') ?? inner)?.getBoundingClientRect();
+      const layer = (inner?.closest('.free') ?? inner)
+        ?.querySelector('.shape-text')
+        ?.getBoundingClientRect();
+      if (!box || !layer) return null;
+      return {
+        left: (layer.x - box.x) / k,
+        top: (layer.y - box.y) / k,
+        right: (box.right - layer.right) / k,
+        bottom: (box.bottom - layer.bottom) / k,
+      };
+    };
+    return { rounded: read('geo-rounded'), arrow: read('geo-arrow') };
+  });
+  const presetRounded = textInset('roundRect', 240, 160, shapeAdjustDefaults('roundRect'));
+  const presetArrow = textInset('rightArrow', 240, 160, shapeAdjustDefaults('rightArrow'));
+  const arrowTop = presetArrow.y;
+  const arrowBottom = 160 - (presetArrow.y + presetArrow.h);
+  /* the Editable text file's bodyPr insets */
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const editable = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
+  await closeDialogs(page);
+  const entries = innerPptx(editable.bytes, 'editable');
+  const xml = slidePartsOf(entries)
+    .map((p) => p.xml)
+    .join('\n');
+  const insetsOf = (text: string) => {
+    const sp = (xml.match(/<p:sp>[\s\S]*?<\/p:sp>|<p:sp [\s\S]*?<\/p:sp>/g) ?? []).find(
+      (s) => s.includes(`<a:t>${text}</a:t>`) || s.includes(`>${text}<`),
+    );
+    const body = sp ? (/<a:bodyPr([^>]*)>/.exec(sp)?.[1] ?? '') : '';
+    const num = (name: string) => {
+      const m = new RegExp(`${name}="(-?\\d+)"`).exec(body);
+      return m ? Number(m[1]) / EMU_PER_PX : null;
+    };
+    return {
+      found: sp !== undefined,
+      l: num('lIns'),
+      t: num('tIns'),
+      r: num('rIns'),
+      b: num('bIns'),
+    };
+  };
+  const roundedIns = insetsOf('Next step');
+  const arrowIns = insetsOf('Go');
+  test.info().annotations.push({
+    type: 'text rect',
+    description: `rounded layer ${JSON.stringify(layers.rounded)} (preset left ${presetRounded.x.toFixed(2)}), arrow layer ${JSON.stringify(layers.arrow)} (preset top ${arrowTop}, bottom ${arrowBottom}); file insets rounded ${JSON.stringify(roundedIns)}, arrow ${JSON.stringify(arrowIns)} (px)`,
+  });
+  expect(editable.ms).toBeLessThan(30_000);
+  expect(layers.rounded, 'the rounded rectangle draws its label layer').not.toBeNull();
+  expect(layers.arrow, 'the arrow draws its label layer').not.toBeNull();
+  expect(
+    Math.abs(layers.rounded!.left - presetRounded.x),
+    "the rounded rectangle's layer sits 7.8 px in",
+  ).toBeLessThanOrEqual(0.6);
+  expect(
+    Math.abs(layers.arrow!.top - arrowTop),
+    "the arrow's layer top sits on the shaft",
+  ).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs(layers.arrow!.bottom - arrowBottom),
+    "the arrow's layer bottom sits on the shaft",
+  ).toBeLessThanOrEqual(1);
+  expect(roundedIns.found && arrowIns.found, 'both labelled shapes are in the file').toBe(true);
+  /* the insets equal the measured inset less the preset's rectangle: the left of the rounded
+     rectangle, and the top and bottom of the arrow together (the first baseline shift moves the
+     top's share to the bottom, text.ts addShapeText) */
+  /* the insets equal the measured inset less the preset's rectangle: the sides exactly; the top
+     gives the exporter's first baseline shift up (clamped at zero) and the bottom takes it
+     (text.ts addShapeText: a margin the box cannot move), so the vertical pair is read net of one
+     shift, the same amount on both shapes (one face at one size) */
+  type Layer = NonNullable<typeof layers.rounded>;
+  type Sides = { l: number; t: number; r: number; b: number };
+  const net = (layer: Layer, preset: Sides): Sides => ({
+    l: Math.max(0, layer.left - preset.l),
+    t: Math.max(0, layer.top - preset.t),
+    r: Math.max(0, layer.right - preset.r),
+    b: Math.max(0, layer.bottom - preset.b),
+  });
+  const netRounded = net(layers.rounded!, {
+    l: presetRounded.x,
+    t: presetRounded.y,
+    r: 240 - (presetRounded.x + presetRounded.w),
+    b: 160 - (presetRounded.y + presetRounded.h),
+  });
+  const netArrow = net(layers.arrow!, {
+    l: presetArrow.x,
+    t: arrowTop,
+    r: 240 - (presetArrow.x + presetArrow.w),
+    b: arrowBottom,
+  });
+  const shiftOf = (ins: typeof roundedIns, n: Sides) => (ins.t ?? 0) + (ins.b ?? 0) - (n.t + n.b);
+  const shifts = { rounded: shiftOf(roundedIns, netRounded), arrow: shiftOf(arrowIns, netArrow) };
+  test.info().annotations.push({
+    type: 'insets net of the preset',
+    description: `rounded net ${JSON.stringify(netRounded)}, arrow net ${JSON.stringify(netArrow)} (px); the first baseline shift the vertical pair carries: rounded ${shifts.rounded.toFixed(2)}, arrow ${shifts.arrow.toFixed(2)} px`,
+  });
+  for (const [name, ins, n] of [
+    ['rounded rectangle', roundedIns, netRounded],
+    ['arrow', arrowIns, netArrow],
+  ] as const) {
+    expect(
+      Math.abs((ins.l ?? 0) - n.l),
+      `the ${name}'s lIns is net of the preset`,
+    ).toBeLessThanOrEqual(1.5);
+    expect(
+      Math.abs((ins.r ?? 0) - n.r),
+      `the ${name}'s rIns is net of the preset`,
+    ).toBeLessThanOrEqual(1.5);
+    expect(ins.t ?? 0, `the ${name}'s tIns is at most the net top`).toBeLessThanOrEqual(n.t + 0.5);
+    expect(ins.b ?? 0, `the ${name}'s bIns is at least the net bottom`).toBeGreaterThanOrEqual(
+      n.b - 0.5,
+    );
+  }
+  expect(
+    Math.abs(shifts.rounded - shifts.arrow),
+    'the vertical pair carries one shift on both shapes',
+  ).toBeLessThanOrEqual(0.5);
+});
+
+test(title('shapes.geometry.export.pptx-prst-avlst'), async () => {
+  test.setTimeout(240_000);
+  const owner = await geometryOwner(1);
+  const { page, deck } = owner;
+  await openEditor(page, deck);
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const editable = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
+  await closeDialogs(page);
+  const xml = slidePartsOf(innerPptx(editable.bytes, 'editable'))
+    .map((p) => p.xml)
+    .join('\n');
+  const geomOf = (prst: string) => {
+    const m = new RegExp(`<a:prstGeom prst="${prst}">([\\s\\S]*?)</a:prstGeom>`).exec(xml);
+    return m ? m[1]! : null;
+  };
+  const hexagon = geomOf('hexagon');
+  const star = geomOf('star5');
+  const callout = geomOf('wedgeRectCallout');
+  test.info().annotations.push({
+    type: 'prstGeom',
+    description: `in ${editable.ms} ms; hexagon ${hexagon ?? 'absent'}; star5 ${star ?? 'absent'}; wedgeRectCallout ${callout ?? 'absent'}`,
+  });
+  expect(editable.ms).toBeLessThan(30_000);
+  expect(hexagon, 'prst hexagon').not.toBeNull();
+  expect(hexagon ?? '', 'with an empty avLst').toMatch(
+    /^\s*<a:avLst\s*\/>\s*$|^\s*<a:avLst>\s*<\/a:avLst>\s*$/,
+  );
+  expect(star ?? '', 'star5 with adj 30000 first').toMatch(
+    /<a:avLst>\s*<a:gd name="adj" fmla="val 30000"\/>/,
+  );
+  expect(callout ?? '', 'the callout carries adj1').toMatch(
+    /<a:gd name="adj1" fmla="val -?\d+"\/>/,
+  );
+  expect(callout ?? '', 'and adj2').toMatch(/<a:gd name="adj2" fmla="val -?\d+"\/>/);
+});
+
+test(title('shapes.geometry.export.raster-modes'), async () => {
+  test.setTimeout(420_000);
+  const owner = await geometryOwner(4);
+  const { page, deck, unskipped } = owner;
+  await openEditor(page, deck);
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.flatten').click({ force: true });
+  const perfect = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
+  await closeDialogs(page);
+  const pptxReport = await reportOf(page, { format: 'pptx', mode: 'flatten', theme: ['light'] });
+  const pages = pptxReport.slides.map((s) => ({
+    id: s.slideId,
+    fraction: s.page?.fraction ?? null,
+  }));
+  await openPdf(page);
+  const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
+  await closeDialogs(page);
+  const pdfReport = await reportOf(page, { format: 'pdf', theme: ['light'] });
+  const verified = pdfReport.slides
+    .filter((s) => s.verify !== undefined)
+    .map((s) => ({ id: s.slideId, fraction: s.verify!.fraction }));
+  test.info().annotations.push({
+    type: 'raster modes',
+    description: `Perfect in ${perfect.ms} ms, report perfect ${pptxReport.perfect}, pages ${JSON.stringify(pages)}; PDF in ${pdf.ms} ms (${pdfPages(pdf.bytes)} pages), report passed ${pdfReport.passed}, verified ${JSON.stringify(verified)}, residual ${pdfReport.residual.slice(0, 3).join(' | ')}`,
+  });
+  expect(perfect.ms).toBeLessThan(30_000);
+  expect(pptxSlides(perfect.bytes).length).toBe(unskipped);
+  expect(pptxReport.perfect, "the Perfect report's perfect is true").toBe(true);
+  for (const p of pages) expect(p.fraction ?? 0, `${p.id} under 0.1 percent`).toBeLessThan(0.001);
+  expect(pdf.ms).toBeLessThan(30_000);
+  expect(pdfPages(pdf.bytes)).toBe(unskipped);
+  expect(pdfReport.passed, "the PDF's report passes").toBe(true);
+  for (const v of verified) expect(v.fraction, `${v.id} under 0.5 percent`).toBeLessThan(0.005);
+});
+
+test(title('svg.export.pdf-vector'), async () => {
+  test.setTimeout(300_000);
+  const owner = await svgOwner(2);
+  const { page, deck, unskipped } = owner;
+  await openEditor(page, deck);
+  await openPdf(page);
+  const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
+  await closeDialogs(page);
+  const images = pdfImages(pdf.bytes);
+  const report = await reportOf(page, { format: 'pdf', theme: ['light'] });
+  test.info().annotations.push({
+    type: 'pdf',
+    description: `in ${pdf.ms} ms; ${pdfPages(pdf.bytes)} pages; ${images} image XObjects; report passed ${report.passed}; residual ${report.residual.slice(0, 3).join(' | ')}`,
+  });
+  expect(pdf.ms).toBeLessThan(30_000);
+  expect(pdfPages(pdf.bytes)).toBe(unskipped);
+  expect(images, 'the svg picture travels as vector: zero image XObjects').toBe(0);
+  expect(report.passed, 'its report passes').toBe(true);
+});
+
+/**
+ * The svg picture's `p:pic` in the Editable text file with its blip parts, or null. The object is
+ * named `ts:<slideId>#<blockId>:<rid>` (b4.md R5), which tells it from the kit's logo objects.
+ */
+function svgPicOf(entries: Map<string, () => Buffer>, blockId: string) {
+  const parts = slidePartsOf(entries);
+  for (const part of parts)
+    for (const pic of picsOf(part.xml)) {
+      const name = /<p:cNvPr[^>]*name="([^"]*)"/.exec(pic.pic)?.[1] ?? '';
+      if (!name.includes(`#${blockId}:`)) continue;
+      const svgTarget = pic.svg ? relTarget(part.rels, pic.svg) : null;
+      const blipTarget = pic.blip ? relTarget(part.rels, pic.blip) : null;
+      if (svgTarget !== null || blipTarget !== null)
+        return {
+          part: part.name,
+          pic: pic.pic,
+          ext: /<a:extLst>[\s\S]*?<a:ext uri="\{96DAC541-7B7A-43D3-8B79-37D633B846F1\}">[\s\S]*?<asvg:svgBlip/.test(
+            pic.pic,
+          ),
+          svgTarget,
+          blipTarget,
+          svgBytes: svgTarget ? mediaBytes(entries, svgTarget) : null,
+          blipBytes: blipTarget ? mediaBytes(entries, blipTarget) : null,
+        };
+    }
+  return null;
+}
+
+test(title('svg.export.pptx-svgblip'), async () => {
+  test.setTimeout(300_000);
+  const owner = await svgOwner(1);
+  const { page, deck } = owner;
+  await openEditor(page, deck);
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const editable = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
+  await closeDialogs(page);
+  const entries = innerPptx(editable.bytes, 'editable');
+  const found = svgPicOf(entries, owner.blockId ?? '');
+  const contentTypes = entries.get('[Content_Types].xml')?.().toString('utf8') ?? '';
+  const svgText = found?.svgBytes?.toString('utf8') ?? '';
+  test.info().annotations.push({
+    type: 'svgBlip',
+    description: `in ${editable.ms} ms; ${found ? `${found.part}: ext ${found.ext}, svg ${found.svgTarget ?? 'none'} (${found.svgBytes?.length ?? 0} bytes, begins ${JSON.stringify(svgText.slice(0, 12))}), blip ${found.blipTarget ?? 'none'}` : 'no picture part with a blip'}; content types svg default ${/Extension="svg"/i.test(contentTypes)}`,
+  });
+  expect(editable.ms).toBeLessThan(30_000);
+  expect(found, 'the picture is in the file').not.toBeNull();
+  expect(found!.ext, 'the p:pic carries asvg:svgBlip inside a:extLst with the ext uri').toBe(true);
+  expect(found!.svgTarget ?? '', 'the rel targets a ../media/*.svg part').toMatch(
+    /^\.\.\/media\/.*\.svg$/,
+  );
+  expect(svgText, 'whose bytes begin with <svg or the prolog').toMatch(/^\s*(<\?xml|<svg)/);
+  expect(svgText, 'and hold no script').not.toMatch(/<script/i);
+  expect(contentTypes, '[Content_Types].xml carries the svg default').toMatch(
+    /<Default Extension="svg" ContentType="image\/svg\+xml"\/>/,
+  );
+});
+
+test(title('svg.export.pptx-fallback'), async () => {
+  test.setTimeout(360_000);
+  const owner = await svgOwner(2);
+  const { page, deck, blockId } = owner;
+  await openEditor(page, deck);
+  const block = (await objectsOfLib(page, owner.slides['svg']!)).find((o) => o.id === blockId);
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const editable = await download(page, () => ctl(page, 'dialog.download.ok').click(), 60_000);
+  await closeDialogs(page);
+  const found = svgPicOf(innerPptx(editable.bytes, 'editable'), blockId ?? '');
+  const size = found?.blipBytes ? pngSize(found.blipBytes) : null;
+  const signature = found?.blipBytes?.subarray(0, 8).toString('latin1') === '\x89PNG\r\n\x1a\n';
+  /* svgVector false through the window API: the file is fetched by the address the report names,
+     else through the sync export route with the deployment's bearer */
+  let off: Awaited<ReturnType<typeof reportOf>>;
+  try {
+    off = await reportOf(page, {
+      format: 'pptx',
+      mode: 'native',
+      theme: ['light'],
+      svgVector: false,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    /* the header field of export.run is the integrator's (b4.md R1): without it the second half
+       cannot be driven and the row reads not driven with the reason, never passed on its first half */
+    if (/Unrecognized key: "svgVector"|invalid input at \/svgVector/.test(message))
+      test.skip(
+        true,
+        `not on this build: export.run { svgVector } (the integrator's header of packages/schema/src/actions.ts, b4.md R1); the first half read: blip ${found?.blipTarget ?? 'none'}, PNG signature ${signature}, IHDR ${JSON.stringify(size)} for the block's ${block?.pos.w ?? '?'} px`,
+      );
+    throw error;
+  }
+  let offBytes: Buffer | null = null;
+  let how = 'no file reachable';
+  const url = off.files.find((f) => f.url !== undefined)?.url ?? null;
+  if (url !== null) {
+    const got = await fetchBytes(page, url);
+    if (got.status === 200) {
+      offBytes = got.bytes;
+      how = `the report's file address (${got.contentType})`;
+    }
+  }
+  if (offBytes === null) {
+    const headers = agentHeaders(new URL(page.url()).origin);
+    if (headers !== null) {
+      const res = await page.request.post(`/api/export/${deck}?sync=1`, {
+        headers,
+        data: { format: 'pptx', mode: 'native', theme: ['light'], svgVector: false },
+        timeout: 240_000,
+        maxRedirects: 0,
+      });
+      if (res.status() === 200) {
+        offBytes = Buffer.from(await res.body());
+        how = `the sync export route (${res.headers()['content-type'] ?? ''})`;
+      } else how = `the sync export route answered ${res.status()}`;
+    } else how = 'no bearer for the sync export route on this origin';
+  }
+  const offEntries = offBytes ? innerPptx(offBytes, 'editable') : null;
+  const offPic = offEntries ? svgPicOf(offEntries, blockId ?? '') : null;
+  const offSvgParts = offEntries
+    ? [...offEntries.keys()].filter((n) => /^ppt\/media\/.*\.svg$/i.test(n))
+    : [];
+  test.info().annotations.push({
+    type: 'fallback',
+    description: `blip ${found?.blipTarget ?? 'none'}: PNG signature ${signature}, IHDR ${JSON.stringify(size)} against the block's ${block?.pos.w ?? '?'} px times 3; svgVector false through ${how}: ${offPic ? `blip ${offPic.blipTarget ?? 'none'}, svgBlip ${offPic.svgTarget ?? 'none'}` : 'no picture read'}, ${offSvgParts.length} svg part(s); residual ${off.residual.filter((r) => /svg/i.test(r)).join(' | ')}`,
+  });
+  expect(editable.ms).toBeLessThan(30_000);
+  expect(found?.blipTarget ?? '', 'the a:blip targets a .png part').toMatch(/\.png$/i);
+  expect(signature, 'whose bytes begin with the PNG signature').toBe(true);
+  expect(
+    Math.abs((size?.width ?? 0) - (block?.pos.w ?? 0) * 3),
+    "and whose IHDR width is the block's width times 3",
+  ).toBeLessThanOrEqual(3);
+  if (offBytes === null)
+    test.skip(true, `not driven: the svgVector false file could not be read (${how})`);
+  expect(offPic?.blipTarget ?? '', 'with svgVector false the blip stays').toMatch(/\.png$/i);
+  expect(offPic?.svgTarget ?? null, 'and no svgBlip').toBeNull();
+  expect(offSvgParts, 'and no .svg part').toEqual([]);
+});
+
+test(title('svg.export.web-page'), async () => {
+  test.setTimeout(240_000);
+  const owner = await svgOwner(1);
+  const { page, deck } = owner;
+  await openEditor(page, deck);
+  const switched = await reachDownloadRow(page, 'file.download.html');
+  const html = await download(
+    page,
+    () => menuPath(page, 'file', 'file.download', 'file.download.html'),
+    30_000,
+  );
+  const text = html.bytes.toString('utf8');
+  const svgUris = text.match(/data:image\/svg\+xml;base64,[A-Za-z0-9+/=]+/g) ?? [];
+  const ours = svgUris.filter((u) =>
+    /<circle cx="48" cy="32"/.test(Buffer.from(u.split(',')[1] ?? '', 'base64').toString('utf8')),
+  );
+  const pngUris = text.match(/data:image\/png;base64,[A-Za-z0-9+/=]+/g) ?? [];
+  const pngSizes = pngUris.map((u) => pngSize(Buffer.from(u.split(',')[1] ?? '', 'base64')));
+  /* the picture's PNG twin is a 3 by 2 raster (the fixture's aspect); none of that aspect is inlined */
+  const twinLike = pngSizes.filter((s) => s !== null && Math.abs(s.width / s.height - 1.5) < 0.02);
+  /* how the page references the picture when no data URI carries it (the inliner works by twin path, apps/cli/src/assets.ts inlineAssets) */
+  const srcForms = [...text.matchAll(/<img[^>]*\ssrc="([^"]{0,60})/g)].map((m) =>
+    m[1]!.replace(/^data:([^;]+);base64,.*$/, 'data:$1;…'),
+  );
+  test.info().annotations.push({
+    type: 'web page',
+    description: `${switched ? 'with the switch on; ' : ''}${html.name} in ${html.ms} ms (${text.length} chars); ${svgUris.length} svg data URI(s), ${ours.length} the picture's; ${pngUris.length} png data URI(s) ${JSON.stringify(pngSizes)}; img sources ${JSON.stringify(srcForms.slice(0, 6))}`,
+  });
+  expect(html.ms).toBeLessThan(30_000);
+  expect(page.url(), 'the editor is still the page').toContain(`/edit/${deck}`);
+  expect(ours.length, 'the html carries the picture as data:image/svg+xml;base64,').toBeGreaterThan(
+    0,
+  );
+  expect(twinLike, 'and no .png data URI of that asset').toEqual([]);
+  if (switched) await menuPath(page, 'tools', 'tools.advancedTools');
+});
+
 coverage(import.meta.filename, [
   'export.zip.bundle',
   'export.html.web-page',
@@ -1742,4 +2369,12 @@ coverage(import.meta.filename, [
   /* the features round, ship one (docs/FEATURES.md 7.1) */
   'diagrams.export.step-label',
   'logos.export.pdf-pptx-crisp',
+  /* the vector round (docs/VECTOR.md 6.1): the geometry in both modes and the svg exports */
+  'shapes.geometry.text-rect',
+  'shapes.geometry.export.pptx-prst-avlst',
+  'shapes.geometry.export.raster-modes',
+  'svg.export.pdf-vector',
+  'svg.export.pptx-svgblip',
+  'svg.export.pptx-fallback',
+  'svg.export.web-page',
 ]);

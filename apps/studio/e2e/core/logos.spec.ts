@@ -22,6 +22,12 @@ import {
   teardownAll,
   title,
   windowActions,
+  clickCard,
+  download,
+  pdfImages,
+  pngSize,
+  slideOrder,
+  zipEntriesRaw,
 } from './lib';
 
 // The logo picker's spec rows (docs/FEATURES.md 4.2, 4.7, 4.9, 4.11, 7.1 `logos.*` with the driver
@@ -779,6 +785,175 @@ test(title('logos.agent.search-insert'), async () => {
     .catch(() => undefined);
 });
 
+/**
+ * The vector round (docs/VECTOR.md 4.6; the row `logos.export.svgblip`): a logo inserted from the
+ * picker is an svg asset, so the Editable text file's logo `p:pic` carries `asvg:svgBlip` beside
+ * its 3x PNG blip, the Perfect file's title and footer logo objects carry it too once the kit's
+ * mark is that logo (`logo.insert { everySlide: true }` writes the kit's slots, the setup write),
+ * and the PDF page holds no image XObject for the logo. The insert is B6's action of ship one; a
+ * build without it on the window transport skips.
+ */
+test(title('logos.export.svgblip'), async () => {
+  test.setTimeout(420_000);
+  await openEditor(page, deck);
+  const first = (await slideOrder(page))[0]!;
+  await clickCard(page, first);
+  const actions = await windowActions(page);
+  if (!actions.has('logo.insert'))
+    test.skip(
+      true,
+      'not on this build: logo.insert on the window transport (docs/FEATURES.md 4.4, 4.11)',
+    );
+  const s = await settled(page);
+  const countsBefore = ((await invoke(page, 'deck.info')) as { counts: { assets: number } }).counts
+    .assets;
+  try {
+    await invoke(
+      page,
+      'logo.insert',
+      { slug: 'figma', everySlide: true, baseRevision: s.revision },
+      120_000,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (/NotImplemented|not implemented|lands in P1/i.test(message))
+      test.skip(
+        true,
+        `not on this build: logo.insert (docs/FEATURES.md 4.4): ${message.slice(0, 100)}`,
+      );
+    if (/did not answer|thesvg\.org|upstream|index/i.test(message))
+      test.skip(
+        true,
+        `not driven: the logo index answered "${message.slice(0, 120)}" on this base`,
+      );
+    throw error;
+  }
+  await settled(page);
+  /* the kit's slots take the asset (everySlide writes the mark and the footer, no picture block),
+     so the deck's asset count is what grows; a slide's referenced assets list only its blocks' */
+  const countsAfter = ((await invoke(page, 'deck.info')) as { counts: { assets: number } }).counts
+    .assets;
+  const logoAssets = countsAfter - countsBefore;
+  /** The download dialog with PowerPoint picked; File > Download > Download options, the type by default. */
+  const openPptxDialog = async () => {
+    await menuPath(page, 'file', 'file.download', 'file.download.options');
+    await ctl(page, 'dialog.download.pptx').waitFor({ timeout: 8000 });
+  };
+  const closeDialog = async () => {
+    for (let i = 0; i < 3; i += 1) {
+      if ((await page.locator('.ts-dialog-scrim [role="dialog"]').count()) === 0) break;
+      const done = page.locator(
+        '[data-control="dialog.download.done"], [data-control="dialog.download.close"], [data-control="dialog.download.cancel"]',
+      );
+      if ((await done.count()) > 0)
+        await done
+          .first()
+          .click({ timeout: 3000 })
+          .catch(() => undefined);
+      else await page.keyboard.press('Escape');
+      await page.waitForTimeout(200);
+    }
+  };
+  /** The inner .pptx of a download bundle and its slide parts with their rels. */
+  const partsOf = (bytes: Buffer, mode: 'editable' | 'perfect') => {
+    let entries = zipEntriesRaw(bytes);
+    const names = [...entries.keys()];
+    const inner =
+      names.find((n) => new RegExp(`\\(light, ${mode}\\)\\.pptx$`).test(n)) ??
+      names.find((n) => n.endsWith('.pptx'));
+    if (inner !== undefined) entries = zipEntriesRaw(entries.get(inner)!());
+    const parts = [...entries.keys()]
+      .filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+      .sort()
+      .map((name) => ({
+        name,
+        xml: entries.get(name)!().toString('utf8'),
+        rels:
+          entries
+            .get(name.replace(/slides\/(slide\d+\.xml)$/, 'slides/_rels/$1.rels'))?.()
+            .toString('utf8') ?? '',
+      }));
+    return { entries, parts };
+  };
+  const target = (rels: string, rId: string) =>
+    new RegExp(`<Relationship[^>]*Id="${rId}"[^>]*Target="([^"]+)"`).exec(rels)?.[1] ??
+    new RegExp(`<Relationship[^>]*Target="([^"]+)"[^>]*Id="${rId}"`).exec(rels)?.[1] ??
+    null;
+  /** Every p:pic of a file with its blip and svgBlip targets and the PNG blip's size. */
+  const picsOf = (bytes: Buffer, mode: 'editable' | 'perfect') => {
+    const { entries, parts } = partsOf(bytes, mode);
+    const out: {
+      part: string;
+      name: string;
+      blip: string | null;
+      svg: string | null;
+      png: { width: number; height: number } | null;
+    }[] = [];
+    for (const part of parts)
+      for (const pic of part.xml.match(/<p:pic>[\s\S]*?<\/p:pic>|<p:pic [\s\S]*?<\/p:pic>/g) ??
+        []) {
+        const blipId = /<a:blip[^>]*r:embed="([^"]+)"/.exec(pic)?.[1] ?? null;
+        const svgId = /<asvg:svgBlip[^>]*r:embed="([^"]+)"/.exec(pic)?.[1] ?? null;
+        const blip = blipId ? target(part.rels, blipId) : null;
+        const svg = svgId ? target(part.rels, svgId) : null;
+        const pngBytes = blip ? entries.get(`ppt/${blip.replace(/^\.\.\//, '')}`)?.() : undefined;
+        out.push({
+          part: part.name,
+          name: /<p:cNvPr[^>]*name="([^"]*)"/.exec(pic)?.[1] ?? '',
+          blip,
+          svg,
+          png: pngBytes ? pngSize(pngBytes) : null,
+        });
+      }
+    return out;
+  };
+  /* the logo objects by name (b4.md R5): the kit's `#title-logo:` and `#footer-logo:` and a logo
+     block's `#<blockId>:` (logo.insert names them logo, logo-2, …); the GT sprite mark of a deck
+     without a picture mark is `#mark:`, a raster of the sheet's own svg and no asset */
+  const isLogo = (p: { name: string }) => /#(title-logo|footer-logo|logo(-\d+)?):/.test(p.name);
+  /* the Editable text file */
+  await openPptxDialog();
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const editable = await download(page, () => ctl(page, 'dialog.download.ok').click(), 120_000);
+  await closeDialog();
+  const editablePics = picsOf(editable.bytes, 'editable').filter(isLogo);
+  /* the Perfect file: the title and footer logo objects over the sheet raster */
+  await openPptxDialog();
+  await ctl(page, 'dialog.download.mode.flatten').click({ force: true });
+  const perfect = await download(page, () => ctl(page, 'dialog.download.ok').click(), 120_000);
+  await closeDialog();
+  const perfectPics = picsOf(perfect.bytes, 'perfect').filter((p) =>
+    /#(title-logo|footer-logo):/.test(p.name),
+  );
+  /* the PDF: no image XObject for the logo */
+  await menuPath(page, 'file', 'file.download', 'file.download.options');
+  await ctl(page, 'dialog.download.type.pdf').waitFor({ timeout: 8000 });
+  await ctl(page, 'dialog.download.type.pdf').click();
+  await ctl(page, 'dialog.download.pdf').waitFor({ timeout: 8000 });
+  const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click(), 120_000);
+  await closeDialog();
+  const images = pdfImages(pdf.bytes);
+  test.info().annotations.push({
+    type: 'svgBlip',
+    description: `logo assets added ${logoAssets} (${countsBefore} -> ${countsAfter}); Editable logo pics ${JSON.stringify(editablePics).slice(0, 400)}; Perfect small pics ${JSON.stringify(perfectPics).slice(0, 400)}; PDF image XObjects ${images}`,
+  });
+  expect(logoAssets, 'the insert added the logo asset').toBeGreaterThan(0);
+  expect(editablePics.length, 'the Editable text file carries the logo picture').toBeGreaterThan(0);
+  for (const p of editablePics) {
+    expect(p.blip ?? '', `${p.name}: a PNG blip`).toMatch(/\.png$/i);
+    /* the PNG blip is the object's own 3x shot (the footer's snapped box is 13 by 18, so 39 by 54;
+       the title slot's 57 by 85, so 171 by 255); its size is the crisp row's claim
+       (logos.export.pdf-pptx-crisp), this row's is that the vector sits beside a real PNG */
+    expect(p.png !== null && p.png.width > 0, `${p.name}: a PNG blip beside the vector`).toBe(true);
+    expect(p.svg ?? '', `${p.name}: asvg:svgBlip beside it`).toMatch(/\.svg$/i);
+  }
+  /* the title slot draws the mark on a title slide and the footer on every slide: at least the footer's object */
+  expect(perfectPics.length, "the Perfect file's kit logo objects").toBeGreaterThanOrEqual(1);
+  for (const p of perfectPics)
+    expect(p.svg ?? '', `${p.name}: asvg:svgBlip on the kit's logo object`).toMatch(/\.svg$/i);
+  expect(images, 'the PDF holds no image XObject for the logo').toBe(0);
+});
+
 coverage(import.meta.filename, [
   'logos.picker.recents',
   'logos.route.mark-headers',
@@ -787,4 +962,6 @@ coverage(import.meta.filename, [
   'logos.index.cached-offline',
   'logos.cache.open-licence-only',
   'logos.agent.search-insert',
+  /* the vector round (docs/VECTOR.md 4.6, 6.1): the logo's vector export */
+  'logos.export.svgblip',
 ]);

@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
+import { resolve } from 'node:path';
 import { inflateRawSync } from 'node:zlib';
 
 import { expect, test } from '@playwright/test';
@@ -961,4 +962,231 @@ export async function windowActions(page: Page): Promise<Set<string>> {
 export function pngSize(bytes: Buffer): { width: number; height: number } | null {
   if (bytes.length < 24 || bytes.toString('latin1', 1, 4) !== 'PNG') return null;
   return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
+}
+
+// ---------------------------------------------------------------------------------------------
+// the vector round (docs/VECTOR.md section 4, 6.1): the svg fixtures under e2e/fixtures, the
+// paste and drop events built in the page (the pattern of core/images.spec.ts), the vector picture
+// placed as a setup write, the asset record read through slide.get and the picture's img facts
+
+/** The bytes of a fixture under apps/studio/e2e/fixtures. */
+export function fixtureBytes(name: string): Buffer {
+  return readFileSync(resolve(import.meta.dirname, '..', 'fixtures', name));
+}
+
+/** The svg fixture of the round: a rect and a circle at 96 by 64, under 1 KB (`mark.svg`). */
+export function svgFixture(): Buffer {
+  return fixtureBytes('mark.svg');
+}
+
+/** A data URL of some bytes. */
+export function dataUrlOf(bytes: Buffer, mime: string): string {
+  return `data:${mime};base64,${bytes.toString('base64')}`;
+}
+
+/**
+ * Pastes a file on the stage through a ClipboardEvent built in the page (Playwright's
+ * dispatchEvent has no ClipboardEvent constructor; core/images.spec.ts `pastePng`).
+ */
+export async function pasteFile(
+  page: Page,
+  bytes: Buffer,
+  name: string,
+  mime: string,
+): Promise<void> {
+  await page.evaluate(
+    ([b64, fileName, type]) => {
+      const bin = atob(b64);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i += 1) arr[i] = bin.charCodeAt(i);
+      const dt = new DataTransfer();
+      dt.items.add(new File([arr], fileName, { type }));
+      const target = document.querySelector('.ts-stagewrap.ts-editor');
+      if (!target) throw new Error('no editor stage to paste on');
+      target.dispatchEvent(
+        new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }),
+      );
+    },
+    [bytes.toString('base64'), name, mime] as const,
+  );
+}
+
+/** Pastes text on the stage through a ClipboardEvent built in the page, with the types given. */
+export async function pasteText(page: Page, data: Record<string, string>): Promise<void> {
+  await page.evaluate((entries) => {
+    const dt = new DataTransfer();
+    for (const [type, value] of Object.entries(entries)) dt.setData(type, value);
+    const target = document.querySelector('.ts-stagewrap.ts-editor');
+    if (!target) throw new Error('no editor stage to paste on');
+    target.dispatchEvent(
+      new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }),
+    );
+  }, data);
+}
+
+/**
+ * A copy event built in the page on the stage; answers what the editor's handler wrote to it
+ * (`text/plain`, `text/html`) and whether it took the event.
+ */
+export async function copyFromStage(
+  page: Page,
+): Promise<{ plain: string; html: string; prevented: boolean }> {
+  return page.evaluate(() => {
+    const dt = new DataTransfer();
+    const target = document.querySelector('.ts-stagewrap.ts-editor');
+    if (!target) throw new Error('no editor stage to copy from');
+    const event = new ClipboardEvent('copy', {
+      clipboardData: dt,
+      bubbles: true,
+      cancelable: true,
+    });
+    target.dispatchEvent(event);
+    return {
+      plain: dt.getData('text/plain'),
+      html: dt.getData('text/html'),
+      prevented: event.defaultPrevented,
+    };
+  });
+}
+
+/**
+ * Drops a file at a sheet point (1600 by 900 sheet px), Playwright's documented file drop
+ * pattern: a DataTransfer built in the page and the three drag events on the stage.
+ */
+export async function dropFileAt(
+  page: Page,
+  sx: number,
+  sy: number,
+  bytes: Buffer,
+  name: string,
+  mime: string,
+): Promise<void> {
+  const sheet = page.locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)').first();
+  const box = (await sheet.boundingBox())!;
+  const k = box.width / 1600;
+  const x = box.x + sx * k;
+  const y = box.y + sy * k;
+  const dt = await page.evaluateHandle(
+    ([b64, fileName, type]) => {
+      const bin = atob(b64);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i += 1) arr[i] = bin.charCodeAt(i);
+      const file = new File([arr], fileName, { type });
+      const transfer = new DataTransfer();
+      transfer.items.add(file);
+      return transfer;
+    },
+    [bytes.toString('base64'), name, mime] as const,
+  );
+  for (const type of ['dragenter', 'dragover', 'drop'])
+    await page.dispatchEvent('.ts-stagewrap.ts-editor', type, {
+      dataTransfer: dt,
+      clientX: x,
+      clientY: y,
+    });
+}
+
+/** The asset record a slide references, through slide.get's `assets` (docs/VECTOR.md 4.1). */
+export async function assetOf(
+  page: Page,
+  slideId: string,
+  assetId: string,
+): Promise<Record<string, unknown> | null> {
+  const got = await invoke<{ assets?: Record<string, Record<string, unknown>> }>(
+    page,
+    'slide.get',
+    { slideId },
+  );
+  return got.assets?.[assetId] ?? null;
+}
+
+/**
+ * Places a vector picture as a setup write (docs/VECTOR.md 4.3: the svg goes to asset.add as a
+ * data URL and takes the intake's svg branch), then a picture block of the upload's kind.
+ */
+export async function placeSvgPicture(
+  page: Page,
+  slideId: string,
+  pos: { x: number; y: number; w: number; h: number },
+  id = `svg-${Date.now().toString(36)}`,
+  svg: Buffer = svgFixture(),
+): Promise<{ blockId: string; assetId: string }> {
+  const s = await state(page);
+  const asset = await invoke<{ id: string; revision?: number }>(page, 'asset.add', {
+    id: `${id}-asset`,
+    file: dataUrlOf(svg, 'image/svg+xml'),
+    role: 'capture',
+    alt: 'core spec svg picture',
+    baseRevision: s.revision,
+  });
+  await settled(page);
+  const s2 = await state(page);
+  await invoke(page, 'block.insert', {
+    slideId,
+    slot: 'main',
+    block: { id, type: 'shot', asset: asset.id, pos },
+    baseRevision: Math.max(s2.revision, asset.revision ?? 0),
+  });
+  await settled(page);
+  return { blockId: id, assetId: asset.id };
+}
+
+/** The `img` a picture block draws on the stage (or in another root), with its source and fit. */
+export async function pictureImg(
+  page: Page,
+  blockId: string,
+  root = '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)',
+): Promise<{
+  src: string;
+  currentSrc: string;
+  alt: string;
+  objectFit: string;
+  natural: { width: number; height: number };
+} | null> {
+  return page.evaluate(
+    ([id, rootSel]) => {
+      const el = document.querySelector(`${rootSel} [data-block="${id}"]`);
+      const img = (
+        el?.tagName.toLowerCase() === 'img' ? el : el?.querySelector('img.picture-img, img')
+      ) as HTMLImageElement | null | undefined;
+      if (!img) return null;
+      return {
+        src: img.getAttribute('src') ?? '',
+        currentSrc: img.currentSrc,
+        alt: img.getAttribute('alt') ?? '',
+        objectFit: getComputedStyle(img).objectFit,
+        natural: { width: img.naturalWidth, height: img.naturalHeight },
+      };
+    },
+    [blockId, root] as const,
+  );
+}
+
+/** The snackbar text on the page, or null. */
+export async function snackbarText(page: Page): Promise<string | null> {
+  return page.evaluate(
+    () =>
+      [
+        ...document.querySelectorAll(
+          '[data-control="snackbar"], [data-control="snackbar.upload.failed"], .ts-snackbar, .pt-toast, [role="alert"]',
+        ),
+      ]
+        .map((el) => (el.textContent ?? '').trim())
+        .filter((text) => text.length > 0)
+        .join(' | ') || null,
+  );
+}
+
+/** The bytes of a same origin or public store file the page can reach, through the page's request context. */
+export async function fetchBytes(
+  page: Page,
+  url: string,
+): Promise<{ status: number; bytes: Buffer; contentType: string }> {
+  const absolute = new URL(url, page.url()).toString();
+  const res = await page.request.get(absolute, { headers: extraHTTPHeaders, maxRedirects: 3 });
+  return {
+    status: res.status(),
+    bytes: Buffer.from(await res.body()),
+    contentType: res.headers()['content-type'] ?? '',
+  };
 }

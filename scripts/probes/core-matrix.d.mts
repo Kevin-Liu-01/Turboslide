@@ -1,5 +1,5 @@
 // Type declarations for core-matrix.mjs (docs/FOCUS.md section 6; docs/RETURN.md section 5;
-// docs/PRODUCT.md section 8), for
+// docs/PRODUCT.md section 8; docs/VECTOR.md section 6 for the svg feature and the menus area), for
 // the TypeScript callers: the core specs under apps/studio/e2e/core/ through
 // apps/studio/e2e/core/matrix.ts. The module itself is plain Node; the declarations describe what
 // it exports and nothing more.
@@ -33,6 +33,7 @@ export type CoreFeature =
   | 'sync'
   | 'cost'
   | 'logos'
+  | 'svg'
   | 'surface';
 
 /** The four words of the audits for what production did on the day the matrix was written. */
@@ -54,7 +55,8 @@ export type CoreSpecDriver =
   | 'core/brand.spec.ts'
   | 'core/assist.spec.ts'
   | 'core/sync.spec.ts'
-  | 'core/logos.spec.ts';
+  | 'core/logos.spec.ts'
+  | 'core/svg.spec.ts';
 
 /** The cost probe of docs/SYNC.md 6.3 (scripts/probes/sync-cost-probe.mjs), run by the gate. */
 export type CostProbeDriver = 'cost-probe';
@@ -111,7 +113,7 @@ export type ParkedList = {
 export const CORE_MATRIX_PATH: string;
 export const CORE_FEATURES: readonly CoreFeature[];
 export const AREA_FEATURE: Readonly<Record<string, CoreFeature>>;
-/** The rows whose feature is not their id's area (docs/FEATURES.md 7.1): the export and intake rows of the logos area. */
+/** The rows whose feature is not their id's area (docs/FEATURES.md 7.1): the export and URL intake rows of the logos area. */
 export const ROW_FEATURE: Readonly<Record<string, CoreFeature>>;
 export const CORE_STATES: readonly CoreState[];
 export const RUN_RESULTS: readonly RunResult[];

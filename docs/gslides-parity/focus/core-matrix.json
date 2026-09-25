@@ -1,5 +1,5 @@
 {
-  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship.",
+  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship. The vector round (docs/VECTOR.md section 6) added 43 rows on 2026-09-24 and extended one (shapes.insert.named-rows reads the seven Insert > Shape rows): the shapes rows of the geometry interpreter, the glyph grids, Change shape and Mask image (parks naming the gallery row or the control each measures, so a red one re parks that category alone and never the three named rows; shapes.geometry.pinned-three, .text-rect and shapes.icons.named-rows carry no parks, being core rows of an earlier round's feature), the menus area whose rows are the chrome's (AREA_FEATURE menus: chrome, unparkable: the icons on the visual rows), the parkable feature svg (the intake by the chooser, a paste, a drop and a URL, the sheet at two zooms, the gestures, the copy, the sanitizer and the exports; every row parks one or more of the six ids of VECTOR.md 4.8 declared in core-matrix.mjs) and logos.export.svgblip; `today` is what the tree at 2be923e and the audits show on 2026-09-24 (a row of a control that does not exist is not driven with the document's reading as its evidence; a behaviour production shows red is broken with the audit's severity), and `note` names the round, the VECTOR.md section and the lane. The row logos.intake.svg-sentence left with its sentence (4.7); svg.import.upload measures the upload.",
   "rows": [
     {
       "id": "decks.home.new-presentation",
@@ -2462,10 +2462,11 @@
     {
       "id": "shapes.insert.named-rows",
       "feature": "shapes",
-      "interaction": "Insert > Shape lists Rectangle, Rounded rectangle and Ellipse as named rows and the toolbar Shape arrow lists the same",
+      "interaction": "Insert > Shape lists Rectangle, Rounded rectangle and Ellipse as named rows above Shapes, Arrows, Callouts and Equation, and the toolbar Shape button lists the same seven (the existing row, its interaction extended; its driver reads the seven ids)",
       "driver": "probe --core",
       "today": "not driven",
-      "evidence": "audit-shapes rows 31 to 34: production draws the gallery plate instead of the named rows"
+      "evidence": "audit-shapes rows 31 to 34; model.ts 1395 to 1451 nests the three under a Shapes container",
+      "note": "Vector round; docs/VECTOR.md 2.6 (B1; the integrator lands the seven rows in model.ts)"
     },
     {
       "id": "shapes.default-look",
@@ -5496,6 +5497,36 @@
       "severity": 2
     },
     {
+      "id": "menus.icons.insert-rows",
+      "feature": "chrome",
+      "interaction": "Every Insert row of 3.2 draws an icon in the menu bar: for each id the row's .ts-menu-ic holds an svg with a non empty path; the chart types, Word art, the line kinds and Special characters included",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "model.ts 1471 to 1482, 1492, 1507 to 1536, 1542, 1571 carry no icon",
+      "note": "Vector round; docs/VECTOR.md 3.2 (B1; the integrator lands the icon fields in model.ts)"
+    },
+    {
+      "id": "menus.icons.format-rows",
+      "feature": "chrome",
+      "interaction": "Every Format row of 3.3 draws an icon: Bold, the four alignments, the Image rows, Borders & lines and its rows, Text fitting, Drop shadow (with the switch on), Change shape (on a shape's right click menu), Edit data and Chart type (on a chart's)",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "model.ts 1602, 1693 to 1705, 1884 to 1920, 1931 to 1957, 1986, 1991, 1997, 2004, 2019",
+      "setup": "block.insert of a shape and a chart and a picture through the window API, so the rows they enable are read",
+      "note": "Vector round; docs/VECTOR.md 3.3 (B1; the integrator lands the icon fields in model.ts)"
+    },
+    {
+      "id": "menus.icons.one-family",
+      "feature": "chrome",
+      "interaction": "Over every open menu of the bar and the toolbar dropdowns: every icon under a row is svg[viewBox=\"0 0 20 20\"][width=\"16\"][height=\"16\"]; no <use>, no <img>, no other viewBox under a row; the line kinds' glyphs are eight distinct stroked paths",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "icons.tsx 1 to 21, 918 to 934 (one family today; the row guards the drawn glyphs)",
+      "note": "Vector round; docs/VECTOR.md 3.1, 3.4 (B1)"
+    },
+    {
       "id": "brand.panel.opens",
       "feature": "brand",
       "interaction": "Slide > Change theme, the toolbar Theme button and Slide > Edit theme open the Brand kit panel with Appearance, Logo, Colors, Fonts, Footer, Slide numbers, Frame (each row with its sentence), Words that never translate and Reset to General Translation",
@@ -6102,6 +6133,255 @@
       "severity": 3,
       "evidence": "audit-objects 4 (d13-shape-labelled.png, d15-shape-resized.png)",
       "note": "Ship one P0; docs/FEATURES.md 2.2 rank 3 (B3: block-css.ts and primitives.ts default, the Align read in ToolbarTail.tsx)"
+    },
+    {
+      "id": "shapes.geometry.shapes.hexagon-sheet",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Shapes, the hexagon tile, one click at (200, 200): a 240 by 160 block with data-shape=\"hexagon\" whose path[d] equals shapePath('hexagon', 239, 159, defaults) (the box less the 1 px stroke) and has six vertices; Cmd+Z removes it",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects rows 26 to 49 (a hexagon inserts as the box); shapes.ts 421 to 445",
+      "parks": ["insert.shape.gallery"],
+      "note": "Vector round; docs/VECTOR.md 2.1, 2.3 (B2 the interpreter and the sheet; B1 the picker)"
+    },
+    {
+      "id": "shapes.geometry.shapes.star5-adjust",
+      "feature": "shapes",
+      "interaction": "A 5 point star drawn by a drag to 300 by 300; Format options > Shape > Adjust set to 30 writes adjust[0] 30000 and the path equals shapePath at that adjust: the inner vertices sit at 60 percent of the outer radius along their directions (ECMA star5 puts them at adj over 50000; 38 percent at the default) within 1 percent; Cmd+Z restores 19098",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "inspector/shape.tsx 28 to 80 writes the fields; the path ignores them (shapes.ts 421 to 445); the 30 percent VECTOR.md 6.1 names is the field's value, not the ECMA ratio (definitions.ts star5 iwd2 = swd2 × a / 50000)",
+      "parks": ["insert.shape.gallery"],
+      "note": "Vector round; docs/VECTOR.md 2.1, 2.4 (B2)"
+    },
+    {
+      "id": "shapes.geometry.shapes.pie-arc",
+      "feature": "shapes",
+      "interaction": "Pie by one click: the path carries arcs (A), starts on the ellipse at 0 degrees and sweeps 270 (the defaults adj1 0, adj2 16200000), the centre at the box's centre within 1 px",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects rows 26 to 49; the arc conversion of 2.1",
+      "parks": ["insert.shape.gallery"],
+      "note": "Vector round; docs/VECTOR.md 2.1 (B2)"
+    },
+    {
+      "id": "shapes.geometry.shapes.multipath-can",
+      "feature": "shapes",
+      "interaction": "Can by one click: the block's svg holds the definition's three geometry paths (a fourth element draws the lighten overlay of 2.3 over the lid's outline), the lid's path with stroke=\"none\" where the definition says stroke false, and the fill of the block on the norm paths",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects rows 26 to 49; primitives.ts 492 to 503 writes one path",
+      "parks": ["insert.shape.gallery"],
+      "note": "Vector round; docs/VECTOR.md 2.3 (B2)"
+    },
+    {
+      "id": "shapes.geometry.shapes.flowchart-own-space",
+      "feature": "shapes",
+      "interaction": "Flowchart: document drawn by a drag to 300 by 100 (a path with its own w and h of 21600): every point of the path lies inside the box within 1 px and the bottom edge is the curve",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects rows 26 to 49; 2.1 the path space",
+      "parks": ["insert.shape.gallery"],
+      "note": "Vector round; docs/VECTOR.md 2.1 (B2)"
+    },
+    {
+      "id": "shapes.geometry.arrows.right-arrow",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Arrows, the Right arrow tile, one click: seven vertices, the tip at the box's right edge at half height, the shaft's height adj1 of the box",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects row 25 (the Arrows plate's tiles are the box glyph), rows 26 to 49",
+      "parks": ["insert.shape.arrows"],
+      "note": "Vector round; docs/VECTOR.md 2.1, 2.6 (B2; B1 the Arrows row)"
+    },
+    {
+      "id": "shapes.geometry.arrows.curved-right",
+      "feature": "shapes",
+      "interaction": "Curved right arrow by a drag to 240 by 240: three geometry paths, arcs in each, the shade path (darkenLess in the definition, where VECTOR.md 6.1 wrote darken) drawn as the ink overlay of 2.3 at opacity 0.15",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects rows 26 to 49; definitions.ts curvedRightArrow shades with darkenLess (vector/build/b2.md 2.6)",
+      "parks": ["insert.shape.arrows"],
+      "note": "Vector round; docs/VECTOR.md 2.1, 2.3 (B2)"
+    },
+    {
+      "id": "shapes.geometry.callouts.wedge-rect",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Callouts, Rectangular callout, one click: the pointer's tip sits at (-20833, 62500) of the box from its centre (left of the box, below its middle), the other vertices on the box",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects row 25, rows 26 to 49",
+      "parks": ["insert.shape.callouts"],
+      "note": "Vector round; docs/VECTOR.md 2.1, 2.6 (B2; B1 the Callouts row)"
+    },
+    {
+      "id": "shapes.geometry.callouts.cloud",
+      "feature": "shapes",
+      "interaction": "Cloud callout by one click: five paths, the two small ellipses of the tail below and left of the cloud, arcs in the cloud's path (the definition's arcTo commands; ECMA cloudCallout draws no cubic)",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects rows 26 to 49; definitions.ts cloudCallout (eleven arcTo commands in the cloud path, where VECTOR.md 6.1 wrote cubic curves)",
+      "parks": ["insert.shape.callouts"],
+      "note": "Vector round; docs/VECTOR.md 2.1, 2.3 (B2)"
+    },
+    {
+      "id": "shapes.geometry.equation.plus-divide",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Equation, Plus then Divide by one click each: the plus has twelve vertices and its arms are adj1 of the box; the divide carries a bar and two round dots (arcs) above and below it",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects row 25, rows 26 to 49",
+      "parks": ["insert.shape.equation"],
+      "note": "Vector round; docs/VECTOR.md 2.1, 2.6 (B2; B1 the Equation row)"
+    },
+    {
+      "id": "shapes.geometry.pinned-three",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Shapes: the Rectangle, Rounded rectangle and Ellipse tiles by one click each (the named rows place the legacy kinds, drawn as rect and ellipse elements: shapes.insert.rounded-click's rx 8): their paths equal ship one's byte for byte at the drawn box (240 by 160 less the stroke: M0,26.5 A26.5,26.5 0 0 1 26.5,0 with four arcs; four arcs of half the box), and the rounded rectangle's Corner field at 50 gives a radius of half the short side (80 at 240 by 160)",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "shapes.test.ts 148 to 186; shapes.insert.rounded-click works on production; the named rows insert shape: 'rectangle', 'rounded' and 'ellipse' (model.ts 1414 to 1426), which primitives.ts draws as rect and ellipse elements, so the pinned paths are read on the preset tiles",
+      "note": "Vector round; docs/VECTOR.md 2.2 (B2)"
+    },
+    {
+      "id": "shapes.geometry.text-rect",
+      "feature": "shapes",
+      "interaction": "A rounded rectangle at 240 by 160 labelled \"Next step\": the .shape-text layer's left is 7.8 px (29.289 percent of 26.67) from the shape's box; a right arrow at 240 by 160 labelled \"Go\": the layer's top and bottom sit on the shaft (y1 and y2, 40 and 120); the Editable text file's bodyPr insets for both equal the measured inset less the preset's rectangle",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "shapes.ts 446 to 461 answers the whole box; text.ts 414 to 445 measures against the box",
+      "setup": "block.insert of the two labelled shapes through the window API",
+      "note": "Vector round; docs/VECTOR.md 2.3, 2.5 (B2 the sheet; B4 addShapeText)"
+    },
+    {
+      "id": "shapes.geometry.sites",
+      "feature": "shapes",
+      "interaction": "A hexagon and an Insert > Line > Line dragged from the sheet to the hexagon's upper right site (x2, y1 of its cxnLst, the top right vertex): the end snaps to it (the site marks show six, not eight) and connect.end.site is below 6; a rectangle still offers eight",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "shapes.ts 483 to 490 answers rectSites for every preset; connect.ts 36 to 40",
+      "parks": ["insert.shape.gallery"],
+      "setup": "block.insert of the hexagon through the window API",
+      "note": "Vector round; docs/VECTOR.md 2.2 (B2)"
+    },
+    {
+      "id": "shapes.geometry.resize-keeps-adjust",
+      "feature": "shapes",
+      "interaction": "The star of star5-adjust resized by its se handle to 600 by 600: adjust still reads [30000, 105146, 110557] and the inner radius is 60 percent of the outer at the new size (ECMA star5: adj over 50000); Cmd+Z restores the box",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "Editor.tsx 2500 to 2536 writes pos alone (the invariant this row pins)",
+      "parks": ["insert.shape.gallery"],
+      "note": "Vector round; docs/VECTOR.md 2.4 (B2 (a probe row over Gestures.tsx and Editor.tsx as they stand))"
+    },
+    {
+      "id": "shapes.geometry.export.pptx-prst-avlst",
+      "feature": "shapes",
+      "interaction": "Editable text download of a slide holding a hexagon, the star (adjust 30000) and a rectangular callout: slide1.xml carries prst=\"hexagon\" with an empty avLst, prst=\"star5\" with <a:gd name=\"adj\" fmla=\"val 30000\"/> first, prst=\"wedgeRectCallout\" with adj1 and adj2; the file arrives within 30 s",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shapes row 48; build.ts 534 to 538 writes the values, unmeasured for a gallery preset",
+      "parks": ["insert.shape.gallery", "insert.shape.callouts"],
+      "setup": "block.insert of the three shapes through the window API",
+      "note": "Vector round; docs/VECTOR.md 2.5 (B4)"
+    },
+    {
+      "id": "shapes.geometry.export.raster-modes",
+      "feature": "shapes",
+      "interaction": "The Perfect download and the PDF of the same slide: the report's perfect is true with every page under 0.1 percent, and the PDF's report passes with the page under 0.5 percent (the gate of pdf/build.ts 1 to 30); each arrives within 30 s",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-shapes rows 47 and 48",
+      "parks": ["insert.shape.gallery"],
+      "setup": "block.insert of the three shapes through the window API",
+      "note": "Vector round; docs/VECTOR.md 2.5 (B4; B2 the sheet the raster shoots)"
+    },
+    {
+      "id": "shapes.insert.grid-shapes",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Shapes opens the plate: 99 tiles (the table's shapes category), 94 distinct glyph d strings (five flowchart presets share a plain shape's outline at the defaults), the rectangle's the box; Enter on the hexagon tile arms the draw tool and one click places 240 by 160; Escape closes",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects row 24 (99 tiles draw three glyph paths); ShapePicker.tsx 47 to 58; the table holds 99 shapes presets (shapes.ts SHAPE_PRESETS), not the 100 of VECTOR.md 6.1",
+      "parks": ["insert.shape.gallery"],
+      "note": "Vector round; docs/VECTOR.md 2.6 (B1; B2 the glyphs)"
+    },
+    {
+      "id": "shapes.insert.grid-arrows",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Arrows: 26 tiles with distinct glyphs; a pick of Left right arrow and a drag draws it with a tip at each end",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects row 25",
+      "parks": ["insert.shape.arrows"],
+      "note": "Vector round; docs/VECTOR.md 2.6 (B1; B2 the glyphs)"
+    },
+    {
+      "id": "shapes.insert.grid-callouts",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Callouts: 4 tiles with distinct glyphs; a pick of Oval callout and one click places it with its pointer",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects row 25",
+      "parks": ["insert.shape.callouts"],
+      "note": "Vector round; docs/VECTOR.md 2.6 (B1; B2 the glyphs)"
+    },
+    {
+      "id": "shapes.insert.grid-equation",
+      "feature": "shapes",
+      "interaction": "Insert > Shape > Equation: 6 tiles with distinct glyphs; a pick of Not equal places it",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects row 25",
+      "parks": ["insert.shape.equation"],
+      "note": "Vector round; docs/VECTOR.md 2.6 (B1; B2 the glyphs)"
+    },
+    {
+      "id": "shapes.icons.named-rows",
+      "feature": "shapes",
+      "interaction": "Each of the three named rows in the menu and in the toolbar dropdown draws a 16 px glyph (svg[viewBox=\"0 0 20 20\"] inside .ts-menu-ic) whose path is non empty and differs between the three; the four category rows draw theirs",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "Kevin's screenshot of 2026-09-24 (plain text rows); model.ts 1414 to 1426 carry no icon",
+      "note": "Vector round; docs/VECTOR.md 3.1, 3.2 (B1; the integrator lands the icon fields in model.ts)"
+    },
+    {
+      "id": "shapes.change-shape.plate",
+      "feature": "shapes",
+      "interaction": "A hexagon selected: the toolbar's Change shape opens the picker with the hexagon tile ringed (is-picked); a pick of Octagon writes shape.set { kind: 'octagon', adjust: null } and the path has eight vertices; the right click menu's Change shape does the same; Cmd+Z restores the hexagon",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/RETURN.md 2.9 (parked with the galleries); toolbar-tails.ts 376 to 392",
+      "parks": ["toolbar.changeShape", "format.changeShape"],
+      "setup": "block.insert of the hexagon through the window API",
+      "note": "Vector round; docs/VECTOR.md 2.6 (B1 the flags and the plate; B2 the glyphs)"
+    },
+    {
+      "id": "shapes.mask-image.plate",
+      "feature": "shapes",
+      "interaction": "A picture selected: Format > Image > Mask image opens the picker; a pick of Ellipse writes mask: 'ellipse', the frame carries data-mask=\"ellipse\" and a clip-path with arcs; the Crop button's arrow opens the same; Reset image clears it",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/RETURN.md 2.9; picture.ts 66 to 72 already clips from shapePath",
+      "parks": ["format.image.maskImage"],
+      "setup": "asset.add and block.insert of a PNG picture through the window API",
+      "note": "Vector round; docs/VECTOR.md 2.6 (B1 the flag and the plate)"
     },
     {
       "id": "tables.selected.typing-appends",
@@ -6743,16 +7023,6 @@
       "note": "Ship one P1; docs/FEATURES.md 4.5 (B6: ThemesPanel.tsx, logo.insert { kit: true }); lands only under the P1 condition"
     },
     {
-      "id": "logos.intake.svg-sentence",
-      "feature": "images",
-      "interaction": "Upload from computer with an .svg: the picture lands as PNG twins, or, while the raster path is off, the snackbar reads \"SVG files are not accepted yet. Export the logo as a PNG and upload that\" and the chooser lists the four raster types",
-      "driver": "core/images.spec.ts",
-      "today": "broken",
-      "severity": 3,
-      "evidence": "audit-logos 4 (04-upload-thesvg-svg.png: \"svg is not accepted here; send png, jpeg, webp or gif\")",
-      "note": "Ship one P1; docs/FEATURES.md 4.7 (B7: intake.ts behind TURBOSLIDE_SVG_RASTER, UPLOAD_REASONS.notSvg); the feature is images (7.1), an unparkable feature, so a red row blocks the ship: the integrator decides at the ship whether B7's P1 landed or the row's sentence is today's"
-    },
-    {
       "id": "logos.intake.url-sentence",
       "feature": "images",
       "interaction": "asset.add { url: 'https://thesvg.org/…' } from the page answers the sentence naming the four sites and no CLI flag; asset.add with the allowlisted Wikimedia PNG answers 200",
@@ -6761,6 +7031,183 @@
       "severity": 2,
       "evidence": "audit-logos 16 (logo-walk.json: \"host thesvg.org is not in the capture allowlist; pass --allow thesvg.org\")",
       "note": "Ship one P1; docs/FEATURES.md 4.7 (B7: shared.ts the sentence and the User-Agent); the feature is images (7.1), an unparkable feature, so a red row blocks the ship: the integrator decides at the ship whether B7's P1 landed or the sentence is today's"
+    },
+    {
+      "id": "logos.export.svgblip",
+      "feature": "logos",
+      "interaction": "A logo inserted from the picker (the fixture upstream on the preview): the Editable text file's logo p:pic carries asvg:svgBlip beside its 3x PNG blip; with a kit whose mark is that logo, the Perfect file's title and footer logo objects carry it too; the PDF page holds no image XObject for the logo",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/FEATURES.md 4.8 and section 8; kit-logos.ts 1 to 27",
+      "parks": ["export.svg.vector"],
+      "setup": "logo.insert { slug: 'figma', everySlide: true } through the window API",
+      "note": "Vector round; docs/VECTOR.md 4.6 (B4; B3 the logo asset's vector twins)"
+    },
+    {
+      "id": "svg.import.upload",
+      "feature": "svg",
+      "interaction": "Insert > Image > Upload from computer with a 1 KB .svg (a rect and a circle) through the chooser: the picture lands within 5 s at the SVG's aspect; its img.picture-img src ends in .svg; the deck's asset reads kind: 'svg', vector.neutral ending in .svg, a PNG twin and scale 3",
+      "driver": "core/svg.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-logos 4 (the refusal sentence); upload.ts 58 to 63; EditorRoot.tsx 423",
+      "parks": ["intake.svg.upload"],
+      "note": "Vector round; docs/VECTOR.md 4.1 to 4.3 (B3; the integrator the chooser's accept list)"
+    },
+    {
+      "id": "svg.import.paste-file",
+      "feature": "svg",
+      "interaction": "A paste event built in the page carrying a File of type image/svg+xml on the stage: the picture lands within 5 s as a vector picture",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "evidence": "Editor.tsx 4883 to 4909 takes the file; the server refuses it today",
+      "parks": ["intake.svg.paste"],
+      "note": "Vector round; docs/VECTOR.md 4.3 (B3)"
+    },
+    {
+      "id": "svg.import.paste-markup",
+      "feature": "svg",
+      "interaction": "Two pastes built in the page: text/plain holding the markup with an XML prolog (Figma's form), then text/html holding <meta charset=\"utf-8\"><svg …> with no text/plain; each lands a vector picture within 5 s; a third paste of text/plain \"hello <svg>\" lands text, not a picture",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "evidence": "Editor.tsx 4895 to 4905 reads the text as the envelope or plain text",
+      "parks": ["intake.svg.paste"],
+      "note": "Vector round; docs/VECTOR.md 4.3 (B3)"
+    },
+    {
+      "id": "svg.import.drop",
+      "feature": "svg",
+      "interaction": "A DataTransfer with an .svg File dropped at (1000, 600): the picture lands within 5 s with its box holding the point; dropped on a PNG picture it replaces the asset and keeps the box",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "evidence": "Editor.tsx 6167 to 6190; images.spec.ts 82 to 125 (the drop pattern)",
+      "parks": ["intake.svg.drop"],
+      "setup": "asset.add and block.insert of the PNG picture the second drop replaces",
+      "note": "Vector round; docs/VECTOR.md 4.3 (B3)"
+    },
+    {
+      "id": "svg.import.url",
+      "feature": "svg",
+      "interaction": "Insert > Image > By URL with the origin's /api/logo/mark/figma/default.svg (the fixture upstream on the preview, the live index on production): the picture lands within 8 s as a vector picture whose alt is the file's name",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "evidence": "Editor.tsx 3947 to 3961; picture-place.ts 285 to 287",
+      "parks": ["intake.svg.url"],
+      "note": "Vector round; docs/VECTOR.md 4.3 (B3)"
+    },
+    {
+      "id": "svg.render.vector-at-zoom",
+      "feature": "svg",
+      "interaction": "The uploaded svg picture at 100 and at 200 percent (view.zoom): the drawn element stays img[src$=\".svg\"], currentSrc is the svg, and the page's resource timing lists no .png of the asset; the Present view and the viewer draw the same img",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "evidence": "4.4; picture.ts 74 to 129 draws the twin today",
+      "parks": ["intake.svg.upload", "intake.svg.paste", "intake.svg.drop", "intake.svg.url"],
+      "note": "Vector round; docs/VECTOR.md 4.4 (B3)"
+    },
+    {
+      "id": "svg.render.picture-gestures",
+      "feature": "svg",
+      "interaction": "On the svg picture: a drag from inside moves it 80 by 40; the se handle with Shift keeps the aspect; the rotation handle writes 15 degrees; Mask image (ellipse), Border weight 2 and Drop shadow each write and draw; a PNG dropped on it replaces the asset in the same box; Crop image is disabled with \"An SVG picture cannot be cropped. Resize it instead\"; each undoes",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "evidence": "4.4; AMENDMENTS.md A1",
+      "parks": ["intake.svg.upload", "intake.svg.paste", "intake.svg.drop", "intake.svg.url"],
+      "note": "Vector round; docs/VECTOR.md 4.4 (B3; B1 the crop sentence)"
+    },
+    {
+      "id": "svg.copy.markup",
+      "feature": "svg",
+      "interaction": "Cmd+C on the selected svg picture (a copy event dispatched in the page after the read ahead settled): text/plain begins with <?xml or <svg and ends with </svg>, text/html begins with <!--turboslide:v1:; Cmd+V in the same deck lands a second picture block 16 px right and down (the envelope wins over the markup)",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "evidence": "Editor.tsx 4869 to 4882 writes the envelope alone",
+      "parks": ["picture.svg.copy"],
+      "note": "Vector round; docs/VECTOR.md 4.5 (B3)"
+    },
+    {
+      "id": "svg.export.pdf-vector",
+      "feature": "svg",
+      "interaction": "File > Download > PDF of a slide whose only picture is the svg: the file arrives within 30 s, has one page per unskipped slide and zero image XObjects (pdfImages 0), and its report passes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "probe (a); pdf/build.ts 179 to 187",
+      "parks": ["export.svg.vector"],
+      "setup": "asset.add of the svg and block.insert of its picture through the window API",
+      "note": "Vector round; docs/VECTOR.md 4.6 (B4; B3 the vector img the print document draws)"
+    },
+    {
+      "id": "svg.export.pptx-svgblip",
+      "feature": "svg",
+      "interaction": "Editable text download of the same slide: the picture's p:pic carries asvg:svgBlip r:embed inside a:extLst with the ext uri {96DAC541-7B7A-43D3-8B79-37D633B846F1}, the rel targets a ../media/*.svg part whose bytes begin with <svg or the prolog and hold no <script, and [Content_Types].xml carries the svg default",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "probe (b); docs/FEATURES.md 4.8 (\"the vector path is the round after's\")",
+      "parks": ["export.svg.vector"],
+      "setup": "asset.add of the svg and block.insert of its picture through the window API",
+      "note": "Vector round; docs/VECTOR.md 4.6 (B4)"
+    },
+    {
+      "id": "svg.export.pptx-fallback",
+      "feature": "svg",
+      "interaction": "The same p:pic's a:blip r:embed targets a .png part whose bytes begin with the PNG signature and whose IHDR width equals the block's width times 3; with svgVector: false through the window API the file carries the blip alone and no .svg part",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "probe (b) (pptxgenjs's own fallback is the svg's bytes); extract.ts 65 to 71",
+      "parks": ["export.svg.vector"],
+      "setup": "asset.add of the svg and block.insert of its picture through the window API",
+      "note": "Vector round; docs/VECTOR.md 4.6 (B4; the integrator the export.run field)"
+    },
+    {
+      "id": "svg.export.web-page",
+      "feature": "svg",
+      "interaction": "With Tools > Advanced tools on, File > Download > Web page of the deck: the html carries data:image/svg+xml;base64, for the picture and no .png data URI of that asset",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "evidence": "apps/cli/src/assets.ts 18 to 27; docs/RETURN.md 2.15",
+      "parks": ["export.svg.vector"],
+      "setup": "asset.add of the svg and block.insert of its picture through the window API",
+      "note": "Vector round; docs/VECTOR.md 4.6 (B4; B3 the vector img)"
+    },
+    {
+      "id": "svg.sanitize.script-and-handlers",
+      "feature": "svg",
+      "interaction": "An svg holding <script>, an onload attribute, a <foreignObject> and <image href=\"https://…\"> uploads: the picture lands, the stored file (fetched by its src) holds none of the four, and the asset's source.sanitized.removed names them",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "evidence": "logo-sanitize.ts 1 to 16, 63 to 96",
+      "parks": ["intake.svg.upload"],
+      "note": "Vector round; docs/VECTOR.md 4.2 (B3)"
+    },
+    {
+      "id": "svg.sanitize.data-image-kept",
+      "feature": "svg",
+      "interaction": "An svg holding <image href=\"data:image/png;base64,…\"> (a 1 by 1 PNG) uploads: the stored file keeps the image element and the picture lands",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "evidence": "4.2 (today every image is dropped, logo-sanitize.ts 63 to 71)",
+      "parks": ["intake.svg.upload"],
+      "note": "Vector round; docs/VECTOR.md 4.2 (B3)"
+    },
+    {
+      "id": "svg.sanitize.cap",
+      "feature": "svg",
+      "interaction": "A 2.1 MB svg uploads: within 5 s the snackbar reads \"The picture could not be uploaded: The SVG file is over 2 MB\" and nothing lands",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "evidence": "4.2; upload.ts 47 to 63 (the sentence shape)",
+      "parks": ["intake.svg.upload"],
+      "note": "Vector round; docs/VECTOR.md 4.2 (B3)"
+    },
+    {
+      "id": "svg.sanitize.broken",
+      "feature": "svg",
+      "interaction": "A file that opens with <svg and is not well formed XML uploads: the snackbar reads \"The picture could not be uploaded: This SVG file could not be read\" and nothing lands",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "evidence": "4.2; logo-sanitize.ts 233 to 254",
+      "parks": ["intake.svg.upload"],
+      "note": "Vector round; docs/VECTOR.md 4.2 (B3)"
     }
   ]
 }

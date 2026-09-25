@@ -8,8 +8,9 @@
 // tables, charts, diagrams, word art, formatting, the chrome, the View menu and the notifications;
 // each is shown only while every row of its feature passes. The product round (docs/PRODUCT.md
 // section 8) added the brand kit, the fonts, the templates and the assist the same way, and the sync
-// and costs round (docs/SYNC.md 6.1) the two unparkable features sync and cost, and the features
-// round, ship one (docs/FEATURES.md section 4, 7.1) the logo picker. Node only; no dependency.
+// and costs round (docs/SYNC.md 6.1) the two unparkable features sync and cost, the features
+// round, ship one (docs/FEATURES.md section 4, 7.1) the logo picker, and the vector round
+// (docs/VECTOR.md section 4, 6.1) the SVG pictures. Node only; no dependency.
 
 /**
  * The features in the order of the README, keyed by the matrix's `feature` field. `heading` is the
@@ -300,6 +301,15 @@ export const FEATURES = [
     heading: 'Logos',
     paragraph:
       "**Logos.** Insert > Logo searches the brand marks of thesvg.org by company name and places the mark on the slide at a logo size, stored on the presentation as its own picture with the brand's licence words; your own brand kit's logo comes first, the tiles show every mark on paper and on ink, and a check puts the mark on the title slide and in every footer. Replace image > Logo swaps a customer's logo and keeps its box, and Tailor for a customer finds the new customer's logo. The picker answers from a daily refreshed index while thesvg.org is down.",
+    shots: [],
+  },
+  /* the vector round (docs/VECTOR.md section 4, 6.1): the SVG pictures, shown only while every
+     row of the feature passes */
+  {
+    key: 'svg',
+    heading: 'SVG pictures',
+    paragraph:
+      '**SVG pictures.** Upload an SVG file, drop it on the slide, paste it as a file or as markup, or fetch it by URL; it lands as a picture that stays sharp at every zoom, moves, resizes and rotates like any picture, and copies its markup back to the clipboard. The PDF keeps it as vector, the PowerPoint file carries the vector beside a PNG fallback, and the web page inlines it.',
     shots: [],
   },
   {

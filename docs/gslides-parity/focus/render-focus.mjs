@@ -53,6 +53,8 @@ const FEATURES = [
   ['cost', 'SYNC 6.1 The calls per state'],
   /* the features round, ship one (docs/FEATURES.md section 4, 7.1): the logo picker over thesvg.org */
   ['logos', 'FEATURES 4 The logo picker'],
+  /* the vector round (docs/VECTOR.md section 4, 6.1): the SVG pictures */
+  ['svg', 'VECTOR 4 SVG pictures'],
   ['surface', '3 The switch'],
 ];
 const STATES = ['works', 'broken', 'flaky', 'not driven'];
@@ -110,6 +112,7 @@ const README = {
   cost: '**Costs.** An open editor, a hidden tab, an editing session, two tabs on one deck and a show each make a bounded number of requests a minute, and the store calls a deck costs a minute are counted in every release run and stay under their ceilings.',
   logos:
     "**Logos.** Insert > Logo searches the brand marks of thesvg.org by company name and places the mark on the slide at a logo size, stored on the presentation as its own picture with the brand's licence words; your own brand kit's logo comes first, the tiles show every mark on paper and on ink, and a check puts the mark on the title slide and in every footer. Replace image > Logo swaps a customer's logo and keeps its box, and Tailor for a customer finds the new customer's logo. The picker answers from a daily refreshed index while thesvg.org is down.",
+  svg: '**SVG pictures.** Upload an SVG file, drop it on the slide, paste it as a file or as markup, or fetch it by URL; it lands as a picture that stays sharp at every zoom, moves, resizes and rotates like any picture, and copies its markup back to the clipboard. The PDF keeps it as vector, the PowerPoint file carries the vector beside a PNG fallback, and the web page inlines it.',
   surface:
     '**For agents and advanced tools.** Every action the editor runs is also a CLI command, an MCP tool, an HTTP route and a window function, including the features behind Tools > Advanced tools. `GET /api/agent` lists them.',
 };

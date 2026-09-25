@@ -36,7 +36,14 @@
 // (`DECLARED_CONTROL_IDS`), `ROW_FEATURE` (a row whose id area is a new feature while its measurement
 // belongs to an unparkable one carries that feature, so a red export or intake row blocks the ship
 // instead of parking the picker) and the `--emit-parked` step, which writes the set of
-// packages/chrome/src/parked-controls.ts (B1's module, 7.2) from a ship's `parkedRows`.
+// packages/chrome/src/parked-controls.ts (B1's module, 7.2) from a ship's `parkedRows`. The
+// vector round (docs/VECTOR.md section 6) added the parkable feature `svg` (the SVG pictures:
+// the intake, the sheet, the copy, the sanitizer), the area `menus` whose rows belong to the
+// unparkable `chrome` (the icons on the visual rows, 3.2 to 3.4), the spec driver
+// `core/svg.spec.ts`, the six control ids of VECTOR.md 4.8 the svg rows' `parks` name before the
+// lanes' files hold them (`intake.svg.*`, `picture.svg.copy`, `export.svg.vector`), and retired
+// the row `logos.intake.svg-sentence` with its sentence (4.7), so ROW_FEATURE keeps the two
+// logos rows whose measurement belongs to export and images.
 //
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
@@ -94,11 +101,18 @@ export const CORE_FEATURES = Object.freeze([
   /* the features round, ship one (docs/FEATURES.md 4.12): the logo picker over thesvg.org, parkable;
      ship two adds `shaders` (5.10) with its rows */
   'logos',
+  /* the vector round (docs/VECTOR.md 6.1): the SVG pictures, parkable; its rows park the six
+     control ids of 4.8 and never the feature whole */
+  'svg',
   'surface',
 ]);
 
-/** An id's first part that is not a feature name, with the feature its rows belong to. */
-export const AREA_FEATURE = Object.freeze({ collab: 'share' });
+/**
+ * An id's first part that is not a feature name, with the feature its rows belong to: the
+ * `collab` rows are the share feature's, and the `menus` rows of the vector round (the icons on
+ * the visual rows, docs/VECTOR.md 6.1) are the chrome's, so an icon row is unparkable.
+ */
+export const AREA_FEATURE = Object.freeze({ collab: 'share', menus: 'chrome' });
 
 /**
  * The rows whose feature is not their id's area (docs/FEATURES.md 7.1): a row of a new feature's
@@ -109,7 +123,8 @@ export const AREA_FEATURE = Object.freeze({ collab: 'share' });
  */
 export const ROW_FEATURE = Object.freeze({
   'logos.export.pdf-pptx-crisp': 'export',
-  'logos.intake.svg-sentence': 'images',
+  /* `logos.intake.svg-sentence` left with its sentence in the vector round (docs/VECTOR.md 4.7);
+     `svg.import.upload` measures the upload under the parkable feature `svg` */
   'logos.intake.url-sentence': 'images',
 });
 
@@ -150,6 +165,9 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
   /* the features round, ship one (docs/FEATURES.md 7.1): the bearer rows, the network rows, the
      fixture upstream rows and the two browser rows of the logo picker */
   'core/logos.spec.ts',
+  /* the vector round (docs/VECTOR.md 6.1): the svg intake by the chooser, a paste, a drop and a
+     URL, the sheet at two zooms, the picture gestures, the copy and the sanitizer rows */
+  'core/svg.spec.ts',
 ]);
 
 export const CORE_DRIVERS = Object.freeze([PROBE_DRIVER, ...CORE_SPEC_DRIVERS, COST_PROBE_DRIVER]);
@@ -312,6 +330,16 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'toolbar.group.text',
   'toolbar.wordart.outline',
   'formatOptions.typography.numerals',
+  /* the vector round (docs/VECTOR.md 4.8): the six ids the svg rows' `parks` name, each read where
+     it acts through `isParked` of parked-controls.ts (the chooser's accept list and the client
+     sniff, the paste and drop handlers, the URL path, the copy handler, the Download dialog); the
+     viewer's files hold them once B3 and B1 land, and the ids are known here from day 0 */
+  'intake.svg.upload',
+  'intake.svg.paste',
+  'intake.svg.drop',
+  'intake.svg.url',
+  'picture.svg.copy',
+  'export.svg.vector',
 ]);
 
 let controlSourceText = null;

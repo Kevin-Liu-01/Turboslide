@@ -7,9 +7,11 @@
 // viewers that ignore text alpha and the text stays searchable and recoverable; the screenshot
 // travels in the encoding the page raster policy picks (page-raster.ts) and its decoded mismatch
 // is the report's `page.fraction`. The pptxgenjs buffer then goes through the OOXML post-process:
-// the repair-risk strip (kern, empty ext lists), row groups, the slide name and the hidden title
-// placeholder per slide, the content types clean, the app.xml titles, embedded fonts (native mode
-// under `embedFonts` only), stored media, and the package validation the report fails on.
+// the repair-risk strip (kern, empty ext lists), the shape rewrites, the vector of every svg
+// picture and logo (`asvg:svgBlip` beside the PNG blip, docs/VECTOR.md 4.6, unless `svgVector` is
+// false), row groups, the slide name and the hidden title placeholder per slide, the content
+// types clean, the app.xml titles, embedded fonts (native mode under `embedFonts` only), stored
+// media, and the package validation the report fails on.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -31,13 +33,14 @@ import { readGeometry } from '../ooxml/geometry.ts';
 import type { ShapeBounds } from '../ooxml/geometry.ts';
 import { groupShapes } from '../ooxml/groups.ts';
 import { toConnector, writeAdjustValues, writeAltText, writeColumns } from '../ooxml/shapes.ts';
+import { looksLikeSvg, writeSvgBlip } from '../ooxml/svg.ts';
 import { addHiddenTitle, setSlideName } from '../ooxml/titles.ts';
 import type { HiddenTitle } from '../ooxml/titles.ts';
 import { validatePackage } from '../ooxml/validate.ts';
 import type { PackageValidation } from '../ooxml/validate.ts';
 import { openPackage, readPart, slideParts, writePackage, writePart } from '../ooxml/zip.ts';
 import { KIT_LOGO_BLOCK_IDS } from '../scene/kit-logos.ts';
-import type { Scene, SceneText } from '../scene/types.ts';
+import type { Scene, SceneRaster, SceneText } from '../scene/types.ts';
 import { PAGE_EMU, PAGE_IN, compositeHex, parseCssColor, pxToEmu, szOf } from '../units.ts';
 import { addSceneChart } from './chart.ts';
 import type { FontSet, FontsCatalog } from './fonts-map.ts';
@@ -91,6 +94,12 @@ export type BuildOptions = {
   tableMode?: TableMode;
   /** `<slideId>#<blockId>` of the tables that missed the per cell budget and fall back to ruled rows. */
   tableFallback?: ReadonlySet<string>;
+  /**
+   * Write the vector of every svg picture and logo as `asvg:svgBlip` beside its PNG blip
+   * (docs/VECTOR.md 4.6); on by default. `false` writes the PNG blip alone, which the parked
+   * control `export.svg.vector` selects.
+   */
+  svgVector?: boolean;
   onPage?: (scene: Scene, raster: PageRaster) => void;
 };
 
@@ -117,6 +126,8 @@ export type RoundTwoCounts = {
   avLst: number;
   /** Shapes and text boxes whose block's alt text was written as `descr` (SPEC-2 2.5.6). */
   altTexts: number;
+  /** Pictures carrying `asvg:svgBlip` beside their PNG blip (docs/VECTOR.md 4.6). */
+  svgBlips: number;
 };
 
 export type BuildSlideReport = {
@@ -249,16 +260,23 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     numCol: 0,
     avLst: 0,
     altTexts: 0,
+    svgBlips: 0,
   };
+  // the attachment ends toConnector left off because their site has no index on the target (VECTOR.md 2.5)
+  let droppedEnds = 0;
+  // the vector pictures left as PNG alone under `svgVector: false`
+  let vectorsLeftOut = 0;
   /**
-   * The post-process rewrites per slide index: connectors, adjust values, columns and the alt
-   * text of shapes and text boxes (SPEC-2 2.2.10, 2.3.2, 2.4.7, 2.5.6).
+   * The post-process rewrites per slide index: connectors, adjust values, columns, the alt text
+   * of shapes and text boxes (SPEC-2 2.2.10, 2.3.2, 2.4.7, 2.5.6) and the vector of every svg
+   * picture placed on the slide (VECTOR.md 4.6).
    */
   const rewrites: {
     connectors: { name: string; ends: NonNullable<Scene['lines']>[number]['connect'] }[];
     adjusts: { name: string; guides: string[]; values: number[] }[];
     columns: { name: string; columns: number }[];
     alts: { name: string; alt: string }[];
+    svgs: { name: string; file: string }[];
   }[] = [];
 
   for (const [sceneIndex, scene] of scenes.entries()) {
@@ -281,8 +299,22 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       adjusts: [],
       columns: [],
       alts: [],
+      svgs: [],
     };
     rewrites.push(slideRewrites);
+    // a placed picture whose raster carries the asset's vector file joins the post-process,
+    // where its pic gains the svgBlip (VECTOR.md 4.6); under `svgVector: false` it stays a PNG
+    const noteVector = (raster: SceneRaster): void => {
+      if (raster.svg === undefined) return;
+      if (options.svgVector === false) {
+        vectorsLeftOut += 1;
+        return;
+      }
+      slideRewrites.svgs.push({
+        name: objectName(namePrefix, raster.id, raster.userGroup),
+        file: raster.svg,
+      });
+    };
     const slide = pptx.addSlide({
       masterName: usePictureMaster
         ? pictureMasterName(options.theme)
@@ -375,7 +407,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       // wordmark's PNG sits on the master over the same pixels; nothing on a deck under the GT mark
       for (const raster of scene.rasters) {
         if (!KIT_LOGO_BLOCK_IDS.has(raster.blockId) || raster.file === undefined) continue;
-        if (existsSync(raster.file)) addRaster(slide, raster, namePrefix);
+        if (existsSync(raster.file) && addRaster(slide, raster, namePrefix)) noteVector(raster);
       }
       // a linked block is an invisible hit target over its box, above the cover (SPEC 7.2.7)
       for (const block of scene.blocks) {
@@ -588,8 +620,9 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       for (const raster of scene.rasters) {
         if (raster.blockId === 'wordmark') continue;
         if (backgroundRaster !== undefined && raster.id === backgroundRaster.id) continue;
-        if (!addRaster(slide, raster, namePrefix, undefined, blockLink(raster.blockId)))
-          warnings.push(`${scene.slideId}#${raster.blockId}: raster ${raster.id} has no file`);
+        if (addRaster(slide, raster, namePrefix, undefined, blockLink(raster.blockId)))
+          noteVector(raster);
+        else warnings.push(`${scene.slideId}#${raster.blockId}: raster ${raster.id} has no file`);
       }
 
       if (scene.texts.some((t) => t.style.mono))
@@ -638,11 +671,30 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         const out = toConnector(xml, connector.name, connector.ends ?? {});
         xml = out.xml;
         if (out.written) counts.connectors += 1;
+        droppedEnds += out.dropped.length;
       }
       for (const alt of slideRewrites.alts) {
         const out = writeAltText(xml, alt.name, alt.alt);
         xml = out.xml;
         if (out.written) counts.altTexts += 1;
+      }
+      // the vector of every svg picture placed on the slide (VECTOR.md 4.6), before grouping,
+      // since the pic's own name is what the writer finds; a file that is missing or is not an
+      // svg leaves the picture a PNG alone and the residual says so
+      for (const entry of slideRewrites.svgs) {
+        const label = `${scene?.slideId ?? part}: ${entry.name}`;
+        if (!existsSync(entry.file)) {
+          residual.add(`svg: ${label} names a vector file that is missing; the picture travels as PNG alone`);
+          continue;
+        }
+        const bytes = readFileSync(entry.file);
+        if (!looksLikeSvg(bytes)) {
+          residual.add(`svg: ${label} names a vector file that is not an svg; the picture travels as PNG alone`);
+          continue;
+        }
+        const out = await writeSvgBlip(zip, part, xml, entry.name, bytes);
+        xml = out.xml;
+        if (out.written) counts.svgBlips += 1;
       }
     }
     const grouped = groupShapes(xml);
@@ -659,6 +711,18 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
   if (counts.connectors > 0)
     residual.add(
       `connectors: ${counts.connectors} connector(s) written as p:cxnSp with stCxn and endCxn on their targets, so PowerPoint moves them with the shapes (gslides-parity SPEC-2 2.4.7)`,
+    );
+  if (droppedEnds > 0)
+    residual.add(
+      `connectors: ${droppedEnds} attachment end(s) left unattached: the site index has no connection site on the target's preset (a rectangle's corner sites; docs/VECTOR.md 2.5); the connector keeps its drawn ends`,
+    );
+  if (counts.svgBlips > 0)
+    residual.add(
+      `svg: ${counts.svgBlips} picture(s) carry asvg:svgBlip beside the PNG blip (docs/VECTOR.md 4.6); PowerPoint 2016 and later draw the vector, every other viewer the PNG fallback`,
+    );
+  if (vectorsLeftOut > 0)
+    residual.add(
+      `svg: ${vectorsLeftOut} vector picture(s) travel as PNG alone (svgVector false)`,
     );
   if (counts.rotated > 0)
     residual.add(

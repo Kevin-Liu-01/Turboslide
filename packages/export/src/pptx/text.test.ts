@@ -1,15 +1,22 @@
 // The M5 width gate fixes of the native text emitter (docs/export-verification.md "The width
 // gate"): the invisible GT run is spaced to the mark's box, a space beside a hyperlink run becomes
 // a no-break space, and the raster scale policy shoots icons and marks at 3x.
+import type PptxGenJS from 'pptxgenjs';
 import { describe, expect, it } from 'vitest';
 
+import { shapeAdjustDefaults, textInset } from '@turboslide/schema/shapes';
+
 import { rasterScaleFor, THREE_X_KINDS } from '../scene/extract.ts';
-import type { SceneRun, SceneStyle, SceneText } from '../scene/types.ts';
+import type { SceneRect, SceneRun, SceneStyle, SceneText } from '../scene/types.ts';
+import { pxToPt } from '../units.ts';
 import { firstBaselineShiftPx } from './baseline.ts';
 import {
   WIDTH_SLACK_IN,
+  addShapeText,
   bulletCharacterCode,
   guardLinkSpaces,
+  layerInsetNetOfPreset,
+  shapeKindOf,
   textBoxOptions,
   textRuns,
 } from './text.ts';
@@ -99,7 +106,7 @@ describe('spaces beside hyperlink runs', () => {
 describe('the raster scale policy', () => {
   it('shoots icons, marks and logos at 3x, diagrams at 1x and the rest at 2x under auto, or a fixed scale', () => {
     /* the logo role joined the 3x kinds in the features round (docs/FEATURES.md 4.8) */
-    expect([...THREE_X_KINDS].sort()).toEqual(['icon', 'logo', 'mark']);
+    expect([...THREE_X_KINDS].sort()).toEqual(['icon', 'logo', 'mark', 'svg']);
     expect(rasterScaleFor('icon', 'auto')).toBe(3);
     expect(rasterScaleFor('mark', 'auto')).toBe(3);
     expect(rasterScaleFor('logo', 'auto')).toBe(3);
@@ -304,5 +311,126 @@ describe('the run marks of gslides-parity SPEC-2 7.2', () => {
     const invisible = textBoxOptions(fitted, { ...options, invisible: true });
     expect(invisible.outline).toBeUndefined();
     expect(invisible.rotate).toBe(37);
+  });
+});
+
+// The vector round (docs/VECTOR.md 2.3, 2.5, 6.3): a shape's text margins are the text layer's
+// measured inset net of the preset's own text rectangle, clamped at zero, since PowerPoint applies
+// the preset's rectangle on top of the body insets.
+describe('the shape text insets net of the preset text rectangle (VECTOR.md 2.5)', () => {
+  const shift = firstBaselineShiftPx(22, 33, 'libreoffice', undefined, false);
+  const line = (box: [number, number, number, number]): SceneText['lines'][number] => ({
+    box,
+    runs: [run('Next step', { box })],
+  });
+  const textAt = (box: [number, number, number, number]): SceneText => ({
+    id: 'r1/text',
+    blockId: 'r1',
+    box,
+    textBox: box,
+    style,
+    lines: [line([box[0], box[1], box[2], 33])],
+    native: true,
+    inShape: 'r1',
+  });
+  const capture = (): { slide: PptxGenJS.Slide; opts: () => Record<string, unknown> } => {
+    let last: Record<string, unknown> = {};
+    const slide = {
+      addText: (_runs: unknown, opts: Record<string, unknown>) => {
+        last = opts;
+      },
+    } as unknown as PptxGenJS.Slide;
+    return { slide, opts: () => last };
+  };
+
+  it('layerInsetNetOfPreset subtracts the preset rectangle per side and clamps at zero', () => {
+    const box: [number, number, number, number] = [100, 100, 240, 160];
+    const preset = { x: 8, y: 8, w: 224, h: 144 };
+    // the layer at the preset rectangle nets nothing
+    expect(layerInsetNetOfPreset(box, [108, 108, 224, 144], preset)).toEqual([0, 0, 0, 0]);
+    // the layer stepped in by 20 nets 12 beyond the preset's 8
+    expect(layerInsetNetOfPreset(box, [120, 120, 200, 120], preset)).toEqual([12, 12, 12, 12]);
+    // a layer inside the preset's inset clamps at zero; a layer past the box clamps too
+    expect(layerInsetNetOfPreset(box, [104, 104, 232, 152], preset)).toEqual([0, 0, 0, 0]);
+    expect(layerInsetNetOfPreset(box, [90, 90, 260, 180], preset)).toEqual([0, 0, 0, 0]);
+    // the whole box as the rectangle keeps the measured inset (every preset before the interpreter)
+    expect(
+      layerInsetNetOfPreset(box, [110, 115, 220, 130], { x: 0, y: 0, w: 240, h: 160 }),
+    ).toEqual([15, 10, 15, 10]);
+  });
+
+  it('shapeKindOf answers the preset, the legacy id behind it, or the plain rect', () => {
+    const rect = (extra: Partial<SceneRect>): SceneRect => ({
+      box: [0, 0, 10, 10],
+      fill: 'rgb(0, 0, 0)',
+      role: 'shape',
+      ...extra,
+    });
+    expect(shapeKindOf(rect({ preset: 'hexagon' }))).toBe('hexagon');
+    expect(shapeKindOf(rect({ preset: 'rounded' }))).toBe('roundRect');
+    expect(shapeKindOf(rect({ shape: 'ellipse' }))).toBe('ellipse');
+    expect(shapeKindOf(rect({}))).toBe('rect');
+  });
+
+  it('addShapeText writes a rounded rectangle label at the ECMA rectangle with no inset beyond the baseline shift', () => {
+    const rect: SceneRect = {
+      box: [100, 100, 240, 160],
+      fill: 'rgb(170, 51, 102)',
+      blockId: 'r1',
+      role: 'shape',
+      preset: 'roundRect',
+    };
+    const tr = textInset('roundRect', 240, 160, shapeAdjustDefaults('roundRect'));
+    const { slide, opts } = capture();
+    expect(
+      addShapeText(slide, rect, textAt([100 + tr.x, 100 + tr.y, tr.w, tr.h]), options, 'r1'),
+    ).toBe(true);
+    // pptxgenjs reads the margin as left, right, bottom, top (marginPt)
+    const [left, right, bottom, top] = opts()['margin'] as [number, number, number, number];
+    expect(left).toBeCloseTo(0, 6);
+    expect(right).toBeCloseTo(0, 6);
+    expect(bottom).toBeCloseTo(pxToPt(shift), 6);
+    expect(top).toBeCloseTo(0, 6);
+    expect(opts()['shape']).toBe('roundRect');
+  });
+
+  it('addShapeText keeps what the layer adds beyond the preset rectangle', () => {
+    const rect: SceneRect = {
+      box: [100, 100, 240, 160],
+      fill: 'rgb(170, 51, 102)',
+      blockId: 'r1',
+      role: 'shape',
+      preset: 'roundRect',
+    };
+    const tr = textInset('roundRect', 240, 160, shapeAdjustDefaults('roundRect'));
+    const { slide, opts } = capture();
+    addShapeText(
+      slide,
+      rect,
+      textAt([100 + tr.x + 20, 100 + tr.y + 20, tr.w - 40, tr.h - 40]),
+      options,
+      'r1',
+    );
+    const [left, right, bottom, top] = opts()['margin'] as [number, number, number, number];
+    expect(left).toBeCloseTo(pxToPt(20), 6);
+    expect(right).toBeCloseTo(pxToPt(20), 6);
+    expect(bottom).toBeCloseTo(pxToPt(20 + shift), 6);
+    expect(top).toBeCloseTo(pxToPt(Math.max(0, 20 - shift)), 6);
+  });
+
+  it('a plain rectangle keeps the measured inset whole (its text rectangle is the box)', () => {
+    const rect: SceneRect = {
+      box: [100, 100, 240, 160],
+      fill: 'rgb(170, 51, 102)',
+      blockId: 'r1',
+      role: 'shape',
+    };
+    const { slide, opts } = capture();
+    addShapeText(slide, rect, textAt([110, 115, 220, 130]), options, 'r1');
+    const [left, right, bottom, top] = opts()['margin'] as [number, number, number, number];
+    expect(left).toBeCloseTo(pxToPt(10), 6);
+    expect(right).toBeCloseTo(pxToPt(10), 6);
+    expect(bottom).toBeCloseTo(pxToPt(15 + shift), 6);
+    expect(top).toBeCloseTo(pxToPt(Math.max(0, 15 - shift)), 6);
   });
 });

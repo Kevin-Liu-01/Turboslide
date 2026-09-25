@@ -257,6 +257,12 @@ export type SceneRaster = SceneObject & {
    * box is the union of its descendants and the extractor screenshots that clip of the page.
    */
   clip?: true;
+  /**
+   * The absolute path of the asset's vector file for the theme (docs/VECTOR.md 4.6), when the
+   * block's asset is an svg picture or a vector logo: the PowerPoint builder writes it as
+   * `asvg:svgBlip` beside the PNG blip of `file`, which stays the fallback every viewer reads.
+   */
+  svg?: string;
 };
 
 export type SceneBlock = {

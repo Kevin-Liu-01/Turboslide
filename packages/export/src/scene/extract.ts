@@ -3,8 +3,11 @@
 // each slide by hash on every page, wait for the render surface's readiness stamp, swap two-tone
 // pictures for their regenerated 2x or 3x twins, measure the scene on the 1x page, and shoot what
 // the mode needs: the whole sheet at 2x for flatten (plus the kit's picture logos at 3x, the
-// features round), the raster elements at 2x (3x for icons, marks and logos, SPEC 8.6 and
-// docs/FEATURES.md 4.8) with alpha for native. The geometry comes from the 1x page because the verify
+// features round), the raster elements at 2x (3x for icons, marks, logos and svg pictures, SPEC
+// 8.6, docs/FEATURES.md 4.8 and docs/VECTOR.md 4.6) with alpha for native. A picture whose asset
+// is a vector (an svg upload, a logo with its sanitized source) also carries the vector file's
+// path on its raster (`svg`), which the PowerPoint builder writes as `asvg:svgBlip` beside the
+// PNG blip. The geometry comes from the 1x page because the verify
 // loop compares the export with the 1x render: measured in M2 on the 2x page, element boxes
 // disagreed with the record by up to 1.5 px (positioning#dia1 at 731.50 against 733) and rasters
 // landed a pixel off. One browser and a few pages, one slide at a time (AGENTS.md). Every page,
@@ -20,9 +23,10 @@ import { join } from 'node:path';
 
 import type { Page } from 'playwright-core';
 
+import type { Block } from '@turboslide/schema/blocks';
 import type { Deck, DeckDocument, Slide } from '@turboslide/schema/deck';
-import { slideOrder, slideTitle } from '@turboslide/schema/deck';
-import { isShareAlike } from '@turboslide/schema/assets';
+import { slideBlocks, slideOrder, slideTitle } from '@turboslide/schema/deck';
+import { assetVector, isShareAlike } from '@turboslide/schema/assets';
 import type { Asset } from '@turboslide/schema/assets';
 import { NATIVE_BLOCK_TYPES } from '@turboslide/schema/export';
 import type { ExportMode } from '@turboslide/schema/export';
@@ -65,13 +69,61 @@ export type RasterScalePolicy = 'auto' | 2 | 3;
  * The raster kinds `auto` shoots at 3x: small glyphs whose edges matter under zoom, and since the
  * features round a logo (docs/FEATURES.md 4.8; audit-logos 18): a picture block whose asset
  * carries `role: 'logo'` is shot at 3x, so the stored twins' 3x pixels reach the file (a 132 by 84
- * title slot gives 396 by 252, the footer's 28 by 18 gives 84 by 54). The kind `logo` is this
- * module's reading of the document (`logoBlockIds`), not a `data-raster` value the sheet carries.
+ * title slot gives 396 by 252, the footer's 28 by 18 gives 84 by 54). Since the vector round an
+ * svg picture too (docs/VECTOR.md 4.6): its shot is the PNG fallback beside the `asvg:svgBlip`,
+ * so a viewer without SVG support draws it as sharp as a logo. The kinds `logo` and `svg` are
+ * this module's reading of the document (`logoBlockIds`, `vectorFilesOf`), not `data-raster`
+ * values the sheet carries.
  */
-export const THREE_X_KINDS: ReadonlySet<string> = new Set(['icon', 'mark', 'logo']);
+export const THREE_X_KINDS: ReadonlySet<string> = new Set(['icon', 'mark', 'logo', 'svg']);
 
 /** The logo names and readers the builder shares (scene/kit-logos.ts), re exported for the tests. */
 export { KIT_LOGO_BLOCK_IDS, kitHasPictureLogo, logoBlockIds };
+
+/**
+ * The vector file for the theme of every block of a slide whose asset answers `vectorOf` (schema
+ * assets.ts, docs/VECTOR.md 4.1: an svg picture's `vector`, a ship one logo's untinted source),
+ * by block id, as absolute paths under the deck directory (VECTOR.md 4.6): the picture and shot
+ * blocks (composites' cells included) and, under the two kit names the extractor gives the brand
+ * kit's picture logos (kit-logos.ts), the kit's mark and footer assets. A block naming an asset
+ * the deck lacks, or an asset without a vector, is absent from the map. Schema imports alone, so
+ * the builder's tests read it without a browser.
+ */
+export function vectorFilesOf(
+  slide: Slide,
+  deck: Pick<Deck, 'assets' | 'brand'>,
+  theme: Theme,
+  deckDir: string,
+): Map<string, string> {
+  const out = new Map<string, string>();
+  const fileOf = (assetId: string | undefined): string | undefined => {
+    if (assetId === undefined) return undefined;
+    const asset = deck.assets[assetId];
+    if (asset === undefined) return undefined;
+    const relative = assetVector(asset, theme);
+    return relative === undefined ? undefined : join(deckDir, ...relative.split('/'));
+  };
+  const visit = (blocks: ReadonlyArray<Block>): void => {
+    for (const block of blocks) {
+      if (block.type === 'composite') {
+        visit(block.cells.flatMap((cell) => cell.blocks));
+        continue;
+      }
+      if (block.type !== 'picture' && block.type !== 'shot') continue;
+      const file = fileOf(block.asset);
+      if (file !== undefined) out.set(block.id, file);
+    }
+  };
+  for (const { block } of slideBlocks(slide)) visit([block]);
+  const kit = deck.brand;
+  if (kit !== undefined) {
+    const mark = kit.mark?.kind === 'picture' ? fileOf(kit.mark.assetId) : undefined;
+    if (mark !== undefined) out.set('title-logo', mark);
+    const footer = kit.footer?.logo === 'picture' ? fileOf(kit.footer.assetId) : undefined;
+    if (footer !== undefined) out.set('footer-logo', footer);
+  }
+  return out;
+}
 
 /**
  * Tags the kit's picture logos on a page after `tagRasterElements` ran, with rids continuing from
@@ -436,6 +488,9 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
             tags.push(...kitTags);
             // the picture and shot blocks whose asset is a logo: shot as the `logo` kind, 3x (4.8)
             const logoBlocks = logoBlockIds(slide, deck);
+            // the blocks and kit logos whose asset is a vector: the file for the theme rides on
+            // the raster and the shot is the `svg` kind, 3x (docs/VECTOR.md 4.6)
+            const vectors = vectorFilesOf(slide, deck, theme, options.deckDir);
 
             const scene = enrichScene(
               await measureScene(measurePage.page, {
@@ -459,6 +514,12 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
             scene.rasters = scene.rasters.filter(
               (r) => !KIT_LOGO_BLOCK_IDS.has(r.blockId) || (r.box[2] >= 1 && r.box[3] >= 1),
             );
+            // a vector file the deck directory does not hold leaves the raster a PNG alone; the
+            // builder writes the svgBlip only where the path is on the raster
+            for (const raster of scene.rasters) {
+              const svg = vectors.get(raster.blockId);
+              if (svg !== undefined && existsSync(svg)) raster.svg = svg;
+            }
             if (pictureFile) scene.pictureFile = pictureFile;
             if (pictureExcluded) scene.pictureExcluded = true;
             if (pictureRegenerated) scene.pictureRegenerated = true;
@@ -480,8 +541,14 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
                   const [, , w, h] = raster.box;
                   if (w < 1 || h < 1) continue;
                   const blockType = scene.blocks.find((b) => b.blockId === raster.blockId)?.type;
-                  // a picture or shot block whose asset is a logo is the `logo` kind here (4.8)
-                  const scaleKind = logoBlocks.has(raster.blockId) ? 'logo' : raster.kind;
+                  // a picture or shot block whose asset is a logo is the `logo` kind here (4.8),
+                  // and one whose asset is a vector the `svg` kind (VECTOR.md 4.6); both 3x
+                  const scaleKind =
+                    raster.svg !== undefined
+                      ? 'svg'
+                      : logoBlocks.has(raster.blockId)
+                        ? 'logo'
+                        : raster.kind;
                   const scale = rasterScaleFor(scaleKind, policy, blockType);
                   // the 1x shots come from the measure page itself, the sheet's own grid; a
                   // forced policy has one shot page, which then serves every other scale

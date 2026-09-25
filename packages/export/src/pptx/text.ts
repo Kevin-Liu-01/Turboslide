@@ -16,8 +16,13 @@
 // (2.2.12); `paraSpaceBefore` and `paraSpaceAfter` on the paragraphs they apply to (2.2.9);
 // `align: 'justify'`; `valign` and a four number `margin` on a positioned text box (2.2.18,
 // 2.2.19); word art's `outline` (2.2.16); the object's `rotate`, `flipH`, `flipV`, `shadow` and
-// `altText` (2.1, 2.3.4, 2.5.6); and a shape's text as one `addText` with `shape` (2.2.17).
+// `altText` (2.1, 2.3.4, 2.5.6); and a shape's text as one `addText` with `shape` (2.2.17), its
+// margins the text layer's measured inset net of the preset's own text rectangle, which
+// PowerPoint applies on top (docs/VECTOR.md 2.3, 2.5).
 import type PptxGenJS from 'pptxgenjs';
+
+import type { Box } from '@turboslide/schema/render';
+import { shapeAdjustDefaults, textInset } from '@turboslide/schema/shapes';
 
 import type { SceneRect, SceneRun, SceneStyle, SceneText } from '../scene/types.ts';
 import { PAGE_IN, PX_PER_IN, parseCssColor, pxToIn, pxToPt } from '../units.ts';
@@ -35,7 +40,7 @@ import {
 import { fillProps, rectLine, rectShape } from './lines.ts';
 import { isSlideLink } from './links.ts';
 import type { LinkResolver } from './links.ts';
-import { objectName, objectProps, outlineBox } from './shapes.ts';
+import { LEGACY_PRESET, objectName, objectProps, outlineBox } from './shapes.ts';
 
 /** Width slack on every text box, in inches (pptx report section 4.1). */
 export const WIDTH_SLACK_IN = 0.02;
@@ -395,12 +400,54 @@ export function addSceneText(
   return true;
 }
 
+/** The preset a rect's geometry is written as: its ECMA name, or the legacy id's preset, `rect` when plain. */
+export function shapeKindOf(rect: SceneRect): string {
+  if (rect.preset !== undefined) return LEGACY_PRESET[rect.preset] ?? rect.preset;
+  return rect.shape ?? 'rect';
+}
+
+/**
+ * The text layer's inset from a shape's box, net of the preset's own text rectangle at that box
+ * (VECTOR.md 2.3, 2.5), clamped at zero per side: top, right, bottom, left, in sheet px. The
+ * sheet lays the `.shape-text` layer at the ECMA text rectangle (a rounded rectangle's steps in
+ * by 29 percent of its corner radius, a right arrow's sits in the shaft) and PowerPoint applies
+ * the same rectangle on top of the body insets, so the insets carry only what the layer adds
+ * beyond it. A preset whose text rectangle is the whole box (every one until the geometry
+ * interpreter answers it) nets nothing.
+ */
+export function layerInsetNetOfPreset(
+  box: Box,
+  layer: Box,
+  textRect: { x: number; y: number; w: number; h: number },
+): [number, number, number, number] {
+  const [x, y, w, h] = box;
+  const [tx, ty, tw, th] = layer;
+  const measured = [
+    Math.max(0, ty - y),
+    Math.max(0, x + w - (tx + tw)),
+    Math.max(0, y + h - (ty + th)),
+    Math.max(0, tx - x),
+  ];
+  const preset = [
+    Math.max(0, textRect.y),
+    Math.max(0, w - (textRect.x + textRect.w)),
+    Math.max(0, h - (textRect.y + textRect.h)),
+    Math.max(0, textRect.x),
+  ];
+  return [
+    Math.max(0, (measured[0] ?? 0) - (preset[0] ?? 0)),
+    Math.max(0, (measured[1] ?? 0) - (preset[1] ?? 0)),
+    Math.max(0, (measured[2] ?? 0) - (preset[2] ?? 0)),
+    Math.max(0, (measured[3] ?? 0) - (preset[3] ?? 0)),
+  ];
+}
+
 /**
  * A shape with text (SPEC-2 2.2.17) as one `addText` with `shape`: the shape's geometry, fill and
  * line at the shape's box, the text laid out inside a margin that is the text layer's inset from
- * the shape's edges (the preset's text rectangle plus the block's padding), the vertical alignment
- * of the block, and the object's transform, shadow and alt text. Returns false when the text is
- * empty, in which case the caller writes the shape alone.
+ * the shape's edges net of the preset's text rectangle (VECTOR.md 2.3) plus the block's padding,
+ * the vertical alignment of the block, and the object's transform, shadow and alt text. Returns
+ * false when the text is empty, in which case the caller writes the shape alone.
  */
 export function addShapeText(
   slide: PptxGenJS.Slide,
@@ -413,7 +460,6 @@ export function addShapeText(
   // the shape's geometry drawn in by half its outline (shapes.ts outlineBox); the text layer's
   // inset is measured from that box so the text keeps the sheet's position
   const [x, y, w, h] = outlineBox(rect);
-  const [tx, ty, tw, th] = text.box;
   const lineHeight = Math.max(...text.lines.map((l) => l.box[3]));
   // the first baseline shift of textBoxOptions, as a margin the box cannot move: the top inset
   // gives it up and the bottom inset takes it, so a centred or bottom aligned text moves up by
@@ -425,11 +471,18 @@ export function addShapeText(
     undefined,
     text.style.mono,
   );
+  // the preset's text rectangle at the exported box, which PowerPoint applies on top (VECTOR.md 2.5)
+  const kind = shapeKindOf(rect);
+  const net = layerInsetNetOfPreset(
+    [x, y, w, h],
+    text.box,
+    textInset(kind, w, h, rect.adjust ?? shapeAdjustDefaults(kind)),
+  );
   const inset: [number, number, number, number] = [
-    Math.max(0, Math.max(0, ty - y) + (text.padding?.[0] ?? 0) - shift),
-    Math.max(0, x + w - (tx + tw)) + (text.padding?.[1] ?? 0),
-    Math.max(0, Math.max(0, y + h - (ty + th)) + (text.padding?.[2] ?? 0) + shift),
-    Math.max(0, tx - x) + (text.padding?.[3] ?? 0),
+    Math.max(0, net[0] + (text.padding?.[0] ?? 0) - shift),
+    net[1] + (text.padding?.[1] ?? 0),
+    Math.max(0, net[2] + (text.padding?.[2] ?? 0) + shift),
+    net[3] + (text.padding?.[3] ?? 0),
   ];
   const { shape, rectRadius } = rectShape(rect);
   slide.addText(textRuns(text, options), {

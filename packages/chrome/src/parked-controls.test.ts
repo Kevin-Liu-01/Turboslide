@@ -18,7 +18,7 @@ import { hideTooltip } from './Tooltip';
 // The parked controls (docs/FEATURES.md 7.2, 7.3): an id in the set is not drawn by the surfaces
 // that read the module; the same id is drawn when the Advanced tools setting is on; an empty set
 // draws everything. The pure rule is pinned over its own set, the committed set is pinned to the
-// parked list of the ship (ship-f0279e1.json), and the Logo dialog and the Shader gallery (ship
+// parked list of the ship (ship-c1a7ff3.json), and the Logo dialog and the Shader gallery (ship
 // two) are the surfaces this lane owns; Overlay.tsx (the handles and the bar, B3) and the Shader
 // section (B5, ship two) pin their reads in their own lanes' tests, as 7.3 lists them.
 
@@ -52,15 +52,17 @@ describe('isParkedIn', () => {
     expect(isParkedIn('dialog.logo.everySlide', set, { advancedTools: 'true' })).toBe(true);
   });
 
-  it('binds the committed set, the parked list of the features round, ship two', async () => {
+  it('binds the committed set, the parked list of the objects round', async () => {
     /* the module is mocked below for the dialog's surface; the committed module is read here. The
-       set is what core-matrix.mjs --emit-parked wrote from docs/gslides-parity/focus/ship-f0279e1.json,
-       which carries the vector round's list (ship-ea332aa.json, itself ship one's ship-f1afe1e.json
-       carried forward unchanged; nothing of the vector round is parked, docs/VECTOR.md section 7)
-       forward: the union of the `parks` of its fourteen parkedRows (the two carried rows of the
-       earlier ships, the eight P1 rows of ship one whose controls are not on the build, ship two's
-       Background dialog Shader row on shaders.background.place-answers and its three P1 rows whose
-       controls are not on the build), sorted */
+       set is what core-matrix.mjs --emit-parked wrote from docs/gslides-parity/focus/ship-c1a7ff3.json,
+       which carries ship two's list (ship-f0279e1.json) forward where its rows did not read green in
+       the objects round's run of record: the union of the `parks` of its eleven parkedRows (the two
+       carried rows of the earlier ships, the four P1 rows of ship one whose controls are not on the
+       build, ship two's Background dialog Shader row on shaders.background.place-answers and its
+       three P1 rows whose controls are not on the build, and the vector round's svg.copy.markup, red
+       in the run of record and in its once rerun), sorted. The table's edge "+", heads and row seams
+       and the word art outline left the list with the objects round, their rows green
+       (docs/OBJECTS.md section 7) */
     const real = await vi.importActual<typeof import('./parked-controls')>('./parked-controls');
     expect([...real.PARKED_CONTROLS].sort()).toEqual([
       'bar.table',
@@ -72,14 +74,9 @@ describe('isParkedIn', () => {
       'file.versionHistory.showChanges',
       'formatOptions.shader.frame.capture',
       'formatOptions.shader.frame.scrubber',
-      'handle.table.add.column',
-      'handle.table.add.row',
-      'handle.table.head.column',
-      'handle.table.head.row',
-      'handle.table.row',
       'panel.brand.logo.find',
+      'picture.svg.copy',
       'toolbar.group.text',
-      'toolbar.wordart.outline',
       'view.livePointers.collaborators',
       'view.livePointers.mine',
     ]);
@@ -89,11 +86,18 @@ describe('isParkedIn', () => {
     expect(real.isParked('dialog.shader.tile.paper:liquid-metal', DEFAULT_SETTINGS)).toBe(false);
     expect(real.isParked('formatOptions.shader.amplitude', DEFAULT_SETTINGS)).toBe(false);
     expect(real.isParked('view.playShaders', DEFAULT_SETTINGS)).toBe(false);
-    /* a P1 family and a carried row are parked while the switch is off, and drawn while it is on */
-    expect(real.isParked('handle.table.row.1', { advancedTools: false })).toBe(true);
+    /* the objects round: the table's row seams, edge "+" and heads and the word art outline are in
+       the default view; the table bar and a carried row are parked while the switch is off and
+       drawn while it is on; the vector round's copy as markup is parked with its row */
+    expect(real.isParked('handle.table.row.1', { advancedTools: false })).toBe(false);
+    expect(real.isParked('handle.table.add.row', DEFAULT_SETTINGS)).toBe(false);
+    expect(real.isParked('handle.table.head.column', DEFAULT_SETTINGS)).toBe(false);
+    expect(real.isParked('toolbar.wordart.outline', DEFAULT_SETTINGS)).toBe(false);
     expect(real.isParked('bar.table.insertRowBelow', DEFAULT_SETTINGS)).toBe(true);
+    expect(real.isParked('bar.table.insertRowBelow', { advancedTools: true })).toBe(false);
     expect(real.isParked('view.livePointers.mine', DEFAULT_SETTINGS)).toBe(true);
-    expect(real.isParked('handle.table.row.1', { advancedTools: true })).toBe(false);
+    expect(real.isParked('picture.svg.copy', DEFAULT_SETTINGS)).toBe(true);
+    expect(real.isParked('picture.svg.copy', { advancedTools: true })).toBe(false);
     /* a control of the picker that ships is not in the set; the Go to slide word left the list */
     expect(real.isParked('dialog.logo.everySlide', DEFAULT_SETTINGS)).toBe(false);
     expect(real.isParked('dialog.logo.search', DEFAULT_SETTINGS)).toBe(false);

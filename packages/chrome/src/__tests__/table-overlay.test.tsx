@@ -26,6 +26,22 @@ import {
 } from '../TableOverlay';
 import { TIP_ID, hideTooltip } from '../Tooltip';
 
+/* The parked ids: the overlay reads the committed set through isParked (parked-controls.ts); the
+   tests of that rule below read it over their own set naming the three handle.table.* families,
+   the state of ship one's and the vector round's lists, since the objects round's list
+   (docs/gslides-parity/focus/ship-c1a7ff3.json) lifts them and the committed set names no table
+   family. The factory is hoisted, so the set is spelled inside it. */
+vi.mock('../parked-controls', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../parked-controls')>();
+  const set = new Set<string>(['handle.table.add', 'handle.table.head', 'handle.table.row']);
+  return {
+    ...original,
+    PARKED_CONTROLS: set,
+    isParked: (id: string, settings: Parameters<typeof original.isParked>[1]) =>
+      original.isParkedIn(id, set, settings),
+  };
+});
+
 // The table's own controls in the overlay (docs/OBJECTS.md 3.3 items 1 and 4; the rows
 // tables.cell.ring-on-cell, tables.heads.select-row-column, tables.heads.header-toggle,
 // tables.edge.add-row-column): the grid areas read from the measured cells, the cell ring on the
@@ -128,9 +144,10 @@ function shellOf(over: {
       ...(over.commit === undefined ? {} : { commit: over.commit }),
       editor: over.selectCells === undefined ? {} : { selectCells: over.selectCells },
     },
-    /* the switch on unless a test says off: the committed set parks the handle.table.* families
-       (parked-controls.ts), read by the family for every table since the integrator's seam of the
-       objects round (build/b4.md, b5.md R7), so the heads and the "+" are hidden while it is off */
+    /* the switch on unless a test says off: the test set above parks the handle.table.* families
+       (the committed set lifted them at the objects round's ship), read by the family for every
+       table since the integrator's seam of the objects round (build/b4.md, b5.md R7), so the heads
+       and the "+" are hidden while it is off */
     settings: over.advanced === false ? {} : { advancedTools: true },
     menuContext: {
       platform: 'mac',
@@ -470,8 +487,8 @@ describe('the "+" at the edges', () => {
 
 describe('the parked ids', () => {
   it('hides a parked control while the switch is off and draws it with the switch on (parked-controls.ts)', () => {
-    /* the committed set names the `handle.table.*` families; the overlay reads them for every
-       table (parkedFamily), a block named `table` and a block named otherwise alike */
+    /* the set names the `handle.table.*` families; the overlay reads them for every table
+       (parkedFamily), a block named `table` and a block named otherwise alike */
     const named: ContentSlide = { ...slide, slots: { main: [{ ...block(), id: 'table' }] } };
     const shell = shellOf({ advanced: false });
     (shell.input.document as unknown as { slides: Record<string, ContentSlide> }).slides.s = named;
@@ -498,7 +515,7 @@ describe('the parked ids', () => {
     expect(document.querySelectorAll('.ts-table-head')).toHaveLength(6);
   });
 
-  it('reads the family for a block named otherwise, so the committed set parks every table alike (build/b4.md)', () => {
+  it('reads the family for a block named otherwise, so a set naming the family parks every table alike (build/b4.md)', () => {
     mount(viewOf(), shellOf({ advanced: false }));
     expect(document.querySelectorAll('.ts-table-head')).toHaveLength(0);
     expect(document.querySelector('.ts-table-add')).toBeNull();

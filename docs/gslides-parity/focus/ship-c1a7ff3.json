@@ -1,0 +1,108 @@
+{
+  "commit": "c1a7ff3",
+  "renderedFrom": ["docs/gslides-parity/focus/verification/objects-verify-p2-preview-run.json"],
+  "rule": "docs/OBJECTS.md 6.2 and docs/RETURN.md section 1 rule 2: parkedFeaturesOf over the last readings of the one gate run of record on the enforce preview https://turboslide-c7toc7dkk-kl01s-projects.vercel.app built from 7e1d85bd (the verifier's pass 2), with its once reruns narrowed to the rows read beside it; a row carrying parks red in the run of record and in its once rerun parks the controls it names, a parkable feature red through a row without parks is parked whole, a row of a feature parked whole is not listed a second time, and a row red in the run of record and green on its once rerun narrowed to it is flaky and is not listed; the previous ship's list (ship-f0279e1.json) is carried forward where its rows did not read green, since the menu model's advanced flags and packages/chrome/src/parked-controls.ts follow this list, and a carried row green in the run of record leaves it (leaves); the exceptions the ship rule makes over the gate's mechanical wouldPark are in notParked, each with its reason; the ship step's gate on the rebased tree's preview reads the list again before the push",
+  "parkedFeatures": ["inbox", "templates"],
+  "parkedRows": [
+    {
+      "id": "arrange.group.tail-text-controls",
+      "parks": ["toolbar.group.text"]
+    },
+    {
+      "id": "logos.kit.find-a-logo",
+      "parks": ["panel.brand.logo.find"]
+    },
+    {
+      "id": "logos.picker.variants",
+      "parks": ["dialog.logo.kind.wordmark", "dialog.logo.tone.mono"]
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "parks": ["dialog.background.shader.addToTheme"]
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "parks": ["dialog.background.shader"]
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "parks": ["formatOptions.shader.frame.scrubber", "formatOptions.shader.frame.capture"]
+    },
+    {
+      "id": "shaders.library.glyph-engines-render",
+      "parks": ["dialog.shader.engine.glyph"]
+    },
+    {
+      "id": "svg.copy.markup",
+      "parks": ["picture.svg.copy"]
+    },
+    {
+      "id": "tables.bar.row-column-buttons",
+      "parks": ["bar.table"]
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "parks": ["file.versionHistory.showChanges"]
+    },
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": ["view.livePointers.mine", "view.livePointers.collaborators"]
+    }
+  ],
+  "notParked": [
+    {
+      "feature": "brand",
+      "why": "the gate's wouldPark names it; the gate's wouldPark names it on brand.objects.kit-colours-first alone, a P1 row not on the build (docs/FEATURES.md section 1; the control formatOptions.chart.swatches.primary); every other brand row on the build is green in the run of record"
+    },
+    {
+      "feature": "fonts",
+      "why": "the gate's wouldPark names it; the gate's wouldPark names it; its entries fonts.picker.specimen-rows and fonts.table.takes-family are P1 rows not on the build (docs/FEATURES.md section 1); every fonts row on the build is green in the run of record"
+    },
+    {
+      "feature": "assist",
+      "why": "the gate's wouldPark names it; the gate's wouldPark names it; assist.quota.429 is not driven with no Upstash on the preview, which docs/PRODUCT.md 8.2 exempts as the environment's; every other assist row is green in the run of record"
+    },
+    {
+      "id": "decks.file.open-list-search",
+      "controls": ["file.open"],
+      "why": "Kevin's standing row, never chased (87 decks listed past its bound on the shared store); file.open stays in the default view"
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "controls": ["insert.logo"],
+      "why": "not driven by design on the fixture preview (TURBOSLIDE_LOGO_UPSTREAM=fixture, not the outage; docs/FEATURES.md 4.3, 4.8, 7.2); the unit test apps/studio/src/server/logos.test.ts is named; parking insert.logo would hide Insert > Logo for a row the fixture preview cannot drive"
+    },
+    {
+      "id": "logos.index.refresh-fixture",
+      "controls": ["insert.logo"],
+      "why": "a fixture only row production never drives by its rule (the index reads thesvg.org there); red on every fixture preview since the vector round because the fixture's manifest is computed from the answering instance's copy of the shared index; parking insert.logo would hide Insert > Logo for a row production cannot drive (the same exception in the vector round's and ship two's lists)"
+    },
+    {
+      "id": "svg.render.vector-at-zoom",
+      "controls": ["intake.svg.upload", "intake.svg.paste", "intake.svg.drop", "intake.svg.url"],
+      "why": "the blob tier's timing class of docs/VECTOR.md 6.2, recorded by id: the viewer at /deck/<id> loaded right after the row's own writes answered at a revision behind the tab's and drew no img of the picture (the reading 'the viewer no img; revision 23'), while the sheet at 100 and at 200 percent and the show drew the svg with no PNG request in the same reading; green on the memory tier in this round's run of record (4439) and at the vector round's production rerun, the same reading at ship two's production run; parking the four intake.svg.* ids would hide the SVG import whose own five svg.import.* rows read green in every run; for the vector round's owner (the viewer route's read behind the store), and the production gate reads it again"
+    }
+  ],
+  "leaves": [
+    {
+      "id": "tables.edge.add-row-column",
+      "controls": ["handle.table.add.column", "handle.table.add.row"],
+      "why": "read green in every run of this ship"
+    },
+    {
+      "id": "tables.heads.select-row-column",
+      "controls": ["handle.table.head.column", "handle.table.head.row"],
+      "why": "read green in every run of this ship"
+    },
+    {
+      "id": "tables.seam.row-drag",
+      "controls": ["handle.table.row"],
+      "why": "read green in every run of this ship"
+    },
+    {
+      "id": "wordart.tail.fill-outline",
+      "controls": ["toolbar.wordart.outline"],
+      "why": "read green in every run of this ship"
+    }
+  ]
+}

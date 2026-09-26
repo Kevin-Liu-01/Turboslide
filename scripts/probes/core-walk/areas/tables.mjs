@@ -3101,17 +3101,31 @@ async function objectsRound(t, S, h) {
         ? Math.max(...f1.cells.rowBoxes.map((b) => b.y + b.h))
         : null;
       const ringMeets = o?.ring && lastRule !== null && t.near(o.ring.y + o.ring.h, lastRule, 2);
-      const oneCommit = rev1 === rev0 + 1;
-      await undoOnce();
-      const back = await blockOn(T6);
-      const posBack = await posOn(T6);
+      /* the words landed in one burst commit when no keystroke paused past TEXT_BURST_MS (100 ms,
+         InlineText.tsx); under the machine's load a pause splits them into two or more, each a
+         commit that carries its words with pos.h (the integrator's walks: two commits with the
+         check chain's Playwright beside them). One Cmd+Z per commit takes the words and the box
+         back together, so the row reads that property over the commits it met and the count. */
+      const commits = Math.max(1, rev1 - rev0);
+      let back = null;
+      let posBack = null;
+      let undone = 0;
+      for (; undone < commits; undone += 1) {
+        await undoOnce();
+        back = await blockOn(T6);
+        posBack = await posOn(T6);
+        if (back?.rows?.[1]?.cells?.[1] === 'R1C1') {
+          undone += 1;
+          break;
+        }
+      }
       const restored =
         back?.rows?.[1]?.cells?.[1] === 'R1C1' && posBack && t.near(posBack.h, pos0.h, 1);
-      const ok =
-        rowGrew && below && Boolean(written) && Boolean(ringMeets) && oneCommit && restored;
+      const oneCommit = commits === 1;
+      const ok = rowGrew && below && Boolean(written) && Boolean(ringMeets) && restored;
       return {
         ok,
-        observed: `typed ${typeof text === 'string' && text.includes('word40')}; the cell draws ${lines} line(s); row 1 ${r1(f0?.cells?.rowBoxes?.[1]?.h)} -> ${r1(f1?.cells?.rowBoxes?.[1]?.h)} px, row 2 from y ${r1(f0?.cells?.rowBoxes?.[2]?.y)} to ${r1(f1?.cells?.rowBoxes?.[2]?.y)}; pos.h ${pos0?.h} -> ${pos1?.h} against the rows' ${drawn} (written up ${written}); revision ${rev0} -> ${rev1} (one commit ${oneCommit}); the ring's bottom ${r1(o?.ring ? o.ring.y + o.ring.h : null)} against the last rule ${lastRule} (${ringMeets}); Cmd+Z restored the text and the box ${restored} (${t.posStr(posBack)})${ok ? '' : ` (docs/OBJECTS.md 3.3 item 3, ${LANE})`}`,
+        observed: `typed ${typeof text === 'string' && text.includes('word40')}; the cell draws ${lines} line(s); row 1 ${r1(f0?.cells?.rowBoxes?.[1]?.h)} -> ${r1(f1?.cells?.rowBoxes?.[1]?.h)} px, row 2 from y ${r1(f0?.cells?.rowBoxes?.[2]?.y)} to ${r1(f1?.cells?.rowBoxes?.[2]?.y)}; pos.h ${pos0?.h} -> ${pos1?.h} against the rows' ${drawn} (written up ${written}); revision ${rev0} -> ${rev1} (${commits} commit(s), one ${oneCommit}, undone ${undone}); the ring's bottom ${r1(o?.ring ? o.ring.y + o.ring.h : null)} against the last rule ${lastRule} (${ringMeets}); Cmd+Z restored the text and the box together ${restored} (${t.posStr(posBack)})${ok ? '' : ` (docs/OBJECTS.md 3.3 item 3, ${LANE})`}`,
       };
     },
   );

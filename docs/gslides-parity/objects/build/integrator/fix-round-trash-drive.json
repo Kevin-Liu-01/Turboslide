@@ -1,0 +1,113 @@
+{
+  "base": "http://localhost:4438",
+  "startedAt": "2026-09-26T15:02:46.844Z",
+  "id": "untitled-20260926-0qgp",
+  "titleSlide": "title",
+  "url": "http://localhost:4438/edit/untitled-20260926-0qgp#s/blank-1",
+  "revisionAfterCreate": 1,
+  "blankSlide": "blank-1",
+  "trash": {
+    "refused": false,
+    "out": {
+      "id": "untitled-20260926-0qgp",
+      "trashedAt": "2026-09-26T15:02:56.208Z",
+      "revision": 1
+    }
+  },
+  "banner": 1,
+  "bannerWords": "This presentation is in the trashRestore",
+  "restoreControl": 1,
+  "dataEditing": "0",
+  "stateTrashedAt": null,
+  "infoTrashedAt": "2026-09-26T15:02:56.208Z",
+  "adapterOwner": "viewer",
+  "insert": {
+    "refused": true,
+    "message": "page.evaluate: RangeError: This presentation is in the trash, so \"block.insert\" is refused; Restore it from the banner or with deck.restore first.\n    at invoke (http://localhost:4438/src/editor/controller.tsx:3461:11)\n    at Object.<anonymous> (http://localhost:4438/@fs/Users/kevinliu/repos/Turboslide-live/packages/agent/src/window/adapter.ts:26:62)\n    at invokeAction (http://localhost:4438/@fs/Users/kevinliu/repos/Turboslide-live/packages/agent/src/window/invoke.ts:84:19)\n    at Object.invoke (http://localhost:4438/@fs/Users/kevinliu/repos/Turboslide-live/packages/agent/src/window/registry.ts:133:11)\n    at eval (eval at evaluate (:311:30), <anonymous>:1:39)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+  },
+  "slideNew": {
+    "refused": true,
+    "message": "page.evaluate: RangeError: This presentation is in the trash, so \"slide.new\" is refused; Restore it from the banner or with deck.restore first.\n    at invoke (http://localhost:4438/src/editor/controller.tsx:3461:11)\n    at Object.<anonymous> (http://localhost:4438/@fs/Users/kevinliu/repos/Turboslide-live/packages/agent/src/window/adapter.ts:26:62)\n    at invokeAction (http://localhost:4438/@fs/Users/kevinliu/repos/Turboslide-live/packages/agent/src/window/invoke.ts:84:19)\n    at Object.invoke (http://localhost:4438/@fs/Users/kevinliu/repos/Turboslide-live/packages/agent/src/window/registry.ts:133:11)\n    at eval (eval at evaluate (:311:30), <anonymous>:1:39)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+  },
+  "restore": {
+    "refused": false,
+    "out": {
+      "id": "untitled-20260926-0qgp",
+      "trashedAt": null,
+      "revision": 1
+    }
+  },
+  "bannerGone": true,
+  "stateTrashedAfter": null,
+  "infoTrashedAfter": null,
+  "dataEditingAfter": "1",
+  "insertAfter": {
+    "refused": false,
+    "out": {
+      "slide": {
+        "schemaVersion": 1,
+        "id": "blank-1",
+        "template": "blank",
+        "kind": "content",
+        "layout": {
+          "type": "freeform"
+        },
+        "slots": {
+          "main": [
+            {
+              "id": "fix-rect",
+              "pos": {
+                "x": 100,
+                "y": 100,
+                "w": 300,
+                "h": 200
+              },
+              "type": "shape",
+              "shape": "rectangle",
+              "fill": "plate",
+              "stroke": "ink"
+            }
+          ]
+        }
+      },
+      "revision": 2,
+      "findings": [
+        {
+          "id": "layout/freeform|blank-1||/layout|",
+          "rule": "layout/freeform",
+          "severity": 1,
+          "kind": "polish",
+          "slideId": "blank-1",
+          "path": "/layout",
+          "evidence": {
+            "text": "freeform",
+            "measured": {
+              "blocks": 1
+            }
+          },
+          "proposal": "This slide is arranged by hand; Apply layout re-flows it",
+          "source": "lint"
+        }
+      ]
+    }
+  },
+  "revisionAfterRestore": 2,
+  "viewerRoleReading": "not driven: this drive holds the creator role only",
+  "cleanupTrash": {
+    "refused": false,
+    "out": {
+      "id": "untitled-20260926-0qgp",
+      "trashedAt": "2026-09-26T15:03:00.019Z",
+      "revision": 2
+    }
+  },
+  "cleanupOwner": "viewer",
+  "cleanupRemove": {
+    "refused": false,
+    "out": {
+      "id": "untitled-20260926-0qgp",
+      "removed": true
+    }
+  },
+  "endedAt": "2026-09-26T15:03:00.698Z"
+}

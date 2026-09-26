@@ -1,0 +1,373 @@
+{
+ "base": "http://localhost:4438",
+ "steps": [
+  {
+   "name": "01 inserted",
+   "facts": {
+    "pos": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 163
+    },
+    "rows": [
+     {
+      "top": 130,
+      "bottom": 183,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     },
+     {
+      "top": 184,
+      "bottom": 237,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     },
+     {
+      "top": 238,
+      "bottom": 291,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     }
+    ],
+    "free": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 163
+    },
+    "rowsBottomInBox": 162,
+    "ring": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 163
+    },
+    "ringMeetsLastRule": true,
+    "editing": false
+   }
+  },
+  {
+   "name": "02 typed",
+   "facts": {
+    "pos": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 163
+    },
+    "rows": [
+     {
+      "top": 130,
+      "bottom": 183,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     },
+     {
+      "top": 184,
+      "bottom": 237,
+      "h": 53,
+      "texts": [
+       "",
+       "Alpha",
+       ""
+      ]
+     },
+     {
+      "top": 238,
+      "bottom": 291,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     }
+    ],
+    "free": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 163
+    },
+    "rowsBottomInBox": 162,
+    "ring": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 163
+    },
+    "ringMeetsLastRule": true,
+    "editing": false
+   }
+  },
+  {
+   "name": "03 context row",
+   "facts": {
+    "found": true
+   }
+  },
+  {
+   "name": "04 menu insert row below",
+   "facts": {
+    "revision": [
+     1,
+     2
+    ],
+    "pos": [
+     163,
+     217
+    ],
+    "rows": [
+     {
+      "top": 130,
+      "bottom": 183,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     },
+     {
+      "top": 184,
+      "bottom": 237,
+      "h": 53,
+      "texts": [
+       "",
+       "Alpha",
+       ""
+      ]
+     },
+     {
+      "top": 238,
+      "bottom": 291,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     },
+     {
+      "top": 292,
+      "bottom": 345,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     }
+    ],
+    "free": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 217
+    },
+    "rowsBottomInBox": 216,
+    "ring": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 217
+    },
+    "ringMeetsLastRule": true,
+    "editing": true
+   }
+  },
+  {
+   "name": "05 after Cmd+Z",
+   "facts": {
+    "pos": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 163
+    },
+    "rows": 3,
+    "revision": 2
+   }
+  },
+  {
+   "name": "06 Tab from the last cell",
+   "facts": {
+    "revision": [
+     2,
+     2
+    ],
+    "pos": [
+     163,
+     217
+    ],
+    "rows": [
+     {
+      "top": 130,
+      "bottom": 183,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     },
+     {
+      "top": 184,
+      "bottom": 237,
+      "h": 53,
+      "texts": [
+       "",
+       "Alpha",
+       ""
+      ]
+     },
+     {
+      "top": 238,
+      "bottom": 291,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     },
+     {
+      "top": 292,
+      "bottom": 345,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     }
+    ],
+    "snackbar": "Row addedUndo",
+    "free": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 217
+    },
+    "rowsBottomInBox": 216,
+    "ring": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 217
+    },
+    "ringMeetsLastRule": true,
+    "editing": true
+   }
+  },
+  {
+   "name": "07 after Escape",
+   "facts": {
+    "pos": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 217
+    },
+    "rows": [
+     {
+      "top": 130,
+      "bottom": 183,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     },
+     {
+      "top": 184,
+      "bottom": 237,
+      "h": 53,
+      "texts": [
+       "",
+       "Alpha",
+       ""
+      ]
+     },
+     {
+      "top": 238,
+      "bottom": 291,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     },
+     {
+      "top": 292,
+      "bottom": 345,
+      "h": 53,
+      "texts": [
+       "",
+       "",
+       ""
+      ]
+     }
+    ],
+    "free": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 217
+    },
+    "rowsBottomInBox": 216,
+    "ring": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 217
+    },
+    "ringMeetsLastRule": true,
+    "editing": false
+   }
+  },
+  {
+   "name": "08 after Cmd+Z",
+   "facts": {
+    "pos": {
+     "x": 320,
+     "y": 129,
+     "w": 960,
+     "h": 163
+    },
+    "rows": 3,
+    "revision": 2
+   }
+  }
+ ],
+ "consoleErrors": [
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4438/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 40048 MB free of 1902738 MB",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4438/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uiirewm-6ec078 render] turboslide render title --deck /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4438/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uiirewm-6ec078 render] render: 1 slide(s) x light at 1x with Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Ma",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4438/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uiirewm-6ec078 render]    1 title light ready 11 ms, shot 30 ms",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4438/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uiirewm-6ec078 render] render: 1 record(s) in 1.7 s -> /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef"
+ ],
+ "teardown": {
+  "trashed": false,
+  "status": null
+ }
+}

@@ -152,7 +152,7 @@ import type {
   PresenceParticipant,
 } from '@turboslide/chrome/editor-shell';
 import type { CommentsDisplay } from '@turboslide/chrome/menus/model';
-import { REFUSALS } from '@turboslide/chrome/menus/strings';
+import { HOME, REFUSALS } from '@turboslide/chrome/menus/strings';
 import type { ArtifactRun, ExportDownload } from '@turboslide/chrome/ExportReportCard';
 import type { ShellState } from '@turboslide/chrome/shell-context';
 import type { ShellMode } from '@turboslide/chrome/shell-data';
@@ -191,7 +191,13 @@ import type { Comment as ThreadComment, Thread } from '@turboslide/schema/commen
 import type { Notification } from '@turboslide/store/inbox';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
 import { makeDiagram } from '@turboslide/schema/diagrams';
-import { canvasObjects, isCanvasSlide, slideBlocks, slideTitle } from '@turboslide/schema/deck';
+import {
+  canvasObjects,
+  isCanvasSlide,
+  isTrashed,
+  slideBlocks,
+  slideTitle,
+} from '@turboslide/schema/deck';
 import type { Asset } from '@turboslide/schema/assets';
 import { blockAssetRefs } from '@turboslide/schema/catalog';
 import type { Block } from '@turboslide/schema/blocks';
@@ -1120,6 +1126,26 @@ function resyncOriginsOf(payload: EditorDeck): Pick<ResyncAnswer, 'origins'> {
     if (ids.length > 0) origins.push({ seq, opIds: ids });
   }
   return origins.length === 0 ? {} : { origins };
+}
+
+/**
+ * The sentence the viewer owner's window API answers for a write it does not take (SPEC-3 6.8;
+ * VERIFICATION-3 finding 44): a person without the write capability is told what they can do and
+ * what to ask for, never a role they lack or an internal noun; an editor in Viewing or Commenting
+ * mode is told where the mode switch is; and an editor whose presentation is in the trash is told
+ * that, with the way back (the banner's Restore, or `deck.restore` through the same API), since
+ * no mode switch exists for it. The objects round's verifier read the mode sentence on a deck
+ * another lane's store sweep had trashed under the walk (pass 1 finding 6: the fresh deck's
+ * writes refused with "needs Editing mode" while the banner read "This presentation is in the
+ * trash"), and 183 rows were read as not driven behind a sentence that named the wrong cause.
+ */
+export function viewerRefusal(action: string, facts: { write: boolean; trashed: boolean }): string {
+  if (!facts.write) return `${REFUSALS.viewOnly}. ${REFUSALS.requestEditAccess} to change it.`;
+  if (facts.trashed) {
+    const state = HOME.inTrash.split(' · ')[0] ?? HOME.inTrash;
+    return `${state}, so "${action}" is refused; ${HOME.restore} it from the banner or with deck.restore first.`;
+  }
+  return `"${action}" needs Editing mode; switch View > Mode to Editing for it.`;
 }
 
 export function createEditorController(init: {
@@ -4256,16 +4282,24 @@ export function createEditorController(init: {
   const viewerAdapter = (): StudioAdapter => ({
     owner: 'viewer',
     actions: visitorActionIds(),
-    invoke: (action, input) => {
+    invoke: async (action, input) => {
+      const trashed = isTrashed(latest().document.deck);
+      // the way back the trash sentence names (SPEC 6.4: the editor is read only under the
+      // banner, whose Restore writes the store and reads the document again): an editor's
+      // deck.restore through the window API does the same, so an agent that meets the trash
+      // sentence can act on it without the pointer; deck.remove is the trash page's Delete
+      // forever, which a trashed deck takes too
+      if (trashed && hasCapability('write') && action === 'deck.restore') {
+        const output = await invokeAsAgent(action, input);
+        await reload();
+        return output;
+      }
+      if (trashed && hasCapability('write') && action === 'deck.remove')
+        return invokeAsAgent(action, input);
       if (!visitorActionIds().includes(action)) {
-        // in words (SPEC-3 6.8; VERIFICATION-3 finding 44): a person without the write capability
-        // is told what they can do and what to ask for, never a role they lack or an internal
-        // noun; an editor in Viewing or Commenting mode is told where the mode switch is
-        throw new RangeError(
-          hasCapability('write')
-            ? `"${action}" needs Editing mode; switch View > Mode to Editing for it.`
-            : `${REFUSALS.viewOnly}. ${REFUSALS.requestEditAccess} to change it.`,
-        );
+        // in words (viewerRefusal): what the person can do and what to ask for, the mode switch,
+        // or the trash and its Restore
+        throw new RangeError(viewerRefusal(action, { write: hasCapability('write'), trashed }));
       }
       return invokeAsAgent(action, input);
     },

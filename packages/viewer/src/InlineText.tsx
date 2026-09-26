@@ -55,6 +55,7 @@ import {
 } from './marks';
 import type { ToggleMark } from './marks';
 import { blockById, cellPointer, listItemPointer } from './Selection';
+import { tableRowsAddedMutation } from './table-fit';
 
 import './InlineText.css';
 
@@ -778,15 +779,21 @@ export function nextCellPointer(
   return { pointer: `rows/${Math.floor(flat / columns)}/cells/${flat % columns}` };
 }
 
-/** The `block.set /rows` that appends an empty row to a table, and the pointer of its first cell. */
+/**
+ * The `block.set /rows` that appends an empty row to a table, the pointer of its first cell, and
+ * the `pos.h` write that grows the box by the row (table-fit.ts `tableRowsAddedMutation`; null
+ * on a table with no box), to travel in the same commit so the ring meets the last rule
+ * (VERIFICATION.md "Objects round, pass 1" finding 1; build/b2.md fix round).
+ */
 export function tableRowAppendMutation(
   slide: Slide,
-  block: TableBlock,
-): { mutation: Mutation; pointer: string } {
+  block: TableBlock & { pos?: { h: number } },
+): { mutation: Mutation; pointer: string; grow: Mutation | null } {
   const rows = [...block.rows, { cells: block.columns.map(() => '') }];
   return {
     mutation: { op: 'block.set', slideId: slide.id, blockId: block.id, path: '/rows', value: rows },
     pointer: `rows/${rows.length - 1}/cells/0`,
+    grow: tableRowsAddedMutation(slide.id, block, rows),
   };
 }
 

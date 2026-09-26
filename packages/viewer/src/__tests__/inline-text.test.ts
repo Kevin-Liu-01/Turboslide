@@ -488,6 +488,21 @@ describe('cells and list items', () => {
       path: '/rows',
       value: [{ cells: ['A', 'B'], header: true }, { cells: ['c', 'd'] }, { cells: ['', ''] }],
     });
+    // a table in a grammar slot has no box, so nothing grows
+    expect(appended.grow).toBeNull();
+  });
+
+  it('appends the box grown by the row beside the rows write on a positioned table (the fix round of the objects round)', () => {
+    const positioned = { ...table, pos: { x: 0, y: 0, w: 960, h: 109, z: 1 } };
+    const appended = tableRowAppendMutation(slide, positioned);
+    // two rows at 54 with the hairline, 109, plus the empty row's pitch at the table's size
+    expect(appended.grow).toEqual({
+      op: 'block.set',
+      slideId: 's',
+      blockId: 't',
+      path: '/pos/h',
+      value: 163,
+    });
   });
 
   it('appends a list item after the one being edited on plain, rows and refs', () => {

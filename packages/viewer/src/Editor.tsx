@@ -291,7 +291,12 @@ import type {
   CellRange,
   TableRangeShape,
 } from './table-range';
-import { readTableRows, tableGrowMutation, tableRowsNaturalHeight } from './table-fit';
+import {
+  readTableRows,
+  tableGrowMutation,
+  tableRowsAddedMutation,
+  tableRowsNaturalHeight,
+} from './table-fit';
 import {
   isTableRowSeamHandle,
   isTableSeamHandle,
@@ -2337,7 +2342,9 @@ export function Editor({
         if (next === 'append') {
           const appended = tableRowAppendMutation(slideNow, block);
           pendingEdit.current = { blockId: block.id, pointer: appended.pointer, caret: 'end' };
-          commit([appended.mutation]);
+          /* the row and the box in one commit, so the ring meets the last rule and one Cmd+Z
+             takes both back (VERIFICATION.md "Objects round, pass 1" finding 1; build/b2.md) */
+          commit(appended.grow === null ? [appended.mutation] : [appended.mutation, appended.grow]);
           notice('Row added', true);
           return;
         }
@@ -3588,6 +3595,10 @@ export function Editor({
         path: '/columns',
         value: edited.columns,
       });
+    /* a grid pasted past the last row grows the box by the rows it added, in the same commit
+       (build/b2.md fix round); `block` carries the pos the TableBlock cast drops */
+    const grown = tableRowsAddedMutation(slideNow.id, block, edited.rows);
+    if (grown !== null) mutations.push(grown);
     if (mutations.length === 0) return true;
     pendingEdit.current = { blockId: table.id, pointer: current.pointer, caret: 'end' };
     commit(mutations);
@@ -3916,6 +3927,10 @@ export function Editor({
         path: '/columns',
         value: edited.columns,
       });
+    /* a command that added rows grows the box by their tracks in the same commit (build/b2.md
+       fix round); `block` carries the pos the TableBlock cast drops */
+    const grown = tableRowsAddedMutation(slideNow.id, block, edited.rows);
+    if (grown !== null) mutations.push(grown);
     commit(mutations);
     select({ kind: 'block', blockId: table.id });
   };

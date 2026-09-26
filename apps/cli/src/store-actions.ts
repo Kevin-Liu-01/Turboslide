@@ -22,7 +22,7 @@ import type { TextRef } from '@turboslide/lint/context';
 import { lintDeck, lintStatic } from '@turboslide/lint/run';
 import type { ChartKind, ChartSeries } from '@turboslide/schema/blocks/chart';
 import type { CellBorder, TableCommand } from '@turboslide/schema/blocks/table';
-import { applyTableCommand } from '@turboslide/schema/blocks/table';
+import { applyTableCommand, tableGrownByRows } from '@turboslide/schema/blocks/table';
 import { applyLayout } from '@turboslide/schema/apply-layout';
 import { groupsKeptOnDuplicate } from '@turboslide/schema/diagrams';
 import type { Asset, AssetVariant } from '@turboslide/schema/assets';
@@ -3070,6 +3070,12 @@ async function tableWrite(
     spans: edit.spans ?? null,
     cells: edit.cells ?? null,
   });
+  /* a command that added rows grows the box by their tracks in the same write, so the new row
+     draws inside the ring wherever the command came from (the cell's menu, Format > Table, the
+     panel, a row head, an agent; VERIFICATION.md "Objects round, pass 1" finding 1; the
+     schema's tableGrownByRows, build/b2.md fix round) */
+  const grown = tableGrownByRows(table, edit.rows);
+  if (grown !== null) mutations.push(setField(slide.id, input.blockId, '/pos/h', grown));
   return commitOrCurrent(deps, ctx, input, current, mutations);
 }
 

@@ -441,7 +441,13 @@ export type MenuPredicate =
   /** Tools > Advanced tools is on (docs/FOCUS.md 3.1): the one effect that changes with the switch, the Shapes gallery plate (section 4) */
   | 'advancedTools';
 
-export type MenuCheck = { setting: MenuSetting; value?: string | boolean };
+/**
+ * A check row's state: a stored setting (with a value for a radio group), or, since the objects
+ * round (docs/OBJECTS.md 3.3 item 4; objects/build/b5.md R1), a fact of the selection the context
+ * carries (the Header row row reads the selected table's first row).
+ */
+export type MenuCheck =
+  { setting: MenuSetting; value?: string | boolean } | { selection: 'tableHeader' };
 
 export type MenuItem = {
   /** dotted, stable: `file.download.pptx`; the audit's `data-menu-item` */
@@ -1902,6 +1908,17 @@ const FORMAT: Menu = {
         now('format.table.distributeColumns', 'Distribute columns', action('block.set'), {
           enabled: 'tableCellSelected',
         }),
+        /* the objects round (docs/OBJECTS.md 3.3 items 4 and 6; objects/build/b5.md R1): the Header
+           row check, drawn checked from the selected table's rows[0].header and written by
+           table-tools.ts's toggleHeader; the row head's own menu (TableOverlay.tsx) lists it first */
+        now('format.table.headerRow', 'Header row', action('block.set'), {
+          enabled: 'tableCellSelected',
+          dividerBefore: true,
+          /* ours: Google's Format > Table lists no header toggle (R01); the grammar's header row is the sheet's */
+          turboslide: true,
+          checked: { selection: 'tableHeader' },
+          doc: 'The first row at display weight with a rule under it',
+        }),
         /* returned in the return round's fix round: the Editor's cell range (a Shift click on a
            second cell or a drag across cells, packages/viewer/src/table-range.ts; return/build/b5.md
            "Return round fix round") gives Merge cells its range, the mechanism the integration's
@@ -3054,6 +3071,7 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.table.deleteRow',
     'format.table.deleteColumn',
     'format.table.deleteTable',
+    'format.table.headerRow',
     DIVIDER,
     'format.table.distributeRows',
     'format.table.distributeColumns',
@@ -3079,6 +3097,7 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.table.deleteRow',
     'format.table.deleteColumn',
     'format.table.deleteTable',
+    'format.table.headerRow',
     DIVIDER,
     'edit.cut',
     'edit.copy',
@@ -3139,6 +3158,8 @@ export type MenuContext = {
     textBlock: boolean;
     listItem: boolean;
     tableCell: boolean;
+    /** the selected table's first row is its header row (`rows[0].header`), read by the Header row check (docs/OBJECTS.md 3.3 item 4) */
+    tableHeader?: boolean;
     /** the selected run or block carries a link */
     linked: boolean;
     order: { forward: boolean; backward: boolean; front: boolean; back: boolean };
@@ -3447,6 +3468,8 @@ export function isChecked(item: MenuItem, ctx: MenuContext): boolean | undefined
         : { setting: item.effect.setting, value: item.effect.value }
       : undefined);
   if (check === undefined) return undefined;
+  /* a selection check (the Header row row): the fact the context carries about the selected table */
+  if ('selection' in check) return ctx.selection[check.selection] === true;
   const current = ctx.settings[check.setting];
   if (check.value === undefined) return current === true;
   /* a boolean value reads the setting as a flag: Editing is checked while Viewing is not on */

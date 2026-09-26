@@ -6654,7 +6654,7 @@
     {
       "id": "wordart.tail.fill-outline",
       "feature": "wordart",
-      "interaction": "Carried (ship one P1 item 10): the word art tail reads Fill color, Border color, Border weight, Border dash before the text controls; Fill writes color, Border color outline.color, weight outline.width, dash outline.dash, each drawn on the letters",
+      "interaction": "Carried (ship one P1 item 10): the word art tail reads Fill color, Border color, Border weight, Border dash before the text controls; Fill writes color, Border color outline.color, weight outline.width, each drawn on the letters; Border dash writes outline.dash once the text schema takes it and, on a build whose outline draws solid, reads aria-disabled with the sentence \"Word art's outline is solid in this version\" (docs/OBJECTS.md section 7)",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-objects 25 (d12-wordart-context.png)",

@@ -553,7 +553,9 @@ function MenuList({
           checked === undefined
             ? 'menuitem'
             : (item.effect?.kind === 'toggle' && item.effect.value !== undefined) ||
-                item.checked?.value !== undefined
+                (item.checked !== undefined &&
+                  'value' in item.checked &&
+                  item.checked.value !== undefined)
               ? 'menuitemradio'
               : 'menuitemcheckbox';
         const doc = tooltipDoc(item, context);

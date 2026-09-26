@@ -410,6 +410,8 @@ const SPEC_ROWS: Row[] = [
     'format.table.deleteTable',
     'format.table.distributeRows',
     'format.table.distributeColumns',
+    /* the objects round (docs/OBJECTS.md 3.3 item 4): the Header row check row */
+    'format.table.headerRow',
   ]),
   row('format', 'now', ['format.table.mergeCells', 'format.table.unmergeCells'], {
     was: 'later',
@@ -2043,8 +2045,9 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
        fix round gave the Editor a cell range (return/build/b5.md "Return round fix round"; the
        integration had re-parked them, return/build/integrator.md section 6) */
     for (const [ctx, tableRows, all] of [
-      [DEFAULT_MENU_CONTEXT, 11, 16],
-      [on, 11, 16],
+      /* twelve table rows since the objects round's Header row check (docs/OBJECTS.md 3.3 item 4) */
+      [DEFAULT_MENU_CONTEXT, 12, 17],
+      [on, 12, 17],
     ] as const) {
       const cell = contextMenuItems('tableCell', ctx);
       expect(

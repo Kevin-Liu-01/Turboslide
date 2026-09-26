@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Block } from '@turboslide/schema/blocks';
+import { tableBoxHeight } from '@turboslide/schema/blocks/table';
 import { blockSchema } from '@turboslide/schema/blocks';
 import type { TableBlock } from '@turboslide/schema/blocks/table';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
@@ -1072,7 +1073,9 @@ describe('the Insert menu', () => {
       expect(block.columns).toHaveLength(DEFAULT_TABLE_SIZE.columns);
       expect(block.rows).toHaveLength(DEFAULT_TABLE_SIZE.rows);
       expect(block.rows[0]?.header).toBe(true);
-      expect([block.pos?.w, block.pos?.h]).toEqual([960, 320]);
+      /* the objects round (docs/OBJECTS.md 3.3 item 3): the box fits its rows, 163 for three at 20 px */
+      expect([block.pos?.w, block.pos?.h]).toEqual([960, tableBoxHeight(DEFAULT_TABLE_SIZE.rows)]);
+      expect(block.pos?.h).toBe(163);
     }
     const chart = menuActionPlan(itemById('insert.chart.pie'), facts(RULE));
     expect(chart).toMatchObject({

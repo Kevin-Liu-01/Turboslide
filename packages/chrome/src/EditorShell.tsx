@@ -1,7 +1,7 @@
 import type { ReactNode, RefObject } from 'react';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { emptyTable } from '@turboslide/schema/blocks/table';
+import { emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { layoutEntry } from '@turboslide/schema/layouts';
 import type { ShapeCategory } from '@turboslide/schema/shapes';
@@ -21,6 +21,7 @@ import {
   LAST_LAYOUT_STORAGE,
   PANEL_SECTION_OF,
   SETTINGS_STORAGE,
+  TABLE_INSERT_WIDTH,
   TOOL_SIZES,
   appearanceOf,
   buildMenuContext,
@@ -1373,7 +1374,13 @@ export function EditorShell({
   const pickTableSize = useCallback(
     (columns: number, rows: number) => {
       setMenuOpen(null);
-      runBuilt(insertBlockPlan(facts(), 'table', (id) => emptyTable(id, columns, rows), 'Table'));
+      /* the objects round (docs/OBJECTS.md 3.3 item 3; objects/build/b2.md 4a): the box fits the
+         picked rows (163 for three at 20 px, 271 for five), the width the table's 960 */
+      runBuilt(
+        insertBlockPlan(facts(), 'table', (id) => emptyTable(id, columns, rows), 'Table', {
+          size: [TABLE_INSERT_WIDTH, tableBoxHeight(rows)],
+        }),
+      );
     },
     [facts, runBuilt],
   );

@@ -32,6 +32,7 @@
     "./blocks/prompt": "./src/blocks/prompt.ts",
     "./blocks/render-block": "./src/blocks/render-block.ts",
     "./blocks/dia": "./src/blocks/dia.ts",
+    "./blocks/table": "./src/blocks/table.ts",
     "./dia/snap": "./src/dia/snap.ts",
     "./dia/templates": "./src/dia/templates.ts",
     "./blocks/html-escape": "./src/blocks/html-escape.ts",

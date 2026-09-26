@@ -13,7 +13,7 @@ import type {
 } from '@turboslide/schema/blocks';
 import { emptyChart } from '@turboslide/schema/blocks/chart';
 import type { ChartKind } from '@turboslide/schema/blocks/chart';
-import { TABLE_SIZES, emptyTable } from '@turboslide/schema/blocks/table';
+import { TABLE_SIZES, emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
 import type { TableBlock, TableCommand } from '@turboslide/schema/blocks/table';
 import { CATALOG, blockTextPaths } from '@turboslide/schema/catalog';
 import type { Color } from '@turboslide/schema/color';
@@ -165,6 +165,11 @@ export type EditorHandle = {
   wordArt?: (text: string) => void;
   /** runs a table plan from `table-tools.ts` */
   tableCommand?: (plan: { action: MenuActionId; input: Record<string, unknown> }) => void;
+  /** selects the table block with no session and sets its cell range, so a head click selects a whole row or column (docs/OBJECTS.md 3.3 item 4; objects/build/b5.md R2) */
+  selectCells?: (
+    blockId: string,
+    cells: { r0: number; c0: number; r1: number; c1: number },
+  ) => void;
   /** opens the chart data grid for the selected chart */
   chartData?: () => void;
   /** previews a slide background while the Background dialog is open */
@@ -1398,6 +1403,10 @@ export function buildMenuContext(
        kept cell after it, or by one click, and acts on the kept cell or cell 1,1 (RETURN.md 2.4
        fix 2: Google enables the rows "when the cursor is in a table") */
     tableCell: block?.type === 'table',
+    /* the objects round (docs/OBJECTS.md 3.3 item 4): the Header row check reads the first row */
+    ...(block?.type === 'table'
+      ? { tableHeader: (block as TableBlock).rows[0]?.header === true }
+      : {}),
     linked: block?.link !== undefined,
     order: { forward, front: forward, backward, back: backward },
     /* round two (SPEC-2 4.1, 1.1): every top level block of every slide kind is an object; the
@@ -1800,6 +1809,8 @@ export function insertBlockPlan(
 
 /** The default table the Table row inserts when its grid is not on hand: 3 columns by 3 rows with a header row. */
 export const DEFAULT_TABLE_SIZE = { columns: 3, rows: 3 } as const;
+/** The inserted table's width in sheet px (INSERT_SIZES.table's); its height comes from its rows (docs/OBJECTS.md 3.3 item 3). */
+export const TABLE_INSERT_WIDTH = 960;
 
 function block(facts: ActionFacts): Block | undefined {
   return objectOf(currentSlide(facts), facts.selection?.blockId);
@@ -2622,11 +2633,14 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
       );
     }
     case 'insert.table':
+      /* the objects round (docs/OBJECTS.md 3.3 item 3; objects/build/b2.md 4a): the box fits its rows
+         (163 for three rows at 20 px, the rule under each row included), the width the table's 960 */
       return insertBlockPlan(
         facts,
         'table',
         (id) => emptyTable(id, DEFAULT_TABLE_SIZE.columns, DEFAULT_TABLE_SIZE.rows),
         item.label,
+        { size: [TABLE_INSERT_WIDTH, tableBoxHeight(DEFAULT_TABLE_SIZE.rows)] },
       );
     case 'insert.chart.bar':
     case 'insert.chart.column':
@@ -3077,7 +3091,8 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     case 'format.table.distributeRows':
     case 'format.table.distributeColumns':
     case 'format.table.mergeCells':
-    case 'format.table.unmergeCells': {
+    case 'format.table.unmergeCells':
+    case 'format.table.headerRow': {
       if (target?.type !== 'table') return { refused: SELECT_CELL };
       const command = tableCommandOfItem(item.id);
       if (command === null) return { refused: SELECT_CELL };

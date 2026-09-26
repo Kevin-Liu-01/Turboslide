@@ -28,6 +28,7 @@
     "./Gestures": "./src/Gestures.tsx",
     "./InlineText": "./src/InlineText.tsx",
     "./Editor": "./src/Editor.tsx",
+    "./gesture-frame": "./src/gesture-frame.ts",
     "./clipboard": "./src/clipboard.ts",
     "./MaterialMount": "./src/MaterialMount.tsx",
     "./shader-frame": "./src/shader-frame.ts",

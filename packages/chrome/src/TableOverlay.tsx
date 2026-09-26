@@ -52,8 +52,11 @@ import { tipProps } from './Tooltip';
  *   without the shell's `commit` the click falls back to the `table.insertColumns` plan.
  *
  * Every control is a button with the chrome's tooltip and a `data-control` id in the shape of
- * model.ts's ids; a parked id (parked-controls.ts) is not drawn while Tools > Advanced tools is
- * off. Pointer downs stop at the control so the stage starts no marquee under them; the right
+ * model.ts's ids; a parked control (parked-controls.ts) is not drawn while Tools > Advanced tools
+ * is off, read by the family the matrix declares (`handle.table.<part>`, the block type in place
+ * of the block id, since the committed set names the family and a block's id is the seller's:
+ * objects/build/b4.md, b5.md R7). Pointer downs stop at the control so the stage starts no
+ * marquee under them; the right
  * click on a head is answered here (`preventDefault`), which the stage's own handler respects.
  */
 export type TableOverlayProps = {
@@ -181,6 +184,9 @@ type HeadEditor = NonNullable<EditorShellState['input']['editor']> & {
     cells: { r0: number; c0: number; r1: number; c1: number },
   ) => void;
 };
+
+/** The id the parked set names for a table control (the family of docs/FEATURES.md 7.2: `handle.table.<part>`). */
+export const parkedFamily = (part: string): string => `handle.table.${part}`;
 
 /** The row ids of a head's menu, in order; the Header row check leads a row head's. */
 export const HEAD_MENU_ROWS: Readonly<Record<HeadAxis, ReadonlyArray<string>>> = {
@@ -442,7 +448,7 @@ export function TableOverlay({ view, tableBox, blockId }: TableOverlayProps) {
     edge !== null &&
     block !== null &&
     !busy &&
-    !isParked(addControl, settings);
+    !isParked(parkedFamily(`add.${edge.axis}`), settings);
   const addStyle: CSSProperties | undefined =
     edge === null
       ? undefined
@@ -468,7 +474,7 @@ export function TableOverlay({ view, tableBox, blockId }: TableOverlayProps) {
       ) : null}
       {heads.map(({ axis, index, area }) => {
         const control = `handle.${blockId}.head.${axis}.${index}`;
-        if (isParked(control, settings)) return null;
+        if (isParked(parkedFamily(`head.${axis}.${index}`), settings)) return null;
         return (
           <button
             key={control}

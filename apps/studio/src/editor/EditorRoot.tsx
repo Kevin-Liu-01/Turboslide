@@ -1400,6 +1400,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         revision: props.revision,
         dispatch: props.dispatch,
         selection: props.selection,
+        /* the objects round (docs/OBJECTS.md 3.3 item 6; objects/build/b5.md R8): the table's measured
+           height, so Distribute rows shares the drawn box rather than clearing the heights */
+        ...(props.boxHeight === undefined ? {} : { boxHeight: props.boxHeight }),
         busy: props.busy,
         onNotice: shellSay,
       }),
@@ -1827,6 +1830,9 @@ function EditorStage({
           dispatch={controller.invoke}
           /* the parked ways in of the vector round (docs/VECTOR.md 4.8): a parked way is off */
           parked={(id) => isParked(id, editorShell.settings)}
+          /* the objects round (docs/OBJECTS.md 2.4; objects/build/b1.md request 1): the last gesture's
+             frame record reaches describe().state.gesture through the controller */
+          onGesture={(report) => controller.setGestureRecord(report)}
           selection={toStageSelection(snap.selection, slide.id)}
           onSelectionChange={(next) => controller.select(fromStageSelection(next, slide.id))}
           onMultiSelectionChange={onMultiSelection}

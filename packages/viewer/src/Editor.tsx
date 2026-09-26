@@ -32,6 +32,9 @@ import type {
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 
+/* the words of the hovered empty cell's prompt (docs/OBJECTS.md 3.3 item 7; objects/build/b2.md
+   request 1f, b1.md request 3): one click places the caret now, so the prompt says what to do next */
+import { TABLE_CELL_PROMPT } from '@turboslide/render/blocks/table';
 import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
 import { bandAssetResolver, bandForSlide, frameBandOf } from '@turboslide/render/stage';
@@ -841,15 +844,6 @@ export type EditorProps = {
    */
   parked?: (id: string) => boolean;
 };
-
-/**
- * The words of the hovered empty cell's prompt (docs/OBJECTS.md 3.3 item 7; build/b2.md request
- * 1f): one click places the caret now, so the prompt says what to do next. The value is the
- * render's `TABLE_CELL_PROMPT` (packages/render/src/blocks/table.ts, B2); the render package
- * exports no `./blocks/table` subpath yet, so the words are repeated here until the integrator
- * adds the line and this becomes the import (build/b1.md request 3).
- */
-const TABLE_CELL_PROMPT = 'Type to add text';
 
 type Editing = {
   blockId: string;

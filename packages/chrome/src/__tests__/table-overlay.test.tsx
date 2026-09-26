@@ -124,7 +124,10 @@ function shellOf(over: {
       ...(over.commit === undefined ? {} : { commit: over.commit }),
       editor: over.selectCells === undefined ? {} : { selectCells: over.selectCells },
     },
-    settings: over.advanced === true ? { advancedTools: true } : {},
+    /* the switch on unless a test says off: the committed set parks the handle.table.* families
+       (parked-controls.ts), read by the family for every table since the integrator's seam of the
+       objects round (build/b4.md, b5.md R7), so the heads and the "+" are hidden while it is off */
+    settings: over.advanced === false ? {} : { advancedTools: true },
     menuContext: {
       platform: 'mac',
       focus: 'canvas',
@@ -414,9 +417,10 @@ describe('the "+" at the edges', () => {
 
 describe('the parked ids', () => {
   it('hides a parked control while the switch is off and draws it with the switch on (parked-controls.ts)', () => {
-    /* the committed set names the `handle.table.*` families, which match a block named `table` */
+    /* the committed set names the `handle.table.*` families; the overlay reads them for every
+       table (parkedFamily), a block named `table` and a block named otherwise alike */
     const named: ContentSlide = { ...slide, slots: { main: [{ ...block(), id: 'table' }] } };
-    const shell = shellOf({});
+    const shell = shellOf({ advanced: false });
     (shell.input.document as unknown as { slides: Record<string, ContentSlide> }).slides.s = named;
     const tableRuns: Record<string, Box> = {};
     for (const [key, box] of Object.entries(runs)) tableRuns[key.replace(/^t\//, 'table/')] = box;
@@ -438,6 +442,15 @@ describe('the parked ids', () => {
         <TableOverlay view={view} tableBox={TABLE} blockId="table" />
       </EditorShellContext.Provider>,
     );
+    expect(document.querySelectorAll('.ts-table-head')).toHaveLength(6);
+  });
+
+  it('reads the family for a block named otherwise, so the committed set parks every table alike (build/b4.md)', () => {
+    mount(viewOf(), shellOf({ advanced: false }));
+    expect(document.querySelectorAll('.ts-table-head')).toHaveLength(0);
+    expect(document.querySelector('.ts-table-add')).toBeNull();
+    cleanup();
+    mount(viewOf(), shellOf({}));
     expect(document.querySelectorAll('.ts-table-head')).toHaveLength(6);
   });
 });

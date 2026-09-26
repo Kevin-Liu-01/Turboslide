@@ -24,6 +24,7 @@ import type { ChartKind, ChartSeries } from '@turboslide/schema/blocks/chart';
 import type { CellBorder, TableCommand } from '@turboslide/schema/blocks/table';
 import { applyTableCommand } from '@turboslide/schema/blocks/table';
 import { applyLayout } from '@turboslide/schema/apply-layout';
+import { groupsKeptOnDuplicate } from '@turboslide/schema/diagrams';
 import type { Asset, AssetVariant } from '@turboslide/schema/assets';
 import { hasContinuousSource, vectorOf } from '@turboslide/schema/assets';
 import type { PictureDither } from '@turboslide/schema/blocks/dither';
@@ -1493,6 +1494,13 @@ export async function blockDuplicate(
   const takenGroups = new Set(
     placed.flatMap(({ block }) => (block.pos?.group !== undefined ? [block.pos.group] : [])),
   );
+  /* the objects round (docs/OBJECTS.md 4.2 item 3; objects/build/b3.md request 2): a member copied
+     without the rest of its group keeps the tag, so Cmd+D on an entered diagram step lands the copy
+     inside the diagram; a group copied whole takes the fresh tag as before */
+  const kept = groupsKeptOnDuplicate(
+    placed.map(({ block }) => block),
+    input.blockIds,
+  );
   let z = maxZ;
   const copies: { row: (typeof placed)[number]; copy: Block; id: string }[] = [];
   for (const blockId of input.blockIds) {
@@ -1509,7 +1517,7 @@ export async function blockDuplicate(
         y: copy.pos.y + DUPLICATE_OFFSET_PX,
         z,
       };
-      if (copy.pos.group !== undefined) {
+      if (copy.pos.group !== undefined && !kept.has(copy.pos.group)) {
         let tag = groupTags.get(copy.pos.group);
         if (tag === undefined) {
           tag = freeId(`${copy.pos.group}-2`, takenGroups);

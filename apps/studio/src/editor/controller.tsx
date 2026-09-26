@@ -209,6 +209,7 @@ import { authorDisplay, authorLabel, sameAuthor, touchedSlides } from '@turbosli
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 import { PRODUCT_TOKENS, PROPER_NOUNS } from '@turboslide/theme/copy';
 import { measureForCanvas, measureForFit } from '@turboslide/viewer/canvas-measure';
+import type { GestureReport } from '@turboslide/viewer/gesture-frame';
 import {
   TEXT_UNDO_GROUP_MS,
   announceTextChanged,
@@ -886,6 +887,8 @@ export type EditorController = {
   setView: (view: EditorView) => void;
   /** the editor shell's stored settings (Tools > Advanced tools among them), for describe().state.settings (docs/FOCUS.md 3.1) */
   setShellSettings: (settings: Readonly<Record<string, boolean | string>>) => void;
+  /** the last gesture's frame record from the stage, for describe().state.gesture (docs/OBJECTS.md 2.4; objects/build/b1.md request 1) */
+  setGestureRecord: (report: GestureReport | null) => void;
   /** the shell's toast */
   say: (message: string) => void;
   /** the validator behind every applySource: the slide, or a RangeError (unknown slide) or TypeError */
@@ -1167,6 +1170,8 @@ export function createEditorController(init: {
   let onLocalApply: ((mutations: readonly Mutation[]) => void) | null = null;
   /* the editor shell's stored settings, for describe().state.settings (docs/FOCUS.md 3.1) */
   let shellSettings: Readonly<Record<string, boolean | string>> = {};
+  /* the last ended gesture's frame record (frames, maxMs, meanMs, skipped, degraded), for describe().state.gesture (docs/OBJECTS.md 2.4) */
+  let gestureRecord: GestureReport | null = null;
   let findingsCache: { document: DeckDocument; findings: Finding[] } | null = null;
   let room: RoomClient | null = null;
   let draftChain: Promise<unknown> = Promise.resolve();
@@ -4126,6 +4131,10 @@ export function createEditorController(init: {
       // the focus round (docs/FOCUS.md 3.1): the shell's stored settings as the rows read them,
       // Tools > Advanced tools among them (`advancedTools`), so a driver reads the switch here
       settings: { ...shellSettings },
+      // the objects round (docs/OBJECTS.md 2.4, 6.1 gestures.frame.*): the last ended gesture's
+      // frame record as the stage told it, so a driver reads the cadence and the budget without
+      // instrumentation; null before the first gesture
+      gesture: gestureRecord === null ? null : { ...gestureRecord },
       // the features round (docs/FEATURES.md 4.4; the integrator, ship one): the deck's asset
       // records as the document holds them, so a driver or an agent reads a placed logo's role,
       // source, twins and scale without an export (source.read is the active slide's source)
@@ -4469,6 +4478,9 @@ export function createEditorController(init: {
     },
     setShellSettings(settings) {
       shellSettings = settings;
+    },
+    setGestureRecord(report) {
+      gestureRecord = report;
     },
     say,
     assertSource,

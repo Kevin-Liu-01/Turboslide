@@ -25,6 +25,8 @@ const FEATURES = [
   ['slides', '2.2 Slides and the filmstrip'],
   ['text', '2.3 Text'],
   ['images', '2.4 Pictures and the slide background'],
+  /* the objects round (docs/OBJECTS.md 6.1): the `gestures.*` rows of the live gestures are the
+     arrange feature's (AREA_FEATURE), so they count here and never park */
   ['arrange', '2.5 Selection, arrange and the canvas'],
   ['shapes', '2.6 Shapes'],
   ['lines', '2.6 Lines'],
@@ -71,7 +73,7 @@ const README = {
   images:
     '**Pictures.** Upload from your computer, drop a file on the slide or paste one. Drop a file on a picture to replace it; the frame stays. Move, resize and rotate by the handles; the size shows while you drag. Crop by double click, Enter to apply, Undo to take it back. Format options sets transparency, brightness and contrast. Change background colours one slide.',
   arrange:
-    '**Selection and arrange.** Select by click, Shift click or a marquee; order, align and centre from the Arrange menu; nudge with the arrow keys; duplicate, delete, undo and redo. The zoom box, its presets and Cmd+0 set the view.',
+    '**Selection and arrange.** Select by click, Shift click or a marquee; order, align and centre from the Arrange menu; nudge with the arrow keys; duplicate, delete, undo and redo. The zoom box, its presets and Cmd+0 set the view. A shape drawn by a drag is drawn as it grows, a resize shows the object at its new size at every frame, a rotated object keeps its ring on its corners, and a connector follows its shape while it moves.',
   shapes:
     '**Shapes.** Rectangle, rounded rectangle and ellipse with a fill, a border and text; they move, resize and rotate by their handles and survive the PDF and the PowerPoint file.',
   lines:

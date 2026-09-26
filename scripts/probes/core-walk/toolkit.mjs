@@ -18,7 +18,12 @@
 // with the control's id, never failed and never passed), the agent surface calls (the actions
 // API with the deployment's bearer read from ~/.config/turboslide/hosts.json or TURBOSLIDE_TOKEN,
 // never printed; none on localhost, whose surface is open to the checkout holder), the tooltip
-// read, the sheet's custom properties and a zip reader for the export rows.
+// read, the sheet's custom properties and a zip reader for the export rows. The objects round
+// (docs/OBJECTS.md 2.6, 6.1) added the frame capture (`frameFacts`, `captureDrag` and the sheet
+// and handle drags over it: a drag in steps with the object's own box on the sheet and the ring's
+// box read after every step, in sheet px) and the pure frame comparison exported at the end
+// (`compareFrame`, `boxCorners`, `cornersDistance`, `readoutsOf`), which the gestures area's
+// rows read at the tenth step of a 12 step drag.
 import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { inflateRawSync, inflateSync } from 'node:zlib';
@@ -1908,7 +1913,434 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     return { status: res.status(), bytes: res.status() === 200 ? await res.body() : null };
   };
 
+  // ---------------------------------------------------------------------------------------------
+  // the objects round (docs/OBJECTS.md 2.6, 6.1 `gestures.*`; B4): the frame capture. A drag in
+  // steps with the facts of the sheet and the overlay read after every step: the object's own box
+  // on the sheet (the `.free` wrapper, its layout box and angle, the inner element, the svg's
+  // drawn attributes, the text's font and line count, the picture and its crop frame, the table's
+  // cells, the chart's bars, a line's ends), the ring's box (turned, when the overlay turns it),
+  // the cell and range rings, the marquee, the readout and the chip, every box in sheet px. The
+  // shape of the specification agent's `captureDrag` and `frameFacts` (the scratchpad's
+  // `objects/lib.mjs`), whose frames are under docs/gslides-parity/objects/audit/.
+
+  /**
+   * The facts of one frame for the block `id` (null for the sheet alone): every box in sheet px
+   * (client px over k), rounded to a tenth. `blocks` carries the bounding box of every `.free`
+   * wrapper on the sheet by id, so a row reads a second object (a connector's shape) from the
+   * same frame.
+   */
+  t.frameFacts = (id = null, { lines = [] } = {}) =>
+    page.evaluate(
+      ([sel, blockId, lineIds]) => {
+        const sheet = document.querySelector(sel);
+        if (!sheet) return null;
+        const sr = sheet.getBoundingClientRect();
+        const k = sr.width / 1600;
+        const r1 = (n) => Math.round(n * 10) / 10;
+        const toSheet = (r) =>
+          r
+            ? {
+                x: r1((r.x - sr.x) / k),
+                y: r1((r.y - sr.y) / k),
+                w: r1(r.width / k),
+                h: r1(r.height / k),
+              }
+            : null;
+        const box = (el) => (el ? toSheet(el.getBoundingClientRect()) : null);
+        const angleOf = (el) => {
+          const m = /matrix\(([^)]+)\)/.exec(getComputedStyle(el).transform);
+          if (!m) return 0;
+          const [a, b] = m[1].split(',').map((v) => parseFloat(v));
+          return r1((Math.atan2(b, a) * 180) / Math.PI);
+        };
+        const cornersOf = (cx, cy, w, h, deg) => {
+          const rad = (deg * Math.PI) / 180;
+          const c = Math.cos(rad);
+          const s = Math.sin(rad);
+          return [
+            [-w / 2, -h / 2],
+            [w / 2, -h / 2],
+            [w / 2, h / 2],
+            [-w / 2, h / 2],
+          ].map(([x, y]) => ({ x: r1(cx + x * c - y * s), y: r1(cy + x * s + y * c) }));
+        };
+        const free = blockId ? sheet.querySelector(`.free[data-free="${blockId}"]`) : null;
+        const inner = blockId ? sheet.querySelector(`[data-block="${blockId}"]`) : null;
+        let freeLayout = null;
+        if (free) {
+          /* the wrapper's own layout box and angle (the sheet lays out at 1600 px and scales
+             by k): its bounding box is the axis aligned bounds of a turned object, the layout
+             box with the angle gives the corners the ring should sit on */
+          const left = parseFloat(free.style.left) || 0;
+          const top = parseFloat(free.style.top) || 0;
+          const w = free.offsetWidth;
+          const h = free.offsetHeight;
+          const angle = angleOf(free);
+          freeLayout = {
+            x: r1(left),
+            y: r1(top),
+            w: r1(w),
+            h: r1(h),
+            angle,
+            corners: cornersOf(left + w / 2, top + h / 2, w, h, angle),
+          };
+        }
+        const svg = inner
+          ? inner.tagName.toLowerCase() === 'svg'
+            ? inner
+            : inner.querySelector('svg')
+          : null;
+        let shape = null;
+        if (svg) {
+          const el = svg.querySelector('rect, ellipse, path, line, polyline, circle');
+          const cs = el ? getComputedStyle(el) : null;
+          shape = {
+            tag: el?.tagName.toLowerCase() ?? null,
+            attrW: svg.getAttribute('width'),
+            attrH: svg.getAttribute('height'),
+            viewBox: svg.getAttribute('viewBox'),
+            box: box(svg),
+            dataShape:
+              inner.getAttribute('data-shape') ??
+              inner.closest('[data-shape]')?.getAttribute('data-shape') ??
+              null,
+            el: el
+              ? {
+                  width: el.getAttribute('width'),
+                  height: el.getAttribute('height'),
+                  rx: el.getAttribute('rx'),
+                  d: el.getAttribute('d') ?? null,
+                  fill: cs.fill,
+                  stroke: cs.stroke,
+                  strokeWidth: cs.strokeWidth,
+                  bbox: box(el),
+                }
+              : null,
+            bars: [...svg.querySelectorAll('.series rect')].slice(0, 4).map((r) => ({
+              width: Number(r.getAttribute('width')),
+              height: Number(r.getAttribute('height')),
+              box: box(r),
+            })),
+          };
+        }
+        /* a line's ends: the first path of the block's svg, its start and end points in sheet px
+           (a connector's end sits on its shape's site, docs/OBJECTS.md 2.3 item 4) */
+        const endsOf = (root) => {
+          const s = root
+            ? root.tagName.toLowerCase() === 'svg'
+              ? root
+              : root.querySelector('svg')
+            : null;
+          const el = s ? s.querySelector('path, line, polyline') : null;
+          if (
+            !el ||
+            typeof el.getTotalLength !== 'function' ||
+            typeof el.getPointAtLength !== 'function'
+          )
+            return null;
+          try {
+            const m = el.getScreenCTM();
+            const at = (len) => {
+              const p = el.getPointAtLength(len);
+              const q = m ? { x: m.a * p.x + m.c * p.y + m.e, y: m.b * p.x + m.d * p.y + m.f } : p;
+              return { x: r1((q.x - sr.x) / k), y: r1((q.y - sr.y) / k) };
+            };
+            const total = el.getTotalLength();
+            return { start: at(0), end: at(total), length: r1(total / k) };
+          } catch {
+            return null;
+          }
+        };
+        const line = endsOf(inner);
+        const lines = {};
+        for (const other of lineIds ?? [])
+          lines[other] = endsOf(sheet.querySelector(`[data-block="${other}"]`));
+        const run = inner
+          ? (inner.querySelector('[data-run]') ?? (inner.matches('[data-run]') ? inner : null))
+          : null;
+        const para = run ? (run.querySelector('.para') ?? run) : null;
+        let text = null;
+        if (para) {
+          const range = document.createRange();
+          range.selectNodeContents(para);
+          const lines = new Set([...range.getClientRects()].map((r) => Math.round(r.top)));
+          text = {
+            /* a computed length inside the sheet is a layout px, which is a sheet px (the stage
+               scales the 1600 px sheet by a transform), so no division by k: the word art rows
+               read 176 px drawn for a stored 176 (docs/OBJECTS.md 4.1) */
+            fontSize: r1(parseFloat(getComputedStyle(para).fontSize)),
+            lines: lines.size,
+            box: box(para),
+            runBox: box(run),
+            sample: (para.textContent ?? '').slice(0, 30),
+          };
+        }
+        const img = inner ? inner.querySelector('img') : null;
+        const frameEl = inner ? inner.querySelector('.shot-crop') : null;
+        const picture = img
+          ? {
+              box: box(img),
+              frame: box(frameEl),
+              trim: frameEl?.getAttribute('data-trim') ?? null,
+              natural: [img.naturalWidth, img.naturalHeight],
+              objectFit: getComputedStyle(img).objectFit,
+            }
+          : null;
+        const table =
+          inner && inner.classList.contains('table')
+            ? inner
+            : (inner?.querySelector('.table') ?? null);
+        let cells = null;
+        if (table)
+          cells = {
+            box: box(table),
+            rows: [...table.querySelectorAll('.tr')].map((tr) =>
+              [...tr.querySelectorAll('.td')].map(box),
+            ),
+            rowBoxes: [...table.querySelectorAll('.tr')].map(box),
+            cols: getComputedStyle(table).getPropertyValue('--table-cols').trim(),
+          };
+        const ringEl = [...document.querySelectorAll('.ts-overlay .ts-select.is-selected')].find(
+          (el) => !el.classList.contains('is-extra') && !el.classList.contains('is-cells'),
+        );
+        const ring = box(ringEl ?? null);
+        let ringTurn = null;
+        const turn = ringEl?.closest('.ts-turn[data-rotated]') ?? null;
+        if (turn && ringEl) {
+          /* the overlay turns the ring about its centre (Overlay.tsx `turnStyle`): the centre is
+             the bounding box's centre, the half extents the ring's own layout size */
+          const tb = turn.getBoundingClientRect();
+          const cx = (tb.x + tb.width / 2 - sr.x) / k;
+          const cy = (tb.y + tb.height / 2 - sr.y) / k;
+          const w = ringEl.offsetWidth / k;
+          const h = ringEl.offsetHeight / k;
+          const angle = angleOf(turn);
+          ringTurn = { angle, w: r1(w), h: r1(h), corners: cornersOf(cx, cy, w, h, angle) };
+        }
+        const readoutEl = document.querySelector('.ts-overlay .ts-readout, .ts-readout');
+        const chipEl = document.querySelector('.ts-overlay .ts-select-chip');
+        const blocks = {};
+        for (const el of sheet.querySelectorAll('.free[data-free]'))
+          blocks[el.getAttribute('data-free')] = box(el);
+        return {
+          k: Math.round(k * 10000) / 10000,
+          free: box(free),
+          freeLayout,
+          inner: box(inner),
+          innerTag: inner?.tagName.toLowerCase() ?? null,
+          shape,
+          line,
+          lines,
+          text,
+          picture,
+          cells,
+          ring,
+          ringTurn,
+          cellRing: box(document.querySelector('.ts-overlay .ts-cell-ring')),
+          rangeRing: box(
+            document.querySelector(
+              '.ts-overlay .ts-select.is-cells, .ts-stagewrap .ts-select.is-cells',
+            ),
+          ),
+          marquee: box(document.querySelector('.ts-overlay .ts-marquee')),
+          readout: readoutEl?.textContent ?? null,
+          readoutBox: box(readoutEl),
+          chip: chipEl?.textContent ?? null,
+          editing: document.querySelector('.ts-stagewrap.ts-editor[data-editing]') !== null,
+          frees: Object.keys(blocks),
+          blocks,
+        };
+      },
+      [SHEET, id, lines],
+    );
+  /** A screenshot of the stage (the sheet with its plate) under the run's shots folder, when one is set. */
+  t.stageShot = async (name) => {
+    if (!report.shots) return null;
+    const wrap = (await t.rectOf('.ts-stagewrap.ts-editor')) ?? (await t.sheetRect());
+    if (!wrap) return null;
+    const size = page.viewportSize() ?? { width: 1440, height: 900 };
+    const clip = {
+      x: Math.max(0, wrap.x - 8),
+      y: Math.max(0, wrap.y - 8),
+      width: Math.min(size.width, wrap.w + 16),
+      height: Math.min(size.height, wrap.h + 16),
+    };
+    const file = `${report.shots}/${name}.png`;
+    await page.screenshot({ path: file, clip }).catch(() => undefined);
+    return file;
+  };
+  /**
+   * A drag in `steps` steps with the facts after every step (docs/OBJECTS.md 2.2's script): the
+   * pointer arrives at `from` in 6 steps, `before` runs, the frame `before` is read, the keys are
+   * held, the pointer presses and the frame `down` is read after `settle` ms, then each step's
+   * frame `step<n>` after `settle` ms, and the release is read at `up+0` (no wait), `up+40`,
+   * `up+120` and `up+400`. `shots` names the stage screenshots per frame under the run's shots
+   * folder (`<shots>-NN-<tag>.png`); none without it. `idOf(facts)` names the block to read once
+   * it exists (a draw makes its block during the drag): with no `id`, each frame is read for the
+   * sheet first and again for the block `idOf` answers. Answers `{ frames, from, to }`, each
+   * frame `{ tag, i, t, facts }`.
+   */
+  t.captureDrag = async (
+    from,
+    to,
+    {
+      id = null,
+      steps = 12,
+      settle = 60,
+      keys = [],
+      shots = null,
+      before = null,
+      idOf = null,
+      lines = [],
+    } = {},
+  ) => {
+    const frames = [];
+    const read = async (tag, i, shot = true) => {
+      let facts = await t.frameFacts(id, { lines });
+      if (id === null && idOf !== null && facts) {
+        const found = idOf(facts);
+        if (found) facts = await t.frameFacts(found, { lines });
+      }
+      const file =
+        shot && shots ? await t.stageShot(`${shots}-${String(i).padStart(2, '0')}-${tag}`) : null;
+      frames.push({ tag, i, t: Date.now(), facts, shot: file ? file.split('/').pop() : null });
+      return facts;
+    };
+    await t.moveHuman({ x: from.x - 30, y: from.y - 20 }, from, 6);
+    await sleep(rand(60, 120));
+    if (before) await before();
+    await read('before', 0);
+    for (const key of keys) await page.keyboard.down(key);
+    await page.mouse.down();
+    await sleep(settle);
+    await read('down', 1);
+    for (let i = 1; i <= steps; i += 1) {
+      const f = i / steps;
+      await page.mouse.move(from.x + (to.x - from.x) * f, from.y + (to.y - from.y) * f);
+      await sleep(settle);
+      await read(`step${i}`, i + 1);
+    }
+    await page.mouse.up();
+    for (const key of keys) await page.keyboard.up(key);
+    await read('up+0', steps + 2, false);
+    await sleep(40);
+    await read('up+40', steps + 3);
+    await sleep(80);
+    await read('up+120', steps + 4);
+    await sleep(280);
+    await read('up+400', steps + 5);
+    return { frames, from, to };
+  };
+  /** A captured drag from a sheet point by a sheet delta. */
+  t.captureSheetDrag = async (from, delta, options = {}) => {
+    const p = await t.sheetPoint(from.x, from.y);
+    const k = await t.kOf();
+    return t.captureDrag(p, { x: p.x + delta.x * k, y: p.y + delta.y * k }, options);
+  };
+  /** A captured drag from a handle's centre by a sheet delta; null when the handle is not drawn. */
+  t.captureHandleDrag = async (control, delta, options = {}) => {
+    const h = await t.handleRect(control);
+    if (!h) return null;
+    const k = await t.kOf();
+    const p = t.center(h);
+    return t.captureDrag(p, { x: p.x + delta.x * k, y: p.y + delta.y * k }, options);
+  };
+  /** The facts of the frame tagged `tag` in a capture, or null. */
+  t.frameAt = (capture, tag) => capture?.frames?.find((f) => f.tag === tag)?.facts ?? null;
+  /** The last gesture's frame record from the window API (`describe().state.gesture`, docs/OBJECTS.md 2.4), or null on a build without it. */
+  t.gestureState = () =>
+    page
+      .evaluate(() => window.turboslide?.studio?.describe?.()?.state?.gesture ?? null)
+      .catch(() => null);
+  t.compareFrame = compareFrame;
+  t.boxCorners = boxCorners;
+  t.cornersDistance = cornersDistance;
+  t.readoutsOf = readoutsOf;
+  /** One line of a frame's facts for an observed column. */
+  t.describeFrame = (facts, outset = 0) => {
+    if (!facts) return 'no frame';
+    const c = compareFrame(facts.free, facts.ring, { outset });
+    return `object ${t.posStr(facts.free)} ring ${t.posStr(facts.ring)} (${c.ok ? 'equal' : `off by ${c.dx}/${c.dy}/${c.dw}/${c.dh}`}); readout ${facts.readout === null ? 'none' : `"${facts.readout}"`}`;
+  };
   return t;
+}
+
+// -----------------------------------------------------------------------------------------------
+// the objects round (docs/OBJECTS.md 2.6, 6.4): the frame comparison, pure, pinned by
+// toolkit.test.mjs. A frame passes when the object's own box on the sheet equals the ring's box
+// within the tolerance once the ring's outset is removed (text-ring.ts: a text block's ring sits
+// 10 sheet px outside its box on every side; every other ring sits on the box).
+
+const tenth = (n) => Math.round(n * 10) / 10;
+
+/**
+ * The object's box against the ring's, the outset removed: `{ ok, dx, dy, dw, dh }` with the
+ * differences in sheet px (object minus ring), or `ok` false with a reason when a box is missing.
+ */
+export function compareFrame(object, ring, { outset = 0, tolerance = 1 } = {}) {
+  if (!object || !ring)
+    return {
+      ok: false,
+      dx: null,
+      dy: null,
+      dw: null,
+      dh: null,
+      reason: object ? 'no ring' : 'no object',
+    };
+  const inner = {
+    x: ring.x + outset,
+    y: ring.y + outset,
+    w: ring.w - 2 * outset,
+    h: ring.h - 2 * outset,
+  };
+  const dx = tenth(object.x - inner.x);
+  const dy = tenth(object.y - inner.y);
+  const dw = tenth(object.w - inner.w);
+  const dh = tenth(object.h - inner.h);
+  const ok = [dx, dy, dw, dh].every((d) => Math.abs(d) <= tolerance);
+  return { ok, dx, dy, dw, dh };
+}
+
+/** The four corners of a box `{ x, y, w, h }` turned by `angle` degrees about its centre. */
+export function boxCorners(box, angle = 0) {
+  const rad = (angle * Math.PI) / 180;
+  const c = Math.cos(rad);
+  const s = Math.sin(rad);
+  const cx = box.x + box.w / 2;
+  const cy = box.y + box.h / 2;
+  return [
+    [-box.w / 2, -box.h / 2],
+    [box.w / 2, -box.h / 2],
+    [box.w / 2, box.h / 2],
+    [-box.w / 2, box.h / 2],
+  ].map(([x, y]) => ({ x: tenth(cx + x * c - y * s), y: tenth(cy + x * s + y * c) }));
+}
+
+/**
+ * The largest distance from a corner of `a` to its nearest corner of `b` (and back), so two
+ * corner lists in any order compare; Infinity when a list is empty or missing.
+ */
+export function cornersDistance(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length === 0 || b.length === 0)
+    return Number.POSITIVE_INFINITY;
+  const nearest = (p, list) => Math.min(...list.map((q) => Math.hypot(p.x - q.x, p.y - q.y)));
+  return tenth(Math.max(...a.map((p) => nearest(p, b)), ...b.map((p) => nearest(p, a))));
+}
+
+/**
+ * The readouts of a capture's step frames against a pattern: `steps` lists each step's text,
+ * `every` is true when every step matched, `afterRelease` is the readout at `up+400` (null when
+ * the readout left, as it should). A capture without step frames answers `every` false.
+ */
+export function readoutsOf(capture, pattern) {
+  const frames = capture?.frames ?? [];
+  const steps = frames.filter((f) => /^step\d+$/.test(f.tag)).map((f) => f.facts?.readout ?? null);
+  const last = frames.find((f) => f.tag === 'up+400');
+  return {
+    steps,
+    every: steps.length > 0 && steps.every((s) => s !== null && pattern.test(s)),
+    afterRelease: last ? (last.facts?.readout ?? null) : undefined,
+  };
 }
 
 // -----------------------------------------------------------------------------------------------

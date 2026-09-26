@@ -807,6 +807,110 @@ async function objectsOfSlide(page: Page, slideId: string) {
   return objectsOf(page, slideId);
 }
 
+/**
+ * The rules a table draws, read from the cells of a sheet root: the inner column seams (a cell's
+ * right border, or its `::after` guide), the rule under each row and the rule under the last row.
+ * The objects round draws an editor guide grid on the stage alone (docs/OBJECTS.md 3.3 item 2,
+ * question 1's default); the show, the print document and the PDF keep the grammar's rules.
+ */
+async function tableRules(page: Page, rootSelector: string, blockId: string) {
+  return page.evaluate(
+    ([sel, id]) => {
+      const root = document.querySelector(`${sel} [data-block="${id}"]`);
+      if (!root) return null;
+      const rows = [...root.querySelectorAll('.tr')];
+      let seams = 0;
+      let drawn = 0;
+      let rules = 0;
+      for (const tr of rows) {
+        const tds = [...tr.querySelectorAll('.td')];
+        tds.forEach((td, i) => {
+          if (i === tds.length - 1) return;
+          seams += 1;
+          const cs = getComputedStyle(td);
+          const after = getComputedStyle(td, '::after');
+          const width = parseFloat(cs.borderRightWidth) || 0;
+          const guide =
+            after.content !== 'none' && after.content !== '' ? parseFloat(after.width) || 0 : 0;
+          /* the editor's guide is an inset box shadow on the cell (build/b2.md): none here */
+          const shadow = cs.boxShadow !== 'none' && cs.boxShadow !== '';
+          if (width > 0 || guide > 0 || shadow) drawn += 1;
+        });
+        const cs = getComputedStyle(tr);
+        if ((parseFloat(cs.borderBottomWidth) || 0) > 0 || (parseFloat(cs.borderTopWidth) || 0) > 0)
+          rules += 1;
+      }
+      const cells = [...root.querySelectorAll('.td')].map((td) => td.textContent?.trim() ?? '');
+      return { rows: rows.length, seams, drawn, rules, cells };
+    },
+    [rootSelector, blockId] as const,
+  );
+}
+
+test(title('tables.show.rules-only'), async () => {
+  test.setTimeout(150_000);
+  const owner = await withBudget(1);
+  const { page, deck, docsSlide } = owner;
+  await openEditor(page, deck);
+  await typeTableCells(owner);
+  await clickCard(page, docsSlide!);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  /* the show from the current slide: the sheet in present mode draws the table with its rules and
+     no column seam (the editor guide grid is the stage's alone) */
+  await ctl(page, 'present.open').click();
+  await ctl(page, 'present.show').waitFor({ timeout: 10_000 });
+  await page.waitForTimeout(800);
+  const show = await tableRules(
+    page,
+    '.ts-stagewrap.is-present .pt-slide:not(.is-leaving), .pt-viewer.is-present .pt-slide:not(.is-leaving)',
+    'export-table',
+  );
+  await page.keyboard.press('Escape');
+  await ctl(page, 'present.show')
+    .waitFor({ state: 'detached', timeout: 10_000 })
+    .catch(() => undefined);
+  test.info().annotations.push({
+    type: 'show',
+    description: show
+      ? `${show.rows} rows, ${show.drawn} of ${show.seams} inner seams drawn, ${show.rules} row rules; cells ${show.cells.join(' | ')}`
+      : 'no table in the show',
+  });
+  expect(show, 'the table is drawn in the show').not.toBeNull();
+  expect(show!.cells.join(' ')).toContain('Q1 revenue');
+  expect(show!.drawn, 'no column seam in the show').toBe(0);
+  expect(show!.rules, 'the rows draw their rules').toBeGreaterThan(0);
+  /* the print document is what Chromium prints as the PDF (packages/export/src/pdf/build.ts): the
+     same table markup on the print page, read the same way, then the PDF's words */
+  await menuPath(page, 'file', 'file.printPreview');
+  await page.waitForURL(/\/print\//, { timeout: 20_000 });
+  await ctl(page, 'print.page').waitFor({ timeout: 20_000 });
+  await page.waitForSelector('[data-control="print.page"][data-hydrated]', { timeout: 20_000 });
+  const printed = await tableRules(page, '[data-control="print.page"]', 'export-table');
+  test.info().annotations.push({
+    type: 'print',
+    description: printed
+      ? `${printed.rows} rows, ${printed.drawn} of ${printed.seams} inner seams drawn, ${printed.rules} row rules`
+      : 'no table on the print page',
+  });
+  expect(printed, 'the table is on the print page').not.toBeNull();
+  expect(printed!.drawn, 'no column seam on the print page').toBe(0);
+  expect(printed!.rules).toBeGreaterThan(0);
+  const pdf = await download(page, () => ctl(page, 'print.pdf').click(), 45_000);
+  await ctl(page, 'print.close').click();
+  await page.waitForURL(/\/edit\//, { timeout: 20_000 });
+  const text = pdfText(pdf.bytes);
+  test.info().annotations.push({
+    type: 'pdf',
+    description: `${pdfPages(pdf.bytes)} pages; Q1 revenue ${text.includes('Q1 revenue')}`,
+  });
+  test.skip(
+    !pdfReadable(text, 'Q1 revenue') && !pdfReadable(text, 'Acme'),
+    'the PDF text is not readable by this spec (pdftotext is not on PATH and no literal or single byte hex string carries the deck words)',
+  );
+  expect(text, 'Q1 revenue is in the PDF text').toContain('Q1 revenue');
+});
+
 test(title('charts.export.pdf'), async () => {
   test.setTimeout(120_000);
   const { page, deck } = await withBudget(1);
@@ -2659,6 +2763,8 @@ coverage(import.meta.filename, [
   'export.png.current-slide',
   'tables.export.pdf',
   'tables.export.pptx-editable',
+  /* the objects round (docs/OBJECTS.md 3.3 item 2, question 1): the show and the print document keep the rules */
+  'tables.show.rules-only',
   'charts.export.pdf',
   'charts.export.pptx-native',
   'wordart.export.pdf',

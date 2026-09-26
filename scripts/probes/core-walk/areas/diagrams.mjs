@@ -19,6 +19,8 @@ export const IDS = [
   'diagrams.label.double-click-opens',
   'diagrams.label.tab-next',
   'diagrams.step.one-object',
+  /* the objects round (docs/OBJECTS.md 4.2 item 3): a member duplicated and removed alone */
+  'diagrams.member.duplicate-delete',
 ];
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -362,7 +364,107 @@ export async function run(t) {
     },
   );
   await featuresRound(t, S, { members, describe, list0, box1, undo });
+  await objectsRound(t, S, { undo, isBox });
   await t.advancedBack('the diagram rows');
+}
+
+/**
+ * The objects round (docs/OBJECTS.md 4.2 item 3, the row `diagrams.member.duplicate-delete`): a
+ * double click enters a member and Escape returns to the member selected inside the group; Cmd+D
+ * there duplicates the member inside the group offset by 16 px, Delete removes the member alone
+ * and detaches its connectors, and Cmd+D with the group selected duplicates the group as today.
+ * A fresh process diagram from the panel on its own slide, so the members are known.
+ */
+async function objectsRound(t, S, h) {
+  const LANE = 'B3';
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const S2 = await t
+    .setup('a slide for the member row', 'slide.new through the window API', async () => {
+      const id = await t.setupSlide(S, 'blank');
+      t.deck.diagramSlide2 = id;
+      return { ok: Boolean(id), observed: `slide ${id}` };
+    })
+    .then(() => t.deck.diagramSlide2);
+  await t.clickCard(S2);
+  await t.clearAll();
+  const members = async () => (await t.objectsOf(S2)).filter((o) => o.pos?.group !== undefined);
+  const isLink = (o) => o.type === 'shape' && /line|elbow|curve|arrow/i.test(o.block.shape ?? '');
+  await t.step(
+    'diagrams.member.duplicate-delete',
+    'Insert > Diagram, Process, Insert; double click step 2; Escape; Cmd+D; Delete on the copy; one click on a step; Cmd+D; Cmd+Z',
+    'Escape leaves the member selected (chip "Shape"); Cmd+D adds one step inside the group offset by 16 px; Delete removes it alone; Cmd+D on the group duplicates the group',
+    async () => {
+      await t.menuPath('insert', 'insert.diagram');
+      await t.waitControl('panel.diagram', 8000);
+      await t.clickControl('insert.diagram.type.process');
+      await t.sleep(300);
+      await t.clickControl('insert.diagram.insert');
+      const list = await t.pollUntil(members, (m) => m.length >= 5, 15_000).catch(members);
+      await t.settled();
+      if (await t.visible('panel.diagram.close')) await t.clickControl('panel.diagram.close');
+      const boxes = list
+        .filter((o) => h.isBox(o))
+        .sort((a, b) => a.pos.x - b.pos.x || a.pos.y - b.pos.y);
+      const links = list.filter(isLink);
+      const step2 = boxes[1] ?? boxes[0] ?? null;
+      if (!step2) return { ok: false, observed: `no diagram step among ${list.length} members` };
+      const group = step2.pos.group;
+      await t.clearAll();
+      const b = await t.boxOf(step2.id);
+      await t.dblclickAt(b.inner.x + b.inner.w / 2, b.inner.y + b.inner.h / 2);
+      await t.sleep(400);
+      const entered = { editing: await t.editing(), chip: await t.chip() };
+      await t.press('Escape');
+      await t.sleep(300);
+      const member = {
+        editing: await t.editing(),
+        chip: await t.chip(),
+        handles: await t.handleControls(),
+      };
+      const memberSelected =
+        member.chip === 'Shape' &&
+        !member.editing &&
+        member.handles.includes(`handle.${step2.id}.move`);
+      const n0 = list.length;
+      await t.press('Meta+d');
+      await t.sleep(500);
+      await t.settled();
+      const after = await t.pollUntil(members, (m) => m.length !== n0, 6000).catch(members);
+      const copies = after.filter((o) => !list.some((x) => x.id === o.id));
+      const copy = copies.length === 1 ? copies[0] : null;
+      const copyOk =
+        copy !== null &&
+        copy.pos.group === group &&
+        t.near(copy.pos.x - step2.pos.x, 16, 1) &&
+        t.near(copy.pos.y - step2.pos.y, 16, 1) &&
+        after.length === n0 + 1;
+      const copyChip = await t.chip();
+      await t.press('Delete');
+      await t.sleep(500);
+      await t.settled();
+      const removed = await t.pollUntil(members, (m) => m.length === n0, 6000).catch(members);
+      const keptOthers = list.every((o) => removed.some((x) => x.id === o.id));
+      const linksKept = removed.filter(isLink).length === links.length;
+      const deleteOk = removed.length === n0 && keptOthers && linksKept;
+      /* the group as today: one click on a step selects the group and Cmd+D duplicates it whole */
+      await t.clearAll();
+      const { facts } = await t.clickSelect(step2.id);
+      await t.press('Meta+d');
+      await t.sleep(600);
+      await t.settled();
+      const doubled = await t.pollUntil(members, (m) => m.length >= 2 * n0, 8000).catch(members);
+      const groups = new Set(doubled.map((o) => o.pos.group));
+      const groupOk = facts.chip === 'Group' && doubled.length === 2 * n0 && groups.size === 2;
+      if (doubled.length > n0) await h.undo();
+      await t.clearAll();
+      const ok = memberSelected && copyOk && deleteOk && groupOk;
+      return {
+        ok,
+        observed: `${n0} members (${boxes.length} steps, ${links.length} links); the double click: session ${entered.editing}, chip "${entered.chip}"; Escape: chip "${member.chip}", session ${member.editing}, the member's handles ${member.handles.includes(`handle.${step2.id}.move`)}; Cmd+D: ${copies.length} new member(s)${copy ? ` ${copy.id} in group ${copy.pos.group} at +${copy.pos.x - step2.pos.x},+${copy.pos.y - step2.pos.y}` : ''} (chip "${copyChip}"), members ${after.length}; Delete: members ${removed.length}, the others kept ${keptOthers}, links ${removed.filter(isLink).length}; the group's Cmd+D (chip "${facts.chip}"): ${doubled.length} members in ${groups.size} group(s)${ok ? '' : ` (docs/OBJECTS.md 4.2 item 3, ${LANE} with B1)`}`,
+      };
+    },
+  );
+  await t.clickCard(S);
 }
 
 /**

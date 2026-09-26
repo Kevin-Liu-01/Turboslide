@@ -1,5 +1,6 @@
 // Type declarations for core-matrix.mjs (docs/FOCUS.md section 6; docs/RETURN.md section 5;
-// docs/PRODUCT.md section 8; docs/VECTOR.md section 6 for the svg feature and the menus area), for
+// docs/PRODUCT.md section 8; docs/VECTOR.md section 6 for the svg feature and the menus area;
+// docs/OBJECTS.md section 6 for the gestures area, whose rows are the arrange feature's), for
 // the TypeScript callers: the core specs under apps/studio/e2e/core/ through
 // apps/studio/e2e/core/matrix.ts. The module itself is plain Node; the declarations describe what
 // it exports and nothing more.
@@ -114,6 +115,7 @@ export type ParkedList = {
 
 export const CORE_MATRIX_PATH: string;
 export const CORE_FEATURES: readonly CoreFeature[];
+/** The areas that are not feature names: `collab` is share's, `menus` chrome's, `gestures` (the objects round, docs/OBJECTS.md 6.1) arrange's. */
 export const AREA_FEATURE: Readonly<Record<string, CoreFeature>>;
 /** The rows whose feature is not their id's area (docs/FEATURES.md 7.1): the export and URL intake rows of the logos area, the export rows and the View row of the shaders area. */
 export const ROW_FEATURE: Readonly<Record<string, CoreFeature>>;

@@ -10,8 +10,9 @@
 // section 8) added the brand kit, the fonts, the templates and the assist the same way, and the sync
 // and costs round (docs/SYNC.md 6.1) the two unparkable features sync and cost, the features
 // round, ship one (docs/FEATURES.md section 4, 7.1) the logo picker and ship two (section 5) the
-// shader library, and the vector round (docs/VECTOR.md section 4, 6.1) the SVG pictures. Node
-// only; no dependency.
+// shader library, and the vector round (docs/VECTOR.md section 4, 6.1) the SVG pictures. The objects
+// round (docs/OBJECTS.md section 2, 6.1) added the live gestures' sentence to the arrange paragraph,
+// whose rows the `gestures` area carries. Node only; no dependency.
 
 /**
  * The features in the order of the README, keyed by the matrix's `feature` field. `heading` is the
@@ -93,7 +94,7 @@ export const FEATURES = [
     key: 'arrange',
     heading: 'Selection and arrange',
     paragraph:
-      '**Selection and arrange.** Select by click, Shift click or a marquee; order, align and centre from the Arrange menu; nudge with the arrow keys; duplicate, delete, undo and redo. The zoom box, its presets and Cmd+0 set the view.',
+      '**Selection and arrange.** Select by click, Shift click or a marquee; order, align and centre from the Arrange menu; nudge with the arrow keys; duplicate, delete, undo and redo. The zoom box, its presets and Cmd+0 set the view. A shape drawn by a drag is drawn as it grows, a resize shows the object at its new size at every frame, a rotated object keeps its ring on its corners, and a connector follows its shape while it moves.',
     shots: [
       {
         file: '07-canvas-snap-guides.jpg',

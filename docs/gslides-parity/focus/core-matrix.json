@@ -1,5 +1,5 @@
 {
-  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship. The vector round (docs/VECTOR.md section 6) added 43 rows on 2026-09-24 and extended one (shapes.insert.named-rows reads the seven Insert > Shape rows): the shapes rows of the geometry interpreter, the glyph grids, Change shape and Mask image (parks naming the gallery row or the control each measures, so a red one re parks that category alone and never the three named rows; shapes.geometry.pinned-three, .text-rect and shapes.icons.named-rows carry no parks, being core rows of an earlier round's feature), the menus area whose rows are the chrome's (AREA_FEATURE menus: chrome, unparkable: the icons on the visual rows), the parkable feature svg (the intake by the chooser, a paste, a drop and a URL, the sheet at two zooms, the gestures, the copy, the sanitizer and the exports; every row parks one or more of the six ids of VECTOR.md 4.8 declared in core-matrix.mjs) and logos.export.svgblip; `today` is what the tree at 2be923e and the audits show on 2026-09-24 (a row of a control that does not exist is not driven with the document's reading as its evidence; a behaviour production shows red is broken with the audit's severity), and `note` names the round, the VECTOR.md section and the lane. The row logos.intake.svg-sentence left with its sentence (4.7); svg.import.upload measures the upload. features round, ship two (docs/FEATURES.md 5, 7.1) added the 29 rows of the shader library on 2026-09-24 under the new parkable feature `shaders` and the existing export and view: `today` is what audit-shaders under docs/gslides-parity/features/ saw on production at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship two P0 or P1) with the lane and the FEATURES.md section, `parks` names the FEATURES.md control ids the row alone guards (a dialog or Shader section control is hidden through packages/chrome/src/parked-controls.ts), the four export rows of the shaders area carry the feature export and the View row the feature view (ROW_FEATURE), so a red one blocks the ship or parks its own control and never the shader library, and `shaders.perf.editor-frame` carries `measure` (7.2): its number is recorded and never holds the ship.",
+  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship. The vector round (docs/VECTOR.md section 6) added 43 rows on 2026-09-24 and extended one (shapes.insert.named-rows reads the seven Insert > Shape rows): the shapes rows of the geometry interpreter, the glyph grids, Change shape and Mask image (parks naming the gallery row or the control each measures, so a red one re parks that category alone and never the three named rows; shapes.geometry.pinned-three, .text-rect and shapes.icons.named-rows carry no parks, being core rows of an earlier round's feature), the menus area whose rows are the chrome's (AREA_FEATURE menus: chrome, unparkable: the icons on the visual rows), the parkable feature svg (the intake by the chooser, a paste, a drop and a URL, the sheet at two zooms, the gestures, the copy, the sanitizer and the exports; every row parks one or more of the six ids of VECTOR.md 4.8 declared in core-matrix.mjs) and logos.export.svgblip; `today` is what the tree at 2be923e and the audits show on 2026-09-24 (a row of a control that does not exist is not driven with the document's reading as its evidence; a behaviour production shows red is broken with the audit's severity), and `note` names the round, the VECTOR.md section and the lane. The row logos.intake.svg-sentence left with its sentence (4.7); svg.import.upload measures the upload. features round, ship two (docs/FEATURES.md 5, 7.1) added the 29 rows of the shader library on 2026-09-24 under the new parkable feature `shaders` and the existing export and view: `today` is what audit-shaders under docs/gslides-parity/features/ saw on production at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship two P0 or P1) with the lane and the FEATURES.md section, `parks` names the FEATURES.md control ids the row alone guards (a dialog or Shader section control is hidden through packages/chrome/src/parked-controls.ts), the four export rows of the shaders area carry the feature export and the View row the feature view (ROW_FEATURE), so a red one blocks the ship or parks its own control and never the shader library, and `shaders.perf.editor-frame` carries `measure` (7.2): its number is recorded and never holds the ship. The objects round (docs/OBJECTS.md section 6) added 33 rows on 2026-09-25 and carried five (tables.seam.row-drag, tables.edge.add-row-column, tables.heads.select-row-column, tables.cells.prompt-hovered-only, wordart.tail.fill-outline; each keeps its id, its note gains the round and the section): nineteen under the new area `gestures`, whose rows are the arrange feature's (AREA_FEATURE gestures: arrange, unparkable, so a red gesture row fails the ship; the live gestures of section 2: the draw drawn as it grows, the click placement, the object and the ring equal at every frame of a resize, a seam drag, a move and a rotation, the connector during a move, the frame cadence and its budget read from describe().state.gesture, the readout, and one watch row), the tables rows of section 3 (the ring with a cell open, the cell ring, the editor guide grid, the show's rules, the box from the rows, the rows that grow, the seams with a cell open, the header toggle from the row head, the Table section's words), and one row each under charts, diagrams and lines (section 4). `today` is what docs/OBJECTS.md measured on production on 2026-09-26 (the return round plus ship one) and on the worktree at 5bf158a, in the four words; a row of a control that does not exist is not driven with the item that measured its absence as evidence; a broken row's severity follows the item's value by the product round's rule; `note` names the round, the OBJECTS.md section and the lane; `setup` names the block.insert and slide.new writes a driver makes before its steps. The frame rows read the gesture record of the window API (docs/OBJECTS.md 2.4), a field the integrator lands by B1's request; on a build without it they read not driven with the field named.",
   "rows": [
     {
       "id": "decks.home.new-presentation",
@@ -6538,35 +6538,35 @@
     {
       "id": "tables.seam.row-drag",
       "feature": "tables",
-      "interaction": "The selected table shows a row seam handle under each row; a drag of the first inner seam by 40 px shows the readout in px and writes rows[0].height; one Cmd+Z restores it; the seam under the last row grows the table",
+      "interaction": "Carried (ship one P1 item 1): the row seam handle under each row; a drag of the first inner seam by 40 writes rows[0].height with the readout; the seam under the last row grows the table",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-objects 8 (run-tables-rows.json rows 16, 17)",
       "setup": "block.insert of a typed 3 by 4 table through the window API",
       "parks": ["handle.table.row"],
-      "note": "Ship one P1; docs/FEATURES.md 2.3 item 1 (B3: table-seam.ts gains the axis; ids handle.table.row.<n>); lands only under the P1 condition of FEATURES.md section 1"
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 1 (B3: table-seam.ts gains the axis; ids handle.table.row.<n>); lands only under the P1 condition of FEATURES.md section 1. Objects round; docs/OBJECTS.md 3.3 item 4 (table-seam.ts gains the row axis; ids handle.<block>.row.<n>); B5 the overlay, B2 the plans"
     },
     {
       "id": "tables.edge.add-row-column",
       "feature": "tables",
-      "interaction": "Hovering the right edge of the selected table at the second seam draws the \"+\"; a click inserts a column there and the widths of the others hold; the same at the bottom edge inserts a row; each is one Cmd+Z",
+      "interaction": "Carried (ship one P1 item 2): the \"+\" on the right edge at the second seam inserts a column there and the widths of the others hold; the \"+\" on the bottom edge inserts a row; each one Cmd+Z",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-objects 9",
       "setup": "block.insert of a typed 3 by 4 table through the window API",
       "parks": ["handle.table.add.column", "handle.table.add.row"],
-      "note": "Ship one P1; docs/FEATURES.md 2.3 item 2 (B3: Overlay.tsx); lands only under the P1 condition"
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 2 (B3: Overlay.tsx); lands only under the P1 condition. Objects round; docs/OBJECTS.md 3.3 item 4 (ids handle.<block>.add.column and .add.row); B5 the overlay, B2 the plans"
     },
     {
       "id": "tables.heads.select-row-column",
       "feature": "tables",
-      "interaction": "A click on the hover band above column 2 selects the whole column as a range; a click on the band left of row 2 selects the row; Fill color from the tail fills every cell of the selection",
+      "interaction": "Carried (ship one P1 item 2): a click on the band above column 2 selects the column as a range; the band left of row 2 the row; Fill color from the tail fills the selection",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-objects 9",
       "setup": "block.insert of a typed 3 by 4 table through the window API",
       "parks": ["handle.table.head.column", "handle.table.head.row"],
-      "note": "Ship one P1; docs/FEATURES.md 2.3 item 2 (B3; ids handle.table.head.column.<n>, handle.table.head.row.<n>); lands only under the P1 condition"
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 2 (B3; ids handle.table.head.column.<n>, handle.table.head.row.<n>); lands only under the P1 condition. Objects round; docs/OBJECTS.md 3.3 item 4 (ids handle.<block>.head.column.<n> and .head.row.<n>); B5 the overlay, B2 the plans"
     },
     {
       "id": "tables.bar.row-column-buttons",
@@ -6644,23 +6644,22 @@
     {
       "id": "tables.cells.prompt-hovered-only",
       "feature": "tables",
-      "interaction": "A 5 by 6 empty table draws no prompt text on the stage until a cell is hovered, and then one prompt in that cell alone; the filmstrip card draws no prompt rows",
+      "interaction": "Carried: no prompt until a cell is hovered, then \"Type to add text\" in that cell alone; the filmstrip card draws none",
       "driver": "probe --core",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "audit-objects 24 (t03-table-one-click.png)",
+      "today": "works",
+      "evidence": "docs/gslides-parity/objects/audit/b02-table-one-click-empty.png (no prompt drawn); the words measured \"Click to add text\" on production",
       "setup": "block.insert of an empty 5 by 6 table through the window API",
-      "note": "Ship one P1; docs/FEATURES.md 2.3 item 9 (B3: render/blocks/table.ts); lands only under the P1 condition"
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 9 (B3: render/blocks/table.ts); lands only under the P1 condition. Objects round; docs/OBJECTS.md 3.3 item 7 (the words become Type to add text once the table's ring and the cell ring are drawn); B2"
     },
     {
       "id": "wordart.tail.fill-outline",
       "feature": "wordart",
-      "interaction": "With word art selected the tail lists Fill color, Border color, Border weight and Border dash; a border weight writes the outline",
+      "interaction": "Carried (ship one P1 item 10): the word art tail reads Fill color, Border color, Border weight, Border dash before the text controls; Fill writes color, Border color outline.color, weight outline.width, dash outline.dash, each drawn on the letters",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-objects 25 (d12-wordart-context.png)",
       "parks": ["toolbar.wordart.outline"],
-      "note": "Ship one P1; docs/FEATURES.md 2.3 item 10 (B3: toolbar-tails.ts); lands only under the P1 condition"
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 10 (B3: toolbar-tails.ts); lands only under the P1 condition. Objects round; docs/OBJECTS.md 4.2 item 4 (menus/toolbar-tails.ts, ToolbarTail.tsx); B5"
     },
     {
       "id": "fonts.inter.italic-release",
@@ -7520,6 +7519,344 @@
       "evidence": "4.2; logo-sanitize.ts 233 to 254",
       "parks": ["intake.svg.upload"],
       "note": "Vector round; docs/VECTOR.md 4.2 (B3)"
+    },
+    {
+      "id": "gestures.draw.shape-fill-at-step5",
+      "feature": "arrange",
+      "interaction": "Rectangle, Rounded rectangle, Ellipse and the Shapes grid's hexagon each drawn by a 12 step drag of 320 by 200 from Insert > Shape: at the fifth step a shape element exists on the sheet at the drag's box within 1 px with the plate fill and the ink stroke and the readout reads its size; the release commits one block at that box and Cmd+Z removes it in one step",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/a1-rectangle-draw-06-step5.png; gestures.json frees 0 at every step; l1-hexagon-draw (local-frames.md)",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 2.3 item 1, 2.4 (the draw and the placement); B1"
+    },
+    {
+      "id": "gestures.draw.click-at-press",
+      "feature": "arrange",
+      "interaction": "Rectangle armed, pointer down on the sheet and held 120 ms: the shape is drawn at 240 by 160 from the press point within one animation frame; the release commits it within one frame and the selection is the new shape",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/a1-rectangle-place-down+120.png; gestures.json polls 5 to 48 ms after the release",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 2.3 item 2, 2.4; question 2; B1"
+    },
+    {
+      "id": "gestures.draw.text-box-frame",
+      "feature": "arrange",
+      "interaction": "Insert > Text box, a 12 step drag: the frame (the marquee) follows with the readout and no text element exists until the release; the release opens the caret in the new box",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "docs/OBJECTS.md 2.4 (a text box previews as its frame); a2-text-* frames",
+      "note": "Objects round; docs/OBJECTS.md 2.4; B1"
+    },
+    {
+      "id": "gestures.draw.grammar-slide-converts",
+      "feature": "arrange",
+      "interaction": "On a one-column slide (not a canvas) the rectangle drawn by a drag is drawn as it grows over the provisional canvas at the fifth step; the release converts the slide once and commits one slide.update; Cmd+Z restores the grammar slide",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "packages/viewer/src/Editor.tsx 5723 to 5810 (no draft); docs/gslides-parity/objects/audit/b14-layout-table-inserted.png (the conversion)",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 2.3 item 1, 2.4 (the provisional conversion); B1"
+    },
+    {
+      "id": "gestures.resize.shape-follows",
+      "feature": "arrange",
+      "interaction": "A rectangle, a rounded rectangle, an ellipse and a star5 each resized from the se handle by 200 by 120 in 12 steps: at the tenth step the object's box equals the ring's within 1 px, the svg's width and height are the box's and the star's path has changed; the readout reads the size",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "docs/gslides-parity/objects/audit/gestures-frames.md a1-*-resize-se; local-frames.md l1-star5-resize-se",
+      "note": "Objects round; docs/OBJECTS.md 2.2, 2.6; B1",
+      "setup": "block.insert through the window API places the four shapes"
+    },
+    {
+      "id": "gestures.resize.text-reflows",
+      "feature": "arrange",
+      "interaction": "A text box of twelve words narrowed from the e handle by 200 in 12 steps: at the tenth step the box equals the ring's within 1 px (the ring outset by 10 removed) and the paragraph draws more line boxes than at the start; grown back, fewer",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/gslides-parity/objects/audit/a2-text-resize-e-narrow-* (three words, one line at every step)",
+      "note": "Objects round; docs/OBJECTS.md 2.2, 2.6; B1",
+      "setup": "block.insert through the window API places the text box"
+    },
+    {
+      "id": "gestures.resize.picture-follows",
+      "feature": "arrange",
+      "interaction": "A picture with a crop resized from se by 240 by 160 in 12 steps: at the tenth step the img's box equals the ring's within 1 px and the crop's frame scales with it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "docs/gslides-parity/objects/audit/a3-picture-resize-se-* (no crop measured)",
+      "note": "Objects round; docs/OBJECTS.md 2.2, 2.6; B1",
+      "setup": "asset.add and block.insert through the window API place the picture; block.set writes its trim"
+    },
+    {
+      "id": "gestures.resize.table-follows",
+      "feature": "arrange",
+      "interaction": "A typed 3 by 3 table resized from se by 200 by 120 in 12 steps: at the tenth step the table's box equals the ring's within 1 px and the header cells' widths are a third of it",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "docs/gslides-parity/objects/audit/a4-table-resize-se-*",
+      "note": "Objects round; docs/OBJECTS.md 2.2, 2.6; B1",
+      "setup": "block.insert through the window API places the table"
+    },
+    {
+      "id": "gestures.seam.table-follows",
+      "feature": "arrange",
+      "interaction": "The first column seam dragged by 90 in 12 steps: at the tenth step the first column's drawn width equals the readout within 1 px and the second column narrowed by the same",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "docs/gslides-parity/objects/audit/a4-table-seam-0-*",
+      "note": "Objects round; docs/OBJECTS.md 2.2, 2.6; B1",
+      "setup": "the table of gestures.resize.table-follows"
+    },
+    {
+      "id": "gestures.resize.chart-follows",
+      "feature": "arrange",
+      "interaction": "A column chart resized from se by 260 by 160 in 12 steps: at the tenth step the svg's box equals the ring's within 1 px and the first bar's width changed",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "docs/gslides-parity/objects/audit/a5-chart-resize-e-*; x1-chart-corner-select-resize-se-*",
+      "note": "Objects round; docs/OBJECTS.md 2.2, 2.6, 4.2 item 7; B1",
+      "setup": "block.insert through the window API places the chart"
+    },
+    {
+      "id": "gestures.resize.diagram-follows",
+      "feature": "arrange",
+      "interaction": "A process diagram's group resized from its se handle by 160 by 90 in 12 steps: at the tenth step every member's box lies inside the ring and the links' ends sit on their steps' sites",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/gslides-parity/objects/audit/b40-diagram-process-resized.png (the state after)",
+      "note": "Objects round; docs/OBJECTS.md 2.6, 4.2 items 3 and 7; B1"
+    },
+    {
+      "id": "gestures.resize.wordart-scales",
+      "feature": "arrange",
+      "interaction": "Word art resized from se by 260 by 120 in 12 steps: at the tenth step the drawn font size equals the readout's letter size and the box equals the ring's within 1 px",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/gslides-parity/objects/audit/c19-wordart-resized.png (the state after: size 176 drawn at 176)",
+      "note": "Objects round; docs/OBJECTS.md 2.6, 4.2 item 7; B1",
+      "setup": "block.insert through the window API places the word art"
+    },
+    {
+      "id": "gestures.move.connector-follows-live",
+      "feature": "arrange",
+      "interaction": "Two rectangles joined by an elbow connector; B moved from inside by 150 by 100 in 12 steps: at the tenth step the connector's end sits on B's left site within 1 px; the release writes the connector once",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "packages/viewer/src/Editor.tsx 2688 to 2700 against 2826 to 2832; docs/gslides-parity/objects/audit/c24-lines-b-moved.png",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 2.3 item 4, 2.4 (the connector during a move), 4.2 item 6; B1",
+      "setup": "block.insert through the window API places the two rectangles and the elbow connector"
+    },
+    {
+      "id": "gestures.rotate.ring-turns-live",
+      "feature": "arrange",
+      "interaction": "A 680 by 320 rectangle rotated by its handle to 45 degrees in 12 steps: at the tenth step the ring is the 680 by 320 box turned by the readout's angle (its corners on the shape's corners within 2 px), never an upright box",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/a1-rectangle-rotate-08-step7.png; gestures-frames.md (the ring 707 by 707 upright)",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 2.3 item 3, 2.4 (the rotated ring); B1",
+      "setup": "block.insert through the window API places the rectangle"
+    },
+    {
+      "id": "gestures.rotate.ring-after-release",
+      "feature": "arrange",
+      "interaction": "After the release, after a deselect and a click, and after a reload, the ring of the rotated rectangle is its 680 by 320 box turned 45 degrees (a bounding box of 707 by 707), the handles on its corners",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/a1-rectangle-rotate-17-up+400.png; x5-*, x6-*; extra.json (ring 1000 by 1000)",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 2.3 item 3, 2.4 (the rotated ring); B1",
+      "setup": "the rectangle of gestures.rotate.ring-turns-live"
+    },
+    {
+      "id": "gestures.frame.one-render-per-frame",
+      "feature": "arrange",
+      "interaction": "During a 12 step move on the measured deck describe().state.gesture.frames is at most the animation frames of the drag and at least 6, skipped 0, and the sheet mutated once per frame",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/gslides-parity/objects/audit/local.json costs (11 to 13 mutations for 12 moves; no state field yet)",
+      "note": "Objects round; docs/OBJECTS.md 2.3 item 5, 2.4 (the cadence and the budget); describe().state.gesture is the integrator's field by B1's request; B1",
+      "setup": "block.insert through the window API places the rectangle"
+    },
+    {
+      "id": "gestures.frame.cost-budget",
+      "feature": "arrange",
+      "interaction": "On a deck of 24 slides (23 slide.new as setup) whose measured slide holds a 5 by 6 table, a column chart and a picture: the table moved and the chart resized in 12 steps read describe().state.gesture.maxMs under 32 and degraded false; the readout moved at every step",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/gslides-parity/objects/audit/local.json costs (8 to 13 ms per move; 62 ms once at a conversion)",
+      "note": "Objects round; docs/OBJECTS.md 2.4 (the cadence and the budget), 6.3 (a frame row red on a throttled preview tab is recorded with its frame count and rerun once); B1",
+      "setup": "23 slide.new through the window API to reach 24 slides, removed again after the row; block.insert places the table, the chart and the picture"
+    },
+    {
+      "id": "gestures.readout.stays",
+      "feature": "arrange",
+      "interaction": "During the live draw of a rectangle the readout reads the growing size at every step; during a live rotation the angle; during a seam drag the width; none after the release",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "docs/gslides-parity/objects/audit/gestures-frames.md (readout column)",
+      "note": "Objects round; docs/OBJECTS.md 2.1 (the readout stays), 2.6; read from the frames of the draw, the rotation and the seam rows; B1"
+    },
+    {
+      "id": "gestures.watch.chart-se-after-mark-click",
+      "feature": "arrange",
+      "interaction": "A column chart selected by a click on its second bar (the value readout shown), the se handle pressed within 300 ms and dragged by 100 by 60: the chart resizes and no marquee starts; three times in the run",
+      "driver": "probe --core",
+      "today": "flaky",
+      "evidence": "docs/gslides-parity/objects/audit/a5-chart-resize-se-02-step1.png once; x1 to x3 resized",
+      "severity": 1,
+      "note": "Objects round; docs/OBJECTS.md 4.2 item 2 (no fix specified; the row watches it on the preview and on production, a second reading is a defect for the fix round); B3 reads, B4 drives",
+      "setup": "block.insert through the window API places the chart"
+    },
+    {
+      "id": "tables.select.ring-with-cell-open",
+      "feature": "tables",
+      "interaction": "One click on cell 1,1 of an empty 3 by 3 table: the selection ring is the table's box, the chip \"Table\" above the table's ring, the four frame edges on the table's ring, the eight handles on its corners; a drag from the ring band moves the table by 80 by 40 exactly",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/b02-table-one-click-empty.png; components-b.json rings",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 3.2, 3.3 item 1; B2 with B5's overlay; the ring box is B1's selectionBox by request",
+      "setup": "block.insert through the window API places the empty table"
+    },
+    {
+      "id": "tables.cell.ring-on-cell",
+      "feature": "tables",
+      "interaction": "With cell 1,1 open a cell ring is drawn on the cell's grid area (the full row height, the column's width) inside the table's ring; a range over 1,1 to 2,2 draws one ring on the union of the four cells",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/components-b.json (the ring 320 by 53 in a 107 px row)",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 3.2, 3.3 item 1 (.ts-cell-ring); B2 with B5's overlay",
+      "setup": "the table of tables.select.ring-with-cell-open"
+    },
+    {
+      "id": "tables.cells.empty-grid-guides",
+      "feature": "tables",
+      "interaction": "An empty 3 by 3 table on the editor's stage draws a hairline on every inner column seam of every row and under the last row, in --pt-hair; the filmstrip card draws none",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/b01-table-inserted-empty.png (four horizontal rules)",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 3.3 item 2 (the editor guide grid, Editor.css); question 1; B2",
+      "setup": "the table of tables.select.ring-with-cell-open"
+    },
+    {
+      "id": "tables.show.rules-only",
+      "feature": "tables",
+      "interaction": "The same table in the show and in the PDF draws the grammar's rules and no column seam (question 1's default)",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "evidence": "docs/gslides-parity/objects/audit/b13-table-show.png; b-table.pdf",
+      "note": "Objects round; docs/OBJECTS.md 3.3 item 2; question 1; B2"
+    },
+    {
+      "id": "tables.light-appearance-guides",
+      "feature": "tables",
+      "interaction": "The guide grid reads on the light and the dark appearance with a contrast above 1.3 to the ground",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/gslides-parity/objects/audit/d01-table-inserted-empty.png (no guides today)",
+      "note": "Objects round; docs/OBJECTS.md 3.3 item 2; B2",
+      "setup": "the table of tables.select.ring-with-cell-open"
+    },
+    {
+      "id": "tables.insert.box-fits-rows",
+      "feature": "tables",
+      "interaction": "Insert > Table 3 by 3 lands a 960 wide table whose pos.h equals its three rows' drawn height within 2 px (160 at 20 px); 5 by 5 lands 267",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/components-b.json (960 by 320 for 3 rows of 53)",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 3.2, 3.3 item 3 (TOOL_SIZES.table by request to the integrator); B2"
+    },
+    {
+      "id": "tables.rows.grow-with-text",
+      "feature": "tables",
+      "interaction": "Forty words typed into cell 1,1 of a 960 wide table wrap to two lines or more; the row's drawn height grows with them, the rows below move down, the table's pos.h is written up in the same commit and the ring meets the last rule; Cmd+Z restores both in one step",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "packages/render/src/block-css.ts 231 to 232 (the rows share the box; the box never follows)",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 3.3 item 3 (the table's autofit); B2",
+      "setup": "block.insert through the window API places the typed table"
+    },
+    {
+      "id": "tables.resize.rows-share-extra",
+      "feature": "tables",
+      "interaction": "The se handle dragged down by 120 shares the extra height evenly across the rows; dragged up past the rows' natural height the table stops at that height and the readout says so",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/a4-table-resize-se-* (shares; no floor)",
+      "severity": 2,
+      "note": "Objects round; docs/OBJECTS.md 3.3 item 3 (the floor at the rows' natural height); B2",
+      "setup": "the table of tables.rows.grow-with-text"
+    },
+    {
+      "id": "tables.seam.visible-with-cell-open",
+      "feature": "tables",
+      "interaction": "With cell 1,1 open the column seam handles are drawn and a drag of the first seam by 60 writes the widths and keeps the cell open with its caret",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/components-b.json (no handle.table.column.* with a cell open); packages/viewer/src/Editor.tsx 6416 to 6427",
+      "severity": 3,
+      "note": "Objects round; docs/OBJECTS.md 3.2, 3.3 item 5 (Editor.tsx by B2's request); B1 for B2",
+      "setup": "the table of tables.rows.grow-with-text"
+    },
+    {
+      "id": "tables.heads.header-toggle",
+      "feature": "tables",
+      "interaction": "A right click on row 0's head lists Header row checked; the click clears rows[0].header and the row draws at the body weight with a hairline; Cmd+Z restores",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/gslides-parity/objects/audit/b10-table-format-options.png (the toggle in the panel only)",
+      "parks": ["handle.table.head.row"],
+      "note": "Objects round; docs/OBJECTS.md 3.3 item 4 (the row head's menu; format.table.headerRow is the integrator's row by B5's request); B5 the overlay, B2 the plans",
+      "setup": "the table of tables.rows.grow-with-text"
+    },
+    {
+      "id": "tables.panel.section-words",
+      "feature": "tables",
+      "interaction": "With a table selected the Table section reads Header row, Border, Rows (one Height, Distribute rows), Columns (Distribute columns), Cell (Fill, Border), Merge, in that order, each property once, and no generated table field is drawn below it",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/b10-table-format-options.png (99 controls in the panel)",
+      "severity": 2,
+      "note": "Objects round; docs/OBJECTS.md 3.3 item 6 (inspector/table.tsx, format-sections.ts); B5",
+      "setup": "the table of tables.rows.grow-with-text"
+    },
+    {
+      "id": "charts.pie.add-series-refused",
+      "feature": "charts",
+      "interaction": "With a pie chart selected the grid's Add series control is disabled with its sentence and the series count stays 1; on a column chart it adds a series",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/c15-chart-pie-series-legend-labels.png (series 1 after the click, no sentence)",
+      "severity": 2,
+      "note": "Objects round; docs/OBJECTS.md 4.2 item 1 (inspector/chart.tsx addSeries, chart-tools.ts addSeriesRefusal); B3",
+      "setup": "block.insert through the window API places the pie and the column chart"
+    },
+    {
+      "id": "diagrams.member.duplicate-delete",
+      "feature": "diagrams",
+      "interaction": "A process diagram: double click on step 2, Escape (the member selected, chip \"Shape\"), Cmd+D adds one step inside the group offset by 16 px; Delete on the copy removes it alone and the group keeps its other members and links; Cmd+D with the group selected duplicates the group as today",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "docs/gslides-parity/objects/audit/b38-diagram-process-duplicated.png (the whole group duplicated from one click)",
+      "note": "Objects round; docs/OBJECTS.md 4.2 item 3 (diagrams.ts for the group tag; the entered group's Cmd+D and Delete in Editor.tsx by B3's request); B3 with B1"
+    },
+    {
+      "id": "lines.chip.kind-name",
+      "feature": "lines",
+      "interaction": "The selected elbow connector's chip reads \"Elbow connector\", a line's \"Line\", an arrow's \"Arrow\", a curved connector's \"Curved connector\"; a rectangle's stays \"Shape\"",
+      "driver": "probe --core",
+      "today": "broken",
+      "evidence": "docs/gslides-parity/objects/audit/c26-lines-elbow-selected.png (chip \"Shape\")",
+      "severity": 1,
+      "note": "Objects round; docs/OBJECTS.md 4.2 item 5 (packages/viewer/src/model.ts blockDisplayName); B3"
     }
   ]
 }

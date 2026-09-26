@@ -51,6 +51,20 @@ export const IDS = [
   'tables.command.keeps-caret',
   'tables.cells.tabular-figures',
   'tables.cells.prompt-hovered-only',
+  /* the objects round (docs/OBJECTS.md section 3, 6.1): the table's ring with a cell open, the
+     cell ring, the editor guide grid, the box from the rows, the rows that grow, the seams with a
+     cell open, the header toggle from the row head and the Table section's words; driven by
+     `objectsRound` below. `tables.show.rules-only` is core/export.spec.ts's */
+  'tables.select.ring-with-cell-open',
+  'tables.cell.ring-on-cell',
+  'tables.cells.empty-grid-guides',
+  'tables.light-appearance-guides',
+  'tables.insert.box-fits-rows',
+  'tables.rows.grow-with-text',
+  'tables.resize.rows-share-extra',
+  'tables.seam.visible-with-cell-open',
+  'tables.heads.header-toggle',
+  'tables.panel.section-words',
 ];
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -1349,6 +1363,13 @@ export async function run(t) {
     endSession,
     pickTailOption,
   });
+  await objectsRound(t, S, {
+    cellRun,
+    sessionCell,
+    cellStyle,
+    openCell,
+    endSession,
+  });
   await t.advancedBack('the tables rows');
 }
 
@@ -2122,12 +2143,19 @@ async function featuresRound(t, S, h) {
       const right = boxes.rows[1][boxes.rows[1].length - 1];
       await page.mouse.move(right.x + right.w - 2, right.y + right.h / 2);
       await t.sleep(500);
-      const addColumn = await t.visible('handle.table.add.column');
+      /* the ids of docs/OBJECTS.md 3.3 item 4 are the block's (`handle.<block>.add.column`); the
+         declared family `handle.table.add.column` is read as well */
+      const addColumnId = (await t.visible(`handle.${T3}.add.column`))
+        ? `handle.${T3}.add.column`
+        : 'handle.table.add.column';
+      const addRowId = async () =>
+        (await t.visible(`handle.${T3}.add.row`)) ? `handle.${T3}.add.row` : 'handle.table.add.row';
+      const addColumn = await t.visible(addColumnId);
       if (!addColumn) {
         const bottom = boxes.rows[boxes.rows.length - 1][1];
         await page.mouse.move(bottom.x + bottom.w / 2, bottom.y + bottom.h - 2);
         await t.sleep(500);
-        if (!(await t.visible('handle.table.add.row')))
+        if (!(await t.visible(await addRowId())))
           return t.notBuilt(
             'handle.table.add.column',
             LANE,
@@ -2136,7 +2164,7 @@ async function featuresRound(t, S, h) {
       }
       const c0 = await countsOf(T3);
       const w0 = boxes.rows[0].map((c) => Math.round(c.w));
-      await t.clickControl('handle.table.add.column');
+      await t.clickControl(addColumnId);
       const c1 = await t
         .pollUntil(
           () => countsOf(T3),
@@ -2154,11 +2182,12 @@ async function featuresRound(t, S, h) {
       const bottom = b2.rows[b2.rows.length - 1][1];
       await page.mouse.move(bottom.x + bottom.w / 2, bottom.y + bottom.h - 2);
       await t.sleep(500);
-      const addRow = await t.visible('handle.table.add.row');
+      const rowControl = await addRowId();
+      const addRow = await t.visible(rowControl);
       let c3 = null;
       let c4 = null;
       if (addRow) {
-        await t.clickControl('handle.table.add.row');
+        await t.clickControl(rowControl);
         c3 = await t
           .pollUntil(
             () => countsOf(T3),
@@ -2191,24 +2220,34 @@ async function featuresRound(t, S, h) {
       const top = boxes.rows[0][2];
       await page.mouse.move(top.x + top.w / 2, top.y - 6);
       await t.sleep(500);
-      const heads = await page.evaluate(() =>
-        [...document.querySelectorAll('[data-control^="handle.table.head."]')]
-          .filter((e) => e.getClientRects().length > 0)
-          .map((e) => e.getAttribute('data-control')),
+      /* the heads' ids are the block's (`handle.<block>.head.<axis>.<n>`, docs/OBJECTS.md 3.3
+         item 4) or the declared family's */
+      const heads = await page.evaluate(
+        (id) =>
+          [
+            ...document.querySelectorAll(
+              `[data-control^="handle.table.head."], [data-control^="handle.${id}.head."]`,
+            ),
+          ]
+            .filter((e) => e.getClientRects().length > 0)
+            .map((e) => e.getAttribute('data-control')),
+        T3,
       );
+      const headOf = (axis, n) =>
+        heads.find((h) => h.endsWith(`.head.${axis}.${n}`)) ?? `handle.table.head.${axis}.${n}`;
       if (heads.length === 0)
         return t.notBuilt(
           'handle.table.head.column',
           LANE,
           'no hover band above the columns of the selected table (P1, FEATURES.md 2.3 item 2)',
         );
-      await t.clickControl('handle.table.head.column.2');
+      await t.clickControl(headOf('column', 2));
       await t.sleep(300);
       const column = await rangeRing(T3);
       const left = boxes.rows[2][0];
       await page.mouse.move(left.x - 6, left.y + left.h / 2);
       await t.sleep(500);
-      await t.clickControl('handle.table.head.row.2');
+      await t.clickControl(headOf('row', 2));
       await t.sleep(300);
       const row = await rangeRing(T3);
       const s0 = await h.cellStyle(T3, 2, 0);
@@ -2438,12 +2477,23 @@ async function featuresRound(t, S, h) {
               getComputedStyle(p).visibility !== 'hidden' &&
               (p.textContent ?? '').trim().length > 0,
           );
+          /* the words are "Type to add text" since the objects round (docs/OBJECTS.md 3.3
+             item 7: one click already places the caret); the older words are counted too and
+             the words read are recorded */
           const byText = [...(root?.querySelectorAll('.td') ?? [])].filter((td) =>
-            /Click to add text/.test(td.textContent ?? ''),
+            /(Click|Type) to add text/.test(td.textContent ?? ''),
           ).length;
+          const words =
+            list.map((p) => p.textContent?.trim() ?? '').find((w) => w.length > 0) ??
+            (/Type to add text/.test(root?.textContent ?? '')
+              ? 'Type to add text'
+              : /Click to add text/.test(root?.textContent ?? '')
+                ? 'Click to add text'
+                : null);
           return {
             count: Math.max(list.length, byText),
             cells: list.map((p) => p.closest('[data-run]')?.getAttribute('data-run') ?? '?'),
+            words,
           };
         }, T4);
       const idle = await prompts();
@@ -2455,7 +2505,7 @@ async function featuresRound(t, S, h) {
         const card = document.querySelector(`[data-control="filmstrip.slide.${slideId}"]`);
         const text = card?.textContent ?? '';
         return {
-          prompts: (text.match(/Click to add text/g) ?? []).length,
+          prompts: (text.match(/(Click|Type) to add text/g) ?? []).length,
           kind: card?.querySelector('img')
             ? 'image'
             : card?.querySelector('.pt-slide, .ts-sheet')
@@ -2469,8 +2519,847 @@ async function featuresRound(t, S, h) {
           idle.count === 0 &&
           hovered.count === 1 &&
           hovered.cells.every((c) => c.endsWith('/rows/2/cells/2')) &&
+          hovered.words === 'Type to add text' &&
           card.prompts === 0,
-        observed: `prompts with the pointer away ${idle.count}; hovering cell 2,2: ${hovered.count} (${hovered.cells.join(', ') || 'none'}); the filmstrip card (${card.kind}) draws ${card.prompts} prompt(s)${idle.count === 0 ? '' : ` (FEATURES.md 2.3 item 9, ${LANE})`}`,
+        observed: `prompts with the pointer away ${idle.count}; hovering cell 2,2: ${hovered.count} (${hovered.cells.join(', ') || 'none'}) reading ${hovered.words === null ? 'no words' : `"${hovered.words}"`}; the filmstrip card (${card.kind}) draws ${card.prompts} prompt(s)${idle.count === 0 ? '' : ` (FEATURES.md 2.3 item 9, ${LANE})`}${hovered.words === 'Type to add text' || hovered.words === null ? '' : ' (docs/OBJECTS.md 3.3 item 7: the words become Type to add text, B2)'}`,
+      };
+    },
+  );
+  await t.clickCard(S);
+}
+
+/**
+ * The objects round (docs/OBJECTS.md section 3, 6.1; the rows `tables.select.ring-with-cell-open`
+ * to `tables.panel.section-words`): Kevin's screenshot answered. The one click state draws the
+ * table's ring with the cell ring inside it (3.3 item 1), the empty cells read as a guide grid on
+ * the editor's stage alone (item 2), the inserted table fits its rows and a row grows with its
+ * text (item 3), the seams stay while a cell is open (item 5), the row head's menu carries Header
+ * row (item 4) and the Table section reads the words of item 6. Every table is placed through the
+ * window API as a setup write except the two of `tables.insert.box-fits-rows`, which the product's
+ * grid places. A control that is not on the build reads not built with its id and the lane.
+ */
+async function objectsRound(t, S, h) {
+  const { page } = t;
+  const LANE = 'B2';
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const r1 = (n) => (typeof n === 'number' ? Math.round(n * 10) / 10 : n);
+  const boxStr = (b) => (b ? `${r1(b.x)},${r1(b.y)} ${r1(b.w)}x${r1(b.h)}` : 'none');
+  const S4 = await t
+    .setup(
+      'a fourth slide for the objects round tables',
+      'slide.new through the window API',
+      async () => {
+        const id = await t.setupSlide(t.deck.tableSlide3 ?? S, 'blank');
+        t.deck.tableSlide4 = id;
+        return { ok: Boolean(id), observed: `slide ${id}` };
+      },
+    )
+    .then(() => t.deck.tableSlide4);
+  await t.clickCard(S4);
+  await t.clearAll();
+  const blockOn = async (id) => (await t.blockOf(S4, id))?.block ?? null;
+  const posOn = async (id) => (await t.blockOf(S4, id))?.pos ?? null;
+  const revision = async () => (await t.state()).revision;
+  const emptyTable = (id, columns, rows, pos) => ({
+    id,
+    type: 'table',
+    columns: Array.from({ length: columns }, () => ({})),
+    rows: Array.from({ length: rows }, (_, r) => ({
+      cells: Array.from({ length: columns }, () => ''),
+      ...(r === 0 ? { header: true } : {}),
+    })),
+    pos,
+  });
+  const typedTable = (id, columns, rows, pos) => ({
+    id,
+    type: 'table',
+    columns: Array.from({ length: columns }, () => ({})),
+    rows: Array.from({ length: rows }, (_, r) => ({
+      cells: Array.from({ length: columns }, (_, c) => (r === 0 ? `H${c}` : `R${r}C${c}`)),
+      ...(r === 0 ? { header: true } : {}),
+    })),
+    pos,
+  });
+  /** The cell's run centre on the stage (an empty cell's run is its zero width space line box). */
+  const cellPoint = async (id, r, c) => {
+    const info = await t.runInfo(h.cellRun(id, r, c));
+    if (!info) throw new Error(`no run for cell ${r},${c} of ${id}`);
+    return { x: info.rect.x + info.rect.w / 2, y: info.rect.y + info.rect.h / 2 };
+  };
+  /** The drawn rows' height of a table (the union of its row boxes, sheet px) from the frame facts. */
+  const rowsHeight = (facts) => {
+    const rows = facts?.cells?.rowBoxes ?? [];
+    if (rows.length === 0) return null;
+    const top = Math.min(...rows.map((b) => b.y));
+    const bottom = Math.max(...rows.map((b) => b.y + b.h));
+    return r1(bottom - top);
+  };
+  /** The overlay's facts around the selected table, in sheet px: the ring, the chip, the frame edges, the handles. */
+  const overlayFacts = (id) =>
+    page.evaluate(
+      ([sel, blockId]) => {
+        const sheet = document.querySelector(sel);
+        if (!sheet) return null;
+        const sr = sheet.getBoundingClientRect();
+        const k = sr.width / 1600;
+        const r1 = (n) => Math.round(n * 10) / 10;
+        const box = (el) => {
+          if (!el || el.getClientRects().length === 0) return null;
+          const r = el.getBoundingClientRect();
+          return {
+            x: r1((r.x - sr.x) / k),
+            y: r1((r.y - sr.y) / k),
+            w: r1(r.width / k),
+            h: r1(r.height / k),
+          };
+        };
+        const ring = [...document.querySelectorAll('.ts-overlay .ts-select.is-selected')].find(
+          (el) => !el.classList.contains('is-extra') && !el.classList.contains('is-cells'),
+        );
+        const chip = document.querySelector('.ts-overlay .ts-select-chip');
+        const edges = [...document.querySelectorAll('.ts-overlay .ts-frame-edge')].map((el) => ({
+          side: el.getAttribute('data-side'),
+          box: box(el),
+        }));
+        const handles = {};
+        for (const dir of ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'])
+          handles[dir] = box(
+            document.querySelector(`.ts-overlay [data-control="handle.${blockId}.resize.${dir}"]`),
+          );
+        return {
+          table: box(sheet.querySelector(`.free[data-free="${blockId}"]`)),
+          ring: box(ring),
+          chip: chip ? { text: chip.textContent ?? '', box: box(chip) } : null,
+          edges,
+          handles,
+          cellRing: box(document.querySelector('.ts-overlay .ts-cell-ring')),
+          cellRings: document.querySelectorAll('.ts-overlay .ts-cell-ring').length,
+          rangeRing: box(
+            document.querySelector(
+              '.ts-overlay .ts-select.is-cells, .ts-stagewrap .ts-select.is-cells',
+            ),
+          ),
+          rangeRings: document.querySelectorAll(
+            '.ts-overlay .ts-select.is-cells, .ts-stagewrap .ts-select.is-cells',
+          ).length,
+          editing: document.querySelector('.ts-stagewrap.ts-editor[data-editing]') !== null,
+        };
+      },
+      [t.SHEET, id],
+    );
+  const centre = (b) => (b ? { x: b.x + b.w / 2, y: b.y + b.h / 2 } : null);
+  const nearBox = (a, b, tol = 1) => t.compareFrame(a, b, { tolerance: tol }).ok;
+  const undoOnce = async () => {
+    if (await t.editing()) {
+      await t.press('Escape');
+      await t.sleep(250);
+    }
+    await t.press('Meta+z');
+    await t.sleep(500);
+    await t.settled();
+  };
+  /**
+   * The guide grid of a table (docs/OBJECTS.md 3.3 item 2; B2's numbers in build/b2.md): an inset
+   * box shadow on every `.td` but the last of its row (`rgba(...) -1px 0px 0px 0px inset` in the
+   * --pt-hair colour), never a border, on the editor's stage alone; the last cell, the filmstrip
+   * card, the show and the print document read `none`. A border right or a `::after` guide is
+   * read as well, so the row judges the guide whichever way a build draws it. `under` is the rule
+   * under the last row (a border on the row or the root, or the root's inset shadow).
+   */
+  const guides = (id, scope = 'stage') =>
+    page.evaluate(
+      ([blockId, where, slideId]) => {
+        const root =
+          where === 'stage'
+            ? document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`)
+            : document.querySelector(
+                `[data-control="filmstrip.slide.${slideId}"] [data-block="${blockId}"]`,
+              );
+        if (!root)
+          return {
+            found: false,
+            image:
+              where !== 'stage' &&
+              document.querySelector(`[data-control="filmstrip.slide.${slideId}"] img`) !== null,
+          };
+        const shadowOf = (cs) => {
+          const s = cs.boxShadow ?? 'none';
+          if (s === 'none' || s === '') return null;
+          const m = /rgba?\([^)]*\)/.exec(s);
+          return { color: m ? m[0] : null, text: s };
+        };
+        const rows = [...root.querySelectorAll('.tr')];
+        const seams = [];
+        let lastDrawn = 0;
+        for (const tr of rows) {
+          const tds = [...tr.querySelectorAll('.td')];
+          tds.forEach((td, i) => {
+            const cs = getComputedStyle(td);
+            const after = getComputedStyle(td, '::after');
+            const border = parseFloat(cs.borderRightWidth) || 0;
+            const guide =
+              after.content !== 'none' && after.content !== '' ? parseFloat(after.width) || 0 : 0;
+            const shadow = shadowOf(cs);
+            const drawn = border > 0 || guide > 0 || shadow !== null;
+            if (i === tds.length - 1) {
+              if (drawn) lastDrawn += 1;
+              return;
+            }
+            seams.push({
+              width: border > 0 ? border : guide > 0 ? guide : shadow ? 1 : 0,
+              color:
+                border > 0
+                  ? cs.borderRightColor
+                  : guide > 0
+                    ? after.backgroundColor || after.borderLeftColor
+                    : (shadow?.color ?? null),
+              how: border > 0 ? 'border' : guide > 0 ? 'after' : shadow ? 'shadow' : 'none',
+            });
+          });
+        }
+        const last = rows[rows.length - 1];
+        const lastCs = last ? getComputedStyle(last) : null;
+        const tableCs = getComputedStyle(root);
+        const rootShadow = shadowOf(tableCs);
+        const under =
+          (lastCs && parseFloat(lastCs.borderBottomWidth)) ||
+          parseFloat(tableCs.borderBottomWidth) ||
+          (rootShadow ? 1 : 0);
+        const underColor =
+          lastCs && parseFloat(lastCs.borderBottomWidth) > 0
+            ? lastCs.borderBottomColor
+            : parseFloat(tableCs.borderBottomWidth) > 0
+              ? tableCs.borderBottomColor
+              : (rootShadow?.color ?? null);
+        return {
+          found: true,
+          seams: seams.length,
+          drawn: seams.filter((s) => s.width > 0).length,
+          how: seams.find((s) => s.width > 0)?.how ?? 'none',
+          color: seams.find((s) => s.width > 0)?.color ?? null,
+          lastDrawn,
+          under,
+          underColor,
+        };
+      },
+      [id, scope, S4],
+    );
+  /**
+   * The contrast of a hairline with an alpha over the ground (B2's reading, build/b2.md: the
+   * --pt-hair token is an rgba at 0.18 light and 0.22 dark, composited over the paper); an opaque
+   * colour reads as the toolkit's contrast.
+   */
+  const hairContrast = (colour, ground) => {
+    const m = /rgba?\(\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(colour ?? '');
+    const g = /rgba?\(\s*(\d+),\s*(\d+),\s*(\d+)/.exec(ground ?? '');
+    if (!m || !g) return null;
+    const a = m[4] === undefined ? 1 : Number(m[4]);
+    const fg = [1, 2, 3].map((i) => Number(m[i]));
+    const bg = [1, 2, 3].map((i) => Number(g[i]));
+    const over = fg.map((v, i) => Math.round(a * v + (1 - a) * bg[i]));
+    return t.contrastOf(`rgb(${over.join(', ')})`, `rgb(${bg.join(', ')})`);
+  };
+
+  // ---- the box from the rows (3.3 item 3)
+  await t.reachSetup('Insert > Table', 'insert', 'insert.table');
+  await t.step(
+    'tables.insert.box-fits-rows',
+    'Insert > Table, the 3 by 3 cell; then the 5 by 5 cell; Cmd+Z each',
+    "each table's pos.h equals its rows' drawn height within 2 px (160 for three rows at 20 px, 267 for five) and the width is 960",
+    async () => {
+      const out = [];
+      let ok = true;
+      for (const pick of ['3x3', '5x5']) {
+        await t.clearAll();
+        const before = await t.objectIds(S4);
+        await t.menuPath('insert', 'insert.table', `insert.table.pick.${pick}`);
+        const obj = await t.newObjectAfter(S4, before, 15_000);
+        await t.settled();
+        if (!obj) {
+          ok = false;
+          out.push(`${pick}: nothing inserted within 15 s`);
+          continue;
+        }
+        await t.press('Escape');
+        await t.sleep(200);
+        const facts = await t.frameFacts(obj.id);
+        const drawn = rowsHeight(facts);
+        const rows = facts?.cells?.rowBoxes?.length ?? 0;
+        const fits = drawn !== null && t.near(obj.pos.h, drawn, 2) && t.near(obj.pos.w, 960, 1);
+        ok = ok && fits;
+        out.push(
+          `${pick}: ${obj.type} ${obj.id} ${t.posStr(obj.pos)}, ${rows} rows drawn ${drawn} px high (fits ${fits})`,
+        );
+        await t.clearAll();
+        await undoOnce();
+      }
+      return {
+        ok,
+        observed: `${out.join(' | ')}${ok ? '' : ` (docs/OBJECTS.md 3.3 item 3, ${LANE}; TOOL_SIZES.table by request)`}`,
+      };
+    },
+  );
+
+  // ---- the one click state (3.2, 3.3 item 1)
+  const T5 = 'ob-empty';
+  await t.setup('an empty 3 by 3 table', 'block.insert through the window API', async () => {
+    const obj = await t.placeBlock(S4, emptyTable(T5, 3, 3, { x: 320, y: 100, w: 960, h: 160 }));
+    return { ok: Boolean(obj), observed: obj?.id ?? 'none' };
+  });
+  await t.step(
+    'tables.select.ring-with-cell-open',
+    'one click on cell 1,1 of the empty table; a drag from the ring band by 80 by 40; Cmd+Z',
+    'the selection ring is the table\'s box, the chip "Table" above it, the four frame edges on it, the eight handles on its corners; the drag moves the table by 80 by 40',
+    async () => {
+      await t.clearAll();
+      const p = await cellPoint(T5, 1, 1);
+      await t.clickAt(p.x, p.y);
+      await t.sleep(300);
+      const o = await overlayFacts(T5);
+      const where = await h.sessionCell();
+      const ringOnTable = o && nearBox(o.ring, o.table);
+      const chipAbove =
+        o?.chip !== null &&
+        o?.chip?.text === 'Table' &&
+        o.chip.box !== null &&
+        o.ring !== null &&
+        o.chip.box.y + o.chip.box.h <= o.ring.y + 4;
+      const edgeOk = (side) => {
+        const e = o?.edges?.find((x) => x.side === side)?.box ?? null;
+        if (!e || !o.ring) return false;
+        if (side === 'n') return t.near(e.y, o.ring.y, 3) && t.near(e.x, o.ring.x, 8);
+        if (side === 's') return t.near(e.y + e.h, o.ring.y + o.ring.h, 3);
+        if (side === 'w') return t.near(e.x, o.ring.x, 3);
+        return t.near(e.x + e.w, o.ring.x + o.ring.w, 3);
+      };
+      const edges = ['n', 'e', 's', 'w'].filter(edgeOk);
+      const cornerOk = (dir, x, y) => {
+        const c = centre(o?.handles?.[dir] ?? null);
+        return c !== null && t.near(c.x, x, 3) && t.near(c.y, y, 3);
+      };
+      const R = o?.ring ?? null;
+      const corners = R
+        ? [
+            cornerOk('nw', R.x, R.y),
+            cornerOk('ne', R.x + R.w, R.y),
+            cornerOk('se', R.x + R.w, R.y + R.h),
+            cornerOk('sw', R.x, R.y + R.h),
+          ].filter(Boolean).length
+        : 0;
+      const handles = o ? Object.values(o.handles).filter(Boolean).length : 0;
+      /* the move by the ring band (the n frame edge, a third of the way along) */
+      const pos0 = await posOn(T5);
+      const grip = await t.frameGrip(T5);
+      let pos1 = null;
+      if (grip) {
+        const k = await t.kOf();
+        await t.drag(grip, { x: grip.x + 80 * k, y: grip.y + 40 * k }, { steps: 12 });
+        await t.settled();
+        pos1 = await t
+          .pollUntil(
+            () => posOn(T5),
+            (q) => q && (q.x !== pos0.x || q.y !== pos0.y),
+            6000,
+          )
+          .catch(() => posOn(T5));
+      }
+      const moved =
+        pos0 && pos1 && t.near(pos1.x - pos0.x, 80, 1) && t.near(pos1.y - pos0.y, 40, 1);
+      if (pos1 && !same(pos0, pos1)) await undoOnce();
+      await t.clearAll();
+      const ok =
+        Boolean(ringOnTable) &&
+        chipAbove &&
+        edges.length === 4 &&
+        handles === 8 &&
+        corners === 4 &&
+        Boolean(moved);
+      return {
+        ok,
+        observed: `after the click: session cell ${where ? `${where.row},${where.column}` : 'none'}; table ${boxStr(o?.table)}, ring ${boxStr(o?.ring)} (on the table ${ringOnTable}); chip ${o?.chip ? `"${o.chip.text}" at ${boxStr(o.chip.box)}` : 'none'} (above the ring ${chipAbove}); frame edges on the ring ${edges.join(',') || 'none'}; handles ${handles}, on the corners ${corners}; the ring band drag ${grip ? `${t.posStr(pos0)} -> ${t.posStr(pos1)} (by 80,40 ${moved})` : 'no frame edge to grip'}${ok ? '' : ` (docs/OBJECTS.md 3.3 item 1, ${LANE} with B5)`}`,
+      };
+    },
+  );
+
+  await t.step(
+    'tables.cell.ring-on-cell',
+    'one click on cell 1,1; then a drag on the selected table from cell 1,1 to cell 2,2',
+    "a cell ring on the cell's grid area (the full row height, the column's width) inside the table's ring; the range draws one ring on the union of the four cells",
+    async () => {
+      await t.clearAll();
+      const p = await cellPoint(T5, 1, 1);
+      await t.clickAt(p.x, p.y);
+      await t.sleep(300);
+      const o = await overlayFacts(T5);
+      const f = await t.frameFacts(T5);
+      const cell = f?.cells?.rows?.[1]?.[1] ?? null;
+      const row = f?.cells?.rowBoxes?.[1] ?? null;
+      const area = cell && row ? { x: cell.x, y: row.y, w: cell.w, h: row.h } : null;
+      const cellRingOk = o?.cellRing !== null && area !== null && nearBox(o.cellRing, area);
+      const insideRing =
+        o?.cellRing && o.ring
+          ? o.cellRing.x >= o.ring.x - 1 &&
+            o.cellRing.y >= o.ring.y - 1 &&
+            o.cellRing.x + o.cellRing.w <= o.ring.x + o.ring.w + 1 &&
+            o.cellRing.y + o.cellRing.h <= o.ring.y + o.ring.h + 1
+          : false;
+      const q = await cellPoint(T5, 2, 2);
+      await t.drag(p, q, { steps: 10 });
+      await t.sleep(300);
+      const o2 = await overlayFacts(T5);
+      const f2 = await t.frameFacts(T5);
+      const c22 = f2?.cells?.rows?.[2]?.[2] ?? null;
+      const row2 = f2?.cells?.rowBoxes?.[2] ?? null;
+      const union =
+        cell && row && c22 && row2
+          ? { x: cell.x, y: row.y, w: c22.x + c22.w - cell.x, h: row2.y + row2.h - row.y }
+          : null;
+      const rangeBox = o2?.rangeRing ?? o2?.cellRing ?? null;
+      const rangeOk = union !== null && rangeBox !== null && nearBox(rangeBox, union);
+      const oneRing = (o2?.rangeRings ?? 0) + (o2?.rangeRings > 0 ? 0 : (o2?.cellRings ?? 0)) === 1;
+      const posAfter = await posOn(T5);
+      await t.clearAll();
+      const ok = cellRingOk && insideRing && rangeOk && oneRing;
+      return {
+        ok,
+        observed: `cell 1,1 open: cell ring ${boxStr(o?.cellRing)} against the cell's grid area ${boxStr(area)} (${cellRingOk}), inside the table ring ${boxStr(o?.ring)} ${insideRing}; the range 1,1 to 2,2: ring ${boxStr(rangeBox)} against the union ${boxStr(union)} (${rangeOk}), rings drawn ${o2?.rangeRings ?? 0} range and ${o2?.cellRings ?? 0} cell; table ${t.posStr(posAfter)}${ok ? '' : ` (docs/OBJECTS.md 3.3 item 1, ${LANE} with B5)`}`,
+      };
+    },
+  );
+
+  // ---- the guide grid (3.3 item 2)
+  await t.step(
+    'tables.cells.empty-grid-guides',
+    "read the empty table's inner column seams and the rule under its last row on the stage and on the filmstrip card",
+    'a hairline on every inner seam of every row and under the last row, in --pt-hair; the card draws none',
+    async () => {
+      await t.clearAll();
+      const stage = await guides(T5, 'stage');
+      const card = await guides(T5, 'card');
+      const hair = await t.sheetVar('--pt-hair');
+      const every = stage.found && stage.seams > 0 && stage.drawn === stage.seams;
+      const lastNone = stage.found && stage.lastDrawn === 0;
+      const under = stage.found && stage.under > 0;
+      const cardNone = !card.found || card.drawn === 0;
+      const ok = every && lastNone && under && cardNone;
+      return {
+        ok,
+        observed: `stage: ${stage.found ? `${stage.drawn} of ${stage.seams} inner seams drawn as a ${stage.how} (${stage.color ?? 'no colour'}), the last cells drawn ${stage.lastDrawn}, the rule under the last row ${stage.under} px (${stage.underColor})` : 'no table'}; --pt-hair ${hair ?? 'unread'}; the filmstrip card: ${card.found ? `${card.drawn} seam(s) drawn` : card.image ? 'an image, no seams read' : 'no table markup'}${ok ? '' : ` (docs/OBJECTS.md 3.3 item 2, ${LANE})`}`,
+      };
+    },
+  );
+
+  await t.step(
+    'tables.light-appearance-guides',
+    'Slide > Change theme, the light tile; read the guides; the dark tile; read again',
+    'the guide grid reads on both appearances with a contrast above 1.3 to the ground',
+    async () => {
+      await t.clearAll();
+      const readings = [];
+      for (const appearance of ['light', 'dark']) {
+        const got = await t.pickAppearance(appearance);
+        await t.closeThemes();
+        await t.sleep(300);
+        const g = await guides(T5, 'stage');
+        const ground = await t.sheetGround();
+        const contrast = g.color ? hairContrast(g.color, ground) : null;
+        readings.push({
+          appearance,
+          got,
+          drawn: g.drawn,
+          seams: g.seams,
+          color: g.color,
+          ground,
+          contrast,
+        });
+      }
+      const ok = readings.every(
+        (r) => r.drawn > 0 && r.drawn === r.seams && r.contrast !== null && r.contrast >= 1.3,
+      );
+      return {
+        ok,
+        observed:
+          readings
+            .map(
+              (r) =>
+                `${r.appearance} (${JSON.stringify(r.got)}): ${r.drawn} of ${r.seams} seams in ${r.color ?? 'no colour'} on ${r.ground} (${r.contrast === null ? 'no contrast' : `${r.contrast}:1`})`,
+            )
+            .join('; ') + (ok ? '' : ` (docs/OBJECTS.md 3.3 item 2, ${LANE})`),
+      };
+    },
+  );
+
+  // ---- the rows and the box (3.3 item 3)
+  const T6 = 'ob-typed';
+  await t.setup(
+    'a typed 3 by 3 table 960 wide',
+    'block.insert through the window API',
+    async () => {
+      const obj = await t.placeBlock(S4, typedTable(T6, 3, 3, { x: 80, y: 420, w: 960, h: 160 }));
+      return { ok: Boolean(obj), observed: obj?.id ?? 'none' };
+    },
+  );
+  const WORDS = Array.from({ length: 40 }, (_, i) => `word${i + 1}`).join(' ');
+  await t.step(
+    'tables.rows.grow-with-text',
+    'forty words typed into cell 1,1; Cmd+Z',
+    "the row's drawn height grows, the rows below move down, pos.h is written up in the same commit and the ring meets the last rule; Cmd+Z restores both in one step",
+    async () => {
+      await t.clearAll();
+      const f0 = await t.frameFacts(T6);
+      const pos0 = await posOn(T6);
+      const rev0 = await t.stableRevision();
+      const on = await h.openCell(T6, 1, 1);
+      if (!on) return { ok: false, observed: 'no cell session' };
+      await t.press('End');
+      await t.typeHuman(` ${WORDS}`);
+      await t.sleep(200);
+      await t.press('Escape');
+      await t.settled();
+      const text = await t
+        .pollUntil(
+          async () => (await blockOn(T6))?.rows?.[1]?.cells?.[1] ?? null,
+          (x) => typeof x === 'string' && x.includes('word40'),
+          10_000,
+        )
+        .catch(async () => (await blockOn(T6))?.rows?.[1]?.cells?.[1] ?? null);
+      const rev1 = await t.stableRevision();
+      const f1 = await t.frameFacts(T6);
+      const pos1 = await posOn(T6);
+      const lines = f1?.text?.lines ?? null;
+      const rowGrew = (f1?.cells?.rowBoxes?.[1]?.h ?? 0) > (f0?.cells?.rowBoxes?.[1]?.h ?? 0) + 10;
+      const below = (f1?.cells?.rowBoxes?.[2]?.y ?? 0) > (f0?.cells?.rowBoxes?.[2]?.y ?? 0) + 10;
+      const drawn = rowsHeight(f1);
+      const written = pos1 && pos0 && pos1.h > pos0.h && drawn !== null && pos1.h >= drawn - 2;
+      await t.clearAll();
+      await t.selectObject(T6);
+      if (await t.editing()) {
+        await t.press('Escape');
+        await t.sleep(200);
+      }
+      const o = await overlayFacts(T6);
+      const lastRule = f1?.cells?.rowBoxes
+        ? Math.max(...f1.cells.rowBoxes.map((b) => b.y + b.h))
+        : null;
+      const ringMeets = o?.ring && lastRule !== null && t.near(o.ring.y + o.ring.h, lastRule, 2);
+      const oneCommit = rev1 === rev0 + 1;
+      await undoOnce();
+      const back = await blockOn(T6);
+      const posBack = await posOn(T6);
+      const restored =
+        back?.rows?.[1]?.cells?.[1] === 'R1C1' && posBack && t.near(posBack.h, pos0.h, 1);
+      const ok =
+        rowGrew && below && Boolean(written) && Boolean(ringMeets) && oneCommit && restored;
+      return {
+        ok,
+        observed: `typed ${typeof text === 'string' && text.includes('word40')}; the cell draws ${lines} line(s); row 1 ${r1(f0?.cells?.rowBoxes?.[1]?.h)} -> ${r1(f1?.cells?.rowBoxes?.[1]?.h)} px, row 2 from y ${r1(f0?.cells?.rowBoxes?.[2]?.y)} to ${r1(f1?.cells?.rowBoxes?.[2]?.y)}; pos.h ${pos0?.h} -> ${pos1?.h} against the rows' ${drawn} (written up ${written}); revision ${rev0} -> ${rev1} (one commit ${oneCommit}); the ring's bottom ${r1(o?.ring ? o.ring.y + o.ring.h : null)} against the last rule ${lastRule} (${ringMeets}); Cmd+Z restored the text and the box ${restored} (${t.posStr(posBack)})${ok ? '' : ` (docs/OBJECTS.md 3.3 item 3, ${LANE})`}`,
+      };
+    },
+  );
+
+  await t.step(
+    'tables.resize.rows-share-extra',
+    "the se handle dragged down by 120, Cmd+Z; then dragged up by 200 past the rows' natural height, Cmd+Z",
+    "the extra height is shared evenly across the rows; the table stops at the rows' natural height and the readout says that size",
+    async () => {
+      await t.clearAll();
+      const ctrls = await t.selectObject(T6);
+      if (await t.editing()) {
+        await t.press('Escape');
+        await t.sleep(200);
+      }
+      if (!ctrls) return { ok: false, observed: 'the table was not selected' };
+      const f0 = await t.frameFacts(T6);
+      const h0 = (f0?.cells?.rowBoxes ?? []).map((b) => b.h);
+      const down = await t.captureHandleDrag(
+        `handle.${T6}.resize.se`,
+        { x: 0, y: 120 },
+        { id: T6 },
+      );
+      if (!down) return { ok: false, observed: 'no se handle on the table' };
+      await t.settled();
+      const f1 = await t.frameFacts(T6);
+      const h1 = (f1?.cells?.rowBoxes ?? []).map((b) => b.h);
+      const shares = h1.map((v, i) => r1(v - (h0[i] ?? 0)));
+      const shared = shares.length === 3 && shares.every((d) => t.near(d, 40, 3));
+      await undoOnce();
+      await t.selectObject(T6);
+      if (await t.editing()) {
+        await t.press('Escape');
+        await t.sleep(200);
+      }
+      const pos0 = await posOn(T6);
+      const up = await t.captureHandleDrag(`handle.${T6}.resize.se`, { x: 0, y: -200 }, { id: T6 });
+      await t.settled();
+      const f2 = await t.frameFacts(T6);
+      const pos2 = await posOn(T6);
+      const natural = rowsHeight(f2);
+      const floor = pos2 && natural !== null && t.near(pos2.h, natural, 2) && pos2.h <= pos0.h;
+      const far = up ? t.frameAt(up, 'step12') : null;
+      const readout = far?.readout ?? null;
+      const said = readout && /× (\d+)/.exec(readout) ? Number(/× (\d+)/.exec(readout)[1]) : null;
+      const readoutOk = said !== null && pos2 && t.near(said, pos2.h, 1);
+      if (pos2 && !same(pos2, pos0)) await undoOnce();
+      const ok = shared && Boolean(floor) && Boolean(readoutOk);
+      return {
+        ok,
+        observed: `down by 120: rows ${h0.map(r1).join(', ')} -> ${h1.map(r1).join(', ')} (each +${shares.join(', +')}; even ${shared}); up by 200: pos.h ${pos0?.h} -> ${pos2?.h} against the rows' natural ${natural} (stopped at the floor ${floor}), the readout at the far point ${readout === null ? 'none' : `"${readout}"`} (says the floor ${readoutOk})${ok ? '' : ` (docs/OBJECTS.md 3.3 item 3, ${LANE})`}`,
+      };
+    },
+  );
+
+  // ---- the seams with a cell open (3.3 item 5)
+  await t.step(
+    'tables.seam.visible-with-cell-open',
+    'one click on cell 1,1 (the caret placed); the first column seam dragged by 60; Cmd+Z',
+    'the column seam handles are drawn with the cell open; the drag writes the widths and keeps the cell open with its caret',
+    async () => {
+      await t.clearAll();
+      const p = await cellPoint(T6, 1, 1);
+      await t.clickAt(p.x, p.y);
+      await t.sleep(300);
+      const open = await t.editing();
+      const where = await h.sessionCell();
+      const seams = (await t.handleControls()).filter((c) => c.startsWith(`handle.${T6}.column.`));
+      if (seams.length === 0) {
+        await h.endSession();
+        return {
+          ok: false,
+          observed: `cell open ${open} (${where ? `${where.row},${where.column}` : 'no cell'}); no column seam handle with the cell open (docs/OBJECTS.md 3.3 item 5, B1 for ${LANE})`,
+        };
+      }
+      const first = seams.find((c) => c.endsWith('.0')) ?? seams[0];
+      const before = (await blockOn(T6))?.columns ?? [];
+      const hr = await t.handleRect(first);
+      const k = await t.kOf();
+      const from = t.center(hr);
+      await t.drag(from, { x: from.x + 60 * k, y: from.y }, { steps: 12 });
+      await t.settled();
+      const after = await t
+        .pollUntil(
+          async () => (await blockOn(T6))?.columns ?? [],
+          (c) => !same(c, before),
+          8000,
+        )
+        .catch(async () => (await blockOn(T6))?.columns ?? []);
+      const stillOpen = await t.editing();
+      const whereAfter = await h.sessionCell();
+      const written = !same(after, before) && typeof after[0]?.width === 'number';
+      await h.endSession();
+      if (written) await undoOnce();
+      const ok =
+        open &&
+        seams.length > 0 &&
+        written &&
+        stillOpen &&
+        whereAfter?.row === 1 &&
+        whereAfter?.column === 1;
+      return {
+        ok,
+        observed: `cell open ${open} (${where ? `${where.row},${where.column}` : 'no cell'}); seams ${seams.join(', ')}; columns ${JSON.stringify(before)} -> ${JSON.stringify(after)} (written ${written}); cell open after the drag ${stillOpen} (${whereAfter ? `${whereAfter.row},${whereAfter.column}` : 'no cell'})${ok ? '' : ` (docs/OBJECTS.md 3.3 item 5, B1 for ${LANE})`}`,
+      };
+    },
+  );
+
+  // ---- the header toggle from the row head (3.3 item 4)
+  await t.step(
+    'tables.heads.header-toggle',
+    "select the table; right click row 0's head; Header row; Cmd+Z",
+    'the menu lists Header row checked; the click clears rows[0].header and the row draws at the body weight; Cmd+Z restores',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(T6);
+      if (await t.editing()) {
+        await t.press('Escape');
+        await t.sleep(200);
+      }
+      const f = await t.frameFacts(T6);
+      const cell = f?.cells?.rows?.[0]?.[0] ?? null;
+      if (cell) {
+        const left = await t.sheetPoint(cell.x - 6, cell.y + cell.h / 2);
+        await page.mouse.move(left.x, left.y);
+        await t.sleep(500);
+      }
+      const heads = await page.evaluate(
+        (id) =>
+          [
+            ...document.querySelectorAll(
+              `[data-control^="handle.table.head.row."], [data-control^="handle.${id}.head.row."]`,
+            ),
+          ]
+            .filter((e) => e.getClientRects().length > 0)
+            .map((e) => e.getAttribute('data-control')),
+        T6,
+      );
+      const head = heads.find((c) => c.endsWith('.head.row.0')) ?? null;
+      if (!head)
+        return t.notBuilt(
+          'handle.table.head.row',
+          'B5',
+          `no row head beside the selected table (docs/OBJECTS.md 3.3 item 4)${heads.length > 0 ? `; heads ${heads.join(', ')}` : ''}`,
+        );
+      const hr = await t.rectOf(`[data-control="${head}"]`);
+      await t.rightClickAt(hr.x + hr.w / 2, hr.y + hr.h / 2);
+      /* the overlay's head menu (build/b5.md R7: `menu.format.table.headerRow`, a check row
+         reading `aria-checked` from rows[0].header) is read by its control, wherever it is drawn */
+      const menuRows = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-control^="menu."]')]
+          .filter((el) => el.getClientRects().length > 0)
+          .map((el) => ({
+            id: el.getAttribute('data-control').replace(/^menu\./, ''),
+            checked: el.getAttribute('aria-checked'),
+            disabled: el.getAttribute('aria-disabled') === 'true',
+          })),
+      );
+      const rows = menuRows.length > 0 ? menuRows : await t.contextRows();
+      const row = rows.find((r) => r.id === 'format.table.headerRow') ?? null;
+      const weight0 = (await h.cellStyle(T6, 0, 0)) ?? null;
+      const w0 = await page.evaluate(
+        ([id, run]) => {
+          const el = document.querySelector(
+            `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"] [data-run="${run}"]`,
+          );
+          return el ? getComputedStyle(el.querySelector('.para') ?? el).fontWeight : null;
+        },
+        [T6, h.cellRun(T6, 0, 0)],
+      );
+      const body = await page.evaluate(
+        ([id, run]) => {
+          const el = document.querySelector(
+            `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"] [data-run="${run}"]`,
+          );
+          return el ? getComputedStyle(el.querySelector('.para') ?? el).fontWeight : null;
+        },
+        [T6, h.cellRun(T6, 1, 0)],
+      );
+      if (row) await t.clickControl('menu.format.table.headerRow');
+      else await t.press('Escape');
+      await t.settled();
+      const header = await t
+        .pollUntil(
+          async () => (await blockOn(T6))?.rows?.[0]?.header ?? null,
+          (x) => x !== true,
+          6000,
+        )
+        .catch(async () => (await blockOn(T6))?.rows?.[0]?.header ?? null);
+      const w1 = await page.evaluate(
+        ([id, run]) => {
+          const el = document.querySelector(
+            `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"] [data-run="${run}"]`,
+          );
+          return el ? getComputedStyle(el.querySelector('.para') ?? el).fontWeight : null;
+        },
+        [T6, h.cellRun(T6, 0, 0)],
+      );
+      const style1 = await h.cellStyle(T6, 0, 0);
+      const cleared = header !== true;
+      if (cleared) await undoOnce();
+      const back = (await blockOn(T6))?.rows?.[0]?.header ?? null;
+      const ok = row !== null && row.checked === 'true' && cleared && w1 === body && back === true;
+      return {
+        ok,
+        observed: `head ${head}; the menu lists Header row ${row ? `(checked ${row.checked}, disabled ${row.disabled})` : 'not at all'} among ${rows.map((r) => r.id).join(', ')}; header ${true} -> ${header}; row 0 weight ${w0} -> ${w1} (the body's ${body}), hairline ${weight0?.borderWidth} ${weight0?.borderColor} -> ${style1?.borderWidth} ${style1?.borderColor}; Cmd+Z: header ${back}${ok ? '' : " (docs/OBJECTS.md 3.3 item 4; format.table.headerRow is the integrator's row by B5's request)"}`,
+      };
+    },
+  );
+
+  // ---- the Table section's words (3.3 item 6)
+  await t.step(
+    'tables.panel.section-words',
+    'select the table; open Format options; read the Table section',
+    'Header row, Border, Rows (one Height, Distribute rows), Columns (Distribute columns), Cell (Fill, Border), Merge in that order, each property once, no generated table field below',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(T6);
+      if (await t.editing()) {
+        await t.press('Escape');
+        await t.sleep(200);
+      }
+      if (!(await t.visible('panel.formatOptions'))) {
+        await t.tailControl('toolbar.formatOptions');
+        await t.waitControl('panel.formatOptions', 8000).catch(() => undefined);
+      }
+      await t.waitControl('formatOptions.table', 8000).catch(() => undefined);
+      const facts = await page.evaluate((id) => {
+        const panel = document.querySelector('[data-control="panel.formatOptions"]');
+        const section = document.querySelector('[data-control="formatOptions.table"]');
+        const visible = (el) => el.getClientRects().length > 0;
+        const sections = [...(panel?.querySelectorAll('section[data-section]') ?? [])].map((s) =>
+          s.getAttribute('data-section'),
+        );
+        const groups = [...(section?.querySelectorAll('[data-group]') ?? [])].map((g) =>
+          g.getAttribute('data-group'),
+        );
+        const has = (c) =>
+          section !== null && section.querySelector(`[data-control="${c}"]`) !== null;
+        const count = (prefix) =>
+          [...(section?.querySelectorAll(`[data-control^="${prefix}"]`) ?? [])].filter(visible)
+            .length;
+        const inGroup = (group, control) =>
+          section?.querySelector(`[data-group="${group}"] [data-control="${control}"]`) !== null;
+        const text = section?.textContent ?? '';
+        const order = [
+          'Header row',
+          'Border',
+          'Rows',
+          'Height',
+          'Distribute rows',
+          'Columns',
+          'Distribute columns',
+          'Cell',
+          'Fill',
+          'Merge',
+        ];
+        let at = -1;
+        const inOrder = order.every((w) => {
+          const i = text.indexOf(w, at + 1);
+          if (i < 0) return false;
+          at = i;
+          return true;
+        });
+        const generated = [
+          ...(panel?.querySelectorAll(`[data-control^="block.${id}."]`) ?? []),
+        ].filter(visible).length;
+        return {
+          sections,
+          groups,
+          headerRow: has('formatOptions.table.headerRow'),
+          border:
+            inGroup('border', 'formatOptions.table.border.weight') &&
+            inGroup('border', 'formatOptions.table.border.dash'),
+          height: count('formatOptions.table.height'),
+          rowHeights: count('formatOptions.table.rowHeight.'),
+          distributeRows: inGroup('rows', 'formatOptions.table.distributeRows'),
+          distributeColumns: inGroup('columns', 'formatOptions.table.distributeColumns'),
+          cellFill:
+            section?.querySelector(
+              '[data-group="cell"] [data-control*="fill"], [data-group="cell"] [data-control*="Fill"]',
+            ) !== null,
+          cellBorder: inGroup('cell', 'formatOptions.table.cell.border.weight'),
+          merge: section?.querySelector('[data-group="merge"] [data-control*="erge"]') !== null,
+          inOrder,
+          generated,
+          words: text.replace(/\s+/g, ' ').slice(0, 240),
+        };
+      }, T6);
+      const groupsOk = same(facts.groups, ['border', 'rows', 'columns', 'cell', 'merge']);
+      const ok =
+        facts.sections[0] === 'table' &&
+        facts.headerRow &&
+        groupsOk &&
+        facts.border &&
+        facts.height === 1 &&
+        facts.rowHeights === 0 &&
+        facts.distributeRows &&
+        facts.distributeColumns &&
+        facts.cellFill &&
+        facts.cellBorder &&
+        facts.merge &&
+        facts.inOrder &&
+        facts.generated === 0;
+      return {
+        ok,
+        observed: `sections ${facts.sections.join(', ')}; groups ${facts.groups.join(', ') || 'none'} (the order ${groupsOk}); Header row ${facts.headerRow}; Border ${facts.border}; Height fields ${facts.height}, per row ${facts.rowHeights}; Distribute rows ${facts.distributeRows}, Distribute columns ${facts.distributeColumns}; Cell fill ${facts.cellFill}, cell border ${facts.cellBorder}; Merge ${facts.merge}; the words in order ${facts.inOrder}; generated table fields below ${facts.generated}; reads "${facts.words}"${ok ? '' : ' (docs/OBJECTS.md 3.3 item 6, B5)'}`,
       };
     },
   );

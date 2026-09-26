@@ -74,3 +74,79 @@ describe('t.stableRevision', () => {
     expect(n).toBeGreaterThan(1);
   });
 });
+
+// The frame comparison of the objects round (docs/OBJECTS.md 2.6, 6.4): the object's box against
+// the ring's within 1 px, a text ring's 10 px outset removed; the corners of a turned box; the
+// readouts of a capture's steps.
+import { boxCorners, compareFrame, cornersDistance, readoutsOf } from './toolkit.mjs';
+
+describe('compareFrame', () => {
+  it('passes a ring on the object within 1 px and names the differences past it', () => {
+    const object = { x: 300, y: 200, w: 320, h: 200 };
+    expect(compareFrame(object, { x: 300.4, y: 199.6, w: 320.8, h: 200 })).toEqual({
+      ok: true,
+      dx: -0.4,
+      dy: 0.4,
+      dw: -0.8,
+      dh: 0,
+    });
+    const off = compareFrame(object, { x: 300, y: 200, w: 340, h: 200 });
+    expect(off.ok).toBe(false);
+    expect(off.dw).toBe(-20);
+  });
+
+  it('removes the text ring outset before comparing', () => {
+    const object = { x: 400, y: 300, w: 480, h: 64 };
+    const ring = { x: 390, y: 290, w: 500, h: 84 };
+    expect(compareFrame(object, ring).ok).toBe(false);
+    expect(compareFrame(object, ring, { outset: 10 })).toEqual({
+      ok: true,
+      dx: 0,
+      dy: 0,
+      dw: 0,
+      dh: 0,
+    });
+  });
+
+  it('answers a reason when a box is missing', () => {
+    expect(compareFrame(null, { x: 0, y: 0, w: 1, h: 1 }).reason).toBe('no object');
+    expect(compareFrame({ x: 0, y: 0, w: 1, h: 1 }, null).reason).toBe('no ring');
+  });
+});
+
+describe('boxCorners and cornersDistance', () => {
+  it('turns a 680 by 320 box by 45 degrees about its centre', () => {
+    const corners = boxCorners({ x: 0, y: 0, w: 680, h: 320 }, 45);
+    /* the bounding box of the turned corners is 707 by 707 (docs/OBJECTS.md 2.2) */
+    const xs = corners.map((c) => c.x);
+    const ys = corners.map((c) => c.y);
+    expect(Math.round(Math.max(...xs) - Math.min(...xs))).toBe(707);
+    expect(Math.round(Math.max(...ys) - Math.min(...ys))).toBe(707);
+    expect(cornersDistance(corners, [...corners].reverse())).toBe(0);
+    const upright = boxCorners({ x: -13.6, y: -193.6, w: 707.1, h: 707.1 }, 0);
+    expect(cornersDistance(corners, upright)).toBeGreaterThan(100);
+    expect(cornersDistance(corners, [])).toBe(Number.POSITIVE_INFINITY);
+  });
+});
+
+describe('readoutsOf', () => {
+  it('reads every step and the release', () => {
+    const capture = {
+      frames: [
+        { tag: 'before', facts: { readout: null } },
+        { tag: 'down', facts: { readout: null } },
+        { tag: 'step1', facts: { readout: '27 × 17' } },
+        { tag: 'step2', facts: { readout: '53 × 33' } },
+        { tag: 'up+0', facts: { readout: '53 × 33' } },
+        { tag: 'up+400', facts: { readout: null } },
+      ],
+    };
+    expect(readoutsOf(capture, /^\d+ × \d+$/)).toEqual({
+      steps: ['27 × 17', '53 × 33'],
+      every: true,
+      afterRelease: null,
+    });
+    expect(readoutsOf(capture, /°$/).every).toBe(false);
+    expect(readoutsOf(null, /x/).every).toBe(false);
+  });
+});

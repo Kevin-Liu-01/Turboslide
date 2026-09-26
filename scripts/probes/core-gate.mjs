@@ -40,6 +40,12 @@
 // The gate holds that rule itself: under vitest (`VITEST` is set in every worker and a spawned gate
 // inherits it) a localhost run that names neither flag is refused with exit 2 before the scratch
 // check, so a later test cannot take the checkout's lock by leaving the flags out.
+// The objects round (docs/OBJECTS.md 6.1, 6.3): the `gestures.*` rows are the arrange feature's
+// (unparkable), driven by the walk probe's gestures area with the toolkit's frame capture; the two
+// frame rows read `describe().state.gesture` and their reason carries the record (frames, maxMs,
+// skipped, degraded) with the animation frames the drag had, so a frame row red on the preview
+// alone with fewer than 6 animation frames (a throttled headless tab) is the recorded class of 6.3,
+// rerun once, and a second reading fails the row; nothing here changes the merge or the verdict.
 // `--matrix <path>` also writes the merged summary (the rows by id with their result and reason,
 // the counts, the verdict and the `results` map) to that path, the ledger copy a ship note or the
 // verifier keeps under docs/gslides-parity/focus/verification/. `--report <dir>` runs no driver:

@@ -231,10 +231,13 @@ export async function run(t) {
     },
   );
 
+  /* the objects round (docs/OBJECTS.md 4.2 item 4, ship one P1 item 10): the four shape
+     controls before the text controls, each written and drawn on the letters; a tail without
+     them reads not built with the parked id */
   await t.step(
     'wordart.tail.fill-outline',
-    'select the word art; read the tail; Border weight 2',
-    'the tail lists Fill color, Border color, Border weight and Border dash; the weight writes the outline',
+    'select the word art; read the tail; Border weight 2, Border dash, Border color, Fill color, each read on the block and the letters and taken back with Cmd+Z',
+    'the tail lists Fill color, Border color, Border weight and Border dash before the text controls; each pick writes its field and the letters draw it',
     async () => {
       await t.clearAll();
       await t.selectObject(W);
@@ -253,57 +256,120 @@ export async function run(t) {
       if (missing.length === want.length)
         return t.notBuilt(
           'toolbar.wordart.outline',
-          'B3',
-          `the word art's tail is the text tail with none of Fill color, Border color, Border weight, Border dash (P1, FEATURES.md 2.3 item 10); tail ${tail.filter((c) => !/^toolbar\.(head|search|newSlide|undo|redo|print|paintFormat|zoom|tail|end|pointer|hideMenus)/.test(c)).join(', ')}`,
+          'B5',
+          `the word art's tail is the text tail with none of Fill color, Border color, Border weight, Border dash (docs/OBJECTS.md 4.2 item 4); tail ${tail.filter((c) => !/^toolbar\.(head|search|newSlide|undo|redo|print|paintFormat|zoom|tail|end|pointer|hideMenus)/.test(c)).join(', ')}`,
         );
-      const before = await block(W);
-      let picked = null;
-      if (tail.includes('toolbar.borderWeight')) {
-        const options = [];
-        await t.tailControl('toolbar.borderWeight');
+      /* the four controls sit before the text controls (the font, the size, the marks) */
+      const firstText = tail.findIndex((c) =>
+        /^toolbar\.(font|fontSize|bold|italic|underline|textColor)$/.test(c),
+      );
+      const lastShape = Math.max(...want.map((c) => tail.indexOf(c)));
+      const before = firstText < 0 || lastShape < firstText;
+      /** Opens a tail control and picks the first new option the test accepts; the pick's id. */
+      const pick = async (control, test) => {
+        if (!tail.includes(control)) return { pick: null, options: [] };
+        const prior = await page.evaluate(() =>
+          [...document.querySelectorAll('[data-control]')].map((e) =>
+            e.getAttribute('data-control'),
+          ),
+        );
+        await t.tailControl(control);
         await t.sleep(400);
-        const pick = await page.evaluate(
-          () =>
-            [
-              ...document.querySelectorAll(
-                '[data-control^="menu.toolbar.borderWeight."], [data-control^="toolbar.borderWeight."]',
-              ),
-            ]
+        const options = await page.evaluate(
+          (seen) =>
+            [...document.querySelectorAll('[data-control]')]
               .filter((e) => e.getClientRects().length > 0)
               .map((e) => ({
                 id: e.getAttribute('data-control'),
                 text: e.textContent?.trim() ?? '',
               }))
-              .find((o) => /(^|[.-])2(px)?$/.test(o.id) || /^2(\s*px)?$/.test(o.text)) ?? null,
+              .filter((o) => !seen.includes(o.id)),
+          prior,
         );
-        if (pick) {
-          await t.clickControl(pick.id);
-          picked = pick.id;
-        } else await t.press('Escape');
-        void options;
-      }
-      await t.settled();
-      const after = await t
-        .pollUntil(
-          () => block(W),
-          (b) => b?.outline?.width === 2,
-          6000,
-        )
-        .catch(() => block(W));
-      const d = await drawn(W);
-      if (after?.outline?.width === 2 && before?.outline?.width !== 2) {
+        const found = options.find((o) => test(o.id, o.text)) ?? null;
+        if (found) await t.clickControl(found.id);
+        else await t.press('Escape');
+        await t.settled();
+        await t.sleep(300);
+        return { pick: found?.id ?? null, options: options.map((o) => o.id) };
+      };
+      const undo = async () => {
         await t.clearAll();
         await t.press('Meta+z');
         await t.sleep(400);
         await t.settled();
-      }
+        await t.selectObject(W);
+      };
+      const b0 = await block(W);
+      const d0 = await drawn(W);
+      const results = [];
+      /* Border weight 2 */
+      const weight = await pick(
+        'toolbar.borderWeight',
+        (id, text) => /(^|[.-])2(px)?$/.test(id) || /^2(\s*px)?$/.test(text),
+      );
+      const b1 = await block(W);
+      const d1 = await drawn(W);
+      results.push({
+        name: 'Border weight',
+        pick: weight.pick,
+        wrote: b1?.outline?.width === 2 && b0?.outline?.width !== 2,
+        drawn: /^2/.test(d1?.stroke ?? ''),
+        value: JSON.stringify(b1?.outline),
+      });
+      if (results[0].wrote) await undo();
+      /* Border dash: any dash but the solid one */
+      const dash = await pick(
+        'toolbar.borderDash',
+        (id) => /dash|dot/i.test(id) && !/solid|none|plate|menu/i.test(id),
+      );
+      const b2 = await block(W);
+      results.push({
+        name: 'Border dash',
+        pick: dash.pick,
+        wrote: typeof b2?.outline?.dash === 'string' && b2.outline.dash !== b0?.outline?.dash,
+        drawn: null,
+        value: JSON.stringify(b2?.outline),
+      });
+      if (results[1].wrote) await undo();
+      /* Border color: a token that is not the current one */
+      const border = await pick(
+        'toolbar.borderColor',
+        (id) =>
+          /^toolbar\.borderColor\.[a-z]+$/.test(id) && !/plate|none|hex|menu|kit|ink$/.test(id),
+      );
+      const b3 = await block(W);
+      const d3 = await drawn(W);
+      results.push({
+        name: 'Border color',
+        pick: border.pick,
+        wrote: typeof b3?.outline?.color === 'string' && b3.outline.color !== b0?.outline?.color,
+        drawn: d3?.strokeColor !== d0?.strokeColor,
+        value: JSON.stringify(b3?.outline),
+      });
+      if (results[2].wrote) await undo();
+      /* Fill color: the letters' colour */
+      const fill = await pick(
+        'toolbar.fillColor',
+        (id) => /^toolbar\.fillColor\.[a-z]+$/.test(id) && !/plate|none|hex|menu|kit/.test(id),
+      );
+      const b4 = await block(W);
+      const d4 = await drawn(W);
+      results.push({
+        name: 'Fill color',
+        pick: fill.pick,
+        wrote: typeof b4?.color === 'string' && b4.color !== b0?.color,
+        drawn: d4?.color !== d0?.color,
+        value: JSON.stringify(b4?.color),
+      });
+      if (results[3].wrote) await undo();
+      const ok =
+        missing.length === 0 &&
+        before &&
+        results.every((r) => r.pick !== null && r.wrote && r.drawn !== false);
       return {
-        ok:
-          missing.length === 0 &&
-          picked !== null &&
-          after?.outline?.width === 2 &&
-          /^2/.test(d?.stroke ?? ''),
-        observed: `tail controls ${want.filter((c) => tail.includes(c)).join(', ') || 'none'}; missing ${missing.join(', ') || 'none'}; Border weight pick ${picked ?? 'none'}: outline ${JSON.stringify(before?.outline)} -> ${JSON.stringify(after?.outline)}, drawn stroke ${d?.stroke}`,
+        ok,
+        observed: `tail controls ${want.filter((c) => tail.includes(c)).join(', ') || 'none'}; missing ${missing.join(', ') || 'none'}; before the text controls ${before}; ${results.map((r) => `${r.name}: pick ${r.pick ?? 'none'}, wrote ${r.wrote} (${r.value})${r.drawn === null ? '' : `, drawn ${r.drawn}`}`).join('; ')}${ok ? '' : ' (docs/OBJECTS.md 4.2 item 4, B5)'}`,
       };
     },
   );

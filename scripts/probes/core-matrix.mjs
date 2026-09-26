@@ -49,7 +49,15 @@
 // `core/svg.spec.ts`, the six control ids of VECTOR.md 4.8 the svg rows' `parks` name before the
 // lanes' files hold them (`intake.svg.*`, `picture.svg.copy`, `export.svg.vector`), and retired
 // the row `logos.intake.svg-sentence` with its sentence (4.7), so ROW_FEATURE keeps the two
-// logos rows whose measurement belongs to export and images.
+// logos rows whose measurement belongs to export and images. The objects round (docs/OBJECTS.md
+// section 6) added the area `gestures` whose rows belong to the unparkable `arrange` (the live
+// gestures: the draw as it grows, the click placement, the rings and the handles on the object
+// at every frame, the rotated ring, the connector during a move, the frame cadence and its
+// budget), the tables, charts, diagrams, wordart and lines rows of its sections 3 and 4, and no
+// new control id: the table handles of 3.3 item 4 and the word art tail of 4.2 item 4 keep the
+// ids the features round declared below (`handle.table.row`, `.add.column`, `.add.row`,
+// `.head.column`, `.head.row`, `toolbar.wordart.outline`), read as `handle.<block>.<part>`
+// families where the overlay templates them.
 //
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
@@ -118,10 +126,18 @@ export const CORE_FEATURES = Object.freeze([
 
 /**
  * An id's first part that is not a feature name, with the feature its rows belong to: the
- * `collab` rows are the share feature's, and the `menus` rows of the vector round (the icons on
- * the visual rows, docs/VECTOR.md 6.1) are the chrome's, so an icon row is unparkable.
+ * `collab` rows are the share feature's, the `menus` rows of the vector round (the icons on the
+ * visual rows, docs/VECTOR.md 6.1) are the chrome's, so an icon row is unparkable, and the
+ * `gestures` rows of the objects round (the live gestures, docs/OBJECTS.md section 2 and 6.1) are
+ * the arrange feature's, so a red gesture row fails the ship.
  */
-export const AREA_FEATURE = Object.freeze({ collab: 'share', menus: 'chrome' });
+export const AREA_FEATURE = Object.freeze({
+  collab: 'share',
+  menus: 'chrome',
+  /* the objects round (docs/OBJECTS.md 6.1): the live gesture rows are the arrange feature's,
+     which is unparkable, so a red gesture row fails the ship */
+  gestures: 'arrange',
+});
 
 /**
  * The rows whose feature is not their id's area (docs/FEATURES.md 7.1): a row of a new feature's

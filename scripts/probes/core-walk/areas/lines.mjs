@@ -24,6 +24,8 @@ export const IDS = [
   'lines.connector.re-end',
   'lines.insert.arrow-head',
   'lines.tail.line-start-end-menu',
+  /* the objects round (docs/OBJECTS.md 4.2 item 5): the chip names the line kind */
+  'lines.chip.kind-name',
 ];
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -478,7 +480,74 @@ export async function run(t) {
     return made;
   };
   const elbow = await connectorRow('lines.connector.elbow', 'elbowConnector');
-  await connectorRow('lines.connector.curved', 'curvedConnector');
+  const curved = await connectorRow('lines.connector.curved', 'curvedConnector');
+  /**
+   * Selects a line by a click on its path, then Tab through the stage's objects until its own
+   * move handle is up (two connectors on one row overlap, so the click reaches whichever is
+   * drawn on top; the re-end row below walks the same way); null when it never comes up.
+   */
+  const selectLine = async (blockId) => {
+    await t.clearAll();
+    const onPath = await page.evaluate((id) => {
+      const inner = document.querySelector(
+        `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`,
+      );
+      const el = inner?.querySelector('path, polyline, line') ?? null;
+      if (!el) return null;
+      if (typeof el.getTotalLength !== 'function') {
+        const r = el.getBoundingClientRect();
+        return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+      }
+      const pt = el.getPointAtLength(el.getTotalLength() / 2);
+      const m = el.getScreenCTM();
+      return m ? { x: m.a * pt.x + m.c * pt.y + m.e, y: m.b * pt.x + m.d * pt.y + m.f } : null;
+    }, blockId);
+    let ctrls = [];
+    if (onPath) {
+      await t.clickAt(onPath.x, onPath.y);
+      await t.sleep(200);
+      ctrls = await t.handleControls();
+    }
+    const own = `handle.${blockId}.move`;
+    let walked = 0;
+    while (!ctrls.includes(own) && walked < 12) {
+      await t.press('Tab');
+      await t.sleep(150);
+      ctrls = await t.handleControls();
+      walked += 1;
+    }
+    if (!ctrls.includes(own)) ctrls = (await t.selectObject(blockId)) ?? [];
+    return ctrls.includes(own) ? await t.chip() : null;
+  };
+  await t.step(
+    'lines.chip.kind-name',
+    'select the elbow connector, the line, the arrow, the curved connector and rectangle A in turn; read the chip',
+    'the chips read "Elbow connector", "Line", "Arrow", "Curved connector" and "Shape"',
+    async () => {
+      const want = [
+        ['the elbow connector', elbow?.id ?? null, 'Elbow connector'],
+        ['the line', line?.id ?? null, 'Line'],
+        ['the arrow', arrow?.id ?? null, 'Arrow'],
+        ['the curved connector', curved?.id ?? null, 'Curved connector'],
+        ['rectangle A', A.id, 'Shape'],
+      ];
+      const read = [];
+      for (const [name, id, expected] of want) {
+        if (!id) {
+          read.push({ name, expected, chip: null, ok: false, reason: 'not on the slide' });
+          continue;
+        }
+        const chip = await selectLine(id);
+        read.push({ name, expected, chip, ok: chip === expected });
+      }
+      await t.clearAll();
+      const ok = read.every((r) => r.ok);
+      return {
+        ok,
+        observed: `${read.map((r) => `${r.name}: chip ${r.chip === null ? (r.reason ?? 'none') : `"${r.chip}"`} (${r.expected})`).join('; ')}${ok ? '' : ' (docs/OBJECTS.md 4.2 item 5, B3: blockDisplayName)'}`,
+      };
+    },
+  );
   await t.step(
     'lines.connector.re-end',
     "a third rectangle C; select the elbow connector, drag its end handle from B's site to C's left site; move C",

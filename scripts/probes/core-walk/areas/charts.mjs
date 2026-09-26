@@ -38,6 +38,8 @@ export const IDS = [
   'charts.legend.none-from-toolbar',
   'charts.panel.no-duplicate-controls',
   'charts.grid.remove-visible',
+  /* the objects round (docs/OBJECTS.md 4.2 item 1): the pie's Add series refused with its sentence */
+  'charts.pie.add-series-refused',
 ];
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -812,7 +814,120 @@ export async function run(t) {
     pickTailOption,
     undo,
   });
+  await objectsRound(t, S, { block, undo });
   await t.advancedBack('the charts rows');
+}
+
+/**
+ * The objects round (docs/OBJECTS.md 4.2 item 1, the row `charts.pie.add-series-refused`): a pie
+ * chart draws one series, so the grid's Add series is disabled with the sentence in its tooltip
+ * and writes nothing; on a column chart the same control adds a series. Both charts are placed
+ * through the window API as setup writes on their own slide.
+ */
+async function objectsRound(t, S, h) {
+  const { page } = t;
+  const LANE = 'B3';
+  const S2 = await t
+    .setup(
+      'a slide for the pie and the column chart',
+      'slide.new through the window API',
+      async () => {
+        const id = await t.setupSlide(S, 'blank');
+        t.deck.chartSlide2 = id;
+        return { ok: Boolean(id), observed: `slide ${id}` };
+      },
+    )
+    .then(() => t.deck.chartSlide2);
+  await t.clickCard(S2);
+  await t.clearAll();
+  const PIE = 'ob-pie';
+  const COL = 'ob-column';
+  const chart = (id, kind, x) => ({
+    id,
+    type: 'chart',
+    kind,
+    categories: ['North', 'South', 'West'],
+    series: [{ name: 'Bookings', values: [30, 45, 20] }],
+    pos: { x, y: 120, w: 700, h: 420 },
+  });
+  await t.setup(
+    'a pie chart and a column chart',
+    'block.insert through the window API',
+    async () => {
+      const a = await t.placeBlock(S2, chart(PIE, 'pie', 60));
+      const b = await t.placeBlock(S2, chart(COL, 'column', 840));
+      return { ok: Boolean(a && b), observed: [a, b].map((o) => o?.id ?? 'none').join(', ') };
+    },
+  );
+  const seriesOf = async (id) => (await t.blockOf(S2, id))?.block?.series?.length ?? null;
+  /** Opens Format options on the Chart data section for the selected chart. */
+  const openData = async () => {
+    if (await t.visible('bar.chart.editData')) await t.clickControl('bar.chart.editData');
+    else if (await t.visible('toolbar.editData')) await t.tailControl('toolbar.editData');
+    else {
+      await t.tailControl('toolbar.formatOptions');
+    }
+    await t.waitControl('formatOptions.chart', 8000).catch(() => undefined);
+    return t.visible('formatOptions.chart.addSeries');
+  };
+  const addSeriesFacts = () =>
+    page.evaluate(() => {
+      const el = document.querySelector('[data-control="formatOptions.chart.addSeries"]');
+      if (!el) return null;
+      return {
+        disabled: el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true',
+        ariaDisabled: el.getAttribute('aria-disabled'),
+        title: el.getAttribute('title') ?? el.getAttribute('aria-label') ?? null,
+      };
+    });
+  await t.step(
+    'charts.pie.add-series-refused',
+    'select the pie; Add series in the Chart data section (its tooltip read); then the same on the column chart; Cmd+Z',
+    'on the pie the control is disabled with the sentence "A pie chart draws one series; change the chart type for more" and the series count stays 1; on the column chart a series is added',
+    async () => {
+      await t.clearAll();
+      await t.selectObject(PIE);
+      const shown = await openData();
+      if (!shown)
+        return {
+          ok: false,
+          observed: 'no Add series control for the pie (formatOptions.chart.addSeries)',
+        };
+      const facts = await addSeriesFacts();
+      const tip = await t.hoverControl('formatOptions.chart.addSeries');
+      const before = await seriesOf(PIE);
+      await t.clickControl('formatOptions.chart.addSeries');
+      await t.sleep(600);
+      await t.settled();
+      const after = await seriesOf(PIE);
+      const sentence = 'A pie chart draws one series; change the chart type for more';
+      const refused = facts?.disabled === true && before === 1 && after === 1;
+      const said = (tip ?? '').includes(sentence);
+      await t.clearAll();
+      await t.selectObject(COL);
+      const shownCol = await openData();
+      const beforeCol = await seriesOf(COL);
+      const factsCol = await addSeriesFacts();
+      if (shownCol) await t.clickControl('formatOptions.chart.addSeries');
+      const afterCol = await t
+        .pollUntil(
+          () => seriesOf(COL),
+          (n) => n === (beforeCol ?? 0) + 1,
+          8000,
+        )
+        .catch(() => seriesOf(COL));
+      await t.settled();
+      const added = beforeCol !== null && afterCol === beforeCol + 1;
+      if (added) await h.undo();
+      await t.clearAll();
+      const ok = refused && said && added && factsCol?.disabled !== true;
+      return {
+        ok,
+        observed: `the pie: Add series ${facts ? `disabled ${facts.disabled} (aria-disabled ${facts.ariaDisabled})` : 'not drawn'}, tooltip ${tip === null ? 'none' : `"${tip}"`} (the sentence ${said}), series ${before} -> ${after}; the column chart: disabled ${factsCol?.disabled}, series ${beforeCol} -> ${afterCol} (added ${added})${ok ? '' : ` (docs/OBJECTS.md 4.2 item 1, ${LANE})`}`,
+      };
+    },
+  );
+  await t.clickCard(S);
 }
 
 /**

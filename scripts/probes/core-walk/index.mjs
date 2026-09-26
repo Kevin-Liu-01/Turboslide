@@ -40,6 +40,7 @@ import * as diagrams from './areas/diagrams.mjs';
 import * as exportArea from './areas/export.mjs';
 import * as fonts from './areas/fonts.mjs';
 import * as formatting from './areas/formatting.mjs';
+import * as gestures from './areas/gestures.mjs';
 import * as help from './areas/help.mjs';
 import * as images from './areas/images.mjs';
 import * as inbox from './areas/inbox.mjs';
@@ -63,7 +64,8 @@ import * as wordart from './areas/wordart.mjs';
  * (docs/PRODUCT.md 8.1) added the brand kit, the fonts and the assist after the View rows; a row
  * whose control a lane has not landed reads not driven with the control's id. The features round
  * (docs/FEATURES.md 7.1) added the logo picker after the fonts and, at ship two, the shader library
- * after the logos.
+ * after the logos. The objects round (docs/OBJECTS.md 6.1) added the gestures area after the word
+ * art: the frame rows of the live gestures, each on its own slide.
  */
 export const AREAS = [
   decks,
@@ -78,6 +80,9 @@ export const AREAS = [
   charts,
   diagrams,
   wordart,
+  /* the objects round (docs/OBJECTS.md 2.6, 6.1): the live gestures after the documents, on their
+     own slides, so every block kind the frames read is the walk's own */
+  gestures,
   share,
   exportArea,
   help,

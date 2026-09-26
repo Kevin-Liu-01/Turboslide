@@ -405,8 +405,9 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     for (const driver of ['core/chrome.spec.ts', 'core/brand.spec.ts', 'core/assist.spec.ts'])
       expect(rowsForDriver(driver).length, driver).toBeGreaterThan(0);
     /* the features round's ship two added 29 rows; the vector round (docs/VECTOR.md 6.1) added 43
-       rows and retired logos.intake.svg-sentence */
-    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29 + 43 - 1);
+       rows and retired logos.intake.svg-sentence; the objects round (docs/OBJECTS.md 6.1) added 33 rows
+       and carried five */
+    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29 + 43 - 1 + 33);
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
       'export.download.large-deck-pptx',
@@ -766,7 +767,7 @@ describe('the vector round (docs/VECTOR.md section 6)', () => {
   it('holds the svg feature, the menus area under chrome, the svg spec and the 43 added rows', () => {
     expect(CORE_FEATURES).toContain('svg');
     expect(isParkable('svg')).toBe(true);
-    expect(AREA_FEATURE).toEqual({ collab: 'share', menus: 'chrome' });
+    expect(AREA_FEATURE).toEqual({ collab: 'share', menus: 'chrome', gestures: 'arrange' });
     expect(CORE_SPEC_DRIVERS).toContain('core/svg.spec.ts');
     expect(rowsForDriver('core/svg.spec.ts').length).toBe(12);
     expect(rowsForDriver('svg.spec.ts')).toEqual(rowsForDriver('core/svg.spec.ts'));
@@ -881,5 +882,85 @@ describe('the vector round (docs/VECTOR.md section 6)', () => {
     expect(written.controls).toEqual(['intake.svg.paste']);
     expect(readFileSync(module, 'utf8')).toContain("  'intake.svg.paste',\n]);");
     expect(emitParked(list, { out: module, check: true }).changed).toBe(false);
+  });
+});
+
+// The objects round (docs/OBJECTS.md section 6, 6.1): the gestures area whose rows are the arrange
+// feature's (unparkable), the 33 rows added and the five carried, each carrying the round in its
+// note; the frame rows' setup writes; the carried tables rows keep their parks.
+describe('the objects round (docs/OBJECTS.md section 6)', () => {
+  const objects = CORE_MATRIX.filter((row) =>
+    /Objects round; docs\/OBJECTS\.md/.test(row.note ?? ''),
+  );
+
+  it('maps the gestures area to arrange, which cannot be parked', () => {
+    expect(AREA_FEATURE.gestures).toBe('arrange');
+    expect(isParkable('arrange')).toBe(false);
+    const gestures = CORE_MATRIX.filter((row) => areaOf(row.id) === 'gestures');
+    expect(gestures.length).toBe(19);
+    for (const row of gestures) {
+      expect(row.feature, row.id).toBe('arrange');
+      expect(row.driver, row.id).toBe(PROBE_DRIVER);
+      expect(row.parks, row.id).toBeUndefined();
+    }
+    expect(
+      validateCoreMatrix([
+        {
+          id: 'gestures.draw.x',
+          feature: 'arrange',
+          interaction: 'x',
+          driver: 'probe --core',
+          today: 'works',
+          evidence: 'e',
+        },
+      ]),
+    ).toHaveLength(1);
+    expect(() =>
+      validateCoreMatrix([
+        {
+          id: 'gestures.draw.x',
+          feature: 'shapes',
+          interaction: 'x',
+          driver: 'probe --core',
+          today: 'works',
+          evidence: 'e',
+        },
+      ]),
+    ).toThrow(/area gestures belongs to arrange, not shapes/);
+  });
+
+  it('holds the 33 added rows and the five carried ones with the round in their notes', () => {
+    expect(objects.length).toBe(38);
+    const byArea = {};
+    for (const row of objects) byArea[areaOf(row.id)] = (byArea[areaOf(row.id)] ?? 0) + 1;
+    expect(byArea).toEqual({
+      gestures: 19,
+      tables: 15,
+      charts: 1,
+      diagrams: 1,
+      wordart: 1,
+      lines: 1,
+    });
+    for (const id of [
+      'tables.seam.row-drag',
+      'tables.edge.add-row-column',
+      'tables.heads.select-row-column',
+      'tables.cells.prompt-hovered-only',
+      'wordart.tail.fill-outline',
+    ])
+      expect(
+        objects.some((row) => row.id === id),
+        id,
+      ).toBe(true);
+    /* the carried P1 rows and the new header toggle keep their parks on the declared families */
+    expect(coreRow('tables.heads.header-toggle').parks).toEqual(['handle.table.head.row']);
+    expect(coreRow('tables.seam.row-drag').parks).toEqual(['handle.table.row']);
+    expect(coreRow('tables.show.rules-only').driver).toBe('core/export.spec.ts');
+    /* every frame row reads the window API field the integrator lands by B1's request */
+    for (const id of ['gestures.frame.one-render-per-frame', 'gestures.frame.cost-budget'])
+      expect(coreRow(id).interaction).toContain('describe().state.gesture');
+    /* a broken row of the round carries the severity its item's value gives */
+    for (const row of objects.filter((r) => r.today === 'broken'))
+      expect([1, 2, 3], row.id).toContain(row.severity);
   });
 });

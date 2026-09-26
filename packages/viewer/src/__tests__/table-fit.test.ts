@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { emptyTable } from '@turboslide/schema/blocks/table';
+import type { TableRowsMeasure } from '@turboslide/schema/blocks/table';
 
 import {
   readTableRows,
@@ -207,13 +208,46 @@ describe('readTableRows', () => {
       el(['tr'], 0, 0, { borderBottomWidth: '1.5px' }, [cell(200, 300, 1)]),
     ]);
     const out = readTableRows(table as unknown as HTMLElement, 2, view);
+    /* the computed paddings and rules are the sheet's own lengths and scale by k to client px
+       before they join the rects (12 and 1.5 at k 2 are 24 and 3 client px), so the natural is
+       (29 + 24 + 24 + 3) / 2 = 40 and the hairline above 1.5 */
     expect(out).toEqual({
-      top: 0.75,
+      top: 1.5,
       rows: [
-        { drawn: 49.25, natural: 27.25 },
-        { drawn: 50, natural: 27.25 },
+        { drawn: 49.25, natural: 40 },
+        { drawn: 50, natural: 40 },
       ],
     });
+  });
+
+  it('reads an empty 54 px row as 54 at the stage’s fit scale (the computed lengths scaled by k)', () => {
+    /* the stage at k 0.5: a 20 px line box is 14.5 client px, the 12 px paddings 6, the 1 px rule
+       0.5; before the scaling the measure read 29 + 25 / k for an empty row (64.5 at k 0.705, the
+       resize floor above the rows and a drag up growing the table; the integrator's reproduction
+       of tables.resize.rows-share-extra) */
+    const cell = (top: number) =>
+      el(
+        ['td'],
+        top,
+        top + 26.5,
+        { paddingTop: '12px', paddingBottom: '12px', borderBottomWidth: '0px' },
+        [el(['para'], top + 6, top + 6 + 14.5)],
+      );
+    const table = el(['table'], 100, 181.5, { borderTopWidth: '1px' }, [
+      el(['tr', 'header'], 100.5, 127.5, { borderBottomWidth: '1px' }, [cell(100.5), cell(100.5)]),
+      el(['tr'], 127.5, 154.5, { borderBottomWidth: '1px' }, [cell(127.5)]),
+      el(['tr'], 154.5, 181.5, { borderBottomWidth: '1px' }, [cell(154.5)]),
+    ]);
+    const out = readTableRows(table as unknown as HTMLElement, 0.5, view);
+    expect(out).toEqual({
+      top: 1,
+      rows: [
+        { drawn: 54, natural: 54 },
+        { drawn: 54, natural: 54 },
+        { drawn: 54, natural: 54 },
+      ],
+    });
+    expect(tableRowsNaturalHeight(out as TableRowsMeasure)).toBe(163);
   });
 
   it('answers null with no rows or no scale', () => {

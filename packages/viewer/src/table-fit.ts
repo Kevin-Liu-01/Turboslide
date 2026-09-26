@@ -127,21 +127,25 @@ export function readTableRows(
       const last = paras[paras.length - 1];
       const contentTop = first ? first.getBoundingClientRect().top : r.top;
       const contentBottom = last ? last.getBoundingClientRect().bottom : r.top;
+      /* the computed paddings and rules are the sheet's own lengths (the sheet lays out at 1600 px
+         and scales by k), while the rects are client px: the lengths are scaled to client px
+         here so the measure adds like with like (read 64.5 for an empty 54 px row at k 0.705
+         before: 29 + 25 / k; the integrator's reproduction of tables.resize.rows-share-extra) */
       return {
         contentTop,
         contentBottom,
-        padTop: parseFloat(cs.paddingTop) || 0,
-        padBottom: parseFloat(cs.paddingBottom) || 0,
-        rule: grid ? parseFloat(cs.borderBottomWidth) || 0 : 0,
+        padTop: (parseFloat(cs.paddingTop) || 0) * k,
+        padBottom: (parseFloat(cs.paddingBottom) || 0) * k,
+        rule: grid ? (parseFloat(cs.borderBottomWidth) || 0) * k : 0,
       };
     });
     if (!Number.isFinite(top) || !Number.isFinite(bottom)) {
       top = 0;
       bottom = 0;
     }
-    return { top, bottom, rule: grid ? 0 : width(view, row, 'borderBottomWidth'), cells };
+    return { top, bottom, rule: grid ? 0 : width(view, row, 'borderBottomWidth') * k, cells };
   });
-  return rowsMeasureFromFacts({ top: width(view, table, 'borderTopWidth'), rows }, k);
+  return rowsMeasureFromFacts({ top: width(view, table, 'borderTopWidth') * k, rows }, k);
 }
 
 /**

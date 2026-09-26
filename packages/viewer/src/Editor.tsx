@@ -5648,17 +5648,23 @@ export function Editor({
       const rect = stageRect();
       if (rect) setPointer(sheetPoint(rect, e.clientX, e.clientY));
     }
-    /* no hover ring and no cell prompt while a gesture or a draw is down: the drawn object's
-       draft sits under the pointer from the press (docs/OBJECTS.md 2.4) */
-    if (gesture.current || frameDown.current) return;
-    const id = resolveObject(e.target, el, slideNow);
-    setHover((prev) => (prev === id ? prev : id));
-    promptHoveredCell(e.target, el, slideNow);
+    /* a gesture's move sets its own sites and guides (beginGesture) */
+    if (gesture.current) return;
+    /* a line tool's site marks follow the pointer while the tool is armed and while its line is
+       drawn (the vector round's shapes.geometry.sites: six marks on the hexagon during the drag),
+       so they stand above the draw's early return below (the integrator's gates of the objects
+       round: the marks read 0 during the drag once the return covered the draw) */
     const drawTool = toolRef.current;
     if (drawTool !== 'select' && isLineTool(drawTool) && isFreeformSlide(slideNow)) {
       const rect = stageRect();
       if (rect) setSites(sitesUnder(slideNow, sheetPoint(rect, e.clientX, e.clientY)));
     }
+    /* no hover ring and no cell prompt while a draw is down: the drawn object's draft sits under
+       the pointer from the press (docs/OBJECTS.md 2.4) */
+    if (frameDown.current) return;
+    const id = resolveObject(e.target, el, slideNow);
+    setHover((prev) => (prev === id ? prev : id));
+    promptHoveredCell(e.target, el, slideNow);
   };
 
   /**

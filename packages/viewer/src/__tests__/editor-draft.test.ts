@@ -507,6 +507,28 @@ describe('the draft of a draw (docs/OBJECTS.md 2.4)', () => {
     expect(wrapperOf(container, 'text')).toBeNull();
     expect(mounted.view().marquee).toEqual([300, 500, 200, 100]);
   });
+
+  it('keeps the line tool’s site marks under the pointer while the line is drawn (shapes.geometry.sites)', () => {
+    const frames = fakeFrames();
+    mounted = mount(documentOf(joinedSlide()), { tool: { kind: 'line', line: 'line' } });
+    const { container, view } = mounted;
+    const sheet = container.querySelector<HTMLElement>('.pt-slide');
+    if (!sheet) throw new Error('no sheet');
+    /* the pointer over rectangle b's left edge before the press: its sites are marked */
+    act(() => sheet.dispatchEvent(pointer('pointermove', 705, 280)));
+    const armed = view().sites.length;
+    expect(armed).toBeGreaterThan(0);
+    /* the press away from the shapes, then the drag onto b's left site: the marks stay while the
+       draw is down (the integrator's gates of the objects round read 0 during the drag once the
+       draw's early return covered the move) */
+    act(() => sheet.dispatchEvent(pointer('pointerdown', 300, 500)));
+    frames.flush();
+    act(() => sheet.dispatchEvent(pointer('pointermove', 705, 280)));
+    act(() => window.dispatchEvent(pointer('pointermove', 705, 280)));
+    frames.flush();
+    expect(wrapperOf(container, 'shape')).not.toBeNull();
+    expect(view().sites.length).toBe(armed);
+  });
 });
 
 describe('a column seam dragged with a cell open (docs/OBJECTS.md 3.3 item 5; build/b2.md request 1b)', () => {

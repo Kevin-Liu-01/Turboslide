@@ -1134,16 +1134,31 @@ export async function run(t) {
     'the ground changes within 5 s, or one sentence names the failure and no log text is shown; Place reads Placing with the seconds while it waits',
     async () => {
       await t.clickCard(B);
-      const o = await openBackground();
+      let o = await openBackground();
       if (!o.open) return o.why;
-      const shaderRow = await t.visible('dialog.background.shader');
-      const materialRow = await t.visible('dialog.background.material.choose');
+      let shaderRow = await t.visible('dialog.background.shader');
+      let materialRow = await t.visible('dialog.background.material.choose');
+      let switched = false;
+      if (!shaderRow && !materialRow) {
+        /* the Shader row is a parked dialog control since the features round's ship two
+           (ship-f0279e1.json, this row's own park through parked-controls.ts): a parked row is
+           driven with the switch on (docs/FOCUS.md 3.1, the toolkit's reachRow rule), and the
+           area's end turns the switch off again */
+        await closeBackground();
+        switched = await t.setAdvanced(true);
+        if (switched) t.deck.advanced = true;
+        await t.clickCard(B);
+        o = await openBackground();
+        if (!o.open) return o.why;
+        shaderRow = await t.visible('dialog.background.shader');
+        materialRow = await t.visible('dialog.background.material.choose');
+      }
       if (!shaderRow && !materialRow) {
         await closeBackground();
         return t.notBuilt(
           'dialog.background.shader',
           BACKGROUND_LANE,
-          'no Shader row and no Material row in the Background dialog (FEATURES.md 5.4)',
+          `no Shader row and no Material row in the Background dialog (FEATURES.md 5.4)${switched ? ', with Tools > Advanced tools on' : ''}`,
         );
       }
       const path = shaderRow ? 'shader' : 'material';

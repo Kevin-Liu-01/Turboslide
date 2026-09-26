@@ -1,10 +1,10 @@
 {
   "commit": "f0279e1",
   "renderedFrom": [
-    "docs/gslides-parity/features/build/ship-two/preview-run1-core-gate.json",
-    "docs/gslides-parity/features/build/ship-two/preview-run2-core-gate.json"
+    "docs/gslides-parity/features/build/ship-two/preview-run3-core-gate.json",
+    "docs/gslides-parity/features/build/ship-two/preview-run4-core-gate.json"
   ],
-  "rule": "docs/FEATURES.md 7.2 and docs/RETURN.md section 1 rule 2: parkedFeaturesOf over the last readings of the two gate runs of record on the enforce preview https://turboslide-bxjtrzqfy-kl01s-projects.vercel.app built from 573dfe0; a row carrying parks red in both runs parks the controls it names, a parkable feature red through a row without parks in both runs is parked whole, a row of a feature parked whole is not listed a second time, and a row or feature red in one run and green in the other is flaky and is not listed; the previous ship's list (ship-f1afe1e.json) is carried forward where its rows did not read green in both runs, since the menu model's advanced flags follow this list, and a carried row green in both runs leaves it (leaves); the exceptions the ship rule makes over the gate's mechanical wouldPark are in notParked, each with its reason",
+  "rule": "docs/FEATURES.md 7.2 and docs/RETURN.md section 1 rule 2: parkedFeaturesOf over the last readings of the two gate runs of record on the enforce preview https://turboslide-ffc7yeovv-kl01s-projects.vercel.app built from 5f4c535; a row carrying parks red in both runs parks the controls it names, a parkable feature red through a row without parks in both runs is parked whole, a row of a feature parked whole is not listed a second time, and a row or feature red in one run and green in the other is flaky and is not listed; the previous ship's list (ship-f1afe1e.json) is carried forward where its rows did not read green in both runs, since the menu model's advanced flags follow this list, and a carried row green in both runs leaves it (leaves); the exceptions the ship rule makes over the gate's mechanical wouldPark are in notParked, each with its reason",
   "parkedFeatures": ["inbox", "templates"],
   "parkedRows": [
     {
@@ -67,7 +67,7 @@
   "notParked": [
     {
       "feature": "brand",
-      "why": "the gate's wouldPark names it; the gate's wouldPark names it on brand.logo.replace-every-slide, red in both runs by the recorded blob tier class (run 1 the editor load's 90 s stall, run 2 the footer's picture past 5 s under a machine load of 100), and on thirteen brand rows not driven in run 1 alone (the walk's picture setup met the store's 403 window on the just written asset) and green in run 2; brand.objects.kit-colours-first is a P1 row not on the build (FEATURES.md section 1); every other brand row on the build is green in the last run"
+      "why": "the gate's wouldPark names it; the gate's wouldPark names it on brand.objects.kit-colours-first, a P1 row not on the build (FEATURES.md section 1); brand.colors.primary-live was red once (run 3) and green in run 4; every other brand row on the build is green in both runs"
     },
     {
       "feature": "fonts",
@@ -75,7 +75,7 @@
     },
     {
       "feature": "assist",
-      "why": "the gate's wouldPark names it; the gate's wouldPark names it; assist.viewer.disabled was red once (run 1, the runner's closed context) and green in run 2; assist.quota.429 is not driven with no Upstash on the preview, which PRODUCT.md 8.2 exempts as the environment's"
+      "why": "the gate's wouldPark names it; the gate's wouldPark names it; assist.outside-write.snackbar was red once (run 3) and green in run 4; assist.quota.429 is not driven with no Upstash on the preview, which PRODUCT.md 8.2 exempts as the environment's"
     },
     {
       "id": "logos.index.cached-offline",
@@ -83,9 +83,9 @@
       "why": "not driven by design on the fixture preview (FEATURES.md 4.3, 4.8, 7.2); the unit tests in apps/studio/src/server/logos.test.ts are named; parking insert.logo would hide Insert > Logo for a row the fixture preview cannot drive"
     },
     {
-      "id": "shaders.frame.auto-capture",
-      "controls": ["insert.shader"],
-      "why": "red in both runs on the runner and not on the product: run 1 the runner's closed browser context before the row's reads (Target page, context or browser has been closed, the machine at a load average of 110 to 130), run 2 the client's frame 12,544 ms after the change against the row's 10 s at a load average of 100 (the capture runs in the runner's Chromium on this machine); every product clause of the row read green in the verifier's pass 2 (F.5 F6: the frame 1.6 s after the change, backend client, the renderer string, the id frame-<16 hex of the key>, 3200 by 1814) and in this step's run 1 up to the closed page; parking insert.shader on the runner's reading would hide Insert > Shader for the product it did not measure; the row is read again by the pair on the confirming preview"
+      "id": "logos.index.refresh-fixture",
+      "controls": ["insert.logo"],
+      "why": "red in both runs on the shared store's index and not on the product: the spec's search for acme answered no row (TypeError at logos.spec.ts 449, JSON.stringify(undefined)), the index this fixture preview read being the one the previews and production share on the one Blob store (ship one rebuilt it from thesvg.org at 4,945 brands; the fixture's ten marks are not in it), the same reading as the ship one hotfix's preview run 1, whose runs 2 and 3 read the row green; the row is recorded not driven on production by design with its unit tests named, and parking insert.logo on the store's state would hide Insert > Logo for a fixture project row"
     },
     {
       "id": "shaders.show.plays-when-on",
@@ -96,6 +96,26 @@
       "id": "shaders.show.frame-when-off",
       "controls": ["view.playShaders"],
       "why": "a P1 row not on the build (the show's ShaderLayer, FEATURES.md 5.6, B5 with B1); its one park view.playShaders is on the build and green in both runs through shaders.view.play-setting"
+    },
+    {
+      "id": "shaders.panel.one-home",
+      "controls": ["formatOptions.shader"],
+      "why": "red in both runs on its second clause alone, the Background dialog's options link, which the walk could not reach because the row that places the ground (shaders.background.place-answers, parked by this list) read not driven with the Shader row hidden and the switch off; with the walk's place step reaching the parked row with the switch on (the toolkit's reachRow rule, the ship step's seam) the row read green in both reruns of the shaders area on this preview (preview-walk-shaders-rerun1.json, rerun2.json: Format options open at the Shader section for the covering picture, Pictures and materials without a Material section)"
+    },
+    {
+      "id": "shaders.panel.kit-colours",
+      "controls": ["formatOptions.shader.color"],
+      "why": "red in both runs on the re capture's time alone (the frame re keyed 14,718 and 18,075 ms after the kit write against 5 s, the block's mean colour moved 78.2 and 76.8, the six swatches read; the capture runs in the runner's Chromium on a machine at a load average of 57 to 140 from other pipelines) and green in run 1 at load 13 (4,355 ms) and in both reruns of the shaders area on this preview at load 13 to 21 (preview-walk-shaders-rerun1.json, rerun2.json)"
+    },
+    {
+      "id": "shaders.panel.preset-tiles",
+      "controls": ["formatOptions.shader.preset"],
+      "why": "red in both runs on the read's time alone (Chrome clicked, the canvas moved 151 to 153 of mean luminance with 93 to 95 percent of its pixels changed, read at 861 and 5,714 ms against 500 by a screenshot loop on a machine at a load average of 57 to 140 from other pipelines) and green in run 1 at load 13 and in the last run of the shaders area on this preview (preview-walk-shaders-rerun2.json)"
+    },
+    {
+      "id": "shaders.perf.one-context",
+      "controls": ["insert.shader"],
+      "why": "red in both runs and in both reruns on the swap's time alone: one canvas on the stage in every selection state, the second's root one canvas and the first's none with its frame decoded, the swap read 3,399 and 613 ms in the runs (load 57 to 140) and 515 and 635 ms in the reruns (load 13 to 21) against the row's 500 ms on the runner's SwiftShader renderer, 429 ms in run 1 and 406 ms in the integrator's run 2 on the same runner, 387 to 440 ms in the seller's browser on a GPU (the verifier's pass 2 F.6); parking insert.shader on 15 to 135 ms of a software renderer's shader compile would hide the library the row's plan proves; the swap's time is the first shader item of the round after (Kevin's list)"
     }
   ],
   "leaves": []

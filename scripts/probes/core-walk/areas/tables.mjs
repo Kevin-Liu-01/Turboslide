@@ -69,6 +69,30 @@ export const IDS = [
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
+/**
+ * The selected table's own controls (the heads and the edge "+", docs/OBJECTS.md 3.3 item 4) are
+ * parked families on a ship (parked-controls.ts, read by the family for every table since the
+ * objects round's merge), hidden while Tools > Advanced tools is off: when the selected table
+ * draws no head the switch goes on, as the walk drives every parked row with it (docs/FOCUS.md
+ * 3.1), the table is selected again and the area's end turns the switch off (`advancedBack`).
+ * The integrator's gates read the three rows "not on this build" with the switch off after the
+ * lines area had turned it back.
+ */
+async function tableControlsOn(t, page, id, reselect) {
+  const drawn = () =>
+    page.evaluate(
+      (id) => document.querySelector(`.ts-overlay [data-control^="handle.${id}.head."]`) !== null,
+      id,
+    );
+  if (await drawn()) return true;
+  const on = await t.setAdvanced(true);
+  if (on) t.deck.advanced = true;
+  await t.sleep(300);
+  await reselect();
+  await t.sleep(300);
+  return drawn();
+}
+
 export async function run(t) {
   const { page, BASE } = t;
   const S = await t
@@ -2143,6 +2167,7 @@ async function featuresRound(t, S, h) {
     'a column is inserted with the other widths held; a row is inserted; each is one Cmd+Z',
     async () => {
       await selectTable(T3);
+      await tableControlsOn(t, page, T3, () => selectTable(T3));
       const boxes = await h.cellBoxes(T3);
       const right = boxes.rows[1][boxes.rows[1].length - 1];
       await page.mouse.move(right.x + right.w - 2, right.y + right.h / 2);
@@ -2220,6 +2245,7 @@ async function featuresRound(t, S, h) {
     'the column, then the row, is selected as a range; the fill writes every cell of the selection',
     async () => {
       await selectTable(T3);
+      await tableControlsOn(t, page, T3, () => selectTable(T3));
       const boxes = await h.cellBoxes(T3);
       const top = boxes.rows[0][2];
       await page.mouse.move(top.x + top.w / 2, top.y - 6);
@@ -3201,6 +3227,13 @@ async function objectsRound(t, S, h) {
         await t.press('Escape');
         await t.sleep(200);
       }
+      await tableControlsOn(t, page, T6, async () => {
+        await t.selectObject(T6);
+        if (await t.editing()) {
+          await t.press('Escape');
+          await t.sleep(200);
+        }
+      });
       const f = await t.frameFacts(T6);
       const cell = f?.cells?.rows?.[0]?.[0] ?? null;
       if (cell) {

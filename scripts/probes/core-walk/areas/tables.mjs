@@ -2806,8 +2806,12 @@ async function objectsRound(t, S, h) {
 
   // ---- the one click state (3.2, 3.3 item 1)
   const T5 = 'ob-empty';
+  /* the tables of this section are placed at their rows' box, 163 for three rows at 20 px (54 a row
+     with the rule and the hairline above, schema tableBoxHeight), so a resize up stops where it
+     began and never grows the box to the floor (the integrator's walk: a table placed at 160 rose
+     to 163 on the drag up) */
   await t.setup('an empty 3 by 3 table', 'block.insert through the window API', async () => {
-    const obj = await t.placeBlock(S4, emptyTable(T5, 3, 3, { x: 320, y: 100, w: 960, h: 160 }));
+    const obj = await t.placeBlock(S4, emptyTable(T5, 3, 3, { x: 320, y: 100, w: 960, h: 163 }));
     return { ok: Boolean(obj), observed: obj?.id ?? 'none' };
   });
   await t.step(
@@ -3015,7 +3019,7 @@ async function objectsRound(t, S, h) {
     'a typed 3 by 3 table 960 wide',
     'block.insert through the window API',
     async () => {
-      const obj = await t.placeBlock(S4, typedTable(T6, 3, 3, { x: 80, y: 420, w: 960, h: 160 }));
+      const obj = await t.placeBlock(S4, typedTable(T6, 3, 3, { x: 80, y: 420, w: 960, h: 163 }));
       return { ok: Boolean(obj), observed: obj?.id ?? 'none' };
     },
   );

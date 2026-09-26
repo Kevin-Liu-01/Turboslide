@@ -2169,8 +2169,11 @@ async function featuresRound(t, S, h) {
       await selectTable(T3);
       await tableControlsOn(t, page, T3, () => selectTable(T3));
       const boxes = await h.cellBoxes(T3);
+      /* the pointer at the second seam of the right edge (the row's words), clear of the e square at
+         the edge's middle, which the "+" keeps clear of since the objects round (TableOverlay.tsx
+         SQUARE_CLEAR_PX; the middle of row 1 of 3 is that square) */
       const right = boxes.rows[1][boxes.rows[1].length - 1];
-      await page.mouse.move(right.x + right.w - 2, right.y + right.h / 2);
+      await page.mouse.move(right.x + right.w - 2, right.y + right.h);
       await t.sleep(500);
       /* the ids of docs/OBJECTS.md 3.3 item 4 are the block's (`handle.<block>.add.column`); the
          declared family `handle.table.add.column` is read as well */
@@ -2182,7 +2185,8 @@ async function featuresRound(t, S, h) {
       const addColumn = await t.visible(addColumnId);
       if (!addColumn) {
         const bottom = boxes.rows[boxes.rows.length - 1][1];
-        await page.mouse.move(bottom.x + bottom.w / 2, bottom.y + bottom.h - 2);
+        /* the second column seam of the bottom edge, clear of the s square at its middle */
+        await page.mouse.move(bottom.x + bottom.w, bottom.y + bottom.h - 2);
         await t.sleep(500);
         if (!(await t.visible(await addRowId())))
           return t.notBuilt(
@@ -2209,7 +2213,7 @@ async function featuresRound(t, S, h) {
       await selectTable(T3);
       const b2 = await h.cellBoxes(T3);
       const bottom = b2.rows[b2.rows.length - 1][1];
-      await page.mouse.move(bottom.x + bottom.w / 2, bottom.y + bottom.h - 2);
+      await page.mouse.move(bottom.x + bottom.w, bottom.y + bottom.h - 2);
       await t.sleep(500);
       const rowControl = await addRowId();
       const addRow = await t.visible(rowControl);

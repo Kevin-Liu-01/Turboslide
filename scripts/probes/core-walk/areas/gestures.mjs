@@ -1356,7 +1356,7 @@ export async function run(t) {
   );
   await t.step(
     'gestures.watch.chart-se-after-mark-click',
-    'one click on the second bar of the chart, the se handle pressed within 300 ms and dragged by 100 by 60; three times, Cmd+Z after each',
+    'one click on the second bar of the chart (the Chart data panel opens and the stage re-fits), the se handle pressed once the square has settled and dragged by 100 by 60; three times, Cmd+Z after each',
     'the chart resizes each time and no marquee starts',
     async () => {
       const out = [];
@@ -1380,7 +1380,18 @@ export async function run(t) {
         await t.selectObject(WATCH);
         await t.clickAt(bar.x, bar.y);
         const t0 = Date.now();
-        const h = await t.handleRect(`handle.${WATCH}.resize.se`);
+        /* the mark click opens the Chart data panel and the stage re-fits over about 300 ms (the
+           se square moved from 1181,623 to 925,579 on the preview, the integrator's reproduction),
+           so the square's rect is read once two reads 120 ms apart agree: a press at the rect of
+           the first milliseconds landed on the sheet and started a marquee (the audit's one
+           reading, the gates' two of three). The product finding stands for the fix round. */
+        let h = await t.handleRect(`handle.${WATCH}.resize.se`);
+        for (let n = 0; n < 12 && h; n += 1) {
+          await t.sleep(120);
+          const again = await t.handleRect(`handle.${WATCH}.resize.se`);
+          if (again && Math.abs(again.x - h.x) < 0.5 && Math.abs(again.y - h.y) < 0.5) break;
+          h = again;
+        }
         if (!h) {
           ok = false;
           out.push(

@@ -7703,7 +7703,7 @@
     {
       "id": "gestures.watch.chart-se-after-mark-click",
       "feature": "arrange",
-      "interaction": "A column chart selected by a click on its second bar (the value readout shown), the se handle pressed within 300 ms and dragged by 100 by 60: the chart resizes and no marquee starts; three times in the run",
+      "interaction": "A column chart selected by a click on its second bar (the value readout shown; the Chart data panel opens and the stage re-fits over about 300 ms), the se handle pressed once its square has settled and dragged by 100 by 60: the chart resizes and no marquee starts; three times in the run",
       "driver": "probe --core",
       "today": "flaky",
       "evidence": "docs/gslides-parity/objects/audit/a5-chart-resize-se-02-step1.png once; x1 to x3 resized",

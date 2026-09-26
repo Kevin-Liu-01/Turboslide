@@ -30,6 +30,7 @@ import type {
   ReactNode,
 } from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
@@ -39,7 +40,7 @@ import { assetVector, vectorOf } from '@turboslide/schema/assets';
 import type { Asset } from '@turboslide/schema/assets';
 import type { Block, BlockType, ShotTrim } from '@turboslide/schema/blocks';
 import { formatChartNumber } from '@turboslide/schema/blocks/chart';
-import type { TableBlock, TableCommand } from '@turboslide/schema/blocks/table';
+import type { TableBlock, TableCommand, TableRowsMeasure } from '@turboslide/schema/blocks/table';
 import { applyTableCommand } from '@turboslide/schema/blocks/table';
 import type { GuidesInput } from '@turboslide/schema/canvas';
 import { GUIDE_CENTRE, grammarRecordOf } from '@turboslide/schema/canvas';
@@ -72,11 +73,17 @@ import {
   styleRange,
 } from '@turboslide/schema/text';
 import type { RunMarks } from '@turboslide/schema/text';
-import { PROMPTS } from '@turboslide/schema/layouts';
 import { TYPE_LADDER } from '@turboslide/schema/typography';
 import { SHEET } from '@turboslide/theme/tokens';
 
-import { measureForCanvas, measureForFit, virtualObjectIds } from './canvas-measure';
+import {
+  awaitSheetReady,
+  measureForCanvas,
+  measureForFit,
+  mountHiddenSheet,
+  renderForMeasure,
+  virtualObjectIds,
+} from './canvas-measure';
 import type { FitMeasure, VirtualObjectId } from './canvas-measure';
 import {
   altFor,
@@ -105,6 +112,7 @@ import { Frame } from './Frame';
 import {
   alignMutations,
   boundingBoxOf,
+  CONTENT_BOX_SHEET,
   distributeMutations,
   expandGroups,
   freeformBlocks,
@@ -131,8 +139,8 @@ import {
   blockMoveFor,
   blockMoveHandle,
   centredBox,
+  drawDraftMutation,
   drawnBox,
-  drawnLineOrientation,
   droppedPictureBox,
   EMPTY_BOXES,
   freeGesture,
@@ -149,7 +157,6 @@ import {
   SCRIBBLE_SAMPLE_PX,
   sheetPoint,
   simplifyPoints,
-  siteUnder,
   sitesUnder,
   TOOL_DEFAULT_SIZE,
   toolBlockType,
@@ -212,7 +219,23 @@ import type {
 import { editorKeyAction, isBareCharacterKey, typingEntry } from './keys';
 import { boldOfRange, rangeHasMark, setBoldRange, toggleMark } from './marks';
 import type { ToggleMark } from './marks';
+import {
+  createFrameCoalescer,
+  EMPTY_GESTURE_RECORD,
+  frameRecord,
+  gestureClock,
+  gestureReport,
+  rendersFrame,
+  skippedFrame,
+} from './gesture-frame';
+import type {
+  FrameCoalescer,
+  GestureFrameRecord,
+  GestureRenderKind,
+  GestureReport,
+} from './gesture-frame';
 import { isMarquee, marqueeBox, marqueeHits } from './Marquee';
+import { selectionRingBox } from './selection-box';
 import { blockTypeIn, boxContains, ringBoxFor } from './text-ring';
 import { MaterialMount } from './MaterialMount';
 import { shaderPaletteOfDeck } from '@turboslide/materials/presets';
@@ -265,7 +288,15 @@ import type {
   CellRange,
   TableRangeShape,
 } from './table-range';
-import { isTableSeamHandle, tableSeamHandles, tableSeamMutation } from './table-seam';
+import { readTableRows, tableGrowMutation, tableRowsNaturalHeight } from './table-fit';
+import {
+  isTableRowSeamHandle,
+  isTableSeamHandle,
+  tableRowSeamHandles,
+  tableSeamDrag,
+  tableSeamHandles,
+} from './table-seam';
+import type { TableSeamContext } from './table-seam';
 import {
   movedCellPointer,
   parseTablePaste,
@@ -357,10 +388,22 @@ export type EditorOverlayView = {
   /** the block under the pointer, when it is not the selected one */
   hover: Box | null;
   selection: Selection;
-  /** the selected block's or run's box */
+  /**
+   * the selection ring's box: one selected object's `pos` box (the shown document's, so a
+   * gesture's draft drives it at every frame and the overlay turns it with the object; selection-
+   * box.ts), the measured box of an object without `pos`, the table's box while one of its cells
+   * is open or active (docs/OBJECTS.md 3.3 item 1), the run's box of a text session
+   */
   selectionBox: Box | null;
   /** the selected object's position, so the ring and the handles rotate and flip with it (SPEC-2 1.5) */
   selectionPos: Position | null;
+  /**
+   * the cell ring inside a table's ring (docs/OBJECTS.md 3.3 item 1): the open or active cell's
+   * measured grid area, or the union of the active range; null with no cell in play. The
+   * overlay draws it as `.ts-cell-ring`; optional so a view built elsewhere (a chrome test)
+   * stands without it
+   */
+  cellRing?: Box | null;
   /** the block's plain name for the chip (gslides-parity SPEC 13.7); with the id after a middle dot only when ids are shown */
   chip: string | null;
   handles: Handle[];
@@ -636,6 +679,20 @@ export type EditorHandle = {
    * instead of being consumed by `exitCrop`.
    */
   cropOpen: () => boolean;
+  /**
+   * The frames of the gesture that is down, or of the last one (docs/OBJECTS.md 2.4; the objects
+   * round): the frame count, the worst and the mean frame in ms, the frames the budget skipped and
+   * whether it degraded; null before the first gesture. The page publishes it through the window
+   * API as `describe().state.gesture`, so a driver reads the cadence without instrumentation.
+   */
+  gestureRecord: () => GestureReport | null;
+  /**
+   * A cell range on a table from the overlay's row and column heads (docs/OBJECTS.md 3.3 item 4;
+   * build/b5.md R2): selects the table block with no session and sets the range from `r0,c0` to
+   * `r1,c1`, so the range ring, `EditorMenuSelection.cells` and the tail's plans read it. Nothing
+   * happens when the block is not a table of the slide.
+   */
+  selectCells: (blockId: string, cells: { r0: number; c0: number; r1: number; c1: number }) => void;
   mask: (shape: string | null) => void;
   centerOnPage: (axis: 'x' | 'y') => void;
   addGuide: (axis: 'x' | 'y', at?: number) => void;
@@ -760,6 +817,12 @@ export type EditorProps = {
   onCanvasConvert?: (slideId: string) => void;
   /** the caret's marks and range changed inside a run (the toolbar's pressed state) */
   onCaret?: (info: CaretInfo | null) => void;
+  /**
+   * The frame record of a gesture as it ends (docs/OBJECTS.md 2.4; the objects round): the same
+   * report `EditorHandle.gestureRecord` answers, told once per gesture at its end, so the page
+   * carries it to `describe().state.gesture` without polling the handle.
+   */
+  onGesture?: (report: GestureReport) => void;
   /* round three (gslides-parity SPEC-3 5.3, 6.3) */
   /**
    * View > Mode: Editing, Commenting or Viewing. Commenting and Viewing refuse every edit gesture
@@ -778,6 +841,15 @@ export type EditorProps = {
    */
   parked?: (id: string) => boolean;
 };
+
+/**
+ * The words of the hovered empty cell's prompt (docs/OBJECTS.md 3.3 item 7; build/b2.md request
+ * 1f): one click places the caret now, so the prompt says what to do next. The value is the
+ * render's `TABLE_CELL_PROMPT` (packages/render/src/blocks/table.ts, B2); the render package
+ * exports no `./blocks/table` subpath yet, so the words are repeated here until the integrator
+ * adds the line and this becomes the import (build/b1.md request 3).
+ */
+const TABLE_CELL_PROMPT = 'Type to add text';
 
 type Editing = {
   blockId: string;
@@ -801,6 +873,18 @@ type ActiveGesture = {
   last: Mutation[] | null;
   /** the last modifiers seen, for the release */
   mods: GestureMods;
+  /**
+   * the table cell whose session the press on a column seam ended (docs/OBJECTS.md 3.3 item 5):
+   * the release queues it again, so a seam drag keeps the cell open with its caret
+   */
+  reopen?: { blockId: string; pointer: string };
+  /**
+   * the rows' measure of the table under a row seam or a resize, read from the stage at the press
+   * (table-fit.ts readTableRows; docs/OBJECTS.md 3.3 items 3 and 4): the row seam's drag writes
+   * over it and the resize never goes below the rows' natural height (`tableFloor`)
+   */
+  tableRows?: TableRowsMeasure | null;
+  tableFloor?: number;
 };
 
 /** A press on a block's body that may become a drag; CSS pixels. */
@@ -1016,19 +1100,28 @@ export function Editor({
   snapGrid = false,
   onCanvasConvert,
   onCaret,
+  onGesture,
   mode: modeProp,
   parked,
 }: EditorProps) {
   const slide = doc.slides[slideId];
   const [draft, setDraft] = useState<DeckDocument | null>(null);
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
   const shown = draft ?? doc;
   const shownSlide = shown.slides[slideId];
   const freeform = isFreeformSlide(slide);
 
+  /* a gesture frame the budget skipped (docs/OBJECTS.md 2.4; gesture-frame.ts rendersFrame
+     false): the sheet keeps the markup of the last rendered frame while the draft still drives
+     the ring and the handles from `pos`; the last rendered markup is kept for that */
+  const sheetFrozen = useRef(false);
+  const lastHtml = useRef<string | null>(null);
   const html = useMemo(() => {
     if (!shownSlide) return '';
+    if (sheetFrozen.current && lastHtml.current !== null) return lastHtml.current;
     try {
-      return renderSlide(shown.deck, shownSlide, {
+      const rendered = renderSlide(shown.deck, shownSlide, {
         theme,
         chrome: true,
         assetBase,
@@ -1037,6 +1130,8 @@ export function Editor({
         // the editor stage alone draws the prompts of empty placeholders (gslides-parity SPEC 5.4)
         live: true,
       }).html;
+      lastHtml.current = rendered;
+      return rendered;
     } catch {
       return '';
     }
@@ -1155,6 +1250,16 @@ export function Editor({
   toolRef.current = tool;
   const htmlRef = useRef(html);
   htmlRef.current = html;
+  /* the live gesture's frames (docs/OBJECTS.md 2.4; gesture-frame.ts): one sheet render per
+     animation frame through the coalescer, the record of each render's cost, the budget's verdict
+     and the last gesture's report for `gestureRecord()` and `onGesture` */
+  const frames = useRef<FrameCoalescer | null>(null);
+  const frameRecordRef = useRef<GestureFrameRecord>(EMPTY_GESTURE_RECORD);
+  const lastFrameRendered = useRef(true);
+  const frameDown = useRef(false);
+  const lastGestureReport = useRef<GestureReport | null>(null);
+  const onGestureRef = useRef(onGesture);
+  onGestureRef.current = onGesture;
   const cropRef = useRef(crop);
   cropRef.current = crop;
   const groupEnteredRef = useRef(groupEntered);
@@ -1358,6 +1463,117 @@ export function Editor({
     onNoticeRef.current?.(undo ? { text, undo } : { text });
   };
 
+  // -------------------------------------------------------------------------------------------
+  // The live gesture's frames (docs/OBJECTS.md 2.4; gesture-frame.ts)
+
+  /** A gesture (a handle drag, a draw) is down: a fresh record, every frame rendered until the budget says otherwise. */
+  const startFrames = () => {
+    frameRecordRef.current = EMPTY_GESTURE_RECORD;
+    lastFrameRendered.current = true;
+    frameDown.current = true;
+  };
+
+  /** The gesture ended by any event: the pending frame is dropped, the sheet unfrozen, the record published. */
+  const finishFrames = () => {
+    frames.current?.cancel();
+    sheetFrozen.current = false;
+    if (!frameDown.current) return;
+    frameDown.current = false;
+    const report = gestureReport(frameRecordRef.current);
+    lastGestureReport.current = report;
+    onGestureRef.current?.(report);
+  };
+
+  /**
+   * The draft document of one gesture frame: the mutations applied over the document, then the
+   * connectors attached to the objects they moved re-routed the way the release re-routes them
+   * (SPEC-2 2.4.7 followConnectors), so an elbow attached to a moved shape follows at every frame
+   * instead of jumping at the release (docs/OBJECTS.md 2.3 item 4). Throws what the reducer throws.
+   */
+  const draftDocument = (canvas: Slide, all: ReadonlyArray<Mutation>): DeckDocument => {
+    const applied = applyMutations(docRef.current, [...all]).document;
+    const touched = all.flatMap((m) =>
+      m.op === 'block.set' && m.path.startsWith('/pos') ? [m.blockId] : [],
+    );
+    if (touched.length === 0) return applied;
+    const after = applied.slides[canvas.id];
+    if (!after) return applied;
+    const followed = followConnectors(after, touched);
+    return followed.length === 0 ? applied : applyMutations(applied, followed).document;
+  };
+
+  /** The `/pos` writes of a frame as the wrapper path places them: the object's id and its new position. */
+  const movedPositions = (mutations: ReadonlyArray<Mutation>): { id: string; pos: Position }[] =>
+    mutations.flatMap((m) =>
+      m.op === 'block.set' && m.path === '/pos' && m.value !== undefined
+        ? [{ id: m.blockId, pos: m.value as Position }]
+        : [],
+    );
+
+  /**
+   * The wrapper path of a degraded move (docs/OBJECTS.md 2.4): the moved objects' `.free`
+   * wrappers take their new left and top inline from the frame's mutations, the way the text
+   * session writes a wrapper's height, and no renderSlide runs until the release. A wrapper in the
+   * content layer is placed against the content origin, one in the sheet layer against the sheet
+   * (slide.ts renderFreeform); the measured boxes of the moved objects follow by hand, since the
+   * layout effect that measures runs on fresh markup alone.
+   */
+  const placeWrappers = (moved: ReadonlyArray<{ id: string; pos: Position }>) => {
+    const el = body.current;
+    if (!el || moved.length === 0) return;
+    const patched: Record<string, Box> = {};
+    for (const { id, pos } of moved) {
+      if (!/^[A-Za-z0-9_.:-]+$/.test(id)) continue;
+      const wrapper = el.querySelector<HTMLElement>(`.free[data-free="${id}"]`);
+      if (!wrapper) continue;
+      const onSheet = wrapper.parentElement?.classList.contains('freeform-sheet') === true;
+      wrapper.style.left = `${onSheet ? pos.x : pos.x - CONTENT_BOX_SHEET[0]}px`;
+      wrapper.style.top = `${onSheet ? pos.y : pos.y - CONTENT_BOX_SHEET[1]}px`;
+      patched[id] = boundingBoxOf(pos);
+    }
+    if (Object.keys(patched).length === 0) return;
+    setBoxes((prev) => ({ ...prev, blocks: { ...prev.blocks, ...patched } }));
+  };
+
+  /**
+   * One sheet render per animation frame (docs/OBJECTS.md 2.4): `build` answers the draft of the
+   * latest pointer position (null clears the draft; `moved` names the `/pos` writes for the
+   * wrapper path) and runs once per frame however many pointermoves arrived in between, the last
+   * one winning. The render is synchronous inside the frame callback (flushSync), so the sheet,
+   * the ring and the handles paint in the same frame and the record reads the render's real
+   * cost, the layout effect's measure included. While the budget is missed (the record's
+   * `degraded`) a move takes the wrapper path and a resize or a rotation renders every second
+   * frame, the sheet keeping its last markup on the skipped frame while the draft still drives
+   * the ring, the handles and the readout from `pos`.
+   */
+  const scheduleGestureFrame = (
+    kind: GestureRenderKind,
+    build: () => { document: DeckDocument | null; moved: ReadonlyArray<Mutation> },
+  ) => {
+    if (frames.current === null)
+      frames.current = createFrameCoalescer({
+        request: (callback) => window.requestAnimationFrame(callback),
+        cancel: (handle) => window.cancelAnimationFrame(handle),
+      });
+    frames.current.push(() => {
+      const start = gestureClock.now();
+      const built = build();
+      const record = frameRecordRef.current;
+      const render =
+        built.document === null || rendersFrame(record, kind, lastFrameRendered.current);
+      lastFrameRendered.current = render;
+      sheetFrozen.current = !render;
+      if (!render) {
+        frameRecordRef.current = skippedFrame(record);
+        flushSync(() => setDraft(built.document));
+        if (kind === 'move') placeWrappers(movedPositions(built.moved));
+        return;
+      }
+      flushSync(() => setDraft(built.document));
+      frameRecordRef.current = frameRecord(record, { start, end: gestureClock.now() });
+    });
+  };
+
   /** One action call per gesture (SPEC 7.1); several mutations travel as one slide.update. */
   const commit = (mutations: ReadonlyArray<Mutation>): void => {
     if (mutations.length === 0 || !editableRef.current) {
@@ -1381,9 +1597,9 @@ export function Editor({
         (error: unknown) => onErrorRef.current?.(error),
       )
       .finally(() => {
-        /* the answer of an earlier write, arriving during the next drag, leaves that drag's
-           preview alone (the same rule as the document effect below) */
-        if (gesture.current === null) setDraft(null);
+        /* the answer of an earlier write, arriving during the next drag or draw, leaves that
+           drag's preview alone (the same rule as the document effect below) */
+        if (gesture.current === null && !frameDown.current) setDraft(null);
       });
   };
 
@@ -1505,6 +1721,29 @@ export function Editor({
         (block.autofit === 'grow' || block.autofit === 'shrink'),
     );
     const out = [...mutations];
+    /* a touched table with `pos` is a candidate always (docs/OBJECTS.md 3.3 item 3; build/b2.md
+       request 1d): its rule is `grow` with no "resized turns it off" clause, since a resize below
+       the rows stops at the floor (the gesture's `tableFloor`); the rows are measured on the
+       hidden 1x sheet and `pos.h` written up when they are taller than the box */
+    const tables = freeformBlocks(after).filter(
+      (block): block is Extract<Block, { type: 'table' }> =>
+        block.type === 'table' && touched.includes(block.id) && block.pos !== undefined,
+    );
+    if (tables.length > 0) {
+      try {
+        const withSlide: DeckDocument = {
+          ...docRef.current,
+          slides: { ...docRef.current.slides, [after.id]: after },
+        };
+        const grown = await measureTableRowsHidden(withSlide, after, tables);
+        for (const block of tables) {
+          const grow = tableGrowMutation(after.id, block, grown.get(block.id) ?? null);
+          if (grow !== null) out.push(grow);
+        }
+      } catch {
+        /* a hidden sheet that cannot render: the write goes without the table's fit */
+      }
+    }
     const fitted: Block[] = [];
     for (const block of candidates) {
       if ('autofit' in block && block.autofit === 'grow' && resized(block)) {
@@ -1606,6 +1845,38 @@ export function Editor({
     if (prefix.length > 0) onConvertRef.current?.(slideNow.id);
   };
 
+  /**
+   * The rows' measure of `tables` on a hidden 1x sheet (canvas-measure.ts, the sheet the
+   * conversion and the text fit measure on; table-fit.ts readTableRows at scale 1), for the
+   * table's autofit of a command's write.
+   */
+  const measureTableRowsHidden = async (
+    document: DeckDocument,
+    slideNow: Slide,
+    tables: ReadonlyArray<{ id: string }>,
+  ): Promise<Map<string, TableRowsMeasure | null>> => {
+    const mounted = mountHiddenSheet(themeRef.current);
+    try {
+      mounted.body.innerHTML = renderForMeasure(
+        document,
+        slideNow,
+        themeRef.current,
+        assetBaseRef.current,
+      );
+      applyThemeToTree(mounted.body, themeRef.current);
+      await awaitSheetReady(mounted.root);
+      const out = new Map<string, TableRowsMeasure | null>();
+      for (const { id } of tables) {
+        if (!/^[A-Za-z0-9_.:-]+$/.test(id)) continue;
+        const tableEl = mounted.body.querySelector<HTMLElement>(`[data-block="${id}"]`);
+        out.set(id, tableEl ? readTableRows(tableEl, 1, window) : null);
+      }
+      return out;
+    } finally {
+      mounted.dispose();
+    }
+  };
+
   /** The connector follow mutations over the slide as the mutations leave it (SPEC-2 2.4.7). */
   const followAfter = (
     canvas: Slide,
@@ -1677,7 +1948,8 @@ export function Editor({
      (build-4/hotfix-3.md 3.5, seen on production); the next move recomputes the preview over the
      new document through docRef, and the release commits over it */
   useEffect(() => {
-    if (gesture.current === null) setDraft(null);
+    /* a draw's draft (docs/OBJECTS.md 2.4) stands the same way while its pointer is down */
+    if (gesture.current === null && !frameDown.current) setDraft(null);
   }, [doc]);
 
   /* Alt held: the diagram handles take the pointer (SPEC 6.4 Alt-drag); Space held: the stage
@@ -1761,6 +2033,26 @@ export function Editor({
     const el = body.current;
     if (!after || !el) return null;
     const block = blockById(after, current.blockId);
+    /* the table's autofit (docs/OBJECTS.md 3.3 item 3; build/b2.md request 1d): a cell whose text
+       wrapped grows its row on the stage, and the table's `pos.h` is written up in the same call
+       as the burst's splice so the ring meets the last rule; the wrapper follows at once, since
+       the markup is frozen for the session */
+    if (block?.type === 'table') {
+      const blockEl = el.querySelector<HTMLElement>(`[data-block="${block.id}"]`);
+      const wrapper = blockEl?.parentElement?.closest<HTMLElement>(
+        `.free[data-free="${block.id}"]`,
+      );
+      const stage = el.parentElement;
+      const k = stage ? stage.getBoundingClientRect().width / SHEET.width : 0;
+      const grow = blockEl
+        ? tableGrowMutation(after.id, block, readTableRows(blockEl, k, window))
+        : null;
+      if (grow !== null && grow.op === 'block.set' && wrapper && typeof grow.value === 'number') {
+        wrapper.style.height = `${grow.value}px`;
+        window.requestAnimationFrame(measure);
+      }
+      return grow;
+    }
     if (!block || block.type !== 'text' || !('autofit' in block)) return null;
     if (block.autofit !== 'grow' && block.autofit !== 'shrink') return null;
     const blockEl = el.querySelector<HTMLElement>(`[data-block="${block.id}"]`);
@@ -2279,7 +2571,13 @@ export function Editor({
     measure();
     const editingNow = editingRef.current;
     if (editingNow && !el.contains(editingNow.element)) setEditing(null);
-    const queued = pendingEdit.current;
+    /* a queued session or selection opens on the committed markup alone, never on a draft's
+       (docs/OBJECTS.md 2.4; measured on 4431: a column seam dragged with a cell open wrote the
+       widths and the cell stayed closed, because the commit's markup equalled the draft's byte
+       for byte, so `shownHtml` never changed and this effect never ran after the write; `doc` and
+       `draft` are dependencies now, and the draft's own render is skipped here so a drawn text
+       box on a slide that is not a canvas never opens on the provisional conversion) */
+    const queued = draft === null ? pendingEdit.current : null;
     if (queued && !editingRef.current) {
       const run = runElement(el, queued.blockId, queued.pointer);
       if (run) {
@@ -2291,7 +2589,7 @@ export function Editor({
         );
       }
     }
-    const wanted = pendingSelect.current;
+    const wanted = draft === null ? pendingSelect.current : null;
     if (
       wanted &&
       wanted.every((id) => el.querySelector(`[data-block="${id}"], .free[data-free="${id}"]`))
@@ -2319,8 +2617,10 @@ export function Editor({
     };
     // the boxes follow the markup and the theme; measure, select and startEdit are closures over
     // refs; a session's end runs it too, so a queued cell (Tab, Shift+Tab) opens on the markup
-    // that end committed even when that markup did not change (docs/RETURN.md 2.4 fix 1)
-  }, [shownHtml, theme, editing]);
+    // that end committed even when that markup did not change (docs/RETURN.md 2.4 fix 1); a
+    // document change and the draft's clearing run it too, so a queued cell or selection lands
+    // after a write whose markup the draft had already drawn (docs/OBJECTS.md 2.4)
+  }, [shownHtml, theme, editing, doc, draft]);
 
   /*
    * The instant preview of a picture being uploaded (docs/PRODUCT.md section 2 rank 10; the row
@@ -2571,46 +2871,85 @@ export function Editor({
           setScaleReadout(`${scaled.size} px`);
         }
       }
-      return { mutations, guides: result?.guides ?? [], sites: result?.sites ?? [], readout };
+      /* a table's resize never goes below its rows' natural height (docs/OBJECTS.md 3.3 item 3;
+         build/b2.md request 1e): the box's height stops at the floor read at the press, a top
+         edge drag keeps the bottom edge where it was, and the readout says the floored size */
+      let floored: GestureReadout = readout;
+      if (
+        kind === 'free-resize' &&
+        g.tableFloor !== undefined &&
+        g.handle.blockId !== undefined &&
+        result?.size !== undefined
+      ) {
+        const floor = Math.ceil(g.tableFloor);
+        const tableId = g.handle.blockId;
+        const fromTop = g.handle.dir === 'n' || g.handle.dir === 'nw' || g.handle.dir === 'ne';
+        mutations = mutations.map((m) => {
+          if (m.op !== 'block.set' || m.blockId !== tableId || m.path !== '/pos') return m;
+          const pos = m.value as Position;
+          if (pos.h >= floor) return m;
+          const y = fromTop ? pos.y + pos.h - floor : pos.y;
+          return { ...m, value: { ...pos, y, h: floor } };
+        });
+        if (result.size.h < floor) floored = { kind: 'size', w: result.size.w, h: floor };
+      }
+      return {
+        mutations,
+        guides: result?.guides ?? [],
+        sites: result?.sites ?? [],
+        readout: floored,
+      };
     }
     if (isTableSeamHandle(g.handle)) {
-      /* the table's column seam (docs/RETURN.md 2.4 fix 5): the left column widens by the drag
-         and its neighbour narrows, in the table's own width; the readout is the moved column's
-         new width (return/build/b5.md request 3) */
-      const seam = tableSeamAt(g.handle.blockId, g.handle.index, g.ctx, now.x - g.start.x);
-      return {
-        mutations: seam === null ? [] : [seam.mutation],
-        guides: [],
-        sites: [],
-        readout: seam === null ? null : { kind: 'width', value: seam.left },
-      };
+      /* a table seam of either axis (docs/RETURN.md 2.4 fix 5; docs/OBJECTS.md 3.3 item 4;
+         build/b2.md request 1c): a column seam widens the column on its left and narrows its
+         neighbour in the table's own width, a row seam writes every row's height over the
+         measure read at the press and the table's `pos.h` with it; the readout is the moved
+         column's width or the moved row's height */
+      const ctx = tableSeamContextOf(g.handle.blockId, g.ctx, g.tableRows ?? null);
+      if (ctx === null) return { mutations: [], guides: [], sites: [], readout: null };
+      const seam = tableSeamDrag(g.handle, ctx, now.x - g.start.x, now.y - g.start.y);
+      return { mutations: seam.mutations, guides: [], sites: [], readout: seam.readout };
     }
     const mutation = gestureMutation(g.handle, g.ctx, g.start, now);
     return { mutations: mutation === null ? [] : [mutation], guides: [], sites: [], readout: null };
   };
 
   /**
-   * The seam drag of a table's column `index` by `dx` sheet px over the gesture's context: the
-   * table's width is its `pos` on a canvas, else its measured box (a table in a layout slot).
+   * What a table seam drag reads (table-seam.ts `tableSeamDrag`): the slide, the table, its
+   * width (its `pos` on a canvas, else its measured box, a table in a layout slot) and the rows'
+   * measure a row seam needs; null when the block is not a table or has no width.
    */
-  const tableSeamAt = (
+  const tableSeamContextOf = (
     blockId: string,
-    index: number,
     ctx: GestureContext,
-    dx: number,
-  ): { mutation: Mutation; left: number; right: number; height: number } | null => {
+    rows: TableRowsMeasure | null,
+  ): TableSeamContext | null => {
     const block = blockById(ctx.slide, blockId);
     if (block?.type !== 'table') return null;
     const box = ctx.boxes.blocks[blockId];
     const width = block.pos?.w ?? box?.[2];
     if (width === undefined || width <= 0) return null;
-    const seam = tableSeamMutation(ctx.slide, block, width, index, dx);
-    return seam === null ? null : { ...seam, height: Math.round(block.pos?.h ?? box?.[3] ?? 0) };
+    return { slide: ctx.slide, block, width, measure: rows };
+  };
+
+  /** The rows' measure of the table `blockId` as the stage draws it now, at the stage `scale` (table-fit.ts). */
+  const tableRowsAt = (blockId: string, scale: number): TableRowsMeasure | null => {
+    const el = body.current;
+    if (!el || !/^[A-Za-z0-9_.:-]+$/.test(blockId)) return null;
+    const tableEl = el.querySelector<HTMLElement>(`[data-block="${blockId}"]`);
+    if (!tableEl) return null;
+    try {
+      return readTableRows(tableEl, scale, window);
+    } catch {
+      return null;
+    }
   };
 
   /** The end of the gesture that is down, by whatever event ended it: every live state clears. */
   const endGestureState = (end: GestureEnd) => {
     gesture.current = null;
+    finishFrames();
     setActiveHandle(null);
     setDrop(null);
     setDropSlot(null);
@@ -2640,7 +2979,11 @@ export function Editor({
     handle: Handle,
     clientX: number,
     clientY: number,
-    options: { duplicate?: boolean; target?: EventTarget | null } = {},
+    options: {
+      duplicate?: boolean;
+      target?: EventTarget | null;
+      reopen?: { blockId: string; pointer: string };
+    } = {},
   ) => {
     const slideNow = slideRef.current;
     const rect = stageRect();
@@ -2665,6 +3008,17 @@ export function Editor({
       const ids = selected.includes(handle.blockId) ? selected : [handle.blockId];
       ctx.free = freeContextFor(ctx.slide, ids, ctx.boxes);
     }
+    /* a row seam or a resize of a table reads the rows' measure once at the press (build/b2.md
+       requests 1c and 1e): the seam's drag writes the heights over it, the resize stops at the
+       rows' natural height */
+    const tableBlock =
+      handle.blockId !== undefined &&
+      (isTableRowSeamHandle(handle) || handle.kind === 'free-resize')
+        ? blockById(ctx.slide, handle.blockId)
+        : undefined;
+    const tableRows =
+      tableBlock?.type === 'table' ? tableRowsAt(tableBlock.id, rect.width / SHEET.width) : null;
+    const tableFloor = tableRows === null ? undefined : tableRowsNaturalHeight(tableRows);
     gesture.current = {
       handle,
       start,
@@ -2673,7 +3027,11 @@ export function Editor({
       duplicate: options.duplicate === true,
       last: null,
       mods: { shift: false },
+      ...(options.reopen ? { reopen: options.reopen } : {}),
+      ...(tableBlock?.type === 'table' ? { tableRows } : {}),
+      ...(tableFloor !== undefined && handle.kind === 'free-resize' ? { tableFloor } : {}),
     };
+    startFrames();
     setActiveHandle(handle.id);
     setHover(null);
     if (handle.blockId !== undefined) {
@@ -2686,19 +3044,32 @@ export function Editor({
       setDrop(first.indicator);
       setDropSlot(first.slotBox);
     }
+    /* the preview of a pointer position (docs/OBJECTS.md 2.4): the draft document with the
+       attached connectors re-routed, rendered once per animation frame however many moves land
+       inside one; the kind tells the budget's degradation which path to take */
+    const renderKind: GestureRenderKind =
+      options.duplicate === true
+        ? 'other'
+        : handle.kind === 'free-move'
+          ? 'move'
+          : handle.kind === 'free-resize'
+            ? 'resize'
+            : handle.kind === 'free-rotate'
+              ? 'rotate'
+              : 'other';
     const preview = (mutations: Mutation[]) => {
       const g = gesture.current;
       if (!g) return;
-      const all = g.convert ? [g.convert, ...mutations] : mutations;
-      if (all.length === 0) {
-        setDraft(null);
-        return;
-      }
-      try {
-        setDraft(applyMutations(docRef.current, all).document);
-      } catch {
-        // a preview the reducer refuses: the last good preview stays up
-      }
+      scheduleGestureFrame(renderKind, () => {
+        const all = g.convert ? [g.convert, ...mutations] : mutations;
+        if (all.length === 0) return { document: null, moved: [] };
+        try {
+          return { document: draftDocument(g.ctx.slide, all), moved: mutations };
+        } catch {
+          /* a preview the reducer refuses: the last good preview stays up */
+          return { document: draftRef.current, moved: [] };
+        }
+      });
     };
     const move = (ev: PointerEvent) => {
       const g = gesture.current;
@@ -2822,6 +3193,10 @@ export function Editor({
       kind === 'free-rotate' ||
       kind === 'line-end';
     if (!isCanvasWrite) {
+      /* a column seam dragged with a cell open (docs/OBJECTS.md 3.3 item 5): the press ended the
+         session with its write, the release writes the widths, and the cell opens again on the
+         markup that write lands, the caret at its end */
+      if (g.reopen) pendingEdit.current = { ...g.reopen, caret: 'end' };
       commit(own);
       return;
     }
@@ -3251,6 +3626,15 @@ export function Editor({
         taken.add(next);
         return next;
       });
+      /* Cmd+D on an entered group member (docs/OBJECTS.md 4.2 item 3; build/b3.md request 1):
+         the copy becomes the entered member before the selection lands on it, so the next Escape
+         returns to the group and a press on the copy reads it as the entered member, not as a
+         member whose press selects the whole group */
+      const entered = groupEnteredRef.current;
+      if (entered !== null && ids.length === 1 && ids[0] === entered && copies[0] !== undefined) {
+        setGroupEntered(copies[0]);
+        groupEnteredRef.current = copies[0];
+      }
       pendingSelect.current = copies;
       await call('block.duplicate', { slideId: slideNow.id, blockIds: ids });
       return;
@@ -4495,6 +4879,21 @@ export function Editor({
       },
       exitCrop: () => exitCrop(true),
       cropOpen: () => cropRef.current !== null,
+      gestureRecord: () =>
+        frameDown.current ? gestureReport(frameRecordRef.current) : lastGestureReport.current,
+      selectCells: (blockId, cells) => {
+        const slideNow = slideRef.current;
+        const block = slideNow ? blockById(slideNow, blockId) : undefined;
+        if (!slideNow || block?.type !== 'table') return;
+        const current = editingRef.current;
+        if (current !== null) endSessionForPress(current);
+        select({ kind: 'block', blockId }, []);
+        setRange({
+          blockId,
+          anchor: { row: cells.r0, col: cells.c0 },
+          focus: { row: cells.r1, col: cells.c1 },
+        });
+      },
       mask: maskSelection,
       centerOnPage: (axis) => alignSelection(axis === 'x' ? 'center' : 'middle', 'sheet'),
       addGuide,
@@ -5087,6 +5486,16 @@ export function Editor({
        session ends with its write, the table stands selected and the drag begins; every other
        handle is inert while a session is open, as before */
     const current = editingRef.current;
+    /* a column seam pressed with a cell open (docs/OBJECTS.md 3.3 item 5): the seam sits on the
+       rules and never over the cell's text, so the drag proceeds and the release opens the cell
+       again (finishCanvasGesture) */
+    const reopen =
+      current !== null &&
+      handle.blockId === current.blockId &&
+      isTableSeamHandle(handle) &&
+      cellPointer(current.pointer) !== null
+        ? { blockId: current.blockId, pointer: current.pointer }
+        : undefined;
     if (current !== null && handle.blockId === current.blockId) {
       endSessionForPress(current);
       if (editingRef.current !== null) return;
@@ -5094,6 +5503,7 @@ export function Editor({
     beginGesture(handle, e.clientX, e.clientY, {
       duplicate: e.altKey && handle.kind === 'free-move',
       target: e.target,
+      ...(reopen ? { reopen } : {}),
     });
   };
 
@@ -5111,13 +5521,16 @@ export function Editor({
       return;
     }
     if (isTableSeamHandle(handle)) {
-      const seam = tableSeamAt(
+      const rect = stageRect();
+      const scale = rect && rect.width > 0 ? rect.width / SHEET.width : 1;
+      const ctx = tableSeamContextOf(
         handle.blockId,
-        handle.index,
         { slide: slideNow, boxes: boxesRef.current },
-        delta,
+        isTableRowSeamHandle(handle) ? tableRowsAt(handle.blockId, scale) : null,
       );
-      if (seam) commit([seam.mutation]);
+      if (ctx === null) return;
+      const seam = tableSeamDrag(handle, ctx, delta, delta);
+      if (seam.mutations.length > 0) commit(seam.mutations);
       return;
     }
     if (handle.kind === 'free-resize' && handle.blockId !== undefined) {
@@ -5241,7 +5654,9 @@ export function Editor({
       const rect = stageRect();
       if (rect) setPointer(sheetPoint(rect, e.clientX, e.clientY));
     }
-    if (gesture.current) return;
+    /* no hover ring and no cell prompt while a gesture or a draw is down: the drawn object's
+       draft sits under the pointer from the press (docs/OBJECTS.md 2.4) */
+    if (gesture.current || frameDown.current) return;
     const id = resolveObject(e.target, el, slideNow);
     setHover((prev) => (prev === id ? prev : id));
     promptHoveredCell(e.target, el, slideNow);
@@ -5287,7 +5702,7 @@ export function Editor({
     prompt.className = 'prompt';
     prompt.setAttribute('data-prompt', '');
     prompt.setAttribute('aria-hidden', 'true');
-    prompt.textContent = PROMPTS.text;
+    prompt.textContent = TABLE_CELL_PROMPT;
     para.appendChild(prompt);
     hoverPrompt.current = prompt;
   };
@@ -5632,53 +6047,42 @@ export function Editor({
     window.addEventListener('pointercancel', up);
   };
 
-  /** The one insert of a draw tool, converting the slide first (SPEC-2 6.1 row 33). */
+  /**
+   * The one insert of a draw tool, converting the slide first (SPEC-2 6.1 row 33): the same
+   * `block.insert` the press previewed (drawDraftMutation: the box, the orientation of a dragged
+   * line, the connector snap under the drag's ends), under the id the press freed so the drawn
+   * block and the committed one are one and the selection that follows finds it.
+   */
   const insertDrawn = (
     drawTool: Exclude<EditorTool, 'select'>,
     box: Box,
     options: {
       points?: [number, number][];
-      orientation?: 'horizontal' | 'vertical' | 'diagonal-down' | 'diagonal-up';
+      dragged?: boolean;
       start?: Point;
       end?: Point;
+      id?: string;
     } = {},
   ) => {
     void commitCanvas(
       (canvas) => {
-        const type = toolBlockType(drawTool);
-        const id = freeId(type, takenBlockIds(canvas));
-        const mutation = toolInsertMutation(canvas, drawTool, id, box, 'main', undefined, {
+        const taken = takenBlockIds(canvas);
+        const id =
+          options.id !== undefined && !taken.has(options.id)
+            ? options.id
+            : freeId(toolBlockType(drawTool), taken);
+        const mutation = drawDraftMutation(canvas, drawTool, id, box, {
           grid: settingsRef.current.snapGrid,
           ...(options.points ? { points: options.points } : {}),
-          ...(options.orientation ? { orientation: options.orientation } : {}),
+          ...(options.dragged !== undefined ? { dragged: options.dragged } : {}),
+          ...(options.start ? { start: options.start } : {}),
+          ...(options.end ? { end: options.end } : {}),
         });
-        if (!mutation || mutation.op !== 'block.insert') return [];
-        const mutations: Mutation[] = [mutation];
-        /* a connector's ends snap to the sites under the drag's start and end (SPEC-2 6.2, 2.4.7) */
-        if (
-          mutation.block.type === 'shape' &&
-          isLineBlock(mutation.block) &&
-          options.start &&
-          options.end &&
-          (mutation.block.shape === 'line' ||
-            mutation.block.shape === 'arrow' ||
-            mutation.block.shape === 'elbow' ||
-            mutation.block.shape === 'curved')
-        ) {
-          const startSite = siteUnder(canvas, options.start);
-          const endSite = siteUnder(canvas, options.end);
-          if (startSite || endSite) {
-            const connect: NonNullable<Extract<Block, { type: 'shape' }>['connect']> = {};
-            if (startSite) connect.start = { block: startSite.blockId, site: startSite.site };
-            if (endSite) connect.end = { block: endSite.blockId, site: endSite.site };
-            const attached = { ...mutation.block, connect } as Block;
-            mutations[0] = { ...mutation, block: attached };
-          }
-        }
+        if (!mutation) return [];
         if (drawTool.kind === 'text')
           pendingEdit.current = { blockId: id, pointer: 'text', caret: 'end' };
         else pendingSelect.current = [id];
-        return mutations;
+        return [mutation];
       },
       { autofit: false },
     );
@@ -5768,51 +6172,119 @@ export function Editor({
       return;
     }
     let current = mods;
+    /* the draft of the draw (docs/OBJECTS.md 2.4): the press builds the block.insert the release
+       will commit and previews it through the draft document, so the sheet draws the object
+       itself from the pointer down, at the tool's default box at the press point and at the drawn
+       box as the pointer travels, with the grammar's default fill and the preset's geometry; a
+       slide that is not a canvas previews over its provisional conversion and the release
+       converts and commits as one write (SPEC-2 1.6); a text box previews as its frame alone (an
+       empty text block draws nothing, and its caret opens at the release); the id is freed once
+       here so the drawn block and the committed one are one */
+    const slideNow = slideRef.current;
+    let canvas: Slide | null = slideNow ?? null;
+    let convert: Mutation | null = null;
+    if (slideNow && !isFreeformSlide(slideNow)) {
+      const provisional = provisionalCanvas(slideNow, boxesRef.current);
+      canvas = provisional ? provisional.slide : null;
+      convert = provisional ? provisional.replace : null;
+    }
+    const id = canvas !== null ? freeId(toolBlockType(drawTool), takenBlockIds(canvas)) : null;
+    /* what the draft previews: the canvas and the freed id, none for a text box */
+    const drafted =
+      canvas !== null && id !== null && drawTool.kind !== 'text' ? { canvas, id } : null;
+    /* the end a click places a line at: the default box's right edge at its middle */
+    const lineEndOf = (box: Box): Point => ({ x: start.x + box[2], y: start.y + box[3] / 2 });
+    const draftAt = (now: Point) => {
+      if (drafted === null) return;
+      const drawn = drawnBox(drawTool, start, now, current);
+      const mutation = drawDraftMutation(drafted.canvas, drawTool, drafted.id, drawn.box, {
+        grid: settingsRef.current.snapGrid,
+        dragged: drawn.dragged,
+        start,
+        end: drawn.dragged ? now : lineEndOf(drawn.box),
+      });
+      const all = mutation === null ? [] : convert ? [convert, mutation] : [mutation];
+      scheduleGestureFrame('other', () => {
+        if (all.length === 0) return { document: null, moved: [] };
+        try {
+          return { document: draftDocument(drafted.canvas, all), moved: [] };
+        } catch {
+          return { document: draftRef.current, moved: [] };
+        }
+      });
+    };
     /* the draw is a gesture of the stage's life like a resize (gesture-life.ts), so the size it
        would store shows while the pointer is down and clears with the release, the cancel or a
        selection (docs/RETURN.md 2.1 "the drawing by drag with the readout"; stage-rules.ts
        drawReadout) */
+    startFrames();
+    setHover(null);
     stepLife({ type: 'down' });
+    draftAt(start);
     const move = (ev: PointerEvent) => {
       const r = stageRect();
       if (!r) return;
       current = { shift: ev.shiftKey, alt: ev.altKey };
-      const drawn = drawnBox(drawTool, start, sheetPoint(r, ev.clientX, ev.clientY), current);
+      const now = sheetPoint(r, ev.clientX, ev.clientY);
+      const drawn = drawnBox(drawTool, start, now, current);
+      /* the marquee stays as the hairline around the growing object, with its readout */
       setMarquee(drawn.dragged ? drawn.box : null);
       const size = drawReadout(drawn.box, drawn.dragged, settingsRef.current.snapGrid);
       stepLife({ type: 'move', readout: size ? { kind: 'size', w: size.w, h: size.h } : null });
+      draftAt(now);
     };
-    const finishDraw = (ev: PointerEvent) => {
+    const detachDraw = () => {
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', finishDraw);
       window.removeEventListener('pointercancel', cancel);
+      window.removeEventListener('blur', onBlur);
+      window.removeEventListener('keydown', onEscape, true);
+    };
+    const finishDraw = (ev: PointerEvent) => {
+      detachDraw();
       setMarquee(null);
       setSites([]);
       stepLife({ type: 'pointerup' });
+      finishFrames();
       const r = stageRect();
-      if (!r) return;
+      if (!r) {
+        setDraft(null);
+        return;
+      }
       const end = sheetPoint(r, ev.clientX, ev.clientY);
       const drawn = drawnBox(drawTool, start, end, current);
-      const orientation =
-        isLineTool(drawTool) && drawTool.line !== 'rule' && drawn.dragged
-          ? drawnLineOrientation(start, end)
-          : undefined;
+      /* the draft stays up until the commit lands (the document effect clears it), so the drawn
+         object never blinks between the release and the write */
       insertDrawn(drawTool, drawn.box, {
-        ...(orientation ? { orientation } : {}),
+        dragged: drawn.dragged,
         start,
-        end: drawn.dragged ? end : { x: start.x + drawn.box[2], y: start.y + drawn.box[3] / 2 },
+        end: drawn.dragged ? end : lineEndOf(drawn.box),
+        ...(id !== null ? { id } : {}),
       });
     };
-    const cancel = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', finishDraw);
-      window.removeEventListener('pointercancel', cancel);
+    /* the draw ends without an insert on the browser's cancel, the window losing focus and
+       Escape, as a gesture does (gesture-life.ts GESTURE_END_EVENTS): the draft clears */
+    const cancelBy = (end: GestureEnd) => {
+      detachDraw();
       setMarquee(null);
-      stepLife({ type: 'pointercancel' });
+      setSites([]);
+      stepLife({ type: end });
+      finishFrames();
+      setDraft(null);
+    };
+    const cancel = () => cancelBy('pointercancel');
+    const onBlur = () => cancelBy('blur');
+    const onEscape = (ev: KeyboardEvent) => {
+      if (ev.key !== 'Escape') return;
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      cancelBy('escape');
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', finishDraw);
     window.addEventListener('pointercancel', cancel);
+    window.addEventListener('blur', onBlur);
+    window.addEventListener('keydown', onEscape, true);
   };
 
   /**
@@ -6331,17 +6803,29 @@ export function Editor({
   /* the deck's shader palette (5.7): the module constant for a deck without a kit, so the mount
      does not remount per render */
   const shaderPalette = useMemo(() => shaderPaletteOfDeck(doc.deck), [doc.deck]);
-  const anchorBlock = slide && selectedId !== null ? blockById(slide, selectedId) : undefined;
+  /* the anchor as the shown document holds it: during a gesture the draft's block, so its `pos`
+     (the box, the angle) drives the ring and the handles at every frame (docs/OBJECTS.md 2.4) */
+  const anchorBlock =
+    selectedId !== null
+      ? ((shownSlide ? blockById(shownSlide, selectedId) : undefined) ??
+        (slide ? blockById(slide, selectedId) : undefined))
+      : undefined;
   const anchorPos: Position | null =
     anchorBlock?.pos ??
-    (slide && selectedId !== null ? posFor(slide, selectedId, boxes) : null) ??
+    (shownSlide && selectedId !== null ? posFor(shownSlide, selectedId, boxes) : null) ??
     null;
+  /* a table cell selected as a run (one click placed the caret, a Shift click, the cell left
+     after a merge): the work is inside the table, and the ring is the table's (3.3 item 1) */
+  const tableCellSelection =
+    selection?.kind === 'run' &&
+    anchorBlock?.type === 'table' &&
+    cellPointer(selection.pointer) !== null;
   /* a text object's ring stands off its text (text-ring.ts): the caret at the first character
      no longer sits on the ring's left edge */
   const measuredSelectionBox =
     selection === null
       ? null
-      : selection.kind === 'run'
+      : selection.kind === 'run' && !tableCellSelection
         ? (boxes.runs[`${selection.blockId}/${selection.pointer}`] ??
           boxes.blocks[selection.blockId] ??
           null)
@@ -6349,11 +6833,21 @@ export function Editor({
   /* a grammar field (the cover title, a subtitle) is no block of the slide, so its type is read
      from the element the renderer wrote (data-type) when the slide's blocks do not name it */
   const ringTypeOf = (id: string): string | undefined =>
-    (slide ? blockById(slide, id)?.type : undefined) ?? blockTypeIn(body.current, id);
+    (shownSlide ? blockById(shownSlide, id)?.type : undefined) ??
+    (slide ? blockById(slide, id)?.type : undefined) ??
+    blockTypeIn(body.current, id);
+  /* the selection ring (selection-box.ts; docs/OBJECTS.md 2.4): one selected object's `pos` box
+     from the shown document, so a rotated object's ring is its own box turned by the overlay and
+     a gesture's draft moves it in the same frame as the sheet; the measured box for an object
+     without `pos`; the run's measured box, outset, while a text session is open */
   const selectionBox =
-    measuredSelectionBox === null || selectedId === null
-      ? measuredSelectionBox
-      : ringBoxFor(ringTypeOf(selectedId), measuredSelectionBox);
+    selectedId === null
+      ? null
+      : (selection?.kind === 'block' && ids.length === 1) || tableCellSelection
+        ? selectionRingBox(anchorBlock, measuredSelectionBox, ringTypeOf(selectedId))
+        : measuredSelectionBox === null
+          ? null
+          : ringBoxFor(ringTypeOf(selectedId), measuredSelectionBox);
   const extraBoxes = extra.flatMap((id) => {
     const box = boxes.blocks[id];
     return box ? [ringBoxFor(ringTypeOf(id), box)] : [];
@@ -6370,8 +6864,25 @@ export function Editor({
       ? null
       : { box, label: `${bounds.r0},${bounds.c0}:${bounds.r1},${bounds.c1}` };
   })();
+  /* the cell ring inside the table's ring (docs/OBJECTS.md 3.3 item 1): the range's union while
+     one is active, else the open or selected cell's measured grid area (the `.td` carries the
+     run attribute, so its run box is the cell's) */
+  const cellRing: Box | null =
+    rangeRing !== null
+      ? rangeRing.box
+      : editing !== null && editing.blockId === anchorId && cellPointer(editing.pointer) !== null
+        ? (boxes.runs[`${editing.blockId}/${editing.pointer}`] ?? null)
+        : tableCellSelection
+          ? (boxes.runs[`${selection.blockId}/${selection.pointer}`] ?? null)
+          : null;
+  /* the union of a multi selection from the shown document, so a group's ring follows its
+     members' draft positions at every frame of a resize or a move (docs/OBJECTS.md 2.1; measured
+     on 4431: the union read from the committed slide stood at the group's old box for the whole
+     drag while the members and the handles moved) */
   const group =
-    ids.length > 1 && slide ? (selectionUnion(slide, ids, boxes) ?? groupBoxOf(ids, boxes)) : null;
+    ids.length > 1 && shownSlide
+      ? (selectionUnion(shownSlide, ids, boxes) ?? groupBoxOf(ids, boxes))
+      : null;
   const groupTag = slide ? sharedGroup(slide, ids) : null;
   const measuredHoverBox =
     hover !== null && !ids.includes(hover) && !activeHandle ? (boxes.blocks[hover] ?? null) : null;
@@ -6414,20 +6925,24 @@ export function Editor({
           )
         : [];
   /* the column seams of one selected table (docs/RETURN.md 2.4 fix 5), from the header row's
-     measured cells, beside its eight handles; none while a cell is edited, a cell or range is
-     active, or in crop mode */
+     measured cells, beside its eight handles, whenever one table is selected, a cell open or
+     active or not (docs/OBJECTS.md 3.3 item 5: the seams sit on the rules and never over a
+     cell's text; a seam press with a cell open ends the session and the release opens the cell
+     again, onHandleDown); none in crop mode or while another block's session is open */
   if (
     shownSlide &&
-    !editing &&
     editable &&
     !crop &&
-    !cellActive &&
     ids.length === 1 &&
-    anchorId !== null
+    anchorId !== null &&
+    (editing === null || editing.blockId === anchorId)
   ) {
     const seamBlock = blockById(shownSlide, anchorId);
     if (seamBlock?.type === 'table')
-      handles.push(...tableSeamHandles(seamBlock, boxes.blocks[anchorId], boxes.runs));
+      handles.push(
+        ...tableSeamHandles(seamBlock, boxes.blocks[anchorId], boxes.runs),
+        ...tableRowSeamHandles(seamBlock, boxes.blocks[anchorId], boxes.runs),
+      );
   }
   const lint: LintBox[] =
     lintLayer && findings
@@ -6493,6 +7008,7 @@ export function Editor({
     selection,
     selectionBox,
     selectionPos: ids.length === 1 ? anchorPos : null,
+    cellRing,
     chip,
     handles,
     activeHandle,

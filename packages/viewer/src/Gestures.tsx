@@ -15,7 +15,7 @@ import { ROWS_KEY_SNAP } from '@turboslide/schema/blocks';
 import { resizeKindOf, rotateVector } from '@turboslide/schema/canvas';
 import { emptyChart } from '@turboslide/schema/blocks/chart';
 import type { ChartKind } from '@turboslide/schema/blocks/chart';
-import { emptyTable } from '@turboslide/schema/blocks/table';
+import { emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
 import {
   canAttach,
   connectorEnds,
@@ -32,7 +32,7 @@ import { jsonEqual } from '@turboslide/schema/pointer';
 import type { Position } from '@turboslide/schema/position';
 import { normalizeRotation } from '@turboslide/schema/position';
 import type { Box } from '@turboslide/schema/render';
-import { isLineKind, isPathKind } from '@turboslide/schema/shapes';
+import { isConnectorKind, isLineKind, isPathKind } from '@turboslide/schema/shapes';
 import type { LineKind } from '@turboslide/schema/shapes';
 import { COLUMN_GAP, CONTENT, CONTENT_ORIGIN, SHEET } from '@turboslide/theme/tokens';
 
@@ -102,11 +102,12 @@ export type HandleKind =
   | 'crop-edge';
 
 /**
- * How the overlay draws a handle: `v` a vertical rule through the hit box, `square` an 11 px
- * square, `area` an invisible region with a cursor, `chip` the selection chip itself, `ring` the
- * 12 px rotation ring joined to the selection by a 1 px line.
+ * How the overlay draws a handle: `v` a vertical rule through the hit box, `h` a horizontal one
+ * (a table's row seam, docs/OBJECTS.md 3.3 item 4), `square` an 11 px square, `area` an
+ * invisible region with a cursor, `chip` the selection chip itself, `ring` the 12 px rotation
+ * ring joined to the selection by a 1 px line.
  */
-export type HandleShape = 'v' | 'square' | 'area' | 'chip' | 'ring';
+export type HandleShape = 'v' | 'h' | 'square' | 'area' | 'chip' | 'ring';
 
 export type Handle = {
   id: string;
@@ -121,6 +122,7 @@ export type Handle = {
   dir?: ResizeDir;
   cursor:
     | 'col-resize'
+    | 'row-resize'
     | 'ew-resize'
     | 'ns-resize'
     | 'nesw-resize'
@@ -300,22 +302,31 @@ function canvasHandles(
     return handles;
   }
   const rows = placedOf(slide, ids, boxes);
+  /* one object: its own box, so the eight squares and the rotation ring sit on the object's
+     corners and top edge inside the overlay's turning layer, which turns them with the ring about
+     the box's centre (docs/OBJECTS.md 2.4; measured on the objects round's server: the union of a
+     rotated object's bounding box put the squares on the bounding box's corners, turned a second
+     time, 500 px from the centre of a 680 by 320 rectangle); several objects: the union of their
+     rotated bounding boxes (SPEC-2 0.107), which the overlay never turns */
+  const single = ids.length === 1 && rows.length === 1 ? rows[0]?.pos : undefined;
   const union: Box | null =
-    rows.length > 0
-      ? unionBox(rows.map((row) => row.pos))
-      : ids.reduce<Box | null>((acc, id) => {
-          const box = boxes.blocks[id];
-          if (!box) return acc;
-          if (!acc) return [...box];
-          const x = Math.min(acc[0], box[0]);
-          const y = Math.min(acc[1], box[1]);
-          return [
-            x,
-            y,
-            Math.max(acc[0] + acc[2], box[0] + box[2]) - x,
-            Math.max(acc[1] + acc[3], box[1] + box[3]) - y,
-          ];
-        }, null);
+    single !== undefined
+      ? [single.x, single.y, single.w, single.h]
+      : rows.length > 0
+        ? unionBox(rows.map((row) => row.pos))
+        : ids.reduce<Box | null>((acc, id) => {
+            const box = boxes.blocks[id];
+            if (!box) return acc;
+            if (!acc) return [...box];
+            const x = Math.min(acc[0], box[0]);
+            const y = Math.min(acc[1], box[1]);
+            return [
+              x,
+              y,
+              Math.max(acc[0] + acc[2], box[0] + box[2]) - x,
+              Math.max(acc[1] + acc[3], box[1] + box[3]) - y,
+            ];
+          }, null);
   const own = boxes.blocks[anchor];
   const measured = union ?? own;
   if (!measured) return handles;
@@ -1441,6 +1452,16 @@ export const TOOL_DEFAULT_SIZE: Readonly<
   wordArt: [800, 120],
 };
 
+/**
+ * The default box of one tool: TOOL_DEFAULT_SIZE by kind, except a table, whose height is its
+ * rows' natural height (docs/OBJECTS.md 3.3 item 3; build/b2.md request 1g: `tableBoxHeight`,
+ * 163 for three rows at 20 px, 271 for five), so the placed table's box fits its rows.
+ */
+export function toolDefaultSize(tool: Exclude<EditorTool, 'select'>): [number, number] {
+  if (tool.kind === 'table') return [TOOL_DEFAULT_SIZE.table[0], tableBoxHeight(tool.rows)];
+  return TOOL_DEFAULT_SIZE[tool.kind];
+}
+
 /** A drag shorter than this on both axes counts as a click and places the default box. */
 export const DRAW_MIN_PX = 8;
 /** Scribble samples the pointer every 8 px and keeps at most this many points (SPEC-2 2.4.4, 6.2). */
@@ -1537,7 +1558,7 @@ export function drawnBox(
   let dy = now.y - start.y;
   const dragged = Math.abs(dx) >= DRAW_MIN_PX || Math.abs(dy) >= DRAW_MIN_PX;
   if (!dragged) {
-    const [w, h] = TOOL_DEFAULT_SIZE[tool.kind];
+    const [w, h] = toolDefaultSize(tool);
     return { box: [start.x, start.y, w, h], dragged: false };
   }
   if (mods.shift === true) {
@@ -1672,6 +1693,64 @@ export function toolInsertMutation(
     ...(after !== undefined ? { after } : {}),
     block,
   };
+}
+
+/**
+ * The one `block.insert` a draw previews and commits (docs/OBJECTS.md 2.4): the press builds the
+ * same mutation the release will commit, so the sheet draws the object itself from the pointer
+ * down, at the tool's default box while the pointer has not travelled DRAW_MIN_PX and at the
+ * drawn box after (`drawnBox` decides both; `dragged` is its verdict), with the same id for the
+ * preview and the commit. A line drawn by a drag takes the drag's orientation (drawnLineOrientation
+ * from `start` to `end`); a connector kind's ends snap to the sites under `start` and `end`, the
+ * way `insertDrawn` snapped them at the release alone before this round (SPEC-2 6.2, 2.4.7). Null
+ * on a slide that is not a canvas: the Editor previews and commits a draw over the converted
+ * slide (the provisional conversion at the press, the measured one at the release, SPEC-2 1.6),
+ * so a grammar slot insert never stands in for the drawn object.
+ */
+export function drawDraftMutation(
+  slide: Slide,
+  tool: Exclude<EditorTool, 'select'>,
+  id: string,
+  box: Box,
+  options: {
+    grid?: boolean;
+    dragged?: boolean;
+    start?: Point;
+    end?: Point;
+    points?: [number, number][];
+  } = {},
+): Mutation | null {
+  if (!isFreeformSlide(slide)) return null;
+  const orientation =
+    isLineTool(tool) &&
+    tool.line !== 'rule' &&
+    options.dragged === true &&
+    options.start !== undefined &&
+    options.end !== undefined
+      ? drawnLineOrientation(options.start, options.end)
+      : undefined;
+  const mutation = toolInsertMutation(slide, tool, id, box, 'main', undefined, {
+    grid: options.grid ?? true,
+    ...(options.points ? { points: options.points } : {}),
+    ...(orientation ? { orientation } : {}),
+  });
+  if (!mutation || mutation.op !== 'block.insert') return null;
+  const block = mutation.block;
+  if (
+    block.type !== 'shape' ||
+    !isLineBlock(block) ||
+    !isConnectorKind(block.shape) ||
+    options.start === undefined ||
+    options.end === undefined
+  )
+    return mutation;
+  const startSite = siteUnder(slide, options.start);
+  const endSite = siteUnder(slide, options.end);
+  if (!startSite && !endSite) return mutation;
+  const connect: NonNullable<ShapeBlock['connect']> = {};
+  if (startSite) connect.start = { block: startSite.blockId, site: startSite.site };
+  if (endSite) connect.end = { block: endSite.blockId, site: endSite.site };
+  return { ...mutation, block: { ...block, connect } as Block };
 }
 
 /**

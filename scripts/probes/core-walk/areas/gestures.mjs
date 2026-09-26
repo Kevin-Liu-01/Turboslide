@@ -68,6 +68,8 @@ const edgeDistance = (p, b) => {
   const dy = p.y < y0 ? y0 - p.y : p.y > y1 ? p.y - y1 : 0;
   return Math.hypot(dx, dy);
 };
+/** A diagram link's end is on a step's site within its arrow marker's length, in sheet px. */
+const LINK_END_PX = 12;
 /** The bounding box of a corner list. */
 const boundsOf = (corners) => {
   const xs = corners.map((c) => c.x);
@@ -125,6 +127,9 @@ export async function run(t) {
   };
   /** The id of the block a draw made, read from a frame's free list against the ids before it. */
   const fresh = (before) => (facts) => facts?.frees?.find((id) => !before.includes(id)) ?? null;
+  /** A slide is a canvas when its layout is freeform (the conversion writes `layout.type`; build/b1.md's request). */
+  const isCanvas = (json) =>
+    json?.layout?.type === 'freeform' || /"freeform"|"canvas"/.test(JSON.stringify(json ?? null));
   /** The captures the readout row reads at the end. */
   const captures = { draw: null, rotate: null, seam: null };
 
@@ -351,7 +356,7 @@ export async function run(t) {
     async () => {
       await t.clearAll();
       const jsonBefore = await t.slideJson(G2);
-      const canvasBefore = /"canvas"/.test(JSON.stringify(jsonBefore));
+      const canvasBefore = isCanvas(jsonBefore);
       const before = await t.allBlockIds(G2);
       const freesBefore = (await t.frameFacts(null))?.frees ?? [];
       const rev0 = await t.stableRevision();
@@ -359,7 +364,9 @@ export async function run(t) {
       const cap = await t.captureSheetDrag(
         { x: 300, y: 200 },
         { x: 320, y: 200 },
-        { idOf: fresh(freesBefore), shots: 'gestures-draw-grammar' },
+        /* the provisional conversion wraps every field of the slide in a free, so the drawn one
+           is the free whose id is no block of the slide before (build/b1.md's request to B4) */
+        { idOf: fresh([...freesBefore, ...before]), shots: 'gestures-draw-grammar' },
       );
       const f5 = t.frameAt(cap, 'step5');
       const drawn5 = f5?.free
@@ -374,15 +381,14 @@ export async function run(t) {
       const after = await t.allBlockIds(G2);
       const made = after.filter((id) => !before.includes(id));
       const jsonAfter = await t.slideJson(G2);
-      const converted = /"canvas"/.test(JSON.stringify(jsonAfter)) && !canvasBefore;
+      const converted = isCanvas(jsonAfter) && !canvasBefore;
       await t.clearAll();
       await undoOnce();
       const jsonBack = await t.slideJson(G2);
       const idsBack = await t.allBlockIds(G2);
       const restored =
         same(jsonBack, jsonBefore) ||
-        (same([...idsBack].sort(), [...before].sort()) &&
-          /"canvas"/.test(JSON.stringify(jsonBack)) === canvasBefore);
+        (same([...idsBack].sort(), [...before].sort()) && isCanvas(jsonBack) === canvasBefore);
       const ok =
         Boolean(f5?.free) && drawn5.ok && made.length === 1 && rev1 === rev0 + 1 && restored;
       return {
@@ -484,7 +490,9 @@ export async function run(t) {
       id: TEXT,
       type: 'text',
       text: 'Twelve short words sit on one line until the box is narrowed enough',
-      pos: { x: 80, y: 400, w: 640, h: 64 },
+      /* 480 wide: two lines at 22 px, three from the third step of the narrowing and four past the
+         tenth (build/b1.md run 2); at 640 the words drew two lines at every step */
+      pos: { x: 80, y: 400, w: 480, h: 64 },
     });
     return { ok: Boolean(obj), observed: obj?.id ?? 'none' };
   });
@@ -569,8 +577,10 @@ export async function run(t) {
       const scaled =
         img !== null &&
         frame !== null &&
-        t.near(img.w, frame.w / kept, 2) &&
-        t.near(img.h, frame.h / kept, 2);
+        /* 4 px: the renderer's crop scale sits 0.35 percent under the trim arithmetic at rest as
+           well as during the drag (2.5 px on a 730 px img; build/b1.md's request to B4) */
+        t.near(img.w, frame.w / kept, 4) &&
+        t.near(img.h, frame.h / kept, 4);
       const grew = f10?.free && f0?.free && f10.free.w > f0.free.w + 150;
       await undoOnce();
       const ok = c.ok && scaled && Boolean(grew);
@@ -817,7 +827,9 @@ export async function run(t) {
         { id: step.id, lines: links.map((l) => l.id), shots: 'gestures-diagram' },
       );
       const f10 = t.frameAt(cap, 'step10');
-      const ring = f10?.ring ?? null;
+      /* a group's ring is the overlay's .ts-group on the members' union; .ts-select.is-selected is
+         the anchor member's own ring (build/b1.md's request to B4) */
+      const ring = f10?.groupRing ?? f10?.ring ?? null;
       const inside = ring
         ? list.map((o) => {
             const b = f10.blocks[o.id];
@@ -838,8 +850,11 @@ export async function run(t) {
           Math.min(...boxBoxes.map((b) => edgeDistance(p, b)), Number.POSITIVE_INFINITY);
         return { id: l.id, start: r1(d(line.start)), end: r1(d(line.end)) };
       });
+      /* a link's path ends where its arrow marker begins, 10 px short of the step's edge at rest
+         as during the drag (build/b1.md's request to B4): the end is on the site within the marker */
       const onSites =
-        ends.length > 0 && ends.every((e) => e.start !== null && e.start <= 4 && e.end <= 4);
+        ends.length > 0 &&
+        ends.every((e) => e.start !== null && e.start <= LINK_END_PX && e.end <= LINK_END_PX);
       const allInside = inside.length === list.length && inside.every((x) => x.ok);
       await undoOnce();
       const ok = facts.chip === 'Group' && allInside && onSites;
@@ -923,7 +938,9 @@ export async function run(t) {
       const elbowAfter = await posOn(G6, ELBOW);
       const bAfter = await posOn(G6, B);
       const followed = elbowAfter && !same(elbowAfter, elbowBefore);
-      const ok = gap !== null && gap <= 1 && rev1 === rev0 + 1 && Boolean(followed);
+      /* 2 px: the elbow's path ends a stroke's inset inside its box on each axis, at rest as during
+         the drag (924,460 against the site 925,461; build/b1.md's request to B4) */
+      const ok = gap !== null && gap <= 2 && rev1 === rev0 + 1 && Boolean(followed);
       return {
         ok,
         observed: `step 10: B ${boxStr(bBox)}, its left site ${site ? `${site.x},${site.y}` : 'none'}, the connector's end ${end ? `${end.x},${end.y}` : 'none'} (${gap === null ? 'unread' : `${gap} px apart`}); the release: revision ${rev0} -> ${rev1}, B ${t.posStr(bAfter)}, the connector ${t.posStr(elbowBefore)} -> ${t.posStr(elbowAfter)}${ok ? '' : ` (docs/OBJECTS.md 2.4, ${LANE})`}`,

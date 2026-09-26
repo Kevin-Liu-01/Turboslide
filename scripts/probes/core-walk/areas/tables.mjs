@@ -2827,10 +2827,12 @@ async function objectsRound(t, S, h) {
       const edgeOk = (side) => {
         const e = o?.edges?.find((x) => x.side === side)?.box ?? null;
         if (!e || !o.ring) return false;
-        if (side === 'n') return t.near(e.y, o.ring.y, 3) && t.near(e.x, o.ring.x, 8);
-        if (side === 's') return t.near(e.y + e.h, o.ring.y + o.ring.h, 3);
-        if (side === 'w') return t.near(e.x, o.ring.x, 3);
-        return t.near(e.x + e.w, o.ring.x + o.ring.w, 3);
+        /* the strips are 8 CSS px wide and centred on the ring (Overlay.tsx FRAME_EDGE_PX), so the
+           reading that matches the drawing is the strip's centre line (build/b5.md R9) */
+        if (side === 'n') return t.near(e.y + e.h / 2, o.ring.y, 3) && t.near(e.x, o.ring.x, 8);
+        if (side === 's') return t.near(e.y + e.h / 2, o.ring.y + o.ring.h, 3);
+        if (side === 'w') return t.near(e.x + e.w / 2, o.ring.x, 3);
+        return t.near(e.x + e.w / 2, o.ring.x + o.ring.w, 3);
       };
       const edges = ['n', 'e', 's', 'w'].filter(edgeOk);
       const cornerOk = (dir, x, y) => {

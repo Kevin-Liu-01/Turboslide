@@ -268,6 +268,19 @@ export async function run(t) {
       /** Opens a tail control and picks the first new option the test accepts; the pick's id. */
       const pick = async (control, test) => {
         if (!tail.includes(control)) return { pick: null, options: [] };
+        /* a control drawn aria-disabled says why in its tooltip and is read, never opened: Border
+           dash while the text schema takes no dash (build/b5.md R6, R10; docs/OBJECTS.md section 7) */
+        const refused = await page.evaluate(
+          (c) =>
+            document.querySelector(`[data-control="${c}"]`)?.getAttribute('aria-disabled') ===
+            'true',
+          control,
+        );
+        if (refused) {
+          const sentence = await t.hoverControl(control);
+          await t.sleep(200);
+          return { pick: null, disabled: true, sentence: sentence ?? null, options: [] };
+        }
         const prior = await page.evaluate(() =>
           [...document.querySelectorAll('[data-control]')].map((e) =>
             e.getAttribute('data-control'),
@@ -288,7 +301,13 @@ export async function run(t) {
         );
         const found = options.find((o) => test(o.id, o.text)) ?? null;
         if (found) await t.clickControl(found.id);
-        else await t.press('Escape');
+        else if (options.length > 0) {
+          /* Escape closes the plate; a second Escape would clear the selection (A1 rule 4), so the
+             word art is selected again before the next control is read (build/b5.md R10) */
+          await t.press('Escape');
+          await t.sleep(200);
+          await t.selectObject(W);
+        }
         await t.settled();
         await t.sleep(300);
         return { pick: found?.id ?? null, options: options.map((o) => o.id) };
@@ -330,6 +349,8 @@ export async function run(t) {
         wrote: typeof b2?.outline?.dash === 'string' && b2.outline.dash !== b0?.outline?.dash,
         drawn: null,
         value: JSON.stringify(b2?.outline),
+        disabled: dash.disabled === true,
+        sentence: dash.sentence ?? null,
       });
       if (results[1].wrote) await undo();
       /* Border color: a token that is not the current one */
@@ -366,10 +387,14 @@ export async function run(t) {
       const ok =
         missing.length === 0 &&
         before &&
-        results.every((r) => r.pick !== null && r.wrote && r.drawn !== false);
+        results.every(
+          (r) =>
+            (r.pick !== null && r.wrote && r.drawn !== false) ||
+            (r.disabled === true && typeof r.sentence === 'string' && r.sentence.length > 0),
+        );
       return {
         ok,
-        observed: `tail controls ${want.filter((c) => tail.includes(c)).join(', ') || 'none'}; missing ${missing.join(', ') || 'none'}; before the text controls ${before}; ${results.map((r) => `${r.name}: pick ${r.pick ?? 'none'}, wrote ${r.wrote} (${r.value})${r.drawn === null ? '' : `, drawn ${r.drawn}`}`).join('; ')}${ok ? '' : ' (docs/OBJECTS.md 4.2 item 4, B5)'}`,
+        observed: `tail controls ${want.filter((c) => tail.includes(c)).join(', ') || 'none'}; missing ${missing.join(', ') || 'none'}; before the text controls ${before}; ${results.map((r) => (r.disabled ? `${r.name}: disabled, "${r.sentence ?? ''}"` : `${r.name}: pick ${r.pick ?? 'none'}, wrote ${r.wrote} (${r.value})${r.drawn === null ? '' : `, drawn ${r.drawn}`}`)).join('; ')}${ok ? '' : ' (docs/OBJECTS.md 4.2 item 4, B5)'}`,
       };
     },
   );

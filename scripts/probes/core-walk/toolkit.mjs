@@ -1971,8 +1971,13 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
           /* the wrapper's own layout box and angle (the sheet lays out at 1600 px and scales
              by k): its bounding box is the axis aligned bounds of a turned object, the layout
              box with the angle gives the corners the ring should sit on */
-          const left = parseFloat(free.style.left) || 0;
-          const top = parseFloat(free.style.top) || 0;
+          /* the inline left and top are against the layer's origin: the content layer sits at
+             137,129 under `.freeform` and at 0,0 under `.freeform-sheet` (slide.ts renderFreeform,
+             insideContent), so the layer's own offset from the sheet is added (build/b1.md) */
+          const layer = free.parentElement;
+          const lr = layer ? layer.getBoundingClientRect() : sr;
+          const left = (lr.x - sr.x) / k + (parseFloat(free.style.left) || 0);
+          const top = (lr.y - sr.y) / k + (parseFloat(free.style.top) || 0);
           const w = free.offsetWidth;
           const h = free.offsetHeight;
           const angle = angleOf(free);
@@ -2136,6 +2141,8 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
           cells,
           ring,
           ringTurn,
+          /* a group's ring on the members' union (Overlay.tsx .ts-group), beside the anchor's own */
+          groupRing: box(document.querySelector('.ts-overlay .ts-group')),
           cellRing: box(document.querySelector('.ts-overlay .ts-cell-ring')),
           rangeRing: box(
             document.querySelector(

@@ -1,11 +1,14 @@
 import type { CellBorder, TableBlock, TableSpan } from '@turboslide/schema/blocks/table';
 import {
+  applyTableCommand,
+  columnShares,
   isCoveredCell,
   spanAt,
   TABLE_MAX_COLUMNS,
   TABLE_MAX_ROWS,
 } from '@turboslide/schema/blocks/table';
 import type { Color } from '@turboslide/schema/color';
+import type { Position } from '@turboslide/schema/position';
 
 import type { EditorSelection } from './editor-shell';
 import type { MenuActionId } from './menus/model';
@@ -18,8 +21,11 @@ import type { MenuActionId } from './menus/model';
  * all call `tablePlan` and dispatch what comes back; the plan carries `blockId` and the action's
  * fields, and the caller adds `slideId` and `baseRevision` (`tableWriteInput`). A plan that cannot
  * be made says why in a sentence a sales user reads in the snackbar. Also here: the cell walk of
- * Tab and Shift+Tab across merged cells (`nextCell`), the range arithmetic the sections share, and
- * the facts the menu context reads (`isMergedAnchor`). No React, no DOM.
+ * Tab and Shift+Tab across merged cells (`nextCell`), the range arithmetic the sections share, the
+ * facts the menu context reads (`isMergedAnchor`), and the table's own controls of the objects
+ * round (docs/OBJECTS.md 3.3 item 4): the range a row or column head names (`headRange`), the
+ * header row toggle (`toggleHeader`) and the one commit of the edge "+" (`edgeInsert`). No React,
+ * no DOM.
  */
 export type TableCommandId =
   | 'insertRowsAbove'
@@ -34,7 +40,9 @@ export type TableCommandId =
   | 'unmerge'
   | 'cellFill'
   | 'cellBorder'
-  | 'tableBorder';
+  | 'tableBorder'
+  /** the Header row check of the Table section and the row head's menu (docs/OBJECTS.md 3.3 items 4 and 6) */
+  | 'toggleHeader';
 
 export type TablePlan =
   { action: MenuActionId; input: Record<string, unknown> } | { refused: string };
@@ -71,6 +79,7 @@ export const TABLE_COMMAND_LABELS: Readonly<Record<TableCommandId, string>> = {
   cellFill: 'Fill color',
   cellBorder: 'Border',
   tableBorder: 'Table border',
+  toggleHeader: 'Header row',
 };
 
 export const SELECT_CELL = 'Click a table cell first';
@@ -214,6 +223,12 @@ export function tablePlan(
   options: TablePlanOptions = {},
 ): TablePlan {
   const range = rangeOf(block, selection);
+  if (command === 'toggleHeader') {
+    return plan('block.set', block.id, {
+      path: '/rows',
+      value: rowsWithHeader(block, !isHeaderRow(block)),
+    });
+  }
   if (command === 'tableBorder') {
     if (options.border === null) return plan('block.set', block.id, { path: '/border' });
     const border = options.border ?? {};
@@ -343,9 +358,136 @@ export function tableCommandOfItem(itemId: string): TableCommandId | null {
       return 'merge';
     case 'format.table.unmergeCells':
       return 'unmerge';
+    case 'format.table.headerRow':
+      return 'toggleHeader';
     default:
       return null;
   }
+}
+
+// ---------------------------------------------------------------------------------------------
+// The header row, the heads and the edge "+" (docs/OBJECTS.md 3.3 items 4 and 6)
+
+/** True while the table's first row is its header (`rows[0].header`). */
+export function isHeaderRow(block: Pick<TableBlock, 'rows'>): boolean {
+  return block.rows[0]?.header === true;
+}
+
+/** The rows with the first row's header flag set or cleared; the other rows untouched. */
+export function rowsWithHeader(block: Pick<TableBlock, 'rows'>, on: boolean): TableBlock['rows'] {
+  return block.rows.map((row, index) => {
+    if (index !== 0) return row;
+    const next = { ...row };
+    if (on) next.header = true;
+    else delete next.header;
+    return next;
+  });
+}
+
+/** The head's axis: the band above a column, the band left of a row. */
+export type HeadAxis = 'column' | 'row';
+
+/**
+ * The range a row or column head names (the band above column `index`, or left of row `index`;
+ * docs/OBJECTS.md 3.3 item 4): every cell of that column or row, in the shell's `cells` words,
+ * clamped to the grid; null off the grid or on an empty table.
+ */
+export function headRange(
+  block: Pick<TableBlock, 'rows' | 'columns'>,
+  axis: HeadAxis,
+  index: number,
+): NonNullable<EditorSelection['cells']> | null {
+  const rows = block.rows.length;
+  const columns = block.columns.length;
+  if (rows === 0 || columns === 0) return null;
+  const at = Math.round(index);
+  if (axis === 'column') {
+    if (at < 0 || at >= columns) return null;
+    return { r0: 0, c0: at, r1: rows - 1, c1: at };
+  }
+  if (at < 0 || at >= rows) return null;
+  return { r0: at, c0: 0, r1: at, c1: columns - 1 };
+}
+
+/** The field writes of one edge insert: the table's fields and its box, each as a `block.set` path and value. */
+export type EdgeInsert = {
+  writes: { path: string; value?: unknown }[];
+  /** the table's box after the insert */
+  pos: Position;
+};
+
+/**
+ * The one commit the edge "+" makes (docs/OBJECTS.md 3.3 item 4; the row
+ * `tables.edge.add-row-column`: "the widths of the others hold"): a column right of the last one
+ * as wide as the last column drawn (`size` px), the table's `pos.w` grown by it, so every other
+ * column keeps its width; or a row under the last one, `pos.h` grown by the last row's drawn
+ * height. Every column takes its drawn width in px so the grid stays proportional after the box
+ * grows (`columnShares`). `total` is the table's drawn width. Null on a full table.
+ */
+export function edgeInsert(
+  block: TableBlock,
+  pos: Position,
+  axis: HeadAxis,
+  size: number,
+  total: number,
+): EdgeInsert | null {
+  const grow = Math.max(1, Math.round(size));
+  if (axis === 'column') {
+    if (block.columns.length >= TABLE_MAX_COLUMNS) return null;
+    const at = block.columns.length - 1;
+    const edited = applyTableCommand(block, { kind: 'insertColumns', at, where: 'right' });
+    if ('deleted' in edited) return null;
+    const shares = columnShares(block.columns, total);
+    const columns = edited.columns.map((column, index) => ({
+      ...column,
+      width: index <= at ? Math.round(shares[index] ?? total / block.columns.length) : grow,
+    }));
+    return {
+      writes: [
+        { path: '/columns', value: columns },
+        { path: '/rows', value: edited.rows },
+        ...spanAndCellWrites(block, edited),
+        { path: '/pos', value: { ...pos, w: pos.w + grow } },
+      ],
+      pos: { ...pos, w: pos.w + grow },
+    };
+  }
+  if (block.rows.length >= TABLE_MAX_ROWS) return null;
+  const at = block.rows.length - 1;
+  const edited = applyTableCommand(block, { kind: 'insertRows', at, where: 'below' });
+  if ('deleted' in edited) return null;
+  return {
+    writes: [
+      { path: '/rows', value: edited.rows },
+      ...(jsonEqual(edited.columns, block.columns)
+        ? []
+        : [{ path: '/columns', value: edited.columns }]),
+      ...spanAndCellWrites(block, edited),
+      { path: '/pos', value: { ...pos, h: pos.h + grow } },
+    ],
+    pos: { ...pos, h: pos.h + grow },
+  };
+}
+
+function jsonEqual(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/** The `spans` and `cells` writes an edit needs: only when they changed; an absent field is removed. */
+function spanAndCellWrites(
+  block: TableBlock,
+  edited: { spans?: TableSpan[]; cells?: TableBlock['cells'] },
+): { path: string; value?: unknown }[] {
+  const out: { path: string; value?: unknown }[] = [];
+  if (!jsonEqual(edited.spans, block.spans))
+    out.push(
+      edited.spans === undefined ? { path: '/spans' } : { path: '/spans', value: edited.spans },
+    );
+  if (!jsonEqual(edited.cells, block.cells))
+    out.push(
+      edited.cells === undefined ? { path: '/cells' } : { path: '/cells', value: edited.cells },
+    );
+  return out;
 }
 
 /** The style of one cell, as stored: fill and border, or nothing. */

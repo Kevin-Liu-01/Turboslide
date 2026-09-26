@@ -92,6 +92,8 @@ export type TableSectionProps = {
   dispatch: EditorDispatch;
   busy: boolean;
   report: (promise: Promise<unknown>) => void;
+  /** the table's measured height in sheet px, so Distribute rows shares the box as it stands (objects/build/b2.md 2d) */
+  boxHeight?: number;
 };
 
 /** The sections another builder draws inside this panel (SPEC-2 section 5: Chart data, Table). */
@@ -224,7 +226,11 @@ function Section({
         className={cn('ts-panel-section-head', disabled && 'is-disabled')}
         aria-expanded={disabled ? undefined : open}
         aria-disabled={disabled ? true : undefined}
-        data-control={`formatOptions.${id}`}
+        /* the head's own id: the section's body carries `formatOptions.<id>` (the Table and Chart
+           data sections' roots, inspector/table.tsx and chart.tsx), and one id on two elements
+           sent every reader of the body to the head (the walk's tables.panel.section-words read
+           the word "Table" and no group; objects round, build/b5.md) */
+        data-control={`formatOptions.section.${id}`}
         data-section-toggle={`formatOptions.section.${id}.toggle`}
         data-status={disabled ? 'later' : 'now'}
         onClick={disabled ? undefined : onToggle}
@@ -802,6 +808,9 @@ export function FormatOptions({
                     dispatch,
                     busy,
                     report,
+                    ...(measuredBoxes?.[selected.id] === undefined
+                      ? {}
+                      : { boxHeight: measuredBoxes[selected.id]?.h }),
                   }) ?? null}
                   {renderGeneratedAdvanced('table')}
                 </Section>

@@ -12,6 +12,7 @@ import {
 import type { ChartBlock } from '@turboslide/schema/blocks/chart';
 import type { TableBlock } from '@turboslide/schema/blocks/table';
 import { isLineKind } from '@turboslide/schema/shapes';
+import type { Dash } from '@turboslide/schema/shapes';
 import type { Color } from '@turboslide/schema/color';
 import { deckAppearance } from '@turboslide/schema/deck';
 import { headingBlockSchema } from '@turboslide/schema/blocks';
@@ -277,7 +278,11 @@ export function ToolbarTail() {
   const slide = input.document.slides[input.slideId];
   const block = selectedBlock(slide, input.selection);
   const members = selectedBlocks(slide, input.selection);
-  const kind: TailKind = tailOfSelection(slide, input.selection);
+  /* a text block with an outline is word art: the shape tail's fill and border controls lead its
+     text tail (docs/OBJECTS.md 4.2 item 4; toolbar-tails.ts WORDART_TAIL) */
+  const base: TailKind = tailOfSelection(slide, input.selection);
+  const kind: TailKind =
+    base === 'text' && block?.type === 'text' && block.outline !== undefined ? 'wordart' : base;
   const many = kind === 'group' || members.length > 1;
   /* a parked control leaves the tail, and the More button's list, while Tools > Advanced tools is
      off (docs/FOCUS.md 3.1, 3.3); `toolbar.font` stays as a disabled `now` control. A tail parked
@@ -410,6 +415,9 @@ export function ToolbarTail() {
     if (block === undefined) return null;
     switch (op) {
       case 'fillColor':
+        /* word art's Fill color is the letters' colour (docs/OBJECTS.md 4.2 item 4) */
+        if (block.type === 'text' && block.outline !== undefined)
+          return { path: '/color', current: colorOf(block.color) };
         if (block.type === 'table') {
           const cell = input.selection?.cell ?? { row: 0, column: 0 };
           const styled = (block as TableBlock).cells?.find(
@@ -757,6 +765,25 @@ export function ToolbarTail() {
     switch (op) {
       case 'borderDash':
       case 'lineDash': {
+        /* word art's Border dash is its outline's (docs/OBJECTS.md 4.2 item 4), written as one
+           /outline once the schema carries the field (toolbar-tails.ts WORDART_TAKES_DASH) */
+        if (block?.type === 'text' && block.outline !== undefined) {
+          const outline = block.outline as { color: Color; width: number; dash?: Dash };
+          return (
+            <DashList
+              picked={outline.dash}
+              control={control.control}
+              autoFocus
+              onPick={(dash) => {
+                setPlate(null);
+                const next: Record<string, unknown> = { ...outline };
+                if (dash === 'solid') delete next.dash;
+                else next.dash = dash;
+                write('/outline', next, 'Border dash');
+              }}
+            />
+          );
+        }
         const current = block !== undefined && 'dash' in block ? (block.dash as never) : undefined;
         return (
           <DashList

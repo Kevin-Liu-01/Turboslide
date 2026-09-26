@@ -8,13 +8,15 @@ import { emptyTable } from '@turboslide/schema/blocks/table';
 import { TableSection, tableFormatSlot } from '../inspector/table';
 import { forbiddenWordsIn } from '../menus/strings';
 
-// The Table section (gslides-parity SPEC-2 section 5 "Table", 2.7, 11.5 table-section.test):
-// the header row toggle; the table border weight with None for Google's Transparent, dash and
-// colour as one block.set /border; the row heights list writing /rows; Distribute rows and
-// columns as table.distribute; the selected cell's fill and border as table.cellStyle; Merge and
-// Unmerge enabled by the selection and written as table.merge and table.unmerge; the insert and
-// delete rows and columns with a count; every write through the editor's tableCommand when the
-// shell passes one; no engineering word; the slot adapter.
+// The Table section (gslides-parity SPEC-2 section 5 "Table", 2.7, 11.5 table-section.test;
+// docs/OBJECTS.md 3.3 item 6, the row tables.panel.section-words): the groups in the spec's
+// order with each property once; the header row toggle; the table border weight with None for
+// Google's Transparent, dash and colour as one block.set /border; one Height field writing
+// /rows; Distribute rows and columns as table.distribute; the selected cell's fill and border as
+// table.cellStyle; Merge and Unmerge enabled by the selection and written as table.merge and
+// table.unmerge, with the sentence under a disabled one; no insert or delete controls (the
+// overlay's "+" and heads and the menus carry them); every write through the editor's
+// tableCommand when the shell passes one; no engineering word; the slot adapter.
 
 afterEach(cleanup);
 
@@ -116,7 +118,7 @@ describe('TableSection', () => {
     const { dispatch } = mount({ cell: { row: 1, column: 0 } });
     const field = control('height') as HTMLInputElement;
     expect(field.value).toBe('56');
-    expect(field.getAttribute('aria-label')).toBe('Row 2 height');
+    expect(field.getAttribute('aria-label')).toBe('Height of row 2');
     expect(document.querySelector('[data-control="formatOptions.table.rowHeight.0"]')).toBeNull();
     fireEvent.change(field, { target: { value: '72' } });
     fireEvent.keyDown(field, { key: 'Enter' });
@@ -139,7 +141,7 @@ describe('TableSection', () => {
     /* rows 1 and 2 differ (auto and 56): the field reads empty with the mixed hint */
     expect(field.value).toBe('');
     expect(field.placeholder).toBe('mixed');
-    expect(field.getAttribute('aria-label')).toBe('Rows 1 to 2 height');
+    expect(field.getAttribute('aria-label')).toBe('Height of rows 1 to 2');
     fireEvent.change(field, { target: { value: '40' } });
     fireEvent.blur(field);
     expect(
@@ -164,6 +166,30 @@ describe('TableSection', () => {
     fireEvent.blur(all);
     expect(whole.dispatch).toHaveBeenCalledTimes(1);
     expect(whole.onNotice).toHaveBeenCalledWith('Type a height in px');
+  });
+
+  it('distributes rows over the measured box when the panel passes one (objects/build/b2.md 2d)', () => {
+    const dispatch = vi.fn<(action: string, input: unknown) => Promise<unknown>>(() =>
+      Promise.resolve({}),
+    );
+    render(
+      <TableSection
+        block={table()}
+        slideId="s"
+        revision={3}
+        dispatch={dispatch}
+        selection={null}
+        boxHeight={320}
+      />,
+    );
+    fireEvent.click(control('distributeRows'));
+    expect(dispatch).toHaveBeenLastCalledWith('table.distribute', {
+      slideId: 's',
+      blockId: 't',
+      axis: 'rows',
+      total: 319,
+      baseRevision: 3,
+    });
   });
 
   it('distributes rows and columns as table.distribute', () => {
@@ -273,56 +299,84 @@ describe('TableSection', () => {
     });
   });
 
-  it('inserts and deletes rows and columns at the cell with the count field', () => {
-    const { dispatch } = mount({ cell: { row: 1, column: 1 } });
-    fireEvent.change(control('count'), { target: { value: '2' } });
-    fireEvent.click(control('insertRowsBelow'));
-    expect(dispatch).toHaveBeenLastCalledWith('table.insertRows', {
-      slideId: 's',
-      blockId: 't',
-      at: 1,
-      count: 2,
-      where: 'below',
-      baseRevision: 3,
-    });
-    /* the count applies to columns too */
-    fireEvent.click(control('insertColumnsLeft'));
-    expect(dispatch).toHaveBeenLastCalledWith('table.insertColumns', {
-      slideId: 's',
-      blockId: 't',
-      at: 1,
-      count: 2,
-      where: 'left',
-      baseRevision: 3,
-    });
-    fireEvent.click(control('deleteRows'));
-    expect(dispatch).toHaveBeenLastCalledWith('table.deleteRows', {
-      slideId: 's',
-      blockId: 't',
-      from: 1,
-      baseRevision: 3,
-    });
-    fireEvent.click(control('deleteColumns'));
-    /* the caret in the merged cells deletes their two columns */
-    expect(dispatch).toHaveBeenLastCalledWith('table.deleteColumns', {
-      slideId: 's',
-      blockId: 't',
-      from: 1,
-      to: 2,
-      baseRevision: 3,
-    });
-    expect(control('insertRowsAbove').getAttribute('data-menu-item')).toBe(
-      'format.table.insertRowAbove',
+  it('reads Header row, Border, Rows, Columns, Cell, Merge in that order, each property once, and no insert or delete control (docs/OBJECTS.md 3.3 item 6)', () => {
+    mount({ cell: { row: 1, column: 1 } });
+    const root = document.querySelector('[data-control="formatOptions.table"]') as HTMLElement;
+    expect(
+      root.firstElementChild?.querySelector('[data-control="formatOptions.table.headerRow"]'),
+    ).not.toBeNull();
+    expect(
+      [...root.querySelectorAll('.ts-table-heading')].map((el) => el.firstChild?.textContent),
+    ).toEqual(['Border', 'Rows', 'Columns', 'Cell', 'Merge']);
+    expect(
+      [...root.querySelectorAll('[role="group"]')].map((el) => el.getAttribute('aria-label')),
+    ).toEqual(['Border', 'Rows', 'Columns', 'Cell', 'Merge']);
+    /* each property once: one Height field, one Distribute of each axis, the table's border once,
+       the cell's border once */
+    const ids = [...root.querySelectorAll('[data-control]')].map((el) =>
+      el.getAttribute('data-control'),
     );
+    for (const id of [
+      'formatOptions.table.height',
+      'formatOptions.table.distributeRows',
+      'formatOptions.table.distributeColumns',
+      'formatOptions.table.border.weight',
+      'formatOptions.table.cell.border.weight',
+      'formatOptions.table.merge',
+      'formatOptions.table.unmerge',
+    ])
+      expect(
+        ids.filter((each) => each === id),
+        id,
+      ).toHaveLength(1);
+    expect(ids.some((id) => /rowHeight\./.test(id ?? ''))).toBe(false);
+    for (const gone of [
+      'count',
+      'insertRowsAbove',
+      'insertRowsBelow',
+      'insertColumnsLeft',
+      'insertColumnsRight',
+      'deleteRows',
+      'deleteColumns',
+    ])
+      expect(control(gone), gone).toBeNull();
+    /* the Distribute buttons sit under their own axis */
+    expect(control('distributeRows').closest('[role="group"]')?.getAttribute('aria-label')).toBe(
+      'Rows',
+    );
+    expect(control('distributeColumns').closest('[role="group"]')?.getAttribute('aria-label')).toBe(
+      'Columns',
+    );
+    /* the Cell heading names the cell */
+    expect(root.querySelector('.ts-table-heading-detail')?.textContent).toBe('Cell 2,2');
+  });
+
+  it('says under a disabled Merge cells and Unmerge cells why it is disabled', () => {
+    mount({ cell: { row: 0, column: 0 } });
+    expect((control('merge') as HTMLButtonElement).disabled).toBe(true);
+    expect(document.querySelector('[data-for="formatOptions.table.merge"]')?.textContent).toBe(
+      'Select two cells or more to merge',
+    );
+    expect(document.querySelector('[data-for="formatOptions.table.unmerge"]')?.textContent).toBe(
+      'Select a merged cell to unmerge',
+    );
+    cleanup();
+    mount({ cells: { r0: 0, c0: 0, r1: 0, c1: 1 } });
+    expect(document.querySelector('[data-for="formatOptions.table.merge"]')).toBeNull();
+    cleanup();
+    mount({ cell: { row: 1, column: 1 } });
+    expect(document.querySelector('[data-for="formatOptions.table.unmerge"]')).toBeNull();
   });
 
   it('asks for a cell first when none is selected', () => {
     mount(null);
     expect(document.body.textContent).toContain('Click a table cell first');
-    expect((control('insertRowsAbove') as HTMLButtonElement).disabled).toBe(true);
     expect((control('cell.fill.plate') as HTMLButtonElement).disabled).toBe(true);
-    /* the table border and the heights still work */
+    expect((control('cell.border.weight') as HTMLSelectElement).disabled).toBe(true);
+    /* the table border, the heights and the distributes still work */
     expect((control('border.weight') as HTMLSelectElement).disabled).toBe(false);
+    expect((control('height') as HTMLInputElement).disabled).toBe(false);
+    expect((control('distributeRows') as HTMLButtonElement).disabled).toBe(false);
   });
 
   it('runs every plan through the editor’s tableCommand when the shell passes one', () => {

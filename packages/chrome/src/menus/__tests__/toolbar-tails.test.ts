@@ -6,6 +6,8 @@ import {
   HIDE_MENUS_CONTROL,
   TOOLBAR_TAILS,
   TOOLBAR_TAIL_END,
+  WORDART_DASH_LATER_DOC,
+  WORDART_TAKES_DASH,
   tailFor,
   tailLabels,
 } from '../toolbar-tails.ts';
@@ -63,6 +65,42 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
     /* the Font dropdown (docs/PRODUCT.md 4.2): live, in Google's position, no longer disabled */
     expect(byId('toolbar.font')?.dropdown).toBe(true);
     expect(byId('toolbar.font')?.enabled).toBeUndefined();
+  });
+
+  it('word art: the shape tail’s fill and border controls before the text controls, each live, and the text tail unchanged (docs/OBJECTS.md 4.2 item 4)', () => {
+    expect(tailLabels('wordart')).toEqual(TEXT_LABELS);
+    const byId = (control: string) =>
+      TOOLBAR_TAILS.wordart.find((each) => each.control === control);
+    const four = [
+      'toolbar.fillColor',
+      'toolbar.borderColor',
+      'toolbar.borderWeight',
+      'toolbar.borderDash',
+    ];
+    expect(TOOLBAR_TAILS.wordart.slice(0, 4).map((each) => each.control)).toEqual(four);
+    /* not parked, not gated on a box: the letters carry a colour and an outline */
+    for (const control of four) {
+      expect(byId(control)?.advanced, control).toBeUndefined();
+      if (control !== 'toolbar.borderDash') expect(byId(control)?.enabled, control).toBeUndefined();
+    }
+    expect(byId('toolbar.fillColor')?.op).toBe('fillColor');
+    expect(byId('toolbar.fillColor')?.doc).toMatch(/letters/);
+    expect(byId('toolbar.borderColor')?.doc).toMatch(/outline/);
+    expect(byId('toolbar.borderWeight')?.doc).toBe('1, 1.5 or 2');
+    /* the dash writes the outline's dash once the schema carries it, else it says so (b5.md R6) */
+    const dash = byId('toolbar.borderDash');
+    if (WORDART_TAKES_DASH) expect(dash?.enabled).toBeUndefined();
+    else {
+      expect(dash?.enabled).toBe('never');
+      expect(dash?.disabledReason).toBe(WORDART_DASH_LATER_DOC);
+    }
+    /* the text controls follow in the text tail's order */
+    expect(TOOLBAR_TAILS.wordart.slice(4).map((each) => each.control)).toEqual(
+      TOOLBAR_TAILS.text.slice(4).map((each) => each.control),
+    );
+    /* the other text blocks keep their parked four (docs/FOCUS.md 3.3) */
+    for (const control of four)
+      expect(TOOLBAR_TAILS.text.find((each) => each.control === control)?.advanced).toBe(true);
   });
 
   it('a shape: Change shape, then the text tail with the text controls enabled (3.3, SPEC-2 0.11)', () => {

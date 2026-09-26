@@ -605,6 +605,18 @@ export const CANVAS = {
   width: (px: number) => `${px} px`,
   /* the button under the selected chart (docs/FEATURES.md 2.2 rank 7) */
   editData: 'Edit data',
+  /* the table's own controls (docs/OBJECTS.md 3.3 item 4): the heads, their menu and the "+" */
+  columnHead: (n: number) => `Column ${n}`,
+  rowHead: (n: number) => `Row ${n}`,
+  headDoc: 'Click to select the whole column or row; right click for its menu',
+  headerRow: 'Header row',
+  headerRowDoc: 'The first row at display weight with a rule under it',
+  addColumn: 'Add a column',
+  addColumnDoc: 'A column at the right edge, as wide as the last one; the table grows by it',
+  addRow: 'Add a row',
+  addRowDoc: 'A row under the last one; the table grows by it',
+  tableFullColumns: 'A table has at most 20 columns',
+  tableFullRows: 'A table has at most 20 rows',
 } as const;
 
 /**

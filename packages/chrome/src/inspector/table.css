@@ -1,8 +1,9 @@
-/* The Table section of Format options (inspector/table.tsx; gslides-parity SPEC-2 section 5):
-   ruled 32 px rows grouped under small headings (Table border, Row heights, Cell, Rows and
-   columns), swatch rows for the fills and border colours with a None square first, the row
-   heights as a numbered list, and the command buttons as the shell's ToolButtons. Rows draw
-   --pt-hair-soft under themselves (SPEC 2.2 line law); a group draws nothing of its own. */
+/* The Table section of Format options (inspector/table.tsx; gslides-parity SPEC-2 section 5;
+   docs/OBJECTS.md 3.3 item 6): ruled 32 px rows grouped under small headings (Border, Rows,
+   Columns, Cell, Merge), swatch rows for the fills and border colours with a None square first,
+   one Height field, and the command buttons as the shell's ToolButtons with the sentence under a
+   disabled one. Rows draw --pt-hair-soft under themselves (SPEC 2.2 line law); a group draws
+   nothing of its own. */
 .ts-table-section {
   display: flex;
   flex-direction: column;
@@ -22,6 +23,15 @@
   font: 11px/1.2 var(--pt-text);
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+/* the cell's address beside the Cell heading, in the heading's tone without its case */
+.ts-table-heading-detail {
+  margin-left: 8px;
+  color: var(--pt-titanium);
+  font: 11px/1.2 var(--pt-text);
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .ts-table-row {
@@ -57,13 +67,7 @@
   font: 12px/1.4 var(--pt-text);
 }
 
-.ts-table-heights {
-  margin: 0;
-  padding: 0;
-}
-
-.ts-table-height,
-.ts-table-count {
+.ts-table-height {
   width: 72px;
   height: 26px;
   padding: 0 8px;
@@ -77,7 +81,6 @@
 }
 
 .ts-table-height:focus-visible,
-.ts-table-count:focus-visible,
 .ts-table-section select:focus-visible,
 .ts-table-section input[type='checkbox']:focus-visible {
   outline: 1px solid var(--pt-ink);
@@ -137,9 +140,4 @@
   flex-wrap: wrap;
   gap: 8px;
   padding: 8px 4px 4px;
-}
-
-.ts-table-actions.is-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
 }

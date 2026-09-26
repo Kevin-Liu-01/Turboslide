@@ -15,6 +15,7 @@ import { cn } from './lib/cn';
 import { CANVAS } from './menus/strings';
 import { isParked } from './parked-controls';
 import { Rulers } from './Rulers';
+import { TableOverlay } from './TableOverlay';
 import { tipProps } from './Tooltip';
 
 import './Overlay.css';
@@ -40,7 +41,10 @@ import './Overlay.css';
  * `role="group"` and the chip "Group"; the readouts (the size while a resize is down, the angle
  * while a rotation is down, the inch position while a guide drags); crop mode's dimmed picture
  * and black handles with its chip sentence; the connection sites of the shape under a line end;
- * the deck's guides (DeckGuides.tsx) and the rulers (Rulers.tsx). Every control carries the
+ * the deck's guides (DeckGuides.tsx) and the rulers (Rulers.tsx). A selected table (docs/OBJECTS.md
+ * 3.3 items 1 and 4) keeps its own ring at the table's box while a cell is open, with the cell ring
+ * inside it, the row and column heads, the edge "+" affordances and the row seams (TableOverlay.tsx;
+ * the seams are B2's handles drawn here as `h` rules). Every control carries the
  * chrome's tooltip (Tooltip.tsx tipProps); a native title is never used. Cmd Up and Cmd Down on a
  * focused move chip change the order through the view's onHandleOrder, Shift for the ends (SPEC
  * 10.1). Line law (SPEC 2.2): every rule here is 1px, the ring and an active handle draw ink as a
@@ -124,8 +128,24 @@ export function frameEdgeStyles(box: Box, k: number): Record<'n' | 's' | 'w' | '
   };
 }
 
-/** A vertical edge handle is placed by its center and never thinner than its minimum hit width. */
+/**
+ * A vertical edge handle is placed by its center and never thinner than its minimum hit width; a
+ * horizontal one (a table's row seam, docs/OBJECTS.md 3.3 item 4; the shape `h` is B1's request
+ * R3 in objects/build/b5.md, read as a string until the union carries it) the same way on its axis.
+ */
 function handleStyle(handle: Handle, k: number): CSSProperties {
+  const shape: string = handle.shape;
+  /* B2's row seam is the `v` kind on the y axis (table-seam.ts tableRowSeamHandles): a rule across */
+  if (shape === 'h' || (shape === 'v' && handle.axis === 'y' && handle.blockId !== undefined)) {
+    return {
+      left: handle.box[0] * k,
+      top: (handle.box[1] + handle.box[3] / 2) * k,
+      width: handle.box[2] * k,
+      height: Math.max(9, handle.box[3] * k),
+      transform: 'translateY(-50%)',
+      cursor: handle.cursor,
+    };
+  }
   if (handle.shape === 'v') {
     return {
       left: (handle.box[0] + handle.box[2] / 2) * k,
@@ -186,7 +206,10 @@ const RESIZE_NAMES: Record<string, string> = {
 export function handleDoc(handle: Handle): string {
   switch (handle.kind) {
     case 'col-seam':
-      /* the layout's column seam, or a table's (docs/RETURN.md 2.4 fix 5; table-seam.ts carries the block) */
+      /* the layout's column seam, or a table's (docs/RETURN.md 2.4 fix 5; table-seam.ts carries the
+         block); a table's row seam is the same kind on the y axis (docs/OBJECTS.md 3.3 item 4) */
+      if (handle.blockId !== undefined && handle.axis === 'y')
+        return 'Drag to resize the row; the rows below move and the table grows. Up and Down step 1 px, Shift 10 px.';
       return handle.blockId !== undefined
         ? 'Drag to resize the column; the next column takes the difference. Left and Right step 1 px, Shift 10 px.'
         : 'Drag to set the column ratio: snaps to 4/8, 5/7 and 1/1, then 10 px steps. Left and Right step it.';
@@ -324,6 +347,7 @@ function HandleButton({
       data-shape={handle.shape}
       data-dir={handle.dir}
       data-index={handle.index}
+      data-axis={handle.axis}
       data-alt-only={handle.alt ? '' : undefined}
       style={style}
       aria-label={handle.label}
@@ -423,7 +447,24 @@ export function Overlay({ view }: OverlayProps) {
       : view.count > 1
         ? CANVAS.objects(view.count)
         : view.chip;
-  const ringBox = view.groupBox ?? view.selectionBox;
+  /* a table with a cell open or a range active keeps its own ring at the table's box, the chip
+     above it and the frame edges on it (docs/OBJECTS.md 3.2, 3.3 item 1: Kevin's screenshot read
+     the cell's box as the only ring); the cell's ring is drawn inside by TableOverlay */
+  const tableId =
+    view.tableFrame && view.count === 1 && view.selection !== null ? view.selection.blockId : null;
+  const tableBox = tableId !== null ? (view.boxes.blocks[tableId] ?? null) : null;
+  const selectionBox = tableBox ?? view.selectionBox;
+  const ringBox = view.groupBox ?? selectionBox;
+  /* the heads and the "+" draw on a table selected by one click too, not only with a cell open:
+     the candidate is the one selected block, and TableOverlay draws nothing when the shell's
+     document says it is no table */
+  const tableControlsId =
+    tableId ??
+    (view.count === 1 && view.selection !== null && view.selection.kind === 'block' && !view.editing
+      ? view.selection.blockId
+      : null);
+  const tableControlsBox =
+    tableControlsId !== null ? (view.boxes.blocks[tableControlsId] ?? null) : null;
   /* a rotated or flipped object's ring and handles turn with it, drawn from pos (SPEC-2 1.5);
      the chip, the readouts and the union box stay upright over the bounding box */
   const transform =
@@ -537,7 +578,7 @@ export function Overlay({ view }: OverlayProps) {
           aria-hidden="true"
         />
       ))}
-      {view.selectionBox && !view.crop ? (
+      {selectionBox && !view.crop ? (
         rotated && ringBox && view.count === 1 ? (
           <div className="ts-turn" style={turnStyle} data-rotated="" aria-hidden="true">
             <div
@@ -562,10 +603,15 @@ export function Overlay({ view }: OverlayProps) {
         ) : (
           <div
             className={cn('ts-select', 'is-selected', view.editing && 'is-editing')}
-            style={place(view.selectionBox, k)}
+            style={place(selectionBox, k)}
             aria-hidden="true"
           />
         )
+      ) : null}
+      {/* the table's own controls (docs/OBJECTS.md 3.3 items 1 and 4): the cell ring, the heads
+          and the edge "+", whenever one table is selected and no crop is open */}
+      {tableControlsId !== null && tableControlsBox !== null && !view.crop ? (
+        <TableOverlay view={view} tableBox={tableControlsBox} blockId={tableControlsId} />
       ) : null}
       {/* the box around a multi-selection: hair, so the whole selection reads as one; a group's ring is a named group */}
       {view.groupBox ? (

@@ -438,3 +438,115 @@
 .ts-draw-path circle {
   fill: var(--pt-ink);
 }
+
+/* ---- the table's own controls (docs/OBJECTS.md 3.3 items 1 and 4; TableOverlay.tsx) ---- */
+
+/* the layer of the table's controls fills the overlay and takes no pointer; its controls do */
+.ts-table-tools {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* the open cell's ring: a 1 px ink rule on the cell's grid area, inside the table's ring */
+.ts-cell-ring {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-ink);
+  pointer-events: none;
+}
+
+/* a table's row seam (B2's handle: the `v` kind on the y axis, table-seam.ts; or a `h` shape): a
+   1 px rule across the middle of the hit box, as the column seam's rule stands down it; silent at
+   rest as the slide-level handles are */
+.ts-handle[data-shape='h']::before,
+.ts-handle[data-shape='v'][data-axis='y']::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  bottom: auto;
+  width: auto;
+  height: 1px;
+  margin-left: 0;
+  margin-top: -0.5px;
+  background: var(--pt-hair);
+}
+
+.ts-handle.is-active[data-shape='h']::before,
+.ts-handle.is-active[data-shape='v'][data-axis='y']::before {
+  background: var(--pt-select);
+}
+
+/* the head bands above the columns and left of the rows: nothing at rest, the plate tone under
+   the pointer or the keyboard, a hairline around an open menu's head; above the frame edges so a
+   click in the band selects the column or row */
+.ts-table-head {
+  position: absolute;
+  z-index: 1;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: none;
+  appearance: none;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.ts-table-head:hover,
+.ts-table-head:focus-visible,
+.ts-table-head.is-open {
+  border-color: var(--pt-hair);
+  background: var(--pt-plate);
+}
+
+.ts-table-head:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+.ts-table-head:disabled {
+  cursor: default;
+}
+
+/* the "+" at the right or the bottom edge: a 16 px paper circle with a hairline and the sprite's
+   plus in ink, centred on the edge at the pointer; ink ground under the pointer. It sits above
+   the frame edge strip that shares its edge */
+.ts-table-add {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--pt-ink);
+  border-radius: 50%;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
+  appearance: none;
+  touch-action: none;
+}
+
+.ts-table-add:hover,
+.ts-table-add:focus-visible {
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+.ts-table-add:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-table-add svg {
+  display: block;
+}

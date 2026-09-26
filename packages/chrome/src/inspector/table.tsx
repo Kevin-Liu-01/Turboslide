@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import type { Block } from '@turboslide/schema/blocks';
 import type { CellBorder, TableBlock, TableBorderWeight } from '@turboslide/schema/blocks/table';
-import { TABLE_BORDER_WEIGHTS } from '@turboslide/schema/blocks/table';
+import { TABLE_BORDER_WEIGHTS, tableRuleWeight } from '@turboslide/schema/blocks/table';
 import type { Color } from '@turboslide/schema/color';
 import { COLOR_TOKENS } from '@turboslide/schema/color';
 import type { Dash } from '@turboslide/schema/shapes';
@@ -15,6 +15,7 @@ import { cn } from '../lib/cn';
 import {
   SELECT_CELL,
   cellStyleAt,
+  isHeaderRow,
   isMergedAnchor,
   isMultiCell,
   rangeOf,
@@ -30,14 +31,17 @@ import './table.css';
 
 /**
  * The Table section of Format options (gslides-parity SPEC-2 section 5 "Table", 2.7; R11 A5, A6;
- * R05 A6): the round one fields stay generated (header row, columns, the table's fill and
- * vertical alignment); this section adds the table border (weight with Google's Transparent as
- * None, colour, dash), the row heights as a list with Distribute rows and Distribute columns, the
- * selected cell's Fill and Border, Merge cells and Unmerge cells, and the insert and delete rows
- * and columns with a count. Every control is one plan of table-tools.ts dispatched as the action
- * of SPEC-2 section 3, through the editor's `tableCommand` when the shell passes one (so the
- * stage keeps the caret), else straight to the dispatcher. Mounted by FormatOptions through its
- * slots (`tableFormatSlot`) when the selected block is a table.
+ * R05 A6; docs/OBJECTS.md 3.3 item 6): the words a seller reads, each property once, in this
+ * order: Header row (a check), Border (the table's rules: weight with Google's Transparent as
+ * None, dash, colour), Rows (one Height field for the selected row or range, Distribute rows),
+ * Columns (Distribute columns), Cell (the caret's cell or the range: Fill, Border), Merge (Merge
+ * cells, Unmerge cells; the sentence under a disabled button says why). The inserts and deletes
+ * left the panel with the objects round: the "+" on the table's edges, the row and column heads
+ * and the right click menus carry them (Overlay.tsx, TableOverlay.tsx). Every control is one plan
+ * of table-tools.ts dispatched as the action of SPEC-2 section 3, through the editor's
+ * `tableCommand` when the shell passes one (so the stage keeps the caret), else straight to the
+ * dispatcher. Mounted by FormatOptions through its slots (`tableFormatSlot`) when the selected
+ * block is a table; the generated table fields stay behind Tools > Advanced tools (rank 11).
  */
 export type TableSectionProps = {
   block: TableBlock;
@@ -49,6 +53,8 @@ export type TableSectionProps = {
   editor?: Pick<EditorHandle, 'tableCommand'>;
   busy?: boolean;
   onNotice?: (message: string) => void;
+  /** the table's measured height in sheet px: Distribute rows then shares the box as it stands (objects/build/b2.md 2d) */
+  boxHeight?: number;
 };
 
 /** The structural props a Format options slot hands its section; the adapter narrows the block. */
@@ -61,6 +67,7 @@ export type TableSlotLikeProps = {
   editor?: Pick<EditorHandle, 'tableCommand'>;
   busy?: boolean;
   onNotice?: (message: string) => void;
+  boxHeight?: number;
 };
 
 /** The Table slot: the section for a table block, nothing for any other block. */
@@ -76,9 +83,14 @@ export function tableFormatSlot(props: TableSlotLikeProps): ReactNode {
       editor={props.editor}
       busy={props.busy}
       onNotice={props.onNotice}
+      boxHeight={props.boxHeight}
     />
   );
 }
+
+/** The sentences under the disabled merge buttons (docs/OBJECTS.md 3.3 item 6). */
+export const MERGE_NEEDS_CELLS = 'Select two cells or more to merge';
+export const UNMERGE_NEEDS_MERGED = 'Select a merged cell to unmerge';
 
 const WEIGHT_LABELS: Readonly<Record<TableBorderWeight, string>> = {
   0: 'None',
@@ -151,6 +163,7 @@ export function TableSection({
   editor,
   busy = false,
   onNotice,
+  boxHeight,
 }: TableSectionProps) {
   const control = 'formatOptions.table';
   const tableSelection = tableSelectionOf(selection);
@@ -161,7 +174,6 @@ export function TableSection({
   const multi = range !== null && isMultiCell(block, range);
   const merged = isMergedAnchor(block, cell);
   const cellStyle = cell === undefined ? {} : cellStyleAt(block, cell);
-  const [count, setCount] = useState(1);
   /* the Height field's draft while it is typed (docs/FEATURES.md 2.2 rank 13) */
   const [heightDraft, setHeightDraft] = useState<string | null>(null);
   /* the rows the Height field reads and writes: the range's rows, else the caret's row, else
@@ -179,8 +191,8 @@ export function TableSection({
     range === null
       ? 'Height of every row'
       : heightRows.length === 1
-        ? `Row ${range.r0 + 1} height`
-        : `Rows ${range.r0 + 1} to ${range.r1 + 1} height`;
+        ? `Height of row ${range.r0 + 1}`
+        : `Height of rows ${range.r0 + 1} to ${range.r1 + 1}`;
 
   const say = (message: string) => onNotice?.(message);
   const report = (promise: Promise<unknown>) =>
@@ -250,17 +262,6 @@ export function TableSection({
     if (changed) writeRows(rows, 'Row height');
   };
 
-  const toggleHeader = (on: boolean) => {
-    const rows = block.rows.map((row, index) => {
-      if (index !== 0) return row;
-      const next = { ...row };
-      if (on) next.header = true;
-      else delete next.header;
-      return next;
-    });
-    writeRows(rows, 'Header row');
-  };
-
   const border = block.border;
   const cellBorder: CellBorder | undefined = cellStyle.border;
   const cellDoc = hasCell ? undefined : SELECT_CELL;
@@ -269,17 +270,23 @@ export function TableSection({
     doc: 'The selected rows in px; empty takes the content height',
     key: 'Enter',
   });
+  const cellWords =
+    range === null
+      ? null
+      : multi
+        ? `Cells ${range.r0 + 1},${range.c0 + 1} to ${range.r1 + 1},${range.c1 + 1}`
+        : `Cell ${range.r0 + 1},${range.c0 + 1}`;
 
   return (
     <div className="ts-table-section" data-control={control}>
       <label className="ts-table-row is-check">
         <input
           type="checkbox"
-          checked={block.rows[0]?.header === true}
+          checked={isHeaderRow(block)}
           aria-label="Header row"
           data-control={`${control}.headerRow`}
           disabled={busy}
-          onChange={(event) => toggleHeader(event.target.checked)}
+          onChange={() => command('toggleHeader')}
           {...tipProps({
             name: 'Header row',
             doc: 'The first row at display weight with a rule under it',
@@ -288,13 +295,13 @@ export function TableSection({
         <span className="ts-table-label">Header row</span>
       </label>
 
-      <div className="ts-table-group" role="group" aria-label="Table border">
-        <span className="ts-table-heading">Table border</span>
+      <div className="ts-table-group" role="group" aria-label="Border" data-group="border">
+        <span className="ts-table-heading">Border</span>
         <div className="ts-table-row">
-          <span className="ts-table-label">Border weight</span>
+          <span className="ts-table-label">Weight</span>
           <select
             className="ts-ctl-select"
-            aria-label="Table border weight"
+            aria-label="Border weight"
             data-control={`${control}.border.weight`}
             value={String(border?.weight ?? 1)}
             disabled={busy}
@@ -304,7 +311,7 @@ export function TableSection({
               })
             }
             {...tipProps({
-              name: 'Border weight',
+              name: 'Weight',
               doc: 'The rules between the cells; None removes them',
             })}
           >
@@ -316,17 +323,17 @@ export function TableSection({
           </select>
         </div>
         <div className="ts-table-row">
-          <span className="ts-table-label">Border dash</span>
+          <span className="ts-table-label">Dash</span>
           <select
             className="ts-ctl-select"
-            aria-label="Table border dash"
+            aria-label="Border dash"
             data-control={`${control}.border.dash`}
             value={border?.dash ?? 'solid'}
             disabled={busy}
             onChange={(event) =>
               command('tableBorder', { border: { dash: event.target.value as Dash } })
             }
-            {...tipProps({ name: 'Border dash', doc: 'Solid or one of the five dashes' })}
+            {...tipProps({ name: 'Dash', doc: 'Solid or one of the five dashes' })}
           >
             {DASHES.map((dash) => (
               <option key={dash} value={dash}>
@@ -336,9 +343,9 @@ export function TableSection({
           </select>
         </div>
         <div className="ts-table-row is-wide">
-          <span className="ts-table-label">Border color</span>
+          <span className="ts-table-label">Color</span>
           <Swatches
-            label="Table border color"
+            label="Border color"
             current={border?.color}
             control={`${control}.border.color`}
             disabled={busy}
@@ -357,7 +364,7 @@ export function TableSection({
         </div>
       </div>
 
-      <div className="ts-table-group" role="group" aria-label="Rows">
+      <div className="ts-table-group" role="group" aria-label="Rows" data-group="rows">
         <span className="ts-table-heading">Rows</span>
         <div className="ts-table-row">
           <span className="ts-table-label">{heightLabel}</span>
@@ -400,9 +407,26 @@ export function TableSection({
             menuItem="format.table.distributeRows"
             disabled={busy}
             onClick={() =>
-              run(tablePlan(block, hasCell ? tableSelection : { cell: [0, 0] }, 'distributeRows'))
+              run(
+                tablePlan(
+                  block,
+                  hasCell ? tableSelection : { cell: [0, 0] },
+                  'distributeRows',
+                  /* the rows share the box as it stands: the drawn height less the rule above
+                     the first row (objects/build/b2.md 2d); without a measure the sizes clear */
+                  boxHeight === undefined
+                    ? {}
+                    : { total: Math.max(1, Math.round(boxHeight - tableRuleWeight(block))) },
+                ),
+              )
             }
           />
+        </div>
+      </div>
+
+      <div className="ts-table-group" role="group" aria-label="Columns" data-group="columns">
+        <span className="ts-table-heading">Columns</span>
+        <div className="ts-table-actions">
           <ToolButton
             label="Distribute columns"
             title="Distribute columns"
@@ -419,13 +443,10 @@ export function TableSection({
         </div>
       </div>
 
-      <div className="ts-table-group" role="group" aria-label="Cell">
+      <div className="ts-table-group" role="group" aria-label="Cell" data-group="cell">
         <span className="ts-table-heading">
-          {range === null
-            ? 'Cell'
-            : multi
-              ? `Cells ${range.r0 + 1},${range.c0 + 1} to ${range.r1 + 1},${range.c1 + 1}`
-              : `Cell ${range.r0 + 1},${range.c0 + 1}`}
+          Cell
+          {cellWords !== null ? <span className="ts-table-heading-detail">{cellWords}</span> : null}
         </span>
         {!hasCell ? <p className="ts-table-note">{SELECT_CELL}</p> : null}
         <div className="ts-table-row is-wide">
@@ -511,11 +532,15 @@ export function TableSection({
             }}
           />
         </div>
+      </div>
+
+      <div className="ts-table-group" role="group" aria-label="Merge" data-group="merge">
+        <span className="ts-table-heading">Merge</span>
         <div className="ts-table-actions">
           <ToolButton
             label="Merge cells"
             title="Merge cells"
-            doc={multi ? 'Joins the selected cells into one' : 'Select two or more cells first'}
+            doc={multi ? 'Joins the selected cells into one' : MERGE_NEEDS_CELLS}
             control={`${control}.merge`}
             menuItem="format.table.mergeCells"
             disabled={busy || !multi}
@@ -524,90 +549,23 @@ export function TableSection({
           <ToolButton
             label="Unmerge cells"
             title="Unmerge cells"
-            doc={merged ? 'Splits the merged cells again' : 'Select a merged cell first'}
+            doc={merged ? 'Splits the merged cells again' : UNMERGE_NEEDS_MERGED}
             control={`${control}.unmerge`}
             menuItem="format.table.unmergeCells"
             disabled={busy || !merged}
             onClick={() => command('unmerge')}
           />
         </div>
-      </div>
-
-      <div className="ts-table-group" role="group" aria-label="Rows and columns">
-        <span className="ts-table-heading">Rows and columns</span>
-        <div className="ts-table-row">
-          <span className="ts-table-label">Count</span>
-          <input
-            type="number"
-            className="ts-table-count"
-            min={1}
-            max={20}
-            value={count}
-            aria-label="Rows or columns to insert"
-            data-control={`${control}.count`}
-            disabled={busy}
-            onChange={(event) =>
-              setCount(Math.max(1, Math.min(20, Math.round(Number(event.target.value)) || 1)))
-            }
-            {...tipProps({ name: 'Count', doc: 'How many rows or columns the insert buttons add' })}
-          />
-        </div>
-        <div className="ts-table-actions is-grid">
-          <ToolButton
-            label="Insert row above"
-            title="Insert row above"
-            doc={cellDoc ?? `Adds ${count} above the cell`}
-            control={`${control}.insertRowsAbove`}
-            menuItem="format.table.insertRowAbove"
-            disabled={busy || !hasCell}
-            onClick={() => command('insertRowsAbove', { count })}
-          />
-          <ToolButton
-            label="Insert row below"
-            title="Insert row below"
-            doc={cellDoc ?? `Adds ${count} below the cell`}
-            control={`${control}.insertRowsBelow`}
-            menuItem="format.table.insertRowBelow"
-            disabled={busy || !hasCell}
-            onClick={() => command('insertRowsBelow', { count })}
-          />
-          <ToolButton
-            label="Insert column left"
-            title="Insert column left"
-            doc={cellDoc ?? `Adds ${count} left of the cell`}
-            control={`${control}.insertColumnsLeft`}
-            menuItem="format.table.insertColumnLeft"
-            disabled={busy || !hasCell}
-            onClick={() => command('insertColumnsLeft', { count })}
-          />
-          <ToolButton
-            label="Insert column right"
-            title="Insert column right"
-            doc={cellDoc ?? `Adds ${count} right of the cell`}
-            control={`${control}.insertColumnsRight`}
-            menuItem="format.table.insertColumnRight"
-            disabled={busy || !hasCell}
-            onClick={() => command('insertColumnsRight', { count })}
-          />
-          <ToolButton
-            label="Delete row"
-            title="Delete row"
-            doc={cellDoc ?? 'Removes the selected rows'}
-            control={`${control}.deleteRows`}
-            menuItem="format.table.deleteRow"
-            disabled={busy || !hasCell}
-            onClick={() => command('deleteRows')}
-          />
-          <ToolButton
-            label="Delete column"
-            title="Delete column"
-            doc={cellDoc ?? 'Removes the selected columns'}
-            control={`${control}.deleteColumns`}
-            menuItem="format.table.deleteColumn"
-            disabled={busy || !hasCell}
-            onClick={() => command('deleteColumns')}
-          />
-        </div>
+        {!multi ? (
+          <p className="ts-table-note" data-for={`${control}.merge`}>
+            {MERGE_NEEDS_CELLS}
+          </p>
+        ) : null}
+        {!merged ? (
+          <p className="ts-table-note" data-for={`${control}.unmerge`}>
+            {UNMERGE_NEEDS_MERGED}
+          </p>
+        ) : null}
       </div>
     </div>
   );

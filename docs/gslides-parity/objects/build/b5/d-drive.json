@@ -1,0 +1,73 @@
+{
+ "base": "http://localhost:4435",
+ "theme": "dark",
+ "startedAt": "2026-09-26T03:14:48.230Z",
+ "steps": [
+  {
+   "name": "Slide > Change theme, the dark tile: the sheet takes the dark appearance",
+   "ok": true,
+   "observed": "{\"sheet\":\"rgba(0, 0, 0, 0)\",\"chrome\":\"dark\"}"
+  },
+  {
+   "name": "insert 3 by 3 table",
+   "ok": true,
+   "observed": "table {\"x\":320,\"y\":129,\"w\":960,\"h\":320}"
+  },
+  {
+   "name": "one click on cell 1,1: the ring at the table, the cell ring inside",
+   "ok": true,
+   "observed": "ring {\"x\":510,\"y\":248,\"w\":677,\"h\":226} table {\"x\":509.5999755859375,\"y\":247.94500732421875,\"w\":676.7999267578125,\"h\":225.5999755859375} cellRing {\"x\":735,\"y\":324,\"w\":226,\"h\":75} (1,1); chip Table at {\"x\":510,\"y\":228,\"w\":46,\"h\":18}; frame edges 4; handles 20 [9 resize/move, 11 seams]; editing true"
+  },
+  {
+   "name": "a drag from the ring band moves the table by 80 by 40",
+   "ok": false,
+   "observed": "{\"x\":320,\"y\":129,\"w\":960,\"h\":320} -> {\"x\":397,\"y\":169,\"w\":960,\"h\":320}"
+  },
+  {
+   "name": "the heads: hover above column 1, click it, the column is a range",
+   "ok": true,
+   "observed": "heads 6 (handle.table.head.column.0, handle.table.head.column.1, handle.table.head.column.2, handle.table.head.row.0, handle.table.head.row.1, handle.table.head.row.2); after the click range 0,1:2,1 {\"x\":735,\"y\":249,\"w\":226,\"h\":224}; chip Table"
+  },
+  {
+   "name": "a right click on row 0 head lists Header row checked; the click clears it; Cmd+Z",
+   "ok": true,
+   "observed": "menu rows format.table.headerRow(menuitemcheckbox checked true), format.table.insertRowAbove(menuitem), format.table.insertRowBelow(menuitem), format.table.deleteRow(menuitem), format.table.distributeRows(menuitem); header after click undefined, revision 4 -> 4; after Cmd+Z true"
+  },
+  {
+   "name": "the \"+\" on the right edge inserts a column; the widths hold; Cmd+Z",
+   "ok": true,
+   "observed": "\"+\" at {\"id\":\"handle.table.add.column\",\"x\":1178,\"y\":353,\"w\":16,\"h\":16}; columns 3 -> 4 (widths 226,226,226 -> 226,226,226,226, held true); pos.w 960 -> 1280; revision 5 -> 5; Cmd+Z: columns 3, pos.w 960"
+  },
+  {
+   "name": "the \"+\" on the bottom edge inserts a row; Cmd+Z",
+   "ok": true,
+   "observed": "\"+\" at {\"id\":\"handle.table.add.row\",\"x\":840,\"y\":466,\"w\":16,\"h\":16}; rows 3 -> 4; pos.h 320 -> 426; revision 6 -> 6; Cmd+Z rows 3"
+  },
+  {
+   "name": "the row seams with the table selected and with a cell open",
+   "ok": true,
+   "observed": "selected: handle.table.column.0, handle.table.column.1, handle.table.row.0, handle.table.row.1, handle.table.row.2; with cell 1,1 open: handle.table.column.0, handle.table.column.1, handle.table.row.0, handle.table.row.1, handle.table.row.2"
+  },
+  {
+   "name": "Format options: the Table section reads Header row, Border, Rows, Columns, Cell, Merge",
+   "ok": true,
+   "observed": "sections table, size, position, textFitting, text, shadow, altText; headings Border, Rows, Columns, Cell, Merge; first formatOptions.table.headerRow; controls 55; ids formatOptions.table.headerRow, formatOptions.table.border.weight, formatOptions.table.border.dash, formatOptions.table.border.color, formatOptions.table.border.color.ink-2, formatOptions.table.border.color.hair, formatOptions.table.border.color.hair-soft, formatOptions.table.border.color.edge, formatOptions.table.border.color.accent, formatOptions.table.height, formatOptions.table.distributeRows, formatOptions.table.distributeColumns, formatOptions.table.cell.fill, formatOptions.table.cell.fill.ink-2, formatOptions.table.cell.fill.hair, formatOptions.table.cell.fill.hair-soft, formatOptions.table.cell.fill.edge, formatOptions.table.cell.fill.accent, formatOptions.table.cell.border.weight, formatOptions.table.cell.border.dash, formatOptions.table.cell.border.color, formatOptions.table.cell.border.color.ink-2, formatOptions.table.cell.border.color.hair, formatOptions.table.cell.border.color.hair-soft, formatOptions.table.cell.border.color.edge, formatOptions.table.cell.border.color.accent, formatOptions.table.merge, formatOptions.table.unmerge; notes Click a table cell first | Select two cells or more to merge | Select a merged cell to unmerge; generated json 4"
+  },
+  {
+   "name": "Insert > Word art, \"Big words\", Enter; the tail lists Fill color, Border color, Border weight, Border dash first",
+   "ok": true,
+   "observed": "tail toolbar.head, toolbar.search, toolbar.newSlide.split, toolbar.newSlide, toolbar.newSlide.arrow, toolbar.undo, toolbar.redo(disabled), toolbar.print, toolbar.paintFormat, toolbar.zoom, toolbar.tail, toolbar.fillColor, toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash(disabled), toolbar.font, toolbar.fontSize, toolbar.fontSize.minus, toolbar.fontSize.value, toolbar.fontSize.plus, toolbar.bold, toolbar.italic, toolbar.underline, toolbar.textColor, toolbar.highlightColor, toolbar.insertLink, toolbar.insertComment, toolbar.align, toolbar.spacing, toolbar.formatOptions, toolbar.more, toolbar.end, toolbar.pointer, toolbar.hideMenus"
+  },
+  {
+   "name": "Border weight 2 writes outline.width 2; Fill color writes color; Border color writes outline.color",
+   "ok": true,
+   "observed": "weight pick menu.toolbar.borderWeight.weight-2: outline {\"color\":\"ink\",\"width\":1.5} -> {\"color\":\"ink\",\"width\":2}; fill toolbar.fillColor.titanium: color undefined -> titanium; border toolbar.borderColor.titanium: outline {\"color\":\"titanium\",\"width\":2}; drawn {\"stroke\":\"2px\",\"strokeColor\":\"rgb(138, 143, 152)\",\"color\":\"rgb(138, 143, 152)\"}"
+  }
+ ],
+ "consoleErrors": [],
+ "serverLogLines": 7,
+ "teardown": {
+  "trashed": false,
+  "status": null
+ }
+}

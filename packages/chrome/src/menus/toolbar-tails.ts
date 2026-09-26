@@ -1,3 +1,5 @@
+import { textBlockSchema } from '@turboslide/schema/blocks';
+
 import type { MenuPredicate, ToolbarControl } from './model.ts';
 import { TOOLBAR_TAIL_DEFAULT, shortcut } from './model.ts';
 
@@ -32,6 +34,8 @@ import { TOOLBAR_TAIL_DEFAULT, shortcut } from './model.ts';
 export type TailKind =
   | 'default'
   | 'text'
+  /** a text block with an outline (docs/OBJECTS.md 4.2 item 4): the shape tail's fill and border controls lead the text tail */
+  | 'wordart'
   | 'shape'
   | 'image'
   | 'line'
@@ -92,13 +96,31 @@ const NO_FILL_DOC = 'Headings, paragraphs and text boxes have no fill';
 const NO_BORDER_DOC = 'Headings, paragraphs and text boxes have no border; word art has an outline';
 const SELECT_CELLS_DOC = 'Select two or more cells first';
 const SELECT_MERGED_DOC = 'Select a merged cell first';
+/** The word art tail's Border dash while the outline's schema carries no dash (objects/build/b5.md R6). */
+export const WORDART_DASH_LATER_DOC = 'Word art’s outline is solid in this version';
+
+/**
+ * True once the text block's outline accepts `dash` (objects/build/b5.md R6, the integrator's
+ * schema): read from the schema, never assumed, so the word art tail's Border dash writes it the
+ * day the field lands and is drawn disabled with its sentence before.
+ */
+export const WORDART_TAKES_DASH: boolean = ((): boolean => {
+  const outline = (
+    textBlockSchema.shape as { outline?: { unwrap?: () => { shape?: Record<string, unknown> } } }
+  ).outline;
+  const inner = outline?.unwrap?.();
+  return inner?.shape !== undefined && 'dash' in inner.shape;
+})();
 
 /**
  * Fill, border colour, border weight and border dash, the first four of every object tail (R02
  * 4.2). On a text block the fill needs a box; the border colour and weight need a box or word art
- * (an outlined text block writes its outline, SPEC-2 0.62); the dash needs a box.
+ * (an outlined text block writes its outline, SPEC-2 0.62); the dash needs a box. On word art
+ * (docs/OBJECTS.md 4.2 item 4; ship one P1 item 10) the four apply to the letters and their
+ * outline: Fill color writes `color`, Border color `outline.color`, Border weight `outline.width`
+ * and Border dash `outline.dash` once the schema carries it.
  */
-function fillAndBorder(family: 'text' | 'shape' | 'table' | 'group'): TailControl[] {
+function fillAndBorder(family: 'text' | 'wordart' | 'shape' | 'table' | 'group'): TailControl[] {
   const textOnly = family === 'text';
   const gate = (predicate: MenuPredicate, reason: string) =>
     textOnly ? { enabled: predicate, disabledReason: reason } : {};
@@ -115,7 +137,9 @@ function fillAndBorder(family: 'text' | 'shape' | 'table' | 'group'): TailContro
     doc:
       family === 'table'
         ? 'The fill of the selected cells, or of the column'
-        : 'A theme colour, none, or a hex',
+        : family === 'wordart'
+          ? 'The colour of the letters, a theme colour or the ink'
+          : 'A theme colour, none, or a hex',
     ...gate('boxSelected', NO_FILL_DOC),
     ...park,
   };
@@ -126,6 +150,9 @@ function fillAndBorder(family: 'text' | 'shape' | 'table' | 'group'): TailContro
     status: 'now',
     op: 'borderColor',
     dropdown: true,
+    ...(family === 'wordart'
+      ? { doc: 'The outline around the letters, a theme colour or none' }
+      : {}),
     ...gate('hasBorderField', NO_BORDER_DOC),
     ...park,
   };
@@ -136,7 +163,7 @@ function fillAndBorder(family: 'text' | 'shape' | 'table' | 'group'): TailContro
     status: 'now',
     op: 'borderWeight',
     dropdown: true,
-    doc: '0, 1, 1.5 or 2',
+    doc: family === 'wordart' ? '1, 1.5 or 2' : '0, 1, 1.5 or 2',
     ...gate('hasBorderField', NO_BORDER_DOC),
     ...park,
   };
@@ -149,6 +176,9 @@ function fillAndBorder(family: 'text' | 'shape' | 'table' | 'group'): TailContro
     dropdown: true,
     doc: 'Solid, dot, dash, dash dot, long dash or long dash dot',
     ...gate('boxSelected', NO_BORDER_DOC),
+    ...(family === 'wordart' && !WORDART_TAKES_DASH
+      ? { enabled: 'never' as const, disabledReason: WORDART_DASH_LATER_DOC }
+      : {}),
     ...park,
   };
   return family === 'table' ? [border, weight, dash, fill] : [fill, border, weight, dash];
@@ -373,6 +403,19 @@ const FORMAT_OPTIONS: TailControl = {
 
 /** 3.2: a text box, heading, paragraph or box selected, or the caret in text. */
 const TEXT_TAIL: TailControl[] = [...fillAndBorder('text'), ...textControls(), FORMAT_OPTIONS];
+
+/**
+ * Word art (docs/OBJECTS.md 4.2 item 4; docs/FEATURES.md 2.3 item 10; the row
+ * wordart.tail.fill-outline): a text block with an outline takes the shape tail's first four
+ * controls before the text controls, each a plate the seller reads as on a shape, so the letters'
+ * colour and their outline are one click away; ToolbarTail.tsx picks this kind for an outlined
+ * text block, and the text tail keeps its parked four for every other text block.
+ */
+const WORDART_TAIL: TailControl[] = [
+  ...fillAndBorder('wordart'),
+  ...textControls(),
+  FORMAT_OPTIONS,
+];
 
 /**
  * 3.3 with SPEC-2 0.11: a shape selected; Change shape opens the picker before Fill color (where
@@ -640,6 +683,7 @@ export const TOOLBAR_TAILS: Readonly<Record<TailKind, ReadonlyArray<TailControl>
     control.control === 'toolbar.select' ? { ...control, op: 'select' as const } : control,
   ),
   text: TEXT_TAIL,
+  wordart: WORDART_TAIL,
   shape: SHAPE_TAIL,
   image: IMAGE_TAIL,
   line: LINE_TAIL,

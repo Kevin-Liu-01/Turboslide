@@ -2184,8 +2184,9 @@ async function featuresRound(t, S, h) {
         (await t.visible(`handle.${T3}.add.row`)) ? `handle.${T3}.add.row` : 'handle.table.add.row';
       const addColumn = await t.visible(addColumnId);
       if (!addColumn) {
-        const bottom = boxes.rows[boxes.rows.length - 1][1];
-        /* the second column seam of the bottom edge, clear of the s square at its middle */
+        /* the first column seam of the bottom edge (a quarter along a four column table), clear of
+           the s square at the edge's middle, which column 1's right edge is on a four column table */
+        const bottom = boxes.rows[boxes.rows.length - 1][0];
         await page.mouse.move(bottom.x + bottom.w, bottom.y + bottom.h - 2);
         await t.sleep(500);
         if (!(await t.visible(await addRowId())))
@@ -2212,7 +2213,7 @@ async function featuresRound(t, S, h) {
       const c2 = await countsOf(T3);
       await selectTable(T3);
       const b2 = await h.cellBoxes(T3);
-      const bottom = b2.rows[b2.rows.length - 1][1];
+      const bottom = b2.rows[b2.rows.length - 1][0];
       await page.mouse.move(bottom.x + bottom.w, bottom.y + bottom.h - 2);
       await t.sleep(500);
       const rowControl = await addRowId();

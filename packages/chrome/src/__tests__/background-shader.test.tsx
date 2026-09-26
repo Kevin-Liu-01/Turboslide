@@ -11,10 +11,13 @@ import { workedDocument } from '@turboslide/schema/fixtures';
 import { BackgroundDialog } from '../dialogs/Background';
 import { SHADER_GALLERY } from '../dialogs/ShaderGallery';
 import { DEFAULT_SETTINGS, buildMenuContext } from '../editor-shell';
+import type { ShellSettings } from '../editor-shell';
 import type { EditorShellInput } from '../editor-shell';
 import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
 import { hideTooltip } from '../Tooltip';
+
+const SETTINGS: ShellSettings = { ...DEFAULT_SETTINGS, advancedTools: true };
 
 // The Background dialog's Shader row (docs/FEATURES.md 5.4, 5.5; audit-shaders 1, 3, 13, 19; the
 // row shaders.background.place-answers): Choose opens the gallery's grid inside the dialog, a card
@@ -47,8 +50,12 @@ function Host({
   const state = {
     input: value,
     platform: 'mac',
-    menuContext: buildMenuContext(value, DEFAULT_SETTINGS, 'mac'),
-    settings: DEFAULT_SETTINGS,
+    /* the switch on: the Shader row is a parked dialog control since the features round's ship
+       two (docs/gslides-parity/focus/ship-f0279e1.json, shaders.background.place-answers), hidden
+       through parked-controls.ts while Advanced tools is off and drawn while it is on; the row's
+       behaviour is pinned here with the switch on, the way a driver drives a parked row */
+    menuContext: buildMenuContext(value, SETTINGS, 'mac'),
+    settings: SETTINGS,
     setSetting: vi.fn(),
     runItem: vi.fn(),
     runControl: vi.fn(),

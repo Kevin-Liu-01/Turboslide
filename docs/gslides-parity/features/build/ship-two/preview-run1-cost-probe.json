@@ -1,0 +1,774 @@
+{
+  "base": "https://turboslide-bxjtrzqfy-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-25T22:06:31.993Z",
+  "endedAt": "2026-09-25T22:27:50.599Z",
+  "minutes": 3,
+  "tier": "blob",
+  "instances": [
+    "6fb17d51",
+    "1054d81d",
+    "80c5cd13",
+    "1ed58a92",
+    "8409d4bd"
+  ],
+  "rows": [
+    {
+      "id": "sync.pull.no-listing",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "commits 10 (at least 10), landed in A true",
+        "the store settled 2.23 s after the state was ready (1 sync.status read(s) before the window)",
+        "store list 2 in the window, by folder: assets 2; the pull's own listing (versions) 0 (ceiling 0)",
+        "store get 24 against 10 commit(s) (one snapshot or record read per commit)",
+        "instances answering sync.status 2"
+      ],
+      "counts": {
+        "minutes": 0.75,
+        "functionRequests": 84,
+        "functionPerMinute": 111.65,
+        "polls": 4,
+        "failedRequests": 0,
+        "commits": 10,
+        "opsPosts": 10,
+        "opsAnswered200": 10,
+        "landed": true,
+        "settle": {
+          "settled": true,
+          "ms": 2232,
+          "samples": 1,
+          "first": {
+            "simple": 30,
+            "advanced": 3,
+            "head": 27,
+            "get": 3,
+            "put": 3,
+            "list": 0,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 0,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "last": {
+            "simple": 30,
+            "advanced": 3,
+            "head": 27,
+            "get": 3,
+            "put": 3,
+            "list": 0,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 0,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "own": 1
+        },
+        "store": {
+          "simple": 151,
+          "advanced": 45,
+          "head": 127,
+          "get": 24,
+          "put": 43,
+          "list": 2,
+          "del": 0,
+          "lists": {
+            "versions": 0,
+            "snapshots": 0,
+            "assets": 2,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          }
+        },
+        "firstSampleStore": {
+          "simple": 46,
+          "advanced": 44,
+          "head": 43,
+          "get": 3,
+          "put": 43,
+          "list": 1,
+          "del": 0,
+          "lists": {
+            "versions": 0,
+            "snapshots": 0,
+            "assets": 1,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          },
+          "own": 2
+        },
+        "ownMax": 6,
+        "instances": 2
+      },
+      "ceilings": {
+        "listVersions": 0,
+        "commits": 10
+      },
+      "where": "present",
+      "instances": [
+        "6fb17d51",
+        "1054d81d"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 2232,
+        "samples": 1
+      },
+      "tier": "blob",
+      "deck": "untitled-20260925-yhhx",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-two/preview-run1/cost-probe/sync.pull.no-listing.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.editor-idle.calls",
+      "result": "failed",
+      "reason": "store simple 48 a minute over 40",
+      "measures": [
+        "function requests 9.99 a minute (ceiling 12; 30 in 3 min)",
+        "the store settled 2.32 s after the state was ready (1 sync.status read(s) before the window)",
+        "store simple 48 a minute (ceiling 40; 3 of the heads the probe's own sync.status reads, which the ceiling carries, b3.md R7 b)",
+        "store advanced 10 a minute (ceiling 11)",
+        "instances answering sync.status 2"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 30,
+        "functionPerMinute": 9.99,
+        "polls": 9,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": null,
+        "settle": {
+          "settled": true,
+          "ms": 2324,
+          "samples": 1,
+          "first": {
+            "simple": 23,
+            "advanced": 3,
+            "head": 19,
+            "get": 4,
+            "put": 3,
+            "list": 0,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 0,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "last": {
+            "simple": 23,
+            "advanced": 3,
+            "head": 19,
+            "get": 4,
+            "put": 3,
+            "list": 0,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 0,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "own": 1
+        },
+        "store": {
+          "simple": 48,
+          "advanced": 10,
+          "head": 35,
+          "get": 13,
+          "put": 9,
+          "list": 1,
+          "del": 1,
+          "lists": {
+            "versions": 0,
+            "snapshots": 0,
+            "assets": 1,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          }
+        },
+        "firstSampleStore": {
+          "simple": 48,
+          "advanced": 1,
+          "head": 35,
+          "get": 13,
+          "put": 0,
+          "list": 1,
+          "del": 0,
+          "lists": {
+            "versions": 0,
+            "snapshots": 0,
+            "assets": 1,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          },
+          "own": 1
+        },
+        "ownMax": 3,
+        "instances": 2
+      },
+      "ceilings": {
+        "functionPerMinute": 12,
+        "simplePerMinute": 40,
+        "advancedPerMinute": 11
+      },
+      "where": "present",
+      "instances": [
+        "80c5cd13",
+        "1054d81d"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 2324,
+        "samples": 1
+      },
+      "tier": "blob",
+      "deck": "untitled-20260925-wbq5",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-two/preview-run1/cost-probe/cost.editor-idle.calls.json",
+      "exit": 1
+    },
+    {
+      "id": "cost.editor-hidden.calls",
+      "result": "not driven",
+      "reason": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached",
+      "measures": [
+        "function requests 9.66 a minute and 9 session poll(s) were read from the tab that stayed visible"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 29,
+        "functionPerMinute": 9.66,
+        "polls": 9,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached",
+        "settle": {
+          "settled": true,
+          "ms": 2224,
+          "samples": 1,
+          "first": {
+            "simple": 23,
+            "advanced": 20,
+            "head": 23,
+            "get": 0,
+            "put": 20,
+            "list": 0,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 0,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "last": {
+            "simple": 23,
+            "advanced": 20,
+            "head": 23,
+            "get": 0,
+            "put": 20,
+            "list": 0,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 0,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "own": 1
+        },
+        "store": {
+          "simple": 32,
+          "advanced": 10,
+          "head": 32,
+          "get": 0,
+          "put": 9,
+          "list": 1,
+          "del": 3,
+          "lists": {
+            "versions": 0,
+            "snapshots": 0,
+            "assets": 1,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          }
+        },
+        "firstSampleStore": {
+          "simple": 32,
+          "advanced": 10,
+          "head": 32,
+          "get": 0,
+          "put": 9,
+          "list": 1,
+          "del": 1,
+          "lists": {
+            "versions": 0,
+            "snapshots": 0,
+            "assets": 1,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          },
+          "own": 1
+        },
+        "ownMax": 3,
+        "instances": 1
+      },
+      "ceilings": {
+        "functionPerMinute": 8,
+        "polls": 0
+      },
+      "where": "present",
+      "instances": [
+        "1054d81d"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 2224,
+        "samples": 1
+      },
+      "tier": "blob",
+      "deck": "untitled-20260925-vmj0",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-two/preview-run1/cost-probe/cost.editor-hidden.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.editor-editing.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "function requests 59.28 a minute (ceiling 75; 178 in 3 min)",
+        "the store settled 63.64 s after the state was ready (7 sync.status read(s) before the window; the first read: head 20, put 3, list 1, del 0)",
+        "store simple 121 a minute (ceiling 140; 3 of the heads the probe's own sync.status reads, which the ceiling carries, b3.md R7 b)",
+        "store advanced 75 a minute (ceiling 85)",
+        "instances answering sync.status 1"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 178,
+        "functionPerMinute": 59.28,
+        "polls": 9,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": null,
+        "settle": {
+          "settled": true,
+          "ms": 63636,
+          "samples": 7,
+          "first": {
+            "simple": 30,
+            "advanced": 4,
+            "head": 20,
+            "get": 10,
+            "put": 3,
+            "list": 1,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 1,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "last": {
+            "simple": 33,
+            "advanced": 9,
+            "head": 33,
+            "get": 0,
+            "put": 9,
+            "list": 0,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 0,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "own": 6
+        },
+        "store": {
+          "simple": 121,
+          "advanced": 75,
+          "head": 117,
+          "get": 4,
+          "put": 72,
+          "list": 3,
+          "del": 4,
+          "lists": {
+            "versions": 0,
+            "snapshots": 1,
+            "assets": 2,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          }
+        },
+        "firstSampleStore": {
+          "simple": 114,
+          "advanced": 73,
+          "head": 114,
+          "get": 0,
+          "put": 72,
+          "list": 1,
+          "del": 3,
+          "lists": {
+            "versions": 0,
+            "snapshots": 0,
+            "assets": 1,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          },
+          "own": 1
+        },
+        "ownMax": 3,
+        "instances": 1
+      },
+      "ceilings": {
+        "functionPerMinute": 75,
+        "simplePerMinute": 140,
+        "advancedPerMinute": 85
+      },
+      "where": "present",
+      "instances": [
+        "1054d81d"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 63636,
+        "samples": 7
+      },
+      "tier": "blob",
+      "deck": "untitled-20260925-n8km",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-two/preview-run1/cost-probe/cost.editor-editing.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.two-tabs-idle.calls",
+      "result": "failed",
+      "reason": "store list 1, ceiling none",
+      "measures": [
+        "the store settled 2.18 s after the state was ready (1 sync.status read(s) before the window)",
+        "store advanced 19 a minute (ceiling 30)",
+        "store list 1 (ceiling 0)",
+        "instances answering sync.status 2"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 58,
+        "functionPerMinute": 19.31,
+        "polls": 18,
+        "failedRequests": 0,
+        "connected": true,
+        "mutual": true,
+        "settle": {
+          "settled": true,
+          "ms": 2181,
+          "samples": 1,
+          "first": {
+            "simple": 33,
+            "advanced": 23,
+            "head": 33,
+            "get": 0,
+            "put": 23,
+            "list": 0,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 0,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "last": {
+            "simple": 33,
+            "advanced": 23,
+            "head": 33,
+            "get": 0,
+            "put": 23,
+            "list": 0,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 0,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "own": 1
+        },
+        "store": {
+          "simple": 56,
+          "advanced": 19,
+          "head": 55,
+          "get": 1,
+          "put": 18,
+          "list": 1,
+          "del": 4,
+          "lists": {
+            "versions": 0,
+            "snapshots": 0,
+            "assets": 1,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          }
+        },
+        "firstSampleStore": {
+          "simple": 50,
+          "advanced": 13,
+          "head": 50,
+          "get": 0,
+          "put": 12,
+          "list": 1,
+          "del": 0,
+          "lists": {
+            "versions": 0,
+            "snapshots": 0,
+            "assets": 1,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          },
+          "own": 1
+        },
+        "ownMax": 2,
+        "instances": 2
+      },
+      "ceilings": {
+        "list": 0,
+        "advancedPerMinute": 30
+      },
+      "where": "present",
+      "instances": [
+        "1ed58a92",
+        "8409d4bd"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 2181,
+        "samples": 1
+      },
+      "tier": "blob",
+      "deck": "untitled-20260925-xyvi",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-two/preview-run1/cost-probe/cost.two-tabs-idle.calls.json",
+      "exit": 1
+    },
+    {
+      "id": "cost.show.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "function requests 0 in the window (ceiling 0)",
+        "the store settled 94.69 s after the state was ready (10 sync.status read(s) before the window; the first read: head 16, put 17, list 0, del 0)",
+        "store calls at the first sample 1 (head 1, get 0, put 0, list 0, del 0), of which 1 the probe's own sync.status read(s) (one deck.json head each, b3.md R7 b); the page's 0 (ceiling 0)",
+        "function requests between the load and the window 0 (the settle, 94.69 s)",
+        "instances answering sync.status 1"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 0,
+        "functionPerMinute": 0,
+        "polls": 0,
+        "failedRequests": 0,
+        "settle": {
+          "settled": true,
+          "ms": 94685,
+          "samples": 10,
+          "first": {
+            "simple": 16,
+            "advanced": 17,
+            "head": 16,
+            "get": 0,
+            "put": 17,
+            "list": 0,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 0,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "last": {
+            "simple": 6,
+            "advanced": 0,
+            "head": 6,
+            "get": 0,
+            "put": 0,
+            "list": 0,
+            "del": 0,
+            "lists": {
+              "versions": 0,
+              "snapshots": 0,
+              "assets": 0,
+              "thumbs": 0,
+              "presence": 0,
+              "deck": 0,
+              "other": 0
+            }
+          },
+          "own": 6
+        },
+        "functionRequestsBeforeWindow": 0,
+        "store": {
+          "simple": 2,
+          "advanced": 0,
+          "head": 2,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "lists": {
+            "versions": 0,
+            "snapshots": 0,
+            "assets": 0,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          }
+        },
+        "firstSampleStore": {
+          "simple": 1,
+          "advanced": 0,
+          "head": 1,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "lists": {
+            "versions": 0,
+            "snapshots": 0,
+            "assets": 0,
+            "thumbs": 0,
+            "presence": 0,
+            "deck": 0,
+            "other": 0
+          },
+          "own": 1
+        },
+        "ownMax": 3,
+        "instances": 1
+      },
+      "ceilings": {
+        "functionRequests": 0,
+        "storeCalls": 0
+      },
+      "where": "present",
+      "instances": [
+        "8409d4bd"
+      ],
+      "settle": {
+        "settled": true,
+        "ms": 94685,
+        "samples": 10
+      },
+      "tier": "blob",
+      "deck": "untitled-20260925-we35",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-two/preview-run1/cost-probe/cost.show.calls.json",
+      "exit": 0
+    }
+  ],
+  "exitCode": 1
+}

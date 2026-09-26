@@ -26,6 +26,7 @@ import { MATERIAL_ANCHORS } from '@turboslide/schema/blocks/material';
 import { Dialog, DialogCheck, DialogField } from '../Dialog';
 import { BACKGROUND_PICTURE_POS, insertBlockPlan, factsOf } from '../editor-shell';
 import { useEditorShell } from '../editor-shell-context';
+import { isParked } from '../parked-controls';
 import type { FormatSectionId } from '../inspector/format-sections';
 import { swatchPaint } from '../inspector/palette';
 import { cn } from '../lib/cn';
@@ -77,7 +78,12 @@ import '../inspector/dither.css';
 const SHADER_SECTION: FormatSectionId | 'shader' = 'shader';
 export function BackgroundDialog() {
   const shell = useEditorShell();
-  const { input } = shell;
+  const { input, settings } = shell;
+  /* the Shader row and its field are a dialog control, hidden through parked-controls.ts when the
+     ship's list names `dialog.background.shader` (docs/FEATURES.md 7.2: the features round, ship two
+     parked it on `shaders.background.place-answers`, the hosted capture past the row's 5 s); the
+     switch still shows it, and a placed ground's words and options link go with the field */
+  const shaderParked = isParked('dialog.background.shader', settings);
   const words = DIALOGS.background;
   const slide = input.document.slides[input.slideId];
   const current = slide?.background?.color;
@@ -659,79 +665,81 @@ export function BackgroundDialog() {
           </div>
         ) : null}
       </DialogField>
-      <DialogField label={SHADER_GALLERY.background} doc={SHADER_GALLERY.backgroundDoc}>
-        {coveringMaterial !== undefined ? (
-          <div
-            className="ts-dialog-row"
-            data-control="dialog.background.shader.current"
-            data-material={coveringMaterial.materialId}
-            data-preset={coveringPreset}
-            {...tipProps({
-              name: shaderWordsOf(coveringMaterial.materialId, coveringPreset),
-              doc: SHADER_GALLERY.currentDoc,
-            })}
-          >
-            <span className="ts-dialog-row-title">
-              {shaderWordsOf(coveringMaterial.materialId, coveringPreset)}
-            </span>
+      {shaderParked ? null : (
+        <DialogField label={SHADER_GALLERY.background} doc={SHADER_GALLERY.backgroundDoc}>
+          {coveringMaterial !== undefined ? (
+            <div
+              className="ts-dialog-row"
+              data-control="dialog.background.shader.current"
+              data-material={coveringMaterial.materialId}
+              data-preset={coveringPreset}
+              {...tipProps({
+                name: shaderWordsOf(coveringMaterial.materialId, coveringPreset),
+                doc: SHADER_GALLERY.currentDoc,
+              })}
+            >
+              <span className="ts-dialog-row-title">
+                {shaderWordsOf(coveringMaterial.materialId, coveringPreset)}
+              </span>
+              <button
+                type="button"
+                className="ts-dialog-btn is-text"
+                data-control="dialog.background.shader.options"
+                onClick={openShaderOptions}
+                {...tipProps({ name: SHADER_GALLERY.options, doc: SHADER_GALLERY.optionsDoc })}
+              >
+                {SHADER_GALLERY.options}
+              </button>
+            </div>
+          ) : null}
+          <div className="ts-dialog-modes ts-dialog-material-row">
             <button
               type="button"
-              className="ts-dialog-btn is-text"
-              data-control="dialog.background.shader.options"
-              onClick={openShaderOptions}
-              {...tipProps({ name: SHADER_GALLERY.options, doc: SHADER_GALLERY.optionsDoc })}
+              className="ts-dialog-btn"
+              data-control="dialog.background.shader"
+              aria-expanded={shaderOpen}
+              data-material={shader?.entry.id}
+              data-preset={shader?.preset?.name}
+              onClick={() => setShaderOpen((open) => !open)}
+              {...tipProps({ name: SHADER_GALLERY.choose, doc: SHADER_GALLERY.chooseDoc })}
             >
-              {SHADER_GALLERY.options}
+              {shader === null
+                ? SHADER_GALLERY.choose
+                : shader.preset === undefined
+                  ? shader.entry.label
+                  : SHADER_GALLERY.pickWords(shader.entry.label, shader.preset.label)}
+            </button>
+            <DialogCheck
+              label={DITHER.dither}
+              checked={shaderDither}
+              control="dialog.background.shader.dither"
+              onChange={setShaderDither}
+              doc={DITHER.help}
+            />
+            <button
+              type="button"
+              className={cn('ts-dialog-btn', shader !== null && !placing && 'is-solid')}
+              data-control="dialog.background.shader.place"
+              data-placing={placing ? 'true' : undefined}
+              disabled={shader === null || placing}
+              onClick={place}
+              {...tipProps({ name: SHADER_GALLERY.place, doc: SHADER_GALLERY.placeDoc })}
+            >
+              {placing ? SHADER_GALLERY.placing(placingSeconds) : SHADER_GALLERY.place}
             </button>
           </div>
-        ) : null}
-        <div className="ts-dialog-modes ts-dialog-material-row">
-          <button
-            type="button"
-            className="ts-dialog-btn"
-            data-control="dialog.background.shader"
-            aria-expanded={shaderOpen}
-            data-material={shader?.entry.id}
-            data-preset={shader?.preset?.name}
-            onClick={() => setShaderOpen((open) => !open)}
-            {...tipProps({ name: SHADER_GALLERY.choose, doc: SHADER_GALLERY.chooseDoc })}
-          >
-            {shader === null
-              ? SHADER_GALLERY.choose
-              : shader.preset === undefined
-                ? shader.entry.label
-                : SHADER_GALLERY.pickWords(shader.entry.label, shader.preset.label)}
-          </button>
-          <DialogCheck
-            label={DITHER.dither}
-            checked={shaderDither}
-            control="dialog.background.shader.dither"
-            onChange={setShaderDither}
-            doc={DITHER.help}
-          />
-          <button
-            type="button"
-            className={cn('ts-dialog-btn', shader !== null && !placing && 'is-solid')}
-            data-control="dialog.background.shader.place"
-            data-placing={placing ? 'true' : undefined}
-            disabled={shader === null || placing}
-            onClick={place}
-            {...tipProps({ name: SHADER_GALLERY.place, doc: SHADER_GALLERY.placeDoc })}
-          >
-            {placing ? SHADER_GALLERY.placing(placingSeconds) : SHADER_GALLERY.place}
-          </button>
-        </div>
-        {shaderOpen ? (
-          <ShaderGalleryGrid
-            compact
-            control="dialog.shader"
-            onPick={(pick) => {
-              setShader(pick);
-              setShaderOpen(false);
-            }}
-          />
-        ) : null}
-      </DialogField>
+          {shaderOpen ? (
+            <ShaderGalleryGrid
+              compact
+              control="dialog.shader"
+              onPick={(pick) => {
+                setShader(pick);
+                setShaderOpen(false);
+              }}
+            />
+          ) : null}
+        </DialogField>
+      )}
       {error !== null ? (
         <p className="ts-dialog-error" role="alert" data-control="dialog.background.error">
           {error}

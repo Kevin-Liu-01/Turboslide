@@ -449,11 +449,15 @@ test(title('decks.file.make-a-copy'), async () => {
   if (!(await target.isChecked().catch(() => false))) await target.click({ force: true });
   /* a name of its own: the dialog's default "Copy of <name>" is the name the card's Make a copy
      row already used in this file, and a second copy under it is refused ("… exists already;
-     pick another name", the local gate run of the fix round) */
+     pick another name", the local gate run of the fix round); the name carries a tag of this run,
+     because the preview and production share one Blob store and another pipeline's run of this
+     file holding "<name> without notes" refused both runs of the features round's ship two */
   const nameField = ctl(page, 'dialog.makeCopy.name');
   await nameField.click();
   await page.keyboard.press('Meta+a');
-  await page.keyboard.type(`${deckName} without notes`, { delay: 40 });
+  await page.keyboard.type(`${deckName} without notes ${Date.now().toString(36).slice(-4)}`, {
+    delay: 40,
+  });
   const opened = context.waitForEvent('page', { timeout: 30_000 });
   await ctl(page, 'dialog.makeCopy.ok').click();
   /* the dialog opens a blank tab on the click and points it at the copy once deck.copy answers;

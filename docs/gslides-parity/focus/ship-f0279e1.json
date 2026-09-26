@@ -1,7 +1,102 @@
 {
   "commit": "f0279e1",
-  "renderedFrom": [],
-  "rule": "docs/FEATURES.md 7.2: the ship's parked list committed before the runs with parkedFeatures and parkedRows empty, named after the fixes commit f0279e1 (its hash after the rebase onto origin/main da00b5e) (the integrator's empty list ship-e2c6a7a.json renamed by the ship step); the ship step writes the list of record from the two enforce preview runs' wouldParkRows with render-ship-json.mjs, the previous ship's list (ship-f1afe1e.json) carried forward where its rows did not read green in both runs, and runs node scripts/probes/core-matrix.mjs --emit-parked on it before the production deploy",
-  "parkedFeatures": [],
-  "parkedRows": []
+  "renderedFrom": [
+    "docs/gslides-parity/features/build/ship-two/preview-run1-core-gate.json",
+    "docs/gslides-parity/features/build/ship-two/preview-run2-core-gate.json"
+  ],
+  "rule": "docs/FEATURES.md 7.2 and docs/RETURN.md section 1 rule 2: parkedFeaturesOf over the last readings of the two gate runs of record on the enforce preview https://turboslide-bxjtrzqfy-kl01s-projects.vercel.app built from 573dfe0; a row carrying parks red in both runs parks the controls it names, a parkable feature red through a row without parks in both runs is parked whole, a row of a feature parked whole is not listed a second time, and a row or feature red in one run and green in the other is flaky and is not listed; the previous ship's list (ship-f1afe1e.json) is carried forward where its rows did not read green in both runs, since the menu model's advanced flags follow this list, and a carried row green in both runs leaves it (leaves); the exceptions the ship rule makes over the gate's mechanical wouldPark are in notParked, each with its reason",
+  "parkedFeatures": ["inbox", "templates"],
+  "parkedRows": [
+    {
+      "id": "arrange.group.tail-text-controls",
+      "parks": ["toolbar.group.text"]
+    },
+    {
+      "id": "logos.kit.find-a-logo",
+      "parks": ["panel.brand.logo.find"]
+    },
+    {
+      "id": "logos.picker.variants",
+      "parks": ["dialog.logo.kind.wordmark", "dialog.logo.tone.mono"]
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "parks": ["dialog.background.shader.addToTheme"]
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "parks": ["dialog.background.shader"]
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "parks": ["formatOptions.shader.frame.scrubber", "formatOptions.shader.frame.capture"]
+    },
+    {
+      "id": "shaders.library.glyph-engines-render",
+      "parks": ["dialog.shader.engine.glyph"]
+    },
+    {
+      "id": "tables.bar.row-column-buttons",
+      "parks": ["bar.table"]
+    },
+    {
+      "id": "tables.edge.add-row-column",
+      "parks": ["handle.table.add.column", "handle.table.add.row"]
+    },
+    {
+      "id": "tables.heads.select-row-column",
+      "parks": ["handle.table.head.column", "handle.table.head.row"]
+    },
+    {
+      "id": "tables.seam.row-drag",
+      "parks": ["handle.table.row"]
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "parks": ["file.versionHistory.showChanges"]
+    },
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": ["view.livePointers.mine", "view.livePointers.collaborators"]
+    },
+    {
+      "id": "wordart.tail.fill-outline",
+      "parks": ["toolbar.wordart.outline"]
+    }
+  ],
+  "notParked": [
+    {
+      "feature": "brand",
+      "why": "the gate's wouldPark names it; the gate's wouldPark names it on brand.logo.replace-every-slide, red in both runs by the recorded blob tier class (run 1 the editor load's 90 s stall, run 2 the footer's picture past 5 s under a machine load of 100), and on thirteen brand rows not driven in run 1 alone (the walk's picture setup met the store's 403 window on the just written asset) and green in run 2; brand.objects.kit-colours-first is a P1 row not on the build (FEATURES.md section 1); every other brand row on the build is green in the last run"
+    },
+    {
+      "feature": "fonts",
+      "why": "the gate's wouldPark names it; the gate's wouldPark names it; its entries fonts.picker.specimen-rows and fonts.table.takes-family are P1 rows not on the build (FEATURES.md section 1); every fonts row on the build is green in both runs"
+    },
+    {
+      "feature": "assist",
+      "why": "the gate's wouldPark names it; the gate's wouldPark names it; assist.viewer.disabled was red once (run 1, the runner's closed context) and green in run 2; assist.quota.429 is not driven with no Upstash on the preview, which PRODUCT.md 8.2 exempts as the environment's"
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "controls": ["insert.logo"],
+      "why": "not driven by design on the fixture preview (FEATURES.md 4.3, 4.8, 7.2); the unit tests in apps/studio/src/server/logos.test.ts are named; parking insert.logo would hide Insert > Logo for a row the fixture preview cannot drive"
+    },
+    {
+      "id": "shaders.frame.auto-capture",
+      "controls": ["insert.shader"],
+      "why": "red in both runs on the runner and not on the product: run 1 the runner's closed browser context before the row's reads (Target page, context or browser has been closed, the machine at a load average of 110 to 130), run 2 the client's frame 12,544 ms after the change against the row's 10 s at a load average of 100 (the capture runs in the runner's Chromium on this machine); every product clause of the row read green in the verifier's pass 2 (F.5 F6: the frame 1.6 s after the change, backend client, the renderer string, the id frame-<16 hex of the key>, 3200 by 1814) and in this step's run 1 up to the closed page; parking insert.shader on the runner's reading would hide Insert > Shader for the product it did not measure; the row is read again by the pair on the confirming preview"
+    },
+    {
+      "id": "shaders.show.plays-when-on",
+      "controls": ["view.playShaders", "formatOptions.shader.play"],
+      "why": "a P1 row not on the build (the show's ShaderLayer, FEATURES.md 5.6, B5 with B1); its parks name view.playShaders, which is on the build and green in both runs through shaders.view.play-setting (the P1 setting item that landed), and formatOptions.shader.play, which exists in no state; parking view.playShaders on a row the P1 condition of section 1 records not driven would hide a control its own row reads green"
+    },
+    {
+      "id": "shaders.show.frame-when-off",
+      "controls": ["view.playShaders"],
+      "why": "a P1 row not on the build (the show's ShaderLayer, FEATURES.md 5.6, B5 with B1); its one park view.playShaders is on the build and green in both runs through shaders.view.play-setting"
+    }
+  ],
+  "leaves": []
 }

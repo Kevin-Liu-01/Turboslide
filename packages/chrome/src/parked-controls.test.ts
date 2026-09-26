@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { workedDocument } from '@turboslide/schema/fixtures';
 
+import { BackgroundDialog } from './dialogs/Background';
 import { LogoDialog } from './dialogs/Logo';
 import { ShaderGalleryDialog } from './dialogs/ShaderGallery';
 import { DEFAULT_SETTINGS, buildMenuContext } from './editor-shell';
@@ -17,7 +18,7 @@ import { hideTooltip } from './Tooltip';
 // The parked controls (docs/FEATURES.md 7.2, 7.3): an id in the set is not drawn by the surfaces
 // that read the module; the same id is drawn when the Advanced tools setting is on; an empty set
 // draws everything. The pure rule is pinned over its own set, the committed set is pinned to the
-// parked list of the ship (ship-f1afe1e.json), and the Logo dialog and the Shader gallery (ship
+// parked list of the ship (ship-f0279e1.json), and the Logo dialog and the Shader gallery (ship
 // two) are the surfaces this lane owns; Overlay.tsx (the handles and the bar, B3) and the Shader
 // section (B5, ship two) pin their reads in their own lanes' tests, as 7.3 lists them.
 
@@ -51,17 +52,24 @@ describe('isParkedIn', () => {
     expect(isParkedIn('dialog.logo.everySlide', set, { advancedTools: 'true' })).toBe(true);
   });
 
-  it('binds the committed set, the parked list of the features round, ship one', async () => {
+  it('binds the committed set, the parked list of the features round, ship two', async () => {
     /* the module is mocked below for the dialog's surface; the committed module is read here. The
-       set is what core-matrix.mjs --emit-parked wrote from docs/gslides-parity/focus/ship-f1afe1e.json:
-       the union of the `parks` of its ten parkedRows (the two carried rows of the earlier ships and
-       the eight P1 rows of ship one whose controls are not on the build), sorted */
+       set is what core-matrix.mjs --emit-parked wrote from docs/gslides-parity/focus/ship-f0279e1.json:
+       the union of the `parks` of its fourteen parkedRows (the two carried rows of the earlier
+       ships, the eight P1 rows of ship one whose controls are not on the build, ship two's
+       Background dialog Shader row on shaders.background.place-answers and its three P1 rows whose
+       controls are not on the build), sorted */
     const real = await vi.importActual<typeof import('./parked-controls')>('./parked-controls');
     expect([...real.PARKED_CONTROLS].sort()).toEqual([
       'bar.table',
+      'dialog.background.shader',
+      'dialog.background.shader.addToTheme',
       'dialog.logo.kind.wordmark',
       'dialog.logo.tone.mono',
+      'dialog.shader.engine.glyph',
       'file.versionHistory.showChanges',
+      'formatOptions.shader.frame.capture',
+      'formatOptions.shader.frame.scrubber',
       'handle.table.add.column',
       'handle.table.add.row',
       'handle.table.head.column',
@@ -73,6 +81,12 @@ describe('isParkedIn', () => {
       'view.livePointers.collaborators',
       'view.livePointers.mine',
     ]);
+    /* ship two: the Background dialog's Shader row and its field are parked, the gallery's Insert >
+       Shader and the Shader section are not, and View > Play shaders stays in the default view */
+    expect(real.isParked('dialog.background.shader.place', DEFAULT_SETTINGS)).toBe(true);
+    expect(real.isParked('dialog.shader.tile.paper:liquid-metal', DEFAULT_SETTINGS)).toBe(false);
+    expect(real.isParked('formatOptions.shader.amplitude', DEFAULT_SETTINGS)).toBe(false);
+    expect(real.isParked('view.playShaders', DEFAULT_SETTINGS)).toBe(false);
     /* a P1 family and a carried row are parked while the switch is off, and drawn while it is on */
     expect(real.isParked('handle.table.row.1', { advancedTools: false })).toBe(true);
     expect(real.isParked('bar.table.insertRowBelow', DEFAULT_SETTINGS)).toBe(true);
@@ -84,7 +98,7 @@ describe('isParkedIn', () => {
     expect(real.isParked('bar.chart.editData', DEFAULT_SETTINGS)).toBe(false);
     expect(real.isParked('title.presence.goTo', DEFAULT_SETTINGS)).toBe(false);
     /* the mocked set the dialog tests read */
-    expect(PARKED_CONTROLS.size).toBe(4);
+    expect(PARKED_CONTROLS.size).toBe(5);
     expect(isParked('dialog.logo.everySlide', DEFAULT_SETTINGS)).toBe(true);
     expect(isParked('dialog.shader.category.metal', DEFAULT_SETTINGS)).toBe(true);
   });
@@ -101,6 +115,7 @@ vi.mock('./parked-controls', async (importOriginal) => {
     'dialog.logo.group.brand',
     'dialog.shader.category.metal',
     'dialog.shader.hover',
+    'dialog.background.shader',
   ]);
   return {
     ...original,
@@ -233,5 +248,35 @@ describe('the Shader gallery reads the parked set (ship two)', () => {
     );
     expect(control('dialog.shader.category.metal')).not.toBeNull();
     expect(document.querySelectorAll('.ts-shader-hover').length).toBeGreaterThan(0);
+  });
+});
+
+describe('the Background dialog reads the parked set (ship two, the ship step)', () => {
+  it('draws no Shader field while the switch is off: no Choose, no Dither, no Place', () => {
+    render(
+      createElement(
+        EditorShellContext,
+        { value: host({ ...DEFAULT_SETTINGS, advancedTools: false }) },
+        createElement(BackgroundDialog, {}),
+      ),
+    );
+    expect(control('dialog.background')).not.toBeNull();
+    expect(control('dialog.background.shader')).toBeNull();
+    expect(control('dialog.background.shader.dither')).toBeNull();
+    expect(control('dialog.background.shader.place')).toBeNull();
+    /* the colour rows of the dialog stay */
+    expect(document.querySelector('[data-control^="dialog.background."]')).not.toBeNull();
+  });
+
+  it('draws the field when Advanced tools is on', () => {
+    render(
+      createElement(
+        EditorShellContext,
+        { value: host({ ...DEFAULT_SETTINGS, advancedTools: true }) },
+        createElement(BackgroundDialog, {}),
+      ),
+    );
+    expect(control('dialog.background.shader')).not.toBeNull();
+    expect(control('dialog.background.shader.place')).not.toBeNull();
   });
 });

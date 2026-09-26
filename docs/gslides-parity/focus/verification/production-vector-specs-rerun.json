@@ -1,0 +1,1720 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "defaultTemplate": {
+    "read": "core-spec-template-muhx7sqx",
+    "reset": true
+  },
+  "startedAt": "2026-09-26T04:16:55.771Z",
+  "ms": 3887129,
+  "parked": {
+    "commit": "ea332aa",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "tables.edge.add-row-column",
+        "parks": [
+          "handle.table.add.column",
+          "handle.table.add.row"
+        ]
+      },
+      {
+        "id": "tables.heads.select-row-column",
+        "parks": [
+          "handle.table.head.column",
+          "handle.table.head.row"
+        ]
+      },
+      {
+        "id": "tables.seam.row-drag",
+        "parks": [
+          "handle.table.row"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      },
+      {
+        "id": "wordart.tail.fill-outline",
+        "parks": [
+          "toolbar.wordart.outline"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 3886492,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/vector/ship/gate-production-specs-rerun/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "rows": 162,
+  "passed": 149,
+  "failed": 12,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [
+    {
+      "id": "export.download.large-deck-pdf",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "PDF: GT brand deck.pdf, 85 slides in 13.9 s, 0.16 s per slide",
+        "PDF: GT brand deck.pdf, 85 slides in 13.9 s, 0.16 s per slide"
+      ]
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "Editable text PowerPoint with Embed fonts: GT brand deck (editable).pptx, 85 slides in 205.7 s, 2.42 s per slide",
+        "Editable text PowerPoint with Embed fonts: GT brand deck (editable).pptx, 85 slides in 205.7 s, 2.42 s per slide"
+      ]
+    }
+  ],
+  "noStep": [],
+  "commit": "aff6e8ab",
+  "origin": "https://turboslide.vercel.app",
+  "date": "2026-09-26",
+  "results": {
+    "slides.layout.plate-four-columns": "passed",
+    "share.dialog.more-row": "passed",
+    "chrome.toolbar.fold-any-width": "passed",
+    "logos.picker.chrome-1280": "passed",
+    "decks.home.new-presentation": "passed",
+    "decks.home.your-presentations": "passed",
+    "decks.root.redirect": "passed",
+    "decks.list.read": "passed",
+    "decks.list.search": "passed",
+    "decks.list.open-thumbnail": "passed",
+    "decks.list.open-title": "passed",
+    "decks.list.open-recent": "passed",
+    "decks.card.menu-open-escape": "passed",
+    "decks.card.rename-enter": "passed",
+    "decks.card.rename-escape": "passed",
+    "decks.row.rename-enter": "passed",
+    "decks.card.make-a-copy": "passed",
+    "decks.card.open-in-new-tab": "passed",
+    "decks.card.present": "passed",
+    "decks.card.move-to-trash-undo": "passed",
+    "decks.list.gt-brand-deck": "passed",
+    "decks.card.download": "passed",
+    "decks.file.make-a-copy": "failed",
+    "decks.file.template-gallery": "passed",
+    "decks.file.open-upload-bundle": "passed",
+    "decks.file.import-slides-bundle": "passed",
+    "help.improve-link": "passed",
+    "decks.trash.listed-after-move": "passed",
+    "decks.trash.restore": "passed",
+    "decks.trash.lists-after-restore": "passed",
+    "decks.trash.delete-forever-cancel": "passed",
+    "decks.trash.delete-forever-enter": "passed",
+    "decks.nav.back-forward": "passed",
+    "decks.access.unknown-edit": "passed",
+    "decks.access.paint": "passed",
+    "decks.access.sign-in-link": "passed",
+    "decks.access.unknown-deck": "passed",
+    "decks.notfound.page": "passed",
+    "decks.trash.delete-forever-button": "passed",
+    "decks.recent.drops-trashed": "passed",
+    "decks.trash.editor-undo-snackbar": "passed",
+    "decks.recent.this-browser-sentence": "passed",
+    "decks.home.seller-lead": "passed",
+    "decks.card.thumbnail-slide-1": "passed",
+    "decks.card.edited-relative-time": "passed",
+    "decks.card.more-glyph": "passed",
+    "decks.trash.button-heights": "passed",
+    "decks.trash.confirm-dialog-chrome": "failed",
+    "decks.new.skeleton-one-frame": "passed",
+    "decks.access.stranger-links": "passed",
+    "decks.notfound.sentence-case": "passed",
+    "templates.gallery.page": "failed",
+    "templates.gallery.strip-and-link": "passed",
+    "chrome.appearance.first-visit-follows-os": "passed",
+    "brand.appearance.default": "passed",
+    "export.pdf.file": "passed",
+    "export.pdf.include-skipped": "passed",
+    "export.pdf.notes-honest": "passed",
+    "export.pptx.perfect": "passed",
+    "export.pptx.editable": "passed",
+    "export.pptx.notes-and-skipped": "passed",
+    "images.export.pdf-with-picture": "passed",
+    "shapes.export.pdf": "passed",
+    "shapes.export.pptx": "passed",
+    "export.print.download-pdf-follows-preview": "passed",
+    "export.zip.bundle": "passed",
+    "export.html.web-page": "passed",
+    "export.jpg.current-slide": "passed",
+    "export.png.current-slide": "passed",
+    "tables.export.pdf": "passed",
+    "tables.export.pptx-editable": "passed",
+    "charts.export.pdf": "passed",
+    "charts.export.pptx-native": "passed",
+    "wordart.export.pdf": "passed",
+    "lines.connector.export-pptx": "passed",
+    "export.download.named-after-title": "passed",
+    "export.download.pdf-direct": "passed",
+    "export.download.pptx-direct": "passed",
+    "export.download.options-dialog": "passed",
+    "export.download.progress-per-slide": "passed",
+    "export.download.mode-sentence": "passed",
+    "export.download.large-deck-pdf": "passed",
+    "export.download.large-deck-pptx": "passed",
+    "brand.footer.text": "passed",
+    "brand.export.pdf-logo": "passed",
+    "fonts.export.editable-names-face": "passed",
+    "fonts.export.pdf-face": "passed",
+    "diagrams.export.step-label": "passed",
+    "logos.export.pdf-pptx-crisp": "passed",
+    "shapes.geometry.text-rect": "passed",
+    "shapes.geometry.export.pptx-prst-avlst": "passed",
+    "shapes.geometry.export.raster-modes": "passed",
+    "svg.export.pdf-vector": "passed",
+    "svg.export.pptx-svgblip": "passed",
+    "svg.export.pptx-fallback": "passed",
+    "svg.export.web-page": "failed",
+    "images.insert.first-on-new-deck": "passed",
+    "images.insert.upload": "passed",
+    "images.insert.upload-while-pending": "passed",
+    "images.insert.drop": "passed",
+    "images.insert.paste": "passed",
+    "images.replace.upload": "passed",
+    "images.replace.drop-on-picture": "passed",
+    "images.background.upload-picture": "passed",
+    "images.background.remove-picture": "passed",
+    "images.insert.centred-in-body": "passed",
+    "images.insert.instant-preview": "passed",
+    "images.insert.menu-direct": "passed",
+    "images.upload.failure-snackbar": "passed",
+    "images.insert.by-url": "passed",
+    "share.dialog.open": "passed",
+    "share.copy-view-link": "passed",
+    "share.copy-present-link": "passed",
+    "share.copy-edit-link": "passed",
+    "share.escape": "passed",
+    "share.file-menu-copy-link": "passed",
+    "share.view-link-lands-viewer": "passed",
+    "share.edit-link-lands-editor": "passed",
+    "share.view-link-cannot-edit": "passed",
+    "share.stranger-cannot-edit": "passed",
+    "collab.edit-from-second-browser": "passed",
+    "collab.edit-from-owner": "passed",
+    "collab.slide-added-appears": "passed",
+    "collab.presence-chips": "passed",
+    "collab.rename-reaches-second-browser": "passed",
+    "share.view-link-excludes-skipped-and-notes": "passed",
+    "share.present-link-excludes-skipped": "passed",
+    "comments.reaches-second-browser": "passed",
+    "versions.restore": "failed",
+    "collab.roster.go-to-slide": "failed",
+    "view.live-pointers.second-browser": "failed",
+    "inbox.notification-arrives": "failed",
+    "share.dialog.one-link": "passed",
+    "share.dialog.slideshow-checkbox": "passed",
+    "share.dialog.you-label": "passed",
+    "share.name-prompt.first-share": "passed",
+    "share.dialog.co-edit-from-copied-link": "failed",
+    "brand.colors.collab-rerender": "passed",
+    "brand.surfaces.viewer-and-show": "passed",
+    "assist.viewer.disabled": "passed",
+    "svg.import.upload": "passed",
+    "svg.import.paste-file": "passed",
+    "svg.import.paste-markup": "passed",
+    "svg.import.drop": "passed",
+    "svg.import.url": "passed",
+    "svg.render.vector-at-zoom": "passed",
+    "svg.render.picture-gestures": "passed",
+    "svg.copy.markup": "failed",
+    "svg.sanitize.script-and-handlers": "passed",
+    "svg.sanitize.data-image-kept": "passed",
+    "svg.sanitize.cap": "passed",
+    "svg.sanitize.broken": "passed",
+    "sync.serial.order-and-latency": "passed",
+    "sync.title.concurrent-both-kept": "passed",
+    "sync.title.offline-both-kept": "passed",
+    "sync.block.concurrent-same-offset-order": "passed",
+    "sync.structural.concurrent": "failed",
+    "sync.block.offline-replay-converges": "passed",
+    "sync.viewer.live-updates": "passed",
+    "sync.reload.same-document": "passed",
+    "sync.undo.after-remote": "failed",
+    "sync.resend.idempotent": "not driven"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.file.make-a-copy",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "versions.restore",
+        "feature": "versions",
+        "result": "failed"
+      },
+      {
+        "id": "collab.roster.go-to-slide",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.dialog.co-edit-from-copied-link",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "decks.trash.confirm-dialog-chrome",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "sync.structural.concurrent",
+        "feature": "sync",
+        "result": "failed"
+      },
+      {
+        "id": "sync.undo.after-remote",
+        "feature": "sync",
+        "result": "failed"
+      },
+      {
+        "id": "sync.resend.idempotent",
+        "feature": "sync",
+        "result": "not driven"
+      },
+      {
+        "id": "svg.copy.markup",
+        "feature": "svg",
+        "result": "failed"
+      },
+      {
+        "id": "svg.export.web-page",
+        "feature": "svg",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [
+    "inbox"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": [
+        "view.livePointers.mine",
+        "view.livePointers.collaborators"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "collab.roster.go-to-slide",
+      "parks": [
+        "title.presence.goTo"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "templates.gallery.page",
+      "parks": [
+        "home.gallery",
+        "file.new.templateGallery"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "svg.copy.markup",
+      "parks": [
+        "picture.svg.copy"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "svg.export.web-page",
+      "parks": [
+        "export.svg.vector"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "decks.file.make-a-copy",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "versions.restore",
+      "feature": "versions",
+      "result": "failed"
+    },
+    {
+      "id": "share.dialog.co-edit-from-copied-link",
+      "feature": "share",
+      "result": "failed"
+    },
+    {
+      "id": "decks.trash.confirm-dialog-chrome",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "sync.structural.concurrent",
+      "feature": "sync",
+      "result": "failed"
+    },
+    {
+      "id": "sync.undo.after-remote",
+      "feature": "sync",
+      "result": "failed"
+    },
+    {
+      "id": "sync.resend.idempotent",
+      "feature": "sync",
+      "result": "not driven"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.home.new-presentation",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.your-presentations",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.root.redirect",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.read",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.search",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-thumbnail",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-title",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-recent",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.menu-open-escape",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-escape",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.row.rename-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.make-a-copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.open-in-new-tab",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.present",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.move-to-trash-undo",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.listed-after-move",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.restore",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.lists-after-restore",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-cancel",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-button",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.nav.back-forward",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.unknown-edit",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.paint",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.sign-in-link",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.unknown-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.notfound.page",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.file.make-a-copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the copy opens in the new tab; the dialog says \"decks/northwind-renewal-v4-without-notes exists already; pick another name\" and the tab is closed"
+    },
+    {
+      "id": "decks.card.download",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.first-on-new-deck",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.upload",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.upload-while-pending",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.drop",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.paste",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.replace.upload",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.background.upload-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.background.remove-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.export.pdf-with-picture",
+      "feature": "images",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.replace.drop-on-picture",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.export.pdf",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.export.pptx",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.open",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-view-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-edit-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.escape",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.file-menu-copy-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-lands-viewer",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.edit-link-lands-editor",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.stranger-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.edit-from-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.edit-from-owner",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.slide-added-appears",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.presence-chips",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.rename-reaches-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-excludes-skipped-and-notes",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.present-link-excludes-skipped",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-present-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.reaches-second-browser",
+      "feature": "comments",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.restore",
+      "feature": "versions",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Error: the restore lands within 35 s: the text did not land within 35 s (panel notice Restored the version of Sep 25, 09:59 PM)"
+    },
+    {
+      "id": "export.pdf.file",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.include-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.notes-honest",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.perfect",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.editable",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.notes-and-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.download-pdf-follows-preview",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.connector.export-pptx",
+      "feature": "lines",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.export.pdf",
+      "feature": "tables",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.export.pptx-editable",
+      "feature": "tables",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.export.pdf",
+      "feature": "charts",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.export.pptx-native",
+      "feature": "charts",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "wordart.export.pdf",
+      "feature": "wordart",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "view.live-pointers.second-browser",
+      "feature": "view",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the second browser's pointer is drawn on the first within 10 s"
+    },
+    {
+      "id": "decks.file.template-gallery",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.file.open-upload-bundle",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.file.import-slides-bundle",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.zip.bundle",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.html.web-page",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.jpg.current-slide",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.png.current-slide",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.improve-link",
+      "feature": "help",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "inbox.notification-arrives",
+      "feature": "inbox",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the panel lists the comment as a mention"
+    },
+    {
+      "id": "collab.roster.go-to-slide",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded."
+    },
+    {
+      "id": "slides.layout.plate-four-columns",
+      "feature": "slides",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.one-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.slideshow-checkbox",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.more-row",
+      "feature": "share",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.you-label",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.name-prompt.first-share",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.co-edit-from-copied-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the full toolbar: the second browser edits"
+    },
+    {
+      "id": "decks.recent.drops-trashed",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.editor-undo-snackbar",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.recent.this-browser-sentence",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.seller-lead",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.thumbnail-slide-1",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.edited-relative-time",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.more-glyph",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.button-heights",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.confirm-dialog-chrome",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the trash page confirms the restore"
+    },
+    {
+      "id": "decks.new.skeleton-one-frame",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.stranger-links",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.notfound.sentence-case",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "templates.gallery.page",
+      "feature": "templates",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "TimeoutError: locator.waitFor: Timeout 6000ms exceeded."
+    },
+    {
+      "id": "templates.gallery.strip-and-link",
+      "feature": "templates",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.named-after-title",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.pdf-direct",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.pptx-direct",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.options-dialog",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.progress-per-slide",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.mode-sentence",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.large-deck-pdf",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.centred-in-body",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.instant-preview",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.menu-direct",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.upload.failure-snackbar",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.by-url",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.appearance.first-visit-follows-os",
+      "feature": "chrome",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.toolbar.fold-any-width",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.collab-rerender",
+      "feature": "brand",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.footer.text",
+      "feature": "brand",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.appearance.default",
+      "feature": "brand",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.export.pdf-logo",
+      "feature": "brand",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.surfaces.viewer-and-show",
+      "feature": "brand",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.export.editable-names-face",
+      "feature": "fonts",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.export.pdf-face",
+      "feature": "fonts",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.viewer.disabled",
+      "feature": "assist",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.serial.order-and-latency",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.title.concurrent-both-kept",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.title.offline-both-kept",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.block.concurrent-same-offset-order",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.structural.concurrent",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "sync.block.offline-replay-converges",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.viewer.live-updates",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.reload.same-document",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.undo.after-remote",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: A's word alone leaves both browsers within 5 s and B's stays, three of three"
+    },
+    {
+      "id": "sync.resend.idempotent",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: the version record carries no origin (docs/SYNC.md 3.2, B3); the word landed once in both browsers"
+    },
+    {
+      "id": "shapes.geometry.text-rect",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.export.pptx-prst-avlst",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.export.raster-modes",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "diagrams.export.step-label",
+      "feature": "diagrams",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.chrome-1280",
+      "feature": "logos",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.export.pdf-pptx-crisp",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.import.upload",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.import.paste-file",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.import.paste-markup",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.import.drop",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.import.url",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.render.vector-at-zoom",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.render.picture-gestures",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.copy.markup",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: Cmd+V lands a second picture"
+    },
+    {
+      "id": "svg.export.pdf-vector",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.export.pptx-svgblip",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.export.pptx-fallback",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.export.web-page",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: every owner tore its deck down"
+    },
+    {
+      "id": "svg.sanitize.script-and-handlers",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.sanitize.data-image-kept",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.sanitize.cap",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.sanitize.broken",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

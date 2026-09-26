@@ -409,6 +409,29 @@ const serialBound = (tier: string): number => (tier === 'blob' ? 5000 : 1000);
  * a 3 s bound there with the words in the same order in both browsers and no repair splice.
  */
 const blockBound = (tier: string): number => (tier === 'blob' ? 5000 : 3000);
+/** Polls a tab's slide count until it reaches `want` or the time is up; answers the last count read. */
+async function countSlides(p: Page, want: number, timeout: number): Promise<number> {
+  const until = Date.now() + timeout;
+  let count = (await slideOrder(p)).length;
+  while (count < want && Date.now() < until) {
+    await p.waitForTimeout(250);
+    count = (await slideOrder(p)).length;
+  }
+  return count;
+}
+/**
+ * The sentence of a slide count against the slides written, for the gate's table (its reason is
+ * the first line of the assertion's message): one over is the blob tier's admission class (a write
+ * acknowledged late, resent and admitted a second time by an instance behind the store, docs/
+ * SYNC.md 3.2, the verifier's pass 1 finding 8 on the objects round), one under the tier's lag.
+ */
+function slidesSentence(read: number, written: number, write: string): string {
+  if (read > written)
+    return `${read} slides read for ${written} after one ${write}: a write admitted twice (the blob tier's admission class, docs/SYNC.md 3.2)`;
+  if (read < written)
+    return `${read} slides read for ${written} after one ${write}: the write has not landed on this tab (the blob tier's lag, docs/SYNC.md 3.2)`;
+  return `${read} slides read for ${written} after one ${write}`;
+}
 
 // ---------------------------------------------------------------------------------------------
 // the rows
@@ -827,7 +850,12 @@ test(title('sync.structural.concurrent'), async ({ browser }) => {
     /* part two: a second slide with a block; B deletes the slide while A moves the block */
     const s = await facts(A);
     await invoke(A, 'slide.new', { layout: 'split', after: first, baseRevision: s.revision });
-    await expect.poll(async () => (await slideOrder(A)).length, { timeout: 15_000 }).toBe(2);
+    /* one slide.new written after the first slide, so the deck reads two; three is the blob
+       tier's admission class (the verifier's pass 1 on the objects round, finding 8: this row read
+       3 for 2 on the preview, a write acknowledged late, resent and admitted a second time by an
+       instance behind the store, docs/SYNC.md 3.2), named here so the gate's table carries it */
+    const slidesRead = await countSlides(A, 2, 15_000);
+    expect(slidesRead, slidesSentence(slidesRead, 2, 'slide.new')).toBe(2);
     const second = (await slideOrder(A)).find((id) => id !== first)!;
     await placeBlock(A, second, {
       id: 'sync-doomed',
@@ -1210,32 +1238,75 @@ test(title('sync.resend.idempotent'), async ({ browser }) => {
     await expect.poll(() => dropped, { timeout: 10_000 }).toBe(1);
     await quiet(A, 45_000);
     await A.unroute(pattern);
+    /* B's read of the word. The memory tier answers within a second or two; on the blob tier the
+       resend waits the client's backoff (room-client.ts BACKOFF_MAX_MS, 8 s), B's instance reads
+       the record by the pulse and an instance behind the store adds its lag (the verifier's pass
+       1 on the objects round, finding 8: B read "Start o" at 10 s on the preview while A had
+       settled), so the bound there is 30 s. A's facts and the wire go into the ledger before the
+       read is judged, so a red carries the mechanism. */
+    const tier = (await facts(A)).sync.tier;
+    const settledA = await facts(A);
+    const resends = wire.filter((w) => w.at > 0 && w.opIds.some((id) => droppedOpIds.includes(id)));
+    test.info().annotations.push({
+      type: 'measure',
+      description: `tier ${tier}; dropped answer status ${droppedStatus}; POSTs carrying the dropped op ids ${resends.length} (${resends.map((w) => `${String(w.status ?? 'pending')} at base ${w.base} admitted ${JSON.stringify(w.admitted)}`).join('; ') || 'none'}); A after quiet: revision ${settledA.revision}, server ${settledA.serverRevision}, pending ${settledA.sync.pending}`,
+    });
+    const wordBound = tier === 'blob' ? 30_000 : 10_000;
     await expect
-      .poll(() => blockText(B, slideId, 'sync-resend'), { timeout: 10_000 })
+      .poll(() => blockText(B, slideId, 'sync-resend'), {
+        timeout: wordBound,
+        message: `B reads the word within ${wordBound} ms on the ${tier} tier (A settled first)`,
+      })
       .toContain(' once');
     await quiet(B);
     const [a, b] = await Promise.all([
       blockText(A, slideId, 'sync-resend'),
       blockText(B, slideId, 'sync-resend'),
     ]);
-    const resends = wire.filter((w) => w.at > 0 && w.opIds.some((id) => droppedOpIds.includes(id)));
     const versions = await invoke<
       { n: number; revision: number; origin?: { clientId: string; opIds: string[] } }[]
     >(A, 'version.list', {});
     const after = versions.filter((v) => v.revision > revisionBefore);
     const withOrigin = after.filter((v) => v.origin !== undefined);
+    /* the blob tier commits one record per POST with edits (blob.ts append) and answers a POST
+       whose op ids a record already names from that record with no commit (docs/SYNC.md 3.2), so
+       the records above revisionBefore are the POSTs answered 200 with an op id outside the
+       dropped POST's, plus the dropped POST's own; one more is a pure resend admitted twice.
+       Recorded for the ledger, not asserted: a resend that also carries fresh ops folds them into
+       one record either way, and the word counted once in both browsers is the row's claim */
+    const freshPosts = wire.filter(
+      (w) =>
+        w.status === 200 &&
+        (w.admitted?.length ?? 0) > 0 &&
+        w.opIds.some((id) => !droppedOpIds.includes(id)),
+    );
+    const recordsLine =
+      tier === 'blob'
+        ? `records above ${revisionBefore}: ${after.length} for ${freshPosts.length + 1} POSTs committed (${freshPosts.length} answered 200 with an op id outside the dropped POST's, plus the dropped one)${after.length > freshPosts.length + 1 ? '; one more than the POSTs: a resend admitted twice (the admission class, docs/SYNC.md 3.2)' : ''}`
+        : `records above ${revisionBefore}: ${after.length} (the memory tier's checkpointer writes them, not one per POST)`;
     test.info().annotations.push({
       type: 'measure',
-      description: `dropped answer status ${droppedStatus}; POSTs carrying the dropped op ids ${resends.length}; records after ${revisionBefore}: ${after.length} (${withOrigin.length} with origin)`,
+      description: `${recordsLine}; ${withOrigin.length} with origin`,
     });
     expect(droppedStatus, 'the dropped POST was committed by the server').toBe(200);
-    expect(countIn(a, ' once'), 'A reads the word once').toBe(1);
-    expect(countIn(b, ' once'), 'B reads the word once').toBe(1);
+    expect(
+      countIn(a, ' once'),
+      `A reads the word once (${countIn(a, ' once')}; twice is the resend admitted twice, the blob tier's admission class, docs/SYNC.md 3.2)`,
+    ).toBe(1);
+    expect(
+      countIn(b, ' once'),
+      `B reads the word once (${countIn(b, ' once')}; twice is the resend admitted twice, the blob tier's admission class, docs/SYNC.md 3.2)`,
+    ).toBe(1);
     expect(a).toBe(b);
+    /* the record's origin cannot be read through version.list on any tier: the store's toVersion
+       (packages/store/src/versions.ts) answers n, revision, author, note, createdAt and mutations
+       and drops the record's origin, so the row's third claim (one record whose origin.opIds
+       names A's op) is not driven until the route carries the field (the sync owner's, docs/
+       SYNC.md 3.2; a request in build/b4.md). The two claims above were read. */
     if (withOrigin.length === 0)
       test.skip(
         true,
-        'not on this build: the version record carries no origin (docs/SYNC.md 3.2, B3); the word landed once in both browsers',
+        `not on this build: version.list answers no origin (packages/store/src/versions.ts toVersion drops the record's origin on every tier; docs/SYNC.md 3.2 names it on the record, the sync owner's); the word landed once in both browsers; ${recordsLine}`,
       );
     const naming = withOrigin.filter((v) =>
       v.origin!.opIds.some((id) => droppedOpIds.includes(id)),

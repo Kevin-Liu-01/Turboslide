@@ -5044,7 +5044,8 @@
       "driver": "core/export.spec.ts",
       "today": "broken",
       "evidence": "audit-seller 23",
-      "severity": 2
+      "severity": 2,
+      "note": "Objects round fix round (the verifier's pass 1 finding 8): a count over what the setup wrote (one more slide) is the blob tier's admission class (a write acknowledged late, resent and admitted a second time by an instance behind the store; docs/SYNC.md 3.2, the sync owner's), which the driver reads before the download and records not driven with the counts and the class named, so the row spends no download on a deck that is not its own."
     },
     {
       "id": "export.download.mode-sentence",
@@ -5958,7 +5959,7 @@
       "today": "not driven",
       "evidence": "invariant 2; transform.ts 348 passes non text ops through; room.ts reanchor 1134",
       "setup": "block.insert of the dragged blocks and slide.new of the slide B deletes",
-      "note": "B1; falsifies invariant 2 outside text (judge-correctness addition 2)."
+      "note": "B1; falsifies invariant 2 outside text (judge-correctness addition 2). Objects round fix round (the verifier's pass 1 finding 8): three slides read for two after one slide.new is the blob tier's admission class (a write acknowledged late, resent and admitted a second time by an instance behind the store; docs/SYNC.md 3.2), which the driver names in its reason."
     },
     {
       "id": "sync.block.offline-replay-converges",
@@ -6006,7 +6007,7 @@
       "driver": "core/sync.spec.ts",
       "today": "not driven",
       "evidence": "audit-ordering item 5 (the case the code does not cover was not driven)",
-      "note": "On a deployment the resend lands on whichever instance is warm, so this row is a smoke of the same instance and synced cases; the cross instance falsifier is the two instance test of docs/SYNC.md 6.4 (B3). The record is read through version.list; a record without origin on the build is recorded not driven with B3 named."
+      "note": "On a deployment the resend lands on whichever instance is warm, so this row is a smoke of the same instance and synced cases; the cross instance falsifier is the two instance test of docs/SYNC.md 6.4 (B3). Objects round fix round (the verifier's pass 1 finding 8): the record is read through version.list, which answers no origin on any tier (packages/store/src/versions.ts toVersion drops the field), so the third claim is recorded not driven with the sync owner named until the route carries it (a request in build/b4.md); the driver reads the first two claims (the word once in both browsers, B's read bounded by the tier: 10 s on the memory tier, 30 s on the blob tier for the resend's backoff and the pulse), records A's facts and the wire before B's read is judged, and on the blob tier records the records above the revision before the typing beside the POSTs answered 200 (one more than the POSTs is a pure resend admitted twice)."
     },
     {
       "id": "sync.pull.no-listing",
@@ -6305,7 +6306,7 @@
       "evidence": "audit-shapes rows 47 and 48",
       "parks": ["insert.shape.gallery"],
       "setup": "block.insert of the three shapes through the window API",
-      "note": "Vector round; docs/VECTOR.md 2.5 (B4; B2 the sheet the raster shoots)"
+      "note": "Vector round; docs/VECTOR.md 2.5 (B4; B2 the sheet the raster shoots) Objects round fix round (the verifier's pass 1 finding 8): a count over what the setup wrote (one more slide) is the blob tier's admission class (a write acknowledged late, resent and admitted a second time by an instance behind the store; docs/SYNC.md 3.2, the sync owner's), which the driver reads before the download and records not driven with the counts and the class named, so the row spends no download on a deck that is not its own."
     },
     {
       "id": "shapes.insert.grid-shapes",
@@ -6538,13 +6539,13 @@
     {
       "id": "tables.seam.row-drag",
       "feature": "tables",
-      "interaction": "Carried (ship one P1 item 1): the row seam handle under each row; a drag of the first inner seam by 40 writes rows[0].height with the readout; the seam under the last row grows the table",
+      "interaction": "Carried (ship one P1 item 1): the row seam handle under each row; a drag of the first inner seam by 40 writes rows[0].height with the readout; the seam under the last row, dragged at a quarter of its width, writes rows[2].height and grows the table",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-objects 8 (run-tables-rows.json rows 16, 17)",
       "setup": "block.insert of a typed 3 by 4 table through the window API",
       "parks": ["handle.table.row"],
-      "note": "Ship one P1; docs/FEATURES.md 2.3 item 1 (B3: table-seam.ts gains the axis; ids handle.table.row.<n>); lands only under the P1 condition of FEATURES.md section 1. Objects round; docs/OBJECTS.md 3.3 item 4 (table-seam.ts gains the row axis; ids handle.<block>.row.<n>); B5 the overlay, B2 the plans"
+      "note": "Ship one P1; docs/FEATURES.md 2.3 item 1 (B3: table-seam.ts gains the axis; ids handle.table.row.<n>); lands only under the P1 condition of FEATURES.md section 1. Objects round; docs/OBJECTS.md 3.3 item 4 (table-seam.ts gains the row axis; ids handle.<block>.row.<n>); B5 the overlay, B2 the plans Objects round fix round: the last seam is pressed at a quarter of its width (its centre is the s resize square's, the verifier's pass 1 finding 3) and the fact is the last row's own height as well as the box."
     },
     {
       "id": "tables.edge.add-row-column",
@@ -7445,7 +7446,7 @@
       "evidence": "probe (a); pdf/build.ts 179 to 187",
       "parks": ["export.svg.vector"],
       "setup": "asset.add of the svg and block.insert of its picture through the window API",
-      "note": "Vector round; docs/VECTOR.md 4.6 (B4; B3 the vector img the print document draws)"
+      "note": "Vector round; docs/VECTOR.md 4.6 (B4; B3 the vector img the print document draws) Objects round fix round (the verifier's pass 1 finding 8): a count over what the setup wrote (one more slide) is the blob tier's admission class (a write acknowledged late, resent and admitted a second time by an instance behind the store; docs/SYNC.md 3.2, the sync owner's), which the driver reads before the download and records not driven with the counts and the class named, so the row spends no download on a deck that is not its own."
     },
     {
       "id": "svg.export.pptx-svgblip",

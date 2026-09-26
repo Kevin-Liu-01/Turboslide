@@ -344,3 +344,146 @@ describe('the gate refuses an --only value that names no driver (s2.md S2-R4)', 
     expect(run.stderr).not.toContain('--only takes probe, specs or cost');
   }, 30_000);
 });
+
+// The objects round fix round (docs/OBJECTS.md 6.2; the verifier's pass 1 finding 8): `--rows
+// <ids>` runs and judges the spec rows named alone, `--areas <areas>` the walk probe's areas, so
+// the ship step reads two export rows again on production without the whole export spec. Each is
+// refused before any driver runs when it names another driver's row or area or is given without
+// its driver; a narrowed run's summary names the narrowing under `narrowed`.
+describe('the gate narrows one driver to rows or areas (the objects round fix round)', () => {
+  const exportRows = specRows.filter((row) => row.driver === 'core/export.spec.ts');
+  const syncRows = specRows.filter((row) => row.driver === 'core/sync.spec.ts');
+  const twoExport = exportRows.slice(0, 2).map((row) => row.id);
+  const oneSync = syncRows[0].id;
+  const probeRow = CORE_MATRIX.find((row) => row.driver === 'probe --core');
+  const escape = (id) => id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  function dryRun(extra) {
+    const dir = mkdtempSync(join(tmpdir(), 'core-gate-narrow-'));
+    const run = spawnSync(
+      'node',
+      [GATE, '--base', 'https://stub.invalid', '--out', join(dir, 'out'), '--dry-run', ...extra],
+      { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
+    );
+    return run;
+  }
+
+  it('judges the --rows named alone from a finished run and names them under narrowed', () => {
+    const { run, out } = runGate(stubReport(), ['--rows', twoExport.join(',')]);
+    expect(run.stderr, run.stderr).toBe('');
+    expect(run.status).toBe(0);
+    const summary = JSON.parse(readFileSync(join(out, 'core-gate.json'), 'utf8'));
+    expect(summary.rows).toBe(2);
+    expect(summary.passed).toBe(2);
+    expect(summary.noStep).toEqual([]);
+    expect(summary.table.map((r) => r.id)).toEqual(twoExport);
+    expect(summary.narrowed).toEqual({
+      only: 'specs',
+      spec: null,
+      rows: twoExport,
+      areas: null,
+      costRows: null,
+    });
+    const failed = runGate(stubReport([twoExport[0]]), ['--rows', twoExport.join(',')]);
+    expect(failed.run.status).toBe(1);
+    const again = JSON.parse(readFileSync(join(failed.out, 'core-gate.json'), 'utf8'));
+    expect(again.rows).toBe(2);
+    expect(again.failed).toBe(1);
+    expect(again.results[twoExport[0]]).toBe('failed');
+  }, 30_000);
+
+  it('plans the rows run over the rows own spec files with an anchored --grep', () => {
+    const run = dryRun(['--only', 'specs', '--rows', `${twoExport[0]},${oneSync}`]);
+    expect(run.stderr, run.stderr).toBe('');
+    expect(run.status).toBe(0);
+    expect(run.stdout).toContain(`the core spec rows ${twoExport[0]}, ${oneSync}`);
+    expect(run.stdout).toContain('apps/studio/e2e/core/export.spec.ts');
+    expect(run.stdout).toContain('apps/studio/e2e/core/sync.spec.ts');
+    expect(run.stdout).toContain(
+      `--grep ${JSON.stringify(`(^| )(${escape(twoExport[0])}|${escape(oneSync)}): `)}`,
+    );
+    expect(run.stdout).toContain('2 rows judged');
+    expect(run.stdout).toContain('Nothing ran and no lock was taken');
+  }, 30_000);
+
+  it('refuses --rows without --only specs, a row of another driver, and a row outside --spec', () => {
+    const noDriver = dryRun(['--rows', twoExport[0]]);
+    expect(noDriver.status).toBe(2);
+    expect(noDriver.stderr).toContain('--rows narrows the core specs and needs --only specs');
+    expect(noDriver.stdout).toBe('');
+    const walkRow = dryRun(['--only', 'specs', '--rows', `${twoExport[0]},${probeRow.id}`]);
+    expect(walkRow.status).toBe(2);
+    expect(walkRow.stderr).toContain(`not a spec row: ${JSON.stringify(probeRow.id)}`);
+    expect(walkRow.stderr).not.toContain(JSON.stringify(twoExport[0]));
+    const outside = dryRun(['--only', 'specs', '--spec', 'export', '--rows', oneSync]);
+    expect(outside.status).toBe(2);
+    expect(outside.stderr).toContain(`--rows names rows outside the --spec files: ${oneSync}`);
+    expect(outside.stderr).toContain('core/sync.spec.ts');
+    const empty = dryRun(['--only', 'specs', '--rows', ',']);
+    expect(empty.status).toBe(2);
+    expect(empty.stderr).toContain('(none named)');
+  }, 30_000);
+
+  it('plans an --areas run over the walk probe and refuses an unknown area or another driver', () => {
+    const tables = CORE_MATRIX.filter(
+      (row) => row.driver === 'probe --core' && row.id.startsWith('tables.'),
+    );
+    const run = dryRun(['--only', 'probe', '--areas', 'tables']);
+    expect(run.stderr, run.stderr).toBe('');
+    expect(run.status).toBe(0);
+    expect(run.stdout).toContain(
+      `the walk probe over the areas tables (${tables.length} rows judged)`,
+    );
+    const unknown = dryRun(['--only', 'probe', '--areas', 'tables,nosuch']);
+    expect(unknown.status).toBe(2);
+    expect(unknown.stderr).toContain('not one: "nosuch"');
+    expect(unknown.stderr).toContain('tables');
+    const specs = dryRun(['--only', 'specs', '--areas', 'tables']);
+    expect(specs.status).toBe(2);
+    expect(specs.stderr).toContain('--areas narrows the walk probe and needs --only probe');
+  }, 30_000);
+
+  it('judges the --areas named alone from a finished walk', () => {
+    const tables = CORE_MATRIX.filter(
+      (row) => row.driver === 'probe --core' && row.id.startsWith('tables.'),
+    );
+    const dir = mkdtempSync(join(tmpdir(), 'core-gate-areas-'));
+    writeFileSync(
+      join(dir, 'core-walk.json'),
+      JSON.stringify({
+        deckId: 'stub',
+        steps: tables.length,
+        core: {
+          exitCode: 0,
+          table: tables.map((row) => ({ id: row.id, result: 'passed', reason: '' })),
+        },
+      }),
+    );
+    const out = join(dir, 'out');
+    const run = spawnSync(
+      'node',
+      [
+        GATE,
+        '--base',
+        'http://stub.invalid',
+        '--only',
+        'probe',
+        '--areas',
+        'tables',
+        '--report',
+        dir,
+        '--out',
+        out,
+      ],
+      { cwd: ROOT, encoding: 'utf8' },
+    );
+    expect(run.stderr, run.stderr).toBe('');
+    expect(run.status).toBe(0);
+    const summary = JSON.parse(readFileSync(join(out, 'core-gate.json'), 'utf8'));
+    expect(summary.rows).toBe(tables.length);
+    expect(summary.passed).toBe(tables.length);
+    expect(summary.noStep).toEqual([]);
+    expect(summary.narrowed.areas).toEqual(['tables']);
+    expect(summary.narrowed.only).toBe('probe');
+  }, 30_000);
+});

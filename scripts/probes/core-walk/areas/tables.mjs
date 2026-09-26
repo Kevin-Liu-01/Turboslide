@@ -2109,8 +2109,8 @@ async function featuresRound(t, S, h) {
   // ---- the P1 handles and the bar (2.3 items 1 to 3)
   await t.step(
     'tables.seam.row-drag',
-    'select the table; drag the first inner row seam by 40 px; Cmd+Z; drag the seam under the last row',
-    'the readout shows px and rows[0].height is written; Cmd+Z restores; the last seam grows the table',
+    'select the table; drag the first inner row seam by 40 px; Cmd+Z; drag the seam under the last row at a quarter of its width',
+    'the readout shows px and rows[0].height is written; Cmd+Z restores; the last seam writes rows[2].height and grows the table',
     async () => {
       const ctrls = (await selectTable(T3)) ?? [];
       const seams = ctrls.filter((c) => /^handle\.(table|ft-typed)\.row\.\d+$/.test(c));
@@ -2146,17 +2146,35 @@ async function featuresRound(t, S, h) {
         .sort()
         .pop();
       let grew = false;
+      let lastWritten = false;
+      let lastObserved = 'no last seam';
       if (last) {
-        const hl = t.center(await t.handleRect(last));
+        /* the seam under the last row shares its centre with the s resize square (the table's
+           own handle, which takes the press there as Google's bottom frame handle does), so the
+           press lands at a quarter of the seam's width, clear of the sw square at the corner and
+           the s square at the middle, and the fact is the last row's own height as well as the
+           box (the verifier's pass 1 finding 3 on the objects round: the s square grows the box
+           too, the extra shared across the rows, rows[].height unchanged; B5's fix round moved the
+           "+" outside the ring, so no position along the edge is covered by it) */
+        const rl = await t.handleRect(last);
+        const hl = { x: rl.x + rl.w / 4, y: rl.y + rl.h / 2 };
+        const index = Number(last.replace(/^.*\.row\./, ''));
+        const rows0 = (await blockOn(S2, T3)).rows.map((r) => r.height ?? null);
         await t.drag(hl, { x: hl.x, y: hl.y + 40 * k }, { steps: 12 });
         await t.settled();
         const pos1 = await posOn(S2, T3);
-        grew = pos1 && pos1.h > pos0.h + 20;
+        const rows1 = (await blockOn(S2, T3)).rows.map((r) => r.height ?? null);
+        grew = Boolean(pos1 && pos1.h > pos0.h + 20);
+        lastWritten =
+          typeof rows1[index] === 'number' &&
+          (rows0[index] === null || rows1[index] > rows0[index] + 20);
+        lastObserved = `rows[${index}].height ${JSON.stringify(rows0[index])} -> ${JSON.stringify(rows1[index])}, pos.h ${pos0.h} -> ${pos1?.h}`;
         await undoOnce();
       }
       return {
-        ok: written && /px/.test(during?.readout ?? '') && same(back, before) && grew,
-        observed: `row seams ${seams.join(', ')}; readout during "${during?.readout ?? 'none'}"; heights ${JSON.stringify(before)} -> ${JSON.stringify(after)} -> Cmd+Z ${JSON.stringify(back)}; the last seam grew the table ${grew}`,
+        ok:
+          written && /px/.test(during?.readout ?? '') && same(back, before) && grew && lastWritten,
+        observed: `row seams ${seams.join(', ')}; readout during "${during?.readout ?? 'none'}"; heights ${JSON.stringify(before)} -> ${JSON.stringify(after)} -> Cmd+Z ${JSON.stringify(back)}; the last seam at a quarter of its width: ${lastObserved}, the table grew ${grew}`,
       };
     },
   );
@@ -2170,8 +2188,9 @@ async function featuresRound(t, S, h) {
       await tableControlsOn(t, page, T3, () => selectTable(T3));
       const boxes = await h.cellBoxes(T3);
       /* the pointer at the second seam of the right edge (the row's words), clear of the e square at
-         the edge's middle, which the "+" keeps clear of since the objects round (TableOverlay.tsx
-         SQUARE_CLEAR_PX; the middle of row 1 of 3 is that square) */
+         the edge's middle; the "+" sits outside the ring since the objects round's fix round
+         (TableOverlay.tsx ADD_GAP), so no position along the edge is covered by it, and the
+         hover positions of the objects round hold */
       const right = boxes.rows[1][boxes.rows[1].length - 1];
       await page.mouse.move(right.x + right.w - 2, right.y + right.h);
       await t.sleep(500);

@@ -13,7 +13,8 @@
 // the list says. Not driven rows are listed by id and reason and are never counted as passed.
 //
 //   node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--parked <ship json>]
-//     [--only probe|specs|cost] [--spec <area>[,<area>]] [--cost-rows <id>[,<id>]]
+//     [--only probe|specs|cost] [--spec <area>[,<area>]] [--rows <id>[,<id>]]
+//     [--areas <area>[,<area>]] [--cost-rows <id>[,<id>]]
 //     [--cost-minutes <n>] [--shots] [--matrix <path>] [--report <dir>]
 //     [--allow-scratch] [--decks <dir>] [--dry-run] [--lock <path>]
 // `--only cost` runs the cost probe alone and judges its rows alone; `--only specs` judges the spec
@@ -22,6 +23,19 @@
 // `--cost-minutes` shortens each state's window for a smoke (the run of record keeps 3; the JSON
 // names the minutes it ran). On a deployment the cost probe reads the bearer for sync.status
 // from TURBOSLIDE_TOKEN or the origin's row of ~/.config/turboslide/hosts.json and never prints it.
+// The objects round fix round (docs/OBJECTS.md 6.2, the verifier's pass 1 finding 8): `--rows
+// <ids>` with `--only specs` runs the tests of the spec rows named alone (Playwright's `--grep`
+// on each id at the head of its title, over the rows' own spec files unless `--spec` names them)
+// and judges those rows alone, so the ship step reads two export rows again on production in
+// minutes rather than the whole export spec with its brand deck rows; `--areas <areas>` with
+// `--only probe` passes the walk probe's `--only` and judges the rows of those areas alone. Both
+// are narrowings of one driver, never a way past a row: the summary names them under `narrowed`,
+// and the ledger of a narrowed run stands beside the run of record, never in its place.
+// The blob tier's admission class (finding 8: a write acknowledged late, resent and admitted a
+// second time by an instance behind the store, docs/SYNC.md 3.2, the sync owner's): a spec's
+// setup that reads one more slide than it wrote is recorded not driven by the export rows with
+// the count and the class in the reason, and read red by the sync rows with the same words, so
+// the table names the mechanism; nothing here changes the merge or the verdict.
 // The gate refuses to start while scratch decks sit under the repository's decks/ folder (every
 // folder there git does not track; the check chains' spec runs left eight behind, VERIFICATION.md
 // C2-F29): it prints them and exits 2, so a run never measures against a store carrying another
@@ -78,6 +92,7 @@ import {
   CORE_SPEC_DRIVERS,
   COST_PROBE_DRIVER,
   PROBE_DRIVER,
+  areaOf,
   coreRow,
   costRows,
   isCostRow,
@@ -98,7 +113,7 @@ const arg = (name, fallback) => {
 const flag = (name) => argv.includes(`--${name}`);
 const BASE = (arg('base', process.env.PLAYWRIGHT_BASE_URL) ?? '').replace(/\/$/, '');
 const USAGE =
-  'usage: node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--matrix <path>] [--parked <ship json>] [--only probe|specs|cost] [--spec <areas>] [--cost-rows <ids>] [--cost-minutes <n>]';
+  'usage: node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--matrix <path>] [--parked <ship json>] [--only probe|specs|cost] [--spec <areas>] [--rows <ids>] [--areas <areas>] [--cost-rows <ids>] [--cost-minutes <n>]';
 if (!BASE) {
   console.error(USAGE);
   process.exit(2);
@@ -117,6 +132,72 @@ if (ONLY !== null && ONLY !== 'probe' && ONLY !== 'specs' && ONLY !== 'cost') {
   process.exit(2);
 }
 const SPEC_ONLY = arg('spec', null);
+/** A comma list flag as its trimmed, non empty items; null when absent. */
+const listArg = (name) => {
+  const value = arg(name, null);
+  if (value === null) return null;
+  return value
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s !== '');
+};
+/**
+ * The spec rows a `--rows` run drives and judges alone (`--only specs`), by id; the walk areas an
+ * `--areas` run drives and judges alone (`--only probe`). Each is refused with exit 2 before any
+ * driver runs when it names another driver's row or area, or is given without its driver, so a
+ * narrowing typed wrong never runs the whole matrix in silence (the rule of `--only` above).
+ */
+const ROWS_ONLY = listArg('rows');
+const AREAS_ONLY = listArg('areas');
+if (ROWS_ONLY !== null) {
+  if (ONLY !== 'specs') {
+    console.error(
+      `core-gate: --rows narrows the core specs and needs --only specs (the walk probe's rows are narrowed by area with --areas, the cost probe's with --cost-rows)`,
+    );
+    console.error(USAGE);
+    process.exit(2);
+  }
+  const unknown = ROWS_ONLY.filter((id) => {
+    const row = CORE_MATRIX.find((r) => r.id === id);
+    return row === undefined || !CORE_SPEC_DRIVERS.includes(row.driver);
+  });
+  if (ROWS_ONLY.length === 0 || unknown.length > 0) {
+    console.error(
+      `core-gate: --rows takes core spec row ids (a row whose driver is core/<area>.spec.ts); not a spec row: ${unknown.map((id) => JSON.stringify(id)).join(', ') || '(none named)'}`,
+    );
+    console.error(USAGE);
+    process.exit(2);
+  }
+  if (SPEC_ONLY !== null) {
+    const files = SPEC_ONLY.split(',').map((a) => `core/${a.trim()}.spec.ts`);
+    const outside = ROWS_ONLY.filter((id) => !files.includes(coreRow(id).driver));
+    if (outside.length > 0) {
+      console.error(
+        `core-gate: --rows names rows outside the --spec files: ${outside.join(', ')} (their drivers ${[...new Set(outside.map((id) => coreRow(id).driver))].join(', ')})`,
+      );
+      console.error(USAGE);
+      process.exit(2);
+    }
+  }
+}
+if (AREAS_ONLY !== null) {
+  if (ONLY !== 'probe') {
+    console.error(
+      `core-gate: --areas narrows the walk probe and needs --only probe (the specs are narrowed with --spec <areas> or --rows <ids>)`,
+    );
+    console.error(USAGE);
+    process.exit(2);
+  }
+  const known = new Set(rowsForDriver(PROBE_DRIVER).map((row) => areaOf(row.id)));
+  const unknown = AREAS_ONLY.filter((area) => !known.has(area));
+  if (AREAS_ONLY.length === 0 || unknown.length > 0) {
+    console.error(
+      `core-gate: --areas takes the walk probe's areas (${[...known].sort().join(', ')}); not one: ${unknown.map((a) => JSON.stringify(a)).join(', ') || '(none named)'}`,
+    );
+    console.error(USAGE);
+    process.exit(2);
+  }
+}
 /** The cost rows the cost probe drives (`--cost-rows`); every cost row when absent. */
 const COST_ROWS = arg('cost-rows', null);
 /** The minutes of each cost state's window (`--cost-minutes`; the probe's own default, 3, when absent). */
@@ -136,6 +217,30 @@ const ALLOW_SCRATCH = flag('allow-scratch');
 const UNDER_VITEST = (process.env.VITEST ?? '') !== '';
 /** Whether `--lock` named a folder (the way past the guard for a test that must run a driver). */
 const LOCK_NAMED = arg('lock', null) != null;
+
+/* the rows this run judges: every row, or the rows of the one driver `--only` names, narrowed by
+   `--spec` or `--rows` (the specs), `--areas` (the walk probe) or `--cost-rows` (the cost probe);
+   a driver's partial run never reads the other drivers' rows as no step */
+const specRowsJudged = CORE_MATRIX.filter(
+  (r) =>
+    CORE_SPEC_DRIVERS.includes(r.driver) &&
+    (!SPEC_ONLY || SPEC_ONLY.split(',').some((a) => r.driver === `core/${a.trim()}.spec.ts`)) &&
+    (ROWS_ONLY === null || ROWS_ONLY.includes(r.id)),
+);
+const probeRowsJudged = rowsForDriver(PROBE_DRIVER).filter(
+  (r) => AREAS_ONLY === null || AREAS_ONLY.includes(areaOf(r.id)),
+);
+const costRowsJudged = costRows().filter(
+  (r) => !COST_ROWS || COST_ROWS.split(',').some((id) => id.trim() === r.id),
+);
+const judged =
+  ONLY === 'probe'
+    ? probeRowsJudged
+    : ONLY === 'specs'
+      ? specRowsJudged
+      : ONLY === 'cost'
+        ? costRowsJudged
+        : CORE_MATRIX;
 
 /**
  * The scratch decks under a decks folder: every folder git does not track (`git ls-files` from
@@ -220,6 +325,8 @@ function runProbe() {
   ];
   if (flag('shots')) args.push('--shots', join(OUT, 'shots'));
   if (PARKED) args.push('--parked', resolve(ROOT, PARKED));
+  /* the walk's own `--only`: the areas an `--areas` run drives, judged alone below */
+  if (AREAS_ONLY !== null) args.push('--only', AREAS_ONLY.join(','));
   console.log(`core-gate: node ${args.join(' ')}`);
   const t = Date.now();
   const result = spawnSync('node', args, { cwd: ROOT, stdio: 'inherit', env: process.env });
@@ -326,17 +433,38 @@ const idOfTitle = (title) => {
   return /^[a-z][a-z0-9]*(?:\.[a-z0-9-]+){1,3}$/.test(head) ? head : null;
 };
 
+/**
+ * The spec files a run covers: the `--spec` areas, else the drivers of the `--rows` named, else
+ * every core spec. The dry run prints them, which is how the gate's own test reads them.
+ */
+function specFiles(specOnly = SPEC_ONLY, rowsOnly = ROWS_ONLY) {
+  const drivers = specOnly
+    ? specOnly.split(',').map((s) => `core/${s.trim()}.spec.ts`)
+    : rowsOnly
+      ? [...new Set(rowsOnly.map((id) => coreRow(id).driver))]
+      : [...CORE_SPEC_DRIVERS];
+  return drivers.map((d) => `apps/studio/e2e/${d}`);
+}
+/**
+ * Playwright's `--grep` for a `--rows` run: each id at the head of its test title (`coreTitle`,
+ * e2e/core/matrix.ts: "<id>: <interaction>"), matched inside the title path Playwright greps
+ * (the project, the file and the titles joined by spaces), so `svg.export.pdf-vector` never
+ * matches a row whose id merely contains it. The dry run prints it for the gate's own test.
+ */
+function rowsGrep(rowsOnly = ROWS_ONLY) {
+  const escaped = rowsOnly.map((id) => id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  return `(^| )(${escaped.join('|')}): `;
+}
+
 function runSpecs() {
-  const areas = SPEC_ONLY
-    ? SPEC_ONLY.split(',').map((s) => s.trim())
-    : CORE_SPEC_DRIVERS.map((d) => d.replace(/^core\//, '').replace(/\.spec\.ts$/, ''));
-  const files = areas.map((a) => `apps/studio/e2e/core/${a}.spec.ts`);
+  const files = specFiles();
   const report = join(OUT, 'specs.json');
   rmSync(report, { force: true });
   /* the run's own output folder for traces and screenshots: every Playwright start on the
      machine clears the shared `.turboslide/playwright`, which deleted a failed row's trace mid
      run (b4.md fix round, b3 R22) */
   const args = ['test', ...files, '--reporter=list,json', '--output', join(OUT, 'playwright')];
+  if (ROWS_ONLY !== null) args.push('--grep', rowsGrep());
   console.log(
     `core-gate: node_modules/.bin/playwright ${args.join(' ')} (PLAYWRIGHT_BASE_URL=${BASE})`,
   );
@@ -454,9 +582,15 @@ if (REPORT !== null) {
   if (DRY_RUN) {
     const drivers =
       ONLY === 'probe'
-        ? 'the walk probe'
+        ? AREAS_ONLY === null
+          ? 'the walk probe'
+          : `the walk probe over the areas ${AREAS_ONLY.join(', ')} (${probeRowsJudged.length} rows judged)`
         : ONLY === 'specs'
-          ? 'the core specs'
+          ? ROWS_ONLY === null
+            ? SPEC_ONLY === null
+              ? 'the core specs'
+              : `the core specs ${specFiles().join(', ')}`
+            : `the core spec rows ${ROWS_ONLY.join(', ')} (${specFiles().join(', ')} with --grep ${JSON.stringify(rowsGrep())}; ${specRowsJudged.length} rows judged)`
           : ONLY === 'cost'
             ? 'the cost probe'
             : 'the walk probe, the core specs and the cost probe';
@@ -540,25 +674,6 @@ const reasons = {
   ...(specs?.reasons ?? {}),
   ...(cost?.reasons ?? {}),
 };
-/* the rows this run judges: every row, or the rows of the one driver `--only` names, narrowed by
-   `--spec` (the specs) or `--cost-rows` (the cost probe); a driver's partial run never reads the
-   other drivers' rows as no step */
-const specRowsJudged = CORE_MATRIX.filter(
-  (r) =>
-    CORE_SPEC_DRIVERS.includes(r.driver) &&
-    (!SPEC_ONLY || SPEC_ONLY.split(',').some((a) => r.driver === `core/${a.trim()}.spec.ts`)),
-);
-const costRowsJudged = costRows().filter(
-  (r) => !COST_ROWS || COST_ROWS.split(',').some((id) => id.trim() === r.id),
-);
-const judged =
-  ONLY === 'probe'
-    ? rowsForDriver(PROBE_DRIVER)
-    : ONLY === 'specs'
-      ? specRowsJudged
-      : ONLY === 'cost'
-        ? costRowsJudged
-        : CORE_MATRIX;
 const table = judged.map((row) => ({
   id: row.id,
   feature: row.feature,
@@ -632,6 +747,14 @@ const summary = {
   },
   /* the cost rows over their ceiling in this run (SYNC.md 6.2: on the preview they hold the ship) */
   costOverCeiling,
+  /* how this run was narrowed, if it was: a narrowed run's ledger stands beside the run of record */
+  narrowed: {
+    only: ONLY,
+    spec: SPEC_ONLY === null ? null : SPEC_ONLY.split(',').map((s) => s.trim()),
+    rows: ROWS_ONLY,
+    areas: AREAS_ONLY,
+    costRows: COST_ROWS === null ? null : COST_ROWS.split(',').map((s) => s.trim()),
+  },
   rows: table.length,
   passed: count('passed'),
   failed: count('failed'),

@@ -1,0 +1,144 @@
+{
+  "base": "http://localhost:4439",
+  "defaultTemplate": null,
+  "startedAt": "2026-09-26T20:07:49.750Z",
+  "ms": 205673,
+  "parked": {
+    "commit": "ea332aa",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "tables.edge.add-row-column",
+        "parks": [
+          "handle.table.add.column",
+          "handle.table.add.row"
+        ]
+      },
+      {
+        "id": "tables.heads.select-row-column",
+        "parks": [
+          "handle.table.head.column",
+          "handle.table.head.row"
+        ]
+      },
+      {
+        "id": "tables.seam.row-drag",
+        "parks": [
+          "handle.table.row"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      },
+      {
+        "id": "wordart.tail.fill-outline",
+        "parks": [
+          "toolbar.wordart.outline"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": null,
+  "cost": {
+    "exit": 0,
+    "ms": 205652,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/objects/verifier2/gate-4439-cost-rerun/cost-probe.json",
+    "minutes": 3,
+    "instances": [
+      "752ba69b"
+    ]
+  },
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "cost",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": [
+      "cost.editor-editing.calls"
+    ]
+  },
+  "rows": 1,
+  "passed": 1,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "cost.editor-editing.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "function requests 74.33 a minute (ceiling 75; 223 in 3 min)",
+        "the store half reads zero on this base (the file store); the function requests alone are asserted"
+      ],
+      "cost": true
+    }
+  ],
+  "noStep": [],
+  "commit": "7e1d85bd",
+  "origin": "http://localhost:4439",
+  "date": "2026-09-26",
+  "results": {
+    "cost.editor-editing.calls": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "cost.editor-editing.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

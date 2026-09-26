@@ -1,0 +1,1172 @@
+{
+ "base": "https://turboslide-c7toc7dkk-kl01s-projects.vercel.app",
+ "ctx": "dark-1440",
+ "deckId": "untitled-20260926-lwgf",
+ "readings": [
+  {
+   "name": "deck",
+   "text": "null at https://turboslide-c7toc7dkk-kl01s-projects.vercel.app/new, viewport 1440 by 900, appearance dark",
+   "at": "15:26:47"
+  },
+  {
+   "name": "dark-sheet",
+   "text": "the sheet rgba(0, 0, 0, 0), the chrome data-theme dark",
+   "at": "15:26:51"
+  },
+  {
+   "name": "advanced-tools",
+   "text": "the switch reads true (the parked table controls draw with it on)",
+   "at": "15:26:51"
+  },
+  {
+   "name": "table-empty",
+   "text": "Insert > Table 3 by 3: table at {\"x\":320,\"y\":129,\"w\":960,\"h\":163}; the rows drawn 53, 53, 53 tall; the guide grid drawn on 6 of 9 cells ({\"shadow\":\"rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset\",\"right\":\"0px none\",\"after\":\"none\"}); the ring 320,129 960x163 on the table 320,129 960x163; chip \"Table\"; the controls 11 table controls of 21",
+   "at": "15:26:56"
+  },
+  {
+   "name": "table-cell-open",
+   "text": "one click on cell 1,1: editing true; the ring 320,129 960x163 on the table 320,129 960x163 (equal); the cell ring data-cell 1,1 at 735,287 226x38 css px (the cell's css box from 735,287); chip \"Table\"; the frame edges 4; the seams and heads with the cell open: handle.table.head.column.0, handle.table.head.column.1, handle.table.head.column.2, handle.table.head.row.0, handle.table.head.row.1, handle.table.head.row.2, handle.table.column.0, handle.table.column.1, handle.table.row.0, handle.table.row.1, handle.table.row.2",
+   "at": "15:26:57"
+  },
+  {
+   "name": "table-filled",
+   "text": "Alpha, Tab, Beta, Tab, Gamma, Escape: the cells [\"\",\"\",\"\",\"\",\"Alpha\",\"Beta\",\"Gamma\",\"\",\"\"]; pos.h 163; the rows 53, 53, 53 tall; the guides on 6 of 9 cells; the ring 320,129 960x163 on the table 320,129 960x163",
+   "at": "15:27:01"
+  },
+  {
+   "name": "table-plus-column",
+   "text": "the \"+\" on the right edge at 1192,297 css px: one click took the table from 3 to 4 columns (widths [320,320,320,320], pos.w 1280); cells [\"\",\"\",\"\",\"\",\"\",\"Alpha\",\"Beta\",\"\",\"Gamma\",\"\",\"\",\"\"]",
+   "at": "15:27:05"
+  },
+  {
+   "name": "table-plus-column-undo",
+   "text": "Cmd+Z: 3 columns",
+   "at": "15:27:06"
+  },
+  {
+   "name": "table-plus-row",
+   "text": "the \"+\" on the bottom edge at 643,369 css px: one click took the table from 3 to 4 rows, pos.h 163 to 217; the ring 320,129 960x217 on the table 320,129 960x217",
+   "at": "15:27:09"
+  },
+  {
+   "name": "table-plus-row-undo",
+   "text": "Cmd+Z: 3 rows, pos.h 163",
+   "at": "15:27:10"
+  },
+  {
+   "name": "table-heads",
+   "text": "a click on the band above column 1: the range ring \"0,1:2,1\" over 3 cells",
+   "at": "15:27:14"
+  },
+  {
+   "name": "table-heads-row",
+   "text": "a click on the band left of row 1: the range ring \"1,0:1,2\" over 3 cells",
+   "at": "15:27:15"
+  },
+  {
+   "name": "table-head-menu",
+   "text": "a right click on row 0's head lists format.table.headerRow (checked true), format.table.insertRowAbove, format.table.insertRowBelow, format.table.deleteRow, format.table.distributeRows",
+   "at": "15:27:17"
+  },
+  {
+   "name": "table-header-toggle",
+   "text": "Header row clicked: rows[0].header undefined, the first cell's font weight 400",
+   "at": "15:27:18"
+  },
+  {
+   "name": "table-header-toggle-undo",
+   "text": "Cmd+Z: rows[0].header true",
+   "at": "15:27:19"
+  },
+  {
+   "name": "table-menu-insert-row",
+   "text": "format.table.insertRowBelow from the cell's menu: 3 → 4 rows, pos.h 163 → 217; the drawn table 320,129 960x217 (216 tall, the rows 53, 53, 53, 53) against the ring 320,129 960x217 (the drawn table -1 px taller than the ring)",
+   "at": "15:27:23"
+  },
+  {
+   "name": "table-menu",
+   "text": "the cell menu: format.table.insertRowBelow 3→4 rows (pos.h 163→217); format.table.insertColumnRight 3→4 columns (widths [null,null,null,null]); format.table.deleteRow 4→3 rows (pos.h 217); format.table.deleteColumn 4→3 columns; the cells [\"\",\"\",\"\",\"\",\"\",\"Alpha\",\"\",\"Beta\",\"Gamma\",\"\",\"\",\"\"]; the ring 320,129 960x217 on 320,129 960x217",
+   "at": "15:27:28"
+  },
+  {
+   "name": "table-tab-appends",
+   "text": "Tab from the last cell: 3 → 4 rows, pos.h 217 → 271 (after Escape 271); the rows drawn 66.5, 66.5, 66.5, 66.5, the last row's bottom 270 px under the table's top against the ring 271 tall",
+   "at": "15:27:31"
+  },
+  {
+   "name": "table-tab-appends-undo",
+   "text": "Cmd+Z: 3 rows, pos.h 217",
+   "at": "15:27:32"
+  },
+  {
+   "name": "table-seam-column",
+   "text": "the first column seam dragged by 90 in 12 steps: at step 10 the header cells 395, 245, 320 wide, readout \"395 px\"; after the release the widths [410,230,320] (from [null,null,null]), editing false",
+   "at": "15:27:36"
+  },
+  {
+   "name": "table-seam-row",
+   "text": "the first row seam dragged by 40 in 12 steps: at step 10 the rows 104, 71, 71 tall, readout \"105 px\"; after the release rows[0].height 112, pos.h 257 (from 217)",
+   "at": "15:27:40"
+  },
+  {
+   "name": "table-seam-last-press",
+   "text": "the seam under the last row 510,424 677x9 css px; the s square 843,424 11x11; the press at a quarter of the width meets [\"button[handle.table.row.2].ts-handle.is-selected\",\"div.ts-frame-edge\",\"span.td.first\",\"div.tr\"]",
+   "at": "15:27:42"
+  },
+  {
+   "name": "table-seam-last",
+   "text": "the seam under the last row dragged by 40: the heights [112,72,72] → [112,72,112], pos 320,129 h 257 → 320,129 h 297; at step 10 the rows 111, 71, 104 (readout \"105 px\"); drawn after 111, 71, 111",
+   "at": "15:27:46"
+  },
+  {
+   "name": "table-grow",
+   "text": "forty words typed into cell 1,0 at human speed (revision 21 → 22): the row's cell 227 tall with 0 lines, the rows 111, 227, 111, pos.h 297 → 453, the ring 320,129 960x453 on the table 320,129 960x453 (the last row's bottom at 581)",
+   "at": "15:28:09"
+  },
+  {
+   "name": "table-grow-undo",
+   "text": "1 Cmd+Z: the cells [\"\",\"\",\"\",\"\",\"Alpha\",\"Beta\",\"Gamma\",\"\",\"\"], pos.h 297, the rows 111, 71, 111",
+   "at": "15:28:10"
+  },
+  {
+   "name": "table-resize",
+   "text": "the se handle dragged down by 120: the rows 144.3, 104.3, 144.3 at step 10, pos.h 297 → 417; dragged up by 240 past the rows' height: at step 10 the rows 111, 71, 111, readout \"960 × 217\", pos.h → 297",
+   "at": "15:28:18"
+  },
+  {
+   "name": "table-format-options",
+   "text": "the Table section: headings Border | Rows | Columns | Cell | Merge; words \"Header row BORDER Weight None 1 px 1.5 px 2 px Dash Solid Dot Dash Dash dot Long dash Long dash dot Color ROWS Height of every row Distribute rows COLUMNS Distribute columns CELL Click a table cell first Fill color Border weight Table’s None 1 px 1.5 px 2 px Border dash Table’s Solid Dot Dash Dash dot Long dash Long dash dot Border color MERGE Merge cells Unmerge cells Select two cells or more to \"; 55 controls; other formatOptions controls outside it [\"formatOptions.section.table\",\"formatOptions.section.size\",\"formatOptions.size.width\",\"formatOptions.size.height\",\"formatOptions.size.lock\",\"formatOptions.size.lock.lock\",\"formatOptions.size.flip\",\"formatOptions.size.flip.h\",\"formatOptions.size.flip.v\",\"formatOptions.size.rotate\",\"formatOptions.size.rotate.dial\",\"formatOptions.section.position\"]",
+   "at": "15:28:21"
+  },
+  {
+   "name": "table-plus-outside",
+   "text": "the pointer 2 px inside the bottom edge at a quarter of the width (the edge at css y 457.3): the \"+\" 670.8,463.3 16x16 (its top 6 px under the edge), the last seam's band 509.6,452.1 676.8x9, the s square 842.5,451.8 11x11; under the pointer [\"button[handle.table.row.2].ts-handle.is-selected\",\"div.ts-frame-edge\",\"span.td.first\",\"div.tr\"]; under the seam at a quarter [\"button[handle.table.row.2].ts-handle.is-selected\",\"div.ts-frame-edge\",\"div.tr\",\"div.table\"]; the pointer moved onto the circle keeps it 670.8,463.3 16x16 with [\"path\",\"svg\",\"button[handle.table.add.row].ts-table-add\",\"div.freeform\"] under it; the right edge (css x 1186.4): the \"+\" 1192.4,344.6 16x16 (its left 6 px past the edge), the e square 1180.9,347.1 11x11; the last seam pressed at a quarter ([\"button[handle.table.row.2].ts-handle.is-selected\",\"div.ts-frame-edge\",\"div.tr\",\"div.table\"]) and dragged by 40: the \"+\" in the DOM at step 6 false, readout \"132 px\", heights [112,72,112] → [112,72,152], pos.h 297 → 337; Cmd+Z [112,72,112] h 297",
+   "at": "15:28:31"
+  },
+  {
+   "name": "show-table",
+   "text": "the show at slide 2: {\"present\":true,\"table\":true,\"cells\":[\"\",\"\",\"\",\"\",\"Alpha\",\"Beta\",\"Gamma\",\"\",\"\"],\"guides\":0,\"editable\":0,\"sheetBg\":\"rgba(0, 0, 0, 0)\"}",
+   "at": "15:28:34"
+  },
+  {
+   "name": "show-escape",
+   "text": "Escape: the show gone true",
+   "at": "15:28:35"
+  },
+  {
+   "name": "pdf",
+   "text": "File > Download > PDF: \"untitled-20260926-lwgf.pdf\" 35764 bytes in 5441 ms, 2 pages; the words Alpha true, Beta true, Gamma true, Big words false, edited false, North false; the table's page 2 rendered to a picture",
+   "at": "15:28:44"
+  },
+  {
+   "name": "trash-sentence",
+   "text": "deck.trash through the window API (passed), the page read again: the banner 1 (\"This presentation is in the trashRestore\"), Restore control 1, data-editing 0, the owner viewer, deck.info {\"id\":\"untitled-20260926-lwgf\",\"title\":\"Untitled presentation\",\"theme\":\"gt-ink-paper\",\"revision\":27,\"sections\":[{\"id\":\"deck\",\"name\":\"Deck\",\"slides\":[{\"id\":\"title\",\"n\":1,\"title\":\"Slide 1\",\"kind\":\"title; slide.new then refused: \"page.evaluate: RangeError: This presentation is in the trash, so \"slide.new\" is refused; Restore it from the banner or with deck.restore first.\n    at invoke (https://turboslide-c7toc7dkk-kl01s-projects.vercel.app/assets/EditorRoot-BkxHYwwQ.js:26:37851)\n    at Object.<anonymous> (https://turboslide-\"; deck.restore through the window API passed {\"id\":\"untitled-20260926-lwgf\",\"trashedAt\":null,\"revision\":27}, the banner gone true, data-editing 1, the owner editor; the next slide.new landed {\"slide\":{\"schemaVersion\":1,\"id\":\"blank-2\",\"template\":\"blank\",\"kind\":\"content\",\"layout\":{\"type\":\"freeform\"},\"slots\":{}},\"revision\":28,\"outline\":[{\"id\":\"deck\",\"name\":\"Deck\",\"slides\":[{\"id\":\"title\",\"n\":, revision 27 → 28",
+   "at": "15:29:42"
+  },
+  {
+   "name": "address at the end",
+   "text": "https://turboslide-c7toc7dkk-kl01s-projects.vercel.app/edit/untitled-20260926-lwgf#s/blank-2",
+   "at": "15:29:42"
+  },
+  {
+   "name": "teardown",
+   "text": "deck untitled-20260926-lwgf: {\"trashed\":true,\"status\":404}",
+   "at": "15:29:58"
+  }
+ ],
+ "facts": {
+  "table.empty": {
+   "pos": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 163
+   },
+   "rows": [
+    53,
+    53,
+    53
+   ],
+   "guides": {
+    "drawn": 6,
+    "total": 9,
+    "sample": {
+     "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+     "right": "0px none",
+     "after": "none"
+    }
+   },
+   "chip": "Table",
+   "ring": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 163
+   },
+   "handles": [
+    "handle.table.head.column.0",
+    "handle.table.head.column.1",
+    "handle.table.head.column.2",
+    "handle.table.head.row.0",
+    "handle.table.head.row.1",
+    "handle.table.head.row.2",
+    "handle.table.move",
+    "handle.table.column.0",
+    "handle.table.column.1",
+    "handle.table.row.0",
+    "handle.table.row.1",
+    "handle.table.row.2",
+    "handle.table.resize.nw",
+    "handle.table.resize.n",
+    "handle.table.resize.ne",
+    "handle.table.resize.e",
+    "handle.table.resize.se",
+    "handle.table.resize.s",
+    "handle.table.resize.sw",
+    "handle.table.resize.w",
+    "handle.table.rotate"
+   ]
+  },
+  "table.cell-open": {
+   "editing": true,
+   "ring": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 163
+   },
+   "free": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 163
+   },
+   "cellRing": {
+    "cell": "1,1",
+    "x": 735,
+    "y": 287,
+    "w": 226,
+    "h": 38
+   },
+   "edges": [
+    "506,244 685x8",
+    "506,359 685x8",
+    "506,252 8x107",
+    "1182,252 8x107"
+   ],
+   "handles": [
+    "handle.table.head.column.0",
+    "handle.table.head.column.1",
+    "handle.table.head.column.2",
+    "handle.table.head.row.0",
+    "handle.table.head.row.1",
+    "handle.table.head.row.2",
+    "handle.table.move",
+    "handle.table.column.0",
+    "handle.table.column.1",
+    "handle.table.row.0",
+    "handle.table.row.1",
+    "handle.table.row.2",
+    "handle.table.resize.nw",
+    "handle.table.resize.n",
+    "handle.table.resize.ne",
+    "handle.table.resize.e",
+    "handle.table.resize.se",
+    "handle.table.resize.s",
+    "handle.table.resize.sw",
+    "handle.table.resize.w"
+   ],
+   "chip": "Table"
+  },
+  "table.filled": {
+   "cells": [
+    "",
+    "",
+    "",
+    "",
+    "Alpha",
+    "Beta",
+    "Gamma",
+    "",
+    ""
+   ],
+   "h": 163,
+   "rows": [
+    53,
+    53,
+    53
+   ],
+   "guides": {
+    "drawn": 6,
+    "total": 9,
+    "sample": {
+     "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+     "right": "0px none",
+     "after": "none"
+    }
+   }
+  },
+  "table.add-column": {
+   "before": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "after": {
+    "rows": 3,
+    "columns": 4,
+    "widths": [
+     320,
+     320,
+     320,
+     320
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 1280,
+    "x": 320,
+    "y": 129
+   }
+  },
+  "table.add-row": {
+   "before": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "after": {
+    "rows": 4,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "h": 217,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "ring": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 217
+   },
+   "free": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 217
+   }
+  },
+  "table.head-menu": [
+   {
+    "id": "format.table.headerRow",
+    "checked": "true",
+    "disabled": null
+   },
+   {
+    "id": "format.table.insertRowAbove",
+    "checked": null,
+    "disabled": null
+   },
+   {
+    "id": "format.table.insertRowBelow",
+    "checked": null,
+    "disabled": null
+   },
+   {
+    "id": "format.table.deleteRow",
+    "checked": null,
+    "disabled": null
+   },
+   {
+    "id": "format.table.distributeRows",
+    "checked": null,
+    "disabled": null
+   }
+  ],
+  "table.menu": {
+   "s0": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "s1": {
+    "rows": 4,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "h": 217,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "s2": {
+    "rows": 4,
+    "columns": 4,
+    "widths": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "h": 217,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "s3": {
+    "rows": 3,
+    "columns": 4,
+    "widths": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 217,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "s4": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 217,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "rows": [
+    "format.table.insertRowBelow",
+    "format.table.insertColumnRight",
+    "format.table.deleteRow",
+    "format.table.deleteColumn"
+   ]
+  },
+  "table.tab-appends": {
+   "before": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 217,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "after": {
+    "rows": 4,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "h": 271,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "afterEscape": {
+    "rows": 4,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "h": 271,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "rowsDrawn": [
+    66.5,
+    66.5,
+    66.5,
+    66.5
+   ],
+   "bottom": 270,
+   "ring": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 271
+   }
+  },
+  "table.seams": {
+   "widths": [
+    410,
+    230,
+    320
+   ],
+   "heights": [
+    112,
+    72,
+    72
+   ],
+   "h": 257,
+   "col10": [
+    395,
+    245,
+    320
+   ],
+   "row10": [
+    104,
+    71,
+    71
+   ]
+  },
+  "table.seam-last": {
+   "before": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     112,
+     72,
+     72
+    ],
+    "h": 257,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "after": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     112,
+     72,
+     112
+    ],
+    "h": 297,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "drawnAfter": [
+    111,
+    71,
+    111
+   ],
+   "step10": [
+    111,
+    71,
+    104
+   ],
+   "readout": "105 px"
+  },
+  "table.grow": {
+   "before": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     112,
+     72,
+     112
+    ],
+    "h": 297,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "grown": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     112,
+     72,
+     112
+    ],
+    "h": 453,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "undone": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     112,
+     72,
+     112
+    ],
+    "h": 297,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "undos": 1,
+   "rows": [
+    111,
+    227,
+    111
+   ]
+  },
+  "table.resize": {
+   "s0": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     112,
+     72,
+     112
+    ],
+    "h": 297,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "s1": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     112,
+     72,
+     112
+    ],
+    "h": 417,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "s2": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     112,
+     72,
+     112
+    ],
+    "h": 297,
+    "w": 960,
+    "x": 320,
+    "y": 129
+   },
+   "down10": [
+    144.3,
+    104.3,
+    144.3
+   ],
+   "up10": [
+    111,
+    71,
+    111
+   ],
+   "upReadout": "960 × 217"
+  },
+  "table.format-options": {
+   "controls": [
+    "formatOptions.table.headerRow",
+    "formatOptions.table.border.weight",
+    "formatOptions.table.border.dash",
+    "formatOptions.table.border.color",
+    "formatOptions.table.border.color.none",
+    "formatOptions.table.border.color.ink",
+    "formatOptions.table.border.color.paper",
+    "formatOptions.table.border.color.ink-2",
+    "formatOptions.table.border.color.titanium",
+    "formatOptions.table.border.color.hair",
+    "formatOptions.table.border.color.hair-soft",
+    "formatOptions.table.border.color.plate",
+    "formatOptions.table.border.color.edge",
+    "formatOptions.table.border.color.green",
+    "formatOptions.table.border.color.amber",
+    "formatOptions.table.border.color.red",
+    "formatOptions.table.border.color.blue",
+    "formatOptions.table.border.color.accent",
+    "formatOptions.table.height",
+    "formatOptions.table.distributeRows",
+    "formatOptions.table.distributeColumns",
+    "formatOptions.table.cell.fill",
+    "formatOptions.table.cell.fill.none",
+    "formatOptions.table.cell.fill.ink",
+    "formatOptions.table.cell.fill.paper",
+    "formatOptions.table.cell.fill.ink-2",
+    "formatOptions.table.cell.fill.titanium",
+    "formatOptions.table.cell.fill.hair",
+    "formatOptions.table.cell.fill.hair-soft",
+    "formatOptions.table.cell.fill.plate",
+    "formatOptions.table.cell.fill.edge",
+    "formatOptions.table.cell.fill.green",
+    "formatOptions.table.cell.fill.amber",
+    "formatOptions.table.cell.fill.red",
+    "formatOptions.table.cell.fill.blue",
+    "formatOptions.table.cell.fill.accent",
+    "formatOptions.table.cell.border.weight",
+    "formatOptions.table.cell.border.dash",
+    "formatOptions.table.cell.border.color",
+    "formatOptions.table.cell.border.color.none",
+    "formatOptions.table.cell.border.color.ink",
+    "formatOptions.table.cell.border.color.paper",
+    "formatOptions.table.cell.border.color.ink-2",
+    "formatOptions.table.cell.border.color.titanium",
+    "formatOptions.table.cell.border.color.hair",
+    "formatOptions.table.cell.border.color.hair-soft",
+    "formatOptions.table.cell.border.color.plate",
+    "formatOptions.table.cell.border.color.edge",
+    "formatOptions.table.cell.border.color.green",
+    "formatOptions.table.cell.border.color.amber",
+    "formatOptions.table.cell.border.color.red",
+    "formatOptions.table.cell.border.color.blue",
+    "formatOptions.table.cell.border.color.accent",
+    "formatOptions.table.merge",
+    "formatOptions.table.unmerge"
+   ],
+   "headings": [
+    "Border",
+    "Rows",
+    "Columns",
+    "Cell",
+    "Merge"
+   ],
+   "words": "Header row BORDER Weight None 1 px 1.5 px 2 px Dash Solid Dot Dash Dash dot Long dash Long dash dot Color ROWS Height of every row Distribute rows COLUMNS Distribute columns CELL Click a table cell first Fill color Border weight Table’s None 1 px 1.5 px 2 px Border dash Table’s Solid Dot Dash Dash dot Long dash Long dash dot Border color MERGE Merge cells Unmerge cells Select two cells or more to ",
+   "below": [
+    "formatOptions.section.table",
+    "formatOptions.section.size",
+    "formatOptions.size.width",
+    "formatOptions.size.height",
+    "formatOptions.size.lock",
+    "formatOptions.size.lock.lock",
+    "formatOptions.size.flip",
+    "formatOptions.size.flip.h",
+    "formatOptions.size.flip.v",
+    "formatOptions.size.rotate",
+    "formatOptions.size.rotate.dial",
+    "formatOptions.section.position"
+   ]
+  },
+  "table.plus-outside": {
+   "edge": {
+    "x": 678.8,
+    "y": 455.33
+   },
+   "bottomCssY": 457.33,
+   "add": {
+    "x": 670.796875,
+    "y": 463.328125,
+    "w": 16,
+    "h": 16
+   },
+   "seam": {
+    "x": 509.59375,
+    "y": 452.125,
+    "w": 676.796875,
+    "h": 9
+   },
+   "sSq": {
+    "x": 842.5,
+    "y": 451.828125,
+    "w": 11,
+    "h": 11
+   },
+   "underEdge": [
+    "button[handle.table.row.2].ts-handle.is-selected",
+    "div.ts-frame-edge",
+    "span.td.first",
+    "div.tr"
+   ],
+   "underSeamQuarter": [
+    "button[handle.table.row.2].ts-handle.is-selected",
+    "div.ts-frame-edge",
+    "div.tr",
+    "div.table"
+   ],
+   "kept": {
+    "add": {
+     "x": 670.796875,
+     "y": 463.328125,
+     "w": 16,
+     "h": 16
+    },
+    "under": [
+     "path",
+     "svg",
+     "button[handle.table.add.row].ts-table-add",
+     "div.freeform"
+    ]
+   },
+   "rightCssX": 1186.4,
+   "addC": {
+    "x": 1192.390625,
+    "y": 344.625,
+    "w": 16,
+    "h": 16
+   },
+   "eRect": {
+    "x": 1180.890625,
+    "y": 347.125,
+    "w": 11,
+    "h": 11
+   },
+   "during": {
+    "underPress": [
+     "button[handle.table.row.2].ts-handle.is-selected",
+     "div.ts-frame-edge",
+     "div.tr",
+     "div.table"
+    ],
+    "addDuring": false,
+    "readout": "132 px",
+    "before": {
+     "rows": 3,
+     "columns": 3,
+     "widths": [
+      410,
+      230,
+      320
+     ],
+     "heights": [
+      112,
+      72,
+      112
+     ],
+     "h": 297,
+     "w": 960,
+     "x": 320,
+     "y": 129
+    },
+    "after": {
+     "rows": 3,
+     "columns": 3,
+     "widths": [
+      410,
+      230,
+      320
+     ],
+     "heights": [
+      112,
+      72,
+      152
+     ],
+     "h": 337,
+     "w": 960,
+     "x": 320,
+     "y": 129
+    },
+    "undo": {
+     "rows": 3,
+     "columns": 3,
+     "widths": [
+      410,
+      230,
+      320
+     ],
+     "heights": [
+      112,
+      72,
+      112
+     ],
+     "h": 297,
+     "w": 960,
+     "x": 320,
+     "y": 129
+    }
+   }
+  },
+  "show": {
+   "present": true,
+   "table": true,
+   "cells": [
+    "",
+    "",
+    "",
+    "",
+    "Alpha",
+    "Beta",
+    "Gamma",
+    "",
+    ""
+   ],
+   "guides": 0,
+   "editable": 0,
+   "sheetBg": "rgba(0, 0, 0, 0)"
+  },
+  "pdf": {
+   "name": "untitled-20260926-lwgf.pdf",
+   "bytes": 35764,
+   "ms": 5441,
+   "pages": "2",
+   "words": [
+    "Alpha true",
+    "Beta true",
+    "Gamma true",
+    "Big words false",
+    "edited false",
+    "North false"
+   ],
+   "tablePage": 2
+  },
+  "trash": {
+   "trash": {
+    "refused": false,
+    "out": "{\"id\":\"untitled-20260926-lwgf\",\"trashedAt\":\"2026-09-26T15:28:45.114Z\",\"revision\":27}"
+   },
+   "trashed": {
+    "banner": 1,
+    "words": "This presentation is in the trashRestore",
+    "restore": 1,
+    "editing": "0",
+    "owner": "viewer"
+   },
+   "info1": {
+    "refused": false,
+    "out": "{\"id\":\"untitled-20260926-lwgf\",\"title\":\"Untitled presentation\",\"theme\":\"gt-ink-paper\",\"revision\":27,\"sections\":[{\"id\":\"deck\",\"name\":\"Deck\",\"slides\":[{\"id\":\"title\",\"n\":1,\"title\":\"Slide 1\",\"kind\":\"title"
+   },
+   "refusedNew": {
+    "refused": true,
+    "message": "page.evaluate: RangeError: This presentation is in the trash, so \"slide.new\" is refused; Restore it from the banner or with deck.restore first.\n    at invoke (https://turboslide-c7toc7dkk-kl01s-projects.vercel.app/assets/EditorRoot-BkxHYwwQ.js:26:37851)\n    at Object.<anonymous> (https://turboslide-"
+   },
+   "restore": {
+    "refused": false,
+    "out": "{\"id\":\"untitled-20260926-lwgf\",\"trashedAt\":null,\"revision\":27}"
+   },
+   "gone": true,
+   "restored": {
+    "banner": 0,
+    "words": null,
+    "restore": 0,
+    "editing": "1",
+    "owner": "editor"
+   },
+   "landed": {
+    "refused": false,
+    "out": "{\"slide\":{\"schemaVersion\":1,\"id\":\"blank-2\",\"template\":\"blank\",\"kind\":\"content\",\"layout\":{\"type\":\"freeform\"},\"slots\":{}},\"revision\":28,\"outline\":[{\"id\":\"deck\",\"name\":\"Deck\",\"slides\":[{\"id\":\"title\",\"n\":"
+   },
+   "revisions": [
+    27,
+    27,
+    27,
+    28
+   ]
+  }
+ },
+ "consoleErrors": [
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()"
+ ],
+ "teardown": {
+  "trashed": true,
+  "status": 404
+ }
+}

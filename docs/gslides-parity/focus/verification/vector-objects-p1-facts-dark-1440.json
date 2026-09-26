@@ -1,0 +1,3119 @@
+{
+ "base": "https://turboslide-14g8lpqev-kl01s-projects.vercel.app",
+ "ctx": "dark-1440",
+ "deckId": "untitled-20260926-9f39",
+ "readings": [
+  {
+   "name": "deck",
+   "text": "null at https://turboslide-14g8lpqev-kl01s-projects.vercel.app/new, viewport 1440 by 900, appearance dark",
+   "at": "09:02:17"
+  },
+  {
+   "name": "dark-sheet",
+   "text": "the sheet rgba(0, 0, 0, 0), the chrome data-theme dark",
+   "at": "09:02:21"
+  },
+  {
+   "name": "advanced-tools",
+   "text": "the switch reads true (the parked table controls draw with it on)",
+   "at": "09:02:21"
+  },
+  {
+   "name": "draw-rect",
+   "text": "Insert > Shape > Rectangle, a 12 step drag from 300,200 to 620,400: the shape's wrapper existed with a box at 12 of 12 steps (step 1 300,200 27x17, step 5 300,200 133x83 rect fill var(--plate) readout \"133 × 83\", step 12 300,200 320x200); after the release the block 300,200 320x200, chip \"Shape\"; the marquee at step 5 300,200 133.3x83.3",
+   "at": "09:02:27"
+  },
+  {
+   "name": "draw-rect-undo",
+   "text": "objects after the draw 1, after one Cmd+Z 0",
+   "at": "09:02:29"
+  },
+  {
+   "name": "draw-hex",
+   "text": "the Shapes grid's hexagon drawn by a 12 step drag: frees on the sheet per step 1,1,1,1,1,1,1,1,1,1,1,1; at step 5 the readout \"133 × 83\", the marquee 700,220 133.3x83.3; after the release the drawn element unread d \"M0,99.5 L50,0 H269.5 L319,99.5 L269.5,199 H50 Z\"",
+   "at": "09:02:34"
+  },
+  {
+   "name": "draw-hex-block",
+   "text": "the committed block shape hexagon at {\"x\":700,\"y\":220,\"w\":320,\"h\":200,\"z\":1}",
+   "at": "09:02:34"
+  },
+  {
+   "name": "draw-click",
+   "text": "a pointer down with the shape armed at 500,520: a free appeared 2 ms after the press, held 120 ms at 500,520 240x160 (fill var(--plate)); the release: the ring 3 ms after, the block {\"x\":500,\"y\":520,\"w\":240,\"h\":160,\"z\":1}, chip \"Shape\"",
+   "at": "09:02:42"
+  },
+  {
+   "name": "resize-setup",
+   "text": "six objects placed through the window API: r-shape shape, r-text text, r-pic shot, r-table table, r-chart chart, r-word text",
+   "at": "09:02:53"
+  },
+  {
+   "name": "resize-star",
+   "text": "r-shape resized from se by 200 by 120 in 12 steps: the object's box equals the ring's within 1 px at 12 of 12 steps; step 10 free 80,80 467x320 ring 80,80 467x320 (0/0/0/0), readout \"467 × 320\"; the star's path changed true, svg 467x320; handles 10 (rotate true)",
+   "at": "09:02:57"
+  },
+  {
+   "name": "rotate-star",
+   "text": "r-shape rotated by its handle in 12 steps: the readouts 3° 7° 11° .. 45°; at step 10 the ring's bounds 44.1,11 371.8x358.1 against the object's 44.1,11 371.8x358.1 (0/0/0/0); after the release pos.rotate 45, the turn layer 45 degrees 259x259 css px",
+   "at": "09:03:03"
+  },
+  {
+   "name": "resize-text",
+   "text": "the twelve word text box narrowed from the e handle by 300 in 12 steps: the box equals the ring's (outset 10 removed) at 12 of 12 steps; the line boxes per step 2,2,2,2,2,2,2,2,2,2,2,2 (start 2); step 10 free 440,80 396x60 ring 430,70 416x80, readout \"396 × 60\"",
+   "at": "09:03:08"
+  },
+  {
+   "name": "rotate-text",
+   "text": "the text box rotated: at step 10 the readout \"38°\", the ring's bounds 475.3,-124.7 569.3x469.4 against the object's 489.4,-110.7 541.3x441.3; after the release pos.rotate 45, the turn layer 45 degrees",
+   "at": "09:03:13"
+  },
+  {
+   "name": "resize-picture",
+   "text": "r-pic resized from se by 240 by 160 in 12 steps: the object's box equals the ring's within 1 px at 12 of 12 steps; step 10 free 1160,80 584x389 ring 1160,80 584x389 (0/0/0/0), readout \"584 × 389\"; the img 1088.3,32.6 727.5x483.8 (start 1113.3,49.3 477.5x317.5), object-fit cover; handles 10 (rotate true)",
+   "at": "09:03:18"
+  },
+  {
+   "name": "rotate-picture",
+   "text": "r-pic rotated by its handle in 12 steps: the readouts 3° 7° 11° .. 45°; at step 10 the ring's bounds 1121.9,-11.1 460.2x438.1 against the object's 1121.9,-11.1 460.2x438.1 (0/0/0/0); after the release pos.rotate 45, the turn layer 45 degrees 319x319 css px",
+   "at": "09:03:24"
+  },
+  {
+   "name": "resize-table",
+   "text": "r-table resized from se by 200 by 120 in 12 steps: the object's box equals the ring's within 1 px at 12 of 12 steps; step 10 free 80,420 807x263 ring 80,420 807x263 (0/0/0/0), readout \"807 × 263\"; the header cells 269, 269, 269 wide of 807 (start 213.3, 213.3, 213.3), the rows 86.3, 86.3, 86.3 tall; handles 21 (rotate true)",
+   "at": "09:03:29"
+  },
+  {
+   "name": "rotate-table",
+   "text": "r-table rotated by its handle in 12 steps: the readouts 3° 7° 11° .. 45°; at step 10 the ring's bounds 97.6,240.3 604.7x522.4 against the object's 97.7,240.3 604.7x522.5 (0.1/0/0/0.1); after the release pos.rotate 45, the turn layer 45 degrees 400x400 css px",
+   "at": "09:03:35"
+  },
+  {
+   "name": "resize-chart",
+   "text": "r-chart resized from se by 260 by 160 in 12 steps: the object's box equals the ring's within 1 px at 12 of 12 steps; step 10 free 800,420 697x433 ring 800,420 697x433 (0/0/0/0), readout \"697 × 433\"; the svg 800,420 697x433, the first bar 859.9,628.5 141.2x192.5 (start 852.7,562 83.3x126); handles 10 (rotate true)",
+   "at": "09:03:39"
+  },
+  {
+   "name": "rotate-chart",
+   "text": "r-chart rotated by its handle in 12 steps: the readouts 3° 7° 11° .. 45°; at step 10 the ring's bounds 758.5,304 562.9x531.9 against the object's 758.5,304 562.9x531.9 (0/0/0/0); after the release pos.rotate 45, the turn layer 45 degrees 389x389 css px",
+   "at": "09:03:44"
+  },
+  {
+   "name": "resize-wordart",
+   "text": "word art resized from se by 260 by 120 in 12 steps: the box equals the ring's (outset 10 removed) at 12 of 12 steps; the drawn font size per step 70,77,84,90,96,102,109,115,122,131,131,141 (start 64); step 10 readout \"817 × 204 · 131 px\"; after the release typography.size 141",
+   "at": "09:03:49"
+  },
+  {
+   "name": "rotate-wordart",
+   "text": "word art rotated: at step 10 the readout \"38°\", ring 98.8,451.9 562.4x476.3 against 112.8,465.9 534.4x448.2; after the release pos.rotate 45, turn 45 degrees",
+   "at": "09:03:54"
+  },
+  {
+   "name": "gesture-record",
+   "text": "describe().state.gesture after the last gesture: {\"frames\":12,\"maxMs\":2.2,\"meanMs\":1.8,\"skipped\":0,\"degraded\":false}",
+   "at": "09:03:55"
+  },
+  {
+   "name": "table-empty",
+   "text": "Insert > Table 3 by 3: table at {\"x\":320,\"y\":129,\"w\":960,\"h\":163}; the rows drawn 53, 53, 53 tall; the guide grid drawn on 6 of 9 cells ({\"shadow\":\"rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset\",\"right\":\"0px none\",\"after\":\"none\"}); the ring 320,129 960x163 on the table 320,129 960x163; chip \"Table\"; the controls 11 table controls of 21",
+   "at": "09:04:01"
+  },
+  {
+   "name": "table-cell-open",
+   "text": "one click on cell 1,1: editing true; the ring 320,129 960x163 on the table 320,129 960x163 (equal); the cell ring data-cell 1,1 at 735,287 226x38 css px (the cell's css box from 735,287); chip \"Table\"; the frame edges 4; the seams and heads with the cell open: handle.table.head.column.0, handle.table.head.column.1, handle.table.head.column.2, handle.table.head.row.0, handle.table.head.row.1, handle.table.head.row.2, handle.table.column.0, handle.table.column.1, handle.table.row.0, handle.table.row.1, handle.table.row.2",
+   "at": "09:04:03"
+  },
+  {
+   "name": "table-filled",
+   "text": "Alpha, Tab, Beta, Tab, Gamma, Escape: the cells [\"\",\"\",\"\",\"\",\"Alpha\",\"Beta\",\"Gamma\",\"\",\"\"]; pos.h 163; the rows 53, 53, 53 tall; the guides on 6 of 9 cells; the ring 320,129 960x163 on the table 320,129 960x163",
+   "at": "09:04:07"
+  },
+  {
+   "name": "table-plus-column",
+   "text": "the \"+\" on the right edge at 1178,280 css px: one click took the table from 3 to 4 columns (widths [320,320,320,320], pos.w 1280); cells [\"\",\"\",\"\",\"\",\"\",\"Alpha\",\"Beta\",\"\",\"Gamma\",\"\",\"\",\"\"]",
+   "at": "09:04:31"
+  },
+  {
+   "name": "table-plus-column-undo",
+   "text": "Cmd+Z: 3 columns",
+   "at": "09:04:32"
+  },
+  {
+   "name": "table-plus-row",
+   "text": "the \"+\" on the bottom edge at 643,355 css px: one click took the table from 3 to 4 rows, pos.h 163 to 217; the ring 320,129 960x217 on the table 320,129 960x217",
+   "at": "09:04:36"
+  },
+  {
+   "name": "table-plus-row-undo",
+   "text": "Cmd+Z: 3 rows, pos.h 163",
+   "at": "09:04:36"
+  },
+  {
+   "name": "table-heads",
+   "text": "a click on the band above column 1: the range ring \"0,1:2,1\" over 3 cells",
+   "at": "09:04:40"
+  },
+  {
+   "name": "table-heads-row",
+   "text": "a click on the band left of row 1: the range ring \"1,0:1,2\" over 3 cells",
+   "at": "09:04:41"
+  },
+  {
+   "name": "table-head-menu",
+   "text": "a right click on row 0's head lists format.table.headerRow (checked true), format.table.insertRowAbove, format.table.insertRowBelow, format.table.deleteRow, format.table.distributeRows",
+   "at": "09:04:42"
+  },
+  {
+   "name": "table-header-toggle",
+   "text": "Header row clicked: rows[0].header undefined, the first cell's font weight 400",
+   "at": "09:04:45"
+  },
+  {
+   "name": "table-header-toggle-undo",
+   "text": "Cmd+Z: rows[0].header true",
+   "at": "09:04:46"
+  },
+  {
+   "name": "table-menu-insert-row",
+   "text": "format.table.insertRowBelow from the cell's menu: 3 → 4 rows, pos.h 163 → 163; the drawn table 320,129 960x163 (163 tall, the rows 53, 53, 53, 53) against the ring 320,129 960x163 (the drawn table 0 px taller than the ring)",
+   "at": "09:04:50"
+  },
+  {
+   "name": "table-menu",
+   "text": "the cell menu: format.table.insertRowBelow 3→4 rows (pos.h 163→163); format.table.insertColumnRight 3→4 columns (widths [null,null,null,null]); format.table.deleteRow 4→3 rows (pos.h 163); format.table.deleteColumn 4→3 columns; the cells [\"\",\"\",\"\",\"\",\"\",\"Alpha\",\"\",\"Beta\",\"Gamma\",\"\",\"\",\"\"]; the ring 320,129 960x163 on 320,129 960x163",
+   "at": "09:04:55"
+  },
+  {
+   "name": "table-seam-column",
+   "text": "the first column seam dragged by 90 in 12 steps: at step 10 the header cells 395, 245, 320 wide, readout \"395 px\"; after the release the widths [410,230,320] (from [null,null,null]), editing false",
+   "at": "09:04:59"
+  },
+  {
+   "name": "table-seam-row",
+   "text": "the first row seam dragged by 40 in 12 steps: at step 10 the rows 86, 53, 53 tall, readout \"87 px\"; after the release rows[0].height 94, pos.h 203 (from 163)",
+   "at": "09:05:03"
+  },
+  {
+   "name": "table-seam-last",
+   "text": "the seam under the last row dragged by 40: the heights [94,54,54] → [94,54,54], pos.h 203 → 243; at step 10 the rows 104, 64, 64 (readout \"960 × 236\"); drawn after 106.3, 66.3, 66.3",
+   "at": "09:05:09"
+  },
+  {
+   "name": "table-grow",
+   "text": "forty words typed into cell 1,0 at human speed (revision 58 → 59): the row's cell 227 tall with 0 lines, the rows 93, 227, 53, pos.h 243 → 377, the ring 320,129 960x377 on the table 320,129 960x377 (the last row's bottom at 505)",
+   "at": "09:05:31"
+  },
+  {
+   "name": "table-grow-undo",
+   "text": "1 Cmd+Z: the cells [\"\",\"\",\"\",\"\",\"Alpha\",\"Beta\",\"Gamma\",\"\",\"\"], pos.h 243, the rows 106.3, 66.3, 66.3",
+   "at": "09:05:32"
+  },
+  {
+   "name": "table-resize",
+   "text": "the se handle dragged down by 120: the rows 139.7, 99.7, 99.7 at step 10, pos.h 243 → 363; dragged up by 240 past the rows' height: at step 10 the rows 93, 53, 53, readout \"960 × 163\", pos.h → 203",
+   "at": "09:05:39"
+  },
+  {
+   "name": "table-format-options",
+   "text": "the Table section: headings Border | Rows | Columns | Cell | Merge; words \"Header row BORDER Weight None 1 px 1.5 px 2 px Dash Solid Dot Dash Dash dot Long dash Long dash dot Color ROWS Height of every row Distribute rows COLUMNS Distribute columns CELL Click a table cell first Fill color Border weight Table’s None 1 px 1.5 px 2 px Border dash Table’s Solid Dot Dash Dash dot Long dash Long dash dot Border color MERGE Merge cells Unmerge cells Select two cells or more to \"; 55 controls; other formatOptions controls outside it [\"formatOptions.section.table\",\"formatOptions.section.size\",\"formatOptions.size.width\",\"formatOptions.size.height\",\"formatOptions.size.lock\",\"formatOptions.size.lock.lock\",\"formatOptions.size.flip\",\"formatOptions.size.flip.h\",\"formatOptions.size.flip.v\",\"formatOptions.size.rotate\",\"formatOptions.size.rotate.dial\",\"formatOptions.section.position\"]",
+   "at": "09:05:42"
+  },
+  {
+   "name": "chart-column",
+   "text": "Insert > Chart > column: the grid's cell 1,1 set to 42 → series values [42,45,20]; Add series {\"ariaDisabled\":null,\"title\":null}; resized from se by -240 by -140: the svg's box equals the ring's at 12 of 12 steps (step 10 svg 320,129 760x423 ring 320,129 760x423, first mark 382,257.5 158x262.5 from 388.7,292.6 211.3x344.4, readout \"760 × 423\"); marks after null",
+   "at": "09:05:57"
+  },
+  {
+   "name": "chart-bar",
+   "text": "Insert > Chart > bar: the grid's cell 1,1 set to 42 → series values [42,45,20]; Add series {\"ariaDisabled\":null,\"title\":null}; resized from se by -240 by -140: the svg's box equals the ring's at 12 of 12 steps (step 10 svg 320,129 760x423 ring 320,129 760x423, first mark 432,157.5 371x98 from 432,161.4 511x129.2, readout \"760 × 423\"); marks after null",
+   "at": "09:06:09"
+  },
+  {
+   "name": "chart-line",
+   "text": "Insert > Chart > line: the grid's cell 1,1 set to 42 → series values [42,45,20]; Add series {\"ariaDisabled\":null,\"title\":null}; resized from se by -240 by -140: the svg's box equals the ring's at 12 of 12 steps (step 10 svg 320,129 760x423 ring 320,129 760x423, first mark none from none, readout \"760 × 423\"); marks after null",
+   "at": "09:06:21"
+  },
+  {
+   "name": "chart-pie",
+   "text": "Insert > Chart > pie: the grid's cell 1,1 set to 42 → series values [42,45,20]; Add series {\"ariaDisabled\":\"true\",\"title\":null}; resized from se by -240 by -140: the svg's box equals the ring's at 12 of 12 steps (step 10 svg 320,129 760x423 ring 320,129 760x423, first mark none from none, readout \"760 × 423\"); marks after null",
+   "at": "09:06:34"
+  },
+  {
+   "name": "diagram-edit",
+   "text": "Insert > Diagram > Process: 7 members (4 steps, 3 links); one click on step 2 chip \"Group\"; a double click chip \"Shape\", session true; End, \" edited\", Escape: chip \"Shape\", the member's text \"Step 2 edited\"",
+   "at": "09:06:43"
+  },
+  {
+   "name": "diagram-member-duplicate",
+   "text": "Cmd+D with the member selected: 7 → 8 objects",
+   "at": "09:06:44"
+  },
+  {
+   "name": "diagram-member-delete",
+   "text": "Delete on the copy: 8 → 7 objects",
+   "at": "09:06:45"
+  },
+  {
+   "name": "diagram-resize",
+   "text": "the group (chip \"Group\") resized from se by 160 by 90 in 12 steps: at step 10 the group ring 320,370 1093x235 with 7 of 7 members inside (step 1 320,370 973x167, step 12 320,370 1120x250)",
+   "at": "09:06:48"
+  },
+  {
+   "name": "wordart-fill",
+   "text": "Fill color's plate: 22 swatches; toolbar.fillColor.kit.accent picked → color \"accent\" (from null), the letters drawn null",
+   "at": "09:06:59"
+  },
+  {
+   "name": "wordart-tail",
+   "text": "Insert > Word art \"Big words\": the tail toolbar.head, toolbar.search, toolbar.newSlide.split, toolbar.newSlide, toolbar.newSlide.arrow, toolbar.undo, toolbar.redo (disabled), toolbar.print, toolbar.paintFormat, toolbar.zoom, toolbar.tail, toolbar.fillColor, toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash (disabled), toolbar.font, toolbar.fontSize, toolbar.fontSize.minus, toolbar.fontSize.value, toolbar.fontSize.plus, toolbar.bold, toolbar.italic, toolbar.underline, toolbar.textColor, toolbar.highlightColor, toolbar.insertLink, toolbar.insertComment, toolbar.align, toolbar.spacing, toolbar.formatOptions, toolbar.more, toolbar.end, toolbar.pointer, toolbar.hideMenus; resized from se by 260 by 120: the box equals the ring's (outset 10) at 12 of 12 steps, step 10 font 161 readout \"1017 × 220 · 161 px\"; typography.size after 176",
+   "at": "09:07:03"
+  },
+  {
+   "name": "connector",
+   "text": "the elbow's chip \"Elbow connector\"; B moved from inside by 150 by 100 in 12 steps: the connector's box width per step 400,425,436,450,457,477,488,503,512,525,537,550 (start 400); at step 10 the connector's box 400,380 525x81; after the release the path's end {\"x\":949,\"y\":479} against B's left site {\"x\":950,\"y\":480} (gap 1.4); the connector's pos {\"x\":400,\"y\":380,\"w\":550,\"h\":100,\"z\":2}",
+   "at": "09:07:14"
+  },
+  {
+   "name": "show-table",
+   "text": "the show at slide 4: {\"present\":true,\"table\":true,\"cells\":[\"\",\"\",\"\",\"\",\"Alpha\",\"Beta\",\"Gamma\",\"\",\"\"],\"guides\":0,\"editable\":0,\"sheetBg\":\"rgba(0, 0, 0, 0)\"}",
+   "at": "09:07:16"
+  },
+  {
+   "name": "show-escape",
+   "text": "Escape: the show gone true",
+   "at": "09:07:17"
+  },
+  {
+   "name": "pdf",
+   "text": "File > Download > PDF: \"untitled-20260926-9f39.pdf\" 220511 bytes in 2154 ms, 8 pages; the words Alpha true, Beta true, Gamma true, Big words true, edited true, North true; the table's page 4 rendered to a picture",
+   "at": "09:07:23"
+  },
+  {
+   "name": "address at the end",
+   "text": "https://turboslide-14g8lpqev-kl01s-projects.vercel.app/edit/untitled-20260926-9f39#s/blank-3",
+   "at": "09:07:23"
+  },
+  {
+   "name": "teardown",
+   "text": "deck untitled-20260926-9f39: {\"trashed\":true,\"status\":404}",
+   "at": "09:07:46"
+  }
+ ],
+ "facts": {
+  "draw.rectangle": {
+   "grew": [
+    {
+     "tag": "step1",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 27,
+      "h": 17
+     },
+     "fill": "var(--plate)",
+     "readout": "27 × 17"
+    },
+    {
+     "tag": "step2",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 53,
+      "h": 33
+     },
+     "fill": "var(--plate)",
+     "readout": "53 × 33"
+    },
+    {
+     "tag": "step3",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 80,
+      "h": 50
+     },
+     "fill": "var(--plate)",
+     "readout": "80 × 50"
+    },
+    {
+     "tag": "step4",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 107,
+      "h": 67
+     },
+     "fill": "var(--plate)",
+     "readout": "107 × 67"
+    },
+    {
+     "tag": "step5",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 133,
+      "h": 83
+     },
+     "fill": "var(--plate)",
+     "readout": "133 × 83"
+    },
+    {
+     "tag": "step6",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 160,
+      "h": 100
+     },
+     "fill": "var(--plate)",
+     "readout": "160 × 100"
+    },
+    {
+     "tag": "step7",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 187,
+      "h": 117
+     },
+     "fill": "var(--plate)",
+     "readout": "187 × 117"
+    },
+    {
+     "tag": "step8",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 213,
+      "h": 133
+     },
+     "fill": "var(--plate)",
+     "readout": "213 × 133"
+    },
+    {
+     "tag": "step9",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 240,
+      "h": 150
+     },
+     "fill": "var(--plate)",
+     "readout": "240 × 150"
+    },
+    {
+     "tag": "step10",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 267,
+      "h": 167
+     },
+     "fill": "var(--plate)",
+     "readout": "267 × 167"
+    },
+    {
+     "tag": "step11",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 293,
+      "h": 183
+     },
+     "fill": "var(--plate)",
+     "readout": "293 × 183"
+    },
+    {
+     "tag": "step12",
+     "free": {
+      "x": 300,
+      "y": 200,
+      "w": 320,
+      "h": 200
+     },
+     "fill": "var(--plate)",
+     "readout": "320 × 200"
+    }
+   ],
+   "up": {
+    "x": 300,
+    "y": 200,
+    "w": 320,
+    "h": 200
+   },
+   "chip": "Shape"
+  },
+  "draw.hexagon": {
+   "perStep": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "pos": {
+    "x": 700,
+    "y": 220,
+    "w": 320,
+    "h": 200,
+    "z": 1
+   },
+   "shape": "hexagon"
+  },
+  "draw.click": {
+   "tDrawn": 2,
+   "tRing": 3,
+   "held": {
+    "x": 500,
+    "y": 520,
+    "w": 240,
+    "h": 160
+   },
+   "after": {
+    "x": 500,
+    "y": 520,
+    "w": 240,
+    "h": 160
+   },
+   "pos": {
+    "x": 500,
+    "y": 520,
+    "w": 240,
+    "h": 160,
+    "z": 1
+   }
+  },
+  "resize.star": {
+   "follow": "12 of 12",
+   "step10": {
+    "free": {
+     "x": 80,
+     "y": 80,
+     "w": 467,
+     "h": 320
+    },
+    "ring": {
+     "x": 80,
+     "y": 80,
+     "w": 467,
+     "h": 320
+    },
+    "readout": "467 × 320"
+   },
+   "frames": [
+    {
+     "tag": "before",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 300,
+      "h": 220
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 300,
+      "h": 220
+     },
+     "readout": null
+    },
+    {
+     "tag": "down",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 300,
+      "h": 220
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 300,
+      "h": 220
+     },
+     "readout": null
+    },
+    {
+     "tag": "step1",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 320,
+      "h": 230
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 320,
+      "h": 230
+     },
+     "readout": "320 × 230"
+    },
+    {
+     "tag": "step2",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 333,
+      "h": 240
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 333,
+      "h": 240
+     },
+     "readout": "333 × 240"
+    },
+    {
+     "tag": "step3",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 350,
+      "h": 250
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 350,
+      "h": 250
+     },
+     "readout": "350 × 250"
+    },
+    {
+     "tag": "step4",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 367,
+      "h": 256
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 367,
+      "h": 256
+     },
+     "readout": "367 × 256"
+    },
+    {
+     "tag": "step5",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 383,
+      "h": 270
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 383,
+      "h": 270
+     },
+     "readout": "383 × 270"
+    },
+    {
+     "tag": "step6",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 400,
+      "h": 280
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 400,
+      "h": 280
+     },
+     "readout": "400 × 280"
+    },
+    {
+     "tag": "step7",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 417,
+      "h": 290
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 417,
+      "h": 290
+     },
+     "readout": "417 × 290"
+    },
+    {
+     "tag": "step8",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 433,
+      "h": 300
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 433,
+      "h": 300
+     },
+     "readout": "433 × 300"
+    },
+    {
+     "tag": "step9",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 450,
+      "h": 310
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 450,
+      "h": 310
+     },
+     "readout": "450 × 310"
+    },
+    {
+     "tag": "step10",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 467,
+      "h": 320
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 467,
+      "h": 320
+     },
+     "readout": "467 × 320"
+    },
+    {
+     "tag": "step11",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 483,
+      "h": 330
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 483,
+      "h": 330
+     },
+     "readout": "483 × 330"
+    },
+    {
+     "tag": "step12",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 500,
+      "h": 340
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 500,
+      "h": 340
+     },
+     "readout": "500 × 340"
+    },
+    {
+     "tag": "up+0",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 500,
+      "h": 340
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 500,
+      "h": 340
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+40",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 500,
+      "h": 340
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 500,
+      "h": 340
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+120",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 500,
+      "h": 340
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 500,
+      "h": 340
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+400",
+     "free": {
+      "x": 80,
+      "y": 80,
+      "w": 500,
+      "h": 340
+     },
+     "ring": {
+      "x": 80,
+      "y": 80,
+      "w": 500,
+      "h": 340
+     },
+     "readout": null
+    }
+   ],
+   "handles": [
+    "handle.r-shape.move",
+    "handle.r-shape.resize.nw",
+    "handle.r-shape.resize.n",
+    "handle.r-shape.resize.ne",
+    "handle.r-shape.resize.e",
+    "handle.r-shape.resize.se",
+    "handle.r-shape.resize.s",
+    "handle.r-shape.resize.sw",
+    "handle.r-shape.resize.w",
+    "handle.r-shape.rotate"
+   ]
+  },
+  "rotate.star": {
+   "readouts": [
+    "3°",
+    "7°",
+    "11°",
+    "15°",
+    "19°",
+    "22°",
+    "26°",
+    "30°",
+    "34°",
+    "38°",
+    "42°",
+    "45°"
+   ],
+   "turn": {
+    "angle": 45,
+    "w": 259,
+    "h": 259
+   },
+   "rotate": 45,
+   "step10": {
+    "free": {
+     "x": 44.1,
+     "y": 11,
+     "w": 371.8,
+     "h": 358.1
+    },
+    "ring": {
+     "x": 44.1,
+     "y": 11,
+     "w": 371.8,
+     "h": 358.1
+    }
+   }
+  },
+  "resize.text": {
+   "follow": "12 of 12",
+   "lines": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "step10": {
+    "free": {
+     "x": 440,
+     "y": 80,
+     "w": 396,
+     "h": 60
+    },
+    "ring": {
+     "x": 430,
+     "y": 70,
+     "w": 416,
+     "h": 80
+    },
+    "text": {
+     "fontSize": 22,
+     "lines": 2,
+     "box": {
+      "x": 440,
+      "y": 80,
+      "w": 396,
+      "h": 66
+     },
+     "runBox": {
+      "x": 440,
+      "y": 80,
+      "w": 396,
+      "h": 66
+     },
+     "sample": "Twelve short words sit on one "
+    }
+   }
+  },
+  "resize.picture": {
+   "follow": "12 of 12",
+   "step10": {
+    "free": {
+     "x": 1160,
+     "y": 80,
+     "w": 584,
+     "h": 389
+    },
+    "ring": {
+     "x": 1160,
+     "y": 80,
+     "w": 584,
+     "h": 389
+    },
+    "readout": "584 × 389"
+   },
+   "frames": [
+    {
+     "tag": "before",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 384,
+      "h": 256
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 384,
+      "h": 256
+     },
+     "readout": null
+    },
+    {
+     "tag": "down",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 384,
+      "h": 256
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 384,
+      "h": 256
+     },
+     "readout": null
+    },
+    {
+     "tag": "step1",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 404,
+      "h": 269
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 404,
+      "h": 269
+     },
+     "readout": "404 × 269"
+    },
+    {
+     "tag": "step2",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 424,
+      "h": 283
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 424,
+      "h": 283
+     },
+     "readout": "424 × 283"
+    },
+    {
+     "tag": "step3",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 440,
+      "h": 296
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 440,
+      "h": 296
+     },
+     "readout": "440 × 296"
+    },
+    {
+     "tag": "step4",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 464,
+      "h": 309
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 464,
+      "h": 309
+     },
+     "readout": "464 × 309"
+    },
+    {
+     "tag": "step5",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 484,
+      "h": 323
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 484,
+      "h": 323
+     },
+     "readout": "484 × 323"
+    },
+    {
+     "tag": "step6",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 504,
+      "h": 340
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 504,
+      "h": 340
+     },
+     "readout": "504 × 340"
+    },
+    {
+     "tag": "step7",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 524,
+      "h": 349
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 524,
+      "h": 349
+     },
+     "readout": "524 × 349"
+    },
+    {
+     "tag": "step8",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 544,
+      "h": 363
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 544,
+      "h": 363
+     },
+     "readout": "544 × 363"
+    },
+    {
+     "tag": "step9",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 564,
+      "h": 376
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 564,
+      "h": 376
+     },
+     "readout": "564 × 376"
+    },
+    {
+     "tag": "step10",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 584,
+      "h": 389
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 584,
+      "h": 389
+     },
+     "readout": "584 × 389"
+    },
+    {
+     "tag": "step11",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 604,
+      "h": 403
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 604,
+      "h": 403
+     },
+     "readout": "604 × 403"
+    },
+    {
+     "tag": "step12",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 624,
+      "h": 422
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 624,
+      "h": 422
+     },
+     "readout": "624 × 422"
+    },
+    {
+     "tag": "up+0",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 624,
+      "h": 422
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 624,
+      "h": 422
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+40",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 624,
+      "h": 422
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 624,
+      "h": 422
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+120",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 624,
+      "h": 422
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 624,
+      "h": 422
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+400",
+     "free": {
+      "x": 1160,
+      "y": 80,
+      "w": 624,
+      "h": 422
+     },
+     "ring": {
+      "x": 1160,
+      "y": 80,
+      "w": 624,
+      "h": 422
+     },
+     "readout": null
+    }
+   ],
+   "handles": [
+    "handle.r-pic.move",
+    "handle.r-pic.resize.nw",
+    "handle.r-pic.resize.n",
+    "handle.r-pic.resize.ne",
+    "handle.r-pic.resize.e",
+    "handle.r-pic.resize.se",
+    "handle.r-pic.resize.s",
+    "handle.r-pic.resize.sw",
+    "handle.r-pic.resize.w",
+    "handle.r-pic.rotate"
+   ]
+  },
+  "rotate.picture": {
+   "readouts": [
+    "3°",
+    "7°",
+    "11°",
+    "15°",
+    "19°",
+    "22°",
+    "26°",
+    "30°",
+    "34°",
+    "38°",
+    "42°",
+    "45°"
+   ],
+   "turn": {
+    "angle": 45,
+    "w": 319,
+    "h": 319
+   },
+   "rotate": 45,
+   "step10": {
+    "free": {
+     "x": 1121.9,
+     "y": -11.1,
+     "w": 460.2,
+     "h": 438.1
+    },
+    "ring": {
+     "x": 1121.9,
+     "y": -11.1,
+     "w": 460.2,
+     "h": 438.1
+    }
+   }
+  },
+  "resize.table": {
+   "follow": "12 of 12",
+   "step10": {
+    "free": {
+     "x": 80,
+     "y": 420,
+     "w": 807,
+     "h": 263
+    },
+    "ring": {
+     "x": 80,
+     "y": 420,
+     "w": 807,
+     "h": 263
+    },
+    "readout": "807 × 263"
+   },
+   "frames": [
+    {
+     "tag": "before",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 640,
+      "h": 163
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 640,
+      "h": 163
+     },
+     "readout": null
+    },
+    {
+     "tag": "down",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 640,
+      "h": 163
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 640,
+      "h": 163
+     },
+     "readout": null
+    },
+    {
+     "tag": "step1",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 652,
+      "h": 173
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 652,
+      "h": 173
+     },
+     "readout": "652 × 173"
+    },
+    {
+     "tag": "step2",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 673,
+      "h": 183
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 673,
+      "h": 183
+     },
+     "readout": "673 × 183"
+    },
+    {
+     "tag": "step3",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 684,
+      "h": 193
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 684,
+      "h": 193
+     },
+     "readout": "684 × 193"
+    },
+    {
+     "tag": "step4",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 707,
+      "h": 203
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 707,
+      "h": 203
+     },
+     "readout": "707 × 203"
+    },
+    {
+     "tag": "step5",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 720,
+      "h": 213
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 720,
+      "h": 213
+     },
+     "readout": "720 × 213"
+    },
+    {
+     "tag": "step6",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 740,
+      "h": 220
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 740,
+      "h": 220
+     },
+     "readout": "740 × 220"
+    },
+    {
+     "tag": "step7",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 756,
+      "h": 233
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 756,
+      "h": 233
+     },
+     "readout": "756 × 233"
+    },
+    {
+     "tag": "step8",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 777,
+      "h": 243
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 777,
+      "h": 243
+     },
+     "readout": "777 × 243"
+    },
+    {
+     "tag": "step9",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 790,
+      "h": 253
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 790,
+      "h": 253
+     },
+     "readout": "790 × 253"
+    },
+    {
+     "tag": "step10",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 807,
+      "h": 263
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 807,
+      "h": 263
+     },
+     "readout": "807 × 263"
+    },
+    {
+     "tag": "step11",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 823,
+      "h": 270
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 823,
+      "h": 270
+     },
+     "readout": "823 × 270"
+    },
+    {
+     "tag": "step12",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 840,
+      "h": 283
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 840,
+      "h": 283
+     },
+     "readout": "840 × 283"
+    },
+    {
+     "tag": "up+0",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 840,
+      "h": 283
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 840,
+      "h": 283
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+40",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 840,
+      "h": 283
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 840,
+      "h": 283
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+120",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 840,
+      "h": 283
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 840,
+      "h": 283
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+400",
+     "free": {
+      "x": 80,
+      "y": 420,
+      "w": 840,
+      "h": 283
+     },
+     "ring": {
+      "x": 80,
+      "y": 420,
+      "w": 840,
+      "h": 283
+     },
+     "readout": null
+    }
+   ],
+   "handles": [
+    "handle.r-table.head.column.0",
+    "handle.r-table.head.column.1",
+    "handle.r-table.head.column.2",
+    "handle.r-table.head.row.0",
+    "handle.r-table.head.row.1",
+    "handle.r-table.head.row.2",
+    "handle.r-table.move",
+    "handle.r-table.column.0",
+    "handle.r-table.column.1",
+    "handle.r-table.row.0",
+    "handle.r-table.row.1",
+    "handle.r-table.row.2",
+    "handle.r-table.resize.nw",
+    "handle.r-table.resize.n",
+    "handle.r-table.resize.ne",
+    "handle.r-table.resize.e",
+    "handle.r-table.resize.se",
+    "handle.r-table.resize.s",
+    "handle.r-table.resize.sw",
+    "handle.r-table.resize.w",
+    "handle.r-table.rotate"
+   ]
+  },
+  "rotate.table": {
+   "readouts": [
+    "3°",
+    "7°",
+    "11°",
+    "15°",
+    "19°",
+    "22°",
+    "26°",
+    "30°",
+    "34°",
+    "38°",
+    "42°",
+    "45°"
+   ],
+   "turn": {
+    "angle": 45,
+    "w": 400,
+    "h": 400
+   },
+   "rotate": 45,
+   "step10": {
+    "free": {
+     "x": 97.7,
+     "y": 240.3,
+     "w": 604.7,
+     "h": 522.5
+    },
+    "ring": {
+     "x": 97.6,
+     "y": 240.3,
+     "w": 604.7,
+     "h": 522.4
+    }
+   }
+  },
+  "resize.chart": {
+   "follow": "12 of 12",
+   "step10": {
+    "free": {
+     "x": 800,
+     "y": 420,
+     "w": 697,
+     "h": 433
+    },
+    "ring": {
+     "x": 800,
+     "y": 420,
+     "w": 697,
+     "h": 433
+    },
+    "readout": "697 × 433"
+   },
+   "frames": [
+    {
+     "tag": "before",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 480,
+      "h": 300
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 480,
+      "h": 300
+     },
+     "readout": null
+    },
+    {
+     "tag": "down",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 480,
+      "h": 300
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 480,
+      "h": 300
+     },
+     "readout": null
+    },
+    {
+     "tag": "step1",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 502,
+      "h": 313
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 502,
+      "h": 313
+     },
+     "readout": "502 × 313"
+    },
+    {
+     "tag": "step2",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 523,
+      "h": 327
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 523,
+      "h": 327
+     },
+     "readout": "523 × 327"
+    },
+    {
+     "tag": "step3",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 545,
+      "h": 340
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 545,
+      "h": 340
+     },
+     "readout": "545 × 340"
+    },
+    {
+     "tag": "step4",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 567,
+      "h": 351
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 567,
+      "h": 351
+     },
+     "readout": "567 × 351"
+    },
+    {
+     "tag": "step5",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 588,
+      "h": 367
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 588,
+      "h": 367
+     },
+     "readout": "588 × 367"
+    },
+    {
+     "tag": "step6",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 610,
+      "h": 380
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 610,
+      "h": 380
+     },
+     "readout": "610 × 380"
+    },
+    {
+     "tag": "step7",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 632,
+      "h": 393
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 632,
+      "h": 393
+     },
+     "readout": "632 × 393"
+    },
+    {
+     "tag": "step8",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 653,
+      "h": 407
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 653,
+      "h": 407
+     },
+     "readout": "653 × 407"
+    },
+    {
+     "tag": "step9",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 675,
+      "h": 424
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 675,
+      "h": 424
+     },
+     "readout": "675 × 424"
+    },
+    {
+     "tag": "step10",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 697,
+      "h": 433
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 697,
+      "h": 433
+     },
+     "readout": "697 × 433"
+    },
+    {
+     "tag": "step11",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 718,
+      "h": 447
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 718,
+      "h": 447
+     },
+     "readout": "718 × 447"
+    },
+    {
+     "tag": "step12",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 744,
+      "h": 460
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 744,
+      "h": 460
+     },
+     "readout": "744 × 460"
+    },
+    {
+     "tag": "up+0",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 744,
+      "h": 460
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 744,
+      "h": 460
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+40",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 744,
+      "h": 460
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 744,
+      "h": 460
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+120",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 744,
+      "h": 460
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 744,
+      "h": 460
+     },
+     "readout": null
+    },
+    {
+     "tag": "up+400",
+     "free": {
+      "x": 800,
+      "y": 420,
+      "w": 744,
+      "h": 460
+     },
+     "ring": {
+      "x": 800,
+      "y": 420,
+      "w": 744,
+      "h": 460
+     },
+     "readout": null
+    }
+   ],
+   "handles": [
+    "handle.r-chart.move",
+    "handle.r-chart.resize.nw",
+    "handle.r-chart.resize.n",
+    "handle.r-chart.resize.ne",
+    "handle.r-chart.resize.e",
+    "handle.r-chart.resize.se",
+    "handle.r-chart.resize.s",
+    "handle.r-chart.resize.sw",
+    "handle.r-chart.resize.w",
+    "handle.r-chart.rotate"
+   ]
+  },
+  "rotate.chart": {
+   "readouts": [
+    "3°",
+    "7°",
+    "11°",
+    "15°",
+    "19°",
+    "22°",
+    "26°",
+    "30°",
+    "34°",
+    "38°",
+    "42°",
+    "45°"
+   ],
+   "turn": {
+    "angle": 45,
+    "w": 389,
+    "h": 389
+   },
+   "rotate": 45,
+   "step10": {
+    "free": {
+     "x": 758.5,
+     "y": 304,
+     "w": 562.9,
+     "h": 531.9
+    },
+    "ring": {
+     "x": 758.5,
+     "y": 304,
+     "w": 562.9,
+     "h": 531.9
+    }
+   }
+  },
+  "resize.wordart": {
+   "follow": "12 of 12",
+   "sizes": [
+    70,
+    77,
+    84,
+    90,
+    96,
+    102,
+    109,
+    115,
+    122,
+    131,
+    131,
+    141
+   ],
+   "step10": {
+    "free": {
+     "x": 80,
+     "y": 640,
+     "w": 817,
+     "h": 204
+    },
+    "ring": {
+     "x": 70,
+     "y": 630,
+     "w": 837,
+     "h": 224
+    },
+    "text": {
+     "fontSize": 131,
+     "lines": 1,
+     "box": {
+      "x": 80,
+      "y": 640,
+      "w": 817,
+      "h": 196.5
+     },
+     "runBox": {
+      "x": 80,
+      "y": 640,
+      "w": 817,
+      "h": 196.5
+     },
+     "sample": "Big words"
+    }
+   },
+   "size": 141
+  },
+  "resize.gesture-record": {
+   "frames": 12,
+   "maxMs": 2.2,
+   "meanMs": 1.8,
+   "skipped": 0,
+   "degraded": false
+  },
+  "table.empty": {
+   "pos": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 163
+   },
+   "rows": [
+    53,
+    53,
+    53
+   ],
+   "guides": {
+    "drawn": 6,
+    "total": 9,
+    "sample": {
+     "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+     "right": "0px none",
+     "after": "none"
+    }
+   },
+   "chip": "Table",
+   "ring": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 163
+   },
+   "handles": [
+    "handle.table.head.column.0",
+    "handle.table.head.column.1",
+    "handle.table.head.column.2",
+    "handle.table.head.row.0",
+    "handle.table.head.row.1",
+    "handle.table.head.row.2",
+    "handle.table.move",
+    "handle.table.column.0",
+    "handle.table.column.1",
+    "handle.table.row.0",
+    "handle.table.row.1",
+    "handle.table.row.2",
+    "handle.table.resize.nw",
+    "handle.table.resize.n",
+    "handle.table.resize.ne",
+    "handle.table.resize.e",
+    "handle.table.resize.se",
+    "handle.table.resize.s",
+    "handle.table.resize.sw",
+    "handle.table.resize.w",
+    "handle.table.rotate"
+   ]
+  },
+  "table.cell-open": {
+   "editing": true,
+   "ring": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 163
+   },
+   "free": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 163
+   },
+   "cellRing": {
+    "cell": "1,1",
+    "x": 735,
+    "y": 287,
+    "w": 226,
+    "h": 38
+   },
+   "edges": [
+    "506,244 685x8",
+    "506,359 685x8",
+    "506,252 8x107",
+    "1182,252 8x107"
+   ],
+   "handles": [
+    "handle.table.head.column.0",
+    "handle.table.head.column.1",
+    "handle.table.head.column.2",
+    "handle.table.head.row.0",
+    "handle.table.head.row.1",
+    "handle.table.head.row.2",
+    "handle.table.move",
+    "handle.table.column.0",
+    "handle.table.column.1",
+    "handle.table.row.0",
+    "handle.table.row.1",
+    "handle.table.row.2",
+    "handle.table.resize.nw",
+    "handle.table.resize.n",
+    "handle.table.resize.ne",
+    "handle.table.resize.e",
+    "handle.table.resize.se",
+    "handle.table.resize.s",
+    "handle.table.resize.sw",
+    "handle.table.resize.w"
+   ],
+   "chip": "Table"
+  },
+  "table.filled": {
+   "cells": [
+    "",
+    "",
+    "",
+    "",
+    "Alpha",
+    "Beta",
+    "Gamma",
+    "",
+    ""
+   ],
+   "h": 163,
+   "rows": [
+    53,
+    53,
+    53
+   ],
+   "guides": {
+    "drawn": 6,
+    "total": 9,
+    "sample": {
+     "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+     "right": "0px none",
+     "after": "none"
+    }
+   }
+  },
+  "table.add-column": {
+   "before": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 960
+   },
+   "after": {
+    "rows": 3,
+    "columns": 4,
+    "widths": [
+     320,
+     320,
+     320,
+     320
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 1280
+   }
+  },
+  "table.add-row": {
+   "before": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 960
+   },
+   "after": {
+    "rows": 4,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "h": 217,
+    "w": 960
+   },
+   "ring": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 217
+   },
+   "free": {
+    "x": 320,
+    "y": 129,
+    "w": 960,
+    "h": 217
+   }
+  },
+  "table.head-menu": [
+   {
+    "id": "format.table.headerRow",
+    "checked": "true",
+    "disabled": null
+   },
+   {
+    "id": "format.table.insertRowAbove",
+    "checked": null,
+    "disabled": null
+   },
+   {
+    "id": "format.table.insertRowBelow",
+    "checked": null,
+    "disabled": null
+   },
+   {
+    "id": "format.table.deleteRow",
+    "checked": null,
+    "disabled": null
+   },
+   {
+    "id": "format.table.distributeRows",
+    "checked": null,
+    "disabled": null
+   }
+  ],
+  "table.menu": {
+   "s0": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 960
+   },
+   "s1": {
+    "rows": 4,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 960
+   },
+   "s2": {
+    "rows": 4,
+    "columns": 4,
+    "widths": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 960
+   },
+   "s3": {
+    "rows": 3,
+    "columns": 4,
+    "widths": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 960
+   },
+   "s4": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     null,
+     null,
+     null
+    ],
+    "heights": [
+     null,
+     null,
+     null
+    ],
+    "h": 163,
+    "w": 960
+   },
+   "rows": [
+    "format.table.insertRowBelow",
+    "format.table.insertColumnRight",
+    "format.table.deleteRow",
+    "format.table.deleteColumn"
+   ]
+  },
+  "table.seams": {
+   "widths": [
+    410,
+    230,
+    320
+   ],
+   "heights": [
+    94,
+    54,
+    54
+   ],
+   "h": 203,
+   "col10": [
+    395,
+    245,
+    320
+   ],
+   "row10": [
+    86,
+    53,
+    53
+   ]
+  },
+  "table.seam-last": {
+   "before": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     94,
+     54,
+     54
+    ],
+    "h": 203,
+    "w": 960
+   },
+   "after": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     94,
+     54,
+     54
+    ],
+    "h": 243,
+    "w": 960
+   },
+   "drawnAfter": [
+    106.3,
+    66.3,
+    66.3
+   ],
+   "step10": [
+    104,
+    64,
+    64
+   ],
+   "readout": "960 × 236"
+  },
+  "table.grow": {
+   "before": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     94,
+     54,
+     54
+    ],
+    "h": 243,
+    "w": 960
+   },
+   "grown": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     94,
+     54,
+     54
+    ],
+    "h": 377,
+    "w": 960
+   },
+   "undone": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     94,
+     54,
+     54
+    ],
+    "h": 243,
+    "w": 960
+   },
+   "undos": 1,
+   "rows": [
+    93,
+    227,
+    53
+   ]
+  },
+  "table.resize": {
+   "s0": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     94,
+     54,
+     54
+    ],
+    "h": 243,
+    "w": 960
+   },
+   "s1": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     94,
+     54,
+     54
+    ],
+    "h": 363,
+    "w": 960
+   },
+   "s2": {
+    "rows": 3,
+    "columns": 3,
+    "widths": [
+     410,
+     230,
+     320
+    ],
+    "heights": [
+     94,
+     54,
+     54
+    ],
+    "h": 203,
+    "w": 960
+   },
+   "down10": [
+    139.7,
+    99.7,
+    99.7
+   ],
+   "up10": [
+    93,
+    53,
+    53
+   ],
+   "upReadout": "960 × 163"
+  },
+  "table.format-options": {
+   "controls": [
+    "formatOptions.table.headerRow",
+    "formatOptions.table.border.weight",
+    "formatOptions.table.border.dash",
+    "formatOptions.table.border.color",
+    "formatOptions.table.border.color.none",
+    "formatOptions.table.border.color.ink",
+    "formatOptions.table.border.color.paper",
+    "formatOptions.table.border.color.ink-2",
+    "formatOptions.table.border.color.titanium",
+    "formatOptions.table.border.color.hair",
+    "formatOptions.table.border.color.hair-soft",
+    "formatOptions.table.border.color.plate",
+    "formatOptions.table.border.color.edge",
+    "formatOptions.table.border.color.green",
+    "formatOptions.table.border.color.amber",
+    "formatOptions.table.border.color.red",
+    "formatOptions.table.border.color.blue",
+    "formatOptions.table.border.color.accent",
+    "formatOptions.table.height",
+    "formatOptions.table.distributeRows",
+    "formatOptions.table.distributeColumns",
+    "formatOptions.table.cell.fill",
+    "formatOptions.table.cell.fill.none",
+    "formatOptions.table.cell.fill.ink",
+    "formatOptions.table.cell.fill.paper",
+    "formatOptions.table.cell.fill.ink-2",
+    "formatOptions.table.cell.fill.titanium",
+    "formatOptions.table.cell.fill.hair",
+    "formatOptions.table.cell.fill.hair-soft",
+    "formatOptions.table.cell.fill.plate",
+    "formatOptions.table.cell.fill.edge",
+    "formatOptions.table.cell.fill.green",
+    "formatOptions.table.cell.fill.amber",
+    "formatOptions.table.cell.fill.red",
+    "formatOptions.table.cell.fill.blue",
+    "formatOptions.table.cell.fill.accent",
+    "formatOptions.table.cell.border.weight",
+    "formatOptions.table.cell.border.dash",
+    "formatOptions.table.cell.border.color",
+    "formatOptions.table.cell.border.color.none",
+    "formatOptions.table.cell.border.color.ink",
+    "formatOptions.table.cell.border.color.paper",
+    "formatOptions.table.cell.border.color.ink-2",
+    "formatOptions.table.cell.border.color.titanium",
+    "formatOptions.table.cell.border.color.hair",
+    "formatOptions.table.cell.border.color.hair-soft",
+    "formatOptions.table.cell.border.color.plate",
+    "formatOptions.table.cell.border.color.edge",
+    "formatOptions.table.cell.border.color.green",
+    "formatOptions.table.cell.border.color.amber",
+    "formatOptions.table.cell.border.color.red",
+    "formatOptions.table.cell.border.color.blue",
+    "formatOptions.table.cell.border.color.accent",
+    "formatOptions.table.merge",
+    "formatOptions.table.unmerge"
+   ],
+   "headings": [
+    "Border",
+    "Rows",
+    "Columns",
+    "Cell",
+    "Merge"
+   ],
+   "words": "Header row BORDER Weight None 1 px 1.5 px 2 px Dash Solid Dot Dash Dash dot Long dash Long dash dot Color ROWS Height of every row Distribute rows COLUMNS Distribute columns CELL Click a table cell first Fill color Border weight Table’s None 1 px 1.5 px 2 px Border dash Table’s Solid Dot Dash Dash dot Long dash Long dash dot Border color MERGE Merge cells Unmerge cells Select two cells or more to ",
+   "below": [
+    "formatOptions.section.table",
+    "formatOptions.section.size",
+    "formatOptions.size.width",
+    "formatOptions.size.height",
+    "formatOptions.size.lock",
+    "formatOptions.size.lock.lock",
+    "formatOptions.size.flip",
+    "formatOptions.size.flip.h",
+    "formatOptions.size.flip.v",
+    "formatOptions.size.rotate",
+    "formatOptions.size.rotate.dial",
+    "formatOptions.section.position"
+   ]
+  },
+  "charts.column": {
+   "id": "chart",
+   "values": [
+    42,
+    45,
+    20
+   ],
+   "addSeries": {
+    "ariaDisabled": null,
+    "title": null
+   },
+   "follow": "12 of 12",
+   "step10": {
+    "free": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "ring": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "svg": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "readout": "760 × 423"
+   },
+   "marks": null
+  },
+  "charts.bar": {
+   "id": "chart",
+   "values": [
+    42,
+    45,
+    20
+   ],
+   "addSeries": {
+    "ariaDisabled": null,
+    "title": null
+   },
+   "follow": "12 of 12",
+   "step10": {
+    "free": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "ring": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "svg": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "readout": "760 × 423"
+   },
+   "marks": null
+  },
+  "charts.line": {
+   "id": "chart",
+   "values": [
+    42,
+    45,
+    20
+   ],
+   "addSeries": {
+    "ariaDisabled": null,
+    "title": null
+   },
+   "follow": "12 of 12",
+   "step10": {
+    "free": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "ring": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "svg": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "readout": "760 × 423"
+   },
+   "marks": null
+  },
+  "charts.pie": {
+   "id": "chart",
+   "values": [
+    42,
+    45,
+    20
+   ],
+   "addSeries": {
+    "ariaDisabled": "true",
+    "title": null
+   },
+   "follow": "12 of 12",
+   "step10": {
+    "free": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "ring": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "svg": {
+     "x": 320,
+     "y": 129,
+     "w": 760,
+     "h": 423
+    },
+    "readout": "760 × 423"
+   },
+   "marks": null
+  },
+  "diagram.resize": {
+   "chipG": "Group",
+   "frames": [
+    {
+     "i": 1,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 973,
+      "h": 167
+     }
+    },
+    {
+     "i": 2,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 987,
+      "h": 175
+     }
+    },
+    {
+     "i": 3,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 1000,
+      "h": 182
+     }
+    },
+    {
+     "i": 4,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 1013,
+      "h": 190
+     }
+    },
+    {
+     "i": 5,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 1027,
+      "h": 198
+     }
+    },
+    {
+     "i": 6,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 1040,
+      "h": 205
+     }
+    },
+    {
+     "i": 7,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 1053,
+      "h": 213
+     }
+    },
+    {
+     "i": 8,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 1067,
+      "h": 220
+     }
+    },
+    {
+     "i": 9,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 1080,
+      "h": 228
+     }
+    },
+    {
+     "i": 10,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 1093,
+      "h": 235
+     }
+    },
+    {
+     "i": 11,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 1107,
+      "h": 242
+     }
+    },
+    {
+     "i": 12,
+     "group": {
+      "x": 320,
+      "y": 370,
+      "w": 1120,
+      "h": 250
+     }
+    }
+   ],
+   "inside": 7
+  },
+  "wordart.insert": {
+   "tail": [
+    "toolbar.head",
+    "toolbar.search",
+    "toolbar.newSlide.split",
+    "toolbar.newSlide",
+    "toolbar.newSlide.arrow",
+    "toolbar.undo",
+    "toolbar.redo (disabled)",
+    "toolbar.print",
+    "toolbar.paintFormat",
+    "toolbar.zoom",
+    "toolbar.tail",
+    "toolbar.fillColor",
+    "toolbar.borderColor",
+    "toolbar.borderWeight",
+    "toolbar.borderDash (disabled)",
+    "toolbar.font",
+    "toolbar.fontSize",
+    "toolbar.fontSize.minus",
+    "toolbar.fontSize.value",
+    "toolbar.fontSize.plus",
+    "toolbar.bold",
+    "toolbar.italic",
+    "toolbar.underline",
+    "toolbar.textColor",
+    "toolbar.highlightColor",
+    "toolbar.insertLink",
+    "toolbar.insertComment",
+    "toolbar.align",
+    "toolbar.spacing",
+    "toolbar.formatOptions",
+    "toolbar.more",
+    "toolbar.end",
+    "toolbar.pointer",
+    "toolbar.hideMenus"
+   ],
+   "follow": "12 of 12",
+   "size": 176,
+   "step10": {
+    "free": {
+     "x": 400,
+     "y": 390,
+     "w": 1017,
+     "h": 220
+    },
+    "ring": {
+     "x": 390,
+     "y": 380,
+     "w": 1037,
+     "h": 240
+    },
+    "fontSize": 161
+   }
+  },
+  "connector": {
+   "chipE": "Elbow connector",
+   "widths": [
+    400,
+    425,
+    436,
+    450,
+    457,
+    477,
+    488,
+    503,
+    512,
+    525,
+    537,
+    550
+   ],
+   "end": {
+    "end": {
+     "x": 949,
+     "y": 479
+    },
+    "bLeft": {
+     "x": 950,
+     "y": 480
+    }
+   },
+   "pos": {
+    "x": 400,
+    "y": 380,
+    "w": 550,
+    "h": 100,
+    "z": 2
+   }
+  },
+  "show": {
+   "present": true,
+   "table": true,
+   "cells": [
+    "",
+    "",
+    "",
+    "",
+    "Alpha",
+    "Beta",
+    "Gamma",
+    "",
+    ""
+   ],
+   "guides": 0,
+   "editable": 0,
+   "sheetBg": "rgba(0, 0, 0, 0)"
+  },
+  "pdf": {
+   "name": "untitled-20260926-9f39.pdf",
+   "bytes": 220511,
+   "ms": 2154,
+   "pages": "8",
+   "words": [
+    "Alpha true",
+    "Beta true",
+    "Gamma true",
+    "Big words true",
+    "edited true",
+    "North true"
+   ],
+   "tablePage": 4
+  }
+ },
+ "consoleErrors": [
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()",
+  "Failed to load resource: the server responded with a status of 404 ()"
+ ],
+ "teardown": {
+  "trashed": true,
+  "status": 404
+ }
+}

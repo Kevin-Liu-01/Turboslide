@@ -3330,6 +3330,14 @@ async function objectsRound(t, S, h) {
     'select the table; open Format options; read the Table section',
     'Header row, Border, Rows (one Height, Distribute rows), Columns (Distribute columns), Cell (Fill, Border), Merge in that order, each property once, no generated table field below',
     async () => {
+      /* the default view: the rows before turned the switch on for the table's parked controls
+         (tableControlsOn), under which the generated table fields draw below the section and the
+         row's "no generated field" reads false (preview 2, the integrator's walk) */
+      if (t.deck.advanced) {
+        const off = await t.setAdvanced(false);
+        if (off) t.deck.advanced = false;
+        await t.sleep(300);
+      }
       await t.clearAll();
       await t.selectObject(T6);
       if (await t.editing()) {

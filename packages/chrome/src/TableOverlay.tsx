@@ -77,6 +77,15 @@ export const HEAD_GAP = 4;
 export const EDGE_BAND_PX = 12;
 /** The "+" circle's diameter in CSS pixels. */
 export const ADD_PX = 16;
+/**
+ * The reach of a resize square from its centre in CSS px, kept clear by the "+": the corner
+ * squares at the ends of an edge and the middle square (s on the bottom edge, e on the right)
+ * sit on the same edges, and the "+" (z-index 3, above the squares) took the press meant for
+ * the se square, so no resize started (the integrator's walk on the merged tree, the row
+ * tables.resize.rows-share-extra: no readout, the rows unchanged). Within this reach of a square
+ * the "+" is not drawn and the square takes the pointer.
+ */
+export const SQUARE_CLEAR_PX = 14;
 
 /** The grid areas of a table as measured: one box per row (the table's width) and per column (its height), in sheet px. */
 export type TableGrid = { rows: Box[]; columns: Box[] };
@@ -161,8 +170,11 @@ export function edgeAt(
   const right = ring.left + ring.width;
   const bottom = ring.top + ring.height;
   const half = ADD_PX / 2;
+  /* inside the edge's run and clear of its three squares (the two corners, the middle) */
   const inRun = (v: number, from: number, to: number) =>
-    v >= from - EDGE_BAND_PX && v <= to + EDGE_BAND_PX;
+    v >= from + SQUARE_CLEAR_PX &&
+    v <= to - SQUARE_CLEAR_PX &&
+    Math.abs(v - (from + to) / 2) > SQUARE_CLEAR_PX;
   if (Math.abs(x - right) <= EDGE_BAND_PX && inRun(y, ring.top, bottom))
     return { axis: 'column', at: Math.min(bottom - half, Math.max(ring.top + half, y)) };
   if (Math.abs(y - bottom) <= EDGE_BAND_PX && inRun(x, ring.left, right))

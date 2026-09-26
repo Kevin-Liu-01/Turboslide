@@ -230,7 +230,7 @@ export async function run(t) {
   await t.step(
     'tables.insert.grid',
     'Insert > Table, point at 4 by 3, click',
-    'the size words read 4 x 3; a 960 by 320 table with a header row lands',
+    'the size words read 4 x 3; a 960 wide table with a header row lands, its box the height of its three rows (163 at 20 px)',
     async () => {
       const before = await t.objectIds(S);
       await t.openMenu('insert');
@@ -252,7 +252,9 @@ export async function run(t) {
           obj.type === 'table' &&
           /4\s*x\s*3/.test(words ?? '') &&
           t.near(obj.pos.w, 960, 2) &&
-          t.near(obj.pos.h, 320, 2) &&
+          /* the objects round (docs/OBJECTS.md 3.3 item 3): the box fits its rows, 54 per row at 20 px
+             with the rule under each and the hairline above (schema tableBoxHeight: 163 for three) */
+          t.near(obj.pos.h, 163, 2) &&
           b?.columns?.length === 4 &&
           b?.rows?.length === 3 &&
           b?.rows?.[0]?.header === true,
@@ -612,13 +614,14 @@ export async function run(t) {
   await t.step(
     'tables.context.rows',
     'right click cell 1,1 with its session open',
-    'the 16 rows of the default view are listed, the two merge rows among them',
+    'the 17 rows of the default view are listed, the two merge rows and the Header row check among them',
     async () => {
       /* the two merge rows follow their own matrix row tables.cells.merge-unmerge, which carries
          `parks` (docs/RETURN.md section 1 rule 2): the integration re-parked them while no cell
          range existed (build/integrator.md section 2 item 7) and the fix round returned them with
          the Editor's cell range (build/b5.md "Return round fix round"), so the default view's cell
-         menu has 16 rows; the switch is read for the record alone */
+         menu has 16 rows, 17 with the objects round's Header row check (docs/OBJECTS.md 3.3 item 4);
+         the switch is read for the record alone */
       const advanced = await t.advancedOn();
       const on = await openCell(T, 1, 1);
       const info = await t.runInfo(cellRun(T, 1, 1));
@@ -637,6 +640,7 @@ export async function run(t) {
         'format.table.deleteRow',
         'format.table.deleteColumn',
         'format.table.deleteTable',
+        'format.table.headerRow',
         'format.table.distributeRows',
         'format.table.distributeColumns',
         'format.table.mergeCells',
@@ -2855,7 +2859,21 @@ async function objectsRound(t, S, h) {
       let pos1 = null;
       if (grip) {
         const k = await t.kOf();
-        await t.drag(grip, { x: grip.x + 80 * k, y: grip.y + 40 * k }, { steps: 12 });
+        /* the drag with the snap lines suppressed by Cmd during the move (Gestures.tsx freeGesture
+           `suppress`, the product's rule): a plain drag at this position snaps the table's centre
+           to the sheet's plate guide 3 px away (877 for 880; the integrator's reproduction on the
+           objects round's tree), which is the product's snapping and not the move's arithmetic;
+           the row proves the band moves the table by the pointer's travel */
+        await t.moveHuman({ x: grip.x - 30, y: grip.y - 20 }, grip, 6);
+        await t.sleep(80);
+        await page.mouse.down();
+        await t.sleep(100);
+        await page.keyboard.down('Meta');
+        await t.moveHuman(grip, { x: grip.x + 80 * k, y: grip.y + 40 * k }, 12);
+        await t.sleep(120);
+        await page.mouse.up();
+        await page.keyboard.up('Meta');
+        await t.sleep(200);
         await t.settled();
         pos1 = await t
           .pollUntil(
@@ -3014,7 +3032,11 @@ async function objectsRound(t, S, h) {
       const on = await h.openCell(T6, 1, 1);
       if (!on) return { ok: false, observed: 'no cell session' };
       await t.press('End');
-      await t.typeHuman(` ${WORDS}`);
+      /* typed inside the text burst's window (InlineText.tsx TEXT_BURST_MS 100: a pause past it
+         flushes a burst as its own commit, so human speed typing of forty words lands three
+         commits by design; the integrator's walk on the merged tree), so the words, the row's growth
+         and pos.h travel in one commit and one Cmd+Z takes them back together */
+      await page.keyboard.type(` ${WORDS}`, { delay: 25 });
       await t.sleep(200);
       await t.press('Escape');
       await t.settled();

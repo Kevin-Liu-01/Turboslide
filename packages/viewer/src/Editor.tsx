@@ -6640,6 +6640,16 @@ export function Editor({
    * rows are block writes whose result the editor adopts only outside a session). The browser's
    * own menu, with its spelling suggestions, never shows on the stage.
    */
+  /** The run of the sheet under a client point, looking through the overlay's elements (a seam handle, the cell ring). */
+  const runUnderPoint = (el: HTMLElement, clientX: number, clientY: number) => {
+    for (const node of document.elementsFromPoint(clientX, clientY)) {
+      if (!el.contains(node)) continue;
+      const found = resolveRun(node, el);
+      if (found !== null) return found;
+    }
+    return null;
+  };
+
   const onContextMenuEvent = (e: ReactMouseEvent<HTMLDivElement>) => {
     const cb = onContextMenuRef.current;
     const el = body.current;
@@ -6711,7 +6721,18 @@ export function Editor({
     const onOverlay = e.target instanceof Element && e.target.closest('.ts-overlay') !== null;
     const selectedAnchor = onOverlay ? selectedBlockId(selectionRef.current) : null;
     const id = inSheet ? resolveObject(e.target, el, slideNow) : selectedAnchor;
-    const run = resolveRun(e.target, el);
+    /* the selected table's own overlay controls sit over its cells (the column and row seams on
+       the rules, drawn with a cell open too since docs/OBJECTS.md 3.3 item 5; the cell ring and
+       the tools of TableOverlay.tsx): a right click on one is the cell beneath the pointer, so a
+       merged cell whose centre falls on a seam still opens the cell's menu with Unmerge cells
+       (the integrator's walk of the objects round: tables.cells.merge-unmerge read the object's
+       menu, the seam at x 640 under the merged cell's centre) */
+    const overTableTool =
+      onOverlay &&
+      e.target instanceof Element &&
+      e.target.closest('[data-kind="col-seam"], .ts-table-tools, .ts-cell-ring') !== null;
+    const run =
+      resolveRun(e.target, el) ?? (overTableTool ? runUnderPoint(el, e.clientX, e.clientY) : null);
     const element =
       (e.target instanceof Element ? e.target.closest<HTMLElement>('[data-block]') : null) ??
       (id !== null ? el.querySelector<HTMLElement>(`[data-block="${id}"]`) : null) ??

@@ -357,10 +357,24 @@ describe('the "+" at the edges', () => {
 
   it('sits on the right edge at the pointer’s height within the band, on the bottom edge at its x, else nowhere', () => {
     expect(edgeAt(638, 120, ring)).toEqual({ axis: 'column', at: 120 });
-    expect(edgeAt(650, 66, ring)).toEqual({ axis: 'column', at: 72.5 });
+    expect(edgeAt(650, 100, ring)).toEqual({ axis: 'column', at: 100 });
     expect(edgeAt(300, 226, ring)).toEqual({ axis: 'row', at: 300 });
     expect(edgeAt(300, 150, ring)).toBeNull();
     expect(edgeAt(700, 120, ring)).toBeNull();
+  });
+
+  it('keeps clear of the resize squares: the corners and the middle of an edge take the pointer (the integrator\u2019s walk, tables.resize.rows-share-extra)', () => {
+    /* the ne and se corners of the right edge, its e square at the middle (144.5) */
+    expect(edgeAt(650, 66, ring)).toBeNull();
+    expect(edgeAt(640, 220, ring)).toBeNull();
+    expect(edgeAt(638, 150, ring)).toBeNull();
+    /* the sw and se corners of the bottom edge, its s square at the middle (400) */
+    expect(edgeAt(170, 226, ring)).toBeNull();
+    expect(edgeAt(632, 226, ring)).toBeNull();
+    expect(edgeAt(408, 226, ring)).toBeNull();
+    /* just past the reach the "+" is drawn again */
+    expect(edgeAt(638, 80, ring)).toEqual({ axis: 'column', at: 80 });
+    expect(edgeAt(420, 226, ring)).toEqual({ axis: 'row', at: 420 });
   });
 
   it('follows the pointer near the right edge and inserts a column in one commit that grows the box', async () => {

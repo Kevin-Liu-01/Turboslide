@@ -370,9 +370,10 @@ export async function run(t) {
       });
       if (results[2].wrote) await undo();
       /* Fill color: the letters' colour */
+      /* a token that is not the letters' default (ink), so the drawn colour changes with the write */
       const fill = await pick(
         'toolbar.fillColor',
-        (id) => /^toolbar\.fillColor\.[a-z]+$/.test(id) && !/plate|none|hex|menu|kit/.test(id),
+        (id) => /^toolbar\.fillColor\.[a-z]+$/.test(id) && !/plate|none|hex|menu|kit|ink$/.test(id),
       );
       const b4 = await block(W);
       const d4 = await drawn(W);

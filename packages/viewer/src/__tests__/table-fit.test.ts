@@ -7,6 +7,7 @@ import {
   readTableRows,
   rowsMeasureFromFacts,
   tableGrowMutation,
+  tableRowsAddedMutation,
   tableRowsHeight,
   tableRowsNaturalHeight,
 } from '../table-fit';
@@ -114,6 +115,24 @@ describe('tableRowsHeight, tableRowsNaturalHeight and tableGrowMutation', () => 
     ).toBeNull();
     expect(tableGrowMutation('s1', table, null)).toBeNull();
     expect(tableGrowMutation('s1', emptyTable('t', 2, 3), measure)).toBeNull();
+  });
+});
+
+describe('tableRowsAddedMutation', () => {
+  it('writes pos.h up by the rows a command added, to travel with the /rows write', () => {
+    const table = { ...emptyTable('t', 2, 3), pos: { x: 0, y: 0, w: 960, h: 163, z: 1 } };
+    const rows = [...table.rows, { cells: ['', ''] }];
+    expect(tableRowsAddedMutation('s1', table, rows)).toEqual({
+      op: 'block.set',
+      slideId: 's1',
+      blockId: 't',
+      path: '/pos/h',
+      value: 217,
+    });
+    /* a removal, the same count and a table with no box write nothing */
+    expect(tableRowsAddedMutation('s1', table, table.rows.slice(0, 2))).toBeNull();
+    expect(tableRowsAddedMutation('s1', table, table.rows)).toBeNull();
+    expect(tableRowsAddedMutation('s1', emptyTable('t', 2, 3), rows)).toBeNull();
   });
 });
 

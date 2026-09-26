@@ -9,9 +9,10 @@
 // (table-seam.ts `tableSeamDrag`) and after a burst or a command that touched a table, where
 // `tableGrowMutation` writes `pos.h` up when the rows are taller than the box (the table's
 // autofit, the rule text blocks have as `grow`; text-fit.ts `growMutation`), so the ring meets
-// the last rule.
-import type { TableBlock, TableRowsMeasure } from '@turboslide/schema/blocks/table';
-import { tableGrownHeight } from '@turboslide/schema/blocks/table';
+// the last rule. `tableRowsAddedMutation` is the pure sibling for a command that adds rows: the
+// box grows by the rows' tracks in the same commit, with no stage to measure on.
+import type { TableBlock, TableRow, TableRowsMeasure } from '@turboslide/schema/blocks/table';
+import { tableGrownByRows, tableGrownHeight } from '@turboslide/schema/blocks/table';
 import type { Mutation } from '@turboslide/schema/mutations';
 
 /** One row as read from the stage, in CSS px: its box and, per drawn cell, the text's extent and the frame around it. */
@@ -159,6 +160,24 @@ export function tableGrowMutation(
   measure: TableRowsMeasure | null,
 ): Mutation | null {
   const height = tableGrownHeight(block, measure === null ? null : tableRowsHeight(measure));
+  if (height === null) return null;
+  return { op: 'block.set', slideId, blockId: block.id, path: '/pos/h', value: height };
+}
+
+/**
+ * The `pos.h` write of a command that added rows (Insert row above or below from the cell's menu,
+ * Format > Table, the panel or a row head, Tab from the last cell, a grid pasted past the last
+ * row): the box grown by the added rows' tracks through the schema's `tableGrownByRows`, to
+ * travel in the same commit as the `/rows` write so the ring meets the last rule and one Cmd+Z
+ * takes both back (VERIFICATION.md "Objects round, pass 1" finding 1). `rows` are the rows the
+ * write lands. Null when nothing grows: a removal, the same count, a table with no box.
+ */
+export function tableRowsAddedMutation(
+  slideId: string,
+  block: TableBlock & { pos?: { h: number } },
+  rows: ReadonlyArray<TableRow>,
+): Mutation | null {
+  const height = tableGrownByRows(block, rows);
   if (height === null) return null;
   return { op: 'block.set', slideId, blockId: block.id, path: '/pos/h', value: height };
 }

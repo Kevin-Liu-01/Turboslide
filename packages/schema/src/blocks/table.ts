@@ -390,6 +390,30 @@ export function tableGrownHeight(
   return Math.ceil(rowsHeight);
 }
 
+/**
+ * The `pos.h` a rows edit leaves the box at so the rows it added draw inside the ring
+ * (VERIFICATION.md "Objects round, pass 1" finding 1; docs/OBJECTS.md 3.3 item 3 with the fix
+ * round's proposal in build/b2.md): the box grows by the track of every row the edit added (its
+ * set height, else the empty row's pitch at the table's size, 54 at 20 px), the rule the edge
+ * "+" applies with the last row's drawn height (packages/chrome table-tools.ts `edgeInsert`) and
+ * Google's (a row inserted grows the table by its height), so the rows below keep their drawn
+ * heights and a box with slack keeps it. A removed row leaves the box, which the rows share.
+ * Null when no row was added or the table has no box; whole px otherwise. The reducer level
+ * rule, since the menu's command reaches the store with no stage to measure on.
+ */
+export function tableGrownByRows(
+  block: Pick<TableFields, 'rows' | 'size' | 'border'> & { pos?: { h: number } },
+  rows: ReadonlyArray<TableRow>,
+): number | null {
+  const pos = block.pos;
+  if (pos === undefined || rows.length <= block.rows.length) return null;
+  const tracks = (list: ReadonlyArray<TableRow>): number =>
+    list.reduce((sum, row) => sum + tableRowTrack(block, row), 0);
+  const grow = tracks(rows) - tracks(block.rows);
+  if (!(grow > 0)) return null;
+  return Math.ceil(pos.h + grow);
+}
+
 /** What a row seam drag reads from the stage: every row's drawn pitch and its natural height, in sheet px. */
 export type TableRowsMeasure = {
   /** the hairline above the first row */

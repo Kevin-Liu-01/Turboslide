@@ -21,6 +21,7 @@ import {
   TABLE_MIN_COLUMN_PX,
   rowsAfterSeamDrag,
   tableBoxHeight,
+  tableGrownByRows,
   tableGrownHeight,
   tableRowHeight,
   tableRowTrack,
@@ -350,6 +351,29 @@ describe('the rows and the box', () => {
     expect(tableGrownHeight(table, 120)).toBeNull();
     expect(tableGrownHeight(table, null)).toBeNull();
     expect(tableGrownHeight(emptyTable('t', 2, 3), 400)).toBeNull();
+  });
+
+  it('grows the box by the rows a command added, and leaves it for a removal or a table with no box', () => {
+    const table = { ...emptyTable('t', 2, 3), pos: { x: 0, y: 0, w: 960, h: 163, z: 1 } };
+    const four = [...table.rows, { cells: ['', ''] }];
+    /* Insert row below on the inserted 3 by 3: 163 to 217, the edge "+"'s number */
+    expect(tableGrownByRows(table, four)).toBe(217);
+    /* a box with slack keeps it: the row adds its pitch, so the rows below stay where they drew */
+    expect(tableGrownByRows({ ...table, pos: { ...table.pos, h: 320 } }, four)).toBe(374);
+    /* two rows at once; a set height on the rows that stand counts as their track */
+    expect(tableGrownByRows(table, [...four, { cells: ['', ''] }])).toBe(271);
+    const sized = {
+      ...table,
+      rows: table.rows.map((row) => ({ ...row, height: 100 })),
+      pos: { ...table.pos, h: 301 },
+    };
+    expect(tableGrownByRows(sized, [...sized.rows, { cells: ['', ''] }])).toBe(355);
+    /* the ladder's smaller sizes give whole px (48.2 a row at 16) */
+    expect(tableGrownByRows({ ...table, size: 16 }, four)).toBe(212);
+    /* a removed row leaves the box, which the rows share; the same count writes nothing */
+    expect(tableGrownByRows(table, table.rows.slice(0, 2))).toBeNull();
+    expect(tableGrownByRows(table, table.rows)).toBeNull();
+    expect(tableGrownByRows(emptyTable('t', 2, 3), four)).toBeNull();
   });
 
   it('moves a row seam: every row keeps its drawn height, the moved row takes the drag, the box follows', () => {

@@ -10,7 +10,7 @@
 // flatten|native --theme light,dark|both --fonts exact|standard|embed [--embed-fonts] [--headings
 // raster] [--raster-scale auto|2|3] [--picture-scale 2|3] [--exclude-share-alike]
 // [--baseline-target libreoffice|none] [--tables auto|table|rows] [--include-skipped]
-// [--include-notes] [--no-jpeg] [--verify] --out <dir>`; the verify pass runs inside exportPptx so
+// [--include-notes] [--no-jpeg] [--no-svg-vector] [--verify] --out <dir>`; the verify pass runs inside exportPptx so
 // a table that misses the per cell budget is rewritten as ruled rows (SPEC 7.3). PDF:
 // `[--appearance light|dark] [--include-skipped] [--verify] --out <dir>` through exportPdf, the
 // raster gate of SPEC 7.6 where poppler exists. TXT: export.text on stdout. JPEG: the selected
@@ -224,6 +224,8 @@ async function exportPptxCommand(
   const tableMode: TableMode = tablesFlag;
   const verify = flagBoolean(ctx.args, 'verify');
   const noJpeg = flagBoolean(ctx.args, 'no-jpeg');
+  // the svgBlip switch (docs/VECTOR.md 4.6): the PNG blip alone for a viewer that reads no vector
+  const noSvgVector = flagBoolean(ctx.args, 'no-svg-vector');
   const startedAt = Date.now();
 
   ctx.out.human(
@@ -244,6 +246,7 @@ async function exportPptxCommand(
     pictureScale,
     tableMode,
     ...(noJpeg ? { noJpeg: true } : {}),
+    ...(noSvgVector ? { svgVector: false } : {}),
     ...(includeSkipped ? { includeSkipped: true } : {}),
     ...(includeNotes ? { includeNotes: true } : {}),
     slideIds: ids,

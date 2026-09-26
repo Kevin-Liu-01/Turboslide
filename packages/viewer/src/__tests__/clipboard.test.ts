@@ -12,7 +12,10 @@ import {
   clipboardKindOf,
   createClipboardStore,
   decodeClipboard,
+  decodeClipboardHtml,
   encodeClipboard,
+  encodeClipboardHtml,
+  envelopeOf,
   freeId,
   insertSlotFor,
   paintFormatOf,
@@ -20,6 +23,9 @@ import {
   PASTE_OFFSET_PX,
   pastedBlockInserts,
   pastedSlideInserts,
+  svgFileOf,
+  svgMarkupOf,
+  svgMarkupOfText,
 } from '../clipboard';
 import type { ClipboardPayload } from '../clipboard';
 
@@ -51,6 +57,118 @@ describe('the envelope', () => {
     expect(clipboardKindOf({ kind: 'blocks', deckId: 'd', slideId: 's', blocks: [] })).toBe(
       'blocks',
     );
+  });
+});
+
+/** A DataTransfer stand in over its text types. */
+function transferOf(types: Record<string, string>): DataTransfer {
+  return { getData: (type: string) => types[type] ?? '' } as unknown as DataTransfer;
+}
+
+const FIGMA_SVG =
+  '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">\n<rect width="24" height="24" fill="#D9D9D9"/>\n</svg>\n';
+const PLAIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><circle r="4"/></svg>';
+
+describe('the svg forms (docs/VECTOR.md 4.3, 4.5)', () => {
+  it('reads svg markup off text/plain with a prolog, a BOM or a comment, and text/html behind Chrome’s meta prefix', () => {
+    expect(svgMarkupOf(transferOf({ 'text/plain': FIGMA_SVG }))).toBe(FIGMA_SVG.trim());
+    expect(svgMarkupOf(transferOf({ 'text/plain': PLAIN_SVG }))).toBe(PLAIN_SVG);
+    expect(svgMarkupOfText(`\uFEFF  ${PLAIN_SVG}\n`)).toBe(PLAIN_SVG);
+    expect(svgMarkupOfText(`<!-- exported -->\n<!DOCTYPE svg>\n${PLAIN_SVG}`)).toBe(
+      `<!-- exported -->\n<!DOCTYPE svg>\n${PLAIN_SVG}`,
+    );
+    expect(svgMarkupOf(transferOf({ 'text/html': `<meta charset="utf-8">${PLAIN_SVG}` }))).toBe(
+      PLAIN_SVG,
+    );
+    expect(
+      svgMarkupOf(
+        transferOf({ 'text/html': `<meta charset='utf-8'>\n<meta name="x">${PLAIN_SVG}` }),
+      ),
+    ).toBe(PLAIN_SVG);
+    /* the plain text wins over the html when both hold markup */
+    expect(svgMarkupOf(transferOf({ 'text/plain': PLAIN_SVG, 'text/html': FIGMA_SVG }))).toBe(
+      PLAIN_SVG,
+    );
+  });
+
+  it('answers null for a text that mentions svg, an unfinished document, the envelope, and an empty transfer', () => {
+    expect(svgMarkupOfText('hello <svg>')).toBeNull();
+    expect(svgMarkupOfText('hello <svg></svg>')).toBeNull();
+    expect(svgMarkupOfText('<svg xmlns="http://www.w3.org/2000/svg"><rect/>')).toBeNull();
+    expect(svgMarkupOfText(`${PLAIN_SVG} and then some`)).toBeNull();
+    expect(svgMarkupOfText('<svgfoo></svgfoo>')).toBeNull();
+    expect(svgMarkupOfText(encodeClipboard({ kind: 'text', text: PLAIN_SVG }))).toBeNull();
+    expect(svgMarkupOf(transferOf({ 'text/plain': 'hello' }))).toBeNull();
+    expect(svgMarkupOf(transferOf({}))).toBeNull();
+    expect(svgMarkupOf(null)).toBeNull();
+    /* a text/html page that merely embeds an svg is a page, not an svg */
+    expect(svgMarkupOf(transferOf({ 'text/html': `<div>${PLAIN_SVG}</div>` }))).toBeNull();
+    const file = svgFileOf(PLAIN_SVG);
+    expect(file.type).toBe('image/svg+xml');
+    expect(file.name).toBe('pasted.svg');
+    expect(file.size).toBe(PLAIN_SVG.length);
+  });
+
+  it('writes the envelope as a text/html comment before the markup and reads it back, with a meta prefix too', () => {
+    const payload: ClipboardPayload = {
+      kind: 'blocks',
+      deckId: 'fixture',
+      slideId: 'free',
+      blocks: [{ id: 'shot', type: 'shot', asset: 'diagram' } as unknown as Block],
+    };
+    const html = encodeClipboardHtml(payload, PLAIN_SVG);
+    expect(html.startsWith('<!--turboslide:v1:')).toBe(true);
+    expect(html.endsWith(`-->${PLAIN_SVG}`)).toBe(true);
+    expect(decodeClipboardHtml(html)).toEqual(payload);
+    expect(decodeClipboardHtml(`<meta charset="utf-8">${html}`)).toEqual(payload);
+    /* a double hyphen inside the payload cannot end the comment early */
+    const dashed: ClipboardPayload = { kind: 'text', text: 'a -- b --> c' };
+    const dashedHtml = encodeClipboardHtml(dashed);
+    expect(dashedHtml.indexOf('-->')).toBe(dashedHtml.length - 3);
+    expect(decodeClipboardHtml(dashedHtml)).toEqual(dashed);
+    expect(decodeClipboardHtml(PLAIN_SVG)).toBeNull();
+    expect(decodeClipboardHtml('<!--turboslide:v1:{not json-->')).toBeNull();
+    expect(decodeClipboardHtml('')).toBeNull();
+    /* the paste reads the plain envelope first, then the html comment, else nothing */
+    expect(envelopeOf(transferOf({ 'text/plain': encodeClipboard(payload) }))).toEqual(payload);
+    expect(envelopeOf(transferOf({ 'text/plain': PLAIN_SVG, 'text/html': html }))).toEqual(payload);
+    expect(envelopeOf(transferOf({ 'text/plain': PLAIN_SVG }))).toBeNull();
+    expect(
+      envelopeOf(transferOf({ 'text/plain': 'hello', 'text/html': '<b>hello</b>' })),
+    ).toBeNull();
+    expect(envelopeOf(null)).toBeNull();
+  });
+
+  it('the store’s note keeps the in page payload without a system write, and read answers it while the markup stands', async () => {
+    const written: string[] = [];
+    let systemText = '';
+    const store = createClipboardStore({
+      writeText: async (text) => {
+        written.push(text);
+        systemText = text;
+      },
+      readText: async () => systemText,
+    });
+    const payload: ClipboardPayload = {
+      kind: 'blocks',
+      deckId: 'fixture',
+      slideId: 'free',
+      blocks: [{ id: 'shot', type: 'shot', asset: 'diagram' } as unknown as Block],
+    };
+    /* the copy event itself put the markup on the system clipboard */
+    systemText = PLAIN_SVG;
+    store.note(payload, PLAIN_SVG);
+    expect(written).toEqual([]);
+    expect(store.last()).toEqual(payload);
+    expect(store.kind()).toBe('blocks');
+    expect(await store.read()).toEqual(payload);
+    /* another program's copy replaces the markup: the system text wins again */
+    systemText = 'elsewhere';
+    expect(await store.read()).toEqual({ kind: 'text', text: 'elsewhere' });
+    /* a plain write clears the note */
+    await store.write({ kind: 'text', text: 'x' });
+    systemText = PLAIN_SVG;
+    expect(await store.read()).toEqual({ kind: 'text', text: PLAIN_SVG });
   });
 });
 

@@ -1447,8 +1447,19 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         for (const entry of response.between ?? []) take(entry);
         for (const entry of response.entries) take(entry);
         if (record !== null) posted = posted.filter((row) => row !== record);
+        let refused = 0;
         for (const rejected of response.rejected) {
           const op = pending.find((row) => row.opId === rejected.opId);
+          // an op acknowledged already (its record's echo on the stream while the POST was in
+          // flight, or an entry of this answer's `between` taken a moment ago) landed: the
+          // refusal is the reducer's word on a second placement of it and makes no card (the
+          // vector round fix round; VERIFICATION.md "Vector round, pass 1" finding 1)
+          if (
+            op === undefined &&
+            (settledOps.has(rejected.opId) || retained.some((row) => row.opId === rejected.opId))
+          )
+            continue;
+          refused += 1;
           pending = pending.filter((row) => row.opId !== rejected.opId);
           rebasePast(op);
           op?.settle?.({ rejected });
@@ -1460,7 +1471,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
           rejects.push(notice);
           options.onReject?.(notice);
         }
-        if (response.rejected.length > 0) {
+        if (refused > 0) {
           const folded = fold();
           emitChange(folded.document, 'all', 'reject');
         }

@@ -39,7 +39,9 @@ export type PartUpload = { from: string; to: string };
  * `parts/` prefix, plus the uploads that put the files there. The sheet shot goes under
  * `sheets/<theme>/`, the rasters under `rasters/<theme>/` (their names carry the slide number,
  * the slide id, the raster id and the scale, unique within a theme), the picture under
- * `pictures/<theme>/` whether it is a regenerated two-tone twin or the deck's own twin file.
+ * `pictures/<theme>/` whether it is a regenerated two-tone twin or the deck's own twin file, and
+ * the vector file of an svg picture under `vectors/<theme>/` (docs/VECTOR.md 4.6), so a merge on
+ * another instance than the batch's finds it.
  */
 export function relocateScene(scene: Scene): { scene: Scene; uploads: PartUpload[] } {
   const uploads = new Map<string, string>();
@@ -53,7 +55,12 @@ export function relocateScene(scene: Scene): { scene: Scene; uploads: PartUpload
   const pictureFile = place(scene.pictureFile, 'pictures');
   const rasters = scene.rasters.map((raster) => {
     const file = place(raster.file, 'rasters');
-    return file === undefined ? raster : { ...raster, file };
+    const svg = place(raster.svg, 'vectors');
+    return {
+      ...raster,
+      ...(file === undefined ? {} : { file }),
+      ...(svg === undefined ? {} : { svg }),
+    };
   });
   const out: Scene = {
     ...scene,
@@ -76,7 +83,12 @@ export function localizeScene(scene: Scene, partsDir: string): Scene {
     ...scene,
     rasters: scene.rasters.map((raster) => {
       const file = local(raster.file);
-      return file === undefined ? raster : { ...raster, file };
+      const svg = local(raster.svg);
+      return {
+        ...raster,
+        ...(file === undefined ? {} : { file }),
+        ...(svg === undefined ? {} : { svg }),
+      };
     }),
     ...(sheetImage === undefined ? {} : { sheetImage }),
     ...(pictureFile === undefined ? {} : { pictureFile }),
@@ -231,6 +243,7 @@ export async function mergeParts(
         baseline: plan.input.baseline ?? DEFAULT_BASELINE,
         ...(plan.input.embedFonts === true ? { embedFonts: true } : {}),
         ...(plan.input.includeNotes === true ? { includeNotes: true } : {}),
+        ...(plan.input.svgVector === false ? { svgVector: false } : {}),
         tableMode: 'auto',
         tableFallback: new Set(),
         wordmarkPng: existsSync(wordmarkPath) ? readFileSync(wordmarkPath) : undefined,

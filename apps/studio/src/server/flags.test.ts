@@ -11,9 +11,7 @@ import {
   FLAG_OFF_MEANS,
   FLAG_REFUSALS,
   LOGO_UPSTREAM_ENV,
-  SVG_RASTER_ENV,
   logoUpstreamMode,
-  svgRasterOn,
   STUDIO_FLAG_DEFAULTS,
   STUDIO_FLAG_NAMES,
   FlagOffError,
@@ -199,13 +197,9 @@ describe('the features round variables', () => {
     }
   });
 
-  it('reads TURBOSLIDE_SVG_RASTER as off unless it says 1, true or on', () => {
-    expect(SVG_RASTER_ENV).toBe('TURBOSLIDE_SVG_RASTER');
-    expect(svgRasterOn({})).toBe(false);
-    expect(svgRasterOn({ [SVG_RASTER_ENV]: '0' })).toBe(false);
-    expect(svgRasterOn({ [SVG_RASTER_ENV]: 'off' })).toBe(false);
-    expect(svgRasterOn({ [SVG_RASTER_ENV]: '1' })).toBe(true);
-    expect(svgRasterOn({ [SVG_RASTER_ENV]: 'true' })).toBe(true);
-    expect(svgRasterOn({ [SVG_RASTER_ENV]: ' ON ' })).toBe(true);
+  it('no longer reads TURBOSLIDE_SVG_RASTER: the svg branch runs by default (docs/VECTOR.md 4.7)', async () => {
+    const flags = (await import('./flags')) as Record<string, unknown>;
+    expect(flags['SVG_RASTER_ENV']).toBeUndefined();
+    expect(flags['svgRasterOn']).toBeUndefined();
   });
 });

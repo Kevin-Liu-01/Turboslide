@@ -12,6 +12,7 @@ import { decodeImage } from '@turboslide/effects/io';
 import { encodePng1 } from '@turboslide/effects/png1';
 import { toGray } from '@turboslide/effects/tone';
 import type { Asset } from '@turboslide/schema/assets';
+import { vectorOf } from '@turboslide/schema/assets';
 import { inlineRuleFor } from '@turboslide/render/standalone';
 
 const MIME: Record<string, string> = {
@@ -115,7 +116,11 @@ export async function inlineAssetFile(
   return { path: twinPath, rule, bytes: uri.length, uri };
 }
 
-/** Every twin of every asset as a data URI, keyed by the twin path renderStandalone looks up. */
+/**
+ * Every twin of every asset as a data URI, keyed by the twin path renderStandalone looks up, and
+ * since the vector round the vector file of an svg asset beside them (docs/VECTOR.md 4.6: the
+ * standalone page's `<img src>` is the vector file the resolver writes, inlined as image/svg+xml).
+ */
 export async function inlineAssets(
   deckDir: string,
   assets: Record<string, Asset>,
@@ -130,7 +135,14 @@ export async function inlineAssets(
   for (const asset of Object.values(assets)) {
     const twins =
       'neutral' in asset.twins ? [asset.twins.neutral] : [asset.twins.light, asset.twins.dark];
-    for (const twin of new Set(twins)) {
+    const vector = vectorOf(asset);
+    const vectors =
+      vector === undefined
+        ? []
+        : 'neutral' in vector
+          ? [vector.neutral]
+          : [vector.light, vector.dark];
+    for (const twin of new Set([...twins, ...vectors])) {
       if (uris[twin]) continue;
       try {
         const item = await inlineAssetFile(deckDir, asset, twin);

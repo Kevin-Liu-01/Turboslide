@@ -79,6 +79,8 @@ export type ExportPptxOptions = {
   pictureScale?: PictureScale;
   /** Skip the JPEG candidate of the flatten page raster policy. */
   noJpeg?: boolean;
+  /** Write the svgBlip beside the PNG blip of every svg picture (docs/VECTOR.md 4.6); default true. */
+  svgVector?: boolean;
   /** Write `<deckId>-both.zip` when both themes are exported; default true. */
   zip?: boolean;
   /** A subset of the play list, in deck order; default every slide of it. */
@@ -222,6 +224,7 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
         baseline: options.baseline ?? DEFAULT_BASELINE,
         ...(options.embedFonts === true ? { embedFonts: true } : {}),
         ...(options.noJpeg ? { noJpeg: true } : {}),
+        ...(options.svgVector === false ? { svgVector: false } : {}),
         ...(options.includeNotes === true ? { includeNotes: true } : {}),
         tableMode: options.tableMode ?? 'auto',
         tableFallback: fallback,

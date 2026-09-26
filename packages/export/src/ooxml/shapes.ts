@@ -5,8 +5,14 @@
 // columns of a text box as `numCol` and `spcCol` on its `a:bodyPr`, and an attached connector
 // rewritten from the `p:sp` pptxgenjs wrote to a `p:cxnSp` whose `p:nvCxnSpPr` carries `a:stCxn`
 // and `a:endCxn` with the target shape's id and connection site, so PowerPoint keeps the
-// attachment and moves the connector with the shape. Every function takes and returns the slide
-// part's XML; a name the part does not hold changes nothing and the count says so.
+// attachment and moves the connector with the shape. Since the vector round (docs/VECTOR.md 2.5)
+// an end is attached only when its site index is one the target's preset lists: a rectangle
+// offers eight sites in the product (the ECMA four then four corners) and the file has an index
+// for the first four alone, so an end on a corner is dropped and the connector keeps its drawn
+// ends. Every function takes and returns the slide part's XML; a name the part does not hold
+// changes nothing and the count says so.
+import { presetOf, shapeAdjustDefaults, sites } from '@turboslide/schema/shapes';
+
 import { listShapes } from './groups.ts';
 
 function encodeEntities(value: string): string {
@@ -90,28 +96,58 @@ export type ConnectorEnds = {
 };
 
 /**
+ * The connection sites a preset lists in the file (its ECMA `cxnLst`), which `stCxn` and `endCxn`
+ * index (VECTOR.md 2.5): a rectangle's four (the product appends four corner sites the file has no
+ * index for, schema shapes.ts `rectSites`), else the preset's own list as `sites` answers it.
+ * Undefined for a geometry that is not a preset (a custom geometry, a graphic frame), which keeps
+ * the index as given.
+ */
+export function presetSiteCount(prst: string): number | undefined {
+  if (prst === 'rect') return 4;
+  if (presetOf(prst) === undefined) return undefined;
+  return sites(prst, 100, 100, shapeAdjustDefaults(prst)).length;
+}
+
+export type ConnectorResult = {
+  xml: string;
+  written: boolean;
+  /** The ends whose site index the target's preset does not list, left unattached. */
+  dropped: ('start' | 'end')[];
+};
+
+/**
  * Rewrites the named `p:sp` as a `p:cxnSp` attached to its targets (SPEC-2 2.4.7): the
  * `p:nvSpPr` becomes `p:nvCxnSpPr` with `a:stCxn` and `a:endCxn` naming the target shapes' ids and
  * sites, the `p:spPr` stays, and a text body (a connector holds none) is dropped. A target the
- * part does not hold leaves that end unattached. Returns the XML and whether the shape became a
- * connector.
+ * part does not hold leaves that end unattached, and so does a site index at or past the
+ * target's preset site count (VECTOR.md 2.5), which `dropped` names. Returns the XML and whether
+ * the shape became a connector.
  */
-export function toConnector(
-  xml: string,
-  name: string,
-  ends: ConnectorEnds,
-): { xml: string; written: boolean } {
+export function toConnector(xml: string, name: string, ends: ConnectorEnds): ConnectorResult {
   const shape = findShape(xml, name);
-  if (!shape || !shape.xml.startsWith('<p:sp>')) return { xml, written: false };
-  const idOf = (target: string | undefined): number | undefined => {
-    if (target === undefined) return undefined;
+  if (!shape || !shape.xml.startsWith('<p:sp>')) return { xml, written: false, dropped: [] };
+  const dropped: ('start' | 'end')[] = [];
+  const idOf = (
+    which: 'start' | 'end',
+    end: { name: string; site: number } | undefined,
+  ): number | undefined => {
+    if (end === undefined) return undefined;
     // the target's own shape, whatever group suffix its name carries
-    const found = listShapes(xml).find((s) => s.name === target || s.name.startsWith(`${target}@`));
-    return found?.id;
+    const found = listShapes(xml).find(
+      (s) => s.name === end.name || s.name.startsWith(`${end.name}@`),
+    );
+    if (found === undefined) return undefined;
+    const prst = /<a:prstGeom prst="([^"]*)"/.exec(found.xml)?.[1];
+    const bound = prst === undefined ? undefined : presetSiteCount(prst);
+    if (bound !== undefined && !(end.site < bound)) {
+      dropped.push(which);
+      return undefined;
+    }
+    return found.id;
   };
-  const startId = idOf(ends.start?.name);
-  const endId = idOf(ends.end?.name);
-  if (startId === undefined && endId === undefined) return { xml, written: false };
+  const startId = idOf('start', ends.start);
+  const endId = idOf('end', ends.end);
+  if (startId === undefined && endId === undefined) return { xml, written: false, dropped };
   const cxn =
     (startId !== undefined && ends.start
       ? `<a:stCxn id="${startId}" idx="${ends.start.site}"/>`
@@ -128,7 +164,7 @@ export function toConnector(
     );
   // a connector carries no text body
   next = next.replace(/<p:txBody>[\s\S]*?<\/p:txBody>/, '');
-  return { xml: replaceAt(xml, shape.start, shape.end, next), written: true };
+  return { xml: replaceAt(xml, shape.start, shape.end, next), written: true, dropped };
 }
 
 /**

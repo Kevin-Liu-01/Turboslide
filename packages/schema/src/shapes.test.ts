@@ -1,10 +1,10 @@
 // The shape presets (gslides-parity SPEC-2 2.3, 11.5 shapes.test.ts): every preset has a label, a
 // category and a prstGeom that is a name in the committed ECMA definitions file (ST_ShapeType, not
-// the pptxgenjs enum, 0.47); the 135 rows in Google's four categories; the legacy ids map; the
-// three kept presets of the focus round (docs/FOCUS.md section 4) answer their own path and text
-// rectangle while every other preset answers the box and the whole box, and every preset eight
-// sites, at three sizes; lineEndPath for the ten decorations; the dashes and the pptxgenjs names.
-// The interpreter's tests join in shapes/geometry.test.ts when it lands.
+// the pptxgenjs enum, 0.47); the 135 rows in Google's four categories; the legacy ids map; every
+// preset answers the interpreter's path, its ECMA text rectangle and its own sites at three sizes
+// (docs/VECTOR.md 2.2), the three paths of ship one byte for byte, `rect` alone eight sites; a
+// line kind and an unknown kind the box; lineEndPath for the ten decorations; the dashes and the
+// pptxgenjs names. The interpreter's own tests are shapes/geometry.test.ts.
 import { describe, expect, it } from 'vitest';
 
 import { SHAPE_KINDS } from './blocks.ts';
@@ -12,7 +12,6 @@ import {
   CONNECTOR_PRST,
   DASHES,
   DASH_PPTX,
-  DRAWN_PRESET_IDS,
   LEGACY_PRESETS,
   LEGACY_SHAPE_IDS,
   LINE_ENDS,
@@ -24,19 +23,20 @@ import {
   dashArray,
   isClosedShapeKind,
   isConnectorKind,
-  isDrawnPreset,
   isLineKind,
   lineEndFilled,
   lineEndPath,
   presetOf,
-  roundRectRadius,
+  rectSites,
   shapeAdjustDefaults,
+  shapeGeometry,
   shapeGuides,
   shapePath,
   sites,
   textInset,
 } from './shapes.ts';
 import { PRESET_DEFINITIONS, PRESET_DEFINITIONS_SHA256 } from './shapes/definitions.ts';
+import { presetGeometry } from './shapes/geometry.ts';
 
 describe('the preset table', () => {
   it('holds 135 presets in Google’s four categories, each with a label and a prstGeom the definitions file names', () => {
@@ -112,52 +112,68 @@ describe('the geometry of the presets', () => {
     [200, 100],
     [400, 400],
   ];
+  const callouts = [
+    'wedgeRectCallout',
+    'wedgeRoundRectCallout',
+    'wedgeEllipseCallout',
+    'cloudCallout',
+  ];
 
-  it('answers the whole box as the text inset and eight sites at three sizes for every preset, and the box as the path outside the kept curves', () => {
+  it('answers the interpreter’s path, its text rectangle inside the box and its own sites at three sizes for every preset', () => {
     for (const row of SHAPE_PRESETS) {
+      const defaults = shapeAdjustDefaults(row.id);
       for (const [w, h] of sizes) {
-        const path = shapePath(row.id, w, h, shapeAdjustDefaults(row.id));
+        const geometry = presetGeometry(row.prstGeom, w, h, defaults);
+        const path = shapePath(row.id, w, h, defaults);
         expect(path, row.id).toMatch(/^M/);
-        expect(path.endsWith('Z'), row.id).toBe(true);
-        expect(textInset(row.id, w, h), row.id).toEqual({ x: 0, y: 0, w, h });
-        if (row.id !== 'roundRect' && row.id !== 'ellipse') {
-          expect(path, row.id).toBe(`M0,0 H${w} V${h} H0 Z`);
-        }
-        const points = sites(row.id, w, h);
-        expect(points).toHaveLength(8);
+        expect(path, row.id).toBe(geometry.paths.map((p) => p.d).join(' '));
+        const inset = textInset(row.id, w, h, defaults);
+        expect(inset, row.id).toEqual(geometry.textRect);
+        expect(inset.x, row.id).toBeGreaterThanOrEqual(-1);
+        expect(inset.y, row.id).toBeGreaterThanOrEqual(-1);
+        expect(inset.x + inset.w, row.id).toBeLessThanOrEqual(w + 1);
+        expect(inset.y + inset.h, row.id).toBeLessThanOrEqual(h + 1);
+        const points = sites(row.id, w, h, defaults);
+        const listed = PRESET_DEFINITIONS[row.prstGeom]?.cxnLst.length ?? -1;
+        expect(points, row.id).toHaveLength(row.id === 'rect' ? listed + 4 : listed);
         for (const point of points) {
-          expect(point.x).toBeGreaterThanOrEqual(0);
-          expect(point.x).toBeLessThanOrEqual(w);
-          expect(point.y).toBeGreaterThanOrEqual(0);
-          expect(point.y).toBeLessThanOrEqual(h);
+          expect(point.x, row.id).toBeGreaterThanOrEqual(-1);
+          expect(point.x, row.id).toBeLessThanOrEqual(w + 1);
+          expect(point.y, row.id).toBeGreaterThanOrEqual(-1);
+          /* a callout's pointer site sits on its tip, below the box at the defaults */
+          expect(point.y, row.id).toBeLessThanOrEqual(
+            callouts.includes(row.id) ? h * 1.125 + 1 : h + 1,
+          );
         }
+        expect(shapeGeometry(row.id, w, h, defaults).sites, row.id).toEqual(points);
       }
     }
   });
 
-  it('names the three kept presets of docs/FOCUS.md section 4 and reads a legacy id through its preset', () => {
-    expect(DRAWN_PRESET_IDS).toEqual(['rect', 'roundRect', 'ellipse']);
-    for (const id of DRAWN_PRESET_IDS) expect(isDrawnPreset(id), id).toBe(true);
-    expect(isDrawnPreset('rounded')).toBe(true);
-    expect(isDrawnPreset('rectangle')).toBe(true);
-    expect(isDrawnPreset('hexagon')).toBe(false);
-    expect(isDrawnPreset('rightArrow')).toBe(false);
-    expect(isDrawnPreset('line')).toBe(false);
+  it('reads a legacy id through its preset and answers the whole geometry', () => {
+    expect(shapeGeometry('rounded', 240, 160)).toEqual(shapeGeometry('roundRect', 240, 160));
+    expect(shapeGeometry('rectangle', 240, 160)).toEqual(shapeGeometry('rect', 240, 160));
+    expect(shapeGeometry('hexagon', 240, 160).paths).toHaveLength(1);
+    expect(shapeGeometry('can', 240, 160).paths.map((p) => p.fill)).toEqual([
+      'norm',
+      'lighten',
+      'none',
+    ]);
   });
 
-  it('draws the rectangle as its box', () => {
+  it('draws the rectangle as its box and keeps its eight sites: the ECMA four then the corners', () => {
     expect(shapePath('rect', 240, 160)).toBe('M0,0 H240 V160 H0 Z');
     expect(shapePath('rectangle', 240, 160)).toBe('M0,0 H240 V160 H0 Z');
     expect(textInset('rect', 240, 160)).toEqual({ x: 0, y: 0, w: 240, h: 160 });
+    expect(sites('rect', 240, 160)).toEqual(rectSites(240, 160));
+    expect(sites('rectangle', 240, 160)).toHaveLength(8);
+    /* every other preset answers its list: a hexagon six, a rectangular callout five */
+    expect(sites('hexagon', 240, 160)).toHaveLength(6);
+    expect(sites('wedgeRectCallout', 240, 160)).toHaveLength(5);
   });
 
   it('draws the rounded rectangle with four quarter arcs of the ECMA radius', () => {
     // x1 = ss * adj / 100000 with ss the shorter side: 160 * 16667 / 100000 = 26.67, on the half pixel grid 26.5
-    expect(roundRectRadius(240, 160)).toBeCloseTo(26.667, 2);
-    expect(roundRectRadius(240, 160, [50000])).toBe(80);
-    // adj pins to 0 .. 50000 (presetShapeDefinitions.xml `pin 0 adj 50000`)
-    expect(roundRectRadius(240, 160, [90000])).toBe(80);
-    expect(roundRectRadius(240, 160, [-5])).toBe(0);
     const path = shapePath('roundRect', 240, 160);
     expect(path).toBe(
       'M0,26.5 A26.5,26.5 0 0 1 26.5,0 H213.5 A26.5,26.5 0 0 1 240,26.5 V133.5 A26.5,26.5 0 0 1 213.5,160 H26.5 A26.5,26.5 0 0 1 0,133.5 Z',
@@ -166,10 +182,20 @@ describe('the geometry of the presets', () => {
     // the legacy id draws the same preset; a zero radius is the box
     expect(shapePath('rounded', 240, 160)).toBe(path);
     expect(shapePath('roundRect', 240, 160, [0])).toBe('M0,0 H240 V160 H0 Z');
+    // adj pins to 0 .. 50000 (presetShapeDefinitions.xml `pin 0 adj 50000`): a radius of 80 at 50 percent and above
+    expect(shapePath('roundRect', 240, 160, [50000])).toContain('A80,80 0 0 1 80,0');
+    expect(shapePath('roundRect', 240, 160, [90000])).toBe(
+      shapePath('roundRect', 240, 160, [50000]),
+    );
+    expect(shapePath('roundRect', 240, 160, [-5])).toBe('M0,0 H240 V160 H0 Z');
     // the picker's glyph at 48 by 36: 36 * 0.16667 = 6
     expect(shapePath('roundRect', 48, 36)).toContain('A6,6 0 0 1 6,0');
-    // the text rectangle stays the whole box until the exporter subtracts the geometry (textInset)
-    expect(textInset('roundRect', 240, 160)).toEqual({ x: 0, y: 0, w: 240, h: 160 });
+    // the text rectangle steps in by x1 * 29289 / 100000 on every side (docs/VECTOR.md 2.2)
+    const inset = textInset('roundRect', 240, 160);
+    expect(inset.x).toBeCloseTo(7.81, 2);
+    expect(inset.y).toBeCloseTo(7.81, 2);
+    expect(inset.w).toBeCloseTo(240 - 2 * 7.81, 1);
+    expect(inset.h).toBeCloseTo(160 - 2 * 7.81, 1);
   });
 
   it('draws the ellipse with four quarter arcs of the half sides', () => {
@@ -181,13 +207,34 @@ describe('the geometry of the presets', () => {
     expect(shapePath('ellipse', 48, 36)).toBe(
       'M0,18 A24,18 0 0 1 24,0 A24,18 0 0 1 48,18 A24,18 0 0 1 24,36 A24,18 0 0 1 0,18 Z',
     );
-    expect(textInset('ellipse', 240, 160)).toEqual({ x: 0, y: 0, w: 240, h: 160 });
+    // the rectangle inscribed at 45 degrees
+    const inset = textInset('ellipse', 240, 160);
+    expect(inset.x).toBeCloseTo(120 - 120 * Math.SQRT1_2, 3);
+    expect(inset.y).toBeCloseTo(80 - 80 * Math.SQRT1_2, 3);
+    expect(sites('ellipse', 240, 160)).toHaveLength(8);
+  });
+
+  it('draws a right arrow with the shaft as its text rectangle and a star that reads its adjust values', () => {
+    expect(shapePath('rightArrow', 240, 160)).toBe('M0,40 H160 V0 L240,80 L160,160 V120 H0 Z');
+    expect(textInset('rightArrow', 240, 160)).toEqual({ x: 0, y: 40, w: 200, h: 80 });
+    const wide = shapePath('star5', 300, 300, [30000, 105146, 110557]);
+    expect(wide).not.toBe(shapePath('star5', 300, 300));
+    expect(wide).toBe(shapeGeometry('star5', 300, 300, [30000, 105146, 110557]).paths[0]?.d);
   });
 
   it('answers the box for an unknown kind and for a line kind', () => {
     expect(shapePath('not-a-shape', 100, 50)).toBe('M0,0 H100 V50 H0 Z');
     expect(shapePath('line', 100, 50)).toBe('M0,0 H100 V50 H0 Z');
+    expect(shapePath('elbow', 100, 50)).toBe('M0,0 H100 V50 H0 Z');
     expect(textInset('line', 100, 50)).toEqual({ x: 0, y: 0, w: 100, h: 50 });
+    expect(sites('line', 100, 50)).toEqual(rectSites(100, 50));
+    expect(sites('not-a-shape', 100, 50)).toHaveLength(8);
+    expect(shapeGeometry('curve', 100, 50)).toEqual({
+      paths: [{ d: 'M0,0 H100 V50 H0 Z', fill: 'norm', stroke: true }],
+      textRect: { x: 0, y: 0, w: 100, h: 50 },
+      sites: rectSites(100, 50),
+      handles: [],
+    });
   });
 });
 

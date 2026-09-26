@@ -51,7 +51,7 @@ import {
   visibleMenus,
   walkItems,
 } from '../model.ts';
-import { STUB_PREFIX, forbiddenWordsIn } from '../strings.ts';
+import { FORMAT, STUB_PREFIX, forbiddenWordsIn } from '../strings.ts';
 import { filterPalette } from '../../palette-data.ts';
 import type { PaletteEntry } from '../../palette-data.ts';
 import { TOOLBAR_TAILS, TOOLBAR_TAIL_END } from '../toolbar-tails.ts';
@@ -82,6 +82,27 @@ const row = (
   ids: string[],
   extra: { omits?: string[]; was?: MenuStatus; was3?: MenuStatus } = {},
 ): Row => ({ menu, status, ids, ...extra });
+
+/**
+ * A row's disabled reason as text for the word checks: the string, or the function form (the
+ * vector round, docs/VECTOR.md 4.4; vector/build/b1.md R1.6) read on an svg picture, the one
+ * state in which it answers a sentence.
+ */
+const reasonOf = (item: MenuItem): string | undefined => {
+  const reason: unknown = item.disabledReason;
+  if (typeof reason !== 'function') return reason as string | undefined;
+  const selection: MenuContext['selection'] & { vector?: boolean } = {
+    ...DEFAULT_MENU_CONTEXT.selection,
+    blocks: 1,
+    block: 'image',
+    picture: true,
+    vector: true,
+  };
+  return (reason as (ctx: MenuContext) => string | undefined)({
+    ...DEFAULT_MENU_CONTEXT,
+    selection,
+  });
+};
 
 /**
  * The rows of SPEC 2.0 to 2.10 with the statuses of round two, one entry per table row, in table
@@ -260,15 +281,18 @@ const SPEC_ROWS: Row[] = [
   row('insert', 'now', ['insert.textBox']),
   /* SPEC-2 12: Audio and Video are present with the recording clause */
   row('insert', 'later', ['insert.audio', 'insert.video'], { was: 'omit' }),
+  /* the vector round (docs/VECTOR.md 2.6): the three named rows sit directly under Insert > Shape,
+     the Shapes container having left */
   row('insert', 'now', [
-    'insert.shape.shapes',
     'insert.shape.shapes.rectangle',
     'insert.shape.shapes.rounded',
     'insert.shape.shapes.ellipse',
   ]),
-  /* the Shapes gallery as its own row behind the switch (docs/FOCUS.md section 4, cycle 2 fix round) */
+  /* the Shapes gallery as its own row (docs/FOCUS.md section 4, cycle 2 fix round; Google's Shapes
+     row since the vector round) */
   row('insert', 'now', ['insert.shape.gallery']),
-  row('insert', 'now', ['insert.shape.arrows', 'insert.shape.arrows.arrow']),
+  /* Arrows is a glyph grid; its Arrow child left with the vector round (a plate wins over children) */
+  row('insert', 'now', ['insert.shape.arrows']),
   row('insert', 'now', ['insert.shape.callouts'], { was: 'later' }),
   row('insert', 'now', ['insert.shape.equation'], { was: 'omit' }),
   row('insert', 'now', ['insert.table']),
@@ -1583,7 +1607,7 @@ describe('statuses and effects', () => {
     for (const item of items) {
       expect(item.label.endsWith('.'), item.label).toBe(false);
       expect(item.label.includes('—'), item.label).toBe(false);
-      for (const text of [item.doc, item.stubReason, item.disabledReason]) {
+      for (const text of [item.doc, item.stubReason, reasonOf(item)]) {
         if (text !== undefined) expect(text.includes('—'), text).toBe(false);
       }
     }
@@ -1767,7 +1791,7 @@ describe('the canvas rows of SPEC-2 section 4', () => {
 
   it('keeps the line up sentence of round one out: no row is disabled because of the layout', () => {
     for (const item of allItems()) {
-      for (const text of [item.disabledReason, item.doc]) {
+      for (const text of [reasonOf(item), item.doc]) {
         if (text === undefined) continue;
         expect(text.includes('Blank layout'), `${item.id}: ${text}`).toBe(false);
         expect(text.includes('line up automatically'), `${item.id}: ${text}`).toBe(false);
@@ -2483,10 +2507,14 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
     const insertOn = ids(MENUS.find((m) => m.id === 'insert')!.items, ON);
     for (const id of [
       'insert.shape',
-      'insert.shape.shapes',
       'insert.shape.shapes.rectangle',
       'insert.shape.shapes.rounded',
       'insert.shape.shapes.ellipse',
+      /* the vector round (docs/VECTOR.md 2.6): the four glyph grids in the default view */
+      'insert.shape.gallery',
+      'insert.shape.arrows',
+      'insert.shape.callouts',
+      'insert.shape.equation',
       'insert.line',
       'insert.line.line',
       'insert.line.arrow',
@@ -2504,12 +2532,9 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       expect(isPresent(itemById(id), OFF), `${id} present off`).toBe(true);
       expect(itemById(id).status, `${id} stays a now row`).toBe('now');
     }
-    /* what stays parked under Insert (RETURN.md 2.9, 2.10, 3.4, section 8) */
+    /* what stays parked under Insert (RETURN.md 2.10, 3.4, section 8; the galleries returned
+       with the vector round, docs/VECTOR.md 2.6) */
     for (const id of [
-      'insert.shape.gallery',
-      'insert.shape.arrows',
-      'insert.shape.callouts',
-      'insert.shape.equation',
       'insert.line.rule',
       'insert.line.curve',
       'insert.line.polyline',
@@ -2523,19 +2548,19 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       expect(isPresent(itemById(id), OFF), `${id} present off`).toBe(false);
       expect(isPresent(itemById(id), ON), `${id} present on`).toBe(true);
     }
-    /* the Shapes row lists the three named rows in both contexts (docs/FOCUS.md section 4); the
-       gallery plate stands behind the switch as its own row, All shapes */
-    const shapesRow = itemById('insert.shape.shapes');
-    expect(shapesRow.altEffect).toBeUndefined();
-    expect(shapesRow.effect?.kind).toBe('submenu');
-    for (const ctx of [OFF, ON])
-      expect(visibleItems(shapesRow.items ?? [], { context: ctx }).map((item) => item.id)).toEqual([
-        'insert.shape.shapes.rectangle',
-        'insert.shape.shapes.rounded',
-        'insert.shape.shapes.ellipse',
-      ]);
+    /* the vector round (docs/VECTOR.md 2.6): Insert > Shape is seven rows in both contexts, the
+       three named rows above the four glyph grids; the Shapes container and the Arrows child left */
+    const SEVEN = [
+      'insert.shape.shapes.rectangle',
+      'insert.shape.shapes.rounded',
+      'insert.shape.shapes.ellipse',
+      'insert.shape.gallery',
+      'insert.shape.arrows',
+      'insert.shape.callouts',
+      'insert.shape.equation',
+    ];
     const gallery = itemById('insert.shape.gallery');
-    expect(gallery.advanced).toBe(true);
+    expect(gallery.advanced).toBeUndefined();
     expect(gallery.effect).toEqual({
       kind: 'submenu',
       dynamic: 'shapes',
@@ -2544,14 +2569,8 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
     });
     const shapeRows = (ctx: MenuContext) =>
       visibleItems(itemById('insert.shape').items ?? [], { context: ctx }).map((item) => item.id);
-    expect(shapeRows(OFF)).toEqual(['insert.shape.shapes']);
-    expect(shapeRows(ON)).toEqual([
-      'insert.shape.shapes',
-      'insert.shape.gallery',
-      'insert.shape.arrows',
-      'insert.shape.callouts',
-      'insert.shape.equation',
-    ]);
+    expect(shapeRows(OFF)).toEqual(SEVEN);
+    expect(shapeRows(ON)).toEqual(SEVEN);
     const lineRows = (ctx: MenuContext) =>
       visibleItems(itemById('insert.line').items ?? [], { context: ctx }).map((item) => item.id);
     expect(lineRows(OFF)).toEqual([
@@ -2596,14 +2615,17 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
        merge rows returned in the fix round with the Editor's cell range (return/build/b5.md) */
     for (const id of [
       'format.bulletsNumbering.listOptions',
-      'format.image.maskImage',
       'format.image.dither',
       'format.dropShadow',
-      'format.changeShape',
       'format.editHtml',
     ]) {
       expect(isPresent(itemById(id), OFF), id).toBe(false);
       expect(isPresent(itemById(id), ON), id).toBe(true);
+    }
+    /* Mask image and Change shape returned with the galleries (docs/VECTOR.md 2.6, item S7) */
+    for (const id of ['format.image.maskImage', 'format.changeShape']) {
+      expect(itemById(id).advanced, id).toBeUndefined();
+      expect(isPresent(itemById(id), OFF), id).toBe(true);
     }
     /* Edit data and Chart type are context only rows: present, drawn on the chart's menu */
     for (const id of ['format.editData', 'format.chartType', 'format.chartType.pie'])
@@ -2659,13 +2681,17 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       const off = presentControls(TOOLBAR_TAILS[kind], OFF).map((control) => control.control);
       expect(off.length, kind).toBeGreaterThan(0);
       for (const control of TOOLBAR_TAILS[kind])
-        if (control.control === 'toolbar.changeShape')
-          expect(control.advanced, `${kind} ${control.control}`).toBe(true);
-        else expect(control.advanced, `${kind} ${control.control}`).toBeUndefined();
+        expect(control.advanced, `${kind} ${control.control}`).toBeUndefined();
     }
-    expect(
-      presentControls(TOOLBAR_TAILS.shape, OFF).map((control) => control.control),
-    ).not.toContain('toolbar.changeShape');
+    /* Change shape leads the shape tail in the default view since the vector round (docs/VECTOR.md
+       2.6, item S7): it carries the divider and the fill follows it without one */
+    const shapeOff = presentControls(TOOLBAR_TAILS.shape, OFF);
+    expect(shapeOff[0]?.control).toBe('toolbar.changeShape');
+    expect(shapeOff[0]?.dividerBefore).toBe(true);
+    expect(shapeOff[0]?.icon).toBe('square-2-stack');
+    expect(shapeOff.find((control) => control.control === 'toolbar.fillColor')?.dividerBefore).toBe(
+      undefined,
+    );
     expect(presentControls(TOOLBAR_TAILS.shape, ON).map((control) => control.control)).toContain(
       'toolbar.changeShape',
     );
@@ -2698,6 +2724,10 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       'insert.shape.shapes.rectangle',
       'insert.shape.shapes.rounded',
       'insert.shape.shapes.ellipse',
+      'insert.shape.gallery',
+      'insert.shape.callouts',
+      'format.changeShape',
+      'format.image.maskImage',
       'insert.line.line',
       'insert.line.arrow',
       'insert.line.elbowConnector',
@@ -2724,7 +2754,6 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       expect(on.has(id), `${id} on`).toBe(true);
     }
     for (const id of [
-      'insert.shape.gallery',
       'insert.line.rule',
       'insert.specialCharacters',
       'insert.icon',
@@ -2812,6 +2841,14 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       'view.appearance.light',
       'view.appearance.match',
       'insert.shape',
+      /* the vector round (docs/VECTOR.md 2.6, item S7): the four glyph grids, Change shape and
+         Mask image in the default view */
+      'insert.shape.gallery',
+      'insert.shape.arrows',
+      'insert.shape.callouts',
+      'insert.shape.equation',
+      'format.changeShape',
+      'format.image.maskImage',
       'insert.table',
       'insert.chart',
       'insert.diagram',
@@ -2875,10 +2912,6 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       'view.gridView',
       'view.showSections',
       'insert.image.fromThisPresentation',
-      'insert.shape.gallery',
-      'insert.shape.arrows',
-      'insert.shape.callouts',
-      'insert.shape.equation',
       'insert.line.rule',
       'insert.line.curve',
       'insert.line.polyline',
@@ -2886,10 +2919,8 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       'insert.specialCharacters',
       'insert.icon',
       'format.bulletsNumbering.listOptions',
-      'format.image.maskImage',
       'format.image.dither',
       'format.dropShadow',
-      'format.changeShape',
       'format.editHtml',
       'tools.notificationSettings',
       'tools.activityDashboard',
@@ -2979,5 +3010,200 @@ describe('the features round, ship one: the Logo rows and the Tabular figures ro
     expect(tooltipDoc(row, OFF)).toBe(
       'Every digit takes the same width, so numbers line up in a column',
     );
+  });
+});
+
+// The vector round (docs/VECTOR.md 2.6, 3.2, 3.3, 4.4; the named unit tests of 6.3, B1;
+// vector/build/b1.md R1): Insert > Shape is the three named rows above the four glyph grids, in
+// the default view, each with an icon; every Insert row that names a thing and every Format row
+// that names a visual thing carries an icon; Change shape and Mask image are unflagged; Crop image
+// is disabled on an svg picture with the one sentence and keeps its plain doc otherwise.
+describe('the vector round: the seven Shape rows, the icons on the visual rows, the crop refusal', () => {
+  const OFF: MenuContext = DEFAULT_MENU_CONTEXT;
+  const ON: MenuContext = { ...OFF, settings: { ...OFF.settings, advancedTools: true } };
+  const SEVEN: ReadonlyArray<[string, string, string]> = [
+    ['insert.shape.shapes.rectangle', 'Rectangle', 'shape-rect'],
+    ['insert.shape.shapes.rounded', 'Rounded rectangle', 'shape-round-rect'],
+    ['insert.shape.shapes.ellipse', 'Ellipse', 'shape-ellipse'],
+    ['insert.shape.gallery', 'Shapes', 'squares-2x2'],
+    ['insert.shape.arrows', 'Arrows', 'arrow-long-right'],
+    ['insert.shape.callouts', 'Callouts', 'chat-bubble-left'],
+    ['insert.shape.equation', 'Equation', 'variable'],
+  ];
+
+  it('lists Insert > Shape as the seven rows in order, unflagged, each with its icon', () => {
+    for (const ctx of [OFF, ON])
+      expect(
+        visibleItems(itemById('insert.shape').items ?? [], { context: ctx }).map((item) => item.id),
+      ).toEqual(SEVEN.map(([id]) => id));
+    for (const [id, label, icon] of SEVEN) {
+      const item = itemById(id);
+      expect(item.status, id).toBe('now');
+      expect(item.advanced, `${id} in the default view`).toBeUndefined();
+      expect(resolveLabel(item, OFF), id).toBe(label);
+      expect(item.icon, id).toBe(icon);
+      expect(item.items, `${id} holds no children`).toBeUndefined();
+    }
+    expect(findItem('insert.shape.shapes')).toBeUndefined();
+    expect(findItem('insert.shape.arrows.arrow')).toBeUndefined();
+    /* the four grids open the shape plate of their category; the named rows insert */
+    for (const [id, category] of [
+      ['insert.shape.gallery', 'shapes'],
+      ['insert.shape.arrows', 'arrows'],
+      ['insert.shape.callouts', 'callouts'],
+      ['insert.shape.equation', 'equation'],
+    ] as const)
+      expect(itemById(id).effect, id).toEqual({
+        kind: 'submenu',
+        dynamic: 'shapes',
+        category,
+        action: 'block.insert',
+      });
+    for (const id of SEVEN.slice(0, 3).map(([each]) => each))
+      expect(itemById(id).effect, id).toEqual({ kind: 'action', id: 'block.insert' });
+    /* the divider sits before Shapes, under the three named rows */
+    expect(itemById('insert.shape.gallery').dividerBefore).toBe(true);
+  });
+
+  it('keeps Google’s four rows findable by the completeness test: Shapes, Arrows, Callouts and Equation under Shape', () => {
+    const shape = itemById('insert.shape');
+    const labels = (shape.items ?? []).map((item) => (item.google ?? item.label).toLowerCase());
+    for (const google of ['shapes', 'arrows', 'callouts', 'equation'])
+      expect(labels, google).toContain(google);
+    expect(itemById('insert.shape.gallery').turboslide).toBeUndefined();
+  });
+
+  it('carries an icon on every Insert row of VECTOR.md 3.2', () => {
+    const expected: Record<string, string> = {
+      'insert.image': 'photo',
+      'insert.image.upload': 'arrow-up-tray',
+      'insert.image.byUrl': 'link',
+      'insert.image.logo': 'tag',
+      'insert.image.fromThisPresentation': 'document-duplicate',
+      'format.image.replaceImage.upload': 'arrow-up-tray',
+      'format.image.replaceImage.byUrl': 'link',
+      'format.image.replaceImage.logo': 'tag',
+      'format.image.replaceImage.fromThisPresentation': 'document-duplicate',
+      'insert.logo': 'tag',
+      'insert.textBox': 'text',
+      'insert.shape': 'box',
+      'insert.table': 'table',
+      'insert.chart': 'chart-bar',
+      'insert.chart.bar': 'chart-bars',
+      'insert.chart.column': 'chart-bar',
+      'insert.chart.line': 'chart-line',
+      'insert.chart.pie': 'chart-pie',
+      'insert.diagram': 'rectangle-group',
+      'insert.wordArt': 'word-art',
+      'insert.line': 'minus',
+      'insert.line.line': 'line-line',
+      'insert.line.arrow': 'line-arrow',
+      'insert.line.rule': 'line-rule',
+      'insert.line.elbowConnector': 'line-elbow',
+      'insert.line.curvedConnector': 'line-curved',
+      'insert.line.curve': 'line-curve',
+      'insert.line.polyline': 'line-polyline',
+      'insert.line.scribble': 'line-scribble',
+      'insert.specialCharacters': 'language',
+      'insert.slideNumbers': 'hashtag',
+      'insert.icon': 'sparkles',
+      /* the features round's ship two renamed the Material row to Shader (build/b1.md R1) */
+      'insert.shader': 'cube',
+      'insert.link': 'link',
+      'insert.comment': 'chat',
+      'insert.newSlide': 'plus',
+    };
+    for (const [id, icon] of Object.entries(expected)) expect(itemById(id).icon, id).toBe(icon);
+    /* the eight line kinds draw eight different glyphs */
+    const lineIcons = (itemById('insert.line').items ?? []).map((item) => item.icon);
+    expect(new Set(lineIcons).size).toBe(8);
+  });
+
+  it('carries an icon on every Format row of VECTOR.md 3.3, and none on the rows that name a setting by a word', () => {
+    const expected: Record<string, string> = {
+      'format.text.bold': 'bold',
+      'format.text.italic': 'italic',
+      'format.text.underline': 'underline',
+      'format.text.strikethrough': 'strikethrough',
+      'format.alignIndent.left': 'bars-3-bottom-left',
+      'format.alignIndent.center': 'bars-3-center-left',
+      'format.alignIndent.right': 'bars-3-bottom-right',
+      'format.alignIndent.justified': 'bars-3',
+      'format.image.cropImage': 'viewfinder-circle',
+      'format.image.maskImage': 'mask',
+      'format.image.replaceImage': 'arrow-path',
+      'format.image.addCaption': 'bars-2',
+      'format.image.resetImage': 'arrow-uturn-left',
+      'format.image.useOnEverySlide': 'slide',
+      'format.image.imageOptions': 'adjustments',
+      'format.bordersLines': 'line-weight',
+      'format.bordersLines.borderColor': 'swatch',
+      'format.bordersLines.borderWeight': 'line-weight',
+      'format.bordersLines.borderDash': 'line-dash',
+      'format.bordersLines.lineStart': 'line-start',
+      'format.bordersLines.lineEnd': 'line-end',
+      'format.formatOptions': 'adjustments',
+      'format.textFitting': 'arrows-pointing-in',
+      'format.dropShadow': 'shadow',
+      'format.changeShape': 'square-2-stack',
+      'format.editData': 'table-cells',
+      'format.chartType': 'chart-bar',
+    };
+    for (const [id, icon] of Object.entries(expected)) expect(itemById(id).icon, id).toBe(icon);
+    for (const id of [
+      'format.text.font',
+      'format.text.size',
+      'format.text.capitalization',
+      'format.text.tabularFigures',
+      'format.clearFormatting',
+      'format.altText',
+    ])
+      expect(itemById(id).icon, `${id} stays a word`).toBeUndefined();
+  });
+
+  it('unflags Change shape and Mask image, on the shape and picture menus in the default view', () => {
+    for (const id of ['format.changeShape', 'format.image.maskImage']) {
+      const item = itemById(id);
+      expect(item.advanced, id).toBeUndefined();
+      expect(item.status, id).toBe('now');
+      expect(item.effect?.kind, id).toBe('submenu');
+      expect(item.effect?.kind === 'submenu' && item.effect.dynamic, id).toBe('shapes');
+    }
+    expect(contextMenuIds('shape')).toContain('format.changeShape');
+    expect(contextMenuIds('image')).toContain('format.image.maskImage');
+    expect(presentControls(TOOLBAR_TAILS.shape, OFF).map((control) => control.control)).toContain(
+      'toolbar.changeShape',
+    );
+  });
+
+  it('disables Crop image on an svg picture with the one sentence, and keeps the plain doc otherwise', () => {
+    expect(FORMAT.picture.svgCrop).toBe('An SVG picture cannot be cropped. Resize it instead');
+    const crop = itemById('format.image.cropImage');
+    const raster: MenuContext = {
+      ...OFF,
+      selection: { ...OFF.selection, blocks: 1, block: 'image', picture: true },
+    };
+    const svgSelection: MenuContext['selection'] & { vector?: boolean } = {
+      ...raster.selection,
+      vector: true,
+    };
+    const svg: MenuContext = { ...raster, selection: svgSelection };
+    expect(crop.enabled).toBe('rasterPictureSelected');
+    expect(isEnabled(crop, raster)).toBe(true);
+    expect(isEnabled(crop, svg)).toBe(false);
+    expect(evaluate(crop.enabled, raster)).toBe(true);
+    expect(evaluate(crop.enabled, svg)).toBe(false);
+    expect(evaluate(crop.enabled, OFF)).toBe(false);
+    expect(tooltipDoc(crop, svg)).toBe(FORMAT.picture.svgCrop);
+    /* nothing selected: the row is disabled with its own doc, never the svg sentence */
+    expect(isEnabled(crop, OFF)).toBe(false);
+    expect(tooltipDoc(crop, OFF)).toBe(crop.doc);
+    /* the other picture rows keep working on an svg picture: mask, replace, reset, options */
+    for (const id of [
+      'format.image.maskImage',
+      'format.image.replaceImage',
+      'format.image.imageOptions',
+    ])
+      expect(isEnabled(itemById(id), svg), id).toBe(true);
   });
 });

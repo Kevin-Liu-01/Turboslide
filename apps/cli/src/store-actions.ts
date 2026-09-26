@@ -25,7 +25,7 @@ import type { CellBorder, TableCommand } from '@turboslide/schema/blocks/table';
 import { applyTableCommand } from '@turboslide/schema/blocks/table';
 import { applyLayout } from '@turboslide/schema/apply-layout';
 import type { Asset, AssetVariant } from '@turboslide/schema/assets';
-import { hasContinuousSource } from '@turboslide/schema/assets';
+import { hasContinuousSource, vectorOf } from '@turboslide/schema/assets';
 import type { PictureDither } from '@turboslide/schema/blocks/dither';
 import { DITHER_NO_SOURCE_MESSAGE } from '@turboslide/schema/blocks/dither';
 import {
@@ -1072,7 +1072,7 @@ export type SlideImportInput = Rev & {
 /** What slide.import reads from the source deck: its document, and a way to copy an asset file. */
 export type SlideImportSource = {
   document: DeckDocument;
-  /** Copies `<source>/<relative>` to `<target>/<relative>`; the twins and the source file of an asset. */
+  /** Copies `<source>/<relative>` to `<target>/<relative>`; each file of `assetFiles(asset)`. */
   copyAsset: (relative: string) => Promise<void>;
 };
 export type BlockDuplicateInput = Rev & { slideId: string; blockIds: string[] };
@@ -1398,11 +1398,18 @@ export function slideAssetIds(slide: Slide): string[] {
   return [...ids];
 }
 
-/** The files an asset record names under the deck directory: the twins and the source file. */
+/**
+ * The files an asset record names under the deck directory, once each: the twins, the vector
+ * files (docs/VECTOR.md 4.1 through `vectorOf`: an svg picture's sanitized source, a tinted logo's
+ * two files, a ship one logo's untinted `sourceFile`) and the source file. What slide.import
+ * copies; without the vector files an imported svg picture drew its PNG twin.
+ */
 export function assetFiles(asset: Asset): string[] {
-  const files = Object.values(asset.twins);
-  if (asset.sourceFile !== undefined) files.push(asset.sourceFile);
-  return files;
+  const files = new Set(Object.values(asset.twins));
+  const vector = vectorOf(asset);
+  if (vector !== undefined) for (const file of Object.values(vector)) files.add(file);
+  if (asset.sourceFile !== undefined) files.add(asset.sourceFile);
+  return [...files];
 }
 
 export async function slideImport(

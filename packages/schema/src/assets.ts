@@ -1,7 +1,10 @@
 // Assets carry role, twins, provenance, treatment and metrics (SPEC 4.2 "Assets"). Twins are
 // relative paths under assets/; the two-tone treatment records the OPENERS.md pipeline as data
 // (report 03 section 11 item 15), and metrics record the plate clearance that used to be counted
-// by hand (item 16).
+// by hand (item 16). The vector round (docs/VECTOR.md 4.1) adds the svg asset: `kind: 'svg'` with
+// its sanitized source under `vector` beside the PNG `twins`, read through `vectorOf`, which also
+// answers a ship one logo's untinted `sourceFile` so the decks already stored draw their logos as
+// vector without a migration.
 import { z } from 'zod';
 import { annotate } from './annotate.ts';
 import { extSchema } from './blocks.ts';
@@ -74,8 +77,15 @@ export type AssetSource =
       license: 'CC0' | 'CC BY' | 'CC BY-SA' | 'public domain' | string;
       shareAlike: boolean;
     }
-  | { kind: 'file' }
+  | FileAssetSource
   | LogoAssetSource;
+
+/**
+ * An uploaded, pasted, dropped or fetched file (the intake's default record). `sanitized` records
+ * the elements the svg sanitizer dropped from an svg asset (docs/VECTOR.md 4.2), in document
+ * order, once each; absent for a raster and for an svg nothing left.
+ */
+export type FileAssetSource = { kind: 'file'; sanitized?: { removed: string[] } };
 
 /**
  * A company mark from a logo source (docs/FEATURES.md 4.4; audit-logos 2): the provider and the
@@ -154,9 +164,21 @@ export type Asset = {
   id: AssetId;
   role: AssetRole;
   alt: string;
+  /**
+   * `svg` for a vector picture (docs/VECTOR.md 4.1): `vector` names its sanitized source file and
+   * `twins` the PNG twin at 3x for the surfaces that cannot take a vector (the deck cards, the
+   * render route's thumbnails, the PowerPoint's fallback blip). Absent for every raster asset.
+   */
+  kind?: 'svg';
+  /**
+   * The sanitized svg file (or the two tinted files of a mono logo, one per appearance) under
+   * assets/, what the sheet, the PDF and the web page draw for an svg asset; read through
+   * `vectorOf`, never directly, so a ship one logo answers too.
+   */
+  vector?: AssetTwins;
   /** relative paths under assets/ */
   twins: AssetTwins;
-  /** pixels of the stored file */
+  /** pixels of the stored file; for an svg asset the file's intrinsic size in sheet px (4.1) */
   size: [number, number];
   /** device pixels per sheet px the file was produced at */
   scale: 1 | 2 | 3;
@@ -223,7 +245,10 @@ export const assetSourceSchema = z.discriminatedUnion('kind', [
     license: z.string().min(1),
     shareAlike: z.boolean(),
   }),
-  z.strictObject({ kind: z.literal('file') }),
+  z.strictObject({
+    kind: z.literal('file'),
+    sanitized: z.strictObject({ removed: z.array(z.string()) }).optional(),
+  }),
   z.strictObject({
     kind: z.literal('logo'),
     provider: z.literal('thesvg'),
@@ -349,6 +374,8 @@ export const assetSchema = z.strictObject({
     group: 'Asset',
   }),
   alt: annotate(z.string().min(1), { label: 'Alt text', control: 'textarea', group: 'Asset' }),
+  kind: z.literal('svg').optional(),
+  vector: assetTwinsSchema.optional(),
   twins: assetTwinsSchema,
   size: z.tuple([z.number().int().positive(), z.number().int().positive()]),
   scale: annotate(z.literal([1, 2, 3]), {
@@ -402,6 +429,35 @@ export function hasContinuousSource(asset: Asset): boolean {
 /** The twin for a theme; a neutral asset serves both. */
 export function assetTwin(asset: Asset, theme: 'light' | 'dark'): string {
   return 'neutral' in asset.twins ? asset.twins.neutral : asset.twins[theme];
+}
+
+/**
+ * The vector files an asset draws as (docs/VECTOR.md 4.1): `vector` when the record carries it,
+ * and for a ship one logo asset (`role: 'logo'`, a `sourceFile` ending in `.svg`, no tint) the
+ * untinted `sourceFile` as one neutral file, so the decks already on production draw their logos
+ * as vector without a migration. A tinted logo of ship one has no tinted svg on disk and answers
+ * nothing (it keeps its PNG twins until it is inserted again). Undefined for every raster asset.
+ */
+export function vectorOf(
+  asset: Pick<Asset, 'vector' | 'role' | 'sourceFile' | 'source'>,
+): AssetTwins | undefined {
+  if (asset.vector !== undefined) return asset.vector;
+  if (
+    asset.role === 'logo' &&
+    asset.sourceFile !== undefined &&
+    /\.svg$/i.test(asset.sourceFile) &&
+    asset.source.kind === 'logo' &&
+    asset.source.tint === undefined
+  )
+    return { neutral: asset.sourceFile };
+  return undefined;
+}
+
+/** The vector file for a theme, or undefined for a raster asset (`vectorOf`). */
+export function assetVector(asset: Asset, theme: 'light' | 'dark'): string | undefined {
+  const vector = vectorOf(asset);
+  if (vector === undefined) return undefined;
+  return 'neutral' in vector ? vector.neutral : vector[theme];
 }
 
 export function isShareAlike(asset: Asset): boolean {

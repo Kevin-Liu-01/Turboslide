@@ -16,6 +16,7 @@ import { promisify } from 'node:util';
 import type { ExportCheck } from '@turboslide/schema/export';
 import { exportCheckSchema } from '@turboslide/schema/export';
 
+import { looksLikeSvg } from './ooxml/svg.ts';
 import { listParts, openPackage, readPart, readPartBytes, slideParts } from './ooxml/zip.ts';
 import { hasTitlePlaceholder, readSlideName } from './ooxml/titles.ts';
 import { validatePackage } from './ooxml/validate.ts';
@@ -64,6 +65,8 @@ export function mediaFormatOf(bytes: Uint8Array): string {
     return 'png-gray';
   }
   if (bytes.length > 2 && bytes[0] === 0xff && bytes[1] === 0xd8) return 'jpeg';
+  // the vector part beside a picture's PNG fallback (docs/VECTOR.md 4.6)
+  if (looksLikeSvg(bytes)) return 'svg';
   return 'other';
 }
 

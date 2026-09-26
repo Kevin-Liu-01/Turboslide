@@ -43528,6 +43528,45 @@
               "group": "Asset"
             }
           },
+          "kind": {
+            "type": "string",
+            "const": "svg"
+          },
+          "vector": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "light": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "dark": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "light",
+                  "dark"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "neutral": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "neutral"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
           "twins": {
             "anyOf": [
               {
@@ -43799,6 +43838,21 @@
                   "kind": {
                     "type": "string",
                     "const": "file"
+                  },
+                  "sanitized": {
+                    "type": "object",
+                    "properties": {
+                      "removed": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "removed"
+                    ],
+                    "additionalProperties": false
                   }
                 },
                 "required": [
@@ -53083,6 +53137,21 @@
                   "kind": {
                     "type": "string",
                     "const": "file"
+                  },
+                  "sanitized": {
+                    "type": "object",
+                    "properties": {
+                      "removed": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "removed"
+                    ],
+                    "additionalProperties": false
                   }
                 },
                 "required": [
@@ -55410,6 +55479,10 @@
           },
           "excludeShareAlike": {
             "description": "Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)",
+            "type": "boolean"
+          },
+          "svgVector": {
+            "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects",
             "type": "boolean"
           },
           "baseline": {

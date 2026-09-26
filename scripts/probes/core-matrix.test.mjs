@@ -226,7 +226,13 @@ describe('the ship helpers of 6.2', () => {
     ]);
     /* an id the run never recorded is not driven, never passed */
     const partial = { [text]: 'passed' };
-    expect(parkedFeaturesOf(partial).parked).toEqual(CORE_FEATURES.filter(isParkable));
+    /* a parkable feature whose every row carries parks (svg, docs/VECTOR.md 6.1) parks its
+       controls and never the feature whole */
+    expect(parkedFeaturesOf(partial).parked).toEqual(
+      CORE_FEATURES.filter(
+        (f) => isParkable(f) && rowsForFeature(f).some((row) => row.parks === undefined),
+      ),
+    );
     expect(parkedFeaturesOf(partial).blocking.length).toBe(
       CORE_MATRIX.filter((row) => !isParkable(row.feature) && row.parks === undefined).length -
         1 -
@@ -398,7 +404,9 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
       expect(rowsForFeature(feature).length, feature).toBeGreaterThan(0);
     for (const driver of ['core/chrome.spec.ts', 'core/brand.spec.ts', 'core/assist.spec.ts'])
       expect(rowsForDriver(driver).length, driver).toBeGreaterThan(0);
-    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29);
+    /* the features round's ship two added 29 rows; the vector round (docs/VECTOR.md 6.1) added 43
+       rows and retired logos.intake.svg-sentence */
+    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29 + 43 - 1);
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
       'export.download.large-deck-pptx',
@@ -507,12 +515,14 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
     expect(CORE_FEATURES).toContain('logos');
     expect(isParkable('logos')).toBe(true);
     expect(CORE_SPEC_DRIVERS).toContain('core/logos.spec.ts');
-    expect(rowsForDriver('core/logos.spec.ts').length).toBe(7);
-    expect(ship.length).toBe(71);
+    /* the vector round added logos.export.svgblip to the spec and the feature, and retired the
+       P1 row logos.intake.svg-sentence with its sentence (docs/VECTOR.md 4.7) */
+    expect(rowsForDriver('core/logos.spec.ts').length).toBe(8);
+    expect(ship.length).toBe(70);
     expect(ship.filter((row) => row.note.startsWith('Ship one P0')).length).toBe(50);
-    expect(ship.filter((row) => row.note.startsWith('Ship one P1')).length).toBe(21);
+    expect(ship.filter((row) => row.note.startsWith('Ship one P1')).length).toBe(20);
     expect(ship.filter((row) => row.driver === PROBE_DRIVER).length).toBe(54);
-    expect(rowsForFeature('logos').length).toBe(22);
+    expect(rowsForFeature('logos').length).toBe(23);
     for (const row of rowsForFeature('logos')) expect(row.today, row.id).toBe('not driven');
     /* every logos row but the agent row carries parks (4.12) */
     for (const row of rowsForFeature('logos'))
@@ -522,7 +532,6 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
   it('carries the export and intake rows of the logos area under their unparkable features', () => {
     expect(ROW_FEATURE).toEqual({
       'logos.export.pdf-pptx-crisp': 'export',
-      'logos.intake.svg-sentence': 'images',
       'logos.intake.url-sentence': 'images',
       'shaders.export.pdf-frame': 'export',
       'shaders.export.pptx-frame': 'export',
@@ -530,6 +539,7 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
       'shaders.export.missing-frame-row': 'export',
       'shaders.view.play-setting': 'view',
     });
+    expect(isCoreId('logos.intake.svg-sentence'), 'retired in the vector round (4.7)').toBe(false);
     for (const [id, feature] of Object.entries(ROW_FEATURE)) {
       expect(coreRow(id).feature).toBe(feature);
       /* every exception but the View row lands on an unparkable feature; the View row parks its own control */
@@ -739,5 +749,137 @@ describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () =>
       'view.playShaders',
     ]);
     expect(readFileSync(module, 'utf8')).toContain('from ship-def5678.json; 3 controls');
+  });
+});
+
+describe('the vector round (docs/VECTOR.md section 6)', () => {
+  const vector = CORE_MATRIX.filter((row) => /^Vector round;/.test(row.note ?? ''));
+  const good = {
+    id: 'menus.icons.insert-rows',
+    feature: 'chrome',
+    interaction: 'x',
+    driver: 'probe --core',
+    today: 'works',
+    evidence: 'e',
+  };
+
+  it('holds the svg feature, the menus area under chrome, the svg spec and the 43 added rows', () => {
+    expect(CORE_FEATURES).toContain('svg');
+    expect(isParkable('svg')).toBe(true);
+    expect(AREA_FEATURE).toEqual({ collab: 'share', menus: 'chrome' });
+    expect(CORE_SPEC_DRIVERS).toContain('core/svg.spec.ts');
+    expect(rowsForDriver('core/svg.spec.ts').length).toBe(12);
+    expect(rowsForDriver('svg.spec.ts')).toEqual(rowsForDriver('core/svg.spec.ts'));
+    /* 43 rows added and the named rows row extended, so 44 carry the note */
+    expect(vector.length).toBe(44);
+    expect(vector.filter((row) => row.id === 'shapes.insert.named-rows').length).toBe(1);
+    expect(rowsForFeature('svg').length).toBe(16);
+    /* 23 shapes rows added plus the extended named rows row */
+    expect(vector.filter((row) => row.feature === 'shapes').length).toBe(24);
+    expect(CORE_MATRIX.filter((row) => areaOf(row.id) === 'menus').map((row) => row.id)).toEqual([
+      'menus.icons.insert-rows',
+      'menus.icons.format-rows',
+      'menus.icons.one-family',
+    ]);
+    for (const row of CORE_MATRIX.filter((row) => areaOf(row.id) === 'menus'))
+      expect(row.feature, row.id).toBe('chrome');
+    /* every svg row parks one or more of the six ids of 4.8, never the feature whole */
+    for (const row of rowsForFeature('svg')) {
+      expect(row.parks, row.id).toBeDefined();
+      for (const control of row.parks)
+        expect(control, row.id).toMatch(
+          /^(intake\.svg\.|picture\.svg\.copy$|export\.svg\.vector$)/,
+        );
+    }
+    expect(coreRow('logos.export.svgblip').parks).toEqual(['export.svg.vector']);
+    /* the gallery rows park their category row alone; the three core rows carry none */
+    for (const id of [
+      'shapes.geometry.pinned-three',
+      'shapes.geometry.text-rect',
+      'shapes.icons.named-rows',
+      'shapes.insert.named-rows',
+    ])
+      expect(coreRow(id).parks, id).toBeUndefined();
+    expect(coreRow('shapes.insert.grid-arrows').parks).toEqual(['insert.shape.arrows']);
+    expect(coreRow('shapes.geometry.shapes.hexagon-sheet').parks).toEqual(['insert.shape.gallery']);
+    /* today as the tree and the audits show on 2026-09-24 */
+    expect(coreRow('svg.import.upload').today).toBe('broken');
+    expect(coreRow('svg.import.upload').severity).toBe(3);
+    expect(coreRow('shapes.icons.named-rows').severity).toBe(1);
+    expect(coreRow('menus.icons.one-family').today).toBe('works');
+    expect(coreRow('shapes.geometry.pinned-three').today).toBe('works');
+  });
+
+  it("reads a menus row as the chrome's and refuses the area as a feature", () => {
+    expect(() => validateCoreMatrix([good])).not.toThrow();
+    expect(() => validateCoreMatrix([{ ...good, feature: 'menus' }])).toThrow(
+      /unknown feature menus/,
+    );
+    expect(() => validateCoreMatrix([{ ...good, feature: 'svg' }])).toThrow(
+      /area menus belongs to chrome, not svg/,
+    );
+    const results = {};
+    for (const id of CORE_IDS) results[id] = 'passed';
+    /* a red icon row blocks the ship (chrome is unparkable) */
+    const run = parkedFeaturesOf({ ...results, 'menus.icons.insert-rows': 'failed' });
+    expect(run.parked).toEqual([]);
+    expect(run.blocking).toEqual([
+      { id: 'menus.icons.insert-rows', feature: 'chrome', result: 'failed' },
+    ]);
+    /* a red svg row parks its controls alone; a red gallery row parks its category row alone */
+    const svg = parkedFeaturesOf({
+      ...results,
+      'svg.import.paste-markup': 'failed',
+      'shapes.insert.grid-arrows': 'not driven',
+    });
+    expect(svg.parked).toEqual([]);
+    expect(svg.blocking).toEqual([]);
+    expect(svg.parkedRows).toEqual([
+      { id: 'shapes.insert.grid-arrows', parks: ['insert.shape.arrows'], result: 'not driven' },
+      { id: 'svg.import.paste-markup', parks: ['intake.svg.paste'], result: 'failed' },
+    ]);
+    expect(() => shipVerdict(results, ['svg'])).not.toThrow();
+  });
+
+  it('knows the six declared ids of VECTOR.md 4.8 and writes them into the parked set from a run', () => {
+    for (const id of [
+      'intake.svg.upload',
+      'intake.svg.paste',
+      'intake.svg.drop',
+      'intake.svg.url',
+      'picture.svg.copy',
+      'export.svg.vector',
+    ]) {
+      expect(DECLARED_CONTROL_IDS).toContain(id);
+      expect(isKnownControl(id), id).toBe(true);
+    }
+    const dir = mkdtempSync(join(tmpdir(), 'core-matrix-vector-'));
+    const module = join(dir, 'parked-controls.ts');
+    writeFileSync(
+      module,
+      `// B1's module\n${PARKED_BEGIN}\nexport const PARKED_CONTROLS: ReadonlySet<string> = new Set<string>([]);\n${PARKED_END}\n`,
+    );
+    /* a fixture run: the paste rows red, the rest green; the ship's list is rendered from it */
+    const results = {};
+    for (const id of CORE_IDS) results[id] = 'passed';
+    const run = parkedFeaturesOf({
+      ...results,
+      'svg.import.paste-file': 'failed',
+      'svg.import.paste-markup': 'not driven',
+    });
+    const list = join(dir, 'ship-vector.json');
+    writeFileSync(
+      list,
+      JSON.stringify({
+        commit: 'abc1234',
+        parkedFeatures: run.parked,
+        parkedRows: run.parkedRows.map(({ id, parks }) => ({ id, parks })),
+      }),
+    );
+    expect(parkedControlsOf(readParkedList(list))).toEqual(['intake.svg.paste']);
+    const written = emitParked(list, { out: module });
+    expect(written.controls).toEqual(['intake.svg.paste']);
+    expect(readFileSync(module, 'utf8')).toContain("  'intake.svg.paste',\n]);");
+    expect(emitParked(list, { out: module, check: true }).changed).toBe(false);
   });
 });

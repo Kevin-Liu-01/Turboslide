@@ -83,6 +83,7 @@
     "./editor-shell": "./src/editor-shell.ts",
     "./editor-shell-context": "./src/editor-shell-context.ts",
     "./menus/model": "./src/menus/model.ts",
+    "./parked-controls": "./src/parked-controls.ts",
     "./menus/strings": "./src/menus/strings.ts",
     "./menus/keys": "./src/menus/keys.ts",
     "./menus/platform": "./src/menus/platform.ts",

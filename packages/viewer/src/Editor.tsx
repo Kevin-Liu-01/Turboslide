@@ -35,6 +35,7 @@ import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
 import { bandAssetResolver, bandForSlide, frameBandOf } from '@turboslide/render/stage';
 import type { ActionId } from '@turboslide/schema/actions';
+import { assetVector, vectorOf } from '@turboslide/schema/assets';
 import type { Asset } from '@turboslide/schema/assets';
 import type { Block, BlockType, ShotTrim } from '@turboslide/schema/blocks';
 import { formatChartNumber } from '@turboslide/schema/blocks/chart';
@@ -83,6 +84,8 @@ import {
   clipboardStore,
   decodeClipboard,
   encodeClipboard,
+  encodeClipboardHtml,
+  envelopeOf,
   fileToDataUrl,
   freeId,
   imageFilesOf,
@@ -91,6 +94,9 @@ import {
   pastedBlockInserts,
   pastedSlideInserts,
   PICTURE_MAX_BYTES,
+  svgFileOf,
+  svgMarkupOf,
+  svgMarkupOfText,
   takenBlockIds,
 } from './clipboard';
 import type { ClipboardPayload, ClipboardStore, PaintFormat } from './clipboard';
@@ -184,6 +190,7 @@ import {
   pictureInsertArea,
   pictureInsertBox,
   pictureNameOf,
+  SVG_CROP_SENTENCE,
   sniffPictureKind,
   uploadFailureOf,
   uploadFailureSentence,
@@ -494,6 +501,8 @@ export type EditorMenuSelection = {
   range?: [number, number];
   /** the selected picture carries a crop, mask or adjustment */
   imageEdited: boolean;
+  /** the one selected picture draws a vector asset (docs/VECTOR.md 4.4): crop is refused on it */
+  vectorPicture: boolean;
   /** the selected list item's level */
   listLevel?: number;
   /** the range of table cells selected on the anchor table, ordered and grown over its merged cells (table-range.ts; docs/RETURN.md 2.4) */
@@ -759,6 +768,15 @@ export type EditorProps = {
    * the route passes nothing.
    */
   mode?: 'editing' | 'commenting' | 'viewing';
+  /**
+   * The parked controls predicate (docs/VECTOR.md 4.8; packages/chrome parked-controls.ts
+   * `isParked`, which the viewer cannot import): the four svg ways in and the svg copy read their
+   * ids (`intake.svg.upload`, `.paste`, `.drop`, `.url`, `picture.svg.copy`) through it before
+   * they act, and a parked way is off: an svg through it reads as a file that is not a picture,
+   * a copy of an svg picture writes the envelope alone. Absent, nothing is parked. The server
+   * keeps accepting an svg on every transport either way.
+   */
+  parked?: (id: string) => boolean;
 };
 
 type Editing = {
@@ -924,6 +942,21 @@ function ladderStepDown(size: number): number | undefined {
   return sorted.find((step) => step < size);
 }
 
+/** The ways an svg comes in (docs/VECTOR.md 4.3) and the parked control id each reads (4.8). */
+type SvgWay = 'upload' | 'paste' | 'drop' | 'url';
+const SVG_WAY_IDS: Readonly<Record<SvgWay, string>> = {
+  upload: 'intake.svg.upload',
+  paste: 'intake.svg.paste',
+  drop: 'intake.svg.drop',
+  url: 'intake.svg.url',
+};
+
+/** A stand in for a missing asset in `vectorOf`: a raster record, which answers nothing. */
+const RASTER: Pick<Asset, 'vector' | 'role' | 'sourceFile' | 'source'> = {
+  role: 'other',
+  source: { kind: 'file' },
+};
+
 /** True for a picture that shows an asset a crop applies to: the picture object or a shot. */
 function isCroppable(
   block: Block | undefined,
@@ -984,6 +1017,7 @@ export function Editor({
   onCanvasConvert,
   onCaret,
   mode: modeProp,
+  parked,
 }: EditorProps) {
   const slide = doc.slides[slideId];
   const [draft, setDraft] = useState<DeckDocument | null>(null);
@@ -1127,6 +1161,12 @@ export function Editor({
   groupEnteredRef.current = groupEntered;
   const themeRef = useRef(theme);
   themeRef.current = theme;
+  const parkedRef = useRef(parked);
+  parkedRef.current = parked;
+  /* the markup of every vector asset selected this page life, read ahead for the copy
+     (docs/VECTOR.md 4.5): one GET per asset file, keyed by the file's path */
+  const svgMarkup = useRef(new Map<string, string>());
+  const svgMarkupInFlight = useRef(new Set<string>());
   const assetBaseRef = useRef(assetBase);
   assetBaseRef.current = assetBase;
   const settingsRef = useRef({ snapGuides, snapGrid, showGuides, showRuler });
@@ -2809,11 +2849,20 @@ export function Editor({
     setCrop({ blockId, frame, trim, original: { frame, trim } });
   };
 
+  /** True when the block is a picture of a vector asset (docs/VECTOR.md 4.4: crop has no vector meaning this round). */
+  const isVectorPicture = (block: Block | undefined): boolean =>
+    isCroppable(block) && vectorOf(docRef.current.deck.assets[block.asset] ?? RASTER) !== undefined;
+
   const enterCrop = (blockId: string) => {
     const slideNow = slideRef.current;
     if (!slideNow) return;
     const block = blockById(slideNow, blockId);
     if (!isCroppable(block)) return;
+    if (isVectorPicture(block)) {
+      /* the toolbar's Crop, Format > Image > Crop image and the double click all land here */
+      notice(SVG_CROP_SENTENCE);
+      return;
+    }
     const box = boxesRef.current.blocks[blockId];
     if (!box) return;
     const frame: Box = block.pos
@@ -2836,6 +2885,10 @@ export function Editor({
     if (!converted || slideRef.current !== slideNow) return;
     const block = blockById(converted.slide, blockId);
     if (!isCroppable(block) || !block.pos) return;
+    if (isVectorPicture(block)) {
+      notice(SVG_CROP_SENTENCE);
+      return;
+    }
     enterCropAt(
       blockId,
       [block.pos.x, block.pos.y, block.pos.w, block.pos.h],
@@ -2976,6 +3029,28 @@ export function Editor({
     if (anchor !== undefined)
       onRemovedRef.current?.({ type: (anchorType ?? 'text') as BlockType, id: anchor });
     return true;
+  };
+
+  /**
+   * The vector file of the selection when it is exactly one picture of a vector asset
+   * (docs/VECTOR.md 4.5), for the theme on screen; null for every other selection.
+   */
+  const svgPathOfSelection = (): string | null => {
+    const slideNow = slideRef.current;
+    if (!slideNow) return null;
+    const ids = selectedIds(selectionRef.current, extraRef.current);
+    if (ids.length !== 1) return null;
+    const block = blockById(slideNow, ids[0] as string);
+    if (!isCroppable(block)) return null;
+    const asset = docRef.current.deck.assets[block.asset];
+    if (asset === undefined) return null;
+    return assetVector(asset, themeRef.current) ?? null;
+  };
+
+  /** The markup the read ahead holds for the selected svg picture, or null before it landed. */
+  const svgMarkupOfSelection = (): string | null => {
+    const path = svgPathOfSelection();
+    return path === null ? null : (svgMarkup.current.get(path) ?? null);
   };
 
   const payloadOfSelection = (): ClipboardPayload | null => {
@@ -3570,6 +3645,8 @@ export function Editor({
     replace?: boolean;
     background?: boolean;
     box?: Box;
+    /** the way the file came in (docs/VECTOR.md 4.8): each svg way reads its parked id; the chooser when absent */
+    way?: SvgWay;
   };
 
   /**
@@ -3864,7 +3941,11 @@ export function Editor({
     } catch {
       return { ok: false, sentence: uploadFailureSentence('not-a-picture', maxMb) };
     }
-    if (sniffPictureKind(head) === null)
+    const kind = sniffPictureKind(head);
+    if (kind === null)
+      return { ok: false, sentence: uploadFailureSentence('not-a-picture', maxMb) };
+    /* a parked svg way is off (docs/VECTOR.md 4.8): the file reads as one that is not a picture */
+    if (kind === 'svg' && parkedRef.current?.(SVG_WAY_IDS[where.way ?? 'upload']) === true)
       return { ok: false, sentence: uploadFailureSentence('not-a-picture', maxMb) };
     const slideBefore = slideRef.current;
     const target =
@@ -3988,7 +4069,7 @@ export function Editor({
       /* a cross origin read the page may not make: the server tries */
     }
     if (file !== null) {
-      const outcome = await insertPictureFile(file, where);
+      const outcome = await insertPictureFile(file, { ...where, way: 'url' });
       if (!outcome.ok) throw new Error(outcome.sentence);
       return;
     }
@@ -4324,6 +4405,7 @@ export function Editor({
     const imageEdited =
       isCroppable(block) &&
       (block.trim !== undefined || block.mask !== undefined || block.adjust !== undefined);
+    const vectorPicture = ids.length === 1 && isVectorPicture(block);
     const cells = rangeOn(anchor ?? null);
     return {
       blocks: ids.length,
@@ -4357,6 +4439,7 @@ export function Editor({
       coversSheet: slideNow !== undefined && anchor !== undefined && coversSheet(slideNow, anchor),
       ...(caretRef.current ? { marks: caretRef.current.marks, range: caretRef.current.range } : {}),
       imageEdited,
+      vectorPicture,
       ...(listLevel !== undefined ? { listLevel } : {}),
     };
   };
@@ -4877,8 +4960,21 @@ export function Editor({
       const payload = payloadOfSelection();
       if (!payload) return;
       e.preventDefault();
-      e.clipboardData?.setData('text/plain', encodeClipboard(payload));
-      void clipboardRef.current.write(payload);
+      /* a selection of exactly one svg picture (docs/VECTOR.md 4.5): its markup as text/plain,
+         what Figma, a text editor and a browser read, and the envelope inside a text/html
+         comment so the product's own paste across tabs still finds it; the store notes the
+         payload without its own system write, which would replace the markup. A copy before
+         the read ahead landed, or with the copy parked, writes the envelope alone, as today. */
+      const markup =
+        parkedRef.current?.('picture.svg.copy') === true ? null : svgMarkupOfSelection();
+      if (markup !== null && e.clipboardData) {
+        e.clipboardData.setData('text/plain', markup);
+        e.clipboardData.setData('text/html', encodeClipboardHtml(payload, markup));
+        clipboardRef.current.note(payload, markup);
+      } else {
+        e.clipboardData?.setData('text/plain', encodeClipboard(payload));
+        void clipboardRef.current.write(payload);
+      }
       if (e.type === 'cut') removeSelected();
     };
     const onPaste = (e: ClipboardEvent) => {
@@ -4891,19 +4987,36 @@ export function Editor({
       if (files.length > 0) {
         e.preventDefault();
         const [first] = files;
-        if (first) void insertPicture(first);
+        if (first) void insertPicture(first, { way: 'paste' });
         return;
       }
       const text = e.clipboardData?.getData('text/plain') ?? '';
-      /* Paste without formatting reads the event's plain text and never the product's envelope */
-      const payload = plain
-        ? text === ''
-          ? null
-          : ({ kind: 'text', text } as ClipboardPayload)
-        : (decodeClipboard(text) ?? clipboardRef.current.last());
+      /* Paste without formatting reads the event's plain text and never the product's envelope
+         nor an svg's markup as a picture (docs/VECTOR.md 4.3 item 4: the markup pastes as text) */
+      if (plain) {
+        if (text === '') return;
+        e.preventDefault();
+        void pastePayload({ kind: 'text', text }, true);
+        return;
+      }
+      /* the product's envelope first, as text/plain or as the text/html comment of an svg copy */
+      const envelope = envelopeOf(e.clipboardData);
+      if (envelope !== null) {
+        e.preventDefault();
+        void pastePayload(envelope, false);
+        return;
+      }
+      /* svg markup (Figma's Copy as SVG, a text editor): a file for the picture path */
+      const markup = svgMarkupOf(e.clipboardData);
+      if (markup !== null) {
+        e.preventDefault();
+        void insertPicture(svgFileOf(markup), { way: 'paste' });
+        return;
+      }
+      const payload = decodeClipboard(text) ?? clipboardRef.current.last();
       if (payload === null) return;
       e.preventDefault();
-      void pastePayload(payload, plain);
+      void pastePayload(payload, false);
     };
     document.addEventListener('copy', onCopyOrCut);
     document.addEventListener('cut', onCopyOrCut);
@@ -4914,6 +5027,30 @@ export function Editor({
       document.removeEventListener('paste', onPaste);
     };
   }, []);
+
+  /* the read ahead of an svg picture's markup (docs/VECTOR.md 4.5): the copy event is
+     synchronous, so when a selection becomes exactly one vector picture its file is fetched once
+     per file per page life (a same origin or public store GET, the store host in connect-src) into
+     the map the copy reads; a selection of anything else fetches nothing, and a copy before the
+     fetch lands writes the envelope alone. The fetch follows a selection, never a state the cost
+     rows measure, and adds no store call and no poll. */
+  useEffect(() => {
+    const path = svgPathOfSelection();
+    if (path === null || svgMarkup.current.has(path) || svgMarkupInFlight.current.has(path)) return;
+    svgMarkupInFlight.current.add(path);
+    void fetch(`${assetBaseRef.current}${path}`, { mode: 'cors', credentials: 'same-origin' })
+      .then(async (response) => {
+        if (!response.ok) return;
+        const text = await response.text();
+        if (svgMarkupOfText(text) !== null) svgMarkup.current.set(path, text.trim());
+      })
+      .catch(() => {
+        /* the copy writes the envelope alone; the next selection tries again */
+      })
+      .finally(() => {
+        svgMarkupInFlight.current.delete(path);
+      });
+  }, [selection, extra]);
 
   /* Cmd+scroll and a trackpad pinch zoom about the pointer (SPEC-2 6.1 row 27): the default is
      prevented over the stage so the page never zooms there */
@@ -6185,6 +6322,7 @@ export function Editor({
       ...(id !== null && blockById(slideNow, id) ? { blockId: id } : {}),
       ...(point ? { point } : {}),
       replace: id === 'picture' && !isFreeformSlide(slideNow),
+      way: 'drop',
     });
   };
 

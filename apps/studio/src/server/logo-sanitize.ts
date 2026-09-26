@@ -5,19 +5,50 @@
 // function has no browser and jsdom is not on the studio's server graph) builds the tree; the
 // walk keeps the listed elements and attributes, drops every `on*` attribute, every `href` that
 // does not start with `#`, every `url(` that is not `url(#<id>)`, a `style` attribute or element
-// that imports or reaches out, `script`, `foreignObject`, `image`, `a`, `iframe`, `text`, the
-// animation elements and every element off the list, and records the drop. When a dropped element
-// draws (text, an image, a primitive off the list, a subtree with shapes in it) the variant's look
-// changed, so `draws` is true and the caller marks the variant unavailable (4.7). A `viewBox` is
-// added from `width` and `height` when absent; a file over the cap is refused before parsing with
-// the sentence naming the cap; a file that does not parse answers "This logo's file is broken on
-// thesvg.org". The mono tint (4.4) rewrites every fill and stroke over the same tree, and the
-// attribution `<desc>` of 4.2 is written into a cached file. Pure over strings; logos.test.ts pins
-// each rule with a fixture.
+// that imports or reaches out, `script`, `foreignObject`, `a`, `iframe`, `text`, the animation
+// elements and every element off the list, and records the drop. An `image` element is kept when
+// its `href` is a `data:image/(png|jpeg|gif|webp);base64,` URI (Figma's Copy as SVG embeds raster
+// fills this way) and dropped otherwise (docs/VECTOR.md 4.2). When a dropped element draws (text,
+// an image, a primitive off the list, a subtree with shapes in it) the variant's look changed, so
+// `draws` is true and the caller marks the variant unavailable (4.7). A `viewBox` is added from
+// `width` and `height` when absent; a file over the cap is refused before parsing with the
+// sentence naming the cap; a file that does not parse answers "This logo's file is broken on
+// thesvg.org". The vector round reuses the same walk for an uploaded svg (docs/VECTOR.md 4.2):
+// `sanitizeLogoSvg` takes `{ maxBytes, words }`, so the intake runs it under the upload's 2 MB cap
+// with the upload's own sentences while the logo picker keeps `LOGO_MAX_BYTES` and `LOGO_WORDS`.
+// The mono tint (4.4) rewrites every fill and stroke over the same tree, and the attribution
+// `<desc>` of 4.2 is written into a cached file. Pure over strings; logos.test.ts pins each rule
+// with a fixture.
 import { LOGO_SOURCE, LOGO_WORDS } from '@turboslide/chrome/logo-model';
 
 /** The most bytes the picker reads of one mark (the largest sampled mark is 98,661 bytes). */
 export const LOGO_MAX_BYTES = 256 * 1024;
+
+/** The two sentences a refusal carries: over the cap (with the cap) and not readable. */
+export type SanitizeWords = {
+  tooLarge: (capBytes: number) => string;
+  broken: string;
+};
+
+/** The logo picker's words, the default (docs/FEATURES.md 4.7). */
+export const LOGO_SANITIZE_WORDS: SanitizeWords = {
+  tooLarge: (capBytes) => LOGO_WORDS.tooLarge(capBytes),
+  broken: LOGO_WORDS.broken,
+};
+
+/** What `sanitizeLogoSvg` runs under: the cap before parsing and the sentences of a refusal. */
+export type SanitizeOptions = {
+  maxBytes?: number;
+  words?: SanitizeWords;
+};
+
+/** An `image` href the walk keeps (docs/VECTOR.md 4.2): a raster data URI, base64, of the four formats. */
+const DATA_IMAGE_HREF = /^\s*data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+/=\s]*$/i;
+
+/** True when an `image` element's href is a raster data URI the walk keeps. */
+export function isDataImageHref(value: string): boolean {
+  return DATA_IMAGE_HREF.test(value);
+}
 
 /** The elements kept, SVG's case (4.7). */
 export const KEPT_ELEMENTS: ReadonlySet<string> = new Set([
@@ -210,26 +241,32 @@ export const KEPT_ATTRIBUTES: ReadonlySet<string> = new Set([
   'dy',
 ]);
 
-/** A file that does not parse (4.7): the sentence is the seller's. */
+/** A file that does not parse (4.7): the sentence is the seller's, the caller's words when given. */
 export class LogoBrokenError extends Error {
   readonly status = 422;
-  constructor(detail?: string) {
-    super(LOGO_WORDS.broken);
+  constructor(detail?: string, sentence: string = LOGO_WORDS.broken) {
+    super(sentence);
     this.name = 'LogoBrokenError';
     if (detail !== undefined) this.detail = detail;
   }
   detail?: string;
 }
 
-/** A file over the cap, refused before parsing (4.7). */
+/** A file over the cap, refused before parsing (4.7); the cap and the sentence are the caller's when given. */
 export class LogoTooLargeError extends Error {
   readonly status = 413;
-  constructor(bytes: number) {
-    super(LOGO_WORDS.tooLarge(LOGO_MAX_BYTES));
+  constructor(
+    bytes: number,
+    capBytes: number = LOGO_MAX_BYTES,
+    sentence: string = LOGO_WORDS.tooLarge(capBytes),
+  ) {
+    super(sentence);
     this.name = 'LogoTooLargeError';
     this.bytes = bytes;
+    this.capBytes = capBytes;
   }
   readonly bytes: number;
+  readonly capBytes: number;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -532,22 +569,29 @@ export function viewBoxOf(element: SvgElement): [number, number, number, number]
   return [x, y, w, h];
 }
 
-function keepAttribute(name: string, value: string): boolean {
+function keepAttribute(name: string, value: string, element: string): boolean {
   const lower = name.toLowerCase();
   if (lower.startsWith('on')) return false;
   if (name.startsWith('xmlns:')) return true;
   if (name.startsWith('aria-')) return true;
   if (!KEPT_ATTRIBUTES.has(name)) return false;
-  if (name === 'href' || name === 'xlink:href') return value.trim().startsWith('#');
+  if (name === 'href' || name === 'xlink:href')
+    return value.trim().startsWith('#') || (element === 'image' && isDataImageHref(value));
   if (name === 'style') return !styleReachesOut(value);
   return urlsAreLocal(value);
+}
+
+/** The href of an `image` element, `href` first, else `xlink:href`. */
+function imageHrefOf(element: SvgElement): string | undefined {
+  return attributeOf(element, 'href') ?? attributeOf(element, 'xlink:href');
 }
 
 /**
  * The allowlist walk over a parsed tree: kept elements keep their kept attributes and their
  * children; every other element leaves with its subtree and is recorded; a `<style>` whose text
- * imports or reaches out leaves too (its rules drew colours, so it counts as a draw); text stays
- * only inside `title`, `desc` and `style`.
+ * imports or reaches out leaves too (its rules drew colours, so it counts as a draw); an `image`
+ * stays only with a raster data URI href (docs/VECTOR.md 4.2) and leaves as a draw otherwise;
+ * text stays only inside `title`, `desc` and `style`.
  */
 export function sanitizeTree(root: SvgElement): {
   root: SvgElement;
@@ -562,12 +606,25 @@ export function sanitizeTree(root: SvgElement): {
     if (drew) draws = true;
   };
   const walk = (element: SvgElement): SvgElement => {
-    const attributes = element.attributes.filter(([name, value]) => keepAttribute(name, value));
+    const attributes = element.attributes.filter(([name, value]) =>
+      keepAttribute(name, value, element.name),
+    );
     const children: SvgNode[] = [];
     for (const child of element.children) {
       if (child.kind === 'text') {
         if (element.name === 'title' || element.name === 'desc') children.push(child);
         else if (element.name === 'style') children.push(child);
+        continue;
+      }
+      if (child.name === 'image') {
+        // an embedded raster stays (Figma's Copy as SVG); any other href, a data URI of another
+        // type (image/svg+xml included) or no href at all leaves as a draw
+        const href = imageHrefOf(child);
+        if (href === undefined || !isDataImageHref(href)) {
+          note('image', true);
+          continue;
+        }
+        children.push(walk(child));
         continue;
       }
       if (!KEPT_ELEMENTS.has(child.name)) {
@@ -597,26 +654,44 @@ export function sanitizeTree(root: SvgElement): {
 }
 
 /**
- * Sanitizes one logo file (4.7): the cap before parsing, the parse, the walk, the viewBox from
- * width and height when absent, the size. Throws LogoTooLargeError or LogoBrokenError.
+ * Sanitizes one svg file (4.7; docs/VECTOR.md 4.2): the cap before parsing, the parse, the walk,
+ * the viewBox from width and height when absent, the size. Throws LogoTooLargeError or
+ * LogoBrokenError carrying the caller's words (`options.words`; the logo picker's by default)
+ * under the caller's cap (`options.maxBytes`; `LOGO_MAX_BYTES` by default).
  */
-export function sanitizeLogoSvg(input: Uint8Array | string): SanitizedSvg {
+export function sanitizeLogoSvg(
+  input: Uint8Array | string,
+  options: SanitizeOptions = {},
+): SanitizedSvg {
+  const maxBytes = options.maxBytes ?? LOGO_MAX_BYTES;
+  const words = options.words ?? LOGO_SANITIZE_WORDS;
+  const broken = (detail: string): LogoBrokenError => new LogoBrokenError(detail, words.broken);
   const bytes = typeof input === 'string' ? new TextEncoder().encode(input) : input;
-  if (bytes.byteLength > LOGO_MAX_BYTES) throw new LogoTooLargeError(bytes.byteLength);
+  if (bytes.byteLength > maxBytes)
+    throw new LogoTooLargeError(bytes.byteLength, maxBytes, words.tooLarge(maxBytes));
   const text = typeof input === 'string' ? input : new TextDecoder('utf-8').decode(bytes);
   if (
     !/^\uFEFF?\s*(<\?xml[\s\S]*?\?>\s*)?(<!--[\s\S]*?-->\s*)*(<!DOCTYPE[^>]*>\s*)?(<!--[\s\S]*?-->\s*)*<svg[\s>]/i.test(
       text,
     )
   )
-    throw new LogoBrokenError('not an svg document');
-  const parsed = parseSvg(text);
-  const { root, removed, draws } = sanitizeTree(parsed);
+    throw broken('not an svg document');
+  let parsed: SvgElement;
+  let walked: ReturnType<typeof sanitizeTree>;
+  try {
+    parsed = parseSvg(text);
+    walked = sanitizeTree(parsed);
+  } catch (error) {
+    // the parser's and the walk's refusals carry the default sentence; the caller's words replace it
+    if (error instanceof LogoBrokenError) throw broken(error.detail ?? error.message);
+    throw error;
+  }
+  const { root, removed, draws } = walked;
   let viewBox = viewBoxOf(root);
   if (viewBox === null) {
     const w = parseLength(attributeOf(root, 'width'));
     const h = parseLength(attributeOf(root, 'height'));
-    if (w === null || h === null) throw new LogoBrokenError('no viewBox and no width and height');
+    if (w === null || h === null) throw broken('no viewBox and no width and height');
     viewBox = [0, 0, w, h];
     setAttribute(root, 'viewBox', `0 0 ${w} ${h}`);
   }

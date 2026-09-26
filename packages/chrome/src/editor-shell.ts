@@ -2,6 +2,7 @@ import type { AnchorHTMLAttributes, ComponentType, ReactNode } from 'react';
 
 import type { MarkSpec } from '@turboslide/identity/marks';
 import type { Asset } from '@turboslide/schema/assets';
+import { vectorOf } from '@turboslide/schema/assets';
 import type { DefaultKit } from '@turboslide/schema/brand';
 import type {
   Block,
@@ -1306,6 +1307,17 @@ export function imageEditedOf(block: Block | undefined): boolean {
   return false;
 }
 
+/**
+ * True when the picture's asset draws a vector (docs/VECTOR.md 4.1, 4.4): `vectorOf` answers its
+ * file. The one place the chrome reads the asset, so the Crop image row, the toolbar's Crop button
+ * and the viewer's refusal agree on what an svg picture is (vector/build/b1.md R2, b3.md R2).
+ */
+export function vectorPictureOf(deck: Deck, block: Block | undefined): boolean {
+  if (block?.type !== 'shot' && block?.type !== 'picture') return false;
+  const asset = deck.assets[block.asset];
+  return asset !== undefined && vectorOf(asset) !== undefined;
+}
+
 /** The context the menus evaluate their predicates over, from the editor's facts and the shell's settings. */
 export function buildMenuContext(
   input: Pick<
@@ -1405,6 +1417,8 @@ export function buildMenuContext(
       : {}),
     ...(picked?.range === undefined ? {} : { range: picked.range }),
     imageEdited: picked?.imageEdited ?? imageEditedOf(block),
+    /* the vector round (docs/VECTOR.md 4.4): an svg picture refuses the crop with the sentence */
+    ...(vectorPictureOf(input.document.deck, block) ? { vector: true } : {}),
     outlined: picked?.outlined ?? (block?.type === 'text' && block.outline !== undefined),
     ...(listLevel === undefined ? {} : { listLevel }),
     spaceBefore: typeof typography?.spaceBefore === 'number' && typography.spaceBefore > 0,
@@ -1586,7 +1600,6 @@ const DRAW_TOOL_OF: Readonly<Record<string, DrawTool>> = {
   'insert.shape.shapes.rectangle': { kind: 'shape', shape: 'rectangle' },
   'insert.shape.shapes.rounded': { kind: 'shape', shape: 'rounded' },
   'insert.shape.shapes.ellipse': { kind: 'shape', shape: 'ellipse' },
-  'insert.shape.arrows.arrow': { kind: 'line', line: 'arrow' },
   'insert.line.line': { kind: 'line', line: 'line' },
   'insert.line.arrow': { kind: 'line', line: 'arrow' },
   'insert.line.rule': { kind: 'line', line: 'rule' },
@@ -2368,6 +2381,8 @@ export function shapePickPlan(
         slideId: facts.slideId,
         blockIds: shapes.map((each) => each.id),
         kind: shape,
+        /* the old preset's adjust values leave with it, as the inspector's plate writes (docs/VECTOR.md 2.6) */
+        adjust: null,
         baseRevision: facts.revision,
       },
       label: 'Change shape',
@@ -2588,7 +2603,6 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     case 'insert.shape.shapes.rectangle':
     case 'insert.shape.shapes.rounded':
     case 'insert.shape.shapes.ellipse':
-    case 'insert.shape.arrows.arrow':
     case 'insert.line.line':
     case 'insert.line.arrow':
     case 'insert.line.rule':

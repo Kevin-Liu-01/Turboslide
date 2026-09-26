@@ -4,7 +4,7 @@
     "docs/gslides-parity/features/build/ship-two/preview-run3-core-gate.json",
     "docs/gslides-parity/features/build/ship-two/preview-run4-core-gate.json"
   ],
-  "rule": "docs/FEATURES.md 7.2 and docs/RETURN.md section 1 rule 2: parkedFeaturesOf over the last readings of the two gate runs of record on the enforce preview https://turboslide-ffc7yeovv-kl01s-projects.vercel.app built from 5f4c535; a row carrying parks red in both runs parks the controls it names, a parkable feature red through a row without parks in both runs is parked whole, a row of a feature parked whole is not listed a second time, and a row or feature red in one run and green in the other is flaky and is not listed; the previous ship's list (ship-f1afe1e.json) is carried forward where its rows did not read green in both runs, since the menu model's advanced flags follow this list, and a carried row green in both runs leaves it (leaves); the exceptions the ship rule makes over the gate's mechanical wouldPark are in notParked, each with its reason",
+  "rule": "docs/FEATURES.md 7.2 and docs/RETURN.md section 1 rule 2: parkedFeaturesOf over the last readings of the two gate runs of record on the enforce preview https://turboslide-ffc7yeovv-kl01s-projects.vercel.app built from 5f4c535; a row carrying parks red in both runs parks the controls it names, a parkable feature red through a row without parks in both runs is parked whole, a row of a feature parked whole is not listed a second time, and a row or feature red in one run and green in the other is flaky and is not listed; the previous ship's list (ship-ea332aa.json) is carried forward where its rows did not read green in both runs, since the menu model's advanced flags follow this list, and a carried row green in both runs leaves it (leaves); the exceptions the ship rule makes over the gate's mechanical wouldPark are in notParked, each with its reason",
   "parkedFeatures": ["inbox", "templates"],
   "parkedRows": [
     {
@@ -67,15 +67,15 @@
   "notParked": [
     {
       "feature": "brand",
-      "why": "the gate's wouldPark names it; the gate's wouldPark names it on brand.objects.kit-colours-first, a P1 row not on the build (FEATURES.md section 1); brand.colors.primary-live was red once (run 3) and green in run 4; every other brand row on the build is green in both runs"
+      "why": "the gate's wouldPark names it on brand.objects.kit-colours-first, a P1 row not on the build (FEATURES.md section 1); brand.colors.primary-live was red once (run 3) and green in run 4; every other brand row on the build is green in both runs"
     },
     {
       "feature": "fonts",
-      "why": "the gate's wouldPark names it; the gate's wouldPark names it; its entries fonts.picker.specimen-rows and fonts.table.takes-family are P1 rows not on the build (FEATURES.md section 1); every fonts row on the build is green in both runs"
+      "why": "the gate's wouldPark names it; its entries fonts.picker.specimen-rows and fonts.table.takes-family are P1 rows not on the build (FEATURES.md section 1); every fonts row on the build is green in both runs"
     },
     {
       "feature": "assist",
-      "why": "the gate's wouldPark names it; the gate's wouldPark names it; assist.outside-write.snackbar was red once (run 3) and green in run 4; assist.quota.429 is not driven with no Upstash on the preview, which PRODUCT.md 8.2 exempts as the environment's"
+      "why": "the gate's wouldPark names it; assist.outside-write.snackbar was red once (run 3) and green in run 4; assist.quota.429 is not driven with no Upstash on the preview, which PRODUCT.md 8.2 exempts as the environment's"
     },
     {
       "id": "logos.index.cached-offline",

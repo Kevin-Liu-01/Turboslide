@@ -6,6 +6,9 @@
 // toggle. The pixel reads are the toolkit's port of audit-chrome.mjs (RETURN.md 4.4): a computed
 // style can ask for a token the pixels never show (audit-chrome row 9), so these rows read the
 // screenshot. The chrome feature is unparkable (RETURN.md rule 2): a red row here blocks the ship.
+// The vector round (docs/VECTOR.md section 3, 6.1) adds the `menus.*` rows, the chrome's too: the
+// icons of the Insert and Format rows read from the menu bar and the right click menus with the
+// switch on, and the one family rule over every menu and the toolbar dropdowns.
 
 export const NAME = 'chrome';
 export const IDS = [
@@ -42,6 +45,10 @@ export const IDS = [
   'chrome.select.one-rule',
   'chrome.check.draws-check',
   'chrome.toolbar.bold-follows-selection',
+  /* the vector round (docs/VECTOR.md 3, 6.1): the icons on the visual rows, the chrome's rows */
+  'menus.icons.insert-rows',
+  'menus.icons.format-rows',
+  'menus.icons.one-family',
 ];
 
 const VIEWPORT = { width: 1440, height: 900 };
@@ -1514,5 +1521,358 @@ async function productRound(t) {
       };
     },
   );
-  await t.advancedBack('the chrome rows of the product round');
+  // ---- the vector round (docs/VECTOR.md section 3, 6.1): the icons on the visual rows, read
+  // from the menu bar, the right click menus and the toolbar dropdowns with the switch on
+  /**
+   * The icon of every visible menu row under a root selector: the svg inside `.ts-menu-ic` with
+   * its viewBox, size and joined path (`fill`/`stroke` of the first path tell a stroked glyph from
+   * a filled one), and anything else drawn there (a sprite `use`, an `img`).
+   */
+  const iconsUnder = (root) =>
+    page.evaluate(
+      (sel) =>
+        [...document.querySelectorAll(`${sel} [data-control^="menu."]`)]
+          .filter(
+            (el) =>
+              el.getClientRects().length > 0 &&
+              el.matches(
+                '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], .ts-menu-item, [data-control^="menu."]',
+              ),
+          )
+          .map((el) => {
+            const ic = el.querySelector(
+              ':scope > .ts-menu-ic, :scope > * > .ts-menu-ic, .ts-menu-ic',
+            );
+            const svg = ic?.querySelector('svg') ?? null;
+            const path = svg?.querySelector('path') ?? null;
+            return {
+              id: el.getAttribute('data-control'),
+              item: (el.getAttribute('data-control') ?? '').replace(/^menu\./, ''),
+              submenu: el.getAttribute('aria-haspopup') !== null,
+              slot: ic !== null,
+              svg: svg !== null,
+              viewBox: svg?.getAttribute('viewBox') ?? null,
+              width: svg?.getAttribute('width') ?? null,
+              height: svg?.getAttribute('height') ?? null,
+              d: svg
+                ? [...svg.querySelectorAll('path')].map((p) => p.getAttribute('d') ?? '').join(' ')
+                : '',
+              fillAttr: path?.getAttribute('fill') ?? svg?.getAttribute('fill') ?? null,
+              strokeAttr: path?.getAttribute('stroke') ?? svg?.getAttribute('stroke') ?? null,
+              others: ic
+                ? [...ic.querySelectorAll('use, img')].map((x) => x.tagName.toLowerCase())
+                : [],
+            };
+          }),
+      root,
+    );
+  const drawsGlyph = (icon) => Boolean(icon?.svg) && icon.d.trim() !== '';
+  const oneFamily = (icon) =>
+    icon.viewBox === '0 0 20 20' &&
+    icon.width === '16' &&
+    icon.height === '16' &&
+    icon.others.length === 0;
+  /**
+   * Every row of a menubar menu with its icon, the submenus hovered one level down (and the
+   * Insert > Shape container of the tree before the round two levels down), the menu closed after.
+   */
+  const readMenu = async (menuId, { select = null } = {}) => {
+    const out = new Map();
+    await t.clearAll();
+    /* a selection kept for the rows it enables (the Image rows, whose Replace image submenu opens
+       only on a picture) */
+    if (select !== null) await t.selectObject(select);
+    await t.openMenu(menuId);
+    const root = `#ts-menu-${menuId}`;
+    const take = (rows) => {
+      for (const r of rows) if (!out.has(r.id)) out.set(r.id, r);
+    };
+    const top = await iconsUnder(root);
+    take(top);
+    for (const parent of top.filter((r) => r.submenu)) {
+      await t.hoverRow(parent.item).catch(() => undefined);
+      await page
+        .locator(`${root} [data-control^="menu.${parent.item}."]`)
+        .first()
+        .waitFor({ timeout: 2000 })
+        .catch(() => undefined);
+      const children = (await iconsUnder(root)).filter((r) => r.item.startsWith(`${parent.item}.`));
+      take(children);
+      for (const inner of children.filter((r) => r.submenu)) {
+        await t.hoverRow(inner.item).catch(() => undefined);
+        await page
+          .locator(`${root} [data-control^="menu.${inner.item}."]`)
+          .first()
+          .waitFor({ timeout: 2000 })
+          .catch(() => undefined);
+        take((await iconsUnder(root)).filter((r) => r.item.startsWith(`${inner.item}.`)));
+      }
+    }
+    await t.closeMenus().catch(() => undefined);
+    return out;
+  };
+  /** The rows of an object's right click menu with their icons, the submenus hovered one level down. */
+  const readContext = async (blockId) => {
+    const out = new Map();
+    await t.clearAll();
+    await t.selectObject(blockId);
+    const b = await t.boxOf(blockId);
+    if (!b) return out;
+    await t.rightClickAt(b.free.x + b.free.w / 2, b.free.y + b.free.h / 2);
+    const root = '.ts-context-menu';
+    const top = await iconsUnder(root);
+    for (const r of top) out.set(r.id, r);
+    for (const parent of top.filter((r) => r.submenu)) {
+      await t.hoverContextRow(parent.item).catch(() => undefined);
+      await t.sleep(400);
+      for (const r of (await iconsUnder(root)).filter((r) => r.item.startsWith(`${parent.item}.`)))
+        if (!out.has(r.id)) out.set(r.id, r);
+    }
+    await t.press('Escape');
+    await t.sleep(200);
+    return out;
+  };
+  /** A toolbar dropdown's rows with their icons (the Image, Shape and Line buttons). */
+  const readDropdown = async (control) => {
+    await t.clearAll();
+    /* the Image and Line buttons run their item on a click and open the dropdown from their arrow;
+       the Shape button is one dropdown button (shapes.mjs named-rows) */
+    const opener = (await t.visible(`${control}.arrow`)) ? `${control}.arrow` : control;
+    if (!(await t.visible(opener))) return null;
+    await t.clickControl(opener);
+    await page
+      .locator('[id^="ts-menu-toolbar"] [data-control^="menu."]')
+      .first()
+      .waitFor({ timeout: 4000 })
+      .catch(() => undefined);
+    const rows = await iconsUnder('[id^="ts-menu-toolbar"]');
+    await t.press('Escape', 2);
+    return rows;
+  };
+  const describeMissing = (ids, map) =>
+    ids
+      .filter((id) => !drawsGlyph(map.get(`menu.${id}`)))
+      .map((id) => {
+        const r = map.get(`menu.${id}`);
+        return `${id} ${r ? (r.slot ? (r.svg ? 'an svg with no path' : 'an empty slot') : 'no icon slot') : 'not drawn'}`;
+      });
+
+  const INSERT_ICON_ROWS = [
+    'insert.image',
+    'insert.image.upload',
+    'insert.image.byUrl',
+    'insert.image.logo',
+    'insert.image.fromThisPresentation',
+    'insert.textBox',
+    'insert.shape',
+    'insert.shape.shapes.rectangle',
+    'insert.shape.shapes.rounded',
+    'insert.shape.shapes.ellipse',
+    'insert.shape.gallery',
+    'insert.shape.arrows',
+    'insert.shape.callouts',
+    'insert.shape.equation',
+    'insert.table',
+    'insert.chart',
+    'insert.chart.bar',
+    'insert.chart.column',
+    'insert.chart.line',
+    'insert.chart.pie',
+    'insert.diagram',
+    'insert.wordArt',
+    'insert.line',
+    'insert.line.line',
+    'insert.line.arrow',
+    'insert.line.rule',
+    'insert.line.elbowConnector',
+    'insert.line.curvedConnector',
+    'insert.line.curve',
+    'insert.line.polyline',
+    'insert.line.scribble',
+    'insert.specialCharacters',
+    'insert.slideNumbers',
+    'insert.logo',
+    'insert.icon',
+    'insert.material',
+    'insert.link',
+    'insert.comment',
+    'insert.newSlide',
+  ];
+  /* rows 3.2 names as unchanged that a build may not draw (a Google service row is omitted; the
+     shader row is ship two's): judged only while drawn */
+  const INSERT_OPTIONAL_ROWS = ['insert.audio', 'insert.video', 'insert.shader'];
+  const FORMAT_MENU_ROWS = [
+    'format.text.bold',
+    'format.alignIndent.left',
+    'format.alignIndent.center',
+    'format.alignIndent.right',
+    'format.alignIndent.justified',
+    'format.image.cropImage',
+    'format.image.maskImage',
+    'format.image.replaceImage',
+    'format.image.replaceImage.upload',
+    'format.image.replaceImage.byUrl',
+    'format.image.replaceImage.logo',
+    'format.image.replaceImage.fromThisPresentation',
+    'format.image.addCaption',
+    'format.image.resetImage',
+    'format.image.useOnEverySlide',
+    'format.image.imageOptions',
+    'format.bordersLines',
+    'format.bordersLines.borderColor',
+    'format.bordersLines.borderWeight',
+    'format.bordersLines.borderDash',
+    'format.bordersLines.lineStart',
+    'format.bordersLines.lineEnd',
+    'format.textFitting',
+    'format.formatOptions',
+  ];
+  /* the context only rows (model.ts contextOnly): Drop shadow and Change shape on a shape's right
+     click menu (the image list carries no Drop shadow row; the picture's shadow is the Format
+     options section), Edit data and Chart type on a chart's */
+  const SHAPE_CONTEXT_ROWS = ['format.changeShape', 'format.dropShadow'];
+  const CHART_CONTEXT_ROWS = ['format.editData', 'format.chartType'];
+
+  const iconsOn = await t.setAdvanced(true);
+  if (iconsOn) t.deck.advanced = true;
+  await t.step(
+    'menus.icons.insert-rows',
+    'open the Insert menu with the switch on and read every row of docs/VECTOR.md 3.2, the submenus hovered',
+    'each row holds an svg with a non empty path in its .ts-menu-ic',
+    async () => {
+      const insert = await readMenu('insert');
+      const missing = describeMissing(INSERT_ICON_ROWS, insert);
+      const optional = INSERT_OPTIONAL_ROWS.filter((id) => insert.has(`menu.${id}`));
+      const optionalMissing = describeMissing(optional, insert);
+      return {
+        ok: missing.length === 0 && optionalMissing.length === 0,
+        observed: `${insert.size} rows read (switch on ${iconsOn}); ${INSERT_ICON_ROWS.length - missing.length} of ${INSERT_ICON_ROWS.length} named rows draw a glyph; missing: ${missing.join(', ') || 'none'}${optional.length > 0 ? `; drawn optional rows ${optional.join(', ')} missing ${optionalMissing.join(', ') || 'none'}` : ''}`,
+      };
+    },
+  );
+  const placedForIcons = await t
+    .step(
+      null,
+      'setup: a rectangle, a chart and a picture on the title slide for the Format rows their selection enables',
+      'block.insert through the window API',
+      async () => {
+        const shape = await t.placeBlock(T, {
+          id: 'icons-shape',
+          type: 'shape',
+          shape: 'rectangle',
+          fill: 'plate',
+          stroke: 'ink',
+          pos: { x: 120, y: 560, w: 240, h: 160 },
+        });
+        const chart = await t.placeBlock(T, {
+          id: 'icons-chart',
+          type: 'chart',
+          kind: 'bar',
+          categories: ['North', 'South', 'West'],
+          series: [{ name: 'Bookings', values: [30, 45, 20] }],
+          pos: { x: 420, y: 520, w: 520, h: 300 },
+        });
+        const picture = await t.placePicture(
+          T,
+          { x: 1000, y: 560, w: 240, h: 160 },
+          'icons-picture',
+        );
+        return {
+          ok: Boolean(shape && chart && picture),
+          observed: `shape ${shape?.id ?? 'none'}, chart ${chart?.id ?? 'none'}, picture ${picture?.id ?? 'none'}`,
+        };
+      },
+    )
+    .then((r) => r.ok === true);
+  await t.step(
+    'menus.icons.format-rows',
+    "open the Format menu with the picture selected and read every row of 3.3, the submenus hovered; the shape's right click menu for Change shape; the chart's for Edit data and Chart type",
+    'each row draws an icon',
+    async () => {
+      await t.clearAll();
+      if (placedForIcons) await t.selectObject('icons-picture');
+      const format = await readMenu('format', { select: placedForIcons ? 'icons-picture' : null });
+      const missing = describeMissing(FORMAT_MENU_ROWS, format);
+      const shapeCtx = placedForIcons ? await readContext('icons-shape') : new Map();
+      const chartCtx = placedForIcons ? await readContext('icons-chart') : new Map();
+      const shapeMissing = describeMissing(SHAPE_CONTEXT_ROWS, shapeCtx);
+      const chartMissing = describeMissing(CHART_CONTEXT_ROWS, chartCtx);
+      return {
+        ok:
+          placedForIcons &&
+          missing.length === 0 &&
+          shapeMissing.length === 0 &&
+          chartMissing.length === 0,
+        observed: `Format menu: ${format.size} rows read, ${FORMAT_MENU_ROWS.length - missing.length} of ${FORMAT_MENU_ROWS.length} draw a glyph, missing ${missing.join(', ') || 'none'}; the shape's right click menu (${shapeCtx.size} rows): missing ${shapeMissing.join(', ') || 'none'}; the chart's (${chartCtx.size} rows): missing ${chartMissing.join(', ') || 'none'}`,
+      };
+    },
+  );
+  await t.step(
+    'menus.icons.one-family',
+    'open every menu of the bar (the submenus hovered) and the toolbar Image, Shape and Line dropdowns; read every icon under a row',
+    'every icon is svg[viewBox="0 0 20 20"][width="16"][height="16"]; no use, no img, no other viewBox; the eight line kinds are distinct stroked paths',
+    async () => {
+      const menus = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-control^="menubar."]')]
+          .filter((el) => el.tagName.toLowerCase() === 'button' && el.getClientRects().length > 0)
+          .map((el) => el.getAttribute('data-control').replace('menubar.', '')),
+      );
+      const all = new Map();
+      for (const id of menus)
+        for (const [k, v] of await readMenu(id)) if (!all.has(k)) all.set(k, v);
+      const dropdowns = {};
+      for (const control of ['toolbar.insertImage', 'toolbar.insertShape', 'toolbar.insertLine']) {
+        const rows = await readDropdown(control);
+        dropdowns[control] = rows === null ? 'no button' : `${rows.length} rows`;
+        for (const r of rows ?? [])
+          if (!all.has(`${control}:${r.id}`)) all.set(`${control}:${r.id}`, r);
+      }
+      const withIcon = [...all.values()].filter((r) => r.svg || r.others.length > 0);
+      const offFamily = withIcon.filter((r) => !oneFamily(r));
+      const lineKinds = [
+        'line',
+        'arrow',
+        'rule',
+        'elbowConnector',
+        'curvedConnector',
+        'curve',
+        'polyline',
+        'scribble',
+      ].map((k) => all.get(`menu.insert.line.${k}`));
+      const lineGlyphs = lineKinds.filter((r) => drawsGlyph(r));
+      const stroked = lineGlyphs.filter(
+        (r) => r.fillAttr === 'none' || (r.strokeAttr !== null && r.strokeAttr !== 'none'),
+      );
+      const distinctLines = new Set(lineGlyphs.map((r) => r.d)).size;
+      const linesOk = lineGlyphs.length === 8 && distinctLines === 8 && stroked.length === 8;
+      return {
+        ok: withIcon.length > 0 && offFamily.length === 0 && linesOk,
+        observed: `${menus.length} menus and ${Object.entries(dropdowns)
+          .map(([k, v]) => `${k} ${v}`)
+          .join(
+            ', ',
+          )}: ${all.size} rows, ${withIcon.length} with an icon, ${offFamily.length} off the family${
+          offFamily.length > 0
+            ? ` (${offFamily
+                .slice(0, 6)
+                .map(
+                  (r) =>
+                    `${r.id} viewBox ${r.viewBox} ${r.width}x${r.height}${r.others.length > 0 ? ` ${r.others.join('+')}` : ''}`,
+                )
+                .join('; ')})`
+            : ''
+        }; line kinds: ${lineGlyphs.length} glyphs, ${distinctLines} distinct, ${stroked.length} stroked`,
+      };
+    },
+  );
+  if (placedForIcons) {
+    for (const id of ['icons-shape', 'icons-chart', 'icons-picture']) {
+      const s = await t.settled();
+      await t
+        .invoke('block.remove', { baseRevision: s.revision, slideId: T, blockId: id })
+        .catch(() => undefined);
+    }
+    await t.settled();
+  }
+  await t.advancedBack('the chrome rows of the product round and the vector round');
 }

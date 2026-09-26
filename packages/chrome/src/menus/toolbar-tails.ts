@@ -380,8 +380,10 @@ const TEXT_TAIL: TailControl[] = [...fillAndBorder('text'), ...textControls(), F
  * because a shape holds text now. Parked whole in cycle 2 of the focus round with Insert > Shape
  * (docs/FOCUS.md section 4 under ruling (1); build/b3.md R14) and returned with it in the return
  * round (docs/RETURN.md 2.2, 3.2): Fill color, Border color, Border weight, Border dash, the text
- * controls, Format options, in Google's order. Change shape stays parked with the galleries (2.9),
- * so with the switch off the fill leads the tail and carries the divider.
+ * controls, Format options, in Google's order. Change shape was parked with the galleries (2.9)
+ * until the geometry interpreter drew the presets; the vector round (docs/VECTOR.md 2.6, item S7)
+ * returns it to the default view, where it leads the tail and carries the divider, and its plate
+ * draws every preset's own outline.
  */
 const SHAPE_TAIL: TailControl[] = [
   {
@@ -389,8 +391,6 @@ const SHAPE_TAIL: TailControl[] = [
     label: 'Change shape',
     icon: 'square-2-stack',
     status: 'now',
-    /* docs/FOCUS.md section 4: parked until the geometry interpreter draws the presets */
-    advanced: true,
     op: 'changeShape',
     dropdown: true,
     dividerBefore: true,

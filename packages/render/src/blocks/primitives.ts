@@ -5,10 +5,12 @@
 // (typography.ts). A shape is inline SVG filling its box, on the half-pixel grid for a 1 px
 // stroke the way a declared diagram is (report 03 section 5.11): the five legacy kinds draw as
 // they did in round one (byte for byte when no round two field is set), a preset of shapes.ts
-// draws its ECMA path from `shapePath` inset by half the stroke, a line kind draws its segments
-// or curve through the box, and the ten decorations of `lineEndPath` sit at the ends, sized as a
-// medium DrawingML line end for the stroke (decorationSize) and centred on the end for the circle,
-// square and diamond kinds the way PowerPoint and LibreOffice draw `oval` and `diamond`. The svg
+// draws the paths of its ECMA geometry from `shapeGeometry` inset by half the stroke, one `<path>`
+// per geometry path with its fill mode and stroke flag (docs/VECTOR.md 2.3), a line kind draws
+// its segments or curve through the box, and the ten decorations of `lineEndPath` sit at the
+// ends, sized as a medium DrawingML line end for the stroke (decorationSize) and centred on the
+// end for the circle, square and diamond kinds the way PowerPoint and LibreOffice draw `oval`
+// and `diamond`. The svg
 // carries data attributes the exporter reads back (scene/measure.ts): `data-shape`, and for a
 // line kind `data-from`, `data-to`, `data-heads`, `data-points`, `data-bend`, `data-start` and
 // `data-end` in the box's own pixels, so the PPTX gets a native line, connector or custom geometry
@@ -36,9 +38,10 @@ import {
   isLineKind,
   lineEndFilled,
   lineEndPath,
-  shapePath,
+  shapeGeometry,
   textInset,
 } from '@turboslide/schema/shapes';
+import type { GeometryFill } from '@turboslide/schema/shapes';
 import { typographyDeclarations } from '@turboslide/schema/typography';
 import { dataAttrs, raster, rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
@@ -311,12 +314,34 @@ export function catmullRomPath(points: ReadonlyArray<Point>, closed: boolean): s
 
 /**
  * The text rectangle of a shape block at its box (SPEC-2 2.2.17): `textInset` of shapes.ts through
- * the legacy id's preset, which is the whole box for every kind today (its docblock names the
- * exporter's reason), so the layer and the PPTX body insets agree.
+ * the legacy id's preset, the ECMA text rectangle of the preset at the block's box with its adjust
+ * values (docs/VECTOR.md 2.3: a rounded rectangle's label steps in by 29 percent of the corner
+ * radius, a right arrow's sits in the shaft); the Editable PPTX export subtracts the same
+ * rectangle from the measured insets, so the layer and the PPTX body insets agree.
  */
 export function shapeTextRect(block: BlockOf<'shape'>, w: number, h: number): Box {
   const presetKind = LEGACY_PRESETS[block.shape as keyof typeof LEGACY_PRESETS] ?? block.shape;
   return textInset(presetKind, w, h, block.adjust ?? []);
+}
+
+/**
+ * The overlay a shade fill mode draws over the block's fill (docs/VECTOR.md 2.3, question 5): the
+ * deck's palette has no shades, so `lighten` and `lightenLess` lay the paper token over the fill
+ * at 0.3 and 0.15 and `darken` and `darkenLess` the ink token; `norm` and `none` draw none.
+ */
+export function shadeOverlay(fill: GeometryFill): { token: Color; opacity: number } | undefined {
+  switch (fill) {
+    case 'lighten':
+      return { token: 'paper', opacity: 0.3 };
+    case 'lightenLess':
+      return { token: 'paper', opacity: 0.15 };
+    case 'darken':
+      return { token: 'ink', opacity: 0.3 };
+    case 'darkenLess':
+      return { token: 'ink', opacity: 0.15 };
+    default:
+      return undefined;
+  }
 }
 
 /**
@@ -489,16 +514,27 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
       break;
     }
     default: {
-      // a preset of shapes.ts (SPEC-2 2.3.1): the ECMA path at the box less the stroke, inset by
-      // half of it so the outline stays inside the box, with the adjust values of 2.3.2
-      const path = shapePath(
+      // a preset of shapes.ts (SPEC-2 2.3.1; docs/VECTOR.md 2.3): the ECMA geometry at the box
+      // less the stroke, inset by half of it so the outline stays inside the box, with the adjust
+      // values of 2.3.2; one path per geometry path in the file's order, filled with the block's
+      // fill for `norm`, none for `none`, and for a shade mode the block's fill under the overlay
+      // of shadeOverlay (only while the block has a fill; a shape with no fill shades nothing),
+      // with no outline where the definition says `stroke false` (a can's lid, an arrow's face)
+      const geometry = shapeGeometry(
         kind,
         Math.max(0, w - width),
         Math.max(0, h - width),
         block.adjust ?? [],
       );
       const translate = inset > 0 ? ` transform="translate(${px(inset)} ${px(inset)})"` : '';
-      body = `<path d="${path}" fill="${fill}" stroke="${stroke}" stroke-width="${px(width)}" stroke-linejoin="miter"${dashAttr}${translate}/>`;
+      for (const path of geometry.paths) {
+        const pathFill = path.fill === 'none' ? 'none' : fill;
+        const pathStroke = path.stroke ? stroke : 'none';
+        body += `<path d="${path.d}" fill="${pathFill}" stroke="${pathStroke}" stroke-width="${px(width)}" stroke-linejoin="miter"${dashAttr}${translate}/>`;
+        const shade = shadeOverlay(path.fill);
+        if (shade !== undefined && block.fill !== undefined)
+          body += `<path d="${path.d}" fill="${colorCss(shade.token)}" fill-opacity="${shade.opacity}" stroke="none" data-shade="${path.fill}"${translate}/>`;
+      }
       if (block.adjust !== undefined) open += ` data-adjust="${block.adjust.map(px).join(',')}"`;
       break;
     }

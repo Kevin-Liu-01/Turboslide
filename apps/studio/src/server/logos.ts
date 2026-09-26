@@ -1116,7 +1116,11 @@ export async function logoInsert(
     sourceBytes,
     'image/svg+xml',
   );
+  // the vector files (docs/VECTOR.md 4.1): the sanitized source itself for one neutral mark, and
+  // for a tinted mono or a light and dark pair the two svg strings this insert already holds, one
+  // file per appearance, so the sheet, the PDF and the web page draw the mark as vector
   let twins: AssetTwins;
+  let vector: AssetTwins;
   let size: [number, number];
   if ('neutral' in twinsSvg) {
     const raster = await rasterize(twinsSvg.neutral, rasterSize);
@@ -1126,6 +1130,7 @@ export async function logoInsert(
       'image/png',
     );
     twins = { neutral: put.relative };
+    vector = { neutral: sourcePut.relative };
     size = [raster.width, raster.height];
   } else {
     const light = await rasterize(twinsSvg.light, rasterSize);
@@ -1141,6 +1146,19 @@ export async function logoInsert(
       'image/png',
     );
     twins = { light: putLight.relative, dark: putDark.relative };
+    const lightBytes = new TextEncoder().encode(twinsSvg.light);
+    const darkBytes = new TextEncoder().encode(twinsSvg.dark);
+    const vectorLight = await deps.store.putAsset(
+      `assets/${id}.${logoDigest(lightBytes).slice(0, 8)}-light.svg`,
+      lightBytes,
+      'image/svg+xml',
+    );
+    const vectorDark = await deps.store.putAsset(
+      `assets/${id}.${logoDigest(darkBytes).slice(0, 8)}-dark.svg`,
+      darkBytes,
+      'image/svg+xml',
+    );
+    vector = { light: vectorLight.relative, dark: vectorDark.relative };
     size = [light.width, light.height];
   }
   const source: LogoAssetSource = {
@@ -1163,6 +1181,8 @@ export async function logoInsert(
     id,
     role: 'logo',
     alt: LOGO_WORDS.alt(row.title),
+    kind: 'svg',
+    vector,
     twins,
     size,
     scale: 3,

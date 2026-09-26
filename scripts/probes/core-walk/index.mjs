@@ -506,20 +506,37 @@ async function cleanupQuiet(t, deckId) {
       .goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' })
       .catch(() => undefined);
     await t.editorReady().catch(() => undefined);
-    const info = await t.invoke('deck.info').catch(() => null);
-    if (info) {
-      await t
-        .invoke('deck.trash', { id: deckId, baseRevision: info.revision })
-        .catch(() => undefined);
-      const again = await t.invoke('deck.info').catch(() => null);
-      await t
-        .invoke('deck.remove', {
-          id: deckId,
-          baseRevision: again?.revision ?? info.revision,
-          confirm: true,
-        })
-        .catch(() => undefined);
-    }
+    /* the last area's write settles first, and a write refused on a stale revision is tried once
+       more with a fresh one and printed (the vector round's shapes smokes left three decks
+       behind: the trash was refused after the area's last write and the refusal was swallowed) */
+    await t.settled().catch(() => undefined);
+    const write = async (action, input) => {
+      /* the tab's deck.info can lag the server by a checkpoint (the fourth shapes smoke: "baseRevision
+         90 is stale; the deck is at revision 91" on both tries), so a refusal that names the
+         server's revision is retried with that number */
+      let base = (await t.invoke('deck.info').catch(() => null))?.revision;
+      if (base === undefined) return 'no deck.info';
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          await t.invoke(action, { id: deckId, baseRevision: base, ...input });
+          return 'ok';
+        } catch (error) {
+          const message = error instanceof Error ? error.message.split('\n')[0] : String(error);
+          const named = /is at revision (\d+)/.exec(message);
+          if (attempt === 2 || !/stale|revision|conflict/i.test(message)) return message;
+          if (named) base = Number(named[1]);
+          else {
+            await t.settled().catch(() => undefined);
+            base = (await t.invoke('deck.info').catch(() => null))?.revision ?? base;
+          }
+        }
+      }
+      return 'not written';
+    };
+    const trashed = await write('deck.trash', {});
+    const removed = await write('deck.remove', { confirm: true });
+    if (trashed !== 'ok' || removed !== 'ok')
+      console.log(`cleanup (quiet) of ${deckId}: trash ${trashed}; remove ${removed}`);
     const until = Date.now() + 20_000;
     for (;;) {
       for (const route of ['edit', 'deck']) {

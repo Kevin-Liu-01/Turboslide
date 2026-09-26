@@ -42,6 +42,14 @@
 // `view` (ROW_FEATURE), the Background dialog among the control sources and the ids FEATURES.md
 // 5.3 to 5.6 declare for the gallery, the Shader section and the View row before the lanes' files
 // hold them.
+// packages/chrome/src/parked-controls.ts (B1's module, 7.2) from a ship's `parkedRows`. The
+// vector round (docs/VECTOR.md section 6) added the parkable feature `svg` (the SVG pictures:
+// the intake, the sheet, the copy, the sanitizer), the area `menus` whose rows belong to the
+// unparkable `chrome` (the icons on the visual rows, 3.2 to 3.4), the spec driver
+// `core/svg.spec.ts`, the six control ids of VECTOR.md 4.8 the svg rows' `parks` name before the
+// lanes' files hold them (`intake.svg.*`, `picture.svg.copy`, `export.svg.vector`), and retired
+// the row `logos.intake.svg-sentence` with its sentence (4.7), so ROW_FEATURE keeps the two
+// logos rows whose measurement belongs to export and images.
 //
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
@@ -102,11 +110,18 @@ export const CORE_FEATURES = Object.freeze([
      Shader is in the default view on the ship's branch and the run's parked list moves it behind
      Tools > Advanced tools if its rows are red */
   'shaders',
+  /* the vector round (docs/VECTOR.md 6.1): the SVG pictures, parkable; its rows park the six
+     control ids of 4.8 and never the feature whole */
+  'svg',
   'surface',
 ]);
 
-/** An id's first part that is not a feature name, with the feature its rows belong to. */
-export const AREA_FEATURE = Object.freeze({ collab: 'share' });
+/**
+ * An id's first part that is not a feature name, with the feature its rows belong to: the
+ * `collab` rows are the share feature's, and the `menus` rows of the vector round (the icons on
+ * the visual rows, docs/VECTOR.md 6.1) are the chrome's, so an icon row is unparkable.
+ */
+export const AREA_FEATURE = Object.freeze({ collab: 'share', menus: 'chrome' });
 
 /**
  * The rows whose feature is not their id's area (docs/FEATURES.md 7.1): a row of a new feature's
@@ -119,7 +134,8 @@ export const AREA_FEATURE = Object.freeze({ collab: 'share' });
  */
 export const ROW_FEATURE = Object.freeze({
   'logos.export.pdf-pptx-crisp': 'export',
-  'logos.intake.svg-sentence': 'images',
+  /* `logos.intake.svg-sentence` left with its sentence in the vector round (docs/VECTOR.md 4.7);
+     `svg.import.upload` measures the upload under the parkable feature `svg` */
   'logos.intake.url-sentence': 'images',
   'shaders.export.pdf-frame': 'export',
   'shaders.export.pptx-frame': 'export',
@@ -169,6 +185,9 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
      second context), the reduced motion context, the WebGL rows, the measurement row and the
      agent transports of the shader library */
   'core/shaders.spec.ts',
+  /* the vector round (docs/VECTOR.md 6.1): the svg intake by the chooser, a paste, a drop and a
+     URL, the sheet at two zooms, the picture gestures, the copy and the sanitizer rows */
+  'core/svg.spec.ts',
 ]);
 
 export const CORE_DRIVERS = Object.freeze([PROBE_DRIVER, ...CORE_SPEC_DRIVERS, COST_PROBE_DRIVER]);
@@ -356,6 +375,16 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'formatOptions.shader.play',
   'formatOptions.shader.frame.scrubber',
   'formatOptions.shader.frame.capture',
+  /* the vector round (docs/VECTOR.md 4.8): the six ids the svg rows' `parks` name, each read where
+     it acts through `isParked` of parked-controls.ts (the chooser's accept list and the client
+     sniff, the paste and drop handlers, the URL path, the copy handler, the Download dialog); the
+     viewer's files hold them once B3 and B1 land, and the ids are known here from day 0 */
+  'intake.svg.upload',
+  'intake.svg.paste',
+  'intake.svg.drop',
+  'intake.svg.url',
+  'picture.svg.copy',
+  'export.svg.vector',
 ]);
 
 let controlSourceText = null;

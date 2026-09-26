@@ -11,6 +11,7 @@ import { authorize, identityLabel, requestContext } from './authorize';
 import type { AuthContext } from './authorize';
 import { requireFlag } from './flags';
 import { RETENTION_MS, logSecurityEvent } from './log';
+import type { SanitizeWords } from './logo-sanitize';
 import {
   RateLimitedError,
   checkQuota,
@@ -27,7 +28,7 @@ import { downloadSecret } from './tokens';
  * over 3 MB cannot travel inside a function's 4.5 MB request body once base64 grows it, so
  * `POST /api/x/upload/picture` runs `authorize(write)`, the `uploads` switch and the picture
  * quotas, and issues a token for `uploads/<principalId>/<uuid>` with the identity's size cap and
- * the four content types, valid ten minutes; the browser PUTs the bytes; `asset.add { upload }`
+ * the five content types, valid ten minutes; the browser PUTs the bytes; `asset.add { upload }`
  * reads the object by key (`readUpload`), sniffs, decodes, re-encodes, puts the twins and deletes
  * the upload; unclaimed uploads are swept after 24 hours (`sweepUploads`).
  *
@@ -45,29 +46,34 @@ export const PRESIGN_THRESHOLD_BYTES = 3 * 1024 * 1024;
  * The reason a refused upload carries for the seller (the product round, docs/PRODUCT.md section
  * 2 rank 10; research 07 rule 22: a sentence, never a code or an action id). The chrome reads
  * `reason` off the route's JSON and shows "The picture could not be uploaded: <reason>"; `message`
- * stays the API's own line. Three sentences cover every refusal: the file is not a picture (the
- * declared type is not one of the four, or the bytes are not what was declared), the file is over
- * the tier's cap, the upload did not finish (a missing body, an expired token, a stream that
- * broke or overran its declared size, a second PUT of one token). The features round adds the
- * fourth (docs/FEATURES.md 4.7; audit-logos 4): an SVG while the raster path is off
- * (`TURBOSLIDE_SVG_RASTER`, flags.ts), which every logo site offers first and the hosted intake
- * refuses in a developer's sentence ("svg is not accepted here; send png, jpeg, webp or gif", the
- * API's line, unchanged). `notSvg` is a whole sentence with its own capital, not a reason after a
- * colon: the chrome shows it as it stands (row logos.intake.svg-sentence).
+ * stays the API's own line. Three sentences cover every refusal of a raster: the file is not a
+ * picture (the declared type is not one of the five, or the bytes are not what was declared), the
+ * file is over the tier's cap, the upload did not finish (a missing body, an expired token, a
+ * stream that broke or overran its declared size, a second PUT of one token). The vector round
+ * (docs/VECTOR.md 4.2) adds the two sentences of an svg the sanitizer refuses, over its own 2 MB
+ * cap or not readable; each is a whole sentence with its own capital after the colon, as the
+ * sanitizer throws it through `asset.add` and as the viewer's `picture-place.ts` repeats it (rows
+ * `svg.sanitize.cap`, `svg.sanitize.broken`). The features round's `notSvg` left with the flag it
+ * read (docs/VECTOR.md 4.7).
  */
 export const UPLOAD_REASONS = {
   notPicture: 'the file is not a picture',
   tooLarge: (maxBytes: number): string => `the file is over ${Math.round(maxBytes / MB)} MB`,
   unfinished: 'the upload did not finish',
-  notSvg: 'SVG files are not accepted yet. Export the logo as a PNG and upload that',
+  svgTooLarge: (maxBytes: number): string => `The SVG file is over ${Math.round(maxBytes / MB)} MB`,
+  svgBroken: 'This SVG file could not be read',
 } as const;
 
-/** True when a refusal's line is the intake's svg refusal (headless shared.ts imageInfo), whatever transport carried it. */
-export function isSvgRefusal(message: string): boolean {
-  return /\bsvg is not accepted here\b/i.test(message);
-}
-
 const MB = 1024 * 1024;
+
+/** The most bytes an uploaded svg may hold before the sanitizer parses it (docs/VECTOR.md 4.2, question 4: 2 MB). */
+export const SVG_UPLOAD_MAX_BYTES = 2 * MB;
+
+/** The sanitizer's words for an upload (`sanitizeLogoSvg`'s `words`): the two sentences above. */
+export const SVG_UPLOAD_WORDS: SanitizeWords = {
+  tooLarge: (capBytes) => UPLOAD_REASONS.svgTooLarge(capBytes),
+  broken: UPLOAD_REASONS.svgBroken,
+};
 
 /** The seller's reason for a refusal the route answers, from its code and status. */
 export function uploadFailureReason(refusal: {
@@ -78,19 +84,19 @@ export function uploadFailureReason(refusal: {
   if (refusal.code === 'payload_too_large' && refusal.maxBytes !== undefined)
     return UPLOAD_REASONS.tooLarge(refusal.maxBytes);
   if (refusal.code === 'not_picture') return UPLOAD_REASONS.notPicture;
-  if (refusal.code === 'not_svg') return UPLOAD_REASONS.notSvg;
   return UPLOAD_REASONS.unfinished;
 }
 
 /** How long an upload token is good for. */
 export const UPLOAD_TOKEN_TTL_MS = 10 * 60 * 1000;
 
-/** The content types an upload may declare (SPEC-3 8.5: png, jpeg, webp, gif hosted). */
+/** The content types an upload may declare (SPEC-3 8.5: png, jpeg, webp, gif hosted; svg since the vector round, docs/VECTOR.md 4.2). */
 export const UPLOAD_CONTENT_TYPES: ReadonlyArray<string> = [
   'image/png',
   'image/jpeg',
   'image/webp',
   'image/gif',
+  'image/svg+xml',
 ];
 
 export const UPLOADS_DIR = 'uploads';
@@ -204,7 +210,7 @@ export async function issueUploadGrant(
       refused: Response.json(
         {
           error: 'invalid_input',
-          message: 'send a png, jpeg, webp or gif',
+          message: 'send a png, jpeg, webp, gif or svg',
           reason: UPLOAD_REASONS.notPicture,
         },
         { status: 400 },
@@ -323,6 +329,7 @@ const SNIFF_BY_TYPE: Readonly<Record<string, SniffedFormat>> = {
   'image/jpeg': 'jpeg',
   'image/webp': 'webp',
   'image/gif': 'gif',
+  'image/svg+xml': 'svg',
 };
 
 export type PutResult =
@@ -339,8 +346,9 @@ export type PutResult =
 /**
  * `PUT /api/x/upload/put/<token>`: the body streamed to the local folder and counted, aborted the
  * moment it passes the token's cap (report 04 F3 sketch 5), then sniffed by its magic bytes; a
- * mismatch with the declared type, a fifth format or an svg is removed and refused with 400
- * (SPEC-3 8.5: nothing is written that fails the sniff).
+ * mismatch with the declared type or a sixth format is removed and refused with 400 (SPEC-3 8.5:
+ * nothing is written that fails the sniff). An svg that passes the sniff is sanitized by
+ * `asset.add { upload }` before anything decodes it (docs/VECTOR.md 4.2).
  */
 export async function receiveUpload(
   token: string,

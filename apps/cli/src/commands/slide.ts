@@ -328,9 +328,10 @@ async function slideImportCommand(ctx: CommandContext): Promise<number> {
 }
 
 /**
- * What slide.import reads from a sibling deck under decks/: its document, and a copy of each asset
- * file (the twins and the source file) into the target deck. RangeError when the deck or a file is
- * missing; the slug schema on sourceDeckId keeps the path inside the decks folder.
+ * What slide.import reads from a sibling deck under decks/: its document, and a copy of each file
+ * `assetFiles` names (the twins, the vector files and the source file) into the target deck.
+ * RangeError when the deck or a file is missing; the slug schema on sourceDeckId keeps the path
+ * inside the decks folder.
  */
 export function slideImportSource(
   decksDir: string,

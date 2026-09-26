@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The svg fixture of the core specs (docs/VECTOR.md 6.1, core/svg.spec.ts): a rect and a circle at 96 by 64, under 1 KB; the intake keeps it as vector and its box takes this aspect. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="64" viewBox="0 0 96 64">
+  <rect x="0" y="0" width="96" height="64" fill="#1b1b1b"/>
+  <circle cx="48" cy="32" r="20" fill="#e8e8e8"/>
+  <rect x="8" y="8" width="16" height="16" fill="#e8e8e8"/>
+</svg>

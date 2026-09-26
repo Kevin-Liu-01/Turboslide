@@ -154,8 +154,10 @@ describe('Overlay on a freeform slide', () => {
     expect(seTip.doc).toMatch(/bottom right corner/);
     expect(seTip.doc).toMatch(/Shift keeps the aspect/);
     // the se square sits on the block's bottom right corner, at the stage scale
-    expect(se.style.left).toBe('250px');
-    expect(se.style.top).toBe('150px');
+    /* the text ring stands 10 sheet px off a text block (text-ring.ts), 5 CSS px at this scale,
+       and the squares sit on the ring */
+    expect(se.style.left).toBe('255px');
+    expect(se.style.top).toBe('155px');
     // every control carries the tooltip primitive and no native title
     for (const button of container.querySelectorAll<HTMLButtonElement>('button')) {
       expect(button.getAttribute('data-tip')).toBeTruthy();
@@ -217,7 +219,8 @@ describe('Overlay on a freeform slide', () => {
     expect(ring.dataset['shape']).toBe('ring');
     /* the box a is 200..500 by 200..300 at k 0.5: the ring sits 24 px above the top centre */
     expect(ring.style.left).toBe('175px');
-    expect(ring.style.top).toBe(`${100 - 24}px`);
+    /* the ring's top edge is the text ring's, 5 CSS px above the block's at this scale */
+    expect(ring.style.top).toBe(`${100 - 5 - 24}px`);
     fireEvent.keyDown(ring, { key: 'ArrowRight' });
     fireEvent.keyDown(ring, { key: 'ArrowLeft', shiftKey: true });
     const calls = (view.onHandleNudge as ReturnType<typeof vi.fn>).mock.calls;

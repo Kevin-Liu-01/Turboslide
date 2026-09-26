@@ -2745,6 +2745,12 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .describe(
           'Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)',
         ),
+      svgVector: z
+        .boolean()
+        .optional()
+        .describe(
+          'Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects',
+        ),
       baseline: z
         .enum(['libreoffice', 'none'])
         .optional()
@@ -2793,7 +2799,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       omit: ['batch', 'merge'],
 
       usage:
-        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --include-comments --verify --out <out>',
+        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --include-comments --no-svg-vector --verify --out <out>',
     },
     mcp: 'deck_export',
     example: { format: 'pptx', mode: 'flatten', theme: ['light'], fonts: 'exact', verify: true },

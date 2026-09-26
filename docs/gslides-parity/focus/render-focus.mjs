@@ -55,6 +55,8 @@ const FEATURES = [
   ['logos', 'FEATURES 4 The logo picker'],
   /* the features round, ship two (docs/FEATURES.md section 5, 7.1): the shader library */
   ['shaders', 'FEATURES 5 The shader library'],
+  /* the vector round (docs/VECTOR.md section 4, 6.1): the SVG pictures */
+  ['svg', 'VECTOR 4 SVG pictures'],
   ['surface', '3 The switch'],
 ];
 const STATES = ['works', 'broken', 'flaky', 'not driven'];
@@ -114,6 +116,7 @@ const README = {
     "**Logos.** Insert > Logo searches the brand marks of thesvg.org by company name and places the mark on the slide at a logo size, stored on the presentation as its own picture with the brand's licence words; your own brand kit's logo comes first, the tiles show every mark on paper and on ink, and a check puts the mark on the title slide and in every footer. Replace image > Logo swaps a customer's logo and keeps its box, and Tailor for a customer finds the new customer's logo. The picker answers from a daily refreshed index while thesvg.org is down.",
   shaders:
     "**Shaders.** Insert > Shader opens a gallery of the shader library with a black and white thumbnail per shader and its presets; one click places the shader on the slide, selected, where it moves and resizes like a picture. Format options shows the shader's controls as sliders with a number field each: Strength, Detail, Frequency, Amplitude, Density, Brightness, Grain, Rotation, Center and Speed, with the presets as tiles and the brand kit's six colours as its palette. A still of the shader is captured in the editor 800 ms after the last change and is what the show, the view link, the PDF, the PowerPoint files and the web page carry; Change background places a shader as the slide's ground or says in one sentence why it could not. Every shader action is also on the CLI, MCP and HTTP transports.",
+  svg: '**SVG pictures.** Upload an SVG file, drop it on the slide, paste it as a file or as markup, or fetch it by URL; it lands as a picture that stays sharp at every zoom, moves, resizes and rotates like any picture, and copies its markup back to the clipboard. The PDF keeps it as vector, the PowerPoint file carries the vector beside a PNG fallback, and the web page inlines it.',
   surface:
     '**For agents and advanced tools.** Every action the editor runs is also a CLI command, an MCP tool, an HTTP route and a window function, including the features behind Tools > Advanced tools. `GET /api/agent` lists them.',
 };

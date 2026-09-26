@@ -429,14 +429,17 @@ function checkConnectors(slide: Slide, file: string, issues: Issue[]): void {
       }
       const count = siteCount(target);
       if (attachment.site >= count) {
-        complete = false;
+        /* the vector round (docs/VECTOR.md 2.2; vector/build/b2.md request 2): a stored index at
+           or past the count reads as an unattached end on every transport (siteAt answers
+           undefined, followConnectors leaves the end where it is), so the rule is a warning and
+           the write goes through; a new attachment by action still meets attachConnector's refusal */
         issues.push(
           issue(
             'connect',
-            3,
+            2,
             file,
             `${pointer}/${which}/site`,
-            `Connector "${block.id}" names site ${attachment.site} of "${attachment.block}", which has ${count} connection site(s) (gslides-parity SPEC-2 2.4.7)`,
+            `Connector "${block.id}" names site ${attachment.site} of "${attachment.block}", which has ${count} connection site(s); the end reads as an unattached end (gslides-parity SPEC-2 2.4.7; docs/VECTOR.md 2.2)`,
           ),
         );
       }

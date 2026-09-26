@@ -299,38 +299,47 @@ export function urlFailureSentence(reason: string): string {
 }
 
 /** The reasons the failure sentence names (rank 10: a sentence, never a code or an action id). */
-export type UploadFailure = 'not-a-picture' | 'too-large' | 'did-not-finish' | 'not-svg';
+export type UploadFailure =
+  'not-a-picture' | 'too-large' | 'did-not-finish' | 'svg-too-large' | 'svg-broken';
 
 /**
- * The seller's sentence for an svg the hosted intake refuses (docs/FEATURES.md 4.7; the same
- * words as the studio's `UPLOAD_REASONS.notSvg`, which the viewer cannot import): whole, so the
- * snackbar never reads the intake's own line or "the upload did not finish".
+ * The sanitizer's two sentences for an svg the intake refuses (docs/VECTOR.md 4.2; the same words
+ * as the studio's `UPLOAD_REASONS.svgTooLarge` and `svgBroken`, which the viewer cannot import):
+ * whole sentences with their own capital after the colon, so the snackbar never reads a raster
+ * sentence for an svg.
  */
-export const NOT_SVG_SENTENCE =
-  'SVG files are not accepted yet. Export the logo as a PNG and upload that';
+export const SVG_TOO_LARGE_SENTENCE = 'The SVG file is over 2 MB';
+export const SVG_BROKEN_SENTENCE = 'This SVG file could not be read';
+
+/** The sentence of a crop asked for on an svg picture (docs/VECTOR.md 4.4): the toolbar's Crop, the menu row and the double click all read it. */
+export const SVG_CROP_SENTENCE = 'An SVG picture cannot be cropped. Resize it instead';
 
 /** The one sentence of a refused upload, with its reason (rank 10; the snackbar `snackbar.upload.failed`). */
 export function uploadFailureSentence(reason: UploadFailure, maxMb: number): string {
-  if (reason === 'not-svg') return NOT_SVG_SENTENCE;
   const why =
     reason === 'not-a-picture'
       ? 'the file is not a picture'
       : reason === 'too-large'
         ? `the file is over ${maxMb} MB`
-        : 'the upload did not finish';
+        : reason === 'svg-too-large'
+          ? SVG_TOO_LARGE_SENTENCE
+          : reason === 'svg-broken'
+            ? SVG_BROKEN_SENTENCE
+            : 'the upload did not finish';
   return `The picture could not be uploaded: ${why}`;
 }
 
 /**
- * The reason a server refusal or a failed call stands for, read from its message: a decode or
- * format refusal is "not a picture", a size or body refusal "too large", anything else (a timeout,
- * a network error, a stale base) "did not finish".
+ * The reason a server refusal or a failed call stands for, read from its message: the sanitizer's
+ * two svg sentences first (docs/VECTOR.md 4.2), then a decode or format refusal as "not a
+ * picture", a size or body refusal as "too large", anything else (a timeout, a network error, a
+ * stale base) as "did not finish".
  */
 export function uploadFailureOf(error: unknown): UploadFailure {
-  const message = (error instanceof Error ? error.message : String(error)).toLowerCase();
-  /* the intake's svg line ("svg is not accepted here; send png, jpeg, webp or gif") and the
-     presigned route's `not_svg` code read as the seller's sentence (docs/FEATURES.md 4.7) */
-  if (/svg is not accepted|not_svg/.test(message)) return 'not-svg';
+  const raw = error instanceof Error ? error.message : String(error);
+  if (raw.includes(SVG_TOO_LARGE_SENTENCE)) return 'svg-too-large';
+  if (raw.includes(SVG_BROKEN_SENTENCE)) return 'svg-broken';
+  const message = raw.toLowerCase();
   if (
     /unsupported|not (a|an) (picture|image)|decode|input buffer|corrupt|invalid (png|jpeg|image)|no image|unknown format|bad image|vips|sharp/.test(
       message,

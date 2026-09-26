@@ -202,11 +202,13 @@ describe('turboslide export pptx arguments', () => {
   });
 
   test('--help names export check and every flag of the generated export contracts', () => {
-    // Two options are spelled differently on the command line: the subset is the `[ids|all]`
-    // positionals of every slide command, and quickLook is the `--no-quick-look` switch.
+    // Three options are spelled differently on the command line: the subset is the `[ids|all]`
+    // positionals of every slide command, and the two booleans that default to true, quickLook and
+    // svgVector (docs/VECTOR.md 4.6), are the `--no-quick-look` and `--no-svg-vector` switches.
     const spelled: Record<string, string> = {
       '--slide-ids': '[ids|all]',
       '--quick-look': '--no-quick-look',
+      '--svg-vector': '--no-svg-vector',
     };
     const cli = generateCli();
     for (const id of ['export.run', 'export.check']) {

@@ -219,7 +219,9 @@ describe('the chip the press arms (Editor armPress, chipHandleFor): the whole ar
     );
     expect(chip).toBeDefined();
     expect(chip?.kind).toBe('free-move');
-    expect(chip?.box).toEqual([100, 100, 400, 80]);
+    /* the text ring stands 10 sheet px off the text box (text-ring.ts), and the drag surface is
+       the ring's whole area, the band included */
+    expect(chip?.box).toEqual([90, 90, 420, 100]);
     expect(chip?.cursor).toBe('move');
   });
 

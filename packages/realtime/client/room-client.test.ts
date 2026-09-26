@@ -2319,4 +2319,93 @@ describe('the sync and costs round: acknowledgement by id, undo past remote entr
       await h.room.stop();
     }
   });
+
+  it('makes no reject card for an op its record’s echo acknowledged while the POST was in flight when the answer then refuses it (the vector round fix round; VERIFICATION.md "Vector round, pass 1" finding 1)', async () => {
+    const document = normalized();
+    const r0 = document.deck.revision;
+    let onEvent: ((event: RoomEvent) => void) | null = null;
+    let release: (() => void) | null = null;
+    const posts: OpsPost[] = [];
+    const transport: RoomTransport & { fire: (event: RoomEvent) => void } = {
+      fire(event) {
+        onEvent?.(event);
+      },
+      open(o: OpenOptions) {
+        onEvent = o.onEvent;
+        return { close: () => undefined };
+      },
+      async postOps(body) {
+        posts.push(structuredClone(body));
+        await new Promise<void>((resolve) => (release = resolve));
+        // the store committed the first attempt and this instance placed the op again against
+        // a document holding it: the reducer's word, no entry
+        return {
+          ok: true,
+          entries: [],
+          rejected: body.entries.map((entry) => ({
+            opId: entry.opId,
+            reason: 'invalid' as const,
+            message: 'Block "shape-6" already exists on slide "blank-7"',
+          })),
+          head: r0 + 1,
+          revision: r0 + 1,
+        };
+      },
+      async postPresence() {
+        return undefined;
+      },
+    };
+    const rejected: { opId: string }[] = [];
+    const changes: DocumentChange[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: r0,
+      tier: 'blob',
+      transform: testTransform,
+      onChange: (change) => changes.push(change),
+      onReject: (r) => rejected.push(r),
+    });
+    room.start();
+    transport.fire({
+      type: 'hello',
+      seq: r0,
+      revision: r0,
+      clientId: TAB_A,
+      role: 'editor',
+      clients: [],
+      editing: 1,
+      tier: 'blob',
+    });
+    const before = textOf(room.document());
+    const word = room.apply([splice(0, 0, 'ab')], 'type');
+    await until(() => posts.length === 1);
+    const opId = posts[0]!.entries[0]!.opId;
+    // the record's echo reaches the tab before the answer: the op is acknowledged at r0 + 1
+    transport.fire({
+      type: 'op',
+      entry: {
+        seq: r0 + 1,
+        rev: r0,
+        kind: 'edit',
+        author: kevin.author,
+        clientId: TAB_A,
+        opId: `store:${r0 + 1}`,
+        mutations: [splice(0, 0, 'ab')],
+        at: new Date().toISOString(),
+        covers: [opId],
+      },
+    });
+    expect(await word.settled).toEqual({ seq: r0 + 1 });
+    expect(room.status()).toMatchObject({ pending: 0, seq: r0 + 1 });
+    // the answer refuses the same op id: no card, nothing re-folded, the word once
+    (release as (() => void) | null)?.();
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(rejected).toEqual([]);
+    expect(room.rejects()).toEqual([]);
+    expect(changes.some((change) => change.reason === 'reject')).toBe(false);
+    expect(textOf(room.document())).toBe(`ab${before}`);
+    await room.stop();
+  });
 });

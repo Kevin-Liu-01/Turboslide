@@ -15,7 +15,7 @@ import type { Block, ShapeBlock, ShapeOrientation, TextBlock } from './blocks.ts
 import type { Color } from './color.ts';
 import type { Position } from './position.ts';
 import { SHEET_HEIGHT, SHEET_WIDTH } from './render.ts';
-import { rectSites } from './shapes.ts';
+import { sites } from './shapes.ts';
 
 export { DIAGRAM_KINDS, DIAGRAM_STYLES };
 export type { DiagramKind, DiagramStyle };
@@ -185,11 +185,14 @@ function segment(
   };
 }
 
-/** The index of the rectangle site nearest a point (the eight of `rectSites`), for `connect`. */
-function nearestSiteIndex(box: Box, point: Point): number {
+/**
+ * The index of the site of a shape kind nearest a point, for `connect`: the preset's own sites
+ * since the vector round (docs/VECTOR.md 2.2; a rounded rectangle's ECMA four, a rectangle's eight).
+ */
+function nearestSiteIndex(box: Box, point: Point, shape: string): number {
   let best = 0;
   let bestDistance = Number.POSITIVE_INFINITY;
-  for (const [index, site] of rectSites(box.w, box.h).entries()) {
+  for (const [index, site] of sites(shape, box.w, box.h).entries()) {
     const distance = Math.hypot(box.x + site.x - point.x, box.y + site.y - point.y);
     if (distance < bestDistance) {
       bestDistance = distance;
@@ -199,8 +202,8 @@ function nearestSiteIndex(box: Box, point: Point): number {
   return best;
 }
 
-function sitePoint(box: Box, site: number): Point {
-  const found = rectSites(box.w, box.h)[site] ?? { x: box.w / 2, y: box.h / 2, angle: 0 };
+function sitePoint(box: Box, site: number, shape: string): Point {
+  const found = sites(shape, box.w, box.h)[site] ?? { x: box.w / 2, y: box.h / 2, angle: 0 };
   return { x: box.x + found.x, y: box.y + found.y };
 }
 
@@ -210,16 +213,16 @@ function sitePoint(box: Box, site: number): Point {
  */
 function link(
   id: string,
-  from: { id: string; box: Box },
-  to: { id: string; box: Box },
+  from: { id: string; box: Box; shape: string },
+  to: { id: string; box: Box; shape: string },
   z: number,
   group: string,
   arrow: boolean,
 ): ShapeBlock {
-  const startSite = nearestSiteIndex(from.box, centre(to.box));
-  const endSite = nearestSiteIndex(to.box, centre(from.box));
-  const start = sitePoint(from.box, startSite);
-  const end = sitePoint(to.box, endSite);
+  const startSite = nearestSiteIndex(from.box, centre(to.box), from.shape);
+  const endSite = nearestSiteIndex(to.box, centre(from.box), to.shape);
+  const start = sitePoint(from.box, startSite, from.shape);
+  const end = sitePoint(to.box, endSite, to.shape);
   const placed = segment(start, end);
   const connect = placed.swapped
     ? { start: { block: to.id, site: endSite }, end: { block: from.id, site: startSite } }
@@ -421,14 +424,15 @@ function makeProcess(count: number, style: DiagramStyle, box: Box, group: string
   const stepH = Math.min(160, box.h * 0.4);
   const y = box.y + (box.h - stepH) / 2;
   const out: Block[] = [];
-  let previous: { id: string; box: Box } | undefined;
+  let previous: { id: string; box: Box; shape: string } | undefined;
   for (let index = 0; index < count; index += 1) {
     const b: Box = { x: box.x + index * (stepW + gap), y, w: stepW, h: stepH };
     const id = `step-${index + 1}`;
+    const step = { id, box: b, shape: 'roundRect' };
     if (previous !== undefined)
-      out.push(link(`link-${index}`, previous, { id, box: b }, out.length, group, true));
+      out.push(link(`link-${index}`, previous, step, out.length, group, true));
     out.push(...node(id, 'roundRect', `Step ${index + 1}`, b, look, out.length, group));
-    previous = { id, box: b };
+    previous = step;
   }
   return out;
 }
@@ -463,7 +467,7 @@ function makeCycle(count: number, style: DiagramStyle, box: Box, group: string):
   const rx = (box.w - stepW) / 2;
   const ry = (box.h - stepH) / 2;
   const c = centre(box);
-  const boxes: { id: string; box: Box }[] = [];
+  const boxes: { id: string; box: Box; shape: string }[] = [];
   for (let index = 0; index < count; index += 1) {
     const angle = -Math.PI / 2 + (index * 2 * Math.PI) / count;
     const b: Box = {
@@ -472,7 +476,7 @@ function makeCycle(count: number, style: DiagramStyle, box: Box, group: string):
       w: stepW,
       h: stepH,
     };
-    boxes.push({ id: `step-${index + 1}`, box: b });
+    boxes.push({ id: `step-${index + 1}`, box: b, shape: 'roundRect' });
   }
   const out: Block[] = [];
   for (const [index, entry] of boxes.entries()) {

@@ -1,0 +1,30 @@
+light: deck untitled-20260925-z5t2 made from /new
+light: Insert rows insert.image:icon insert.image.upload:icon insert.image.logo:icon insert.image.byUrl:icon insert.logo:icon insert.textBox:icon insert.shape:icon insert.table:icon insert.chart:icon insert.diagram:icon insert.wordArt:icon insert.line:icon insert.link:icon insert.comment:icon insert.newSlide:icon insert.slideNumbers:icon
+light: Insert > Shape rows insert.shape.shapes.rectangle, insert.shape.shapes.rounded, insert.shape.shapes.ellipse, insert.shape.gallery, insert.shape.arrows, insert.shape.callouts, insert.shape.equation
+light: gallery plate 99 tiles, 94 distinct glyphs
+light: arrows plate 26 tiles, 26 distinct glyphs
+light: callouts plate 4 tiles, 4 distinct glyphs
+light: equation plate 6 tiles, 6 distinct glyphs
+light: Insert > Line rows (submenu id not matched)
+light: toolbar Shape rows insert.shape.shapes.rectangle:icon insert.shape.shapes.rounded:icon insert.shape.shapes.ellipse:icon insert.shape.gallery:icon insert.shape.arrows:icon insert.shape.callouts:icon insert.shape.equation:icon
+light: svg pasted in 1469 ms, src /decks/untitled-20260925-z5t2/assets/pasted.svg, object-fit contain
+light: picture selected; toolbar Crop aria-disabled true, label "Crop image"
+light: Format > Image > Crop image reads aria-disabled true Crop image; tooltip "Crop imageAn SVG picture cannot be cropped. Resize it instead."
+light: Format rows format.text:icon format.alignIndent:none format.spacing:none format.bulletsNumbering:none format.table:icon format.image:icon format.image.cropImage:icon format.image.maskImage:icon format.image.replaceImage:icon format.image.addCaption:icon format.image.resetImage:icon format.image.useOnEverySlide:icon format.image.imageOptions:icon format.bordersLines:icon format.formatOptions:icon format.clearFormatting:none format.textFitting:icon
+light: at 200 percent the picture draws pasted.svg at 1642 css px (natural 96)
+teardown untitled-20260925-z5t2: /edit answers 404
+dark: deck untitled-20260925-p3co made from /new
+dark: Insert rows insert.image:icon insert.image.upload:icon insert.image.logo:icon insert.image.byUrl:icon insert.logo:icon insert.textBox:icon insert.shape:icon insert.table:icon insert.chart:icon insert.diagram:icon insert.wordArt:icon insert.line:icon insert.link:icon insert.comment:icon insert.newSlide:icon insert.slideNumbers:icon
+dark: Insert > Shape rows insert.shape.shapes.rectangle, insert.shape.shapes.rounded, insert.shape.shapes.ellipse, insert.shape.gallery, insert.shape.arrows, insert.shape.callouts, insert.shape.equation
+dark: gallery plate 99 tiles, 94 distinct glyphs
+dark: arrows plate 26 tiles, 26 distinct glyphs
+dark: callouts plate 4 tiles, 4 distinct glyphs
+dark: equation plate 6 tiles, 6 distinct glyphs
+dark: Insert > Line rows (submenu id not matched)
+dark: toolbar Shape rows insert.shape.shapes.rectangle:icon insert.shape.shapes.rounded:icon insert.shape.shapes.ellipse:icon insert.shape.gallery:icon insert.shape.arrows:icon insert.shape.callouts:icon insert.shape.equation:icon
+dark: svg pasted in 1315 ms, src /decks/untitled-20260925-p3co/assets/pasted.svg, object-fit contain
+dark: picture selected; toolbar Crop aria-disabled true, label "Crop image"
+dark: Format > Image > Crop image reads aria-disabled true Crop image; tooltip "Crop imageAn SVG picture cannot be cropped. Resize it instead."
+dark: Format rows format.text:icon format.alignIndent:none format.spacing:none format.bulletsNumbering:none format.table:icon format.image:icon format.image.cropImage:icon format.image.maskImage:icon format.image.replaceImage:icon format.image.addCaption:icon format.image.resetImage:icon format.image.useOnEverySlide:icon format.image.imageOptions:icon format.bordersLines:icon format.formatOptions:icon format.clearFormatting:none format.textFitting:icon
+dark: at 200 percent the picture draws pasted.svg at 1642 css px (natural 96)
+teardown untitled-20260925-p3co: /edit answers 404

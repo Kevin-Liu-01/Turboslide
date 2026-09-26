@@ -1,0 +1,249 @@
+{
+  "base": "https://turboslide-1ncbsb9tb-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-25T06:34:49.698Z",
+  "ms": 190428,
+  "parked": {
+    "commit": "f1afe1e",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "tables.edge.add-row-column",
+        "parks": [
+          "handle.table.add.column",
+          "handle.table.add.row"
+        ]
+      },
+      {
+        "id": "tables.heads.select-row-column",
+        "parks": [
+          "handle.table.head.column",
+          "handle.table.head.row"
+        ]
+      },
+      {
+        "id": "tables.seam.row-drag",
+        "parks": [
+          "handle.table.row"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      },
+      {
+        "id": "wordart.tail.fill-outline",
+        "parks": [
+          "toolbar.wordart.outline"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 190421,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/vector/integrator/gate-preview2-svg/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "rows": 12,
+  "passed": 10,
+  "failed": 2,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "commit": "49d5f2f",
+  "origin": "https://turboslide-1ncbsb9tb-kl01s-projects.vercel.app",
+  "date": "2026-09-25",
+  "results": {
+    "svg.import.upload": "passed",
+    "svg.import.paste-file": "passed",
+    "svg.import.paste-markup": "passed",
+    "svg.import.drop": "passed",
+    "svg.import.url": "passed",
+    "svg.render.vector-at-zoom": "failed",
+    "svg.render.picture-gestures": "passed",
+    "svg.copy.markup": "failed",
+    "svg.sanitize.script-and-handlers": "passed",
+    "svg.sanitize.data-image-kept": "passed",
+    "svg.sanitize.cap": "passed",
+    "svg.sanitize.broken": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "svg.render.vector-at-zoom",
+        "feature": "svg",
+        "result": "failed"
+      },
+      {
+        "id": "svg.copy.markup",
+        "feature": "svg",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "svg.render.vector-at-zoom",
+      "parks": [
+        "intake.svg.upload",
+        "intake.svg.paste",
+        "intake.svg.drop",
+        "intake.svg.url"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "svg.copy.markup",
+      "parks": [
+        "picture.svg.copy"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "svg.import.upload",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.import.paste-file",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.import.paste-markup",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.import.drop",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.import.url",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.render.vector-at-zoom",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the viewer draws the same img"
+    },
+    {
+      "id": "svg.render.picture-gestures",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.copy.markup",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: text/plain begins with the prolog or <svg"
+    },
+    {
+      "id": "svg.sanitize.script-and-handlers",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.sanitize.data-image-kept",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.sanitize.cap",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.sanitize.broken",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

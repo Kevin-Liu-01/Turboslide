@@ -43,9 +43,9 @@ import { cn } from './lib/cn';
 import { useMountEffect } from './lib/useMountEffect';
 import { Menu } from './Menu';
 import { evaluate, isPresent, itemById, presentControls, visibleItems } from './menus/model';
-import type { MenuItem } from './menus/model';
+import type { MenuContext, MenuItem } from './menus/model';
 import { HIDE_MENUS_CONTROL, TOOLBAR_TAIL_END, tailFor } from './menus/toolbar-tails';
-import { PRESENCE } from './menus/strings';
+import { FORMAT, PRESENCE } from './menus/strings';
 import type { TailControl, TailKind, TailOp } from './menus/toolbar-tails';
 import { FontField } from './FontPicker';
 import { ColorPlate, anchoredAt } from './pickers/ColorPlate';
@@ -258,6 +258,17 @@ function listButtonOf(
   if (control.control === 'toolbar.numberedList')
     return { marker: 'number', preset: NUMBER_PRESETS[0] ?? 'decimal' };
   return null;
+}
+
+/**
+ * True when the selected picture draws a vector asset (docs/VECTOR.md 4.4): the shell's context
+ * carries `selection.vector` from the asset's `vectorOf` (vector/build/b1.md R1.4, R2); read
+ * through a widened type so this file typechecks before and after the fact lands, and false
+ * while the context has no such fact, which is what production does today.
+ */
+export function vectorPictureSelected(context: MenuContext): boolean {
+  const selection: MenuContext['selection'] & { vector?: boolean } = context.selection;
+  return selection.vector === true;
 }
 
 export function ToolbarTail() {
@@ -878,6 +889,12 @@ export function ToolbarTail() {
       return;
     }
     if (op === 'crop') {
+      /* the vector round (docs/VECTOR.md 4.4): crop has no vector meaning, so an svg picture is
+         refused with the one sentence the menu row and the viewer's double click say */
+      if (vectorPictureSelected(menuContext)) {
+        shell.say(FORMAT.picture.svgCrop);
+        return;
+      }
       if (input.editor?.cropMode) input.editor.cropMode();
       else shell.say('Double click the picture on the slide to crop it');
       return;
@@ -1033,6 +1050,13 @@ export function ToolbarTail() {
           control.arrow !== undefined
         ) {
           const arrowItem = itemById(control.arrow);
+          /* the vector round (docs/VECTOR.md 4.4; vector/build/b3.md R2): the Crop button is
+             disabled with the sentence on an svg picture, the way the menu row is; the Mask arrow
+             beside it stays live, since a mask clips the vector as it clips a raster */
+          const cropRefused = control.op === 'crop' && vectorPictureSelected(menuContext);
+          const mainControl: TailControl = cropRefused
+            ? { ...control, enabled: 'never', disabledReason: FORMAT.picture.svgCrop }
+            : control;
           return (
             <span
               key={key}
@@ -1042,7 +1066,7 @@ export function ToolbarTail() {
             >
               {divider}
               <ToolbarButton
-                control={control}
+                control={mainControl}
                 onClick={(anchor) => onControl(control, anchor)}
                 className="ts-tb-split-main"
               />
@@ -1186,7 +1210,12 @@ export function ToolbarTail() {
             returnFocusTo={plate.anchor}
             onSelect={(chosen) => shell.runItem(chosen, plate.anchor)}
             onClose={() => setPlate(null)}
-            renderDynamic={shell.renderDynamicSubmenu}
+            /* the vector round (docs/VECTOR.md 2.6): a pick in a plate the dropdown opens (the
+               Shapes, Arrows, Callouts and Equation rows of the Shape button) closes the dropdown,
+               so the click that places the shape lands on the sheet and not on a tile */
+            renderDynamic={(item, options) =>
+              shell.renderDynamicSubmenu(item, { ...options, onPicked: () => setPlate(null) })
+            }
             id={`ts-menu-${plate.plate.control.control}`}
           />
         ) : plate.plate.kind === 'swatches' ? (

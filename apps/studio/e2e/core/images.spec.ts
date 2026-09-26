@@ -813,82 +813,8 @@ test(title('images.insert.by-url'), async () => {
   expect(replaced?.pos, 'the replaced picture keeps its box').toEqual(pic.pos);
 });
 
-/**
- * The features round, ship one (docs/FEATURES.md 4.7, the images row `logos.intake.svg-sentence`,
- * P1 of B7): Upload from computer with an .svg lands as PNG twins behind TURBOSLIDE_SVG_RASTER, or,
- * while the raster path is off, the snackbar reads the seller's sentence and the chooser lists
- * the four raster types; the developer's sentence of audit-logos 4 fails the row.
- */
-test(title('logos.intake.svg-sentence'), async () => {
-  test.setTimeout(120_000);
-  if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
-  await openEditor(page, deck);
-  const slideId = await addSlide(page);
-  const before = await pictureCount(slideId);
-  const svg = Buffer.from(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#1b1b1b"/><circle cx="32" cy="32" r="18" fill="#e8e8e8"/></svg>',
-  );
-  const chooser = page.waitForEvent('filechooser', { timeout: 10_000 });
-  await menuPath(page, 'insert', 'insert.image', 'insert.image.upload');
-  const fc = await chooser;
-  const accept = await fc
-    .element()
-    .getAttribute('accept')
-    .catch(() => null);
-  await fc.setFiles({ name: 'mark.svg', mimeType: 'image/svg+xml', buffer: svg });
-  const t0 = Date.now();
-  let landed: Awaited<ReturnType<typeof pictures>>[number] | null = null;
-  let said: string | null = null;
-  while (Date.now() - t0 < 10_000 && landed === null && said === null) {
-    const list = await pictures(slideId);
-    if (list.length > before) landed = list[list.length - 1]!;
-    said = await page.evaluate(
-      () =>
-        [
-          ...document.querySelectorAll(
-            '[data-control="snackbar"], [data-control="snackbar.upload.failed"], .ts-snackbar, .pt-toast, [role="alert"]',
-          ),
-        ]
-          .map((el) => (el.textContent ?? '').trim())
-          .find((text) => text.length > 0 && /svg|SVG|accepted|picture/.test(text)) ?? null,
-    );
-    if (landed === null && said === null) await page.waitForTimeout(200);
-  }
-  test.info().annotations.push({
-    type: 'svg',
-    description: `chooser accept "${accept ?? 'none'}"; ${landed ? `picture ${landed.id} landed ${JSON.stringify(landed.block['asset'])}` : 'no picture'}; snackbar "${said ?? 'none'}" after ${Date.now() - t0} ms`,
-  });
-  if (landed !== null) {
-    /* the raster path: PNG twins, the source kept */
-    /* the deck's asset table as describe().state.assets carries it (source.read answers the
-       active slide's source, which holds no assets) */
-    const assets = ((await state(page)) as { assets?: unknown }).assets as
-      | Record<string, { twins?: unknown; sourceFile?: string }>
-      | { id: string; twins?: unknown; sourceFile?: string }[]
-      | undefined;
-    const record = Array.isArray(assets)
-      ? assets.find((a) => a.id === landed!.block['asset'])
-      : assets?.[landed.block['asset'] as string];
-    const twins = JSON.stringify(record?.twins ?? '');
-    expect(twins, 'PNG twins').toMatch(/\.png/);
-    expect(twins, 'no svg twin').not.toMatch(/\.svg/);
-    return;
-  }
-  expect(said ?? '', "the seller's sentence, not the developer's").toMatch(
-    /SVG files are not accepted yet\. Export the logo as a PNG and upload that/,
-  );
-  expect(said ?? '', 'no developer sentence').not.toMatch(/svg is not accepted here/);
-  const types = (accept ?? '')
-    .split(',')
-    .map((x) => x.trim())
-    .filter(Boolean);
-  expect(types.sort(), 'the chooser lists the four raster types').toEqual([
-    'image/gif',
-    'image/jpeg',
-    'image/png',
-    'image/webp',
-  ]);
-});
+/* the row `logos.intake.svg-sentence` of the features round left with its sentence in the vector
+   round (docs/VECTOR.md 4.7); the svg intake's rows are core/svg.spec.ts's */
 
 coverage(import.meta.filename, [
   'images.insert.first-on-new-deck',
@@ -906,6 +832,4 @@ coverage(import.meta.filename, [
   'images.insert.menu-direct',
   'images.upload.failure-snackbar',
   'images.insert.by-url',
-  /* the features round, ship one (docs/FEATURES.md 7.1): the svg intake, an images row */
-  'logos.intake.svg-sentence',
 ]);

@@ -206,7 +206,7 @@ function TitleField() {
   );
 }
 
-/** The longest of the six phrases: the cell is as wide as this one so the clock never moves (05 rule 4). */
+/** The longest of the six phrases: the cell is as wide as this one so nothing to its right moves (05 rule 4); the clock sits to its left since 2026-09-25. */
 const LONGEST_SAVE_WORDS = [
   TITLE_ROW.saved,
   TITLE_ROW.saving,
@@ -495,8 +495,10 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
           menuItem={home.id}
         />
         <TitleField />
-        <SaveState />
+        {/* the clock right after the name, the save words after it, so no reserved cell stands
+            between the name and the clock (Kevin, 2026-09-25: the clock sat 200 px from the words) */}
         <LastEdit />
+        <SaveState />
       </div>
       <div className="ts-title-r">
         {/* SPEC-3 0.43: five fixed slots from the first paint, left to right */}

@@ -19,7 +19,15 @@ import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
 import type { EditorShellInput } from '../editor-shell';
 import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
+import { PARKED_CONTROLS, isParked, isParkedIn } from '../parked-controls';
 import { hideTooltip } from '../Tooltip';
+
+/* the vector round: `isParked` is spied so one case can park `export.svg.vector` without the
+   committed set changing; every other case reads the real rule through the spy */
+vi.mock('../parked-controls', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../parked-controls')>();
+  return { ...original, isParked: vi.fn(original.isParked) };
+});
 
 // The Download dialog of the focus round (docs/FOCUS.md rank 24, `export.pdf.notes-honest`): the
 // PDF builder prints one page per slide and never the speaker notes (packages/export/src/pdf/
@@ -243,5 +251,36 @@ describe('DownloadDialog after a run completes', () => {
     const saved = say.mock.calls.at(-1) as unknown as [string, { label: string } | undefined];
     expect(saved[0]).toBe(`Saved ${doc.deck.title}.pdf`);
     expect(saved[1]?.label).toBe('Details');
+  });
+});
+
+// The vector round (docs/VECTOR.md 4.6, 6.2; vector/build/b1.md R6): an svg picture exports as
+// vector by the header's default, so the dialog sends no `svgVector` key; the parked control
+// `export.svg.vector` alone selects the PNG blip with `svgVector: false`.
+describe('the svg vector flag of export.run', () => {
+  afterEach(() => {
+    vi.mocked(isParked).mockImplementation((id, settings) =>
+      isParkedIn(id, PARKED_CONTROLS, settings),
+    );
+  });
+
+  it('sends no svgVector key by default, so the header’s default applies', () => {
+    const { dispatch } = mount('pptx');
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    const [id, input] = dispatch.mock.calls[0] as unknown as [string, Record<string, unknown>];
+    expect(id).toBe('export.run');
+    expect(input).not.toHaveProperty('svgVector');
+    expect(isParked).toHaveBeenCalledWith('export.svg.vector', DEFAULT_SETTINGS);
+  });
+
+  it('sends svgVector false while export.svg.vector is parked, and nothing else changes', () => {
+    vi.mocked(isParked).mockImplementation((id) => id === 'export.svg.vector');
+    const { dispatch } = mount('pdf');
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    const [id, input] = dispatch.mock.calls[0] as unknown as [string, Record<string, unknown>];
+    expect(id).toBe('export.run');
+    expect(input.svgVector).toBe(false);
+    expect(input.format).toBe('pdf');
+    expect(input.verify).toBe(false);
   });
 });

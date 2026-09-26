@@ -80,11 +80,13 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
       ).toBeUndefined();
     /* cycle 2 of the focus round parked the tail whole with Insert > Shape (docs/FOCUS.md section
        4 under ruling (1), build/b3.md R14); the return round brought it back (docs/RETURN.md 2.2,
-       3.2): only Change shape keeps the flag, with the galleries (2.9) */
+       3.2) with Change shape flagged beside the galleries (2.9); the vector round returns Change
+       shape too (docs/VECTOR.md 2.6, item S7), so no control of the tail carries the flag and
+       Change shape leads it with the divider */
     for (const control of TOOLBAR_TAILS.shape)
-      expect(control.advanced, control.control).toBe(
-        control.control === 'toolbar.changeShape' ? true : undefined,
-      );
+      expect(control.advanced, control.control).toBeUndefined();
+    expect(change?.dividerBefore).toBe(true);
+    expect(change?.dropdown).toBe(true);
   });
 
   it('an image: the frame controls, Crop with the Mask arrow, Replace, Image options, Reset, Dither (3.4; SPEC-3 13.2)', () => {

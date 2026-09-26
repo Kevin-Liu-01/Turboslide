@@ -1457,11 +1457,10 @@ try {
     'a shape placed on the slide with the short title converts it to a canvas',
     'a shape object on the second slide',
     async () => {
-      const r = await insertByTool(
-        secondSlide,
-        ['insert.shape', 'insert.shape.shapes', 'insert.shape.shapes.pick.rect'],
-        { x: 1200, y: 700 },
-      );
+      const r = await insertByTool(secondSlide, ['insert.shape', 'insert.shape.shapes.rectangle'], {
+        x: 1200,
+        y: 700,
+      });
       return {
         ok: Boolean(r.obj),
         observed: r.obj
@@ -1931,11 +1930,10 @@ try {
   );
   addKind(
     'a rectangle (Insert > Shape > Shapes)',
-    await insertByTool(
-      TITLE_SLIDE,
-      ['insert.shape', 'insert.shape.shapes', 'insert.shape.shapes.pick.rect'],
-      { x: 480, y: 480 },
-    ),
+    await insertByTool(TITLE_SLIDE, ['insert.shape', 'insert.shape.shapes.rectangle'], {
+      x: 480,
+      y: 480,
+    }),
     'menu',
   );
   addKind(

@@ -9,6 +9,7 @@ import { attrs, classes, el, escapeAttr, px, style } from './html.ts';
 import { colorCss } from '@turboslide/schema/color';
 import { renderMultiline, renderTextOrPrompt } from './blocks/prompt.ts';
 import type { AssetId, SlideId } from '@turboslide/schema/ids';
+import { vectorOf } from '@turboslide/schema/assets';
 import type { AssetTwins } from '@turboslide/schema/assets';
 import type { Block, BlockOf } from '@turboslide/schema/blocks';
 import type { ContentSlide, Deck, Layout, Plate, Slide, SlotName } from '@turboslide/schema/deck';
@@ -115,6 +116,12 @@ function twinResolver(
   };
 }
 
+/**
+ * An asset's image for the sheet: its vector files when it has them (docs/VECTOR.md 4.4: an svg
+ * asset of the vector round, or a ship one logo's untinted source, read through `vectorOf`), so
+ * the editor, the render route, the print document and the standalone page all draw the svg and
+ * never request the PNG twin; the twins otherwise.
+ */
 function imageResolver(
   deck: Deck,
   options: RenderOptions,
@@ -123,7 +130,7 @@ function imageResolver(
   return (id) => {
     const asset = deck.assets[id];
     if (!asset) return undefined;
-    return twins(id, asset.twins, asset.alt, asset.size);
+    return twins(id, vectorOf(asset) ?? asset.twins, asset.alt, asset.size);
   };
 }
 

@@ -26,6 +26,7 @@ import {
   teardownAll,
   title,
   waitEditor,
+  sweepTemplateLeftovers,
 } from './lib';
 
 // The brand kit and the templates, the spec rows (docs/PRODUCT.md 4.1 to 4.3, 8.1 `templates.*`,
@@ -52,7 +53,9 @@ let context: BrowserContext;
 let page: Page;
 let deck = '';
 const STAMP = Date.now().toString(36);
-const TEMPLATE_NAME = `Core spec template ${STAMP}`;
+/** The name every run of this file gives its template, before the run's stamp; the sweep at the end reads it. */
+const TEMPLATE_PREFIX = 'Core spec template ';
+const TEMPLATE_NAME = `${TEMPLATE_PREFIX}${STAMP}`;
 /** The slug of the template this file saved, for its removal at the end. */
 let savedSlug: string | null = null;
 /** Whether this file set a deployment default, so the end restores Blank. */
@@ -113,6 +116,21 @@ test.afterAll(async () => {
           `the template ${savedSlug}: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
         );
       }
+    }
+    /* the templates earlier runs of this file left on the shared store, cut between their save
+       and their delete (VERIFICATION.md "Vector round, pass 1" finding 3): every card of this
+       file's name older than the sweep's age, and this run's own whatever its age (the card menu
+       step above finds no card on an instance whose index is behind the store), through the
+       agent surface; best effort, one line */
+    const swept = await sweepTemplateLeftovers(
+      (process.env['PLAYWRIGHT_BASE_URL'] ?? '').replace(/\/$/, ''),
+      TEMPLATE_PREFIX,
+      { own: STAMP },
+    );
+    if (swept.removed.length > 0 || swept.reason !== null) {
+      console.log(
+        `brand.spec: leftover templates ${swept.removed.length > 0 ? `removed ${swept.removed.join(', ')}` : 'none removed'}${swept.reason === null ? '' : ` (${swept.reason})`}`,
+      );
     }
     await teardownAll(page, scratch);
   } finally {

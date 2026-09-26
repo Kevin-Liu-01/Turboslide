@@ -10,7 +10,11 @@
 // its border and `shadow` the frame's box-shadow. A converted picture kind's photograph and the
 // Background dialog's Choose image both produce this block; the chips of a picture kind are drawn
 // by the slide over this object when it covers the sheet at the bottom of the stack (slide.ts).
-// The image is the raster the exporter reads (kind `shot`, SPEC-2 1.5).
+// The image is the raster the exporter reads (kind `shot`, SPEC-2 1.5). An svg asset
+// (docs/VECTOR.md 4.4, `vectorOf`) draws its vector file, which the resolver answers as the
+// image's `src`, with `object-fit: contain` inline so the picture shows whole at the box's
+// aspect and stays vector at every zoom; every picture gesture but crop applies unchanged.
+import { vectorOf } from '@turboslide/schema/assets';
 import type { BlockOf, ShotAdjust, ShotFrame, ShotTrim } from '@turboslide/schema/blocks';
 import { colorCss } from '@turboslide/schema/color';
 import { shapePath } from '@turboslide/schema/shapes';
@@ -78,6 +82,7 @@ export function renderPicture(block: BlockOf<'picture'>, ctx: BlockContext): str
   const asset = ctx.asset?.(block.asset);
   const material =
     asset !== undefined && asset.source.kind === 'material' ? asset.source : undefined;
+  const vector = asset !== undefined && vectorOf(asset) !== undefined;
   // the block level dither (gslides-parity SPEC-3 10.3): the root carries the field, its key and
   // the state; in state variant the image is the materialized twin, in state live the continuous
   // twin under the overlay canvas the runtime draws (a live render only, dither-attrs.ts)
@@ -87,6 +92,7 @@ export function renderPicture(block: BlockOf<'picture'>, ctx: BlockContext): str
     block.position !== undefined &&
       block.position !== 'center' &&
       `object-position:${block.position}`,
+    vector && 'object-fit:contain',
     ...trimDeclarations(block.trim),
     ...adjustDeclarations(block.adjust),
   );

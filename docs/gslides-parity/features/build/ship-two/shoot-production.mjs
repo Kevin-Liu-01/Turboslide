@@ -59,12 +59,19 @@ for (const width of WIDTHS) {
     const invoke = (action, input) =>
       page.evaluate(([id, v]) => window.turboslide.studio.invoke(id, v), [action, input]);
     const describe = () => page.evaluate(() => window.turboslide.studio.describe());
-    const shot = async (name) => {
+    const shot = async (name, fileName = name) => {
       if (!wanted(name)) return;
-      const file = join(OUT, `${PREFIX}-${name}-${width}-${appearance}.jpg`);
+      const file = join(OUT, `${PREFIX}-${fileName}-${width}-${appearance}.jpg`);
       await page.screenshot({ path: file, fullPage: false, type: 'jpeg', quality: 88 });
-      results.push({ name, width, appearance, file, ok: true, at: new Date().toISOString() });
-      console.log(`ok   ${name} ${width} ${appearance}`);
+      results.push({
+        name: fileName,
+        width,
+        appearance,
+        file,
+        ok: true,
+        at: new Date().toISOString(),
+      });
+      console.log(`ok   ${fileName} ${width} ${appearance}`);
     };
     const miss = (name, why) => {
       results.push({ name, width, appearance, ok: false, why });
@@ -150,22 +157,45 @@ for (const width of WIDTHS) {
         await closeAll();
       }
 
-      // 3. Change background, the Shader row with Choose open
+      // 3. Change background, the Shader row with Choose open. The row is a parked dialog control
+      //    since ship two's list (shaders.background.place-answers), hidden while Tools > Advanced
+      //    tools is off: the shot turns the switch on when the row is absent and off again after,
+      //    the walk's rule for a parked row
+      let switched = false;
       try {
         if (!wanted('background-shader')) throw new Error('skipped by --only');
         await control('menubar.slide').click();
         await menuItem('slide.changeBackground').click();
         await page.locator('[data-control="dialog.background"]').waitFor();
+        if ((await control('dialog.background.shader').count()) === 0) {
+          await closeAll();
+          await control('menubar.tools').click();
+          await menuItem('tools.advancedTools').click();
+          await page.waitForTimeout(400);
+          switched = true;
+          await control('menubar.slide').click();
+          await menuItem('slide.changeBackground').click();
+          await page.locator('[data-control="dialog.background"]').waitFor();
+        }
         await control('dialog.background.shader').click();
         await page
           .locator('[data-control="dialog.background"] [data-control="dialog.shader"]')
           .waitFor();
         await page.waitForTimeout(800);
-        await shot('background-shader');
+        await shot(
+          'background-shader',
+          switched ? 'background-shader-advanced' : 'background-shader',
+        );
         await closeAll();
       } catch (error) {
         if (!(error instanceof Error && error.message === 'skipped by --only'))
           miss('background-shader', error instanceof Error ? error.message : String(error));
+        await closeAll();
+      }
+      if (switched) {
+        await control('menubar.tools').click();
+        await menuItem('tools.advancedTools').click();
+        await page.waitForTimeout(300);
         await closeAll();
       }
 

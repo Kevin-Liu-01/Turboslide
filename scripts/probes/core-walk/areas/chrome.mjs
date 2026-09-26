@@ -1693,14 +1693,16 @@ async function productRound(t) {
     'insert.slideNumbers',
     'insert.logo',
     'insert.icon',
-    'insert.material',
+    /* the Material row of VECTOR.md 3.2 is the Shader row since the features round's ship two
+       (build/b1.md R1: insert.material renamed to insert.shader and unflagged), with the cube */
+    'insert.shader',
     'insert.link',
     'insert.comment',
     'insert.newSlide',
   ];
-  /* rows 3.2 names as unchanged that a build may not draw (a Google service row is omitted; the
-     shader row is ship two's): judged only while drawn */
-  const INSERT_OPTIONAL_ROWS = ['insert.audio', 'insert.video', 'insert.shader'];
+  /* rows 3.2 names as unchanged that a build may not draw (a Google service row is omitted):
+     judged only while drawn */
+  const INSERT_OPTIONAL_ROWS = ['insert.audio', 'insert.video'];
   const FORMAT_MENU_ROWS = [
     'format.text.bold',
     'format.alignIndent.left',

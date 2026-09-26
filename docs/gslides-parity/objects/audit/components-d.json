@@ -1,0 +1,689 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "theme": "dark",
+  "startedAt": "2026-09-26T01:14:48.516Z",
+  "steps": [
+    {
+      "name": "table: insert 3 by 3 from the grid",
+      "observed": "table pos {\"x\":320,\"y\":129,\"w\":960,\"h\":320}; columns 3 rows 3 header true; drawn table {\"x\":320,\"y\":129,\"w\":960,\"h\":320} row0 [{\"x\":320,\"y\":130,\"w\":320,\"h\":53},{\"x\":640,\"y\":130,\"w\":320,\"h\":53},{\"x\":960,\"y\":130,\"w\":320,\"h\":53}]",
+      "shot": "d01-table-inserted-empty.png",
+      "rings": {
+        "active": null,
+        "free": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "table": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "paras": [
+          {
+            "td": {
+              "x": 320,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 320,
+              "y": 142,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 640,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 656,
+              "y": 142,
+              "w": 288,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 960,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 976,
+              "y": 142,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          }
+        ],
+        "ring": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "overlay": [
+          {
+            "cls": "ts-select is-selected",
+            "box": {
+              "x": 320,
+              "y": 129,
+              "w": 960,
+              "h": 320
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-select-chip",
+            "box": {
+              "x": 320,
+              "y": 100.6,
+              "w": 65.1,
+              "h": 25.5
+            },
+            "control": "handle.table.move"
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 314.3,
+              "y": 123.3,
+              "w": 971.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 314.3,
+              "y": 443.3,
+              "w": 971.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 314.3,
+              "y": 134.7,
+              "w": 11.3,
+              "h": 308.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 1274.3,
+              "y": 134.7,
+              "w": 11.3,
+              "h": 308.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 633.6,
+              "y": 129,
+              "w": 12.8,
+              "h": 320
+            },
+            "control": "handle.table.column.0"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 953.6,
+              "y": 129,
+              "w": 12.8,
+              "h": 320
+            },
+            "control": "handle.table.column.1"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 312.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.nw"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 792.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.n"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.ne"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 281.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.e"
+          }
+        ],
+        "editing": false,
+        "chip": "Table"
+      }
+    },
+    {
+      "name": "table: one click on cell 1,1 of the empty table",
+      "observed": "editing true; chip Table; ring {\"x\":640,\"y\":236.3,\"w\":320,\"h\":53}; active {\"tag\":\"span\",\"run\":\"table/rows/1/cells/1\",\"box\":{\"x\":640,\"y\":236.3,\"w\":320,\"h\":53},\"outline\":\"none 3px rgb(7, 7, 7)\",\"editable\":\"true\"}; handles 9",
+      "shot": "d02-table-one-click-empty.png",
+      "rings": {
+        "active": {
+          "tag": "span",
+          "run": "table/rows/1/cells/1",
+          "box": {
+            "x": 640,
+            "y": 236.3,
+            "w": 320,
+            "h": 53
+          },
+          "outline": "none 3px rgb(7, 7, 7)",
+          "editable": "true"
+        },
+        "free": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "table": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "paras": [
+          {
+            "td": {
+              "x": 320,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 320,
+              "y": 142,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 640,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 656,
+              "y": 142,
+              "w": 288,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 960,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 976,
+              "y": 142,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          }
+        ],
+        "ring": {
+          "x": 640,
+          "y": 236.3,
+          "w": 320,
+          "h": 53
+        },
+        "overlay": [
+          {
+            "cls": "ts-select is-selected is-editing",
+            "box": {
+              "x": 640,
+              "y": 236.3,
+              "w": 320,
+              "h": 53
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-select-chip",
+            "box": {
+              "x": 640,
+              "y": 208,
+              "w": 65.1,
+              "h": 25.5
+            },
+            "control": "handle.table.move"
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 230.7,
+              "w": 331.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 283.6,
+              "w": 331.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 242,
+              "w": 11.3,
+              "h": 41.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 954.3,
+              "y": 242,
+              "w": 11.3,
+              "h": 41.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 312.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.nw"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 792.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.n"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.ne"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 281.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.e"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 441.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.se"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 792.2,
+              "y": 441.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.s"
+          }
+        ],
+        "editing": true,
+        "chip": "Table"
+      },
+      "page": "d03-table-one-click-empty-page.png"
+    },
+    {
+      "name": "table: type Alpha, Tab, Beta, Tab, Gamma",
+      "observed": "rows [[\"\",\"\",\"\"],[\"\",\"Alpha\",\"Beta\"],[\"Gamma\",\"\",\"\"]]; after the first Tab: editing true active table/rows/1/cells/2",
+      "shot": "d04-table-typed.png"
+    },
+    {
+      "name": "table: right click cell 1,1, Insert row below",
+      "observed": "context rows 16: menu.format.table.insertRowAbove, menu.format.table.insertRowBelow, menu.format.table.insertColumnLeft, menu.format.table.insertColumnRight, menu.format.table.deleteRow, menu.format.table.deleteColumn, menu.format.table.deleteTable, menu.format.table.distributeRows; clicked menu.format.table.insertRowBelow; rows now 4; pos {\"x\":320,\"y\":129,\"w\":960,\"h\":320}",
+      "shot": "d05-table-row-added.png"
+    },
+    {
+      "name": "table: right click cell 1,1, Insert column right",
+      "observed": "clicked menu.format.table.insertColumnRight; columns now 4 [{},{},{},{}]; drawn row0 [{\"x\":320,\"y\":130,\"w\":240,\"h\":53},{\"x\":560,\"y\":130,\"w\":240,\"h\":53},{\"x\":800,\"y\":130,\"w\":240,\"h\":53},{\"x\":1040,\"y\":130,\"w\":240,\"h\":53}]; pos {\"x\":320,\"y\":129,\"w\":960,\"h\":320}",
+      "shot": "d06-table-column-added.png"
+    },
+    {
+      "name": "table: right click the new row, Delete row; right click the new column, Delete column",
+      "observed": "columns 3 rows 3; cells [[\"\",\"\",\"\"],[\"\",\"Alpha\",\"Beta\"],[\"Gamma\",\"\",\"\"]]",
+      "shot": "d07-table-row-column-removed.png"
+    },
+    {
+      "name": "table: select the table, drag the first column seam by 90 px",
+      "observed": "handles handle.table.column.0, handle.table.column.1; columns [{},{},{}] -> [{\"width\":410},{\"width\":230},{\"width\":320}]; drawn row0 [{\"x\":320,\"y\":130,\"w\":410,\"h\":53},{\"x\":730,\"y\":130,\"w\":230,\"h\":53},{\"x\":960,\"y\":130,\"w\":320,\"h\":53}]",
+      "shot": "d08-table-seam-dragged.png"
+    },
+    {
+      "name": "table: header row: a range over row 0 by a drag on the selected table, Cmd+B",
+      "observed": "range chip Table; overlay [\"ts-select is-selected\",\"ts-select-chip\",\"ts-frame-edge\",\"ts-frame-edge\",\"ts-frame-edge\",\"ts-frame-edge\",\"ts-handle is-selected\",\"ts-handle is-selected\",\"ts-handle is-selected\",\"ts-handle is-selected\",\"ts-handle is-selected\",\"ts-handle is-selected\"]; row0 after Cmd+B {\"cells\":[\"\",\"\",\"\"],\"header\":true}",
+      "shot": "d09-table-header-range-bold.png"
+    },
+    {
+      "name": "table: Format options with the table selected",
+      "observed": "panel true; 99 controls; first panel.formatOptions.close, formatOptions.table, formatOptions.table, formatOptions.table.headerRow, formatOptions.table.border.weight, formatOptions.table.border.dash, formatOptions.table.border.color, formatOptions.table.border.color.none, formatOptions.table.border.color.ink, formatOptions.table.border.color.paper, formatOptions.table.border.color.ink-2, formatOptions.table.border.color.titanium, formatOptions.table.border.color.hair, formatOptions.table.border.color.hair-soft; headerRow formatOptions.table.headerRow",
+      "shot": "d10-table-format-options.png"
+    },
+    {
+      "name": "table: resize from the se handle by 200 by 120 and move by 120 by 60",
+      "observed": "pos {\"x\":320,\"y\":129,\"w\":960,\"h\":320} -> resized {\"x\":320,\"y\":129,\"w\":1160,\"h\":440} (drawn table {\"x\":320,\"y\":129,\"w\":1160,\"h\":440}, rows 3) -> moved {\"x\":320,\"y\":189,\"w\":1160,\"h\":380}",
+      "shot": "d11-table-resized-moved.png"
+    },
+    {
+      "name": "table: reload",
+      "observed": "cells [[\"\",\"\",\"\"],[\"\",\"Alpha\",\"Beta\"],[\"Gamma\",\"\",\"\"]]; pos {\"x\":320,\"y\":189,\"w\":1160,\"h\":380}",
+      "shot": "d12-table-reloaded.png"
+    },
+    {
+      "name": "table: the show",
+      "observed": "{\"show\":true,\"table\":true,\"cells\":[\"\",\"\",\"\",\"\",\"Alpha\",\"Beta\",\"Gamma\",\"\",\"\"],\"editable\":false}",
+      "shot": "d13-table-show.png"
+    },
+    {
+      "name": "table: the PDF",
+      "observed": "untitled-20260926-5fvs.pdf 35774 B, pages 2, pdftotext Alpha:true Beta:true Gamma:true; page 2 text \"Alpha Beta Gamma 02 / 02\""
+    },
+    {
+      "name": "table on a layout slide (Kevin's screenshot): a one-column slide, Insert > Table 3 by 3, one click on a cell",
+      "observed": "table pos {\"x\":320,\"y\":218,\"w\":960,\"h\":320,\"z\":2}; free {\"x\":320,\"y\":218,\"w\":960,\"h\":320}; table {\"x\":320,\"y\":218,\"w\":960,\"h\":320}; ring {\"x\":640,\"y\":325.3,\"w\":320,\"h\":53}; active {\"tag\":\"span\",\"run\":\"table/rows/1/cells/1\",\"box\":{\"x\":640,\"y\":325.3,\"w\":320,\"h\":53},\"outline\":\"none 3px rgb(7, 7, 7)\",\"editable\":\"true\"}; paras [{\"td\":{\"x\":320,\"y\":219,\"w\":320,\"h\":53},\"para\":{\"x\":320,\"y\":231,\"w\":304,\"h\":29},\"text\":\"\"},{\"td\":{\"x\":640,\"y\":219,\"w\":320,\"h\":53},\"para\":{\"x\":656,\"y\":231,\"w\":288,\"h\":29},\"text\":\"\"},{\"td\":{\"x\":960,\"y\":219,\"w\":320,\"h\":53},\"para\":{\"x\":976,\"y\":231,\"w\":304,\"h\":29},\"text\":\"\"}]; overlay [{\"cls\":\"ts-select is-selected is-editing\",\"box\":{\"x\":640,\"y\":325.3,\"w\":320,\"h\":53},\"control\":null},{\"cls\":\"ts-select-chip\",\"box\":{\"x\":640,\"y\":296.9,\"w\":65.1,\"h\":25.5},\"control\":\"handle.table.move\"},{\"cls\":\"ts-frame-edge\",\"box\":{\"x\":634.3,\"y\":319.6,\"w\":331.3,\"h\":11.3},\"control\":null},{\"cls\":\"ts-frame-edge\",\"box\":{\"x\":634.3,\"y\":372.7,\"w\":331.3,\"h\":11.3},\"control\":null},{\"cls\":\"ts-frame-edge\",\"box\":{\"x\":634.3,\"y\":331,\"w\":11.3,\"h\":41.6},\"control\":null},{\"cls\":\"ts-frame-edge\",\"box\":{\"x\":954.3,\"y\":331,\"w\":11.3,\"h\":41.6},\"control\":null},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":312.2,\"y\":210.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.nw\"},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":792.2,\"y\":210.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.n\"},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":1272.2,\"y\":210.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.ne\"},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":1272.2,\"y\":370.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.e\"},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":1272.2,\"y\":530.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.se\"},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":792.2,\"y\":530.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.s\"}]",
+      "shot": "d15-layout-table-one-click.png",
+      "inserted": "d14-layout-table-inserted.png",
+      "full": "d16-layout-table-one-click-page.png",
+      "rings": {
+        "active": {
+          "tag": "span",
+          "run": "table/rows/1/cells/1",
+          "box": {
+            "x": 640,
+            "y": 325.3,
+            "w": 320,
+            "h": 53
+          },
+          "outline": "none 3px rgb(7, 7, 7)",
+          "editable": "true"
+        },
+        "free": {
+          "x": 320,
+          "y": 218,
+          "w": 960,
+          "h": 320
+        },
+        "table": {
+          "x": 320,
+          "y": 218,
+          "w": 960,
+          "h": 320
+        },
+        "paras": [
+          {
+            "td": {
+              "x": 320,
+              "y": 219,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 320,
+              "y": 231,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 640,
+              "y": 219,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 656,
+              "y": 231,
+              "w": 288,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 960,
+              "y": 219,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 976,
+              "y": 231,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          }
+        ],
+        "ring": {
+          "x": 640,
+          "y": 325.3,
+          "w": 320,
+          "h": 53
+        },
+        "overlay": [
+          {
+            "cls": "ts-select is-selected is-editing",
+            "box": {
+              "x": 640,
+              "y": 325.3,
+              "w": 320,
+              "h": 53
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-select-chip",
+            "box": {
+              "x": 640,
+              "y": 296.9,
+              "w": 65.1,
+              "h": 25.5
+            },
+            "control": "handle.table.move"
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 319.6,
+              "w": 331.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 372.7,
+              "w": 331.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 331,
+              "w": 11.3,
+              "h": 41.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 954.3,
+              "y": 331,
+              "w": 11.3,
+              "h": 41.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 312.2,
+              "y": 210.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.nw"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 792.2,
+              "y": 210.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.n"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 210.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.ne"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 370.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.e"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 530.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.se"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 792.2,
+              "y": 530.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.s"
+          }
+        ],
+        "editing": true,
+        "chip": "Table"
+      }
+    },
+    {
+      "name": "table on a blank slide with one column (Insert > Table 1 by 3), one click",
+      "observed": "error: no cell 1,0"
+    }
+  ],
+  "notes": [],
+  "deckId": "untitled-20260926-5fvs",
+  "consoleErrors": ["Failed to load resource: the server responded with a status of 502 ()"],
+  "teardown": {
+    "trashed": true,
+    "status": 404
+  },
+  "endedAt": "2026-09-26T01:16:13.015Z"
+}

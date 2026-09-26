@@ -1,0 +1,150 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "theme": "light",
+  "startedAt": "2026-09-26T01:12:46.960Z",
+  "steps": [
+    {
+      "name": "chart bar: insert",
+      "observed": "chart pos {\"x\":320,\"y\":129,\"w\":960,\"h\":540}; series [{\"name\":\"Series 1\",\"values\":[30,45,20]}]; categories [\"Category 1\",\"Category 2\",\"Category 3\"]; legend undefined labels undefined",
+      "shot": "c01-chart-bar-inserted.png"
+    },
+    {
+      "name": "chart bar: Format options, the grid: cell 1,1 Enter 42 Enter",
+      "observed": "panel true; cell formatOptions.chart.cell.1.1; edit field formatOptions.chart.edit; series [{\"name\":\"Series 1\",\"values\":[42,45,20]}]",
+      "shot": "c02-chart-bar-edited.png"
+    },
+    {
+      "name": "chart bar: Add series; legend; labels",
+      "observed": "addSeries formatOptions.chart.addSeries; series 2 [\"Series 1\",\"Series 2\"]; legend control formatOptions.chart.legend -> bottom; labels control formatOptions.chart.showValues -> true",
+      "shot": "c03-chart-bar-series-legend-labels.png"
+    },
+    {
+      "name": "chart bar: resize from the se handle by -240 by -140",
+      "observed": "pos {\"x\":320,\"y\":129,\"w\":960,\"h\":540} -> {\"x\":320,\"y\":129,\"w\":720,\"h\":400}; svg 720x400 box {\"x\":320,\"y\":129,\"w\":720,\"h\":400}",
+      "shot": "c04-chart-bar-resized.png"
+    },
+    {
+      "name": "chart column: insert",
+      "observed": "chart pos {\"x\":320,\"y\":129,\"w\":960,\"h\":540}; series [{\"name\":\"Series 1\",\"values\":[30,45,20]}]; categories [\"Category 1\",\"Category 2\",\"Category 3\"]; legend undefined labels undefined",
+      "shot": "c05-chart-column-inserted.png"
+    },
+    {
+      "name": "chart column: Format options, the grid: cell 1,1 Enter 42 Enter",
+      "observed": "panel true; cell formatOptions.chart.cell.1.1; edit field formatOptions.chart.edit; series [{\"name\":\"Series 1\",\"values\":[42,45,20]}]",
+      "shot": "c06-chart-column-edited.png"
+    },
+    {
+      "name": "chart column: Add series; legend; labels",
+      "observed": "addSeries formatOptions.chart.addSeries; series 2 [\"Series 1\",\"Series 2\"]; legend control formatOptions.chart.legend -> bottom; labels control formatOptions.chart.showValues -> true",
+      "shot": "c07-chart-column-series-legend-labels.png"
+    },
+    {
+      "name": "chart column: resize from the se handle by -240 by -140",
+      "observed": "pos {\"x\":320,\"y\":129,\"w\":960,\"h\":540} -> {\"x\":320,\"y\":129,\"w\":720,\"h\":400}; svg 720x400 box {\"x\":320,\"y\":129,\"w\":720,\"h\":400}",
+      "shot": "c08-chart-column-resized.png"
+    },
+    {
+      "name": "chart line: insert",
+      "observed": "chart pos {\"x\":320,\"y\":129,\"w\":960,\"h\":540}; series [{\"name\":\"Series 1\",\"values\":[30,45,20]}]; categories [\"Category 1\",\"Category 2\",\"Category 3\"]; legend undefined labels undefined",
+      "shot": "c09-chart-line-inserted.png"
+    },
+    {
+      "name": "chart line: Format options, the grid: cell 1,1 Enter 42 Enter",
+      "observed": "panel true; cell formatOptions.chart.cell.1.1; edit field formatOptions.chart.edit; series [{\"name\":\"Series 1\",\"values\":[42,45,20]}]",
+      "shot": "c10-chart-line-edited.png"
+    },
+    {
+      "name": "chart line: Add series; legend; labels",
+      "observed": "addSeries formatOptions.chart.addSeries; series 2 [\"Series 1\",\"Series 2\"]; legend control formatOptions.chart.legend -> bottom; labels control formatOptions.chart.showValues -> true",
+      "shot": "c11-chart-line-series-legend-labels.png"
+    },
+    {
+      "name": "chart line: resize from the se handle by -240 by -140",
+      "observed": "pos {\"x\":320,\"y\":129,\"w\":960,\"h\":540} -> {\"x\":320,\"y\":129,\"w\":720,\"h\":400}; svg 720x400 box {\"x\":320,\"y\":129,\"w\":720,\"h\":400}",
+      "shot": "c12-chart-line-resized.png"
+    },
+    {
+      "name": "chart pie: insert",
+      "observed": "chart pos {\"x\":320,\"y\":129,\"w\":960,\"h\":540}; series [{\"name\":\"Series 1\",\"values\":[30,45,20]}]; categories [\"Category 1\",\"Category 2\",\"Category 3\"]; legend undefined labels undefined",
+      "shot": "c13-chart-pie-inserted.png"
+    },
+    {
+      "name": "chart pie: Format options, the grid: cell 1,1 Enter 42 Enter",
+      "observed": "panel true; cell formatOptions.chart.cell.1.1; edit field formatOptions.chart.edit; series [{\"name\":\"Series 1\",\"values\":[42,45,20]}]",
+      "shot": "c14-chart-pie-edited.png"
+    },
+    {
+      "name": "chart pie: Add series; legend; labels",
+      "observed": "addSeries formatOptions.chart.addSeries; series 1 [\"Series 1\"]; legend control formatOptions.chart.legend -> bottom; labels control formatOptions.chart.showValues -> true",
+      "shot": "c15-chart-pie-series-legend-labels.png"
+    },
+    {
+      "name": "chart pie: resize from the se handle by -240 by -140",
+      "observed": "pos {\"x\":320,\"y\":129,\"w\":960,\"h\":540} -> {\"x\":320,\"y\":129,\"w\":720,\"h\":400}; svg 720x400 box {\"x\":320,\"y\":129,\"w\":720,\"h\":400}",
+      "shot": "c16-chart-pie-resized.png"
+    },
+    {
+      "name": "word art: Insert > Word art, type Big words, Enter",
+      "observed": "text pos {\"x\":400,\"y\":390,\"w\":800,\"h\":120,\"z\":1}; typography {\"size\":88,\"weight\":500,\"align\":\"center\"} outline {\"color\":\"ink\",\"width\":1.5} fill undefined",
+      "shot": "c17-wordart-inserted.png"
+    },
+    {
+      "name": "word art: double click, End, type \" now\", Escape",
+      "observed": "session true; text \"Big words now\"",
+      "shot": "c18-wordart-typed.png"
+    },
+    {
+      "name": "word art: resize from the se handle by 260 by 120",
+      "observed": "pos {\"x\":400,\"y\":390,\"w\":800,\"h\":120,\"z\":1} size 88 font 88 -> pos {\"x\":400,\"y\":390,\"w\":1063,\"h\":240,\"z\":1} size 176 font 176 lines 2",
+      "shot": "c19-wordart-resized.png"
+    },
+    {
+      "name": "word art: the tail and the fill and outline controls",
+      "observed": "tail [\"toolbar.head\",\"toolbar.search\",\"toolbar.newSlide.split\",\"toolbar.newSlide\",\"toolbar.newSlide.arrow\",\"toolbar.undo\",\"toolbar.redo\",\"toolbar.print\",\"toolbar.paintFormat\",\"toolbar.zoom\",\"toolbar.tail\",\"toolbar.font\",\"toolbar.fontSize\",\"toolbar.fontSize.minus\",\"toolbar.fontSize.value\",\"toolbar.fontSize.plus\",\"toolbar.bold\",\"toolbar.italic\",\"toolbar.underline\",\"toolbar.textColor\"]; fill undefined textColor toolbar.textColor outline undefined; colour write {\"color\":null,\"swatches\":[\"toolbar.textColor.plate\"]}; panel true outline rows [\"formatOptions.colour.outlineWeight\",\"formatOptions.colour.outlineWeight.1\",\"formatOptions.colour.outlineWeight.1.5\",\"formatOptions.colour.outlineWeight.2\"] of 104",
+      "shot": "c20-wordart-tail-panel.png"
+    },
+    {
+      "name": "lines: two rectangles through the window API",
+      "observed": "con-a, con-b",
+      "shot": "c21-lines-two-rectangles.png"
+    },
+    {
+      "name": "lines: Insert > Line > Line dragged from A to B below the sites",
+      "observed": "shape pos {\"x\":440,\"y\":480,\"w\":460,\"h\":1,\"z\":3} shape line connect undefined",
+      "shot": "c22-lines-line-drawn.png"
+    },
+    {
+      "name": "lines: Insert > Line > Elbow connector dragged from A's right site to B's left site",
+      "observed": "shape-2 pos {\"x\":440,\"y\":380,\"w\":460,\"h\":1,\"z\":4} shape elbow connect {\"start\":{\"block\":\"con-a\",\"site\":3},\"end\":{\"block\":\"con-b\",\"site\":1}}",
+      "shot": "c23-lines-elbow-drawn.png"
+    },
+    {
+      "name": "lines: move B by a drag from inside by 150 by 100; the connector and the line",
+      "observed": "B {\"x\":1050,\"y\":400,\"w\":240,\"h\":160,\"z\":2}; elbow {\"x\":440,\"y\":380,\"w\":460,\"h\":1,\"z\":4} -> {\"x\":440,\"y\":380,\"w\":610,\"h\":100,\"z\":4}; line {\"x\":440,\"y\":480,\"w\":460,\"h\":1,\"z\":3} -> {\"x\":440,\"y\":480,\"w\":460,\"h\":1,\"z\":3}",
+      "shot": "c24-lines-b-moved.png"
+    },
+    {
+      "name": "lines: move A by a drag from inside by -60 by 120",
+      "observed": "A {\"x\":137,\"y\":420,\"w\":240,\"h\":160,\"z\":1}; elbow {\"x\":440,\"y\":380,\"w\":610,\"h\":100,\"z\":4} -> {\"x\":377,\"y\":480,\"w\":673,\"h\":20,\"z\":4}",
+      "shot": "c25-lines-a-moved.png"
+    },
+    {
+      "name": "lines: select the elbow connector; its handles",
+      "observed": "handles [\"handle.shape-2.move\",\"handle.shape-2.start\",\"handle.shape-2.end\"]; chip Shape",
+      "shot": "c26-lines-elbow-selected.png"
+    }
+  ],
+  "notes": [],
+  "deckId": "untitled-20260926-rsr8",
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "teardown": {
+    "trashed": true,
+    "status": 404
+  },
+  "endedAt": "2026-09-26T01:14:45.608Z"
+}

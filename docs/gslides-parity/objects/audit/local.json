@@ -1,0 +1,4236 @@
+{
+  "base": "http://localhost:4421",
+  "startedAt": "2026-09-26T01:16:31.830Z",
+  "steps": [
+    {
+      "name": "hexagon: draw by a drag from the Shapes grid",
+      "observed": "shape pos {\"x\":300,\"y\":200,\"w\":320,\"h\":240,\"z\":1}; marquee at step6 {\"x\":300,\"y\":200,\"w\":160,\"h\":120}; frees at step6 0; drawn undefined d M0,119.5 L60,0 H259.5 L319,119.5 L259.5,239 H60 Z",
+      "id": "shape"
+    },
+    {
+      "name": "hexagon: resize from the se handle by 200 by 120",
+      "observed": "path d distinct over 18 frames: 13; step1 M0,124.5 L62.5,0 H274 L336,124.5 L274,249 H62.5 Z step12 M0,179.5 L90,0 H429.5 L519,179.5 L429.5,359 H90 Z; free at step12 {\"x\":300,\"y\":200,\"w\":520,\"h\":360} ring {\"x\":300,\"y\":200,\"w\":520,\"h\":360}; svg 520x360"
+    },
+    {
+      "name": "star5: draw by a drag from the Shapes grid",
+      "observed": "shape pos {\"x\":300,\"y\":200,\"w\":320,\"h\":240,\"z\":1}; marquee at step6 {\"x\":300,\"y\":200,\"w\":160,\"h\":120}; frees at step6 0; drawn undefined d M0,91.5 H122 L159.5,0 L197,91.5 H319 L220.5,147.5 L258,239 L",
+      "id": "shape"
+    },
+    {
+      "name": "star5: resize from the se handle by 200 by 120",
+      "observed": "path d distinct over 18 frames: 13; step1 M0,95 H128.5 L168,0 L207.5,95 H336 L232,154 L272,249 L168,19 step12 M0,137 H198 L259.5,0 L321,137 H519 L358.5,222 L420,359 L259.; free at step12 {\"x\":300,\"y\":200,\"w\":520,\"h\":360} ring {\"x\":300,\"y\":200,\"w\":520,\"h\":360}; svg 520x360"
+    },
+    {
+      "name": "cost: fresh deck, blank slide, a rectangle moved",
+      "observed": "long 0 raf max 25.3"
+    },
+    {
+      "name": "cost: fresh deck, a 5 by 6 table resized",
+      "observed": "long 0 raf max 25.2"
+    },
+    {
+      "name": "cost: the GT deck (85 slides), slide 1, the title moved",
+      "observed": "slide opener-brand block h (heading); move handle handle.h.move; long 1 raf max 58.7; html 1827"
+    },
+    {
+      "name": "cost: the GT deck, the largest slide by markup, its first block moved",
+      "observed": "slide diagrams (6155 B of JSON, 3 blocks) block h (heading); long 1 (63 ms) raf max 57.8; html 1827"
+    }
+  ],
+  "gestures": [
+    {
+      "name": "l1-hexagon-draw",
+      "frames": [
+        {
+          "tag": "before",
+          "i": 0,
+          "t": 1790385407316,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": null,
+            "readout": null,
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-00-before.png"
+        },
+        {
+          "tag": "down",
+          "i": 1,
+          "t": 1790385407473,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": null,
+            "readout": null,
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-01-down.png"
+        },
+        {
+          "tag": "step1",
+          "i": 2,
+          "t": 1790385407662,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 26.7,
+              "h": 20
+            },
+            "readout": "27 × 20",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-02-step1.png"
+        },
+        {
+          "tag": "step2",
+          "i": 3,
+          "t": 1790385407872,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 53.3,
+              "h": 40
+            },
+            "readout": "53 × 40",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-03-step2.png"
+        },
+        {
+          "tag": "step3",
+          "i": 4,
+          "t": 1790385408044,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 80,
+              "h": 60
+            },
+            "readout": "80 × 60",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-04-step3.png"
+        },
+        {
+          "tag": "step4",
+          "i": 5,
+          "t": 1790385408250,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 106.6,
+              "h": 80
+            },
+            "readout": "107 × 80",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-05-step4.png"
+        },
+        {
+          "tag": "step5",
+          "i": 6,
+          "t": 1790385408565,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 133.3,
+              "h": 100
+            },
+            "readout": "133 × 100",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-06-step5.png"
+        },
+        {
+          "tag": "step6",
+          "i": 7,
+          "t": 1790385408909,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 160,
+              "h": 120
+            },
+            "readout": "160 × 120",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-07-step6.png"
+        },
+        {
+          "tag": "step7",
+          "i": 8,
+          "t": 1790385409081,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 186.7,
+              "h": 140
+            },
+            "readout": "187 × 140",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-08-step7.png"
+        },
+        {
+          "tag": "step8",
+          "i": 9,
+          "t": 1790385409244,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 213.3,
+              "h": 160
+            },
+            "readout": "213 × 160",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-09-step8.png"
+        },
+        {
+          "tag": "step9",
+          "i": 10,
+          "t": 1790385409567,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 240,
+              "h": 180
+            },
+            "readout": "240 × 180",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-10-step9.png"
+        },
+        {
+          "tag": "step10",
+          "i": 11,
+          "t": 1790385409878,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 266.7,
+              "h": 200
+            },
+            "readout": "267 × 200",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-11-step10.png"
+        },
+        {
+          "tag": "step11",
+          "i": 12,
+          "t": 1790385410021,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 293.3,
+              "h": 220
+            },
+            "readout": "293 × 220",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-12-step11.png"
+        },
+        {
+          "tag": "step12",
+          "i": 13,
+          "t": 1790385410254,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "readout": "320 × 240",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-hexagon-draw-13-step12.png"
+        },
+        {
+          "tag": "up+0",
+          "i": 14,
+          "t": 1790385410358,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": null
+        },
+        {
+          "tag": "up+40",
+          "i": 15,
+          "t": 1790385410536,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-draw-15-up+40.png"
+        },
+        {
+          "tag": "up+120",
+          "i": 16,
+          "t": 1790385410689,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-draw-16-up+120.png"
+        },
+        {
+          "tag": "up+400",
+          "i": 17,
+          "t": 1790385411101,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-draw-17-up+400.png"
+        }
+      ]
+    },
+    {
+      "name": "l1-hexagon-resize-se",
+      "frames": [
+        {
+          "tag": "before",
+          "i": 0,
+          "t": 1790385411998,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "320px",
+              "height": "240px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "320",
+              "attrH": "240",
+              "viewBox": "0 0 320 240",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 320,
+                "h": 240
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,119.5 L60,0 H259.5 L319,119.5 L259.5,239 H60 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 319,
+                  "h": 239
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 346.7,
+                "y": 235,
+                "w": 226.7,
+                "h": 170
+              },
+              "runBox": {
+                "x": 346.7,
+                "y": 235,
+                "w": 226.7,
+                "h": 170
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-00-before.png"
+        },
+        {
+          "tag": "down",
+          "i": 1,
+          "t": 1790385412228,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "320px",
+              "height": "240px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "320",
+              "attrH": "240",
+              "viewBox": "0 0 320 240",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 320,
+                "h": 240
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,119.5 L60,0 H259.5 L319,119.5 L259.5,239 H60 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 319,
+                  "h": 239
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 346.7,
+                "y": 235,
+                "w": 226.7,
+                "h": 170
+              },
+              "runBox": {
+                "x": 346.7,
+                "y": 235,
+                "w": 226.7,
+                "h": 170
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-01-down.png"
+        },
+        {
+          "tag": "step1",
+          "i": 2,
+          "t": 1790385412495,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 337,
+              "h": 250
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "337px",
+              "height": "250px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 337,
+              "h": 250
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "337",
+              "attrH": "250",
+              "viewBox": "0 0 337 250",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 337,
+                "h": 250
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,124.5 L62.5,0 H274 L336,124.5 L274,249 H62.5 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 336,
+                  "h": 249
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 348.9,
+                "y": 236.3,
+                "w": 239.2,
+                "h": 177.4
+              },
+              "runBox": {
+                "x": 348.9,
+                "y": 236.3,
+                "w": 239.2,
+                "h": 177.4
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 337,
+              "h": 250
+            },
+            "marquee": null,
+            "readout": "337 × 250",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-02-step1.png"
+        },
+        {
+          "tag": "step2",
+          "i": 3,
+          "t": 1790385412779,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 353,
+              "h": 260
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "353px",
+              "height": "260px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 353,
+              "h": 260
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "353",
+              "attrH": "260",
+              "viewBox": "0 0 353 260",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 353,
+                "h": 260
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,129.5 L65,0 H287.5 L352,129.5 L287.5,259 H65 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 352,
+                  "h": 259
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 351.1,
+                "y": 237.6,
+                "w": 250.8,
+                "h": 184.7
+              },
+              "runBox": {
+                "x": 351.1,
+                "y": 237.6,
+                "w": 250.8,
+                "h": 184.7
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 353,
+              "h": 260
+            },
+            "marquee": null,
+            "readout": "353 × 260",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-03-step2.png"
+        },
+        {
+          "tag": "step3",
+          "i": 4,
+          "t": 1790385412952,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 370,
+              "h": 270
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "370px",
+              "height": "270px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 370,
+              "h": 270
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "370",
+              "attrH": "270",
+              "viewBox": "0 0 370 270",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 370,
+                "h": 270
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,134.5 L67.5,0 H302 L369,134.5 L302,269 H67.5 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 369,
+                  "h": 269
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 353.3,
+                "y": 238.9,
+                "w": 263.3,
+                "h": 192.2
+              },
+              "runBox": {
+                "x": 353.3,
+                "y": 238.9,
+                "w": 263.3,
+                "h": 192.2
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 370,
+              "h": 270
+            },
+            "marquee": null,
+            "readout": "370 × 270",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-04-step3.png"
+        },
+        {
+          "tag": "step4",
+          "i": 5,
+          "t": 1790385413131,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 387,
+              "h": 280
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "387px",
+              "height": "280px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 387,
+              "h": 280
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "387",
+              "attrH": "280",
+              "viewBox": "0 0 387 280",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 387,
+                "h": 280
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,139.5 L70,0 H316.5 L386,139.5 L316.5,279 H70 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 386,
+                  "h": 279
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 355.6,
+                "y": 240.2,
+                "w": 275.8,
+                "h": 199.6
+              },
+              "runBox": {
+                "x": 355.6,
+                "y": 240.2,
+                "w": 275.8,
+                "h": 199.6
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 387,
+              "h": 280
+            },
+            "marquee": null,
+            "readout": "387 × 280",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-05-step4.png"
+        },
+        {
+          "tag": "step5",
+          "i": 6,
+          "t": 1790385413368,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 403,
+              "h": 290
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "403px",
+              "height": "290px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 403,
+              "h": 290
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "403",
+              "attrH": "290",
+              "viewBox": "0 0 403 290",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 403,
+                "h": 290
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,144.5 L72.5,0 H330 L402,144.5 L330,289 H72.5 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 402,
+                  "h": 289
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 357.7,
+                "y": 241.5,
+                "w": 287.5,
+                "h": 206.9
+              },
+              "runBox": {
+                "x": 357.7,
+                "y": 241.5,
+                "w": 287.5,
+                "h": 206.9
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 403,
+              "h": 290
+            },
+            "marquee": null,
+            "readout": "403 × 290",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-06-step5.png"
+        },
+        {
+          "tag": "step6",
+          "i": 7,
+          "t": 1790385413549,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 420,
+              "h": 300
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "420px",
+              "height": "300px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 420,
+              "h": 300
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "420",
+              "attrH": "300",
+              "viewBox": "0 0 420 300",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 420,
+                "h": 300
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,149.5 L75,0 H344.5 L419,149.5 L344.5,299 H75 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 419,
+                  "h": 299
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 360,
+                "y": 242.8,
+                "w": 300,
+                "h": 214.3
+              },
+              "runBox": {
+                "x": 360,
+                "y": 242.8,
+                "w": 300,
+                "h": 214.3
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 420,
+              "h": 300
+            },
+            "marquee": null,
+            "readout": "420 × 300",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-07-step6.png"
+        },
+        {
+          "tag": "step7",
+          "i": 8,
+          "t": 1790385413775,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 432,
+              "h": 310
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "432px",
+              "height": "310px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 432,
+              "h": 310
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "432",
+              "attrH": "310",
+              "viewBox": "0 0 432 310",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 432,
+                "h": 310
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,154.5 L77.5,0 H354 L431,154.5 L354,309 H77.5 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 431,
+                  "h": 309
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 361.8,
+                "y": 244.4,
+                "w": 308.3,
+                "h": 221.2
+              },
+              "runBox": {
+                "x": 361.8,
+                "y": 244.4,
+                "w": 308.3,
+                "h": 221.2
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 432,
+              "h": 310
+            },
+            "marquee": null,
+            "readout": "432 × 310",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-08-step7.png"
+        },
+        {
+          "tag": "step8",
+          "i": 9,
+          "t": 1790385414032,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 453,
+              "h": 320
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "453px",
+              "height": "320px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 453,
+              "h": 320
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "453",
+              "attrH": "320",
+              "viewBox": "0 0 453 320",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 453,
+                "h": 320
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,159.5 L80,0 H372.5 L452,159.5 L372.5,319 H80 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 452,
+                  "h": 319
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 364.4,
+                "y": 245.5,
+                "w": 324.2,
+                "h": 229
+              },
+              "runBox": {
+                "x": 364.4,
+                "y": 245.5,
+                "w": 324.2,
+                "h": 229
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 453,
+              "h": 320
+            },
+            "marquee": null,
+            "readout": "453 × 320",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-09-step8.png"
+        },
+        {
+          "tag": "step9",
+          "i": 10,
+          "t": 1790385414174,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 464,
+              "h": 330
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "464px",
+              "height": "330px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 464,
+              "h": 330
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "464",
+              "attrH": "330",
+              "viewBox": "0 0 464 330",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 464,
+                "h": 330
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,164.5 L82.5,0 H381 L463,164.5 L381,329 H82.5 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 463,
+                  "h": 329
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 366.2,
+                "y": 247,
+                "w": 331.7,
+                "h": 235.9
+              },
+              "runBox": {
+                "x": 366.2,
+                "y": 247,
+                "w": 331.7,
+                "h": 235.9
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 464,
+              "h": 330
+            },
+            "marquee": null,
+            "readout": "464 × 330",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-10-step9.png"
+        },
+        {
+          "tag": "step10",
+          "i": 11,
+          "t": 1790385414328,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 487,
+              "h": 340
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "487px",
+              "height": "340px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 487,
+              "h": 340
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "487",
+              "attrH": "340",
+              "viewBox": "0 0 487 340",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 487,
+                "h": 340
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,169.5 L85,0 H401.5 L486,169.5 L401.5,339 H85 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 486,
+                  "h": 339
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 368.9,
+                "y": 248.1,
+                "w": 349.2,
+                "h": 243.8
+              },
+              "runBox": {
+                "x": 368.9,
+                "y": 248.1,
+                "w": 349.2,
+                "h": 243.8
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 487,
+              "h": 340
+            },
+            "marquee": null,
+            "readout": "487 × 340",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-11-step10.png"
+        },
+        {
+          "tag": "step11",
+          "i": 12,
+          "t": 1790385414538,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 500,
+              "h": 350
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "500px",
+              "height": "350px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 500,
+              "h": 350
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "500",
+              "attrH": "350",
+              "viewBox": "0 0 500 350",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 500,
+                "h": 350
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,174.5 L87.5,0 H412 L499,174.5 L412,349 H87.5 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 499,
+                  "h": 349
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 370.8,
+                "y": 249.6,
+                "w": 358.3,
+                "h": 250.8
+              },
+              "runBox": {
+                "x": 370.8,
+                "y": 249.6,
+                "w": 358.3,
+                "h": 250.8
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 500,
+              "h": 350
+            },
+            "marquee": null,
+            "readout": "500 × 350",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-12-step11.png"
+        },
+        {
+          "tag": "step12",
+          "i": 13,
+          "t": 1790385414700,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "520px",
+              "height": "360px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "520",
+              "attrH": "360",
+              "viewBox": "0 0 520 360",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 520,
+                "h": 360
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,179.5 L90,0 H429.5 L519,179.5 L429.5,359 H90 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 519,
+                  "h": 359
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 373.3,
+                "y": 250.8,
+                "w": 373.3,
+                "h": 258.5
+              },
+              "runBox": {
+                "x": 373.3,
+                "y": 250.8,
+                "w": 373.3,
+                "h": 258.5
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "marquee": null,
+            "readout": "520 × 360",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-13-step12.png"
+        },
+        {
+          "tag": "up+0",
+          "i": 14,
+          "t": 1790385414729,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "520px",
+              "height": "360px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "520",
+              "attrH": "360",
+              "viewBox": "0 0 520 360",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 520,
+                "h": 360
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,179.5 L90,0 H429.5 L519,179.5 L429.5,359 H90 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 519,
+                  "h": 359
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 373.3,
+                "y": 250.8,
+                "w": 373.3,
+                "h": 258.5
+              },
+              "runBox": {
+                "x": 373.3,
+                "y": 250.8,
+                "w": 373.3,
+                "h": 258.5
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": null
+        },
+        {
+          "tag": "up+40",
+          "i": 15,
+          "t": 1790385414862,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "520px",
+              "height": "360px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "520",
+              "attrH": "360",
+              "viewBox": "0 0 520 360",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 520,
+                "h": 360
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,179.5 L90,0 H429.5 L519,179.5 L429.5,359 H90 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 519,
+                  "h": 359
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 373.3,
+                "y": 250.8,
+                "w": 373.3,
+                "h": 258.5
+              },
+              "runBox": {
+                "x": 373.3,
+                "y": 250.8,
+                "w": 373.3,
+                "h": 258.5
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-15-up+40.png"
+        },
+        {
+          "tag": "up+120",
+          "i": 16,
+          "t": 1790385415029,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "520px",
+              "height": "360px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "520",
+              "attrH": "360",
+              "viewBox": "0 0 520 360",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 520,
+                "h": 360
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,179.5 L90,0 H429.5 L519,179.5 L429.5,359 H90 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 519,
+                  "h": 359
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 373.3,
+                "y": 250.8,
+                "w": 373.3,
+                "h": 258.5
+              },
+              "runBox": {
+                "x": 373.3,
+                "y": 250.8,
+                "w": 373.3,
+                "h": 258.5
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-16-up+120.png"
+        },
+        {
+          "tag": "up+400",
+          "i": 17,
+          "t": 1790385415391,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "520px",
+              "height": "360px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "520",
+              "attrH": "360",
+              "viewBox": "0 0 520 360",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 520,
+                "h": 360
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,179.5 L90,0 H429.5 L519,179.5 L429.5,359 H90 Z",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 519,
+                  "h": 359
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 373.3,
+                "y": 250.8,
+                "w": 373.3,
+                "h": 258.5
+              },
+              "runBox": {
+                "x": 373.3,
+                "y": 250.8,
+                "w": 373.3,
+                "h": 258.5
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-hexagon-resize-se-17-up+400.png"
+        }
+      ]
+    },
+    {
+      "name": "l1-star5-draw",
+      "frames": [
+        {
+          "tag": "before",
+          "i": 0,
+          "t": 1790385421218,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": null,
+            "readout": null,
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-00-before.png"
+        },
+        {
+          "tag": "down",
+          "i": 1,
+          "t": 1790385421518,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": null,
+            "readout": null,
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-01-down.png"
+        },
+        {
+          "tag": "step1",
+          "i": 2,
+          "t": 1790385421714,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 26.7,
+              "h": 20
+            },
+            "readout": "27 × 20",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-02-step1.png"
+        },
+        {
+          "tag": "step2",
+          "i": 3,
+          "t": 1790385421861,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 53.3,
+              "h": 40
+            },
+            "readout": "53 × 40",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-03-step2.png"
+        },
+        {
+          "tag": "step3",
+          "i": 4,
+          "t": 1790385422022,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 80,
+              "h": 60
+            },
+            "readout": "80 × 60",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-04-step3.png"
+        },
+        {
+          "tag": "step4",
+          "i": 5,
+          "t": 1790385422204,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 106.6,
+              "h": 80
+            },
+            "readout": "107 × 80",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-05-step4.png"
+        },
+        {
+          "tag": "step5",
+          "i": 6,
+          "t": 1790385422420,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 133.3,
+              "h": 100
+            },
+            "readout": "133 × 100",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-06-step5.png"
+        },
+        {
+          "tag": "step6",
+          "i": 7,
+          "t": 1790385422622,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 160,
+              "h": 120
+            },
+            "readout": "160 × 120",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-07-step6.png"
+        },
+        {
+          "tag": "step7",
+          "i": 8,
+          "t": 1790385422867,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 186.7,
+              "h": 140
+            },
+            "readout": "187 × 140",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-08-step7.png"
+        },
+        {
+          "tag": "step8",
+          "i": 9,
+          "t": 1790385423104,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 213.3,
+              "h": 160
+            },
+            "readout": "213 × 160",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-09-step8.png"
+        },
+        {
+          "tag": "step9",
+          "i": 10,
+          "t": 1790385423290,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 240,
+              "h": 180
+            },
+            "readout": "240 × 180",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-10-step9.png"
+        },
+        {
+          "tag": "step10",
+          "i": 11,
+          "t": 1790385423492,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 266.7,
+              "h": 200
+            },
+            "readout": "267 × 200",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-11-step10.png"
+        },
+        {
+          "tag": "step11",
+          "i": 12,
+          "t": 1790385423714,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 293.3,
+              "h": 220
+            },
+            "readout": "293 × 220",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-12-step11.png"
+        },
+        {
+          "tag": "step12",
+          "i": 13,
+          "t": 1790385423874,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": null,
+            "marquee": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "readout": "320 × 240",
+            "chip": null,
+            "editing": false,
+            "frees": []
+          },
+          "shot": "l1-star5-draw-13-step12.png"
+        },
+        {
+          "tag": "up+0",
+          "i": 14,
+          "t": 1790385423945,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": null
+        },
+        {
+          "tag": "up+40",
+          "i": 15,
+          "t": 1790385424081,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-draw-15-up+40.png"
+        },
+        {
+          "tag": "up+120",
+          "i": 16,
+          "t": 1790385424345,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-draw-16-up+120.png"
+        },
+        {
+          "tag": "up+400",
+          "i": 17,
+          "t": 1790385424719,
+          "facts": {
+            "k": 0.705,
+            "free": null,
+            "freeStyle": null,
+            "inner": null,
+            "innerTag": null,
+            "shape": null,
+            "text": null,
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-draw-17-up+400.png"
+        }
+      ]
+    },
+    {
+      "name": "l1-star5-resize-se",
+      "frames": [
+        {
+          "tag": "before",
+          "i": 0,
+          "t": 1790385425470,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "320px",
+              "height": "240px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "320",
+              "attrH": "240",
+              "viewBox": "0 0 320 240",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 320,
+                "h": 240
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,91.5 H122 L159.5,0 L197,91.5 H319 L220.5,147.5 L258,239 L",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 319,
+                  "h": 239
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 398.9,
+                "y": 291.7,
+                "w": 122.2,
+                "h": 91.7
+              },
+              "runBox": {
+                "x": 398.9,
+                "y": 291.7,
+                "w": 122.2,
+                "h": 91.7
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-00-before.png"
+        },
+        {
+          "tag": "down",
+          "i": 1,
+          "t": 1790385425603,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "320px",
+              "height": "240px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "320",
+              "attrH": "240",
+              "viewBox": "0 0 320 240",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 320,
+                "h": 240
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,91.5 H122 L159.5,0 L197,91.5 H319 L220.5,147.5 L258,239 L",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 319,
+                  "h": 239
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 398.9,
+                "y": 291.7,
+                "w": 122.2,
+                "h": 91.7
+              },
+              "runBox": {
+                "x": 398.9,
+                "y": 291.7,
+                "w": 122.2,
+                "h": 91.7
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 320,
+              "h": 240
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-01-down.png"
+        },
+        {
+          "tag": "step1",
+          "i": 2,
+          "t": 1790385425798,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 337,
+              "h": 250
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "337px",
+              "height": "250px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 337,
+              "h": 250
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "337",
+              "attrH": "250",
+              "viewBox": "0 0 337 250",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 337,
+                "h": 250
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,95 H128.5 L168,0 L207.5,95 H336 L232,154 L272,249 L168,19",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 336,
+                  "h": 249
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 404.1,
+                "y": 295.5,
+                "w": 128.7,
+                "h": 95.5
+              },
+              "runBox": {
+                "x": 404.1,
+                "y": 295.5,
+                "w": 128.7,
+                "h": 95.5
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 337,
+              "h": 250
+            },
+            "marquee": null,
+            "readout": "337 × 250",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-02-step1.png"
+        },
+        {
+          "tag": "step2",
+          "i": 3,
+          "t": 1790385426004,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 353,
+              "h": 260
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "353px",
+              "height": "260px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 353,
+              "h": 260
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "353",
+              "attrH": "260",
+              "viewBox": "0 0 353 260",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 353,
+                "h": 260
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,99 H134.5 L176,0 L217.5,99 H352 L243,160 L285,259 L176,19",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 352,
+                  "h": 259
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 409.1,
+                "y": 299.3,
+                "w": 134.8,
+                "h": 99.3
+              },
+              "runBox": {
+                "x": 409.1,
+                "y": 299.3,
+                "w": 134.8,
+                "h": 99.3
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 353,
+              "h": 260
+            },
+            "marquee": null,
+            "readout": "353 × 260",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-03-step2.png"
+        },
+        {
+          "tag": "step3",
+          "i": 4,
+          "t": 1790385426169,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 370,
+              "h": 270
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "370px",
+              "height": "270px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 370,
+              "h": 270
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "370",
+              "attrH": "270",
+              "viewBox": "0 0 370 270",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 370,
+                "h": 270
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,102.5 H141 L184.5,0 L228,102.5 H369 L255,166.5 L298.5,269",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 369,
+                  "h": 269
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 414.3,
+                "y": 303.1,
+                "w": 141.3,
+                "h": 103.1
+              },
+              "runBox": {
+                "x": 414.3,
+                "y": 303.1,
+                "w": 141.3,
+                "h": 103.1
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 370,
+              "h": 270
+            },
+            "marquee": null,
+            "readout": "370 × 270",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-04-step3.png"
+        },
+        {
+          "tag": "step4",
+          "i": 5,
+          "t": 1790385426353,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 387,
+              "h": 280
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "387px",
+              "height": "280px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 387,
+              "h": 280
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "387",
+              "attrH": "280",
+              "viewBox": "0 0 387 280",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 387,
+                "h": 280
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,106.5 H147.5 L193,0 L238.5,106.5 H386 L266.5,172.5 L312.5",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 386,
+                  "h": 279
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 419.6,
+                "y": 306.9,
+                "w": 147.8,
+                "h": 106.9
+              },
+              "runBox": {
+                "x": 419.6,
+                "y": 306.9,
+                "w": 147.8,
+                "h": 106.9
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 387,
+              "h": 280
+            },
+            "marquee": null,
+            "readout": "387 × 280",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-05-step4.png"
+        },
+        {
+          "tag": "step5",
+          "i": 6,
+          "t": 1790385426516,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 403,
+              "h": 290
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "403px",
+              "height": "290px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 403,
+              "h": 290
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "403",
+              "attrH": "290",
+              "viewBox": "0 0 403 290",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 403,
+                "h": 290
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,110.5 H153.5 L201,0 L248.5,110.5 H402 L278,178.5 L325,289",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 402,
+                  "h": 289
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 424.5,
+                "y": 310.8,
+                "w": 153.9,
+                "h": 110.8
+              },
+              "runBox": {
+                "x": 424.5,
+                "y": 310.8,
+                "w": 153.9,
+                "h": 110.8
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 403,
+              "h": 290
+            },
+            "marquee": null,
+            "readout": "403 × 290",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-06-step5.png"
+        },
+        {
+          "tag": "step6",
+          "i": 7,
+          "t": 1790385426670,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 420,
+              "h": 300
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "420px",
+              "height": "300px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 420,
+              "h": 300
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "420",
+              "attrH": "300",
+              "viewBox": "0 0 420 300",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 420,
+                "h": 300
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,114 H160 L209.5,0 L259,114 H419 L289.5,185 L339,299 L209.",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 419,
+                  "h": 299
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 429.8,
+                "y": 314.6,
+                "w": 160.4,
+                "h": 114.6
+              },
+              "runBox": {
+                "x": 429.8,
+                "y": 314.6,
+                "w": 160.4,
+                "h": 114.6
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 420,
+              "h": 300
+            },
+            "marquee": null,
+            "readout": "420 × 300",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-07-step6.png"
+        },
+        {
+          "tag": "step7",
+          "i": 8,
+          "t": 1790385426848,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 432,
+              "h": 310
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "432px",
+              "height": "310px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 432,
+              "h": 310
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "432",
+              "attrH": "310",
+              "viewBox": "0 0 432 310",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 432,
+                "h": 310
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,118 H164.5 L215.5,0 L266.5,118 H431 L298,191 L348.5,309 L",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 431,
+                  "h": 309
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 433.5,
+                "y": 318.4,
+                "w": 165,
+                "h": 118.4
+              },
+              "runBox": {
+                "x": 433.5,
+                "y": 318.4,
+                "w": 165,
+                "h": 118.4
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 432,
+              "h": 310
+            },
+            "marquee": null,
+            "readout": "432 × 310",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-08-step7.png"
+        },
+        {
+          "tag": "step8",
+          "i": 9,
+          "t": 1790385427039,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 453,
+              "h": 320
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "453px",
+              "height": "320px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 453,
+              "h": 320
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "453",
+              "attrH": "320",
+              "viewBox": "0 0 453 320",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 453,
+                "h": 320
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,122 H172.5 L226,0 L279.5,122 H452 L312.5,197 L365.5,319 L",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 452,
+                  "h": 319
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 440,
+                "y": 322.2,
+                "w": 173,
+                "h": 122.2
+              },
+              "runBox": {
+                "x": 440,
+                "y": 322.2,
+                "w": 173,
+                "h": 122.2
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 453,
+              "h": 320
+            },
+            "marquee": null,
+            "readout": "453 × 320",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-09-step8.png"
+        },
+        {
+          "tag": "step9",
+          "i": 10,
+          "t": 1790385427221,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 464,
+              "h": 330
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "464px",
+              "height": "330px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 464,
+              "h": 330
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "464",
+              "attrH": "330",
+              "viewBox": "0 0 464 330",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 464,
+                "h": 330
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,125.5 H177 L231.5,0 L286,125.5 H463 L320,203.5 L374.5,329",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 463,
+                  "h": 329
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 443.4,
+                "y": 326,
+                "w": 177.2,
+                "h": 126
+              },
+              "runBox": {
+                "x": 443.4,
+                "y": 326,
+                "w": 177.2,
+                "h": 126
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 464,
+              "h": 330
+            },
+            "marquee": null,
+            "readout": "464 × 330",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-10-step9.png"
+        },
+        {
+          "tag": "step10",
+          "i": 11,
+          "t": 1790385427368,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 487,
+              "h": 340
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "487px",
+              "height": "340px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 487,
+              "h": 340
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "487",
+              "attrH": "340",
+              "viewBox": "0 0 487 340",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 487,
+                "h": 340
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,129.5 H185.5 L243,0 L300.5,129.5 H486 L336,209.5 L393,339",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 486,
+                  "h": 339
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 450.5,
+                "y": 329.9,
+                "w": 186,
+                "h": 129.9
+              },
+              "runBox": {
+                "x": 450.5,
+                "y": 329.9,
+                "w": 186,
+                "h": 129.9
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 487,
+              "h": 340
+            },
+            "marquee": null,
+            "readout": "487 × 340",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-11-step10.png"
+        },
+        {
+          "tag": "step11",
+          "i": 12,
+          "t": 1790385427531,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 500,
+              "h": 350
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "500px",
+              "height": "350px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 500,
+              "h": 350
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "500",
+              "attrH": "350",
+              "viewBox": "0 0 500 350",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 500,
+                "h": 350
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,133.5 H190.5 L249.5,0 L308.5,133.5 H499 L345,215.5 L403.5",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 499,
+                  "h": 349
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 454.5,
+                "y": 333.7,
+                "w": 191,
+                "h": 133.7
+              },
+              "runBox": {
+                "x": 454.5,
+                "y": 333.7,
+                "w": 191,
+                "h": 133.7
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 500,
+              "h": 350
+            },
+            "marquee": null,
+            "readout": "500 × 350",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-12-step11.png"
+        },
+        {
+          "tag": "step12",
+          "i": 13,
+          "t": 1790385427697,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "520px",
+              "height": "360px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "520",
+              "attrH": "360",
+              "viewBox": "0 0 520 360",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 520,
+                "h": 360
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,137 H198 L259.5,0 L321,137 H519 L358.5,222 L420,359 L259.",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 519,
+                  "h": 359
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 460.7,
+                "y": 337.5,
+                "w": 198.6,
+                "h": 137.5
+              },
+              "runBox": {
+                "x": 460.7,
+                "y": 337.5,
+                "w": 198.6,
+                "h": 137.5
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "marquee": null,
+            "readout": "520 × 360",
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-13-step12.png"
+        },
+        {
+          "tag": "up+0",
+          "i": 14,
+          "t": 1790385427732,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "520px",
+              "height": "360px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "520",
+              "attrH": "360",
+              "viewBox": "0 0 520 360",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 520,
+                "h": 360
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,137 H198 L259.5,0 L321,137 H519 L358.5,222 L420,359 L259.",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 519,
+                  "h": 359
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 460.7,
+                "y": 337.5,
+                "w": 198.6,
+                "h": 137.5
+              },
+              "runBox": {
+                "x": 460.7,
+                "y": 337.5,
+                "w": 198.6,
+                "h": 137.5
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": null
+        },
+        {
+          "tag": "up+40",
+          "i": 15,
+          "t": 1790385427891,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "520px",
+              "height": "360px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "520",
+              "attrH": "360",
+              "viewBox": "0 0 520 360",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 520,
+                "h": 360
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,137 H198 L259.5,0 L321,137 H519 L358.5,222 L420,359 L259.",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 519,
+                  "h": 359
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 460.7,
+                "y": 337.5,
+                "w": 198.6,
+                "h": 137.5
+              },
+              "runBox": {
+                "x": 460.7,
+                "y": 337.5,
+                "w": 198.6,
+                "h": 137.5
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-15-up+40.png"
+        },
+        {
+          "tag": "up+120",
+          "i": 16,
+          "t": 1790385428084,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "520px",
+              "height": "360px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "520",
+              "attrH": "360",
+              "viewBox": "0 0 520 360",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 520,
+                "h": 360
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,137 H198 L259.5,0 L321,137 H519 L358.5,222 L420,359 L259.",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 519,
+                  "h": 359
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 460.7,
+                "y": 337.5,
+                "w": 198.6,
+                "h": 137.5
+              },
+              "runBox": {
+                "x": 460.7,
+                "y": 337.5,
+                "w": 198.6,
+                "h": 137.5
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-16-up+120.png"
+        },
+        {
+          "tag": "up+400",
+          "i": 17,
+          "t": 1790385428458,
+          "facts": {
+            "k": 0.705,
+            "free": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "freeStyle": {
+              "left": "163px",
+              "top": "71px",
+              "width": "520px",
+              "height": "360px",
+              "transform": ""
+            },
+            "inner": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "innerTag": "div",
+            "shape": {
+              "tag": "path",
+              "attrW": "520",
+              "attrH": "360",
+              "viewBox": "0 0 520 360",
+              "box": {
+                "x": 300,
+                "y": 200,
+                "w": 520,
+                "h": 360
+              },
+              "el": {
+                "width": null,
+                "height": null,
+                "rx": null,
+                "ry": null,
+                "d": "M0,137 H198 L259.5,0 L321,137 H519 L358.5,222 L420,359 L259.",
+                "fill": "var(--plate)",
+                "bbox": {
+                  "x": 300.5,
+                  "y": 200.5,
+                  "w": 519,
+                  "h": 359
+                }
+              },
+              "bars": []
+            },
+            "text": {
+              "fontSize": 22,
+              "lines": 0,
+              "box": {
+                "x": 460.7,
+                "y": 337.5,
+                "w": 198.6,
+                "h": 137.5
+              },
+              "runBox": {
+                "x": 460.7,
+                "y": 337.5,
+                "w": 198.6,
+                "h": 137.5
+              },
+              "sample": ""
+            },
+            "picture": null,
+            "cells": null,
+            "ring": {
+              "x": 300,
+              "y": 200,
+              "w": 520,
+              "h": 360
+            },
+            "marquee": null,
+            "readout": null,
+            "chip": "Shape",
+            "editing": false,
+            "frees": ["shape"]
+          },
+          "shot": "l1-star5-resize-se-17-up+400.png"
+        }
+      ]
+    }
+  ],
+  "costs": [
+    {
+      "name": "fresh-blank-move",
+      "armed": true,
+      "steps": 12,
+      "pause": 30,
+      "moves": 12,
+      "mutations": 11,
+      "longTasks": [],
+      "longTotalMs": 0,
+      "rafFrames": 133,
+      "rafMax": 25.3,
+      "rafOver34": 0,
+      "rafOver50": 0,
+      "latencyMs": [49.9, 8.3, 8.8, 8.4, 8.4, 9.2, 8.8, 8.6, 9, 8.1, 8.6, 8.7],
+      "htmlLength": 753
+    },
+    {
+      "name": "fresh-table-6x5-resize",
+      "armed": true,
+      "steps": 12,
+      "pause": 30,
+      "moves": 12,
+      "mutations": 12,
+      "longTasks": [],
+      "longTotalMs": 0,
+      "rafFrames": 132,
+      "rafMax": 25.2,
+      "rafOver34": 0,
+      "rafOver50": 0,
+      "latencyMs": [10.6, 13, 10.3, 10.7, 10.2, 10.2, 10, 10.4, 10.5, 9.9, 9.7, 10.9],
+      "htmlLength": 3743
+    },
+    {
+      "name": "gt-deck-slide1-move",
+      "armed": true,
+      "steps": 12,
+      "pause": 30,
+      "moves": 12,
+      "mutations": 13,
+      "longTasks": [
+        {
+          "start": 4435,
+          "dur": 62
+        }
+      ],
+      "longTotalMs": 62,
+      "rafFrames": 137,
+      "rafMax": 58.7,
+      "rafOver34": 1,
+      "rafOver50": 1,
+      "latencyMs": [21.5, 12.5, 11.2, 12, 9.4, 10.9, 11.4, 10.7, 12.6, 9.9, 11.1, 10.2],
+      "htmlLength": 1827
+    },
+    {
+      "name": "gt-deck-largest-move",
+      "armed": true,
+      "steps": 12,
+      "pause": 30,
+      "moves": 12,
+      "mutations": 13,
+      "longTasks": [
+        {
+          "start": 17147,
+          "dur": 63
+        }
+      ],
+      "longTotalMs": 63,
+      "rafFrames": 127,
+      "rafMax": 57.8,
+      "rafOver34": 1,
+      "rafOver50": 1,
+      "latencyMs": [12.9, 12.3, 12.7, 12.4, 10.1, 11.4, 11.3, 11, 10.3, 11.1, 10.8, 11.5],
+      "htmlLength": 1827
+    }
+  ],
+  "freshDeck": "untitled-20260926-o1jr",
+  "consoleErrors": [
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4421/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 93474 MB free of 1902738 MB",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4421/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhp8qms-bead64 render] turboslide render title --deck /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/decks",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4421/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhp8qms-bead64 render] render: 1 slide(s) x light at 1x with Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Ma",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4421/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhp8qms-bead64 render]    1 title light ready 9 ms, shot 120 ms",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4421/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhp8qms-bead64 render] render: 1 record(s) in 3.1 s -> /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/.tur",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4421/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: seed directory:/Users/kevinliu/repos/Turboslide-live/decks: 0 twins of gt-brand written (0 KB), 202 present, 14 ms",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4421/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 93745 MB free of 1902738 MB",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4421/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhp9og6-73e3e7 render] turboslide render opener-brand --deck /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslid",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4421/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhp9og6-73e3e7 render] render: 1 slide(s) x dark at 1x with Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4421/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhp9og6-73e3e7 render]    1 opener-brand dark ready 9 ms, shot 68 ms",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4421/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhp9og6-73e3e7 render] render: 1 record(s) in 2.4 s -> /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/.tur"
+  ]
+}

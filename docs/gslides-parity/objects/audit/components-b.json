@@ -1,0 +1,830 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "theme": "light",
+  "startedAt": "2026-09-26T01:07:52.937Z",
+  "steps": [
+    {
+      "name": "table: insert 3 by 3 from the grid",
+      "observed": "table pos {\"x\":320,\"y\":129,\"w\":960,\"h\":320}; columns 3 rows 3 header true; drawn table {\"x\":320,\"y\":129,\"w\":960,\"h\":320} row0 [{\"x\":320,\"y\":130,\"w\":320,\"h\":53},{\"x\":640,\"y\":130,\"w\":320,\"h\":53},{\"x\":960,\"y\":130,\"w\":320,\"h\":53}]",
+      "shot": "b01-table-inserted-empty.png",
+      "rings": {
+        "active": null,
+        "free": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "table": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "paras": [
+          {
+            "td": {
+              "x": 320,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 320,
+              "y": 142,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 640,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 656,
+              "y": 142,
+              "w": 288,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 960,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 976,
+              "y": 142,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          }
+        ],
+        "ring": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "overlay": [
+          {
+            "cls": "ts-select is-selected",
+            "box": {
+              "x": 320,
+              "y": 129,
+              "w": 960,
+              "h": 320
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-select-chip",
+            "box": {
+              "x": 320,
+              "y": 100.6,
+              "w": 65.1,
+              "h": 25.5
+            },
+            "control": "handle.table.move"
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 314.3,
+              "y": 123.3,
+              "w": 971.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 314.3,
+              "y": 443.3,
+              "w": 971.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 314.3,
+              "y": 134.7,
+              "w": 11.3,
+              "h": 308.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 1274.3,
+              "y": 134.7,
+              "w": 11.3,
+              "h": 308.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 633.6,
+              "y": 129,
+              "w": 12.8,
+              "h": 320
+            },
+            "control": "handle.table.column.0"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 953.6,
+              "y": 129,
+              "w": 12.8,
+              "h": 320
+            },
+            "control": "handle.table.column.1"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 312.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.nw"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 792.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.n"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.ne"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 281.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.e"
+          }
+        ],
+        "editing": false,
+        "chip": "Table"
+      }
+    },
+    {
+      "name": "table: one click on cell 1,1 of the empty table",
+      "observed": "editing true; chip Table; ring {\"x\":640,\"y\":236.3,\"w\":320,\"h\":53}; active {\"tag\":\"span\",\"run\":\"table/rows/1/cells/1\",\"box\":{\"x\":640,\"y\":236.3,\"w\":320,\"h\":53},\"outline\":\"none 3px rgb(7, 7, 7)\",\"editable\":\"true\"}; handles 9",
+      "shot": "b02-table-one-click-empty.png",
+      "rings": {
+        "active": {
+          "tag": "span",
+          "run": "table/rows/1/cells/1",
+          "box": {
+            "x": 640,
+            "y": 236.3,
+            "w": 320,
+            "h": 53
+          },
+          "outline": "none 3px rgb(7, 7, 7)",
+          "editable": "true"
+        },
+        "free": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "table": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "paras": [
+          {
+            "td": {
+              "x": 320,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 320,
+              "y": 142,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 640,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 656,
+              "y": 142,
+              "w": 288,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 960,
+              "y": 130,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 976,
+              "y": 142,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          }
+        ],
+        "ring": {
+          "x": 640,
+          "y": 236.3,
+          "w": 320,
+          "h": 53
+        },
+        "overlay": [
+          {
+            "cls": "ts-select is-selected is-editing",
+            "box": {
+              "x": 640,
+              "y": 236.3,
+              "w": 320,
+              "h": 53
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-select-chip",
+            "box": {
+              "x": 640,
+              "y": 208,
+              "w": 65.1,
+              "h": 25.5
+            },
+            "control": "handle.table.move"
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 230.7,
+              "w": 331.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 283.6,
+              "w": 331.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 242,
+              "w": 11.3,
+              "h": 41.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 954.3,
+              "y": 242,
+              "w": 11.3,
+              "h": 41.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 312.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.nw"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 792.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.n"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 121.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.ne"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 281.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.e"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 441.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.se"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 792.2,
+              "y": 441.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.s"
+          }
+        ],
+        "editing": true,
+        "chip": "Table"
+      },
+      "page": "b03-table-one-click-empty-page.png"
+    },
+    {
+      "name": "table: type Alpha, Tab, Beta, Tab, Gamma",
+      "observed": "rows [[\"\",\"\",\"\"],[\"\",\"Alpha\",\"Beta\"],[\"Gamma\",\"\",\"\"]]; after the first Tab: editing true active table/rows/1/cells/2",
+      "shot": "b04-table-typed.png"
+    },
+    {
+      "name": "table: right click cell 1,1, Insert row below",
+      "observed": "context rows 16: menu.format.table.insertRowAbove, menu.format.table.insertRowBelow, menu.format.table.insertColumnLeft, menu.format.table.insertColumnRight, menu.format.table.deleteRow, menu.format.table.deleteColumn, menu.format.table.deleteTable, menu.format.table.distributeRows; clicked menu.format.table.insertRowBelow; rows now 4; pos {\"x\":320,\"y\":129,\"w\":960,\"h\":320}",
+      "shot": "b05-table-row-added.png"
+    },
+    {
+      "name": "table: right click cell 1,1, Insert column right",
+      "observed": "clicked menu.format.table.insertColumnRight; columns now 4 [{},{},{},{}]; drawn row0 [{\"x\":320,\"y\":130,\"w\":240,\"h\":53},{\"x\":560,\"y\":130,\"w\":240,\"h\":53},{\"x\":800,\"y\":130,\"w\":240,\"h\":53},{\"x\":1040,\"y\":130,\"w\":240,\"h\":53}]; pos {\"x\":320,\"y\":129,\"w\":960,\"h\":320}",
+      "shot": "b06-table-column-added.png"
+    },
+    {
+      "name": "table: right click the new row, Delete row; right click the new column, Delete column",
+      "observed": "columns 3 rows 3; cells [[\"\",\"\",\"\"],[\"\",\"Alpha\",\"Beta\"],[\"Gamma\",\"\",\"\"]]",
+      "shot": "b07-table-row-column-removed.png"
+    },
+    {
+      "name": "table: select the table, drag the first column seam by 90 px",
+      "observed": "handles handle.table.column.0, handle.table.column.1; columns [{},{},{}] -> [{\"width\":410},{\"width\":230},{\"width\":320}]; drawn row0 [{\"x\":320,\"y\":130,\"w\":410,\"h\":53},{\"x\":730,\"y\":130,\"w\":230,\"h\":53},{\"x\":960,\"y\":130,\"w\":320,\"h\":53}]",
+      "shot": "b08-table-seam-dragged.png"
+    },
+    {
+      "name": "table: header row: a range over row 0 by a drag on the selected table, Cmd+B",
+      "observed": "range chip Table; overlay [\"ts-select is-selected\",\"ts-select-chip\",\"ts-frame-edge\",\"ts-frame-edge\",\"ts-frame-edge\",\"ts-frame-edge\",\"ts-handle is-selected\",\"ts-handle is-selected\",\"ts-handle is-selected\",\"ts-handle is-selected\",\"ts-handle is-selected\",\"ts-handle is-selected\"]; row0 after Cmd+B {\"cells\":[\"\",\"\",\"\"],\"header\":true}",
+      "shot": "b09-table-header-range-bold.png"
+    },
+    {
+      "name": "table: Format options with the table selected",
+      "observed": "panel true; 99 controls; first panel.formatOptions.close, formatOptions.table, formatOptions.table, formatOptions.table.headerRow, formatOptions.table.border.weight, formatOptions.table.border.dash, formatOptions.table.border.color, formatOptions.table.border.color.none, formatOptions.table.border.color.ink, formatOptions.table.border.color.paper, formatOptions.table.border.color.ink-2, formatOptions.table.border.color.titanium, formatOptions.table.border.color.hair, formatOptions.table.border.color.hair-soft; headerRow formatOptions.table.headerRow",
+      "shot": "b10-table-format-options.png"
+    },
+    {
+      "name": "table: resize from the se handle by 200 by 120 and move by 120 by 60",
+      "observed": "pos {\"x\":320,\"y\":129,\"w\":960,\"h\":320} -> resized {\"x\":320,\"y\":129,\"w\":1160,\"h\":440} (drawn table {\"x\":320,\"y\":129,\"w\":1160,\"h\":440}, rows 3) -> moved {\"x\":320,\"y\":189,\"w\":1160,\"h\":380}",
+      "shot": "b11-table-resized-moved.png"
+    },
+    {
+      "name": "table: reload",
+      "observed": "cells [[\"\",\"\",\"\"],[\"\",\"Alpha\",\"Beta\"],[\"Gamma\",\"\",\"\"]]; pos {\"x\":320,\"y\":189,\"w\":1160,\"h\":380}",
+      "shot": "b12-table-reloaded.png"
+    },
+    {
+      "name": "table: the show",
+      "observed": "{\"show\":true,\"table\":true,\"cells\":[\"\",\"\",\"\",\"\",\"Alpha\",\"Beta\",\"Gamma\",\"\",\"\"],\"editable\":false}",
+      "shot": "b13-table-show.png"
+    },
+    {
+      "name": "table: the PDF",
+      "observed": "untitled-20260926-ji3c.pdf 35774 B, pages 2, pdftotext Alpha:true Beta:true Gamma:true; page 2 text \"Alpha Beta Gamma 02 / 02\""
+    },
+    {
+      "name": "table on a layout slide (Kevin's screenshot): a one-column slide, Insert > Table 3 by 3, one click on a cell",
+      "observed": "table pos {\"x\":320,\"y\":218,\"w\":960,\"h\":320,\"z\":2}; free {\"x\":320,\"y\":218,\"w\":960,\"h\":320}; table {\"x\":320,\"y\":218,\"w\":960,\"h\":320}; ring {\"x\":640,\"y\":325.3,\"w\":320,\"h\":53}; active {\"tag\":\"span\",\"run\":\"table/rows/1/cells/1\",\"box\":{\"x\":640,\"y\":325.3,\"w\":320,\"h\":53},\"outline\":\"none 3px rgb(7, 7, 7)\",\"editable\":\"true\"}; paras [{\"td\":{\"x\":320,\"y\":219,\"w\":320,\"h\":53},\"para\":{\"x\":320,\"y\":231,\"w\":304,\"h\":29},\"text\":\"\"},{\"td\":{\"x\":640,\"y\":219,\"w\":320,\"h\":53},\"para\":{\"x\":656,\"y\":231,\"w\":288,\"h\":29},\"text\":\"\"},{\"td\":{\"x\":960,\"y\":219,\"w\":320,\"h\":53},\"para\":{\"x\":976,\"y\":231,\"w\":304,\"h\":29},\"text\":\"\"}]; overlay [{\"cls\":\"ts-select is-selected is-editing\",\"box\":{\"x\":640,\"y\":325.3,\"w\":320,\"h\":53},\"control\":null},{\"cls\":\"ts-select-chip\",\"box\":{\"x\":640,\"y\":296.9,\"w\":65.1,\"h\":25.5},\"control\":\"handle.table.move\"},{\"cls\":\"ts-frame-edge\",\"box\":{\"x\":634.3,\"y\":319.6,\"w\":331.3,\"h\":11.3},\"control\":null},{\"cls\":\"ts-frame-edge\",\"box\":{\"x\":634.3,\"y\":372.7,\"w\":331.3,\"h\":11.3},\"control\":null},{\"cls\":\"ts-frame-edge\",\"box\":{\"x\":634.3,\"y\":331,\"w\":11.3,\"h\":41.6},\"control\":null},{\"cls\":\"ts-frame-edge\",\"box\":{\"x\":954.3,\"y\":331,\"w\":11.3,\"h\":41.6},\"control\":null},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":312.2,\"y\":210.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.nw\"},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":792.2,\"y\":210.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.n\"},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":1272.2,\"y\":210.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.ne\"},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":1272.2,\"y\":370.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.e\"},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":1272.2,\"y\":530.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.se\"},{\"cls\":\"ts-handle is-selected\",\"box\":{\"x\":792.2,\"y\":530.2,\"w\":15.6,\"h\":15.6},\"control\":\"handle.table.resize.s\"}]",
+      "shot": "b15-layout-table-one-click.png",
+      "inserted": "b14-layout-table-inserted.png",
+      "full": "b16-layout-table-one-click-page.png",
+      "rings": {
+        "active": {
+          "tag": "span",
+          "run": "table/rows/1/cells/1",
+          "box": {
+            "x": 640,
+            "y": 325.3,
+            "w": 320,
+            "h": 53
+          },
+          "outline": "none 3px rgb(7, 7, 7)",
+          "editable": "true"
+        },
+        "free": {
+          "x": 320,
+          "y": 218,
+          "w": 960,
+          "h": 320
+        },
+        "table": {
+          "x": 320,
+          "y": 218,
+          "w": 960,
+          "h": 320
+        },
+        "paras": [
+          {
+            "td": {
+              "x": 320,
+              "y": 219,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 320,
+              "y": 231,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 640,
+              "y": 219,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 656,
+              "y": 231,
+              "w": 288,
+              "h": 29
+            },
+            "text": ""
+          },
+          {
+            "td": {
+              "x": 960,
+              "y": 219,
+              "w": 320,
+              "h": 53
+            },
+            "para": {
+              "x": 976,
+              "y": 231,
+              "w": 304,
+              "h": 29
+            },
+            "text": ""
+          }
+        ],
+        "ring": {
+          "x": 640,
+          "y": 325.3,
+          "w": 320,
+          "h": 53
+        },
+        "overlay": [
+          {
+            "cls": "ts-select is-selected is-editing",
+            "box": {
+              "x": 640,
+              "y": 325.3,
+              "w": 320,
+              "h": 53
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-select-chip",
+            "box": {
+              "x": 640,
+              "y": 296.9,
+              "w": 65.1,
+              "h": 25.5
+            },
+            "control": "handle.table.move"
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 319.6,
+              "w": 331.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 372.7,
+              "w": 331.3,
+              "h": 11.3
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 634.3,
+              "y": 331,
+              "w": 11.3,
+              "h": 41.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-frame-edge",
+            "box": {
+              "x": 954.3,
+              "y": 331,
+              "w": 11.3,
+              "h": 41.6
+            },
+            "control": null
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 312.2,
+              "y": 210.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.nw"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 792.2,
+              "y": 210.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.n"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 210.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.ne"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 370.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.e"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 1272.2,
+              "y": 530.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.se"
+          },
+          {
+            "cls": "ts-handle is-selected",
+            "box": {
+              "x": 792.2,
+              "y": 530.2,
+              "w": 15.6,
+              "h": 15.6
+            },
+            "control": "handle.table.resize.s"
+          }
+        ],
+        "editing": true,
+        "chip": "Table"
+      }
+    },
+    {
+      "name": "table on a blank slide with one column (Insert > Table 1 by 3), one click",
+      "observed": "error: no cell 1,0"
+    },
+    {
+      "name": "diagram grid: the panel and Insert",
+      "observed": "3 objects: shape:item-1(\"Item 1\"), shape:item-2(\"Item 2\"), shape:item-3(\"Item 3\"); groups [\"grid\"]",
+      "shot": "b18-diagram-grid-inserted.png",
+      "panel": "b17-diagram-grid-panel.png"
+    },
+    {
+      "name": "diagram grid: one click on a member, then a double click on its label, type \" plus\"",
+      "observed": "member shape item-1; chip after one click \"Group\", after a double click \"Shape\"; session true; text now \"Ite plusm 1\"",
+      "shot": "b19-diagram-grid-label-edited.png"
+    },
+    {
+      "name": "diagram grid: a node added (Cmd+D on a member) and removed (Delete)",
+      "observed": "chip \"Group\"; objects 3 -> Cmd+D 6 -> Delete 3; a panel control to add a node: []",
+      "shot": "b21-diagram-grid-deleted.png",
+      "dup": "b20-diagram-grid-duplicated.png"
+    },
+    {
+      "name": "diagram grid: resize the group from its se handle by -160 by -90",
+      "observed": "chip \"Group\"; handle handle.item-1.resize.se; 3 of 3 objects moved or resized",
+      "shot": "b22-diagram-grid-resized.png"
+    },
+    {
+      "name": "diagram hierarchy: the panel and Insert",
+      "observed": "9 objects: shape:level-1(\"Level 1\"), shape:level-2(\"Level 2\"), shape:link-1, shape:level-3(\"Level 2\"), shape:link-2, shape:level-4(\"Level 3\"), shape:link-3, shape:level-5(\"Level 3\"), shape:link-4; groups [\"hierarchy\"]",
+      "shot": "b24-diagram-hierarchy-inserted.png",
+      "panel": "b23-diagram-hierarchy-panel.png"
+    },
+    {
+      "name": "diagram hierarchy: one click on a member, then a double click on its label, type \" plus\"",
+      "observed": "member shape level-1; chip after one click \"Group\", after a double click \"Shape\"; session true; text now \"Le plusvel 1\"",
+      "shot": "b25-diagram-hierarchy-label-edited.png"
+    },
+    {
+      "name": "diagram hierarchy: a node added (Cmd+D on a member) and removed (Delete)",
+      "observed": "chip \"Group\"; objects 9 -> Cmd+D 18 -> Delete 9; a panel control to add a node: []",
+      "shot": "b27-diagram-hierarchy-deleted.png",
+      "dup": "b26-diagram-hierarchy-duplicated.png"
+    },
+    {
+      "name": "diagram hierarchy: resize the group from its se handle by -160 by -90",
+      "observed": "chip \"Group\"; handle handle.level-1.resize.se; 9 of 9 objects moved or resized",
+      "shot": "b28-diagram-hierarchy-resized.png"
+    },
+    {
+      "name": "diagram timeline: the panel and Insert",
+      "observed": "9 objects: shape:rule, shape:date-1, text:label-1(\"Date 1\"), shape:date-2, text:label-2(\"Date 2\"), shape:date-3, text:label-3(\"Date 3\"), shape:date-4, text:label-4(\"Date 4\"); groups [\"timeline\"]",
+      "shot": "b30-diagram-timeline-inserted.png",
+      "panel": "b29-diagram-timeline-panel.png"
+    },
+    {
+      "name": "diagram timeline: one click on a member, then a double click on its label, type \" plus\"",
+      "observed": "member text label-1; chip after one click \"Group\", after a double click \"Text box\"; session true; text now \"Da pluste 1\"",
+      "shot": "b31-diagram-timeline-label-edited.png"
+    },
+    {
+      "name": "diagram timeline: a node added (Cmd+D on a member) and removed (Delete)",
+      "observed": "chip \"Group\"; objects 9 -> Cmd+D 18 -> Delete 9; a panel control to add a node: []",
+      "shot": "b33-diagram-timeline-deleted.png",
+      "dup": "b32-diagram-timeline-duplicated.png"
+    },
+    {
+      "name": "diagram timeline: resize the group from its se handle by -160 by -90",
+      "observed": "chip \"Group\"; handle handle.label-1.resize.se; 9 of 9 objects moved or resized",
+      "shot": "b34-diagram-timeline-resized.png"
+    },
+    {
+      "name": "diagram process: the panel and Insert",
+      "observed": "7 objects: shape:step-1(\"Step 1\"), shape:link-1, shape:step-2(\"Step 2\"), shape:link-2, shape:step-3(\"Step 3\"), shape:link-3, shape:step-4(\"Step 4\"); groups [\"process\"]",
+      "shot": "b36-diagram-process-inserted.png",
+      "panel": "b35-diagram-process-panel.png"
+    },
+    {
+      "name": "diagram process: one click on a member, then a double click on its label, type \" plus\"",
+      "observed": "member shape step-1; chip after one click \"Group\", after a double click \"Shape\"; session true; text now \"Ste plusp 1\"",
+      "shot": "b37-diagram-process-label-edited.png"
+    },
+    {
+      "name": "diagram process: a node added (Cmd+D on a member) and removed (Delete)",
+      "observed": "chip \"Group\"; objects 7 -> Cmd+D 14 -> Delete 7; a panel control to add a node: []",
+      "shot": "b39-diagram-process-deleted.png",
+      "dup": "b38-diagram-process-duplicated.png"
+    },
+    {
+      "name": "diagram process: resize the group from its se handle by -160 by -90",
+      "observed": "chip \"Group\"; handle handle.step-1.resize.se; 7 of 7 objects moved or resized",
+      "shot": "b40-diagram-process-resized.png"
+    },
+    {
+      "name": "diagram relationship: the panel and Insert",
+      "observed": "3 objects: shape:item-1(\"Item 1\"), shape:item-2(\"Item 2\"), shape:item-3(\"Item 3\"); groups [\"relationship\"]",
+      "shot": "b42-diagram-relationship-inserted.png",
+      "panel": "b41-diagram-relationship-panel.png"
+    },
+    {
+      "name": "diagram relationship: one click on a member, then a double click on its label, type \" plus\"",
+      "observed": "member shape item-1; chip after one click \"Group\", after a double click \"Shape\"; session true; text now \"Ite plusm 1\"",
+      "shot": "b43-diagram-relationship-label-edited.png"
+    },
+    {
+      "name": "diagram relationship: a node added (Cmd+D on a member) and removed (Delete)",
+      "observed": "chip \"Group\"; objects 3 -> Cmd+D 6 -> Delete 3; a panel control to add a node: []",
+      "shot": "b45-diagram-relationship-deleted.png",
+      "dup": "b44-diagram-relationship-duplicated.png"
+    },
+    {
+      "name": "diagram relationship: resize the group from its se handle by -160 by -90",
+      "observed": "chip \"Group\"; handle handle.item-1.resize.se; 3 of 3 objects moved or resized",
+      "shot": "b46-diagram-relationship-resized.png"
+    },
+    {
+      "name": "diagram cycle: the panel and Insert",
+      "observed": "8 objects: shape:step-1(\"Step 1\"), shape:step-2(\"Step 2\"), shape:step-3(\"Step 3\"), shape:step-4(\"Step 4\"), shape:link-1, shape:link-2, shape:link-3, shape:link-4; groups [\"cycle\"]",
+      "shot": "b48-diagram-cycle-inserted.png",
+      "panel": "b47-diagram-cycle-panel.png"
+    },
+    {
+      "name": "diagram cycle: one click on a member, then a double click on its label, type \" plus\"",
+      "observed": "member shape step-1; chip after one click \"Group\", after a double click \"Shape\"; session true; text now \"St plusep 1\"",
+      "shot": "b49-diagram-cycle-label-edited.png"
+    },
+    {
+      "name": "diagram cycle: a node added (Cmd+D on a member) and removed (Delete)",
+      "observed": "chip \"Group\"; objects 8 -> Cmd+D 16 -> Delete 8; a panel control to add a node: []",
+      "shot": "b51-diagram-cycle-deleted.png",
+      "dup": "b50-diagram-cycle-duplicated.png"
+    },
+    {
+      "name": "diagram cycle: resize the group from its se handle by -160 by -90",
+      "observed": "chip \"Group\"; handle handle.step-1.resize.se; 8 of 8 objects moved or resized",
+      "shot": "b52-diagram-cycle-resized.png"
+    }
+  ],
+  "notes": ["diagram grid: the name prompt was up (dialog.namePrompt.close)"],
+  "deckId": "untitled-20260926-ji3c",
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()",
+    "Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "teardown": {
+    "trashed": true,
+    "status": 404
+  },
+  "endedAt": "2026-09-26T01:11:13.616Z"
+}

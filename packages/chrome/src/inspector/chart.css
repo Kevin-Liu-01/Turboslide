@@ -255,3 +255,14 @@
   gap: 8px;
   padding: 0 4px;
 }
+
+/* a menu row refused with its reason (docs/OBJECTS.md 4.2 item 1: Add series on a pie): in the
+   tab order with its tooltip, drawn as a disabled row, no write on the click */
+.ts-chartgrid-menu-row[aria-disabled='true'] {
+  color: var(--pt-ink-2);
+  cursor: default;
+}
+
+.ts-chartgrid-menu-row[aria-disabled='true']:hover {
+  background: transparent;
+}

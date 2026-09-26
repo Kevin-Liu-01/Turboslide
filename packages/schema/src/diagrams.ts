@@ -569,3 +569,31 @@ export function makeDiagram(
     );
   return DIAGRAM_TEMPLATES[kind].make(count, style, box, group);
 }
+
+/**
+ * The group tags a duplicate keeps (docs/OBJECTS.md 4.2 item 3): the groups of which the copied
+ * ids hold some member but not every one. A member copied alone (Cmd+D on an entered diagram
+ * step) stays in its group, so the copy is one more step of the diagram; a group copied whole
+ * (Cmd+D on the selected diagram) is not in the answer and takes a fresh tag, as
+ * `block.duplicate` gives it today (store-actions.ts `blockDuplicate`). Pure over the slide's
+ * placed blocks and the ids; a block without a position or a group counts for nothing.
+ */
+export function groupsKeptOnDuplicate(
+  blocks: ReadonlyArray<Pick<Block, 'id' | 'pos'>>,
+  copiedIds: ReadonlyArray<string>,
+): Set<string> {
+  const copied = new Set(copiedIds);
+  const members = new Map<string, { total: number; copied: number }>();
+  for (const block of blocks) {
+    const group = block.pos?.group;
+    if (group === undefined) continue;
+    const entry = members.get(group) ?? { total: 0, copied: 0 };
+    entry.total += 1;
+    if (copied.has(block.id)) entry.copied += 1;
+    members.set(group, entry);
+  }
+  const kept = new Set<string>();
+  for (const [group, entry] of members)
+    if (entry.copied > 0 && entry.copied < entry.total) kept.add(group);
+  return kept;
+}

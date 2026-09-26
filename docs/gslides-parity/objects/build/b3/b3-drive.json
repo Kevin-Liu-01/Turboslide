@@ -1,0 +1,234 @@
+{
+ "base": "http://localhost:4433",
+ "startedAt": "2026-09-26T01:50:07.235Z",
+ "steps": [
+  {
+   "id": "charts.pie.add-series-refused",
+   "name": "Insert > Chart > Pie; select; Format options",
+   "observed": "chart series [\"Series 1\"]; panel true; addSeries {\"disabled\":false,\"ariaDisabled\":\"true\",\"text\":\"Add series\"}; addCategory {\"disabled\":false,\"ariaDisabled\":null,\"text\":\"Add category\"}",
+   "add": {
+    "disabled": false,
+    "ariaDisabled": "true",
+    "text": "Add series"
+   },
+   "addCategory": {
+    "disabled": false,
+    "ariaDisabled": null,
+    "text": "Add category"
+   }
+  },
+  {
+   "id": "charts.pie.add-series-refused",
+   "name": "hover Add series: the tooltip; click it: the series count",
+   "observed": "tooltip {\"name\":\"Add series\",\"doc\":\"A pie chart draws one series; change the chart type for more\"}; after the click series 1 [\"Series 1\"]",
+   "tip": {
+    "name": "Add series",
+    "doc": "A pie chart draws one series; change the chart type for more"
+   },
+   "series": [
+    "Series 1"
+   ],
+   "shot": "b3-01-pie-add-series-tooltip.png"
+  },
+  {
+   "id": "charts.pie.add-series-refused",
+   "name": "right click the series header: the menu's Add series",
+   "observed": "menu rows [\"formatOptions.chart.menu.add\",\"formatOptions.chart.menu.remove\"]; add {\"disabled\":false,\"ariaDisabled\":\"true\",\"text\":\"Add series\"}; tooltip {\"name\":\"Add series\",\"doc\":\"A pie chart draws one series; change the chart type for more\"}; menu still open after the click true; series 1",
+   "rows": [
+    "formatOptions.chart.menu.add",
+    "formatOptions.chart.menu.remove"
+   ],
+   "add": {
+    "disabled": false,
+    "ariaDisabled": "true",
+    "text": "Add series"
+   },
+   "tip": {
+    "name": "Add series",
+    "doc": "A pie chart draws one series; change the chart type for more"
+   },
+   "series": [
+    "Series 1"
+   ],
+   "shot": "b3-02-pie-header-menu-add-series.png"
+  },
+  {
+   "id": "charts.pie.add-series-refused",
+   "name": "a column chart: Add series adds one; the header menu adds one more",
+   "observed": "addSeries {\"disabled\":false,\"ariaDisabled\":null,\"text\":\"Add series\"}; tooltip {\"name\":\"Add series\",\"doc\":\"A new column of zeros\"}; after the button [\"Series 1\",\"Series 2\"]; menu add {\"disabled\":false,\"ariaDisabled\":null,\"text\":\"Add series\"}; after the menu [\"Series 1\",\"Series 2\",\"Series 3\"]",
+   "shot": "b3-03-column-add-series-twice.png"
+  },
+  {
+   "id": "gestures.watch.chart-se-after-mark-click",
+   "name": "a column chart; click its second bar; press the se handle within 300 ms; drag by 100 by 60; three times",
+   "observed": "[{\"try\":1,\"readout\":null,\"marquee\":false,\"pos\":\"{\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":960,\\\"h\\\":540} -> {\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":1060,\\\"h\\\":600}\",\"bars\":3},{\"try\":2,\"readout\":null,\"marquee\":false,\"pos\":\"{\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":960,\\\"h\\\":540} -> {\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":1060,\\\"h\\\":600}\",\"bars\":3},{\"try\":3,\"readout\":null,\"marquee\":false,\"pos\":\"{\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":960,\\\"h\\\":540} -> {\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":1060,\\\"h\\\":600}\",\"bars\":3}]",
+   "results": [
+    {
+     "try": 1,
+     "readout": null,
+     "marquee": false,
+     "pos": "{\"x\":320,\"y\":129,\"w\":960,\"h\":540} -> {\"x\":320,\"y\":129,\"w\":1060,\"h\":600}",
+     "bars": 3
+    },
+    {
+     "try": 2,
+     "readout": null,
+     "marquee": false,
+     "pos": "{\"x\":320,\"y\":129,\"w\":960,\"h\":540} -> {\"x\":320,\"y\":129,\"w\":1060,\"h\":600}",
+     "bars": 3
+    },
+    {
+     "try": 3,
+     "readout": null,
+     "marquee": false,
+     "pos": "{\"x\":320,\"y\":129,\"w\":960,\"h\":540} -> {\"x\":320,\"y\":129,\"w\":1060,\"h\":600}",
+     "bars": 3
+    }
+   ],
+   "shot": "b3-04-watch-chart-se-after-bar-click.png"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "an elbow connector from A's right site to B's left site; select it; the chip",
+   "observed": "shape shape elbow connect {\"start\":{\"block\":\"con-a\",\"site\":3},\"end\":{\"block\":\"con-b\",\"site\":1}}; handles [\"handle.shape.move\",\"handle.shape.start\",\"handle.shape.end\"]; chip \"Elbow connector\"",
+   "chip": "Elbow connector",
+   "shot": "b3-05-elbow-selected-chip.png"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "a line drawn below; the chip",
+   "observed": "shape-2 shape line; chip \"Line\"",
+   "chip": "Line"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "an arrow drawn below; the chip",
+   "observed": "shape-3 shape arrow; chip \"Arrow\"",
+   "chip": "Arrow",
+   "shot": "b3-06-arrow-selected-chip.png"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "a curved connector from A's bottom site to B's top site; the chip",
+   "observed": "shape-4 shape curved connect {\"start\":{\"block\":\"con-a\",\"site\":2},\"end\":{\"block\":\"con-b\",\"site\":0}}; chip \"Curved connector\"",
+   "chip": "Curved connector",
+   "shot": "b3-07-curved-selected-chip.png"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "a scribble drawn by a diagonal drag; the chip",
+   "observed": "error: locator.waitFor: Timeout 6000ms exceeded.",
+   "error": true
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "a curve drawn by a drag; the chip",
+   "observed": "error: locator.waitFor: Timeout 6000ms exceeded.",
+   "error": true
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "a polyline by two clicks and a double click; the chip",
+   "observed": "error: locator.waitFor: Timeout 6000ms exceeded.",
+   "error": true
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "rectangle A selected; the chip stays Shape",
+   "observed": "chip \"Curved connector\"",
+   "chip": "Curved connector",
+   "shot": "b3-08-rectangle-selected-chip.png"
+  },
+  {
+   "id": "diagrams.member.duplicate-delete",
+   "name": "Insert > Diagram > Process with three steps; Insert",
+   "observed": "count 3; 5 objects: step-1, link-1(connect), step-2, link-2(connect), step-3; groups [\"process\"]",
+   "shot": "b3-09-process-inserted.png"
+  },
+  {
+   "id": "diagrams.member.duplicate-delete",
+   "name": "double click on step 2; Escape; the member selected",
+   "observed": "chip after one click \"Group\"; double click opened the session true, chip \"Shape\"; after Escape chip \"Shape\", selection null",
+   "shot": "b3-10-process-step2-entered.png"
+  },
+  {
+   "id": "diagrams.member.duplicate-delete",
+   "name": "Cmd+D with the member selected: the copy, its group and its offset",
+   "observed": "objects 5 -> 6; added [{\"id\":\"step-2-2\",\"group\":\"process-2\",\"x\":675.2,\"y\":386,\"connect\":null}]; step 2 at 659.2,370 group process; chip \"Shape\"; selection null",
+   "added": [
+    {
+     "id": "step-2-2",
+     "type": "shape",
+     "pos": {
+      "x": 675.2,
+      "y": 386,
+      "w": 281.6,
+      "h": 160,
+      "z": 5,
+      "group": "process-2"
+     },
+     "block": {
+      "id": "step-2-2",
+      "pos": {
+       "x": 675.2,
+       "y": 386,
+       "w": 281.6,
+       "h": 160,
+       "z": 5,
+       "group": "process-2"
+      },
+      "type": "shape",
+      "shape": "roundRect",
+      "stroke": "ink",
+      "width": 1.5,
+      "text": "Step 2",
+      "typography": {
+       "weight": 500,
+       "align": "center"
+      },
+      "padding": 16,
+      "valign": "middle"
+     }
+    }
+   ],
+   "shot": "b3-11-process-member-duplicated.png"
+  },
+  {
+   "id": "diagrams.member.duplicate-delete",
+   "name": "Delete on the copy: the group keeps its members and links",
+   "observed": "objects 6 -> 5; removed [\"step-2-2\"]; left step-1, link-1, step-2, link-2, step-3; links link-1:{\"start\":{\"block\":\"step-1\",\"site\":3},\"end\":{\"block\":\"step-2\",\"site\":1}} link-2:{\"start\":{\"block\":\"step-2\",\"site\":3},\"end\":{\"block\":\"step-3\",\"site\":1}}",
+   "shot": "b3-12-process-copy-deleted.png"
+  },
+  {
+   "id": "diagrams.member.duplicate-delete",
+   "name": "Cmd+D with the group selected duplicates the group under a fresh tag; Cmd+Z",
+   "observed": "chip \"Group\"; objects 5 -> 10; added groups [\"process-2\"]; after Cmd+Z 5",
+   "shot": "b3-13-process-group-duplicated.png"
+  }
+ ],
+ "notes": [],
+ "consoleErrors": [
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 90474 MB free of 1902738 MB",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render] turboslide render title --deck /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/decks",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render] file:///Users/kevinliu/repos/Turboslide-live/packages/render/src/block-css.ts:215",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render]    (the auto row tracks of both forms stretch over their floors, sheet.css `.ts-sheet .table`;",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render]                                                                                 ^",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render] ReferenceError: sheet is not defined",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render]     at file:http://localhost:4433/__tsd/open-source?source=%2F%2F%2FUsers%2Fkevinliu%2Frepos%2FT",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render]     at ModuleJob.run (node:internalhttp://localhost:4433/__tsd/open-source?source=%2Fmodules%2Fe",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render]     at process.processTicksAndRejections (node:internalhttp://localhost:4433/__tsd/open-source?s",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render]     at async onImport.tracePromise.__proto__ (node:internalhttp://localhost:4433/__tsd/open-sour",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render]     at async asyncRunEntryPointWithESMLoader (node:internalhttp://localhost:4433/__tsd/open-sour",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render] Node.js v24.13.0",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqgp3m-7315f6 render] failed: render: turboslide exited 1 without a JSON result\nfile:///Users/kevinliu/repos/Turboslid",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 90428 MB free of 1902738 MB",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqhb39-bb660c render] turboslide render title --deck /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/decks",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqhb39-bb660c render] file:///Users/kevinliu/repos/Turboslide-live/packages/render/src/block-css.ts:215",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqhb39-bb660c render]    (the auto row tracks of both forms stretch over their floors, sheet.css `.ts-sheet .table`;",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqhb39-bb660c render]                                                                                 ^",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqhb39-bb660c render] ReferenceError: sheet is not defined",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqhb39-bb660c render]     at file:http://localhost:4433/__tsd/open-source?source=%2F%2F%2FUsers%2Fkevinliu%2Frepos%2FT"
+ ],
+ "deck": "untitled-20260926-ahez",
+ "endedAt": "2026-09-26T01:53:08.308Z"
+}

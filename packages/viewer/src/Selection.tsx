@@ -8,7 +8,7 @@ import type { Block } from '@turboslide/schema/blocks';
 import type { Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
 import { assistMark } from '@turboslide/schema/ext';
-import { isLineKind } from '@turboslide/schema/shapes';
+import { LINE_KIND_LABELS, isLineKind } from '@turboslide/schema/shapes';
 
 export type Selection =
   | null
@@ -440,6 +440,9 @@ export function blockDisplayName(
     assets[marked.asset]?.role === 'logo'
   )
     return 'Logo';
+  /* a line shape reads its kind, as Google's chip does (docs/OBJECTS.md 4.2 item 5): Line, Arrow,
+     Elbow connector, Curved connector, Curve, Polyline, Scribble; a closed preset stays Shape */
+  if (marked?.type === 'shape' && isLineKind(marked.shape)) return LINE_KIND_LABELS[marked.shape];
   if (slide.kind === 'title' && blockId === 'lead') return 'Subtitle';
   if (slide.kind === 'title' && blockId === 'heading') return 'Title';
   if (

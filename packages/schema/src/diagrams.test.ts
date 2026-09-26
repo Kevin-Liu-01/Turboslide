@@ -16,6 +16,7 @@ import {
   DIAGRAM_STYLES,
   DIAGRAM_TEMPLATES,
   clampDiagramCount,
+  groupsKeptOnDuplicate,
   makeDiagram,
 } from './diagrams.ts';
 import type { DiagramKind, DiagramStyle } from './diagrams.ts';
@@ -249,5 +250,39 @@ describe('DIAGRAM_TEMPLATES', () => {
   it('every style is one of the three and reads as a word a sales user knows', () => {
     const styles: DiagramStyle[] = [...DIAGRAM_STYLES];
     expect(styles).toEqual(['outline', 'plate', 'ink']);
+  });
+});
+
+// A member duplicated alone stays in its group; a group copied whole takes a fresh tag
+// (docs/OBJECTS.md 4.2 item 3, the row `diagrams.member.duplicate-delete`; the store's
+// `blockDuplicate` reads the answer).
+describe('groupsKeptOnDuplicate', () => {
+  const process = makeDiagram('process', 3, 'outline', BOX, 'dia');
+  const loose: Block = { id: 'note', type: 'text', text: 'x', pos: { x: 0, y: 0, w: 100, h: 40, z: 9 } };
+
+  it('keeps the group of a member copied without the rest of it', () => {
+    expect(process.map((block) => block.id)).toEqual(['step-1', 'link-1', 'step-2', 'link-2', 'step-3']);
+    expect([...groupsKeptOnDuplicate([...process, loose], ['step-2'])]).toEqual(['dia']);
+    expect([...groupsKeptOnDuplicate(process, ['step-1', 'link-1'])]).toEqual(['dia']);
+  });
+
+  it('answers nothing for a group copied whole, a loose object or nothing copied', () => {
+    expect(groupsKeptOnDuplicate(process, process.map((block) => block.id)).size).toBe(0);
+    expect(groupsKeptOnDuplicate([...process, loose], ['note']).size).toBe(0);
+    expect(groupsKeptOnDuplicate(process, []).size).toBe(0);
+    expect(groupsKeptOnDuplicate(process, ['missing']).size).toBe(0);
+  });
+
+  it('keeps each group copied in part when two diagrams are on the slide', () => {
+    const cycle = makeDiagram('cycle', 3, 'plate', { x: 0, y: 0, w: 600, h: 400 }, 'ring').map(
+      (block) => ({ ...block, id: `ring-${block.id}` }),
+    );
+    const kept = groupsKeptOnDuplicate([...process, ...cycle], ['step-3', 'ring-step-1']);
+    expect([...kept].sort()).toEqual(['dia', 'ring']);
+    const one = groupsKeptOnDuplicate(
+      [...process, ...cycle],
+      ['step-3', ...cycle.map((block) => block.id)],
+    );
+    expect([...one]).toEqual(['dia']);
   });
 });

@@ -13,6 +13,8 @@ import {
   CHART_LAST_CATEGORY,
   CHART_LAST_SERIES,
   CHART_PIE_ONE_SERIES,
+  addCategoryRefusal,
+  addSeriesRefusal,
   chartBlockFor,
   chartDataPlan,
   chartDataText,
@@ -143,6 +145,32 @@ describe('chartDataPlan', () => {
     expect(() => chartDataPlan(long, { kind: 'addCategory' })).toThrow(CHART_FULL_CATEGORIES);
     const pie: ChartBlock = { ...chart(), kind: 'pie', series: [{ name: 'A', values: [1, 2, 3] }] };
     expect(() => chartDataPlan(pie, { kind: 'addSeries' })).toThrow(CHART_PIE_ONE_SERIES);
+  });
+
+  it('refuses Add series on a pie with the sentence the tooltip reads (docs/OBJECTS.md 4.2 item 1)', () => {
+    const pie: ChartBlock = { ...chart(), kind: 'pie', series: [{ name: 'A', values: [1, 2, 3] }] };
+    expect(addSeriesRefusal(pie)).toBe('A pie chart draws one series; change the chart type for more');
+    expect(addSeriesRefusal(chart())).toBeNull();
+    expect(addSeriesRefusal({ ...chart(), kind: 'bar' })).toBeNull();
+    const wide: ChartBlock = {
+      ...chart(),
+      series: Array.from({ length: CHART_MAX_SERIES }, (_, index) => ({
+        name: `S${index}`,
+        values: [1, 2, 3],
+      })),
+    };
+    expect(addSeriesRefusal(wide)).toBe(CHART_FULL_SERIES);
+    /* a pie's sentence wins over the cap's: the reason a seller can act on comes first */
+    expect(addSeriesRefusal({ ...wide, kind: 'pie' })).toBe(CHART_PIE_ONE_SERIES);
+    expect(addCategoryRefusal(chart())).toBeNull();
+    expect(
+      addCategoryRefusal({
+        ...chart(),
+        categories: Array.from({ length: CHART_MAX_CATEGORIES }, (_, index) => `C${index}`),
+      }),
+    ).toBe(CHART_FULL_CATEGORIES);
+    /* the plan and the helper agree: the plan throws exactly the helper's sentence */
+    expect(() => chartDataPlan(pie, { kind: 'addSeries' })).toThrow(addSeriesRefusal(pie) ?? '');
   });
 
   it('every edit leaves data the block’s own check accepts', () => {

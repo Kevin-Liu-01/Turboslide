@@ -7,6 +7,7 @@ import { CHART_CELL_EVENT } from '@turboslide/viewer/Editor';
 
 import { ChartSection, chartFormatSlot } from '../inspector/chart';
 import { forbiddenWordsIn } from '../menus/strings';
+import { TIP_DELAY_MS, hideTooltip } from '../Tooltip';
 
 // The Chart data section (gslides-parity SPEC-2 section 5 "Chart data", section 10, 11.5
 // chart-grid.test.tsx): the grid with row and column headers; the arrows, Home, End and Tab
@@ -183,15 +184,90 @@ describe('ChartSection', () => {
     expect((dispatch.mock.calls[3]?.[1] as { categories: string[] }).categories).toEqual(['Q1']);
     cleanup();
     const pie: ChartBlock = { ...chart(), kind: 'pie', series: [{ name: 'Only', values: [1, 2] }] };
-    mount(pie);
+    const pieMount = mount(pie);
     const add = document.querySelector(
       '[data-control="formatOptions.chart.addSeries"]',
     ) as HTMLButtonElement;
-    expect(add.disabled).toBe(true);
+    /* refused with its reason (docs/OBJECTS.md 4.2 item 1): aria-disabled keeps the tooltip and
+       the tab order, the click writes nothing */
+    expect(add.disabled).toBe(false);
+    expect(add.getAttribute('aria-disabled')).toBe('true');
+    fireEvent.click(add);
+    expect(pieMount.dispatch).not.toHaveBeenCalled();
     const remove = document.querySelector(
       '[data-control="formatOptions.chart.series.0.remove"]',
     ) as HTMLButtonElement;
     expect(remove.disabled).toBe(true);
+  });
+
+  it('a pie refuses Add series with its sentence in the tooltip and in the series header menu', () => {
+    const pie: ChartBlock = { ...chart(), kind: 'pie', series: [{ name: 'Only', values: [1, 2] }] };
+    const { dispatch } = mount(pie);
+    const add = document.querySelector(
+      '[data-control="formatOptions.chart.addSeries"]',
+    ) as HTMLButtonElement;
+    hideTooltip();
+    vi.useFakeTimers();
+    fireEvent.mouseEnter(add);
+    act(() => {
+      vi.advanceTimersByTime(TIP_DELAY_MS);
+    });
+    vi.useRealTimers();
+    const plate = document.getElementById('pt-tip');
+    expect(plate?.hidden).toBe(false);
+    expect(plate?.querySelector('.pt-tip-name')?.textContent).toBe('Add series');
+    expect(plate?.querySelector('.pt-tip-doc')?.textContent).toBe(
+      'A pie chart draws one series; change the chart type for more',
+    );
+    fireEvent.mouseLeave(add);
+    /* Add category is not refused on a pie */
+    expect(
+      document
+        .querySelector('[data-control="formatOptions.chart.addCategory"]')
+        ?.getAttribute('aria-disabled'),
+    ).toBeNull();
+    /* the series header's menu lists Add series the same way */
+    fireEvent.contextMenu(cell(0, 1), { clientX: 40, clientY: 50 });
+    const row = document.querySelector(
+      '[data-control="formatOptions.chart.menu.add"]',
+    ) as HTMLButtonElement;
+    expect(row.textContent).toBe('Add series');
+    expect(row.getAttribute('aria-disabled')).toBe('true');
+    fireEvent.click(row);
+    expect(dispatch).not.toHaveBeenCalled();
+    /* the menu stays, the refused row wrote nothing */
+    expect(document.querySelector('[data-control="formatOptions.chart.menu"]')).not.toBeNull();
+    fireEvent.keyDown(window, { key: 'Escape' });
+  });
+
+  it('a column chart adds a series from the series header menu and a category from a category header', () => {
+    const { dispatch } = mount();
+    fireEvent.contextMenu(cell(0, 1), { clientX: 40, clientY: 50 });
+    const add = document.querySelector(
+      '[data-control="formatOptions.chart.menu.add"]',
+    ) as HTMLButtonElement;
+    expect(add.textContent).toBe('Add series');
+    expect(add.getAttribute('aria-disabled')).toBeNull();
+    fireEvent.click(add);
+    expect(document.querySelector('[data-control="formatOptions.chart.menu"]')).toBeNull();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch.mock.calls[0]?.[0]).toBe('chart.setData');
+    expect((dispatch.mock.calls[0]?.[1] as { series: { name: string }[] }).series.map((s) => s.name)).toEqual([
+      'Docs',
+      'App',
+      'Series 3',
+    ]);
+    fireEvent.contextMenu(cell(2, 0), { clientX: 40, clientY: 90 });
+    const addCategory = document.querySelector(
+      '[data-control="formatOptions.chart.menu.add"]',
+    ) as HTMLButtonElement;
+    expect(addCategory.textContent).toBe('Add category');
+    fireEvent.click(addCategory);
+    expect((dispatch.mock.calls[1]?.[1] as { categories: string[] }).categories).toEqual([
+      'Q1',
+      'Q2',
+      'Category 3',
+    ]);
   });
 
   it('picks a series colour from the swatches', () => {

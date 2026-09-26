@@ -1,0 +1,96 @@
+{
+ "base": "http://localhost:4433",
+ "startedAt": "2026-09-26T01:58:54.330Z",
+ "steps": [
+  {
+   "id": "gestures.watch.chart-se-after-mark-click",
+   "name": "a column chart; click its second bar; press the se handle within 300 ms; drag by 100 by 60; three times",
+   "observed": "[{\"try\":1,\"readout\":\"Category 2: 45\",\"marquee\":false,\"pos\":\"{\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":960,\\\"h\\\":540} -> {\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":1060,\\\"h\\\":600}\",\"bars\":3},{\"try\":2,\"readout\":\"Category 2: 45\",\"marquee\":false,\"pos\":\"{\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":960,\\\"h\\\":540} -> {\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":1060,\\\"h\\\":600}\",\"bars\":3},{\"try\":3,\"readout\":\"Category 2: 45\",\"marquee\":false,\"pos\":\"{\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":960,\\\"h\\\":540} -> {\\\"x\\\":320,\\\"y\\\":129,\\\"w\\\":1060,\\\"h\\\":600}\",\"bars\":3}]",
+   "results": [
+    {
+     "try": 1,
+     "readout": "Category 2: 45",
+     "marquee": false,
+     "pos": "{\"x\":320,\"y\":129,\"w\":960,\"h\":540} -> {\"x\":320,\"y\":129,\"w\":1060,\"h\":600}",
+     "bars": 3
+    },
+    {
+     "try": 2,
+     "readout": "Category 2: 45",
+     "marquee": false,
+     "pos": "{\"x\":320,\"y\":129,\"w\":960,\"h\":540} -> {\"x\":320,\"y\":129,\"w\":1060,\"h\":600}",
+     "bars": 3
+    },
+    {
+     "try": 3,
+     "readout": "Category 2: 45",
+     "marquee": false,
+     "pos": "{\"x\":320,\"y\":129,\"w\":960,\"h\":540} -> {\"x\":320,\"y\":129,\"w\":1060,\"h\":600}",
+     "bars": 3
+    }
+   ],
+   "shot": "b3a-01-watch-chart-se-after-bar-click.png"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "an elbow connector from A's right site to B's left site; select it; the chip",
+   "observed": "shape shape elbow connect undefined; handles [\"handle.shape.move\",\"handle.shape.start\",\"handle.shape.end\"]; chip \"Elbow connector\"",
+   "chip": "Elbow connector",
+   "shot": "b3a-02-elbow-selected-chip.png"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "a line drawn below; the chip",
+   "observed": "shape-2 shape line; chip \"Line\"",
+   "chip": "Line"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "an arrow drawn below; the chip",
+   "observed": "shape-3 shape arrow; chip \"Arrow\"",
+   "chip": "Arrow",
+   "shot": "b3a-03-arrow-selected-chip.png"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "a curved connector from A's bottom site to B's top site; the chip",
+   "observed": "shape-4 shape curved connect {\"start\":{\"block\":\"con-a\",\"site\":2},\"end\":{\"block\":\"con-b\",\"site\":0}}; chip \"Curved connector\"",
+   "chip": "Curved connector",
+   "shot": "b3a-04-curved-selected-chip.png"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "a scribble drawn by a diagonal drag; the chip",
+   "observed": "shape-5 shape scribble; chip \"Scribble\"",
+   "chip": "Scribble"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "a curve drawn by a drag; the chip",
+   "observed": "null shape undefined; chip null",
+   "chip": null
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "a polyline by two clicks and a double click; the chip",
+   "observed": "no polyline landed from two clicks and a double click (not driven)"
+  },
+  {
+   "id": "lines.chip.kind-name",
+   "name": "rectangle A selected by a click away from the connectors' boxes; the chip stays Shape",
+   "observed": "chip \"Shape\"",
+   "chip": "Shape",
+   "shot": "b3a-05-rectangle-selected-chip.png"
+  }
+ ],
+ "notes": [],
+ "consoleErrors": [
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 90367 MB free of 1902738 MB",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqr1sc-d48fca render] turboslide render title --deck /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/decks",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqr1sc-d48fca render] render: 1 slide(s) x light at 1x with Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Ma",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqr1sc-d48fca render]    1 title light ready 9 ms, shot 63 ms",
+  "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4433/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhqr1sc-d48fca render] render: 1 record(s) in 5.0 s -> /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/.tur"
+ ],
+ "deck": "untitled-20260926-mcp9",
+ "endedAt": "2026-09-26T02:00:09.106Z"
+}

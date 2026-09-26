@@ -20,8 +20,6 @@ import {
   CHART_KINDS,
   CHART_KIND_LABELS,
   CHART_LEGENDS,
-  CHART_MAX_CATEGORIES,
-  CHART_MAX_SERIES,
   CHART_NUMBER_FORMATS,
   formatChartNumber,
 } from '@turboslide/schema/blocks/chart';
@@ -31,6 +29,8 @@ import { COLOR_TOKENS } from '@turboslide/schema/color';
 import {
   CHART_LEGEND_LABELS,
   CHART_NUMBER_FORMAT_LABELS,
+  addCategoryRefusal,
+  addSeriesRefusal,
   chartDataPlan,
   chartKindPlan,
   chartOptionPlan,
@@ -145,11 +145,17 @@ export function ChartSection({
   const control = 'formatOptions.chart';
   const rows = block.categories.length;
   const columns = block.series.length;
+  /* Add series and Add category refused with their reason (docs/OBJECTS.md 4.2 item 1: a pie
+     draws one series; the caps of SPEC-2 2.8.1): the button and the header menu's row keep their
+     tooltip through aria-disabled and the click writes nothing */
+  const seriesRefusal = addSeriesRefusal(block);
+  const categoryRefusal = addCategoryRefusal(block);
   const [active, setActive] = useState<Active>(() => requestedCell(block.id, rows, columns));
   const [editing, setEditing] = useState<(Active & { draft: string }) | null>(null);
   const [swatchesFor, setSwatchesFor] = useState<number | null>(null);
   const [titleDraft, setTitleDraft] = useState<string | null>(null);
-  /* the right click menu of a series or category header: Remove (docs/FEATURES.md 2.2 rank 12) */
+  /* the right click menu of a series or category header: Add series or Add category, then Remove
+     (docs/FEATURES.md 2.2 rank 12; docs/OBJECTS.md 4.2 item 1) */
   const [menu, setMenu] = useState<(Active & { x: number; y: number }) | null>(null);
   const grid = useRef<HTMLTableElement>(null);
   const focusAfter = useRef<Active | null>(null);
@@ -388,6 +394,10 @@ export function ChartSection({
           };
   const menuCanRemove =
     menuTarget !== null && (menuTarget.kind === 'series' ? columns > 1 : rows > 1);
+  const menuAddRefusal =
+    menuTarget === null ? null : menuTarget.kind === 'series' ? seriesRefusal : categoryRefusal;
+  const menuAddName =
+    menuTarget?.kind === 'series' ? words.addSeries : words.addCategory;
 
   const gridTip = tipProps({
     name: words.title,
@@ -476,8 +486,6 @@ export function ChartSection({
     );
   };
 
-  const canAddSeries = block.kind !== 'pie' && columns < CHART_MAX_SERIES;
-  const canAddCategory = rows < CHART_MAX_CATEGORIES;
 
   const kindOptions = CHART_KINDS.map((kind) => ({
     value: kind,
@@ -630,6 +638,27 @@ export function ChartSection({
             type="button"
             role="menuitem"
             className="ts-chartgrid-menu-row"
+            data-control={`${control}.menu.add`}
+            disabled={busy}
+            aria-disabled={!busy && menuAddRefusal !== null ? true : undefined}
+            onClick={() => {
+              if (menuAddRefusal !== null) return;
+              setMenu(null);
+              runEdit(menuTarget.kind === 'series' ? { kind: 'addSeries' } : { kind: 'addCategory' });
+            }}
+            {...tipProps({
+              name: menuAddName,
+              doc:
+                menuAddRefusal ??
+                (menuTarget.kind === 'series' ? 'A new column of zeros' : 'A new row of zeros'),
+            })}
+          >
+            {menuAddName}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="ts-chartgrid-menu-row"
             data-control={`${control}.menu.remove`}
             disabled={busy || !menuCanRemove}
             onClick={() => {
@@ -691,29 +720,21 @@ export function ChartSection({
         <ToolButton
           label={words.addSeries}
           title={words.addSeries}
-          doc={
-            canAddSeries
-              ? 'A new column of zeros'
-              : block.kind === 'pie'
-                ? 'A pie chart has one series'
-                : `A chart has at most ${CHART_MAX_SERIES} series`
-          }
+          doc={seriesRefusal ?? 'A new column of zeros'}
           icon="plus"
           control={`${control}.addSeries`}
-          disabled={busy || !canAddSeries}
+          disabled={busy}
+          ariaDisabled={!busy && seriesRefusal !== null}
           onClick={() => runEdit({ kind: 'addSeries' })}
         />
         <ToolButton
           label={words.addCategory}
           title={words.addCategory}
-          doc={
-            canAddCategory
-              ? 'A new row of zeros'
-              : `A chart has at most ${CHART_MAX_CATEGORIES} categories`
-          }
+          doc={categoryRefusal ?? 'A new row of zeros'}
           icon="plus"
           control={`${control}.addCategory`}
-          disabled={busy || !canAddCategory}
+          disabled={busy}
+          ariaDisabled={!busy && categoryRefusal !== null}
           onClick={() => runEdit({ kind: 'addCategory' })}
         />
       </div>

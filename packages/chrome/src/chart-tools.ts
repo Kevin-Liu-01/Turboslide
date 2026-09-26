@@ -66,7 +66,25 @@ export const CHART_FULL_SERIES = `A chart has at most ${CHART_MAX_SERIES} series
 export const CHART_FULL_CATEGORIES = `A chart has at most ${CHART_MAX_CATEGORIES} categories`;
 export const CHART_LAST_SERIES = 'A chart keeps at least one series';
 export const CHART_LAST_CATEGORY = 'A chart keeps at least one category';
-export const CHART_PIE_ONE_SERIES = 'A pie chart has one series';
+/** 4.2 item 1 of docs/OBJECTS.md: the sentence the refused Add series of a pie reads (Google's pie takes one series). */
+export const CHART_PIE_ONE_SERIES = 'A pie chart draws one series; change the chart type for more';
+
+/**
+ * Why Add series is refused on a chart, or null when a series can be added (docs/OBJECTS.md 4.2
+ * item 1; SPEC-2 2.8.1): a pie draws one series, and every kind stops at the cap. The grid's
+ * button and the series header's menu row read it as their `aria-disabled` sentence, so the
+ * control stays in the tab order with its tooltip and no write is attempted.
+ */
+export function addSeriesRefusal(block: Pick<ChartBlock, 'kind' | 'series'>): string | null {
+  if (block.kind === 'pie') return CHART_PIE_ONE_SERIES;
+  if (block.series.length >= CHART_MAX_SERIES) return CHART_FULL_SERIES;
+  return null;
+}
+
+/** Why Add category is refused, or null: the cap alone. */
+export function addCategoryRefusal(block: Pick<ChartBlock, 'categories'>): string | null {
+  return block.categories.length >= CHART_MAX_CATEGORIES ? CHART_FULL_CATEGORIES : null;
+}
 
 /** A series name free in the block: Series 1, Series 2, … */
 export function nextSeriesName(series: ReadonlyArray<ChartSeries>): string {
@@ -112,14 +130,14 @@ export function chartDataPlan(block: ChartBlock, edit: ChartGridEdit): ChartData
       break;
     }
     case 'addSeries': {
-      if (next.series.length >= CHART_MAX_SERIES) throw new RangeError(CHART_FULL_SERIES);
-      if (block.kind === 'pie') throw new RangeError(CHART_PIE_ONE_SERIES);
+      const refused = addSeriesRefusal(block);
+      if (refused !== null) throw new RangeError(refused);
       next.series.push({ name: nextSeriesName(next.series), values: next.categories.map(() => 0) });
       break;
     }
     case 'addCategory': {
-      if (next.categories.length >= CHART_MAX_CATEGORIES)
-        throw new RangeError(CHART_FULL_CATEGORIES);
+      const refused = addCategoryRefusal(block);
+      if (refused !== null) throw new RangeError(refused);
       next.categories.push(nextCategoryName(next.categories));
       for (const series of next.series) series.values.push(0);
       break;

@@ -390,8 +390,9 @@ describe('the freeform gestures', () => {
     const se = handle('free-resize', handles, 'se');
     expect(se.control).toBe('handle.a.resize.se');
     expect(se.cursor).toBe('nwse-resize');
-    // the se square is centered on the block's bottom right corner
-    expect([se.box[0] + se.box[2] / 2, se.box[1] + se.box[3] / 2]).toEqual([500, 300]);
+    // the se square is centered on the bottom right corner of the text ring, 10 sheet px out from
+    // the block's own corner (text-ring.ts: a text object's squares sit on its ring)
+    expect([se.box[0] + se.box[2] / 2, se.box[1] + se.box[3] / 2]).toEqual([510, 310]);
   });
 
   it('moves the group by the anchor’s snapped offset, one pos write per block', () => {

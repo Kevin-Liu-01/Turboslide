@@ -37,6 +37,8 @@ import type { LineKind } from '@turboslide/schema/shapes';
 import { COLUMN_GAP, CONTENT, CONTENT_ORIGIN, SHEET } from '@turboslide/theme/tokens';
 
 import { labelClearance, snapHalf, unitsPerPixel } from '@turboslide/render/dia/snap';
+
+import { ringBoxFor } from './text-ring';
 import type { DiaBox } from '@turboslide/render/dia/snap';
 
 import {
@@ -315,8 +317,14 @@ function canvasHandles(
           ];
         }, null);
   const own = boxes.blocks[anchor];
-  const box = union ?? own;
-  if (!box) return handles;
+  const measured = union ?? own;
+  if (!measured) return handles;
+  const block = blockById(slide, anchor);
+  /* a text object's ring stands off its text (text-ring.ts, the caret fix of 2026-09-20), so the
+     chip, the eight squares and the rotation ring sit on that ring and not on the text's own box
+     (Kevin, 2026-09-25: the squares of a text box sat inside the lines); every other object and a
+     multi-selection keep the measured box */
+  const box = ids.length === 1 && block !== undefined ? ringBoxFor(block.type, measured) : measured;
   handles.push({
     id: `free-move:${anchor}`,
     kind: 'free-move',
@@ -329,7 +337,6 @@ function canvasHandles(
     axis: 'xy',
     sign: 1,
   });
-  const block = blockById(slide, anchor);
   if (ids.length === 1 && isLineBlock(block) && block.pos !== undefined) {
     const ends = connectorEnds(block);
     (['start', 'end'] as const).forEach((which, index) => {

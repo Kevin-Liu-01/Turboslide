@@ -1,0 +1,29 @@
+# Core gate matrix
+
+Base https://turboslide-dxutmn8x9-kl01s-projects.vercel.app, started 2026-09-26T07:35:02.628Z, 1289 s. 6 rows judged: 4 passed, 1 failed, 1 not driven (0 of them manual, the checklist's: none), 0 no step. Measurement rows (PRODUCT.md 8.2, recorded and never holding the ship; the cost rows of SYNC.md 6.1 among them, which hold it over their ceiling on the preview): cost.editor-idle.calls passed (function requests 9.99 a minute (ceiling 12; 30 in 3 min); the store settled 2.35 s after the state was ready (1 sync.status read(s) before the window); store simple 24 a minute (ceiling 40; 3 of the heads the probe's own sync.status reads, which the ceiling carries, b3.md R7 b); store advanced 10 a minute (ceiling 11); instances answering sync.status 2); cost.editor-hidden.calls not driven (function requests 9.66 a minute and 9 session poll(s) were read from the tab that stayed visible); cost.editor-editing.calls passed (function requests 68.93 a minute (ceiling 75; 207 in 3 min); the store settled 94.16 s after the state was ready (10 sync.status read(s) before the window; the first read: head 26, put 8, list 1, del 0); store simple 123 a minute (ceiling 140; 3 of the heads the probe's own sync.status reads, which the ceiling carries, b3.md R7 b); store advanced 70 a minute (ceiling 85); instances answering sync.status 1); cost.two-tabs-idle.calls failed (the store settled 2.22 s after the state was ready (1 sync.status read(s) before the window); store advanced 19 a minute (ceiling 30); store list 1 (ceiling 0); instances answering sync.status 1); cost.show.calls passed (function requests 0 in the window (ceiling 0); the store settled 84.20 s after the state was ready (9 sync.status read(s) before the window; the first read: head 15, put 3, list 0, del 0); store calls at the first sample 1 (head 1, get 0, put 0, list 0, del 0), of which 1 the probe's own sync.status read(s) (one deck.json head each, b3.md R7 b); the page's 0 (ceiling 0); function requests between the load and the window 0 (the settle, 84.20 s); instances answering sync.status 1). Cost rows over their ceiling in this run: cost.two-tabs-idle.calls. Verdict ok with the committed parked list inbox, templates and the parked rows arrange.group.tail-text-controls, logos.kit.find-a-logo, logos.picker.variants, tables.bar.row-column-buttons, tables.edge.add-row-column, tables.heads.select-row-column, tables.seam.row-drag, versions.show-changes-marks, view.live-pointers.second-browser, wordart.tail.fill-outline; retries no specs run; exit 1. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): none; rows whose own controls a ship would keep parked: none; rows of an unparkable feature blocking the ship: none.
+
+| Row | Feature | Driver | Today | Result | Reason |
+| --- | --- | --- | --- | --- | --- |
+| `sync.pull.no-listing` | sync | cost-probe | broken | passed |  |
+| `cost.editor-idle.calls` | cost | cost-probe | broken | passed |  |
+| `cost.editor-hidden.calls` | cost | cost-probe | broken | not driven | document.visibilityState read "visible" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached |
+| `cost.editor-editing.calls` | cost | cost-probe | broken | passed |  |
+| `cost.two-tabs-idle.calls` | cost | cost-probe | works | failed | store list 1, ceiling none |
+| `cost.show.calls` | cost | cost-probe | broken | passed |  |
+
+## Not driven rows, by id and reason
+
+- `cost.editor-hidden.calls`: document.visibilityState read "visible" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached
+
+## Failed rows, by id and reason
+
+- `cost.two-tabs-idle.calls`: store list 1, ceiling none
+
+## Measurement rows, by id (PRODUCT.md 8.2; the cost rows of SYNC.md 6.1)
+
+- `cost.editor-idle.calls`: passed; recorded function requests 9.99 a minute (ceiling 12; 30 in 3 min); the store settled 2.35 s after the state was ready (1 sync.status read(s) before the window); store simple 24 a minute (ceiling 40; 3 of the heads the probe's own sync.status reads, which the ceiling carries, b3.md R7 b); store advanced 10 a (a cost row: over its ceiling on the preview it holds the ship)
+- `cost.editor-hidden.calls`: not driven (document.visibilityState read "visible" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached); recorded function requests 9.66 a minute and 9 session poll(s) were read from the tab that stayed visible (a cost row: over its ceiling on the preview it holds the ship)
+- `cost.editor-editing.calls`: passed; recorded function requests 68.93 a minute (ceiling 75; 207 in 3 min); the store settled 94.16 s after the state was ready (10 sync.status read(s) before the window; the first read: head 26, put 8, list 1, del 0); store simple 123 a minute (ceiling 140; 3 of the heads the probe's own sync.status reads, which  (a cost row: over its ceiling on the preview it holds the ship)
+- `cost.two-tabs-idle.calls`: failed (store list 1, ceiling none); recorded the store settled 2.22 s after the state was ready (1 sync.status read(s) before the window); store advanced 19 a minute (ceiling 30); store list 1 (ceiling 0); instances answering sync.status 1 (a cost row: over its ceiling on the preview it holds the ship)
+- `cost.show.calls`: passed; recorded function requests 0 in the window (ceiling 0); the store settled 84.20 s after the state was ready (9 sync.status read(s) before the window; the first read: head 15, put 3, list 0, del 0); store calls at the first sample 1 (head 1, get 0, put 0, list 0, del 0), of which 1 the probe's own sync.status (a cost row: over its ceiling on the preview it holds the ship)
+

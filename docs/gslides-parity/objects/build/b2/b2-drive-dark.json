@@ -1,0 +1,1464 @@
+{
+  "base": "http://localhost:4432",
+  "theme": "dark",
+  "steps": [
+    {
+      "name": "00 dark tile",
+      "facts": {
+        "tile": "panel.brand.appearance.dark",
+        "controls": ["toolbar.theme", "panel.themes", "themes.gt.light", "themes.gt.dark"]
+      }
+    },
+    {
+      "name": "00 sheet theme",
+      "facts": {
+        "sheet": "dark",
+        "paper": "rgb(7, 7, 7)"
+      }
+    },
+    {
+      "name": "01 inserted empty",
+      "facts": {
+        "pos": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "k": 0.71,
+        "display": "grid",
+        "gridTemplateRows": "106.328px 106.328px 106.344px",
+        "alignContent": "stretch",
+        "tableShadow": "none",
+        "borderTop": "1px",
+        "free": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "freeStyle": {
+          "height": "320px"
+        },
+        "table": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "rowsBottom": 320,
+        "rows": [
+          {
+            "box": {
+              "x": 320,
+              "y": 130,
+              "w": 960,
+              "h": 106.33
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 130,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 130,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 130,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          },
+          {
+            "box": {
+              "x": 320,
+              "y": 236.33,
+              "w": 960,
+              "h": 106.33
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 236.33,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 236.33,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 236.33,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          },
+          {
+            "box": {
+              "x": 320,
+              "y": 342.66,
+              "w": 960,
+              "h": 106.34
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 342.66,
+                  "w": 320,
+                  "h": 105.34
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 342.66,
+                  "w": 320,
+                  "h": 105.34
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 342.66,
+                  "w": 320,
+                  "h": 105.34
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          }
+        ],
+        "paper": "rgb(7, 7, 7)",
+        "cardCellShadow": "none",
+        "ring": {
+          "x": 319.99,
+          "y": 128.99,
+          "w": 960,
+          "h": 319.99
+        },
+        "cellRing": null,
+        "edges": [
+          {
+            "x": 314.32,
+            "y": 123.32,
+            "w": 971.34,
+            "h": 11.35
+          },
+          {
+            "x": 314.32,
+            "y": 443.31,
+            "w": 971.34,
+            "h": 11.35
+          },
+          {
+            "x": 314.32,
+            "y": 134.66,
+            "w": 11.35,
+            "h": 308.64
+          },
+          {
+            "x": 1274.31,
+            "y": 134.66,
+            "w": 11.35,
+            "h": 308.64
+          }
+        ],
+        "chip": "Table",
+        "handles": [
+          "handle.table.column.0",
+          "handle.table.column.1",
+          "handle.table.row.0",
+          "handle.table.row.1",
+          "handle.table.row.2",
+          "handle.table.resize.nw",
+          "handle.table.resize.n",
+          "handle.table.resize.ne",
+          "handle.table.resize.e",
+          "handle.table.resize.se",
+          "handle.table.resize.s",
+          "handle.table.resize.sw",
+          "handle.table.resize.w",
+          "handle.table.rotate"
+        ],
+        "editing": false,
+        "readout": null
+      }
+    },
+    {
+      "name": "01 guide contrast",
+      "facts": {
+        "line": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+        "paper": "rgb(7, 7, 7)",
+        "composed": [59, 59, 58],
+        "ratio": 1.79
+      }
+    },
+    {
+      "name": "02 one click on 1,1",
+      "facts": {
+        "k": 0.71,
+        "display": "grid",
+        "gridTemplateRows": "106.328px 106.328px 106.344px",
+        "alignContent": "stretch",
+        "tableShadow": "none",
+        "borderTop": "1px",
+        "free": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "freeStyle": {
+          "height": "320px"
+        },
+        "table": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "rowsBottom": 320,
+        "rows": [
+          {
+            "box": {
+              "x": 320,
+              "y": 130,
+              "w": 960,
+              "h": 106.33
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 130,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 130,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 130,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          },
+          {
+            "box": {
+              "x": 320,
+              "y": 236.33,
+              "w": 960,
+              "h": 106.33
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 236.33,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 236.33,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 236.33,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          },
+          {
+            "box": {
+              "x": 320,
+              "y": 342.66,
+              "w": 960,
+              "h": 106.34
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 342.66,
+                  "w": 320,
+                  "h": 105.34
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 342.66,
+                  "w": 320,
+                  "h": 105.34
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 342.66,
+                  "w": 320,
+                  "h": 105.34
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          }
+        ],
+        "paper": "rgb(7, 7, 7)",
+        "cardCellShadow": "none",
+        "ring": {
+          "x": 319.99,
+          "y": 128.99,
+          "w": 960,
+          "h": 319.99
+        },
+        "cellRing": {
+          "x": 639.98,
+          "y": 236.33,
+          "w": 319.99,
+          "h": 106.32
+        },
+        "edges": [
+          {
+            "x": 314.32,
+            "y": 123.32,
+            "w": 971.34,
+            "h": 11.35
+          },
+          {
+            "x": 314.32,
+            "y": 443.31,
+            "w": 971.34,
+            "h": 11.35
+          },
+          {
+            "x": 314.32,
+            "y": 134.66,
+            "w": 11.35,
+            "h": 308.64
+          },
+          {
+            "x": 1274.31,
+            "y": 134.66,
+            "w": 11.35,
+            "h": 308.64
+          }
+        ],
+        "chip": "Table",
+        "handles": [
+          "handle.table.column.0",
+          "handle.table.column.1",
+          "handle.table.row.0",
+          "handle.table.row.1",
+          "handle.table.row.2",
+          "handle.table.resize.nw",
+          "handle.table.resize.n",
+          "handle.table.resize.ne",
+          "handle.table.resize.e",
+          "handle.table.resize.se",
+          "handle.table.resize.s",
+          "handle.table.resize.sw",
+          "handle.table.resize.w"
+        ],
+        "editing": true,
+        "readout": null
+      }
+    },
+    {
+      "name": "03 typed three words",
+      "facts": {
+        "k": 0.71,
+        "display": "grid",
+        "gridTemplateRows": "106.328px 106.328px 106.344px",
+        "alignContent": "stretch",
+        "tableShadow": "none",
+        "borderTop": "1px",
+        "free": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "freeStyle": {
+          "height": "320px"
+        },
+        "table": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 320
+        },
+        "rowsBottom": 320,
+        "rows": [
+          {
+            "box": {
+              "x": 320,
+              "y": 130,
+              "w": 960,
+              "h": 106.33
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 130,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 130,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 130,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          },
+          {
+            "box": {
+              "x": 320,
+              "y": 236.33,
+              "w": 960,
+              "h": 106.33
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 236.33,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 236.33,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "Alpha",
+                "lines": 1
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 236.33,
+                  "w": 320,
+                  "h": 105.33
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "Beta",
+                "lines": 1
+              }
+            ]
+          },
+          {
+            "box": {
+              "x": 320,
+              "y": 342.66,
+              "w": 960,
+              "h": 106.34
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 342.66,
+                  "w": 320,
+                  "h": 105.34
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "Gamma",
+                "lines": 1
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 342.66,
+                  "w": 320,
+                  "h": 105.34
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 342.66,
+                  "w": 320,
+                  "h": 105.34
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          }
+        ],
+        "paper": "rgb(7, 7, 7)",
+        "cardCellShadow": "none",
+        "ring": {
+          "x": 319.99,
+          "y": 128.99,
+          "w": 960,
+          "h": 319.99
+        },
+        "cellRing": null,
+        "edges": [
+          {
+            "x": 314.32,
+            "y": 123.32,
+            "w": 971.34,
+            "h": 11.35
+          },
+          {
+            "x": 314.32,
+            "y": 443.31,
+            "w": 971.34,
+            "h": 11.35
+          },
+          {
+            "x": 314.32,
+            "y": 134.66,
+            "w": 11.35,
+            "h": 308.64
+          },
+          {
+            "x": 1274.31,
+            "y": 134.66,
+            "w": 11.35,
+            "h": 308.64
+          }
+        ],
+        "chip": "Table",
+        "handles": [
+          "handle.table.column.0",
+          "handle.table.column.1",
+          "handle.table.row.0",
+          "handle.table.row.1",
+          "handle.table.row.2",
+          "handle.table.resize.nw",
+          "handle.table.resize.n",
+          "handle.table.resize.ne",
+          "handle.table.resize.e",
+          "handle.table.resize.se",
+          "handle.table.resize.s",
+          "handle.table.resize.sw",
+          "handle.table.resize.w",
+          "handle.table.rotate"
+        ],
+        "editing": false,
+        "readout": null
+      }
+    },
+    {
+      "name": "04 forty words typed, session open",
+      "facts": {
+        "pos": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 456
+        },
+        "k": 0.71,
+        "display": "grid",
+        "gridTemplateRows": "64.6562px 64.6719px 325.672px",
+        "alignContent": "stretch",
+        "tableShadow": "none",
+        "borderTop": "1px",
+        "free": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 456
+        },
+        "freeStyle": {
+          "height": "456px"
+        },
+        "table": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 456
+        },
+        "rowsBottom": 456,
+        "rows": [
+          {
+            "box": {
+              "x": 320,
+              "y": 130,
+              "w": 960,
+              "h": 64.66
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 130,
+                  "w": 320,
+                  "h": 63.66
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 130,
+                  "w": 320,
+                  "h": 63.66
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 130,
+                  "w": 320,
+                  "h": 63.66
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          },
+          {
+            "box": {
+              "x": 320,
+              "y": 194.66,
+              "w": 960,
+              "h": 64.67
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 194.66,
+                  "w": 320,
+                  "h": 63.67
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 194.66,
+                  "w": 320,
+                  "h": 63.67
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "Alpha",
+                "lines": 1
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 194.66,
+                  "w": 320,
+                  "h": 63.67
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "Beta",
+                "lines": 1
+              }
+            ]
+          },
+          {
+            "box": {
+              "x": 320,
+              "y": 259.33,
+              "w": 960,
+              "h": 325.67
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 259.33,
+                  "w": 320,
+                  "h": 324.67
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "Gamma",
+                "lines": 1
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 259.33,
+                  "w": 320,
+                  "h": 324.67
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "alpha beta gamma delta epsilon alpha bet",
+                "lines": 10
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 259.33,
+                  "w": 320,
+                  "h": 324.67
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          }
+        ],
+        "paper": "rgb(7, 7, 7)",
+        "cardCellShadow": "none",
+        "ring": {
+          "x": 319.99,
+          "y": 128.99,
+          "w": 960,
+          "h": 455.98
+        },
+        "cellRing": {
+          "x": 639.98,
+          "y": 259.31,
+          "w": 319.99,
+          "h": 325.66
+        },
+        "edges": [
+          {
+            "x": 314.32,
+            "y": 123.32,
+            "w": 971.34,
+            "h": 11.35
+          },
+          {
+            "x": 314.32,
+            "y": 579.32,
+            "w": 971.34,
+            "h": 11.35
+          },
+          {
+            "x": 314.32,
+            "y": 134.66,
+            "w": 11.35,
+            "h": 444.64
+          },
+          {
+            "x": 1274.31,
+            "y": 134.66,
+            "w": 11.35,
+            "h": 444.64
+          }
+        ],
+        "chip": "Table",
+        "handles": [
+          "handle.table.column.0",
+          "handle.table.column.1",
+          "handle.table.row.0",
+          "handle.table.row.1",
+          "handle.table.row.2",
+          "handle.table.resize.nw",
+          "handle.table.resize.n",
+          "handle.table.resize.ne",
+          "handle.table.resize.e",
+          "handle.table.resize.se",
+          "handle.table.resize.s",
+          "handle.table.resize.sw",
+          "handle.table.resize.w"
+        ],
+        "editing": true,
+        "readout": null
+      }
+    },
+    {
+      "name": "04 forty words, session closed",
+      "facts": {
+        "pos": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 456
+        },
+        "k": 0.71,
+        "display": "grid",
+        "gridTemplateRows": "64.6562px 64.6719px 325.672px",
+        "alignContent": "stretch",
+        "tableShadow": "none",
+        "borderTop": "1px",
+        "free": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 456
+        },
+        "freeStyle": {
+          "height": "456px"
+        },
+        "table": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 456
+        },
+        "rowsBottom": 456,
+        "rows": [
+          {
+            "box": {
+              "x": 320,
+              "y": 130,
+              "w": 960,
+              "h": 64.66
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 130,
+                  "w": 320,
+                  "h": 63.66
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 130,
+                  "w": 320,
+                  "h": 63.66
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 130,
+                  "w": 320,
+                  "h": 63.66
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          },
+          {
+            "box": {
+              "x": 320,
+              "y": 194.66,
+              "w": 960,
+              "h": 64.67
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 194.66,
+                  "w": 320,
+                  "h": 63.67
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 194.66,
+                  "w": 320,
+                  "h": 63.67
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "Alpha",
+                "lines": 1
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 194.66,
+                  "w": 320,
+                  "h": 63.67
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "Beta",
+                "lines": 1
+              }
+            ]
+          },
+          {
+            "box": {
+              "x": 320,
+              "y": 259.33,
+              "w": 960,
+              "h": 325.67
+            },
+            "rule": "1px",
+            "shadow": "none",
+            "cells": [
+              {
+                "box": {
+                  "x": 320,
+                  "y": 259.33,
+                  "w": 320,
+                  "h": 324.67
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "Gamma",
+                "lines": 1
+              },
+              {
+                "box": {
+                  "x": 640,
+                  "y": 259.33,
+                  "w": 320,
+                  "h": 324.67
+                },
+                "shadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "alpha beta gamma delta epsilon alpha bet",
+                "lines": 10
+              },
+              {
+                "box": {
+                  "x": 960,
+                  "y": 259.33,
+                  "w": 320,
+                  "h": 324.67
+                },
+                "shadow": "none",
+                "alignSelf": "stretch",
+                "alignContent": "start",
+                "text": "",
+                "lines": 0
+              }
+            ]
+          }
+        ],
+        "paper": "rgb(7, 7, 7)",
+        "cardCellShadow": "none",
+        "ring": {
+          "x": 319.99,
+          "y": 128.99,
+          "w": 960,
+          "h": 455.98
+        },
+        "cellRing": null,
+        "edges": [
+          {
+            "x": 314.32,
+            "y": 123.32,
+            "w": 971.34,
+            "h": 11.35
+          },
+          {
+            "x": 314.32,
+            "y": 579.32,
+            "w": 971.34,
+            "h": 11.35
+          },
+          {
+            "x": 314.32,
+            "y": 134.66,
+            "w": 11.35,
+            "h": 444.64
+          },
+          {
+            "x": 1274.31,
+            "y": 134.66,
+            "w": 11.35,
+            "h": 444.64
+          }
+        ],
+        "chip": "Table",
+        "handles": [
+          "handle.table.column.0",
+          "handle.table.column.1",
+          "handle.table.row.0",
+          "handle.table.row.1",
+          "handle.table.row.2",
+          "handle.table.resize.nw",
+          "handle.table.resize.n",
+          "handle.table.resize.ne",
+          "handle.table.resize.e",
+          "handle.table.resize.se",
+          "handle.table.resize.s",
+          "handle.table.resize.sw",
+          "handle.table.resize.w",
+          "handle.table.rotate"
+        ],
+        "editing": false,
+        "readout": null
+      }
+    },
+    {
+      "name": "05 handles",
+      "facts": {
+        "controls": [
+          "handle.table.move",
+          "handle.table.column.0",
+          "handle.table.column.1",
+          "handle.table.row.0",
+          "handle.table.row.1",
+          "handle.table.row.2",
+          "handle.table.resize.nw",
+          "handle.table.resize.n",
+          "handle.table.resize.ne",
+          "handle.table.resize.e",
+          "handle.table.resize.se",
+          "handle.table.resize.s",
+          "handle.table.resize.sw",
+          "handle.table.resize.w",
+          "handle.table.rotate"
+        ],
+        "se": {
+          "x": 1180.890625,
+          "y": 563.921875,
+          "w": 11,
+          "h": 11
+        }
+      }
+    },
+    {
+      "name": "05 under the se point",
+      "facts": {
+        "from": {
+          "x": 1186.390625,
+          "y": 569.421875
+        },
+        "under": "button.ts-handle is-selected handle.table.resize.se"
+      }
+    },
+    {
+      "name": "05 se +120 down",
+      "facts": {
+        "pos": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 577
+        },
+        "mid": {
+          "readout": "960 × 577",
+          "facts": [105, 105, 366],
+          "gesture": {
+            "gesture": null
+          }
+        },
+        "rows": [105, 105, 366],
+        "free": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 577
+        }
+      }
+    },
+    {
+      "name": "06 se -200 up",
+      "facts": {
+        "pos": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 456
+        },
+        "rows": [64.66, 64.67, 325.67],
+        "rowsBottom": 456,
+        "free": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 456
+        }
+      }
+    },
+    {
+      "name": "06b row seam 0 +40",
+      "facts": {
+        "seam": {
+          "x": 509.59375,
+          "y": 289.015625,
+          "w": 676.796875,
+          "h": 9
+        },
+        "under": "handle.table.row.0",
+        "mid": {
+          "readout": "105 px",
+          "rows": [105.33, 65.33, 326.34]
+        },
+        "before": {
+          "pos": {
+            "x": 320,
+            "y": 129,
+            "w": 960,
+            "h": 456
+          },
+          "heights": [null, null, null]
+        },
+        "after": {
+          "pos": {
+            "x": 320,
+            "y": 129,
+            "w": 960,
+            "h": 498
+          },
+          "heights": [105, 65, 326]
+        },
+        "rows": [105.33, 65.33, 326.34],
+        "editing": false,
+        "cellRing": null
+      }
+    },
+    {
+      "name": "06c after Cmd+Z",
+      "facts": {
+        "pos": {
+          "x": 320,
+          "y": 129,
+          "w": 960,
+          "h": 456
+        },
+        "heights": [null, null, null],
+        "rows": [64.66, 64.67, 325.67]
+      }
+    },
+    {
+      "name": "06d last row seam +30",
+      "facts": {
+        "seam": {
+          "x": 509.59375,
+          "y": 564.21875,
+          "w": 676.796875,
+          "h": 9
+        },
+        "under": "handle.table.row.2",
+        "mid": {
+          "readout": "356 px",
+          "rows": [65.33, 65.33, 356.34]
+        },
+        "before": {
+          "pos": {
+            "x": 320,
+            "y": 129,
+            "w": 960,
+            "h": 456
+          },
+          "heights": [null, null, null]
+        },
+        "after": {
+          "pos": {
+            "x": 320,
+            "y": 129,
+            "w": 960,
+            "h": 488
+          },
+          "heights": [65, 65, 356]
+        },
+        "rows": [65.33, 65.33, 356.34],
+        "editing": false,
+        "cellRing": null
+      }
+    },
+    {
+      "name": "06e cell 1,1 open: seams drawn",
+      "facts": {
+        "editing": true,
+        "handles": [
+          "handle.table.column.0",
+          "handle.table.column.1",
+          "handle.table.row.0",
+          "handle.table.row.1",
+          "handle.table.row.2",
+          "handle.table.resize.nw",
+          "handle.table.resize.n",
+          "handle.table.resize.ne",
+          "handle.table.resize.e",
+          "handle.table.resize.se",
+          "handle.table.resize.s",
+          "handle.table.resize.sw",
+          "handle.table.resize.w"
+        ],
+        "cellRing": {
+          "x": 639.98,
+          "y": 194.66,
+          "w": 319.99,
+          "h": 64.65
+        }
+      }
+    },
+    {
+      "name": "06f column seam 0 +60 with the cell open",
+      "facts": {
+        "widths": [380, 260, 320],
+        "editing": false,
+        "cellRing": null,
+        "chip": "Table"
+      }
+    },
+    {
+      "name": "07 show",
+      "facts": {
+        "cells": 18,
+        "shadows": ["none"],
+        "editable": false,
+        "display": "grid",
+        "surface": "pt-viewer is-editor is-present",
+        "cards": ["none"]
+      }
+    }
+  ],
+  "teardown": {
+    "trashed": false,
+    "status": null
+  },
+  "consoleErrors": [
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4432/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 86166 MB free of 1902738 MB",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4432/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhrhsfj-4a68ed render] turboslide render title --deck /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/decks",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4432/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhrhsfj-4a68ed render] render: 1 slide(s) x light at 1x with Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Ma",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4432/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhrhsfj-4a68ed render]    1 title light ready 3 ms, shot 268 ms",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4432/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhrhsfj-4a68ed render] render: 1 record(s) in 7.6 s -> /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/.tur",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4432/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 85129 MB free of 1902738 MB",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4432/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uhrife2-02e6bb render] turboslide render title --deck /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/decks"
+  ]
+}

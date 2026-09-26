@@ -310,6 +310,124 @@ function roundWidth(width: number): number {
 /** The narrowest a column drag or a column insert leaves a column, in sheet px (docs/RETURN.md 2.4 fix 5). */
 export const TABLE_MIN_COLUMN_PX = 40;
 
+// ---------------------------------------------------------------------------------------------
+// The rows and the box (docs/OBJECTS.md 3.3 item 3; Google: a row is its text's height plus the
+// padding, the table's box is the rows' sum, a frame drag distributes). The numbers below are the
+// theme's table rules (packages/theme sheet.css `.ts-sheet .table`: font-size from the ladder,
+// line-height 1.45, the cell padding 12 px above and below, the rule under every row at the
+// border weight); the renderer writes the grid's row tracks from them (packages/render
+// blocks/table.ts `tableRowsTemplate`: `auto` for a row with no set height, whose floor is the
+// empty cell's line box, `minmax(<height>px, auto)` for a set one), so an empty row is never
+// shorter than its line box, a wrapped cell grows its row, and a box taller than the rows shares
+// the extra evenly (the auto tracks stretch).
+
+/** The line height of a table cell, as the theme draws it (sheet.css `.ts-sheet .table`). */
+export const TABLE_LINE_HEIGHT = 1.45;
+/** The padding above and below a cell's text, in sheet px (sheet.css `.ts-sheet .table .td`). */
+export const TABLE_CELL_PADDING_PX = 12;
+/** The rule weight a table draws when its border sets none (the sheet hairline). */
+const TABLE_RULE_DEFAULT_PX = 1;
+
+/** The rule weight under every row: the block's border weight, 1 when unset, 0 for Transparent. */
+export function tableRuleWeight(block: Pick<TableFields, 'border'>): number {
+  return block.border?.weight ?? TABLE_RULE_DEFAULT_PX;
+}
+
+/**
+ * The height of one empty row at a ladder size in sheet px, its rule included: the line box
+ * (the size times the line height), the two paddings and the rule under the row. 54 at 20 px
+ * with the hairline (12 + 29 + 12 + 1); the fraction the smaller sizes give stays (26.1 at 18),
+ * since the browser draws it and the sum of a column of such rows is what the box holds.
+ */
+export function tableRowHeight(size: number, rule: number = TABLE_RULE_DEFAULT_PX): number {
+  return size * TABLE_LINE_HEIGHT + 2 * TABLE_CELL_PADDING_PX + rule;
+}
+
+/**
+ * The floor of one row's track in sheet px: its set `height` (Google's minimum row height, the
+ * row grows past it with its text), else the empty row's height at the table's size.
+ */
+export function tableRowTrack(
+  block: Pick<TableFields, 'size' | 'border'>,
+  row: Pick<TableRow, 'height'>,
+): number {
+  const size = block.size ?? 20;
+  return row.height ?? tableRowHeight(size, tableRuleWeight(block));
+}
+
+/**
+ * The height the table's box needs with no wrapped text, in sheet px: the hairline above plus
+ * every row's track floor. 163 for three empty rows at 20 px, 271 for five. The insert sizes its
+ * box from it, a resize stops at it, and the rows' drawn height never reads below it.
+ */
+export function tableRowsFloor(block: Pick<TableFields, 'rows' | 'size' | 'border'>): number {
+  const rule = tableRuleWeight(block);
+  return rule + block.rows.reduce((sum, row) => sum + tableRowTrack(block, row), 0);
+}
+
+/**
+ * The box height Insert > Table gives a table of `rows` empty rows at the ladder `size` (the
+ * width stays the tool's 960): `tableRowsFloor` of the empty table, whole px.
+ */
+export function tableBoxHeight(rows: number, size: number = 20): number {
+  const count = Math.max(1, Math.min(TABLE_MAX_ROWS, Math.round(rows)));
+  return Math.ceil(tableRowHeight(size) * count + TABLE_RULE_DEFAULT_PX);
+}
+
+/**
+ * The `pos.h` a commit writes so the ring meets the last rule (the table's autofit, the rule
+ * text blocks have as `grow`): `rowsHeight` is the drawn height of the rows with the hairline
+ * above, read from the stage; the new height when it exceeds the box by more than a pixel, else
+ * null (a box taller than its rows keeps its slack, which the rows share).
+ */
+export function tableGrownHeight(
+  block: Pick<TableFields, 'rows'> & { pos?: { h: number } },
+  rowsHeight: number | null,
+): number | null {
+  if (rowsHeight === null || !Number.isFinite(rowsHeight)) return null;
+  const pos = block.pos;
+  if (pos === undefined || rowsHeight <= pos.h + 1) return null;
+  return Math.ceil(rowsHeight);
+}
+
+/** What a row seam drag reads from the stage: every row's drawn pitch and its natural height, in sheet px. */
+export type TableRowsMeasure = {
+  /** the hairline above the first row */
+  top: number;
+  /** per row: the pitch drawn (this row's top to the next one's) and the least it can draw at (its text with the paddings and the rule) */
+  rows: { drawn: number; natural: number }[];
+};
+
+/**
+ * The rows after the seam under row `index` moved by `dy` px (docs/OBJECTS.md 3.3 item 4;
+ * Google drags a gridline between rows): every row takes its drawn height as its `height`, so
+ * the slack the box held is captured and nothing else moves, row `index` takes its drawn height
+ * plus the drag, never below its natural height (the text with the paddings and the rule), and
+ * the table's box is the rows' new sum with the hairline above, so the rows below move down and
+ * the seam under the last row grows the table. Null when nothing changes (a click, a seam at its
+ * floor, an index off the grid, a measure that does not match the rows).
+ */
+export function rowsAfterSeamDrag(
+  block: Pick<TableFields, 'rows'>,
+  measure: TableRowsMeasure,
+  index: number,
+  dy: number,
+): { rows: TableRow[]; height: number; boxHeight: number } | null {
+  if (index < 0 || index >= block.rows.length || !Number.isFinite(dy)) return null;
+  if (measure.rows.length !== block.rows.length) return null;
+  const moved = measure.rows[index];
+  if (moved === undefined) return null;
+  const floor = Math.max(1, Math.round(moved.natural));
+  const next = Math.max(floor, Math.round(moved.drawn + dy));
+  if (next === Math.round(moved.drawn)) return null;
+  const rows = block.rows.map((row, i) => ({
+    ...row,
+    height: i === index ? next : Math.max(1, Math.round(measure.rows[i]?.drawn ?? 0)),
+  }));
+  const boxHeight = Math.ceil(measure.top + rows.reduce((sum, row) => sum + (row.height ?? 0), 0));
+  return { rows, height: next, boxHeight };
+}
+
 /**
  * The widths the columns draw at inside a table `total` px wide, the grid template's own rule
  * (packages/render blocks/table.ts tableColumnsTemplate): equal shares when no column carries a

@@ -12,12 +12,19 @@ import { validateDeck, validateSlide } from '../validate.ts';
 import {
   TABLE_MAX_COLUMNS,
   TABLE_MAX_ROWS,
+  TABLE_SIZES,
   applyTableCommand,
   emptyTable,
   tableSizeProblem,
   columnShares,
   columnsAfterSeamDrag,
   TABLE_MIN_COLUMN_PX,
+  rowsAfterSeamDrag,
+  tableBoxHeight,
+  tableGrownHeight,
+  tableRowHeight,
+  tableRowTrack,
+  tableRowsFloor,
 } from './table.ts';
 import type { TableBlock, TableCommand } from './table.ts';
 
@@ -295,5 +302,109 @@ describe('columnsAfterSeamDrag, the column seam handle (docs/RETURN.md 2.4 fix 5
     expect(columnsAfterSeamDrag([{}, {}], 960, 1, 40)).toBeNull();
     expect(columnsAfterSeamDrag([{}, {}], 960, -1, 40)).toBeNull();
     expect(columnsAfterSeamDrag([{}, {}], 60, 0, 40)).toBeNull();
+  });
+});
+
+// The rows and the box (docs/OBJECTS.md 3.3 item 3): the empty row's height at each size of the
+// ladder, a set height as the track's floor, the table's box from its rows, the `pos.h` written
+// up when the rows are taller, and the rows after a seam under one of them moved (item 4).
+describe('the rows and the box', () => {
+  it('sizes an empty row from the ladder: the line box, the two paddings and the rule', () => {
+    expect(tableRowHeight(20)).toBe(54);
+    expect(tableRowHeight(20, 0)).toBe(53);
+    expect(tableRowHeight(20, 2)).toBe(55);
+    /* the fractions the smaller sizes give stay: the browser draws them */
+    expect(TABLE_SIZES.map((size) => Math.round(tableRowHeight(size) * 100) / 100)).toEqual([
+      54, 51.1, 49.65, 48.2, 46.75,
+    ]);
+  });
+
+  it('takes a set height as the track floor and the empty row otherwise', () => {
+    const table = emptyTable('t', 2, 2);
+    expect(tableRowTrack(table, {})).toBe(54);
+    expect(tableRowTrack(table, { height: 80 })).toBe(80);
+    expect(tableRowTrack({ ...table, size: 16 }, {})).toBe(48.2);
+    expect(tableRowTrack({ ...table, border: { weight: 0 } }, {})).toBe(53);
+  });
+
+  it('sizes the box from its rows: the hairline above and every row track', () => {
+    expect(tableRowsFloor(emptyTable('t', 3, 3))).toBe(163);
+    expect(tableRowsFloor(emptyTable('t', 3, 5))).toBe(271);
+    expect(tableRowsFloor({ ...emptyTable('t', 3, 3), border: { weight: 0 } })).toBe(159);
+    const sized = emptyTable('t', 2, 3);
+    sized.rows[1] = { ...sized.rows[1]!, height: 100 };
+    expect(tableRowsFloor(sized)).toBe(1 + 54 + 100 + 54);
+    /* the insert's box: three rows land 163, five 271, at every size of the ladder */
+    expect(tableBoxHeight(3)).toBe(163);
+    expect(tableBoxHeight(5)).toBe(271);
+    expect(TABLE_SIZES.map((size) => tableBoxHeight(3, size))).toEqual([163, 155, 150, 146, 142]);
+    expect(tableBoxHeight(0)).toBe(55);
+    expect(tableBoxHeight(99)).toBe(tableBoxHeight(TABLE_MAX_ROWS));
+  });
+
+  it('writes the box up when the rows draw taller than it, and leaves slack alone', () => {
+    const table = { ...emptyTable('t', 2, 3), pos: { x: 0, y: 0, w: 960, h: 163, z: 1 } };
+    expect(tableGrownHeight(table, 240.4)).toBe(241);
+    expect(tableGrownHeight(table, 164)).toBeNull();
+    expect(tableGrownHeight(table, 165)).toBe(165);
+    expect(tableGrownHeight(table, 120)).toBeNull();
+    expect(tableGrownHeight(table, null)).toBeNull();
+    expect(tableGrownHeight(emptyTable('t', 2, 3), 400)).toBeNull();
+  });
+
+  it('moves a row seam: every row keeps its drawn height, the moved row takes the drag, the box follows', () => {
+    const table = emptyTable('t', 2, 3);
+    const measure = {
+      top: 1,
+      rows: [
+        { drawn: 54, natural: 54 },
+        { drawn: 54, natural: 54 },
+        { drawn: 54, natural: 54 },
+      ],
+    };
+    const out = rowsAfterSeamDrag(table, measure, 0, 40);
+    expect(out?.height).toBe(94);
+    expect(out?.boxHeight).toBe(1 + 94 + 54 + 54);
+    expect(out?.rows.map((row) => row.height)).toEqual([94, 54, 54]);
+    expect(out?.rows[0]?.header).toBe(true);
+    /* the seam under the last row grows the table by the drag */
+    const last = rowsAfterSeamDrag(table, measure, 2, 30);
+    expect(last?.rows.map((row) => row.height)).toEqual([54, 54, 84]);
+    expect(last?.boxHeight).toBe(1 + 54 + 54 + 84);
+  });
+
+  it('captures the slack a stretched table held, so the other rows stay where they draw', () => {
+    const table = emptyTable('t', 2, 3);
+    const measure = {
+      top: 1,
+      rows: [
+        { drawn: 106.33, natural: 54 },
+        { drawn: 106.33, natural: 54 },
+        { drawn: 106.34, natural: 54 },
+      ],
+    };
+    const out = rowsAfterSeamDrag(table, measure, 1, -20);
+    expect(out?.rows.map((row) => row.height)).toEqual([106, 86, 106]);
+    expect(out?.height).toBe(86);
+    expect(out?.boxHeight).toBe(299);
+  });
+
+  it('stops at the row’s natural height and answers null for a click or a seam off the grid', () => {
+    const table = emptyTable('t', 2, 2);
+    const measure = {
+      top: 1,
+      rows: [
+        { drawn: 90, natural: 83 },
+        { drawn: 54, natural: 54 },
+      ],
+    };
+    expect(rowsAfterSeamDrag(table, measure, 0, -30)?.height).toBe(83);
+    expect(rowsAfterSeamDrag(table, measure, 1, -30)).toBeNull();
+    expect(rowsAfterSeamDrag(table, measure, 0, 0)).toBeNull();
+    expect(rowsAfterSeamDrag(table, measure, 0, 0.3)).toBeNull();
+    expect(rowsAfterSeamDrag(table, measure, 2, 30)).toBeNull();
+    expect(rowsAfterSeamDrag(table, measure, -1, 30)).toBeNull();
+    expect(rowsAfterSeamDrag(table, { top: 1, rows: [] }, 0, 30)).toBeNull();
+    expect(rowsAfterSeamDrag(table, measure, 0, Number.NaN)).toBeNull();
   });
 });

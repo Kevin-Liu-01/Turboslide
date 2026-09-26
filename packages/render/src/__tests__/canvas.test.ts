@@ -390,7 +390,11 @@ describe.skipIf(!fixtureReady)('the export fixture deck of SPEC-2 11.2 in both t
   it('draws the merged table in the grid form with per cell rules, fills and row heights (2.7)', () => {
     const html = renderSlide(deck, slides['table-merge'] as Slide, options('light')).html;
     expect(html).toContain('class="table grid"');
-    expect(html).toContain('grid-template-rows:56px 56px 56px 56px');
+    /* a set row height is the track's floor, the row grows past it with its text (docs/OBJECTS.md
+       3.3 item 3; Google's minimum row height) */
+    expect(html).toContain(
+      'grid-template-rows:minmax(56px, auto) minmax(56px, auto) minmax(56px, auto) minmax(56px, auto)',
+    );
     expect(html).toContain('--table-rule-style:dashed');
     expect(html).toContain('grid-row:span 2;grid-column:span 2');
     expect(html).toContain('data-span="2x2"');

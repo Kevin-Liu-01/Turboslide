@@ -355,15 +355,11 @@ describe('objects of the canvas scale their content with the box', () => {
     );
   });
 
-  it('a table object takes the box height and its rows share it', () => {
+  it('a table object takes the box height and its rows share it (the auto tracks of both forms stretch, docs/OBJECTS.md 3.3 item 3)', () => {
     expect(BLOCK_CSS).toContain(
-      '.ts-sheet .free > .table, .ts-sheet .free > .link > .table { height: 100%; }',
+      '.ts-sheet .free > .table, .ts-sheet .free > .link > .table { height: 100%; align-content: stretch; }',
     );
-    expect(BLOCK_CSS).toContain(
-      '.ts-sheet .free > .table > .tr, .ts-sheet .free > .link > .table > .tr { flex: 1 1 auto; }',
-    );
-    expect(BLOCK_CSS).toContain(
-      '.ts-sheet .free > .table.grid, .ts-sheet .free > .link > .table.grid { align-content: stretch; }',
-    );
+    /* the flex rows are gone: the rows are the tracks the renderer writes (sheet.css `.ts-sheet .table`) */
+    expect(BLOCK_CSS).not.toContain('.table > .tr { flex');
   });
 });

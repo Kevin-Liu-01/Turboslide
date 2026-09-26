@@ -881,8 +881,14 @@
    3 px cell budget (focus b2.md); that export difference stands and is recorded in
    docs/gslides-parity/features/build/b2.md, the sheet's alignment wins. */
 .ts-sheet .table {
-  display: flex;
-  flex-direction: column;
+  /* one grid of rows (docs/OBJECTS.md 3.3 item 3): the renderer writes the row tracks inline as
+     minmax(<track>px, auto), a floor per row from the ladder or the row's set height, so a row
+     grows with its text and a positioned table's slack stretches every row alike (block-css.ts
+     `.free > .table`); the classic form's rows are the items of this one column, the grid form
+     replaces the columns with the cells' template (block-css.ts `.table.grid`) */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: auto;
   border-top: var(--table-rule, 1px) solid var(--hair);
   font-size: 20px;
   line-height: 1.45;
@@ -891,6 +897,8 @@
 .ts-sheet .table > .tr {
   display: grid;
   grid-template-columns: var(--table-cols);
+  /* the exporter reads the vertical alignment from the row (packages/export scene/measure.ts);
+     the cells stretch on their own below and align their content with the same value */
   align-items: var(--table-valign, start);
   border-bottom: var(--table-rule, 1px) solid var(--hair);
 }
@@ -905,6 +913,11 @@
   min-width: 0;
   padding: 12px 16px;
   overflow-wrap: anywhere;
+  /* a cell fills its row's track in both forms (docs/OBJECTS.md 3.2, 3.3 item 1: the cell ring
+     is the cell's grid area, the full row height): the fill covers the row, as Google's does
+     and as the a:tbl the export writes, and the vertical alignment moves to the content */
+  align-self: stretch;
+  align-content: var(--table-valign, start);
 }
 .ts-sheet .table .td.first {
   padding-left: 0;

@@ -211,8 +211,9 @@ export const BLOCK_CSS = `
    SPEC-5-amendments A4): an icon object's glyph fills its box (renderIcon writes no size for a
    positioned icon), a diagram object fills its box in both axes (renderDia adds
    preserveAspectRatio none for a positioned dia), a table object's rows share the box's height
-   (the flex rows of the classic form grow from their content height, the auto tracks of the grid
-   form stretch); at the box the conversion measured nothing changes, so the fidelity gate holds.
+   (the auto row tracks of both forms stretch over their floors, sheet.css .ts-sheet .table;
+   docs/OBJECTS.md 3.3 item 3); at the box the conversion measured nothing changes, so the
+   fidelity gate holds.
    hotfix-4 causes W2 and W8 add the mark object (renderMark writes no size for a positioned mark
    and the class mark-block; the symbol keeps its ratio inside the box) and the panel object: the
    panel fills its box and the two marks of its term form take half and the whole of the content
@@ -227,9 +228,7 @@ export const BLOCK_CSS = `
 .ts-sheet .free > .panel.term > svg.mark-l, .ts-sheet .free > .link > .panel.term > svg.mark-l { height: 100%; width: auto; }
 .ts-sheet .free > svg.icon-block, .ts-sheet .free > .link > svg.icon-block { width: 100%; height: 100%; }
 .ts-sheet .free > svg.dia, .ts-sheet .free > .link > svg.dia { width: 100%; height: 100%; }
-.ts-sheet .free > .table, .ts-sheet .free > .link > .table { height: 100%; }
-.ts-sheet .free > .table > .tr, .ts-sheet .free > .link > .table > .tr { flex: 1 1 auto; }
-.ts-sheet .free > .table.grid, .ts-sheet .free > .link > .table.grid { align-content: stretch; }
+.ts-sheet .free > .table, .ts-sheet .free > .link > .table { height: 100%; align-content: stretch; }
 /* the slide background colour layer (2.6.1): under .in at the sheet box */
 .ts-sheet .slide-bg { position: absolute; inset: -57px; pointer-events: none; }
 /* a positioned text box with an alignment or a padding fills its box (2.2.18, 2.2.19) */
@@ -296,9 +295,9 @@ export const BLOCK_CSS = `
 /* the table's grid form (2.7.1, 2.7.2): merged cells and per cell rules */
 .ts-sheet .table.grid { display: grid; grid-template-columns: var(--table-cols); }
 .ts-sheet .table.grid > .tr { display: contents; }
-/* a cell fills its track so its rule sits on the row's bottom edge and its fill covers the row, as
-   in Google's table and the a:tbl the export writes; the vertical alignment moves to the content */
-.ts-sheet .table.grid .td { align-self: stretch; align-content: var(--table-valign, start); }
+/* a cell fills its track in both forms (the theme's .ts-sheet .table .td rule, sheet.css): its rule
+   sits on the row's bottom edge and its fill covers the row, as in Google's table and the a:tbl
+   the export writes; the vertical alignment moves to the content */
 .ts-sheet .table.grid > .tr.header .td { font-family: var(--display); font-weight: 500; letter-spacing: -0.01em; }
 
 /* ---- the render surface: one visible slide, the sheet filling the viewport in present mode ---- */

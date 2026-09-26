@@ -19,6 +19,18 @@
 // border says weight 0, the cell's own colour and dash where set); a cell fill is inline. A table
 // written before this round renders byte for byte.
 //
+// The objects round (docs/OBJECTS.md 3.3 items 2 and 3): both forms are one CSS grid whose row
+// tracks the renderer writes inline (`tableRowsTemplate`): `auto` for a row with no set height,
+// whose floor is its content (the empty cell's line box, 54 px at 20 px with the rule, the
+// schema's `tableRowTrack`), and `minmax(<height>px, auto)` for a row with a set `height`,
+// Google's minimum row height; so an empty row stands at its line box, a wrapped cell grows its
+// row and a positioned table taller than its rows shares the extra evenly (the auto tracks
+// stretch, block-css.ts); the classic form's `.tr` no longer carries an inline height. A table whose rule
+// weight is 0 carries the class `no-rule` on its root, and a grid form cell whose own rule is 0
+// carries it on the cell: the editor's stage draws its guide grid from those classes and from
+// `.td:not(.last)` (packages/viewer Editor.css), never from anything written here, so the show,
+// the thumbnails, the PDF and the PowerPoint draw the grammar's rules alone.
+//
 // The exporter reads the same elements: the row rules from the computed borders (the ruled rows
 // construction), the cell boxes for addTable's column widths and row heights, and the alignment
 // and fill from the computed style (packages/export/src/scene/measure.ts).
@@ -26,6 +38,7 @@ import type { BlockOf } from '@turboslide/schema/blocks';
 import { isCoveredCell, spanAt } from '@turboslide/schema/blocks';
 import { colorCss } from '@turboslide/schema/color';
 import type { TableBorderWeight, TableCellStyle } from '@turboslide/schema/blocks/table';
+import { tableRowTrack } from '@turboslide/schema/blocks/table';
 import { classes, el, px, style } from '../html.ts';
 import { rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
@@ -37,6 +50,35 @@ export const TABLE_DEFAULT_SIZE = 20;
 
 /** 1, the sheet hairline; not the first weight of the list, which is Google's Transparent 0 since round two (SPEC-2 0.63). */
 export const TABLE_DEFAULT_BORDER: TableBorderWeight = 1;
+
+/**
+ * The words the editor's stage draws in the hovered empty cell (docs/OBJECTS.md 3.3 item 7):
+ * one click already places the caret, so the prompt names the next gesture. The renderer writes
+ * no prompt; packages/viewer Editor.tsx `promptHoveredCell` appends it to the hovered cell alone.
+ */
+export const TABLE_CELL_PROMPT = 'Type to add text';
+
+/**
+ * The row tracks of the table's grid: `auto` for a row with no set height, so its floor is its
+ * content (an empty cell keeps a line box through the sheet's CSS, 54 px at 20 px with the rule;
+ * the schema's `tableRowTrack` states the same number) and a wrapped cell grows it; and
+ * `minmax(<height>px, auto)` for a row with a set height, Google's minimum row height. The auto
+ * max lets a positioned table's slack stretch every row alike (block-css.ts `align-content`). A
+ * fixed minimum is written only where the document sets one: a track whose minimum is a length
+ * turns the grid item's automatic minimum size off (CSS Grid 6.6), and in a box shorter than the
+ * rows the item then overflows its track instead of growing it (measured on the lane's stage:
+ * forty words in a 320 px box gave a 211 px track under a 314 px cell), so the common row keeps
+ * the content-based minimum an auto track gives.
+ */
+export function tableRowsTemplate(block: BlockOf<'table'>): string {
+  return block.rows
+    .map((row) =>
+      row.height === undefined
+        ? 'auto'
+        : `minmax(${px(Math.round(tableRowTrack(block, row) * 100) / 100)}px, auto)`,
+    )
+    .join(' ');
+}
 
 /**
  * The grid template of the columns: an equal share when no column carries a width; a width in
@@ -101,8 +143,10 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
       `--table-rule-style:${block.border.dash === 'dot' ? 'dotted' : 'dashed'}`,
     block.valign === 'middle' && '--table-valign:center',
     block.valign === 'bottom' && '--table-valign:end',
-    grid &&
-      `grid-template-rows:${block.rows.map((row) => (row.height !== undefined ? `${px(row.height)}px` : 'auto')).join(' ')}`,
+    /* the row tracks of both forms (docs/OBJECTS.md 3.3 item 3): a floor per row, growth with
+       the text, the slack shared; the classic form's rows are the items of the root's one column
+       grid (sheet.css `.ts-sheet .table`) and the grid form's cells span it */
+    `grid-template-rows:${tableRowsTemplate(block)}`,
     boxShadowDeclaration(block.shadow),
   );
   const last = block.columns.length - 1;
@@ -121,6 +165,7 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
              editor, the show and the exports (audit-objects rows 97 and 85, the "one column at
              the whole table width"; measured on the checkout in docs/gslides-parity/return/build/b5.md) */
           const align = column?.align;
+          const rule = grid ? cellRule(block, row.header === true, own) : undefined;
           return el(
             'span',
             {
@@ -128,13 +173,15 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
                 'td',
                 c === 0 && 'first',
                 (span !== undefined ? c + span.columns - 1 : c) === last && 'last',
+                /* a grid form cell with no rule of its own: the stage's guide draws one (Editor.css) */
+                rule === 'border-bottom:0' && 'no-rule',
               ),
               style: style(
                 (align === 'center' || align === 'right') && `text-align:${align}`,
                 fill !== undefined && `background:${colorCss(fill)}`,
                 span !== undefined && span.rows > 1 && `grid-row:span ${span.rows}`,
                 span !== undefined && span.columns > 1 && `grid-column:span ${span.columns}`,
-                grid && cellRule(block, row.header === true, own),
+                rule,
               ),
               'data-run': runAttr(ctx, block.id, `rows/${r}/cells/${c}`),
               'data-span':
@@ -151,20 +198,22 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
           );
         })
         .join('');
-      return el(
-        'div',
-        {
-          class: classes('tr', row.header === true && 'header'),
-          style: row.height !== undefined && !grid ? `height:${px(row.height)}px` : undefined,
-        },
-        cells,
-      );
+      /* a row's set height is its track's floor (the root's grid-template-rows above), never an
+         inline height that clipped a wrapped cell: Google's minimum row height */
+      return el('div', { class: classes('tr', row.header === true && 'header') }, cells);
     })
     .join('');
   return el(
     'div',
     rootAttrs(block, ctx, {
-      className: classes('table', size !== TABLE_DEFAULT_SIZE && `table-${size}`, grid && 'grid'),
+      className: classes(
+        'table',
+        size !== TABLE_DEFAULT_SIZE && `table-${size}`,
+        grid && 'grid',
+        /* Google's Transparent border (SPEC-2 0.63): no rule drawn; the stage's guide grid draws
+           the rows' seams from the class (Editor.css) */
+        weight === 0 && 'no-rule',
+      ),
       style: inline,
       role: 'table',
       'data-dash': borderStyleDeclaration(block.border?.dash) ? block.border?.dash : undefined,

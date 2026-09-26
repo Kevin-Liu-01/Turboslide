@@ -168,6 +168,40 @@
   }
 }
 
+/* The editor's guide grid on every table (docs/OBJECTS.md 3.3 item 2; Kevin's screenshot: an
+   empty 3 by 3 table read as bare rules with no cell). A `--pt-hair` hairline on every inner
+   column seam of every row, drawn as an inset shadow at the cell's right edge so no box moves
+   and the show's wrap points hold; and, where the grammar's rule is absent (a table whose border
+   weight is 0, class `no-rule` on the root, or a grid form cell whose own rule is 0, the class on
+   the cell; packages/render blocks/table.ts), a hairline above the table and under each row.
+   The rules bind to the stage's sheet root alone (.ts-sheet.ts-editor, the way block-css.ts binds
+   the click model; the shell's own root carries .ts-editor as well and holds the filmstrip's
+   cards) and not to its present state (.is-present, the show on the same root), so the filmstrip
+   cards, the show, the thumbnails, the PDF and the PowerPoint draw the grammar's rules and no
+   seam (docs/grammar.md "table"; docs/OBJECTS.md section 8 question 1 keeps cell borders out of
+   the show). */
+.ts-sheet.ts-editor:not(.is-present) .pt-slide .table .td:not(.last) {
+  box-shadow: inset -1px 0 0 var(--pt-hair);
+}
+
+.ts-sheet.ts-editor:not(.is-present) .pt-slide .table.no-rule {
+  box-shadow: inset 0 1px 0 var(--pt-hair);
+}
+
+.ts-sheet.ts-editor:not(.is-present) .pt-slide .table.no-rule:not(.grid) > .tr {
+  box-shadow: inset 0 -1px 0 var(--pt-hair);
+}
+
+.ts-sheet.ts-editor:not(.is-present) .pt-slide .table.grid .td.no-rule {
+  box-shadow: inset 0 -1px 0 var(--pt-hair);
+}
+
+.ts-sheet.ts-editor:not(.is-present) .pt-slide .table.grid .td.no-rule:not(.last) {
+  box-shadow:
+    inset -1px 0 0 var(--pt-hair),
+    inset 0 -1px 0 var(--pt-hair);
+}
+
 /* the caption field's placeholder while the session is open on an empty caption (Add a caption
    from the picture's menu opens the field at once, InlineText.tsx): the prompt's wording in the
    prompt's colour, as a block so the caret sits at the start of the line in Chromium */

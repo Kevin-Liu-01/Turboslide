@@ -8,7 +8,12 @@ import type { TableBlock } from '@turboslide/schema/blocks/table';
 import { emptyTable } from '@turboslide/schema/blocks/table';
 import type { BlockContext } from '../blocks/context.ts';
 import { renderBlock } from '../blocks/render-block.ts';
-import { renderTable, tableColumnsTemplate } from '../blocks/table.ts';
+import {
+  TABLE_CELL_PROMPT,
+  renderTable,
+  tableColumnsTemplate,
+  tableRowsTemplate,
+} from '../blocks/table.ts';
 
 function context(extra: Partial<BlockContext> = {}): BlockContext {
   return {
@@ -108,9 +113,79 @@ describe('renderTable', () => {
     expect(html).not.toContain('data-run');
     expect(html).not.toContain('data-block');
     expect(html).not.toContain('prompt');
-    // the default weight and alignment write nothing; the column template always does
-    expect(html).toContain('style="--table-cols:minmax(0, 1fr) minmax(0, 1fr)"');
+    // the default weight and alignment write nothing; the column template and the row tracks always do
+    expect(html).toContain(
+      'style="--table-cols:minmax(0, 1fr) minmax(0, 1fr);grid-template-rows:auto auto"',
+    );
     expect(html).not.toContain('--table-rule');
+  });
+
+  it('writes the row tracks of both forms: auto for a row, minmax(<height>px, auto) for a set height (docs/OBJECTS.md 3.3 item 3)', () => {
+    /* an auto track: the floor is the empty cell's line box (54 at 20 px with the rule) and a
+       wrapped cell grows it; a fixed minimum would turn the row's content minimum off */
+    expect(tableRowsTemplate(emptyTable('t', 2, 3))).toBe('auto auto auto');
+    /* a set height is the track's floor (Google's minimum row height) */
+    expect(
+      tableRowsTemplate({
+        ...pricing,
+        rows: [pricing.rows[0]!, { ...pricing.rows[1]!, height: 80 }, pricing.rows[2]!],
+      }),
+    ).toBe('auto minmax(80px, auto) auto');
+    expect(tableRowsTemplate({ ...pricing, rows: [{ ...pricing.rows[0]!, height: 50.155 }] })).toBe(
+      'minmax(50.16px, auto)',
+    );
+    const html = renderTable(pricing, context());
+    expect(html).toContain('grid-template-rows:auto auto auto"');
+    /* the grid form takes the same template */
+    const merged = renderTable(
+      { ...pricing, spans: [{ row: 1, column: 1, rows: 1, columns: 2 }] },
+      context(),
+    );
+    expect(merged).toContain('class="table table-17 grid"');
+    expect(merged).toContain('grid-template-rows:auto auto auto"');
+  });
+
+  it('writes no inline height on a row: its set height is the track floor, never a clip', () => {
+    const html = renderTable(
+      { ...pricing, rows: [pricing.rows[0]!, { ...pricing.rows[1]!, height: 80 }] },
+      context(),
+    );
+    expect(html).not.toContain('style="height:');
+    expect(html).toContain('<div class="tr">');
+    expect(html).toContain('minmax(80px, auto)');
+  });
+
+  it('names the absent rules for the stage guides and writes no guide of its own (docs/OBJECTS.md 3.3 item 2)', () => {
+    const plain = renderTable(emptyTable('t', 2, 2), context());
+    expect(plain).not.toContain('no-rule');
+    /* Google's Transparent border: the class on the root */
+    const bare = renderTable({ ...emptyTable('t', 2, 2), border: { weight: 0 } }, context());
+    expect(bare).toContain('class="table no-rule"');
+    expect(bare).toContain('--table-rule:0px');
+    /* a grid form cell whose own rule is 0: the class on the cell */
+    const cell = renderTable(
+      {
+        ...emptyTable('t', 2, 2),
+        cells: [{ row: 1, column: 0, border: { weight: 0 } }],
+      },
+      context(),
+    );
+    expect(cell).toContain('class="td first no-rule" style="border-bottom:0"');
+    expect(cell.match(/no-rule/g)?.length).toBe(1);
+    /* the guides are the editor stage's CSS (packages/viewer Editor.css): nothing here draws
+       a seam, a box shadow or a right border */
+    for (const html of [plain, bare, cell]) {
+      expect(html).not.toContain('guide');
+      expect(html).not.toContain('box-shadow');
+      expect(html).not.toContain('border-right');
+    }
+  });
+
+  it('names the prompt words the stage draws in the hovered empty cell (docs/OBJECTS.md 3.3 item 7)', () => {
+    expect(TABLE_CELL_PROMPT).toBe('Type to add text');
+    expect(renderTable(emptyTable('t', 1, 1), context({ live: true }))).not.toContain(
+      TABLE_CELL_PROMPT,
+    );
   });
 
   it('draws no prompt in an empty cell, on the editor stage or elsewhere, and keeps the empty paragraph (docs/FEATURES.md 2.3 item 9)', () => {

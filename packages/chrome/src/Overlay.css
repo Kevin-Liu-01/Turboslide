@@ -511,9 +511,10 @@
   cursor: default;
 }
 
-/* the "+" at the right or the bottom edge: a 16 px paper circle with a hairline and the sprite's
-   plus in ink, centred on the edge at the pointer; ink ground under the pointer. It sits above
-   the frame edge strip that shares its edge */
+/* the "+" beside the right or under the bottom edge: a 16 px paper circle with a hairline and
+   the sprite's plus in ink, centred ADD_CENTRE_PX outside the edge at the pointer along it
+   (TableOverlay.tsx), so the edge itself stays the seam's, the frame edge strip's and the
+   squares'; ink ground under the pointer */
 .ts-table-add {
   position: absolute;
   z-index: 3;

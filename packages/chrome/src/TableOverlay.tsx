@@ -44,12 +44,17 @@ import { tipProps } from './Tooltip';
  *   the Header row check (`format.table.headerRow`, writing `rows[0].header`), Insert row above and
  *   below, Delete row and Distribute rows; on a column head the column rows. The menu's rows run
  *   the table plans over the head's own range, so they act before the range API lands.
- * - The "+" affordances: a 16 px circle with the sprite's plus, ink on paper, centred on the ring's
- *   right edge (`handle.<block>.add.column`) or bottom edge (`.add.row`) at the pointer while it is
- *   within EDGE_BAND_PX of that edge; one click inserts a column right of the last one (a row under
- *   the last) in one commit that also grows the table's box by the new column's width (the last
- *   row's height), so every other column keeps its width (the row `tables.edge.add-row-column`);
- *   without the shell's `commit` the click falls back to the `table.insertColumns` plan.
+ * - The "+" affordances: a 16 px circle with the sprite's plus, ink on paper, just outside the
+ *   ring's right edge (`handle.<block>.add.column`) or bottom edge (`.add.row`) at the pointer's
+ *   height (or x) while the pointer is within EDGE_BAND_PX inside that edge or over the circle
+ *   itself; one click inserts a column right of the last one (a row under the last) in one commit
+ *   that also grows the table's box by the new column's width (the last row's height), so every
+ *   other column keeps its width (the row `tables.edge.add-row-column`); without the shell's
+ *   `commit` the click falls back to the `table.insertColumns` plan. The circle sits ADD_GAP off
+ *   the edge, so it never covers the seam under the last row, the frame edge strip or a resize
+ *   square, which share the edge (the verifier's pass 1 finding 3: drawn at the pointer on the
+ *   edge it took the press meant for the last row's seam everywhere but the bands beside the
+ *   squares); while a handle drag is live the circle is not drawn.
  *
  * Every control is a button with the chrome's tooltip and a `data-control` id in the shape of
  * model.ts's ids; a parked control (parked-controls.ts) is not drawn while Tools > Advanced tools
@@ -73,19 +78,21 @@ export type TableOverlayProps = {
  */
 export const HEAD_PX = 12;
 export const HEAD_GAP = 4;
-/** The pointer is within this many CSS pixels of the ring's right or bottom edge: the "+" shows. */
+/** The pointer is within this many CSS pixels inside the ring's right or bottom edge: the "+" shows. */
 export const EDGE_BAND_PX = 12;
 /** The "+" circle's diameter in CSS pixels. */
 export const ADD_PX = 16;
 /**
- * The reach of a resize square from its centre in CSS px, kept clear by the "+": the corner
- * squares at the ends of an edge and the middle square (s on the bottom edge, e on the right)
- * sit on the same edges, and the "+" (z-index 3, above the squares) took the press meant for
- * the se square, so no resize started (the integrator's walk on the merged tree, the row
- * tables.resize.rows-share-extra: no readout, the rows unchanged). Within this reach of a square
- * the "+" is not drawn and the square takes the pointer.
+ * The gap between the ring's edge and the near side of the "+" circle, in CSS px: past the half
+ * of the seam handle's 9 px hit band on the last rule (Overlay.tsx handleStyle, 4.5), the half of
+ * a frame edge strip (FRAME_EDGE_PX / 2, 4) and the half of an 11 px resize square (5.5), so the
+ * circle covers none of them and a press on the edge itself goes to the seam, the strip or the
+ * square, as Google's bottom gridline resizes the last row from anywhere along it. The pointer
+ * keeps the "+" while it is over the circle, up to ADD_GAP + ADD_PX outside the edge.
  */
-export const SQUARE_CLEAR_PX = 14;
+export const ADD_GAP = 6;
+/** How far outside the edge the pointer may go and keep the "+": the circle's far side. */
+export const ADD_REACH_PX = ADD_GAP + ADD_PX;
 
 /** The grid areas of a table as measured: one box per row (the table's width) and per column (its height), in sheet px. */
 export type TableGrid = { rows: Box[]; columns: Box[] };
@@ -158,9 +165,13 @@ export function headStyle(axis: HeadAxis, area: Box, tableBox: Box, k: number): 
 }
 
 /**
- * Where the "+" sits for a pointer at (x, y) in CSS pixels over a ring box in CSS pixels: on the
- * right edge at the pointer's y when the pointer is within the band of that edge, else on the
- * bottom edge at the pointer's x, else nowhere. The circle stays inside the edge's run.
+ * Where the "+" sits for a pointer at (x, y) in CSS pixels over a ring box in CSS pixels: beside
+ * the right edge at the pointer's y when the pointer is within EDGE_BAND_PX inside that edge or
+ * over the circle outside it (up to ADD_REACH_PX), else under the bottom edge at the pointer's x
+ * the same way, else nowhere. `at` is the circle's centre along the edge, kept inside the edge's
+ * run; the circle's centre across the edge is ADD_CENTRE_PX outside it.
+ * Nothing along the run is kept clear: outside the ring the circle covers no square, seam or
+ * frame edge strip, whatever its position along the edge.
  */
 export function edgeAt(
   x: number,
@@ -170,17 +181,20 @@ export function edgeAt(
   const right = ring.left + ring.width;
   const bottom = ring.top + ring.height;
   const half = ADD_PX / 2;
-  /* inside the edge's run and clear of its three squares (the two corners, the middle) */
-  const inRun = (v: number, from: number, to: number) =>
-    v >= from + SQUARE_CLEAR_PX &&
-    v <= to - SQUARE_CLEAR_PX &&
-    Math.abs(v - (from + to) / 2) > SQUARE_CLEAR_PX;
-  if (Math.abs(x - right) <= EDGE_BAND_PX && inRun(y, ring.top, bottom))
+  /* from EDGE_BAND_PX inside the edge to the circle's far side outside it */
+  const nearEdge = (v: number, edge: number) =>
+    v >= edge - EDGE_BAND_PX && v <= edge + ADD_REACH_PX;
+  /* along the edge's run */
+  const inRun = (v: number, from: number, to: number) => v >= from && v <= to;
+  if (nearEdge(x, right) && inRun(y, ring.top, bottom))
     return { axis: 'column', at: Math.min(bottom - half, Math.max(ring.top + half, y)) };
-  if (Math.abs(y - bottom) <= EDGE_BAND_PX && inRun(x, ring.left, right))
+  if (nearEdge(y, bottom) && inRun(x, ring.left, right))
     return { axis: 'row', at: Math.min(right - half, Math.max(ring.left + half, x)) };
   return null;
 }
+
+/** The "+" circle's centre across its edge, measured outward from the ring's edge, in CSS px. */
+export const ADD_CENTRE_PX = ADD_GAP + ADD_PX / 2;
 
 /** The view with B1's `cellRing` (build/b5.md R4): the open cell's box, or a range's box while one is active. */
 type ViewWithCellRing = EditorOverlayView & { cellRing?: Box | null };
@@ -455,18 +469,22 @@ export function TableOverlay({ view, tableBox, blockId }: TableOverlayProps) {
         ...grid.rows.map((area, index) => ({ axis: 'row' as const, index, area })),
       ];
   const addControl = edge === null ? null : `handle.${blockId}.add.${edge.axis}`;
+  /* not while a handle drag is live (a seam, a square): the pointer is on that handle's work and
+     a circle drawn beside it would read as a target */
   const addShown =
     addControl !== null &&
     edge !== null &&
     block !== null &&
     !busy &&
+    view.activeHandle === null &&
     !isParked(parkedFamily(`add.${edge.axis}`), settings);
+  /* the circle's centre: ADD_CENTRE_PX outside the edge, at the pointer along it */
   const addStyle: CSSProperties | undefined =
     edge === null
       ? undefined
       : edge.axis === 'column'
-        ? { left: ring.left + ring.width, top: edge.at }
-        : { left: edge.at, top: ring.top + ring.height };
+        ? { left: ring.left + ring.width + ADD_CENTRE_PX, top: edge.at }
+        : { left: edge.at, top: ring.top + ring.height + ADD_CENTRE_PX };
 
   if (!isTable) return null;
   return (

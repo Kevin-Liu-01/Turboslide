@@ -12,6 +12,10 @@ import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
 import { forbiddenWordsIn } from '../menus/strings';
 import {
+  ADD_CENTRE_PX,
+  ADD_GAP,
+  ADD_PX,
+  ADD_REACH_PX,
   TableOverlay,
   cellOfPointer,
   cellRingBox,
@@ -104,7 +108,7 @@ function viewOf(over: Partial<EditorOverlayView> = {}): EditorOverlayView {
     onGuideContextMenu: vi.fn(),
     onRulerDown: vi.fn(),
     ...over,
-  } as EditorOverlayView;
+  };
 }
 
 function shellOf(over: {
@@ -212,7 +216,7 @@ describe('the grid areas and the cell ring', () => {
         selection: { kind: 'run', blockId: 't', pointer: 'rows/1/cells/1' },
         tableFrame: true,
         cellRing: [640, 236, 640, 213],
-      } as Partial<EditorOverlayView>),
+      }),
     );
     expect(document.querySelector('.ts-cell-ring')).toBeNull();
     cleanup();
@@ -222,7 +226,7 @@ describe('the grid areas and the cell ring', () => {
         selection: { kind: 'run', blockId: 't', pointer: 'rows/1/cells/1' },
         tableFrame: true,
         cellRing: runs['t/rows/1/cells/1'],
-      } as Partial<EditorOverlayView>),
+      }),
     );
     expect(document.querySelector('.ts-cell-ring')).not.toBeNull();
   });
@@ -355,26 +359,41 @@ describe('the heads', () => {
 describe('the "+" at the edges', () => {
   const ring = { left: 160, top: 64.5, width: 480, height: 160 };
 
-  it('sits on the right edge at the pointer’s height within the band, on the bottom edge at its x, else nowhere', () => {
+  it('answers the right edge at the pointer’s height within the band inside it, the bottom edge at its x, else nowhere', () => {
     expect(edgeAt(638, 120, ring)).toEqual({ axis: 'column', at: 120 });
-    expect(edgeAt(650, 100, ring)).toEqual({ axis: 'column', at: 100 });
+    expect(edgeAt(628, 100, ring)).toEqual({ axis: 'column', at: 100 });
     expect(edgeAt(300, 226, ring)).toEqual({ axis: 'row', at: 300 });
+    expect(edgeAt(300, 213, ring)).toEqual({ axis: 'row', at: 300 });
     expect(edgeAt(300, 150, ring)).toBeNull();
     expect(edgeAt(700, 120, ring)).toBeNull();
+    expect(edgeAt(627, 120, ring)).toBeNull();
+    expect(edgeAt(300, 212, ring)).toBeNull();
   });
 
-  it('keeps clear of the resize squares: the corners and the middle of an edge take the pointer (the integrator\u2019s walk, tables.resize.rows-share-extra)', () => {
-    /* the ne and se corners of the right edge, its e square at the middle (144.5) */
-    expect(edgeAt(650, 66, ring)).toBeNull();
-    expect(edgeAt(640, 220, ring)).toBeNull();
-    expect(edgeAt(638, 150, ring)).toBeNull();
-    /* the sw and se corners of the bottom edge, its s square at the middle (400) */
-    expect(edgeAt(170, 226, ring)).toBeNull();
-    expect(edgeAt(632, 226, ring)).toBeNull();
-    expect(edgeAt(408, 226, ring)).toBeNull();
-    /* just past the reach the "+" is drawn again */
-    expect(edgeAt(638, 80, ring)).toEqual({ axis: 'column', at: 80 });
-    expect(edgeAt(420, 226, ring)).toEqual({ axis: 'row', at: 420 });
+  it('keeps the "+" while the pointer is over the circle outside the edge, and drops it past its far side', () => {
+    /* the circle spans ADD_GAP to ADD_GAP + ADD_PX outside the edge (6 to 22 px) */
+    expect(edgeAt(640 + ADD_GAP, 120, ring)).toEqual({ axis: 'column', at: 120 });
+    expect(edgeAt(640 + ADD_CENTRE_PX, 120, ring)).toEqual({ axis: 'column', at: 120 });
+    expect(edgeAt(640 + ADD_REACH_PX, 120, ring)).toEqual({ axis: 'column', at: 120 });
+    expect(edgeAt(640 + ADD_REACH_PX + 1, 120, ring)).toBeNull();
+    expect(edgeAt(300, 224.5 + ADD_CENTRE_PX, ring)).toEqual({ axis: 'row', at: 300 });
+    expect(edgeAt(300, 224.5 + ADD_REACH_PX + 1, ring)).toBeNull();
+  });
+
+  it('is drawn at the middle and the corners of an edge as anywhere else, since outside the ring it covers no square, seam or frame edge (the verifier’s pass 1 finding 3)', () => {
+    /* the s square at the bottom edge's middle (400), the sw and se corners */
+    expect(edgeAt(400, 224, ring)).toEqual({ axis: 'row', at: 400 });
+    expect(edgeAt(162, 224, ring)).toEqual({ axis: 'row', at: 168 });
+    expect(edgeAt(627, 224, ring)).toEqual({ axis: 'row', at: 627 });
+    /* the e square at the right edge's middle (144.5), the ne and se corners */
+    expect(edgeAt(639, 144.5, ring)).toEqual({ axis: 'column', at: 144.5 });
+    expect(edgeAt(639, 66, ring)).toEqual({ axis: 'column', at: 72.5 });
+    expect(edgeAt(639, 220, ring)).toEqual({ axis: 'column', at: 216.5 });
+    /* the circle's near side clears the seam's 9 px hit band on the rule, the 8 px frame edge
+       strip and the 11 px square, all centred on the edge */
+    expect(ADD_GAP).toBeGreaterThan(9 / 2);
+    expect(ADD_GAP).toBeGreaterThan(8 / 2);
+    expect(ADD_GAP).toBeGreaterThan(11 / 2);
   });
 
   it('follows the pointer near the right edge and inserts a column in one commit that grows the box', async () => {
@@ -386,8 +405,13 @@ describe('the "+" at the edges', () => {
     fireEvent.pointerMove(window, { clientX: 638, clientY: 120 });
     const add = control('handle.t.add.column')!;
     expect(add.getAttribute('aria-label')).toBe('Add a column');
-    expect(add.style.left).toBe('640px');
+    /* the circle's centre ADD_CENTRE_PX right of the ring's right edge (640), at the pointer's y */
+    expect(add.style.left).toBe(`${640 + ADD_CENTRE_PX}px`);
     expect(add.style.top).toBe('120px');
+    /* the pointer over the circle keeps it in place */
+    fireEvent.pointerMove(window, { clientX: 640 + ADD_CENTRE_PX, clientY: 120 });
+    expect(control('handle.t.add.column')).toBe(add);
+    expect(add.style.left).toBe(`${640 + ADD_CENTRE_PX}px`);
     fireEvent.click(add);
     expect(commit).toHaveBeenCalledTimes(1);
     const [mutations, label] = commit.mock.calls[0] as unknown as [
@@ -403,12 +427,27 @@ describe('the "+" at the edges', () => {
     /* away from the edges the "+" goes */
     fireEvent.pointerMove(window, { clientX: 300, clientY: 150 });
     expect(control('handle.t.add.column')).toBeNull();
-    /* the bottom edge adds a row */
+    /* the bottom edge adds a row; the circle sits under the ring's bottom edge (224.5), so the
+       seam under the last row (handle.t.row.2, its 9 px band on the rule) keeps the edge itself */
     fireEvent.pointerMove(window, { clientX: 300, clientY: 226 });
-    fireEvent.click(control('handle.t.add.row')!);
+    const addRow = control('handle.t.add.row')!;
+    expect(addRow.style.left).toBe('300px');
+    expect(addRow.style.top).toBe(`${224.5 + ADD_CENTRE_PX}px`);
+    expect(parseFloat(addRow.style.top) - ADD_PX / 2).toBeGreaterThan(224.5 + 9 / 2);
+    fireEvent.click(addRow);
     const [rowMutations] = commit.mock.calls[1] as unknown as [{ path: string; value?: unknown }[]];
     expect(rowMutations.map((mutation) => mutation.path)).toEqual(['/rows', '/pos']);
     expect((rowMutations[1]?.value as { h: number }).h).toBe(320 + 106);
+  });
+
+  it('is not drawn while a handle drag is live (a seam or a square under the pointer)', () => {
+    const { container } = mount(viewOf({ activeHandle: 'row-seam:t:2' }), shellOf({}));
+    const layer = container.querySelector<HTMLElement>('.ts-table-tools')!;
+    layer.getBoundingClientRect = () => ({ left: 0, top: 0, width: 800, height: 450 }) as DOMRect;
+    fireEvent.pointerMove(window, { clientX: 300, clientY: 226 });
+    expect(control('handle.t.add.row')).toBeNull();
+    fireEvent.pointerMove(window, { clientX: 638, clientY: 120 });
+    expect(control('handle.t.add.column')).toBeNull();
   });
 
   it('falls back to the insert plan without the shell’s commit', () => {

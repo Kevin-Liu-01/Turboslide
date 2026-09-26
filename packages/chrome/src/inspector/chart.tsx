@@ -396,8 +396,7 @@ export function ChartSection({
     menuTarget !== null && (menuTarget.kind === 'series' ? columns > 1 : rows > 1);
   const menuAddRefusal =
     menuTarget === null ? null : menuTarget.kind === 'series' ? seriesRefusal : categoryRefusal;
-  const menuAddName =
-    menuTarget?.kind === 'series' ? words.addSeries : words.addCategory;
+  const menuAddName = menuTarget?.kind === 'series' ? words.addSeries : words.addCategory;
 
   const gridTip = tipProps({
     name: words.title,
@@ -485,7 +484,6 @@ export function ChartSection({
       </Tag>
     );
   };
-
 
   const kindOptions = CHART_KINDS.map((kind) => ({
     value: kind,
@@ -644,7 +642,9 @@ export function ChartSection({
             onClick={() => {
               if (menuAddRefusal !== null) return;
               setMenu(null);
-              runEdit(menuTarget.kind === 'series' ? { kind: 'addSeries' } : { kind: 'addCategory' });
+              runEdit(
+                menuTarget.kind === 'series' ? { kind: 'addSeries' } : { kind: 'addCategory' },
+              );
             }}
             {...tipProps({
               name: menuAddName,

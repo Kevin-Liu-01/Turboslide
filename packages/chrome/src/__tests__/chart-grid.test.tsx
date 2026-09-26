@@ -252,11 +252,9 @@ describe('ChartSection', () => {
     expect(document.querySelector('[data-control="formatOptions.chart.menu"]')).toBeNull();
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(dispatch.mock.calls[0]?.[0]).toBe('chart.setData');
-    expect((dispatch.mock.calls[0]?.[1] as { series: { name: string }[] }).series.map((s) => s.name)).toEqual([
-      'Docs',
-      'App',
-      'Series 3',
-    ]);
+    expect(
+      (dispatch.mock.calls[0]?.[1] as { series: { name: string }[] }).series.map((s) => s.name),
+    ).toEqual(['Docs', 'App', 'Series 3']);
     fireEvent.contextMenu(cell(2, 0), { clientX: 40, clientY: 90 });
     const addCategory = document.querySelector(
       '[data-control="formatOptions.chart.menu.add"]',

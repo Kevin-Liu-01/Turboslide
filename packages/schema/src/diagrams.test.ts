@@ -258,16 +258,32 @@ describe('DIAGRAM_TEMPLATES', () => {
 // `blockDuplicate` reads the answer).
 describe('groupsKeptOnDuplicate', () => {
   const process = makeDiagram('process', 3, 'outline', BOX, 'dia');
-  const loose: Block = { id: 'note', type: 'text', text: 'x', pos: { x: 0, y: 0, w: 100, h: 40, z: 9 } };
+  const loose: Block = {
+    id: 'note',
+    type: 'text',
+    text: 'x',
+    pos: { x: 0, y: 0, w: 100, h: 40, z: 9 },
+  };
 
   it('keeps the group of a member copied without the rest of it', () => {
-    expect(process.map((block) => block.id)).toEqual(['step-1', 'link-1', 'step-2', 'link-2', 'step-3']);
+    expect(process.map((block) => block.id)).toEqual([
+      'step-1',
+      'link-1',
+      'step-2',
+      'link-2',
+      'step-3',
+    ]);
     expect([...groupsKeptOnDuplicate([...process, loose], ['step-2'])]).toEqual(['dia']);
     expect([...groupsKeptOnDuplicate(process, ['step-1', 'link-1'])]).toEqual(['dia']);
   });
 
   it('answers nothing for a group copied whole, a loose object or nothing copied', () => {
-    expect(groupsKeptOnDuplicate(process, process.map((block) => block.id)).size).toBe(0);
+    expect(
+      groupsKeptOnDuplicate(
+        process,
+        process.map((block) => block.id),
+      ).size,
+    ).toBe(0);
     expect(groupsKeptOnDuplicate([...process, loose], ['note']).size).toBe(0);
     expect(groupsKeptOnDuplicate(process, []).size).toBe(0);
     expect(groupsKeptOnDuplicate(process, ['missing']).size).toBe(0);

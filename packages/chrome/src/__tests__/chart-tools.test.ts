@@ -149,7 +149,9 @@ describe('chartDataPlan', () => {
 
   it('refuses Add series on a pie with the sentence the tooltip reads (docs/OBJECTS.md 4.2 item 1)', () => {
     const pie: ChartBlock = { ...chart(), kind: 'pie', series: [{ name: 'A', values: [1, 2, 3] }] };
-    expect(addSeriesRefusal(pie)).toBe('A pie chart draws one series; change the chart type for more');
+    expect(addSeriesRefusal(pie)).toBe(
+      'A pie chart draws one series; change the chart type for more',
+    );
     expect(addSeriesRefusal(chart())).toBeNull();
     expect(addSeriesRefusal({ ...chart(), kind: 'bar' })).toBeNull();
     const wide: ChartBlock = {

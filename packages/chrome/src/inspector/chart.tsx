@@ -511,7 +511,7 @@ export function ChartSection({
         />
       </div>
 
-      <div className="ts-chartgrid-wrap pt-scroll">
+      <div className="ts-chartgrid-wrap">
         <table
           ref={grid}
           className="ts-chartgrid"
@@ -549,7 +549,7 @@ export function ChartSection({
                       }}
                       {...tipProps({
                         name: `${series.name} color`,
-                        doc: 'The colour of this series in the chart',
+                        doc: 'The color of this series in the chart',
                       })}
                     />
                     <span className="ts-chartgrid-name">{series.name}</span>
@@ -709,7 +709,7 @@ export function ChartSection({
                   runEdit({ kind: 'seriesColor', index: swatchesFor, color: token as Color });
                   setSwatchesFor(null);
                 }}
-                {...tipProps({ name: token, doc: 'Sets the series colour' })}
+                {...tipProps({ name: token, doc: 'Sets the series color' })}
               />
             );
           })}

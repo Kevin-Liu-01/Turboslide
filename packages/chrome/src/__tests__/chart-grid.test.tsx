@@ -208,6 +208,7 @@ describe('ChartSection', () => {
     ) as HTMLButtonElement;
     hideTooltip();
     vi.useFakeTimers();
+    fireEvent.mouseMove(document.body);
     fireEvent.mouseEnter(add);
     act(() => {
       vi.advanceTimersByTime(TIP_DELAY_MS);

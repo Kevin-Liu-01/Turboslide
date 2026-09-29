@@ -10,7 +10,8 @@
 // the `gdLst` in order with the seventeen formula operations of 20.1.9.11. Each path of the
 // `pathLst` becomes one SVG path string on the half pixel grid: a path with its own `w` and `h` is
 // scaled into the box, an `arcTo` is converted from its geometric start angle to the parametric
-// angle of the ellipse (20.1.9.4) before its end point is computed, and an axis aligned `lnTo`
+// angle of the ellipse (20.1.9.4) in the path's own space before its end point is computed and
+// scaled (a parametric angle survives the scaling, a geometric one does not), and an axis aligned `lnTo`
 // writes `H` or `V`, so the paths of `rect`, `roundRect` and `ellipse` equal ship one's hand
 // written strings byte for byte (shapes.test.ts pins them). The text rectangle, the connection
 // sites and the adjust handles evaluate from the same table.
@@ -272,20 +273,25 @@ function parametric(theta: number, rx: number, ry: number): number {
 
 /**
  * An `arcTo` (ECMA-376 20.1.9.4): from the current point along the ellipse of radii `wR` by `hR`
- * whose outline passes through the current point at the geometric angle `stAng`, sweeping
- * `swAng`, both in 60000ths of a degree, clockwise positive in the sheet's y down space. A
- * geometric angle θ is converted to the parametric angle t = atan2(wR sin θ, hR cos θ) before the
- * point on the ellipse is computed (the two agree on a circle and at multiples of 90 degrees,
- * which is why ship one's hand written `roundRect` and `ellipse` needed no such step): the centre
- * is the current point less (wR cos t₀, hR sin t₀) and the end point is the centre plus the same
- * at the parametric angle of the geometric end angle `stAng + swAng`, converted on its own rather
- * than as t₀ plus the sweep, so a pie's arc ends where its own guides put the end angle's point
- * (`x2`, `y2`, the second adjust handle) on a wide ellipse too. `large` is 1 when the sweep exceeds
- * 180 degrees (the conversion keeps a half turn a half turn, so the flag reads the same in both
- * angles) and `sweep` 1 when it is positive; a sweep of 360 degrees or more is written as two
- * arcs, since one SVG arc whose ends coincide draws nothing. Two collapsed radii move nowhere and
- * write nothing; one collapsed radius still lands its end point and writes a flat arc, which SVG
- * draws as a line.
+ * in the path's own space whose outline passes through the current point at the geometric angle
+ * `stAng`, sweeping `swAng`, both in 60000ths of a degree, clockwise positive in the sheet's y
+ * down space. A geometric angle θ is converted to the parametric angle t = atan2(wR sin θ, hR cos θ)
+ * before the point on the ellipse is computed (the two agree on a circle and at multiples of 90
+ * degrees, which is why ship one's hand written `roundRect` and `ellipse` needed no such step).
+ * The conversion runs in the path's space, with the radii as the file wrote them, because the
+ * angles are defined there: a path with its own `w` and `h` is scaled into the box by `sx` and
+ * `sy`, and a parametric angle survives that scaling while a geometric one does not (the polish
+ * round, docs/POLISH.md item 25: the cloud callout's crease arcs and its closing arc drew about
+ * the wrong centres in every box that was not square). The centre is the current point less
+ * (rx cos t₀, ry sin t₀) in the box's space, with rx = wR sx and ry = hR sy, and the end point is
+ * the centre plus the same at the parametric angle of the geometric end angle `stAng + swAng`,
+ * converted on its own rather than as t₀ plus the sweep, so a pie's arc ends where its own guides
+ * put the end angle's point (`x2`, `y2`, the second adjust handle) on a wide ellipse too. `large`
+ * is 1 when the sweep exceeds 180 degrees (the conversion is monotone and keeps a half turn a
+ * half turn, so the flag reads the same in both angles) and `sweep` 1 when it is positive; a
+ * sweep of 360 degrees or more is written as two arcs, since one SVG arc whose ends coincide
+ * draws nothing. Two collapsed radii move nowhere and write nothing; one collapsed radius still
+ * lands its end point and writes a flat arc, which SVG draws as a line.
  */
 function arcTo(
   from: Point,
@@ -293,12 +299,16 @@ function arcTo(
   hR: number,
   stAng: number,
   swAng: number,
+  sx = 1,
+  sy = 1,
 ): { commands: string[]; end: Point } {
   if (wR <= 0 && hR <= 0) return { commands: [], end: from };
-  const rx = Math.max(wR, RADIUS_FLOOR);
-  const ry = Math.max(hR, RADIUS_FLOOR);
+  const ownRx = Math.max(wR, RADIUS_FLOOR);
+  const ownRy = Math.max(hR, RADIUS_FLOOR);
+  const rx = ownRx * sx;
+  const ry = ownRy * sy;
   const theta = radians(stAng);
-  const t0 = parametric(theta, rx, ry);
+  const t0 = parametric(theta, ownRx, ownRy);
   const cx = from.x - rx * Math.cos(t0);
   const cy = from.y - ry * Math.sin(t0);
   const pieces = Math.abs(swAng) >= FULL_TURN ? 2 : 1;
@@ -308,7 +318,7 @@ function arcTo(
   const commands: string[] = [];
   let end = from;
   for (let piece = 1; piece <= pieces; piece += 1) {
-    const t = parametric(theta + step * piece, rx, ry);
+    const t = parametric(theta + step * piece, ownRx, ownRy);
     end = { x: cx + rx * Math.cos(t), y: cy + ry * Math.sin(t) };
     commands.push(`A${fmt(rx)},${fmt(ry)} 0 ${large} ${direction} ${fmt(end.x)},${fmt(end.y)}`);
   }
@@ -383,10 +393,12 @@ export function pathData(
       case 'arcTo': {
         const drawn = arcTo(
           current,
-          read(command.wR) * sx,
-          read(command.hR) * sy,
+          read(command.wR),
+          read(command.hR),
           read(command.stAng),
           read(command.swAng),
+          sx,
+          sy,
         );
         out.push(...drawn.commands);
         current = drawn.end;

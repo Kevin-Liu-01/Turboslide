@@ -338,7 +338,7 @@ export function PositionSection({ blocks, measured, write }: GeometrySectionProp
             label: words.topLeft,
             doc: 'X and Y measure to the object’s top left corner',
           },
-          { value: 'center', label: words.center, doc: 'X and Y measure to the object’s centre' },
+          { value: 'center', label: words.center, doc: 'X and Y measure to the object’s center' },
         ]}
         pressed={from}
         onToggle={setFrom}

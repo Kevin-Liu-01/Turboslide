@@ -5,8 +5,11 @@
 // with `data-run` so it travels as a run, the legend as 15 px rows with a 10 px swatch, and the
 // values on the marks when `labels` is set, written in the chart's number format. The geometry is
 // arithmetic over the box: a positioned chart takes its `pos`, a flow chart the slot width and its
-// `height` (480 when absent). Nothing here reads a DOM; the export screenshots the svg as a
-// raster in Perfect and writes `addChart` from the block's data in Editable text.
+// `height` (480 when absent). The type and the gutters scale with the box below 640 by 360 and the
+// category labels are fitted to their slots (every n-th kept, a long one cut with an ellipsis), so
+// a small chart never piles its labels (the polish round, docs/POLISH.md item 31); the svg takes
+// no browser text selection (item 29). Nothing here reads a DOM; the export screenshots the svg
+// as a raster in Perfect and writes `addChart` from the block's data in Editable text.
 import type { BlockOf } from '@turboslide/schema/blocks';
 import {
   CHART_SERIES_COLORS,
@@ -15,7 +18,7 @@ import {
 } from '@turboslide/schema/blocks/chart';
 import type { ChartLegend } from '@turboslide/schema/blocks/chart';
 import { colorCss } from '@turboslide/schema/color';
-import { escapeAttr, escapeText, px } from '../html.ts';
+import { escapeAttr, escapeText, px, style } from '../html.ts';
 import { renderText } from '../text.ts';
 import { dataAttrs, raster, rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
@@ -35,7 +38,80 @@ const LEGEND_ROW = 24;
 const LEGEND_GAP = 24;
 const LABEL_LINE = 24;
 
+/** The box a chart's type reads at its full size: at or above it every size is the grammar's. */
+const FULL_W = 640;
+const FULL_H = 360;
+/** The smallest the type scales to: 0.6 of the grammar's sizes, 11 px labels. */
+const TYPE_FLOOR = 0.6;
+/** Inter's average advance as a fraction of the size, for the label measures (a safe upper read). */
+const EM_ADVANCE = 0.55;
+/** The gap a label keeps from its neighbour, in px at full size. */
+const LABEL_GAP = 6;
+
 type Box = { x: number; y: number; w: number; h: number };
+
+/**
+ * The type scale of a chart box (the polish round, docs/POLISH.md item 31; audit-objects item
+ * 14: at 240 by 140 the category labels piled up): 1 at or above 640 by 360, down to 0.6 in a
+ * small box, so every size, gutter and pitch of the chart shrinks with it. Google scales a chart's
+ * text with the chart.
+ */
+export function chartTypeScale(w: number, h: number): number {
+  return Math.max(TYPE_FLOOR, Math.min(1, w / FULL_W, h / FULL_H));
+}
+
+/** The width a label takes at a size, from the average advance. */
+function labelWidth(text: string, size: number): number {
+  return text.length * EM_ADVANCE * size;
+}
+
+/** A label cut to `room` px with an ellipsis; the whole label when it fits. */
+function fitLabel(text: string, size: number, room: number): string {
+  if (labelWidth(text, size) <= room) return text;
+  const keep = Math.max(1, Math.floor(room / (EM_ADVANCE * size)) - 1);
+  return `${text.slice(0, keep).trimEnd()}\u2026`;
+}
+
+/**
+ * The category labels fitted to their slots (item 31): a label wider than its slot keeps every
+ * n-th label, n the number of slots it needs, and a kept label wider than the room it then has
+ * is cut with an ellipsis, so no two label boxes intersect on the sheet, in the thumbnail or on
+ * the PDF's page. `across` is the slot's extent along the labels' run (the width under a column
+ * chart, the height beside a bar chart, where the label's own extent is one line of the size).
+ */
+export function fitCategoryLabels(
+  categories: readonly string[],
+  size: number,
+  slot: number,
+  across: 'width' | 'height',
+): { labels: (string | null)[]; fit: string | undefined } {
+  /* a line's leading is its own gap beside a bar chart */
+  const gap = across === 'width' ? LABEL_GAP * (size / CHART_TYPE.label) : 0;
+  const extent = (text: string): number =>
+    across === 'width' ? labelWidth(text, size) : size * 1.2;
+  const widest = Math.max(0, ...categories.map(extent));
+  /* never more slots than the chart has: a label wider than the whole run is cut, not skipped past the plot */
+  const step =
+    slot > 0
+      ? Math.min(Math.max(1, categories.length), Math.max(1, Math.ceil((widest + gap) / slot)))
+      : 1;
+  const room = step * slot - gap;
+  let cut = false;
+  const labels = categories.map((category, index) => {
+    if (index % step !== 0) return null;
+    if (across === 'height') return category;
+    const fitted = fitLabel(category, size, room);
+    if (fitted !== category) cut = true;
+    return fitted;
+  });
+  const fit = [step > 1 && 'skip', cut && 'ellipsis'].filter(Boolean).join(' ');
+  return { labels, fit: fit === '' ? undefined : fit };
+}
+
+/** The inline size of a scaled text element, so the sheet's chart CSS does not set it back. */
+function sizeStyle(size: number, base: number): string {
+  return size === base ? '' : ` style="font-size:${px(size)}px"`;
+}
 
 /** Snaps to the half pixel for a 1 px stroke (report 03 section 5.11). */
 function half(value: number): number {
@@ -70,29 +146,34 @@ function splitLegend(
   box: Box,
   legend: ChartLegend,
   names: readonly string[],
+  k = 1,
 ): { plot: Box; legend?: Box } {
   if (legend === 'none' || names.length === 0) return { plot: box };
   const longest = Math.max(...names.map((n) => n.length));
   // 15 px Inter runs about 7.4 px per character; the swatch and its gap come first
-  const columnW = Math.min(box.w / 3, LEGEND_SWATCH + 8 + Math.ceil(longest * 7.4) + 8);
+  const columnW = Math.min(
+    box.w / 3,
+    (LEGEND_SWATCH + 8) * k + Math.ceil(longest * 7.4 * k) + 8 * k,
+  );
+  const legendGap = LEGEND_GAP * k;
   if (legend === 'right')
     return {
-      plot: { ...box, w: box.w - columnW - LEGEND_GAP },
+      plot: { ...box, w: box.w - columnW - legendGap },
       legend: { x: box.x + box.w - columnW, y: box.y, w: columnW, h: box.h },
     };
   if (legend === 'left')
     return {
-      plot: { ...box, x: box.x + columnW + LEGEND_GAP, w: box.w - columnW - LEGEND_GAP },
+      plot: { ...box, x: box.x + columnW + legendGap, w: box.w - columnW - legendGap },
       legend: { x: box.x, y: box.y, w: columnW, h: box.h },
     };
-  const rowH = LEGEND_ROW;
+  const rowH = LEGEND_ROW * k;
   if (legend === 'top')
     return {
-      plot: { ...box, y: box.y + rowH + LEGEND_GAP / 2, h: box.h - rowH - LEGEND_GAP / 2 },
+      plot: { ...box, y: box.y + rowH + legendGap / 2, h: box.h - rowH - legendGap / 2 },
       legend: { x: box.x, y: box.y, w: box.w, h: rowH },
     };
   return {
-    plot: { ...box, h: box.h - rowH - LEGEND_GAP / 2 },
+    plot: { ...box, h: box.h - rowH - legendGap / 2 },
     legend: { x: box.x, y: box.y + box.h - rowH, w: box.w, h: rowH },
   };
 }
@@ -101,25 +182,29 @@ function legendMarkup(
   box: Box,
   legend: ChartLegend,
   entries: readonly { name: string; color: string }[],
+  k = 1,
 ): string {
   let out = `<g class="legend">`;
   const vertical = legend === 'right' || legend === 'left';
+  const row = LEGEND_ROW * k;
+  const swatch = LEGEND_SWATCH * k;
+  const size = Math.round(CHART_TYPE.legend * k);
   let x = box.x;
   let y = box.y;
   entries.forEach((entry, i) => {
     if (vertical) {
-      y = box.y + i * LEGEND_ROW;
+      y = box.y + i * row;
       x = box.x;
     } else {
       // rows across: each entry takes its swatch, 8 px and about 7.4 px per character plus 20
       if (i > 0) {
         const previous = entries[i - 1] as { name: string };
-        x += LEGEND_SWATCH + 8 + Math.ceil(previous.name.length * 7.4) + 20;
+        x += swatch + 8 * k + Math.ceil(previous.name.length * 7.4 * k) + 20 * k;
       }
     }
-    const cy = y + LEGEND_ROW / 2;
-    out += `<rect x="${px(x)}" y="${px(cy - LEGEND_SWATCH / 2)}" width="${LEGEND_SWATCH}" height="${LEGEND_SWATCH}" fill="${entry.color}"/>`;
-    out += `<text x="${px(x + LEGEND_SWATCH + 8)}" y="${px(cy + 5)}">${escapeText(entry.name)}</text>`;
+    const cy = y + row / 2;
+    out += `<rect x="${px(x)}" y="${px(cy - swatch / 2)}" width="${px(swatch)}" height="${px(swatch)}" fill="${entry.color}"/>`;
+    out += `<text x="${px(x + swatch + 8 * k)}" y="${px(cy + 5 * k)}"${sizeStyle(size, CHART_TYPE.legend)}>${escapeText(entry.name)}</text>`;
   });
   return `${out}</g>`;
 }
@@ -134,9 +219,12 @@ export function renderChart(block: BlockOf<'chart'>, ctx: BlockContext): string 
     values: s.values,
     color: colorCss(chartSeriesColor(s, i)),
   }));
+  const k = chartTypeScale(w, h);
+  /* no browser text selection over the legend or the labels on a double click that opens the
+     Chart data grid (the polish round, docs/POLISH.md item 29; audit-objects item 11) */
   const attributes = rootAttrs(block, ctx, {
     className: 'chart',
-    style: dropShadowDeclaration(block.shadow) || undefined,
+    style: style('user-select:none', dropShadowDeclaration(block.shadow)),
   });
   let open = `<svg viewBox="0 0 ${px(w)} ${px(h)}" width="${px(w)}" height="${px(h)}"`;
   for (const [name, value] of Object.entries(attributes)) {
@@ -148,15 +236,17 @@ export function renderChart(block: BlockOf<'chart'>, ctx: BlockContext): string 
   open +=
     block.alt !== undefined ? ` aria-label="${escapeAttr(block.alt)}"` : ' aria-hidden="true"';
   let body = '';
-  let top = PAD;
+  const pad = PAD * k;
+  let top = pad;
   if (block.title !== undefined && block.title !== '') {
     const run = runAttr(ctx, block.id, 'title');
-    body += `<text class="title"${run !== undefined ? ` data-run="${escapeAttr(run)}"` : ''} x="${PAD}" y="${top + CHART_TYPE.title}">${renderText(block.title, { gtWord: false })}</text>`;
-    top += CHART_TYPE.title + 16;
+    const titleSize = Math.round(CHART_TYPE.title * k);
+    body += `<text class="title"${run !== undefined ? ` data-run="${escapeAttr(run)}"` : ''} x="${px(pad)}" y="${px(top + titleSize)}"${sizeStyle(titleSize, CHART_TYPE.title)}>${renderText(block.title, { gtWord: false })}</text>`;
+    top += titleSize + 16 * k;
   }
-  const outer: Box = { x: PAD, y: top, w: w - 2 * PAD, h: h - top - PAD };
+  const outer: Box = { x: pad, y: top, w: w - 2 * pad, h: h - top - pad };
   const legendNames = block.kind === 'pie' ? block.categories : series.map((s) => s.name);
-  const { plot, legend } = splitLegend(outer, legendAt, legendNames);
+  const { plot, legend } = splitLegend(outer, legendAt, legendNames, k);
   const legendEntries =
     block.kind === 'pie'
       ? block.categories.map((name, i) => ({
@@ -171,11 +261,12 @@ export function renderChart(block: BlockOf<'chart'>, ctx: BlockContext): string 
       plot,
       legendEntries.map((e) => e.color),
       format,
+      k,
     );
   } else {
-    body += axesMarkup(block, plot, series, format);
+    body += axesMarkup(block, plot, series, format, k);
   }
-  if (legend) body += legendMarkup(legend, legendAt, legendEntries);
+  if (legend) body += legendMarkup(legend, legendAt, legendEntries, k);
   return `${open}>${body}</svg>`;
 }
 
@@ -184,10 +275,13 @@ function pieMarkup(
   plot: Box,
   colors: readonly string[],
   format: BlockOf<'chart'>['numberFormat'],
+  k = 1,
 ): string {
   const values = block.series[0]?.values ?? [];
   const total = values.reduce((sum, v) => sum + Math.max(0, v), 0) || 1;
-  const labelRoom = block.labels === true ? 48 : 0;
+  const valueSize = Math.round(CHART_TYPE.legend * k);
+  const valueStyle = sizeStyle(valueSize, CHART_TYPE.legend);
+  const labelRoom = block.labels === true ? 48 * k : 0;
   const r = Math.max(8, Math.min(plot.w, plot.h) / 2 - labelRoom);
   const cx = plot.x + plot.w / 2;
   const cy = plot.y + plot.h / 2;
@@ -215,14 +309,14 @@ function pieMarkup(
     }
     if (block.labels === true && sweep > 0) {
       const mid = angle + sweep / 2;
-      const lx = cx + (r + 24) * Math.cos(mid);
-      const ly = cy + (r + 24) * Math.sin(mid);
+      const lx = cx + (r + 24 * k) * Math.cos(mid);
+      const ly = cy + (r + 24 * k) * Math.sin(mid);
       const anchor = Math.cos(mid) < -0.2 ? 'end' : Math.cos(mid) > 0.2 ? 'start' : 'middle';
       const text =
         format === 'percent'
           ? `${Math.round((value / total) * 100)}%`
           : formatChartNumber(value, format);
-      labels += `<text class="value" x="${px(lx)}" y="${px(ly + 6)}" text-anchor="${anchor}">${escapeText(text)}</text>`;
+      labels += `<text class="value" x="${px(lx)}" y="${px(ly + 6 * k)}" text-anchor="${anchor}"${valueStyle}>${escapeText(text)}</text>`;
     }
     angle = end;
   });
@@ -234,20 +328,27 @@ function axesMarkup(
   plot: Box,
   series: readonly { name: string; values: number[]; color: string }[],
   format: BlockOf<'chart'>['numberFormat'],
+  k = 1,
 ): string {
   const values = series.flatMap((s) => s.values);
   const scale = valueScale(values);
   const categories = block.categories;
   const horizontal = block.kind === 'bar';
+  const labelSize = Math.round(CHART_TYPE.label * k);
+  const labelStyle = sizeStyle(labelSize, CHART_TYPE.label);
+  const valueSize = Math.round(CHART_TYPE.legend * k);
+  const valueStyle = sizeStyle(valueSize, CHART_TYPE.legend);
+  const tick = TICK * k;
+  const labelLine = LABEL_LINE * k;
   // the value axis labels take a gutter sized by the longest tick label
   const tickLabels = scale.ticks.map((t) => formatChartNumber(t, format));
-  const tickW = Math.max(...tickLabels.map((t) => t.length)) * 10 + TICK + 8;
-  const catLabelW = Math.max(...categories.map((c) => c.length)) * 9 + TICK + 8;
+  const tickW = Math.max(...tickLabels.map((t) => t.length)) * 10 * k + tick + 8 * k;
+  const catLabelW = Math.max(...categories.map((c) => c.length)) * 9 * k + tick + 8 * k;
   const left =
     plot.x + (horizontal ? Math.min(catLabelW, plot.w / 3) : Math.min(tickW, plot.w / 3));
-  const bottom = plot.y + plot.h - LABEL_LINE;
+  const bottom = plot.y + plot.h - labelLine;
   const right = plot.x + plot.w;
-  const topY = plot.y + (block.labels === true && !horizontal ? LABEL_LINE : 8);
+  const topY = plot.y + (block.labels === true && !horizontal ? labelLine : 8 * k);
   const areaW = Math.max(1, right - left);
   const areaH = Math.max(1, bottom - topY);
   const span = scale.max - scale.min || 1;
@@ -257,16 +358,16 @@ function axesMarkup(
       : bottom - ((v - scale.min) / span) * areaH;
   let out = `<g class="grid">`;
   // ticks and their labels
-  for (const [i, tick] of scale.ticks.entries()) {
+  for (const [i, value] of scale.ticks.entries()) {
     const label = tickLabels[i] ?? '';
     if (horizontal) {
-      const x = half(along(tick));
+      const x = half(along(value));
       out += `<line class="hair" x1="${px(x)}" y1="${px(topY)}" x2="${px(x)}" y2="${px(bottom)}" stroke-width="1"/>`;
-      out += `<text x="${px(x)}" y="${px(bottom + 20)}" text-anchor="middle">${escapeText(label)}</text>`;
+      out += `<text x="${px(x)}" y="${px(bottom + 20 * k)}" text-anchor="middle"${labelStyle}>${escapeText(label)}</text>`;
     } else {
-      const y = half(along(tick));
+      const y = half(along(value));
       out += `<line class="hair" x1="${px(left)}" y1="${px(y)}" x2="${px(right)}" y2="${px(y)}" stroke-width="1"/>`;
-      out += `<text x="${px(left - TICK - 4)}" y="${px(y + 6)}" text-anchor="end">${escapeText(label)}</text>`;
+      out += `<text x="${px(left - tick - 4 * k)}" y="${px(y + 6 * k)}" text-anchor="end"${labelStyle}>${escapeText(label)}</text>`;
     }
   }
   out += '</g>';
@@ -282,14 +383,18 @@ function axesMarkup(
   }
   const n = categories.length;
   const slot = (horizontal ? areaH : areaW) / Math.max(1, n);
-  // category labels
-  out += '<g class="categories">';
-  categories.forEach((category, i) => {
+  // category labels, fitted to their slots (item 31): every n-th kept, a long one cut, a label
+  // beside a bar chart cut to its gutter
+  const fitted = fitCategoryLabels(categories, labelSize, slot, horizontal ? 'height' : 'width');
+  const gutter = left - plot.x - tick - 4 * k;
+  out += `<g class="categories"${fitted.fit !== undefined ? ` data-fit="${fitted.fit}"` : ''}>`;
+  fitted.labels.forEach((label, i) => {
+    if (label === null) return;
     const center = (horizontal ? topY : left) + slot * (i + 0.5);
     if (horizontal)
-      out += `<text x="${px(left - TICK - 4)}" y="${px(center + 6)}" text-anchor="end">${escapeText(category)}</text>`;
+      out += `<text x="${px(left - tick - 4 * k)}" y="${px(center + 6 * k)}" text-anchor="end"${labelStyle}>${escapeText(fitLabel(label, labelSize, gutter))}</text>`;
     else
-      out += `<text x="${px(center)}" y="${px(bottom + 20)}" text-anchor="middle">${escapeText(category)}</text>`;
+      out += `<text x="${px(center)}" y="${px(bottom + 20 * k)}" text-anchor="middle"${labelStyle}>${escapeText(label)}</text>`;
   });
   out += '</g>';
   if (block.kind === 'line') {
@@ -299,12 +404,12 @@ function axesMarkup(
       out += `<path class="series" data-series="${si}" d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
       /* a point names its cell for the editor's mark hit test (docs/FEATURES.md 2.2 rank 7) */
       points.forEach((p, i) => {
-        out += `<circle cx="${px(p.x)}" cy="${px(p.y)}" r="4" data-series="${si}" data-category="${i}" fill="${s.color}"/>`;
+        out += `<circle cx="${px(p.x)}" cy="${px(p.y)}" r="${px(4 * k)}" data-series="${si}" data-category="${i}" fill="${s.color}"/>`;
       });
       if (block.labels === true)
         s.values.forEach((v, i) => {
           const p = points[i] as { x: number; y: number };
-          out += `<text class="value" x="${px(p.x)}" y="${px(p.y - 10)}" text-anchor="middle">${escapeText(formatChartNumber(v, format))}</text>`;
+          out += `<text class="value" x="${px(p.x)}" y="${px(p.y - 10 * k)}" text-anchor="middle"${valueStyle}>${escapeText(formatChartNumber(v, format))}</text>`;
         });
     });
     return out;
@@ -329,9 +434,9 @@ function axesMarkup(
       if (block.labels === true) {
         const label = escapeText(formatChartNumber(v, format));
         if (horizontal)
-          out += `<text class="value" x="${px(end + 6)}" y="${px(start + barSize / 2 + 5)}">${label}</text>`;
+          out += `<text class="value" x="${px(end + 6 * k)}" y="${px(start + barSize / 2 + 5 * k)}"${valueStyle}>${label}</text>`;
         else
-          out += `<text class="value" x="${px(start + barSize / 2 - 1)}" y="${px(end - 8)}" text-anchor="middle">${label}</text>`;
+          out += `<text class="value" x="${px(start + barSize / 2 - 1)}" y="${px(end - 8 * k)}" text-anchor="middle"${valueStyle}>${label}</text>`;
       }
     });
     out += '</g>';

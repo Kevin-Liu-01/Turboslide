@@ -6,10 +6,13 @@
 // `sites`, rectangle stubs until the geometry interpreter lands) in unrotated coordinates, rotated
 // about the target's centre and mirrored by its flip before an end is placed. Removing the target
 // clears the attachment on its connectors; duplicating a target with its connectors renames the
-// references; a connector alone drops them. Pure over the document; the editor's gesture end, the
-// Size & rotation fields, block.align, block.distribute, block.rotate, block.flip and the store
-// action handlers of block.set /pos call it.
-import type { Block, ShapeBlock, ShapeOrientation } from './blocks.ts';
+// references; a connector alone drops them. A connector moved by its own body detaches from the
+// targets that stayed (`detachMovedConnectors`), and an elbow or curved connector takes the axis
+// it leaves and arrives along from the sites its ends sit on (`connectorAxis`; the polish round,
+// docs/POLISH.md items 27 and 33). Pure over the document; the editor's gesture end, the Size &
+// rotation fields, block.align, block.distribute, block.rotate, block.flip and the store action
+// handlers of block.set /pos call it.
+import type { Block, ConnectorAxis, ShapeBlock, ShapeOrientation } from './blocks.ts';
 import type { Slide } from './deck.ts';
 import { canvasObjects } from './deck.ts';
 import type { BlockId } from './ids.ts';
@@ -32,13 +35,64 @@ export function canAttach(block: Block): boolean {
   return true;
 }
 
+/** The connection sites of a target in its own unrotated box with the angle each faces: the preset's list, or the eight of a rectangle. */
+function ownSiteList(block: Block, pos: Position): { x: number; y: number; angle: number }[] {
+  if (block.type === 'shape')
+    return sites(block.shape, pos.w, pos.h, block.adjust ?? shapeAdjustDefaults(block.shape));
+  return rectSites(pos.w, pos.h);
+}
+
 /** The connection sites of a target in its own unrotated box: the preset's list, or the eight of a rectangle. */
 function ownSites(block: Block, pos: Position): Point[] {
-  if (block.type === 'shape')
-    return sites(block.shape, pos.w, pos.h, block.adjust ?? shapeAdjustDefaults(block.shape)).map(
-      ({ x, y }) => ({ x, y }),
-    );
-  return rectSites(pos.w, pos.h).map(({ x, y }) => ({ x, y }));
+  return ownSiteList(block, pos).map(({ x, y }) => ({ x, y }));
+}
+
+/**
+ * The direction a site faces in sheet space, in degrees clockwise from the right: the preset's
+ * angle turned by the target's rotation and mirrored by its flip (a horizontal flip sends a
+ * right facing site left, a vertical one sends up to down). Undefined for a target without a
+ * position or a site out of range.
+ */
+export function siteAngleAt(block: Block, site: number): number | undefined {
+  if (block.pos === undefined) return undefined;
+  const pos = block.pos;
+  const own = ownSiteList(block, pos)[site];
+  if (own === undefined) return undefined;
+  let angle = own.angle;
+  if (pos.flip === 'h' || pos.flip === 'hv') angle = 180 - angle;
+  if (pos.flip === 'v' || pos.flip === 'hv') angle = -angle;
+  angle += normalizeRotation(pos.rotate ?? 0);
+  return ((angle % 360) + 360) % 360;
+}
+
+/** The axis a connector leaves a site along: vertical within 45 degrees of up or down, else horizontal. */
+function axisOfAngle(angle: number): ConnectorAxis {
+  const fromVertical = Math.min(Math.abs(angle - 90), Math.abs(angle - 270));
+  return fromVertical < 45 ? 'vertical' : 'horizontal';
+}
+
+/**
+ * The axis a connector leaves and arrives along, from the sites its ends sit on (the polish round,
+ * docs/POLISH.md item 33; audit-objects item 16: the curve from A's bottom site ran along A's
+ * bottom edge). The start's site decides when it is attached, else the end's; a connector with
+ * no attached end answers undefined and keeps whatever it holds. Google turns `bentConnector3`
+ * and `curvedConnector3` a quarter when a site faces up or down; the L of `bentConnector2` for a
+ * pair of sites on different axes is not drawn yet, so such a pair takes the start's axis.
+ */
+export function connectorAxis(
+  connect: ShapeBlock['connect'],
+  byId: ReadonlyMap<string, Block>,
+): ConnectorAxis | undefined {
+  if (connect === undefined) return undefined;
+  for (const which of ['start', 'end'] as const) {
+    const end = connect[which];
+    if (end === undefined) continue;
+    const target = byId.get(end.block);
+    if (target === undefined) continue;
+    const angle = siteAngleAt(target, end.site);
+    if (angle !== undefined) return axisOfAngle(angle);
+  }
+  return undefined;
 }
 
 /** How many connection sites a target offers (what `connect.site` is checked against). */
@@ -197,12 +251,18 @@ export function connectorBetween(
   };
 }
 
-/** The connector's fields after its ends land on two points: `pos`, `orientation`, and the start and end fields exchanged when the direction reversed. */
+/**
+ * The connector's fields after its ends land on two points: `pos`, `orientation`, the start and
+ * end fields exchanged when the direction reversed, and, when the slide's blocks are given, the
+ * `axis` its attached sites ask for (an elbow or curved connector; the field is left alone on
+ * every other kind and when no end is attached).
+ */
 export function connectorFieldsBetween(
   current: ShapeBlock,
   start: Point,
   end: Point,
   connect: ShapeBlock['connect'],
+  byId?: ReadonlyMap<string, Block>,
 ): Partial<ShapeBlock> & { pos: Position } {
   const placed = connectorBetween(current, start, end);
   const out: Partial<ShapeBlock> & { pos: Position } = {
@@ -226,6 +286,10 @@ export function connectorFieldsBetween(
     }
   }
   out.connect = nextConnect;
+  if (byId !== undefined && (current.shape === 'elbow' || current.shape === 'curved')) {
+    const axis = connectorAxis(nextConnect, byId);
+    if (axis !== undefined) out.axis = axis;
+  }
   return out;
 }
 
@@ -298,6 +362,7 @@ export function followConnectors(slide: Slide, movedIds: ReadonlyArray<BlockId>)
       startPoint ?? ends.start,
       endPoint ?? ends.end,
       block.connect,
+      byId,
     );
     for (const [path, value] of Object.entries(fields)) {
       const current = (block as unknown as Record<string, unknown>)[path];
@@ -310,6 +375,38 @@ export function followConnectors(slide: Slide, movedIds: ReadonlyArray<BlockId>)
         ...(value !== undefined ? { value } : {}),
       });
     }
+  }
+  return out;
+}
+
+/**
+ * The `block.set /connect` mutations that detach a connector moved by its body from every target
+ * that did not move with it (the polish round, docs/POLISH.md item 27; audit-objects item 7: the
+ * moved connector drew dangling and snapped back on the target's next move). Google detaches
+ * both ends of a dragged connector; a selection moved as one keeps the attachments between its
+ * members, since the ends still lie on their sites. The editor's free-move gesture and the arrow
+ * key nudge call it with the moved ids after `followConnectors`; the line-end gesture, which just
+ * wrote an attachment, never does.
+ */
+export function detachMovedConnectors(slide: Slide, movedIds: ReadonlyArray<BlockId>): Mutation[] {
+  const moved = new Set(movedIds);
+  const out: Mutation[] = [];
+  for (const block of canvasObjects(slide)) {
+    if (!moved.has(block.id) || !isConnector(block) || block.connect === undefined) continue;
+    const keep: NonNullable<ShapeBlock['connect']> = {};
+    for (const which of ['start', 'end'] as const) {
+      const end = block.connect[which];
+      if (end !== undefined && moved.has(end.block)) keep[which] = end;
+    }
+    const next = Object.keys(keep).length === 0 ? undefined : keep;
+    if (JSON.stringify(next) === JSON.stringify(block.connect)) continue;
+    out.push({
+      op: 'block.set',
+      slideId: slide.id,
+      blockId: block.id,
+      path: '/connect',
+      ...(next !== undefined ? { value: next } : {}),
+    });
   }
   return out;
 }
@@ -404,5 +501,5 @@ export function attachConnector(
     points[which] = point;
   }
   const next = Object.keys(connect).length === 0 ? undefined : connect;
-  return connectorFieldsBetween(connector, points.start, points.end, next);
+  return connectorFieldsBetween(connector, points.start, points.end, next, byId);
 }

@@ -10,10 +10,13 @@ import type { Position } from './position.ts';
 import {
   attachConnector,
   attachedEndsOnSites,
+  connectorAxis,
   connectorEnds,
   detachConnectors,
+  detachMovedConnectors,
   followConnectors,
   renameConnectorRefs,
+  siteAngleAt,
   siteAt,
   siteCount,
   targetSites,
@@ -278,5 +281,138 @@ describe('followConnectors', () => {
     expect(
       validateSlide(range).issues.filter((issue) => issue.code === 'connect')[0]?.message,
     ).toMatch(/site 12/);
+  });
+});
+
+describe('a connector moved by its body (the polish round, docs/POLISH.md item 27)', () => {
+  it('detaches from every target that stayed, and the next move of the target leaves it alone', () => {
+    const moved = apply(slide(), [
+      {
+        op: 'block.set',
+        slideId: 'wired',
+        blockId: 'link',
+        path: '/pos',
+        value: { x: 450, y: 246, w: 300, h: 8, z: 1 },
+      },
+    ]);
+    /* followConnectors skips the moved connector: nothing snaps it back in the same write */
+    expect(followConnectors(moved, ['link'])).toEqual([]);
+    const detach = detachMovedConnectors(moved, ['link']);
+    expect(detach).toEqual([{ op: 'block.set', slideId: 'wired', blockId: 'link', path: '/connect' }]);
+    const next = apply(moved, detach);
+    expect(connector(next).connect).toBeUndefined();
+    /* a moves afterwards: the detached connector keeps its box */
+    const later = apply(next, [
+      {
+        op: 'block.set',
+        slideId: 'wired',
+        blockId: 'a',
+        path: '/pos',
+        value: { x: 100, y: 400, w: 200, h: 100, z: 0 },
+      },
+    ]);
+    expect(followConnectors(later, ['a'])).toEqual([]);
+    expect(connector(later).pos).toEqual({ x: 450, y: 246, w: 300, h: 8, z: 1 });
+  });
+
+  it('keeps an attachment whose target moved in the same write, and writes nothing for an unattached line', () => {
+    const together = detachMovedConnectors(slide(), ['link', 'a']);
+    expect(together).toEqual([
+      {
+        op: 'block.set',
+        slideId: 'wired',
+        blockId: 'link',
+        path: '/connect',
+        value: { start: { block: 'a', site: 3 } },
+      },
+    ]);
+    expect(detachMovedConnectors(slide(), ['link', 'a', 'b'])).toEqual([]);
+    const loose = apply(slide(), [
+      { op: 'block.set', slideId: 'wired', blockId: 'link', path: '/connect' },
+    ]);
+    expect(detachMovedConnectors(loose, ['link'])).toEqual([]);
+  });
+});
+
+describe('the axis of a connector at its sites (the polish round, docs/POLISH.md item 33)', () => {
+  /** a and b as the fixture places them, with an elbow between the named sites. */
+  function elbowSlide(startSite: number, endSite: number, extra: Partial<ShapeBlock> = {}): ContentSlide {
+    const current = slide();
+    const a = current.slots.main![0]!;
+    const b = current.slots.main![1]!;
+    const start = siteAt(a, startSite)!;
+    const end = siteAt(b, endSite)!;
+    current.slots.main![2] = {
+      id: 'link',
+      type: 'shape',
+      shape: 'elbow',
+      stroke: 'ink',
+      orientation: 'diagonal-down',
+      connect: { start: { block: 'a', site: startSite }, end: { block: 'b', site: endSite } },
+      pos: {
+        x: Math.min(start.x, end.x),
+        y: Math.min(start.y, end.y),
+        w: Math.abs(end.x - start.x) || 1,
+        h: Math.abs(end.y - start.y) || 1,
+        z: 1,
+      },
+      ...extra,
+    };
+    return current;
+  }
+  const byIdOf = (current: ContentSlide) => new Map(current.slots.main!.map((block) => [block.id, block]));
+
+  it('reads the angle a site faces, turned by the target\u2019s rotation and mirrored by its flip', () => {
+    const a = slide().slots.main![0]!;
+    /* a rectangle's eight sites: top, left, bottom, right, then the corners */
+    expect([0, 1, 2, 3].map((site) => siteAngleAt(a, site))).toEqual([270, 180, 90, 0]);
+    const turned = { ...a, pos: { ...a.pos!, rotate: 90 } };
+    expect([0, 1, 2, 3].map((site) => siteAngleAt(turned, site))).toEqual([0, 270, 180, 90]);
+    const mirrored = { ...a, pos: { ...a.pos!, flip: 'h' as const } };
+    expect([1, 3].map((site) => siteAngleAt(mirrored, site))).toEqual([0, 180]);
+    const upended = { ...a, pos: { ...a.pos!, flip: 'v' as const } };
+    expect([0, 2].map((site) => siteAngleAt(upended, site))).toEqual([90, 270]);
+    expect(siteAngleAt(a, 12)).toBeUndefined();
+  });
+
+  it('answers vertical from a bottom or top site, horizontal from a side, and nothing for a loose connector', () => {
+    const vertical = elbowSlide(2, 0);
+    expect(connectorAxis(connector(vertical).connect, byIdOf(vertical))).toBe('vertical');
+    const horizontal = elbowSlide(3, 1);
+    expect(connectorAxis(connector(horizontal).connect, byIdOf(horizontal))).toBe('horizontal');
+    /* the start's site decides for a pair on different axes (the L is not drawn yet) */
+    const mixed = elbowSlide(2, 1);
+    expect(connectorAxis(connector(mixed).connect, byIdOf(mixed))).toBe('vertical');
+    const endOnly = elbowSlide(2, 0);
+    expect(connectorAxis({ end: { block: 'b', site: 0 } }, byIdOf(endOnly))).toBe('vertical');
+    expect(connectorAxis(undefined, byIdOf(endOnly))).toBeUndefined();
+    expect(connectorAxis({ start: { block: 'gone', site: 0 } }, byIdOf(endOnly))).toBeUndefined();
+  });
+
+  it('writes the axis through followConnectors when the target turns, and through a reroute', () => {
+    const current = elbowSlide(2, 0);
+    /* a turned a quarter: its bottom site faces left, so the elbow leaves horizontally */
+    const turned = apply(current, [
+      {
+        op: 'block.set',
+        slideId: 'wired',
+        blockId: 'a',
+        path: '/pos',
+        value: { x: 100, y: 100, w: 200, h: 100, z: 0, rotate: 90 },
+      },
+    ]);
+    const follow = followConnectors(turned, ['a']);
+    expect(follow.some((m) => m.op === 'block.set' && m.path === '/axis' && m.value === 'horizontal')).toBe(true);
+    const next = apply(turned, follow);
+    expect(connector(next).axis).toBe('horizontal');
+    /* rerouted onto b's left site from a's right site: horizontal; onto b's top from a's bottom: vertical */
+    const byId = byIdOf(current);
+    expect(
+      attachConnector(connector(current), byId, { start: { block: 'a', site: 3 }, end: { block: 'b', site: 1 } }).axis,
+    ).toBe('horizontal');
+    expect(attachConnector(connector(current), byId, { end: { block: 'b', site: 0 } }).axis).toBe('vertical');
+    /* a straight line takes no axis */
+    const line = slide();
+    expect(attachConnector(connector(line), byIdOf(line), { end: { block: 'b', site: 0 } }).axis).toBeUndefined();
   });
 });

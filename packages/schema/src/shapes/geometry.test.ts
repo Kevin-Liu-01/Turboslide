@@ -195,6 +195,181 @@ describe('the path space', () => {
   });
 });
 
+describe('the arcs in a scaled path space (the polish round, docs/POLISH.md item 25)', () => {
+  /** One SVG arc command with its start point, as the path string wrote it. */
+  type Arc = {
+    x1: number;
+    y1: number;
+    rx: number;
+    ry: number;
+    large: number;
+    sweep: number;
+    x2: number;
+    y2: number;
+  };
+
+  /** The arcs of a path string with the start point of each, and the point every M moved to. */
+  function arcs(d: string): { arcs: Arc[]; moves: { x: number; y: number }[] } {
+    const out: Arc[] = [];
+    const moves: { x: number; y: number }[] = [];
+    let x = 0;
+    let y = 0;
+    for (const match of d.matchAll(/([MLHVQCAZ])([^MLHVQCAZ]*)/g)) {
+      const letter = match[1];
+      const nums = (match[2]?.match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
+      if (letter === 'Z') continue;
+      if (letter === 'A') {
+        const [rx = 0, ry = 0, , large = 0, sweep = 0, x2 = 0, y2 = 0] = nums;
+        out.push({ x1: x, y1: y, rx, ry, large, sweep, x2, y2 });
+        x = x2;
+        y = y2;
+        continue;
+      }
+      if (letter === 'H') x = nums[0] ?? x;
+      else if (letter === 'V') y = nums[0] ?? y;
+      else {
+        x = nums[nums.length - 2] ?? x;
+        y = nums[nums.length - 1] ?? y;
+      }
+      if (letter === 'M') moves.push({ x, y });
+    }
+    return { arcs: out, moves };
+  }
+
+  /** The centre of an SVG arc from its endpoint parameterization (SVG 1.1 F.6.5, no rotation). */
+  function centreOf(arc: Arc): { x: number; y: number } {
+    const dx = (arc.x1 - arc.x2) / 2;
+    const dy = (arc.y1 - arc.y2) / 2;
+    let rx = arc.rx;
+    let ry = arc.ry;
+    const lambda = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry);
+    if (lambda > 1) {
+      rx *= Math.sqrt(lambda);
+      ry *= Math.sqrt(lambda);
+    }
+    const num = rx * rx * ry * ry - rx * rx * dy * dy - ry * ry * dx * dx;
+    const den = rx * rx * dy * dy + ry * ry * dx * dx;
+    const sign = arc.large !== arc.sweep ? 1 : -1;
+    const coef = sign * Math.sqrt(Math.max(0, num / den));
+    return {
+      x: (coef * rx * dy) / ry + (arc.x1 + arc.x2) / 2,
+      y: (coef * -ry * dx) / rx + (arc.y1 + arc.y2) / 2,
+    };
+  }
+
+  const boxes: [number, number][] = [
+    [300, 200],
+    [200, 300],
+    [240, 160],
+    [300, 300],
+  ];
+
+  it('draws the cloud callout closed: the outline\u2019s last arc ends on its first point at every box', () => {
+    for (const [w, h] of boxes) {
+      const outline = presetGeometry('cloudCallout', w, h, []).paths[0];
+      if (outline === undefined) throw new Error('no outline');
+      const parsed = arcs(outline.d);
+      expect(parsed.arcs, `${w}x${h}`).toHaveLength(11);
+      const start = parsed.moves[0];
+      const last = parsed.arcs[parsed.arcs.length - 1];
+      if (start === undefined || last === undefined) throw new Error('no arcs');
+      /* the file's own rounding leaves 140 of 43200 units between the chain's end and its start */
+      expect(Math.hypot(last.x2 - start.x, last.y2 - start.y), `${w}x${h}`).toBeLessThanOrEqual(1.5);
+      expect(outline.d.endsWith('Z')).toBe(true);
+    }
+  });
+
+  it('puts every crease arc of the cloud callout on the ellipse of the puff it belongs to, in a box that is not square', () => {
+    for (const [w, h] of boxes) {
+      const geometry = presetGeometry('cloudCallout', w, h, []);
+      const outline = arcs(geometry.paths[0]?.d ?? '').arcs;
+      const creases = arcs(geometry.paths[4]?.d ?? '').arcs;
+      expect(creases, `${w}x${h}`).toHaveLength(11);
+      for (const crease of creases) {
+        const centre = centreOf(crease);
+        /* the puff with the crease's radii, its centre from the outline's own chain */
+        const puffs = outline.filter(
+          (arc) => Math.abs(arc.rx - crease.rx) <= 0.5 && Math.abs(arc.ry - crease.ry) <= 0.5,
+        );
+        expect(puffs.length, `${w}x${h} crease at ${crease.x1},${crease.y1}`).toBeGreaterThan(0);
+        const nearest = Math.min(
+          ...puffs.map((puff) => {
+            const own = centreOf(puff);
+            return Math.hypot(own.x - centre.x, own.y - centre.y);
+          }),
+        );
+        /* the arcs and the file's numbers round to the half pixel, which a short crease's centre
+           magnifies: within 4 px of the puff's centre (measured 2.65 at worst over these boxes;
+           24 to 31 px with the conversion in the scaled space, docs/POLISH.md item 25) */
+        expect(nearest, `${w}x${h} crease at ${crease.x1},${crease.y1}`).toBeLessThanOrEqual(4);
+        /* and the crease itself lies inside the box, never past the cloud's right edge */
+        expect(crease.x2, `${w}x${h}`).toBeLessThanOrEqual(w + 1);
+        expect(crease.x2, `${w}x${h}`).toBeGreaterThanOrEqual(-1);
+      }
+    }
+  });
+
+  it('keeps the parametric conversion in the path\u2019s own space: an arc of a 2 by 1 ellipse drawn into a 1 by 2 box ends where the file puts it', () => {
+    /* a quarter arc from the ellipse's right point (0 degrees) sweeping 90 in a 200 by 100 path
+       space; the box is 100 by 200, so the scaled ellipse is 50 by 100 and the geometric angle
+       would have moved the end off its axis */
+    const arc = pathData(
+      {
+        w: 200,
+        h: 100,
+        commands: [
+          { op: 'moveTo', x: '200', y: '50' },
+          { op: 'arcTo', wR: '100', hR: '50', stAng: '0', swAng: 'cd4' },
+        ],
+      },
+      builtinGuides(100, 200),
+      100,
+      200,
+    );
+    expect(arc).toBe('M100,100 A50,100 0 0 1 50,200');
+    const half = pathData(
+      {
+        w: 200,
+        h: 100,
+        commands: [
+          { op: 'moveTo', x: '200', y: '50' },
+          { op: 'arcTo', wR: '100', hR: '50', stAng: '-2700000', swAng: '5400000' },
+        ],
+      },
+      builtinGuides(100, 200),
+      100,
+      200,
+    );
+    /* from 45 degrees below the axis to 45 above it on the file's ellipse: in the path's space
+       the start's parametric angle is atan2(50 sin -45, 100 cos -45), the centre (155.3, 94.7) and
+       the end (200, 139.4), which scales to (100, 279); the conversion in the scaled space put the
+       end at (100, 189.5) */
+    const points = vertices(half);
+    expect(points[0]).toEqual({ x: 100, y: 100 });
+    expect(points[1]).toEqual({ x: 100, y: 279 });
+  });
+
+  it('never asks SVG to grow an arc\u2019s radii: every arc\u2019s chord fits its ellipse on every preset at 300 by 200 and 200 by 300', () => {
+    for (const row of SHAPE_PRESETS) {
+      for (const [w, h] of [
+        [300, 200],
+        [200, 300],
+      ] as [number, number][]) {
+        const geometry = presetGeometry(row.prstGeom, w, h, shapeAdjustDefaults(row.id));
+        for (const path of geometry.paths) {
+          for (const arc of arcs(path.d).arcs) {
+            const dx = (arc.x1 - arc.x2) / 2;
+            const dy = (arc.y1 - arc.y2) / 2;
+            const lambda = (dx * dx) / (arc.rx * arc.rx) + (dy * dy) / (arc.ry * arc.ry);
+            /* the half pixel rounding of the ends and the radii leaves at most a few percent */
+            expect(lambda, `${row.id} ${w}x${h} ${path.d}`).toBeLessThanOrEqual(1.05);
+          }
+        }
+      }
+    }
+  });
+});
+
 describe('every preset', () => {
   const sizes: [number, number][] = [
     [48, 36],

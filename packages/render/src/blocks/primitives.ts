@@ -10,7 +10,9 @@
 // its segments or curve through the box, and the ten decorations of `lineEndPath` sit at the
 // ends, sized as a medium DrawingML line end for the stroke (decorationSize) and centred on the
 // end for the circle, square and diamond kinds the way PowerPoint and LibreOffice draw `oval`
-// and `diamond`. The svg
+// and `diamond`. A line kind's svg takes no pointer; a transparent hit path over its stroke does
+// (LINE_HIT_PX, the polish round item 24), and an elbow or curved connector whose `axis` is
+// vertical is drawn turned a quarter, leaving and arriving along y (item 33). The svg
 // carries data attributes the exporter reads back (scene/measure.ts): `data-shape`, and for a
 // line kind `data-from`, `data-to`, `data-heads`, `data-points`, `data-bend`, `data-start` and
 // `data-end` in the box's own pixels, so the PPTX gets a native line, connector or custom geometry
@@ -50,6 +52,12 @@ import { paraSpacingDeclarations } from './text-blocks.ts';
 
 /** The filled arrowhead length in px, the largest dia/stroke-grammar allows (DECK-GRAMMAR.md:44). */
 export const ARROWHEAD = 8;
+/**
+ * The width of a line kind's transparent hit stroke in sheet px (the polish round, docs/POLISH.md
+ * item 24): a press within 6 px of the stroke lands on the line, the way Google's lines hit; a
+ * press further inside the line's box lands on whatever the box covers.
+ */
+export const LINE_HIT_PX = 12;
 /** A shape's height in a flow layout when the block sets none. */
 export const SHAPE_FLOW_HEIGHT = 120;
 /** A box's padding when the block sets none. */
@@ -362,8 +370,13 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
   const stroke = colorCss(block.stroke ?? (closed ? 'hair' : 'ink'));
   const fill = block.fill !== undefined ? colorCss(block.fill) : 'none';
   const withText = closed && block.text !== undefined;
-  const svgClass = classes('shape', `shape-${kind}`);
-  const svgStyle = style(dropShadowDeclaration(block.shadow));
+  /* a line kind's hit area is its stroke (the polish round, docs/POLISH.md item 24; audit-objects
+     item 2: a connector's box took the press meant for the shape under it): the svg takes no
+     pointer, the transparent hit path over the stroke does (pointer-events="stroke"), so a press
+     inside the box off the stroke reaches the object under it; `.is-line` lets the sheet's CSS
+     release the `.free` wrapper the same way */
+  const svgClass = classes('shape', `shape-${kind}`, lineLike && 'is-line');
+  const svgStyle = style(dropShadowDeclaration(block.shadow), lineLike && 'pointer-events:none');
   // with a text layer the block root is the wrapper; the svg keeps the shape's own attributes
   const attributes: Record<string, string | undefined> = withText
     ? { class: svgClass, style: svgStyle }
@@ -380,6 +393,9 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
   const dash = dashArray(block.dash, width);
   const dashAttr = dash !== '' ? ` stroke-dasharray="${dash}"` : '';
   let body = '';
+  /* the path the hit stroke follows for a line kind: the full run from end to end */
+  let hitPath = '';
+  let hitAll = false;
   switch (kind) {
     case 'rectangle':
     case 'rounded': {
@@ -399,6 +415,7 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
       const to = { x: snapStroke(ends.x2, width), y: snapStroke(ends.y2, width) };
       const dir = unit(from, to);
       const len = Math.hypot(to.x - from.x, to.y - from.y) || 1;
+      hitPath = `M${pt(from)} L${pt(to)}`;
       if (block.lineStart !== undefined || block.lineEnd !== undefined) {
         // the decorations of SPEC-2 2.4.5 replace the round one arrowheads when written
         const startKind: LineEnd = block.lineStart ?? 'none';
@@ -441,33 +458,49 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
       const from = { x: snapStroke(ends.x1, width), y: snapStroke(ends.y1, width) };
       const to = { x: snapStroke(ends.x2, width), y: snapStroke(ends.y2, width) };
       const bend = block.bend ?? 0.5;
-      const bx = snapStroke(from.x + (to.x - from.x) * bend, width);
       const heads: Arrowheads = block.arrowheads ?? 'none';
       const startKind: LineEnd =
         block.lineStart ?? (heads === 'start' || heads === 'both' ? 'fillArrow' : 'none');
       const endKind: LineEnd =
         block.lineEnd ?? (heads === 'end' || heads === 'both' ? 'fillArrow' : 'none');
-      const startDir = { x: -1, y: 0 };
-      const endDir = { x: 1, y: 0 };
-      if (to.x < from.x) {
-        startDir.x = 1;
-        endDir.x = -1;
-      }
+      /* the axis the connector leaves and arrives along (the polish round, docs/POLISH.md item
+         33; audit-objects item 16: the curve from a bottom site ran along the shape's edge): the
+         horizontal S of `bentConnector3` and `curvedConnector3` unless the block's `axis` says
+         vertical, when the same connector is drawn turned a quarter: it leaves along y, runs
+         across at the bend and arrives along y, and its decorations point up or down */
+      const vertical = block.axis === 'vertical';
+      const startDir = vertical
+        ? { x: 0, y: to.y < from.y ? 1 : -1 }
+        : { x: to.x < from.x ? 1 : -1, y: 0 };
+      const endDir = { x: -startDir.x, y: -startDir.y };
       const startSize = decorationSize(startKind, width);
       const endSize = decorationSize(endKind, width);
       const lineFrom = shorten(from, startDir, decorationInset(startKind, startSize));
       const lineTo = shorten(to, endDir, decorationInset(endKind, endSize));
       let d: string;
-      if (kind === 'elbow') {
-        d = `M${pt(lineFrom)} H${px(bx)} V${px(lineTo.y)} H${px(lineTo.x)}`;
+      let points: string;
+      if (vertical) {
+        const by = snapStroke(from.y + (to.y - from.y) * bend, width);
+        d =
+          kind === 'elbow'
+            ? `M${pt(lineFrom)} V${px(by)} H${px(lineTo.x)} V${px(lineTo.y)}`
+            : `M${pt(lineFrom)} C${px(lineFrom.x)},${px(by)} ${px(lineTo.x)},${px(by)} ${pt(lineTo)}`;
+        points = `${pt(from)} ${px(from.x)},${px(by)} ${px(to.x)},${px(by)} ${pt(to)}`;
       } else {
-        d = `M${pt(lineFrom)} C${px(bx)},${px(lineFrom.y)} ${px(bx)},${px(lineTo.y)} ${pt(lineTo)}`;
+        const bx = snapStroke(from.x + (to.x - from.x) * bend, width);
+        d =
+          kind === 'elbow'
+            ? `M${pt(lineFrom)} H${px(bx)} V${px(lineTo.y)} H${px(lineTo.x)}`
+            : `M${pt(lineFrom)} C${px(bx)},${px(lineFrom.y)} ${px(bx)},${px(lineTo.y)} ${pt(lineTo)}`;
+        points = `${pt(from)} ${px(bx)},${px(from.y)} ${px(bx)},${px(to.y)} ${pt(to)}`;
       }
       body = `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${px(width)}" stroke-linecap="square" stroke-linejoin="miter"${dashAttr}/>`;
       body += decoration(endKind, to, endDir, stroke, width, endSize);
       body += decoration(startKind, from, startDir, stroke, width, startSize);
+      hitPath = d;
       open += ` data-from="${pt(from)}" data-to="${pt(to)}" data-heads="none" data-bend="${px(bend)}" data-start="${startKind}" data-end="${endKind}"`;
-      open += ` data-points="${pt(from)} ${px(bx)},${px(from.y)} ${px(bx)},${px(to.y)} ${pt(to)}"`;
+      open += ` data-points="${points}"`;
+      if (vertical) open += ' data-axis="vertical"';
       break;
     }
     case 'curve':
@@ -510,6 +543,8 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
       body = `<path d="${d}" fill="${pathFill}" stroke="${stroke}" stroke-width="${px(width)}" ${joins}${dashAttr}/>`;
       body += decoration(endKind, last, endDir, stroke, width, endSize);
       body += decoration(startKind, first, startDir, stroke, width, startSize);
+      hitPath = d;
+      hitAll = isClosed && pathFill !== 'none';
       open += ` data-points="${points.map(pt).join(' ')}"${isClosed ? ' data-closed="1"' : ''} data-start="${startKind}" data-end="${endKind}"`;
       break;
     }
@@ -539,6 +574,11 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
       break;
     }
   }
+  /* the hit path of a line kind (item 24): the run of the line under a transparent stroke of
+     LINE_HIT_PX, the only element of the svg that takes the pointer; a closed and filled curve
+     takes it over its interior too */
+  if (lineLike && hitPath !== '')
+    body += `<path class="hit" d="${hitPath}" fill="none" stroke="transparent" stroke-width="${px(Math.max(LINE_HIT_PX, width + 4))}" stroke-linecap="round" stroke-linejoin="round" pointer-events="${hitAll ? 'all' : 'stroke'}" data-hit="stroke"/>`;
   const svg = `${open}>${body}</svg>`;
   if (!withText) return svg;
   // the text layer over the svg inside the kind's text rectangle (SPEC-2 2.2.17, shapeTextRect)

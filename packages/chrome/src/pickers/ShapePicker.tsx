@@ -26,7 +26,8 @@ const tileTip = (name: string) => tipProps({ name });
  * ArrowLeft on the first column is left to the menu. The vector round (docs/VECTOR.md 2.6): the
  * geometry interpreter answers `shapePath` for every preset, so every tile draws its own outline;
  * one `<path>` per tile still, since the joined `d` string carries every subpath of a multi path
- * preset. The grid is named after its category when it draws one (Insert > Shape > Arrows reads
+ * preset. `columns` sets the tiles per row (8 in a menu plate; the panel's mask grid passes 7 so
+ * it fits 320 px, the polish round item 42). The grid is named after its category when it draws one (Insert > Shape > Arrows reads
  * Arrows) and Shapes when it draws all four (Change shape, Mask image). The control id is the
  * caller's row (`insert.shape.gallery.grid`, `insert.shape.gallery.pick.hexagon`).
  */
@@ -37,6 +38,11 @@ export type ShapePickerProps = {
   picked?: string;
   autoFocus?: boolean;
   control?: string;
+  /**
+   * Tiles per row: 8 in a menu plate, 7 inside the 320 px Format options panel (the polish
+   * round, docs/POLISH.md item 42: the mask grid's eighth column was cut at the panel's edge).
+   */
+  columns?: number;
 };
 
 export const SHAPE_GRID_COLUMNS = 8;
@@ -68,6 +74,7 @@ export function ShapePicker({
   picked,
   autoFocus = false,
   control = 'shapes',
+  columns = SHAPE_GRID_COLUMNS,
 }: ShapePickerProps) {
   const root = useRef<HTMLDivElement>(null);
   const tiles = shapeTiles(category);
@@ -101,7 +108,7 @@ export function ShapePicker({
       {...tip}
       onKeyDown={(event) => {
         tip.onKeyDown(event);
-        const result = gridKey(event, index, tiles.length, SHAPE_GRID_COLUMNS);
+        const result = gridKey(event, index, tiles.length, columns);
         if (result === null) return;
         event.preventDefault();
         event.stopPropagation();
@@ -126,7 +133,7 @@ export function ShapePicker({
             <div
               className="ts-picker-grid"
               role="row"
-              style={{ gridTemplateColumns: `repeat(${SHAPE_GRID_COLUMNS}, 40px)` }}
+              style={{ gridTemplateColumns: `repeat(${columns}, 40px)` }}
             >
               {rows.map((row, i) => {
                 const at = start + i;

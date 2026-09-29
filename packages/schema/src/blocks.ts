@@ -25,6 +25,9 @@ import {
   LINE_KINDS,
   SHAPE_PRESET_IDS,
   isClosedShapeKind,
+  isConnectorKind,
+  isLineKind,
+  shapeGuides,
 } from './shapes.ts';
 import type { IconColor, IconName } from './icons.ts';
 import { ICON_COLORS, iconNameSchema } from './icons.ts';
@@ -353,6 +356,14 @@ export const SHAPE_ORIENTATIONS = [
 export type ShapeOrientation = (typeof SHAPE_ORIENTATIONS)[number];
 export const ARROWHEADS = ['end', 'start', 'both', 'none'] as const;
 export type Arrowheads = (typeof ARROWHEADS)[number];
+/**
+ * The axis an elbow or curved connector leaves its start and arrives at its end along (the polish
+ * round, docs/POLISH.md item 33): horizontal is the S of `bentConnector3` and `curvedConnector3`
+ * as PowerPoint draws them unrotated; vertical is the same connector turned a quarter, the one a
+ * site that faces up or down asks for. Absent reads horizontal, so a stored connector draws as it did.
+ */
+export const CONNECTOR_AXES = ['horizontal', 'vertical'] as const;
+export type ConnectorAxis = (typeof CONNECTOR_AXES)[number];
 export const SHAPE_STROKE_WIDTHS = [1, 1.5, 2, 3, 4] as const;
 export type ShapeStrokeWidth = (typeof SHAPE_STROKE_WIDTHS)[number];
 
@@ -389,6 +400,8 @@ export type ShapeBlock = BlockBase & {
   shadow?: Shadow;
   /** Where a connector bends, 0 to 1 along the box; 0.5 unless set (SPEC-2 2.4.1). */
   bend?: number;
+  /** The axis a connector leaves and arrives along; horizontal unless set (docs/POLISH.md item 33). */
+  axis?: ConnectorAxis;
   /** The points of a curve, polyline or scribble as fractions of the box (SPEC-2 2.4.3). */
   points?: [number, number][];
   /** A curve or polyline closed on its first point, filled when `fill` is set. */
@@ -1786,6 +1799,13 @@ export const shapeBlockSchema = z.strictObject({
     group: 'Block',
     help: 'Where an elbow or curved connector turns, 0 to 1 along the box; 0.5 unless set (gslides-parity SPEC-2 2.4.1).',
   }),
+  axis: annotate(z.enum(CONNECTOR_AXES).optional(), {
+    label: 'Axis',
+    control: 'select',
+    snap: CONNECTOR_AXES,
+    group: 'Block',
+    help: 'The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33).',
+  }),
   points: annotate(
     z
       .array(z.tuple([z.number().min(0).max(1), z.number().min(0).max(1)]))
@@ -1837,6 +1857,76 @@ export const shapeBlockSchema = z.strictObject({
     },
   ),
 }) satisfies z.ZodType<ShapeBlock>;
+
+/** The shape kinds that read `radius`: the legacy rounded rectangle alone (primitives.ts). */
+const RADIUS_KINDS: ReadonlySet<string> = new Set(['rounded']);
+/** The kinds that read `arrowheads`: the arrow and the two connectors (a line draws no head). */
+const ARROWHEAD_KINDS: ReadonlySet<string> = new Set(['arrow', 'elbow', 'curved']);
+/** The kinds that bend: the two connectors. */
+const BEND_KINDS: ReadonlySet<string> = new Set(['elbow', 'curved']);
+/** The kinds drawn through `points`. */
+const POINT_KINDS: ReadonlySet<string> = new Set(['curve', 'polyline', 'scribble']);
+/** The point kinds that close (a scribble never does). */
+const CLOSABLE_KINDS: ReadonlySet<string> = new Set(['curve', 'polyline']);
+/** The fields a closed shape draws and a line kind has no use for. */
+const CLOSED_FIELDS: ReadonlySet<string> = new Set([
+  'text',
+  'typography',
+  'color',
+  'padding',
+  'valign',
+  'autofit',
+]);
+
+/**
+ * Whether Format options draws a shape field for a block of this kind (the polish round,
+ * docs/POLISH.md item 52; audit-chrome item 7, audit-objects item 13: a star listed "Corner
+ * radius", "Arrowheads", "Orientation" and "Height"). Google's rectangle shows Size and rotation,
+ * Position, Text fitting and Alt text, so a field a kind never reads is not drawn: the corner
+ * radius belongs to the rounded rectangle, the arrowheads to the arrow and the connectors, the
+ * orientation and the attachments to the four connector kinds, the bend and the axis to the two
+ * bending ones, the points to the path kinds, `closed` to the two that close, the line ends to
+ * every line kind, the adjust values to a preset with adjust guides, the text fields to a closed
+ * shape, the fill to a closed shape or a closed curve, and the flow height to a block without a
+ * position box. `path` is the field name or its JSON pointer. Pure; format-sections.ts reads it.
+ */
+export function shapeFieldApplies(
+  path: string,
+  block: { shape: string; pos?: unknown; closed?: true },
+): boolean {
+  const field = path.startsWith('/') ? path.slice(1) : path;
+  const kind = block.shape;
+  const line = isLineKind(kind);
+  const connector = isConnectorKind(kind);
+  switch (field) {
+    case 'radius':
+      return RADIUS_KINDS.has(kind);
+    case 'arrowheads':
+      return ARROWHEAD_KINDS.has(kind);
+    case 'orientation':
+    case 'connect':
+      return connector;
+    case 'bend':
+    case 'axis':
+      return BEND_KINDS.has(kind);
+    case 'points':
+      return POINT_KINDS.has(kind);
+    case 'closed':
+      return CLOSABLE_KINDS.has(kind);
+    case 'lineStart':
+    case 'lineEnd':
+      return line;
+    case 'adjust':
+      return !line && shapeGuides(kind).length > 0;
+    case 'fill':
+      return !line || (CLOSABLE_KINDS.has(kind) && block.closed === true);
+    case 'height':
+      return block.pos === undefined;
+    default:
+      if (CLOSED_FIELDS.has(field)) return !line;
+      return true;
+  }
+}
 
 export const ruleBlockSchema = z.strictObject({
   ...base,

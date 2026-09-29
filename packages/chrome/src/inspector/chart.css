@@ -65,9 +65,32 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* the grid sized to the 320 px panel (the polish round, docs/POLISH.md item 26; audit-objects
+   item 4: the second series sat past the panel's edge behind a scrollbar nobody could see): 12 px
+   type, a 20 px corner, a category column of 80 px and value columns of 84 px, so two series fit
+   the panel whole (268 of 271 px); a third overflows sideways under a scrollbar that is drawn.
+   The scrollbar is the ::-webkit-scrollbar kind alone: scrollbar-width and scrollbar-color stay
+   auto, since Chromium ignores the webkit rules once either is set (tokens.css) and macOS then
+   hides the thin one until a scroll, which is what the audit met */
 .ts-chartgrid-wrap {
   overflow-x: auto;
-  padding: 0 4px;
+  overflow-y: hidden;
+  padding: 0 4px 4px;
+}
+
+.ts-chartgrid-wrap::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.ts-chartgrid-wrap::-webkit-scrollbar-track {
+  background: var(--pt-plate);
+}
+
+.ts-chartgrid-wrap::-webkit-scrollbar-thumb {
+  border: 2px solid var(--pt-plate);
+  background: var(--pt-thumb);
+  background-clip: padding-box;
 }
 
 .ts-chartgrid {
@@ -75,20 +98,35 @@
   min-width: 100%;
   border: 1px solid var(--pt-hair);
   background: var(--pt-paper);
-  font: 13px/1.2 var(--pt-text);
+  font: 12px/1.2 var(--pt-text);
   font-variant-numeric: tabular-nums;
 }
 
 .ts-chartgrid-cell {
   position: relative;
-  min-width: 64px;
-  height: 28px;
-  padding: 0 8px;
+  min-width: 60px;
+  height: 26px;
+  padding: 0 6px;
   border: 1px solid var(--pt-hair-soft);
   color: var(--pt-ink);
   text-align: right;
   vertical-align: middle;
   cursor: cell;
+}
+
+/* the value columns: 84 px each, the width the series header needs for "Series 1" with its swatch */
+.ts-chartgrid th[role='columnheader']:not(.is-corner),
+.ts-chartgrid td.ts-chartgrid-cell {
+  width: 84px;
+  min-width: 84px;
+  max-width: 84px;
+}
+
+/* the category column: 80 px holds "Category 1" at 12 px; a longer name ends in an ellipsis */
+.ts-chartgrid th[role='rowheader'] {
+  width: 80px;
+  min-width: 80px;
+  max-width: 80px;
 }
 
 .ts-chartgrid-cell:focus {
@@ -110,25 +148,29 @@
 }
 
 .ts-chartgrid th.is-corner {
-  min-width: 28px;
-  width: 28px;
+  min-width: 20px;
+  width: 20px;
+  max-width: 20px;
   cursor: default;
 }
 
 .ts-chartgrid-head {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   max-width: 100%;
 }
 
 .ts-chartgrid-name {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* the series swatch at 16 px, always drawn (docs/FEATURES.md 2.2 rank 12; audit-objects 21) */
+/* the series swatch at 14 px in the grid and 16 px in the swatch row, always drawn
+   (docs/FEATURES.md 2.2 rank 12; audit-objects 21) */
 .ts-chartgrid-swatch,
 .ts-chart-swatch {
   flex: 0 0 auto;
@@ -140,13 +182,23 @@
   cursor: pointer;
 }
 
+.ts-chartgrid-swatch {
+  width: 14px;
+  height: 14px;
+}
+
 .ts-chartgrid-swatch:focus-visible,
 .ts-chart-swatch:focus-visible {
   outline: 1px solid var(--pt-ink);
   outline-offset: 2px;
 }
 
+/* the remove square sits over the right end of its header and takes no room of its own, so the
+   name keeps the column's width; it is drawn on a paper ground over the name's tail while shown */
 .ts-chartgrid-remove {
+  position: absolute;
+  top: 50%;
+  right: 3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -155,10 +207,11 @@
   padding: 0;
   border: 0;
   border-radius: 3px;
-  background: transparent;
+  background: var(--pt-plate);
   color: var(--pt-ink-2);
   cursor: pointer;
   opacity: 0;
+  transform: translateY(-50%);
 }
 
 .ts-chartgrid-remove svg {
@@ -166,11 +219,11 @@
   height: 12px;
 }
 
-/* the remove control is drawn on the active row's and column's header without a hover (rank 12;
-   audit-objects 21 measured the squares at opacity 0 until hovered), and on the hovered header */
+/* the remove control is drawn on the hovered header and on its own focus (the polish round,
+   docs/POLISH.md item 26): drawn on the active line too, as the objects round had it, it covered
+   the name's last character in the panel's narrow columns; the right click menu's Remove row
+   stays for the keyboard */
 .ts-chartgrid-cell:hover .ts-chartgrid-remove,
-.ts-chartgrid-cell.is-active .ts-chartgrid-remove,
-.ts-chartgrid-cell.is-active-line .ts-chartgrid-remove,
 .ts-chartgrid-remove:focus-visible {
   opacity: 1;
 }

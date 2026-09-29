@@ -1,0 +1,282 @@
+{
+  "base": "http://localhost:4448",
+  "defaultTemplate": null,
+  "startedAt": "2026-09-29T06:08:07.033Z",
+  "ms": 250880,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 250861,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/polish/integrator/gate-4448-rerun-specs/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": [
+      "assist"
+    ],
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 10,
+  "passed": 2,
+  "failed": 7,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "commit": "db039f4f",
+  "origin": "http://localhost:4448",
+  "date": "2026-09-29",
+  "results": {
+    "assist.rewrite.card-accept-undo": "failed",
+    "assist.notes.draft": "failed",
+    "assist.free-ask.fallback-sentence": "failed",
+    "assist.mark.chip-and-history": "failed",
+    "assist.quota.429": "not driven",
+    "assist.panel.mode-aware": "passed",
+    "assist.tailor.one-pass": "passed",
+    "assist.snackbar.names-change": "failed",
+    "assist.panel.words-and-layout": "failed",
+    "assist.polish.agent-sweep": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "assist.rewrite.card-accept-undo",
+        "feature": "assist",
+        "result": "failed"
+      },
+      {
+        "id": "assist.notes.draft",
+        "feature": "assist",
+        "result": "failed"
+      },
+      {
+        "id": "assist.free-ask.fallback-sentence",
+        "feature": "assist",
+        "result": "failed"
+      },
+      {
+        "id": "assist.mark.chip-and-history",
+        "feature": "assist",
+        "result": "failed"
+      },
+      {
+        "id": "assist.quota.429",
+        "feature": "assist",
+        "result": "not driven"
+      },
+      {
+        "id": "assist.snackbar.names-change",
+        "feature": "assist",
+        "result": "failed"
+      },
+      {
+        "id": "assist.panel.words-and-layout",
+        "feature": "assist",
+        "result": "failed"
+      },
+      {
+        "id": "assist.polish.agent-sweep",
+        "feature": "assist",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [
+    "assist"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "assist.rewrite.card-accept-undo",
+      "parks": [
+        "panel.assist.starter.shorter"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "assist.notes.draft",
+      "parks": [
+        "panel.assist.starter.notes"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "assist.free-ask.fallback-sentence",
+      "parks": [
+        "panel.assist.prompt"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "assist.rewrite.card-accept-undo",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "assist.notes.draft",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "assist.free-ask.fallback-sentence",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "assist.mark.chip-and-history",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "assist.quota.429",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven: the quota counts across instances only with Upstash and this base does not say which limiter it runs (GET /api/agent instance facts); the unit test apps/studio/src/server/ratelimit.test.ts covers the rows (PRODUCT.md 8.2)"
+    },
+    {
+      "id": "assist.panel.mode-aware",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.tailor.one-pass",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.snackbar.names-change",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: renewal became contract"
+    },
+    {
+      "id": "assist.panel.words-and-layout",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: one line under the composer"
+    },
+    {
+      "id": "assist.polish.agent-sweep",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    }
+  ]
+}

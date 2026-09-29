@@ -183,6 +183,7 @@ function optionsItems(state: { laser: boolean; fullscreen: boolean }): MenuItem[
       id: 'present.options.more',
       label: PRESENT_TEXT.more,
       status: 'now',
+      icon: 'ellipsis-horizontal',
       effect: { kind: 'submenu' },
       items: [
         {

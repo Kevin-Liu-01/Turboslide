@@ -601,6 +601,9 @@ test(title('comments.toolbar-and-menu-routes'), async () => {
   await submitComment('From the toolbar.');
   await expect.poll(async () => (await threads()).length, { timeout: 20_000 }).toBe(before + 1);
   await page.keyboard.press('Escape');
+  /* Escape cleared the selection with the composer; the menu route needs the card again (item
+     66: the row is disabled with nothing selected, and the preview run of record found it so) */
+  await clickCard(page, slides[3]!);
   await menuPath(page, 'insert', 'insert.comment');
   await submitComment('From the Insert menu.');
   await expect.poll(async () => (await threads()).length, { timeout: 20_000 }).toBe(before + 2);

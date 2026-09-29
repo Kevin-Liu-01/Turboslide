@@ -336,7 +336,9 @@ test(title('share.copy-view-link'), async ({ browser }) => {
   expect(copied).toMatch(SHARE_LINK);
   expect(copied).not.toContain('present=1');
   const landed = await landingOf(browser, copied);
-  expect(landed.path).toBe(`/deck/${deck}`);
+  /* the polish round's item 101 (server/auth/links.ts landingPath): every role lands on the
+     editor page, a viewer on its viewer floor, so the stream carries an edit to a viewer */
+  expect(landed.path).toBe(`/edit/${deck}`);
 });
 test(title('share.copy-present-link'), async ({ browser }) => {
   test.setTimeout(90_000);
@@ -387,12 +389,19 @@ test(title('share.view-link-lands-viewer'), async ({ browser }) => {
   const { context: other, page: viewer } = await otherContext(browser);
   try {
     await viewer.goto(links.view);
-    await viewer.waitForURL(new RegExp(`/deck/${deck}`), { timeout: 20_000 });
-    await expect(viewer.locator('.pt-viewer').first()).toHaveAttribute('data-settled', '', {
-      timeout: 60_000,
-    });
-    await expect(ctl(viewer, 'menubar'), 'no editor chrome').toHaveCount(0);
-    await expect(ctl(viewer, 'toolbar'), 'no toolbar').toHaveCount(0);
+    /* the polish round's item 101 (server/auth/links.ts landingPath): the View link lands on
+       the editor page's viewer floor, View > Mode Viewing with no write tools, where the stream
+       carries the owner's edits to the viewer */
+    await viewer.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 20_000 });
+    await expect(viewer.locator('.pt-viewer:not(.ts-skeleton)').first()).toHaveAttribute(
+      'data-edit-mode',
+      'viewing',
+      { timeout: 60_000 },
+    );
+    await expect(
+      viewer.locator('[data-control="toolbar"]:not(.is-view-only)'),
+      'no write tools',
+    ).toHaveCount(0);
   } finally {
     await closeSecond(other, viewer);
   }
@@ -491,8 +500,8 @@ test(title('share.view-link-cannot-edit'), async ({ browser }) => {
   const { context: other, page: viewer } = await otherContext(browser);
   try {
     await viewer.goto(links.view);
-    await viewer.waitForURL(new RegExp(`/deck/${deck}`), { timeout: 20_000 });
-    await viewer.goto(viewer.url().replace('/deck/', '/edit/'));
+    /* item 101: the View link lands on the editor page itself, on its viewer floor */
+    await viewer.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 20_000 });
     await viewer.waitForLoadState('domcontentloaded');
     const verdict = await cannotEdit(viewer, deck);
     expect(verdict.ok, verdict.why).toBe(true);

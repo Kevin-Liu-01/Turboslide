@@ -55,14 +55,25 @@ function page(
  * instead of the viewer. The flag travels only to a `/deck/` landing; a commenter or an editor
  * link lands in the editor whatever the address carried, and no other query key is forwarded.
  */
-export function withPresent(location: string, request: Request): string {
+export function withPresent(
+  location: string,
+  request: Request,
+  grant?: { deckId: string; role: string },
+): string {
   let present = false;
   try {
     present = new URL(request.url).searchParams.get('present') === '1';
   } catch {
     present = false;
   }
-  if (!present || !location.startsWith('/deck/') || location.includes('?')) return location;
+  if (!present || location.includes('?')) return location;
+  /* the polish round's item 101 lands every role on the editor page (links.ts landingPath); the
+     Present link keeps the show on the viewer page for a viewer grant, as the sentence above
+     says and the run of record on the enforce preview read it missing (share.copy-present-link,
+     share.present-link-excludes-skipped) */
+  if (grant?.role === 'viewer' && location.startsWith('/edit/'))
+    return `/deck/${grant.deckId}?present=1`;
+  if (!location.startsWith('/deck/')) return location;
   return `${location}?present=1`;
 }
 
@@ -93,7 +104,7 @@ async function serve(request: Request, token: string): Promise<Response> {
       return new Response(null, {
         status: 303,
         headers: {
-          location: withPresent(outcome.location, request),
+          location: withPresent(outcome.location, request, outcome.grant),
           ...EXCHANGE_HEADERS,
           ...cookie,
         },

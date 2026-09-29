@@ -1,9 +1,17 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { Dialog, DialogCheck, DialogField, focusableIn } from '../Dialog';
+import {
+  Dialog,
+  DialogCheck,
+  DialogField,
+  focusReturnTarget,
+  focusableIn,
+  noteMenuRowActivated,
+  recentMenuRow,
+} from '../Dialog';
 import { hideTooltip } from '../Tooltip';
 
 // The dialog primitive (gslides-parity SPEC 13.3; R08 B9): role dialog named by its title, the
@@ -265,5 +273,95 @@ describe('Dialog, the focus round cycle 2', () => {
     const doneButton = document.querySelector('[data-control="dialog.dl.done"]');
     expect(doneButton).not.toBeNull();
     expect(document.activeElement).toBe(doneButton);
+  });
+});
+
+describe('the focus after a close and the trap (docs/POLISH.md 2.6 item 65)', () => {
+  it('returns the focus to the menubar button of the row that opened the dialog when the row is gone, and never to the body', async () => {
+    /* the opener is a menu row that unmounts with its menu (audit-chrome item 15: the focus
+       landed on the body for sixteen dialogs); the menubar button of its menu takes the focus */
+    function Host() {
+      const [open, setOpen] = useState(false);
+      const [rowShown, setRowShown] = useState(true);
+      return (
+        <>
+          <button type="button" data-control="menubar.file">
+            File
+          </button>
+          {rowShown ? (
+            <div
+              role="menuitem"
+              tabIndex={0}
+              data-menu-item="file.details"
+              onClick={() => {
+                setOpen(true);
+                setRowShown(false);
+              }}
+            >
+              Details
+            </div>
+          ) : null}
+          {open ? (
+            <Dialog title="Details" onClose={() => setOpen(false)} control="dialog.details">
+              <input type="text" aria-label="Name" />
+            </Dialog>
+          ) : null}
+        </>
+      );
+    }
+    render(<Host />);
+    const row = screen.getByRole('menuitem', { name: 'Details' });
+    row.focus();
+    noteMenuRowActivated('file.details');
+    fireEvent.click(row);
+    const dialog = screen.getByRole('dialog', { name: 'Details' });
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    /* the mount effect's cleanup is deferred a tick (lib/useMountEffect), so the focus follows */
+    await waitFor(() =>
+      expect(document.activeElement?.getAttribute('data-control')).toBe('menubar.file'),
+    );
+    expect(recentMenuRow()).toBe('file.details');
+    expect(focusReturnTarget(null)).toBeNull();
+  });
+
+  it('wraps Tab over a summary, so the Logo dialog keeps its focus inside', () => {
+    render(
+      <Dialog title="Logo" onClose={() => undefined} control="dialog.logo">
+        <input type="text" aria-label="Search" />
+        <details>
+          <summary>More</summary>
+          <a href="https://example.com">A link</a>
+        </details>
+      </Dialog>,
+    );
+    const dialog = screen.getByRole('dialog', { name: 'Logo' });
+    /* closed: the X button, the field, the summary; the link inside the closed details is one
+       the browser's Tab skips, so the trap wraps from the summary (the walk's Logo dialog lost
+       five of eight Tabs past its More summary) */
+    const closed = focusableIn(dialog);
+    expect(closed.map((el) => el.tagName)).toContain('SUMMARY');
+    expect(closed.map((el) => el.tagName)).not.toContain('A');
+    const summary = closed[closed.length - 1] as HTMLElement;
+    expect(summary.tagName).toBe('SUMMARY');
+    summary.focus();
+    fireEvent.keyDown(dialog, { key: 'Tab' });
+    expect(document.activeElement).toBe(closed[0]);
+    /* the focus on the card itself (nothing the list counts): Tab lands on the first element */
+    dialog.focus();
+    fireEvent.keyDown(dialog, { key: 'Tab' });
+    expect(document.activeElement).toBe(closed[0]);
+    /* open: the link is the last element and Tab wraps from it */
+    (dialog.querySelector('details') as HTMLDetailsElement).open = true;
+    const list = focusableIn(dialog);
+    const last = list[list.length - 1] as HTMLElement;
+    expect(last.tagName).toBe('A');
+    last.focus();
+    fireEvent.keyDown(dialog, { key: 'Tab' });
+    expect(document.activeElement).toBe(list[0]);
+    (list[0] as HTMLElement).focus();
+    fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(last);
   });
 });

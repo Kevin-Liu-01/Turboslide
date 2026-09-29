@@ -61,8 +61,12 @@
   outline: none;
 }
 
+/* the plate ground on hover, on a keyboard focus (the arrows walk the rows) and on the open row;
+   a menu opened by the pointer focuses its first row for the keys without lighting it, since a
+   programmatic focus after a click is not focus visible (docs/POLISH.md 2.6 item 74; audit-chrome
+   item 48: Paste, Cut and Insert row above read as hovered the moment the menu opened) */
 .ts-menu-item:hover,
-.ts-menu-item:focus,
+.ts-menu-item:focus-visible,
 .ts-menu-item.is-open {
   background: var(--pt-plate);
   color: var(--pt-ink);
@@ -96,7 +100,8 @@
   color: var(--pt-ink);
 }
 
-.ts-menu-item.is-disabled .ts-menu-ic {
+.ts-menu-item.is-disabled .ts-menu-ic,
+.ts-menu-item.is-disabled .ts-menu-key {
   color: var(--pt-disabled);
 }
 

@@ -20,7 +20,7 @@ import { tipProps } from '../Tooltip';
  * to the selected block, Cancel closes. The rows are the `font.list` answer the plate loaded; a
  * face's stylesheet links when its row shows (FontRowLabel), never before.
  *
- * Ids (PRODUCT.md 7.1): `dialog.moreFonts`, `dialog.moreFonts.row.<id>`, `dialog.moreFonts.licence.<id>`.
+ * Ids (PRODUCT.md 7.1): `dialog.moreFonts`, `dialog.moreFonts.row.<id>`, `dialog.moreFonts.license.<id>`.
  */
 export type MoreFontsDialogProps = {
   rows: readonly FontRow[];

@@ -578,14 +578,20 @@ describe('the Insert menu, compact mode and the title row', () => {
     expect(ellipse).not.toBeNull();
     fireEvent.click(ellipse as HTMLElement);
     expect(onDrawTool).toHaveBeenLastCalledWith({ kind: 'shape', shape: 'ellipse' });
-    /* the toolbar Shape button lists the named rows first, then the gallery rows */
+    /* the toolbar Shape button is a split like Image and Line (docs/POLISH.md 2.6 item 74): the
+       button arms the rectangle tool and its arrow lists the named rows first, then the gallery
+       rows */
     fireEvent.click(
       gallery.container.querySelector('[data-control="toolbar.insertShape"]') as HTMLElement,
     );
+    expect(onDrawTool).toHaveBeenLastCalledWith({ kind: 'shape', shape: 'rectangle' });
+    fireEvent.click(
+      gallery.container.querySelector('[data-control="toolbar.insertShape.arrow"]') as HTMLElement,
+    );
     expect(
-      [...document.querySelectorAll('#ts-menu-toolbar\\.insertShape [data-menu-item]')].map((el) =>
-        el.getAttribute('data-menu-item'),
-      ),
+      [
+        ...document.querySelectorAll('#ts-menu-toolbar\\.insertShape\\.arrow [data-menu-item]'),
+      ].map((el) => el.getAttribute('data-menu-item')),
     ).toEqual([
       'insert.shape.shapes.rectangle',
       'insert.shape.shapes.rounded',

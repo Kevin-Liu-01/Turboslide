@@ -70,6 +70,8 @@ import type { PaletteEntry } from './palette-data';
 import type { SaveState } from './StatusChip';
 import {
   cellsInRange,
+  cellsWithAlign,
+  rangeIsWholeColumns,
   rangeOf as tableRangeOf,
   tableCommandOfItem,
   tablePlan,
@@ -771,6 +773,13 @@ export type EditorShellInput = {
   linkComponent?: LinkComponent;
   /** TURBOSLIDE_TOKEN is set on the deployment (Agent access) */
   tokenRequired?: boolean;
+  /**
+   * What the deployment's assistant can do (apps/studio/src/server/assist.ts `assistMode`; the
+   * polish round, docs/POLISH.md 2.9 item 113): `model` or `fixture` answer asks, `unconfigured`
+   * has no key and `off` is the kill switch. The panel offers only what the mode can do and the
+   * finder offers no Ask row without a model; absent reads as `model`, today's behaviour.
+   */
+  assistMode?: AssistMode;
   /** Insert > Link: the canvas link popover (B4); a dialog when absent */
   onLink?: () => void;
   /** Paint format: arm the gesture (B4); a snackbar when absent */
@@ -1397,7 +1406,10 @@ export function buildMenuContext(
       block?.type === 'plain' ||
       picked?.text === true ||
       block?.type === 'table' ||
-      (block?.type === 'shape' && !isLineKind(block.shape)),
+      /* a closed shape with a label: its runs take the marks; a shape with no text has nothing
+         for Format > Text to act on, so the rows read disabled instead of refusing after the
+         menu enabled them (docs/POLISH.md 2.3 item 17; audit-chrome item 4, rows 161 to 165) */
+      (block?.type === 'shape' && !isLineKind(block.shape) && block.text !== undefined),
     listItem,
     /* every Format > Table row is enabled while a table is selected, by a cell session, by the
        kept cell after it, or by one click, and acts on the kept cell or cell 1,1 (RETURN.md 2.4
@@ -1510,6 +1522,9 @@ export type ActionPlan = {
 /** A plan that cannot be built from the current selection: the sentence the snackbar shows. */
 export type ActionRefusal = { refused: string };
 
+/** The assistant's mode as the server reports it (apps/studio/src/server/assist.ts `AssistMode`). */
+export type AssistMode = 'fixture' | 'off' | 'model' | 'unconfigured';
+
 export type ActionFacts = {
   document: DeckDocument;
   slideId: string;
@@ -1531,8 +1546,8 @@ const SELECT_BLOCK = 'Select an object on the slide first';
 const SELECT_CELL = 'Click a table cell first';
 const SELECT_OBJECTS = 'Select two or more objects on the slide first';
 /* the sentences of the plans a `plain` list block cannot carry (C2-F1, C2-R16): its items have no
-   typography field, so Bold, the alignments and the line spacings apply to a text block alone */
-const BOLD_ON_LIST = 'Bold applies to a text block';
+   typography field, so the alignments and the line spacings apply to a text block alone; Bold is
+   an inline run since the polish round and applies to a list item too */
 const ALIGN_ON_LIST = 'Alignment applies to a text block';
 const SPACING_ON_LIST = 'Line spacing applies to a text block';
 
@@ -1553,8 +1568,7 @@ export function selectionMarks(facts: ActionFacts): (RunMarks & { b?: true }) | 
   const selection = facts.selection;
   if (selection === null || selection === undefined) return undefined;
   const reported = selection.marks as (RunMarks & { b?: true }) | undefined;
-  if (reported !== undefined) return reported;
-  if (selection.range === undefined) return undefined;
+  if (selection.text === true && reported !== undefined) return reported;
   const target = block(facts);
   if (target === undefined) return undefined;
   const path = textPathOf(target, selection);
@@ -1773,7 +1787,9 @@ export const INSERT_SIZES: Readonly<Record<string, [number, number]>> = {
   icon: [48, 48],
   shot: [480, 272],
   picture: [480, 272],
-  material: [480, 272],
+  /* a shader takes the content box, the largest free rectangle under a title (docs/POLISH.md 2.5
+     item 48; polish/build/b4.md R7); placeInsert takes the smaller of this and the room */
+  material: [1326, 642],
   heading: [800, 56],
   paragraph: [640, 104],
   table: [960, 320],
@@ -2015,9 +2031,16 @@ function markOf(item: MenuItem): 'i' | 'u' | 's' | 'sup' | 'sub' | null {
     : null;
 }
 
-/** The range a text write covers: the caret's, else the whole Text at the path. */
+/**
+ * The range a text write covers: the caret's while a session is open (`selection.text`), else
+ * the whole Text at the path. A range the route kept from a session that ended is not a
+ * selection: the polish round's chrome audit (docs/POLISH.md 2.3 item 17; audit-chrome item 4)
+ * read Italic, Underline, Strikethrough, Superscript and Subscript writing nothing on a text box
+ * selected by one click, because the collapsed caret of the last session was still the range.
+ */
 function rangeOf(target: Block, path: string, facts: ActionFacts): [number, number] {
-  if (facts.selection?.range !== undefined) return facts.selection.range;
+  if (facts.selection?.text === true && facts.selection.range !== undefined)
+    return facts.selection.range;
   return [0, plainLength(textAt(target, path) ?? '')];
 }
 
@@ -2177,6 +2200,44 @@ export function tableMarksPlan(
 }
 
 /**
+ * One `slide.update` of one `text.mark` writing or clearing the bold run over the caret's range
+ * or the whole Text of the selected block (docs/POLISH.md 2.3 item 12): the reducer's own edit,
+ * since `text.style` carries the five span marks and the colours but not `b`. Cleared when every
+ * run with a character in the range is bold already, set otherwise. One commit, one Cmd+Z.
+ */
+export function boldPlan(
+  facts: ActionFacts,
+  target: Block,
+  label: string,
+): ActionPlan | ActionRefusal {
+  const path = textPathOf(target, facts.selection);
+  if (path === null) return { refused: SELECT_TEXT };
+  const text = textAt(target, path) ?? '';
+  const range = rangeOf(target, path, facts);
+  const inside = placeRuns(text).filter(
+    (placed) =>
+      placed.run.t !== '' &&
+      placed.end > range[0] &&
+      placed.start < Math.max(range[1], range[0] + 1),
+  );
+  const on = inside.length > 0 && inside.every((placed) => placed.run.b === true);
+  return slideUpdatePlan(
+    facts,
+    [
+      {
+        op: 'text.mark',
+        slideId: facts.slideId,
+        blockId: target.id,
+        path,
+        range,
+        edit: { kind: 'marks', ...(on ? { clear: ['b'] } : { set: { b: true } }) },
+      },
+    ],
+    label,
+  );
+}
+
+/**
  * One `text.style` toggling a mark, or setting a colour, over the caret's range or the whole
  * Text (SPEC-2 4.1): the toggle reads the range's current marks (the route's, else the Text's).
  * On a table with a range, or selected by one click with no cell, the write goes into every
@@ -2257,11 +2318,15 @@ export function listPlan(
 ): ActionPlan | ActionRefusal {
   const target = block(facts);
   if (target === undefined) return { refused: SELECT_TEXT };
+  /* a heading takes a list too (docs/POLISH.md 2.3 item 18; audit-chrome item 17: the title
+     placeholder's Bulleted list answered "Select a paragraph or a text box first" from an enabled
+     button); the store's `listBlockFrom` converts it as it converts a paragraph */
   if (
     target.type !== 'plain' &&
     target.type !== 'paragraph' &&
     target.type !== 'text' &&
-    target.type !== 'box'
+    target.type !== 'box' &&
+    target.type !== 'heading'
   )
     return { refused: 'Select a paragraph or a text box first' };
   const items =
@@ -2837,27 +2902,14 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     }
     case 'format.text.bold': {
       if (target === undefined) return { refused: SELECT_TEXT };
-      /* a `plain` list block has no typography field (blocks.ts `plainBlockSchema`, strict), so the
-         `/typography` write was refused by the server and the title row read "Couldn't save,
-         retrying" until the card was dismissed (VERIFICATION C2-F1; b7's C2-R16, applied by the
-         integrator at the cycle 3 merge): refuse with a sentence, as the table branch does */
-      if (target.type === 'plain') return { refused: BOLD_ON_LIST };
       /* a table has no typography field: Bold writes the bold run into every selected cell's
          text (docs/FEATURES.md 2.2 rank 8; audit-objects 7) */
       if (target.type === 'table')
         return tableMarksPlan(facts, target as TableBlock, { mark: 'b' }, 'Bold');
-      const typography = typographyOf(target);
-      const weight = typography.weight === 500 ? undefined : 500;
-      const next = { ...typography };
-      if (weight === undefined) delete next.weight;
-      else next.weight = weight;
-      return blockSet(
-        facts,
-        target.id,
-        '/typography',
-        Object.keys(next).length === 0 ? undefined : next,
-        'Bold',
-      );
+      /* the polish round (docs/POLISH.md 2.3 item 12; audit-text item 1): Bold is the inline
+         bold run, as Cmd+B writes it, over the selected range or the whole text of a block
+         selected by one click; the block's weight 500 override read as nothing bold */
+      return boldPlan(facts, target, 'Bold');
     }
     case 'format.text.italic':
     case 'format.text.underline':
@@ -2968,10 +3020,29 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
       if (target.type === 'plain') return { refused: ALIGN_ON_LIST };
       if (target.type === 'table') {
         if (align === 'justify') return { refused: 'Justified applies to a text block' };
-        /* the range's columns, the caret's column, or every column of a table selected by one
-           click (docs/FEATURES.md 2.2 rank 8, `tables.range.size-color`) */
         const cells = facts.selection?.cells;
         const cell = facts.selection?.cell;
+        /* a range that is not whole columns, or the caret's cell, writes the cells' own alignment
+           (docs/POLISH.md 2.2 item 10; polish/build/b2.md R5; audit-tables item 14: Center on
+           the header cells centred every cell below); a column head's range and a table selected
+           by one click keep writing the column */
+        const table = target as TableBlock;
+        const cellRange =
+          cells !== undefined && !rangeIsWholeColumns(table, cells)
+            ? cells
+            : cells === undefined && cell !== undefined && facts.selection?.text === true
+              ? { r0: cell.row, c0: cell.column, r1: cell.row, c1: cell.column }
+              : null;
+        if (cellRange !== null && align !== undefined)
+          return blockSet(
+            facts,
+            target.id,
+            '/cells',
+            cellsWithAlign(table, cellRange, align),
+            item.label,
+          );
+        /* the range's columns, the caret's column, or every column of a table selected by one
+           click (docs/FEATURES.md 2.2 rank 8, `tables.range.size-color`) */
         const covers = (index: number): boolean =>
           cells !== undefined
             ? index >= Math.min(cells.c0, cells.c1) && index <= Math.max(cells.c0, cells.c1)
@@ -3031,8 +3102,10 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     case 'format.spacing.1_5':
     case 'format.spacing.double': {
       if (target === undefined) return { refused: SELECT_TEXT };
-      /* no typography field on a `plain` list block (C2-F1, C2-R16; the Bold case above) */
-      if (target.type === 'plain') return { refused: SPACING_ON_LIST };
+      /* no typography field on a `plain` list block (C2-F1, C2-R16) or on a table (docs/POLISH.md
+         2.6 item 54; audit-chrome item 2: the `/typography` write on a table was applied by the
+         client, refused by the schema and Redo printed the validator's path) */
+      if (target.type === 'plain' || target.type === 'table') return { refused: SPACING_ON_LIST };
       return blockSet(
         facts,
         target.id,
@@ -3045,6 +3118,7 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     case 'format.spacing.addBefore':
     case 'format.spacing.addAfter': {
       if (target === undefined) return { refused: SELECT_TEXT };
+      if (target.type === 'plain' || target.type === 'table') return { refused: SPACING_ON_LIST };
       const typography = typographyOf(target);
       const field = item.id.endsWith('addBefore') ? 'before' : 'after';
       const current = typography[field === 'before' ? 'spaceBefore' : 'spaceAfter'];

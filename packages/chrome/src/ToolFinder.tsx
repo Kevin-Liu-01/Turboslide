@@ -7,6 +7,7 @@ import { LAYOUTS } from '@turboslide/schema/layouts';
 import type { LayoutId } from '@turboslide/schema/layouts';
 
 import type { EditorDispatch } from './dispatch';
+import type { AssistMode } from './editor-shell';
 import { KIND_ICONS } from './inspector/sections';
 import { finderRows } from './menus/finder';
 import type { MenuContext, MenuItem } from './menus/model';
@@ -41,6 +42,12 @@ export type ToolFinderProps = {
   onNotice?: (message: string) => void;
   /** opens the Assist panel with the phrase; without it the empty state stays "Nothing matches" */
   onAsk?: (phrase: string) => void;
+  /**
+   * The assistant's mode (docs/POLISH.md 2.9 item 113): the Ask row is offered with `model` or
+   * `fixture` alone, since an unconfigured or switched off assistant answers every ask with one
+   * sentence. Absent reads as `model`.
+   */
+  assistMode?: AssistMode;
 };
 
 /** The Ask row's entry id; the palette draws it as `palette.finder.assist.ask`. */
@@ -124,8 +131,10 @@ export function askEntry(
   phrase: string,
   ctx: MenuContext,
   ask: ((phrase: string) => void) | undefined,
+  mode: AssistMode = 'model',
 ): PaletteEntry | null {
   const trimmed = phrase.trim();
+  if (mode === 'off' || mode === 'unconfigured') return null;
   if (ask === undefined || trimmed === '' || !assistPresent(ctx)) return null;
   if (filterPalette(entries, phrase).some((group) => group.rows.length > 0)) return null;
   return {
@@ -150,6 +159,7 @@ export function ToolFinder({
   onClose,
   onNotice,
   onAsk,
+  assistMode = 'model',
 }: ToolFinderProps) {
   const [phrase, setPhrase] = useState('');
   const [wasOpen, setWasOpen] = useState(open);
@@ -162,8 +172,8 @@ export function ToolFinder({
     [open, document, slideId, menuContext, onRunItem, onPickLayout],
   );
   const ask = useMemo(
-    () => (open ? askEntry(base, phrase, menuContext, onAsk) : null),
-    [open, base, phrase, menuContext, onAsk],
+    () => (open ? askEntry(base, phrase, menuContext, onAsk, assistMode) : null),
+    [open, base, phrase, menuContext, onAsk, assistMode],
   );
   const entries = useMemo(() => (ask === null ? base : [...base, ask]), [base, ask]);
   /* the palette owns the query; the finder reads it as it is typed, from the input's own event,

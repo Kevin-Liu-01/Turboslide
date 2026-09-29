@@ -10,35 +10,47 @@
   color: var(--pt-ink);
 }
 
+/* the one line under the composer (docs/POLISH.md 2.9 item 118): nothing is written until an
+   accept; the provider words live in the Assist button's tooltip and the Help dialog */
 .ts-assist-note {
   margin: 0;
-  padding: 10px 16px;
+  padding: 0 16px 10px;
   font-size: 12px;
   line-height: 1.5;
   color: var(--pt-titanium);
-  border-bottom: 1px solid var(--pt-hair-soft);
+  background: var(--pt-paper);
+  position: sticky;
+  bottom: 0;
 }
 
+/* the slide's label: one line, the derived title cut with an ellipsis */
 .ts-assist-slide {
   margin: 0;
   padding: 8px 16px 0;
   font-size: 12px;
   color: var(--pt-titanium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* the starters: one ruled row each, the whole row a button */
+/* the starters: one ruled row each, the whole row a button, no glyph; they sit at the bottom
+   of the log area so the suggestions read beside the box (item 118) */
 .ts-assist-starters {
   list-style: none;
-  margin: 0;
+  margin: auto 0 0;
   padding: 4px 0 0;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-assist-starters.is-alone {
+  margin: 0;
+  border-top: 0;
 }
 
 .ts-assist-starter {
   appearance: none;
-  display: grid;
-  grid-template-columns: 16px minmax(0, 1fr);
-  align-items: start;
-  gap: 10px;
+  display: block;
   width: 100%;
   padding: 10px 16px;
   border: 0;
@@ -49,14 +61,6 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
-}
-
-.ts-assist-starter svg {
-  width: 16px;
-  height: 16px;
-  margin-top: 1px;
-  fill: currentColor;
-  color: var(--pt-titanium);
 }
 
 .ts-assist-starter:hover {
@@ -79,12 +83,18 @@
   color: var(--pt-titanium);
 }
 
-/* the log: asks, cards and sentences in order */
+/* the log: asks, cards and sentences in order; empty, it takes no room so the starters rise to
+   the composer */
 .ts-assist-log {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   list-style: none;
   margin: 0;
-  padding: 0 0 8px;
+  padding: 0;
+}
+
+.ts-assist-log:not(:empty) {
+  flex: 1 1 auto;
+  padding-bottom: 8px;
 }
 
 .ts-assist-ask {
@@ -214,9 +224,15 @@
   border-top: 1px solid var(--pt-hair-soft);
 }
 
-/* the disabled panel: the one sentence, the starters and the composer gone */
+/* the disabled panel: the one sentence, the starters and the composer gone; inline, the
+   assistant's refusal in the log area with the starters and the composer kept (item 113) */
 .ts-assist-disabled {
   margin: 0;
   padding: 16px;
   color: var(--pt-titanium);
+}
+
+.ts-assist-disabled.is-inline {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--pt-hair-soft);
 }

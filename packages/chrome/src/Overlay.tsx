@@ -4,6 +4,7 @@ import { useContext, useEffect } from 'react';
 import type { ChartCellDetail, EditorOverlayView, LintBox } from '@turboslide/viewer/Editor';
 import { CHART_CELL_EVENT } from '@turboslide/viewer/Editor';
 import type { Box, Handle } from '@turboslide/viewer/Gestures';
+import { HANDLE_SQUARE } from '@turboslide/viewer/Gestures';
 import { GuideLines } from '@turboslide/viewer/Guides';
 import { MarqueeRect } from '@turboslide/viewer/Marquee';
 import { objectTransform, ROTATE_HANDLE_GAP_PX, ROTATE_HANDLE_PX } from '@turboslide/viewer/rotate';
@@ -61,18 +62,47 @@ function place(box: Box, k: number): CSSProperties {
 /** The chip's height plus its gap to the ring, in CSS pixels. */
 const CHIP_H = 18;
 const CHIP_GAP = 2;
+/**
+ * The chip's clearance above the ring: the corner handle's half height plus a gap, so the chip
+ * never covers the nw handle (docs/POLISH.md 2.6 item 62; audit-media item 14 read "Image" over
+ * the handle and the rotate stem on a picture under 161 px and on every logo).
+ */
+const CHIP_CLEAR = Math.ceil(HANDLE_SQUARE / 2) + 4;
+/** A ring narrower than this many sheet px has its rotate stem under the chip's words, so the chip drops below. */
+const CHIP_BELOW_UNDER_SHEET_PX = 140;
 /** The clearance a diagram label keeps from a stroke, in sheet pixels (DECK-GRAMMAR.md:45). */
 const CLEARANCE_PX = 12;
 /** The frame edge strips of an object: this many CSS pixels wide, centred on the ring (gslides-parity SPEC 10.2). */
 export const FRAME_EDGE_PX = 8;
 
-/** The chip sits above the ring's top left corner, or under its bottom left when the ring meets the sheet's top. */
+/**
+ * The chip sits above the ring's top left corner, clear of the corner handle, or under its
+ * bottom left when the ring meets the sheet's top or is too narrow for the chip beside the
+ * rotate stem (item 62).
+ */
 function chipStyle(box: Box, k: number): CSSProperties {
-  const above = box[1] * k - CHIP_H - CHIP_GAP;
+  const above = box[1] * k - CHIP_H - CHIP_CLEAR;
+  const narrow = box[2] < CHIP_BELOW_UNDER_SHEET_PX;
   return {
     left: box[0] * k,
-    top: above >= 0 ? above : (box[1] + box[3]) * k + CHIP_GAP,
+    top: above >= 0 && !narrow ? above : (box[1] + box[3]) * k + CHIP_CLEAR,
   };
+}
+
+/**
+ * The four strips of the crop's dim (item 50): the parts of the picture's full box outside the
+ * frame, so the kept part stays as drawn and the cut part reads dimmed; empty when the frame
+ * covers the box.
+ */
+function cropDimStrips(full: Box, frame: Box, k: number): CSSProperties[] {
+  const [fx, fy, fw, fh] = full;
+  const [cx, cy, cw, ch] = frame;
+  const strips: Box[] = [];
+  if (cy > fy) strips.push([fx, fy, fw, cy - fy]);
+  if (cy + ch < fy + fh) strips.push([fx, cy + ch, fw, fy + fh - (cy + ch)]);
+  if (cx > fx) strips.push([fx, cy, cx - fx, ch]);
+  if (cx + cw < fx + fw) strips.push([cx + cw, cy, fx + fw - (cx + cw), ch]);
+  return strips.filter((strip) => strip[2] > 0 && strip[3] > 0).map((strip) => place(strip, k));
 }
 
 /** The readout chip sits above the ring's top right, clear of the chip and the rotation ring. */
@@ -98,7 +128,7 @@ function barStyle(box: Box, k: number, sheetHeight: number): CSSProperties {
   };
 }
 
-/** The four edge strips of an object's frame, each centred on the ring's edge (gslides-parity SPEC 10.2: the frame is the drag surface). */
+/** The four edge strips of an object's frame, each centered on the ring's edge (gslides-parity SPEC 10.2: the frame is the drag surface). */
 export function frameEdgeStyles(box: Box, k: number): Record<'n' | 's' | 'w' | 'e', CSSProperties> {
   const half = FRAME_EDGE_PX / 2;
   const left = box[0] * k;
@@ -234,11 +264,11 @@ export function handleDoc(handle: Handle): string {
     case 'block-move':
       return `Drag the chip or the block to reorder it within its slot or into another slot. ${modKey()}Up and ${modKey()}Down move it one step, and with Shift to the first or the last place in its slot.`;
     case 'free-move':
-      return `Drag the frame or the chip anywhere: snaps to other objects, the slide's edges and centre and the guides; Shift keeps one axis, ${modKey()}drag skips the snaps, Option drag drops a copy. Arrows nudge 1 px, Shift 10 px. ${modKey()}Up and ${modKey()}Down change the order.`;
+      return `Drag the frame or the chip anywhere: snaps to other objects, the slide's edges and center and the guides; Shift keeps one axis, ${modKey()}drag skips the snaps, Option drag drops a copy. Arrows nudge 1 px, Shift 10 px. ${modKey()}Up and ${modKey()}Down change the order.`;
     case 'free-resize':
-      return `Drag the ${RESIZE_NAMES[handle.dir ?? ''] ?? 'edge'} to resize; Shift keeps the aspect ratio, Option resizes from the centre. Arrows step 1 px, Shift 10 px.`;
+      return `Drag the ${RESIZE_NAMES[handle.dir ?? ''] ?? 'edge'} to resize; Shift keeps the aspect ratio, Option resizes from the center. Arrows step 1 px, Shift 10 px.`;
     case 'free-rotate':
-      return 'Drag to rotate about the centre; Shift snaps to 15 degrees. Left and Right turn 1 degree, Shift 15.';
+      return 'Drag to rotate about the center; Shift snaps to 15 degrees. Left and Right turn 1 degree, Shift 15.';
     case 'line-end':
       return 'Drag the end of the line; it snaps to a connection site of the shape under it and follows that shape from then on. Shift keeps 45 degree steps.';
     case 'crop-edge':
@@ -401,6 +431,11 @@ export function Overlay({ view }: OverlayProps) {
   }, [openPanel, view.slideId]);
   const chipHandle = view.handles.find((handle) => handle.shape === 'chip');
   const drawn = view.handles.filter((handle) => handle.shape !== 'chip');
+  /* a selected line kind is its two end handles and its chip, no ring and no frame edge strips
+     (docs/POLISH.md 2.4 item 28; polish/build/b3.md request 3): the line end handles exist for a
+     line kind alone, so their presence says which selection this is */
+  const lineEnds = view.handles.filter((handle) => handle.kind === 'line-end');
+  const lineSelected = view.count === 1 && lineEnds.length > 0 && !view.crop;
   /* a table with a cell open keeps its chip and ring band as its move surface while `editing`
      is true (docs/FEATURES.md 2.1; the view's `tableFrame`) */
   const frameLive = !view.editing || view.tableFrame;
@@ -477,9 +512,13 @@ export function Overlay({ view }: OverlayProps) {
   /* the frame of an object is its drag surface (gslides-parity SPEC 10.2, R09 A1): four edge
      strips start the same free-move gesture as the chip */
   const frameEdges =
-    chipHandle && chipHandle.kind === 'free-move' && ringBox && frameLive && !view.crop
+    chipHandle && chipHandle.kind === 'free-move' && ringBox && frameLive && !view.crop && !lineSelected
       ? frameEdgeStyles(rotated ? [0, 0, ringBox[2], ringBox[3]] : ringBox, k)
       : null;
+  /* the chip of a line sits by its start handle, the way its box would be a ring's corner */
+  const chipBox: Box | null = lineSelected
+    ? (lineEnds.find((handle) => handle.index === 0) ?? lineEnds[0])?.box ?? ringBox
+    : ringBox;
   const angle = view.selectionPos?.rotate ?? 0;
   /* the handles of a turned object are placed relative to its own box inside the turning layer */
   const localHandle = (handle: Handle): Handle =>
@@ -565,6 +604,11 @@ export function Overlay({ view }: OverlayProps) {
       {/* crop mode (SPEC-2 6.1 row 19): the picture at its full extent, dimmed outside the frame */}
       {view.crop ? (
         <>
+          {/* the dim covers the cut part alone (docs/POLISH.md 2.5 item 50; polish/build/b4.md
+              R8): four strips between the picture's full box and the frame, the kept part as drawn */}
+          {cropDimStrips(view.crop.full, view.crop.frame, k).map((strip, index) => (
+            <div key={`dim:${index}`} className="ts-crop-dim" style={strip} aria-hidden="true" />
+          ))}
           <div className="ts-crop-full" style={place(view.crop.full, k)} aria-hidden="true" />
           <div className="ts-crop-frame" style={place(view.crop.frame, k)} aria-hidden="true" />
         </>
@@ -578,7 +622,7 @@ export function Overlay({ view }: OverlayProps) {
           aria-hidden="true"
         />
       ))}
-      {selectionBox && !view.crop ? (
+      {selectionBox && !view.crop && !lineSelected ? (
         rotated && ringBox && view.count === 1 ? (
           <div className="ts-turn" style={turnStyle} data-rotated="" aria-hidden="true">
             <div
@@ -627,26 +671,88 @@ export function Overlay({ view }: OverlayProps) {
           <div className="ts-group" style={place(view.groupBox, k)} aria-hidden="true" />
         )
       ) : null}
-      {ringBox && chipText !== null && !view.crop ? (
+      {ringBox && chipBox && chipText !== null && !view.crop ? (
         chipHandle && frameLive ? (
           <HandleButton
             handle={chipHandle}
             className={cn('ts-select-chip', view.activeHandle === chipHandle.id && 'is-active')}
-            style={chipStyle(ringBox, k)}
+            style={chipStyle(chipBox, k)}
             onDown={view.onHandleDown}
             onKey={onHandleKey}
           >
             {chipText}
           </HandleButton>
         ) : (
-          <span className="ts-select-chip is-static" style={chipStyle(ringBox, k)}>
+          <span className="ts-select-chip is-static" style={chipStyle(chipBox, k)}>
             {chipText}
           </span>
         )
       ) : null}
+      {/* the link chip of a linked run clicked once outside a session (docs/POLISH.md 2.3 item
+          20): the address with Open, Copy, Change and Remove under the run's box; its presses
+          stay its own so the stage neither clears the selection nor starts a drag */}
+      {view.linkChip !== null && !view.editing ? (
+        <div
+          className="ts-link-chip is-overlay"
+          role="group"
+          aria-label="Link"
+          data-control="chip.link"
+          style={{
+            left: view.linkChip.box[0] * k,
+            top: (view.linkChip.box[1] + view.linkChip.box[3]) * k + 6,
+          }}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          <span className="ts-link-chip-href" data-control="chip.link.href" title={view.linkChip.href}>
+            {view.linkChip.href.length > 56
+              ? `${view.linkChip.href.slice(0, 55)}\u2026`
+              : view.linkChip.href}
+          </span>
+          <button
+            type="button"
+            className="ts-run-link-btn"
+            data-control="chip.link.open"
+            onClick={view.linkChip.onOpen}
+            {...tipProps({ name: 'Open', doc: 'Opens the link in a new tab' })}
+          >
+            Open
+          </button>
+          <button
+            type="button"
+            className="ts-run-link-btn"
+            data-control="chip.link.copy"
+            onClick={view.linkChip.onCopy}
+            {...tipProps({ name: 'Copy', doc: 'Copies the address' })}
+          >
+            Copy
+          </button>
+          <button
+            type="button"
+            className="ts-run-link-btn"
+            data-control="chip.link.change"
+            onClick={view.linkChip.onChange}
+            {...tipProps({ name: 'Change', doc: 'Opens the link bar on the linked words' })}
+          >
+            Change
+          </button>
+          <button
+            type="button"
+            className="ts-run-link-btn"
+            data-control="chip.link.remove"
+            onClick={view.linkChip.onRemove}
+            {...tipProps({ name: 'Remove', doc: 'Removes the link and keeps the words' })}
+          >
+            Remove
+          </button>
+        </div>
+      ) : null}
       {view.crop && ringBox ? (
         <span className="ts-select-chip is-static is-crop" style={chipStyle(view.crop.frame, k)}>
-          {CANVAS.crop}
+          {CANVAS.cropChip}
         </span>
       ) : null}
       {readout !== null && ringBox ? (

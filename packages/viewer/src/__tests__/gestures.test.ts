@@ -80,7 +80,7 @@ describe('handlesFor', () => {
     ]);
     const edge = handle('key-edge', selected);
     expect(edge.box[0] + edge.box[2] / 2).toBe(731.5 + 200);
-    expect(edge.label).toBe('list: Key column edge');
+    expect(edge.label).toBe('Key column edge');
     expect(edge.control).toBe('handle.list.key');
   });
 
@@ -593,7 +593,7 @@ describe('declared diagram labels and markers (SPEC 6.4 Alt-drag, M5)', () => {
     ]);
     const label = list.find((h) => h.kind === 'dia-label');
     expect(label).toMatchObject({
-      label: 'dia1: Label 1',
+      label: 'Label 1',
       control: 'handle.dia1.data.texts.0',
       axis: 'xy',
       alt: true,

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 
-import { blurVerdictOf } from '../InlineText';
+import { blurVerdictOf, isParkingField } from '../InlineText';
 
 // The menu bar and the menu plates as transient surfaces (docs/RETURN.md 2.14 item 2): a blur
 // into a menu bar title or a menu row parks the session and leaves the focus with the menu for
@@ -32,6 +32,27 @@ describe('blurVerdictOf on the menu bar and a menu plate', () => {
     } finally {
       bar.remove();
       menu.remove();
+    }
+  });
+
+  /* the toolbar's size field marks itself as one the session parks for (docs/POLISH.md 2.3 item
+     16): its typed value lands on the selected run as a mark, and the run takes the focus and
+     its range back when the field blurs; a plain field of the toolbar still ends the session */
+  it('parks a session for a field marked data-session-park (the size field) and ends it for another toolbar field', () => {
+    const toolbar = document.createElement('div');
+    toolbar.setAttribute('role', 'toolbar');
+    const size = document.createElement('input');
+    size.setAttribute('data-session-park', 'true');
+    const other = document.createElement('input');
+    toolbar.append(size, other);
+    document.body.appendChild(toolbar);
+    try {
+      expect(isParkingField(size)).toBe(true);
+      expect(isParkingField(other)).toBe(false);
+      expect(blurVerdictOf(size)).toBe('park');
+      expect(blurVerdictOf(other)).toBe('end');
+    } finally {
+      toolbar.remove();
     }
   });
 });

@@ -54,6 +54,21 @@ const VIEWPORT_MARGIN = 8;
 /** A press on the anchor within this window keeps the focus that follows it from showing the tip. */
 const PRESS_GRACE_MS = 400;
 
+/**
+ * A pointer that entered a control without moving within this window is a resting pointer: the
+ * control moved under it (a menu closed, a panel opened), and no tip shows until it moves
+ * (docs/POLISH.md 2.6 item 61; audit-media item 15: the toolbar's Image tip opened under the
+ * resting pointer when the Insert menu closed and stayed through the upload).
+ */
+const REST_MS = 500;
+
+/**
+ * A focus that lands within this window after Escape or Enter is a return of focus (the palette
+ * or a dialog closed), not keyboard navigation, so it shows no tip (item 61; audit-assist item 13:
+ * "Search the menus" stayed after the palette closed).
+ */
+const RETURN_GRACE_MS = 600;
+
 /** Inside these surfaces a tooltip shows on hover alone, never on keyboard focus (3.1.1). */
 export const QUIET_FOCUS_SURFACES = '.ts-menu, .ts-context-menu, [role="dialog"]';
 
@@ -140,6 +155,43 @@ let pending: { anchor: HTMLElement; timer: number } | null = null;
 let listening = false;
 /* the anchor last pressed by the pointer and when, so the focus a click gives shows no tip */
 let pressed: { anchor: HTMLElement; at: number } | null = null;
+/* when the pointer last moved anywhere, so a mouseenter under a resting pointer shows no tip */
+let lastMoveAt = -Infinity;
+/* when Escape or Enter was last pressed anywhere, so a focus returned by a close shows no tip */
+let lastReturnKeyAt = -Infinity;
+let watching = false;
+
+/** The always on document listeners that record the pointer's last move and the last dismiss key. */
+function watch(): void {
+  if (watching || typeof document === 'undefined') return;
+  watching = true;
+  document.addEventListener(
+    'mousemove',
+    () => {
+      lastMoveAt = Date.now();
+    },
+    { capture: true, passive: true },
+  );
+  document.addEventListener(
+    'keydown',
+    (event) => {
+      if (event.key === 'Escape' || event.key === 'Enter') lastReturnKeyAt = Date.now();
+    },
+    true,
+  );
+}
+
+/** Forgets the last pointer move and the last dismiss key, for tests that share the module between cases. */
+export function resetTooltipTiming(): void {
+  lastMoveAt = -Infinity;
+  lastReturnKeyAt = -Infinity;
+  pressed = null;
+}
+
+/** True while the pointer moved recently: a mouseenter is the pointer's own, not a control moving under it. */
+function pointerMoving(): boolean {
+  return Date.now() - lastMoveAt <= REST_MS;
+}
 
 function reducedMotion(): boolean {
   try {
@@ -223,8 +275,9 @@ function place(el: HTMLElement, anchor: HTMLElement): void {
   el.dataset.place = placement;
 }
 
-function onDocumentKey(event: globalThis.KeyboardEvent): void {
-  if (event.key === 'Escape') hideTooltip();
+/* any key hides the tip (item 61): the seller has moved on from the control under the pointer */
+function onDocumentKey(_event: globalThis.KeyboardEvent): void {
+  hideTooltip();
 }
 
 function onDocumentPress(): void {
@@ -314,6 +367,7 @@ export function shownTooltipAnchor(): HTMLElement | null {
 export type TipAnchorProps = {
   'data-tip': string;
   onMouseEnter: (event: MouseEvent<HTMLElement>) => void;
+  onMouseMove: (event: MouseEvent<HTMLElement>) => void;
   onMouseLeave: (event: MouseEvent<HTMLElement>) => void;
   onMouseDown: (event: MouseEvent<HTMLElement>) => void;
   onFocus: (event: FocusEvent<HTMLElement>) => void;
@@ -327,6 +381,7 @@ export type TipAnchorProps = {
  * engine's :focus-visible is not consulted because a synthetic focus (a test, a script) has none.
  */
 function keyboardFocus(anchor: HTMLElement): boolean {
+  if (Date.now() - lastReturnKeyAt < RETURN_GRACE_MS) return false;
   return !(
     pressed !== null &&
     pressed.anchor === anchor &&
@@ -342,9 +397,19 @@ function keyboardFocus(anchor: HTMLElement): boolean {
  */
 export function tipProps(input: TipInput, label?: string): TipAnchorProps {
   const content = tipOf(input, label);
+  watch();
   return {
     'data-tip': content.name,
-    onMouseEnter: (event) => scheduleTooltip(event.currentTarget, content),
+    /* a tip after the pointer's own arrival; a control that moved under a resting pointer waits
+       for the next movement over it (item 61) */
+    onMouseEnter: (event) => {
+      if (pointerMoving()) scheduleTooltip(event.currentTarget, content);
+    },
+    onMouseMove: (event) => {
+      const anchor = event.currentTarget;
+      if (shown?.anchor === anchor || pending?.anchor === anchor) return;
+      scheduleTooltip(anchor, content);
+    },
     onMouseLeave: (event) => hideTooltip(event.currentTarget),
     onMouseDown: (event) => {
       pressed = { anchor: event.currentTarget, at: Date.now() };
@@ -378,6 +443,7 @@ export function mergeTipProps(own: AnchorLike, tip: TipAnchorProps): AnchorLike 
     ...own,
     'data-tip': tip['data-tip'],
     onMouseEnter: both(own.onMouseEnter, tip.onMouseEnter),
+    onMouseMove: both(own.onMouseMove, tip.onMouseMove),
     onMouseLeave: both(own.onMouseLeave, tip.onMouseLeave),
     onMouseDown: both(own.onMouseDown, tip.onMouseDown),
     onFocus: both(own.onFocus, tip.onFocus),

@@ -57,6 +57,10 @@ function wrappersOf(run: Run): Wrapper[] {
   if (run.sup === true) out.push({ tag: 'sup' });
   else if (run.sub === true) out.push({ tag: 'sub' });
   if (run.color !== undefined) out.push({ tag: 'span', style: `color:${colorCss(run.color)}` });
+  /* the size mark `z:36` (docs/POLISH.md 2.3 item 16; schema text.ts RunMarks.size): a span with
+     the size after the colour's, before the highlight, so a sized run draws in the stage and in
+     the session's editable alike (InlineText reads the style back into the run) */
+  if (run.size !== undefined) out.push({ tag: 'span', style: `font-size:${run.size}px` });
   if (run.hl !== undefined) out.push({ tag: 'mark', style: `background:${colorCss(run.hl)}` });
   return out;
 }

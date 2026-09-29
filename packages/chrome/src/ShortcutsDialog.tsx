@@ -15,7 +15,7 @@ import './ShortcutsDialog.css';
  * Keyboard shortcuts (gslides-parity SPEC 2.10, 10.1, 13.10; Cmd+/): the key table of the menu
  * model under Google's group names with a search box. Every row is real text, so a screen reader
  * reads it; a Later row is greyed with its reason. Groups follow Google's shortcut page order
- * (R04 Part B): Common actions, Film strip actions, Navigation, Menus, Text, Move and arrange
+ * (R04 Part B): Common actions, Filmstrip actions, Navigation, Menus, Text, Move and arrange
  * objects, Presenting, then the groups whose rows are all Later. Built from `buildKeyTable()`,
  * so the dialog is always true for the editor. Replaces HelpCard.tsx for the editor; the view
  * route keeps the card. Since the focus round (docs/FOCUS.md 3.1) the dialog takes the menu
@@ -35,7 +35,7 @@ export type ShortcutsDialogProps = {
 /** Google's group order on the shortcuts page (R04 Part B). */
 export const GROUP_ORDER: ReadonlyArray<ShortcutGroup> = [
   'Common actions',
-  'Film strip actions',
+  'Filmstrip actions',
   'Navigation',
   'Menus',
   'Text',
@@ -92,6 +92,10 @@ export function shortcutRows(
      so Redo reads once with both its chords */
   const byId = new Map<string, ShortcutRow>();
   for (const binding of table) {
+    /* one row per chord (docs/POLISH.md 2.6 item 73; audit-chrome item 52): the toolbar's Paint
+       format prints both chords at once while Copy formatting and Paste formatting print one
+       each, so the toolbar's row is left out of the page */
+    if (binding.id === 'toolbar.paintFormat') continue;
     if (context !== undefined) {
       const item = findItem(binding.id);
       if (item !== undefined && !isPresent(item, context)) continue;

@@ -38,3 +38,19 @@
   outline: 1px solid var(--pt-ink);
   outline-offset: 1px;
 }
+
+/* a row holding a segmented control wraps the control under its label when the options are wider
+   than the room beside it (docs/POLISH.md 2.6 item 52; audit-chrome item 7 read "izontalOrientation"
+   with the segment drawn over its own label): the row flexes and the field takes the rest */
+.ts-insp-row:has(> .ts-insp-field > .ts-ctl-seg) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  row-gap: 4px;
+}
+
+.ts-insp-row:has(> .ts-insp-field > .ts-ctl-seg) > .ts-insp-field {
+  margin-left: auto;
+  max-width: 100%;
+}

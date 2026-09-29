@@ -21,6 +21,7 @@ import {
   visibleItems,
 } from './menus/model.ts';
 import { openRoster } from './presence/roster-hook';
+import { noteMenuRowActivated } from './Dialog';
 import { hideTooltip, sentence, tipProps } from './Tooltip';
 
 import './Menu.css';
@@ -101,6 +102,8 @@ export type MenuProps = {
 
 /** How long a pointer rests on a submenu row before it opens (SPEC 2.11). */
 export const SUBMENU_HOVER_MS = 120;
+/** How long after a list opens an enter with no pointer movement is the browser's own (the list appeared under the pointer), not a person's. */
+const RESTING_POINTER_MS = 300;
 
 /** The plate stays this far inside the viewport. */
 const VIEWPORT_MARGIN = 8;
@@ -292,6 +295,21 @@ function MenuList({
   const openViaKeyboard = useRef(false);
   const hoverTimer = useRef(0);
   const typed = useRef({ buffer: '', at: 0 });
+  /* a list that opens under a resting pointer (a right click menu at the pointer) gets the
+     browser's own enter for the row under it, with no movement of the pointer; that enter lights
+     no row (docs/POLISH.md 2.6 item 74; audit-chrome item 48). The roving focus follows the
+     pointer once it has moved, or after the first moments of the list, when an enter is a real entry */
+  const mountedAt = useRef(Date.now());
+  const pointerMoved = useRef(false);
+  useEffect(() => {
+    const onMove = (event: PointerEvent) => {
+      if (event.movementX !== 0 || event.movementY !== 0) pointerMoved.current = true;
+    };
+    document.addEventListener('pointermove', onMove, true);
+    return () => document.removeEventListener('pointermove', onMove, true);
+  }, []);
+  const pointerRests = (): boolean =>
+    !pointerMoved.current && Date.now() - mountedAt.current < RESTING_POINTER_MS;
 
   /* a row a role cannot use is absent, never disabled (SPEC-3 13.4) */
   const visible = useMemo(
@@ -403,6 +421,7 @@ function MenuList({
         else openSubmenu(item, viaKeyboard);
         return;
       }
+      noteMenuRowActivated(item.id);
       onSelect(item);
     },
     [context, renderDynamic, openId, closeSubmenu, openSubmenu, onSelect],
@@ -501,6 +520,7 @@ function MenuList({
 
   const onRowPointerEnter = (item: MenuItem) => (event: ReactPointerEvent<HTMLElement>) => {
     if (event.pointerType === 'touch') return;
+    if (pointerRests()) return;
     window.clearTimeout(hoverTimer.current);
     if (isEnabled(item, context)) setFocusId(item.id);
     if (hasSubmenu(item, context, renderDynamic) && isEnabled(item, context)) {
@@ -559,6 +579,11 @@ function MenuList({
               ? 'menuitemradio'
               : 'menuitemcheckbox';
         const doc = tooltipDoc(item, context);
+        /* a row draws a plate only when it is enabled, leads nowhere else and has a sentence to
+           say (docs/POLISH.md 2.6 item 61; audit-chrome item 21: a disabled row's plate covered
+           the rows under it, a submenu row's the submenu, a row without a doc repeated its name);
+           `data-tip` stays on every row for the tooltip audit */
+        const quiet = !rowEnabled || submenu || doc === undefined;
         const tip = tipProps({
           name: text,
           key: tooltipKey(item.key, context.platform),
@@ -597,11 +622,25 @@ function MenuList({
                 event.stopPropagation();
                 activate(item, false);
               }}
-              {...tip}
+              {...(quiet ? { 'data-tip': tip['data-tip'] } : tip)}
               onMouseEnter={(event) => {
                 /* a row whose submenu or grid is open shows no plate over it (rank 28) */
-                if (isOpen) return;
+                if (isOpen || quiet) return;
                 tip.onMouseEnter(event);
+              }}
+              onMouseMove={(event) => {
+                /* the pointer's own movement over a row takes the roving focus (the entry the
+                   resting rule above left alone lights on the first real move) */
+                if (
+                  (event.movementX !== 0 || event.movementY !== 0) &&
+                  focusId !== item.id &&
+                  isEnabled(item, context)
+                ) {
+                  pointerMoved.current = true;
+                  setFocusId(item.id);
+                }
+                if (isOpen || quiet) return;
+                tip.onMouseMove(event);
               }}
             >
               <span className="ts-menu-ic" aria-hidden="true">

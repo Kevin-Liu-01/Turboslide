@@ -68,6 +68,7 @@ function Harness(props: {
   onClose?: () => void;
   onLayout?: (layout: string) => void;
   layout?: (typeof LAYOUT_IDS)[number];
+  openedBy?: 'pointer' | 'keyboard';
 }) {
   return (
     <ContextMenu
@@ -79,6 +80,7 @@ function Harness(props: {
       onClose={props.onClose ?? (() => undefined)}
       layout={props.layout}
       onLayout={props.onLayout}
+      {...(props.openedBy === undefined ? {} : { openedBy: props.openedBy })}
     />
   );
 }
@@ -167,7 +169,16 @@ describe('ContextMenu', () => {
         .querySelector('[data-menu-item="slide.changeBackground"]')
         ?.getAttribute('aria-disabled'),
     ).toBeNull();
-    /* the first row has focus */
+    /* a right click lights no row (docs/POLISH.md 2.6 item 74; audit-chrome item 48): the list
+       itself holds the focus so Escape and the arrows land on it, and Down lights the first row */
+    expect(document.activeElement).toBe(menu);
+    expect(document.querySelectorAll('[role="menu"] [role^="menuitem"]:focus')).toHaveLength(0);
+    fireEvent.keyDown(menu, { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(document.querySelector('[data-menu-item="edit.cut"]'));
+  });
+
+  it('lights the first row when the keyboard opened the menu (Shift F10)', () => {
+    render(<Harness openedBy="keyboard" />);
     expect(document.activeElement).toBe(document.querySelector('[data-menu-item="edit.cut"]'));
   });
 
@@ -203,7 +214,12 @@ describe('ContextMenu', () => {
     const apply = document.querySelector<HTMLElement>('[data-menu-item="slide.applyLayout"]');
     if (!apply) throw new Error('no Apply layout row');
     expect(apply.getAttribute('aria-haspopup')).toBe('menu');
-    /* the pointer rests on the row (the menu's roving focus follows), then Right opens it */
+    /* the pointer moves onto the row after the list's first moments (an enter with no movement
+       right after the open is the browser's own, for a list that appeared under the pointer, and
+       lights nothing; the roving focus follows a real entry), then Right opens it */
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     fireEvent.pointerEnter(apply);
     fireEvent.keyDown(apply, { key: 'ArrowRight' });
     act(() => {
@@ -269,6 +285,10 @@ describe('ContextMenu', () => {
     if (!row) throw new Error('no Change shape row');
     expect(row.getAttribute('aria-disabled')).not.toBe('true');
     expect(row.getAttribute('aria-haspopup')).toBe('menu');
+    /* the entry after the list's first moments is a person's (the resting pointer rule) */
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     fireEvent.pointerEnter(row);
     fireEvent.keyDown(row, { key: 'ArrowRight' });
     act(() => {

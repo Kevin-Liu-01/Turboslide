@@ -45,6 +45,12 @@ export type RunMarks = {
   sub?: true;
   color?: Color;
   hl?: Color;
+  /**
+   * the run's own font size in px (the polish round, docs/POLISH.md 2.3 item 16): a size set on a
+   * selected word, as Google keeps it, serialized as `z:36` in the mark list; the block's
+   * typography size stays the box's
+   */
+  size?: number;
 };
 
 /** parseText(text): Run[]; serializeRuns(runs): Text. A gt run always has t === 'GT'. */
@@ -203,6 +209,7 @@ function makeRun(t: string, flags: Flags, gt: boolean): Run {
   for (const flag of MARK_FLAGS) if (flags[flag]) run[flag] = true;
   if (flags.color !== undefined) run.color = flags.color;
   if (flags.hl !== undefined) run.hl = flags.hl;
+  if (flags.size !== undefined) run.size = flags.size;
   if (flags.link !== undefined) run.link = flags.link;
   if (gt) run.gt = true;
   return run;
@@ -228,6 +235,13 @@ export function parseMarks(list: string): RunMarks | null {
     if (colon !== 1) return null;
     const kind = token.charAt(0);
     const value = token.slice(2);
+    if (kind === 'z') {
+      const size = Number(value);
+      if (!/^\d+$/.test(value) || !Number.isInteger(size) || size < MIN_RUN_SIZE || size > MAX_RUN_SIZE)
+        return null;
+      marks.size = size;
+      continue;
+    }
     if (!colorSchema.safeParse(value).success) return null;
     if (kind === 'c') marks.color = value as Color;
     else if (kind === 'h') marks.hl = value as Color;
@@ -236,12 +250,17 @@ export function parseMarks(list: string): RunMarks | null {
   return marks;
 }
 
+/** The bounds of a run's own size (item 16): the type ladder's ends with room for a typed value. */
+export const MIN_RUN_SIZE = 6;
+export const MAX_RUN_SIZE = 200;
+
 /** The marks of a run or flag set in canonical order, as the `{…}` list without the braces. */
 export function serializeMarks(marks: RunMarks): string {
   const out: string[] = [];
   for (const flag of MARK_FLAGS) if (marks[flag]) out.push(flag);
   if (marks.color !== undefined) out.push(`c:${marks.color}`);
   if (marks.hl !== undefined) out.push(`h:${marks.hl}`);
+  if (marks.size !== undefined) out.push(`z:${marks.size}`);
   return out.join(' ');
 }
 
@@ -351,6 +370,7 @@ export function runMarks(run: Run): RunMarks {
   for (const flag of MARK_FLAGS) if (run[flag]) marks[flag] = true;
   if (run.color !== undefined) marks.color = run.color;
   if (run.hl !== undefined) marks.hl = run.hl;
+  if (run.size !== undefined) marks.size = run.size;
   return marks;
 }
 
@@ -581,6 +601,8 @@ export type MarkEdit = {
   sub?: boolean;
   color?: Color | null;
   highlight?: Color | null;
+  /** the run's own size in px; null clears it (item 16) */
+  size?: number | null;
 };
 
 /** The runs over a plain text range with the marks applied; the rest of the Text is unchanged. */
@@ -601,6 +623,8 @@ export function styleRange(text: Text, range: readonly [number, number], edit: M
     else if (edit.color !== undefined) run.color = edit.color;
     if (edit.highlight === null) delete run.hl;
     else if (edit.highlight !== undefined) run.hl = edit.highlight;
+    if (edit.size === null) delete run.size;
+    else if (edit.size !== undefined) run.size = edit.size;
   }
   return paragraphs.map((runs) => serializeRuns(runs)).join('\n');
 }
@@ -617,6 +641,7 @@ export function marksOfRange(text: Text, range: readonly [number, number]): RunM
     for (const flag of MARK_FLAGS) if (!other[flag]) delete marks[flag];
     if (other.color !== marks.color) delete marks.color;
     if (other.hl !== marks.hl) delete marks.hl;
+    if (other.size !== marks.size) delete marks.size;
   }
   return marks;
 }
@@ -734,7 +759,7 @@ export function insertAt(text: Text, at: number, insert: string): Text {
 export type RunFlags = RunMarks & { b?: true; link?: string };
 
 /** The keys of RunFlags in canonical order; what text.mark's `clear` names. */
-export const RUN_FLAG_KEYS = [...MARK_FLAGS, 'color', 'hl', 'b', 'link'] as const;
+export const RUN_FLAG_KEYS = [...MARK_FLAGS, 'color', 'hl', 'size', 'b', 'link'] as const;
 export type RunFlagKey = (typeof RUN_FLAG_KEYS)[number];
 
 export const runFlagsSchema = z.strictObject({
@@ -745,6 +770,7 @@ export const runFlagsSchema = z.strictObject({
   sub: z.literal(true).optional(),
   color: colorSchema.optional(),
   hl: colorSchema.optional(),
+  size: z.number().int().min(MIN_RUN_SIZE).max(MAX_RUN_SIZE).optional(),
   b: z.literal(true).optional(),
   link: z.string().min(1).optional(),
 }) satisfies z.ZodType<RunFlags>;
@@ -770,6 +796,7 @@ function runOfFlags(flags: RunFlags): Run {
   if (run.sup && run.sub) delete run.sub;
   if (flags.color !== undefined) run.color = flags.color;
   if (flags.hl !== undefined) run.hl = flags.hl;
+  if (flags.size !== undefined) run.size = flags.size;
   if (flags.b) run.b = true;
   if (flags.link !== undefined) run.link = flags.link;
   return run;
@@ -1012,6 +1039,7 @@ export function markRange(text: Text, range: readonly [number, number], edit: Fl
     if (set.sub) delete run.sup;
     if (set.color !== undefined) run.color = set.color;
     if (set.hl !== undefined) run.hl = set.hl;
+    if (set.size !== undefined) run.size = set.size;
     if (set.b) run.b = true;
     if (set.link !== undefined) run.link = set.link;
     for (const key of clear) delete run[key];

@@ -318,7 +318,10 @@ describe('lintStatic', () => {
     });
     expect(title?.proposal).toMatch(/^Slide 5 has an empty title/);
     expect(cell).toMatchObject({ blockId: 'grid', path: '/slots/main/1/rows/1/cells/0' });
-    expect(cell?.proposal).toMatch(/has an empty table cell/);
+    expect(cell?.proposal).toBe('The table has an empty cell; type into it or remove the row.');
+    /* the polish round (docs/POLISH.md 2.6 item 55): one finding per table with the count, no
+       parenthesis and no specification cited in any sentence a seller reads */
+    for (const finding of empty) expect(finding.proposal).not.toMatch(/\(|SPEC/);
     // the two planted blocks trip no other copy rule
     expect(
       findings.filter(
@@ -348,6 +351,35 @@ describe('lintStatic', () => {
     ]);
     expect(blank[0]?.proposal).toMatch(/Slide 1 has an empty title/);
     expect(blank[1]?.proposal).toMatch(/Slide 1 has an empty subtitle/);
+  });
+
+  test('copy/empty-placeholder names a table with nine empty cells once, with the count (docs/POLISH.md 2.6 item 55)', () => {
+    const grid = lintStatic({
+      deck: { ...document.deck, sections: [{ id: 'one', name: 'One', slideIds: ['g'] }] },
+      slides: {
+        g: {
+          schemaVersion: 1,
+          id: 'g',
+          kind: 'content',
+          layout: { type: 'center' },
+          slots: {
+            main: [
+              {
+                id: 'grid9',
+                type: 'table',
+                columns: [{}, {}, {}],
+                rows: [{ cells: ['', '', ''] }, { cells: ['', '', ''] }, { cells: ['', '', ''] }],
+              },
+            ],
+          },
+        },
+      },
+    }).filter((f) => f.rule === 'copy/empty-placeholder');
+    expect(grid).toHaveLength(1);
+    expect(grid[0]?.proposal).toBe(
+      'The table has 9 empty cells; type into them or remove the rows.',
+    );
+    expect(grid[0]?.path).toBe('/slots/main/0/rows/0/cells/0');
   });
 
   test('the copy rules skip table cells and table/size names the ragged row at severity 3', () => {

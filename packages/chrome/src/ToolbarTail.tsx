@@ -11,6 +11,7 @@ import {
 } from '@turboslide/schema/blocks/chart';
 import type { ChartBlock } from '@turboslide/schema/blocks/chart';
 import type { TableBlock } from '@turboslide/schema/blocks/table';
+import { TABLE_SIZES } from '@turboslide/schema/blocks/table';
 import { isLineKind } from '@turboslide/schema/shapes';
 import type { Dash } from '@turboslide/schema/shapes';
 import type { Color } from '@turboslide/schema/color';
@@ -18,6 +19,7 @@ import { deckAppearance } from '@turboslide/schema/deck';
 import { headingBlockSchema } from '@turboslide/schema/blocks';
 import { BULLET_PRESETS, NUMBER_PRESETS } from '@turboslide/schema/text';
 import { TYPE_LADDER } from '@turboslide/schema/typography';
+import { SESSION_PARK_ATTRIBUTE } from '@turboslide/viewer/InlineText';
 
 import {
   dashPlan,
@@ -25,7 +27,9 @@ import {
   lineEndPlan,
   listPlan,
   memberWritePlan,
+  menuActionPlan,
   PLAIN_SIZE_LADDER,
+  pseudoBlockOf,
   selectedBlock,
   selectedBlocks,
   selectionMarks,
@@ -35,6 +39,7 @@ import {
   stepPlainSize,
   tailKindOf as tailOfSelection,
   pictureTargetOf,
+  textPathOf,
   textStylePlan,
 } from './editor-shell';
 import type { ActionPlan, ActionRefusal } from './editor-shell';
@@ -45,7 +50,7 @@ import { useMountEffect } from './lib/useMountEffect';
 import { Menu } from './Menu';
 import { evaluate, isPresent, itemById, presentControls, visibleItems } from './menus/model';
 import type { MenuContext, MenuItem } from './menus/model';
-import { HIDE_MENUS_CONTROL, TOOLBAR_TAIL_END, tailFor } from './menus/toolbar-tails';
+import { HIDE_MENUS_CONTROL, TOOLBAR_TAIL_END, tailEditable, tailFor } from './menus/toolbar-tails';
 import { FORMAT, PRESENCE } from './menus/strings';
 import type { TailControl, TailKind, TailOp } from './menus/toolbar-tails';
 import { FontField } from './FontPicker';
@@ -277,6 +282,14 @@ export function ToolbarTail() {
   const { input, menuContext } = shell;
   const slide = input.document.slides[input.slideId];
   const block = selectedBlock(slide, input.selection);
+  /* the title slide's fields are pseudo blocks the menus see (editor-shell `pseudoBlockOf`): the
+     size field reads their heading's size (docs/POLISH.md 2.3 item 22; the box read empty while
+     a title or a subtitle was edited) */
+  const sizeBlock =
+    block ??
+    (slide !== undefined && input.selection?.blockId !== undefined
+      ? pseudoBlockOf(slide, input.selection.blockId)
+      : undefined);
   const members = selectedBlocks(slide, input.selection);
   /* a text block with an outline is word art: the shape tail's fill and border controls lead its
      text tail (docs/OBJECTS.md 4.2 item 4; toolbar-tails.ts WORDART_TAIL) */
@@ -289,12 +302,18 @@ export function ToolbarTail() {
      whole (a chart, a table cell, a group) falls back to the default tail, so the bar is never
      empty while a parked block is selected; a control whose arrow opens a parked row (Crop image
      and Mask image) keeps its button and loses the arrow. */
-  const controls = withPresentArrows(
-    presentControls(tailFor(kind), menuContext).length > 0 || kind === 'default'
-      ? presentControls(tailFor(kind), menuContext)
-      : presentControls(tailFor('default'), menuContext),
-    menuContext,
-  );
+  /* the tail reads the mode (docs/POLISH.md 2.6 item 58; audit-pages item 6, audit-chrome item
+     27): a reader at /edit and Commenting mode get no write control, since every tail control
+     writes; the tail's end (the pointer toggle, Hide the menus) and the head's view controls stay */
+  const canEdit = tailEditable(menuContext);
+  const controls = canEdit
+    ? withPresentArrows(
+        presentControls(tailFor(kind), menuContext).length > 0 || kind === 'default'
+          ? presentControls(tailFor(kind), menuContext)
+          : presentControls(tailFor('default'), menuContext),
+        menuContext,
+      )
+    : [];
   const [plate, setPlate] = useState<{ anchor: HTMLElement; plate: Plate } | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreButton = useRef<HTMLButtonElement>(null);
@@ -428,7 +447,7 @@ export function ToolbarTail() {
         /* a shape or line drawn by the tool carries no fill or stroke field until one is written
            (the schema's shape block has both optional); the swatch writes the field either way.
            Before this the `in` check answered null on a fresh line and the Line color swatch
-           wrote nothing (VERIFICATION.md C2-F11, `lines.tail.colour-weight-dash-ends`) */
+           wrote nothing (VERIFICATION.md C2-F11, `lines.tail.color-weight-dash-ends`) */
         if (block.type === 'shape') return { path: '/fill', current: colorOf(block.fill) };
         return 'fill' in block ? { path: '/fill', current: colorOf(block.fill) } : null;
       case 'borderColor':
@@ -711,7 +730,7 @@ export function ToolbarTail() {
     }
     if (many) {
       const field = op === 'fillColor' ? 'fill' : op === 'textColor' ? 'color' : 'stroke';
-      run(memberWritePlan(facts(), field, value === 'none' ? undefined : value, 'Colour'));
+      run(memberWritePlan(facts(), field, value === 'none' ? undefined : value, 'Color'));
       return;
     }
     const target = colorTarget(op);
@@ -754,10 +773,15 @@ export function ToolbarTail() {
     if (target.path === '/frame' && (block.type === 'shot' || block.type === 'picture')) {
       const frame = { ...(block.frame ?? {}) } as Record<string, unknown>;
       if (value === 'none') delete frame.color;
-      else frame.color = value;
+      else {
+        frame.color = value;
+        /* a colour on a picture with no weight draws at once at 1 px (docs/POLISH.md 2.5 item 44;
+           polish/build/b4.md R6) */
+        if (frame.weight === undefined) frame.weight = 1;
+      }
       return write('/frame', Object.keys(frame).length === 0 ? undefined : frame, 'Border color');
     }
-    write(target.path, value === 'none' ? undefined : value, 'Colour');
+    write(target.path, value === 'none' ? undefined : value, 'Color');
   };
 
   /** The pickers of round two as plates: the dash list, the line decorations, the shape picker. */
@@ -959,6 +983,13 @@ export function ToolbarTail() {
       input.uploadPicture(pictureTargetOf('insert.image.upload', input.slideId, undefined));
       return;
     }
+    /* the Shape button arms the rectangle tool the way the Line button arms the line tool, and
+       its arrow lists the shapes, so the three insert buttons share one form (docs/POLISH.md 2.6
+       item 74; audit-chrome item 44: Image and Line were splits and Shape a chevron button) */
+    if (control.control === 'toolbar.insertShape' && input.onDrawTool !== undefined) {
+      input.onDrawTool({ kind: 'shape', shape: 'rectangle' });
+      return;
+    }
     if (
       control.arrow !== undefined ||
       (control.op !== undefined &&
@@ -1008,6 +1039,28 @@ export function ToolbarTail() {
    * else from the block's text and the range (`selectionMarks`), so Cmd+B in a session lights the
    * button; a block level bold (the heading's weight) counts as well.
    */
+  /** The sentence a control's own plan refuses with, for the buttons that write through a menu row's plan; null when it would write. */
+  const refusalOf = (control: TailControl): string | null => {
+    if (control.item === undefined || control.op !== undefined) return null;
+    if (listButtonOf(control) !== null) {
+      const list = listButtonOf(control);
+      if (list === null) return null;
+      const plan = listPlan(facts(), list, control.label);
+      return 'refused' in plan ? plan.refused : null;
+    }
+    if (
+      control.control !== 'toolbar.increaseIndent' &&
+      control.control !== 'toolbar.decreaseIndent' &&
+      control.control !== 'toolbar.clearFormatting'
+    )
+      return null;
+    const item = itemById(control.item);
+    if (item.effect?.kind !== 'action') return null;
+    if (!evaluate(control.enabled ?? item.enabled, menuContext)) return null;
+    const plan = menuActionPlan(item, facts());
+    return 'refused' in plan ? plan.refused : null;
+  };
+
   const markPressed = (control: TailControl): boolean | undefined => {
     const marks = selectionMarks(facts());
     if (control.control === 'toolbar.italic') return marks?.i === true;
@@ -1037,7 +1090,7 @@ export function ToolbarTail() {
               data-slot={control.control}
               aria-hidden={isFolded ? true : undefined}
             >
-              <FontSizeField control={control} block={block} />
+              <FontSizeField control={control} block={sizeBlock} />
             </span>
           );
         /* the Font dropdown in Google's position, left of the size field (docs/PRODUCT.md 4.2;
@@ -1057,6 +1110,12 @@ export function ToolbarTail() {
           control.dividerBefore === true && index > 0 ? (
             <ToolbarDivider key={`${key}-sep`} />
           ) : null;
+        /* a button whose plan refuses reads disabled with the plan's sentence in its tooltip
+           (docs/POLISH.md 2.3 item 18; audit-chrome item 17: Bulleted list drew enabled on a
+           heading and answered with a snackbar); the plans are pure, so the read is cheap */
+        const refusal = refusalOf(control);
+        const drawn: TailControl =
+          refusal === null ? control : { ...control, enabled: 'never', disabledReason: refusal };
         const pressed =
           control.op === 'formatOptions'
             ? shell.panel === 'formatOptions'
@@ -1073,6 +1132,7 @@ export function ToolbarTail() {
           (control.op === 'crop' ||
             listButtonOf(control) !== null ||
             control.control === 'toolbar.insertLine' ||
+            (control.control === 'toolbar.insertShape' && input.onDrawTool !== undefined) ||
             (control.control === 'toolbar.insertImage' && input.uploadPicture !== undefined)) &&
           control.arrow !== undefined
         ) {
@@ -1119,7 +1179,9 @@ export function ToolbarTail() {
                       ? 'Shows the picture inside a shape'
                       : control.control === 'toolbar.insertLine'
                         ? 'Line or arrow'
-                        : control.control === 'toolbar.insertImage'
+                        : control.control === 'toolbar.insertShape'
+                          ? 'Shapes, arrows, callouts and equation symbols'
+                          : control.control === 'toolbar.insertImage'
                           ? 'Upload from computer, By URL or a picture of this presentation'
                           : 'Another style'),
                 })}
@@ -1138,7 +1200,7 @@ export function ToolbarTail() {
           >
             {divider}
             <ToolbarButton
-              control={control}
+              control={drawn}
               onClick={(anchor) => onControl(control, anchor)}
               pressed={pressed}
               chevron={control.dropdown === true || control.arrow !== undefined}
@@ -1319,7 +1381,10 @@ function AnchoredPlate({
   children: ReactNode;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const at = anchoredAt(anchor, 360, 320);
+  /* the plate opens under its anchor and scrolls inside the viewport (docs/POLISH.md 2.6 item
+     53): the height passed to anchoredAt is the room below the anchor, so a tall plate is never
+     placed above the toolbar off screen; Pickers.css caps it with `--ts-plate-top` */
+  const at = anchoredAt(anchor, 360, 0);
   useEffect(() => {
     const onDown = (event: MouseEvent) => {
       if (!(event.target instanceof Node)) return;
@@ -1335,7 +1400,7 @@ function AnchoredPlate({
       className="ts-plate-anchored ts-chrome"
       role="dialog"
       aria-label={label}
-      style={{ left: at.left, top: at.top }}
+      style={{ left: at.left, top: at.top, ['--ts-plate-top' as string]: `${at.top}px` }}
       data-control={`${control}.plate`}
       onKeyDown={(event) => {
         if (event.key === 'Escape' || event.key === 'ArrowLeft') {
@@ -1389,9 +1454,20 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
         );
       return;
     }
-    const step = nearestStep(next);
-    if (step !== next) shell.say(`Font size ${step}: the nearest step of the type ladder`);
+    /* a table's text has its own ladder, 15 to 20 (schema TABLE_SIZES): a typed value outside it
+       lands on the nearest end with the end's sentence, never on the validator (docs/POLISH.md
+       2.6 item 59; the walk's 22 answered "Invalid option: expected one of 20|18|17|16|15") */
     if (block.type === 'table') {
+      const ladder = [...TABLE_SIZES].sort((a, b) => a - b);
+      const floor = ladder[0] ?? 15;
+      const ceiling = ladder[ladder.length - 1] ?? 20;
+      const step = ladder.reduce(
+        (best, each) => (Math.abs(each - next) < Math.abs(best - next) ? each : best),
+        floor,
+      );
+      if (next > ceiling) shell.say(`A table's text is ${ceiling} px at most`);
+      else if (next < floor) shell.say(`A table's text is ${floor} px at least`);
+      else if (step !== next) shell.say(`Font size ${step}: the nearest step of the table's ladder`);
       shell.input
         .dispatch('block.set', {
           slideId: shell.input.slideId,
@@ -1404,6 +1480,36 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
           shell.say(error instanceof Error ? error.message : String(error)),
         );
       return;
+    }
+    /* a typed value is honoured (docs/POLISH.md 2.3 item 16; audit-text item 5: 36 landed on 34
+       with a snackbar); the ladder stays for the steppers */
+    const step = Math.round(next);
+    /* a range selected in a session takes the size as a run mark, as a colour does (item 16), so
+       the rest of the box keeps its size; the reducer's text.mark carries it */
+    const range = shell.input.selection?.range;
+    if (shell.input.selection?.text === true && range !== undefined && range[0] !== range[1]) {
+      const path = textPathOf(block, shell.input.selection);
+      if (path !== null) {
+        shell.input
+          .dispatch('slide.update', {
+            slideId: shell.input.slideId,
+            mutations: [
+              {
+                op: 'text.mark',
+                slideId: shell.input.slideId,
+                blockId: block.id,
+                path,
+                range,
+                edit: { kind: 'marks', set: { size: step } },
+              },
+            ],
+            baseRevision: shell.input.revision,
+          })
+          .catch((error: unknown) =>
+            shell.say(error instanceof Error ? error.message : String(error)),
+          );
+        return;
+      }
     }
     shell.input
       .dispatch('block.set', {
@@ -1442,20 +1548,45 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
   const fieldTip = tipProps(tip);
   const decrease = itemById('format.text.size.decrease');
   const increase = itemById('format.text.size.increase');
+  /* a table's steppers walk the table ladder 15 to 20 (docs/POLISH.md 2.2 item 5; polish/build/b2.md
+     R4): at its ends the button reads disabled with the sentence, and no write reaches the
+     validator from the control */
+  const tableLadder = [...TABLE_SIZES].sort((a, b) => a - b);
+  const stepOf = (direction: 1 | -1): number | null => {
+    if (size === null) return null;
+    if (block?.type === 'plain') return stepPlainSize(size, direction);
+    if (block?.type === 'table') {
+      const at = tableLadder.indexOf(size as (typeof tableLadder)[number]);
+      const next = tableLadder[(at < 0 ? tableLadder.length - 1 : at) + direction];
+      return next ?? null;
+    }
+    return stepLadder(size, direction);
+  };
+  const tableEnd = (direction: 1 | -1): string | undefined =>
+    block?.type === 'table' && stepOf(direction) === null
+      ? direction > 0
+        ? `A table's text is ${tableLadder[tableLadder.length - 1]} px at most`
+        : `A table's text is ${tableLadder[0]} px at least`
+      : undefined;
+  const minusEnd = tableEnd(-1);
+  const plusEnd = tableEnd(1);
   return (
     <span className={cn('ts-tb-size', !enabled && 'is-disabled')} data-control={control.control}>
       <button
         type="button"
         className="pt-ib pt-icon ts-tb ts-tb-size-step"
         aria-label={decrease.label}
-        aria-disabled={enabled ? undefined : true}
+        aria-disabled={enabled && minusEnd === undefined ? undefined : true}
         data-control="toolbar.fontSize.minus"
-        onClick={() =>
-          enabled &&
-          size !== null &&
-          apply(block?.type === 'plain' ? stepPlainSize(size, -1) : stepLadder(size, -1))
-        }
-        {...tipProps({ name: decrease.label, key: 'Cmd Shift <' })}
+        onClick={() => {
+          const next = stepOf(-1);
+          if (enabled && next !== null) apply(next);
+        }}
+        {...tipProps({
+          name: decrease.label,
+          ...(minusEnd === undefined ? {} : { doc: minusEnd }),
+          key: 'Cmd Shift <',
+        })}
       >
         <Icon name="minus" />
       </button>
@@ -1470,6 +1601,10 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
         data-control="toolbar.fontSize.value"
         autoComplete="off"
         spellCheck={false}
+        /* a session parks while the field holds the focus and resumes with its range when the
+           field blurs (viewer InlineText `isParkingField`), so a typed size lands on the selected
+           run as a mark (docs/POLISH.md 2.3 item 16) */
+        {...{ [SESSION_PARK_ATTRIBUTE]: 'true' }}
         {...fieldTip}
         onFocus={(event) => {
           fieldTip.onFocus(event);
@@ -1492,14 +1627,17 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
         type="button"
         className="pt-ib pt-icon ts-tb ts-tb-size-step"
         aria-label={increase.label}
-        aria-disabled={enabled ? undefined : true}
+        aria-disabled={enabled && plusEnd === undefined ? undefined : true}
         data-control="toolbar.fontSize.plus"
-        onClick={() =>
-          enabled &&
-          size !== null &&
-          apply(block?.type === 'plain' ? stepPlainSize(size, 1) : stepLadder(size, 1))
-        }
-        {...tipProps({ name: increase.label, key: 'Cmd Shift >' })}
+        onClick={() => {
+          const next = stepOf(1);
+          if (enabled && next !== null) apply(next);
+        }}
+        {...tipProps({
+          name: increase.label,
+          ...(plusEnd === undefined ? {} : { doc: plusEnd }),
+          key: 'Cmd Shift >',
+        })}
       >
         <Icon name="plus" />
       </button>

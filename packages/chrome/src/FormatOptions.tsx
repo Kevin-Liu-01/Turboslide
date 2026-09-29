@@ -323,7 +323,10 @@ export function FormatOptions({
       ?.querySelector<HTMLElement>(`[data-section="${openSection}"]`);
     if (el !== null && el !== undefined && typeof el.scrollIntoView === 'function')
       el.scrollIntoView({ block: 'start' });
-    el?.querySelector<HTMLElement>('.ts-panel-section-head')?.focus();
+    /* a section that marks a field with `data-autofocus` (the Alt text description, docs/POLISH.md
+       2.5 item 45; polish/build/b4.md R3) takes the focus there, else its head */
+    const marked = el?.querySelector<HTMLElement>('[data-autofocus]');
+    (marked ?? el?.querySelector<HTMLElement>('.ts-panel-section-head'))?.focus();
   }, [openSection]);
 
   const report = (promise: Promise<unknown>) => {
@@ -586,6 +589,10 @@ export function FormatOptions({
           // the integrator at merge 2 for b5.md request 7)
           return selected !== undefined && !many && hasDither(selected);
         case 'shadow':
+          /* Drop shadow draws in the default view (docs/POLISH.md 2.5 item 41; polish/build/b4.md
+             R5) for every block whose schema carries the field, and not on a table or a chart,
+             where Google has none */
+          if (!many && (selected?.type === 'table' || selected?.type === 'chart')) return false;
           return selected !== undefined && (many ? blocks.some(hasShadow) : hasShadow(selected));
         case 'table':
           return selected?.type === 'table' && !many;

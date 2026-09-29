@@ -40,7 +40,7 @@ describe('the sections', () => {
        rank 10, the words), in the panel's word list of menus/strings.ts too */
     for (const name of PANELS.formatOptions.sections) expect(names).toContain(name);
     expect(names.indexOf('Size & rotation')).toBeLessThan(names.indexOf('Position'));
-    expect(names.indexOf('Text')).toBeLessThan(names.indexOf('Colour'));
+    expect(names.indexOf('Text')).toBeLessThan(names.indexOf('Color'));
     /* SPEC-2 section 5: the round two sections in Google's order (R05 B7, F3) */
     for (const name of ['Adjustments', 'Drop shadow', 'Chart data', 'Line', 'Shape', 'Alt text'])
       expect(names).toContain(name);
@@ -70,7 +70,32 @@ describe('a block control routes to', () => {
     expect(sections.get('/link')).toBeNull();
   });
 
-  it('List for a plain block’s items and Colour for a box fill', () => {
+  it('draws a shape’s fields by its kind: no Corner radius, Arrowheads, Orientation or Height on a rectangle; the radius on a rounded rectangle; the arrowheads on an arrow (docs/POLISH.md 2.6 item 52)', () => {
+    const rect: Block = {
+      id: 'r',
+      type: 'shape',
+      shape: 'rect',
+      pos: { x: 0, y: 0, w: 200, h: 100, z: 0 },
+    } as Block;
+    const sections = new Map(
+      blockControls(rect).controls.map((spec) => [
+        spec.path,
+        formatSectionOfBlockControl(spec, rect),
+      ]),
+    );
+    for (const path of ['/radius', '/arrowheads', '/orientation', '/height', '/bend', '/points'])
+      expect(sections.get(path), path).toBeNull();
+    const rounded: Block = { ...rect, id: 'rr', shape: 'rounded' } as Block;
+    const radius = blockControls(rounded).controls.find((spec) => spec.path === '/radius');
+    expect(radius && formatSectionOfBlockControl(radius, rounded)).toBe('shape');
+    const arrow: Block = { ...rect, id: 'a', shape: 'arrow' } as Block;
+    const heads = blockControls(arrow).controls.find((spec) => spec.path === '/arrowheads');
+    expect(heads && formatSectionOfBlockControl(heads, arrow)).toBe('line');
+    const orientation = blockControls(arrow).controls.find((spec) => spec.path === '/orientation');
+    expect(orientation && formatSectionOfBlockControl(orientation, arrow)).toBe('line');
+  });
+
+  it('List for a plain block’s items and Color for a box fill', () => {
     const plain = block('plain');
     const generated = blockControls(plain);
     for (const spec of generated.controls) {
@@ -86,11 +111,11 @@ describe('a block control routes to', () => {
     if (radius) expect(formatSectionOfBlockControl(radius, box)).toBe('size');
   });
 
-  it('Picture for a shot’s asset and caption; Table for a table’s cells', () => {
+  it('no generated row for a shot (the Image options section is the whole picture panel, docs/POLISH.md 2.5 item 40); Table for a table’s cells', () => {
     const shot: Block = { id: 's', type: 'shot', asset: 'a', caption: 'c' };
     for (const spec of blockControls(shot).controls) {
       if (spec.path === '/asset' || spec.path === '/caption' || spec.path === '/crop')
-        expect(formatSectionOfBlockControl(spec, shot), spec.path).toBe('picture');
+        expect(formatSectionOfBlockControl(spec, shot), spec.path).toBeNull();
     }
     const table: Block = {
       id: 't',

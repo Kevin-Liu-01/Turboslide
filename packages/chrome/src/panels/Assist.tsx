@@ -6,7 +6,7 @@ import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideOrder, slideTitle } from '@turboslide/schema/deck';
 
 import type { EditorDispatch } from '../dispatch';
-import { Icon } from '../icons';
+import type { AssistMode } from '../editor-shell';
 import { cn } from '../lib/cn';
 import { Panel } from '../Panel';
 import type { SnackbarAction } from '../Snackbar';
@@ -41,6 +41,13 @@ export type AssistPanelProps = {
   restricted?: boolean;
   /** the phrase Search the menus handed over ("Ask the assistant: <phrase>") */
   initialPrompt?: string;
+  /**
+   * What the deployment's assistant can do (docs/POLISH.md 2.9 item 113): with `unconfigured` or
+   * `off` the panel draws Tailor for a customer and one sentence, no model starter and no
+   * composer; `model` and `fixture` draw the starters and the box, which stay after every answer.
+   * Absent reads as `model`.
+   */
+  mode?: AssistMode;
   /** opens the Tailor dialog (the first starter card, no model call) */
   onTailor: () => void;
   /** the shell's snackbar with one action */
@@ -69,6 +76,7 @@ export function AssistPanel({
   canWrite,
   restricted = false,
   initialPrompt,
+  mode = 'model',
   onTailor,
   say,
   onUndo,
@@ -83,11 +91,13 @@ export function AssistPanel({
   const log = useRef<HTMLUListElement>(null);
   const box = useRef<HTMLTextAreaElement>(null);
 
+  /* the box takes the focus once the panel is on screen (docs/POLISH.md 2.9 item 118; audit-assist
+     item 17: Enter after the Ask row sent nothing because the focus stayed on the body): after a
+     tick, since the panel's frame places itself before its fields can take focus */
   useEffect(() => {
-    if (initialPrompt !== undefined && initialPrompt !== '') {
-      setDraft(initialPrompt);
-      box.current?.focus();
-    }
+    if (initialPrompt !== undefined && initialPrompt !== '') setDraft(initialPrompt);
+    const timer = window.setTimeout(() => box.current?.focus(), 0);
+    return () => window.clearTimeout(timer);
   }, [initialPrompt]);
 
   useEffect(() => {
@@ -189,7 +199,9 @@ export function AssistPanel({
       </Panel>
     );
   }
-  if (off !== null) {
+  /* a deployment without a model (item 113): Tailor for a customer and one sentence, since Tailor
+     calls no model; the finder offers no Ask row either */
+  if (mode === 'unconfigured' || mode === 'off') {
     return (
       <Panel
         title={ASSIST.title}
@@ -197,12 +209,84 @@ export function AssistPanel({
         control="panel.assist"
         className="ts-assist-panel"
       >
-        <p className="ts-assist-disabled" data-control="panel.assist.off">
-          {off}
-        </p>
+        <div className="ts-assist">
+          <ul className="ts-assist-starters is-alone" data-control="panel.assist.starters">
+            <li>
+              <button
+                type="button"
+                className="ts-assist-starter"
+                data-control="panel.assist.starter.tailor"
+                onClick={onTailor}
+                {...tipProps({ name: ASSIST.starters.tailor, doc: ASSIST.starters.tailorDoc })}
+              >
+                <span>
+                  <b>{ASSIST.starters.tailor}</b>
+                  <span>{ASSIST.starters.tailorDoc}</span>
+                </span>
+              </button>
+            </li>
+          </ul>
+          <p
+            className="ts-assist-disabled"
+            data-control={mode === 'off' ? 'panel.assist.off' : 'panel.assist.unconfigured'}
+          >
+            {mode === 'off' ? ASSIST.offMode : ASSIST.unconfigured}
+          </p>
+        </div>
       </Panel>
     );
   }
+  const starters = (
+    <ul className="ts-assist-starters" data-control="panel.assist.starters">
+      <li>
+        <button
+          type="button"
+          className="ts-assist-starter"
+          data-control="panel.assist.starter.tailor"
+          onClick={onTailor}
+          {...tipProps({ name: ASSIST.starters.tailor, doc: ASSIST.starters.tailorDoc })}
+        >
+          <span>
+            <b>{ASSIST.starters.tailor}</b>
+            <span>{ASSIST.starters.tailorDoc}</span>
+          </span>
+        </button>
+      </li>
+      <li>
+        <button
+          type="button"
+          className="ts-assist-starter"
+          data-control="panel.assist.starter.shorter"
+          disabled={busy}
+          onClick={() => propose('shorter', '')}
+          {...tipProps({
+            name: ASSIST.starters.shorter,
+            doc: ASSIST.starters.shorterDoc,
+          })}
+        >
+          <span>
+            <b>{ASSIST.starters.shorter}</b>
+            <span>{ASSIST.starters.shorterDoc}</span>
+          </span>
+        </button>
+      </li>
+      <li>
+        <button
+          type="button"
+          className="ts-assist-starter"
+          data-control="panel.assist.starter.notes"
+          disabled={busy}
+          onClick={() => propose('notes', '')}
+          {...tipProps({ name: ASSIST.starters.notes, doc: ASSIST.starters.notesDoc })}
+        >
+          <span>
+            <b>{ASSIST.starters.notes}</b>
+            <span>{ASSIST.starters.notesDoc}</span>
+          </span>
+        </button>
+      </li>
+    </ul>
+  );
   return (
     <Panel
       title={ASSIST.title}
@@ -211,76 +295,12 @@ export function AssistPanel({
       className="ts-assist-panel"
     >
       <div className="ts-assist">
-        <p className="ts-assist-note" data-control="panel.assist.firstLine">
-          {restricted
-            ? ASSIST.firstLine.replace(
-                'these suggestions',
-                `these suggestions${ASSIST.firstLineRestricted}`,
-              )
-            : ASSIST.firstLine}
-        </p>
         {slide === undefined ? (
           <p className="ts-assist-slide">{ASSIST.noSlide}</p>
         ) : (
-          <>
-            <p className="ts-assist-slide" data-control="panel.assist.slide">
-              {ASSIST.slideLabel(n, slideTitle(slide, n))}
-            </p>
-            {entries.length === 0 ? (
-              <ul className="ts-assist-starters" data-control="panel.assist.starters">
-                <li>
-                  <button
-                    type="button"
-                    className="ts-assist-starter"
-                    data-control="panel.assist.starter.tailor"
-                    onClick={onTailor}
-                    {...tipProps({ name: ASSIST.starters.tailor, doc: ASSIST.starters.tailorDoc })}
-                  >
-                    <Icon name="sparkles" />
-                    <span>
-                      <b>{ASSIST.starters.tailor}</b>
-                      <span>{ASSIST.starters.tailorDoc}</span>
-                    </span>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="ts-assist-starter"
-                    data-control="panel.assist.starter.shorter"
-                    disabled={busy}
-                    onClick={() => propose('shorter', '')}
-                    {...tipProps({
-                      name: ASSIST.starters.shorter,
-                      doc: ASSIST.starters.shorterDoc,
-                    })}
-                  >
-                    <Icon name="sparkles" />
-                    <span>
-                      <b>{ASSIST.starters.shorter}</b>
-                      <span>{ASSIST.starters.shorterDoc}</span>
-                    </span>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="ts-assist-starter"
-                    data-control="panel.assist.starter.notes"
-                    disabled={busy}
-                    onClick={() => propose('notes', '')}
-                    {...tipProps({ name: ASSIST.starters.notes, doc: ASSIST.starters.notesDoc })}
-                  >
-                    <Icon name="sparkles" />
-                    <span>
-                      <b>{ASSIST.starters.notes}</b>
-                      <span>{ASSIST.starters.notesDoc}</span>
-                    </span>
-                  </button>
-                </li>
-              </ul>
-            ) : null}
-          </>
+          <p className="ts-assist-slide" data-control="panel.assist.slide">
+            {ASSIST.slideLabel(n, slideTitle(slide, n))}
+          </p>
         )}
         <ul
           ref={log}
@@ -384,6 +404,12 @@ export function AssistPanel({
             );
           })}
         </ul>
+        {off !== null ? (
+          <p className="ts-assist-disabled is-inline" data-control="panel.assist.off">
+            {off}
+          </p>
+        ) : null}
+        {slide !== undefined && entries.length === 0 ? starters : null}
         {busy ? (
           <p className="ts-assist-busy" role="status" data-control="panel.assist.busy">
             {ASSIST.thinking}
@@ -426,6 +452,9 @@ export function AssistPanel({
             <span className="pt-lb">{ASSIST.send}</span>
           </button>
         </div>
+        <p className="ts-assist-note" data-control="panel.assist.firstLine">
+          {restricted ? ASSIST.firstLineRestricted : ASSIST.firstLine}
+        </p>
       </div>
     </Panel>
   );

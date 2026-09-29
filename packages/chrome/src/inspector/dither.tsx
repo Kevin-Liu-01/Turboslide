@@ -721,8 +721,8 @@ export function DitherFormatSection({ block, write, assets }: DitherFormatSectio
             { value: 'three', label: 'Three tones', doc: 'Ink, titanium and paper' },
             {
               value: 'original',
-              label: 'Original colours',
-              doc: 'The picture’s own colours, posterised',
+              label: 'Original colors',
+              doc: 'The picture’s own colors, posterized',
             },
           ]}
           pressed={resolved.tone}

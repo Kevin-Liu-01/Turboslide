@@ -60,6 +60,12 @@ export type ContextMenuProps = {
     options: { viaKeyboard?: boolean; onPicked: () => void },
   ) => ReactNode;
   id?: string;
+  /**
+   * how the menu was opened: a right click opens it with no row lit, as Google's does, and the
+   * arrows walk the rows from the top; Shift F10 or the Menu key lights the first row for the
+   * keyboard (docs/POLISH.md 2.6 item 74; audit-chrome item 48). Pointer unless said.
+   */
+  openedBy?: 'pointer' | 'keyboard';
 };
 
 /**
@@ -217,6 +223,7 @@ export function ContextMenu({
   layout,
   onLayout,
   renderLayouts,
+  openedBy = 'pointer',
   renderDynamic,
   id,
 }: ContextMenuProps) {
@@ -237,6 +244,7 @@ export function ContextMenu({
       anchor={{ kind: 'point', x: anchor.x, y: anchor.y }}
       placement="point"
       includeContextOnly
+      autoFocus={openedBy === 'keyboard'}
       returnFocusTo={returnFocusTo}
       onSelect={onSelect}
       onClose={onClose}

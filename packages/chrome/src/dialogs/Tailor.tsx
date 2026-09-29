@@ -166,7 +166,13 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
   });
 
   const order = useMemo(() => slideOrder(input.document.deck), [input.document]);
-  const counts = useMemo(() => tailorCounts(input.document, from), [input.document, from]);
+  /* the count is frozen while the write is in flight (docs/POLISH.md 2.9 item 116): the live
+     memo recomputed from the document as the replacements landed and read "Not found in the
+     text" while the dialog still stood */
+  const liveCounts = useMemo(() => tailorCounts(input.document, from), [input.document, from]);
+  const frozenCounts = useRef(liveCounts);
+  if (busy === null) frozenCounts.current = liveCounts;
+  const counts = busy === null ? liveCounts : frozenCounts.current;
   const hasName = from.trim() !== '' && counts.places > 0;
   const hasLogo = replaceAlt && (file !== null || storedLogo !== null) && from.trim() !== '';
   const hasSkip = skip.size > 0;
@@ -229,9 +235,22 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
     });
   };
 
+  /**
+   * Apply is one pass (docs/POLISH.md 2.9 item 116; audit-assist item 11): the dialog closes as
+   * the pass is sent and the snackbar carries the result, the counts with Undo, or the refusal's
+   * sentence, so the seller never watches the counts change under a dialog that stays. A chosen
+   * file is uploaded first with the dialog reading "Adding the picture", since the asset must
+   * land before the pass can name it; a refusal in that step stays in the dialog.
+   */
   const apply = async () => {
     if (!canApply) return;
     setError(null);
+    const say = shell.say;
+    const name = to.trim();
+    const places = counts.places;
+    const slides = counts.slides;
+    const skipped = order.filter((id) => skip.has(id));
+    let closed = false;
     try {
       let logo: { assetId: string; replaceAlt: string } | undefined;
       if (storedLogo !== null && hasLogo) {
@@ -243,22 +262,29 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
         const asset = (await input.dispatch('asset.add', {
           file: dataUrl,
           role: 'capture',
-          alt: `${to.trim() === '' ? 'The customer' : to.trim()} logo`,
+          alt: `${name === '' ? 'The customer' : name} logo`,
           baseRevision: input.revision,
         })) as { id?: string };
         if (typeof asset.id !== 'string') throw new TypeError('the picture was not added');
         logo = { assetId: asset.id, replaceAlt: from.trim() };
       }
-      setBusy(TAILOR.label(to.trim()));
+      setBusy(TAILOR.label(name));
+      closed = true;
+      closeRef.current();
       await input.dispatch('deck.tailor', {
-        ...(hasName ? { replacements: [{ from: from.trim(), to: to.trim() }] } : {}),
+        ...(hasName ? { replacements: [{ from: from.trim(), to: name }] } : {}),
         ...(logo === undefined ? {} : { logo }),
-        ...(hasSkip ? { skip: order.filter((id) => skip.has(id)) } : {}),
+        ...(skipped.length > 0 ? { skip: skipped } : {}),
         baseRevision: input.revision,
       });
-      closeRef.current();
+      const undo = input.history?.undo;
+      say(
+        TAILOR.result(name, hasName ? places : 0, hasName ? slides : 0, skipped.length),
+        undo === undefined ? undefined : { label: TAILOR.undo, run: () => undo() },
+      );
     } catch (err: unknown) {
-      setError(refusalSentence(err));
+      if (closed) say(refusalSentence(err));
+      else setError(refusalSentence(err));
     } finally {
       setBusy(null);
     }
@@ -275,6 +301,7 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
       control="dialog.tailor"
       cancel
       cancelLabel={TAILOR.cancel}
+      footnote={canApply || busy !== null ? undefined : TAILOR.nothing}
       actions={[
         {
           label: busy ?? TAILOR.apply,
@@ -286,11 +313,7 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
         },
       ]}
     >
-      <DialogField
-        label={TAILOR.from}
-        doc={TAILOR.fromDoc}
-        hint={from === '' ? undefined : TAILOR.count(counts.places, counts.slides)}
-      >
+      <DialogField label={TAILOR.from} doc={TAILOR.fromDoc}>
         <input
           ref={fromField}
           type="text"
@@ -313,9 +336,11 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
           onChange={(event) => setTo(event.target.value)}
         />
       </DialogField>
-      <p className="ts-dialog-hint" data-control="dialog.tailor.count" aria-live="polite">
-        {from === '' ? ' ' : TAILOR.count(counts.places, counts.slides)}
-      </p>
+      {from === '' ? null : (
+        <p className="ts-dialog-hint" data-control="dialog.tailor.count" aria-live="polite">
+          {TAILOR.count(counts.places, counts.slides)}
+        </p>
+      )}
       <p className="ts-dialog-field-label">{TAILOR.logoHead}</p>
       {finder !== null && foundLogo !== null && to.trim() !== '' ? (
         <div className="ts-tailor-find" data-control="dialog.tailor.logo.found">
@@ -341,14 +366,6 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
           ) : null}
         </div>
       ) : null}
-      <DialogCheck
-        label={TAILOR.logoEverySlide}
-        checked={false}
-        onChange={() => undefined}
-        disabled
-        control="dialog.tailor.logo.everySlide"
-        doc={TAILOR.logoEverySlideDoc}
-      />
       <DialogCheck
         label={TAILOR.logoReplaceAlt}
         checked={replaceAlt}

@@ -378,7 +378,9 @@ export const DIALOGS = {
   },
   download: {
     title: 'Download',
-    perfect: 'Perfect',
+    /* the two PowerPoint modes in a seller's words (docs/POLISH.md 2.6 item 73; audit-chrome item
+       36: "Perfect" named nothing a seller can picture): every slide as a picture, or editable text */
+    perfect: 'Pictures',
     editable: 'Editable text',
     includeNotes: 'Include speaker notes',
     includeSkipped: 'Include skipped slides',
@@ -556,8 +558,12 @@ export const PICKERS = {
   tableGrid: {
     grid: 'Table size',
     doc: 'Point at the size and click it; the arrow keys move the highlight',
-    /* Google's caption: "4 x 3" with a plain x */
-    size: (columns: number, rows: number) => `${columns} x ${rows}`,
+    /* Google's caption: "4 x 3" with a plain x; past the rows the slide holds at the insert's
+       size the caption says how many fit (docs/POLISH.md 2.2 item 6; polish/build/b2.md R9) */
+    size: (columns: number, rows: number, fit?: number) =>
+      fit !== undefined && rows > fit
+        ? `${columns} x ${rows}, ${fit} rows fit the slide`
+        : `${columns} x ${rows}`,
     cell: (columns: number, rows: number) =>
       `${columns} column${columns === 1 ? '' : 's'} by ${rows} row${rows === 1 ? '' : 's'}`,
   },
@@ -591,6 +597,9 @@ export const PICKERS = {
  */
 export const CANVAS = {
   crop: 'Drag the handles to crop. Press Enter to finish',
+  /* the chip while a crop is open (docs/POLISH.md 2.5 item 50; polish/build/b4.md R8): one word;
+     the sentence above stays the handles' tooltip */
+  cropChip: 'Crop',
   wordArt: 'Type your text and press Enter',
   group: 'Group',
   /* the selected text object's chip tooltip (A1 items 3 and 4): the two ways into the text */
@@ -701,12 +710,16 @@ export const FORMAT = {
     none: 'None',
     reset: 'Reset image',
     frame: 'Frame',
+    /* the tail's word for the frame and the picture's name line (docs/POLISH.md 2.5 item 40;
+       polish/build/b4.md R4) */
+    border: 'Border',
+    name: 'Name',
     weight: 'Weight',
     color: 'Color',
     dash: 'Dash',
     anchor: 'Crop anchor',
     top: 'Top',
-    centre: 'Centre',
+    centre: 'Center',
     /* the vector round (docs/VECTOR.md 4.4): crop has no vector meaning, so the menu row, the
        toolbar's Crop button and the viewer's double click refuse an svg picture with one sentence;
        the viewer keeps its own copy of the words (it cannot import the chrome) and a test pins both */
@@ -846,7 +859,7 @@ export const PANELS = {
       'Position',
       'Layout',
       'Text',
-      'Colour',
+      'Color',
       /* the picture's section reads Image options, Google's words (docs/PRODUCT.md section 2 rank 10) */
       'Image options',
       'Table',
@@ -1011,7 +1024,7 @@ export const LOGO_DIALOG = {
 export const SHADER_GALLERY = {
   title: 'Shader',
   sentence:
-    'Previews are in black and white. The shader takes your brand kit’s colours on the slide',
+    'Each still shows the shader in one preset. On the slide the shader takes your brand kit’s colors',
   search: 'Search shaders',
   searchDoc: 'The name, what it draws, or its engine',
   categories: 'Categories',

@@ -34,7 +34,6 @@ import { flushSync } from 'react-dom';
 
 /* the words of the hovered empty cell's prompt (docs/OBJECTS.md 3.3 item 7; objects/build/b2.md
    request 1f, b1.md request 3): one click places the caret now, so the prompt says what to do next */
-import { TABLE_CELL_PROMPT } from '@turboslide/render/blocks/table';
 import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
 import { bandAssetResolver, bandForSlide, frameBandOf } from '@turboslide/render/stage';
@@ -49,7 +48,11 @@ import type { GuidesInput } from '@turboslide/schema/canvas';
 import { GUIDE_CENTRE, grammarRecordOf } from '@turboslide/schema/canvas';
 import { isMultilinePath, isMultilineType } from '@turboslide/schema/catalog';
 import type { Color } from '@turboslide/schema/color';
-import { detachConnectors, followConnectors } from '@turboslide/schema/connect';
+import {
+  detachConnectors,
+  detachMovedConnectors,
+  followConnectors,
+} from '@turboslide/schema/connect';
 import type { DeckDocument, DeckGuides, Slide } from '@turboslide/schema/deck';
 import { slideOrder, slideTitle } from '@turboslide/schema/deck';
 import type { Finding } from '@turboslide/schema/findings';
@@ -76,7 +79,7 @@ import {
   styleRange,
 } from '@turboslide/schema/text';
 import type { RunMarks } from '@turboslide/schema/text';
-import { TYPE_LADDER } from '@turboslide/schema/typography';
+import { TYPE_LADDER, typographyDeclarations } from '@turboslide/schema/typography';
 import { SHEET } from '@turboslide/theme/tokens';
 
 import {
@@ -186,6 +189,7 @@ import {
   listAppendMutation,
   listRemoveMutation,
   nextCellPointer,
+  plainOffsetOf,
   readRunText,
   runKey,
   sessionContextTarget,
@@ -200,6 +204,9 @@ import {
   pictureInsertArea,
   pictureInsertBox,
   pictureNameOf,
+  replacedPictureBox,
+  clampBoxToSheet,
+  CAPTION_ROW_HEIGHT,
   SVG_CROP_SENTENCE,
   sniffPictureKind,
   uploadFailureOf,
@@ -295,6 +302,7 @@ import {
   readTableRows,
   tableGrowMutation,
   tableRowsAddedMutation,
+  tableRowsHeight,
   tableRowsNaturalHeight,
 } from './table-fit';
 import {
@@ -386,6 +394,17 @@ export type DraggingGuide = { axis: 'x' | 'y'; at: number; label: string; from?:
 export type CropView = { blockId: string; frame: Box; full: Box; trim: ShotTrim };
 
 /** What the Editor hands the overlay layer on every render (SPEC 6.4); the chrome's Overlay draws it. */
+/** The link chip the overlay draws for a linked run clicked once outside a session (item 20). */
+export type LinkChipView = {
+  href: string;
+  /** the linked run's box in sheet px */
+  box: Box;
+  onOpen: () => void;
+  onCopy: () => void;
+  onChange: () => void;
+  onRemove: () => void;
+};
+
 export type EditorOverlayView = {
   slideId: string;
   /** the stage scale: sheet pixels times k are CSS pixels inside the overlay */
@@ -472,6 +491,12 @@ export type EditorOverlayView = {
   draggingGuide: DraggingGuide | null;
   /** crop mode (SPEC-2 6.1 row 19) */
   crop: CropView | null;
+  /**
+   * the chip of a linked run clicked once outside a session (docs/POLISH.md 2.3 item 20;
+   * audit-text item 6): the address with Open, Copy, Change and Remove, drawn by the overlay
+   * under the run's box; null with no such click, and gone with the next press or a session
+   */
+  linkChip: LinkChipView | null;
   /** the connection sites of the shape under a dragged line end or an armed line tool (6 px rings) */
   sites: Point[];
   /** the points placed so far by a Curve or Polyline tool, in sheet pixels */
@@ -883,6 +908,12 @@ type ActiveGesture = {
    * over it and the resize never goes below the rows' natural height (`tableFloor`)
    */
   tableRows?: TableRowsMeasure | null;
+  /**
+   * the seam of the other axis whose band also held the press (a crossing of a column seam and a
+   * row seam; docs/POLISH.md 2.2 item 11): the first movement routes the drag to the seam whose
+   * axis matches the larger travel, then the field is cleared
+   */
+  crossing?: Handle | null;
   tableFloor?: number;
 };
 
@@ -1018,6 +1049,9 @@ function boxesFromPositions(slide: Slide, measured: MeasuredBoxes): MeasuredBoxe
   }
   return { ...measured, blocks };
 }
+
+/** A list item's indent per level past the first, in sheet pixels: the render's NUMERAL_INDENT (render/blocks/lists.ts). */
+const LIST_LEVEL_INDENT_PX = 36;
 
 /** The next smaller ladder size, or undefined at the bottom (the store action's ladderStepDown). */
 function ladderStepDown(size: number): number | undefined {
@@ -1247,6 +1281,34 @@ export function Editor({
   paintRef.current = paint;
   const toolRef = useRef(tool);
   toolRef.current = tool;
+  /* true while the selection came from a key that left a session (item 19): cleared by a press */
+  const selectedByKey = useRef(false);
+  /* the linked run a single click landed on outside a session (item 20): the overlay draws its
+     chip; a press elsewhere, a session or a selection of another block clears it */
+  const [linkChip, setLinkChip] = useState<{
+    blockId: string;
+    pointer: string;
+    href: string;
+    box: Box;
+    range: [number, number];
+  } | null>(null);
+  const linkChipRef = useRef(linkChip);
+  linkChipRef.current = linkChip;
+  /* arming a draw tool clears the selection and the extra ids (docs/POLISH.md 2.4 item 34;
+     polish/build/b3.md request 7): the previous ring and chip leave while the sites draw */
+  const armedTool = useRef(tool);
+  useEffect(() => {
+    if (armedTool.current === tool) return;
+    armedTool.current = tool;
+    if (tool !== 'select' && editingRef.current === null && gesture.current === null) {
+      selectionRef.current = null;
+      extraRef.current = [];
+      setExtra([]);
+      setInnerSelection(null);
+      setGroupEntered(null);
+      groupEnteredRef.current = null;
+    }
+  }, [tool]);
   const htmlRef = useRef(html);
   htmlRef.current = html;
   /* the live gesture's frames (docs/OBJECTS.md 2.4; gesture-frame.ts): one sheet render per
@@ -1300,6 +1362,19 @@ export function Editor({
   /* the markup shown while a run is edited: frozen at the session's start so a burst's re-render
      never replaces the editable element under the caret */
   const frozenHtml = useRef<string | null>(null);
+  /* the height of a shrink placeholder's element as the session found it, in CSS pixels (docs/
+     POLISH.md 2.3 item 21): the title placeholder has no box of its own, so the height it draws
+     with one line of its prompt, or with the title as typed, is the height its text must fit;
+     growAfterBurst steps the size down the ladder while the text needs more. Null on every
+     other run. */
+  const placeholderFit = useRef<number | null>(null);
+  /* the size the cover's title placeholder stepped down to under the session: written once, with
+     the session's final text, since a `typography.size` write on the cover's `heading` field
+     converts the cover to a canvas (the studio's convert first), after which the session's next
+     burst still named the slide field and was refused ("text.splice: /heading is not a string on
+     block heading", the words after the step lost; measured on 4441). A slot heading of a layout
+     is a block already and takes each step with its burst. */
+  const placeholderSize = useRef<number | null>(null);
   /* the markup of the run as the document last held it, what the next burst diffs against */
   const committedText = useRef<Markup>('');
   /* the markup the session's own last write left in the document; a document that reads
@@ -1811,7 +1886,12 @@ export function Editor({
    */
   const commitCanvas = async (
     build: (canvas: Slide, boxesNow: MeasuredBoxes) => Mutation[],
-    options: { autofit?: boolean; select?: (canvas: Slide) => string[] | null } = {},
+    options: {
+      autofit?: boolean;
+      select?: (canvas: Slide) => string[] | null;
+      /** the write moves objects by hand (a nudge): a moved connector detaches (item 27) */
+      detach?: boolean;
+    } = {},
   ): Promise<void> => {
     const slideNow = slideRef.current;
     if (!slideNow) return;
@@ -1834,7 +1914,9 @@ export function Editor({
     const touched = own.flatMap((m) =>
       m.op === 'block.set' && m.path.startsWith('/pos') ? [m.blockId] : [],
     );
-    const followed = followAfter(canvas, [...prefix, ...own], touched);
+    const followed = followAfter(canvas, [...prefix, ...own], touched, {
+      detach: options.detach === true,
+    });
     let mutations = [...prefix, ...own, ...followed];
     if (options.autofit !== false && touched.length > 0)
       mutations = await withAutofit(slideNow, mutations, touched);
@@ -1881,11 +1963,17 @@ export function Editor({
     canvas: Slide,
     mutations: ReadonlyArray<Mutation>,
     moved: ReadonlyArray<string>,
+    options: { detach?: boolean } = {},
   ): Mutation[] => {
     if (moved.length === 0) return [];
     try {
       const after = applyMutations(docRef.current, [...mutations]).document.slides[canvas.id];
-      return after ? followConnectors(after, moved) : [];
+      if (!after) return [];
+      const followed = followConnectors(after, moved);
+      /* a connector moved by its body detaches from every target that did not move in the same
+         write (docs/POLISH.md 2.4 item 27; polish/build/b3.md request 2): the free move and the
+         arrow keys alone, never a resize and never the line end gesture that wrote the attachment */
+      return options.detach === true ? [...followed, ...detachMovedConnectors(after, moved)] : followed;
     } catch {
       return [];
     }
@@ -2013,12 +2101,19 @@ export function Editor({
        last burst, so no burst consumed it) made the first burst here diff against a text two
        remote writes old and send the whole run back at stale offsets (VERIFICATION.md C3-F8) */
     forgetAbsorbed(runKey(slideNow.id, run.blockId, run.pointer));
-    /* the hovered cell's prompt leaves before the session reads the run's text (2.3 item 9) */
-    clearHoverPrompt();
     committedText.current = readRunText(slideNow, run.blockId, run.pointer) ?? '';
     expectedDocText.current = committedText.current;
     frozenHtml.current = htmlRef.current;
     sessionTableShape.current = block?.type === 'table' ? tableShapeOf(block) : null;
+    const shrinkPlaceholder =
+      (block?.type === 'heading' &&
+        block.pos === undefined &&
+        'autofit' in block &&
+        block.autofit === 'shrink') ||
+      (block === undefined && slideNow.kind === 'title' && run.blockId === 'heading');
+    const found = shrinkPlaceholder ? run.element.getBoundingClientRect().height : 0;
+    placeholderFit.current = found > 0 ? found : null;
+    placeholderSize.current = null;
     setEditing({ ...run, caret, multiline, ...(options.link ? { link: true } : {}) });
     select({ kind: 'run', blockId: run.blockId, pointer: run.pointer });
   };
@@ -2028,7 +2123,19 @@ export function Editor({
    * content height read from the live stage once the burst's text is in the editable, and the
    * `pos.h` write when the text needs more than the box, in the same call as the splice.
    */
-  const growAfterBurst = (current: Editing, after: Slide | undefined): Mutation | null => {
+  /** The shrunk placeholder keeps its measured height for the session (see growAfterBurst); the measure is drawn pixels, the style a layout length, so the value is divided by the stage scale. */
+  const holdPlaceholderHeight = (target: HTMLElement, fit: number | null): void => {
+    const stage = body.current?.parentElement;
+    const k = stage ? stage.getBoundingClientRect().width / SHEET.width : 0;
+    if (fit !== null && k > 0 && target.style.minHeight === '')
+      target.style.minHeight = `${fit / k}px`;
+    window.requestAnimationFrame(measure);
+  };
+
+  const growAfterBurst = (
+    current: Editing,
+    after: Slide | undefined,
+  ): Mutation | Mutation[] | null => {
     const el = body.current;
     if (!after || !el) return null;
     const block = blockById(after, current.blockId);
@@ -2052,7 +2159,111 @@ export function Editor({
       }
       return grow;
     }
-    if (!block || block.type !== 'text' || !('autofit' in block)) return null;
+    /* a title placeholder without a box shrinks to the height it had (docs/POLISH.md 2.3 item 21;
+       audit-text item 7: a long title stayed 88 px and grew down the slide, three lines at ring
+       height 204): a slot heading carries `autofit: 'shrink'` from its layout and the title
+       slide's heading field is read as one; the size steps down the ladder while the element
+       needs more than the height the session found it with (`placeholderFit`; two lines at 44 px
+       fit where one line at 88 px drew), so the ring keeps the placeholder's height as Google's
+       title box keeps its size. The live element takes each step at once, and the
+       `typography.size` write travels with the burst (the cover's first format write converts
+       it, as Center's does). Without a measured height the text shrinks past two lines. */
+    const placeholder: Block | null =
+      block?.type === 'heading' && block.pos === undefined
+        ? block
+        : !block && after.kind === 'title' && current.blockId === 'heading'
+          ? ({
+              id: 'heading',
+              type: 'heading',
+              level: 'h1',
+              text: after.heading,
+              autofit: 'shrink',
+            } as Block)
+          : null;
+    if (placeholder !== null && 'autofit' in placeholder && placeholder.autofit === 'shrink') {
+      const target = current.element;
+      const linesOf = (): number => {
+        const range = document.createRange();
+        range.selectNodeContents(target);
+        return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+      };
+      const fit = placeholderFit.current;
+      const overflows = (): boolean =>
+        fit !== null ? target.getBoundingClientRect().height > fit + 1 : linesOf() > 2;
+      const typography =
+        'typography' in placeholder &&
+        typeof placeholder.typography === 'object' &&
+        placeholder.typography !== null
+          ? (placeholder.typography as { size?: number })
+          : {};
+      const drawn = parseFloat(window.getComputedStyle(target).fontSize);
+      let size = typography.size ?? (Number.isFinite(drawn) ? Math.round(drawn) : undefined);
+      let stepped: number | undefined;
+      for (let guard = 0; guard < 12 && size !== undefined && overflows(); guard += 1) {
+        const next = ladderStepDown(size);
+        if (next === undefined || next >= size) break;
+        target.style.fontSize = `${next}px`;
+        size = next;
+        stepped = next;
+      }
+      /* the cover's field: the step is drawn now and written with the session's final text
+         (`placeholderSize`); the final write is the one after endEdit cleared the session */
+      const coverField = !block && after.kind === 'title';
+      if (coverField) {
+        if (stepped !== undefined) placeholderSize.current = stepped;
+        const ending = editingRef.current === null;
+        const pending = placeholderSize.current;
+        if (!ending || pending === null) {
+          if (stepped !== undefined) holdPlaceholderHeight(target, fit);
+          return null;
+        }
+        placeholderSize.current = null;
+        const sizeWrite: Mutation = {
+          op: 'block.set',
+          slideId: after.id,
+          blockId: placeholder.id,
+          path: '/typography',
+          value: { ...typography, size: pending },
+        };
+        /* the placeholder's box behind the size (Google's title box keeps its size): the
+           studio's conversion measures the cover from the document, where the title still draws
+           at 88 px over its lines, so the converted heading's box would be that text's height;
+           `/pos/h` lands on the block the conversion made, at the placeholder's height in sheet
+           pixels (the measured height is drawn pixels; the stage is scaled by k) */
+        const stage = el.parentElement;
+        const k = stage ? stage.getBoundingClientRect().width / SHEET.width : 0;
+        if (fit === null || !(k > 0)) return sizeWrite;
+        return [
+          sizeWrite,
+          {
+            op: 'block.set',
+            slideId: after.id,
+            blockId: placeholder.id,
+            path: '/pos/h',
+            value: Math.round(fit / k),
+          },
+        ];
+      }
+      if (stepped === undefined) return null;
+      /* the placeholder keeps the height it had while its text draws smaller (Google's title box
+         keeps its size): the live element holds the measured height for the session, so the ring
+         stays while the words land. The measure is the element's drawn height (the stage is
+         scaled by k), and the style is a layout length, so the value is divided by k. After
+         Escape the cover's conversion measures the slide from the document, so the converted
+         heading's box is the shrunk text's own height (build/b1.md R28 to B5); a `/pos/h` write
+         behind the size was refused with the burst and cut the typed words (measured on 4441),
+         so nothing but the size travels with the burst. */
+      holdPlaceholderHeight(target, fit);
+      return {
+        op: 'block.set',
+        slideId: after.id,
+        blockId: placeholder.id,
+        path: '/typography',
+        value: { ...typography, size: stepped },
+      };
+    }
+    if (!block || (block.type !== 'text' && block.type !== 'heading') || !('autofit' in block))
+      return null;
     if (block.autofit !== 'grow' && block.autofit !== 'shrink') return null;
     const blockEl = el.querySelector<HTMLElement>(`[data-block="${block.id}"]`);
     if (!blockEl) return null;
@@ -2118,7 +2329,9 @@ export function Editor({
       committedText.current = text;
       const after = slideAfter(mutations);
       const grow = growAfterBurst(current, after);
-      commit(grow ? [...mutations, grow] : mutations);
+      commit(
+        grow === null ? mutations : [...mutations, ...(Array.isArray(grow) ? grow : [grow])],
+      );
       const docText = after && readRunText(after, current.blockId, current.pointer);
       expectedDocText.current = docText ?? committedText.current;
       /* the document's markup after the splice can differ from the editable's in its marks alone
@@ -2143,6 +2356,15 @@ export function Editor({
           text: docText,
         });
       }
+    } else if (editingRef.current === null && placeholderSize.current !== null) {
+      /* the session's final write with no text left to send (the last burst carried it): the
+         cover's shrunk size still goes out, as the one write of the session's end */
+      const grow = growAfterBurst(current, slideNow);
+      if (grow !== null) {
+        const writes = Array.isArray(grow) ? grow : [grow];
+        commit(writes);
+        return writes;
+      }
     }
     return mutations;
   };
@@ -2162,6 +2384,45 @@ export function Editor({
     const slideNow = slideRef.current;
     const expected = expectedDocText.current;
     if (!current || !slideNow || expected === null) return;
+    /* a paragraph write from the toolbar with the session parked (Center, 1.5, Increase indent;
+       docs/POLISH.md 2.3 item 14; audit-text item 3: the text moved only after the session closed)
+       reaches the live block at once: the stage's markup is frozen for the session, so the
+       block's own alignment, leading and indent are set on its element from the document */
+    const styled = blockById(slideNow, current.blockId);
+    const blockEl = body.current?.querySelector<HTMLElement>(`[data-block="${current.blockId}"]`);
+    if (blockEl && styled !== undefined && 'typography' in styled) {
+      const typography =
+        typeof styled.typography === 'object' && styled.typography !== null
+          ? styled.typography
+          : undefined;
+      const wanted = new Map(
+        typographyDeclarations(typography)
+          .map((declaration) => declaration.split(':') as [string, string])
+          .filter(([name]) => name === 'text-align' || name === 'line-height' || name === 'padding-left'),
+      );
+      for (const name of ['text-align', 'line-height', 'padding-left']) {
+        const value = wanted.get(name);
+        if (value === undefined) blockEl.style.removeProperty(name);
+        else if (blockEl.style.getPropertyValue(name) !== value) blockEl.style.setProperty(name, value);
+      }
+    }
+    /* a list item's level written under the session (Tab, Shift Tab, Cmd ] and Cmd [ in the
+       item; docs/POLISH.md 2.3 item 15) reaches the live item at once: the frozen markup would
+       draw the nesting only after Escape, while Google indents the item as Tab lands */
+    if (blockEl && styled?.type === 'plain') {
+      const itemEls = blockEl.querySelectorAll<HTMLElement>('.item');
+      styled.items.forEach((item, index) => {
+        const itemEl = itemEls[index];
+        if (itemEl === undefined) return;
+        const level = Math.min(9, Math.max(1, Math.round(item.level ?? 1)));
+        const pad = level > 1 ? `${(level - 1) * LIST_LEVEL_INDENT_PX}px` : null;
+        if (pad === null) itemEl.style.removeProperty('padding-left');
+        else if (itemEl.style.getPropertyValue('padding-left') !== pad)
+          itemEl.style.setProperty('padding-left', pad);
+        if (level > 1) itemEl.dataset['level'] = String(level);
+        else delete itemEl.dataset['level'];
+      });
+    }
     /* a row or column added or removed under a cell session (Format > Table, the cell menu, with
        the session parked; docs/RETURN.md 2.4): the pointer names its cell by position, so the
        re-send below wrote the editable's text into whatever cell now sat there (measured on the
@@ -2195,7 +2456,24 @@ export function Editor({
       return;
     }
     const docText = readRunText(slideNow, current.blockId, current.pointer);
-    if (docText === undefined) return;
+    if (docText === undefined) {
+      /* the block became a list under the session (Bulleted list from the tail or the menu with
+         the session parked; docs/POLISH.md 2.3 item 15; audit-text item 4: Enter then raised
+         "text.splice: /text is not a string" over the stage): the text moved into the first
+         item, so the session ends with no write of its own and opens again on that item at the
+         end of its text; Enter then appends an item and Tab nests it */
+      const listNow = blockById(slideNow, current.blockId);
+      if (listNow?.type === 'plain' && !current.pointer.startsWith('items/')) {
+        const index = Math.max(0, listNow.items.length - 1);
+        const pointer = `items/${index}/text`;
+        committedText.current = textFromNode(current.element, { multiline: current.multiline });
+        window.clearTimeout(reconcileTimer.current);
+        reconcileTimer.current = 0;
+        pendingEdit.current = { blockId: current.blockId, pointer, caret: 'end' };
+        inlineRef.current?.end('blur');
+      }
+      return;
+    }
     const verdict = sessionReconcile(expected, docText);
     if (verdict === 'none') return;
     if (verdict === 'absorb') {
@@ -2287,6 +2565,7 @@ export function Editor({
     window.clearTimeout(reconcileTimer.current);
     reconcileTimer.current = 0;
     setEditing(null);
+    selectedByKey.current = reason === 'enter' || reason === 'escape' || reason === 'tab' || reason === 'shift-tab';
     /* a printable key that opened a session never leaves its character behind for the next one:
        the handle callback consumes it on mount, and a session ending clears any unconsumed value */
     pendingInsert.current = null;
@@ -2430,6 +2709,37 @@ export function Editor({
   };
 
   /** True when the run being edited is an item of a plain, rows or refs list: Enter appends an item (SPEC 7.4). */
+  /**
+   * The table's box follows its rows at every input (docs/POLISH.md 2.1 item 2; polish/build/b2.md
+   * R2): a sentence typed at human speed wraps its cell and the row grows on the stage at once,
+   * while the box and the ring followed only when a burst committed 100 ms after the last key,
+   * so mid sentence the last rule sat 20 px below the ring. The wrapper's height is set from the
+   * rows here and the overlay measures; the `pos.h` write stays with the burst (growAfterBurst).
+   */
+  const followTableRows = () => {
+    const current = editingRef.current;
+    const el = body.current;
+    const slideNow = slideRef.current;
+    if (!current || !el || !slideNow) return;
+    const block = blockById(slideNow, current.blockId);
+    if (block?.type !== 'table') return;
+    const blockEl = el.querySelector<HTMLElement>(`[data-block="${block.id}"]`);
+    const wrapper = blockEl?.parentElement?.closest<HTMLElement>(`.free[data-free="${block.id}"]`);
+    const stage = el.parentElement;
+    const k = stage ? stage.getBoundingClientRect().width / SHEET.width : 0;
+    if (!blockEl || !wrapper || !(k > 0)) return;
+    let rows: TableRowsMeasure | null = null;
+    try {
+      rows = readTableRows(blockEl, k, window);
+    } catch {
+      rows = null;
+    }
+    if (rows === null) return;
+    const height = Math.ceil(tableRowsHeight(rows));
+    if (height > (parseFloat(wrapper.style.height) || block.pos?.h || 0) + 1)
+      wrapper.style.height = `${height}px`;
+  };
+
   const onListEnter = (): boolean => {
     const current = editingRef.current;
     const slideNow = slideRef.current;
@@ -3020,6 +3330,26 @@ export function Editor({
     const tableRows =
       tableBlock?.type === 'table' ? tableRowsAt(tableBlock.id, rect.width / SHEET.width) : null;
     const tableFloor = tableRows === null ? undefined : tableRowsNaturalHeight(tableRows);
+    /* a press on a crossing of the two seam axes (polish/build/b2.md R6a): the other seam whose
+       band holds the press point is kept, and the first movement decides which one drags */
+    let crossing: Handle | null = null;
+    if (isTableSeamHandle(handle) && handle.blockId !== undefined) {
+      const seamTable = blockById(ctx.slide, handle.blockId);
+      const seamBox = ctx.boxes.blocks[handle.blockId];
+      if (seamTable?.type === 'table' && seamBox !== undefined) {
+        const others = isTableRowSeamHandle(handle)
+          ? tableSeamHandles(seamTable, seamBox, ctx.boxes.runs)
+          : tableRowSeamHandles(seamTable, seamBox, ctx.boxes.runs);
+        crossing =
+          others.find(
+            (other) =>
+              start.x >= other.box[0] &&
+              start.x <= other.box[0] + other.box[2] &&
+              start.y >= other.box[1] &&
+              start.y <= other.box[1] + other.box[3],
+          ) ?? null;
+      }
+    }
     gesture.current = {
       handle,
       start,
@@ -3029,6 +3359,7 @@ export function Editor({
       last: null,
       mods: { shift: false },
       ...(options.reopen ? { reopen: options.reopen } : {}),
+      ...(crossing !== null ? { crossing } : {}),
       ...(tableBlock?.type === 'table' ? { tableRows } : {}),
       ...(tableFloor !== undefined && handle.kind === 'free-resize' ? { tableFloor } : {}),
     };
@@ -3079,6 +3410,21 @@ export function Editor({
       const now = sheetPoint(r, ev.clientX, ev.clientY);
       const mods = modsOf(ev);
       g.mods = mods;
+      if (g.crossing !== undefined && g.crossing !== null) {
+        const dx = Math.abs(now.x - g.start.x);
+        const dy = Math.abs(now.y - g.start.y);
+        if (dx >= 3 || dy >= 3) {
+          const other = g.crossing;
+          g.crossing = null;
+          const wantsRow = dy > dx;
+          if (wantsRow !== isTableRowSeamHandle(g.handle)) {
+            g.handle = other;
+            if (isTableRowSeamHandle(other) && other.blockId !== undefined)
+              g.tableRows = tableRowsAt(other.blockId, r.width / SHEET.width);
+            setActiveHandle(other.id);
+          }
+        }
+      }
       if (g.handle.kind === 'block-move' && g.handle.blockId !== undefined) {
         const at = blockMoveFor(g.ctx.slide, g.handle.blockId, now, g.ctx.boxes);
         setDrop(at.indicator);
@@ -3204,7 +3550,9 @@ export function Editor({
     const touched = own.flatMap((m) =>
       m.op === 'block.set' && m.path.startsWith('/pos') ? [m.blockId] : [],
     );
-    const followed = followAfter(canvas, [...prefix, ...own], touched);
+    const followed = followAfter(canvas, [...prefix, ...own], touched, {
+      detach: kind === 'free-move',
+    });
     let mutations = [...prefix, ...own, ...followed];
     if (kind === 'free-resize' && touched.length > 0)
       mutations = await withAutofit(slideRef.current ?? canvas, mutations, touched);
@@ -4097,6 +4445,30 @@ export function Editor({
     }
     const target = where.blockId !== undefined ? blockById(slideNow, where.blockId) : undefined;
     if (target && (target.type === 'shot' || target.type === 'picture')) {
+      /* the box keeps its centre and area and refits to the new picture's aspect (docs/POLISH.md
+         2.5 item 37; polish/build/b4.md R1), in the same commit so one Cmd+Z takes both back */
+      const replaced = asset.size ?? naturalSize;
+      const refit: Mutation[] =
+        target.pos !== undefined
+          ? [
+              {
+                op: 'block.set',
+                slideId: slideNow.id,
+                blockId: target.id,
+                path: '/pos',
+                value: {
+                  ...target.pos,
+                  ...(() => {
+                    const [x, y, w, h] = replacedPictureBox(
+                      [target.pos.x, target.pos.y, target.pos.w, target.pos.h],
+                      replaced,
+                    );
+                    return { x, y, w, h };
+                  })(),
+                },
+              },
+            ]
+          : [];
       commit([
         {
           op: 'block.set',
@@ -4105,6 +4477,7 @@ export function Editor({
           path: '/asset',
           value: asset.id,
         },
+        ...refit,
       ]);
       select({ kind: 'block', blockId: target.id });
       notice('Picture replaced', true);
@@ -4118,11 +4491,15 @@ export function Editor({
     /* the box at the picture's own aspect: the picture fills its box since the focus round
        (docs/FOCUS.md rank 18), so a fixed box would squash it at the insert */
     const size = asset.size ?? naturalSize;
-    const shot = { id: 'shot', type: 'shot', asset: asset.id } as Block;
+    /* no hairline under a seller's picture (docs/POLISH.md 2.5 item 38; polish/build/b4.md R20) */
+    const shot = { id: 'shot', type: 'shot', asset: asset.id, border: false } as Block;
     if (where.box !== undefined) {
       insertObject(shot, { box: where.box });
     } else if (where.point !== undefined) {
-      insertObject(shot, { box: droppedPictureBox(where.point, DROP_PICTURE_WIDTH, size) });
+      /* a drop near an edge lands inside the sheet (item 50; b4.md R19) */
+      insertObject(shot, {
+        box: clampBoxToSheet(droppedPictureBox(where.point, DROP_PICTURE_WIDTH, size)),
+      });
     } else {
       insertObject(shot, {
         place: (canvas) => {
@@ -4303,7 +4680,7 @@ export function Editor({
           slideId: canvas.id,
           slot: 'main',
           ...(last !== undefined ? { after: last } : {}),
-          block: { id, type: 'shot', asset: asset.id, pos } as Block,
+          block: { id, type: 'shot', asset: asset.id, pos, border: false } as Block,
         });
         mutations.push(...everySlideMutations());
         pendingSelect.current = [id];
@@ -4362,7 +4739,7 @@ export function Editor({
         : where.box !== undefined
           ? where.box
           : where.point !== undefined
-            ? droppedPictureBox(where.point, DROP_PICTURE_WIDTH, size)
+            ? clampBoxToSheet(droppedPictureBox(where.point, DROP_PICTURE_WIDTH, size))
             : picturePlaceOn(slideBefore, size).box;
     const firstBox = previewFor(undefined);
     if (firstBox !== null) {
@@ -4513,8 +4890,21 @@ export function Editor({
     const block = anchor === null ? undefined : blockById(slideNow, anchor);
     if (!block || block.type !== 'shot') return false;
     if (block.caption === undefined) {
+      /* the box grows by the caption's row so the picture keeps its size (docs/POLISH.md 2.5
+         item 43; polish/build/b4.md R2), in the same commit as the empty caption */
       commit([
         { op: 'block.set', slideId: slideNow.id, blockId: block.id, path: '/caption', value: '' },
+        ...(block.pos !== undefined
+          ? [
+              {
+                op: 'block.set' as const,
+                slideId: slideNow.id,
+                blockId: block.id,
+                path: '/pos',
+                value: { ...block.pos, h: block.pos.h + CAPTION_ROW_HEIGHT },
+              },
+            ]
+          : []),
       ]);
     }
     pendingEdit.current = { blockId: block.id, pointer: 'caption', caret: 'end' };
@@ -4626,7 +5016,9 @@ export function Editor({
   const nudgeSelection = (dx: number, dy: number) => {
     const ids = selectedObjectIds();
     if (ids.length === 0) return;
-    void commitCanvas((canvas, boxesNow) => freeNudgeMutations(canvas, ids, boxesNow, dx, dy));
+    void commitCanvas((canvas, boxesNow) => freeNudgeMutations(canvas, ids, boxesNow, dx, dy), {
+      detach: true,
+    });
   };
 
   const alignSelection = (edge: AlignEdge, to?: AlignTarget) => {
@@ -4728,7 +5120,9 @@ export function Editor({
         id: 'text',
         type: 'text',
         text: canonicalText(trimmed),
-        typography: { size: 88, weight: 500, align: 'center' },
+        /* the regular weight (docs/POLISH.md 2.4 item 34): the tail's B reads unpressed at the
+           insert and one press bolds the letters */
+        typography: { size: 88, align: 'center' },
         outline: { color: 'ink', width: 1.5 },
       } as Block,
       { box: centredBox([w, h]) },
@@ -5679,48 +6073,11 @@ export function Editor({
     if (frameDown.current) return;
     const id = resolveObject(e.target, el, slideNow);
     setHover((prev) => (prev === id ? prev : id));
-    promptHoveredCell(e.target, el, slideNow);
   };
 
-  /**
-   * The prompt "Click to add text" in the hovered empty cell alone (docs/FEATURES.md 2.3 item 9,
-   * P1; audit-objects 24: a 5 by 6 table drew thirty prompts on the stage and faint rows in the
-   * filmstrip card): the renderer writes no prompt into a table cell (render/blocks/table.ts), and
-   * the stage appends one to the empty cell under the pointer and removes it when the pointer
-   * leaves the cell, the sheet, or a session opens there. The span is the renderer's own prompt
-   * markup, so the session strips it as it strips every prompt (InlineText mounts).
-   */
-  const hoverPrompt = useRef<HTMLElement | null>(null);
-  const clearHoverPrompt = () => {
-    hoverPrompt.current?.remove();
-    hoverPrompt.current = null;
-  };
-  const promptHoveredCell = (target: EventTarget | null, el: HTMLElement, slideNow: Slide) => {
-    const run = resolveRun(target, el);
-    const cell = run === null ? null : cellPointer(run.pointer);
-    const table = run === null ? undefined : blockById(slideNow, run.blockId);
-    const para =
-      cell !== null && table?.type === 'table' && editingRef.current === null
-        ? run?.element.querySelector<HTMLElement>(':scope > .para')
-        : null;
-    const empty =
-      para !== null &&
-      para !== undefined &&
-      (table as TableBlock).rows[cell?.row ?? -1]?.cells[cell?.col ?? -1] === '';
-    if (!empty || para === null || para === undefined) {
-      clearHoverPrompt();
-      return;
-    }
-    if (hoverPrompt.current !== null && hoverPrompt.current.parentElement === para) return;
-    clearHoverPrompt();
-    const prompt = document.createElement('span');
-    prompt.className = 'prompt';
-    prompt.setAttribute('data-prompt', '');
-    prompt.setAttribute('aria-hidden', 'true');
-    prompt.textContent = TABLE_CELL_PROMPT;
-    para.appendChild(prompt);
-    hoverPrompt.current = prompt;
-  };
+  /* no prompt in a table cell (docs/POLISH.md 2.1 item 1; polish/build/b2.md R1): the hovered
+     cell's "Type to add text" wrapped in a narrow cell and grew its row under the pointer; the
+     cell ring and the caret say where typing goes */
 
   /**
    * A Shift click on a cell of the edited or selected table selects the cells from the anchor
@@ -5865,8 +6222,17 @@ export function Editor({
     point: { x: number; y: number },
   ) => {
     const slideNow = slideRef.current;
-    if (!slideNow || editingRef.current !== null || gesture.current !== null) return;
+    if (!slideNow || gesture.current !== null) return;
     if (readRunText(slideNow, run.blockId, run.pointer) === undefined) return;
+    const current = editingRef.current;
+    if (current !== null) {
+      /* one click on another cell moves the caret (docs/POLISH.md 2.2 item 4; polish/build/b2.md
+         R3): the open session ends with its final write and the pressed cell's session opens at
+         the click point, as Google's does; a click inside the open cell is the caret's own */
+      if (current.blockId === run.blockId && current.pointer === run.pointer) return;
+      endSessionForPress(current);
+      if (editingRef.current !== null) return;
+    }
     startEdit(run, point);
   };
 
@@ -5904,8 +6270,15 @@ export function Editor({
     slideNow: Slide,
     blockId: string,
     entry: 'typing' | 'enter',
-  ): CaretPlacement =>
-    blockById(slideNow, blockId)?.type === 'table' ? 'end' : entryCaret(entry, null);
+  ): CaretPlacement => {
+    if (blockById(slideNow, blockId)?.type === 'table') return 'end';
+    /* the selected object rule's replace (A1 rule 4) applies after a selection a click made,
+       never after a key that left a session (docs/POLISH.md 2.3 item 19; audit-assist section 6:
+       Enter closed a title's session and the next sentence replaced the whole paragraph): the
+       first printable key after such a key types at the end */
+    if (entry === 'typing' && selectedByKey.current) return 'end';
+    return entryCaret(entry, null);
+  };
 
   /**
    * The labels of a group in document order (docs/FEATURES.md 2.2 rank 6): every member whose
@@ -6347,7 +6720,12 @@ export function Editor({
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     const el = body.current;
     const slideNow = slideRef.current;
+    selectedByKey.current = false;
+    if (linkChipRef.current !== null) setLinkChip(null);
     if (!el || !slideNow || e.button !== 0) return;
+    /* a Shift or Cmd press adds to the selection and never starts the browser's own text
+       selection over the pictures (docs/POLISH.md 2.4 item 29; polish/build/b3.md request 4) */
+    if ((e.shiftKey || e.metaKey || e.ctrlKey) && editingRef.current === null) e.preventDefault();
     if (shiftClickOnCell(e, el, slideNow)) return;
     const current = editingRef.current;
     if (current) {
@@ -6356,10 +6734,18 @@ export function Editor({
          session here, before the focus moves, and runs below as that object's press, so a plain
          click selects it and a Shift or Cmd click adds it (finding F5); one on the empty sheet
          ends the session and the block stays selected */
+      const pressedRunNow = resolveRun(e.target, el);
       const verdict = sessionPressVerdict({
         insideRun: e.target instanceof Node && current.element.contains(e.target),
         under: resolveObject(e.target, el, slideNow),
         blockId: current.blockId,
+        /* another cell of the edited table (docs/POLISH.md 2.2 item 4; polish/build/b2.md R3):
+           the session ends with its write and the press opens the pressed cell at the point */
+        otherRun:
+          pressedRunNow !== null &&
+          pressedRunNow.blockId === current.blockId &&
+          pressedRunNow.pointer !== current.pointer &&
+          cellPointer(pressedRunNow.pointer) !== null,
       });
       if (verdict === 'caret') {
         /* a press inside an open table cell that travels into another cell selects the cells
@@ -6629,14 +7015,18 @@ export function Editor({
         /* the run under the pointer takes the caret at the point; a double click on the box's
            padding, or on a closed shape's body (docs/FOCUS.md section 4), opens the first run at
            its end. The browser's own double click selection of the drawn text is prevented: the
-           session places the caret itself. */
+           session places the caret itself. On a shape's label or a diagram member's text the
+           word at the point is selected, so typing replaces it (docs/POLISH.md 2.4 item 30;
+           question 5's default; polish/build/b3.md request 5); a text box keeps A1 rule 3's caret */
         const under = resolveRun(e.target, el);
         const run = under !== null && under.blockId === id ? under : firstRunOf(el, id);
         if (!run || readRunText(slideNow, run.blockId, run.pointer) === undefined) return;
         e.preventDefault();
+        const wordSelect = clicked !== undefined && !isTextBlockType(clicked.type);
+        const at = run === under ? { x: e.clientX, y: e.clientY } : null;
         startEdit(
           run,
-          entryCaret('double-click', run === under ? { x: e.clientX, y: e.clientY } : null),
+          wordSelect && at !== null ? { ...at, word: true } : entryCaret('double-click', at),
         );
         return;
       }
@@ -6647,7 +7037,94 @@ export function Editor({
 
   /* links are text on the stage in edit mode, never navigation */
   const onClick = (e: ReactMouseEvent<HTMLDivElement>) => {
-    if (e.target instanceof Element && e.target.closest('a')) e.preventDefault();
+    if (!(e.target instanceof Element)) return;
+    const anchor = e.target.closest('a');
+    if (anchor === null) return;
+    e.preventDefault();
+    /* one click on a linked word outside a session shows the chip (docs/POLISH.md 2.3 item 20;
+       audit-text item 6: the chip appeared only inside a session with the caret in the link);
+       the click has already selected the box (A1 rule 1, onPointerDown) */
+    const el = body.current;
+    const slideNow = slideRef.current;
+    const rect = stageRect();
+    if (!el || !slideNow || !rect || editingRef.current !== null || gesture.current !== null) return;
+    const run = resolveRun(anchor, el);
+    if (run === null) return;
+    const href = anchor.getAttribute('href');
+    if (href === null || href === '') return;
+    const scale = rect.width / SHEET.width;
+    if (!(scale > 0)) return;
+    const block = blockById(slideNow, run.blockId);
+    const multiline =
+      block !== undefined
+        ? isMultilinePath(block, `/${run.pointer}`)
+        : isMultilineType(blockTypeOf(slideNow, run.blockId) ?? '', `/${run.pointer}`);
+    const start = plainOffsetOf(run.element, anchor, 0, multiline);
+    const end = plainOffsetOf(run.element, anchor, anchor.childNodes.length, multiline);
+    if (start === null || end === null || end <= start) return;
+    const ar = anchor.getBoundingClientRect();
+    setLinkChip({
+      blockId: run.blockId,
+      pointer: run.pointer,
+      href,
+      box: [
+        (ar.left - rect.left) / scale,
+        (ar.top - rect.top) / scale,
+        ar.width / scale,
+        ar.height / scale,
+      ],
+      range: [start, end],
+    });
+  };
+
+  /** The chip's four actions (item 20): Open, Copy, Change (the session with the popover) and Remove (the link mark cleared). */
+  const linkChipView = (): LinkChipView | null => {
+    const chip = linkChip;
+    if (chip === null || editing !== null) return null;
+    return {
+      href: chip.href,
+      box: chip.box,
+      onOpen: () => {
+        window.open(chip.href, '_blank', 'noopener');
+      },
+      onCopy: () => {
+        void navigator.clipboard?.writeText(chip.href).catch(() => undefined);
+        notice('Link copied');
+      },
+      onChange: () => {
+        const el = body.current;
+        const slideNow = slideRef.current;
+        if (!el || !slideNow) return;
+        const runEl = el.querySelector<HTMLElement>(
+          `[data-run="${chip.blockId}/${chip.pointer}"]`,
+        );
+        setLinkChip(null);
+        if (!runEl) return;
+        const anchor = runEl.querySelector<HTMLElement>(`a[href="${CSS.escape(chip.href)}"]`);
+        const r = (anchor ?? runEl).getBoundingClientRect();
+        startEdit(
+          { blockId: chip.blockId, pointer: chip.pointer, element: runEl },
+          { x: r.left + Math.min(8, r.width / 2), y: r.top + r.height / 2 },
+          { link: true },
+        );
+      },
+      onRemove: () => {
+        const slideNow = slideRef.current;
+        if (!slideNow) return;
+        setLinkChip(null);
+        commit([
+          {
+            op: 'text.mark',
+            slideId: slideNow.id,
+            blockId: chip.blockId,
+            path: `/${chip.pointer}`,
+            range: chip.range,
+            edit: { kind: 'marks', clear: ['link'] },
+          },
+        ]);
+        notice('Link removed', true);
+      },
+    };
   };
 
   /**
@@ -6974,10 +7451,13 @@ export function Editor({
     (editing === null || editing.blockId === anchorId)
   ) {
     const seamBlock = blockById(shownSlide, anchorId);
+    /* the row seams under the column seams (docs/POLISH.md 2.2 item 11; polish/build/b2.md R6):
+       at a crossing the column seam is on top, and the press routes by its first movement
+       (beginGesture's `crossing`) */
     if (seamBlock?.type === 'table')
       handles.push(
-        ...tableSeamHandles(seamBlock, boxes.blocks[anchorId], boxes.runs),
         ...tableRowSeamHandles(seamBlock, boxes.blocks[anchorId], boxes.runs),
+        ...tableSeamHandles(seamBlock, boxes.blocks[anchorId], boxes.runs),
       );
   }
   const lint: LintBox[] =
@@ -7093,6 +7573,7 @@ export function Editor({
           trim: crop.trim,
         }
       : null,
+    linkChip: linkChipView(),
     sites,
     drawPoints,
     onHandleDown,
@@ -7194,7 +7675,6 @@ export function Editor({
             onPointerMove={onPointerMove}
             onPointerLeave={() => {
               setHover(null);
-              clearHoverPrompt();
             }}
             onPointerDown={onPointerDown}
             onDoubleClick={onDoubleClick}
@@ -7265,6 +7745,7 @@ export function Editor({
             key={`${slideId}:${editing.blockId}/${editing.pointer}`}
             element={editing.element}
             box={editingBox}
+            blockBox={boxes.blocks[editing.blockId] ?? null}
             k={k}
             multiline={editing.multiline}
             caret={editing.caret}
@@ -7284,7 +7765,10 @@ export function Editor({
             onListLeave={onListBackspace}
             onIndent={onIndent}
             onCaret={onCaretInfo}
-            onInput={measure}
+            onInput={() => {
+              followTableRows();
+              measure();
+            }}
             onPaste={pasteIntoCell}
             onUndo={() => onUndoRef.current?.()}
             onRedo={() => onRedoRef.current?.()}

@@ -87,10 +87,12 @@
   border: 1px solid var(--pt-hair);
 }
 
+/* as wide as "Slides in this presentation" (docs/POLISH.md 2.6 item 70; audit-chrome item 22 read
+   "Slides in this pres…") */
 .ts-run-link-slide {
   appearance: none;
   height: 32px;
-  max-width: 160px;
+  width: 196px;
   padding: 0 24px 0 8px;
   border: 1px solid var(--pt-hair);
   border-radius: 0;

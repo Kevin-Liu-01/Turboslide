@@ -27,11 +27,17 @@ describe('finderRows', () => {
   const rows = finderRows(ADVANCED);
   const plain = finderRows(DEFAULT_MENU_CONTEXT);
 
-  it('lists every command of the model outside the omitted ones and the plain containers', () => {
-    const expected = allItems()
+  it('lists every command of the model outside the omitted ones and the plain containers, the menus first and the title row last (docs/POLISH.md 2.6 item 73)', () => {
+    const all = allItems()
       .filter(isFinderItem)
       .filter((item) => isPresent(item, ADVANCED));
+    const expected = [
+      ...all.filter((item) => !item.id.startsWith('title.')),
+      ...all.filter((item) => item.id.startsWith('title.')),
+    ];
     expect(rows.map((row) => row.item.id)).toEqual(expected.map((item) => item.id));
+    expect(rows[0]?.item.id.startsWith('title.')).toBe(false);
+    expect(rows[rows.length - 1]?.item.id.startsWith('title.')).toBe(true);
     expect(rows.length).toBeGreaterThan(100);
     expect(rows.some((row) => row.item.status === 'omit')).toBe(false);
     /* with the switch off the same list without its Later rows and its parked rows */
@@ -175,6 +181,9 @@ describe('the seller’s words and the Ask row (docs/PRODUCT.md 6.1; audit-assis
     /* an empty phrase or no handler never does */
     expect(askEntry(entries, '', DEFAULT_MENU_CONTEXT, ask)).toBeNull();
     expect(askEntry(entries, 'add a video', DEFAULT_MENU_CONTEXT, undefined)).toBeNull();
+    /* no Ask row without a model (docs/POLISH.md 2.9 item 113) */
+    expect(askEntry(entries, 'add a video', DEFAULT_MENU_CONTEXT, ask, 'unconfigured')).toBeNull();
+    expect(askEntry(entries, 'add a video', DEFAULT_MENU_CONTEXT, ask, 'off')).toBeNull();
     const row = askEntry(entries, 'add a video', DEFAULT_MENU_CONTEXT, ask);
     if (present) {
       expect(row?.id).toBe(ASK_ENTRY_ID);

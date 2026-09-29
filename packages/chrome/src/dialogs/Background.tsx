@@ -45,7 +45,7 @@ import '../inspector/dither.css';
  * dialogs, or a picture of this presentation from the list here), converting the slide to the
  * canvas first; a covering picture already there shows as a fixed 96 by 54 thumbnail with its
  * alt, Remove and a Format options link that opens the panel at Dither; Reset to theme removes the
- * slide's colour; Add to theme writes the brand kit's Background role for the deck's appearance
+ * slide's color; Add to theme writes the brand kit's Background role for the deck's appearance
  * (`brand.set /colors/<appearance>/background`, docs/PRODUCT.md 4.1; audit-brand 17), so every
  * slide follows and the wordmark and counter recompute against the coloured ground. Enter in the
  * hex field previews on the sheet and keeps the dialog open, as Google's field does; Done applies
@@ -210,7 +210,7 @@ export function BackgroundDialog() {
    */
   const addToTheme = () => {
     if (color === undefined) {
-      setError('Pick a colour first');
+      setError('Pick a color first');
       return;
     }
     const appearance = deckAppearance(input.document.deck);
@@ -231,13 +231,13 @@ export function BackgroundDialog() {
           ],
           'Brand kit: Background',
         )
-        .then(() => shell.say('The colour is now the background of every slide'))
+        .then(() => shell.say('The color is now the background of every slide'))
         .catch(fail);
       return;
     }
     input
       .dispatch('deck.setBackground', { background: { color }, baseRevision: input.revision })
-      .then(() => shell.say('The colour is now the default of every slide'))
+      .then(() => shell.say('The color is now the default of every slide'))
       .catch(fail);
   };
 
@@ -418,7 +418,7 @@ export function BackgroundDialog() {
 
   const swatchTip = (label: string) => tipProps({ name: label });
   const hexTip = tipProps({
-    name: 'Custom colour',
+    name: 'Custom color',
     doc: 'Six hex digits; Enter applies',
     key: 'Enter',
   });
@@ -440,14 +440,14 @@ export function BackgroundDialog() {
           label: words.resetToTheme,
           onClick: resetToTheme,
           control: 'dialog.background.reset',
-          doc: 'Removes this slide’s own colour; the theme default shows',
+          doc: 'Removes this slide’s own color; the theme default shows',
           disabled: color === undefined,
         },
         {
           label: words.addToTheme,
           onClick: addToTheme,
           control: 'dialog.background.addToTheme',
-          doc: 'Makes the picked colour the default of every slide',
+          doc: 'Makes the picked color the default of every slide',
           disabled: color === undefined,
         },
         {
@@ -455,7 +455,7 @@ export function BackgroundDialog() {
           primary: true,
           onClick: done,
           control: 'dialog.background.done',
-          doc: 'Writes the colour to this slide',
+          doc: 'Writes the color to this slide',
         },
       ]}
     >
@@ -645,23 +645,38 @@ export function BackgroundDialog() {
             : ''}
         </p>
         {pictures.length > 0 ? (
-          <div className="ts-dialog-list" role="list" aria-label="Pictures in this presentation">
-            {pictures.map((asset) => (
-              <button
-                key={asset.id}
-                type="button"
-                role="listitem"
-                className="ts-dialog-row"
-                data-control={`dialog.background.choose.${asset.id}`}
-                onClick={() => choose(asset.id)}
-                {...tipProps({
-                  name: asset.alt || asset.id,
-                  doc: 'Places this picture behind the slide',
-                })}
-              >
-                <span className="ts-dialog-row-title">{asset.alt || asset.id}</span>
-              </button>
-            ))}
+          /* the deck's pictures as thumbnails (docs/POLISH.md 2.6 item 56; audit-chrome item 6:
+             a list box of clipped text rows of two widths, no thumbnails, no ellipsis): a grid of
+             tiles, each the picture at 16 by 9 with its name ellipsised at one width */
+          <div
+            className="ts-dialog-tiles"
+            role="list"
+            aria-label="Pictures in this presentation"
+            data-control="dialog.background.pictures"
+          >
+            {pictures.map((asset) => {
+              const name = asset.alt || asset.id;
+              const path = 'neutral' in asset.twins ? asset.twins.neutral : asset.twins.light;
+              const src = (input.assetUrl ?? ((each: string) => each))(path);
+              return (
+                <button
+                  key={asset.id}
+                  type="button"
+                  role="listitem"
+                  className="ts-dialog-tile"
+                  data-control={`dialog.background.choose.${asset.id}`}
+                  onClick={() => choose(asset.id)}
+                  {...tipProps({ name, doc: 'Places this picture behind the slide' })}
+                >
+                  {/* the name first in the markup (a screen reader hears it before the picture,
+                      which is decorative); the tile's grid draws it under the thumbnail */}
+                  <span className="ts-dialog-tile-name">{name}</span>
+                  <span className="ts-dialog-tile-thumb" aria-hidden="true">
+                    <img src={src} alt="" loading="lazy" decoding="async" />
+                  </span>
+                </button>
+              );
+            })}
           </div>
         ) : null}
       </DialogField>

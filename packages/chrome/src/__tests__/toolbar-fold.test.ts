@@ -80,9 +80,13 @@ describe('selectionMarks', () => {
     selection,
   });
 
-  it('answers nothing with no selection and the editor’s report when it carries one', () => {
+  it('answers nothing with no selection and the editor’s report while a session is open; a report kept from a session that ended is not read (docs/POLISH.md 2.3 item 17)', () => {
     expect(selectionMarks(factsOf(input(null)))).toBeUndefined();
-    const facts = factsOf(input({ blockId: 'x', marks: { i: true, b: true } as never } as never));
+    const facts = factsOf(
+      input({ blockId: 'x', text: true, marks: { i: true, b: true } as never } as never),
+    );
     expect(selectionMarks(facts)).toEqual({ i: true, b: true });
+    const stale = factsOf(input({ blockId: 'x', marks: { i: true, b: true } as never } as never));
+    expect(selectionMarks(stale)).toBeUndefined();
   });
 });

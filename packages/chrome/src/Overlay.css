@@ -334,11 +334,20 @@
 /* crop mode (SPEC-2 6.1 row 19): the picture's full extent dimmed under a hair outline, the frame
    and the eight handles in the selection colour (ruling 1), the handles filled with it as Google
    fills its black squares */
+/* the picture's full extent as a hairline, the cut part dimmed by the strips beside the frame
+   (docs/POLISH.md 2.5 item 50: the dim covered the kept part too) */
 .ts-crop-full {
   position: absolute;
   box-sizing: border-box;
   border: 1px solid var(--pt-hair);
-  background: rgba(0, 0, 0, 0.35);
+  background: none;
+  pointer-events: none;
+}
+
+.ts-crop-dim {
+  position: absolute;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.4);
   pointer-events: none;
 }
 
@@ -502,9 +511,10 @@
   background: var(--pt-plate);
 }
 
+/* the head's keyboard focus draws the band's plate look through TableOverlay.css (B2, the polish
+   round); no outline here (polish/build/b2.md R7) */
 .ts-table-head:focus-visible {
-  outline: 1px solid var(--pt-ink);
-  outline-offset: 1px;
+  outline: none;
 }
 
 .ts-table-head:disabled {

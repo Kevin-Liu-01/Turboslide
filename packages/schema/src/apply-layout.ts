@@ -200,13 +200,19 @@ export function untouchedPlaceholders(slide: Slide, deck: Deck, sectionId: strin
     return NOTHING_UNTOUCHED;
   }
   if (fresh === null) return NOTHING_UNTOUCHED;
+  /* the fit a placeholder carries from its layout (a title's `autofit: 'shrink'`, the polish
+     round) is furniture too: a slide made before the layouts wrote it compares without it */
+  const furniture = (block: Block): string => {
+    const { autofit: _fit, ...rest } = stripPosition(block) as Block & { autofit?: unknown };
+    return stableJson(rest);
+  };
   const freshBlocks = new Map(
-    slideBlocks(fresh).map(({ block }) => [block.id, stableJson(stripPosition(block))] as const),
+    slideBlocks(fresh).map(({ block }) => [block.id, furniture(block)] as const),
   );
   const blocks = new Set<BlockId>();
   const all = slideBlocks(slide);
   for (const { block } of all) {
-    if (freshBlocks.get(block.id) === stableJson(stripPosition(block))) blocks.add(block.id);
+    if (freshBlocks.get(block.id) === furniture(block)) blocks.add(block.id);
   }
   /* the starter is the layout's only while nothing else on the slide was touched: a figure a
      person brought to a picture layout became its background, and when it is the deck's starter
@@ -370,12 +376,23 @@ export function applyLayout(input: ApplyLayoutInput): ApplyLayoutResult {
   const untouched = untouchedPlaceholders(source, input.deck, input.sectionId);
 
   // Blank: freeform keeps every box, a grammar source runs through toFreeform, the fixed kinds
-  // become a stack first
+  // become a stack first. The placeholders the source layout placed and nobody typed into leave
+  // before the convert (docs/POLISH.md 2.3 item 13; audit-text item 2 read the title and body
+  // prompts of an untyped Title and body slide overprinting the whole Blank slide as two boxes):
+  // Google's Blank is an empty slide; a typed box stays.
   if (entry.id === 'blank') {
     const content: ContentSlide =
-      source.kind === 'content' ? source : asStack(source, extractContent(source, untouched));
+      source.kind === 'content'
+        ? withoutEmptyPlaceholders(source, untouched)
+        : asStack(source, extractContent(source, untouched));
     const converted = convertLayout(content, { type: 'freeform' });
-    return { slide: { ...converted, ...kept }, dropped: [] };
+    const dropped =
+      source.kind === 'content'
+        ? slideBlocks(source)
+            .map(({ block }) => block.id)
+            .filter((id) => !slideBlocks(converted).some(({ block }) => block.id === id))
+        : [];
+    return { slide: { ...converted, ...kept }, dropped };
   }
 
   const made = entry.make(source.id, input.deck, input.sectionId);
@@ -433,6 +450,27 @@ function dropAllBut(extracted: Extracted, keep: ReadonlyArray<'title' | 'body0'>
     if (picture.from !== 'picture') dropped.add(picture.from);
   for (const block of extracted.rest) dropped.add(block.id);
   return [...dropped];
+}
+
+/**
+ * A content slide without its untouched placeholders and its empty text blocks (the furniture of
+ * SPEC 5.4), every slot kept; the picture of a picture layout stays. Used by Blank, which keeps
+ * what was typed and nothing the layout left for typing.
+ */
+function withoutEmptyPlaceholders(slide: ContentSlide, untouched: Untouched): ContentSlide {
+  const isFurniture = (block: Block): boolean =>
+    untouched.blocks.has(block.id) ||
+    ((block.type === 'heading' ||
+      block.type === 'paragraph' ||
+      block.type === 'text' ||
+      block.type === 'credit') &&
+      isEmptyText(block.text ?? ''));
+  const slots: ContentSlide['slots'] = {};
+  for (const [slot, blocks] of Object.entries(slide.slots) as [SlotName, Block[] | undefined][]) {
+    if (blocks === undefined) continue;
+    slots[slot] = blocks.filter((block) => !isFurniture(block));
+  }
+  return { ...slide, slots };
 }
 
 /** The fixed kinds as a stack of blocks, the form convertLayout takes to freeform. */

@@ -1,7 +1,7 @@
 import { textBlockSchema } from '@turboslide/schema/blocks';
 
-import type { MenuPredicate, ToolbarControl } from './model.ts';
-import { TOOLBAR_TAIL_DEFAULT, shortcut } from './model.ts';
+import type { MenuContext, MenuPredicate, ToolbarControl } from './model.ts';
+import { TOOLBAR_TAIL_DEFAULT, evaluate, shortcut } from './model.ts';
 
 /**
  * The contextual toolbar tails of the Google Slides parity rounds (SPEC 3.2 to 3.8; SPEC-2 4.2;
@@ -90,7 +90,7 @@ export type TailControl = ToolbarControl & {
  * tooltip and no chevron, and `chrome.toolbar.fold-any-width` accepts either drawing.
  */
 export const FONTS_PARKED = false;
-const FONT_DOC = 'The face of the selected text; More fonts lists every face with its licence';
+const FONT_DOC = 'The face of the selected text; More fonts lists every face with its license';
 const FONT_PARKED_DOC = 'The face of the selected text; the font catalog returns in a later ship';
 const NO_FILL_DOC = 'Headings, paragraphs and text boxes have no fill';
 const NO_BORDER_DOC = 'Headings, paragraphs and text boxes have no border; word art has an outline';
@@ -138,8 +138,8 @@ function fillAndBorder(family: 'text' | 'wordart' | 'shape' | 'table' | 'group')
       family === 'table'
         ? 'The fill of the selected cells, or of the column'
         : family === 'wordart'
-          ? 'The colour of the letters, a theme colour or the ink'
-          : 'A theme colour, none, or a hex',
+          ? 'The color of the letters, a theme color or the ink'
+          : 'A theme color, none, or a hex',
     ...gate('boxSelected', NO_FILL_DOC),
     ...park,
   };
@@ -151,7 +151,7 @@ function fillAndBorder(family: 'text' | 'wordart' | 'shape' | 'table' | 'group')
     op: 'borderColor',
     dropdown: true,
     ...(family === 'wordart'
-      ? { doc: 'The outline around the letters, a theme colour or none' }
+      ? { doc: 'The outline around the letters, a theme color or none' }
       : {}),
     ...gate('hasBorderField', NO_BORDER_DOC),
     ...park,
@@ -197,6 +197,10 @@ const MERGE_CONTROLS: TailControl[] = [
     icon: 'arrows-pointing-in',
     status: 'now',
     item: 'format.table.mergeCells',
+    /* drawn only with a cell range to merge, as Google's table toolbar offers Merge cells for a
+       range alone (docs/POLISH.md 2.6 item 74; audit-chrome item 45: Merge and Unmerge with
+       nothing to merge) */
+    when: 'cellRangeSelected',
     enabled: 'cellRangeSelected',
     disabledReason: SELECT_CELLS_DOC,
     turboslide: true,
@@ -210,6 +214,7 @@ const MERGE_CONTROLS: TailControl[] = [
     icon: 'table-cells',
     status: 'now',
     item: 'format.table.unmergeCells',
+    when: 'mergedCellSelected',
     enabled: 'mergedCellSelected',
     disabledReason: SELECT_MERGED_DOC,
     turboslide: true,
@@ -221,6 +226,16 @@ const MERGE_CONTROLS: TailControl[] = [
  * each, the dropdown while `fonts` is in the default view and the read only family when parked;
  * `menu-model.test.ts` asserts both states through the `parked` argument.
  */
+/**
+ * True when the toolbar's tail draws its write controls (docs/POLISH.md 2.6 item 58; audit-pages
+ * item 6, audit-chrome item 27): the caller holds the write capability and the mode is Editing.
+ * A reader at /edit and Commenting mode get no tail control, since every tail control writes;
+ * the tail's end (the pointer toggle, Hide the menus) and the head's view controls stay.
+ */
+export function tailEditable(ctx: MenuContext): boolean {
+  return evaluate('write', ctx) && (ctx.settings.mode ?? 'editing') === 'editing';
+}
+
 export function fontControl(parked: boolean = FONTS_PARKED): TailControl {
   return parked
     ? {
@@ -288,7 +303,7 @@ function textControls(options: { table?: boolean } = {}): TailControl[] {
       status: 'now',
       op: 'textColor',
       dropdown: true,
-      doc: 'Ink or muted on headings and paragraphs; the theme colours on selected text, text boxes and boxes',
+      doc: 'Ink or muted on headings and paragraphs; the theme colors on selected text, text boxes and boxes',
     },
     /* Highlight color: parked by docs/FOCUS.md 3.3, returned by docs/RETURN.md 2.11 (it marks the
        selected word alone, audit-formatting row 28) */
@@ -299,7 +314,7 @@ function textControls(options: { table?: boolean } = {}): TailControl[] {
       status: 'now',
       op: 'highlightColor',
       dropdown: true,
-      doc: 'A theme colour behind the selected text, or none',
+      doc: 'A theme color behind the selected text, or none',
     },
     {
       control: 'toolbar.insertLink',
@@ -438,7 +453,7 @@ const SHAPE_TAIL: TailControl[] = [
     dropdown: true,
     dividerBefore: true,
     turboslide: true,
-    doc: 'Another shape, the same size and colours',
+    doc: 'Another shape, the same size and colors',
   },
   ...fillAndBorder('shape').map((control) => {
     if (control.control !== 'toolbar.fillColor') return control;
@@ -466,7 +481,7 @@ const IMAGE_TAIL: TailControl[] = [
     op: 'imageBorder',
     dropdown: true,
     dividerBefore: true,
-    doc: 'The frame around the picture, a theme colour or none',
+    doc: 'The frame around the picture, a theme color or none',
   },
   {
     control: 'toolbar.borderWeight',
@@ -680,7 +695,11 @@ const OTHER_TAIL: TailControl[] = parkedTail([
 
 export const TOOLBAR_TAILS: Readonly<Record<TailKind, ReadonlyArray<TailControl>>> = {
   default: TOOLBAR_TAIL_DEFAULT.map((control) =>
-    control.control === 'toolbar.select' ? { ...control, op: 'select' as const } : control,
+    /* Select draws the plain arrow (icons.tsx `cursor-arrow`) and the pointer toggle keeps the
+       rays (docs/POLISH.md 2.6 item 72; audit-chrome item 9: both drew cursor-arrow-rays) */
+    control.control === 'toolbar.select'
+      ? { ...control, op: 'select' as const, icon: 'cursor-arrow' as const }
+      : control,
   ),
   text: TEXT_TAIL,
   wordart: WORDART_TAIL,

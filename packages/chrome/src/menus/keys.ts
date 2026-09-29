@@ -425,7 +425,7 @@ export const OWN_MAP_SCOPES: ReadonlySet<KeyScope> = new Set<KeyScope>(['present
 /** Google's group names on the shortcuts page (R04 Part B), the headings of the shortcuts dialog. */
 export type ShortcutGroup =
   | 'Common actions'
-  | 'Film strip actions'
+  | 'Filmstrip actions'
   | 'Navigation'
   | 'Menus'
   | 'Comments'
@@ -539,7 +539,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     label: 'Move to previous slide',
     key: K('Up', 'PageUp or Up'),
     scope: 'filmstrip',
-    group: 'Film strip actions',
+    group: 'Filmstrip actions',
     google: ['previous-slide'],
   }),
   extra({
@@ -547,7 +547,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     label: 'Move to next slide',
     key: K('Down', 'PageDown or Down'),
     scope: 'filmstrip',
-    group: 'Film strip actions',
+    group: 'Filmstrip actions',
     google: ['next-slide'],
   }),
   extra({
@@ -555,7 +555,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     label: 'Move focus to first slide',
     key: K('Home', 'Home'),
     scope: 'filmstrip',
-    group: 'Film strip actions',
+    group: 'Filmstrip actions',
     google: ['first-slide'],
   }),
   extra({
@@ -563,7 +563,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     label: 'Move focus to last slide',
     key: K('End', 'End'),
     scope: 'filmstrip',
-    group: 'Film strip actions',
+    group: 'Filmstrip actions',
     google: ['last-slide'],
   }),
   extra({
@@ -571,7 +571,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     label: 'Select previous slide',
     key: K('Shift+Up'),
     scope: 'filmstrip',
-    group: 'Film strip actions',
+    group: 'Filmstrip actions',
     google: ['select-previous-slide'],
   }),
   extra({
@@ -579,7 +579,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     label: 'Select next slide',
     key: K('Shift+Down'),
     scope: 'filmstrip',
-    group: 'Film strip actions',
+    group: 'Filmstrip actions',
     google: ['select-next-slide'],
   }),
   extra({
@@ -587,7 +587,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     label: 'Select first slide',
     key: K('Shift+Home'),
     scope: 'filmstrip',
-    group: 'Film strip actions',
+    group: 'Filmstrip actions',
     google: ['select-first-slide'],
   }),
   extra({
@@ -595,7 +595,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     label: 'Select last slide',
     key: K('Shift+End'),
     scope: 'filmstrip',
-    group: 'Film strip actions',
+    group: 'Filmstrip actions',
     google: ['select-last-slide'],
   }),
   extra({
@@ -1066,7 +1066,7 @@ export const OMITTED_SHORTCUTS: ReadonlyArray<OmittedShortcut> = [
   {
     google: 'cell-border-selection',
     status: 'later',
-    reason: 'Border colour applies to the selected cells',
+    reason: 'Border color applies to the selected cells',
   },
   { google: 'play-video', status: 'omit', reason: 'No video' },
   { google: 'accessibility-menu', status: 'omit', reason: SCREEN_READER_GREY },
@@ -1249,7 +1249,7 @@ function groupOfMenu(menuId: string): ShortcutGroup {
     case 'format':
       return 'Text';
     case 'slide':
-      return 'Film strip actions';
+      return 'Filmstrip actions';
     case 'arrange':
       return 'Move and arrange objects';
     default:

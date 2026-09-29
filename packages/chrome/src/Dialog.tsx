@@ -72,16 +72,81 @@ export type DialogProps = {
    */
   modal?: boolean;
   children?: ReactNode;
+  /**
+   * One sentence under the buttons, in titanium: the reason the primary action is disabled
+   * (docs/POLISH.md 2.9 item 116; audit-assist item 18: a disabled button takes no pointer, so
+   * its tooltip never reached the seller). Drawn as `<control>.reason` when the dialog has a
+   * control id.
+   */
+  footnote?: string;
 };
 
+/* a `summary` is focusable by the browser without a tabindex, so the trap counts it too
+   (docs/POLISH.md 2.6 item 65; audit-chrome item 16: four Tabs left the Logo dialog through its
+   More summary) */
 const FOCUSABLE =
-  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
 
-/** The focusable elements inside a root, in document order. */
+/**
+ * Where the focus goes when a dialog closes (docs/POLISH.md 2.6 item 65; audit-chrome item 15):
+ * the element that opened it while it is still in the document, else, for a dialog a menu row
+ * opened (the row left with its menu), the menubar button of that row's menu, so a keyboard user
+ * lands where the menu was and not on the page body. Null when neither exists.
+ */
+export function focusReturnTarget(
+  opener: HTMLElement | null,
+  menuRow: string | null = null,
+): HTMLElement | null {
+  if (opener !== null && opener.isConnected && opener !== document.body) return opener;
+  const row = menuRow ?? opener?.getAttribute('data-menu-item') ?? null;
+  if (row === null) return null;
+  const menu = row.split('.')[0];
+  if (menu === undefined || menu === '') return null;
+  return document.querySelector<HTMLElement>(`[data-control="menubar.${menu}"]`);
+}
+
+/* the menu row activated last and when (Menu.tsx `activate` notes it): a menu unmounts its rows
+   in the same render that mounts the dialog its row opened, so the dialog's mount reads the body
+   as the active element and the row's id is the only trace of where the focus came from */
+let activatedRow: { id: string; at: number } | null = null;
+const ACTIVATION_GRACE_MS = 1_000;
+
+/** Records the menu row that just ran, for the dialog it opens (item 65). */
+export function noteMenuRowActivated(id: string): void {
+  activatedRow = { id, at: Date.now() };
+}
+
+/** The menu row that ran within the last second, else null. */
+export function recentMenuRow(): string | null {
+  if (activatedRow === null || Date.now() - activatedRow.at > ACTIVATION_GRACE_MS) return null;
+  return activatedRow.id;
+}
+
+/**
+ * The focusable elements inside a root, in document order, that a Tab can reach: an element
+ * inside a closed `details` (past its summary) is one the browser skips, and a trap that counted
+ * it as the last element never saw the focus reach it, so Tab from the summary left the card
+ * (docs/POLISH.md 2.6 item 65; the walk's Logo dialog kept three of eight Tabs inside).
+ */
 export function focusableIn(root: HTMLElement): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-    (el) => el.getAttribute('aria-hidden') !== 'true' && !el.hidden,
+    (el) => el.getAttribute('aria-hidden') !== 'true' && !el.hidden && !insideClosedDetails(el, root),
   );
+}
+
+/** True when an element sits inside a closed `details` below the root, past that details' summary. */
+function insideClosedDetails(el: HTMLElement, root: HTMLElement): boolean {
+  let node: HTMLElement | null = el.parentElement;
+  let child: HTMLElement = el;
+  while (node !== null && node !== root) {
+    if (node instanceof HTMLDetailsElement && !node.open) {
+      const summary = node.querySelector(':scope > summary');
+      if (summary === null || (child !== summary && !summary.contains(child))) return true;
+    }
+    child = node;
+    node = node.parentElement;
+  }
+  return false;
 }
 
 export function Dialog({
@@ -95,10 +160,14 @@ export function Dialog({
   control,
   className,
   modal = true,
+  footnote,
   children,
 }: DialogProps) {
   const card = useRef<HTMLDivElement>(null);
   const opener = useRef<HTMLElement | null>(null);
+  /* the menu row that opened this dialog, when a menu did (item 65): the focus returns to its
+     menubar button, since the row itself left with the menu */
+  const openerRow = useRef<string | null>(null);
   const titleId = useId();
   const leadId = useId();
   const primary = actions.find((action) => action.primary);
@@ -120,11 +189,11 @@ export function Dialog({
   useMountEffect(() => {
     if (!modal) {
       return () => {
-        const back = opener.current;
-        if (back && back.isConnected) back.focus();
+        focusReturnTarget(opener.current, openerRow.current)?.focus();
       };
     }
     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    openerRow.current = recentMenuRow();
     const el = card.current;
     if (el) {
       /* the marked control first (an action with `autoFocus`), else the first field or button */
@@ -134,8 +203,7 @@ export function Dialog({
       if (first instanceof HTMLInputElement && first.dataset.select === 'all') first.select();
     }
     return () => {
-      const back = opener.current;
-      if (back && back.isConnected) back.focus();
+      focusReturnTarget(opener.current, openerRow.current)?.focus();
     };
   });
 
@@ -203,10 +271,14 @@ export function Dialog({
       const first = list[0];
       const last = list[list.length - 1];
       if (first === undefined || last === undefined) return;
-      if (event.shiftKey && document.activeElement === first) {
+      const active = document.activeElement;
+      /* the focus on an element the list does not count (the card itself, a summary's open
+         content that closed): the next Tab lands on the card's first or last element */
+      const outside = !(active instanceof HTMLElement) || !list.includes(active);
+      if (event.shiftKey && (active === first || outside)) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (!event.shiftKey && (active === last || outside)) {
         event.preventDefault();
         first.focus();
       }
@@ -289,6 +361,14 @@ export function Dialog({
               </button>
             ))}
           </div>
+        ) : null}
+        {footnote !== undefined && footnote !== '' ? (
+          <p
+            className="ts-dialog-footnote"
+            data-control={control === undefined ? undefined : `${control}.reason`}
+          >
+            {footnote}
+          </p>
         ) : null}
       </div>
     </div>

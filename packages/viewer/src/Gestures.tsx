@@ -18,6 +18,7 @@ import type { ChartKind } from '@turboslide/schema/blocks/chart';
 import { emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
 import {
   canAttach,
+  connectorAxis,
   connectorEnds,
   connectorFieldsBetween,
   isConnector,
@@ -25,7 +26,7 @@ import {
   targetSites,
 } from '@turboslide/schema/connect';
 import type { Slide } from '@turboslide/schema/deck';
-import { PLATE_WIDTHS, slotsForLayout } from '@turboslide/schema/deck';
+import { canvasObjects, PLATE_WIDTHS, slotsForLayout } from '@turboslide/schema/deck';
 import { boundingBox, unionBox } from '@turboslide/schema/freeform';
 import type { BlockSlot, Mutation } from '@turboslide/schema/mutations';
 import { jsonEqual } from '@turboslide/schema/pointer';
@@ -274,7 +275,7 @@ function resizeHandles(
       blockId,
       dir,
       cursor: resizeCursor(dir),
-      label: `${blockId}: ${prefix} ${dir}`,
+      label: prefix,
       control: `handle.${blockId}.${kind === 'crop-edge' ? 'crop' : 'resize'}.${dir}`,
       shape: 'square',
       axis: 'xy',
@@ -342,7 +343,7 @@ function canvasHandles(
     box,
     blockId: anchor,
     cursor: 'move',
-    label: `${anchor}: Move`,
+    label: 'Move',
     control: `handle.${anchor}.move`,
     shape: 'chip',
     axis: 'xy',
@@ -359,7 +360,7 @@ function canvasHandles(
         blockId: anchor,
         index,
         cursor: 'crosshair',
-        label: `${anchor}: ${which === 'start' ? 'Line start' : 'Line end'}`,
+        label: which === 'start' ? 'Line start' : 'Line end',
         control: `handle.${anchor}.${which}`,
         shape: 'square',
         axis: 'xy',
@@ -381,7 +382,7 @@ function canvasHandles(
     ],
     blockId: anchor,
     cursor: 'grab',
-    label: `${anchor}: Rotate`,
+    label: 'Rotate',
     control: `handle.${anchor}.rotate`,
     shape: 'ring',
     axis: 'x',
@@ -477,7 +478,7 @@ export function handlesFor(
         box: edge(box[0] + block.key, box[1], box[3]),
         blockId,
         cursor: 'col-resize',
-        label: `${blockId}: Key column edge`,
+        label: 'Key column edge',
         control: `handle.${blockId}.key`,
         shape: 'v',
         axis: 'x',
@@ -492,7 +493,7 @@ export function handlesFor(
           box: edge(box[0] + box[2], box[1], box[3]),
           blockId,
           cursor: 'ew-resize',
-          label: `${blockId}: Width`,
+          label: 'Width',
           control: `handle.${blockId}.width`,
           shape: 'v',
           axis: 'x',
@@ -507,7 +508,7 @@ export function handlesFor(
           box: image,
           blockId,
           cursor: 'ns-resize',
-          label: `${blockId}: Crop anchor`,
+          label: 'Crop anchor',
           control: `handle.${blockId}.crop`,
           shape: 'area',
           axis: 'y',
@@ -527,7 +528,7 @@ export function handlesFor(
             blockId,
             index,
             cursor: 'grab',
-            label: `${blockId}: Figure ${index + 1}`,
+            label: `Figure ${index + 1}`,
             control: `handle.${blockId}.figures.${index}`,
             shape: 'area',
             axis: 'x',
@@ -547,7 +548,7 @@ export function handlesFor(
           blockId,
           index,
           cursor: 'ew-resize',
-          label: `${blockId}: Marker ${index + 1}`,
+          label: `Marker ${index + 1}`,
           control: `handle.${blockId}.items.${index}.value`,
           shape: 'square',
           axis: 'x',
@@ -570,7 +571,7 @@ export function handlesFor(
             blockId,
             index,
             cursor: 'grab',
-            label: `${blockId}: Marker ${index + 1}`,
+            label: `Marker ${index + 1}`,
             control: `handle.${blockId}.data.markers.${index}`,
             shape: 'square',
             axis: 'xy',
@@ -588,7 +589,7 @@ export function handlesFor(
           blockId,
           index: textIndex,
           cursor: 'grab',
-          label: `${blockId}: Label ${textIndex + 1}`,
+          label: `Label ${textIndex + 1}`,
           control: `handle.${blockId}.data.texts.${textIndex}`,
           shape: 'area',
           axis: 'xy',
@@ -622,7 +623,7 @@ export function blockMoveHandle(
     box,
     blockId,
     cursor: 'grab',
-    label: `${blockId}: Move`,
+    label: 'Move',
     control: `handle.${blockId}.move`,
     shape: 'chip',
     axis: 'y',
@@ -1044,11 +1045,15 @@ export function lineEndMutations(
   if (site) connect[which] = { block: site.blockId, site: site.site };
   else delete connect[which];
   const normalized = Object.keys(connect).length === 0 ? undefined : connect;
+  /* the axis an attached end asks for travels with the attachment (docs/POLISH.md 2.4 item 33;
+     polish/build/b3.md request 2b): a connector into a top or bottom site leaves it vertically */
+  const byId = new Map(canvasObjects(slide).map((each) => [each.id, each] as const));
   const fields = connectorFieldsBetween(
     block,
     which === 'start' ? point : ends.start,
     which === 'end' ? point : ends.end,
     normalized,
+    byId,
   );
   const mutations: Mutation[] = [];
   for (const [path, value] of Object.entries(fields)) {
@@ -1750,7 +1755,16 @@ export function drawDraftMutation(
   const connect: NonNullable<ShapeBlock['connect']> = {};
   if (startSite) connect.start = { block: startSite.blockId, site: startSite.site };
   if (endSite) connect.end = { block: endSite.blockId, site: endSite.site };
-  return { ...mutation, block: { ...block, connect } as Block };
+  /* an elbow or curved connector drawn into a top or bottom site takes the vertical variant
+     (item 33; b3.md request 2b); the field stays out when no attached site asks for an axis */
+  const axis =
+    block.shape === 'elbow' || block.shape === 'curved'
+      ? connectorAxis(connect, new Map(canvasObjects(slide).map((each) => [each.id, each] as const)))
+      : undefined;
+  return {
+    ...mutation,
+    block: { ...block, connect, ...(axis === undefined ? {} : { axis }) } as Block,
+  };
 }
 
 /**

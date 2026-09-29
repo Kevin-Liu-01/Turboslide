@@ -424,6 +424,33 @@ describe('applyLayout', () => {
       ['fig', 'h', 'list', 'p1', 'p2'].sort(),
     );
     expect(blocking(boxed.slide)).toEqual([]);
+    // an untyped Title and body slide to Blank is an empty slide (docs/POLISH.md 2.3 item 13);
+    // a typed box stays with its box
+    const untyped = layoutEntry('split').make('untyped', blankDeck, 'deck');
+    if (untyped === null) throw new Error('split needs no picture');
+    const emptied = applyLayout({
+      slide: untyped,
+      layout: 'blank',
+      deck: blankDeck,
+      sectionId: 'deck',
+    });
+    if (emptied.slide.kind !== 'content') throw new Error('kind');
+    expect(slideBlocks(emptied.slide)).toEqual([]);
+    expect(emptied.dropped.length).toBeGreaterThan(0);
+    const typed = layoutEntry('split').make('typed', blankDeck, 'deck');
+    if (typed === null || typed.kind !== 'content') throw new Error('kind');
+    const typedTitle = slideBlocks(typed).find(({ block }) => block.type === 'heading')?.block;
+    if (typedTitle === undefined || typedTitle.type !== 'heading') throw new Error('title');
+    typedTitle.text = 'Quarterly review';
+    const keptTyped = applyLayout({
+      slide: typed,
+      layout: 'blank',
+      deck: blankDeck,
+      sectionId: 'deck',
+    });
+    if (keptTyped.slide.kind !== 'content') throw new Error('kind');
+    expect(slideBlocks(keptTyped.slide).map(({ block }) => block.type)).toEqual(['heading']);
+    expect(slideBlocks(keptTyped.slide)[0]?.block.pos).toBeDefined();
     // a title slide to Blank becomes a stack of boxes
     const titleToBlank = applyLayout({
       slide: filled('title'),

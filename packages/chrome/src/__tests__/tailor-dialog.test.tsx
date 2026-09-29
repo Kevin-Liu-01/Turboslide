@@ -35,8 +35,9 @@ function host(dispatch: EditorShellInput['dispatch'], closeDialog = vi.fn()) {
     revision: 7,
     dispatch,
   };
-  const state = { input, closeDialog } as unknown as EditorShellState;
-  return { state, closeDialog };
+  const say = vi.fn();
+  const state = { input, closeDialog, say } as unknown as EditorShellState;
+  return { state, closeDialog, say };
 }
 
 const control = (id: string) => window.document.querySelector(`[data-control="${id}"]`);
@@ -90,17 +91,19 @@ describe('TailorDialog', () => {
     expect(closeDialog).toHaveBeenCalledTimes(1);
   });
 
-  it('draws Use this logo on every slide disabled and reports a refused write in the dialog', async () => {
+  it('draws no dead Use this logo on every slide row, the reason under the buttons while Apply waits, and reports a refused write in the snackbar after the dialog closed (docs/POLISH.md 2.9 item 116)', async () => {
     const dispatch = vi.fn(() =>
       Promise.reject(new Error('The slide changed while this was written; ask again')),
     );
-    const { state, closeDialog } = host(dispatch);
+    const { state, closeDialog, say } = host(dispatch);
     render(
       <EditorShellContext value={state}>
         <TailorDialog logoFinder={null} />
       </EditorShellContext>,
     );
-    expect((control('dialog.tailor.logo.everySlide') as HTMLInputElement).disabled).toBe(true);
+    expect(control('dialog.tailor.logo.everySlide')).toBeNull();
+    expect(control('dialog.tailor.count')).toBeNull();
+    expect(control('dialog.tailor.reason')?.textContent).toBe(TAILOR.nothing);
     /* no finder: no Find the logo button; the chooser lists the four raster types alone */
     fireEvent.click(control('dialog.tailor.logo.replaceAlt') as HTMLInputElement);
     expect(control('dialog.tailor.logo.find')).toBeNull();
@@ -108,11 +111,14 @@ describe('TailorDialog', () => {
       'image/png,image/jpeg,image/webp,image/gif',
     );
     fireEvent.click(control('dialog.tailor.skip.thesis') as HTMLInputElement);
+    expect(control('dialog.tailor.reason')).toBeNull();
     await act(async () => {
       fireEvent.click(control('dialog.tailor.apply') as HTMLButtonElement);
     });
-    expect(control('dialog.tailor.error')?.textContent).toContain('ask again');
-    expect(closeDialog).not.toHaveBeenCalled();
+    expect(closeDialog).toHaveBeenCalledTimes(1);
+    expect(say).toHaveBeenCalledWith(
+      'The slide changed while this was written; ask again',
+    );
   });
 
   it('draws Find the <To> logo once the finder knows the name, stores the mark on a click and names it in the one deck.tailor', async () => {

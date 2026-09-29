@@ -209,8 +209,15 @@ export function hasStarterPicture(deck: Deck): boolean {
 // ---------------------------------------------------------------------------------------------
 // Block builders (empty Texts)
 
+/**
+ * A title placeholder shrinks its text on overflow (docs/POLISH.md 2.3 item 21; audit-text item 7:
+ * a long title stayed 88 px and grew down the slide, three lines at ring height 204), as
+ * Google's title placeholder does; the mood plate's title keeps its fixed line.
+ */
 function heading(text = '', level: 'h1' | 'h2' | 'big' | 'title' = 'h2', id = 'h'): Block {
-  return { id, type: 'heading', level, text };
+  return level === 'title'
+    ? { id, type: 'heading', level, text }
+    : { id, type: 'heading', level, text, autofit: 'shrink' };
 }
 
 function paragraph(

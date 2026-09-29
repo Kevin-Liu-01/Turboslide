@@ -1805,7 +1805,7 @@ describe('the canvas rows of SPEC-2 section 4', () => {
     });
     expect(itemById('slide.changeBackground').altEffect).toBeUndefined();
     expect(tooltipDoc(itemById('slide.changeBackground'), DEFAULT_MENU_CONTEXT)).toBe(
-      'A colour or a picture behind the slide',
+      'A color or a picture behind the slide',
     );
   });
 });

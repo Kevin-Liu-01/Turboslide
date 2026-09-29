@@ -443,6 +443,9 @@ export function blockDisplayName(
   /* a line shape reads its kind, as Google's chip does (docs/OBJECTS.md 4.2 item 5): Line, Arrow,
      Elbow connector, Curved connector, Curve, Polyline, Scribble; a closed preset stays Shape */
   if (marked?.type === 'shape' && isLineKind(marked.shape)) return LINE_KIND_LABELS[marked.shape];
+  /* a text block with an outline is word art (docs/POLISH.md 2.4 item 34; polish/build/b3.md
+     request 6): the chip and the menus name it so; a text box without one stays Text box */
+  if (marked?.type === 'text' && marked.outline !== undefined) return 'Word art';
   if (slide.kind === 'title' && blockId === 'lead') return 'Subtitle';
   if (slide.kind === 'title' && blockId === 'heading') return 'Title';
   if (

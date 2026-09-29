@@ -341,12 +341,13 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
     expect(control('formatOptions.picture.reset').getAttribute('aria-disabled')).toBe('true');
   });
 
-  it('draws no parked section with the switch off: Drop shadow and Dither leave; Shape returned with the shapes and Alt text in the product round (docs/FOCUS.md 3.2; docs/RETURN.md 2.2, 2.15; PRODUCT.md section 5)', () => {
+  it('draws no parked section with the switch off: Dither leaves; Drop shadow stays since the polish round (docs/POLISH.md 2.5 item 41); Shape returned with the shapes and Alt text in the product round (docs/FOCUS.md 3.2; docs/RETURN.md 2.2, 2.15; PRODUCT.md section 5)', () => {
     panel('s');
     const sections = [...document.querySelectorAll('[data-section]')].map((el) =>
       el.getAttribute('data-section'),
     );
-    for (const parked of ['shadow', 'dither']) expect(sections, parked).not.toContain(parked);
+    expect(sections).not.toContain('dither');
+    expect(sections).toContain('shadow');
     /* Alt text returned to the default view (PRODUCT.md section 5; RETURN.md question 6) */
     expect(sections).toContain('altText');
     expect(sections).toContain('size');
@@ -354,7 +355,7 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
     /* the Shape section returned with Insert > Shape (RETURN.md 2.2); Table and Chart data return
        with their blocks (2.4, 2.5) and are drawn for a table and a chart alone */
     expect(sections).toContain('shape');
-    expect(document.querySelector('[data-control="formatOptions.shadow.enable"]')).toBeNull();
+    expect(document.querySelector('[data-control="formatOptions.shadow.enable"]')).not.toBeNull();
   });
 
   it('opens at the section a menu row names and puts the sections in Google’s order', () => {

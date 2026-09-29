@@ -100,7 +100,13 @@ function lastParagraph(plain: string): string {
   return parts[parts.length - 1] ?? plain;
 }
 
-/** copy/empty-placeholder (gslides-parity SPEC 5.4): the empty Texts a layout left for copy. */
+/**
+ * copy/empty-placeholder (gslides-parity SPEC 5.4): the empty Texts a layout left for copy. The
+ * sentence names the object in plain words and cites no specification (docs/POLISH.md 2.6 item
+ * 55; audit-chrome item 3 read the same sentence nine times on one table, one per empty cell,
+ * each ending in a parenthesis): a table's empty cells are one finding with their count, on the
+ * first empty cell's path.
+ */
 function checkEmptyPlaceholders(ctx: LintContext, slide: Slide): Finding[] {
   const out: Finding[] = [];
   const n = ctx.slideN(slide.id);
@@ -109,17 +115,36 @@ function checkEmptyPlaceholders(ctx: LintContext, slide: Slide): Finding[] {
     out.push(
       ctx.finding('copy/empty-placeholder', slide.id, {
         path: empty.path,
-        proposal: `${where} has an empty ${empty.what}; type the copy or remove the placeholder (gslides-parity SPEC 5.4).`,
+        proposal: `${where} has an empty ${empty.what}; type the copy or remove the placeholder.`,
       }),
     );
   }
   for (const ref of ctx.blocksOf(slide)) {
-    for (const empty of emptyTexts(ref.block)) {
+    const empties = emptyTexts(ref.block);
+    if (ref.block.type === 'table') {
+      const first = empties[0];
+      if (first === undefined) continue;
+      const count = empties.length;
+      out.push(
+        ctx.finding('copy/empty-placeholder', slide.id, {
+          blockId: ref.block.id,
+          path: `${ref.path}${first.path}`,
+          /* the panel lists one slide's findings, so the sentence names the table alone, as
+             docs/POLISH.md 2.6 item 55 words it: "The table has 9 empty cells" */
+          proposal:
+            count === 1
+              ? 'The table has an empty cell; type into it or remove the row.'
+              : `The table has ${count} empty cells; type into them or remove the rows.`,
+        }),
+      );
+      continue;
+    }
+    for (const empty of empties) {
       out.push(
         ctx.finding('copy/empty-placeholder', slide.id, {
           blockId: ref.block.id,
           path: `${ref.path}${empty.path}`,
-          proposal: `${where} has an empty ${empty.what}; type the copy or remove the placeholder (gslides-parity SPEC 5.4).`,
+          proposal: `${where} has an empty ${empty.what}; type the copy or remove the placeholder.`,
         }),
       );
     }

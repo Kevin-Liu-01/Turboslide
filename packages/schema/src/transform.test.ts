@@ -513,6 +513,8 @@ function randomEdit(random: () => number): MarkMutation['edit'] {
     }
     if (key === 'color' || key === 'hl') set[key] = COLORS[randomInt(random, COLORS.length - 1)]!;
     else if (key === 'link') set.link = 'https://x.y/z';
+    /* the run's own size (the polish round, docs/POLISH.md 2.3 item 16): an integer in px */
+    else if (key === 'size') set.size = 12 + randomInt(random, 60);
     else set[key] = true;
   }
   for (const key of clear) delete set[key];

@@ -40,8 +40,11 @@ export const SHARE_NAME_PROMPT_TITLE = 'Your name, shown to collaborators';
 export function NamePromptDialog({ modal = false, title, onDone }: NamePromptDialogProps = {}) {
   const shell = useEditorShell();
   const account = shell.input.account;
-  const prefilled =
-    account?.namePrompt?.prefilled ?? account?.principal.name ?? account?.principal.label ?? '';
+  /* the field opens empty unless the person chose a name (docs/POLISH.md 2.6 item 63; audit-chrome
+     item 10 read "studio", the write path's default author, filled in and selected on a fresh
+     browser): a prefilled value the route hands over, else the principal's chosen name, never the
+     generated label or the default author, with "Your name" as the placeholder */
+  const prefilled = account?.namePrompt?.prefilled ?? account?.principal.name ?? '';
   const [name, setName] = useState(prefilled);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -108,6 +111,7 @@ export function NamePromptDialog({ modal = false, title, onDone }: NamePromptDia
           className="ts-name-prompt-field"
           value={name}
           maxLength={80}
+          placeholder="Your name"
           aria-label={ACCOUNT.namePrompt.name}
           data-control="dialog.namePrompt.name"
           autoComplete="nickname"

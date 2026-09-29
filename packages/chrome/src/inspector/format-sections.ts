@@ -1,5 +1,5 @@
 import type { Block, BlockType } from '@turboslide/schema/blocks';
-import { BLOCK_SCHEMAS } from '@turboslide/schema/blocks';
+import { BLOCK_SCHEMAS, shapeFieldApplies } from '@turboslide/schema/blocks';
 import { isLineKind } from '@turboslide/schema/shapes';
 
 import type { IconName } from '../icons';
@@ -68,7 +68,7 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     id: 'position',
     title: 'Position',
     icon: 'move',
-    doc: 'The distance from the top left or the centre of the slide',
+    doc: 'The distance from the top left or the center of the slide',
   },
   { id: 'layout', title: 'Layout', icon: 'columns', doc: 'How this slide arranges its blocks' },
   {
@@ -83,7 +83,7 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     icon: 'text',
     doc: 'Size, weight, alignment, spacing, columns and the selected text’s marks',
   },
-  { id: 'colour', title: 'Colour', icon: 'swatch', doc: 'Fill, border and text colour' },
+  { id: 'colour', title: 'Color', icon: 'swatch', doc: 'Fill, border and text color' },
   {
     id: 'picture',
     title: 'Image options',
@@ -109,14 +109,15 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     id: 'shader',
     title: 'Shader',
     icon: 'cube',
-    doc: 'The shader’s preset, your brand kit’s colours and Glyphfield’s controls',
+    doc: 'The shader’s preset, your brand kit’s colors and Glyphfield’s controls',
   },
+  /* Drop shadow draws in the default view since the polish round (docs/POLISH.md 2.5 item 41;
+     polish/build/b4.md R5): the parked list of record parks no `format.dropShadow` */
   {
     id: 'shadow',
     title: 'Drop shadow',
     icon: 'square-2-stack',
-    doc: 'Colour, transparency, angle, distance and blur',
-    advanced: true,
+    doc: 'Color, transparency, angle, distance and blur',
   },
   {
     id: 'table',
@@ -300,6 +301,10 @@ export function formatSectionOfBlockControl(
   if (spec.path === '/outline') return 'colour';
   if (block.type === 'chart') return 'chart';
   if (block.type === 'shape') {
+    /* a field the kind never draws leaves the panel (docs/POLISH.md 2.6 item 52; audit-chrome
+       item 7, audit-objects item 13: a rectangle listed Corner radius, Arrowheads, Orientation
+       and Height, and two sections were titled Shape): the schema's own rule says which apply */
+    if (!shapeFieldApplies(spec.path, block)) return null;
     if (isLineKind(block.shape)) {
       if (spec.kind === 'typography' || spec.path === '/text') return null;
       return 'line';
@@ -312,7 +317,11 @@ export function formatSectionOfBlockControl(
       spec.path === '/bend' ||
       spec.path === '/points' ||
       spec.path === '/closed' ||
-      spec.path === '/connect'
+      spec.path === '/connect' ||
+      spec.path === '/radius' ||
+      spec.path === '/arrowheads' ||
+      spec.path === '/orientation' ||
+      spec.path === '/axis'
     )
       return 'shape';
   }
@@ -323,9 +332,11 @@ export function formatSectionOfBlockControl(
   }
   if (block.type === 'material') {
     /* the features round, ship two (docs/FEATURES.md 5.3): the recipe fields are the Shader
-       section's own; the caption is text, the height is the box, the asset is the frame */
-    if (spec.path === '/caption' || spec.path === '/captionSize') return 'text';
-    if (spec.path === '/height') return 'size';
+       section's own; the caption, the caption size and the flow height leave the panel (the
+       polish round, docs/POLISH.md 2.5 item 47; polish/build/b4.md R11: no Text section and no
+       second Height stepper for a shader, Size and rotation draws the box) */
+    if (spec.path === '/caption' || spec.path === '/captionSize' || spec.path === '/height')
+      return null;
     if (spec.path === '/asset') return null;
     return 'shader';
   }
@@ -339,6 +350,11 @@ export function formatSectionOfBlockControl(
   if (spec.kind === 'color') return 'colour';
   if (spec.kind === 'typography') return 'text';
   if (PICTURE_TYPES.has(block.type)) {
+    /* a shot's and a picture's generated rows leave the panel (docs/POLISH.md 2.5 item 40;
+       polish/build/b4.md R4): the hand built Image options section is the whole picture panel,
+       so no "Asset", "Role", "resample", "Fit" or "Caption size" row names an internal thing;
+       pair, tiles and details keep their generated rows */
+    if (block.type === 'shot' || block.type === 'picture') return null;
     if (spec.path === '/trim' || spec.path === '/mask' || spec.path === '/frame') return 'picture';
     if (spec.path === '/adjust') return 'adjustments';
     if (spec.kind === 'asset' || isItemControl(spec) || PICTURE_FIELDS.test(label) || spec.text)
@@ -353,7 +369,10 @@ export function formatSectionOfBlockControl(
     return 'block';
   }
   if (block.type === 'shape' || block.type === 'rule') {
-    if (spec.path === '/dash') return 'colour';
+    if (spec.path === '/dash' || spec.path === '/width') return 'colour';
+    /* a closed shape's label goes with its text, so no second "Shape" section carries it (item
+       52: the fallback section took the block's label and read as a second Shape) */
+    if (spec.path === '/text' || spec.text === true) return 'text';
     if (GEOMETRY.test(label)) return 'size';
     return 'block';
   }

@@ -247,11 +247,16 @@ describe('the kept cell pointer (RETURN.md 2.4 fixes 2 and 3)', () => {
 describe("the cover title before it converts (RETURN.md 2.14 item 1): the plans carry the reducer's mutations", () => {
   const heading: EditorSelection = { blockId: 'heading' };
 
-  it('Bold, Center, the size and the spacings plan block.set on the field object as on a block', () => {
+  it('Bold marks the field bold as one text.mark; Center, the size and the spacings plan block.set on the field object as on a block', () => {
     const bold = menuActionPlan(itemById('format.text.bold'), facts('title', heading));
     expect(bold).toMatchObject({
-      action: 'block.set',
-      input: { slideId: 'title', blockId: 'heading', path: '/typography', value: { weight: 500 } },
+      action: 'slide.update',
+      input: {
+        slideId: 'title',
+        mutations: [
+          { op: 'text.mark', blockId: 'heading', path: '/text', edit: { kind: 'marks', set: { b: true } } },
+        ],
+      },
     });
     const center = menuActionPlan(itemById('format.alignIndent.center'), facts('title', heading));
     expect(center).toMatchObject({
@@ -584,16 +589,226 @@ describe('menuActionPlan', () => {
     if (!('refused' in up)) expect(up.action).toBe('slide.move');
   });
 
-  it('Bold toggles weight 500 on the selected text block and refuses with nothing selected', () => {
+  it('Bold writes the bold run over the whole text of a block selected by one click, clears it when every run is bold, marks a session range alone, and refuses with nothing selected (docs/POLISH.md 2.3 item 12)', () => {
     const slide = document.slides[RULE] as Slide;
     const heading = firstBlockOf(slide, 'heading') as Block;
+    const text = 'text' in heading && typeof heading.text === 'string' ? heading.text : '';
     const bold = menuActionPlan(itemById('format.text.bold'), facts(RULE, { blockId: heading.id }));
     expect(bold).toMatchObject({
-      action: 'block.set',
-      input: { blockId: heading.id, path: '/typography', value: { weight: 500 } },
+      action: 'slide.update',
+      label: 'Bold',
+      input: {
+        mutations: [
+          {
+            op: 'text.mark',
+            blockId: heading.id,
+            path: '/text',
+            range: [0, text.length],
+            edit: { kind: 'marks', set: { b: true } },
+          },
+        ],
+      },
+    });
+    /* a stale range from a session that ended is not a selection (item 17): the whole text */
+    const stale = menuActionPlan(
+      itemById('format.text.bold'),
+      facts(RULE, { blockId: heading.id, range: [3, 3] }),
+    );
+    expect(stale).toMatchObject({
+      input: { mutations: [{ range: [0, text.length] }] },
+    });
+    /* inside a session the caret's range alone */
+    const run = menuActionPlan(
+      itemById('format.text.bold'),
+      facts(RULE, { blockId: heading.id, text: true, range: [0, 4] }),
+    );
+    expect(run).toMatchObject({ input: { mutations: [{ range: [0, 4] }] } });
+    /* a text that is bold whole clears the run */
+    const boldDoc: DeckDocument = {
+      ...document,
+      slides: {
+        ...document.slides,
+        bold: {
+          schemaVersion: 1,
+          id: 'bold',
+          kind: 'content',
+          layout: { type: 'stack', gap: 22 },
+          slots: { main: [{ id: 't', type: 'text', text: '*All bold*' }] },
+        } as Slide,
+      },
+    };
+    const clear = menuActionPlan(itemById('format.text.bold'), {
+      ...facts('bold', { blockId: 't' }),
+      document: boldDoc,
+    });
+    expect(clear).toMatchObject({
+      input: { mutations: [{ edit: { kind: 'marks', clear: ['b'] } }] },
     });
     expect(menuActionPlan(itemById('format.text.bold'), facts(RULE))).toEqual({
       refused: 'Select a text block first',
+    });
+  });
+
+  it('the five mark rows take the whole text of a block selected by one click and a shape without a label is not a text block (docs/POLISH.md 2.3 item 17)', () => {
+    const slide = document.slides[RULE] as Slide;
+    const heading = firstBlockOf(slide, 'heading') as Block;
+    const text = 'text' in heading && typeof heading.text === 'string' ? heading.text : '';
+    const italic = menuActionPlan(
+      itemById('format.text.italic'),
+      facts(RULE, { blockId: heading.id, range: [2, 2], marks: {} }),
+    );
+    expect(italic).toMatchObject({
+      action: 'text.style',
+      input: { blockId: heading.id, path: '/text', range: [0, text.length], marks: { i: true } },
+    });
+    const shapeDoc: DeckDocument = {
+      ...document,
+      slides: {
+        ...document.slides,
+        shapes: {
+          schemaVersion: 1,
+          id: 'shapes',
+          kind: 'content',
+          layout: { type: 'freeform' },
+          slots: {
+            main: [
+              { id: 'bare', type: 'shape', shape: 'rect', pos: { x: 0, y: 0, w: 200, h: 100, z: 0 } },
+              {
+                id: 'labelled',
+                type: 'shape',
+                shape: 'rect',
+                text: 'Step 1',
+                pos: { x: 0, y: 200, w: 200, h: 100, z: 1 },
+              },
+            ],
+          },
+        } as Slide,
+      },
+    };
+    const bare = buildMenuContext(
+      { document: shapeDoc, slideId: 'shapes', selection: { blockId: 'bare' } },
+      DEFAULT_SETTINGS,
+      'mac',
+    );
+    expect(bare.selection.textBlock).toBe(false);
+    const labelled = buildMenuContext(
+      { document: shapeDoc, slideId: 'shapes', selection: { blockId: 'labelled' } },
+      DEFAULT_SETTINGS,
+      'mac',
+    );
+    expect(labelled.selection.textBlock).toBe(true);
+    const underline = menuActionPlan(itemById('format.text.underline'), {
+      ...facts('shapes', { blockId: 'labelled' }),
+      document: shapeDoc,
+    });
+    expect(underline).toMatchObject({
+      action: 'text.style',
+      input: { blockId: 'labelled', path: '/text', range: [0, 6], marks: { u: true } },
+    });
+  });
+
+  it('Center on a cell range writes the cells, a whole column range and a table selected by one click write the columns (docs/POLISH.md 2.2 item 10)', () => {
+    const tableSlide: Slide = {
+      schemaVersion: 1,
+      id: 'tbl4',
+      kind: 'content',
+      layout: { type: 'center' },
+      slots: {
+        main: [
+          {
+            id: 't',
+            type: 'table',
+            columns: [{}, {}],
+            rows: [{ cells: ['A', 'B'], header: true }, { cells: ['1', '2'] }],
+          } as Block,
+        ],
+      },
+    };
+    const doc: DeckDocument = {
+      deck: document.deck,
+      slides: { ...document.slides, tbl4: tableSlide },
+    };
+    const center = itemById('format.alignIndent.center');
+    const header = menuActionPlan(center, {
+      ...facts('tbl4', { blockId: 't', cells: { r0: 0, c0: 0, r1: 0, c1: 1 } }),
+      document: doc,
+    });
+    expect(header).toMatchObject({
+      action: 'block.set',
+      input: {
+        path: '/cells',
+        value: [
+          { row: 0, column: 0, align: 'center' },
+          { row: 0, column: 1, align: 'center' },
+        ],
+      },
+    });
+    const session = menuActionPlan(center, {
+      ...facts('tbl4', { blockId: 't', text: true, cell: { row: 1, column: 1 } }),
+      document: doc,
+    });
+    expect(session).toMatchObject({
+      input: { path: '/cells', value: [{ row: 1, column: 1, align: 'center' }] },
+    });
+    const column = menuActionPlan(center, {
+      ...facts('tbl4', { blockId: 't', cells: { r0: 0, c0: 1, r1: 1, c1: 1 } }),
+      document: doc,
+    });
+    expect(column).toMatchObject({ input: { path: '/columns', value: [{}, { align: 'center' }] } });
+    const whole = menuActionPlan(center, { ...facts('tbl4', { blockId: 't' }), document: doc });
+    expect(whole).toMatchObject({
+      input: { path: '/columns', value: [{ align: 'center' }, { align: 'center' }] },
+    });
+  });
+
+  it('the spacing rows refuse on a table with a sentence instead of writing /typography (docs/POLISH.md 2.6 item 54)', () => {
+    const tableSlide: Slide = {
+      schemaVersion: 1,
+      id: 'tbl3',
+      kind: 'content',
+      layout: { type: 'center' },
+      slots: {
+        main: [
+          {
+            id: 't',
+            type: 'table',
+            columns: [{}, {}],
+            rows: [{ cells: ['A', 'B'], header: true }, { cells: ['1', '2'] }],
+          } as Block,
+        ],
+      },
+    };
+    const doc: DeckDocument = {
+      deck: document.deck,
+      slides: { ...document.slides, tbl3: tableSlide },
+    };
+    const table = { id: 't' };
+    for (const id of [
+      'format.spacing.single',
+      'format.spacing.1_15',
+      'format.spacing.1_5',
+      'format.spacing.double',
+      'format.spacing.addBefore',
+      'format.spacing.addAfter',
+    ]) {
+      const plan = menuActionPlan(itemById(id), {
+        ...facts('tbl3', { blockId: table.id }),
+        document: doc,
+      });
+      expect(plan, id).toEqual({ refused: 'Line spacing applies to a text block' });
+    }
+  });
+
+  it('Bulleted list and Increase indent take a heading (docs/POLISH.md 2.3 item 18)', () => {
+    const slide = document.slides[RULE] as Slide;
+    const heading = firstBlockOf(slide, 'heading') as Block;
+    const list = menuActionPlan(
+      itemById('format.bulletsNumbering.bulleted'),
+      facts(RULE, { blockId: heading.id }),
+    );
+    expect(list).toMatchObject({
+      action: 'text.list',
+      input: { blockId: heading.id, marker: 'bullet' },
     });
   });
 
@@ -646,7 +861,7 @@ describe('menuActionPlan', () => {
     expect(stepPlainSize(20, -1)).toBe(20);
   });
 
-  it('Bold, the alignments and the line spacings refuse on a list block instead of writing /typography (C2-F1, b7 C2-R16)', () => {
+  it('the alignments and the line spacings refuse on a list block instead of writing /typography (C2-F1, b7 C2-R16); Bold marks the item (docs/POLISH.md 2.3 item 12)', () => {
     /* a `plain` block has no typography field, so the `/typography` write these plans made was
        refused by the server's schema check and the title row read "Couldn't save, retrying"
        (VERIFICATION C2-F1: `text.format-menu.size-increase` and every text row after it while the
@@ -654,8 +869,12 @@ describe('menuActionPlan', () => {
     const slide = document.slides[RULE] as Slide;
     const list = firstBlockOf(slide, 'plain') as Block;
     const listFacts = facts(RULE, { blockId: list.id });
+    const boldItem = menuActionPlan(itemById('format.text.bold'), listFacts);
+    expect(boldItem).toMatchObject({
+      action: 'slide.update',
+      input: { mutations: [{ op: 'text.mark', blockId: list.id, path: '/items/0/text' }] },
+    });
     const rows = [
-      ['format.text.bold', 'Bold applies to a text block'],
       ['format.alignIndent.left', 'Alignment applies to a text block'],
       ['format.alignIndent.center', 'Alignment applies to a text block'],
       ['format.alignIndent.right', 'Alignment applies to a text block'],
@@ -669,10 +888,11 @@ describe('menuActionPlan', () => {
       const plan = menuActionPlan(itemById(id), listFacts);
       expect(plan, id).toEqual({ refused: sentence });
     }
-    /* the same rows on a text block keep their /typography write */
+    /* the same rows on a text block keep their write: the alignments and spacings /typography,
+       Bold the inline run (docs/POLISH.md 2.3 item 12) */
     const heading = firstBlockOf(slide, 'heading') as Block;
     const bold = menuActionPlan(itemById('format.text.bold'), facts(RULE, { blockId: heading.id }));
-    expect(bold).toMatchObject({ action: 'block.set', input: { path: '/typography' } });
+    expect(bold).toMatchObject({ action: 'slide.update', label: 'Bold' });
     const double = menuActionPlan(
       itemById('format.spacing.double'),
       facts(RULE, { blockId: heading.id }),

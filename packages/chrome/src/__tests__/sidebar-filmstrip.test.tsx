@@ -349,6 +349,10 @@ describe('the filmstrip', () => {
     fireEvent.contextMenu(card('thesis'), { clientX: 120, clientY: 80 });
     const move = document.querySelector<HTMLElement>('[data-menu-item="slide.moveSlide"]');
     if (!move) throw new Error('no Move slide row');
+    /* the entry after the list's first moments is a person's (Menu.tsx's resting pointer rule) */
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     fireEvent.pointerEnter(move);
     fireEvent.keyDown(move, { key: 'ArrowRight' });
     act(() => {
@@ -366,6 +370,9 @@ describe('the filmstrip', () => {
     fireEvent.contextMenu(card('thesis'), { clientX: 120, clientY: 80 });
     const apply = document.querySelector<HTMLElement>('[data-menu-item="slide.applyLayout"]');
     if (!apply) throw new Error('no Apply layout row');
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     fireEvent.pointerEnter(apply);
     fireEvent.keyDown(apply, { key: 'ArrowRight' });
     act(() => {

@@ -109,6 +109,7 @@ function viewOf(over: Partial<EditorOverlayView> = {}): EditorOverlayView {
     deckGuides: null,
     draggingGuide: null,
     crop: null,
+    linkChip: null,
     sites: [],
     drawPoints: [],
     onHandleDown: vi.fn(),
@@ -135,9 +136,9 @@ describe('Overlay on a freeform slide', () => {
     if (!chip) throw new Error('no chip');
     expect(chip.dataset['control']).toBe('handle.a.move');
     expect(chip.dataset['kind']).toBe('free-move');
-    expect(chip.getAttribute('data-tip')).toBe('a: Move');
+    expect(chip.getAttribute('data-tip')).toBe('Move');
     const chipTip = tipShown(chip);
-    expect(chipTip.name).toBe('a: Move');
+    expect(chipTip.name).toBe('Move');
     expect(chipTip.doc).toMatch(/Drag the frame or the chip anywhere/);
     /* Shift nudges 10 px since gslides-parity SPEC-2 0.87 */
     expect(chipTip.doc).toMatch(/Arrows nudge 1 px, Shift 10 px/);
@@ -179,7 +180,7 @@ describe('Overlay on a freeform slide', () => {
     expect(order.map((call) => call[1])).toEqual(['forward', 'backward', 'front', 'back']);
     expect(view.onHandleNudge).not.toHaveBeenCalled();
     // the tooltip names the keys, never the retired Alt chord (SPEC 10.2)
-    expect(chip.getAttribute('data-tip')).toBe('a: Move');
+    expect(chip.getAttribute('data-tip')).toBe('Move');
     // Cmd with a sideways arrow, Cmd with Alt, Alt with an arrow (retired), or Cmd Up on a
     // resize square, is nothing
     fireEvent.keyDown(chip, { key: 'ArrowLeft', metaKey: true });
@@ -282,9 +283,10 @@ describe('Overlay on a freeform slide', () => {
     expect(container.querySelector<HTMLElement>('.ts-crop-full')?.style.width).toBe('250px');
     expect(container.querySelector('.ts-crop-frame')).not.toBeNull();
     expect(container.querySelectorAll('.ts-handle[data-kind="crop-edge"]')).toHaveLength(8);
-    expect(container.querySelector('.ts-select-chip.is-crop')?.textContent).toBe(
-      'Drag the handles to crop. Press Enter to finish',
-    );
+    /* the chip is one word since the polish round (docs/POLISH.md 2.5 item 50); the sentence
+       stays the handles' tooltip; the dim covers the cut part alone as strips beside the frame */
+    expect(container.querySelector('.ts-select-chip.is-crop')?.textContent).toBe('Crop');
+    expect(container.querySelectorAll('.ts-crop-dim').length).toBeGreaterThan(0);
     /* no rotation ring and no frame edges in crop mode */
     expect(container.querySelector('[data-kind="free-rotate"]')).toBeNull();
     expect(container.querySelector('.ts-frame-edge')).toBeNull();
@@ -347,7 +349,7 @@ describe('Overlay on a freeform slide', () => {
               box: boxes.blocks['a'] ?? [0, 0, 0, 0],
               blockId: 'a',
               cursor: 'grab',
-              label: 'a: Move',
+              label: 'Move',
               control: 'handle.a.move',
               shape: 'chip',
               axis: 'y',

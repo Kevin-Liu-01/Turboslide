@@ -259,6 +259,10 @@ describe.skipIf(!fixtureReady)('the export fixture deck of SPEC-2 11.2 in both t
         '<i><u><s><sup><span style="color:#e5484d"><mark style="background:#f0a020">x</mark></span></sup></s></u></i>',
     );
     expect(renderRuns(parseText('plain'), { gtWord: true })).toBe('plain');
+    /* the size mark (docs/POLISH.md 2.3 item 16): a span after the colour's, before the highlight */
+    expect(renderRuns(parseText('[Acme]{c:red z:36 h:amber} renews'), { gtWord: true })).toBe(
+      '<span style="color:#e5484d"><span style="font-size:36px"><mark style="background:#f0a020">Acme</mark></span></span> renews',
+    );
   });
 
   it('draws the bullet and numbered presets per level beside the round one form (2.2.12, 0.59)', () => {

@@ -81,10 +81,19 @@ function mount(over: Partial<Parameters<typeof AssistPanel>[0]> = {}) {
 const control = (id: string) => window.document.querySelector(`[data-control="${id}"]`);
 
 describe('AssistPanel', () => {
-  it('shows the first line, the slide and the three starters; Tailor opens the dialog with no call', () => {
+  it('shows the slide, the three starters without a glyph and the one line under the composer; Tailor opens the dialog with no call', () => {
     const { dispatch, onTailor } = mount();
     expect(control('panel.assist')).not.toBeNull();
     expect(control('panel.assist.firstLine')?.textContent).toBe(ASSIST.firstLine);
+    /* the note sits after the composer (docs/POLISH.md 2.9 item 118) */
+    const composer = control('panel.assist.prompt')?.closest('.ts-assist-composer');
+    expect(composer?.nextElementSibling?.getAttribute('data-control')).toBe(
+      'panel.assist.firstLine',
+    );
+    expect(control('panel.assist.starter.shorter')?.querySelector('svg')).toBeNull();
+    expect((control('panel.assist.prompt') as HTMLTextAreaElement).placeholder).toBe(
+      'Ask the assistant',
+    );
     expect(control('panel.assist.slide')?.textContent).toContain('Slide 5');
     for (const id of ['tailor', 'shorter', 'notes'])
       expect(control(`panel.assist.starter.${id}`)).not.toBeNull();
@@ -149,7 +158,7 @@ describe('AssistPanel', () => {
     expect(box.value).toBe('');
   });
 
-  it('draws the viewer’s sentence with no starters and no composer, and the switch’s sentence on a 503', async () => {
+  it('draws the viewer’s sentence with no starters and no composer, and the switch’s sentence on a 503 with the starters and the box kept', async () => {
     mount({ canWrite: false });
     expect(control('panel.assist.viewer')?.textContent).toBe(ASSIST.viewer);
     expect(control('panel.assist.prompt')).toBeNull();
@@ -164,6 +173,24 @@ describe('AssistPanel', () => {
     expect(control('panel.assist.off')?.textContent).toBe(
       'The assistant is off on this Turboslide',
     );
+    /* the polish round (docs/POLISH.md 2.9 item 113): the panel is not one sentence afterwards */
+    expect(control('panel.assist.starter.shorter')).not.toBeNull();
+    expect(control('panel.assist.prompt')).not.toBeNull();
+  });
+
+  it('on a deployment with no model draws Tailor for a customer and one sentence, no model starter and no composer (docs/POLISH.md 2.9 item 113)', () => {
+    const { onTailor } = mount({ mode: 'unconfigured' });
+    expect(control('panel.assist.unconfigured')?.textContent).toBe(ASSIST.unconfigured);
+    expect(control('panel.assist.starter.tailor')).not.toBeNull();
+    expect(control('panel.assist.starter.shorter')).toBeNull();
+    expect(control('panel.assist.starter.notes')).toBeNull();
+    expect(control('panel.assist.prompt')).toBeNull();
+    fireEvent.click(control('panel.assist.starter.tailor') as HTMLElement);
+    expect(onTailor).toHaveBeenCalledTimes(1);
+    cleanup();
+    mount({ mode: 'off' });
+    expect(control('panel.assist.off')?.textContent).toBe(ASSIST.offMode);
+    expect(control('panel.assist.prompt')).toBeNull();
   });
 
   it('names the restricted presentation in the first line and starts with the finder’s phrase', () => {
@@ -171,6 +198,7 @@ describe('AssistPanel', () => {
     expect(control('panel.assist.firstLine')?.textContent).toContain(
       'including this restricted presentation',
     );
+    expect(control('panel.assist.firstLine')?.textContent).toBe(ASSIST.firstLineRestricted);
     expect((control('panel.assist.prompt') as HTMLTextAreaElement).value).toBe('make it shorter');
   });
 });

@@ -6,10 +6,19 @@
  */
 export const ASSIST = {
   title: 'Assist',
-  /** the first line under the title, in `ts-tt-note` (6.1, 6.3 "Privacy words") */
-  firstLine:
-    'Your slide text is sent to the assistant’s model provider under General Translation’s account to write these suggestions. Nothing is written to your slides until you accept.',
-  firstLineRestricted: ', including this restricted presentation',
+  /**
+   * The one line under the composer (docs/POLISH.md 2.9 item 118; audit-assist item 8: four
+   * lines of provider words stood above every control). The provider sentence is the Assist
+   * button's tooltip and the Help dialog's (6.3 "Privacy words").
+   */
+  firstLine: 'Nothing is written to your slides until you accept',
+  firstLineRestricted:
+    'Your slide text, including this restricted presentation’s, goes to the model provider under General Translation’s account. Nothing is written to your slides until you accept',
+  provider:
+    'Your slide text is sent to the assistant’s model provider under General Translation’s account to write these suggestions',
+  /** the panel on a deployment with no model (item 113): Tailor stays, the model starters and the composer leave */
+  unconfigured: 'The assistant is not set up on this Turboslide yet. Tailor for a customer works without it',
+  offMode: 'The assistant is off on this Turboslide. Tailor for a customer works without it',
   starters: {
     tailor: 'Tailor for a customer',
     tailorDoc:
@@ -20,7 +29,7 @@ export const ASSIST = {
     notes: 'Write speaker notes',
     notesDoc: 'Asks for a talk track for this slide, under 120 words',
   },
-  prompt: 'Ask for a shorter slide or for speaker notes',
+  prompt: 'Ask the assistant',
   promptDoc: 'Enter sends; Shift Enter starts a new line',
   send: 'Send',
   sendDoc: 'Sends the ask; the answer arrives as a card you accept or dismiss',
@@ -54,9 +63,6 @@ export const TAILOR = {
       ? 'Not found in the text'
       : `${places} place${places === 1 ? '' : 's'} on ${slides} slide${slides === 1 ? '' : 's'}`,
   logoHead: 'Logo',
-  logoEverySlide: 'Use this logo on every slide',
-  logoEverySlideDoc:
-    'Arrives with the brand kit; until then the logo lives on the slides that show it',
   logoReplaceAlt: 'Replace the pictures named after the old customer',
   logoReplaceAltDoc:
     'Swaps every picture whose description names the customer for the file you choose',
@@ -73,6 +79,18 @@ export const TAILOR = {
   nothing: 'Type a customer name, choose a logo or tick a slide first',
   done: (to: string) => `Tailored for ${to}`,
   doneNoName: 'Tailored',
+  undo: 'Undo',
+  /** the snackbar after Apply (docs/POLISH.md 2.9 item 116): the counts the pass made */
+  result: (to: string, places: number, slides: number, skipped: number) => {
+    const head = to === '' ? 'Tailored' : `Tailored for ${to}`;
+    const parts: string[] = [];
+    if (places > 0)
+      parts.push(
+        `${places} place${places === 1 ? '' : 's'} on ${slides} slide${slides === 1 ? '' : 's'}`,
+      );
+    if (skipped > 0) parts.push(`${skipped} slide${skipped === 1 ? '' : 's'} skipped`);
+    return parts.length === 0 ? head : `${head}: ${parts.join(', ')}`;
+  },
   label: (to: string) => (to === '' ? 'Tailor for a customer' : `Tailor for ${to}`),
   uploading: 'Adding the picture',
 } as const;

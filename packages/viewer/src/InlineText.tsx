@@ -101,6 +101,8 @@ type Flags = {
   sub?: true;
   color?: Color;
   hl?: Color;
+  /** the run's own size in px (docs/POLISH.md 2.3 item 16) */
+  size?: number;
 };
 
 /** The marks of a flags record as a run carries them. */
@@ -114,6 +116,7 @@ function markFlags(flags: Flags): Partial<Run> {
   else if (flags.sub) out.sub = true;
   if (flags.color !== undefined) out.color = flags.color;
   if (flags.hl !== undefined) out.hl = flags.hl;
+  if (flags.size !== undefined) out.size = flags.size;
   if (flags.link !== undefined) out.link = flags.link;
   return out;
 }
@@ -199,6 +202,10 @@ function walk(node: RunNode, flags: Flags, out: Run[]): void {
       const parsed = colorFromCss(background);
       if (parsed !== null) next.hl = parsed;
     }
+    /* a run's own size (docs/POLISH.md 2.3 item 16): the renderer draws it as an inline font size
+       on the span, and the walk reads it back so a session keeps it */
+    const fontSize = /(?:^|;)\s*font-size\s*:\s*(\d+)px/i.exec(styleAttr)?.[1];
+    if (fontSize !== undefined && name === 'SPAN') next.size = Number(fontSize);
   }
   if (name === 'A') {
     const href = node.getAttribute?.('href');
@@ -491,9 +498,11 @@ export function sessionPressVerdict(input: {
   insideRun: boolean;
   under: string | null;
   blockId: string;
+  /** the press landed on another run of the edited block (another cell of the table): the session ends and the press opens that cell (docs/POLISH.md 2.2 item 4) */
+  otherRun?: boolean;
 }): SessionPressVerdict {
   if (input.insideRun) return 'caret';
-  if (input.under === input.blockId) return 'keep';
+  if (input.under === input.blockId) return input.otherRun === true ? 'end-and-select' : 'keep';
   return input.under === null ? 'end' : 'end-and-select';
 }
 
@@ -603,6 +612,20 @@ export function sessionContextTarget(input: {
 export const CHROME_TRANSIENT_SELECTOR =
   '[role="toolbar"], .ts-tb-tail, .ts-plate-anchored, .ts-layout-plate, .ts-context-menu, .ts-menubar, .ts-menu';
 
+/**
+ * A chrome field that acts on the session's range and hands the focus back when it is done (the
+ * toolbar's size field: docs/POLISH.md 2.3 item 16): the session parks while it holds the focus
+ * instead of ending, so the typed value lands on the selected run as a mark, and the run takes
+ * the focus and its range back when the field blurs (Enter or Escape). Marked by the field itself.
+ */
+export const SESSION_PARK_ATTRIBUTE = 'data-session-park';
+const SESSION_PARK_SELECTOR = `[${SESSION_PARK_ATTRIBUTE}]`;
+
+/** True for a field that parks the session while it holds the focus (`SESSION_PARK_ATTRIBUTE`). */
+export function isParkingField(target: EventTarget | null): boolean {
+  return target instanceof Element && target.closest(SESSION_PARK_SELECTOR) !== null;
+}
+
 /** What a blur does to the session: end it, park it, or park it and take the focus back on the next tick. */
 export type BlurVerdict = 'end' | 'park' | 'park-and-refocus';
 
@@ -643,6 +666,7 @@ const OPEN_PLATE_SELECTOR = '.ts-menu, .ts-plate-anchored, .ts-context-menu, .ts
 /** The verdict for the element a blur handed the focus to. */
 export function blurVerdictOf(to: EventTarget | null): BlurVerdict {
   if (!(to instanceof Element)) return 'end';
+  if (isParkingField(to)) return 'park';
   return blurVerdict({
     field: isFieldElement(to),
     transient: isTransientTarget(to),
@@ -1170,7 +1194,11 @@ export function editableHtml(text: Markup, multiline: boolean): string {
 // The caret
 
 /** Where the caret lands on mount: at the client point of the click, at the start, at the end, or over everything. */
-export type CaretPlacement = { x: number; y: number } | 'start' | 'end' | 'all';
+/**
+ * Where a session's caret lands: a point (the caret there; with `word` the word at the point is
+ * selected, so typing replaces it, docs/POLISH.md 2.4 item 30), the start, the end, or everything.
+ */
+export type CaretPlacement = { x: number; y: number; word?: boolean } | 'start' | 'end' | 'all';
 
 type CaretDocument = Document & {
   caretRangeFromPoint?: (x: number, y: number) => Range | null;
@@ -1208,6 +1236,17 @@ export function placeCaret(element: HTMLElement, caret: CaretPlacement): void {
   }
   selection.removeAllRanges();
   selection.addRange(range);
+  /* the word at the point (item 30): the caret walks to the word's start and extends to its end;
+     a point on white space selects nothing more than the caret */
+  if (typeof caret === 'object' && caret.word === true && typeof selection.modify === 'function') {
+    selection.modify('move', 'backward', 'word');
+    selection.modify('extend', 'forward', 'word');
+    const text = selection.toString();
+    if (text.trim() === '') {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
 }
 
 /** True when the editable holds no text (the prompt does not count). */
@@ -1227,11 +1266,6 @@ function plainOf(text: Markup): string {
     .join('\n');
 }
 
-/** True when the caret sits at the very start of the editable (a Tab there changes a list level). */
-function caretAtStart(element: HTMLElement, multiline: boolean): boolean {
-  const range = selectionOffsets(element, multiline);
-  return range !== null && range[0] === 0 && range[1] === 0;
-}
 
 /** The four arrows as the direction a cell session leaves in (docs/FEATURES.md 2.2 rank 5). */
 export type CellArrow = 'left' | 'right' | 'up' | 'down';
@@ -1403,6 +1437,8 @@ export type InlineTextProps = {
   element: HTMLElement;
   /** the run's box in sheet pixels, for the link popover's place */
   box: Box;
+  /** the edited block's box in sheet px, when the run's box is smaller (a padded text box): the link bar sits under it (docs/POLISH.md 2.6 item 70) */
+  blockBox?: Box | null;
   /** the stage scale */
   k: number;
   /** the pointer takes paragraph breaks (the four multiline pointers, gslides-parity SPEC 7.4) */
@@ -1484,6 +1520,7 @@ const POPOVER_GAP = 6;
 export function InlineText({
   element,
   box,
+  blockBox = null,
   k,
   multiline = false,
   caret = 'end',
@@ -2054,12 +2091,10 @@ export function InlineText({
       } else if (e.key === 'Tab' && !meta && !e.altKey) {
         e.preventDefault();
         e.stopPropagation();
-        /* Tab at the start of a list item raises its level, Shift Tab lowers it (SPEC-2 6.2) */
-        if (
-          caretAtStart(element, options.current.multiline) &&
-          callbacks.current.onListLevel?.(e.shiftKey ? -1 : 1) === true
-        )
-          return;
+        /* Tab in a list item raises its level wherever the caret sits, Shift Tab lowers it
+           (SPEC-2 6.2; docs/POLISH.md 2.3 item 15): Google nests the item from any caret
+           position, and a Tab after "Two" that ended the session left the next words after "One" */
+        if (callbacks.current.onListLevel?.(e.shiftKey ? -1 : 1) === true) return;
         finish(e.shiftKey ? 'shift-tab' : 'tab');
       } else if (meta && !e.altKey && (e.key === ']' || e.key === '[')) {
         /* Increase and Decrease indent, Chrome's Forward and Back on macOS: always prevented (0.55) */
@@ -2249,6 +2284,8 @@ export function InlineText({
       const target = e.target;
       if (!(target instanceof Node)) return;
       if (element.contains(target) || popover.current?.contains(target)) return;
+      /* the size field holds the focus for its typed value; the run resumes when it blurs */
+      if (isParkingField(target)) return;
       if (isTransientTarget(target) && !isFieldElement(target)) {
         resumeAfterChrome();
         return;
@@ -2282,7 +2319,8 @@ export function InlineText({
       if (parked.current && !done.current && !insideEditable) {
         const inPopover =
           e.target instanceof Node && (popover.current?.contains(e.target) ?? false);
-        if (!inPopover && !isTransientTarget(e.target)) finish('blur');
+        if (!inPopover && !isTransientTarget(e.target) && !isParkingField(e.target))
+          finish('blur');
       }
     };
     /* the same end on the pointer event, which the browser fires before the mouse event: the
@@ -2294,13 +2332,14 @@ export function InlineText({
       if (!parked.current || done.current) return;
       if (e.target instanceof Node && element.contains(e.target)) return;
       const inPopover = e.target instanceof Node && (popover.current?.contains(e.target) ?? false);
-      if (!inPopover && !isTransientTarget(e.target)) finish('blur');
+      if (!inPopover && !isTransientTarget(e.target) && !isParkingField(e.target)) finish('blur');
     };
     /* the focus left a chrome surface for the body: a menu or plate pick unmounted it */
     const onDocFocusOut = (e: FocusEvent) => {
       if (!parked.current || done.current) return;
       if (e.relatedTarget !== null) return;
-      if (e.target instanceof Element && isTransientTarget(e.target)) resumeAfterChrome();
+      if (e.target instanceof Element && (isTransientTarget(e.target) || isParkingField(e.target)))
+        resumeAfterChrome();
     };
     const onPaste = (e: ClipboardEvent) => {
       // pasted text lands as plain text; a line break is a paragraph break on a multiline
@@ -2424,12 +2463,18 @@ export function InlineText({
     }, 0);
   };
 
-  const place = (height: number) => {
-    const above = box[1] * k - height - POPOVER_GAP;
-    return {
-      left: Math.max(0, box[0] * k),
-      top: above >= 0 ? above : (box[1] + box[3]) * k + POPOVER_GAP,
-    };
+  /* under the selection's box and inside the viewport (docs/POLISH.md 2.6 item 70; audit-chrome
+     item 22 read the bar at the page's corner): above the box only when the viewport ends first */
+  const place = (height: number, width = 560) => {
+    const stage = element.closest('.ts-stagewrap')?.getBoundingClientRect();
+    const anchor = blockBox ?? box;
+    const below = (anchor[1] + anchor[3]) * k + POPOVER_GAP;
+    const above = anchor[1] * k - height - POPOVER_GAP;
+    const fitsBelow = stage === undefined || stage.top + below + height <= window.innerHeight - 8;
+    const top = fitsBelow || above < 0 ? below : above;
+    const room = stage === undefined ? Number.POSITIVE_INFINITY : window.innerWidth - 8 - stage.left;
+    const left = Math.max(0, Math.min(anchor[0] * k, room - width));
+    return { left, top };
   };
 
   if (linkOpen) {
@@ -2520,10 +2565,7 @@ export function InlineText({
 
   if (chipHref !== null) {
     const shownHref = chipHref.length > 56 ? `${chipHref.slice(0, 55)}\u2026` : chipHref;
-    const style = {
-      left: Math.max(0, box[0] * k),
-      top: (box[1] + box[3]) * k + POPOVER_GAP,
-    };
+    const style = place(32, 420);
     return (
       <div
         className="ts-link-chip"

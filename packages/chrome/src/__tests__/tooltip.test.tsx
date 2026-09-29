@@ -8,6 +8,7 @@ import {
   TIP_ID,
   Tooltip,
   hideTooltip,
+  resetTooltipTiming,
   isKeyLike,
   shownTooltipAnchor,
   tipOf,
@@ -27,6 +28,7 @@ beforeEach(() => {
 
 afterEach(() => {
   hideTooltip();
+  resetTooltipTiming();
   cleanup();
   vi.useRealTimers();
 });
@@ -73,6 +75,7 @@ describe('Tooltip', () => {
     const button = screen.getByRole('button', { name: 'Twin' });
     expect(button.getAttribute('data-tip')).toBe('Twin');
     expect(button.hasAttribute('title')).toBe(false);
+    fireEvent.mouseMove(document.body);
     fireEvent.mouseEnter(button);
     expect(layer()).toBeNull();
     act(() => {
@@ -118,18 +121,54 @@ describe('Tooltip', () => {
     );
     const first = screen.getByRole('button', { name: 'First' });
     const second = screen.getByRole('button', { name: 'Second' });
+    fireEvent.mouseMove(document.body);
     fireEvent.mouseEnter(first);
     act(() => {
       vi.advanceTimersByTime(TIP_DELAY_MS);
     });
     expect(shownTooltipAnchor()).toBe(first);
     /* while one is up the next shows at once */
+    fireEvent.mouseMove(document.body);
     fireEvent.mouseEnter(second);
     expect(shownTooltipAnchor()).toBe(second);
     expect(document.querySelectorAll('[role="tooltip"]')).toHaveLength(1);
     expect(layer()?.querySelector('.pt-tip-name')?.textContent).toBe('Second');
     expect(first.hasAttribute('aria-describedby')).toBe(false);
     expect(second.getAttribute('aria-describedby')).toBe(TIP_ID);
+  });
+
+  it('shows no tip for a control that moved under a resting pointer until the pointer moves, and none on a focus returned right after Escape (docs/POLISH.md 2.6 item 61)', () => {
+    render(
+      <Tooltip content="Insert image">
+        <button type="button">Image</button>
+      </Tooltip>,
+    );
+    const button = screen.getByRole('button');
+    /* no movement for a while: the enter is a control moving under the pointer */
+    act(() => {
+      vi.advanceTimersByTime(2_000);
+    });
+    fireEvent.mouseEnter(button);
+    act(() => {
+      vi.advanceTimersByTime(TIP_DELAY_MS + 50);
+    });
+    expect(shownTooltipAnchor()).toBeNull();
+    /* the pointer's own movement over the control schedules it */
+    fireEvent.mouseMove(button);
+    act(() => {
+      vi.advanceTimersByTime(TIP_DELAY_MS + 50);
+    });
+    expect(shownTooltipAnchor()).toBe(button);
+    hideTooltip();
+    /* a focus that follows Escape (a palette closing) shows nothing; one after a Tab shows */
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    fireEvent.focus(button);
+    expect(shownTooltipAnchor()).toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(1_000);
+    });
+    fireEvent.focus(button);
+    expect(shownTooltipAnchor()).toBe(button);
   });
 
   it('hides on Escape', () => {
@@ -144,6 +183,7 @@ describe('Tooltip', () => {
   it('cancels a pending hover when the pointer leaves before the delay', () => {
     render(<ToolButton title="Copy link" onClick={() => undefined} />);
     const button = screen.getByRole('button', { name: 'Copy link' });
+    fireEvent.mouseMove(document.body);
     fireEvent.mouseEnter(button);
     fireEvent.mouseLeave(button);
     act(() => {

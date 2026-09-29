@@ -184,29 +184,24 @@ describe('Menu rows', () => {
     expect(row('edit.undo').getAttribute('aria-keyshortcuts')).toBe('Control+Z');
   });
 
-  it('shows the stub sentence in the tooltip of a Later row', () => {
+  it('draws no plate over a Later row or a disabled row, and keeps their names as data-tip for the audit (docs/POLISH.md 2.6 item 61)', () => {
+    /* audit-chrome item 21: a disabled row's plate covered the rows under it; the stub clause
+       and the disabled reason stay in the model (tooltipDoc) for the finder and the palette */
     render(<Harness />);
+    fireEvent.mouseMove(document.body);
     fireEvent.mouseEnter(row('edit.italic'));
     act(() => {
-      vi.advanceTimersByTime(TIP_DELAY_MS);
+      vi.advanceTimersByTime(TIP_DELAY_MS + 50);
     });
-    const tip = document.getElementById(TIP_ID);
-    expect(tip?.querySelector('.pt-tip-name')?.textContent).toBe('Italic');
-    expect(tip?.querySelector('.pt-tip-doc')?.textContent).toBe(
-      'Not available in Turboslide yet. The GT theme sets Inter in one style.',
-    );
-    expect(tip?.querySelector('.pt-tip-key')?.textContent).toBe('Cmd I');
-  });
-
-  it('shows the disabled reason while the predicate says no', () => {
-    render(<Harness />);
+    expect(document.getElementById(TIP_ID)?.hidden ?? true).toBe(true);
+    expect(row('edit.italic').getAttribute('data-tip')).toBe('Italic');
+    fireEvent.mouseMove(document.body);
     fireEvent.mouseEnter(row('edit.paste'));
     act(() => {
-      vi.advanceTimersByTime(TIP_DELAY_MS);
+      vi.advanceTimersByTime(TIP_DELAY_MS + 50);
     });
-    expect(document.getElementById(TIP_ID)?.querySelector('.pt-tip-doc')?.textContent).toBe(
-      'Copy something first.',
-    );
+    expect(document.getElementById(TIP_ID)?.hidden ?? true).toBe(true);
+    expect(row('edit.paste').getAttribute('data-tip')).toBe('Paste');
   });
 });
 
@@ -346,6 +341,18 @@ describe('Menu pointer', () => {
   it('opens a submenu after resting on its row for 120 ms and switches when another row is hovered', () => {
     render(<Harness autoFocus={false} />);
     expect(document.activeElement).toBe(menu());
+    /* an enter in the list's first moments with no pointer movement is the browser's own for a
+       list that opened under the pointer and lights nothing (docs/POLISH.md 2.6 item 74); the
+       person's entry comes after them */
+    fireEvent.pointerEnter(row('edit.more'), { pointerType: 'mouse' });
+    act(() => {
+      vi.advanceTimersByTime(SUBMENU_HOVER_MS);
+    });
+    expect(screen.queryByRole('menu', { name: 'More' })).toBeNull();
+    expect(document.activeElement).toBe(menu());
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     fireEvent.pointerEnter(row('edit.more'), { pointerType: 'mouse' });
     expect(screen.queryByRole('menu', { name: 'More' })).toBeNull();
     act(() => {

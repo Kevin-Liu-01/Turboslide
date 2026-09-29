@@ -1,6 +1,15 @@
 import { tooltipKey } from './keys.ts';
 import type { MenuContext, MenuItem, Platform } from './model.ts';
-import { allItems, isEnabled, isPresent, itemPath, resolveLabel, tooltipDoc } from './model.ts';
+import {
+  allItems,
+  isEnabled,
+  isPresent,
+  itemPath,
+  resolveLabel,
+  TITLE_ROW_ITEMS,
+  tooltipDoc,
+  walkItems,
+} from './model.ts';
 
 /**
  * Search the menus (SPEC 2.10, 3.1 row 1; Google's tool finder, Option+/): the rows the ToolFinder
@@ -141,6 +150,12 @@ export function finderRows(ctx: MenuContext): FinderRow[] {
         .toLowerCase(),
     });
   };
-  for (const item of allItems()) push(item);
+  /* the ten menus' rows first and the title row's last (docs/POLISH.md 2.6 item 73; audit-chrome
+     item 42: an empty query began with Turboslide home, Rename and Document status under
+     "Menus"); `allItems` walks the title row first */
+  const titleIds = new Set(walkItems(TITLE_ROW_ITEMS).map((item) => item.id));
+  const all = allItems();
+  for (const item of all) if (!titleIds.has(item.id)) push(item);
+  for (const item of all) if (titleIds.has(item.id)) push(item);
   return rows;
 }

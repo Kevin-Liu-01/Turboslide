@@ -21,6 +21,14 @@
   text-transform: uppercase;
 }
 
+/* inside Format options the group labels read in sentence case, as the panel's other words do
+   (docs/POLISH.md 2.5 item 42; polish/build/b3.md request 8, b4.md R9) */
+.ts-fo .ts-picker-title {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+}
+
 .ts-picker-grid {
   display: grid;
   gap: 2px;
@@ -128,13 +136,29 @@
 }
 
 /* the colour plate and the weight list anchored to a menu row or a toolbar button (SPEC-2 0.27) */
+/* an anchored plate never runs past the viewport (docs/POLISH.md 2.6 item 53; audit-chrome item
+   5: Change shape and the Mask arrow opened 923 px tall plates in a 900 px viewport): it takes a
+   max height from its top to 16 px above the viewport's bottom and scrolls inside */
 .ts-plate-anchored {
   position: fixed;
   z-index: 60;
+  box-sizing: border-box;
   padding: 8px;
   border: 1px solid var(--pt-hair);
   background: var(--pt-paper);
   color: var(--pt-ink);
+  max-height: calc(100vh - var(--ts-plate-top, 0px) - 16px);
+  overflow: hidden;
+}
+
+/* the picker inside the plate is the element that scrolls (docs/POLISH.md 2.6 item 53): its box
+   ends inside the viewport, 8 px of the plate's padding and its hairline on each side of it, and
+   its last tile is reached by a scroll inside it; the walk reads the picker's own box */
+.ts-plate-anchored > .ts-picker {
+  box-sizing: border-box;
+  max-height: calc(100vh - var(--ts-plate-top, 0px) - 34px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .ts-color-grid {

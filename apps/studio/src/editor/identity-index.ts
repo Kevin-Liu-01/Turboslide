@@ -170,9 +170,14 @@ export function identityIndex(input: IdentityIndexInput): ReadonlyMap<string, Id
     });
     note(entry.principalId);
   }
+  /* the caller: the payload's own identity is the boot's reading, so once the room holds the
+     caller's row that row's live facts win (the name typed in this session, its trust and mark;
+     the integrator's preview pictures read the version rows with the label's plate and no guest
+     word after Change name, the boot's stale view overriding the roster); the payload supplies
+     what the row lacks (the run id, the deleted flag, the account behind an alias) */
   const me = identityView(input.identity, input.author);
   const own = out.get(me.principalId);
-  out.set(me.principalId, own === undefined ? me : { ...own, ...me });
+  out.set(me.principalId, own === undefined ? me : { ...me, ...own });
   note(me.principalId);
   for (const id of out.keys()) note(id);
   const person = (id: string): string => personOf.get(id) ?? id;

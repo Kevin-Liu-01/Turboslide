@@ -148,23 +148,31 @@ describe('identityIndex', () => {
     expect(identityOfPrincipal('agent:tok_1').trust).toBe('agent');
   });
 
-  it('lets the roster and the caller override the payload by id, keeping the payload mark for the caller', () => {
+  it('lets the roster row override the payload and the boot identity of the caller by id, the payload supplying what the row lacks', () => {
     const resolved: Record<string, EditorIdentity> = {
       [A]: { principalId: A, label: 'Titanium 471', trust: 'label', kind: 'anonymous' },
     };
     const roster = [{ ...entry(A, 'c1', 'Ada Lovelace', 0), trust: 'guest' as const }];
+    /* the boot's reading of the caller, from before the name was typed in this session: the
+       room's live row wins over it (the integrator's preview pictures read the version rows with
+       the label's plate and no guest word while the boot identity overrode the row) */
     const me: EditorIdentity = {
       principalId: A,
       label: 'Titanium 471',
-      name: 'Ada Lovelace',
-      trust: 'guest',
+      trust: 'label',
       kind: 'anonymous',
-      mark: { variant: 'initials', self: true } as unknown as EditorIdentity['mark'],
+      runId: 'run-7',
+      mark: { variant: 'initials', initials: 'T', self: true } as unknown as EditorIdentity['mark'],
     };
     const names = identityIndex({ roster, identity: me, author, threads: [], resolved });
     const view = names.get(A);
     expect(view).toMatchObject({ name: 'Ada Lovelace', trust: 'guest', clientId: 'c1', hue: 1 });
-    expect(view?.mark).toEqual({ variant: 'initials', self: true });
+    expect(view?.mark).toEqual(roster[0]!.mark);
+    expect(view?.runId).toBe('run-7');
+    /* with no room row yet, the boot identity stands on its own */
+    const alone = identityIndex({ roster: [], identity: me, author, threads: [], resolved });
+    expect(alone.get(A)?.mark).toEqual({ variant: 'initials', initials: 'T', self: true });
+    expect(alone.get(A)?.trust).toBe('label');
   });
 
   it('tells two people of one text apart by first appearance across the log, the comments and the roster', () => {

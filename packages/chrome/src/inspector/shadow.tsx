@@ -64,8 +64,14 @@ export function ShadowSection({ blocks, write }: ShadowSectionProps) {
 
   const patch = (fields: Partial<Shadow>) => commit({ ...(current ?? {}), ...fields });
 
+  /* on a picture the section's root carries the id the polish round's row parks by
+     (docs/POLISH.md item 41, `formatOptions.picture.shadow`); the controls keep their own ids */
+  const picture = first !== undefined && (first.type === 'shot' || first.type === 'picture');
   return (
-    <>
+    <div
+      className="ts-fo-shadow"
+      data-control={picture ? 'formatOptions.picture.shadow' : 'formatOptions.shadow'}
+    >
       <CheckField
         label={words.enable}
         checked={on}
@@ -122,6 +128,6 @@ export function ShadowSection({ blocks, write }: ShadowSectionProps) {
         disabled={write.busy || !on}
         unit="px"
       />
-    </>
+    </div>
   );
 }

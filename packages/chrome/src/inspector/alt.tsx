@@ -42,10 +42,13 @@ export function AltTextSection({ block, asset, write }: AltTextSectionProps) {
   return (
     <label className="ts-fo-alt">
       <span className="ts-fo-field-label">{words.description}</span>
+      {/* the field the panel focuses when a row opens it on this section (docs/POLISH.md item 45;
+          FormatOptions.tsx reads data-autofocus, build/b4.md R3), so the seller types at once */}
       <textarea
         value={draft ?? current}
         aria-label={words.description}
         data-control="formatOptions.altText.description"
+        data-autofocus=""
         rows={3}
         disabled={write.busy}
         {...tip}

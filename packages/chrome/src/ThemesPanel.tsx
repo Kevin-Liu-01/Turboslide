@@ -15,6 +15,8 @@ import {
   KIT_COLORS,
   KIT_COLOR_TOKENS,
   KIT_COLOR_WORDS,
+  MARK_POSITION_FLOW,
+  MARK_POSITION_FLOW_LABEL,
   SLOT_POSITIONS,
   SLOT_POSITION_LABELS,
   brandWriteLabel,
@@ -199,6 +201,16 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
   const defaultKit = defaultKitOfInput(input);
   const current = deckAppearance(deck);
   const [colorAppearance, setColorAppearance] = useState<Appearance>(current);
+  /* the Colors tab follows the appearance the seller picks (docs/POLISH.md item 49; audit-media
+     item 20: the Dark tile left the tab on Light): the tab resets when the deck's appearance
+     changes, and the seller can still switch it to edit the other appearance's colours */
+  const [seenAppearance, setSeenAppearance] = useState<Appearance>(current);
+  if (seenAppearance !== current) {
+    setSeenAppearance(current);
+    setColorAppearance(current);
+  }
+  /* the hex being typed per role, so the swatch follows the field before Enter (item 49) */
+  const [typedHex, setTypedHex] = useState<Partial<Record<KitColor, HexColor>>>({});
   const firstId = slideOrder(deck)[0];
   const first = firstId === undefined ? undefined : document.slides[firstId];
   const fileInput = useRef<HTMLInputElement>(null);
@@ -393,15 +405,22 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
       'Brand kit: Logo',
     ).then(() => shell.say(words.logoDefault(defaultKit.name), undoAction()));
 
+  /* the two Position selects name what is drawn (item 49): the title slide's mark sits above the
+     heading while the record names no position, so its select reads "Above the title" then and
+     the pick of that row removes the position; the footer's logo sits bottom left by default */
   const positionSelect = (
     pointer: '/positions/mark' | '/positions/footerLogo',
     control: string,
     label: string,
   ) => {
-    const value: SlotPosition =
-      pointer === '/positions/mark'
-        ? (kit?.positions?.mark ?? 'bottom-left')
-        : (kit?.positions?.footerLogo ?? 'bottom-left');
+    const isMark = pointer === '/positions/mark';
+    const value: string = isMark
+      ? (kit?.positions?.mark ?? MARK_POSITION_FLOW)
+      : (kit?.positions?.footerLogo ?? 'bottom-left');
+    const options: { value: string; label: string }[] = [
+      ...(isMark ? [{ value: MARK_POSITION_FLOW, label: MARK_POSITION_FLOW_LABEL }] : []),
+      ...SLOT_POSITIONS.map((position) => ({ value: position, label: SLOT_POSITION_LABELS[position] })),
+    ];
     return (
       <label className="ts-brand-field">
         <span className="ts-brand-label">{label}</span>
@@ -411,13 +430,21 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
           data-control={control}
           {...tipProps({
             name: `${words.position}, ${label.toLowerCase()}`,
-            doc: 'One of the four corners of the slide, or hidden',
+            doc: isMark
+              ? 'Above the title, one of the four corners of the slide, or hidden'
+              : 'One of the four corners of the slide, or hidden',
           })}
-          onChange={(event) => writeKit(pointer, event.target.value as SlotPosition)}
+          onChange={(event) => {
+            const picked = event.target.value;
+            void writeKit(
+              pointer,
+              picked === MARK_POSITION_FLOW ? undefined : (picked as SlotPosition),
+            );
+          }}
         >
-          {SLOT_POSITIONS.map((position) => (
-            <option key={position} value={position}>
-              {SLOT_POSITION_LABELS[position]}
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
@@ -430,13 +457,23 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
     const own = kit?.colors?.[colorAppearance]?.[role] !== undefined;
     const meaning = KIT_COLOR_WORDS[role];
     const pointer = `/colors/${colorAppearance}/${role}`;
+    const shown = typedHex[role] ?? hex;
+    const preview = (typed: HexColor | null) => {
+      setTypedHex((held) => {
+        const next = { ...held };
+        if (typed === null) delete next[role];
+        else next[role] = typed;
+        return next;
+      });
+      previewKit(kit, colorAppearance, role, typed);
+    };
     return (
       <div key={role} className="ts-brand-color" data-role={role}>
         <label
           className={cn('ts-brand-swatch', own && 'is-own')}
-          style={{ background: hex }}
+          style={{ background: shown }}
           data-control={`panel.brand.color.${role}.swatch`}
-          {...tipProps({ name: meaning.name, doc: `${meaning.line}. ${hex}` })}
+          {...tipProps({ name: meaning.name, doc: `${meaning.line}. ${shown}` })}
         >
           <input
             type="color"
@@ -464,7 +501,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
           value={hex}
           control={`panel.brand.color.${role}.hex`}
           disabled={commit === undefined}
-          onPreview={(typed) => previewKit(kit, colorAppearance, role, typed)}
+          onPreview={preview}
           onCommit={(next) => void writeKit(pointer, next)}
         />
       </div>
@@ -656,7 +693,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
                 onClick={() => setColorAppearance(appearance)}
                 {...tipProps({
                   name: appearance === 'light' ? words.light : words.dark,
-                  doc: `Edits the colours the ${appearance} appearance draws`,
+                  doc: `Edits the colors the ${appearance} appearance draws`,
                 })}
               >
                 <span className="pt-lb">{appearance === 'light' ? words.light : words.dark}</span>

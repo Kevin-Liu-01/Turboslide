@@ -6,8 +6,12 @@ import { ladderStepDown } from '@turboslide/schema/typography';
 
 import {
   BODY_SLOT,
+  CAPTION_ROW_HEIGHT,
+  clampBoxToSheet,
   freeRectanglesOf,
+  NATURAL_SIZE_LIMIT,
   PICTURE_MARGIN,
+  replacedPictureBox,
   pictureBodyRect,
   pictureInsertArea,
   pictureInsertBox,
@@ -26,10 +30,10 @@ import { shrinkMutation } from '../text-fit';
 
 describe('pictureInsertBox', () => {
   it('centres the picture in the body slot at the largest size that keeps the 40 px margin', () => {
-    const [x, y, w, h] = pictureInsertBox([400, 300]);
+    const [x, y, w, h] = pictureInsertBox([1600, 1200]);
     const [ax, ay, aw, ah] = BODY_SLOT;
     expect(h).toBe(ah - 2 * PICTURE_MARGIN);
-    expect(w).toBe(Math.round(((ah - 2 * PICTURE_MARGIN) * 400) / 300));
+    expect(w).toBe(Math.round(((ah - 2 * PICTURE_MARGIN) * 1600) / 1200));
     expect(x).toBe(Math.round(ax + (aw - w) / 2));
     expect(y).toBe(Math.round(ay + (ah - h) / 2));
     expect(x).toBeGreaterThanOrEqual(ax + PICTURE_MARGIN);
@@ -45,6 +49,67 @@ describe('pictureInsertBox', () => {
   it('reads an unknown size as 16:9 and takes another area', () => {
     expect(pictureInsertBox(undefined, [0, 0, 1600, 900], 0)).toEqual([0, 0, 1600, 900]);
     expect(pictureInsertBox([0, 0], [100, 100, 800, 450], 0)).toEqual([100, 100, 800, 450]);
+  });
+
+  it('keeps the natural size of a picture under the limit whatever the area (docs/POLISH.md item 51)', () => {
+    // the same 180 px icon in the whole body and in a strip beside a table
+    const whole = pictureInsertBox([180, 180]);
+    expect([whole[2], whole[3]]).toEqual([180, 180]);
+    const strip = pictureInsertBox([180, 180], [777, 265, 686, 506]);
+    expect([strip[2], strip[3]]).toEqual([180, 180]);
+    expect(strip[0] + 90).toBe(Math.round(777 + 686 / 2));
+    // a small picture in a smaller area still scales down to fit the margin
+    const tight = pictureInsertBox([180, 180], [0, 0, 200, 200]);
+    expect([tight[2], tight[3]]).toEqual([120, 120]);
+    // at the limit the picture takes the largest box the area gives it
+    const large = pictureInsertBox([NATURAL_SIZE_LIMIT, NATURAL_SIZE_LIMIT]);
+    expect(large[3]).toBe(BODY_SLOT[3] - 2 * PICTURE_MARGIN);
+  });
+
+  it('places a small picture at its size in the free rectangle beside a table, at the top left of the empty ones', () => {
+    const table: Block = {
+      id: 'tbl',
+      type: 'paragraph',
+      text: 'Q1 revenue',
+      pos: { x: 137, y: 265, w: 600, h: 506, z: 1 },
+    };
+    const placed = pictureInsertArea(canvas([heading, table]), [180, 180]);
+    const box = pictureInsertBox([180, 180], placed.area);
+    expect([box[2], box[3]]).toEqual([180, 180]);
+    expect(box[0]).toBeGreaterThanOrEqual(137 + 600 + 40);
+  });
+});
+
+describe('the box of a dropped or replaced picture (docs/POLISH.md items 37 and 50)', () => {
+  it('moves a dropped box inside the sheet and cuts one larger than the sheet to its edge', () => {
+    expect(clampBoxToSheet([1096, 696, 480, 240])).toEqual([1096, 660, 480, 240]);
+    expect(clampBoxToSheet([1400, 100, 480, 240])).toEqual([1120, 100, 480, 240]);
+    expect(clampBoxToSheet([-20, -10, 480, 240])).toEqual([0, 0, 480, 240]);
+    expect(clampBoxToSheet([100, 100, 2000, 1000])).toEqual([0, 0, 1600, 900]);
+    expect(clampBoxToSheet([100, 100, 480, 240])).toEqual([100, 100, 480, 240]);
+  });
+
+  it('keeps the centre and the area of a replaced picture and refits the sides to the new aspect', () => {
+    // a 108 by 160 symbol box takes a 3:1 wordmark: the same area, the wordmark's aspect
+    const box = replacedPictureBox([700, 300, 108, 160], [900, 300]);
+    const [x, y, w, h] = box;
+    expect(Math.abs(w / h - 3)).toBeLessThan(0.03);
+    expect(Math.abs(w * h - 108 * 160)).toBeLessThan(0.02 * 108 * 160);
+    expect(Math.abs(x + w / 2 - (700 + 54))).toBeLessThanOrEqual(1);
+    expect(Math.abs(y + h / 2 - (300 + 80))).toBeLessThanOrEqual(1);
+    // the same aspect keeps the box
+    expect(replacedPictureBox([700, 300, 400, 300], [800, 600])).toEqual([700, 300, 400, 300]);
+    // an unknown size keeps the box as it is
+    expect(replacedPictureBox([700, 300, 400, 300], undefined)).toEqual([700, 300, 400, 300]);
+    expect(replacedPictureBox([700, 300, 400, 300], [0, 0])).toEqual([700, 300, 400, 300]);
+    // a box at the sheet's edge stays inside it
+    const edge = replacedPictureBox([1500, 800, 100, 100], [1600, 400]);
+    expect(edge[0] + edge[2]).toBeLessThanOrEqual(1600);
+    expect(edge[1] + edge[3]).toBeLessThanOrEqual(900);
+  });
+
+  it('names the caption row the box grows by', () => {
+    expect(CAPTION_ROW_HEIGHT).toBe(35);
   });
 });
 
@@ -74,13 +139,13 @@ const emptyBody: Block = {
 
 describe('pictureInsertArea (rank 10: the body slot a new picture takes)', () => {
   it('fills the empty body placeholder of the layout and takes its place', () => {
-    const placed = pictureInsertArea(canvas([heading, emptyBody]), [120, 80]);
+    const placed = pictureInsertArea(canvas([heading, emptyBody]), [1200, 800]);
     expect(placed.area).toEqual([137, 289, 901, 482]);
     expect(placed.replaces).toEqual(['p1']);
     // the picture centred in it with the 40 px margin, the spec's reading of the row
-    const [x, y, w, h] = pictureInsertBox([120, 80], placed.area);
+    const [x, y, w, h] = pictureInsertBox([1200, 800], placed.area);
     expect(h).toBe(482 - 2 * PICTURE_MARGIN);
-    expect(w).toBe(Math.round((h * 120) / 80));
+    expect(w).toBe(Math.round((h * 1200) / 800));
     expect(x + w / 2).toBeCloseTo(137 + 901 / 2, 0);
     expect(y + h / 2).toBeCloseTo(289 + 482 / 2, 0);
   });
@@ -94,21 +159,21 @@ describe('pictureInsertArea (rank 10: the body slot a new picture takes)', () =>
       text: '',
       pos: { x: 137, y: 467, w: 768, h: 88, z: 1 },
     };
-    const placed = pictureInsertArea(canvas([heading, oneLine]), [120, 80]);
+    const placed = pictureInsertArea(canvas([heading, oneLine]), [1200, 800]);
     expect(placed.replaces).toEqual(['p1']);
     // the column of the placeholder, from the body's top (40 px under the heading) to the content box's bottom
     const bodyTop = 129 + 96 + 40;
     expect(placed.area).toEqual([137, bodyTop, 768, 771 - bodyTop]);
-    const [x, y, w, h] = pictureInsertBox([120, 80], placed.area);
+    const [x, y, w, h] = pictureInsertBox([1200, 800], placed.area);
     expect(h).toBe(771 - bodyTop - 2 * PICTURE_MARGIN);
-    expect(w).toBe(Math.round((h * 120) / 80));
+    expect(w).toBe(Math.round((h * 1200) / 800));
     expect(Math.abs(x + w / 2 - (137 + 768 / 2))).toBeLessThanOrEqual(1);
     expect(Math.abs(y + h / 2 - (bodyTop + (771 - bodyTop) / 2))).toBeLessThanOrEqual(1);
     // a placeholder above the body's top (no heading on the slide) starts the area at its own top
-    const high = pictureInsertArea(canvas([oneLine]), [120, 80]);
+    const high = pictureInsertArea(canvas([oneLine]), [1200, 800]);
     expect(high.area).toEqual([137, 129, 768, 771 - 129]);
     // a real slot (the 4/8 split's 482 px body) stands for itself
-    expect(pictureInsertArea(canvas([heading, emptyBody]), [120, 80]).area).toEqual([
+    expect(pictureInsertArea(canvas([heading, emptyBody]), [1200, 800]).area).toEqual([
       137, 289, 901, 482,
     ]);
   });
@@ -126,7 +191,7 @@ describe('pictureInsertArea (rank 10: the body slot a new picture takes)', () =>
       text: '',
       pos: { x: 1078, y: 289, w: 385, h: 200, z: 3 },
     };
-    const placed = pictureInsertArea(canvas([heading, typed, emptyBody, small]), [4, 3]);
+    const placed = pictureInsertArea(canvas([heading, typed, emptyBody, small]), [1600, 1200]);
     expect(placed.replaces).toEqual(['p1']);
     // a drawn text box that is empty is not a layout placeholder
     const drawn: Block = {
@@ -135,11 +200,11 @@ describe('pictureInsertArea (rank 10: the body slot a new picture takes)', () =>
       text: '',
       pos: { x: 300, y: 400, w: 320, h: 160, z: 3 },
     };
-    expect(pictureInsertArea(canvas([heading, drawn]), [4, 3]).replaces).toEqual([]);
+    expect(pictureInsertArea(canvas([heading, drawn]), [1600, 1200]).replaces).toEqual([]);
   });
 
   it('centres in the body under the head band when no placeholder stands', () => {
-    const placed = pictureInsertArea(canvas([heading]), [16, 9]);
+    const placed = pictureInsertArea(canvas([heading]), [1600, 900]);
     expect(placed.replaces).toEqual([]);
     // the body starts 40 px under the heading and ends at the content box's bottom
     expect(placed.area).toEqual([137, 129 + 96 + 40, 1326, 129 + 642 - (129 + 96 + 40)]);
@@ -156,11 +221,11 @@ describe('pictureInsertArea (rank 10: the body slot a new picture takes)', () =>
       text: 'Q1 revenue',
       pos: { x: 137, y: 265, w: 600, h: 506, z: 1 },
     };
-    const placed = pictureInsertArea(canvas([heading, table]), [4, 3]);
+    const placed = pictureInsertArea(canvas([heading, table]), [1600, 1200]);
     expect(placed.replaces).toEqual([]);
     // the strip to the right of the table, 40 px from its edge, the body's full height
     expect(placed.area).toEqual([137 + 600 + 40, 265, 1326 - 600 - 40, 771 - 265]);
-    const box = pictureInsertBox([4, 3], placed.area);
+    const box = pictureInsertBox([1600, 1200], placed.area);
     expect(box[0]).toBeGreaterThanOrEqual(137 + 600 + 40);
     expect(box[0] + box[2]).toBeLessThanOrEqual(1463);
   });
@@ -211,6 +276,22 @@ describe('sniffPictureKind', () => {
     expect(sniffPictureKind(new TextEncoder().encode('hello, this is a text file'))).toBeNull();
     expect(sniffPictureKind(new Uint8Array([]))).toBeNull();
     expect(sniffPictureKind(new TextEncoder().encode('<html><body>no</body></html>'))).toBeNull();
+  });
+
+  it('reads an SVG past a comment over 256 characters and past several comments (docs/POLISH.md item 50)', () => {
+    const long = `<!-- ${'The product mark. '.repeat(20)} -->`;
+    expect(long.length).toBeGreaterThan(256);
+    const svg = `${long}\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M0 0h8v8z"/></svg>`;
+    expect(sniffPictureKind(new TextEncoder().encode(svg).subarray(0, 512))).toBe('svg');
+    const two = `<!-- one -->\n<!-- two -->\n  <svg xmlns="http://www.w3.org/2000/svg"/>`;
+    expect(sniffPictureKind(new TextEncoder().encode(two))).toBe('svg');
+    const declared = `<?xml version="1.0"?>\n${long}\n<svg/>`;
+    expect(sniffPictureKind(new TextEncoder().encode(declared).subarray(0, 512))).toBe('svg');
+    // a comment that never closes inside the read bytes is not a picture
+    const open = `<!-- ${'x'.repeat(600)}`;
+    expect(sniffPictureKind(new TextEncoder().encode(open).subarray(0, 512))).toBeNull();
+    // an HTML file behind a comment is still not a picture
+    expect(sniffPictureKind(new TextEncoder().encode('<!-- a --><html><body/></html>'))).toBeNull();
   });
 });
 

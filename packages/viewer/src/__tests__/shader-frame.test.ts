@@ -275,4 +275,160 @@ describe('the capturer', () => {
     expect(hosted).toEqual(['shader']);
     capturer.dispose();
   });
+
+  /** A capture of three bytes, the fake pixel path of the presign and retry cases. */
+  const smallCapture =
+    (captures: string[]) =>
+    async (target: MaterialBlock, palette: Parameters<typeof frameKeyOf>[1]) => {
+      captures.push(target.id);
+      return {
+        bytes: new Uint8Array([1, 2, 3]),
+        width: 3200,
+        height: 1814,
+        renderer: 'ANGLE (test)',
+        frameKey: frameKeyOf(target, palette),
+      };
+    };
+
+  it('takes the presigned path for a frame over the cap, and the hosted job when the page has no upload path (docs/POLISH.md item 36)', async () => {
+    const doc = documentWith([shader('shader')]);
+    const c = clock();
+    const writes: ShaderFrameWrite[] = [];
+    const uploads: number[] = [];
+    const capturer = createShaderFrameCapturer({
+      document: () => doc,
+      write: async (input) => {
+        writes.push(input);
+        return { ok: true, revision: 2 };
+      },
+      upload: async (bytes) => {
+        uploads.push(bytes.length);
+        return 'uploads/p/abc';
+      },
+      uploadAbove: 2,
+      capture: smallCapture([]),
+      canCapture: () => true,
+      now: c.now,
+      setTimer: c.setTimer,
+      clearTimer: c.clearTimer,
+    });
+    capturer.scheduleStale();
+    await c.advance(800);
+    expect(uploads).toEqual([3]);
+    expect(writes).toHaveLength(1);
+    expect(writes[0]?.upload).toBe('uploads/p/abc');
+    expect(writes[0]?.bytes).toBeUndefined();
+    capturer.dispose();
+
+    // under the cap the bytes travel in the write and the upload is not asked
+    const under: ShaderFrameWrite[] = [];
+    const capturer2 = createShaderFrameCapturer({
+      document: () => doc,
+      write: async (input) => {
+        under.push(input);
+        return { ok: true, revision: 3 };
+      },
+      upload: async () => {
+        throw new Error('not asked');
+      },
+      uploadAbove: 3,
+      capture: smallCapture([]),
+      canCapture: () => true,
+      now: c.now,
+      setTimer: c.setTimer,
+      clearTimer: c.clearTimer,
+    });
+    capturer2.scheduleStale();
+    await c.advance(800);
+    expect(under[0]?.bytes).toBe('AQID');
+    capturer2.dispose();
+
+    // no upload path on the page: the hosted job draws the frame and no write is sent
+    const hosted: string[] = [];
+    const none: ShaderFrameWrite[] = [];
+    const capturer3 = createShaderFrameCapturer({
+      document: () => doc,
+      write: async (input) => {
+        none.push(input);
+        return { ok: true, revision: 4 };
+      },
+      captureHosted: async (_slideId, blockId) => {
+        hosted.push(blockId);
+      },
+      uploadAbove: 2,
+      capture: smallCapture([]),
+      canCapture: () => true,
+      now: c.now,
+      setTimer: c.setTimer,
+      clearTimer: c.clearTimer,
+    });
+    capturer3.scheduleStale();
+    await c.advance(800);
+    expect(hosted).toEqual(['shader']);
+    expect(none).toEqual([]);
+    capturer3.dispose();
+  });
+
+  it('tries once more after a failed put and reports one sentence when the second attempt fails too', async () => {
+    const doc = documentWith([shader('shader')]);
+    const c = clock();
+    const captures: string[] = [];
+    const errors: unknown[] = [];
+    let puts = 0;
+    const capturer = createShaderFrameCapturer({
+      document: () => doc,
+      write: async () => ({ ok: true, revision: 5 }),
+      upload: async () => {
+        puts += 1;
+        throw new Error('413');
+      },
+      uploadAbove: 2,
+      capture: smallCapture(captures),
+      canCapture: () => true,
+      onError: (error) => errors.push(error),
+      now: c.now,
+      setTimer: c.setTimer,
+      clearTimer: c.clearTimer,
+    });
+    capturer.scheduleStale();
+    await c.advance(800);
+    await c.advance(0);
+    expect(puts).toBe(2);
+    expect(captures).toEqual(['shader', 'shader']);
+    expect(errors).toHaveLength(1);
+    expect(capturer.pending()).toEqual([]);
+    capturer.dispose();
+
+    // the second attempt landing: no sentence
+    const landed: ShaderFrameWrite[] = [];
+    const quiet: unknown[] = [];
+    let tries = 0;
+    const capturer2 = createShaderFrameCapturer({
+      document: () => doc,
+      write: async (input) => {
+        landed.push(input);
+        return { ok: true, revision: 6 };
+      },
+      upload: async () => {
+        tries += 1;
+        if (tries === 1) throw new Error('413');
+        return 'uploads/p/second';
+      },
+      uploadAbove: 2,
+      capture: smallCapture([]),
+      canCapture: () => true,
+      onError: (error) => quiet.push(error),
+      now: c.now,
+      setTimer: c.setTimer,
+      clearTimer: c.clearTimer,
+    });
+    capturer2.scheduleStale();
+    await c.advance(800);
+    await c.advance(0);
+    expect(tries).toBe(2);
+    expect(landed).toHaveLength(1);
+    expect(landed[0]?.upload).toBe('uploads/p/second');
+    expect(quiet).toEqual([]);
+    capturer2.dispose();
+  });
 });

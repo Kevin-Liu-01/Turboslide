@@ -9,9 +9,12 @@ import { workedDocument } from '@turboslide/schema/fixtures';
 import { FormatOptions } from '../FormatOptions';
 import { hideTooltip } from '../Tooltip';
 
-// The caption field of a shot in Image options (docs/PRODUCT.md section 2 rank 10): the prompt
-// as its placeholder, one block.set /caption for Enter followed by the blur it causes, the caption
-// removed when the field is emptied. The section list for a picture: no text section.
+// The caption field of a shot in Image options (docs/PRODUCT.md section 2 rank 10; docs/POLISH.md
+// item 43): the prompt as its placeholder, one write for Enter followed by the blur it causes, the
+// caption removed when the field is emptied. A caption added to a free picture grows its box by
+// the caption row in the same write and an emptied caption gives the row back, so the photograph
+// keeps its drawn height; a caption changed in place is one block.set. The section list for a
+// picture: no text section.
 
 afterEach(() => {
   hideTooltip();
@@ -76,16 +79,41 @@ describe('the caption field', () => {
     fireEvent.keyDown(field, { key: 'Enter' });
     fireEvent.blur(field);
     expect(dispatch).toHaveBeenCalledTimes(1);
+    /* the first caption grows the box by the caption row (35 sheet px) in the same write */
+    expect(dispatch).toHaveBeenLastCalledWith('slide.update', {
+      slideId: 'cv',
+      mutations: [
+        { op: 'block.set', slideId: 'cv', blockId: 'shot', path: '/caption', value: 'Team photo, Q3' },
+        {
+          op: 'block.set',
+          slideId: 'cv',
+          blockId: 'shot',
+          path: '/pos',
+          value: { x: 100, y: 100, w: 480, h: 335, z: 0 },
+        },
+      ],
+      baseRevision: 7,
+    });
+  });
+
+  it('changes a stored caption in place with one block.set', () => {
+    dispatch.mockClear();
+    panel('cap');
+    const field = control('formatOptions.picture.caption') as HTMLInputElement;
+    expect(field.value).toBe('Team photo');
+    fireEvent.change(field, { target: { value: 'Team photo, Q3' } });
+    fireEvent.blur(field);
+    expect(dispatch).toHaveBeenCalledTimes(1);
     expect(dispatch).toHaveBeenLastCalledWith('block.set', {
       slideId: 'cv',
-      blockId: 'shot',
+      blockId: 'cap',
       path: '/caption',
       value: 'Team photo, Q3',
       baseRevision: 7,
     });
   });
 
-  it('shows the stored caption and removes it when the field is emptied', () => {
+  it('shows the stored caption and removes it when the field is emptied, giving the row back', () => {
     dispatch.mockClear();
     panel('cap');
     const field = control('formatOptions.picture.caption') as HTMLInputElement;
@@ -93,10 +121,18 @@ describe('the caption field', () => {
     fireEvent.change(field, { target: { value: '' } });
     fireEvent.blur(field);
     expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(dispatch).toHaveBeenLastCalledWith('block.set', {
+    expect(dispatch).toHaveBeenLastCalledWith('slide.update', {
       slideId: 'cv',
-      blockId: 'cap',
-      path: '/caption',
+      mutations: [
+        { op: 'block.set', slideId: 'cv', blockId: 'cap', path: '/caption' },
+        {
+          op: 'block.set',
+          slideId: 'cv',
+          blockId: 'cap',
+          path: '/pos',
+          value: { x: 700, y: 100, w: 480, h: 265, z: 1 },
+        },
+      ],
       baseRevision: 7,
     });
   });

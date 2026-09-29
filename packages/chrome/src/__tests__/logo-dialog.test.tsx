@@ -597,7 +597,7 @@ describe('LogoDialog', () => {
     expect(control('dialog.logo.empty')?.textContent).toContain(LOGO_WORDS.emptyKit);
   });
 
-  it('lists Your brand first with the default kit’s mark and the deck’s logo asset, and places the asset through the editor', async () => {
+  it('lists Your brand with the default kit’s mark alone, the deck’s logo asset under Recent, the results first while a query is typed, and places the asset through the editor (docs/POLISH.md items 39 and 46)', async () => {
     stubRoute();
     const insertPictureAsset = vi.fn(() => Promise.resolve());
     const { Host, closeDialog } = makeHost({
@@ -611,7 +611,11 @@ describe('LogoDialog', () => {
     );
     const brand = control('dialog.logo.group.brand');
     expect(brand).not.toBeNull();
-    expect(brand?.getAttribute('data-rows')).toBe('2');
+    expect(brand?.getAttribute('data-rows')).toBe('1');
+    /* a logo the deck holds is a recent pick, not the brand (item 46) */
+    expect(control('dialog.logo.group.recent')?.getAttribute('data-rows')).toBe('1');
+    /* the group labels in sentence case, the dialog's own words */
+    expect(brand?.querySelector('.ts-picker-title')?.textContent).toBe('Your brand');
     /* the default kit's logo is the theme's mark on GT's deployment: the glyph on both grounds */
     const kit = control('dialog.logo.tile.kit');
     expect(kit?.textContent).toBe('General Translation');
@@ -625,10 +629,18 @@ describe('LogoDialog', () => {
     expect(control('dialog.logo.tile.asset.acme-logo.ink')?.querySelector('img')?.src).toContain(
       '/decks/gt-brand/assets/acme-dark.png',
     );
-    /* the groups order: Your brand before Results */
+    /* the groups order while a query is typed: Results first, so what the seller searched for is
+       in view before the tiles of Your brand and Recent (item 39) */
     await search('figma');
     const groups = controls('dialog.logo.group.').map((el) => el.getAttribute('data-control'));
-    expect(groups).toEqual(['dialog.logo.group.brand', 'dialog.logo.group.results']);
+    expect(groups).toEqual([
+      'dialog.logo.group.results',
+      'dialog.logo.group.brand',
+      'dialog.logo.group.recent',
+    ]);
+    /* the first result is preselected and carries the ring's class */
+    expect(control('dialog.logo.tile.figma')?.getAttribute('aria-selected')).toBe('true');
+    expect(control('dialog.logo.tile.figma')?.classList.contains('is-active')).toBe(true);
     await act(async () => {
       fireEvent.click(asset as HTMLElement);
       await Promise.resolve();
@@ -694,8 +706,9 @@ describe('LogoDialog', () => {
     expect(control('dialog.logo.source')?.textContent).toContain(
       'thesvg.org did not answer at 14:05 UTC',
     );
-    /* the arrows move the selection over the tiles: Left from the first result reaches Recent */
-    fireEvent.keyDown(control('dialog.logo.search') as HTMLElement, { key: 'ArrowLeft' });
+    /* the arrows move the selection over the tiles in the drawn order: End from the first result
+       reaches the last tile, Recent's (the results draw first, item 39) */
+    fireEvent.keyDown(control('dialog.logo.search') as HTMLElement, { key: 'End' });
     expect(
       recent
         ?.querySelector('[data-control="dialog.logo.tile.vercel"]')
@@ -704,7 +717,8 @@ describe('LogoDialog', () => {
     expect(control('dialog.logo.licence')?.textContent).toBe(
       'Vercel: Free to use, the brand’s site',
     );
-    fireEvent.keyDown(control('dialog.logo.search') as HTMLElement, { key: 'ArrowRight' });
+    /* Home returns to the first result, which Insert places */
+    fireEvent.keyDown(control('dialog.logo.search') as HTMLElement, { key: 'Home' });
     await act(async () => {
       fireEvent.click(control('dialog.logo.insert') as HTMLButtonElement);
       await Promise.resolve();

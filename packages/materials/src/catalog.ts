@@ -180,7 +180,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:liquid-metal': paper({
     id: 'paper:liquid-metal',
     label: 'Liquid metal',
-    doc: 'Fluid chrome over a shape (circle, daisy, diamond, metaballs) or the whole canvas: animated stripes distorted along the edges, with dispersion and contour controls. The Prototemplate and Glyphfield opener.',
+    doc: 'Chrome that flows over a shape or the whole box, with stripes that bend at the edges.',
     shader: 'liquidMetal',
     sizing: 'object',
     noiseTexture: false,
@@ -211,7 +211,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:gem-smoke': paper({
     id: 'paper:gem-smoke',
     label: 'Gem smoke',
-    doc: 'Animated color fields behind a glassy shape: smoke inside and around the form with separate glow and distortion inside and out. The two color openers, Blog and content and Developer experience.',
+    doc: 'Coloured smoke inside and around a glass shape, with its own glow and distortion.',
     shader: 'gemSmoke',
     sizing: 'object',
     noiseTexture: false,
@@ -242,7 +242,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:smoke-ring': paper({
     id: 'paper:smoke-ring',
     label: 'Smoke ring',
-    doc: 'A radial multi-color gradient shaped with layered noise into a smoky ring.',
+    doc: 'A smoky ring of several colours, shaped by layers of noise.',
     shader: 'smokeRing',
     sizing: 'object',
     noiseTexture: true,
@@ -263,7 +263,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:god-rays': paper({
     id: 'paper:god-rays',
     label: 'God rays',
-    doc: 'A fan of light rays from one point with a bloom, the cleanest hard geometry after the ring (OPENERS.md, rejected at 1.9 percent lit).',
+    doc: 'A fan of light rays from one point, with a soft bloom.',
     shader: 'godRays',
     sizing: 'object',
     noiseTexture: true,
@@ -286,7 +286,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:mesh-gradient': paper({
     id: 'paper:mesh-gradient',
     label: 'Mesh gradient',
-    doc: 'Color spots moving along distinct paths, warped by organic distortion and swirl.',
+    doc: 'Colour spots that drift along their own paths and warp into each other.',
     shader: 'meshGradient',
     sizing: 'object',
     noiseTexture: false,
@@ -305,7 +305,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:simplex-noise': paper({
     id: 'paper:simplex-noise',
     label: 'Simplex noise',
-    doc: 'A multi-color gradient mapped into smooth animated curves, stepped or soft.',
+    doc: 'A gradient of several colours bent into smooth moving curves, stepped or soft.',
     shader: 'simplexNoise',
     sizing: 'pattern',
     noiseTexture: false,
@@ -322,7 +322,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:swirl': paper({
     id: 'paper:swirl',
     label: 'Swirl',
-    doc: 'Color bands twisted around a center, with noise over the twist.',
+    doc: 'Bands of colour twisted around a centre, with noise over the twist.',
     shader: 'swirl',
     sizing: 'object',
     noiseTexture: false,
@@ -345,7 +345,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:spiral': paper({
     id: 'paper:spiral',
     label: 'Spiral',
-    doc: 'A single spiral stroke on a ground, with taper, cap and noise; dithers to one clean line (OPENERS.md).',
+    doc: 'One spiral stroke on a ground, with a taper, a cap and noise.',
     shader: 'spiral',
     sizing: 'pattern',
     noiseTexture: false,
@@ -369,7 +369,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:grain-gradient': paper({
     id: 'paper:grain-gradient',
     label: 'Grain gradient',
-    doc: 'A grainy gradient shaped as a wave, dots, truchet tiles, corners, a ripple, a blob or a sphere.',
+    doc: 'A grainy gradient shaped as a wave, dots, tiles, corners, a ripple, a blob or a sphere.',
     shader: 'grainGradient',
     sizing: 'pattern',
     noiseTexture: true,
@@ -397,7 +397,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:dithering': paper({
     id: 'paper:dithering',
     label: 'Dithering',
-    doc: 'Paper’s ordered dither over a shape, at 2 by 2, 4 by 4 or 8 by 8, in two colors; the deck’s own screen is the two-tone treatment, this is the shader.',
+    doc: 'An ordered dither over a shape in two colours, at 2 by 2, 4 by 4 or 8 by 8.',
     shader: 'dithering',
     sizing: 'pattern',
     noiseTexture: false,
@@ -424,7 +424,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:static-radial-gradient': paper({
     id: 'paper:static-radial-gradient',
     label: 'Static radial gradient',
-    doc: 'A still radial gradient with a movable focal point, falloff, mixing and distortion.',
+    doc: 'A still radial gradient with a movable centre, falloff, mixing and distortion.',
     shader: 'staticRadialGradient',
     sizing: 'object',
     noiseTexture: false,
@@ -451,7 +451,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:neuro-noise': paper({
     id: 'paper:neuro-noise',
     label: 'Neuro noise',
-    doc: 'A glowing web of fluid lines and soft intersections in three colors.',
+    doc: 'A glowing web of fluid lines and soft crossings in three colours.',
     shader: 'neuroNoise',
     sizing: 'pattern',
     noiseTexture: false,
@@ -470,7 +470,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:metaballs': paper({
     id: 'paper:metaballs',
     label: 'Metaballs',
-    doc: 'Up to 20 gooey blobs moving around the center and merging into smooth forms.',
+    doc: 'Up to twenty soft blobs that move around the centre and merge.',
     shader: 'metaballs',
     sizing: 'object',
     noiseTexture: true,
@@ -488,7 +488,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:waves': paper({
     id: 'paper:waves',
     label: 'Waves',
-    doc: 'A still line pattern from sharp zigzags to smooth waves in two colors.',
+    doc: 'A still pattern of lines, from sharp zigzags to smooth waves, in two colours.',
     shader: 'waves',
     sizing: 'pattern',
     noiseTexture: false,
@@ -511,7 +511,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:dot-grid': paper({
     id: 'paper:dot-grid',
     label: 'Dot grid',
-    doc: 'A still grid of circles, diamonds, squares or triangles with fill and stroke.',
+    doc: 'A still grid of circles, diamonds, squares or triangles with a fill and a stroke.',
     shader: 'dotGrid',
     sizing: 'pattern',
     noiseTexture: false,
@@ -536,7 +536,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:perlin-noise': paper({
     id: 'paper:perlin-noise',
     label: 'Perlin noise',
-    doc: 'Animated 3D Perlin noise in two colors with octave, persistence and lacunarity controls.',
+    doc: 'Moving noise in two colours, with controls for its detail and roughness.',
     shader: 'perlinNoise',
     sizing: 'pattern',
     noiseTexture: false,
@@ -557,7 +557,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:static-mesh-gradient': paper({
     id: 'paper:static-mesh-gradient',
     label: 'Static mesh gradient',
-    doc: 'A still mesh gradient: color spots placed by a seed and warped by two waves.',
+    doc: 'A still mesh gradient: colour spots placed by a seed and warped by two waves.',
     shader: 'staticMeshGradient',
     sizing: 'object',
     noiseTexture: false,

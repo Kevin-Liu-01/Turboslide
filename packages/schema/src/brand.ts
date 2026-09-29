@@ -65,6 +65,15 @@ export const SLOT_POSITION_LABELS: Readonly<Record<SlotPosition, string>> = {
   hidden: 'Hidden',
 };
 
+/**
+ * The title slide's mark when the record names no position (docs/POLISH.md item 49; audit-media
+ * item 20): it draws in the flow above the heading (render slide.ts `titleMarkSlot`), which the
+ * panel's select names by what is drawn instead of "Bottom left". The value is the select's
+ * alone, never written to the record: picking it removes `positions.mark`.
+ */
+export const MARK_POSITION_FLOW = 'flow';
+export const MARK_POSITION_FLOW_LABEL = 'Above the title';
+
 /** The slide counter's three formats (PRODUCT.md 4.1, Slide numbers). */
 export const COUNTER_FORMATS = ['n / N', 'n', 'Slide n'] as const;
 export type CounterFormat = (typeof COUNTER_FORMATS)[number];

@@ -164,11 +164,18 @@ describe('the sanitizer (4.7)', () => {
     expect(litFraction(raster as NonNullable<typeof raster>, 255)).toBeGreaterThan(0.01);
   });
 
-  it('drops a text element with its subtree and marks the variant unavailable through the refresh', async () => {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M0 0h8v8z" fill="#000"/><text x="2" y="20">Acme<tspan>Corp</tspan></text></svg>`;
+  it('keeps a text element with its words, and marks the variant unavailable through the refresh when a foreignObject is dropped', async () => {
+    const kept = sanitizeLogoSvg(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M0 0h8v8z" fill="#000"/><text x="2" y="20" font-family="Inter" font-weight="600">Acme<tspan dx="2">Corp</tspan></text></svg>`,
+    );
+    /* the polish round keeps the words (docs/POLISH.md item 32; audit-objects item 15) */
+    expect(kept.svg).toContain('<text x="2" y="20" font-family="Inter" font-weight="600">Acme<tspan dx="2">Corp</tspan></text>');
+    expect(kept.removed).toEqual([]);
+    expect(kept.draws).toBe(false);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M0 0h8v8z" fill="#000"/><foreignObject x="2" y="20" width="40" height="20"><div>Acme</div></foreignObject></svg>`;
     const out = sanitizeLogoSvg(svg);
-    expect(out.svg).not.toMatch(/<text|<tspan|Acme/);
-    expect(out.removed).toEqual(['text']);
+    expect(out.svg).not.toMatch(/<foreignObject|Acme/);
+    expect(out.removed).toEqual(['foreignObject']);
     expect(out.draws).toBe(true);
     const row = rowOfIcon({
       slug: 'texty',

@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react';
 
+import type { AssetId } from '@turboslide/schema/ids';
 import type { Block, ShotFrame } from '@turboslide/schema/blocks';
 import type { Color } from '@turboslide/schema/color';
 import { DASHES, DASH_LABELS, presetOf } from '@turboslide/schema/shapes';
 import type { Dash } from '@turboslide/schema/shapes';
+import { CAPTION_ROW_HEIGHT } from '@turboslide/render/block-css';
 
 import { UseOnEverySlideButton } from '../brand/UseOnEverySlide';
 import type { PictureTarget } from '../editor-shell';
@@ -14,15 +16,30 @@ import { ColorRow, Note, PanelButton, SelectField, SliderField, ToggleRow } from
 import type { SectionWrite } from './fields';
 
 /**
- * Picture and Adjustments (gslides-parity SPEC-2 0.17, 2.5, section 5; R05 B11): Replace image,
- * Crop (a Crop image button entering crop mode through the editor's handle, plus Top and Centre
- * for the round one anchor while no trim is set), Mask (a shape picker button and None), Reset
- * image, Frame (weight, colour, dash) on a shot and a picture object; Transparency, Brightness and
- * Contrast as sliders with a value field and Reset on a shot, a picture and an icon (transparency
- * only). Each control is one action call: `block.crop` through the handle, `block.mask`,
- * `block.resetImage`, `block.set /frame`, `block.set /crop`, `block.adjust`. The generated rows of
- * round one (asset, caption, fit) stay above.
+ * Image options and Adjustments (gslides-parity SPEC-2 0.17, 2.5, section 5; R05 B11; docs/POLISH.md
+ * item 40): the picture's panel in the seller's words. The name of the picture (its file's name as
+ * the asset's id reads it), Replace image, Use on every slide, Crop image, Reset image, a labelled
+ * Crop anchor (Top or Centre while no trim is set), Mask (a shape picker and None), the Caption
+ * field, and Border (weight, dash, colour), the tail's word, on a shot and a picture object;
+ * Transparency, Brightness and Contrast as sliders with a value field and Reset on a shot, a
+ * picture and an icon (transparency only). Each control is one action call: `block.crop` through
+ * the handle, `block.mask`, `block.resetImage`, `block.set /frame`, `block.set /crop`,
+ * `block.adjust`. No generated row draws for a picture (format-sections.ts routes them away), so
+ * the id, the role, the resample rule and the twins never reach the panel (audit-media item 7).
  */
+
+/**
+ * The words of item 40 that are not in `FORMAT.picture` yet: the request build/b4.md R4 moves
+ * `border` and `name` into `packages/chrome/src/menus/strings.ts` and this table goes.
+ */
+const PICTURE_WORDS = { border: 'Border', name: 'Name' } as const;
+
+/** The picture's name as a seller reads it: the asset's id with its dashes as spaces. */
+export function pictureNameOfAsset(asset: { id: AssetId } | undefined, fallback = 'Picture'): string {
+  if (asset === undefined) return fallback;
+  const words = asset.id.replace(/[-_]+/g, ' ').trim();
+  return words === '' ? fallback : words[0]?.toUpperCase() + words.slice(1);
+}
 /**
  * The caption of a shot (docs/PRODUCT.md section 2 rank 10; the right click row Add a caption
  * writes the same field): a text field with the prompt "Add a caption", committed on Enter and on
@@ -104,6 +121,11 @@ export type PictureSectionProps = {
   say: (text: string) => void;
 };
 
+/** The asset a shot or a picture object shows, for the name line. */
+function assetOf(block: Block): { id: AssetId } | undefined {
+  return block.type === 'shot' || block.type === 'picture' ? { id: block.asset } : undefined;
+}
+
 function hasPictureTools(block: Block): block is Block & {
   trim?: unknown;
   mask?: string;
@@ -117,13 +139,22 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
   const [maskOpen, setMaskOpen] = useState(false);
   if (!hasPictureTools(block)) return null;
   const frame = block.frame ?? {};
+  const field = (path: string, value: unknown) => ({
+    slideId: write.slideId,
+    blockId: block.id,
+    path,
+    ...(value === undefined ? {} : { value }),
+  });
   const set = (path: string, value: unknown) =>
     write.report(
-      write.dispatch('block.set', {
+      write.dispatch('block.set', { ...field(path, value), baseRevision: write.revision }),
+    );
+  /* several fields in one write, one history entry */
+  const setAll = (writes: [string, unknown][]) =>
+    write.report(
+      write.dispatch('slide.update', {
         slideId: write.slideId,
-        blockId: block.id,
-        path,
-        ...(value === undefined ? {} : { value }),
+        mutations: writes.map(([path, value]) => ({ op: 'block.set' as const, ...field(path, value) })),
         baseRevision: write.revision,
       }),
     );
@@ -131,6 +162,39 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
     const next: Record<string, unknown> = { ...frame, ...patch };
     for (const key of Object.keys(next)) if (next[key] === undefined) delete next[key];
     set('/frame', Object.keys(next).length === 0 ? undefined : next);
+  };
+  /* Border weight None on a shot takes the hairline too (docs/POLISH.md item 38): a picture
+     inserted before the round, which draws sheet.css's hairline, loses it here */
+  const setWeight = (weight: number) => {
+    const next: Record<string, unknown> = { ...frame };
+    if (weight === 0) delete next.weight;
+    else next.weight = weight;
+    const frameValue = Object.keys(next).length === 0 ? undefined : next;
+    if (weight === 0 && block.type === 'shot' && block.border !== false)
+      setAll([
+        ['/frame', frameValue],
+        ['/border', false],
+      ]);
+    else set('/frame', frameValue);
+  };
+  /* a caption grows the box by its row and an emptied caption gives it back (item 43), so the
+     photograph keeps its drawn height */
+  const setCaption = (caption: string | undefined) => {
+    if (block.type !== 'shot' || block.pos === undefined) {
+      set('/caption', caption);
+      return;
+    }
+    const had = block.caption !== undefined;
+    const has = caption !== undefined;
+    if (had === has) {
+      set('/caption', caption);
+      return;
+    }
+    const h = Math.max(8, block.pos.h + (has ? CAPTION_ROW_HEIGHT : -CAPTION_ROW_HEIGHT));
+    setAll([
+      ['/caption', caption],
+      ['/pos', { ...block.pos, h }],
+    ]);
   };
   const mask = (shape: string | null) => {
     setMaskOpen(false);
@@ -153,12 +217,12 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
 
   return (
     <>
+      <div className="ts-fo-row" data-control="formatOptions.picture.name">
+        <span className="ts-fo-field-label">{PICTURE_WORDS.name}</span>
+        <span className="ts-fo-picture-name">{pictureNameOfAsset(assetOf(block))}</span>
+      </div>
       {block.type === 'shot' ? (
-        <CaptionField
-          value={block.caption}
-          disabled={write.busy}
-          onCommit={(caption) => set('/caption', caption)}
-        />
+        <CaptionField value={block.caption} disabled={write.busy} onCommit={setCaption} />
       ) : null}
       <div className="ts-fo-buttons">
         <PanelButton
@@ -209,17 +273,20 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
         />
       </div>
       {block.type === 'shot' && block.trim === undefined ? (
-        <ToggleRow<'top' | 'center'>
-          label={words.anchor}
-          options={[
-            { value: 'top', label: words.top, doc: 'The picture keeps its top' },
-            { value: 'center', label: words.centre, doc: 'The picture keeps its centre' },
-          ]}
-          pressed={block.crop ?? 'center'}
-          onToggle={(value) => set('/crop', value === 'center' ? undefined : value)}
-          control="formatOptions.picture.anchor"
-          disabled={write.busy}
-        />
+        <div className="ts-fo-row">
+          <span className="ts-fo-field-label">{words.anchor}</span>
+          <ToggleRow<'top' | 'center'>
+            label={words.anchor}
+            options={[
+              { value: 'top', label: words.top, doc: 'The picture keeps its top' },
+              { value: 'center', label: words.centre, doc: 'The picture keeps its center' },
+            ]}
+            pressed={block.crop ?? 'center'}
+            onToggle={(value) => set('/crop', value === 'center' ? undefined : value)}
+            control="formatOptions.picture.anchor"
+            disabled={write.busy}
+          />
+        </div>
       ) : null}
       <div className="ts-fo-row">
         <span className="ts-fo-field-label">{words.mask}</span>
@@ -244,19 +311,22 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
           ) : null}
         </div>
         {maskOpen ? (
+          /* seven tiles per row fit the 320 px panel (docs/POLISH.md item 42; the plate's grid is
+             eight wide and clipped its last column here) */
           <ShapePicker
             onPick={mask}
             picked={block.mask}
             control="formatOptions.picture.mask"
+            columns={7}
             autoFocus
           />
         ) : null}
       </div>
       <div className="ts-fo-row">
-        <span className="ts-fo-field-label">{words.frame}</span>
+        <span className="ts-fo-field-label">{PICTURE_WORDS.border}</span>
         <div className="ts-fo-fields is-two">
           <SelectField<string>
-            label={`${words.frame} ${words.weight}`}
+            label={`${PICTURE_WORDS.border} ${words.weight.toLowerCase()}`}
             value={String(frame.weight ?? 0)}
             control="formatOptions.picture.frame.weight"
             options={[
@@ -265,13 +335,11 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
               { value: '1.5', label: '1.5 px' },
               { value: '2', label: '2 px' },
             ]}
-            onChange={(value) =>
-              setFrame({ weight: value === '0' ? undefined : (Number(value) as 1 | 1.5 | 2) })
-            }
+            onChange={(value) => setWeight(Number(value))}
             disabled={write.busy}
           />
           <SelectField<string>
-            label={`${words.frame} ${words.dash}`}
+            label={`${PICTURE_WORDS.border} ${words.dash.toLowerCase()}`}
             value={frame.dash ?? 'solid'}
             control="formatOptions.picture.frame.dash"
             options={DASHES.map((dash) => ({ value: dash, label: DASH_LABELS[dash] }))}
@@ -281,8 +349,10 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
             disabled={write.busy}
           />
         </div>
+        {/* a colour with no weight draws at 1 px (item 44; picture.ts frameDeclarations reads
+            weight 1 when the field is absent), so the pick shows at once */}
         <ColorRow
-          label={`${words.frame} ${words.color}`}
+          label={`${PICTURE_WORDS.border} ${words.color.toLowerCase()}`}
           current={frame.color as Color | undefined}
           control="formatOptions.picture.frame.color"
           onPick={(value) => setFrame({ color: value ?? undefined })}

@@ -352,6 +352,7 @@ describe('the Format options Dither section', () => {
       const label = row?.querySelector('.ts-fo-field-label');
       if (!(row instanceof HTMLElement) || !(label instanceof HTMLElement))
         throw new Error('no Tone row');
+      fireEvent.mouseMove(document.body);
       fireEvent.mouseEnter(label);
       act(() => {
         vi.advanceTimersByTime(TIP_DELAY_MS);

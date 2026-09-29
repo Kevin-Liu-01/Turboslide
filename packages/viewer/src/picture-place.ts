@@ -1,6 +1,7 @@
 // Where a picked picture lands and what a refused upload says (docs/PRODUCT.md section 2 rank
 // 10, section 5 "Pictures"; audit-seller 10, 14, 22; audit-brand 12; audit-gaps 1). Pure: the
 // Editor's insertPicture and the Image by URL dialog call these, picture-place.test.ts pins them.
+import { CAPTION_ROW_HEIGHT } from '@turboslide/render/block-css';
 import type { Block } from '@turboslide/schema/blocks';
 import type { Slide } from '@turboslide/schema/deck';
 import { canvasObjects } from '@turboslide/schema/deck';
@@ -11,6 +12,53 @@ import { CONTENT, CONTENT_ORIGIN } from '@turboslide/theme/tokens';
 
 /** The margin a placed picture keeps from the body slot's edges, in sheet px (rank 10). */
 export const PICTURE_MARGIN = 40;
+
+/**
+ * A picture whose longer side is under this many pixels keeps its natural size at the insert
+ * (docs/POLISH.md item 51; audit-media item 26: one 180 px icon landed at 94, 119 and 161 sheet
+ * px depending on the free rectangle). Google inserts a picture at its natural size scaled down
+ * to fit, never scaled up; a larger picture still takes the largest box its area gives it.
+ */
+export const NATURAL_SIZE_LIMIT = 600;
+
+/** The height a caption row adds under a free picture (docs/POLISH.md item 43), the renderer's number, here for the editor's caption session. */
+export { CAPTION_ROW_HEIGHT };
+
+/** The sheet's box in sheet px: a dropped picture is clamped inside it (docs/POLISH.md item 50). */
+const SHEET_BOX: Box = [0, 0, 1600, SHEET_HEIGHT];
+
+/**
+ * The box moved inside the sheet (item 50; audit-media item 23: an SVG dropped at 800,700 ended
+ * at y 936 on a 900 px sheet): the box slides left and up until it is inside, and a box larger
+ * than the sheet in an axis is cut to the sheet's edge in that axis. Whole sheet px.
+ */
+export function clampBoxToSheet(box: Box): Box {
+  const [sx, sy, sw, sh] = SHEET_BOX;
+  const w = Math.min(box[2], sw);
+  const h = Math.min(box[3], sh);
+  const x = Math.max(sx, Math.min(box[0], sx + sw - w));
+  const y = Math.max(sy, Math.min(box[1], sy + sh - h));
+  return [Math.round(x), Math.round(y), Math.round(w), Math.round(h)];
+}
+
+/**
+ * The box a replaced picture takes (docs/POLISH.md item 37; audit-media item 4: Replace image
+ * squeezed a wordmark into the old box): the old box's centre and area are kept and the sides are
+ * refit to the new picture's aspect, so nothing is stretched. A size that is unknown or degenerate
+ * keeps the box as it is. The result is moved inside the sheet and rounded to whole sheet px, at
+ * least 8 by 8.
+ */
+export function replacedPictureBox(box: Box, size: readonly [number, number] | undefined): Box {
+  if (size === undefined || !(size[0] > 0) || !(size[1] > 0)) return box;
+  const [x, y, w, h] = box;
+  const area = Math.max(64, w * h);
+  const ratio = size[0] / size[1];
+  const nw = Math.max(8, Math.round(Math.sqrt(area * ratio)));
+  const nh = Math.max(8, Math.round(Math.sqrt(area / ratio)));
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  return clampBoxToSheet([Math.round(cx - nw / 2), Math.round(cy - nh / 2), nw, nh]);
+}
 
 /** The body slot of a slide as a box in sheet px: the content area (theme tokens CONTENT_ORIGIN and CONTENT). */
 export const BODY_SLOT: Box = [CONTENT_ORIGIN[0], CONTENT_ORIGIN[1], CONTENT[0], CONTENT[1]];
@@ -216,10 +264,14 @@ export function pictureInsertBox(
   area: Box = BODY_SLOT,
   margin: number = PICTURE_MARGIN,
 ): Box {
-  const [aw, ah] = size !== undefined && size[0] > 0 && size[1] > 0 ? size : [16, 9];
+  const known = size !== undefined && size[0] > 0 && size[1] > 0;
+  const [aw, ah] = known ? size : [16, 9];
   const maxW = Math.max(8, area[2] - 2 * margin);
   const maxH = Math.max(8, area[3] - 2 * margin);
-  const scale = Math.min(maxW / aw, maxH / ah);
+  const fit = Math.min(maxW / aw, maxH / ah);
+  /* a small picture keeps its natural size whatever the free area (NATURAL_SIZE_LIMIT) */
+  const natural = known && Math.max(aw, ah) < NATURAL_SIZE_LIMIT;
+  const scale = natural ? Math.min(1, fit) : fit;
   const w = Math.max(8, Math.round(aw * scale));
   const h = Math.max(8, Math.round(ah * scale));
   const x = Math.round(area[0] + (area[2] - w) / 2);
@@ -234,7 +286,10 @@ export type PictureKind = 'png' | 'jpeg' | 'gif' | 'webp' | 'svg' | 'avif' | 'bm
  * The picture format of a file's first bytes, or null when the bytes are not a picture (a text
  * file renamed .png, an empty file): the sentence "the file is not a picture" is answered before
  * any upload and no placeholder is drawn (audit-brand 12; the gaps audit's replace with a broken
- * PNG went silent). SVG is read as text starting with `<`.
+ * PNG went silent). SVG is read as text starting with `<`: a BOM, white space, an XML declaration
+ * and any number of comments may stand before `<svg` inside the 512 bytes the intake reads
+ * (docs/POLISH.md item 50; audit-media item 22: the product's own icon.svg opens with a comment
+ * over 256 characters and was refused as "not a picture").
  */
 export function sniffPictureKind(bytes: Uint8Array): PictureKind | null {
   if (bytes.length < 4) return null;
@@ -258,8 +313,11 @@ export function sniffPictureKind(bytes: Uint8Array): PictureKind | null {
   while (i < bytes.length && (at(i) === 0x20 || at(i) === 0x0a || at(i) === 0x0d || at(i) === 0x09))
     i += 1;
   if (at(i) === 0x3c) {
-    const head = ascii(i, Math.min(256, bytes.length - i)).toLowerCase();
-    if (head.includes('<svg') || head.startsWith('<?xml')) return 'svg';
+    const head = ascii(i, Math.min(512, bytes.length - i)).toLowerCase();
+    if (head.startsWith('<?xml')) return 'svg';
+    /* the comments and the white space before the root, then the root's name */
+    const rest = head.replace(/^(?:\s|<!--[\s\S]*?-->|<!--[\s\S]*$)*/, '');
+    if (rest.startsWith('<svg') || head.includes('<svg')) return 'svg';
   }
   return null;
 }

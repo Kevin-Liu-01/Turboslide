@@ -37,7 +37,7 @@ export type FontRow = {
 /** The picker's words. Google's labels where Google has the row; the rest is Turboslide's. */
 export const FONT_PICKER = {
   control: 'Font',
-  doc: 'The face of the selected text; More fonts lists every face with its licence',
+  doc: 'The face of the selected text; More fonts lists every face with its license',
   tableDoc: 'A table takes one size; its face is the theme’s',
   /* a fixed kind's field (the cover's heading and lead): the kit's face for its role draws it */
   fixedDisplayDoc: 'This heading takes the brand kit’s Display face; Slide > Edit theme changes it',
@@ -52,7 +52,7 @@ export const FONT_PICKER = {
   clearRecentDoc: 'Forgets the faces this browser picked lately',
   themeFace: 'Theme font',
   moreFonts: 'More fonts',
-  moreFontsDoc: 'Every face of the catalog with its category and licence',
+  moreFontsDoc: 'Every face of the catalog with its category and license',
   noMatch: 'No font matches',
   /** the More fonts dialog (Google's form: the search, the category filter, the list, the chosen) */
   dialog: {
@@ -65,7 +65,7 @@ export const FONT_PICKER = {
     categoryDoc: 'Show one category of the catalog',
     licenceLine: (licence: FontLicence) =>
       licence === 'OFL 1.1' ? 'SIL Open Font License 1.1' : 'Apache License 2.0',
-    licenceDoc: 'Opens the licence text',
+    licenceDoc: 'Opens the license text',
   },
 } as const;
 
@@ -240,8 +240,9 @@ export type FontGroup = {
  * The picker's groups (docs/PRODUCT.md 4.2): the kit's faces under Brand, the families this
  * presentation uses, the faces this browser picked lately (docs/FEATURES.md 3.5, P1; audit-fonts
  * 10) then the catalog by category in Google's order (Sans serif, Serif, Display, Monospace). A
- * used or recent family stays in its category too, so the catalog reads whole. Every group
- * filters by the query; empty groups are dropped.
+ * used or recent family stays in its category too, so the catalog reads whole; a Brand face is
+ * listed once, under Brand alone (docs/POLISH.md item 49; audit-media item 20: Inter twice). Every
+ * group filters by the query; empty groups are dropped.
  */
 export function groupRows(
   rows: readonly FontRow[],
@@ -265,7 +266,9 @@ export function groupRows(
   if (recentRows.length > 0)
     groups.push({ id: 'recent', title: FONT_PICKER.recent, rows: recentRows });
   for (const category of FONT_CATEGORIES) {
-    const inCategory = shown.filter((row) => row.category === category);
+    const inCategory = shown.filter(
+      (row) => row.category === category && !brand.includes(row.id),
+    );
     if (inCategory.length > 0)
       groups.push({ id: category, title: FONT_CATEGORY_LABELS[category], rows: inCategory });
   }
@@ -380,7 +383,7 @@ const DIRECTORIES: Readonly<Record<FontId, string>> = {
  * The Inter release the bundled files come from (docs/FEATURES.md 3.1 items 1 and 2; audit-fonts
  * 4 and 5): rsms/inter tags the release `v4.1` while the font's internal version reads 4.001, and
  * the `v4.001` tag does not exist, so the licence link a marketer clicks from More fonts answered
- * 404 (B2's row `fonts.links.licence-v4-1`, the one line in this file by B2's request).
+ * 404 (B2's row `fonts.links.license-v4-1`, the one line in this file by B2's request).
  */
 export const INTER_RELEASE_TAG = 'v4.1';
 

@@ -206,6 +206,7 @@ describe('the Shader section', () => {
       expect(strength.tabIndex).toBe(-1);
       expect(strength.closest('.ts-shader-slider')?.classList.contains('is-off')).toBe(true);
       expect(amplitude.getAttribute('aria-disabled')).toBeNull();
+      fireEvent.mouseMove(document.body);
       fireEvent.mouseEnter(strength);
       vi.advanceTimersByTime(400);
       const plate = document.querySelector('.pt-tip');
@@ -216,6 +217,7 @@ describe('the Shader section', () => {
       fireEvent.pointerUp(strength);
       expect(dispatch).not.toHaveBeenCalled();
       hideTooltip();
+      fireEvent.mouseMove(document.body);
       fireEvent.mouseEnter(amplitude);
       vi.advanceTimersByTime(400);
       const used = document.querySelector('.pt-tip');

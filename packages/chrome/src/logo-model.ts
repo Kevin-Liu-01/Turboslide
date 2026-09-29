@@ -98,7 +98,7 @@ export const LICENCE_SENTENCES: Readonly<Record<LicenceClass, string>> = {
   open: 'Free to use',
   credit: 'Free to use with credit',
   unchanged: 'Free to use unchanged',
-  copyleft: 'Free to use under an open licence',
+  copyleft: 'Free to use under an open license',
   own: 'The brand’s own terms',
 };
 
@@ -128,7 +128,7 @@ export function licenceSentenceOf(license: string): string {
 
 /** The tooltip that carries the recorded string (4.6). */
 export function licenceTooltipOf(license: string): string {
-  return `Recorded on ${LOGO_SOURCE} as ${license.trim() === '' ? 'no licence' : license.trim()}`;
+  return `Recorded on ${LOGO_SOURCE} as ${license.trim() === '' ? 'no license' : license.trim()}`;
 }
 
 /** True for the marks the server may keep a sanitized copy of in the store (4.2, 4.10). */
@@ -366,7 +366,7 @@ export function monoOffered(svgText: string): boolean {
 // ---------------------------------------------------------------------------------------------
 // The kit's colours a logo is drawn with (4.3, 4.4)
 
-/** The kit's text colour for an appearance, else the theme's ink (the tint colour of a mono mark). */
+/** The kit's text color for an appearance, else the theme's ink (the tint colour of a mono mark). */
 export function kitTextColour(kit: BrandKit | undefined, appearance: KitAppearance): string {
   return kit?.colors?.[appearance]?.text ?? TOKENS[appearance].ink;
 }

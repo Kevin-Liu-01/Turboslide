@@ -36,14 +36,15 @@ import './Logo.css';
 /**
  * Insert > Logo, Insert > Image > Logo and Replace image > Logo (docs/FEATURES.md 4.3, 4.4, 4.6,
  * 4.9; audit-logos 1, 6, 12, 15, 17, 21): the picker over thesvg.org. The head holds the search
- * field "Company name" with the focus; the body holds the groups Your brand (the deployment's
- * default kit logo, the deck's kit logo when it is a picture, and the deck's `role: 'logo'`
- * assets), Recent (the last twelve picks on this browser) and Results (the cache's matches,
- * twenty at a time, more on scroll); the foot holds the check "Use as this presentation's logo on
- * every slide" with its sentence, the selected tile's licence row as a seller's sentence with the
+ * field "Company name" with the focus; the body is a box of one fixed height holding the groups
+ * Results (the cache's matches, twenty at a time, more on scroll; drawn first while a query is
+ * typed, docs/POLISH.md item 39), Your brand (the deployment's default kit logo and the deck's kit
+ * logo when it is a picture) and Recent (the deck's `role: 'logo'` assets, then the last twelve
+ * picks on this browser; item 46); the foot holds the check "Use as this presentation's logo on
+ * every slide" with its sentence, the selected tile's license row as a seller's sentence with the
  * recorded string in its tooltip, the source sentence with the cache's date, and Insert. A tile is
  * the mark drawn twice, on a paper half and an ink half whose grounds are the kit's two Background
- * colours, with the title under it; each half draws the variant the appearance rule of
+ * colors, with the title under it; each half draws the variant the appearance rule of
  * logo-model.ts picks for its appearance (`chooseVariant`, B6's, with the tint rule of question
  * 2). The first result is preselected so Enter inserts it; the arrows move; Escape closes; a
  * click inserts at once and the dialog closes with the picture selected.
@@ -300,7 +301,7 @@ function storageOf(): Storage | null {
 // ---------------------------------------------------------------------------------------------
 // The kit's grounds and the words of the foot
 
-/** The two grounds and the two text colours of a tile, from the kit's Background and Text roles. */
+/** The two grounds and the two text colors of a tile, from the kit's Background and Text roles. */
 export type Grounds = {
   paper: string;
   ink: string;
@@ -325,7 +326,7 @@ export function namesKit(query: string, names: readonly (string | undefined)[]):
   return names.some((name) => name !== undefined && name.trim().toLocaleLowerCase() === q);
 }
 
-/** The licence row's words (4.6): "<Title>: <sentence>, " and the link's text. */
+/** The license row's words (4.6): "<Title>: <sentence>, " and the link's text. */
 export function licenceRowWords(row: LogoSearchRow): {
   lead: string;
   link: string;
@@ -636,32 +637,30 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
   const assetUrl = input.assetUrl ?? ((path: string) => `/decks/${input.deckId}/${path}`);
   const grounds = useMemo<Grounds>(() => kitGrounds(kit), [kit]);
 
-  /* Your brand (4.3; audit-logos 15): the default kit's logo, the deck's kit logo when it is a
-     picture, the deck's logo assets; one tile per asset */
+  /* Your brand (4.3; audit-logos 15; docs/POLISH.md item 46): the default kit's logo and the deck's
+     kit logo when it is a picture, one brand. The deck's other logo assets (a customer's mark
+     inserted from the picker, audit-media item 16) list under Recent with the browser's picks */
+  const kitAsset =
+    kit?.mark?.kind === 'picture' && kit.mark.assetId !== undefined
+      ? deck.assets[kit.mark.assetId]
+      : undefined;
   const brandPicks = useMemo<LogoPick[]>(() => {
     const picks: LogoPick[] = [];
     if (defaultKit !== undefined) picks.push({ kind: 'kit', kit: defaultKit });
-    const seen = new Set<string>();
-    const kitAsset =
-      kit?.mark?.kind === 'picture' && kit.mark.assetId !== undefined
-        ? deck.assets[kit.mark.assetId]
-        : undefined;
-    if (kitAsset !== undefined) {
-      seen.add(kitAsset.id);
+    if (kitAsset !== undefined)
       picks.push({ kind: 'asset', asset: kitAsset, title: kit?.name ?? kitAsset.alt });
-    }
+    return picks;
+  }, [defaultKit, kit, kitAsset]);
+
+  const recentPicks = useMemo<LogoPick[]>(() => {
+    const picks: LogoPick[] = [];
     for (const asset of Object.values(deck.assets)) {
-      if (asset.role !== 'logo' || seen.has(asset.id)) continue;
-      seen.add(asset.id);
+      if (asset.role !== 'logo' || asset.id === kitAsset?.id) continue;
       picks.push({ kind: 'asset', asset, title: asset.alt });
     }
+    for (const row of recent) picks.push({ kind: 'thesvg', row, recent: true });
     return picks;
-  }, [deck.assets, defaultKit, kit]);
-
-  const recentPicks = useMemo<LogoPick[]>(
-    () => recent.map((row) => ({ kind: 'thesvg', row, recent: true })),
-    [recent],
-  );
+  }, [deck.assets, kitAsset, recent]);
   const resultPicks = useMemo<LogoPick[]>(
     () => (results ?? []).map((row) => ({ kind: 'thesvg', row })),
     [results],
@@ -671,14 +670,16 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
   const showRecent = recentPicks.length > 0 && !parked(LOGO_GROUP_CONTROLS.recent);
   const showResults = query.trim() !== '' && !parked(LOGO_GROUP_CONTROLS.results);
 
-  /* the flat order the arrows walk: brand, recent, results */
+  /* the flat order the arrows walk, the order the groups draw in: the results first while a query
+     is typed (docs/POLISH.md item 39: what the seller searched for is in view before the tiles of
+     Your brand and Recent), then brand, then recent */
   const walk = useMemo<{ key: string; pick: LogoPick }[]>(() => {
     const out: { key: string; pick: LogoPick }[] = [];
+    if (showResults)
+      for (const pick of resultPicks) out.push({ key: `results:${pickId(pick)}`, pick });
     if (showBrand) for (const pick of brandPicks) out.push({ key: `brand:${pickId(pick)}`, pick });
     if (showRecent)
       for (const pick of recentPicks) out.push({ key: `recent:${pickId(pick)}`, pick });
-    if (showResults)
-      for (const pick of resultPicks) out.push({ key: `results:${pickId(pick)}`, pick });
     return out;
   }, [brandPicks, recentPicks, resultPicks, showBrand, showRecent, showResults]);
 
@@ -918,7 +919,7 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
     selectedEntry !== undefined && selectedEntry.pick.kind === 'thesvg'
       ? selectedEntry.pick.row
       : undefined;
-  const licence = selectedRow === undefined ? undefined : licenceRowWords(selectedRow);
+  const license = selectedRow === undefined ? undefined : licenceRowWords(selectedRow);
   /* the source sentence of logo-model.ts, with the site linked to its legal page */
   const source = LOGO_WORDS.source(facts);
   const sourceAt = source.indexOf('thesvg.org');
@@ -1013,8 +1014,6 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
           data-query={answered}
           data-searching={searching ? 'true' : undefined}
         >
-          {showBrand ? group('brand', brandPicks, brandGroup) : null}
-          {showRecent ? group('recent', recentPicks) : null}
           {showResults ? (
             <>
               {results !== null && results.length > 0 ? group('results', resultPicks) : null}
@@ -1043,6 +1042,8 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
               <div ref={moreSentinel} className="ts-logo-more" aria-hidden="true" />
             </>
           ) : null}
+          {showBrand ? group('brand', brandPicks, brandGroup) : null}
+          {showRecent ? group('recent', recentPicks) : null}
         </div>
         <div className="ts-logo-foot">
           {parked('dialog.logo.everySlide') ? null : (
@@ -1060,24 +1061,29 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
               </p>
             </>
           )}
-          {selectedRow !== undefined && licence !== undefined && !parked('dialog.logo.licence') ? (
+          {/* the license row keeps its line while no mark is selected, so the dialog's height holds
+              from open through a search and a pick (docs/POLISH.md item 39) */}
+          {parked('dialog.logo.license') ? null : selectedRow !== undefined &&
+            license !== undefined ? (
             <p
-              className="ts-logo-licence"
+              className="ts-logo-license"
               data-control="dialog.logo.licence"
               data-license={selectedRow.license}
               {...tipProps({ name: licenceTooltipOf(selectedRow.license) })}
             >
-              {licence.lead}
+              {license.lead}
               <a
-                href={licence.href}
+                href={license.href}
                 target="_blank"
                 rel="noreferrer"
                 data-control="dialog.logo.licence.link"
               >
-                {licence.link}
+                {license.link}
               </a>
             </p>
-          ) : null}
+          ) : (
+            <p className="ts-logo-license is-empty" aria-hidden="true" />
+          )}
           {parked('dialog.logo.source') ? null : (
             <p className="ts-logo-source" data-control="dialog.logo.source">
               {sourceAt < 0 ? (

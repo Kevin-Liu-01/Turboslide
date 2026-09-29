@@ -2,6 +2,16 @@
 // that is now a block or a kind (SPEC 5.2, "What the renderer owns that slides used to copy";
 // report 03 section 11). It is loaded after @turboslide/theme's sheet.css and scoped under the same
 // `.ts-sheet` root class. Every value is the deck's, cited to the slide that set it.
+
+/**
+ * The height a caption row adds under a free picture, in sheet px (docs/POLISH.md item 43): the
+ * `.shot-fig` figure's 12 px gap plus one 16 px line at 1.45 (the two rules below), rounded up.
+ * The caption session (viewer Editor.tsx `addCaption`) and the panel's Caption field grow `pos.h`
+ * by it when a caption is added to a free picture and shrink it back when the caption is emptied,
+ * so the photograph keeps its drawn height instead of losing the row to the caption.
+ */
+export const CAPTION_ROW_HEIGHT = 35;
+
 export const BLOCK_CSS = `
 /* ---- the sheet's inherited text rules. head.html sets these on body (head:183) and on .slide a
    (head:196-199), outside the 11-176 range the theme ports, so the renderer carries them until
@@ -272,6 +282,14 @@ export const BLOCK_CSS = `
 .ts-sheet .free > .shot-fig > img.shot, .ts-sheet .free > .link > .shot-fig > img.shot { width: 100%; height: 100%; max-width: none; max-height: none; min-height: 0; object-fit: fill; }
 .ts-sheet .free > .shot-fig > .shot-crop, .ts-sheet .free > .link > .shot-fig > .shot-crop { height: 100%; min-height: 0; aspect-ratio: auto !important; }
 .ts-sheet .free > .shot-fig > .shot-crop > img.shot, .ts-sheet .free > .link > .shot-fig > .shot-crop > img.shot { object-fit: fill; }
+/* a free picture shows the slide through its transparent parts (docs/POLISH.md item 38;
+   audit-media item 5, audit-objects item 20: every logo and every uploaded svg sat on a grey plate):
+   no plate under a free object's image or its crop frame. The flow figure keeps sheet.css's plate
+   and hairline (the brand deck's screenshot block), and a converted screenshot covers its box with
+   an opaque raster, so the conversion fidelity gate reads the same pixels. The hairline is the
+   block's own: the editor inserts a seller's picture with border false, which figures.ts writes
+   as border 0 inline, and a border the seller sets is the inline frame declaration. */
+.ts-sheet .free > .shot-fig > img.shot, .ts-sheet .free > .link > .shot-fig > img.shot, .ts-sheet .free > .shot-fig > .shot-crop, .ts-sheet .free > .link > .shot-fig > .shot-crop { background: transparent; }
 /* the chart block (2.8.1): the diagram grammar's sizes */
 .ts-sheet svg.chart { display: block; overflow: visible; }
 .ts-sheet .free > svg.chart, .ts-sheet .free > .link > svg.chart { width: 100%; height: 100%; }
@@ -298,7 +316,8 @@ export const BLOCK_CSS = `
 /* a cell fills its track in both forms (the theme's .ts-sheet .table .td rule, sheet.css): its rule
    sits on the row's bottom edge and its fill covers the row, as in Google's table and the a:tbl
    the export writes; the vertical alignment moves to the content */
-.ts-sheet .table.grid > .tr.header .td { font-family: var(--display); font-weight: 500; letter-spacing: -0.01em; }
+/* the header's display weight draws with the ink rule, under a header row that holds text (docs/POLISH.md item 3; B2's R8): the renderer writes has-text on such a row, and the editor's open session counts as text while its paragraph holds any */
+.ts-sheet .table.grid > .tr.header.has-text .td, .ts-sheet.ts-editor .table.grid > .tr.header:has(.td.ts-editing .para:not(:empty)) .td { font-family: var(--display); font-weight: 500; letter-spacing: -0.01em; }
 
 /* ---- the render surface: one visible slide, the sheet filling the viewport in present mode ---- */
 .ts-render-surface { margin: 0; background: var(--paper); overflow: hidden; }

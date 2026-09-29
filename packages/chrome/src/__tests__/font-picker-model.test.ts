@@ -130,6 +130,22 @@ describe('filterRows', () => {
   });
 });
 
+describe('the Brand group', () => {
+  it('lists a Brand face once, under Brand alone (docs/POLISH.md item 49)', () => {
+    const groups = groupRows(ROWS, [], '', ['inter']);
+    const brand = groups.find((group) => group.id === 'brand');
+    expect(brand?.rows.map((row) => row.id)).toEqual(['inter']);
+    const sans = groups.find((group) => group.id === 'sans');
+    expect(sans?.rows.map((row) => row.id)).not.toContain('inter');
+    const listed = groups.flatMap((group) => group.rows.filter((row) => row.id === 'inter'));
+    expect(listed).toHaveLength(1);
+    /* a used or recent face keeps its category row, so the catalog reads whole */
+    const used = groupRows(ROWS, ['lora'], '', ['inter'], ['roboto']);
+    expect(used.find((group) => group.id === 'serif')?.rows.map((row) => row.id)).toContain('lora');
+    expect(used.find((group) => group.id === 'sans')?.rows.map((row) => row.id)).toContain('roboto');
+  });
+});
+
 describe('the Recent group', () => {
   it('lists the recent faces after Used and before the catalog, in the order picked', () => {
     const groups = groupRows(ROWS, ['lora'], '', ['inter'], ['fira-code', 'roboto']);

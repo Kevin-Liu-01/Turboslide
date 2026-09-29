@@ -107,7 +107,7 @@ const RECORDED_LICENCES = [
   'LGPL-2.1',
 ];
 
-describe('the licence sentences (4.6)', () => {
+describe('the license sentences (4.6)', () => {
   it('covers the 57 recorded strings with the brand’s own terms as the fallback', () => {
     expect(RECORDED_LICENCES).toHaveLength(57);
     const sentences = new Set(Object.values(LICENCE_SENTENCES));
@@ -122,8 +122,8 @@ describe('the licence sentences (4.6)', () => {
     expect(licenceSentenceOf('CC-BY-4.0')).toBe('Free to use with credit');
     expect(licenceSentenceOf('CC-BY-SA-4.0')).toBe('Free to use with credit');
     expect(licenceSentenceOf('CC-BY-ND-2.0')).toBe('Free to use unchanged');
-    expect(licenceSentenceOf('MPL-2.0')).toBe('Free to use under an open licence');
-    expect(licenceSentenceOf('GPL-3.0-or-later')).toBe('Free to use under an open licence');
+    expect(licenceSentenceOf('MPL-2.0')).toBe('Free to use under an open license');
+    expect(licenceSentenceOf('GPL-3.0-or-later')).toBe('Free to use under an open license');
     for (const own of [
       'brand-use',
       'Trademark',
@@ -141,7 +141,7 @@ describe('the licence sentences (4.6)', () => {
     expect(licenceTooltipOf('CC0-1.0')).toBe('Recorded on thesvg.org as CC0-1.0');
   });
 
-  it('caches open licences alone and turns the tint off where derivatives are forbidden or the terms are the brand’s', () => {
+  it('caches open licenses alone and turns the tint off where derivatives are forbidden or the terms are the brand’s', () => {
     for (const open of ['CC0-1.0', 'MIT', 'Apache-2.0', 'BSD-2-Clause', 'ISC', 'Unlicense'])
       expect(isOpenLicence(open), open).toBe(true);
     for (const other of ['CC-BY-4.0', 'CC-BY-ND-2.0', 'GPL-3.0', 'Trademark', 'Unknown', 'PD'])
@@ -232,7 +232,7 @@ describe('the appearance rule (4.3, 4.4)', () => {
     expect(chooseVariant(fresh, 'dark')).toEqual({ variant: 'default', tint: false });
   });
 
-  it('never tints a mark whose licence forbids derivatives: the untinted default on a plate instead', () => {
+  it('never tints a mark whose license forbids derivatives: the untinted default on a plate instead', () => {
     expect(chooseVariant(awsMark, 'dark')).toEqual({
       variant: 'default',
       tint: false,
@@ -283,7 +283,7 @@ describe('the appearance rule (4.3, 4.4)', () => {
     );
   });
 
-  it('tints with the kit’s text colour for the appearance, else the theme’s ink', () => {
+  it('tints with the kit’s text color for the appearance, else the theme’s ink', () => {
     expect(kitTextColour(undefined, 'light')).toBe('#070707');
     expect(kitTextColour(undefined, 'dark')).toBe('#f2f2f0');
     expect(kitTextColour({ colors: { light: { text: '#0b3d91' } } }, 'light')).toBe('#0b3d91');
@@ -495,7 +495,7 @@ describe('the title rule (4.4)', () => {
     ).toBeNull();
   });
 
-  it('scales the logo to the row and sits it at the area’s left edge, centred on the row’s height', () => {
+  it('scales the logo to the row and sits it at the area’s left edge, centered on the row’s height', () => {
     expect(logoBoxAtStart([309, 370, 1114, 84], [108, 160])).toEqual([309, 370, 57, 84]);
     expect(logoBoxAtStart([309, 370, 1114, 84], [320, 64])).toEqual([309, 380, 320, 64]);
     expect(logoBoxAtStart([309, 370, 100, 84], [320, 64])).toEqual([309, 402, 100, 20]);

@@ -38,20 +38,47 @@
     var(--pt-plate);
 }
 
-.ts-shader-name {
+/* the head's name column; its own class, since `.ts-shader-name` is the gallery's one line name */
+.ts-shader-head-name {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  min-width: 0;
+  white-space: normal;
+}
+
+/* the name and Change on one line, 8 px apart or more (docs/POLISH.md item 47) */
+.ts-shader-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   min-width: 0;
 }
 
+.ts-shader-name-row > .ts-fo-button {
+  flex: 0 0 auto;
+}
+
 .ts-shader-title {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 13px;
   line-height: 1.3;
   color: var(--pt-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* the still's state under the name, one line in the note's size */
+.ts-shader-still-line {
+  display: block;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--pt-titanium);
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .ts-shader-group {
@@ -254,9 +281,3 @@
   margin-right: 4px;
 }
 
-.ts-shader-frame {
-  margin: 4px 0 0;
-  font-size: 11px;
-  line-height: 1.4;
-  color: var(--pt-titanium);
-}

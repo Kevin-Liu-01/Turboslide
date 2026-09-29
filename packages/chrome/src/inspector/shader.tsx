@@ -99,7 +99,7 @@ export type ShaderSectionProps = {
 export const SHADER_WORDS = {
   section: 'Shader',
   change: 'Change',
-  changeDoc: 'Opens the gallery; the shader takes your brand kit’s colours on the slide',
+  changeDoc: 'Opens the gallery; the shader takes your brand kit’s colors on the slide',
   preset: 'Preset',
   presetDoc: 'The shader’s recorded looks; a pick keeps its geometry and drops the slider changes',
   colors: 'Colors',
@@ -125,7 +125,7 @@ export const SHADER_WORDS = {
   plateDoc: 'The corner the two-tone still keeps clear for a title plate',
   none: 'none',
   ground:
-    'The ground of this slide. A preset, a colour or a value below renders it again; Change background removes it',
+    'The ground of this slide. A preset, a color or a value below renders it again; Change background removes it',
 } as const;
 
 const PLATE_WORDS: Readonly<Record<MaterialPlateSide, string>> = {
@@ -587,7 +587,12 @@ function AdvancedGroup({
   );
 }
 
-/** The head of the section: the still, the name, Change and the still line. */
+/**
+ * The head of the section (docs/POLISH.md item 47; audit-media item 18): the still, then the name
+ * and Change on one line with a gap between them, then the still line in the note's size. The
+ * still line's class is the section's own: the gallery's `.ts-shader-frame` is a 16:10 plate, and
+ * the line drew as a large grey box while it shared the name.
+ */
 function Head({
   entry,
   stale,
@@ -608,21 +613,23 @@ function Head({
         className="ts-shader-thumb"
         alt={`${entry.label} shader`}
       />
-      <div className="ts-shader-name">
-        <span className="ts-shader-title" {...tipProps({ name: entry.label, doc: entry.doc })}>
-          {entry.label}
-        </span>
-        {onChange !== undefined && !parked(`${ID}.change`) ? (
-          <PanelButton
-            label={SHADER_WORDS.change}
-            control={`${ID}.change`}
-            onClick={onChange}
-            disabled={busy}
-            doc={SHADER_WORDS.changeDoc}
-          />
-        ) : null}
+      <div className="ts-shader-head-name">
+        <div className="ts-shader-name-row">
+          <span className="ts-shader-title" {...tipProps({ name: entry.label, doc: entry.doc })}>
+            {entry.label}
+          </span>
+          {onChange !== undefined && !parked(`${ID}.change`) ? (
+            <PanelButton
+              label={SHADER_WORDS.change}
+              control={`${ID}.change`}
+              onClick={onChange}
+              disabled={busy}
+              doc={SHADER_WORDS.changeDoc}
+            />
+          ) : null}
+        </div>
         <span
-          className="ts-shader-frame"
+          className="ts-shader-still-line"
           data-control={`${ID}.still`}
           data-stale={stale ? '1' : '0'}
         >

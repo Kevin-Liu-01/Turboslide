@@ -5,8 +5,12 @@
 // function has no browser and jsdom is not on the studio's server graph) builds the tree; the
 // walk keeps the listed elements and attributes, drops every `on*` attribute, every `href` that
 // does not start with `#`, every `url(` that is not `url(#<id>)`, a `style` attribute or element
-// that imports or reaches out, `script`, `foreignObject`, `a`, `iframe`, `text`, the animation
-// elements and every element off the list, and records the drop. An `image` element is kept when
+// that imports or reaches out, `script`, `foreignObject`, `a`, `iframe`, the animation elements
+// and every element off the list, and records the drop. `text`, `tspan` and `textPath` are kept
+// with their words and their font attributes since the polish round (docs/POLISH.md item 32;
+// audit-objects item 15: a pasted svg lost its wordmark's text while the uploaded copy kept it),
+// so a wordmark set in type survives and the mono tint recolours it like a path; a `textPath`'s
+// `href` follows the local rule. An `image` element is kept when
 // its `href` is a `data:image/(png|jpeg|gif|webp);base64,` URI (Figma's Copy as SVG embeds raster
 // fills this way) and dropped otherwise (docs/VECTOR.md 4.2). When a dropped element draws (text,
 // an image, a primitive off the list, a subtree with shapes in it) the variant's look changed, so
@@ -87,13 +91,16 @@ export const KEPT_ELEMENTS: ReadonlySet<string> = new Set([
   'feFuncG',
   'feFuncB',
   'feFuncA',
-]);
-
-/** The elements whose drop changes the look (4.7), beside a subtree that holds a shape. */
-const DRAWING_DROPS: ReadonlySet<string> = new Set([
   'text',
   'tspan',
   'textPath',
+]);
+
+/** The elements that hold words the walk keeps (docs/POLISH.md item 32). */
+const TEXT_ELEMENTS: ReadonlySet<string> = new Set(['text', 'tspan', 'textPath']);
+
+/** The elements whose drop changes the look (4.7), beside a subtree that holds a shape. */
+const DRAWING_DROPS: ReadonlySet<string> = new Set([
   'image',
   'foreignObject',
   'marker',
@@ -239,6 +246,33 @@ export const KEPT_ATTRIBUTES: ReadonlySet<string> = new Set([
   'edgeMode',
   'dx',
   'dy',
+  /* the type of a text element (item 32): the face, the size, the weight, the spacing and the
+     anchor, the path's offset and its side; a family name is a name, never a url */
+  'font-family',
+  'font-size',
+  'font-size-adjust',
+  'font-weight',
+  'font-style',
+  'font-variant',
+  'font-stretch',
+  'letter-spacing',
+  'word-spacing',
+  'text-anchor',
+  'text-decoration',
+  'text-rendering',
+  'dominant-baseline',
+  'alignment-baseline',
+  'baseline-shift',
+  'writing-mode',
+  'direction',
+  'unicode-bidi',
+  'rotate',
+  'textLength',
+  'lengthAdjust',
+  'startOffset',
+  'method',
+  'spacing',
+  'side',
 ]);
 
 /** A file that does not parse (4.7): the sentence is the seller's, the caller's words when given. */
@@ -591,7 +625,7 @@ function imageHrefOf(element: SvgElement): string | undefined {
  * children; every other element leaves with its subtree and is recorded; a `<style>` whose text
  * imports or reaches out leaves too (its rules drew colours, so it counts as a draw); an `image`
  * stays only with a raster data URI href (docs/VECTOR.md 4.2) and leaves as a draw otherwise;
- * text stays only inside `title`, `desc` and `style`.
+ * words stay inside `title`, `desc`, `style` and the text elements (item 32).
  */
 export function sanitizeTree(root: SvgElement): {
   root: SvgElement;
@@ -614,6 +648,7 @@ export function sanitizeTree(root: SvgElement): {
       if (child.kind === 'text') {
         if (element.name === 'title' || element.name === 'desc') children.push(child);
         else if (element.name === 'style') children.push(child);
+        else if (TEXT_ELEMENTS.has(element.name)) children.push(child);
         continue;
       }
       if (child.name === 'image') {

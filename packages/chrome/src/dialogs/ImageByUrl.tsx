@@ -151,7 +151,7 @@ export function ImageByUrlDialog({ target }: { target?: PictureTarget }) {
           await input.dispatch('block.insert', {
             slideId: where.slideId,
             slot,
-            block: { id: `shot-${Date.now().toString(36)}`, type: 'shot', asset: asset.id },
+            block: { id: `shot-${Date.now().toString(36)}`, type: 'shot', asset: asset.id, border: false },
             baseRevision: revision,
           });
         }
@@ -208,9 +208,12 @@ export function ImageByUrlDialog({ target }: { target?: PictureTarget }) {
       </DialogField>
       {preview !== '' ? (
         <div className="ts-dialog-slide-frame" style={{ maxHeight: 200 }}>
+          {/* the preview fits inside the frame whole (docs/POLISH.md item 50; audit-media item 21:
+              a 180 px icon was stretched to the dialog's width and cut by the footer) */}
           <img
             src={preview}
             alt=""
+            style={{ objectFit: 'contain', height: 200 }}
             data-control="dialog.imageByUrl.preview"
             onError={() => setError('The picture could not be loaded from this address')}
             onLoad={() => setError(null)}

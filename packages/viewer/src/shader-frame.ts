@@ -323,8 +323,25 @@ export function bytesToBase64(bytes: Uint8Array): string {
 export const FRAME_UPLOAD_ABOVE_BYTES = 3 * 1024 * 1024;
 
 /**
+ * The one sentence the editor shows when a block's frame could not be saved after the capturer's
+ * own retry (docs/POLISH.md item 36; audit-media item 2: god rays at 727 by 412 answered 413 four
+ * times and nothing said so). The controller wires it to the snackbar through `onError`.
+ */
+export const SHADER_FRAME_FAILED_SENTENCE =
+  'The shader’s frame could not be saved. Change the shader to try again';
+
+/**
  * One capturer per editor (5.5, the shared editor rule): debounced per block, one capture at a
  * time, the write through the controller's queue, the 409 rule, the hosted fallback.
+ *
+ * The frame over the function's cap (docs/POLISH.md item 36): a PNG over `uploadAbove` (3 MB,
+ * the picture path's presign threshold; the function's body is capped at 4.5 MB and base64 grows
+ * the bytes by a third) goes up through `deps.upload`, the presigned PUT the picture intake uses,
+ * and the write names the upload's key; without an `upload` dep the hosted `shader.capture` draws
+ * and stores the frame inside the function instead, so no frame is ever sent through a body it
+ * cannot fit. A failed capture, put or write is tried once more, and when the second attempt
+ * fails too `onError` is called once with the error, so the editor shows one sentence
+ * (`SHADER_FRAME_FAILED_SENTENCE`) and never one per attempt.
  */
 export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrameCapturer {
   const delay = deps.delayMs ?? FRAME_DEBOUNCE_MS;
@@ -366,12 +383,17 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
       frameKey: frame.frameKey,
       renderer: frame.renderer,
     };
-    if (
-      deps.upload !== undefined &&
-      frame.bytes.length > (deps.uploadAbove ?? FRAME_UPLOAD_ABOVE_BYTES)
-    )
-      input.upload = await deps.upload(frame.bytes);
-    else input.bytes = bytesToBase64(frame.bytes);
+    const overCap = frame.bytes.length > (deps.uploadAbove ?? FRAME_UPLOAD_ABOVE_BYTES);
+    if (overCap && deps.upload !== undefined) input.upload = await deps.upload(frame.bytes);
+    else if (overCap) {
+      // no presigned path on this page: the hosted job draws and stores the frame in the function
+      if (deps.captureHosted === undefined)
+        throw new Error(
+          `the frame is ${frame.bytes.length} bytes, over the function's cap, and the page has no upload path`,
+        );
+      await deps.captureHosted(slideId, blockId);
+      return;
+    } else input.bytes = bytesToBase64(frame.bytes);
     const outcome = await deps.write(input);
     if (outcome.ok) return;
     if (!outcome.conflict) throw outcome.error;
@@ -388,7 +410,15 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
     capturing.add(key);
     chain = chain
       .then(() => run(slideId, blockId, true))
-      .catch((error: unknown) => deps.onError?.(error))
+      .catch(async () => {
+        // one more attempt after a failed capture, put or write; then the one sentence
+        if (disposed) return;
+        try {
+          await run(slideId, blockId, true);
+        } catch (error: unknown) {
+          deps.onError?.(error);
+        }
+      })
       .finally(() => capturing.delete(key));
   };
 

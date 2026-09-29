@@ -1860,7 +1860,10 @@ function EditorStage({
         <StageEditor
           document={snap.document}
           slideId={slide.id}
-          theme={theme}
+          /* the sheet draws the presentation's own appearance whatever the chrome's (docs/POLISH.md
+             2.5 item 49; polish/build/b4.md R18: the Brand kit's Dark tile changes the slides and
+             leaves the chrome light, as Google's theme does); the chrome's theme is the chrome's */
+          theme={deckAppearance(snap.document.deck)}
           /* Tools > Preferences > Link detection reaches the stage (docs/POLISH.md item 114) */
           linkDetection={editorShell.settings.linkDetection !== false}
           assetBase={ASSET_BASE(snap.deckId)}
@@ -1951,7 +1954,7 @@ function EditorStage({
           mode={shell.mode}
           present={shell.present}
           narrow={shell.narrow}
-          theme={theme}
+          theme={deckAppearance(snap.document.deck)}
           dir={shell.dir ?? 'next'}
           onStep={onStep}
           band={frameBandOf(
@@ -1969,7 +1972,7 @@ function EditorStage({
           deckId={snap.deckId}
           slides={play}
           activeId={shell.active}
-          theme={theme}
+          theme={deckAppearance(snap.document.deck)}
           onGoto={shell.select}
           onExit={() => shell.setPresent(false)}
           say={say}
@@ -1979,7 +1982,7 @@ function EditorStage({
         <GridView
           deck={viewerDeck}
           active={shell.active}
-          theme={theme}
+          theme={deckAppearance(snap.document.deck)}
           onSelect={(id) => {
             shell.setMode('slide');
             shell.select(id);
@@ -2011,7 +2014,7 @@ function EditorStage({
         <BookView
           deck={viewerDeck}
           active={shell.active}
-          theme={theme}
+          theme={deckAppearance(snap.document.deck)}
           isMode
           onSelect={shell.select}
           onOpen={(id) => {

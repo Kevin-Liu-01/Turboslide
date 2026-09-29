@@ -3221,9 +3221,10 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     DIVIDER,
     'insert.comment',
   ],
-  /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 50): Google's fifteen rows.
-     Add a caption, Use on every slide and Image options stay under Format > Image; Group draws
-     with two objects, Reset image once the picture is edited */
+  /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 50): Google's seventeen rows
+     for one picture. Add a caption and Use on every slide stay under Format > Image; Group draws
+     with two objects, as Google's does; Reset image and Image options stay, Google's rows
+     (the matrix row images.context.image reads them) */
   image: [
     ...OBJECT_CLIPBOARD,
     DIVIDER,
@@ -3236,9 +3237,10 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.image.replaceImage',
     'format.image.cropImage',
     'format.image.maskImage',
-    { id: 'format.image.resetImage', when: 'imageEdited' },
+    'format.image.resetImage',
     /* SPEC-3 13.2: the picture's Dither toggle sits with the image rows */
     'format.image.dither',
+    'format.image.imageOptions',
     'format.formatOptions',
     'format.altText',
     DIVIDER,

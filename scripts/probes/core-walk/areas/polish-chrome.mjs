@@ -732,7 +732,7 @@ export async function run(t) {
   await t.step(
     'chrome.menus.structure-sweep',
     "a disabled row's key chip; every submenu's row count; Format > Text > Size with nothing selected; the Format menu with the picture selected; Tabular figures; the three insert buttons; the table tail; a right click menu on open; the picture's menu",
-    'the chip reads --pt-disabled; no submenu with one visible row; Size disabled; Alt text listed; a check row; one form; no Merge; no row lit; 15 rows',
+    'the chip reads --pt-disabled; no submenu with one visible row; Size disabled; Alt text listed; a check row; one form; no Merge; no row lit; 17 rows',
     async () => {
       await t.clearAll();
       const facts = [];
@@ -868,7 +868,9 @@ export async function run(t) {
         (r) => !r.id.includes('.', r.id.indexOf('.') + 1) || true,
       ).length;
       await t.press('Escape');
-      ok = ok && lit === 0 && rows === 15;
+      /* Google's seventeen rows for one picture (the integrator's merge: the carried row
+         images.context.image reads Reset image and Image options among them) */
+      ok = ok && lit === 0 && rows === 17;
       facts.push(`picture menu: ${rows} rows, ${lit} lit on open`);
       await t.clearAll();
       return {

@@ -138,7 +138,7 @@
     {
       "id": "decks.list.read",
       "feature": "decks",
-      "interaction": "/decks lists Blank presentation, the GT brand deck, the Recent row and the store cards",
+      "interaction": "/decks lists Blank presentation, the GT brand deck and the store cards, this browser's decks first with the line Opened (docs/POLISH.md 2.7 item 75: the Recent row is gone)",
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-decks row 26"
@@ -170,7 +170,7 @@
     {
       "id": "decks.list.open-recent",
       "feature": "decks",
-      "interaction": "Click the Recent row card; the editor opens; Back returns",
+      "interaction": "Click the card of a deck this browser opened; the editor opens; Back returns",
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-decks row 32"
@@ -2770,7 +2770,7 @@
     {
       "id": "share.dialog.open",
       "feature": "share",
-      "interaction": "Share in the title row opens the dialog with the View, Present and Edit links",
+      "interaction": "Share in the title row on a deck opened to Anyone with the link (docs/POLISH.md 2.7 item 95: a new deck starts Restricted) opens the dialog with the View, Present and Edit links",
       "driver": "core/share.spec.ts",
       "today": "works",
       "evidence": "audit-present row 17"
@@ -2963,7 +2963,7 @@
     {
       "id": "comments.toolbar-and-menu-routes",
       "feature": "comments",
-      "interaction": "With nothing selected, the toolbar Insert comment button and Insert > Comment each open the card; a comment submitted from each appears as a marker within 20 s",
+      "interaction": "With a slide card selected (docs/POLISH.md 2.6 item 66: Insert > Comment waits with nothing selected), the toolbar Insert comment button and Insert > Comment each open the card; a comment submitted from each appears as a marker within 20 s",
       "driver": "core/present.spec.ts",
       "today": "not driven",
       "evidence": "audit-present row 35 drove the three routes on the title placeholder, which is refused; rows 36 and 37 drove Cmd+Option+M on a slide and on an object"
@@ -3817,7 +3817,7 @@
     {
       "id": "wordart.insert",
       "feature": "wordart",
-      "interaction": "Insert > Word art, type, Enter; an 88 px, weight 500, centred text block with a 1.5 px ink outline",
+      "interaction": "Insert > Word art, type, Enter; an 88 px, regular weight, centred text block with a 1.5 px ink outline (docs/POLISH.md 2.4 item 34)",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-objects row 71"
@@ -4827,7 +4827,7 @@
     {
       "id": "share.dialog.co-edit-from-copied-link",
       "feature": "share",
-      "interaction": "On a deck created from /new, Share shows Anyone with the link, Editor; Copy link; a second browser context opens the copied address, gets the full toolbar, double clicks the body and types six words; the first browser reads them on the slide within 5 s",
+      "interaction": "On a deck created from /new, opened to Anyone with the link as an editor through the API (a new deck starts Restricted, docs/POLISH.md 2.7 item 95), Share shows Anyone with the link, Editor; Copy link; a second browser context opens the copied address, gets the full toolbar, double clicks the body and types six words; the first browser reads them on the slide within 5 s",
       "driver": "core/share.spec.ts",
       "today": "broken",
       "evidence": "audit-seller 4 (p1280-editor.png: View only; authorize.ts 188 to 193, the viewer floor)",
@@ -4836,7 +4836,7 @@
     {
       "id": "decks.recent.drops-trashed",
       "feature": "decks",
-      "interaction": "After File > Move to trash the Opened on this device row no longer lists the deck",
+      "interaction": "After File > Move to trash the list no longer holds the deck's card",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "evidence": "audit-seller 15",
@@ -5636,7 +5636,7 @@
     {
       "id": "brand.footer.text",
       "feature": "brand",
-      "interaction": "Footer > Text \"Confidential\" draws in the frame band on every slide but the title; the PDF's text carries it",
+      "interaction": "Footer > Text \"Confidential\" draws in the frame band on every slide, the title included (docs/POLISH.md 2.5 item 49); the PDF's text carries it",
       "driver": "core/export.spec.ts",
       "today": "not driven",
       "evidence": "audit-brand 20; audit-gaps 12"
@@ -6524,7 +6524,7 @@
     {
       "id": "charts.grid.remove-visible",
       "feature": "charts",
-      "interaction": "The active row's remove control has opacity 1 without hover; the series swatch measures 16 by 16 px; a right click on a series header lists Remove",
+      "interaction": "The active row's remove control has opacity 1 with the row hovered and less with the pointer away (docs/POLISH.md 2.4 item 26); the series swatch measures 16 by 16 px; a right click on a series header lists Remove",
       "driver": "probe --core",
       "today": "broken",
       "severity": 2,

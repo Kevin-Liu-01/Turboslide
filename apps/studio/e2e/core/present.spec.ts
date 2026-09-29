@@ -590,8 +590,9 @@ test(title('comments.resolve'), async () => {
 test(title('comments.toolbar-and-menu-routes'), async () => {
   test.setTimeout(120_000);
   await openEditor(page, deck);
+  /* the slide card stays selected (docs/POLISH.md 2.6 item 66: Insert > Comment and the toolbar
+     button need an object, a text range or a slide card; with nothing selected they wait) */
   await clickCard(page, slides[3]!);
-  await page.keyboard.press('Escape');
   /* the count once the threads have loaded, as the `comments.on-*` rows read it (b6 R5); read
      at once it missed the earlier rows' threads and the row then counted them as its own (the
      cycle 2 rerun, C2-F25: "4 threads where 1 was expected") */

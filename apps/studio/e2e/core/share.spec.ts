@@ -309,6 +309,7 @@ async function landingOf(browser: import('@playwright/test').Browser, url: strin
 
 test(title('share.dialog.open'), async () => {
   await openEditor(page, deck);
+  await linkAccess(page, deck);
   await openShare();
   for (const id of ['view', 'present', 'edit'])
     await expect(ctl(page, `dialog.share.${id}`)).toBeVisible();
@@ -325,6 +326,7 @@ test(title('share.dialog.open'), async () => {
 test(title('share.copy-view-link'), async ({ browser }) => {
   test.setTimeout(90_000);
   await openEditor(page, deck);
+  await linkAccess(page, deck);
   const copied = await copyRow('view');
   /* the copy rows judge the clipboard itself: Copy link has to put the address there */
   expect(
@@ -339,6 +341,7 @@ test(title('share.copy-view-link'), async ({ browser }) => {
 test(title('share.copy-present-link'), async ({ browser }) => {
   test.setTimeout(90_000);
   await openEditor(page, deck);
+  await linkAccess(page, deck);
   const copied = await copyRow('present');
   expect(
     lastCopy?.clipboard,
@@ -379,6 +382,7 @@ test(title('share.file-menu-copy-link'), async () => {
 test(title('share.view-link-lands-viewer'), async ({ browser }) => {
   test.setTimeout(90_000);
   await openEditor(page, deck);
+  await linkAccess(page, deck);
   links = await readLinks();
   const { context: other, page: viewer } = await otherContext(browser);
   try {
@@ -424,6 +428,24 @@ async function authorizeMode(p: Page, id: string): Promise<string> {
   return body.authorize ?? body.mode ?? `unknown (${res.status()})`;
 }
 /**
+ * Anyone with the link on the deck through the window API (docs/POLISH.md 2.7 item 95, B5: a
+ * new deck starts Restricted with no link, so the rows that read the View, Present and Edit
+ * links set the general access first, as an owner does in the Share dialog).
+ */
+async function linkAccess(
+  p: Page,
+  id: string,
+  role: 'viewer' | 'editor' = 'viewer',
+): Promise<void> {
+  const got = await invoke<{ record: { revision: number } }>(p, 'share.get', { id });
+  await invoke(p, 'share.setGeneralAccess', {
+    id,
+    mode: 'link',
+    role,
+    baseRevision: got.record.revision,
+  }).catch(() => undefined);
+}
+/**
  * True when the page cannot edit: You need access, or the editor in a mode without Edit. The
  * write half is judged in enforce mode alone; in shadow mode the page's chrome is judged and the
  * write's answer is recorded, since the mode admits every write by design (b6 R2).
@@ -462,6 +484,7 @@ async function cannotEdit(p: Page, id: string): Promise<{ ok: boolean; why: stri
 test(title('share.view-link-cannot-edit'), async ({ browser }) => {
   test.setTimeout(120_000);
   await openEditor(page, deck);
+  await linkAccess(page, deck);
   links = await readLinks();
   const run = await headingRun(page);
   const before = JSON.stringify(await slideJson(page, (await slideOrder(page))[0]!));
@@ -805,6 +828,7 @@ test(title('share.view-link-excludes-skipped-and-notes'), async ({ browser }) =>
 test(title('share.present-link-excludes-skipped'), async ({ browser }) => {
   test.setTimeout(120_000);
   await openEditor(page, deck);
+  await linkAccess(page, deck);
   const order = await slideOrder(page);
   const skipped = (await page.locator('[data-control^="filmstrip.slide."][data-skip]').count()) > 0;
   if (!skipped) {
@@ -1344,6 +1368,7 @@ const notBuiltShare = 'not on this build: dialog.share.address (docs/PRODUCT.md 
 test(title('share.dialog.one-link'), async () => {
   test.setTimeout(120_000);
   await openEditor(page, deck);
+  await linkAccess(page, deck);
   const stage = await shareStage(page);
   test.info().annotations.push({ type: 'share', description: JSON.stringify(stage) });
   if (stage.address === null) {
@@ -1364,7 +1389,7 @@ test(title('share.dialog.one-link'), async () => {
   expect(clipboard, 'the clipboard equals the field').toBe(field);
   const anyone = /anyone/i.test(stage.mode!.value) || /Anyone/.test(stage.mode!.text);
   expect(stage.sentence ?? '', 'the sentence under the select reads the selected access').toMatch(
-    anyone ? /Anyone with this link/ : /Only/,
+    anyone ? /Anyone with (this|the) link/ : /Only/,
   );
   await closeShare();
 });
@@ -1611,6 +1636,9 @@ test(title('share.name-prompt.first-share'), async ({ browser }) => {
 test(title('share.dialog.co-edit-from-copied-link'), async ({ browser }) => {
   test.setTimeout(180_000);
   const own = await newDeck(page, scratch, 'Co edit deck');
+  /* item 95: a deck from /new starts Restricted; the owner opens it to Anyone with the link as
+     an editor, and the copied link co-edits */
+  await linkAccess(page, own, 'editor');
   const stage = await shareStage(page);
   if (stage.address === null) {
     await closeShare();
@@ -1620,7 +1648,7 @@ test(title('share.dialog.co-edit-from-copied-link'), async ({ browser }) => {
     type: 'access',
     description: `${stage.mode?.text ?? 'no mode'} / ${stage.role?.text ?? 'no role'}: ${stage.address?.value ?? ''}`,
   });
-  expect(stage.mode?.text ?? '', 'a deck from /new starts as Anyone with the link').toMatch(
+  expect(stage.mode?.text ?? '', 'Anyone with the link once the owner set it').toMatch(
     /Anyone with the link/,
   );
   expect(stage.role?.text ?? '', 'with the Editor role').toMatch(/Editor/);

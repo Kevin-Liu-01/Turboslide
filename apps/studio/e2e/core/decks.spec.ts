@@ -180,9 +180,13 @@ test(title('decks.list.read'), async () => {
   await gotoDecks();
   await expect(ctl(page, 'home.blank')).toContainText('Blank presentation');
   await expect(ctl(page, 'home.template.gt-brand')).toContainText('GT brand deck');
-  await expect(ctl(page, 'home.recent')).toBeVisible();
+  /* the polish round (docs/POLISH.md 2.7 item 75, B5): the Recent row is gone; this browser's
+     decks are the first cards with the line "Opened just now" */
   await expect(ctl(page, 'home.cards')).toBeVisible();
   await expect(ctl(page, `home.card.${deck}`)).toBeVisible();
+  await expect(
+    ctl(page, 'home.cards').locator('[data-control^="home.card."]').first(),
+  ).toContainText(/Opened/);
 });
 
 test(title('decks.list.search'), async () => {
@@ -199,7 +203,8 @@ test(title('decks.list.search'), async () => {
 for (const [id, control] of [
   ['decks.list.open-thumbnail', 'home.open'],
   ['decks.list.open-title', 'home.title'],
-  ['decks.list.open-recent', 'home.recent.open'],
+  /* item 75: the Recent row's open is the card's own open since the polish round */
+  ['decks.list.open-recent', 'home.open'],
 ] as const) {
   test(title(id), async () => {
     await gotoDecks();
@@ -450,7 +455,9 @@ test(title('decks.file.make-a-copy'), async () => {
       timeout: 10_000,
     })
     .toContain('A note the copy leaves out.');
-  await menuPath(page, 'file', 'file.makeCopy', 'file.makeCopy.entire');
+  /* the polish round (docs/POLISH.md 2.6 item 74): Make a copy draws as its one visible row
+     while Selected slides is parked, the row keeping its own id */
+  await menuPath(page, 'file', 'file.makeCopy.entire');
   await ctl(page, 'dialog.makeCopy').waitFor({ timeout: 8000 });
   const remove = ctl(page, 'dialog.makeCopy.removeNotes');
   const input = remove.locator('input').first();
@@ -1306,18 +1313,19 @@ test(title('decks.recent.drops-trashed'), async () => {
   deck = await newDeck(page, scratch, 'Northwind renewal');
   await openEditor(page, deck);
   await gotoDecks();
-  const listedBefore = await ctl(page, `home.recent.${deck}`).count();
+  /* item 75: the opened deck is a card of the list (no Recent row since the polish round) */
+  const listedBefore = await ctl(page, `home.card.${deck}`).count();
   await trashFromEditor(deck);
   await gotoDecks();
-  const listedAfter = await ctl(page, `home.recent.${deck}`).count();
+  const listedAfter = await ctl(page, `home.card.${deck}`).count();
   test.info().annotations.push({
     type: 'recent',
     description: `listed before ${listedBefore}, after the trash ${listedAfter}`,
   });
   await gotoTrash();
   await restoreFromTrash(deck);
-  expect(listedBefore, 'the opened deck is in the Opened on this device row').toBeGreaterThan(0);
-  expect(listedAfter, 'the trashed deck leaves the row').toBe(0);
+  expect(listedBefore, 'the opened deck is a card of the list').toBeGreaterThan(0);
+  expect(listedAfter, 'the trashed deck leaves the list').toBe(0);
 });
 
 test(title('decks.trash.editor-undo-snackbar'), async () => {

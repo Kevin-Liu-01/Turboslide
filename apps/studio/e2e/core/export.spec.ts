@@ -1493,7 +1493,9 @@ test(title('brand.footer.text'), async () => {
     description: `title slide ${onTitle.drawn}; second slide ${onSecond.drawn}; PDF text ${inPdf}`,
   });
   expect(onSecond.drawn, 'the footer text draws on a slide after the title').toBe(true);
-  expect(onTitle.drawn, 'and not on the title').toBe(false);
+  /* the polish round (docs/POLISH.md 2.5 item 49; polish/build/b4.md I3): the footer text draws
+     on the title slide too, as the Brand kit panel's sentence says */
+  expect(onTitle.drawn, 'and on the title since the polish round').toBe(true);
   expect(inPdf, "the PDF's text carries it").toBe(true);
 });
 

@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/build-home-assets.ts",
-  "capturedAt": "2026-09-28T23:34:14.229Z",
-  "commit": "877eb690",
+  "capturedAt": "2026-09-29T02:23:22.705Z",
+  "commit": "14612488",
   "deck": "gt-brand",
   "slide": "mood-earth",
   "viewport": {
@@ -20,20 +20,20 @@
       "height": 900,
       "variants": [
         {
-          "path": "/home/hero-dark-2x-bf5467c71f.jpg",
+          "path": "/home/hero-dark-2x-dfd9c8d761.jpg",
           "scale": 2,
           "width": 2880,
           "height": 1800,
-          "bytes": 395118,
-          "sha256": "bf5467c71fd1faab39a0a96e55ca9b326a01518be752f9520bd0ee12dd6aa660"
+          "bytes": 395602,
+          "sha256": "dfd9c8d761239ae7eea3f9d87d9400a8516e04a1ddd42a63639e9f46a6751152"
         },
         {
-          "path": "/home/hero-dark-e63614f9a3.jpg",
+          "path": "/home/hero-dark-ba3e172d10.jpg",
           "scale": 1,
           "width": 1440,
           "height": 900,
-          "bytes": 154463,
-          "sha256": "e63614f9a31a16d3cea7736f3a5e8e1ea6efa03130670e668fd01de11bfc15f2"
+          "bytes": 154628,
+          "sha256": "ba3e172d10584c03feedd2c17db372b607303e451998008705f2cc0e186423cc"
         }
       ],
       "chrome": {
@@ -102,20 +102,20 @@
       "height": 505,
       "variants": [
         {
-          "path": "/home/menus-dark-2x-fa3790626d.png",
+          "path": "/home/menus-dark-2x-2d19e0a345.png",
           "scale": 2,
           "width": 1224,
           "height": 1010,
-          "bytes": 177624,
-          "sha256": "fa3790626d68ed7a7628551b82539b8292398006e9b89c1b3065c2790fec72c2"
+          "bytes": 171841,
+          "sha256": "2d19e0a345454326e38aa7d7baf6e50e57c90943795ea6fa7fbcc631cda11f98"
         },
         {
-          "path": "/home/menus-dark-287ad06d43.png",
+          "path": "/home/menus-dark-7e1af41db7.png",
           "scale": 1,
           "width": 612,
           "height": 505,
-          "bytes": 64315,
-          "sha256": "287ad06d43091269c3099fe90e795d18b2dc691939c42c54dd0543603c1de530"
+          "bytes": 67213,
+          "sha256": "7e1af41db71aaf3a50c734518d9f8cd275eb267138e72f06f788d5f28f24b5af"
         }
       ],
       "chrome": {
@@ -143,20 +143,20 @@
       "height": 900,
       "variants": [
         {
-          "path": "/home/hero-light-2x-d3820cc65c.jpg",
+          "path": "/home/hero-light-2x-d6106a0704.jpg",
           "scale": 2,
           "width": 2880,
           "height": 1800,
-          "bytes": 392074,
-          "sha256": "d3820cc65c5e841a450657b45520117c52ee977ae09146d206ed3664e685b4a0"
+          "bytes": 392483,
+          "sha256": "d6106a07049a72cf748d1aa8d412141e341139d6a041c71a9b9185bc4ddb8469"
         },
         {
-          "path": "/home/hero-light-108cd0244e.jpg",
+          "path": "/home/hero-light-fdb7c9b176.jpg",
           "scale": 1,
           "width": 1440,
           "height": 900,
-          "bytes": 153062,
-          "sha256": "108cd0244e8ee6051758ba8d6b8a1ec0fead6fc25d27f8ce17599897d642aff0"
+          "bytes": 153286,
+          "sha256": "fdb7c9b176bf53c8efe766aed683d1277d71ac69d61942cc49b38d36f9d4dc5b"
         }
       ],
       "chrome": {
@@ -225,20 +225,20 @@
       "height": 505,
       "variants": [
         {
-          "path": "/home/menus-light-2x-9f5e82a0f0.png",
+          "path": "/home/menus-light-2x-fbf9d72b74.png",
           "scale": 2,
           "width": 1224,
           "height": 1010,
-          "bytes": 188186,
-          "sha256": "9f5e82a0f0e648585be9329e927ab0fbcc9ff10acfc524d0776c37f690de7f06"
+          "bytes": 187210,
+          "sha256": "fbf9d72b7490a5ea27da41b3235e1b9ec7361a858911f768e99d30b1dfd664d8"
         },
         {
-          "path": "/home/menus-light-b75ab7edbf.png",
+          "path": "/home/menus-light-aa2b00e489.png",
           "scale": 1,
           "width": 612,
           "height": 505,
-          "bytes": 69195,
-          "sha256": "b75ab7edbfa24a6231711725dc12a04b98c9a6c5486c719eec02d93300448931"
+          "bytes": 68954,
+          "sha256": "aa2b00e48993a66d726e3fab42b7d2b957b2599046a1144c602f54d2b2d24d2a"
         }
       ],
       "chrome": {

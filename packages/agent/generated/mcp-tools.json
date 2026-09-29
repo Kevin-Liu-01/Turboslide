@@ -41949,6 +41949,624 @@
                 "control": "textarea",
                 "group": "Text"
               }
+            },
+            "typography": {
+              "title": "Field typography",
+              "x-inspector": {
+                "label": "Field typography",
+                "control": "json",
+                "group": "Text",
+                "help": "The face and type settings a text field carries of its own, per field; the brand kit’s face for the field’s role when absent."
+              },
+              "description": "The face and type settings a text field carries of its own, per field; the brand kit’s face for the field’s role when absent.",
+              "type": "object",
+              "properties": {
+                "heading": {
+                  "type": "object",
+                  "properties": {
+                    "size": {
+                      "title": "Size",
+                      "x-inspector": {
+                        "label": "Size",
+                        "control": "select",
+                        "snap": [
+                          88,
+                          72,
+                          58,
+                          44,
+                          34,
+                          26,
+                          24,
+                          22,
+                          20,
+                          18,
+                          17,
+                          16,
+                          15
+                        ],
+                        "group": "Text",
+                        "help": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding."
+                      },
+                      "description": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding.",
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "weight": {
+                      "title": "Weight",
+                      "x-inspector": {
+                        "label": "Weight",
+                        "control": "select",
+                        "snap": [
+                          300,
+                          400,
+                          500,
+                          600,
+                          700
+                        ],
+                        "group": "Text",
+                        "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                      },
+                      "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                      "type": "number",
+                      "enum": [
+                        300,
+                        400,
+                        500,
+                        600,
+                        700
+                      ]
+                    },
+                    "align": {
+                      "title": "Align",
+                      "x-inspector": {
+                        "label": "Align",
+                        "control": "select",
+                        "snap": [
+                          "left",
+                          "center",
+                          "right",
+                          "justify"
+                        ],
+                        "group": "Text"
+                      },
+                      "type": "string",
+                      "enum": [
+                        "left",
+                        "center",
+                        "right",
+                        "justify"
+                      ]
+                    },
+                    "tracking": {
+                      "title": "Tracking (em)",
+                      "x-inspector": {
+                        "label": "Tracking (em)",
+                        "control": "number",
+                        "snap": [
+                          -0.025,
+                          -0.02,
+                          -0.015,
+                          -0.01,
+                          0,
+                          0.01,
+                          0.02
+                        ],
+                        "group": "Text",
+                        "help": "Letter spacing in em; the display faces sit at -0.025 (head:58)."
+                      },
+                      "description": "Letter spacing in em; the display faces sit at -0.025 (head:58).",
+                      "type": "number"
+                    },
+                    "leading": {
+                      "title": "Line spacing",
+                      "x-inspector": {
+                        "label": "Line spacing",
+                        "control": "number",
+                        "snap": [
+                          1,
+                          1.02,
+                          1.06,
+                          1.08,
+                          1.1,
+                          1.15,
+                          1.2,
+                          1.25,
+                          1.3,
+                          1.4,
+                          1.45,
+                          1.5,
+                          1.7,
+                          2
+                        ],
+                        "group": "Text",
+                        "help": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65); Single, 1.15, 1.5 and Double are Google’s values (gslides-parity SPEC-2 2.2.8)."
+                      },
+                      "description": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65); Single, 1.15, 1.5 and Double are Google’s values (gslides-parity SPEC-2 2.2.8).",
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "spaceBefore": {
+                      "title": "Space before",
+                      "x-inspector": {
+                        "label": "Space before",
+                        "control": "number",
+                        "snap": [
+                          0,
+                          8,
+                          16,
+                          24
+                        ],
+                        "group": "Text",
+                        "help": "Space above every paragraph but the first, in px (gslides-parity SPEC-2 2.2.9)."
+                      },
+                      "description": "Space above every paragraph but the first, in px (gslides-parity SPEC-2 2.2.9).",
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "spaceAfter": {
+                      "title": "Space after",
+                      "x-inspector": {
+                        "label": "Space after",
+                        "control": "number",
+                        "snap": [
+                          0,
+                          8,
+                          16,
+                          24
+                        ],
+                        "group": "Text",
+                        "help": "Space below every paragraph but the last, in px (gslides-parity SPEC-2 2.2.9)."
+                      },
+                      "description": "Space below every paragraph but the last, in px (gslides-parity SPEC-2 2.2.9).",
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "columns": {
+                      "title": "Columns",
+                      "x-inspector": {
+                        "label": "Columns",
+                        "control": "select",
+                        "snap": [
+                          1,
+                          2,
+                          3
+                        ],
+                        "group": "Text",
+                        "help": "Text columns inside the block with a 40 px gap; one when absent (gslides-parity SPEC-2 2.2.10)."
+                      },
+                      "description": "Text columns inside the block with a 40 px gap; one when absent (gslides-parity SPEC-2 2.2.10).",
+                      "type": "number",
+                      "enum": [
+                        1,
+                        2,
+                        3
+                      ]
+                    },
+                    "indent": {
+                      "title": "Indent",
+                      "x-inspector": {
+                        "label": "Indent",
+                        "control": "number",
+                        "snap": [
+                          0,
+                          64,
+                          128,
+                          192
+                        ],
+                        "group": "Text",
+                        "help": "The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11)."
+                      },
+                      "description": "The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11).",
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "family": {
+                      "title": "Font",
+                      "x-inspector": {
+                        "label": "Font",
+                        "control": "select",
+                        "snap": [
+                          "inter",
+                          "roboto",
+                          "open-sans",
+                          "lato",
+                          "montserrat",
+                          "poppins",
+                          "source-sans-3",
+                          "source-serif-4",
+                          "merriweather",
+                          "playfair-display",
+                          "lora",
+                          "pt-serif",
+                          "libre-baskerville",
+                          "eb-garamond",
+                          "nunito",
+                          "raleway",
+                          "work-sans",
+                          "dm-sans",
+                          "space-grotesk",
+                          "oswald",
+                          "bebas-neue",
+                          "roboto-mono",
+                          "jetbrains-mono",
+                          "ibm-plex-sans",
+                          "ibm-plex-mono",
+                          "fira-code",
+                          "geist",
+                          "geist-mono",
+                          "instrument-sans",
+                          "manrope",
+                          "bricolage-grotesque",
+                          "schibsted-grotesk",
+                          "newsreader",
+                          "fraunces"
+                        ],
+                        "group": "Text",
+                        "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                      },
+                      "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                      "type": "string",
+                      "enum": [
+                        "inter",
+                        "roboto",
+                        "open-sans",
+                        "lato",
+                        "montserrat",
+                        "poppins",
+                        "source-sans-3",
+                        "source-serif-4",
+                        "merriweather",
+                        "playfair-display",
+                        "lora",
+                        "pt-serif",
+                        "libre-baskerville",
+                        "eb-garamond",
+                        "nunito",
+                        "raleway",
+                        "work-sans",
+                        "dm-sans",
+                        "space-grotesk",
+                        "oswald",
+                        "bebas-neue",
+                        "roboto-mono",
+                        "jetbrains-mono",
+                        "ibm-plex-sans",
+                        "ibm-plex-mono",
+                        "fira-code",
+                        "geist",
+                        "geist-mono",
+                        "instrument-sans",
+                        "manrope",
+                        "bricolage-grotesque",
+                        "schibsted-grotesk",
+                        "newsreader",
+                        "fraunces"
+                      ]
+                    },
+                    "numerals": {
+                      "title": "Tabular figures",
+                      "x-inspector": {
+                        "label": "Tabular figures",
+                        "control": "toggle",
+                        "snap": [
+                          "tabular"
+                        ],
+                        "group": "Text",
+                        "help": "Every digit takes the same width, so numbers line up in a column"
+                      },
+                      "description": "Every digit takes the same width, so numbers line up in a column",
+                      "type": "string",
+                      "enum": [
+                        "tabular"
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "lead": {
+                  "type": "object",
+                  "properties": {
+                    "size": {
+                      "title": "Size",
+                      "x-inspector": {
+                        "label": "Size",
+                        "control": "select",
+                        "snap": [
+                          88,
+                          72,
+                          58,
+                          44,
+                          34,
+                          26,
+                          24,
+                          22,
+                          20,
+                          18,
+                          17,
+                          16,
+                          15
+                        ],
+                        "group": "Text",
+                        "help": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding."
+                      },
+                      "description": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding.",
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "weight": {
+                      "title": "Weight",
+                      "x-inspector": {
+                        "label": "Weight",
+                        "control": "select",
+                        "snap": [
+                          300,
+                          400,
+                          500,
+                          600,
+                          700
+                        ],
+                        "group": "Text",
+                        "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                      },
+                      "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                      "type": "number",
+                      "enum": [
+                        300,
+                        400,
+                        500,
+                        600,
+                        700
+                      ]
+                    },
+                    "align": {
+                      "title": "Align",
+                      "x-inspector": {
+                        "label": "Align",
+                        "control": "select",
+                        "snap": [
+                          "left",
+                          "center",
+                          "right",
+                          "justify"
+                        ],
+                        "group": "Text"
+                      },
+                      "type": "string",
+                      "enum": [
+                        "left",
+                        "center",
+                        "right",
+                        "justify"
+                      ]
+                    },
+                    "tracking": {
+                      "title": "Tracking (em)",
+                      "x-inspector": {
+                        "label": "Tracking (em)",
+                        "control": "number",
+                        "snap": [
+                          -0.025,
+                          -0.02,
+                          -0.015,
+                          -0.01,
+                          0,
+                          0.01,
+                          0.02
+                        ],
+                        "group": "Text",
+                        "help": "Letter spacing in em; the display faces sit at -0.025 (head:58)."
+                      },
+                      "description": "Letter spacing in em; the display faces sit at -0.025 (head:58).",
+                      "type": "number"
+                    },
+                    "leading": {
+                      "title": "Line spacing",
+                      "x-inspector": {
+                        "label": "Line spacing",
+                        "control": "number",
+                        "snap": [
+                          1,
+                          1.02,
+                          1.06,
+                          1.08,
+                          1.1,
+                          1.15,
+                          1.2,
+                          1.25,
+                          1.3,
+                          1.4,
+                          1.45,
+                          1.5,
+                          1.7,
+                          2
+                        ],
+                        "group": "Text",
+                        "help": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65); Single, 1.15, 1.5 and Double are Google’s values (gslides-parity SPEC-2 2.2.8)."
+                      },
+                      "description": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65); Single, 1.15, 1.5 and Double are Google’s values (gslides-parity SPEC-2 2.2.8).",
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "spaceBefore": {
+                      "title": "Space before",
+                      "x-inspector": {
+                        "label": "Space before",
+                        "control": "number",
+                        "snap": [
+                          0,
+                          8,
+                          16,
+                          24
+                        ],
+                        "group": "Text",
+                        "help": "Space above every paragraph but the first, in px (gslides-parity SPEC-2 2.2.9)."
+                      },
+                      "description": "Space above every paragraph but the first, in px (gslides-parity SPEC-2 2.2.9).",
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "spaceAfter": {
+                      "title": "Space after",
+                      "x-inspector": {
+                        "label": "Space after",
+                        "control": "number",
+                        "snap": [
+                          0,
+                          8,
+                          16,
+                          24
+                        ],
+                        "group": "Text",
+                        "help": "Space below every paragraph but the last, in px (gslides-parity SPEC-2 2.2.9)."
+                      },
+                      "description": "Space below every paragraph but the last, in px (gslides-parity SPEC-2 2.2.9).",
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "columns": {
+                      "title": "Columns",
+                      "x-inspector": {
+                        "label": "Columns",
+                        "control": "select",
+                        "snap": [
+                          1,
+                          2,
+                          3
+                        ],
+                        "group": "Text",
+                        "help": "Text columns inside the block with a 40 px gap; one when absent (gslides-parity SPEC-2 2.2.10)."
+                      },
+                      "description": "Text columns inside the block with a 40 px gap; one when absent (gslides-parity SPEC-2 2.2.10).",
+                      "type": "number",
+                      "enum": [
+                        1,
+                        2,
+                        3
+                      ]
+                    },
+                    "indent": {
+                      "title": "Indent",
+                      "x-inspector": {
+                        "label": "Indent",
+                        "control": "number",
+                        "snap": [
+                          0,
+                          64,
+                          128,
+                          192
+                        ],
+                        "group": "Text",
+                        "help": "The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11)."
+                      },
+                      "description": "The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11).",
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "family": {
+                      "title": "Font",
+                      "x-inspector": {
+                        "label": "Font",
+                        "control": "select",
+                        "snap": [
+                          "inter",
+                          "roboto",
+                          "open-sans",
+                          "lato",
+                          "montserrat",
+                          "poppins",
+                          "source-sans-3",
+                          "source-serif-4",
+                          "merriweather",
+                          "playfair-display",
+                          "lora",
+                          "pt-serif",
+                          "libre-baskerville",
+                          "eb-garamond",
+                          "nunito",
+                          "raleway",
+                          "work-sans",
+                          "dm-sans",
+                          "space-grotesk",
+                          "oswald",
+                          "bebas-neue",
+                          "roboto-mono",
+                          "jetbrains-mono",
+                          "ibm-plex-sans",
+                          "ibm-plex-mono",
+                          "fira-code",
+                          "geist",
+                          "geist-mono",
+                          "instrument-sans",
+                          "manrope",
+                          "bricolage-grotesque",
+                          "schibsted-grotesk",
+                          "newsreader",
+                          "fraunces"
+                        ],
+                        "group": "Text",
+                        "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                      },
+                      "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                      "type": "string",
+                      "enum": [
+                        "inter",
+                        "roboto",
+                        "open-sans",
+                        "lato",
+                        "montserrat",
+                        "poppins",
+                        "source-sans-3",
+                        "source-serif-4",
+                        "merriweather",
+                        "playfair-display",
+                        "lora",
+                        "pt-serif",
+                        "libre-baskerville",
+                        "eb-garamond",
+                        "nunito",
+                        "raleway",
+                        "work-sans",
+                        "dm-sans",
+                        "space-grotesk",
+                        "oswald",
+                        "bebas-neue",
+                        "roboto-mono",
+                        "jetbrains-mono",
+                        "ibm-plex-sans",
+                        "ibm-plex-mono",
+                        "fira-code",
+                        "geist",
+                        "geist-mono",
+                        "instrument-sans",
+                        "manrope",
+                        "bricolage-grotesque",
+                        "schibsted-grotesk",
+                        "newsreader",
+                        "fraunces"
+                      ]
+                    },
+                    "numerals": {
+                      "title": "Tabular figures",
+                      "x-inspector": {
+                        "label": "Tabular figures",
+                        "control": "toggle",
+                        "snap": [
+                          "tabular"
+                        ],
+                        "group": "Text",
+                        "help": "Every digit takes the same width, so numbers line up in a column"
+                      },
+                      "description": "Every digit takes the same width, so numbers line up in a column",
+                      "type": "string",
+                      "enum": [
+                        "tabular"
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
             }
           },
           "required": [
@@ -42448,6 +43066,322 @@
               },
               "type": "number",
               "exclusiveMinimum": 0
+            },
+            "typography": {
+              "title": "Field typography",
+              "x-inspector": {
+                "label": "Field typography",
+                "control": "json",
+                "group": "Text",
+                "help": "The face and type settings a text field carries of its own, per field; the brand kit’s face for the field’s role when absent."
+              },
+              "description": "The face and type settings a text field carries of its own, per field; the brand kit’s face for the field’s role when absent.",
+              "type": "object",
+              "properties": {
+                "big": {
+                  "type": "object",
+                  "properties": {
+                    "size": {
+                      "title": "Size",
+                      "x-inspector": {
+                        "label": "Size",
+                        "control": "select",
+                        "snap": [
+                          88,
+                          72,
+                          58,
+                          44,
+                          34,
+                          26,
+                          24,
+                          22,
+                          20,
+                          18,
+                          17,
+                          16,
+                          15
+                        ],
+                        "group": "Text",
+                        "help": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding."
+                      },
+                      "description": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding.",
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "weight": {
+                      "title": "Weight",
+                      "x-inspector": {
+                        "label": "Weight",
+                        "control": "select",
+                        "snap": [
+                          300,
+                          400,
+                          500,
+                          600,
+                          700
+                        ],
+                        "group": "Text",
+                        "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                      },
+                      "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                      "type": "number",
+                      "enum": [
+                        300,
+                        400,
+                        500,
+                        600,
+                        700
+                      ]
+                    },
+                    "align": {
+                      "title": "Align",
+                      "x-inspector": {
+                        "label": "Align",
+                        "control": "select",
+                        "snap": [
+                          "left",
+                          "center",
+                          "right",
+                          "justify"
+                        ],
+                        "group": "Text"
+                      },
+                      "type": "string",
+                      "enum": [
+                        "left",
+                        "center",
+                        "right",
+                        "justify"
+                      ]
+                    },
+                    "tracking": {
+                      "title": "Tracking (em)",
+                      "x-inspector": {
+                        "label": "Tracking (em)",
+                        "control": "number",
+                        "snap": [
+                          -0.025,
+                          -0.02,
+                          -0.015,
+                          -0.01,
+                          0,
+                          0.01,
+                          0.02
+                        ],
+                        "group": "Text",
+                        "help": "Letter spacing in em; the display faces sit at -0.025 (head:58)."
+                      },
+                      "description": "Letter spacing in em; the display faces sit at -0.025 (head:58).",
+                      "type": "number"
+                    },
+                    "leading": {
+                      "title": "Line spacing",
+                      "x-inspector": {
+                        "label": "Line spacing",
+                        "control": "number",
+                        "snap": [
+                          1,
+                          1.02,
+                          1.06,
+                          1.08,
+                          1.1,
+                          1.15,
+                          1.2,
+                          1.25,
+                          1.3,
+                          1.4,
+                          1.45,
+                          1.5,
+                          1.7,
+                          2
+                        ],
+                        "group": "Text",
+                        "help": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65); Single, 1.15, 1.5 and Double are Google’s values (gslides-parity SPEC-2 2.2.8)."
+                      },
+                      "description": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65); Single, 1.15, 1.5 and Double are Google’s values (gslides-parity SPEC-2 2.2.8).",
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "spaceBefore": {
+                      "title": "Space before",
+                      "x-inspector": {
+                        "label": "Space before",
+                        "control": "number",
+                        "snap": [
+                          0,
+                          8,
+                          16,
+                          24
+                        ],
+                        "group": "Text",
+                        "help": "Space above every paragraph but the first, in px (gslides-parity SPEC-2 2.2.9)."
+                      },
+                      "description": "Space above every paragraph but the first, in px (gslides-parity SPEC-2 2.2.9).",
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "spaceAfter": {
+                      "title": "Space after",
+                      "x-inspector": {
+                        "label": "Space after",
+                        "control": "number",
+                        "snap": [
+                          0,
+                          8,
+                          16,
+                          24
+                        ],
+                        "group": "Text",
+                        "help": "Space below every paragraph but the last, in px (gslides-parity SPEC-2 2.2.9)."
+                      },
+                      "description": "Space below every paragraph but the last, in px (gslides-parity SPEC-2 2.2.9).",
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "columns": {
+                      "title": "Columns",
+                      "x-inspector": {
+                        "label": "Columns",
+                        "control": "select",
+                        "snap": [
+                          1,
+                          2,
+                          3
+                        ],
+                        "group": "Text",
+                        "help": "Text columns inside the block with a 40 px gap; one when absent (gslides-parity SPEC-2 2.2.10)."
+                      },
+                      "description": "Text columns inside the block with a 40 px gap; one when absent (gslides-parity SPEC-2 2.2.10).",
+                      "type": "number",
+                      "enum": [
+                        1,
+                        2,
+                        3
+                      ]
+                    },
+                    "indent": {
+                      "title": "Indent",
+                      "x-inspector": {
+                        "label": "Indent",
+                        "control": "number",
+                        "snap": [
+                          0,
+                          64,
+                          128,
+                          192
+                        ],
+                        "group": "Text",
+                        "help": "The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11)."
+                      },
+                      "description": "The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11).",
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "family": {
+                      "title": "Font",
+                      "x-inspector": {
+                        "label": "Font",
+                        "control": "select",
+                        "snap": [
+                          "inter",
+                          "roboto",
+                          "open-sans",
+                          "lato",
+                          "montserrat",
+                          "poppins",
+                          "source-sans-3",
+                          "source-serif-4",
+                          "merriweather",
+                          "playfair-display",
+                          "lora",
+                          "pt-serif",
+                          "libre-baskerville",
+                          "eb-garamond",
+                          "nunito",
+                          "raleway",
+                          "work-sans",
+                          "dm-sans",
+                          "space-grotesk",
+                          "oswald",
+                          "bebas-neue",
+                          "roboto-mono",
+                          "jetbrains-mono",
+                          "ibm-plex-sans",
+                          "ibm-plex-mono",
+                          "fira-code",
+                          "geist",
+                          "geist-mono",
+                          "instrument-sans",
+                          "manrope",
+                          "bricolage-grotesque",
+                          "schibsted-grotesk",
+                          "newsreader",
+                          "fraunces"
+                        ],
+                        "group": "Text",
+                        "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                      },
+                      "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                      "type": "string",
+                      "enum": [
+                        "inter",
+                        "roboto",
+                        "open-sans",
+                        "lato",
+                        "montserrat",
+                        "poppins",
+                        "source-sans-3",
+                        "source-serif-4",
+                        "merriweather",
+                        "playfair-display",
+                        "lora",
+                        "pt-serif",
+                        "libre-baskerville",
+                        "eb-garamond",
+                        "nunito",
+                        "raleway",
+                        "work-sans",
+                        "dm-sans",
+                        "space-grotesk",
+                        "oswald",
+                        "bebas-neue",
+                        "roboto-mono",
+                        "jetbrains-mono",
+                        "ibm-plex-sans",
+                        "ibm-plex-mono",
+                        "fira-code",
+                        "geist",
+                        "geist-mono",
+                        "instrument-sans",
+                        "manrope",
+                        "bricolage-grotesque",
+                        "schibsted-grotesk",
+                        "newsreader",
+                        "fraunces"
+                      ]
+                    },
+                    "numerals": {
+                      "title": "Tabular figures",
+                      "x-inspector": {
+                        "label": "Tabular figures",
+                        "control": "toggle",
+                        "snap": [
+                          "tabular"
+                        ],
+                        "group": "Text",
+                        "help": "Every digit takes the same width, so numbers line up in a column"
+                      },
+                      "description": "Every digit takes the same width, so numbers line up in a column",
+                      "type": "string",
+                      "enum": [
+                        "tabular"
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
             }
           },
           "required": [

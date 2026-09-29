@@ -135,9 +135,9 @@ describe('Overlay on a freeform slide', () => {
     if (!chip) throw new Error('no chip');
     expect(chip.dataset['control']).toBe('handle.a.move');
     expect(chip.dataset['kind']).toBe('free-move');
-    expect(chip.getAttribute('data-tip')).toBe('a: Move');
+    expect(chip.getAttribute('data-tip')).toBe('Move');
     const chipTip = tipShown(chip);
-    expect(chipTip.name).toBe('a: Move');
+    expect(chipTip.name).toBe('Move');
     expect(chipTip.doc).toMatch(/Drag the frame or the chip anywhere/);
     /* Shift nudges 10 px since gslides-parity SPEC-2 0.87 */
     expect(chipTip.doc).toMatch(/Arrows nudge 1 px, Shift 10 px/);
@@ -179,7 +179,7 @@ describe('Overlay on a freeform slide', () => {
     expect(order.map((call) => call[1])).toEqual(['forward', 'backward', 'front', 'back']);
     expect(view.onHandleNudge).not.toHaveBeenCalled();
     // the tooltip names the keys, never the retired Alt chord (SPEC 10.2)
-    expect(chip.getAttribute('data-tip')).toBe('a: Move');
+    expect(chip.getAttribute('data-tip')).toBe('Move');
     // Cmd with a sideways arrow, Cmd with Alt, Alt with an arrow (retired), or Cmd Up on a
     // resize square, is nothing
     fireEvent.keyDown(chip, { key: 'ArrowLeft', metaKey: true });
@@ -347,7 +347,7 @@ describe('Overlay on a freeform slide', () => {
               box: boxes.blocks['a'] ?? [0, 0, 0, 0],
               blockId: 'a',
               cursor: 'grab',
-              label: 'a: Move',
+              label: 'Move',
               control: 'handle.a.move',
               shape: 'chip',
               axis: 'y',

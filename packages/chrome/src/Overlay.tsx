@@ -98,7 +98,7 @@ function barStyle(box: Box, k: number, sheetHeight: number): CSSProperties {
   };
 }
 
-/** The four edge strips of an object's frame, each centred on the ring's edge (gslides-parity SPEC 10.2: the frame is the drag surface). */
+/** The four edge strips of an object's frame, each centered on the ring's edge (gslides-parity SPEC 10.2: the frame is the drag surface). */
 export function frameEdgeStyles(box: Box, k: number): Record<'n' | 's' | 'w' | 'e', CSSProperties> {
   const half = FRAME_EDGE_PX / 2;
   const left = box[0] * k;
@@ -234,11 +234,11 @@ export function handleDoc(handle: Handle): string {
     case 'block-move':
       return `Drag the chip or the block to reorder it within its slot or into another slot. ${modKey()}Up and ${modKey()}Down move it one step, and with Shift to the first or the last place in its slot.`;
     case 'free-move':
-      return `Drag the frame or the chip anywhere: snaps to other objects, the slide's edges and centre and the guides; Shift keeps one axis, ${modKey()}drag skips the snaps, Option drag drops a copy. Arrows nudge 1 px, Shift 10 px. ${modKey()}Up and ${modKey()}Down change the order.`;
+      return `Drag the frame or the chip anywhere: snaps to other objects, the slide's edges and center and the guides; Shift keeps one axis, ${modKey()}drag skips the snaps, Option drag drops a copy. Arrows nudge 1 px, Shift 10 px. ${modKey()}Up and ${modKey()}Down change the order.`;
     case 'free-resize':
-      return `Drag the ${RESIZE_NAMES[handle.dir ?? ''] ?? 'edge'} to resize; Shift keeps the aspect ratio, Option resizes from the centre. Arrows step 1 px, Shift 10 px.`;
+      return `Drag the ${RESIZE_NAMES[handle.dir ?? ''] ?? 'edge'} to resize; Shift keeps the aspect ratio, Option resizes from the center. Arrows step 1 px, Shift 10 px.`;
     case 'free-rotate':
-      return 'Drag to rotate about the centre; Shift snaps to 15 degrees. Left and Right turn 1 degree, Shift 15.';
+      return 'Drag to rotate about the center; Shift snaps to 15 degrees. Left and Right turn 1 degree, Shift 15.';
     case 'line-end':
       return 'Drag the end of the line; it snaps to a connection site of the shape under it and follows that shape from then on. Shift keeps 45 degree steps.';
     case 'crop-edge':

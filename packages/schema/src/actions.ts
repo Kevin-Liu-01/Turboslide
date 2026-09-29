@@ -5439,9 +5439,11 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         ),
     }),
     output: meSchema,
+    /* the usage grammar the generator reads takes no brackets around a placeholder
+       (actions-gs3.test.ts); the three flags are each optional, as the CLI's help says */
     cli: {
       usage:
-        'turboslide account avatar --variant <variant> [--initials <XY>] [--another] [--picture <file>]',
+        'turboslide account avatar --variant <variant> --initials <initials> --another --picture <file>',
     },
     mcp: 'deck_set_my_avatar',
     example: { variant: 'glyph' },

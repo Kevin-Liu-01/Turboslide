@@ -6472,7 +6472,7 @@
     },
     {
       "action": "account.setAvatar",
-      "usage": "turboslide account avatar --variant <variant> [--initials <XY>] [--another] [--picture <file>]",
+      "usage": "turboslide account avatar --variant <variant> --initials <initials> --another --picture <file>",
       "command": [
         "account",
         "avatar"
@@ -6512,7 +6512,12 @@
           "description": "A data URL of a JPEG, PNG, WebP or GIF under 512 KB; sharp re-encodes it and keeps no original"
         }
       ],
-      "custom": [],
+      "custom": [
+        {
+          "flag": "--picture",
+          "template": "<file>"
+        }
+      ],
       "mutates": true,
       "milestone": "GS3"
     },

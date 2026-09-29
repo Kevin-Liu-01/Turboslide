@@ -161,9 +161,11 @@ describe('turboslide presence, sync and account on a checkout', () => {
     const again = await run(['account', 'me']);
     expect((again.json as Me).name).toBe('Maya Chen');
     expect((again.json as Me).avatar).toMatchObject({ variant: 'initials' });
+    /* the people round (docs/PEOPLE.md 4.7; build/b4.md): --avatar-png writes the caller's 256 px
+       one bit PNG through renderMarkPng1 and answers avatarPng */
     const png = await run(['account', 'me', '--avatar-png', join(root, 'me.png')]);
-    expect(png.code).toBe(2);
-    expect(existsSync(join(root, 'me.png'))).toBe(false);
+    expect(png.code, png.stderr).toBe(0);
+    expect(existsSync(join(root, 'me.png'))).toBe(true);
     const decks = await run(['account', 'decks']);
     expect(decks.code, decks.stderr).toBe(0);
     const rows = decks.json as {

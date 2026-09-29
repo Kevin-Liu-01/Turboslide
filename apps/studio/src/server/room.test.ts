@@ -171,7 +171,9 @@ describe('rosterEntryForReader', () => {
     const { hue: _h2, ...plateB } = other.mark as { hue: unknown };
     expect(plateB).toEqual(plateA);
     // a different role, a different plate
-    expect(rosterEntryForReader(entry(USR_A, { role: 'owner' }), reader('link')).mark).toMatchObject({
+    expect(
+      rosterEntryForReader(entry(USR_A, { role: 'owner' }), reader('link')).mark,
+    ).toMatchObject({
       initials: 'O',
       label: 'The owner',
     });
@@ -221,7 +223,11 @@ describe('resolveIdentity', () => {
 
   it('renders an account id through the account the request resolved to, and only that account', () => {
     const own = resolveIdentity(USR_A, newPrincipalRecord(USR_A), profile);
-    expect(own).toMatchObject({ displayName: 'Maya Chen', trust: 'verified', email: 'maya@example.test' });
+    expect(own).toMatchObject({
+      displayName: 'Maya Chen',
+      trust: 'verified',
+      email: 'maya@example.test',
+    });
     const other = resolveIdentity(USR_B, null, profile);
     expect(other).toMatchObject({ displayName: 'Deleted account', deleted: true });
     const none = resolveIdentity(USR_A, null);
@@ -238,7 +244,11 @@ describe('the account session on the room routes', () => {
     expect(identity.kind).toBe('signedIn');
     expect(identity.principalId).toBe(`usr_${userId}`);
     expect(identity.identity).toBe(`usr_${userId}`);
-    expect(identity.ctx.principal).toMatchObject({ id: `usr_${userId}`, kind: 'account', email: 'maya@example.test' });
+    expect(identity.ctx.principal).toMatchObject({
+      id: `usr_${userId}`,
+      kind: 'account',
+      email: 'maya@example.test',
+    });
     expect(identity.account?.email).toBe('maya@example.test');
     expect(identity.record?.principalId).toBe(`usr_${userId}`);
     expect(identity.setCookie).toBeUndefined();
@@ -263,7 +273,9 @@ describe('the account session on the room routes', () => {
   });
 
   it('a request without a session is anonymous as before', async () => {
-    const identity = await requestIdentity(request('/api/decks/q4/presence', { cookie: 'ts.session_token=nonsense' }));
+    const identity = await requestIdentity(
+      request('/api/decks/q4/presence', { cookie: 'ts.session_token=nonsense' }),
+    );
     expect(identity.kind).toBe('anonymous');
     expect(identity.principalId).toMatch(/^anon_/);
     expect(identity.account).toBeUndefined();
@@ -313,13 +325,25 @@ describe('identityViewsFor', () => {
       access: record,
     });
     expect(Object.keys(views).sort()).toEqual([USR_A, USR_B, ANON].sort());
-    expect(views[USR_A]).toMatchObject({ name: 'Maya Chen', trust: 'verified', email: 'maya@example.test' });
+    expect(views[USR_A]).toMatchObject({
+      name: 'Maya Chen',
+      trust: 'verified',
+      email: 'maya@example.test',
+    });
     expect(views[USR_A]?.mark).toMatchObject({ variant: 'initials', initials: 'MC' });
     // an account without a typed name: its label, the badge, the address for the sharer
-    expect(views[USR_B]).toMatchObject({ label: labelFor(USR_B), trust: 'verified', email: 'kai@example.test' });
+    expect(views[USR_B]).toMatchObject({
+      label: labelFor(USR_B),
+      trust: 'verified',
+      email: 'kai@example.test',
+    });
     expect(views[USR_B]?.name).toBeUndefined();
     expect(views[ANON]).toMatchObject({ label: labelFor(ANON), trust: 'label', kind: 'anonymous' });
-    const hidden = await identityViewsFor([USR_A], { showEmail: false, roleWords: false, access: record });
+    const hidden = await identityViewsFor([USR_A], {
+      showEmail: false,
+      roleWords: false,
+      access: record,
+    });
     expect(hidden[USR_A]?.email).toBeUndefined();
     expect(hidden[USR_A]?.name).toBe('Maya Chen');
   });

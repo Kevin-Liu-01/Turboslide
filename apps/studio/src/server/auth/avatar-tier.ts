@@ -21,7 +21,9 @@ export function avatarUsersDir(): string {
 }
 
 /** The store `account.setAvatar` writes to on this tier. */
-export function selectAvatarStore(env: Readonly<Record<string, string | undefined>> = process.env): AvatarStore {
+export function selectAvatarStore(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): AvatarStore {
   if (avatarFilesOnDisk()) return fileAvatarStore(avatarUsersDir());
   return blobAvatarStore(() => exportBlobClient(), { origin: publicStoreOrigin(env) });
 }

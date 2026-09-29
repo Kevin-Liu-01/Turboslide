@@ -197,7 +197,7 @@ The CSRF middleware covers `/api/avatar/*` (`docs/security.md` line 275). The WA
 
 2. A picture avatar is never drawn. `marks.ts` lines 108 to 111 draw the picture only when `options.pictureUrl` is passed; the three callers pass none: `meOf` (`auth/actions.ts` lines 148 to 160), `rosterEntryFor` (`room.ts` line 2079), and `identityViewFor` itself only forwards what it is given (`identity.ts` line 716). A record with `variant: 'picture'` falls to the initials branch (`marks.ts` lines 115 to 124). The chrome's `account.pictureUrl` is never set (`EditorRoot.tsx` lines 806 to 863), so `Profile.tsx` line 79 and `IdentityChip.tsx` line 124 get `undefined`. `actions.test.ts` line 223 declares `mark: { pictureUrl?: string }` and asserts only `avatar.url`, so the test does not catch it.
 
-3. Hosted, the files go to the function's disk and the URL is a 404. `server/actions.ts` line 1256 registers the account actions without `avatarStore`; `auth/actions.ts` lines 293 to 294 default to `fileAvatarStore(`${stateDir}/users`)`; `blobAvatarStore` (`avatar.ts` line 243) has no caller. The stored `base` is then `/api/avatar/u/<key>` (line 224) and `routes/api/avatar.$.ts` line 23 answers 404 for every request when hosted. A second defect sits behind it: `isPublicPath` (`packages/store/src/migrate.ts` lines 77 to 82) does not include `u/`, so a wired `blobAvatarStore` over the split client would put the files on the private store, where an `<img>` cannot load them.
+3. Hosted, the files go to the function's disk and the URL is a 404. `server/actions.ts` line 1256 registers the account actions without `avatarStore`; `auth/actions.ts` lines 293 to 294 default to `fileAvatarStore(`${stateDir}/users`)`; `blobAvatarStore` (`avatar.ts` line 243) has no caller. The stored `base` is then `/api/avatar/u/<key>` (line 224) and `routes/api/avatar.$.ts`line 23 answers 404 for every request when hosted. A second defect sits behind it:`isPublicPath` (`packages/store/src/migrate.ts`lines 77 to 82) does not include`u/`, so a wired `blobAvatarStore`over the split client would put the files on the private store, where an`<img>` cannot load them.
 
 4. The own chip never changes after Apply. `identityView` (`controller.tsx` lines 287 to 299) carries no `mark`, so `markOf` (`IdentityChip.tsx` lines 58 to 76) computes one from `resolvedOf`, whose avatar is always `{ variant: 'initials' }` (line 51). The own chip is therefore initials from the name whatever the record says. `setAvatar` in `EditorRoot.tsx` does not call `controller.refreshPresence()` as `setName` does (lines 816 to 821), and the server handler does not call `room.forgetIdentity` as `setName` does (`auth/actions.ts` line 327). This is the return audit's row 9 (`return/audit-surface.md` line 23), still open.
 
@@ -233,20 +233,20 @@ The CSRF middleware covers `/api/avatar/*` (`docs/security.md` line 275). The WA
 
 The target the task names: a size limited upload with a client resize to 128 and 256 px WebP under 64 KB, a 512 KB server cap on the request, sanitising through a decode and re-encode, and the digest in the path.
 
-| Target piece | State | Where |
-| --- | --- | --- |
-| Client side decode and resize to 128 and 256 px WebP, under 64 KB | Missing. The browser hands the raw `File` to the shell and the editor drops it. | `AvatarBuilder.tsx` 147 to 162, 177; `EditorRoot.tsx` 823 to 828 |
-| A server cap of 512 KB on the request | Missing. The cap is 5 MB after the body is read (`avatar.ts` 107); the transports cap at 1 MB (`/api/actions`) and 4.5 MB (server function, platform). | `avatar.ts` 34, 107; `dispatch.ts` 21, 96 |
-| Sanitising through a decode and re-encode | Present. Sniff, `failOn: 'error'`, `limitInputPixels`, format equality, `rotate`, `resize`, WebP and PNG re-encode, no metadata. | `avatar.ts` 102 to 172 |
-| The digest in the path for cache busting | Present. `u/<key>/<sha256 of the 256 PNG>-<size>.<ext>`, `overwrite: false`, the key rotated per change. | `avatar.ts` 142 to 164, 247 to 250, 295, 311 |
-| The picture drawn on every chip | Missing. No caller passes `pictureUrl` to `markSpec`. | defect 2 |
-| The hosted store | Missing. File store on every tier; `u/` not a public path. | defect 3 |
-| A square crop | Missing. | defect 6 |
-| Sizes by device pixel ratio | Missing. One 64 px URL. | defect 12 |
-| The CLI path (`--picture <file>`, `--avatar-png`) | Missing. | defects 8, 9 |
-| Account deletion removing the files | Missing. | defect 10 |
-| The own chip and the builder reading the current choice | Missing. | defects 4, 5 |
-| An end to end row for the upload | Missing. | defect 17 |
+| Target piece                                                      | State                                                                                                                                                  | Where                                                            |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Client side decode and resize to 128 and 256 px WebP, under 64 KB | Missing. The browser hands the raw `File` to the shell and the editor drops it.                                                                        | `AvatarBuilder.tsx` 147 to 162, 177; `EditorRoot.tsx` 823 to 828 |
+| A server cap of 512 KB on the request                             | Missing. The cap is 5 MB after the body is read (`avatar.ts` 107); the transports cap at 1 MB (`/api/actions`) and 4.5 MB (server function, platform). | `avatar.ts` 34, 107; `dispatch.ts` 21, 96                        |
+| Sanitising through a decode and re-encode                         | Present. Sniff, `failOn: 'error'`, `limitInputPixels`, format equality, `rotate`, `resize`, WebP and PNG re-encode, no metadata.                       | `avatar.ts` 102 to 172                                           |
+| The digest in the path for cache busting                          | Present. `u/<key>/<sha256 of the 256 PNG>-<size>.<ext>`, `overwrite: false`, the key rotated per change.                                               | `avatar.ts` 142 to 164, 247 to 250, 295, 311                     |
+| The picture drawn on every chip                                   | Missing. No caller passes `pictureUrl` to `markSpec`.                                                                                                  | defect 2                                                         |
+| The hosted store                                                  | Missing. File store on every tier; `u/` not a public path.                                                                                             | defect 3                                                         |
+| A square crop                                                     | Missing.                                                                                                                                               | defect 6                                                         |
+| Sizes by device pixel ratio                                       | Missing. One 64 px URL.                                                                                                                                | defect 12                                                        |
+| The CLI path (`--picture <file>`, `--avatar-png`)                 | Missing.                                                                                                                                               | defects 8, 9                                                     |
+| Account deletion removing the files                               | Missing.                                                                                                                                               | defect 10                                                        |
+| The own chip and the builder reading the current choice           | Missing.                                                                                                                                               | defects 4, 5                                                     |
+| An end to end row for the upload                                  | Missing.                                                                                                                                               | defect 17                                                        |
 
 ## 4. Notes for the design
 

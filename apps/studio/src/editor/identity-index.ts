@@ -155,7 +155,8 @@ export function identityIndex(input: IdentityIndexInput): ReadonlyMap<string, Id
   for (const thread of input.threads) {
     for (const comment of [thread.comment, ...thread.replies]) {
       const { principalId, label, kind } = comment.author;
-      if (!out.has(principalId)) out.set(principalId, identityOfPrincipal(principalId, label, kind));
+      if (!out.has(principalId))
+        out.set(principalId, identityOfPrincipal(principalId, label, kind));
       note(principalId);
     }
   }

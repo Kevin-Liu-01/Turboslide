@@ -483,7 +483,9 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
        record's people; the address for the owner and a grant holder (SPEC-3 4.8), a role word for
        a verified person read by a link visitor without the owner's switch (0.12; 4.5) */
     const commentAuthors = standing.capabilities.includes('readComments')
-      ? await (await import('./comments'))
+      ? await (
+          await import('./comments')
+        )
           .liveThreads(deckRoom)
           .then(({ threads }) =>
             [...threads.values()].flatMap((thread) =>

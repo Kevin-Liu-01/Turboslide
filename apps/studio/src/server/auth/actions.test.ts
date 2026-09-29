@@ -208,7 +208,10 @@ describe('account.setAvatar', () => {
     expect(glyph.mark.variant).toBe('glyph');
     // the choice out of the room's identity cache and onto the deck index (PEOPLE.md 3.11, 3.13)
     expect(forgetIdentity).toHaveBeenCalledWith(identity.principalId);
-    expect(noteAvatarChoice).toHaveBeenCalledWith(identity.principalId, { variant: 'glyph', salt: 7 });
+    expect(noteAvatarChoice).toHaveBeenCalledWith(identity.principalId, {
+      variant: 'glyph',
+      salt: 7,
+    });
     const png = await sharp({
       create: { width: 64, height: 64, channels: 3, background: '#406080' },
     })
@@ -293,7 +296,10 @@ describe('account.setAvatar', () => {
     };
     expect(me.principal).toMatchObject({ id: `usr_${id}`, kind: 'account' });
     expect(me.avatar).toEqual({ variant: 'dither', salt: 3 });
-    expect((await runtime.principals.get(`usr_${id}`))?.avatar).toEqual({ variant: 'dither', salt: 3 });
+    expect((await runtime.principals.get(`usr_${id}`))?.avatar).toEqual({
+      variant: 'dither',
+      salt: 3,
+    });
     expect((await runtime.profiles.get(id))?.avatar).toEqual({ variant: 'dither', salt: 3 });
     expect(forgetIdentity).toHaveBeenCalledWith(`usr_${id}`);
     const named = (await run('account.setName', { name: 'Owner Name' })) as { name?: string };

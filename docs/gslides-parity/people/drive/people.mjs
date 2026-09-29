@@ -11,7 +11,9 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { chromium } = require('/Users/kevinliu/repos/Turboslide-people/node_modules/.pnpm/playwright@1.62.1/node_modules/playwright');
+const {
+  chromium,
+} = require('/Users/kevinliu/repos/Turboslide-people/node_modules/.pnpm/playwright@1.62.1/node_modules/playwright');
 
 const BASE = 'https://www.turboslide.com';
 const OUT = dirname(fileURLToPath(import.meta.url));
@@ -66,7 +68,10 @@ async function settled(page, timeout = 20_000) {
     const words = await ctl(page, 'deck.saveState')
       .textContent()
       .catch(() => null);
-    if ((s.sync?.pending ?? s.pending ?? 0) === 0 && (words === null || /All changes saved|Not saved yet/.test(words)))
+    if (
+      (s.sync?.pending ?? s.pending ?? 0) === 0 &&
+      (words === null || /All changes saved|Not saved yet/.test(words))
+    )
       return s;
     await page.waitForTimeout(150);
   }
@@ -75,15 +80,17 @@ async function settled(page, timeout = 20_000) {
 
 async function headingRun(page) {
   const runs = await page.evaluate(() =>
-    [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run]')].map(
-      (el) => el.getAttribute('data-run') ?? '',
-    ),
+    [
+      ...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run]'),
+    ].map((el) => el.getAttribute('data-run') ?? ''),
   );
   return runs.find((r) => /heading/.test(r)) ?? runs[0] ?? '';
 }
 
 async function typeInto(page, run, text) {
-  const el = page.locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${run}"]`).first();
+  const el = page
+    .locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${run}"]`)
+    .first();
   await el.dblclick();
   await page.waitForTimeout(200);
   await page.keyboard.press('Meta+a');
@@ -147,23 +154,45 @@ function slotFacts(page) {
         classes: chip.className,
         box: { w: r.width, h: r.height },
         border: cs.borderTopWidth + ' ' + cs.borderTopStyle + ' ' + cs.borderTopColor,
-        plateInset: p ? { l: p.left - r.left, t: p.top - r.top, r: r.right - p.right, b: r.bottom - p.bottom } : null,
+        plateInset: p
+          ? { l: p.left - r.left, t: p.top - r.top, r: r.right - p.right, b: r.bottom - p.bottom }
+          : null,
         initials: chip.querySelector('.ts-chip-initials')?.textContent ?? null,
         stripe: chip.querySelector('.ts-chip-stripe') !== null,
         cells: chip.querySelectorAll('rect').length,
-        svg: plate ? { w: plate.clientWidth, h: plate.clientHeight, attrW: plate.getAttribute('width'), cssW: getComputedStyle(plate).width } : null,
+        svg: plate
+          ? {
+              w: plate.clientWidth,
+              h: plate.clientHeight,
+              attrW: plate.getAttribute('width'),
+              cssW: getComputedStyle(plate).width,
+            }
+          : null,
         cellsExtent: (() => {
           const rects = [...chip.querySelectorAll('rect')].map((e) => e.getBoundingClientRect());
           if (rects.length === 0) return null;
-          const l = Math.min(...rects.map((b) => b.left)), t = Math.min(...rects.map((b) => b.top));
-          const rr = Math.max(...rects.map((b) => b.right)), bb = Math.max(...rects.map((b) => b.bottom));
-          return { fromLeft: l - r.left, fromTop: t - r.top, fromRight: r.right - rr, fromBottom: r.bottom - bb };
+          const l = Math.min(...rects.map((b) => b.left)),
+            t = Math.min(...rects.map((b) => b.top));
+          const rr = Math.max(...rects.map((b) => b.right)),
+            bb = Math.max(...rects.map((b) => b.bottom));
+          return {
+            fromLeft: l - r.left,
+            fromTop: t - r.top,
+            fromRight: r.right - rr,
+            fromBottom: r.bottom - bb,
+          };
         })(),
         initialsBox: (() => {
           const t = chip.querySelector('.ts-chip-initials');
           if (!t) return null;
           const b = t.getBoundingClientRect();
-          return { w: b.width, h: b.height, fontSize: getComputedStyle(t).fontSize, fill: getComputedStyle(t).fill, stroke: getComputedStyle(t).stroke };
+          return {
+            w: b.width,
+            h: b.height,
+            fontSize: getComputedStyle(t).fontSize,
+            fill: getComputedStyle(t).fill,
+            stroke: getComputedStyle(t).stroke,
+          };
         })(),
       };
     });
@@ -172,7 +201,13 @@ function slotFacts(page) {
       count: slot.getAttribute('data-count'),
       tip: slot.getAttribute('data-tip') ?? slot.getAttribute('aria-description') ?? null,
       chips,
-      more: more ? { classes: more.className, label: more.getAttribute('aria-label'), text: more.textContent } : null,
+      more: more
+        ? {
+            classes: more.className,
+            label: more.getAttribute('aria-label'),
+            text: more.textContent,
+          }
+        : null,
       ownChip: slot.querySelector('[data-control="title.account"]') !== null,
       rule: slot.querySelector('.ts-presence-rule') !== null,
     };
@@ -218,7 +253,11 @@ function presenceState(s) {
           markInitials: p.mark?.initials,
           markLabel: p.mark?.label,
         };
-  return { self: strip(s.presence?.self), others: (s.presence?.others ?? []).map(strip), count: s.presence?.count };
+  return {
+    self: strip(s.presence?.self),
+    others: (s.presence?.others ?? []).map(strip),
+    count: s.presence?.count,
+  };
 }
 
 async function setTheme(page, theme) {
@@ -269,7 +308,11 @@ async function advancedOn(page) {
   if (checked !== 'true') await row.click();
   else await page.keyboard.press('Escape');
   await page.waitForTimeout(400);
-  return page.evaluate(() => document.documentElement.hasAttribute('data-advanced-tools') || document.querySelector('[data-advanced-tools]') !== null);
+  return page.evaluate(
+    () =>
+      document.documentElement.hasAttribute('data-advanced-tools') ||
+      document.querySelector('[data-advanced-tools]') !== null,
+  );
 }
 
 async function openAccountMenu(page) {
@@ -283,7 +326,9 @@ async function openAccountMenu(page) {
       name: menu.querySelector('.ts-account-name')?.textContent ?? null,
       sentence: menu.querySelector('.ts-account-sentence')?.textContent ?? null,
       chip: menu.querySelector('.ts-chip')?.getAttribute('aria-label') ?? null,
-      rows: [...menu.querySelectorAll('[role="menuitem"]')].map((r) => r.getAttribute('data-control')),
+      rows: [...menu.querySelectorAll('[role="menuitem"]')].map((r) =>
+        r.getAttribute('data-control'),
+      ),
     };
   });
 }
@@ -297,7 +342,9 @@ function dialogFacts(page, control) {
       title: d.querySelector('.ts-dialog-title')?.textContent ?? null,
       size: { w: r.width, h: r.height },
       text: (d.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 600),
-      controls: [...d.querySelectorAll('[data-control]')].map((e) => e.getAttribute('data-control')),
+      controls: [...d.querySelectorAll('[data-control]')].map((e) =>
+        e.getAttribute('data-control'),
+      ),
       chips: [...d.querySelectorAll('.ts-chip')].map((chip) => {
         const cr = chip.getBoundingClientRect();
         const plate = chip.querySelector('.ts-chip-plate, img');
@@ -305,7 +352,14 @@ function dialogFacts(page, control) {
         return {
           size: { w: cr.width, h: cr.height },
           label: chip.getAttribute('aria-label'),
-          plateInset: p ? { l: p.left - cr.left, t: p.top - cr.top, r: cr.right - p.right, b: cr.bottom - p.bottom } : null,
+          plateInset: p
+            ? {
+                l: p.left - cr.left,
+                t: p.top - cr.top,
+                r: cr.right - p.right,
+                b: cr.bottom - p.bottom,
+              }
+            : null,
         };
       }),
     };
@@ -313,7 +367,13 @@ function dialogFacts(page, control) {
 }
 
 const browser = await chromium.launch({ headless: true });
-const mk = () => browser.newContext({ baseURL: BASE, viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2, colorScheme: 'light' });
+const mk = () =>
+  browser.newContext({
+    baseURL: BASE,
+    viewport: { width: 1440, height: 900 },
+    deviceScaleFactor: 2,
+    colorScheme: 'light',
+  });
 const ctxA = await mk();
 const ctxB = await mk();
 const A = await ctxA.newPage();
@@ -327,11 +387,17 @@ try {
   const info = await invoke(A, 'deck.info');
   deckId = info.id;
   say('deck.id', deckId);
-  say('build', await A.evaluate(() => ({
-    title: document.title,
-    build: document.documentElement.dataset.build ?? document.querySelector('meta[name="turboslide-build"]')?.content ?? null,
-    theme: document.documentElement.dataset.theme ?? null,
-  })));
+  say(
+    'build',
+    await A.evaluate(() => ({
+      title: document.title,
+      build:
+        document.documentElement.dataset.build ??
+        document.querySelector('meta[name="turboslide-build"]')?.content ??
+        null,
+      theme: document.documentElement.dataset.theme ?? null,
+    })),
+  );
   await typeInto(A, await headingRun(A), 'People audit deck');
   await poll(async () => (await state(A)).revision >= 1, 30_000);
   await A.waitForURL(/\/edit\//, { timeout: 30_000 });
@@ -346,7 +412,8 @@ try {
   if (prompted) {
     say('namePrompt.A', await dialogFacts(A, 'dialog.namePrompt'));
     say('shot.namePrompt.A', await shotAround(A, prompt, 'A-name-prompt-first-edit', 16));
-    if ((await ctl(A, 'dialog.namePrompt.close').count()) > 0) await ctl(A, 'dialog.namePrompt.close').click();
+    if ((await ctl(A, 'dialog.namePrompt.close').count()) > 0)
+      await ctl(A, 'dialog.namePrompt.close').click();
     else await ctl(A, 'dialog.namePrompt.skip').click();
     await A.waitForTimeout(300);
   }
@@ -380,14 +447,32 @@ try {
   say('slot.B.anon', await slotFacts(B));
   say('shot.slot.A.anon', await shotAround(A, ctl(A, 'title.presence'), 'A-slot-anonymous', 20));
   say('shot.slot.B.anon', await shotAround(B, ctl(B, 'title.presence'), 'B-slot-anonymous', 20));
-  say('shot.titlerow.A.anon', await A.screenshot({ path: join(OUT, 'A-title-row-anonymous.png'), clip: { x: 0, y: 0, width: 1440, height: 96 } }).then(() => join(OUT, 'A-title-row-anonymous.png')));
+  say(
+    'shot.titlerow.A.anon',
+    await A.screenshot({
+      path: join(OUT, 'A-title-row-anonymous.png'),
+      clip: { x: 0, y: 0, width: 1440, height: 96 },
+    }).then(() => join(OUT, 'A-title-row-anonymous.png')),
+  );
   // the other chip's tooltip
   const chipA = A.locator('[data-control^="presence.chip."]').first();
   await chipA.hover();
   await A.waitForTimeout(900);
-  say('tooltip.A.anon', await A.evaluate(() => document.querySelector('.pt-tip:not([hidden])')?.textContent ?? null));
-  say('shot.tooltip.A.anon', await A.screenshot({ path: join(OUT, 'A-chip-tooltip-anonymous.png'), clip: { x: 560, y: 0, width: 880, height: 150 } }).then(() => join(OUT, 'A-chip-tooltip-anonymous.png')));
-  for (const [page, tag] of [[A, 'A'], [B, 'B']]) {
+  say(
+    'tooltip.A.anon',
+    await A.evaluate(() => document.querySelector('.pt-tip:not([hidden])')?.textContent ?? null),
+  );
+  say(
+    'shot.tooltip.A.anon',
+    await A.screenshot({
+      path: join(OUT, 'A-chip-tooltip-anonymous.png'),
+      clip: { x: 560, y: 0, width: 880, height: 150 },
+    }).then(() => join(OUT, 'A-chip-tooltip-anonymous.png')),
+  );
+  for (const [page, tag] of [
+    [A, 'A'],
+    [B, 'B'],
+  ]) {
     await page.keyboard.press('Escape');
     await page.mouse.move(600, 500);
     await ctl(page, 'presence.more').click();
@@ -396,7 +481,20 @@ try {
     say(`roster.${tag}.anon`, await rosterFacts(page));
     const menu = page.locator('#ts-menu-roster');
     const mb = await menu.boundingBox();
-    say(`shot.roster.${tag}.anon`, await page.screenshot({ path: join(OUT, `${tag}-roster-anonymous.png`), clip: { x: Math.max(0, mb.x - 260), y: 0, width: Math.min(1440 - Math.max(0, mb.x - 260), mb.width + 300), height: mb.y + mb.height + 16 } }).then(() => join(OUT, `${tag}-roster-anonymous.png`)));
+    say(
+      `shot.roster.${tag}.anon`,
+      await page
+        .screenshot({
+          path: join(OUT, `${tag}-roster-anonymous.png`),
+          clip: {
+            x: Math.max(0, mb.x - 260),
+            y: 0,
+            width: Math.min(1440 - Math.max(0, mb.x - 260), mb.width + 300),
+            height: mb.y + mb.height + 16,
+          },
+        })
+        .then(() => join(OUT, `${tag}-roster-anonymous.png`)),
+    );
     await page.keyboard.press('Escape');
   }
 
@@ -404,23 +502,51 @@ try {
   say('advanced.A', await advancedOn(A));
   await A.waitForTimeout(400);
   say('slot.A.advanced', await slotFacts(A));
-  say('shot.slot.A.advanced', await shotAround(A, ctl(A, 'title.presence'), 'A-slot-advanced-own-chip', 20));
+  say(
+    'shot.slot.A.advanced',
+    await shotAround(A, ctl(A, 'title.presence'), 'A-slot-advanced-own-chip', 20),
+  );
   say('accountMenu.A.anon', await openAccountMenu(A));
   {
     const mb = await A.locator('#ts-menu-account').boundingBox();
-    say('shot.accountMenu.A.anon', await A.screenshot({ path: join(OUT, 'A-account-menu-anonymous.png'), clip: { x: Math.max(0, mb.x - 260), y: 0, width: Math.min(1440 - Math.max(0, mb.x - 260), mb.width + 300), height: mb.y + mb.height + 16 } }).then(() => join(OUT, 'A-account-menu-anonymous.png')));
+    say(
+      'shot.accountMenu.A.anon',
+      await A.screenshot({
+        path: join(OUT, 'A-account-menu-anonymous.png'),
+        clip: {
+          x: Math.max(0, mb.x - 260),
+          y: 0,
+          width: Math.min(1440 - Math.max(0, mb.x - 260), mb.width + 300),
+          height: mb.y + mb.height + 16,
+        },
+      }).then(() => join(OUT, 'A-account-menu-anonymous.png')),
+    );
   }
   // Change name from the account menu
   await ctl(A, 'account.changeName').click();
   await ctl(A, 'dialog.namePrompt').waitFor({ timeout: 8000 });
   say('changeName.dialog', await dialogFacts(A, 'dialog.namePrompt'));
-  say('shot.changeName', await shotAround(A, ctl(A, 'dialog.namePrompt'), 'A-change-name-dialog', 24));
+  say(
+    'shot.changeName',
+    await shotAround(A, ctl(A, 'dialog.namePrompt'), 'A-change-name-dialog', 24),
+  );
   await ctl(A, 'dialog.namePrompt.name').fill('');
   await ctl(A, 'dialog.namePrompt.name').type('Ada Lovelace', { delay: TYPE_DELAY });
   await ctl(A, 'dialog.namePrompt.continue').click();
   await A.waitForTimeout(800);
-  say('changeName.error', await ctl(A, 'dialog.namePrompt.error').textContent().catch(() => null));
-  await poll(async () => (await state(B)).presence?.others?.some((p) => p.name === 'Ada Lovelace' || p.label === 'Ada Lovelace'), 40_000);
+  say(
+    'changeName.error',
+    await ctl(A, 'dialog.namePrompt.error')
+      .textContent()
+      .catch(() => null),
+  );
+  await poll(
+    async () =>
+      (await state(B)).presence?.others?.some(
+        (p) => p.name === 'Ada Lovelace' || p.label === 'Ada Lovelace',
+      ),
+    40_000,
+  );
   await A.waitForTimeout(800);
   say('presence.A.named', presenceState(await state(A)));
   say('presence.B.named', presenceState(await state(B)));
@@ -434,9 +560,21 @@ try {
   const chipB = B.locator('[data-control^="presence.chip."]').first();
   await chipB.hover();
   await B.waitForTimeout(900);
-  say('tooltip.B.named', await B.evaluate(() => document.querySelector('.pt-tip:not([hidden])')?.textContent ?? null));
-  say('shot.tooltip.B.named', await B.screenshot({ path: join(OUT, 'B-chip-tooltip-named.png'), clip: { x: 560, y: 0, width: 880, height: 150 } }).then(() => join(OUT, 'B-chip-tooltip-named.png')));
-  for (const [page, tag] of [[A, 'A'], [B, 'B']]) {
+  say(
+    'tooltip.B.named',
+    await B.evaluate(() => document.querySelector('.pt-tip:not([hidden])')?.textContent ?? null),
+  );
+  say(
+    'shot.tooltip.B.named',
+    await B.screenshot({
+      path: join(OUT, 'B-chip-tooltip-named.png'),
+      clip: { x: 560, y: 0, width: 880, height: 150 },
+    }).then(() => join(OUT, 'B-chip-tooltip-named.png')),
+  );
+  for (const [page, tag] of [
+    [A, 'A'],
+    [B, 'B'],
+  ]) {
     await page.keyboard.press('Escape');
     await page.mouse.move(600, 500);
     await ctl(page, 'presence.more').click();
@@ -444,14 +582,38 @@ try {
     await page.waitForTimeout(300);
     say(`roster.${tag}.named`, await rosterFacts(page));
     const mb = await page.locator('#ts-menu-roster').boundingBox();
-    say(`shot.roster.${tag}.named`, await page.screenshot({ path: join(OUT, `${tag}-roster-named.png`), clip: { x: Math.max(0, mb.x - 260), y: 0, width: Math.min(1440 - Math.max(0, mb.x - 260), mb.width + 300), height: mb.y + mb.height + 16 } }).then(() => join(OUT, `${tag}-roster-named.png`)));
+    say(
+      `shot.roster.${tag}.named`,
+      await page
+        .screenshot({
+          path: join(OUT, `${tag}-roster-named.png`),
+          clip: {
+            x: Math.max(0, mb.x - 260),
+            y: 0,
+            width: Math.min(1440 - Math.max(0, mb.x - 260), mb.width + 300),
+            height: mb.y + mb.height + 16,
+          },
+        })
+        .then(() => join(OUT, `${tag}-roster-named.png`)),
+    );
     await page.keyboard.press('Escape');
   }
   // the account menu head with the name
   say('accountMenu.A.named', await openAccountMenu(A));
   {
     const mb = await A.locator('#ts-menu-account').boundingBox();
-    say('shot.accountMenu.A.named', await A.screenshot({ path: join(OUT, 'A-account-menu-named.png'), clip: { x: Math.max(0, mb.x - 260), y: 0, width: Math.min(1440 - Math.max(0, mb.x - 260), mb.width + 300), height: mb.y + mb.height + 16 } }).then(() => join(OUT, 'A-account-menu-named.png')));
+    say(
+      'shot.accountMenu.A.named',
+      await A.screenshot({
+        path: join(OUT, 'A-account-menu-named.png'),
+        clip: {
+          x: Math.max(0, mb.x - 260),
+          y: 0,
+          width: Math.min(1440 - Math.max(0, mb.x - 260), mb.width + 300),
+          height: mb.y + mb.height + 16,
+        },
+      }).then(() => join(OUT, 'A-account-menu-named.png')),
+    );
   }
   await A.keyboard.press('Escape');
 
@@ -460,7 +622,10 @@ try {
   await settled(A);
 
   // ---- version history: A and B, light and dark
-  for (const [page, tag] of [[A, 'A'], [B, 'B']]) {
+  for (const [page, tag] of [
+    [A, 'A'],
+    [B, 'B'],
+  ]) {
     await openVersions(page);
     const win = page.locator('.ts-version-window-row').first();
     if ((await win.count()) > 0) {
@@ -468,27 +633,62 @@ try {
       await page.waitForTimeout(500);
     }
     say(`versions.${tag}.light`, await versionsFacts(page));
-    say(`versions.${tag}.markEdge`, await page.evaluate(() => {
-      const panel = document.querySelector('.ts-versions.is-history');
-      const pr = panel.getBoundingClientRect();
-      const host = panel.closest('.ts-panel-body, .ts-panel, aside') ?? panel.parentElement;
-      const hr = host.getBoundingClientRect();
-      return [...panel.querySelectorAll('.ts-chip')].map((chip) => {
-        const r = chip.getBoundingClientRect();
-        return { label: chip.getAttribute('aria-label'), size: chip.getAttribute('data-size'), w: r.width, h: r.height, leftOfPanel: r.left - pr.left, leftOfHost: r.left - hr.left, hostClass: host.className, hostOverflow: getComputedStyle(host).overflowX, panelPaddingLeft: getComputedStyle(panel).paddingLeft };
-      });
-    }));
+    say(
+      `versions.${tag}.markEdge`,
+      await page.evaluate(() => {
+        const panel = document.querySelector('.ts-versions.is-history');
+        const pr = panel.getBoundingClientRect();
+        const host = panel.closest('.ts-panel-body, .ts-panel, aside') ?? panel.parentElement;
+        const hr = host.getBoundingClientRect();
+        return [...panel.querySelectorAll('.ts-chip')].map((chip) => {
+          const r = chip.getBoundingClientRect();
+          return {
+            label: chip.getAttribute('aria-label'),
+            size: chip.getAttribute('data-size'),
+            w: r.width,
+            h: r.height,
+            leftOfPanel: r.left - pr.left,
+            leftOfHost: r.left - hr.left,
+            hostClass: host.className,
+            hostOverflow: getComputedStyle(host).overflowX,
+            panelPaddingLeft: getComputedStyle(panel).paddingLeft,
+          };
+        });
+      }),
+    );
     const panel = page.locator('.ts-versions.is-history').first();
-    say(`shot.versions.${tag}.light`, await shotAround(page, panel, `${tag}-version-history-light`, 8));
+    say(
+      `shot.versions.${tag}.light`,
+      await shotAround(page, panel, `${tag}-version-history-light`, 8),
+    );
     await setTheme(page, 'dark');
     await page.waitForTimeout(500);
-    say(`shot.versions.${tag}.dark`, await shotAround(page, panel, `${tag}-version-history-dark`, 8));
-    say(`shot.slot.${tag}.dark`, await shotAround(page, ctl(page, 'title.presence'), `${tag}-slot-dark`, 20));
+    say(
+      `shot.versions.${tag}.dark`,
+      await shotAround(page, panel, `${tag}-version-history-dark`, 8),
+    );
+    say(
+      `shot.slot.${tag}.dark`,
+      await shotAround(page, ctl(page, 'title.presence'), `${tag}-slot-dark`, 20),
+    );
     await ctl(page, 'presence.more').click();
     await page.locator('#ts-menu-roster').waitFor({ timeout: 8000 });
     await page.waitForTimeout(300);
     const mb = await page.locator('#ts-menu-roster').boundingBox();
-    say(`shot.roster.${tag}.dark`, await page.screenshot({ path: join(OUT, `${tag}-roster-dark.png`), clip: { x: Math.max(0, mb.x - 260), y: 0, width: Math.min(1440 - Math.max(0, mb.x - 260), mb.width + 300), height: mb.y + mb.height + 16 } }).then(() => join(OUT, `${tag}-roster-dark.png`)));
+    say(
+      `shot.roster.${tag}.dark`,
+      await page
+        .screenshot({
+          path: join(OUT, `${tag}-roster-dark.png`),
+          clip: {
+            x: Math.max(0, mb.x - 260),
+            y: 0,
+            width: Math.min(1440 - Math.max(0, mb.x - 260), mb.width + 300),
+            height: mb.y + mb.height + 16,
+          },
+        })
+        .then(() => join(OUT, `${tag}-roster-dark.png`)),
+    );
     await page.keyboard.press('Escape');
     await setTheme(page, 'light');
     await page.waitForTimeout(300);
@@ -496,18 +696,25 @@ try {
   }
   // close the panel in both (the clock toggles it)
   for (const page of [A, B]) {
-    if ((await page.locator('.ts-versions.is-history').count()) > 0) await ctl(page, 'deck.lastEdit').click().catch(() => {});
+    if ((await page.locator('.ts-versions.is-history').count()) > 0)
+      await ctl(page, 'deck.lastEdit')
+        .click()
+        .catch(() => {});
     await page.waitForTimeout(300);
   }
 
   // ---- a comment by A, seen by B
   await A.keyboard.press('Escape');
-  const heading = A.locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="heading/text"]').first();
+  const heading = A.locator(
+    '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="heading/text"]',
+  ).first();
   await heading.click();
   await A.keyboard.press('ControlOrMeta+Alt+m');
   const card = A.locator('[data-control="comment.card"]');
   await card.waitFor({ timeout: 10_000 });
-  await card.locator('[data-control="comment.card.new.field"]').fill('Can you check the title on this slide?');
+  await card
+    .locator('[data-control="comment.card.new.field"]')
+    .fill('Can you check the title on this slide?');
   say('shot.comment.A.compose', await shotAround(A, card, 'A-comment-compose', 12));
   await card.locator('[data-control="comment.card.new.submit"]').click();
   await poll(async () => ((await state(A)).comments?.threads?.length ?? 0) >= 1, 20_000);
@@ -515,49 +722,100 @@ try {
     const t = (await state(B)).comments?.threads ?? [];
     return t.length >= 1 ? t : null;
   }, 40_000);
-  say('comments.B.threads', threadsB ? threadsB.map((t) => ({ id: t.id, author: t.comment?.author ?? t.author ?? null })) : null);
+  say(
+    'comments.B.threads',
+    threadsB
+      ? threadsB.map((t) => ({ id: t.id, author: t.comment?.author ?? t.author ?? null }))
+      : null,
+  );
   say('comments.B.state', (await state(B)).comments);
   await A.waitForTimeout(500);
-  say('comment.A.card', await A.evaluate(() => {
-    const c = document.querySelector('[data-control="comment.card"]');
-    return c ? { name: c.querySelector('.ts-comment-name')?.textContent, trust: c.querySelector('.ts-comment-trust')?.textContent ?? null, chip: c.querySelector('.ts-chip')?.getAttribute('aria-label') } : null;
-  }));
-  if ((await card.count()) > 0) say('shot.comment.A.posted', await shotAround(A, card, 'A-comment-posted', 12));
+  say(
+    'comment.A.card',
+    await A.evaluate(() => {
+      const c = document.querySelector('[data-control="comment.card"]');
+      return c
+        ? {
+            name: c.querySelector('.ts-comment-name')?.textContent,
+            trust: c.querySelector('.ts-comment-trust')?.textContent ?? null,
+            chip: c.querySelector('.ts-chip')?.getAttribute('aria-label'),
+          }
+        : null;
+    }),
+  );
+  if ((await card.count()) > 0)
+    say('shot.comment.A.posted', await shotAround(A, card, 'A-comment-posted', 12));
   else say('comment.A.cardAfterPost', 'the card closed after Comment');
-  say('shot.comment.A.marker', await A.screenshot({ path: join(OUT, 'A-comment-marker.png') }).then(() => join(OUT, 'A-comment-marker.png')));
+  say(
+    'shot.comment.A.marker',
+    await A.screenshot({ path: join(OUT, 'A-comment-marker.png') }).then(() =>
+      join(OUT, 'A-comment-marker.png'),
+    ),
+  );
   await B.keyboard.press('Escape');
   await ctl(B, 'title.comments').click();
   await B.waitForTimeout(600);
   const firstId = threadsB?.[0]?.id;
   if (firstId) {
-    await ctl(B, `panel.comments.open.${firstId}`).click().catch(() => {});
+    await ctl(B, `panel.comments.open.${firstId}`)
+      .click()
+      .catch(() => {});
     await B.waitForTimeout(600);
   }
-  say('comment.B.panel', await B.evaluate(() => {
-    const panel = document.querySelector('[data-control="panel.comments"], .ts-comments-panel, .ts-comments');
-    const card = document.querySelector('[data-control="comment.card"]');
-    return {
-      panelText: (panel?.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 400),
-      card: card ? { name: card.querySelector('.ts-comment-name')?.textContent, trust: card.querySelector('.ts-comment-trust')?.textContent ?? null, chip: card.querySelector('.ts-chip')?.getAttribute('aria-label'), chipVariant: card.querySelector('.ts-chip')?.getAttribute('data-variant') } : null,
-      rows: [...document.querySelectorAll('[data-control^="panel.comments.open."]')].map((r) => ({ text: (r.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 160), chip: r.querySelector('.ts-chip')?.getAttribute('aria-label') ?? null })),
-    };
-  }));
+  say(
+    'comment.B.panel',
+    await B.evaluate(() => {
+      const panel = document.querySelector(
+        '[data-control="panel.comments"], .ts-comments-panel, .ts-comments',
+      );
+      const card = document.querySelector('[data-control="comment.card"]');
+      return {
+        panelText: (panel?.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 400),
+        card: card
+          ? {
+              name: card.querySelector('.ts-comment-name')?.textContent,
+              trust: card.querySelector('.ts-comment-trust')?.textContent ?? null,
+              chip: card.querySelector('.ts-chip')?.getAttribute('aria-label'),
+              chipVariant: card.querySelector('.ts-chip')?.getAttribute('data-variant'),
+            }
+          : null,
+        rows: [...document.querySelectorAll('[data-control^="panel.comments.open."]')].map((r) => ({
+          text: (r.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 160),
+          chip: r.querySelector('.ts-chip')?.getAttribute('aria-label') ?? null,
+        })),
+      };
+    }),
+  );
   say('shot.comment.B', await shotFull(B, 'B-comment-by-A'));
   {
     const panel = B.locator('[data-control="panel.comments"]').first();
-    if ((await panel.count()) > 0) say('shot.comment.B.panel', await shotAround(B, panel, 'B-comments-panel', 8));
+    if ((await panel.count()) > 0)
+      say('shot.comment.B.panel', await shotAround(B, panel, 'B-comments-panel', 8));
     const marker = B.locator('[data-control="comment.marker"]').first();
     if ((await marker.count()) > 0) {
       await marker.click().catch(() => {});
       await B.waitForTimeout(600);
-      say('comment.B.afterMarker', await B.evaluate(() => {
-        const card = document.querySelector('[data-control="comment.card"]');
-        return card ? { name: card.querySelector('.ts-comment-name')?.textContent, trust: card.querySelector('.ts-comment-trust')?.textContent ?? null, chip: card.querySelector('.ts-chip')?.getAttribute('aria-label'), chipVariant: card.querySelector('.ts-chip')?.getAttribute('data-variant'), chipHue: card.querySelector('.ts-chip')?.getAttribute('data-hue'), classes: card.querySelector('.ts-chip')?.className } : null;
-      }));
+      say(
+        'comment.B.afterMarker',
+        await B.evaluate(() => {
+          const card = document.querySelector('[data-control="comment.card"]');
+          return card
+            ? {
+                name: card.querySelector('.ts-comment-name')?.textContent,
+                trust: card.querySelector('.ts-comment-trust')?.textContent ?? null,
+                chip: card.querySelector('.ts-chip')?.getAttribute('aria-label'),
+                chipVariant: card.querySelector('.ts-chip')?.getAttribute('data-variant'),
+                chipHue: card.querySelector('.ts-chip')?.getAttribute('data-hue'),
+                classes: card.querySelector('.ts-chip')?.className,
+              }
+            : null;
+        }),
+      );
     }
   }
   const cardB = B.locator('[data-control="comment.card"]');
-  if ((await cardB.count()) > 0) say('shot.comment.B.card', await shotAround(B, cardB, 'B-comment-card', 12));
+  if ((await cardB.count()) > 0)
+    say('shot.comment.B.card', await shotAround(B, cardB, 'B-comment-card', 12));
 
   // ---- the profile dialog and the avatar builder in A (Advanced tools on)
   await A.keyboard.press('Escape');
@@ -567,9 +825,15 @@ try {
   await A.waitForTimeout(300);
   say('profile.A', await dialogFacts(A, 'dialog.profile'));
   say('shot.profile.A', await shotAround(A, ctl(A, 'dialog.profile'), 'A-profile-dialog', 24));
-  say('shot.profile.A.head', await shotAround(A, ctl(A, 'dialog.profile.head'), 'A-profile-head', 8));
+  say(
+    'shot.profile.A.head',
+    await shotAround(A, ctl(A, 'dialog.profile.head'), 'A-profile-head', 8),
+  );
   await setTheme(A, 'dark');
-  say('shot.profile.A.dark', await shotAround(A, ctl(A, 'dialog.profile'), 'A-profile-dialog-dark', 24));
+  say(
+    'shot.profile.A.dark',
+    await shotAround(A, ctl(A, 'dialog.profile'), 'A-profile-dialog-dark', 24),
+  );
   await setTheme(A, 'light');
   await ctl(A, 'dialog.profile.done').click();
   await A.waitForTimeout(300);
@@ -582,38 +846,77 @@ try {
     await ctl(A, `dialog.avatarBuilder.tab.${tab}`).click();
     await A.waitForTimeout(400);
     say(`avatar.A.${tab}`, await dialogFacts(A, 'dialog.avatarBuilder'));
-    say(`shot.avatar.A.${tab}`, await shotAround(A, ctl(A, 'dialog.avatarBuilder'), `A-avatar-builder-${tab}`, 24));
+    say(
+      `shot.avatar.A.${tab}`,
+      await shotAround(A, ctl(A, 'dialog.avatarBuilder'), `A-avatar-builder-${tab}`, 24),
+    );
   }
-  say('avatar.A.picture.upload', await A.evaluate(() => ({
-    file: document.querySelectorAll('[data-control="dialog.avatarBuilder.file"]').length,
-    uploadLabel: document.querySelector('.ts-avatar-upload')?.textContent ?? null,
-    sentence: document.querySelector('.ts-avatar-sentence')?.textContent ?? null,
-    signIn: document.querySelector('[data-control="dialog.avatarBuilder.signInSentence"]')?.textContent ?? null,
-    apply: document.querySelector('[data-control="dialog.avatarBuilder.apply"]')?.getAttribute('aria-disabled') ?? document.querySelector('[data-control="dialog.avatarBuilder.apply"]')?.disabled ?? null,
-  })));
-  say('shot.avatar.A.strip', await shotAround(A, ctl(A, 'dialog.avatarBuilder.strip'), 'A-avatar-builder-strip', 8));
+  say(
+    'avatar.A.picture.upload',
+    await A.evaluate(() => ({
+      file: document.querySelectorAll('[data-control="dialog.avatarBuilder.file"]').length,
+      uploadLabel: document.querySelector('.ts-avatar-upload')?.textContent ?? null,
+      sentence: document.querySelector('.ts-avatar-sentence')?.textContent ?? null,
+      signIn:
+        document.querySelector('[data-control="dialog.avatarBuilder.signInSentence"]')
+          ?.textContent ?? null,
+      apply:
+        document
+          .querySelector('[data-control="dialog.avatarBuilder.apply"]')
+          ?.getAttribute('aria-disabled') ??
+        document.querySelector('[data-control="dialog.avatarBuilder.apply"]')?.disabled ??
+        null,
+    })),
+  );
+  say(
+    'shot.avatar.A.strip',
+    await shotAround(A, ctl(A, 'dialog.avatarBuilder.strip'), 'A-avatar-builder-strip', 8),
+  );
   await setTheme(A, 'dark');
-  say('shot.avatar.A.picture.dark', await shotAround(A, ctl(A, 'dialog.avatarBuilder'), 'A-avatar-builder-picture-dark', 24));
+  say(
+    'shot.avatar.A.picture.dark',
+    await shotAround(A, ctl(A, 'dialog.avatarBuilder'), 'A-avatar-builder-picture-dark', 24),
+  );
   await setTheme(A, 'light');
   // Glyph applied: does B see the new mark?
   await ctl(A, 'dialog.avatarBuilder.tab.glyph').click();
   await A.waitForTimeout(300);
   await ctl(A, 'dialog.avatarBuilder.apply').click();
   await A.waitForTimeout(1500);
-  say('avatar.A.applyError', await ctl(A, 'dialog.avatarBuilder.error').textContent().catch(() => null));
-  if ((await ctl(A, 'dialog.avatarBuilder').count()) > 0) await ctl(A, 'dialog.avatarBuilder.close').click().catch(() => {});
-  await poll(async () => (await state(B)).presence?.others?.some((p) => p.mark?.variant === 'glyph'), 30_000);
+  say(
+    'avatar.A.applyError',
+    await ctl(A, 'dialog.avatarBuilder.error')
+      .textContent()
+      .catch(() => null),
+  );
+  if ((await ctl(A, 'dialog.avatarBuilder').count()) > 0)
+    await ctl(A, 'dialog.avatarBuilder.close')
+      .click()
+      .catch(() => {});
+  await poll(
+    async () => (await state(B)).presence?.others?.some((p) => p.mark?.variant === 'glyph'),
+    30_000,
+  );
   say('presence.B.afterAvatar', presenceState(await state(B)));
   say('slot.B.afterAvatar', await slotFacts(B));
   say('slot.A.afterAvatar', await slotFacts(A));
-  say('shot.slot.B.afterAvatar', await shotAround(B, ctl(B, 'title.presence'), 'B-slot-after-glyph-avatar', 20));
-  say('shot.slot.A.afterAvatar', await shotAround(A, ctl(A, 'title.presence'), 'A-slot-after-glyph-avatar', 20));
+  say(
+    'shot.slot.B.afterAvatar',
+    await shotAround(B, ctl(B, 'title.presence'), 'B-slot-after-glyph-avatar', 20),
+  );
+  say(
+    'shot.slot.A.afterAvatar',
+    await shotAround(A, ctl(A, 'title.presence'), 'A-slot-after-glyph-avatar', 20),
+  );
 
   // B without Advanced tools: what account surface does B have?
-  say('B.ownChip', await B.evaluate(() => ({
-    account: document.querySelectorAll('[data-control="title.account"]').length,
-    rule: document.querySelectorAll('.ts-presence-rule').length,
-  })));
+  say(
+    'B.ownChip',
+    await B.evaluate(() => ({
+      account: document.querySelectorAll('[data-control="title.account"]').length,
+      rule: document.querySelectorAll('.ts-presence-rule').length,
+    })),
+  );
 } catch (error) {
   say('error', error instanceof Error ? `${error.message}\n${error.stack}` : String(error));
   await A.screenshot({ path: join(OUT, 'A-error.png') }).catch(() => {});
@@ -625,10 +928,18 @@ try {
     say('teardown.info', { status: info.status, revision: info.json?.revision ?? null });
     let rev = info.json?.revision;
     const trash = await post('deck.trash', deckId, { id: deckId, baseRevision: rev });
-    say('teardown.trash', { status: trash.status, revision: trash.json?.revision ?? null, error: trash.json?.error ?? null });
+    say('teardown.trash', {
+      status: trash.status,
+      revision: trash.json?.revision ?? null,
+      error: trash.json?.error ?? null,
+    });
     const info2 = await post('deck.info', deckId, {});
     rev = info2.json?.revision ?? rev;
-    const remove = await post('deck.remove', deckId, { id: deckId, confirm: true, baseRevision: rev });
+    const remove = await post('deck.remove', deckId, {
+      id: deckId,
+      confirm: true,
+      baseRevision: rev,
+    });
     say('teardown.remove', { status: remove.status, body: remove.json });
     const gone = await fetch(`${BASE}/edit/${deckId}`, { redirect: 'manual' });
     say('teardown.editStatus', gone.status);

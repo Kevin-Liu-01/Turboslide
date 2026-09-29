@@ -519,9 +519,11 @@ describe('the proven read (pass 2)', () => {
     expect(cleared?.avatar).toBeUndefined();
     expect(indexUpdates.avatar(null)(cleared ?? base)).toBeNull();
     // the schema admits the field and refuses a picture variant on it
-    expect(deckIndexSchema.safeParse({ ...base, avatar: { variant: 'dither', salt: 1 } }).success).toBe(
-      true,
+    expect(
+      deckIndexSchema.safeParse({ ...base, avatar: { variant: 'dither', salt: 1 } }).success,
+    ).toBe(true);
+    expect(deckIndexSchema.safeParse({ ...base, avatar: { variant: 'picture' } }).success).toBe(
+      false,
     );
-    expect(deckIndexSchema.safeParse({ ...base, avatar: { variant: 'picture' } }).success).toBe(false);
   });
 });

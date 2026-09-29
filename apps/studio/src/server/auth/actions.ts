@@ -32,12 +32,7 @@ import {
 } from './avatar.ts';
 import type { AvatarStore } from './avatar.ts';
 import { deckIndexFor, identityRuntime, identityViewFor } from './identity.ts';
-import type {
-  AccountFacts,
-  DeckIndexView,
-  IdentityRuntime,
-  RequestIdentity,
-} from './identity.ts';
+import type { AccountFacts, DeckIndexView, IdentityRuntime, RequestIdentity } from './identity.ts';
 import { ANON_COOKIE, sealPrincipalCookie, serializeAnonymousCookie } from './session.ts';
 import type { ApiKeyRecord } from './tokens.ts';
 
@@ -89,7 +84,10 @@ type Subject = {
 };
 
 function subjectOf(identity: RequestIdentity): Subject | null {
-  if (identity.principalId !== null && (identity.kind === 'anonymous' || identity.kind === 'account'))
+  if (
+    identity.principalId !== null &&
+    (identity.kind === 'anonymous' || identity.kind === 'account')
+  )
     return { principalId: identity.principalId, account: identity.account, viaKey: false };
   if (identity.kind === 'agent' && identity.agent !== null && identity.account !== null) {
     if (identity.account.profile.deletedAt !== null) return null;

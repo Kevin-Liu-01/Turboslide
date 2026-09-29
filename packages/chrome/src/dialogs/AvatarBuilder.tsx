@@ -402,10 +402,7 @@ export function AvatarBuilderDialog() {
     if (active === null || active.pointerId !== event.pointerId) return;
     drag.current = null;
     const target = event.currentTarget;
-    if (
-      typeof target.hasPointerCapture === 'function' &&
-      target.hasPointerCapture(event.pointerId)
-    )
+    if (typeof target.hasPointerCapture === 'function' && target.hasPointerCapture(event.pointerId))
       target.releasePointerCapture(event.pointerId);
   };
   const onKeyDown = (event: KeyboardEvent<HTMLCanvasElement>) => {
@@ -624,10 +621,7 @@ export function AvatarBuilderDialog() {
                 >
                   {AVATAR_SENTENCES.privacy}
                 </p>
-                <p
-                  className="ts-avatar-sentence"
-                  data-control="dialog.avatarBuilder.cacheSentence"
-                >
+                <p className="ts-avatar-sentence" data-control="dialog.avatarBuilder.cacheSentence">
                   {AVATAR_SENTENCES.cache}
                 </p>
               </div>

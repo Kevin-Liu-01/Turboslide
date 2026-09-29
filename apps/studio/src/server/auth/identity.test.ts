@@ -323,7 +323,12 @@ describe('the account profile', () => {
       id,
       {
         variant: 'picture',
-        picture: { avatarKey: key, digest, sizes: [32, 64, 128, 256], base: `https://s.test/u/${key}` },
+        picture: {
+          avatarKey: key,
+          digest,
+          sizes: [32, 64, 128, 256],
+          base: `https://s.test/u/${key}`,
+        },
       },
       key,
     );

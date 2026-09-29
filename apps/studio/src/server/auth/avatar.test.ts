@@ -108,7 +108,9 @@ function fakeStore(): AvatarStore & {
 }
 
 /** A Blob client over a map, the shape `blobAvatarStore` needs and nothing more. */
-function fakeBlobClient(origin = 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com'): BlobClient & {
+function fakeBlobClient(
+  origin = 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com',
+): BlobClient & {
   puts: { pathname: string; options: BlobPutOptions }[];
   blobs: Map<string, BlobEntry>;
 } {
@@ -201,7 +203,9 @@ describe('processAvatar', () => {
     await expect(processAvatar(huge, newAvatarKey())).rejects.toThrow(AVATAR_TOO_LARGE);
     expect(sniffAvatar(huge)).toBeNull();
     // the data URL bound admits the cap's bytes in base64 with a header and nothing more
-    expect(AVATAR_MAX_DATA_URL_LENGTH).toBeGreaterThanOrEqual(Math.ceil(AVATAR_MAX_BYTES / 3) * 4 + 23);
+    expect(AVATAR_MAX_DATA_URL_LENGTH).toBeGreaterThanOrEqual(
+      Math.ceil(AVATAR_MAX_BYTES / 3) * 4 + 23,
+    );
     expect(AVATAR_MAX_DATA_URL_LENGTH).toBeLessThan(700_000);
     const tiny = await picture('png', 4, 4);
     await expect(processAvatar(tiny, newAvatarKey())).rejects.toThrow(AvatarRefusal);
@@ -306,7 +310,7 @@ describe('blobAvatarStore', () => {
 });
 
 describe('sweepOrphanAvatars', () => {
-  test('keeps a profile\'s key and a young key, removes an old orphan, and lists only on a dry run', async () => {
+  test("keeps a profile's key and a young key, removes an old orphan, and lists only on a dry run", async () => {
     const store = fakeStore();
     const profiles = memoryProfileStore();
     const principals = memoryPrincipalStore();

@@ -577,7 +577,6 @@ export type EditorAccount = {
   pictureUrl?: string;
 };
 
-
 /** One line of the Activity panel (SPEC-3 5.7): one plain sentence, the actor's mark, a tabular time. */
 export type ActivityEventView = {
   id: string;

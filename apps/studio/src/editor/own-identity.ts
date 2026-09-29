@@ -111,7 +111,8 @@ export function ownPictureUrlOf(
  * disambiguated map replaces this once it lands (build/b3.md R3); a map it carries wins here.
  */
 export function shellIdentitiesOf(
-  fromController: ReadonlyMap<string, IdentityView> | Readonly<Record<string, IdentityView>> | undefined,
+  fromController:
+    ReadonlyMap<string, IdentityView> | Readonly<Record<string, IdentityView>> | undefined,
   fromPayload: Readonly<Record<string, IdentityView>> | undefined,
   roster: readonly PresenceParticipant[],
   me: IdentityView,

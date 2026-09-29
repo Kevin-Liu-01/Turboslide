@@ -249,7 +249,12 @@ async function main(): Promise<unknown> {
       if (!isSeedFormat(format)) throw new Error('picture wants jpeg, png, webp or gif');
       const width = Math.max(1, Math.floor(Number(w ?? '256')));
       const height = Math.max(1, Math.floor(Number(h ?? '256')));
-      const bytes = await testPicture(format, width, height, fill === 'noise' ? 'noise' : 'gradient');
+      const bytes = await testPicture(
+        format,
+        width,
+        height,
+        fill === 'noise' ? 'noise' : 'gradient',
+      );
       return {
         base64: Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString('base64'),
         mime: MIME[format],

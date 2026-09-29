@@ -87,7 +87,12 @@ describe('participantOf', () => {
       { ...entry(USR, 'c4', 'Kevin Liu', 1), trust: 'verified', email: 'kevin@example.test' },
       now,
     );
-    expect(withEmail).toMatchObject({ hue: 2, email: 'kevin@example.test', kind: 'account', name: 'Kevin Liu' });
+    expect(withEmail).toMatchObject({
+      hue: 2,
+      email: 'kevin@example.test',
+      kind: 'account',
+      name: 'Kevin Liu',
+    });
   });
 });
 
@@ -104,7 +109,11 @@ describe('identityView', () => {
       avatar: { variant: 'glyph', salt: 3 },
     };
     const view = identityView(identity, author);
-    expect(view).toMatchObject({ principalId: USR, name: 'Kevin Liu', email: 'kevin@example.test' });
+    expect(view).toMatchObject({
+      principalId: USR,
+      name: 'Kevin Liu',
+      email: 'kevin@example.test',
+    });
     expect(view.mark).toEqual({ variant: 'glyph' });
     expect(view).not.toHaveProperty('avatar');
     expect(view.deleted).toBeUndefined();
@@ -161,10 +170,28 @@ describe('identityIndex', () => {
   it('tells two people of one text apart by first appearance across the log, the comments and the roster', () => {
     const label = 'Titanium 471';
     const resolved: Record<string, EditorIdentity> = {
-      [A]: { principalId: A, label, trust: 'label', kind: 'anonymous', mark: { initials: 'T' } as never },
-      [B]: { principalId: B, label, trust: 'label', kind: 'anonymous', mark: { initials: 'T' } as never },
+      [A]: {
+        principalId: A,
+        label,
+        trust: 'label',
+        kind: 'anonymous',
+        mark: { initials: 'T' } as never,
+      },
+      [B]: {
+        principalId: B,
+        label,
+        trust: 'label',
+        kind: 'anonymous',
+        mark: { initials: 'T' } as never,
+      },
       [C]: { principalId: C, label: 'Kevin', name: 'Kevin', trust: 'guest', kind: 'anonymous' },
-      [USR]: { principalId: USR, label: 'Cobalt 512', name: 'Kevin', trust: 'verified', kind: 'account' },
+      [USR]: {
+        principalId: USR,
+        label: 'Cobalt 512',
+        name: 'Kevin',
+        trust: 'verified',
+        kind: 'account',
+      },
     };
     const names = identityIndex({
       roster: [entry(A, 'c1', label, 0)],
@@ -187,7 +214,13 @@ describe('identityIndex', () => {
 
   it('counts people, never ids: an aliased anonymous id and its account are one person', () => {
     const resolved: Record<string, EditorIdentity> = {
-      [A]: { principalId: A, label: 'Silica 255', trust: 'verified', kind: 'anonymous', accountId: USR },
+      [A]: {
+        principalId: A,
+        label: 'Silica 255',
+        trust: 'verified',
+        kind: 'anonymous',
+        accountId: USR,
+      },
       [USR]: { principalId: USR, label: 'Silica 255', trust: 'verified', kind: 'account' },
       [B]: { principalId: B, label: 'Silica 255', trust: 'label', kind: 'anonymous' },
     };
@@ -197,7 +230,11 @@ describe('identityIndex', () => {
       author,
       threads: [],
       resolved,
-      versions: [version(1, A, 'Silica 255'), version(2, B, 'Silica 255'), version(3, USR, 'Silica 255')],
+      versions: [
+        version(1, A, 'Silica 255'),
+        version(2, B, 'Silica 255'),
+        version(3, USR, 'Silica 255'),
+      ],
     });
     expect(names.get(A)?.label).toBe('Silica 255');
     expect(names.get(USR)?.label).toBe('Silica 255');

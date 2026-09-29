@@ -71,7 +71,10 @@ describe('meAnswerFacts', () => {
   });
 
   it('keeps the salt a number and drops one that is not', () => {
-    expect(avatarChoiceOf({ variant: 'glyph', salt: 12345 })).toEqual({ variant: 'glyph', salt: 12345 });
+    expect(avatarChoiceOf({ variant: 'glyph', salt: 12345 })).toEqual({
+      variant: 'glyph',
+      salt: 12345,
+    });
     expect(avatarChoiceOf({ variant: 'glyph', salt: '12345' })).toEqual({ variant: 'glyph' });
     expect(avatarChoiceOf({ variant: 'initials', initials: 'KL' })).toEqual({
       variant: 'initials',
@@ -134,7 +137,9 @@ describe('ownPictureUrlOf', () => {
     ).toBe(PICTURE);
     expect(ownPictureUrlOf({ variant: 'glyph', salt: 1 }, undefined)).toBeUndefined();
     expect(
-      ownPictureUrlOf({ variant: 'glyph' }, { variant: 'initials' } as unknown as IdentityView['mark']),
+      ownPictureUrlOf({ variant: 'glyph' }, {
+        variant: 'initials',
+      } as unknown as IdentityView['mark']),
     ).toBeUndefined();
     expect(ownPictureUrlOf(null, undefined)).toBeUndefined();
   });
@@ -166,7 +171,9 @@ describe('shellIdentitiesOf', () => {
     expect(shellIdentitiesOf(map, fromPayload, [other], payload)).toEqual({
       [payload.principalId]: payload,
     });
-    expect(shellIdentitiesOf({ x: payload }, fromPayload, [other], payload)).toEqual({ x: payload });
+    expect(shellIdentitiesOf({ x: payload }, fromPayload, [other], payload)).toEqual({
+      x: payload,
+    });
   });
 
   it('else the payload map under the roster rows under the caller, roster rows stripped of the room facts', () => {

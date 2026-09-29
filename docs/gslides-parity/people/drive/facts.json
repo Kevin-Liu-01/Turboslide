@@ -404,12 +404,7 @@
     "name": "studio",
     "sentence": "Not signed in",
     "chip": "studio, guest",
-    "rows": [
-      "account.changeName",
-      "account.changeAvatar",
-      "account.forget",
-      "account.sessions"
-    ]
+    "rows": ["account.changeName", "account.changeAvatar", "account.forget", "account.sessions"]
   },
   "shot.accountMenu.A.anon": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-account-menu-anonymous.png",
   "changeName.dialog": {
@@ -708,12 +703,7 @@
     "name": "studio",
     "sentence": "Not signed in",
     "chip": "studio, guest",
-    "rows": [
-      "account.changeName",
-      "account.changeAvatar",
-      "account.forget",
-      "account.sessions"
-    ]
+    "rows": ["account.changeName", "account.changeAvatar", "account.forget", "account.sessions"]
   },
   "shot.accountMenu.A.named": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-account-menu-named.png",
   "versions.A.light": {
@@ -738,9 +728,7 @@
     "windows": [
       {
         "text": "AL11:56 AM to 11:56 AMYou · 1 change▾",
-        "marks": [
-          "Ada Lovelace, guest"
-        ]
+        "marks": ["Ada Lovelace, guest"]
       }
     ]
   },
@@ -805,9 +793,7 @@
     "windows": [
       {
         "text": "AL11:56 AM to 11:56 AMAda Lovelace · 0 changes▾",
-        "marks": [
-          "Ada Lovelace, guest"
-        ]
+        "marks": ["Ada Lovelace, guest"]
       }
     ]
   },

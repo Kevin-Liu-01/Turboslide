@@ -196,7 +196,10 @@ describe('the people round', () => {
   });
 
   test('pictureUrl is the 64 px file of a picture choice and absent otherwise', () => {
-    const account = resolvePrincipal(USR, lookup({ account: () => ({ ...KEVIN, avatar: PICTURE }) }));
+    const account = resolvePrincipal(
+      USR,
+      lookup({ account: () => ({ ...KEVIN, avatar: PICTURE }) }),
+    );
     expect(account.pictureUrl).toBe(`${PICTURE.picture.base}/${DIGEST}-64.webp`);
     const record = { ...newPrincipalRecord(ANON), avatar: PICTURE };
     const anonymous = resolvePrincipal(ANON, lookup({ record: () => record }));
@@ -228,7 +231,9 @@ describe('the people round', () => {
       }),
     );
     expect(toIdentityView(aliased).accountId).toBe('usr_01JKEVIN');
-    expect(toIdentityView(resolvePrincipal(USR, lookup({ account: () => KEVIN }))).accountId).toBeUndefined();
+    expect(
+      toIdentityView(resolvePrincipal(USR, lookup({ account: () => KEVIN }))).accountId,
+    ).toBeUndefined();
     expect(toIdentityView(resolvePrincipal(ANON, lookup())).accountId).toBeUndefined();
     const deleted = resolvePrincipal(
       ANON,
@@ -244,7 +249,9 @@ describe('the people round', () => {
     const gone = resolvePrincipal(USR, lookup());
     expect(toIdentityView(gone).deleted).toBe(true);
     expect(toIdentityView(gone, { showEmail: true }).email).toBeUndefined();
-    expect(toIdentityView(resolvePrincipal(USR, lookup({ account: () => KEVIN }))).deleted).toBeUndefined();
+    expect(
+      toIdentityView(resolvePrincipal(USR, lookup({ account: () => KEVIN }))).deleted,
+    ).toBeUndefined();
     expect(toIdentityView(resolvePrincipal(ANON, lookup())).deleted).toBeUndefined();
   });
 });

@@ -51,7 +51,10 @@ vi.mock('../parked-controls', () => ({
 function host(
   accountOverrides: Partial<EditorAccount> = {},
   settings: ShellSettings = DEFAULT_SETTINGS,
-): { Host: ({ children }: { children: ReactNode }) => ReactNode; closeDialog: ReturnType<typeof vi.fn> } {
+): {
+  Host: ({ children }: { children: ReactNode }) => ReactNode;
+  closeDialog: ReturnType<typeof vi.fn>;
+} {
   const account: EditorAccount = {
     principal: {
       principalId: 'usr_7e2f00000000400080000000',
@@ -92,7 +95,10 @@ function host(
   return { Host, closeDialog };
 }
 
-function stubCanvas(blobBytes: number, blobType = 'image/webp'): { ctx: Ctx; toBlob: ReturnType<typeof vi.fn> } {
+function stubCanvas(
+  blobBytes: number,
+  blobType = 'image/webp',
+): { ctx: Ctx; toBlob: ReturnType<typeof vi.fn> } {
   const ctx: Ctx = { clearRect: vi.fn(), drawImage: vi.fn() };
   Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
     configurable: true,
@@ -101,7 +107,10 @@ function stubCanvas(blobBytes: number, blobType = 'image/webp'): { ctx: Ctx; toB
   const toBlob = vi.fn((cb: (blob: Blob | null) => void) => {
     cb(new Blob([new Uint8Array(blobBytes)], { type: blobType }));
   });
-  Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', { configurable: true, value: toBlob });
+  Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+    configurable: true,
+    value: toBlob,
+  });
   return { ctx, toBlob };
 }
 
@@ -195,7 +204,9 @@ describe('AvatarBuilderDialog, the Picture tab', () => {
   it('decodes the file with the orientation applied, takes the drag, encodes the square at 256 px and hands the data URL to setAvatar', async () => {
     const { ctx, toBlob } = stubCanvas(24 * 1024);
     const create = stubBitmap(1200, 900);
-    const setAvatar = vi.fn<(choice: AvatarChoiceInput) => Promise<unknown>>(() => Promise.resolve({}));
+    const setAvatar = vi.fn<(choice: AvatarChoiceInput) => Promise<unknown>>(() =>
+      Promise.resolve({}),
+    );
     const { Host, closeDialog } = host({ setAvatar });
     render(
       <Host>
@@ -207,9 +218,7 @@ describe('AvatarBuilderDialog, the Picture tab', () => {
     expect(control('dialog.avatarBuilder.privacySentence').textContent).toBe(
       AVATAR_SENTENCES.privacy,
     );
-    expect(control('dialog.avatarBuilder.cacheSentence').textContent).toBe(
-      AVATAR_SENTENCES.cache,
-    );
+    expect(control('dialog.avatarBuilder.cacheSentence').textContent).toBe(AVATAR_SENTENCES.cache);
     const apply = screen.getByRole('button', { name: 'Apply' }) as HTMLButtonElement;
     expect(apply.disabled).toBe(true);
     const file = jpeg();
@@ -251,7 +260,9 @@ describe('AvatarBuilderDialog, the Picture tab', () => {
   it('refuses a resized picture over 512 KB before a data URL is made, and no request leaves', async () => {
     stubCanvas(AVATAR_MAX_BYTES + 1);
     stubBitmap(1200, 900);
-    const setAvatar = vi.fn<(choice: AvatarChoiceInput) => Promise<unknown>>(() => Promise.resolve({}));
+    const setAvatar = vi.fn<(choice: AvatarChoiceInput) => Promise<unknown>>(() =>
+      Promise.resolve({}),
+    );
     const { Host, closeDialog } = host({ setAvatar });
     render(
       <Host>
@@ -297,7 +308,9 @@ describe('AvatarBuilderDialog, the Picture tab', () => {
   });
 
   it('reads "Sign in to upload a picture" with Apply disabled for an anonymous person', async () => {
-    const setAvatar = vi.fn<(choice: AvatarChoiceInput) => Promise<unknown>>(() => Promise.resolve({}));
+    const setAvatar = vi.fn<(choice: AvatarChoiceInput) => Promise<unknown>>(() =>
+      Promise.resolve({}),
+    );
     const { Host } = host({
       signedIn: false,
       setAvatar,
@@ -324,7 +337,9 @@ describe('AvatarBuilderDialog, the Picture tab', () => {
   });
 
   it('draws the current picture in the strip at the ladder sizes and keeps it on Apply with nothing new chosen', async () => {
-    const setAvatar = vi.fn<(choice: AvatarChoiceInput) => Promise<unknown>>(() => Promise.resolve({}));
+    const setAvatar = vi.fn<(choice: AvatarChoiceInput) => Promise<unknown>>(() =>
+      Promise.resolve({}),
+    );
     const { Host, closeDialog } = host({
       setAvatar,
       avatar: { variant: 'picture', url: PICTURE_URL },
@@ -344,7 +359,9 @@ describe('AvatarBuilderDialog, the Picture tab', () => {
     );
     expect(pictures).toHaveLength(8);
     const at = (size: number) =>
-      pictures.find((img) => img.closest('.ts-avatar-cell')?.getAttribute('data-size') === String(size))!;
+      pictures.find(
+        (img) => img.closest('.ts-avatar-cell')?.getAttribute('data-size') === String(size),
+      )!;
     expect(at(24).getAttribute('src')).toBe(PICTURE_URL.replace('-64.webp', '-32.webp'));
     expect(at(24).getAttribute('srcset')).toContain('-64.webp 2x');
     expect(at(64).getAttribute('src')).toBe(PICTURE_URL);
@@ -380,7 +397,9 @@ describe('AvatarBuilderDialog, the Picture tab', () => {
 
 describe('AvatarBuilderDialog, the current choice', () => {
   it('starts from the current glyph and its salt, so Apply without Another keeps the same glyph', async () => {
-    const setAvatar = vi.fn<(choice: AvatarChoiceInput) => Promise<unknown>>(() => Promise.resolve({}));
+    const setAvatar = vi.fn<(choice: AvatarChoiceInput) => Promise<unknown>>(() =>
+      Promise.resolve({}),
+    );
     const { Host } = host({ setAvatar, avatar: { variant: 'glyph', salt: 12345 } });
     render(
       <Host>
@@ -395,7 +414,10 @@ describe('AvatarBuilderDialog, the current choice', () => {
 
   it('hides the Picture tab while the panel is parked and starts on Initials for a parked picture choice', () => {
     parked.picture = true;
-    const { Host } = host({ avatar: { variant: 'picture', url: PICTURE_URL }, pictureUrl: PICTURE_URL });
+    const { Host } = host({
+      avatar: { variant: 'picture', url: PICTURE_URL },
+      pictureUrl: PICTURE_URL,
+    });
     render(
       <Host>
         <AvatarBuilderDialog />

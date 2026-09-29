@@ -10,7 +10,12 @@ const DIGEST = 'a'.repeat(64);
 const BASE = 'https://store.example.test/u/AbCdEfGhIjKlMnOpQrStUv';
 const CHOICE: AvatarChoice = {
   variant: 'picture',
-  picture: { avatarKey: 'AbCdEfGhIjKlMnOpQrStUv', digest: DIGEST, sizes: [32, 64, 128, 256], base: BASE },
+  picture: {
+    avatarKey: 'AbCdEfGhIjKlMnOpQrStUv',
+    digest: DIGEST,
+    sizes: [32, 64, 128, 256],
+    base: BASE,
+  },
 };
 
 describe('pictureUrlOf', () => {
@@ -34,7 +39,8 @@ describe('pictureUrlAt', () => {
 
   test('answers each size from the 64 px URL', () => {
     expect(mark).toBe(`${BASE}/${DIGEST}-64.webp`);
-    for (const size of PICTURE_SIZES) expect(pictureUrlAt(mark, size)).toBe(`${BASE}/${DIGEST}-${size}.webp`);
+    for (const size of PICTURE_SIZES)
+      expect(pictureUrlAt(mark, size)).toBe(`${BASE}/${DIGEST}-${size}.webp`);
   });
 
   test('keeps a checkout route base as it is', () => {

@@ -20,6 +20,7 @@ export const IDS = [
   'text.heading.enter-keeps-session',
   'text.link.chip-on-click',
   'text.title.shrink-on-overflow',
+  'text.title.second-session-survives-reload',
   'text.link.popover-anchored',
   'text.link.detection-setting',
   'text.tail.size-reads-heading',
@@ -741,6 +742,57 @@ export async function run(t) {
       return {
         ok,
         observed: `font ${sizeBefore} -> ${info?.font} px over ${info?.lines} lines; ring height ${ringBefore ? r1(ringBefore.h) : '?'} -> ${ringAfter ? r1(ringAfter.h) : '?'} sheet px (kept ${ringKept}); text inside the sheet ${inside} (k ${r1(k)})${ok ? '' : ` (docs/POLISH.md 2.3 item 21, ${LANE})`}`,
+      };
+    },
+  );
+
+  // ---- the fix round (VERIFICATION.md "Polish round, pass 1" finding 1): a title that wrapped
+  // keeps its last words, and a second session on it lands; both read from the document after a
+  // reload, since the stage keeps the session's text until then and the walk's other title rows
+  // read the DOM. The shrink's size write rides the last burst and converts the cover to a canvas
+  // in the same write (controller.tsx convertThenCommit); the burst's field run must follow it to
+  // the canvas block (convert-first.ts retargetFieldRuns) or the reducer refuses the whole write.
+  await t.step(
+    'text.title.second-session-survives-reload',
+    'a title that wraps typed over the placeholder; Escape; the title opened again, End, more words; Escape; the page reloaded',
+    "the document's heading holds both sessions' words after the reload, the stage draws them and no write was refused",
+    async () => {
+      await clickTitle();
+      await t.typeHuman('Onboarding plan for Acme in ninety days');
+      await t.sleep(300);
+      await escapeOut();
+      const snackFirst = await t.snackbar();
+      await t.clearAll();
+      const on = await t.openRun(HEAD);
+      await t.press('End');
+      await t.typeHuman(' and beyond');
+      await t.sleep(300);
+      await escapeOut();
+      const snackSecond = await t.snackbar();
+      const staged = await headingText();
+      await t.reloadTo(`${BASE}/edit/${t.deck.id}#s/${TS}`);
+      await t.settled();
+      await onTitleSlide();
+      const slide = await t.slideJson(TS);
+      const headingId = slide?.grammar?.slots?.main?.[1] ?? 'heading';
+      const stored =
+        slide?.kind === 'title'
+          ? (slide.heading ?? '')
+          : ((slide?.slots?.main ?? []).find((b) => b.id === headingId)?.text ?? '');
+      const drawn = await headingText();
+      const refused = [snackFirst, snackSecond].some(
+        (text) => text !== null && /refused|is not a string|No block/.test(text),
+      );
+      const ok =
+        on &&
+        stored.includes('in ninety days') &&
+        stored.includes('and beyond') &&
+        drawn.includes('and beyond') &&
+        !refused;
+      await t.clearAll();
+      return {
+        ok,
+        observed: `staged "${staged}"; stored after reload "${stored}" (slide kind ${slide?.kind}); drawn "${drawn}"; snackbars ${JSON.stringify([snackFirst, snackSecond])}${ok ? '' : ' (VERIFICATION.md "Polish round, pass 1" finding 1; the integrator)'}`,
       };
     },
   );

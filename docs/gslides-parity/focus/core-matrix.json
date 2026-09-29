@@ -8104,6 +8104,16 @@
       "note": "Polish round; docs/POLISH.md 2.3 item 21; B1"
     },
     {
+      "id": "text.title.second-session-survives-reload",
+      "feature": "text",
+      "interaction": "A title that wraps typed over the placeholder and Escape; the title opened again, more words typed and Escape; the page reloaded: the document's heading holds both sessions' words, the stage draws them and no write was refused",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "VERIFICATION.md \"Polish round, pass 1\" finding 1",
+      "note": "Polish round fix round; the integrator's fixer; convert-first.ts retargetFieldRuns"
+    },
+    {
       "id": "text.link.popover-anchored",
       "feature": "text",
       "interaction": "Cmd+K with a text box selected: the Link bar's top is within 8 px below the selection's ring and inside the viewport; the slides dropdown's label is whole",

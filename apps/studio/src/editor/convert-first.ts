@@ -11,8 +11,8 @@
 // Clear formatting land on the cover title from one click. Pure: this module says which slide
 // needs converting; the controller measures and converts.
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
-import { slideBlocks } from '@turboslide/schema/deck';
-import type { Mutation } from '@turboslide/schema/mutations';
+import { isCanvasSlide, slideBlocks } from '@turboslide/schema/deck';
+import type { Mutation, SlideFieldId } from '@turboslide/schema/mutations';
 import { slideFieldOf, slideFieldPath } from '@turboslide/schema/mutations';
 
 /**
@@ -75,4 +75,60 @@ export function slideToConvertFor(
     return slide.id;
   }
   return null;
+}
+
+/**
+ * The block a slide field became on the canvas a conversion made (schema/canvas.ts `toCanvas`):
+ * the title's main slot lists the mark, the heading and the lead in that order, the statement's
+ * lists the big line, and the record's ids are read the way the reducer's `deckTitleSource` reads
+ * the heading's. Null when `after` is not a canvas of the field's kind or the block is not there.
+ */
+function canvasFieldBlockId(after: Slide, field: SlideFieldId): string | null {
+  if (!isCanvasSlide(after) || after.grammar === undefined) return null;
+  const main = after.grammar.slots?.main;
+  const id =
+    after.grammar.kind === 'title' && field === 'heading'
+      ? (main?.[1] ?? 'heading')
+      : after.grammar.kind === 'title' && field === 'lead'
+        ? (main?.[2] ?? 'lead')
+        : after.grammar.kind === 'statement' && field === 'big'
+          ? (main?.[0] ?? 'big')
+          : null;
+  if (id === null) return null;
+  const block = slideBlocks(after).find((each) => each.block.id === id)?.block;
+  return block !== undefined && 'text' in block && typeof block.text === 'string' ? id : null;
+}
+
+/**
+ * The write's field text runs re-addressed to the canvas the same write makes (VERIFICATION.md
+ * "Polish round, pass 1" finding 1). A text run on the cover's heading names the field (`blockId`
+ * `heading`, `path` `/heading`, docs/SYNC.md 3.4) and converts nothing on its own; when another
+ * mutation of the same write converts the slide first (the placeholder shrink's `block.set
+ * /typography` and `/pos/h` on the title's last burst, docs/POLISH.md 2.3 item 21), the measured
+ * `slide.replace` travels in front and the run is applied to a content slide, where `heading` is
+ * a block whose Text sits at `/text`: the reducer refused it as `/heading is not a string on
+ * block "heading"` and the whole write with it, so a title that wrapped lost its last words on
+ * the next reload and every later session on it was refused. The run's plain offsets are the
+ * block's too, since the conversion carries the field's markup over unchanged. A run on another
+ * slide, on a block, or on a field the canvas did not make is returned as it stands.
+ */
+export function retargetFieldRuns(
+  before: Slide,
+  after: Slide,
+  mutations: ReadonlyArray<Mutation>,
+): Mutation[] {
+  return mutations.map((mutation) => {
+    if (!('slideId' in mutation) || mutation.slideId !== before.id) return mutation;
+    if (!isSlideFieldTextRun(before, mutation)) return mutation;
+    if (
+      mutation.op !== 'text.splice' &&
+      mutation.op !== 'text.mark' &&
+      mutation.op !== 'text.replace'
+    )
+      return mutation;
+    const field = slideFieldOf(before, mutation.blockId);
+    const blockId = field === null ? null : canvasFieldBlockId(after, field);
+    if (blockId === null) return mutation;
+    return { ...mutation, blockId, path: '/text' };
+  });
 }

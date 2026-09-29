@@ -7,7 +7,7 @@ import { planAcceptedCard, withAssistClear } from './assist-accept';
 import { autoTitleMutations } from './auto-title';
 import type { AutoTitleMemory } from './auto-title';
 import { awaitAcknowledged } from './ack-wait';
-import { slideToConvertFor } from './convert-first';
+import { retargetFieldRuns, slideToConvertFor } from './convert-first';
 import { createExportModeGate } from './export-mode';
 import { refusalSentence } from './refusal';
 import { refusalText } from '@turboslide/chrome/error-text';
@@ -2614,7 +2614,16 @@ export function createEditorController(init: {
       if (again !== null) return convertThenCommit(again, mutations, label);
       return commitAs(withAutoTitle(mutations), label, 'edit');
     }
-    return commitAs(withAutoTitle([...canvas.prefix, ...mutations]), label, 'edit');
+    /* the write's text runs on the slide's fields follow the conversion to the canvas's blocks
+       (convert-first.ts `retargetFieldRuns`): the reducer resolves a run by the slide's kind, and
+       the kind is a content slide once the prefix applied (VERIFICATION.md "Polish round, pass 1"
+       finding 1: the title's last burst, riding with the placeholder shrink's size write, was
+       refused as `/heading is not a string on block "heading"` and its words left on reload) */
+    return commitAs(
+      withAutoTitle([...canvas.prefix, ...retargetFieldRuns(slide, canvas.slide, mutations)]),
+      label,
+      'edit',
+    );
   };
   const commit = (rawMutations: Mutation[], label: string): Promise<Committed> => {
     /* the seller's edit of an assisted block clears its mark (docs/PRODUCT.md 6.1) */

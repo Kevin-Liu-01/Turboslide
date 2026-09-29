@@ -230,7 +230,19 @@ async function runText(p: Page, run: string): Promise<string | null> {
 async function headingOf(p: Page): Promise<string> {
   const first = (await slideOrder(p))[0]!;
   const slide = await slideJson(p, first);
-  return String(slide['heading'] ?? '').replace(/\u00a0/g, ' ');
+  /* the cover's heading is the title slide's field, or the heading block of the cover once a
+     write converted it to a canvas (the placeholder shrink's size write rides a title's last
+     burst when the words wrap, docs/POLISH.md 2.3 item 21; the block is the one the grammar
+     record's main slot names second, as the reducer's deckTitleSource reads it). The field alone
+     read "" for every round after the first on a title that wrapped (VERIFICATION.md "Polish
+     round, pass 1" finding 1, the collab audit's concurrent rounds 2 and 3) */
+  if (slide['kind'] === 'title') return String(slide['heading'] ?? '').replace(/\u00a0/g, ' ');
+  const grammar = slide['grammar'] as { slots?: { main?: string[] } } | undefined;
+  const id = grammar?.slots?.main?.[1] ?? 'heading';
+  const main = ((slide['slots'] as { main?: { id: string; text?: unknown }[] } | undefined)?.main ??
+    []) as { id: string; text?: unknown }[];
+  const block = main.find((b) => b.id === id);
+  return String(block?.text ?? '').replace(/\u00a0/g, ' ');
 }
 /** The plain text of a block's text field through the window API. */
 async function blockText(p: Page, slideId: string, blockId: string): Promise<string> {

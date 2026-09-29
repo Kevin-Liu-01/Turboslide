@@ -5,13 +5,16 @@
 // public origin, which is the deployment's `TURBOSLIDE_PUBLIC_ORIGIN` when set, else the origin
 // the caller derived from its request, else the production address.
 
-/** The sentence the README opens with (R05 6.10), reused by the head, the manifest and the card. */
+/**
+ * The one description of the product (docs/POLISH.md 3.6): the /home hero's lead, reused by the
+ * head, the manifest, the card and the README so the four never drift.
+ */
 const DESCRIPTION =
-  "An agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export.";
+  "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.";
 
-/** The card's alt text (SPEC-4 1.6). */
+/** The card's alt text (SPEC-4 1.6; docs/POLISH.md 3.6). */
 const IMAGE_ALT =
-  'The Turboslide mark and name on a plate cut from a two tone dithered liquid metal frame';
+  'The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser and the address www.turboslide.com, on a plate cut from a two tone dithered frame';
 
 export type ManifestIcon = {
   src: string;
@@ -84,8 +87,8 @@ export const SITE = {
   name: 'Turboslide',
   description: DESCRIPTION,
   imageAlt: IMAGE_ALT,
-  /** the hosted studio (docs/hosting.md) */
-  productionOrigin: 'https://turboslide.vercel.app',
+  /** the hosted studio (docs/hosting.md; docs/POLISH.md section 0 item 3: the domain) */
+  productionOrigin: 'https://www.turboslide.com',
   repository: 'https://github.com/Kevin-Liu-01/Turboslide',
   /**
    * The public origin for absolute URLs (the card, `og:url`): `TURBOSLIDE_PUBLIC_ORIGIN` when the

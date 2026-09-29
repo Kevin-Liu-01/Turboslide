@@ -565,14 +565,21 @@ function lockupStackedSvg(): string {
   );
 }
 
-// The Open Graph card (SPEC-4 1.7; design-4/dither/og.html): 1200 by 630 in the dark appearance,
-// the hero frame through the screen at 10 px cells behind, the plate cut from it at the mark's
-// proportions (left 150, width 600, bottom 79, height 236) with the 48 px solid mark, the word as
-// outlines and the one sentence, the address top left on its own plate; nothing that matters
-// within 48 px of an edge. The page links tokens.css, brand.css and inter.css by relative paths so
-// the type and the tokens are the product's.
+// The Open Graph card (SPEC-4 1.7; design-4/dither/og.html; docs/POLISH.md 3.6): 1200 by 630 in
+// the dark appearance, the hero frame through the screen at 10 px cells behind, the plate cut from
+// it at the mark's proportions (left 150, width 600, top 79, height 236) with the 48 px solid mark,
+// the word as outlines and the lead's first sentence, the address bottom left on its own plate
+// (`SITE.productionOrigin`, so the card prints the domain); nothing that matters within 48 px of
+// an edge. The page links tokens.css, brand.css and inter.css by relative paths so the type and the
+// tokens are the product's.
 const CARD = { width: 1200, height: 630 } as const;
-const CARD_PLATE = { left: 150, width: 600, bottom: 79, height: 236 } as const;
+const CARD_PLATE = { left: 150, width: 600, top: 79, height: 236 } as const;
+
+/** The card's sentence: the first sentence of the one description (POLISH.md 3.6). */
+function cardSentence(): string {
+  const first = /^[^.]*\./.exec(SITE.description);
+  return first === null ? SITE.description : first[0];
+}
 
 async function ogTemplateHtml(outline: { d: string; widthPx: number } | null): Promise<string> {
   const scale = WORD_PX / 2048;
@@ -595,10 +602,10 @@ async function ogTemplateHtml(outline: { d: string; widthPx: number } | null): P
   apps/studio/public/og/turboslide.png. The composition is the mark at card size: the hero's frame
   through the screen at 10 px cells (${TWIN_PATHS.ogScreen.dark}, 120 by 63 cells, so a 552 px feed
   card still shows 4.6 px cells and a 360 px unfurl 3 px); the plate cut from it at the mark's
-  proportions (left ${CARD_PLATE.left}, width ${CARD_PLATE.width}, bottom ${CARD_PLATE.bottom}, height ${CARD_PLATE.height}) carrying the 48 px solid mark, the word
-  as outlines and the one sentence; the address top left on its own plate. Nothing that matters
-  sits within 48 px of an edge (X crops 1.91:1 to 2:1). Generated; edit the template function in
-  scripts/build-brand.ts.
+  proportions (left ${CARD_PLATE.left}, width ${CARD_PLATE.width}, top ${CARD_PLATE.top}, height ${CARD_PLATE.height}) carrying the 48 px solid mark, the word
+  as outlines and the lead's first sentence; the address bottom left on its own plate
+  (docs/POLISH.md 3.6). Nothing that matters sits within 48 px of an edge (X crops 1.91:1 to
+  2:1). Generated; edit the template function in scripts/build-brand.ts.
 -->
 <link rel="stylesheet" href="../../fonts/src/inter.css">
 <link rel="stylesheet" href="../../chrome/src/tokens.css">
@@ -607,13 +614,13 @@ async function ogTemplateHtml(outline: { d: string; widthPx: number } | null): P
 html, body { margin: 0; }
 body { width: ${CARD.width}px; height: ${CARD.height}px; overflow: hidden; background: var(--pt-paper); color: var(--pt-ink); font-family: var(--pt-display); font-feature-settings: 'cv11', 'ss01'; -webkit-font-smoothing: antialiased; }
 .card { position: relative; width: ${CARD.width}px; height: ${CARD.height}px; background: url('${screen}') 0 0 no-repeat; background-size: ${CARD.width}px ${CARD.height}px; image-rendering: pixelated; }
-.plate { position: absolute; left: ${CARD_PLATE.left}px; bottom: ${CARD_PLATE.bottom}px; width: ${CARD_PLATE.width}px; height: ${CARD_PLATE.height}px; box-sizing: border-box; background: var(--ts-plate); padding: 30px 32px 0; }
+.plate { position: absolute; left: ${CARD_PLATE.left}px; top: ${CARD_PLATE.top}px; width: ${CARD_PLATE.width}px; height: ${CARD_PLATE.height}px; box-sizing: border-box; background: var(--ts-plate); padding: 30px 32px 0; }
 .lock { display: flex; align-items: flex-end; gap: ${WORD_GAP_PX}px; height: ${WORD_PX}px; }
 .lock .mark { width: ${WORD_MARK_PX}px; height: ${WORD_MARK_PX}px; fill: currentColor; display: block; margin-bottom: ${WORD_PX - WORD_BASELINE_Y}px; }
 .lock .word { display: block; fill: currentColor; }
 .lock b { font-weight: 500; font-size: ${WORD_PX}px; line-height: 1; letter-spacing: ${WORD_TRACK_EM}em; }
 .plate p { margin: 22px 0 0; font-family: var(--pt-text); font-size: 22px; line-height: 1.4; color: var(--pt-ink-2); max-width: 536px; }
-.url { position: absolute; left: ${CARD_PLATE.left}px; top: 60px; font-family: var(--pt-mono); font-size: 20px; color: var(--pt-ink); background: var(--ts-plate); padding: 6px 12px; }
+.url { position: absolute; left: ${CARD_PLATE.left}px; bottom: 60px; font-family: var(--pt-mono); font-size: 20px; color: var(--pt-ink); background: var(--ts-plate); padding: 6px 12px; }
 </style>
 </head>
 <body>
@@ -621,7 +628,7 @@ body { width: ${CARD.width}px; height: ${CARD.height}px; overflow: hidden; backg
   <span class="url">${SITE.productionOrigin.replace(/^https?:\/\//, '')}</span>
   <div class="plate">
     <div class="lock"><svg class="mark" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill-rule="evenodd" d="${markPath(2)}"/></svg>${word}</div>
-    <p>${SITE.description}</p>
+    <p>${cardSentence()}</p>
   </div>
 </div>
 </body>

@@ -1,0 +1,17 @@
+01-new-presentation: The fresh Untitled presentation on the Title slide in the dark appearance: the title row, the menu bar, the toolbar, the filmstrip and the speaker notes pane.
+13-editor-light: The editor on a Title and body slide with typed text, in the light appearance.
+06-canvas-rotation: A picture rotated by its handle, with the degree readout.
+02-file-menu: The File menu open with its Download submenu.
+05-filmstrip-menu: The filmstrip's right click menu with Google's rows.
+07-canvas-snap-guides: A picture dragged into alignment with a snap guide.
+04-layout-grid: The layout grid with Google's eleven layouts and the GT layouts after them.
+03-insert-menu: The Insert menu with the Image submenu.
+08-format-options: Format options on a picture.
+09-download-dialog: The Download dialog with Perfect and Editable text.
+11-presenter-console: Presenter view with the timer, the notes and the previews.
+14-book-view: The viewer's book view of the GT brand deck.
+15-grid-view: The viewer's grid view of the GT deck's Brand section.
+10-decks-home: The home page at /decks with the search field and the cards.
+12-slideshow-dither: The Blue Marble slide of the GT deck in the slideshow, a two tone dither with its plate.
+hero-frame: The liquid metal material, one continuous frame before the two tone screen.
+svg: Turboslide

@@ -9,10 +9,10 @@
   apps/studio/public/og/turboslide.png. The composition is the mark at card size: the hero's frame
   through the screen at 10 px cells (/brand/og-screen-dark.png, 120 by 63 cells, so a 552 px feed
   card still shows 4.6 px cells and a 360 px unfurl 3 px); the plate cut from it at the mark's
-  proportions (left 150, width 600, bottom 79, height 236) carrying the 48 px solid mark, the word
-  as outlines and the one sentence; the address top left on its own plate. Nothing that matters
-  sits within 48 px of an edge (X crops 1.91:1 to 2:1). Generated; edit the template function in
-  scripts/build-brand.ts.
+  proportions (left 150, width 600, top 79, height 236) carrying the 48 px solid mark, the word
+  as outlines and the lead's first sentence; the address bottom left on its own plate
+  (docs/POLISH.md 3.6). Nothing that matters sits within 48 px of an edge (X crops 1.91:1 to
+  2:1). Generated; edit the template function in scripts/build-brand.ts.
 -->
     <link rel="stylesheet" href="../../fonts/src/inter.css" />
     <link rel="stylesheet" href="../../chrome/src/tokens.css" />
@@ -43,7 +43,7 @@
       .plate {
         position: absolute;
         left: 150px;
-        bottom: 79px;
+        top: 79px;
         width: 600px;
         height: 236px;
         box-sizing: border-box;
@@ -84,7 +84,7 @@
       .url {
         position: absolute;
         left: 150px;
-        top: 60px;
+        bottom: 60px;
         font-family: var(--pt-mono);
         font-size: 20px;
         color: var(--pt-ink);
@@ -95,7 +95,7 @@
   </head>
   <body>
     <div class="card">
-      <span class="url">turboslide.vercel.app</span>
+      <span class="url">www.turboslide.com</span>
       <div class="plate">
         <div class="lock">
           <svg class="mark" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
@@ -107,10 +107,7 @@
             />
           </svg>
         </div>
-        <p>
-          An agent native slides editor with Google Slides' behaviours, a canvas on every slide and
-          a pixel identical PowerPoint export.
-        </p>
+        <p>Turboslide is a slides editor in the browser.</p>
       </div>
     </div>
   </body>

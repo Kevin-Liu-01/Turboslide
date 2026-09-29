@@ -92,13 +92,13 @@
       "kind": "built"
     },
     "apps/studio/public/manifest.webmanifest": {
-      "bytes": 971,
-      "sha256": "e11add99257e1f3e372ff96b2766a90e58fff6955c6c19768a0be65883cbb848",
+      "bytes": 955,
+      "sha256": "cd08afdec0eb3353883469ac69b8c4bbd559fae8bf84d6928f47235e7020c19c",
       "kind": "built"
     },
     "apps/studio/public/og/turboslide.png": {
-      "bytes": 29818,
-      "sha256": "fbfd5cbba23d2b669bec9466ed10d6548609bdfaf16c264390ddf81fbfd1d402",
+      "bytes": 19617,
+      "sha256": "b518dd6ba813a0d9187524da7f42e5f6d7ab234e74fed51695ef472cdca07297",
       "kind": "rendered"
     },
     "apps/studio/public/robots.txt": {
@@ -142,8 +142,8 @@
       "kind": "built"
     },
     "packages/theme/brand/og-template.html": {
-      "bytes": 8348,
-      "sha256": "cb6c10264cc57727fdeafbc7c085fd1f0e45b7f1d3669057f00bd4ba75930ddf",
+      "bytes": 8264,
+      "sha256": "5560c6f6d9ba5e60795f254e4589337a830da2c606d465af141b2561ed568a03",
       "kind": "built"
     },
     "packages/theme/brand/wordmark-outlines.svg": {

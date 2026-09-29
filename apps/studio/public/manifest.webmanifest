@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Turboslide",
   "short_name": "Turboslide",
-  "description": "An agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export.",
+  "description": "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.",
   "start_url": "/home",
   "scope": "/",
   "display": "standalone",

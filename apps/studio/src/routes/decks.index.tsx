@@ -1604,7 +1604,6 @@ function DeckCardView({
           event.preventDefault();
           onOpen();
         }}
-        {...tipProps({ name: card.title, doc: 'Opens the presentation.' })}
       >
         <Thumb card={card} />
       </Link>
@@ -1618,7 +1617,6 @@ function DeckCardView({
             preload={preloadOf(index)}
             className="ts-hm-card-title"
             data-control={`home.title.${card.id}`}
-            {...tipProps({ name: card.title, doc: 'Opens the presentation in the editor.' })}
             onClick={(event) => {
               event.preventDefault();
               onOpen();
@@ -1669,7 +1667,6 @@ function DeckRowView({
             preload={preloadOf(index)}
             className="ts-hm-card-title"
             data-control={`home.title.${card.id}`}
-            {...tipProps({ name: card.title, doc: 'Opens the presentation in the editor.' })}
             onClick={(event) => {
               event.preventDefault();
               onOpen();

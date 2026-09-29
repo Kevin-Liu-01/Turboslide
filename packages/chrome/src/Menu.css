@@ -113,14 +113,11 @@
 }
 
 /* the check: a 5 by 9 corner turned 45 degrees, drawn in the current color */
+/* the check row's mark is the sprite's check glyph since the polish round (item 57) */
 .ts-menu-check {
-  display: block;
-  width: 5px;
-  height: 9px;
-  margin-top: -2px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--pt-ink);
 }
 

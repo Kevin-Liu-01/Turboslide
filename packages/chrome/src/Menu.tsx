@@ -654,7 +654,11 @@ function MenuList({
             >
               <span className="ts-menu-ic" aria-hidden="true">
                 {checked === true ? (
-                  <span className="ts-menu-check" />
+                  /* the check as the sprite's check glyph (docs/POLISH.md 2.6 item 57: a glyph on
+                     every row, a checked row included) */
+                  <span className="ts-menu-check">
+                    <Icon name="check" />
+                  </span>
                 ) : item.icon ? (
                   <Icon name={item.icon} />
                 ) : null}

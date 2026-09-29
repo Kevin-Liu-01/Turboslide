@@ -1233,6 +1233,11 @@ export async function run(t) {
     "Insert > Comment is disabled with nothing selected; the card's box is within 24 px of the shape's ring",
     async () => {
       await t.clearAll();
+      /* the focus off the filmstrip: a focused slide card is a slide selected (item 66), so
+         "nothing selected" is the empty sheet clicked */
+      const away = await t.emptySheetPoint();
+      await t.clickAt(away.x, away.y);
+      await t.sleep(200);
       const rows = await menuRowsWith('insert', null);
       const comment = rows.find((r) => r.id === 'insert.comment') ?? null;
       const disabledOk = comment !== null && comment.disabled;

@@ -1,4 +1,5 @@
 import type { ReactNode, RefObject } from 'react';
+import { SHOT_FRAME_WEIGHTS } from '@turboslide/schema/blocks';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
@@ -2302,7 +2303,10 @@ export function EditorShell({
       ? [1, 1.5, 2]
       : block?.type === 'shape'
         ? [0, 1, 1.5, 2, 3, 4]
-        : [0, 1, 1.5, 2];
+        : block?.type === 'shot' || block?.type === 'picture'
+          ? /* Google's list for a picture (docs/POLISH.md 2.5 item 44), the tail's list */
+            [0, ...SHOT_FRAME_WEIGHTS]
+          : [0, 1, 1.5, 2];
     const currentWeight = outlined
       ? block.outline?.width
       : block !== undefined && 'strokeWidth' in block
@@ -2331,6 +2335,25 @@ export function EditorShell({
                 blockId: block.id,
                 path: '/outline',
                 value: { ...block.outline, width: weight },
+                baseRevision: current.revision,
+              },
+              label: 'Border weight',
+            });
+            return;
+          }
+          /* a picture's frame, as the tail writes it (docs/POLISH.md 2.6 item 69: the menu's
+             row opens the same list; the merged tree's gate read a pick that wrote nothing) */
+          if (block.type === 'shot' || block.type === 'picture') {
+            const frame = { ...(block.frame ?? {}) } as Record<string, unknown>;
+            if (weight === 0) delete frame.weight;
+            else frame.weight = weight;
+            runBuilt({
+              action: 'block.set',
+              input: {
+                slideId: current.slideId,
+                blockId: block.id,
+                path: '/frame',
+                value: Object.keys(frame).length === 0 ? undefined : frame,
                 baseRevision: current.revision,
               },
               label: 'Border weight',

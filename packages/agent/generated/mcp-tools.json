@@ -14779,16 +14779,20 @@
                 "control": "select",
                 "snap": [
                   "horizontal",
-                  "vertical"
+                  "vertical",
+                  "horizontal-vertical",
+                  "vertical-horizontal"
                 ],
                 "group": "Block",
-                "help": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33)."
+                "help": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33)."
               },
-              "description": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33).",
+              "description": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33).",
               "type": "string",
               "enum": [
                 "horizontal",
-                "vertical"
+                "vertical",
+                "horizontal-vertical",
+                "vertical-horizontal"
               ]
             },
             "points": {

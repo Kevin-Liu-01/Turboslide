@@ -169,8 +169,8 @@
   white-space: nowrap;
 }
 
-/* the series swatch at 14 px in the grid and 16 px in the swatch row, always drawn
-   (docs/FEATURES.md 2.2 rank 12; audit-objects 21) */
+/* the series swatch at 16 px in the grid and in the swatch row, always drawn (docs/FEATURES.md
+   2.2 rank 12; audit-objects 21; the fix round: the grid's read 14 by 14 against the row's 16) */
 .ts-chartgrid-swatch,
 .ts-chart-swatch {
   flex: 0 0 auto;
@@ -180,11 +180,6 @@
   border: 1px solid var(--pt-hair);
   border-radius: 3px;
   cursor: pointer;
-}
-
-.ts-chartgrid-swatch {
-  width: 14px;
-  height: 14px;
 }
 
 .ts-chartgrid-swatch:focus-visible,
@@ -219,10 +214,13 @@
   height: 12px;
 }
 
-/* the remove control is drawn on the hovered header and on its own focus (the polish round,
-   docs/POLISH.md item 26): drawn on the active line too, as the objects round had it, it covered
-   the name's last character in the panel's narrow columns; the right click menu's Remove row
-   stays for the keyboard */
+/* the remove control is drawn while its row is hovered, anywhere along the row for a category
+   and on the header itself for a series, and on its own focus (the polish round, docs/POLISH.md
+   item 26; the fix round: drawn on the header's own hover alone, a pointer over a value cell of
+   the row never showed it). Drawn on the active line without a hover, as the objects round had
+   it, it covered the name's last character in the panel's narrow columns; the right click
+   menu's Remove row stays for the keyboard */
+.ts-chartgrid tbody tr:hover .ts-chartgrid-remove,
 .ts-chartgrid-cell:hover .ts-chartgrid-remove,
 .ts-chartgrid-remove:focus-visible {
   opacity: 1;

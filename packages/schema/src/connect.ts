@@ -9,10 +9,17 @@
 // references; a connector alone drops them. A connector moved by its own body detaches from the
 // targets that stayed (`detachMovedConnectors`), and an elbow or curved connector takes the axis
 // it leaves and arrives along from the sites its ends sit on (`connectorAxis`; the polish round,
-// docs/POLISH.md items 27 and 33). Pure over the document; the editor's gesture end, the Size &
+// docs/POLISH.md items 27 and 33), the S when both sites face one axis and the L when they do
+// not. Pure over the document; the editor's gesture end, the Size &
 // rotation fields, block.align, block.distribute, block.rotate, block.flip and the store action
 // handlers of block.set /pos call it.
-import type { Block, ConnectorAxis, ShapeBlock, ShapeOrientation } from './blocks.ts';
+import type {
+  Block,
+  ConnectorAxis,
+  ConnectorLegAxis,
+  ShapeBlock,
+  ShapeOrientation,
+} from './blocks.ts';
 import type { Slide } from './deck.ts';
 import { canvasObjects } from './deck.ts';
 import type { BlockId } from './ids.ts';
@@ -66,7 +73,7 @@ export function siteAngleAt(block: Block, site: number): number | undefined {
 }
 
 /** The axis a connector leaves a site along: vertical within 45 degrees of up or down, else horizontal. */
-function axisOfAngle(angle: number): ConnectorAxis {
+function axisOfAngle(angle: number): ConnectorLegAxis {
   const fromVertical = Math.min(Math.abs(angle - 90), Math.abs(angle - 270));
   return fromVertical < 45 ? 'vertical' : 'horizontal';
 }
@@ -74,25 +81,32 @@ function axisOfAngle(angle: number): ConnectorAxis {
 /**
  * The axis a connector leaves and arrives along, from the sites its ends sit on (the polish round,
  * docs/POLISH.md item 33; audit-objects item 16: the curve from A's bottom site ran along A's
- * bottom edge). The start's site decides when it is attached, else the end's; a connector with
- * no attached end answers undefined and keeps whatever it holds. Google turns `bentConnector3`
- * and `curvedConnector3` a quarter when a site faces up or down; the L of `bentConnector2` for a
- * pair of sites on different axes is not drawn yet, so such a pair takes the start's axis.
+ * bottom edge). Each attached end takes the axis its site faces and a loose end takes the other's.
+ * Two ends on one axis give the S of `bentConnector3`, horizontal or vertical; ends on different
+ * axes give the L of `bentConnector2`, named as the leaving axis then the arriving one (the fix
+ * round; the verifier's item 27: a shape turned a quarter sends its bottom site sideways while
+ * the other shape's top site still faces up, and the elbow arrived sideways at it). A connector
+ * with no attached end answers undefined and keeps whatever it holds.
  */
 export function connectorAxis(
   connect: ShapeBlock['connect'],
   byId: ReadonlyMap<string, Block>,
 ): ConnectorAxis | undefined {
   if (connect === undefined) return undefined;
+  const axes: { start?: ConnectorLegAxis; end?: ConnectorLegAxis } = {};
   for (const which of ['start', 'end'] as const) {
     const end = connect[which];
     if (end === undefined) continue;
     const target = byId.get(end.block);
     if (target === undefined) continue;
     const angle = siteAngleAt(target, end.site);
-    if (angle !== undefined) return axisOfAngle(angle);
+    if (angle !== undefined) axes[which] = axisOfAngle(angle);
   }
-  return undefined;
+  const leave = axes.start ?? axes.end;
+  const arrive = axes.end ?? axes.start;
+  if (leave === undefined || arrive === undefined) return undefined;
+  if (leave === arrive) return leave;
+  return leave === 'horizontal' ? 'horizontal-vertical' : 'vertical-horizontal';
 }
 
 /** How many connection sites a target offers (what `connect.site` is checked against). */

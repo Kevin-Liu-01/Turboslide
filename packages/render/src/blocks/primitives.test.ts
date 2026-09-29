@@ -188,6 +188,33 @@ describe('a preset on the sheet', () => {
     expect(paths(flat)[0]).toContain('d="M0.5,0.5 H120.5 V159.5 H239.5"');
   });
 
+  it('draws the L of an axis with two legs: one corner, leaving along the first axis and arriving along the second (the fix round)', () => {
+    const elbow = renderBlock(shape({ shape: 'elbow', axis: 'horizontal-vertical' }), context());
+    expect(elbow).toContain('data-axis="horizontal-vertical"');
+    expect(paths(elbow)[0]).toContain('d="M0.5,0.5 H239.5 V159.5"');
+    expect(elbow).toContain('data-points="0.5,0.5 239.5,0.5 239.5,159.5"');
+    const other = renderBlock(shape({ shape: 'elbow', axis: 'vertical-horizontal' }), context());
+    expect(other).toContain('data-axis="vertical-horizontal"');
+    expect(paths(other)[0]).toContain('d="M0.5,0.5 V159.5 H239.5"');
+    expect(other).toContain('data-points="0.5,0.5 0.5,159.5 239.5,159.5"');
+    /* the curve's control points sit half way along each leg, PowerPoint's curvedConnector2 */
+    const curve = renderBlock(shape({ shape: 'curved', axis: 'horizontal-vertical' }), context());
+    expect(paths(curve)[0]).toContain('d="M0.5,0.5 C120,0.5 239.5,80 239.5,159.5"');
+    /* the decorations point along their own legs: the end's down, the start's left */
+    const headed = renderBlock(
+      shape({
+        shape: 'elbow',
+        axis: 'horizontal-vertical',
+        lineStart: 'fillArrow',
+        lineEnd: 'fillArrow',
+      }),
+      context(),
+    );
+    const ends = paths(headed).filter((path) => path.includes('class="line-end"'));
+    expect(ends[0]).toContain('rotate(90)');
+    expect(ends[1]).toContain('rotate(180)');
+  });
+
   it('places the label layer at the preset’s text rectangle: a rounded rectangle steps in, a right arrow sits in the shaft', () => {
     const rounded = renderBlock(
       shape({ shape: 'roundRect', fill: 'plate', text: 'Next step' }),

@@ -387,9 +387,15 @@ describe('the axis of a connector at its sites (the polish round, docs/POLISH.md
     expect(connectorAxis(connector(vertical).connect, byIdOf(vertical))).toBe('vertical');
     const horizontal = elbowSlide(3, 1);
     expect(connectorAxis(connector(horizontal).connect, byIdOf(horizontal))).toBe('horizontal');
-    /* the start's site decides for a pair on different axes (the L is not drawn yet) */
+    /* a pair on different axes is the L, named as the leaving axis then the arriving one: a's
+       bottom site to b's left site leaves along y and arrives along x, a's right site to b's top
+       site the other way round (the fix round) */
     const mixed = elbowSlide(2, 1);
-    expect(connectorAxis(connector(mixed).connect, byIdOf(mixed))).toBe('vertical');
+    expect(connectorAxis(connector(mixed).connect, byIdOf(mixed))).toBe('vertical-horizontal');
+    const acrossThenDown = elbowSlide(3, 0);
+    expect(connectorAxis(connector(acrossThenDown).connect, byIdOf(acrossThenDown))).toBe(
+      'horizontal-vertical',
+    );
     const endOnly = elbowSlide(2, 0);
     expect(connectorAxis({ end: { block: 'b', site: 0 } }, byIdOf(endOnly))).toBe('vertical');
     expect(connectorAxis(undefined, byIdOf(endOnly))).toBeUndefined();
@@ -398,7 +404,9 @@ describe('the axis of a connector at its sites (the polish round, docs/POLISH.md
 
   it('writes the axis through followConnectors when the target turns, and through a reroute', () => {
     const current = elbowSlide(2, 0);
-    /* a turned a quarter: its bottom site faces left, so the elbow leaves horizontally */
+    /* a turned a quarter: its bottom site faces left while b's top site still faces up, so the
+       elbow leaves horizontally and arrives vertically, the L (the verifier's item 27 of the polish
+       round: the S arrived sideways at b's top site) */
     const turned = apply(current, [
       {
         op: 'block.set',
@@ -410,10 +418,12 @@ describe('the axis of a connector at its sites (the polish round, docs/POLISH.md
     ]);
     const follow = followConnectors(turned, ['a']);
     expect(
-      follow.some((m) => m.op === 'block.set' && m.path === '/axis' && m.value === 'horizontal'),
+      follow.some(
+        (m) => m.op === 'block.set' && m.path === '/axis' && m.value === 'horizontal-vertical',
+      ),
     ).toBe(true);
     const next = apply(turned, follow);
-    expect(connector(next).axis).toBe('horizontal');
+    expect(connector(next).axis).toBe('horizontal-vertical');
     /* rerouted onto b's left site from a's right site: horizontal; onto b's top from a's bottom: vertical */
     const byId = byIdOf(current);
     expect(

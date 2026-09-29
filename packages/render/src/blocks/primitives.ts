@@ -12,7 +12,8 @@
 // end for the circle, square and diamond kinds the way PowerPoint and LibreOffice draw `oval`
 // and `diamond`. A line kind's svg takes no pointer; a transparent hit path over its stroke does
 // (LINE_HIT_PX, the polish round item 24), and an elbow or curved connector whose `axis` is
-// vertical is drawn turned a quarter, leaving and arriving along y (item 33). The svg
+// vertical is drawn turned a quarter, leaving and arriving along y (item 33), or as the L of one
+// corner when its axis names two legs (the fix round). The svg
 // carries data attributes the exporter reads back (scene/measure.ts): `data-shape`, and for a
 // line kind `data-from`, `data-to`, `data-heads`, `data-points`, `data-bend`, `data-start` and
 // `data-end` in the box's own pixels, so the PPTX gets a native line, connector or custom geometry
@@ -29,7 +30,7 @@ import type {
   ShapeOrientation,
   Valign,
 } from '@turboslide/schema/blocks';
-import { SHADOW_DEFAULTS, paddingSides } from '@turboslide/schema/blocks';
+import { SHADOW_DEFAULTS, connectorLegs, paddingSides } from '@turboslide/schema/blocks';
 import type { Color } from '@turboslide/schema/color';
 import { colorCss } from '@turboslide/schema/color';
 import { iconSymbolId } from '@turboslide/schema/icon-names';
@@ -467,19 +468,46 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
          33; audit-objects item 16: the curve from a bottom site ran along the shape's edge): the
          horizontal S of `bentConnector3` and `curvedConnector3` unless the block's `axis` says
          vertical, when the same connector is drawn turned a quarter: it leaves along y, runs
-         across at the bend and arrives along y, and its decorations point up or down */
-      const vertical = block.axis === 'vertical';
-      const startDir = vertical
-        ? { x: 0, y: to.y < from.y ? 1 : -1 }
-        : { x: to.x < from.x ? 1 : -1, y: 0 };
-      const endDir = { x: -startDir.x, y: -startDir.y };
+         across at the bend and arrives along y, and its decorations point up or down. An axis
+         of two legs is the L of `bentConnector2` and `curvedConnector2` (the fix round; the
+         verifier's item 27: a turned shape's bottom site faces a side while the other shape's
+         top site faces up, and the S arrived sideways): one corner where the leaving leg meets
+         the arriving one, the curve's control points `bend` of the way along each leg from its
+         end, and each decoration pointing along its own leg */
+      const legs = connectorLegs(block.axis);
+      const startDir =
+        legs.leave === 'vertical'
+          ? { x: 0, y: to.y < from.y ? 1 : -1 }
+          : { x: to.x < from.x ? 1 : -1, y: 0 };
+      const endDir =
+        legs.arrive === 'vertical'
+          ? { x: 0, y: to.y < from.y ? -1 : 1 }
+          : { x: to.x < from.x ? -1 : 1, y: 0 };
       const startSize = decorationSize(startKind, width);
       const endSize = decorationSize(endKind, width);
       const lineFrom = shorten(from, startDir, decorationInset(startKind, startSize));
       const lineTo = shorten(to, endDir, decorationInset(endKind, endSize));
       let d: string;
       let points: string;
-      if (vertical) {
+      if (legs.leave !== legs.arrive) {
+        const corner =
+          legs.leave === 'horizontal' ? { x: to.x, y: from.y } : { x: from.x, y: to.y };
+        const c1 = {
+          x: lineFrom.x + (corner.x - lineFrom.x) * bend,
+          y: lineFrom.y + (corner.y - lineFrom.y) * bend,
+        };
+        const c2 = {
+          x: lineTo.x + (corner.x - lineTo.x) * bend,
+          y: lineTo.y + (corner.y - lineTo.y) * bend,
+        };
+        d =
+          kind === 'elbow'
+            ? legs.leave === 'horizontal'
+              ? `M${pt(lineFrom)} H${px(lineTo.x)} V${px(lineTo.y)}`
+              : `M${pt(lineFrom)} V${px(lineTo.y)} H${px(lineTo.x)}`
+            : `M${pt(lineFrom)} C${pt(c1)} ${pt(c2)} ${pt(lineTo)}`;
+        points = `${pt(from)} ${pt(corner)} ${pt(to)}`;
+      } else if (legs.leave === 'vertical') {
         const by = snapStroke(from.y + (to.y - from.y) * bend, width);
         d =
           kind === 'elbow'
@@ -500,7 +528,8 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
       hitPath = d;
       open += ` data-from="${pt(from)}" data-to="${pt(to)}" data-heads="none" data-bend="${px(bend)}" data-start="${startKind}" data-end="${endKind}"`;
       open += ` data-points="${points}"`;
-      if (vertical) open += ' data-axis="vertical"';
+      if (block.axis !== undefined && block.axis !== 'horizontal')
+        open += ` data-axis="${block.axis}"`;
       break;
     }
     case 'curve':

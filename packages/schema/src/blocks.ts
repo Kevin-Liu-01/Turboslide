@@ -360,10 +360,38 @@ export type Arrowheads = (typeof ARROWHEADS)[number];
  * The axis an elbow or curved connector leaves its start and arrives at its end along (the polish
  * round, docs/POLISH.md item 33): horizontal is the S of `bentConnector3` and `curvedConnector3`
  * as PowerPoint draws them unrotated; vertical is the same connector turned a quarter, the one a
- * site that faces up or down asks for. Absent reads horizontal, so a stored connector draws as it did.
+ * site that faces up or down asks for. `horizontal-vertical` and `vertical-horizontal` are the L
+ * of `bentConnector2` and `curvedConnector2`: the connector leaves along the first axis and
+ * arrives along the second, which a start site facing a side and an end site facing up or down
+ * ask for (the polish round's fix round; the verifier's item 27: the elbow from a turned shape's
+ * bottom site arrived sideways at a top site). Absent reads horizontal, so a stored connector
+ * draws as it did.
  */
-export const CONNECTOR_AXES = ['horizontal', 'vertical'] as const;
+export const CONNECTOR_AXES = [
+  'horizontal',
+  'vertical',
+  'horizontal-vertical',
+  'vertical-horizontal',
+] as const;
 export type ConnectorAxis = (typeof CONNECTOR_AXES)[number];
+/** One leg's axis: what an S leaves and arrives along, and what each leg of an L runs along. */
+export type ConnectorLegAxis = 'horizontal' | 'vertical';
+/** The axis a connector leaves along and the one it arrives along, read from its `axis`; horizontal both when unset. */
+export function connectorLegs(axis: ConnectorAxis | undefined): {
+  leave: ConnectorLegAxis;
+  arrive: ConnectorLegAxis;
+} {
+  switch (axis) {
+    case 'vertical':
+      return { leave: 'vertical', arrive: 'vertical' };
+    case 'horizontal-vertical':
+      return { leave: 'horizontal', arrive: 'vertical' };
+    case 'vertical-horizontal':
+      return { leave: 'vertical', arrive: 'horizontal' };
+    default:
+      return { leave: 'horizontal', arrive: 'horizontal' };
+  }
+}
 export const SHAPE_STROKE_WIDTHS = [1, 1.5, 2, 3, 4] as const;
 export type ShapeStrokeWidth = (typeof SHAPE_STROKE_WIDTHS)[number];
 
@@ -400,7 +428,7 @@ export type ShapeBlock = BlockBase & {
   shadow?: Shadow;
   /** Where a connector bends, 0 to 1 along the box; 0.5 unless set (SPEC-2 2.4.1). */
   bend?: number;
-  /** The axis a connector leaves and arrives along; horizontal unless set (docs/POLISH.md item 33). */
+  /** The axis a connector leaves and arrives along, or the pair of an L; horizontal unless set (docs/POLISH.md item 33). */
   axis?: ConnectorAxis;
   /** The points of a curve, polyline or scribble as fractions of the box (SPEC-2 2.4.3). */
   points?: [number, number][];
@@ -1811,7 +1839,7 @@ export const shapeBlockSchema = z.strictObject({
     control: 'select',
     snap: CONNECTOR_AXES,
     group: 'Block',
-    help: 'The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33).',
+    help: 'The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33).',
   }),
   points: annotate(
     z

@@ -1029,10 +1029,7 @@
       "themeColor": "#070707",
       "title": "Turboslide",
       "hydrated": true,
-      "pressed": [
-        "home.theme.light=false",
-        "home.theme.dark=true"
-      ]
+      "pressed": ["home.theme.light=false", "home.theme.dark=true"]
     }
   },
   "dark-1280": {
@@ -2065,10 +2062,7 @@
       "themeColor": "#070707",
       "title": "Turboslide",
       "hydrated": true,
-      "pressed": [
-        "home.theme.light=false",
-        "home.theme.dark=true"
-      ]
+      "pressed": ["home.theme.light=false", "home.theme.dark=true"]
     }
   },
   "dark-390": {
@@ -3056,10 +3050,7 @@
       "themeColor": "#070707",
       "title": "Turboslide",
       "hydrated": true,
-      "pressed": [
-        "home.theme.light=false",
-        "home.theme.dark=true"
-      ]
+      "pressed": ["home.theme.light=false", "home.theme.dark=true"]
     }
   },
   "light-1440": {
@@ -4087,10 +4078,7 @@
       "themeColor": "#ffffff",
       "title": "Turboslide",
       "hydrated": true,
-      "pressed": [
-        "home.theme.light=true",
-        "home.theme.dark=false"
-      ]
+      "pressed": ["home.theme.light=true", "home.theme.dark=false"]
     }
   },
   "light-1280": {
@@ -5130,10 +5118,7 @@
       "themeColor": "#ffffff",
       "title": "Turboslide",
       "hydrated": true,
-      "pressed": [
-        "home.theme.light=true",
-        "home.theme.dark=false"
-      ]
+      "pressed": ["home.theme.light=true", "home.theme.dark=false"]
     }
   },
   "light-390": {
@@ -6124,10 +6109,7 @@
       "themeColor": "#ffffff",
       "title": "Turboslide",
       "hydrated": true,
-      "pressed": [
-        "home.theme.light=true",
-        "home.theme.dark=false"
-      ]
+      "pressed": ["home.theme.light=true", "home.theme.dark=false"]
     }
   }
 }

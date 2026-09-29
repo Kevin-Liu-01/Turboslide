@@ -158,7 +158,8 @@ describe('the action table', () => {
     // 69 Heroicons plus gt-mark: M5 added lock-closed (slide 83), the editor depth round the three
     // bars glyphs of the arrange bar's align buttons, the Google Slides parity round three bell and
     // inbox for the inbox plate and Notification settings (merge 1, build-3/b6.md request 2)
-    expect(ICON_NAMES).toHaveLength(70);
-    expect(new Set(ICON_NAMES).size).toBe(70);
+    // the polish round adds cursor-arrow-rays and arrow-down-tray for the home page's sections
+    expect(ICON_NAMES).toHaveLength(72);
+    expect(new Set(ICON_NAMES).size).toBe(72);
   });
 });

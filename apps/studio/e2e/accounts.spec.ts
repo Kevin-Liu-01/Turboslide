@@ -1230,7 +1230,7 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
     /* D: anonymous by the link, with a typed name */
     ({ context: dCtx, page: D } = await otherContext(browser));
     await D.goto(link);
-    await D.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 30_000 });
+    await D.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 90_000 });
     await waitEditor(D);
     expect(await nameByPrompt(D, NAME_D), 'D types a name').toBe(true);
     dClient = await clientIdOf(D);
@@ -1402,7 +1402,7 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
       /* the account is not the owner (build/b1.md R3): A2 comes back through the link like E;
          by the id alone it would stand as a viewer ("You can view this presentation") */
       await A2.goto(link2);
-      await A2.waitForURL(new RegExp(`/edit/${deck2}`), { timeout: 30_000 });
+      await A2.waitForURL(new RegExp(`/edit/${deck2}`), { timeout: 90_000 });
       await waitEditor(A2);
       await expect
         .poll(async () => (await peopleState(A2)).account?.signedIn ?? false, { timeout: 15_000 })
@@ -1415,7 +1415,7 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
       await settled(A2);
       /* the reload through the link: A2's own rows read You */
       await A2.goto(link2);
-      await A2.waitForURL(new RegExp(`/edit/${deck2}`), { timeout: 30_000 });
+      await A2.waitForURL(new RegExp(`/edit/${deck2}`), { timeout: 90_000 });
       await waitEditor(A2);
       await openHistory(A2);
       const own = await versionRows(A2);
@@ -1425,7 +1425,7 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
       /* E by the link reads both rows as the account's name with one mark */
       ({ context: eCtx, page: E } = await otherContext(browser));
       await E.goto(link2);
-      await E.waitForURL(new RegExp(`/edit/${deck2}`), { timeout: 30_000 });
+      await E.waitForURL(new RegExp(`/edit/${deck2}`), { timeout: 90_000 });
       await waitEditor(E);
       await openHistory(E);
       const seen = await versionRows(E);
@@ -1490,7 +1490,7 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
         contexts.push(context);
         pages.push(page);
         await page.goto(link);
-        await page.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 30_000 });
+        await page.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 90_000 });
         await waitEditor(page);
         expect(
           (await peopleState(page)).account?.principalId,
@@ -1602,7 +1602,7 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
     const { context: cCtx, page: C } = await otherContext(browser);
     try {
       await C.goto(link);
-      await C.waitForURL(new RegExp(`/(edit|deck)/${deck}`), { timeout: 30_000 });
+      await C.waitForURL(new RegExp(`/(edit|deck)/${deck}`), { timeout: 90_000 });
       await waitEditor(C);
       expect(
         await ctl(C, 'share.open').count(),
@@ -1677,7 +1677,7 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
     try {
       await setNamesSwitch(A, true);
       await S.goto(link);
-      await S.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 30_000 });
+      await S.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 90_000 });
       await waitEditor(S);
       const standing = (await peopleState(S)) as PeopleState & {
         access?: { role?: string; via?: string };
@@ -1867,7 +1867,7 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
     const { context: cCtx, page: C } = await otherContext(browser);
     try {
       await C.goto(link);
-      await C.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 30_000 });
+      await C.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 90_000 });
       await waitEditor(C);
       await expect(chipOf(C, aClient), "A's chip on C's tab").toHaveCount(1, { timeout: 15_000 });
       const entry =

@@ -92,7 +92,6 @@ import {
 } from './canvas-measure';
 import type { FitMeasure, VirtualObjectId } from './canvas-measure';
 import {
-  altFor,
   assetIdFor,
   clipboardStore,
   decodeClipboard,
@@ -263,6 +262,7 @@ import {
   cycleSelection,
   escapeSelection,
   firstRunOf,
+  isDiagramMember,
   isEditableTarget,
   isTextBlockType,
   listItemPointer,
@@ -684,7 +684,7 @@ export type EditorHandle = {
    * a logo asset the document holds (the Logo dialog's `logo.insert` answer; docs/FEATURES.md
    * 4.4, B6): placed at the logo size, a symbol 160 sheet px tall or a wordmark 320 wide at the
    * mark's ratio, centred in the body slot's free area and never at the largest fit, selected;
-   * `blockId` swaps that picture's asset and keeps its box (Replace image > Logo); `everySlide`
+   * `blockId` swaps that picture's asset and refits its box to the mark's aspect around the same centre (Replace image > Logo); `everySlide`
    * writes the kit's `/mark`, `/footer/logo` and `/footer/assetId` in the same commit and says
    * "The <title> logo is on every slide" with Undo. No snackbar on a plain insert.
    */
@@ -1322,21 +1322,7 @@ export function Editor({
   } | null>(null);
   const linkChipRef = useRef(linkChip);
   linkChipRef.current = linkChip;
-  /* arming a draw tool clears the selection and the extra ids (docs/POLISH.md 2.4 item 34;
-     polish/build/b3.md request 7): the previous ring and chip leave while the sites draw */
   const armedTool = useRef(tool);
-  useEffect(() => {
-    if (armedTool.current === tool) return;
-    armedTool.current = tool;
-    if (tool !== 'select' && editingRef.current === null && gesture.current === null) {
-      selectionRef.current = null;
-      extraRef.current = [];
-      setExtra([]);
-      setInnerSelection(null);
-      setGroupEntered(null);
-      groupEnteredRef.current = null;
-    }
-  }, [tool]);
   const htmlRef = useRef(html);
   htmlRef.current = html;
   /* the live gesture's frames (docs/OBJECTS.md 2.4; gesture-frame.ts): one sheet render per
@@ -1468,6 +1454,22 @@ export function Editor({
     setInnerSelection(next);
     onSelectionRef.current?.(next);
   };
+
+  /* arming a draw tool clears the selection and the extra ids (docs/POLISH.md 2.4 item 34;
+     polish/build/b3.md request 7): the previous ring and chip leave while the sites draw. The
+     clear goes through `select`, which tells the shell: the studio controls the selection, so a
+     cleared inner state alone left the ring drawn (VERIFICATION.md "Polish round, pass 1"
+     finding 26, the elbow tool armed from Insert > Line) */
+  useEffect(() => {
+    if (armedTool.current === tool) return;
+    armedTool.current = tool;
+    if (tool !== 'select' && editingRef.current === null && gesture.current === null) {
+      setGroupEntered(null);
+      groupEnteredRef.current = null;
+      select(null, []);
+    }
+    // select reads refs alone; the effect keys on the tool
+  }, [tool]);
 
   /** A selection of objects widened to whole groups unless a member was entered (SPEC-2 6.1 row 14). */
   const selectObjects = (ids: readonly string[]) => {
@@ -4621,6 +4623,30 @@ export function Editor({
     if (where.blockId !== undefined) {
       const target = blockById(slideNow, where.blockId);
       if (target && (target.type === 'shot' || target.type === 'picture')) {
+        /* the box refits to the mark's aspect around the same centre, as placePictureAsset's
+           replace does (the fix round, B4's F1; VERIFICATION.md "Polish round, pass 1" finding 8:
+           a 77 by 32 wordmark stayed letterboxed in a 108 by 160 portrait box) */
+        const refit: Mutation[] =
+          target.pos !== undefined
+            ? [
+                {
+                  op: 'block.set',
+                  slideId: slideNow.id,
+                  blockId: target.id,
+                  path: '/pos',
+                  value: {
+                    ...target.pos,
+                    ...(() => {
+                      const [x, y, w, h] = replacedPictureBox(
+                        [target.pos.x, target.pos.y, target.pos.w, target.pos.h],
+                        natural,
+                      );
+                      return { x, y, w, h };
+                    })(),
+                  },
+                },
+              ]
+            : [];
         commit([
           {
             op: 'block.set',
@@ -4629,6 +4655,7 @@ export function Editor({
             path: '/asset',
             value: asset.id,
           },
+          ...refit,
           ...everySlideMutations(),
         ]);
         select({ kind: 'block', blockId: target.id });
@@ -4800,7 +4827,8 @@ export function Editor({
           id,
           file: dataUrl,
           role: 'capture',
-          alt: altFor(file.name),
+          /* an empty alt: the file's name is the asset's id (assetIdFor), never its alt (item 45; B4's F2) */
+          alt: '',
         })) as Asset;
       } catch (error) {
         /* the preview leaves before the sentence, so no placeholder stands under a refusal */
@@ -4882,7 +4910,7 @@ export function Editor({
       asset = (await call('asset.add', {
         url: address,
         role: 'capture',
-        alt: altFor(pictureNameOf(address, '')),
+        alt: '',
       })) as Asset;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -7032,15 +7060,22 @@ export function Editor({
         select({ kind: 'block', blockId: id }, []);
         /* a member that carries a run (a text box, a shape with its label) opens its text at once
            with the member entered behind it (docs/FEATURES.md 2.2 rank 6; audit-objects 11: one
-           label was five clicks) */
+           label was five clicks). On a shape's label or a diagram member's text the word at the
+           point is selected, so typing replaces it (docs/POLISH.md 2.4 item 30; VERIFICATION.md
+           "Polish round, pass 1" finding 12: the caret landed mid word, "Ste plusp 2"); a text box
+           inside a plain group keeps A1 rule 3's caret */
         if (entry.hasRun && entry.kind !== 'picture' && entry.kind !== 'line') {
           const under = resolveRun(e.target, el);
           const run = under !== null && under.blockId === id ? under : firstRunOf(el, id);
-          if (run && readRunText(slideNow, run.blockId, run.pointer) !== undefined)
+          if (run && readRunText(slideNow, run.blockId, run.pointer) !== undefined) {
+            const at = run === under ? { x: e.clientX, y: e.clientY } : null;
+            const wordSelect =
+              clicked !== undefined && (!isTextBlockType(clicked.type) || isDiagramMember(clicked));
             startEdit(
               run,
-              entryCaret('double-click', run === under ? { x: e.clientX, y: e.clientY } : null),
+              wordSelect && at !== null ? { ...at, word: true } : entryCaret('double-click', at),
             );
+          }
         }
         return;
       }
@@ -7055,7 +7090,8 @@ export function Editor({
         const run = under !== null && under.blockId === id ? under : firstRunOf(el, id);
         if (!run || readRunText(slideNow, run.blockId, run.pointer) === undefined) return;
         e.preventDefault();
-        const wordSelect = clicked !== undefined && !isTextBlockType(clicked.type);
+        const wordSelect =
+          clicked !== undefined && (!isTextBlockType(clicked.type) || isDiagramMember(clicked));
         const at = run === under ? { x: e.clientX, y: e.clientY } : null;
         startEdit(
           run,

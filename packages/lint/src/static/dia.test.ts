@@ -114,8 +114,12 @@ describe('dia rules over a nested declared diagram', () => {
     const all = lintStatic(document, { rules: ['dia/fit-slot', 'export/non-native'] });
     expect(all.some((f) => f.rule === 'dia/fit-slot' && f.blockId === 'dia1')).toBe(true);
     const listing = all.find((f) => f.rule === 'export/non-native');
-    expect(listing?.proposal).toContain('dia1 (dia)');
-    expect(listing?.proposal).not.toContain('group (composite)');
+    /* the listing names the diagram in plain words and never the composite (docs/POLISH.md 2.6
+       item 55: no id, no parenthesis) */
+    expect(listing?.evidence.text).toContain('dia1');
+    expect(listing?.evidence.text).not.toContain('group');
+    expect(listing?.proposal).toContain('a diagram');
+    expect(listing?.proposal).not.toMatch(/[()]/);
   });
 
   it('treats a composite as transparent for the export listing', () => {

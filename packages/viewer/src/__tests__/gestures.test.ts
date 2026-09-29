@@ -8,6 +8,7 @@ import {
   actionForMutations,
   blockMoveFor,
   blockMoveHandle,
+  clampTableResize,
   drawnBox,
   dropIndexFor,
   dropSlotFor,
@@ -834,5 +835,26 @@ describe('draw tools', () => {
     };
     const after = applyMutations(doc, [onFree!]).document.slides['free'];
     expect(after?.kind === 'content' && after.slots.main?.length).toBe(2);
+  });
+});
+
+describe('clampTableResize (docs/POLISH.md 2.2 item 11; polish/build/b2.md R6 b)', () => {
+  const start = [320, 420, 960, 162] as const;
+
+  it('stops the dragged right and bottom edges at the content box', () => {
+    /* 260 px past the right edge (1280 + 260 = 1540 against 1463): the edge lands on 1463 */
+    expect(clampTableResize(start, 'se', [320, 420, 1220, 162])).toEqual([320, 420, 1143, 162]);
+    expect(clampTableResize(start, 's', [320, 420, 960, 500])).toEqual([320, 420, 960, 351]);
+    /* a drag that stays inside is untouched */
+    expect(clampTableResize(start, 'e', [320, 420, 1100, 162])).toEqual([320, 420, 1100, 162]);
+  });
+
+  it('stops the dragged left and top edges at the content box and keeps the opposite edge', () => {
+    expect(clampTableResize(start, 'nw', [100, 100, 1180, 482])).toEqual([137, 129, 1143, 453]);
+  });
+
+  it('leaves an edge alone that started outside the content box', () => {
+    const outside = [900, 420, 700, 162] as const;
+    expect(clampTableResize(outside, 'e', [900, 420, 800, 162])).toEqual([900, 420, 800, 162]);
   });
 });

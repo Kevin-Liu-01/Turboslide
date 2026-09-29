@@ -3,7 +3,13 @@ import { describe, expect, test } from 'vitest';
 import { createContext } from '../context.ts';
 import { document } from '../fixtures/deck.ts';
 import { lintStatic } from '../run.ts';
-import { checkExportNonNative, classifyBlock, hasGtWord, hasIcons } from './export-non-native.ts';
+import {
+  checkExportNonNative,
+  classifyBlock,
+  describeBlocks,
+  hasGtWord,
+  hasIcons,
+} from './export-non-native.ts';
 
 describe('export/non-native (SPEC 7.7; MILESTONES M2 item 7)', () => {
   test('classifies raster blocks as a whole and native blocks by their raster parts', () => {
@@ -48,11 +54,18 @@ describe('export/non-native (SPEC 7.7; MILESTONES M2 item 7)', () => {
     const contentRule = bySlide.get('content-rule');
     expect(contentRule?.evidence.text).toBe('list');
     expect(contentRule?.evidence.measured).toEqual({ rasterBlocks: 0, partialBlocks: 1 });
-    expect(contentRule?.proposal).toContain('list (icons and mark)');
+    /* the sentence names the block in plain words with no id and no parenthesis (docs/POLISH.md
+       2.6 item 55) */
+    expect(contentRule?.proposal).toContain("the list's icons and GT mark");
+    expect(contentRule?.proposal).not.toMatch(/[()]/);
     const site = bySlide.get('the-production-site');
     expect(site?.evidence.text).toContain('shot');
     expect(site?.evidence.measured?.rasterBlocks).toBe(1);
-    expect(site?.proposal).toContain('native mode');
+    expect(site?.proposal).toContain('In native mode an image exports as a 2x raster.');
+    expect(site?.proposal).not.toMatch(/[()]|SPEC/);
+    expect(describeBlocks(['shot', 'chart', 'shot'])).toBe('2 images and a chart');
+    expect(describeBlocks(['material'])).toBe('a shader');
+    expect(describeBlocks(['dia', 'icon', 'chart'])).toBe('a diagram, an icon and a chart');
   });
 
   test('flatten mode words the listing as the invisible layer; false switches it off', () => {

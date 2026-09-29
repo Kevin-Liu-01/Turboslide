@@ -1236,17 +1236,50 @@ export function placeCaret(element: HTMLElement, caret: CaretPlacement): void {
   }
   selection.removeAllRanges();
   selection.addRange(range);
-  /* the word at the point (item 30): the caret walks to the word's start and extends to its end;
-     a point on white space selects nothing more than the caret */
-  if (typeof caret === 'object' && caret.word === true && typeof selection.modify === 'function') {
-    selection.modify('move', 'backward', 'word');
-    selection.modify('extend', 'forward', 'word');
-    const text = selection.toString();
-    if (text.trim() === '') {
+  /* the word at the point (item 30): the word the caret's text node holds around the caret, so a
+     caret that landed before "2" in "Step 2" selects "2" and one inside "Step" selects "Step".
+     The browser's own word walk (`selection.modify` backward then forward) took the previous
+     word from a caret at a word's start (VERIFICATION.md "Polish round, pass 1" finding 12: " plus"
+     typed after the double click gave "Step plus2" and "Ste plusp 2"). A point on white space
+     keeps the caret alone */
+  if (typeof caret === 'object' && caret.word === true) {
+    const word = wordRangeInNode(range.startContainer, range.startOffset);
+    if (word !== null) {
+      const wordRange = document.createRange();
+      wordRange.setStart(word.node, word.start);
+      wordRange.setEnd(word.node, word.end);
       selection.removeAllRanges();
-      selection.addRange(range);
+      selection.addRange(wordRange);
     }
   }
+}
+
+/** A character a word is made of: a letter, a digit or an apostrophe inside it (schema text.ts titleCase's class). */
+const WORD_GLYPH = /[\p{L}\p{N}'’]/u;
+
+/**
+ * The word around an offset of a text node: the run of word characters that holds the offset,
+ * taking the character after the caret first (a caret at a word's start belongs to that word)
+ * and the one before it otherwise. Null when the caret is not in a text node or touches no word.
+ */
+export function wordRangeInNode(
+  node: Node,
+  offset: number,
+): { node: Text; start: number; end: number } | null {
+  if (node.nodeType !== Node.TEXT_NODE) return null;
+  const text = (node as Text).data;
+  const isWord = (at: number) => at >= 0 && at < text.length && WORD_GLYPH.test(text[at] ?? '');
+  let start = offset;
+  let end = offset;
+  if (isWord(offset)) {
+    end = offset + 1;
+    while (isWord(end)) end += 1;
+    while (isWord(start - 1)) start -= 1;
+  } else if (isWord(offset - 1)) {
+    start = offset - 1;
+    while (isWord(start - 1)) start -= 1;
+  } else return null;
+  return { node: node as Text, start, end };
 }
 
 /** True when the editable holds no text (the prompt does not count). */

@@ -7,6 +7,7 @@
 import type { Block } from '@turboslide/schema/blocks';
 import type { Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
+import { isDiagramKind } from '@turboslide/schema/diagrams';
 import { assistMark } from '@turboslide/schema/ext';
 import { LINE_KIND_LABELS, isLineKind } from '@turboslide/schema/shapes';
 
@@ -486,6 +487,19 @@ export function blockFamily(type: string | undefined): BlockFamily {
     default:
       return 'other';
   }
+}
+
+/**
+ * True for a member of a diagram's group (docs/POLISH.md 2.4 item 30): `diagram.insert` tags
+ * the members with the diagram kind's own id (`process`, `process-2`; store-actions.ts
+ * `diagramInsert` through `freeId`), while a group made by hand is tagged `group`. The double
+ * click on such a member's text selects the word at the point, as on a shape's label.
+ */
+export function isDiagramMember(block: Block | undefined): boolean {
+  const group = block?.pos?.group;
+  if (group === undefined) return false;
+  const base = /^([a-z]+)(?:-\d+)?$/.exec(group)?.[1];
+  return base !== undefined && isDiagramKind(base);
 }
 
 /** True for the block types whose text takes typography (SPEC 3.2: heading, paragraph, text, box, table). */

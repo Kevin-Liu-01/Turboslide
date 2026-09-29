@@ -1,10 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
+import type { Block } from '@turboslide/schema/blocks';
 import { workedDocument } from '@turboslide/schema/fixtures';
 
 import { factsOf, selectionMarks } from '../editor-shell';
 import type { EditorShellInput } from '../editor-shell';
-import { FOLD_ORDER, MORE_BUTTON_PX, NEVER_FOLDS, TAIL_GAP_PX, foldPlan } from '../ToolbarTail';
+import {
+  FOLD_ORDER,
+  MORE_BUTTON_PX,
+  NEVER_FOLDS,
+  TAIL_GAP_PX,
+  foldPlan,
+  selectedRunSize,
+} from '../ToolbarTail';
 
 // The toolbar's fold (docs/PRODUCT.md 3.4; the row chrome.toolbar.fold-any-width): the tail folds
 // what does not fit into More at any width, in the order Clear formatting, the indent pair, the
@@ -88,5 +96,25 @@ describe('selectionMarks', () => {
     expect(selectionMarks(facts)).toEqual({ i: true, b: true });
     const stale = factsOf(input({ blockId: 'x', marks: { i: true, b: true } as never } as never));
     expect(selectionMarks(stale)).toBeUndefined();
+  });
+});
+
+describe('selectedRunSize (docs/POLISH.md 2.3 item 16; the polish round\'s fix round)', () => {
+  const sized: Block = { id: 'z', type: 'text', text: '[Acme]{z:22} renews in Q3' };
+
+  it('reads the size mark of the selected range before the block\'s size', () => {
+    expect(selectedRunSize(sized, { blockId: 'z', text: true, range: [0, 4] })).toBe(22);
+  });
+
+  it('reads nothing for a collapsed caret, a range whose runs disagree, or a block selected by one click', () => {
+    expect(selectedRunSize(sized, { blockId: 'z', text: true, range: [2, 2] })).toBeUndefined();
+    expect(selectedRunSize(sized, { blockId: 'z', text: true, range: [0, 9] })).toBeUndefined();
+    expect(selectedRunSize(sized, { blockId: 'z' })).toBeUndefined();
+    expect(selectedRunSize(undefined, { blockId: 'z', text: true, range: [0, 4] })).toBeUndefined();
+  });
+
+  it('clamps a range past the text and answers nothing for an unsized run', () => {
+    expect(selectedRunSize(sized, { blockId: 'z', text: true, range: [5, 60] })).toBeUndefined();
+    expect(selectedRunSize(sized, { blockId: 'z', text: true, range: [0, 60] })).toBeUndefined();
   });
 });

@@ -54,6 +54,7 @@ import { rotateMutations, rotationFromDrag } from './rotate';
 import type { Selection } from './Selection';
 import { blockById, selectedBlockId } from './Selection';
 import {
+  FREE_MIN_SIZE,
   axisLock,
   CROP_FLIP_PX,
   plateSideFor,
@@ -1065,6 +1066,38 @@ export function lineEndMutations(
 }
 
 /**
+ * A table's resize stops at the content box (docs/POLISH.md 2.2 item 11; polish/build/b2.md R6
+ * (b); the row `tables.polish.seams-snap-grid`): the dragged edges never cross the content box
+ * outward, so the columns stay on the slide, the way item 9 keeps the edge "+" inside it. An
+ * edge that started outside the box is left where the drag puts it, so a table already past
+ * the edge does not jump on the first pixel of a resize. Pure over sheet boxes.
+ */
+export function clampTableResize(
+  start: readonly [number, number, number, number],
+  dir: ResizeDir,
+  box: readonly [number, number, number, number],
+): [number, number, number, number] {
+  const [left, top] = CONTENT_ORIGIN;
+  const right = left + CONTENT[0];
+  const bottom = top + CONTENT[1];
+  let [x, y, w, h] = box;
+  const [sx, sy, sw, sh] = start;
+  if (dir.includes('e') && sx + sw <= right && x + w > right)
+    w = Math.max(FREE_MIN_SIZE, right - x);
+  if (dir.includes('s') && sy + sh <= bottom && y + h > bottom)
+    h = Math.max(FREE_MIN_SIZE, bottom - y);
+  if (dir.includes('w') && sx >= left && x < left) {
+    w = Math.max(FREE_MIN_SIZE, w - (left - x));
+    x = left;
+  }
+  if (dir.includes('n') && sy >= top && y < top) {
+    h = Math.max(FREE_MIN_SIZE, h - (top - y));
+    y = top;
+  }
+  return [x, y, w, h];
+}
+
+/**
  * The canvas gestures (SPEC-2 6.1 rows 7, 9, 11, 20): a `free-move` drag moves every selected
  * object by the same snapped offset (Shift locks the axis, Cmd suppresses the snaps); a
  * `free-resize` drag moves one or two edges of the object with the same snaps (Shift keeps the
@@ -1143,7 +1176,12 @@ export function freeGesture(
         ? { kind: resizeKindOf(blockById(slide, blockId)) }
         : {}),
     });
-    const [x, y, w, h] = snapped.box;
+    /* an unrotated table stops at the content box (clampTableResize); a rotated one's edges are
+       not sheet lines, so it resizes as the snap left it */
+    const [x, y, w, h] =
+      angle === 0 && blockById(slide, blockId)?.type === 'table'
+        ? clampTableResize(posBox(anchor), handle.dir, snapped.box)
+        : snapped.box;
     if (x === anchor.x && y === anchor.y && w === anchor.w && h === anchor.h) return null;
     return {
       mutations: [posMutation(slide, blockId, { ...anchor, x, y, w, h })],

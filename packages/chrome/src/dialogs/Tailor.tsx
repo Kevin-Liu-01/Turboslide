@@ -271,17 +271,26 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
       setBusy(TAILOR.label(name));
       closed = true;
       closeRef.current();
+      /* the result is said as the pass is sent, with the dialog's own counts (item 116: "the
+         snackbar carrying the result"): the pass applies to the page at once and the dispatch
+         resolves on the server's acknowledgement, seconds later on the blob tier, where the
+         seller saw the words change under no snackbar (VERIFICATION.md "Polish round, pass 1"
+         finding 14). Undo reads the editor's history when it is pressed. The same sentence is
+         said again once the pass is acknowledged, so it is the one left on screen, and a refusal
+         replaces it */
+      const result = TAILOR.result(name, hasName ? places : 0, hasName ? slides : 0, skipped.length);
+      const sayResult = () => {
+        const undo = input.history?.undo;
+        say(result, undo === undefined ? undefined : { label: TAILOR.undo, run: () => undo() });
+      };
+      sayResult();
       await input.dispatch('deck.tailor', {
         ...(hasName ? { replacements: [{ from: from.trim(), to: name }] } : {}),
         ...(logo === undefined ? {} : { logo }),
         ...(skipped.length > 0 ? { skip: skipped } : {}),
         baseRevision: input.revision,
       });
-      const undo = input.history?.undo;
-      say(
-        TAILOR.result(name, hasName ? places : 0, hasName ? slides : 0, skipped.length),
-        undo === undefined ? undefined : { label: TAILOR.undo, run: () => undo() },
-      );
+      sayResult();
     } catch (err: unknown) {
       if (closed) say(refusalSentence(err));
       else setError(refusalSentence(err));

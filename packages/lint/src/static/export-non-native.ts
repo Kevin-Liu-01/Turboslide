@@ -47,6 +47,60 @@ export function classifyBlock(block: Block): BlockExportClass {
   return { blockId: block.id, type: block.type, native: true, parts };
 }
 
+/**
+ * The plain name of a block type in the listing's sentence, with its plural (docs/POLISH.md 2.6
+ * item 55: Check slides names the object in plain words, never by its id and never in a
+ * parenthesis; the words are the chip's, viewer Selection.tsx DISPLAY_NAMES). A type outside the
+ * table reads as its own name.
+ */
+const BLOCK_WORDS: Readonly<Partial<Record<Block['type'], readonly [string, string]>>> = {
+  shot: ['image', 'images'],
+  picture: ['image', 'images'],
+  pair: ['image pair', 'image pairs'],
+  tiles: ['image grid', 'image grids'],
+  details: ['detail grid', 'detail grids'],
+  material: ['shader', 'shaders'],
+  chart: ['chart', 'charts'],
+  dia: ['diagram', 'diagrams'],
+  mark: ['mark', 'marks'],
+  icon: ['icon', 'icons'],
+  say: ['quote block', 'quote blocks'],
+  scales: ['scale', 'scales'],
+  board: ['board', 'boards'],
+  matrix: ['matrix', 'matrices'],
+  html: ['embedded block', 'embedded blocks'],
+  spec: ['type specimen', 'type specimens'],
+  lang: ['script sample', 'script samples'],
+  swatches: ['swatch row', 'swatch rows'],
+  rows: ['list', 'lists'],
+  plain: ['list', 'lists'],
+  refs: ['list', 'lists'],
+  ladder: ['type ladder', 'type ladders'],
+  panel: ['code block', 'code blocks'],
+};
+
+function wordsOf(type: Block['type'], count: number): string {
+  const [one, many] = BLOCK_WORDS[type] ?? [type, `${type}s`];
+  if (count === 1) return /^[aeiou]/.test(one) ? `an ${one}` : `a ${one}`;
+  return `${count} ${many}`;
+}
+
+/** "an image", "2 images and a chart", "an image, a chart and a diagram": the types counted, in first appearance order. */
+export function describeBlocks(types: ReadonlyArray<Block['type']>): string {
+  const counts = new Map<Block['type'], number>();
+  for (const type of types) counts.set(type, (counts.get(type) ?? 0) + 1);
+  const words = [...counts].map(([type, count]) => wordsOf(type, count));
+  if (words.length <= 1) return words[0] ?? '';
+  return `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`;
+}
+
+/** The raster parts of one native block as words: "the list's icons and mark". */
+function partsOf(entry: BlockExportClass): string {
+  const [one] = BLOCK_WORDS[entry.type] ?? [entry.type, `${entry.type}s`];
+  const parts = entry.parts.map((part) => (part === 'mark' ? 'GT mark' : part));
+  return `the ${one}'s ${parts.join(' and ')}`;
+}
+
 export function checkExportNonNative(ctx: LintContext): Finding[] {
   const out: Finding[] = [];
   const mode = ctx.options.exportMode;
@@ -56,18 +110,23 @@ export function checkExportNonNative(ctx: LintContext): Finding[] {
     const whole = classes.filter((c) => !c.native);
     const partial = classes.filter((c) => c.native && c.parts.length > 0);
     if (whole.length === 0 && partial.length === 0) continue;
-    const wholeText = whole.map((c) => `${c.blockId} (${c.type})`).join(', ');
-    const partialText = partial.map((c) => `${c.blockId} (${c.parts.join(' and ')})`).join(', ');
+    /* the sentences name the blocks in plain words with no id and no parenthesis (item 55;
+       VERIFICATION.md "Polish round, pass 1" finding 20: "audit-pic-mumqjwt5 (shot)" beside the
+       table's sentence); the ids stay in the finding's evidence for the tools */
+    const wholeText = describeBlocks(whole.map((c) => c.type));
+    const partialText = partial.map(partsOf).join(', ');
     const sentences: string[] = [];
     if (whole.length > 0)
       sentences.push(
         mode === 'flatten'
-          ? `In flatten mode the slide is one 2x raster; ${wholeText} carry no native text beyond the invisible layer.`
-          : `In native mode these blocks export as 2x rasters: ${wholeText}.`,
+          ? `In flatten mode the slide is one 2x raster; ${wholeText} ${whole.length === 1 ? 'carries' : 'carry'} no native text beyond the invisible layer.`
+          : whole.length === 1
+            ? `In native mode ${wholeText} exports as a 2x raster.`
+            : `In native mode ${wholeText} export as 2x rasters.`,
       );
     if (partial.length > 0)
       sentences.push(
-        `Native text with raster parts: ${partialText}; icons and the GT mark are PNGs in every office format (SPEC 8.6).`,
+        `Native text with raster parts: ${partialText}. Icons and the GT mark are PNGs in every office format.`,
       );
     out.push(
       ctx.finding('export/non-native', slide.id, {

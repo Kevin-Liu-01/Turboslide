@@ -61,7 +61,7 @@ describe('TailorDialog', () => {
         revision: 8,
       }),
     );
-    const { state, closeDialog } = host(dispatch);
+    const { state, closeDialog, say } = host(dispatch);
     render(
       <EditorShellContext value={state}>
         <TailorDialog logoFinder={null} />
@@ -89,6 +89,50 @@ describe('TailorDialog', () => {
       baseRevision: 7,
     });
     expect(closeDialog).toHaveBeenCalledTimes(1);
+    /* the result is said as the pass is sent and again once it is acknowledged (docs/POLISH.md
+       2.9 item 116; the polish round's fix round): the same sentence with the dialog's counts */
+    expect(say.mock.calls.map((call: unknown[]) => call[0])).toEqual([
+      TAILOR.result('Globex', 5, 3, 1),
+      TAILOR.result('Globex', 5, 3, 1),
+    ]);
+  });
+
+  it('says the result before the server acknowledges the pass (the blob tier: seconds), with Undo from the history', async () => {
+    let settle: (value: unknown) => void = () => undefined;
+    const dispatch = vi.fn(() => new Promise((resolve) => (settle = resolve)));
+    const undo = vi.fn();
+    const { state, closeDialog, say } = host(dispatch);
+    (state.input as { history?: unknown }).history = {
+      canUndo: true,
+      canRedo: false,
+      undo,
+      redo: vi.fn(),
+    };
+    render(
+      <EditorShellContext value={state}>
+        <TailorDialog logoFinder={null} />
+      </EditorShellContext>,
+    );
+    fireEvent.change(control('dialog.tailor.from') as HTMLInputElement, {
+      target: { value: 'product' },
+    });
+    fireEvent.change(control('dialog.tailor.to') as HTMLInputElement, {
+      target: { value: 'Globex' },
+    });
+    await act(async () => {
+      fireEvent.click(control('dialog.tailor.apply') as HTMLButtonElement);
+    });
+    expect(closeDialog).toHaveBeenCalledTimes(1);
+    expect(say).toHaveBeenCalledTimes(1);
+    expect(say.mock.calls[0]?.[0]).toBe(TAILOR.result('Globex', 5, 3, 0));
+    const action = say.mock.calls[0]?.[1] as { label: string; run: () => void };
+    expect(action.label).toBe(TAILOR.undo);
+    action.run();
+    expect(undo).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      settle({ replacements: 5, slideIds: [], pictures: 0, skipped: [], revision: 8 });
+    });
+    expect(say).toHaveBeenCalledTimes(2);
   });
 
   it('draws no dead Use this logo on every slide row, the reason under the buttons while Apply waits, and reports a refused write in the snackbar after the dialog closed (docs/POLISH.md 2.9 item 116)', async () => {
@@ -117,6 +161,8 @@ describe('TailorDialog', () => {
     });
     expect(closeDialog).toHaveBeenCalledTimes(1);
     expect(say).toHaveBeenCalledWith('The slide changed while this was written; ask again');
+    /* the refusal is the sentence left on screen, after the result said as the pass went out */
+    expect(say.mock.calls.at(-1)?.[0]).toBe('The slide changed while this was written; ask again');
   });
 
   it('draws Find the <To> logo once the finder knows the name, stores the mark on a click and names it in the one deck.tailor', async () => {

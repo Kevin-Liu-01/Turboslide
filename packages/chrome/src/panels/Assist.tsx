@@ -409,7 +409,10 @@ export function AssistPanel({
             {off}
           </p>
         ) : null}
-        {slide !== undefined && entries.length === 0 ? starters : null}
+        {/* the starters stay after every answer (docs/POLISH.md 2.9 item 113; VERIFICATION.md
+            "Polish round, pass 1" finding 13: after Make it shorter the panel drew none until it
+            was reopened), at the bottom of the log area (item 118) */}
+        {slide !== undefined ? starters : null}
         {busy ? (
           <p className="ts-assist-busy" role="status" data-control="panel.assist.busy">
             {ASSIST.thinking}

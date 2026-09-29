@@ -17,7 +17,7 @@ import type { Dash } from '@turboslide/schema/shapes';
 import type { Color } from '@turboslide/schema/color';
 import { deckAppearance } from '@turboslide/schema/deck';
 import { headingBlockSchema } from '@turboslide/schema/blocks';
-import { BULLET_PRESETS, NUMBER_PRESETS } from '@turboslide/schema/text';
+import { BULLET_PRESETS, NUMBER_PRESETS, marksOfRange, plainLength } from '@turboslide/schema/text';
 import { TYPE_LADDER } from '@turboslide/schema/typography';
 import { SESSION_PARK_ATTRIBUTE } from '@turboslide/viewer/InlineText';
 
@@ -39,10 +39,11 @@ import {
   stepPlainSize,
   tailKindOf as tailOfSelection,
   pictureTargetOf,
+  textAt,
   textPathOf,
   textStylePlan,
 } from './editor-shell';
-import type { ActionPlan, ActionRefusal } from './editor-shell';
+import type { ActionPlan, ActionRefusal, EditorShellInput } from './editor-shell';
 import { useEditorShell } from './editor-shell-context';
 import { Icon } from './icons';
 import { cn } from './lib/cn';
@@ -222,6 +223,35 @@ export function shownSize(block: Block | undefined): number | null {
   if (block.type === 'plain') return (block as PlainBlock).size ?? 20;
   if (block.type === 'text' || block.type === 'box' || block.type === 'shape') return 20;
   return null;
+}
+
+/**
+ * The size mark the selected range carries, read from the document's text (docs/POLISH.md 2.3
+ * item 16; VERIFICATION.md "Polish round, pass 1" finding 10: "Acme" selected, the tail's "+"
+ * wrote a 22 px mark on the run and the field kept reading the block's 20). The document is read
+ * rather than the session's caret report, which lags a mark write by a render. A collapsed caret
+ * and a selection whose runs disagree read nothing, so the field falls back to the block's size,
+ * which is also what `apply()` writes for them.
+ */
+export function selectedRunSize(
+  block: Block | undefined,
+  selection: EditorShellInput['selection'],
+): number | undefined {
+  if (block === undefined || selection?.text !== true || selection.range === undefined)
+    return undefined;
+  const [from, to] = selection.range;
+  if (from === to) return undefined;
+  const path = textPathOf(block, selection);
+  if (path === null) return undefined;
+  const text = textAt(block, path);
+  if (text === undefined) return undefined;
+  const length = plainLength(text);
+  const range: [number, number] = [
+    Math.max(0, Math.min(from, length)),
+    Math.max(0, Math.min(to, length)),
+  ];
+  if (range[0] >= range[1]) return undefined;
+  return marksOfRange(text, range).size;
 }
 
 /** The nearest ladder step to a typed size (SPEC 3.2 row 13). */
@@ -1067,8 +1097,12 @@ export function ToolbarTail() {
     const marks = selectionMarks(facts());
     if (control.control === 'toolbar.italic') return marks?.i === true;
     if (control.control === 'toolbar.underline') return marks?.u === true;
-    if (control.control === 'toolbar.bold')
-      return marks?.b === true || typography(block).weight === 500;
+    if (control.control === 'toolbar.bold') {
+      /* a block weight of 500 (the older toggle) or 700 (word art's Bold, editor-shell
+         `wordArtBoldPlan`) reads as bold beside the run mark */
+      const weight = typography(block).weight;
+      return marks?.b === true || (typeof weight === 'number' && weight >= 500);
+    }
     return undefined;
   };
 
@@ -1092,7 +1126,11 @@ export function ToolbarTail() {
               data-slot={control.control}
               aria-hidden={isFolded ? true : undefined}
             >
-              <FontSizeField control={control} block={sizeBlock} />
+              <FontSizeField
+                control={control}
+                block={sizeBlock}
+                runSize={selectedRunSize(sizeBlock, input.selection)}
+              />
             </span>
           );
         /* the Font dropdown in Google's position, left of the size field (docs/PRODUCT.md 4.2;
@@ -1419,11 +1457,22 @@ function AnchoredPlate({
 }
 
 /** The Font size field with its minus and plus (SPEC 3.2 row 13). */
-function FontSizeField({ control, block }: { control: TailControl; block: Block | undefined }) {
+function FontSizeField({
+  control,
+  block,
+  runSize,
+}: {
+  control: TailControl;
+  block: Block | undefined;
+  /** the size mark of the selected range (`selectedRunSize`), read before the block's size */
+  runSize?: number | undefined;
+}) {
   const shell = useEditorShell();
   const enabled =
     control.status === 'now' && evaluate(control.enabled, shell.menuContext) && block !== undefined;
-  const size = shownSize(block);
+  /* a selected run's own size leads (item 16): the steppers walk the ladder from it and write the
+     next step as the run's mark through `apply()` */
+  const size = runSize ?? shownSize(block);
   const [typing, setTyping] = useState<string | null>(null);
   /* the typed value as the handlers read it: Enter commits and blurs in one event, and the blur's
      commit ran again on the state the render had bound, so one typed size made two writes and two
@@ -1580,6 +1629,9 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
         className="pt-ib pt-icon ts-tb ts-tb-size-step"
         aria-label={decrease.label}
         aria-disabled={enabled && minusEnd === undefined ? undefined : true}
+        /* the end sentence as an attribute beside the tooltip's plate, so a machine read of the
+           disabled button finds why (the walk's `tables.tail.size-step-ladder` reads it) */
+        data-tip-doc={minusEnd}
         data-control="toolbar.fontSize.minus"
         onClick={() => {
           const next = stepOf(-1);
@@ -1631,6 +1683,7 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
         className="pt-ib pt-icon ts-tb ts-tb-size-step"
         aria-label={increase.label}
         aria-disabled={enabled && plusEnd === undefined ? undefined : true}
+        data-tip-doc={plusEnd}
         data-control="toolbar.fontSize.plus"
         onClick={() => {
           const next = stepOf(1);

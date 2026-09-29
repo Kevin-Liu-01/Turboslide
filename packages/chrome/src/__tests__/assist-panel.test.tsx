@@ -115,6 +115,18 @@ describe('AssistPanel', () => {
     });
     expect(control('panel.assist.card.1')).not.toBeNull();
     expect(control('panel.assist.card.1')?.textContent).toContain(CARD.sentence);
+    /* the starters stay after the answer, after the log (docs/POLISH.md 2.9 items 113 and 118;
+       VERIFICATION.md "Polish round, pass 1" finding 13) */
+    for (const id of ['tailor', 'shorter', 'notes'])
+      expect(control(`panel.assist.starter.${id}`)).not.toBeNull();
+    const log = control('panel.assist.log');
+    const starters = control('panel.assist.starters');
+    expect(log).not.toBeNull();
+    expect(starters).not.toBeNull();
+    expect(
+      (log as Element).compareDocumentPosition(starters as Element) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     expect(control('panel.assist.card.1.row.content-rule')).not.toBeNull();
     expect(screen.getByLabelText(ASSIST.before).textContent).toContain('what it cost');
     expect(window.document.querySelectorAll('.is-changed').length).toBeGreaterThan(0);

@@ -1260,13 +1260,26 @@ async function featuresRound(t, S, h) {
   await t.step(
     'charts.grid.remove-visible',
     "the grid with the pointer away; the active row's remove control, the series swatch; a right click on a series header",
-    'the remove control has opacity 1 without hover, the swatch is 16 by 16, the menu lists Remove',
+    'the remove control has opacity 1 with the row hovered and less with the pointer away (item 26), the swatch is 16 by 16, the menu lists Remove',
     async () => {
       await h.openPanel();
       await t.clickControl('formatOptions.chart.cell.1.1');
       await t.sleep(200);
       await page.mouse.move(20, 450);
       await t.sleep(400);
+      /* the polish round (docs/POLISH.md 2.4 item 26, B3): the remove square draws on the row's
+         hover and focus alone, so the grid holds every series in view; the read hovers the row */
+      const awayOpacity = await page.evaluate(() => {
+        const remove = document.querySelector(
+          '[data-control^="formatOptions.chart.category."][data-control$=".remove"]',
+        );
+        return remove ? getComputedStyle(remove).opacity : null;
+      });
+      const cell = await t.rectOf('[data-control="formatOptions.chart.cell.1.1"]');
+      if (cell) {
+        await page.mouse.move(cell.x + cell.w / 2, cell.y + cell.h / 2, { steps: 6 });
+        await t.sleep(400);
+      }
       const facts = await page.evaluate(() => {
         const remove = document.querySelector(
           '[data-control="formatOptions.chart.category.0.remove"], [data-control^="formatOptions.chart.category."][data-control$=".remove"], [data-control^="formatOptions.chart.remove.category."]',
@@ -1301,8 +1314,8 @@ async function featuresRound(t, S, h) {
       await h.closePanel();
       const listsRemove = rows.some((r) => /^Remove/i.test(r));
       return {
-        ok: facts.opacity === '1' && facts.swatchOk && listsRemove,
-        observed: `remove control ${facts.removeId ?? 'none'} opacity ${facts.opacity ?? 'unread'} with the pointer away; series swatch ${facts.swatch ?? 'unread'}; right click on the series header lists ${rows.join(', ') || 'no menu'}${facts.opacity === '1' ? '' : ` (FEATURES.md 2.2 rank 12, ${LANE})`}`,
+        ok: facts.opacity === '1' && awayOpacity !== '1' && facts.swatchOk && listsRemove,
+        observed: `remove control ${facts.removeId ?? 'none'} opacity ${facts.opacity ?? 'unread'} with the row hovered (${awayOpacity ?? 'unread'} with the pointer away, item 26); series swatch ${facts.swatch ?? 'unread'}; right click on the series header lists ${rows.join(', ') || 'no menu'}${facts.opacity === '1' ? '' : ` (FEATURES.md 2.2 rank 12, ${LANE})`}`,
       };
     },
   );

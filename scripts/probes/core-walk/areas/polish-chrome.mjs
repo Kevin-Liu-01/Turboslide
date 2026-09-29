@@ -714,12 +714,18 @@ export async function run(t) {
               for (let n = walker.nextNode(); n; n = walker.nextNode()) out.push(n);
               return out;
             })(),
-          ].filter((node) => /Paint format/.test(node.textContent ?? '')).length,
+          ].filter((node) =>
+            /Paint format|Copy formatting|Paste formatting/.test(node.textContent ?? ''),
+          ).length,
       );
       await t.press('Escape');
       await t.waitGone('[data-control="dialog.keyboardShortcuts"]', 4000).catch(() => undefined);
-      ok = ok && paint === 1;
-      facts.push(`Paint format rows in the shortcuts dialog ${paint}`);
+      /* audit-chrome 52's one row per chord: the dialog lists Copy formatting and Paste formatting
+         once each (polish/build/b1.md R22a), or Paint format once */
+      ok = ok && (paint === 1 || paint === 2);
+      facts.push(
+        `Paint format rows in the shortcuts dialog ${paint} (Copy formatting and Paste formatting count)`,
+      );
       await t.clearAll();
       return {
         ok,

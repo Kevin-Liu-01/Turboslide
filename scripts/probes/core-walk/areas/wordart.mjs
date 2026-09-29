@@ -54,7 +54,7 @@ export async function run(t) {
   await t.step(
     'wordart.insert',
     'Insert > Word art, type Big words, Enter',
-    'an 88 px, weight 500, centred text block with a 1.5 px ink outline',
+    'an 88 px, regular weight, centred text block with a 1.5 px ink outline',
     async () => {
       const before = await t.objectIds(S);
       await t.menuPath('insert', 'insert.wordArt');
@@ -74,13 +74,14 @@ export async function run(t) {
           obj.type === 'text' &&
           b?.text === 'Big words' &&
           b?.typography?.size === 88 &&
-          b?.typography?.weight === 500 &&
+          /* the regular weight at insert since the polish round (docs/POLISH.md 2.4 item 34): B then makes it bold */
+          (b?.typography?.weight === undefined || b?.typography?.weight === 400) &&
           b?.typography?.align === 'center' &&
           b?.outline?.color === 'ink' &&
           b?.outline?.width === 1.5 &&
           d !== null &&
           t.near(d.fontSize, 88, 1) &&
-          String(d.weight) === '500' &&
+          String(d.weight) === '400' &&
           /1\.5/.test(d.stroke ?? ''),
         observed: obj
           ? `placeholder "${placeholder}"; ${obj.type} ${obj.id} ${t.posStr(obj.pos)}; typography ${JSON.stringify(b?.typography)} outline ${JSON.stringify(b?.outline)}; drawn font ${d?.fontSize}px weight ${d?.weight} align ${d?.align} text stroke ${d?.stroke} ${d?.strokeColor}`

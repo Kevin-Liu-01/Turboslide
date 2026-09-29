@@ -2,7 +2,7 @@ import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import type { Block, PlainBlock } from '@turboslide/schema/blocks';
-import { STROKE_WIDTHS } from '@turboslide/schema/blocks';
+import { STROKE_WIDTHS, SHOT_FRAME_WEIGHTS } from '@turboslide/schema/blocks';
 import {
   CHART_KINDS,
   CHART_KIND_LABELS,
@@ -518,7 +518,9 @@ export function ToolbarTail() {
         if (block?.type === 'shot' || block?.type === 'picture') {
           const current =
             block.frame?.weight ?? (block.type === 'shot' && block.border === true ? 1 : 0);
-          return [0, 1, 1.5, 2].map((weight) => ({
+          /* Google's list (docs/POLISH.md 2.5 item 44; polish/build/b4.md R6): None, then the
+             schema's SHOT_FRAME_WEIGHTS, one list for the tail, the panel and the schema */
+          return [0, ...SHOT_FRAME_WEIGHTS].map((weight) => ({
             id: `weight-${weight}`,
             label: weight === 0 ? 'None' : `${weight} px`,
             value: weight,

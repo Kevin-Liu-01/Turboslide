@@ -226,6 +226,14 @@ describe('presencePostSchema', () => {
     expect(rosterEntrySchema.parse(roster)).toEqual(roster);
     expect(rosterEntrySchema.safeParse({ ...roster, hueSlot: 6 }).success).toBe(false);
     expect(rosterEntrySchema.safeParse({ ...roster, trust: 'admin' }).success).toBe(false);
+    // the reader's email (docs/PEOPLE.md 3.7): absent by default, round trips when the room wrote it
+    expect(rosterEntrySchema.parse(roster)).not.toHaveProperty('email');
+    const withEmail = { ...roster, trust: 'verified' as const, email: 'maya@example.test' };
+    expect(rosterEntrySchema.parse(withEmail)).toEqual(withEmail);
+    expect(rosterEntrySchema.safeParse({ ...roster, email: 'x'.repeat(255) }).success).toBe(false);
+    expect(presencePostSchema.safeParse({ ...roster, email: 'maya@example.test' }).success).toBe(
+      false,
+    );
   });
 });
 

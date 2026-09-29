@@ -39,7 +39,10 @@ export type MarkOptions = {
   hueSlot?: HueSlot | null;
   presenter?: boolean;
   self?: boolean;
-  /** The public URL of the 32 or 64 px picture when the variant is `picture`. */
+  /**
+   * The public URL of the 64 px picture when the variant is `picture`; absent, the resolved
+   * identity's own `pictureUrl` is read (docs/PEOPLE.md 4.4), so no caller passes one today.
+   */
   pictureUrl?: string;
 };
 
@@ -106,8 +109,9 @@ export function markSpec(identity: ResolvedIdentity, options: MarkOptions = {}):
     return { ...base, variant: 'agent', initials: '', hue: null };
   }
   const chosen = identity.avatar.variant;
-  if (chosen === 'picture' && options.pictureUrl) {
-    return { ...base, variant: 'picture', initials: '', pictureUrl: options.pictureUrl, hue };
+  const pictureUrl = options.pictureUrl ?? identity.pictureUrl;
+  if (chosen === 'picture' && pictureUrl) {
+    return { ...base, variant: 'picture', initials: '', pictureUrl, hue };
   }
   if (chosen === 'glyph' || chosen === 'dither') {
     return { ...base, variant: chosen, initials: '', hue };

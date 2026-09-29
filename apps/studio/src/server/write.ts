@@ -3,6 +3,12 @@ import { getRequest, setCookie } from '@tanstack/react-start/server';
 import type { AccessRecord, Capability, Role, Via } from '@turboslide/schema/access';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
+import type { AvatarVariant } from '@turboslide/identity/principal';
+import { markSpec } from '@turboslide/identity/marks';
+import type { MarkSpec } from '@turboslide/identity/marks';
+import { PICTURE_MARK_SIZE, pictureUrlOf } from '@turboslide/identity/picture';
+import { toIdentityView } from '@turboslide/identity/resolve';
+import type { ResolvedIdentity } from '@turboslide/identity/resolve';
 import { authorSchema, writeSchema } from '@turboslide/schema/mutations';
 import type { Author, Lease, Version, Write } from '@turboslide/schema/mutations';
 import type { Issue } from '@turboslide/schema/validate';
@@ -84,7 +90,20 @@ function parseAuthor(value: unknown): Author {
   return parsed.data;
 }
 
-/** The caller's identity as the route shows it (gslides-parity SPEC-3 7.8; the chrome's IdentityView). */
+/** The own avatar choice as `account.me` reports it (auth/actions.ts avatarAnswer): the picture as its 64 px URL, never the key. */
+export type EditorAvatar = {
+  variant: AvatarVariant;
+  initials?: string;
+  salt?: number;
+  url?: string;
+};
+
+/**
+ * A person as the route shows one (gslides-parity SPEC-3 7.8; the chrome's IdentityView): the
+ * caller's own identity on `identity`, and every principal the page names on `identities`
+ * (docs/PEOPLE.md 3.8), resolved through the room's resolver (the alias table, the account
+ * profiles), with the mark the chrome draws and the address when the reader may see it.
+ */
 export type EditorIdentity = {
   principalId: string;
   label: string;
@@ -92,7 +111,62 @@ export type EditorIdentity = {
   trust: 'label' | 'guest' | 'verified' | 'agent';
   kind: 'anonymous' | 'account' | 'agent';
   email?: string;
+  /** the mark (`self` on the own identity; the 64 px picture URL on it when the choice is a picture) */
+  mark?: MarkSpec;
+  /** the own identity's choice (docs/PEOPLE.md 3.11), so the builder starts from it; absent on `identities` */
+  avatar?: EditorAvatar;
+  runId?: string;
+  /** a deleted account (SPEC-3 7.4): no badge beside "Deleted account" */
+  deleted?: boolean;
+  /** the account (`usr_<id>`) an aliased anonymous id renders as (7.4), so the two ids are one person to the label suffix */
+  accountId?: string;
 };
+
+/** The own identity of a payload: the view with `self` on its mark and the choice beside it. */
+export function ownIdentityOf(resolved: ResolvedIdentity): EditorIdentity {
+  const view = toIdentityView(resolved, {
+    mark: markSpec(resolved, { self: true }),
+    showEmail: true,
+  });
+  const choice = resolved.avatar;
+  const url = pictureUrlOf(choice, PICTURE_MARK_SIZE);
+  const avatar: EditorAvatar = {
+    variant: choice.variant,
+    ...(choice.initials !== undefined ? { initials: choice.initials } : {}),
+    ...(choice.salt !== undefined ? { salt: choice.salt } : {}),
+    ...(url !== undefined ? { url } : {}),
+  };
+  return { ...view, avatar };
+}
+
+/**
+ * The principal ids a payload names (docs/PEOPLE.md 3.8): the trimmed log's authors, the comment
+ * authors when the reader may read comments, the record's owner, pending owner, grants and
+ * requests. Pure; the order is the order of first appearance the label suffix reads.
+ */
+export function peopleOf(input: {
+  versions: ReadonlyArray<Version>;
+  commentAuthors: ReadonlyArray<string>;
+  access: AccessRecord | null | undefined;
+}): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const add = (id: string | null | undefined): void => {
+    if (id === null || id === undefined || seen.has(id)) return;
+    seen.add(id);
+    out.push(id);
+  };
+  for (const version of input.versions) add(version.author.principalId);
+  for (const id of input.commentAuthors) add(id);
+  const record = input.access ?? null;
+  if (record !== null) {
+    add(record.owner);
+    add(record.pendingOwner?.principalId);
+    for (const grant of record.grants) add(grant.principalId);
+    for (const request of record.requests) add(request.principalId);
+  }
+  return out;
+}
 
 /** The room's facts the editor starts from (SPEC-3 3.6): the stream position of the document it was handed. */
 export type EditorRoom = {
@@ -158,13 +232,20 @@ export type EditorDeck = {
   /* round three (gslides-parity SPEC-3 3.6, 6.3, 7.8; MILESTONES-3 B2 day 4) */
   room?: EditorRoom;
   identity?: EditorIdentity;
+  /**
+   * The people the page names, keyed by principal id (docs/PEOPLE.md 3.8): the version authors,
+   * the comment authors, the owner, the pending owner and the grants, resolved once at load; the
+   * controller merges the map under the roster and the caller for the version rows, the comment
+   * cards and the Share dialog. Absent on a draft, which names nobody yet.
+   */
+  identities?: Readonly<Record<string, EditorIdentity>>;
   /** the caller's role on the deck; absent on a draft */
   role?: Role;
   via?: Via;
   capabilities?: Capability[];
   /** the effective access record (the legacy synthesis for a deck nobody claimed), tokens hashed */
   access?: AccessRecord;
-  /** the deployment's sign in facts (7.3); absent on a draft */
+  /** the deployment's sign in facts (7.3) */
   auth?: EditorAuthFacts;
 };
 
@@ -357,10 +438,9 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
         : originsSince(await deckRoom.store.records(), data.since);
     const record = await access.effectiveAccess(data.deckId);
     const standing = access.standingOf(decision, record);
-    const resolved = room.resolveIdentity(
-      identity.principalId ?? identity.identity,
-      identity.record,
-    );
+    // the caller as the room resolves it (docs/PEOPLE.md 3.6): the account behind a session or
+    // an aliased cookie, else the record's name or label
+    const resolved = await room.resolveRequestIdentity(identity);
     const selection = room.realtimeSelection();
     const result: EditorDeck = {
       deckId: data.deckId,
@@ -377,16 +457,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
          the store's template index is pulled first so a default set on another instance holds */
       defaultKit: await defaultKitOfCollection(),
       room: { seq: live.seq, tier: selection.tier, notice: selection.notice },
-      identity: {
-        principalId: resolved.principalId,
-        label: resolved.label,
-        ...(resolved.trust === 'guest' || resolved.trust === 'verified'
-          ? { name: resolved.displayName }
-          : {}),
-        trust: resolved.trust,
-        kind: resolved.kind,
-        ...(resolved.email !== undefined ? { email: resolved.email } : {}),
-      },
+      identity: ownIdentityOf(resolved),
       ...(standing.role !== null ? { role: standing.role } : {}),
       ...(standing.via !== null ? { via: standing.via } : {}),
       capabilities: standing.capabilities,
@@ -401,9 +472,33 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       },
     };
     const shaped = shapeByRole(result, standing.capabilities);
+    /* the people the page names, resolved once (docs/PEOPLE.md 3.8): the shaped log's authors (a
+       role without history names none), the comment authors for a role with readComments, the
+       record's people; the address for the owner and a grant holder (SPEC-3 4.8), a role word for
+       a verified person read by a link visitor without the owner's switch (0.12; 4.5) */
+    const commentAuthors = standing.capabilities.includes('readComments')
+      ? await (await import('./comments'))
+          .liveThreads(deckRoom)
+          .then(({ threads }) =>
+            [...threads.values()].flatMap((thread) =>
+              [thread.comment, ...thread.replies].map((comment) => comment.author.principalId),
+            ),
+          )
+          .catch(() => [] as string[])
+      : [];
+    const byLink = standing.via === 'link' || standing.via === 'open';
+    const identities = await room.identityViewsFor(
+      peopleOf({ versions: shaped.versions, commentAuthors, access: record }),
+      {
+        showEmail: standing.via === 'owner' || standing.via === 'grant',
+        roleWords: byLink && !(record.settings.showNamesToLinkVisitors ?? false),
+        access: record,
+      },
+    );
     // the trim after the shaping: a role without history carries an empty log and no count
     return JSON.stringify({
       ...shaped,
+      identities,
       versions: trimVersionLog(shaped.versions),
       ...(shaped.versions.length > 0 || standing.capabilities.includes('history')
         ? { versionCount: shaped.versions.length }
@@ -457,6 +552,16 @@ async function defaultKitOfCollection(): Promise<DefaultKit> {
 const FIRST_SAVE_LOG_MS = 1000;
 
 const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Promise<string> => {
+  /* the person the draft belongs to (docs/PEOPLE.md 3.11; production 1 and 2): the same identity
+     the editor boot carries, so the own chip, the account menu and the name prompt on the first
+     edit read the person and not the page's default author; the sign in facts beside it so the
+     Sign in row exists on /new where the deployment offers one */
+  const room = await import('./room');
+  const auth = await import('./auth/identity');
+  const identity = await room.requestIdentity(getRequest());
+  sendMintedCookie(identity.setCookie);
+  const resolved = await room.resolveRequestIdentity(identity);
+  const runtime = auth.identityRuntime();
   const decks = await ensureDecks();
   await decks.templates.pull();
   const from = readDefaultTemplateId(decks.decksDir);
@@ -497,6 +602,15 @@ const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Prom
     hosting: hostingFacts(),
     defaultKit,
     draft: true,
+    identity: ownIdentityOf(resolved),
+    auth: {
+      signIn: runtime.methods.available,
+      email: runtime.methods.email,
+      passkeys: runtime.methods.passkeys,
+      passkeysNotice: runtime.methods.passkeysNotice,
+      github: runtime.methods.github,
+      mail: runtime.mailMode,
+    },
   };
   return JSON.stringify(result);
 });

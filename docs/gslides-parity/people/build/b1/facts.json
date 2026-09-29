@@ -1,0 +1,684 @@
+{
+  "uptime": "13:32  up 5 days,  3:29, 2 users, load averages: 10.06 11.36 10.18",
+  "before.A.account": {
+    "principalId": "anon_ac8326b3-21e7-48ef-8a12-db21ff571862",
+    "label": "Helium 492",
+    "trust": "label",
+    "signedIn": false,
+    "signInAvailable": true
+  },
+  "before.A.presence": {
+    "others": [],
+    "count": 0
+  },
+  "before.A.cookiePrincipal": "anon_ac8326b3-21e7-48ef-8a12-db21ff571862",
+  "before.A.slot": {
+    "count": "0",
+    "chips": [
+      {
+        "holder": "title.account",
+        "ariaLabel": "Helium 492",
+        "variant": "initials",
+        "trust": "label",
+        "hue": null,
+        "hueVar": "",
+        "initials": "H",
+        "picture": false,
+        "stripe": false
+      }
+    ],
+    "ownChip": true
+  },
+  "before.A.accountMenu": {
+    "name": "Helium 492",
+    "sentence": "Not signed in",
+    "chip": "Helium 492",
+    "chipTrust": "label",
+    "chipVariant": "initials",
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signIn",
+      "account.forget",
+      "account.sessions"
+    ]
+  },
+  "shot.before.A.accountMenu": "A-account-menu-before-anonymous.png",
+  "signIn.A.userId": true,
+  "after.A.account": {
+    "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg",
+    "label": "Platinum 858",
+    "trust": "verified",
+    "signedIn": true,
+    "signInAvailable": true
+  },
+  "after.A.presence": {
+    "others": [],
+    "count": 0
+  },
+  "after.A.identities.self": {
+    "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg",
+    "label": "Platinum 858",
+    "trust": "verified",
+    "kind": "account",
+    "email": "b1-a-mun4uiut@example.test",
+    "markVariant": "initials",
+    "markInitials": "P8",
+    "markSelf": true,
+    "markHue": null
+  },
+  "after.A.alias": true,
+  "after.A.slot": {
+    "count": "0",
+    "chips": [
+      {
+        "holder": "title.account",
+        "ariaLabel": "Platinum 858, signed in",
+        "variant": "initials",
+        "trust": "verified",
+        "hue": null,
+        "hueVar": "",
+        "initials": "P8",
+        "picture": false,
+        "stripe": false
+      }
+    ],
+    "ownChip": true
+  },
+  "after.A.accountMenu": {
+    "name": "Platinum 858",
+    "sentence": "Signed in as b1-a-mun4uiut@example.test",
+    "chip": "Platinum 858, signed in",
+    "chipTrust": "verified",
+    "chipVariant": "initials",
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signOut",
+      "account.forget",
+      "account.sessions"
+    ]
+  },
+  "shot.after.A.accountMenu": "A-account-menu-after-signed-in.png",
+  "deck.id": "untitled-20260929-wht7",
+  "after.A.namePromptFired": false,
+  "after.A.access": {
+    "role": "owner",
+    "via": "owner",
+    "owner": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg"
+  },
+  "versions.A.afterSignIn": [
+    {
+      "n": 1,
+      "author": {
+        "kind": "human",
+        "name": "Platinum 858",
+        "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg"
+      }
+    }
+  ],
+  "share.link": true,
+  "B.access": {
+    "role": "editor",
+    "via": "link"
+  },
+  "linkVisitor.B.presence": {
+    "self": {
+      "clientId": "e14f90dc1c2a389a27adb8a70584e701",
+      "principalId": "anon_a8eb00b1-bf17-4dc4-a8d3-f747a61f5a06",
+      "label": "Lithium 799",
+      "trust": "label",
+      "kind": "human",
+      "role": "editor",
+      "slideId": "title",
+      "markVariant": "initials",
+      "markInitials": "L",
+      "markLabel": "Lithium 799",
+      "markHueSlot": 1,
+      "markPicture": null
+    },
+    "others": [
+      {
+        "clientId": "7867cb47800fdb57632af7e2f84a04da",
+        "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg",
+        "label": "The owner",
+        "trust": "label",
+        "kind": "human",
+        "role": "owner",
+        "slideId": "title",
+        "markVariant": "initials",
+        "markInitials": "O",
+        "markLabel": "The owner",
+        "markHueSlot": 6,
+        "markPicture": null
+      }
+    ],
+    "count": 1
+  },
+  "linkVisitor.B.identities.A": {
+    "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg",
+    "label": "The owner",
+    "trust": "label",
+    "kind": "account",
+    "markVariant": "initials",
+    "markInitials": "O",
+    "markSelf": false,
+    "markHue": {
+      "slot": 6,
+      "hex": "#5533ff"
+    }
+  },
+  "linkVisitor.B.slot": {
+    "count": "1",
+    "chips": [
+      {
+        "holder": "presence.chip.7867cb47800fdb57632af7e2f84a04da",
+        "ariaLabel": "The owner",
+        "variant": "initials",
+        "trust": "label",
+        "hue": "6",
+        "hueVar": "#5533ff",
+        "initials": "O",
+        "picture": false,
+        "stripe": true
+      }
+    ],
+    "ownChip": false
+  },
+  "linkVisitor.B.tip": "The owner · slide 1Signed in Click to follow; click again to stop",
+  "shot.linkVisitor.B.tip": "B-chip-tooltip-link-visitor.png",
+  "linkVisitor.B.roster": {
+    "rows": [
+      {
+        "control": "presence.roster.7867cb47800fdb57632af7e2f84a04da",
+        "name": "The owner",
+        "meta": "owner · slide 1",
+        "act": "",
+        "chip": "The owner",
+        "chipTrust": "label",
+        "chipVariant": "initials",
+        "initials": "O",
+        "hue": "6"
+      }
+    ]
+  },
+  "shot.linkVisitor.B.roster": "B-roster-link-visitor.png",
+  "owner.A.presence": {
+    "self": {
+      "clientId": "7867cb47800fdb57632af7e2f84a04da",
+      "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg",
+      "label": "Platinum 858",
+      "trust": "verified",
+      "kind": "human",
+      "role": "owner",
+      "email": "b1-a-mun4uiut@example.test",
+      "slideId": "title",
+      "markVariant": "initials",
+      "markInitials": "P8",
+      "markLabel": "Platinum 858",
+      "markHueSlot": 6,
+      "markPicture": null
+    },
+    "others": [
+      {
+        "clientId": "e14f90dc1c2a389a27adb8a70584e701",
+        "principalId": "anon_a8eb00b1-bf17-4dc4-a8d3-f747a61f5a06",
+        "label": "Lithium 799",
+        "trust": "label",
+        "kind": "human",
+        "role": "editor",
+        "slideId": "title",
+        "markVariant": "initials",
+        "markInitials": "L",
+        "markLabel": "Lithium 799",
+        "markHueSlot": 1,
+        "markPicture": null
+      }
+    ],
+    "count": 1
+  },
+  "owner.A.slot": {
+    "count": "1",
+    "chips": [
+      {
+        "holder": "presence.chip.e14f90dc1c2a389a27adb8a70584e701",
+        "ariaLabel": "Lithium 799",
+        "variant": "initials",
+        "trust": "label",
+        "hue": "1",
+        "hueVar": "#2f5ce0",
+        "initials": "L",
+        "picture": false,
+        "stripe": true
+      },
+      {
+        "holder": "title.account",
+        "ariaLabel": "Platinum 858, signed in",
+        "variant": "initials",
+        "trust": "verified",
+        "hue": "6",
+        "hueVar": "#5533ff",
+        "initials": "P8",
+        "picture": false,
+        "stripe": false
+      }
+    ],
+    "ownChip": true
+  },
+  "share.settings": {
+    "showNames": true
+  },
+  "namesOn.B.presence": {
+    "self": {
+      "clientId": "edbe39a422a2e245e83f78a2891727a7",
+      "principalId": "anon_a8eb00b1-bf17-4dc4-a8d3-f747a61f5a06",
+      "label": "Lithium 799",
+      "trust": "label",
+      "kind": "human",
+      "role": "editor",
+      "slideId": "title",
+      "markVariant": "initials",
+      "markInitials": "L",
+      "markLabel": "Lithium 799",
+      "markHueSlot": 1,
+      "markPicture": null
+    },
+    "others": [
+      {
+        "clientId": "7867cb47800fdb57632af7e2f84a04da",
+        "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg",
+        "label": "Platinum 858",
+        "trust": "verified",
+        "kind": "human",
+        "role": "owner",
+        "slideId": "title",
+        "markVariant": "initials",
+        "markInitials": "P8",
+        "markLabel": "Platinum 858",
+        "markHueSlot": 6,
+        "markPicture": null
+      }
+    ],
+    "count": 1
+  },
+  "namesOn.B.identities.A": {
+    "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg",
+    "label": "Platinum 858",
+    "name": "Platinum 858",
+    "trust": "verified",
+    "kind": "account",
+    "markVariant": "initials",
+    "markInitials": "P8",
+    "markSelf": false,
+    "markHue": {
+      "slot": 6,
+      "hex": "#5533ff"
+    }
+  },
+  "namesOn.B.tip": "Platinum 858 · signed in · slide 1Signed in Click to follow; click again to stop",
+  "namesOn.B.roster": {
+    "rows": [
+      {
+        "control": "presence.roster.7867cb47800fdb57632af7e2f84a04da",
+        "name": "Platinum 858",
+        "meta": "owner · slide 1",
+        "act": "",
+        "chip": "Platinum 858, signed in",
+        "chipTrust": "verified",
+        "chipVariant": "initials",
+        "initials": "P8",
+        "hue": "6"
+      }
+    ]
+  },
+  "shot.namesOn.B.roster": "B-roster-names-on-account-label.png",
+  "A.accountMenu.beforeName": {
+    "name": "Platinum 858",
+    "sentence": "Signed in as b1-a-mun4uiut@example.test",
+    "chip": "Platinum 858, signed in",
+    "chipTrust": "verified",
+    "chipVariant": "initials",
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signOut",
+      "account.forget",
+      "account.sessions"
+    ]
+  },
+  "changeName.error": null,
+  "named.B.presence": {
+    "self": {
+      "clientId": "edbe39a422a2e245e83f78a2891727a7",
+      "principalId": "anon_a8eb00b1-bf17-4dc4-a8d3-f747a61f5a06",
+      "label": "Lithium 799",
+      "trust": "label",
+      "kind": "human",
+      "role": "editor",
+      "slideId": "title",
+      "markVariant": "initials",
+      "markInitials": "L",
+      "markLabel": "Lithium 799",
+      "markHueSlot": 1,
+      "markPicture": null
+    },
+    "others": [
+      {
+        "clientId": "7867cb47800fdb57632af7e2f84a04da",
+        "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg",
+        "label": "Kevin B1",
+        "trust": "verified",
+        "kind": "human",
+        "role": "owner",
+        "slideId": "title",
+        "markVariant": "initials",
+        "markInitials": "KB",
+        "markLabel": "Kevin B1",
+        "markHueSlot": 6,
+        "markPicture": null
+      }
+    ],
+    "count": 1
+  },
+  "named.A.presence": {
+    "self": {
+      "clientId": "7867cb47800fdb57632af7e2f84a04da",
+      "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg",
+      "label": "Kevin B1",
+      "trust": "verified",
+      "kind": "human",
+      "role": "owner",
+      "email": "b1-a-mun4uiut@example.test",
+      "slideId": "title",
+      "markVariant": "initials",
+      "markInitials": "KB",
+      "markLabel": "Kevin B1",
+      "markHueSlot": 6,
+      "markPicture": null
+    },
+    "others": [
+      {
+        "clientId": "edbe39a422a2e245e83f78a2891727a7",
+        "principalId": "anon_a8eb00b1-bf17-4dc4-a8d3-f747a61f5a06",
+        "label": "Lithium 799",
+        "trust": "label",
+        "kind": "human",
+        "role": "editor",
+        "slideId": "title",
+        "markVariant": "initials",
+        "markInitials": "L",
+        "markLabel": "Lithium 799",
+        "markHueSlot": 1,
+        "markPicture": null
+      }
+    ],
+    "count": 1
+  },
+  "named.A.account": {
+    "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg",
+    "label": "Platinum 858",
+    "trust": "verified",
+    "signedIn": true,
+    "signInAvailable": true
+  },
+  "named.B.tip": "Kevin B1 · signed in · slide 1Signed in Click to follow; click again to stop",
+  "shot.named.B.tip": "B-chip-tooltip-account-named.png",
+  "named.B.roster": {
+    "rows": [
+      {
+        "control": "presence.roster.7867cb47800fdb57632af7e2f84a04da",
+        "name": "Kevin B1",
+        "meta": "owner · slide 1",
+        "act": "",
+        "chip": "Kevin B1, signed in",
+        "chipTrust": "verified",
+        "chipVariant": "initials",
+        "initials": "KB",
+        "hue": "6"
+      }
+    ]
+  },
+  "shot.named.B.roster": "B-roster-account-named.png",
+  "named.A.accountMenu": {
+    "name": "Kevin B1",
+    "sentence": "Signed in as b1-a-mun4uiut@example.test",
+    "chip": "Kevin B1, signed in",
+    "chipTrust": "verified",
+    "chipVariant": "initials",
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signOut",
+      "account.forget",
+      "account.sessions"
+    ]
+  },
+  "shot.named.A.accountMenu": "A-account-menu-after-named.png",
+  "hue.A.caretDrawn": true,
+  "hue.A.selectionOfB": [
+    {
+      "name": "Lithium 799",
+      "selection": {
+        "blockIds": [
+          "heading"
+        ],
+        "caret": {
+          "blockId": "heading",
+          "path": "/text",
+          "range": [
+            25,
+            25
+          ]
+        }
+      },
+      "slideId": "title"
+    }
+  ],
+  "hue.A.readsB": {
+    "caret": "rgb(47, 92, 224)",
+    "caretHueVar": "#2f5ce0",
+    "chipHue": "1",
+    "chipHueVar": "#2f5ce0",
+    "stripe": "rgb(47, 92, 224)",
+    "flag": "LLithium",
+    "markHueSlot": 1,
+    "markHueHex": "#2f5ce0"
+  },
+  "shot.hue.A.caret": "A-caret-of-B-hue.png",
+  "order.A": {
+    "before": [
+      "edbe39a422a2e245e83f78a2891727a7",
+      "15ac57209ccd25533b697c14650258bb"
+    ],
+    "afterC": [
+      "edbe39a422a2e245e83f78a2891727a7",
+      "15ac57209ccd25533b697c14650258bb"
+    ],
+    "afterB": [
+      "edbe39a422a2e245e83f78a2891727a7",
+      "15ac57209ccd25533b697c14650258bb"
+    ],
+    "held": true
+  },
+  "shot.order.A.slot": "A-slot-two-others.png",
+  "comment.C.added": {
+    "ok": true,
+    "error": null,
+    "author": {
+      "principalId": "anon_6cbabb30-08b6-410f-84da-89f5aff793e3",
+      "label": "Maya Guest",
+      "kind": "human"
+    }
+  },
+  "signIn.B.userId": true,
+  "aliased.B.account": {
+    "principalId": "usr_6reybYnDmkoATUqRsBVijoTFX6i4Hy0Z",
+    "label": "Silicon 457",
+    "trust": "verified",
+    "signedIn": true,
+    "signInAvailable": true
+  },
+  "aliased.B.identities.anonB": {
+    "principalId": "anon_a8eb00b1-bf17-4dc4-a8d3-f747a61f5a06",
+    "label": "Silicon 457",
+    "trust": "verified",
+    "kind": "anonymous",
+    "markVariant": "initials",
+    "markInitials": "S4",
+    "markSelf": false,
+    "markHue": null
+  },
+  "aliased.B.identities.usrB": {
+    "principalId": "usr_6reybYnDmkoATUqRsBVijoTFX6i4Hy0Z",
+    "label": "Silicon 457",
+    "name": "Silicon 457",
+    "trust": "verified",
+    "kind": "account",
+    "email": "b1-b-mun4uiut@example.test",
+    "markVariant": "initials",
+    "markInitials": "S4",
+    "markSelf": true,
+    "markHue": null
+  },
+  "reload.A.identities.guestC": {
+    "principalId": "anon_6cbabb30-08b6-410f-84da-89f5aff793e3",
+    "label": "Iridium 476",
+    "name": "Maya Guest",
+    "trust": "guest",
+    "kind": "anonymous",
+    "markVariant": "initials",
+    "markInitials": "MG",
+    "markSelf": false,
+    "markHue": null
+  },
+  "reload.A.identities.anonB": {
+    "principalId": "anon_a8eb00b1-bf17-4dc4-a8d3-f747a61f5a06",
+    "label": "Silicon 457",
+    "trust": "verified",
+    "kind": "anonymous",
+    "email": "b1-b-mun4uiut@example.test",
+    "markVariant": "initials",
+    "markInitials": "S4",
+    "markSelf": false,
+    "markHue": null
+  },
+  "reload.A.identities.usrB": {
+    "principalId": "usr_6reybYnDmkoATUqRsBVijoTFX6i4Hy0Z",
+    "label": "Silicon 457",
+    "name": "Silicon 457",
+    "trust": "verified",
+    "kind": "account",
+    "email": "b1-b-mun4uiut@example.test",
+    "markVariant": "initials",
+    "markInitials": "S4",
+    "markSelf": false,
+    "markHue": {
+      "slot": 4,
+      "hex": "#1d8fc8"
+    }
+  },
+  "reload.A.identities.self": {
+    "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg",
+    "label": "Platinum 858",
+    "name": "Kevin B1",
+    "trust": "verified",
+    "kind": "account",
+    "email": "b1-a-mun4uiut@example.test",
+    "markVariant": "initials",
+    "markInitials": "KB",
+    "markSelf": true,
+    "markHue": null
+  },
+  "reload.A.identities.keys": 4,
+  "reload.A.comment.author": {
+    "principalId": "anon_6cbabb30-08b6-410f-84da-89f5aff793e3",
+    "label": "Iridium 476",
+    "name": "Maya Guest",
+    "trust": "guest",
+    "kind": "anonymous"
+  },
+  "versions.A.final": [
+    {
+      "n": 1,
+      "author": {
+        "kind": "human",
+        "name": "Platinum 858",
+        "principalId": "usr_xHWwX9zzvSgT7QVTPfClHFsXcIpoDLFg"
+      }
+    },
+    {
+      "n": 2,
+      "author": {
+        "kind": "human",
+        "name": "Lithium 799",
+        "principalId": "anon_a8eb00b1-bf17-4dc4-a8d3-f747a61f5a06"
+      }
+    },
+    {
+      "n": 3,
+      "author": {
+        "kind": "human",
+        "name": "Iridium 476",
+        "principalId": "anon_6cbabb30-08b6-410f-84da-89f5aff793e3"
+      }
+    },
+    {
+      "n": 4,
+      "author": {
+        "kind": "human",
+        "name": "Lithium 799",
+        "principalId": "anon_a8eb00b1-bf17-4dc4-a8d3-f747a61f5a06"
+      }
+    },
+    {
+      "n": 5,
+      "author": {
+        "kind": "human",
+        "name": "Lithium 799",
+        "principalId": "anon_a8eb00b1-bf17-4dc4-a8d3-f747a61f5a06"
+      }
+    },
+    {
+      "n": 6,
+      "author": {
+        "kind": "human",
+        "name": "Silicon 457",
+        "principalId": "usr_6reybYnDmkoATUqRsBVijoTFX6i4Hy0Z"
+      }
+    }
+  ],
+  "shot.reload.A.comments": "A-comments-departed-guest.png",
+  "creator.D.before": {
+    "role": "owner",
+    "via": "owner",
+    "owner": "anon_7bb2a493-672b-448b-af42-6909435f5c1a",
+    "principalId": "anon_7bb2a493-672b-448b-af42-6909435f5c1a"
+  },
+  "creator.D.afterSignIn": {
+    "role": "viewer",
+    "via": "open",
+    "owner": "anon_7bb2a493-672b-448b-af42-6909435f5c1a",
+    "principalId": "usr_YzlxRYPOwCPVv4C2spSwvjYqRkROumq5",
+    "ownerView": {
+      "principalId": "anon_7bb2a493-672b-448b-af42-6909435f5c1a",
+      "label": "The owner",
+      "trust": "label",
+      "kind": "anonymous",
+      "markVariant": "initials",
+      "markInitials": "O",
+      "markSelf": false,
+      "markHue": null
+    }
+  },
+  "uptime.end": "13:34  up 5 days,  3:31, 2 users, load averages: 11.73 11.79 10.52",
+  "teardown.untitled-20260929-wht7": {
+    "trash": 200,
+    "remove": 200,
+    "error": null
+  },
+  "teardown.untitled-20260929-r0sj": {
+    "trash": 200,
+    "remove": 200,
+    "error": null
+  }
+}

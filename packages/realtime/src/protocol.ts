@@ -279,6 +279,9 @@ const identityFields = {
   hueSlot: z.number().int().min(0).max(5),
   kind: z.enum(['human', 'agent']),
   role: roleSchema,
+  /* the reader's view of a verified person's address (docs/PEOPLE.md 3.7): optional on the wire,
+     never in a presence body (the identity fields are refused there, report 10 F31) */
+  email: z.string().max(254).optional(),
 };
 
 export const rosterIdentitySchema = z.strictObject(

@@ -153,10 +153,16 @@ export type RosterIdentity = {
   trust: Trust;
   /** the mark spec `@turboslide/identity` draws (B3); opaque to the channel */
   mark: Record<string, unknown>;
-  /** the hue slot the room granted, 0 to 5 */
+  /** the hue slot the room granted, 0 to 5 on the wire (the chrome's `HueSlot` is this plus one) */
   hueSlot: number;
   kind: 'human' | 'agent';
   role: Role;
+  /**
+   * a verified person's address, for the tooltip (docs/PEOPLE.md 3.7; SPEC-3 4.8): never on the
+   * shared roster; written per reader by the room's `rosterEntryForReader` for a reader who holds
+   * a grant or owns the deck, absent for everyone else
+   */
+  email?: string;
 };
 
 export type RosterEntry = PresenceState & RosterIdentity;

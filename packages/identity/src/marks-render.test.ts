@@ -9,12 +9,14 @@ import type { MarkSpec, MarkVariant } from './marks.ts';
 import { renderMarkPng1 } from './marks-png.ts';
 import {
   MARK_CELL,
+  MARK_FIELD_ORIGIN,
   MARK_PREVIEW_SIZES,
   MARK_SIZES,
   bitsOfSvg,
   glyphGrid,
   glyphInk,
   initialsFontSize,
+  plateOf,
   rampParams,
   renderMarkBits,
   renderMarkSvg,
@@ -109,7 +111,7 @@ function count(bits: MarkBits, region?: [number, number, number, number]): numbe
 }
 
 describe('renderMarkBits', () => {
-  test('the border ring is ink, the plate is inside it, and the cells are 2 px', () => {
+  test('the border ring is ink, a paper gap sits inside it, the field is inside that, and the cells are 2 px', () => {
     const bits = renderMarkBits(spec(0), 24);
     expect(bits.width).toBe(24);
     for (let i = 0; i < 24; i += 1) {
@@ -118,12 +120,19 @@ describe('renderMarkBits', () => {
       expect(bits.bits[i * 24]).toBe(1);
       expect(bits.bits[i * 24 + 23]).toBe(1);
     }
-    // an initials plate at density d lights about d eighths of its 2 px cells (an 11 by 11 cell
+    // pixel 1 is paper on every side (docs/PEOPLE.md 3.4): no cell touches the ring
+    for (let i = 1; i < 23; i += 1) {
+      expect(bits.bits[1 * 24 + i]).toBe(0);
+      expect(bits.bits[22 * 24 + i]).toBe(0);
+      expect(bits.bits[i * 24 + 1]).toBe(0);
+      expect(bits.bits[i * 24 + 22]).toBe(0);
+    }
+    // an initials field at density d lights about d eighths of its 2 px cells (a 10 by 10 cell
     // window over the 8 by 8 screen is not a whole tile, so the fraction is close, not exact), and
-    // a denser plate never unlights a cell of a lighter one
+    // a denser field never unlights a cell of a lighter one
     const initials = markSpec(identity(0, 'initials'));
     const plate = renderMarkBits(initials, 24);
-    const fraction = count(plate, [1, 1, 23, 23]) / (22 * 22);
+    const fraction = count(plate, [2, 2, 22, 22]) / (20 * 20);
     expect(Math.abs(fraction - initials.density / 8)).toBeLessThan(0.1);
     for (const density of [1, 2, 3] as const) {
       const lighter = renderMarkBits({ ...initials, density }, 24);
@@ -132,13 +141,66 @@ describe('renderMarkBits', () => {
         if (lighter.bits[i] === 1) expect(denser.bits[i]).toBe(1);
       expect(count(denser)).toBeGreaterThan(count(lighter));
     }
-    // every lit pixel's 2 px cell partner is lit too (aligned to the plate's top left)
-    for (let y = 1; y < 23; y += 1)
-      for (let x = 1; x < 23; x += 1) {
-        const cx = 1 + Math.floor((x - 1) / MARK_CELL) * MARK_CELL;
-        const cy = 1 + Math.floor((y - 1) / MARK_CELL) * MARK_CELL;
+    // every lit pixel's 2 px cell partner is lit too (aligned to the field's top left)
+    for (let y = 2; y < 22; y += 1)
+      for (let x = 2; x < 22; x += 1) {
+        const cx = 2 + Math.floor((x - 2) / MARK_CELL) * MARK_CELL;
+        const cy = 2 + Math.floor((y - 2) / MARK_CELL) * MARK_CELL;
         expect(plate.bits[y * 24 + x]).toBe(plate.bits[cy * 24 + cx]);
       }
+  });
+
+  test('the field starts at pixel 2 and is size - 4 wide at 24, 16, 14 and 12, the glyph grid centred in it, the stripe over its bottom two rows', () => {
+    expect(MARK_FIELD_ORIGIN).toBe(2);
+    const variants = ['initials', 'glyph', 'dither', 'agent'] as const;
+    for (const size of [24, 16, 14, 12]) {
+      const { origin, extent } = plateOf(size);
+      expect(origin).toBe(2);
+      expect(extent).toBe(size - 4);
+      for (const variant of variants) {
+        const s: MarkSpec = { ...spec(0), variant, density: 4, presenter: false };
+        const bits = renderMarkBits(s, size);
+        let lit = 0;
+        for (let y = 0; y < size; y += 1)
+          for (let x = 0; x < size; x += 1) {
+            const onRing = x === 0 || y === 0 || x === size - 1 || y === size - 1;
+            const inField = x >= 2 && x < size - 2 && y >= 2 && y < size - 2;
+            const bit = bits.bits[y * size + x];
+            if (!onRing && !inField) expect(bit).toBe(0);
+            if (inField && bit === 1) lit += 1;
+          }
+        expect(lit).toBeGreaterThan(0);
+      }
+      // the glyph grid: 4 px cells fill the field at 24; 2 px cells centred at 16 and 14; 1 px at 12
+      const cell = Math.max(1, Math.floor(extent / 5));
+      const offset = origin + Math.floor((extent - cell * 5) / 2);
+      const glyph = renderMarkBits({ ...spec(1), presenter: false }, size);
+      expect(spec(1).variant).toBe('glyph');
+      for (let y = 0; y < size; y += 1)
+        for (let x = 0; x < size; x += 1) {
+          const onRing = x === 0 || y === 0 || x === size - 1 || y === size - 1;
+          const inGrid =
+            x >= offset && x < offset + cell * 5 && y >= offset && y < offset + cell * 5;
+          if (!onRing && !inGrid) expect(glyph.bits[y * size + x]).toBe(0);
+        }
+      expect([24, 16, 14, 12].indexOf(size) < 0 ? null : offset).toBe(
+        size === 24 ? 2 : size === 16 ? 3 : size === 14 ? 2 : 3,
+      );
+    }
+    // the live stripe covers the field's bottom two rows and touches no ring
+    expect(renderMarkSvg(spec(0), 24, 'light', { live: true })).toContain(
+      '<rect class="ts-mark-stripe" x="2" y="20" width="20" height="2"',
+    );
+    expect(renderMarkSvg(spec(0), 16, 'light', { live: true })).toContain(
+      '<rect class="ts-mark-stripe" x="2" y="12" width="12" height="2"',
+    );
+    expect(renderMarkSvg(spec(0), 12, 'light', { live: true })).toContain(
+      '<rect class="ts-mark-stripe" x="2" y="8" width="8" height="2"',
+    );
+    // the picture and the plate rect are drawn at the field
+    expect(renderMarkSvg(spec(8), 24, 'light')).toContain(
+      '<image class="ts-mark-picture" x="2" y="2" width="20" height="20"',
+    );
   });
 
   test('the agent mark is a 50 percent field with a centred square and a dashed ring', () => {
@@ -146,12 +208,19 @@ describe('renderMarkBits', () => {
     expect(spec(4).variant).toBe('agent');
     // the ring alternates two on and two off
     expect([...agent.bits.subarray(0, 8)]).toEqual([1, 1, 0, 0, 1, 1, 0, 0]);
-    // the centred 8 px square is solid
-    for (let y = 8; y < 16; y += 1)
-      for (let x = 8; x < 16; x += 1) expect(agent.bits[y * 24 + x]).toBe(1);
-    // the field outside the square is about half lit (the 11 by 11 cell window is not a whole tile)
-    const outside = (count(agent, [1, 1, 23, 23]) - 64) / (22 * 22 - 64);
+    // the centred 7 px square (a third of the 20 px field) is solid, at 8 to 14
+    for (let y = 8; y < 15; y += 1)
+      for (let x = 8; x < 15; x += 1) expect(agent.bits[y * 24 + x]).toBe(1);
+    // the field outside the square is about half lit (the 10 by 10 cell window is not a whole tile)
+    const outside = (count(agent, [2, 2, 22, 22]) - 49) / (20 * 20 - 49);
     expect(Math.abs(outside - 0.5)).toBeLessThan(0.1);
+    // the square is 4 px at 16, 14 and 12 (never under 4)
+    for (const size of [16, 14, 12]) {
+      const small = renderMarkBits(spec(4), size);
+      const start = 2 + Math.floor((size - 4 - 4) / 2);
+      for (let y = start; y < start + 4; y += 1)
+        for (let x = start; x < start + 4; x += 1) expect(small.bits[y * size + x]).toBe(1);
+    }
     // the corners of the dashed ring stay on
     expect(agent.bits[23]).toBe(1);
     expect(agent.bits[23 * 24]).toBe(1);
@@ -195,20 +264,22 @@ describe('renderMarkBits', () => {
   test('a presenter carries the badge and a picture mark is a bare plate', () => {
     const presenter = renderMarkBits(spec(3), 24);
     expect(spec(3).presenter).toBe(true);
-    // the 6 px triangle points right: its base at x 16 spans rows 16 to 21, its tip at x 21 sits
-    // on rows 18 and 19, and the plate's corner under the tip is paper
-    expect(presenter.bits[16 * 24 + 16]).toBe(1);
-    expect(presenter.bits[21 * 24 + 16]).toBe(1);
-    expect(presenter.bits[18 * 24 + 21]).toBe(1);
-    expect(presenter.bits[19 * 24 + 21]).toBe(1);
+    // the 6 px triangle points right inside the 20 px field: its base at x 15 spans rows 15 to
+    // 20, its tip at x 20 sits on rows 17 and 18, and the field's corner under the tip is paper
+    expect(presenter.bits[15 * 24 + 15]).toBe(1);
+    expect(presenter.bits[20 * 24 + 15]).toBe(1);
+    expect(presenter.bits[17 * 24 + 20]).toBe(1);
+    expect(presenter.bits[18 * 24 + 20]).toBe(1);
+    expect(presenter.bits[20 * 24 + 20]).toBe(0);
+    // the 1 px paper gap above and left of the badge is clear, and so is the chip's paper gap
+    expect(presenter.bits[14 * 24 + 14]).toBe(0);
     expect(presenter.bits[21 * 24 + 21]).toBe(0);
-    // the 1 px paper gap above and left of the badge is clear
-    expect(presenter.bits[15 * 24 + 15]).toBe(0);
+    expect(presenter.bits[22 * 24 + 22]).toBe(0);
     const plain = renderMarkBits({ ...spec(3), presenter: false }, 24);
     expect(count(presenter)).not.toBe(count(plain));
     const picture = renderMarkBits({ ...spec(8), presenter: false }, 24);
     expect(spec(8).variant).toBe('picture');
-    expect(count(picture, [1, 1, 23, 23])).toBe(0);
+    expect(count(picture, [2, 2, 22, 22])).toBe(0);
   });
 
   test('refuses sizes outside 8 to 1024', () => {

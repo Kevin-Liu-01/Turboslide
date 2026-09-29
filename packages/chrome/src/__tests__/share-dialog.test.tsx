@@ -868,6 +868,118 @@ describe('ShareDialog', () => {
     ).toBe(false);
     vi.unstubAllGlobals();
   });
+
+  it('reads the owner row from a resolved view with the badge or the guest word, and the email line for a sharer alone (people round)', async () => {
+    const owner = {
+      principalId: 'usr_owner',
+      label: 'Cobalt 512',
+      name: 'Ada Lovelace',
+      trust: 'verified' as const,
+      kind: 'account' as const,
+    };
+    const typed = {
+      principalId: 'anon_maya',
+      label: 'Titanium 471',
+      name: 'Maya',
+      trust: 'guest' as const,
+      kind: 'anonymous' as const,
+    };
+    const grants = [
+      {
+        principal: typed,
+        email: 'maya@example.test',
+        role: 'editor' as const,
+        invitedAt: '2026-09-10T00:00:00Z',
+        acceptedAt: '2026-09-10T00:00:00Z',
+        expiresAt: null,
+        status: 'active' as const,
+      },
+    ];
+    const asSharer = host(
+      baseInput({
+        access: restricted({ owner, grants, via: 'grant' }),
+        capabilities: ['read', 'share'],
+        presence: { others: [], self: undefined },
+      }),
+    );
+    render(
+      <Host state={asSharer.state}>
+        <ShareDialog />
+      </Host>,
+    );
+    await flush();
+    const ownerRow = document.querySelector<HTMLElement>('[data-control="dialog.share.owner"]');
+    expect(ownerRow?.querySelector('.ts-share-row-name')?.textContent).toContain('Ada Lovelace');
+    expect(ownerRow?.querySelector('.ts-trust-mark')?.getAttribute('aria-label')).toBe('signed in');
+    expect(ownerRow?.querySelector('.ts-chip')?.getAttribute('aria-label')).toBe(
+      'Ada Lovelace, signed in',
+    );
+    const grantRow = document.querySelector<HTMLElement>('[data-control^="dialog.share.grant."]');
+    expect(grantRow?.querySelector('.ts-share-row-name')?.textContent).toContain('Maya');
+    expect(grantRow?.querySelector('.ts-share-row-trust')?.textContent).toContain('guest');
+    expect(grantRow?.querySelector('.ts-share-row-name')?.getAttribute('title')).toBeNull();
+    const email = grantRow?.querySelector<HTMLElement>('[data-control="dialog.share.row.0.email"]');
+    expect(email?.textContent).toBe('maya@example.test');
+    expect(email?.classList.contains('ts-share-row-email')).toBe(true);
+    cleanup();
+    /* a reader without share sees the same rows and no address */
+    const asReader = host(
+      baseInput({
+        access: restricted({ owner, grants, via: 'link' }),
+        capabilities: ['read'],
+        presence: { others: [], self: undefined },
+      }),
+    );
+    render(
+      <Host state={asReader.state}>
+        <ShareDialog />
+      </Host>,
+    );
+    await flush();
+    const readerGrant = document.querySelector<HTMLElement>(
+      '[data-control^="dialog.share.grant."]',
+    );
+    expect(readerGrant?.querySelector('.ts-share-row-email')).toBeNull();
+    expect(readerGrant?.querySelector('.ts-share-row-name')?.getAttribute('title')).toBeNull();
+    /* the owner reading the dialog reads You on the row through the one own identity (3.11) */
+    cleanup();
+    const asOwner = host(
+      baseInput({
+        access: restricted({ owner, grants, via: 'owner' }),
+        capabilities: ['read', 'share'],
+        account: { principal: owner, signedIn: true, signInAvailable: true },
+      }),
+    );
+    render(
+      <Host state={asOwner.state}>
+        <ShareDialog />
+      </Host>,
+    );
+    await flush();
+    expect(
+      document.querySelector('[data-control="dialog.share.owner"] .ts-share-row-name')?.textContent,
+    ).toContain('You');
+  });
+
+  it('maps a fetched record through the identities map when one is given, else to the label the id gives (people round)', () => {
+    const resolved = {
+      principalId: 'usr_owner',
+      label: 'Cobalt 512',
+      name: 'Ada Lovelace',
+      trust: 'verified' as const,
+      kind: 'account' as const,
+      email: 'ada@example.test',
+    };
+    const view = accessViewOfRecord(record({ owner: 'usr_owner' }), {
+      signedIn: true,
+      identities: { usr_owner: resolved },
+    });
+    expect(view.owner).toBe(resolved);
+    const bare = accessViewOfRecord(record({ owner: 'usr_owner' }), { signedIn: true });
+    expect(bare.owner?.name).toBeUndefined();
+    expect(bare.owner?.trust).toBe('verified');
+    expect(bare.owner?.label.length).toBeGreaterThan(0);
+  });
 });
 
 // The product round (docs/PRODUCT.md section 2 ranks 3 and 4; the rows share.dialog.one-link,

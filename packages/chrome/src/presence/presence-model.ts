@@ -1,8 +1,11 @@
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideOrder } from '@turboslide/schema/deck';
 
+import { trustTooltip } from '@turboslide/identity/resolve';
+
 import type {
   EditorAccess,
+  EditorAccount,
   EditorCapability,
   EditorPresence,
   IdentityView,
@@ -66,6 +69,23 @@ export function viewerFactsOf(
   };
 }
 
+/** The four role words the server writes into a verified person's entry for a link visitor (room.ts rosterEntryForReader). */
+const ROLE_WORD_LABELS: ReadonlySet<string> = new Set([
+  PRESENCE.theOwner,
+  PRESENCE.anEditor,
+  PRESENCE.aCommenter,
+  PRESENCE.aViewer,
+]);
+
+/**
+ * True for an entry the server rewrote for a link visitor (0.12; build/b1.md R2): its label is
+ * one of the four role words and its trust reads `label`, so the person behind it is signed in
+ * and the label is not a generated one.
+ */
+export function isRoleWordView(identity: Pick<IdentityView, 'trust' | 'label'>): boolean {
+  return identity.trust === 'label' && ROLE_WORD_LABELS.has(identity.label);
+}
+
 /** The role word a link visitor sees instead of a verified person's name (0.12). */
 export function roleWordFor(role: PresenceParticipant['role']): string {
   switch (role) {
@@ -94,9 +114,42 @@ export function displayNameFor(participant: PresenceParticipant, viewer: ViewerF
   return participant.name ?? participant.label;
 }
 
-/** The trust word beside a name: "guest" for a typed name alone (15). */
-export function trustWordFor(identity: Pick<IdentityView, 'trust'>): string | null {
-  return identity.trust === 'guest' ? PRESENCE.guest : null;
+/**
+ * The trust word beside a name (15; docs/PEOPLE.md 2.2 default 3): "guest" for a typed name,
+ * "signed in" for a verified account (the accessible word beside the badge), nothing for a label,
+ * an agent or a deleted account.
+ */
+export function trustWordFor(
+  identity: Pick<IdentityView, 'trust'> & { deleted?: boolean },
+): string | null {
+  if (identity.trust === 'guest') return PRESENCE.guest;
+  if (identity.trust === 'verified' && identity.deleted !== true) return PRESENCE.signedIn;
+  return null;
+}
+
+/**
+ * The trust sentence of a tooltip's doc line (research 11 5.2; docs/PEOPLE.md 3.7): "Signed in
+ * as <email>" when the view carries an address the reader may see, "Signed in" for a verified
+ * person without one, "Not signed in. This name was typed, not verified." for a guest, "Not signed
+ * in. A generated label for this browser." for a label, the agent's sentence for an agent.
+ */
+export function trustSentenceOf(identity: Pick<IdentityView, 'trust' | 'email'>): string {
+  return trustTooltip(identity.trust, identity.email);
+}
+
+/**
+ * The one identity this browser reads as itself on every surface (docs/PEOPLE.md 3.11; authorship
+ * 12): the account's principal when signed in (it carries the address), else the roster's own
+ * entry (it carries the server's mark, the typed name and the hue), else the account's principal
+ * from the page payload, else nothing. The own chip, the account head, the Profile head, the
+ * version rows' You and the Share dialog's You read this and nothing else.
+ */
+export function meOf(input: {
+  account?: Pick<EditorAccount, 'principal' | 'signedIn'> | undefined;
+  presence?: Pick<EditorPresence, 'self'> | undefined;
+}): IdentityView | null {
+  if (input.account?.signedIn === true) return input.account.principal;
+  return input.presence?.self ?? input.account?.principal ?? null;
 }
 
 /** The role word of a roster row (4.5): the role, or "by link" for a person admitted by a link. */
@@ -119,13 +172,40 @@ export function canFollow(
   return participant.slideId !== undefined;
 }
 
-/** The chip's tooltip: "Maya · guest · slide 12" (11 6.2). */
+/** The chip's tooltip name line: "Maya · guest · slide 12" (11 6.2). */
 export function chipTipOf(
   participant: PresenceParticipant,
   viewer: ViewerFacts,
   slide: number | null,
 ): string {
   return PRESENCE.chipTip(displayNameFor(participant, viewer), trustWordFor(participant), slide);
+}
+
+/**
+ * The trust sentence a participant's tooltip carries for this viewer (docs/PEOPLE.md 3.7): a
+ * verified person a link visitor sees as a role word (the server's rewrite, or the chrome's under
+ * `displayNameFor`) reads the plain "Signed in", never the address and never the generated label
+ * sentence (build/b1.md R2); everyone else reads `trustSentenceOf`.
+ */
+export function trustSentenceFor(participant: PresenceParticipant, viewer: ViewerFacts): string {
+  if (isRoleWordView(participant)) return trustSentenceOf({ trust: 'verified' });
+  if (participant.trust === 'verified' && viewer.viaLink && !viewer.showNames)
+    return trustSentenceOf({ trust: 'verified' });
+  return trustSentenceOf(participant);
+}
+
+/**
+ * The chip's tooltip doc line (docs/PEOPLE.md 3.7; the row people.chip-tooltip-trust): the trust
+ * sentence first, then the action sentence the surface adds ("Go to slide 12", "Click to follow;
+ * click again to stop") when it has one.
+ */
+export function chipTipDocOf(
+  participant: PresenceParticipant,
+  viewer: ViewerFacts,
+  action?: string,
+): string {
+  const sentence = trustSentenceFor(participant, viewer);
+  return action === undefined || action === '' ? sentence : `${sentence} ${action}`;
 }
 
 /**

@@ -3,7 +3,10 @@ import { useState } from 'react';
 import { Dialog } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
 import { ACCOUNT, REFUSALS } from '../menus/strings';
-import { IdentityChip, nameOf } from '../presence/IdentityChip';
+import { pictureUrlAt } from '@turboslide/identity/picture';
+
+import { IdentityChip, TrustMark, nameOf } from '../presence/IdentityChip';
+import { meOf } from '../presence/presence-model';
 import { tipProps } from '../Tooltip';
 
 import './accounts.css';
@@ -31,7 +34,8 @@ export function ProfileDialog() {
       .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
       .finally(() => setBusy(false));
   };
-  const identity = account?.principal;
+  /* the head reads the one own identity every surface reads (docs/PEOPLE.md 3.11) */
+  const identity = meOf({ account, presence: shell.input.presence }) ?? undefined;
   const sessions = account?.sessions ?? [];
   const tokens = account?.tokens ?? [];
   const trustSentence =
@@ -76,9 +80,18 @@ export function ProfileDialog() {
       ) : (
         <>
           <div className="ts-profile-head" data-control="dialog.profile.head">
-            <IdentityChip identity={identity} size={24} self pictureUrl={account?.pictureUrl} />
+            <IdentityChip
+              identity={identity}
+              size={24}
+              self
+              /* the head reads the 128 px file (docs/PEOPLE.md 4.4), 64 at 1x through srcset */
+              pictureUrl={pictureUrlAt(account?.pictureUrl, 128) ?? account?.pictureUrl}
+            />
             <span className="ts-profile-row-text">
-              <span className="ts-profile-row-main">{nameOf(identity)}</span>
+              <span className="ts-profile-row-main">
+                {nameOf(identity)}
+                <TrustMark identity={identity} />
+              </span>
               <span className="ts-profile-sentence" data-control="dialog.profile.trust">
                 {trustSentence}
               </span>

@@ -189,6 +189,28 @@
   text-overflow: ellipsis;
 }
 
+/* the name column: the name (with the badge or the guest word after it) and, for a sharer, the
+   address as a second line inside the 40 px row (docs/PEOPLE.md 3.10) */
+.ts-share-row-who {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.ts-share-row-trust,
+.ts-share-row-email {
+  color: var(--pt-ink-2);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-share-row-name .ts-trust-mark {
+  vertical-align: text-bottom;
+}
+
 /* Pending and Expired in a fixed 64 px chip, empty for an accepted grant */
 .ts-share-row-chip {
   display: inline-block;

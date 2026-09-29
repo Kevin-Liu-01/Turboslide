@@ -1,0 +1,293 @@
+{
+  "deck.id": "untitled-20260929-ppzg",
+  "namePrompt.firstEdit": false,
+  "setName.A": {
+    "principal": {
+      "id": "anon_056fff87-1f4d-4f53-bd55-714bcb44b922",
+      "kind": "anonymous",
+      "admin": false
+    },
+    "trust": "guest",
+    "label": "Ada Lovelace",
+    "name": "Ada Lovelace",
+    "mark": {
+      "density": 2,
+      "glyphSeed": 1483767496,
+      "presenter": false,
+      "self": true,
+      "trust": "guest",
+      "label": "Ada Lovelace, guest",
+      "variant": "initials",
+      "initials": "AL",
+      "hue": null
+    },
+    "avatar": {
+      "variant": "initials"
+    }
+  },
+  "share.A.light": [
+    {
+      "control": "dialog.share.owner",
+      "name": "You",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": null,
+      "chip": "Krypton 770",
+      "height": 40
+    }
+  ],
+  "shareChips.A.light": [
+    {
+      "holder": "dialog.share.owner",
+      "ariaLabel": "Krypton 770",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "0px",
+      "field": {
+        "w": 12,
+        "h": 22,
+        "l": 6,
+        "t": 1,
+        "r": 6,
+        "b": 1
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 36,
+      "cellsExtent": {
+        "fromLeft": 6,
+        "fromTop": 6,
+        "fromRight": 6,
+        "fromBottom": 6
+      },
+      "initials": "K"
+    }
+  ],
+  "shot.sharePeople.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/before-share-people-A-light.png",
+  "shot.share.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/before-share-A-light.png",
+  "share.A.dark": [
+    {
+      "control": "dialog.share.owner",
+      "name": "You",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": null,
+      "chip": "Krypton 770",
+      "height": 40
+    }
+  ],
+  "shareChips.A.dark": [
+    {
+      "holder": "dialog.share.owner",
+      "ariaLabel": "Krypton 770",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "0px",
+      "field": {
+        "w": 12,
+        "h": 22,
+        "l": 6,
+        "t": 1,
+        "r": 6,
+        "b": 1
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 36,
+      "cellsExtent": {
+        "fromLeft": 6,
+        "fromTop": 6,
+        "fromRight": 6,
+        "fromBottom": 6
+      },
+      "initials": "K"
+    }
+  ],
+  "shot.sharePeople.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/before-share-people-A-dark.png",
+  "shot.share.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/before-share-A-dark.png",
+  "share.B.light": "not driven: the Share dialog did not open within 10 s of share.open",
+  "shot.shareMissing.B.light": "written",
+  "share.B.dark": [
+    {
+      "control": "dialog.share.owner",
+      "name": "Krypton 770",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": null,
+      "chip": "Krypton 770",
+      "height": 40
+    }
+  ],
+  "shareChips.B.dark": [
+    {
+      "holder": "dialog.share.owner",
+      "ariaLabel": "Krypton 770",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "0px",
+      "field": {
+        "w": 12,
+        "h": 22,
+        "l": 6,
+        "t": 1,
+        "r": 6,
+        "b": 1
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 36,
+      "cellsExtent": {
+        "fromLeft": 6,
+        "fromTop": 6,
+        "fromRight": 6,
+        "fromBottom": 6
+      },
+      "initials": "K"
+    }
+  ],
+  "shot.sharePeople.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/before-share-people-B-dark.png",
+  "shot.share.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/before-share-B-dark.png",
+  "profileHead.A.light": {
+    "text": "ALAda LovelaceYou are known by the name you typedChange nameChange avatar",
+    "badge": null
+  },
+  "profileChips.A.light": [
+    {
+      "holder": "dialog.profile.head",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "0px",
+      "field": {
+        "w": 12,
+        "h": 22,
+        "l": 6,
+        "t": 1,
+        "r": 6,
+        "b": 1
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 36,
+      "cellsExtent": {
+        "fromLeft": 6,
+        "fromTop": 6,
+        "fromRight": 6,
+        "fromBottom": 6
+      },
+      "initials": "AL"
+    }
+  ],
+  "shot.profileHead.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/before-profile-head-A-light.png",
+  "profileHead.A.dark": {
+    "text": "ALAda LovelaceYou are known by the name you typedChange nameChange avatar",
+    "badge": null
+  },
+  "profileChips.A.dark": [
+    {
+      "holder": "dialog.profile.head",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "0px",
+      "field": {
+        "w": 12,
+        "h": 22,
+        "l": 6,
+        "t": 1,
+        "r": 6,
+        "b": 1
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 36,
+      "cellsExtent": {
+        "fromLeft": 6,
+        "fromTop": 6,
+        "fromRight": 6,
+        "fromBottom": 6
+      },
+      "initials": "AL"
+    }
+  ],
+  "shot.profileHead.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/before-profile-head-A-dark.png",
+  "filmstripChips.A": [
+    {
+      "holder": "filmstrip.slide.title",
+      "ariaLabel": "Clay 489",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "0px",
+      "field": {
+        "w": 4,
+        "h": 14,
+        "l": 6,
+        "t": 1,
+        "r": 6,
+        "b": 1
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 1,
+        "r": 1,
+        "b": 1,
+        "h": 2
+      },
+      "cells": 21,
+      "cellsExtent": {
+        "fromLeft": 6,
+        "fromTop": 6,
+        "fromRight": 6,
+        "fromBottom": 6
+      },
+      "initials": "C"
+    }
+  ],
+  "shot.filmstrip.A": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/before-filmstrip-marks-A-light.png",
+  "deck.removed": "untitled-20260929-ppzg"
+}

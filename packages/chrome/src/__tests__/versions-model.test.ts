@@ -89,6 +89,32 @@ describe('groupVersions', () => {
     expect(
       identityOfAuthor({ kind: 'human', name: 'Titanium 471', principalId: 'anon_m' }, identities),
     ).toBe(maya);
+    /* a map entry carries the account's trust and its mark to the row (docs/PEOPLE.md 3.8) */
+    const ada: IdentityView = {
+      principalId: 'usr_ada',
+      label: 'Cobalt 512',
+      name: 'Ada Lovelace',
+      trust: 'verified',
+      kind: 'account',
+      mark: {
+        variant: 'glyph',
+        initials: '',
+        density: 2,
+        glyphSeed: 77,
+        presenter: false,
+        self: false,
+        hue: null,
+        trust: 'verified',
+        label: 'Ada Lovelace',
+      },
+    };
+    const resolved = identityOfAuthor(
+      { kind: 'human', name: 'Cobalt 512', principalId: 'usr_ada' },
+      { ...identities, usr_ada: ada },
+    );
+    expect(resolved.trust).toBe('verified');
+    expect(resolved.mark?.variant).toBe('glyph');
+    expect(resolved.name).toBe('Ada Lovelace');
     const legacy = identityOfAuthor({ kind: 'human', name: 'studio' }, identities);
     expect(isLegacyAuthor(legacy)).toBe(true);
     expect(legacy.label).toBe(PANELS.versionHistory.earlierEdits);

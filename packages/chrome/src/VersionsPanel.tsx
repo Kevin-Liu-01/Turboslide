@@ -11,7 +11,7 @@ import { Menu } from './Menu';
 import { DEFAULT_MENU_CONTEXT, isPresent, itemById } from './menus/model';
 import type { MenuContext, MenuItem } from './menus/model';
 import { PANELS, stubClause } from './menus/strings';
-import { IdentityChip, nameOf, trustWordOf } from './presence/IdentityChip';
+import { IdentityChip, TrustMark, nameOf, trustMarkOf, trustWordOf } from './presence/IdentityChip';
 import { ToolButton } from './ToolButton';
 import { tipProps } from './Tooltip';
 import {
@@ -30,11 +30,14 @@ import './VersionsPanel.css';
  * Slides parity rounds (gslides-parity SPEC 2.1, 12 "Panels"; SPEC-3 0.45, 5.7): the records
  * grouped by day, newest first, and inside a day by a 15 minute window whose row shows up to four
  * author marks and the change count and expands to its records; a named record stands alone. Each
- * record carries its author's 16 px mark and trust word (the round one `studio` author collapses
- * into "Earlier edits"); "Only show named versions", "Name current version", "Restore this
- * version" per version, and a More menu per version with "Name this version", "Make a copy" (at
- * that version, through `deck.copy { atVersion }`) and the two delete rows as disabled stubs with
- * their clause; the 40 named versions cap with a sentence naming the oldest. "Show changes" is the
+ * record carries its author's 16 px mark and trust word, or the verified badge after an account's
+ * name (docs/PEOPLE.md 3.7; the round one `studio` author collapses into "Earlier edits"); "Only
+ * show named versions", "Name current version", "Restore this version" per version (the first row
+ * of the version's More menu, and a button drawn on the row's hover and focus alone so the meta
+ * line keeps its column, docs/PEOPLE.md 3.19), and the More menu with "Name this version", "Make
+ * a copy" (at that version, through `deck.copy { atVersion }`) and the two delete rows as disabled
+ * stubs with their clause; the 40 named versions cap with a sentence naming the oldest. "Show
+ * changes" is the
  * checkbox at the panel's bottom, Google's position: it selects a version and the shell runs
  * `version.diff` against its predecessor and hatches the overlay. Restore is a mutation through
  * version.restore with the current baseRevision, so it is undoable. Nothing here reads or writes
@@ -124,6 +127,15 @@ export function groupByDay(
 }
 
 const MORE_ITEMS: ReadonlyArray<MenuItem> = [
+  /* Restore first (docs/PEOPLE.md 2.2 default 9): the row's button is drawn on hover and focus
+     alone, so the menu is where a keyboard reader finds it; absent on the current version */
+  {
+    id: 'version.restore',
+    label: PANELS.versionHistory.restore,
+    status: 'now',
+    doc: 'Brings the presentation back to this version; Undo returns',
+    effect: { kind: 'client', handler: 'runAction' },
+  },
   {
     id: 'version.name',
     label: PANELS.versionHistory.name,
@@ -238,7 +250,9 @@ export function VersionsPanel({
     const current = version.revision === revision;
     const identity = identityOfAuthor(version.author, identities);
     const legacy = isLegacyAuthor(identity);
-    const trust = trustWordOf(identity);
+    /* the word after the author: " · guest" for a typed name; a verified account draws the badge
+       after the author span instead (3.7), outside the 140 px span so it never truncates */
+    const trust = trustMarkOf(identity) === null ? trustWordOf(identity) : null;
     const picked = selected?.n === version.n;
     return (
       <li
@@ -316,6 +330,7 @@ export function VersionsPanel({
               {authorWord(identity)}
               {trust !== null && authorWord(identity) !== 'You' ? ` · ${trust}` : ''}
             </span>
+            <TrustMark identity={identity} />
             {' · '}
             {version.mutations.length === 0
               ? 'named'
@@ -499,7 +514,11 @@ export function VersionsPanel({
         ))}
         {more !== null ? (
           <Menu
-            items={MORE_ITEMS}
+            items={
+              more.version.revision === revision
+                ? MORE_ITEMS.filter((item) => item.id !== 'version.restore')
+                : MORE_ITEMS
+            }
             context={menuContext}
             /* the two delete rows are contextOnly rows of the File menu's model (SPEC-3 0.45, 13.3:
                present here and disabled with their clause); without this flag the Menu drops
@@ -510,6 +529,7 @@ export function VersionsPanel({
             placement="below"
             returnFocusTo={more.anchor}
             onSelect={(item) => {
+              if (item.id === 'version.restore') restore(more.version);
               if (item.id === 'version.name')
                 setNaming({ version: more.version, value: more.version.note });
               if (item.id === 'version.copy') onMakeCopy?.(more.version);

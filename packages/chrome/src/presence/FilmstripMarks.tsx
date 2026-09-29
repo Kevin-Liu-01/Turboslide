@@ -15,7 +15,8 @@ import { participantsOnSlide } from './presence-model';
  * figures, with the live stripe and the halo over a picture thumbnail; in outline density one
  * 12 px chip in the marks span where the round one lease dot was, with a `+N` numeral. The count
  * chip sits to the left of the thumbnail in tabular figures with a two digit width, present at
- * zero as an empty box. Every mark is absolute inside the frame, so the card's
+ * zero as an empty box. The outline chip is a real 12 px size with an 8 px field (docs/PEOPLE.md
+ * 3.4), not a 14 px chip scaled by a rule. Every mark is absolute inside the frame, so the card's
  * `contain-intrinsic-size` is unchanged. Without the editor shell (the view route) nothing draws.
  */
 export function FilmstripMarks({
@@ -56,7 +57,7 @@ export function FilmstripMarks({
   );
 }
 
-/** The 12 px chip of the outline density, where the lease dot was. */
+/** The 12 px chip of the outline density, where the lease dot was: a real size, its cells on whole pixels. */
 export function OutlineMarks({ slideId }: { slideId: string }) {
   const shell = useContext(EditorShellContext);
   const others = shell?.input.presence?.others ?? [];
@@ -69,13 +70,7 @@ export function OutlineMarks({ slideId }: { slideId: string }) {
       aria-label={here.map(nameOf).join(', ')}
       data-count={here.length}
     >
-      <IdentityChip
-        identity={first}
-        size={14}
-        hueSlot={first.hue ?? null}
-        live
-        className="ts-chip-12"
-      />
+      <IdentityChip identity={first} size={12} hueSlot={first.hue ?? null} live />
       {here.length > 1 ? (
         <span className="pt-orow-people-more">{PRESENCE.more(here.length - 1)}</span>
       ) : null}

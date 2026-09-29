@@ -102,8 +102,13 @@ export const PRESENCE = {
       .join(' · '),
   you: '(you)',
   guest: 'guest',
+  /* the accessible word after a signed in account's name, beside the 14 px check badge
+     (docs/PEOPLE.md 2.2 default 3, 3.7): "Ada Lovelace, signed in" */
+  signedIn: 'signed in',
   byLink: 'by link',
-  /* the role word a link visitor sees instead of a name (0.12) */
+  /* the role word a link visitor sees instead of a name (0.12); the server writes the same four
+     into a verified person's roster entry for such a reader (room.ts rosterEntryForReader) */
+  theOwner: 'The owner',
   anEditor: 'An editor',
   aCommenter: 'A commenter',
   aViewer: 'A viewer',
@@ -258,7 +263,20 @@ export const ACCOUNT = {
     upload: 'Upload a picture',
     crop: 'Drag to crop',
     apply: 'Apply',
-    tooLarge: 'Pictures up to 5 MB',
+    /* the Picture panel's sentences (docs/PEOPLE.md 4.1, 4.5; build/b3.md R8 names the keys):
+       the guard on the original file before it is decoded, the sentence under the control at all
+       times, the refusal when the browser's 256 px WebP is still over the request cap, the
+       privacy sentence and the cache sentence under it (one thought per sentence), the refusal for
+       a file the browser cannot decode, and the formats */
+    original: 'Pictures up to 25 MB',
+    sizes: 'Cropped to a square and sent at 256 px, under 512 KB. JPEG, PNG, WebP or GIF',
+    overCap: 'The resized picture is over 512 KB. Choose another picture',
+    privacy:
+      'Your picture shows on every presentation you open while signed in, to people invited by email. People who arrive by a link see a role initial instead',
+    cache:
+      'A replaced or removed picture can stay readable at its old address for up to a year in caches',
+    unreadable: 'That picture could not be read. Choose another picture',
+    formats: 'JPEG, PNG, WebP or GIF',
   },
 } as const;
 

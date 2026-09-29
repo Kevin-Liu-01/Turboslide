@@ -18,7 +18,14 @@ import type {
 import { Icon } from '../icons';
 import { cn } from '../lib/cn';
 import { DIALOGS, SNACKBARS } from '../menus/strings';
-import { IdentityChip, nameOf } from '../presence/IdentityChip';
+import {
+  IdentityChip,
+  TrustMark,
+  nameOf,
+  trustMarkOf,
+  trustWordOf,
+} from '../presence/IdentityChip';
+import { meOf } from '../presence/presence-model';
 import { tipProps } from '../Tooltip';
 
 import './share.css';
@@ -274,7 +281,18 @@ export type FetchedAccess = {
   authorize: AuthorizeMode | undefined;
 };
 
-function identityOf(principalId: string): IdentityView {
+/**
+ * The view of a principal the record names (docs/PEOPLE.md 3.10): the resolved view of the page's
+ * `identities` map (the name, the trust, the mark and, for a sharer, the address), else the
+ * least a reader can be told from the id alone until the route's answer carries the map: the
+ * generated label and the trust the id's prefix gives.
+ */
+function viewOf(
+  principalId: string,
+  identities: Readonly<Record<string, IdentityView>> | undefined,
+): IdentityView {
+  const resolved = identities?.[principalId];
+  if (resolved !== undefined) return resolved;
   const account = principalId.startsWith('usr_');
   return {
     principalId,
@@ -287,23 +305,30 @@ function identityOf(principalId: string): IdentityView {
 /** The record as the dialog draws it, from the route's JSON (the mapping the editor page makes for `input.access`). */
 export function accessViewOfRecord(
   record: AccessRecordJson,
-  options: { signedIn: boolean; via?: EditorAccess['via'] | null; now?: number } = {
+  options: {
+    signedIn: boolean;
+    via?: EditorAccess['via'] | null;
+    now?: number;
+    /** the resolved people of the page payload, by principal id (docs/PEOPLE.md 3.8, 3.10) */
+    identities?: Readonly<Record<string, IdentityView>>;
+  } = {
     signedIn: false,
   },
 ): EditorAccess {
   const now = options.now ?? Date.now();
+  const identities = options.identities;
   return {
     revision: record.revision ?? 0,
-    owner: record.owner === null ? null : identityOf(record.owner),
+    owner: record.owner === null ? null : viewOf(record.owner, identities),
     pendingOwner:
       record.pendingOwner === undefined ||
       record.pendingOwner === null ||
       record.pendingOwner.principalId === null
         ? null
-        : identityOf(record.pendingOwner.principalId),
+        : viewOf(record.pendingOwner.principalId, identities),
     generalAccess: record.generalAccess,
     grants: (record.grants ?? []).map((grant) => ({
-      ...(grant.principalId !== null ? { principal: identityOf(grant.principalId) } : {}),
+      ...(grant.principalId !== null ? { principal: viewOf(grant.principalId, identities) } : {}),
       ...(grant.email !== null ? { email: grant.email } : {}),
       role: grant.role,
       invitedAt: grant.invitedAt,
@@ -331,7 +356,9 @@ export function accessViewOfRecord(
       .filter((request) => request.respondedAt === null)
       .map((request) => ({
         id: request.id,
-        ...(request.principalId !== null ? { principal: identityOf(request.principalId) } : {}),
+        ...(request.principalId !== null
+          ? { principal: viewOf(request.principalId, identities) }
+          : {}),
         ...(request.email !== null ? { email: request.email } : {}),
         role: request.role,
         ...(request.message !== undefined ? { message: request.message } : {}),
@@ -553,7 +580,8 @@ export function ShareDialog() {
       account.principal.name === undefined &&
       !nameAskedBefore(),
   );
-  const me = account?.principal ?? input.presence?.self;
+  /* the one own identity every surface reads (docs/PEOPLE.md 3.11) */
+  const me = meOf({ account, presence: input.presence }) ?? undefined;
   /** The name a row shows (rank 4): You for this browser's own principal. */
   const personName = (identity: IdentityView): string =>
     me !== undefined && identity.principalId === me.principalId ? 'You' : nameOf(identity);
@@ -1018,7 +1046,12 @@ export function ShareDialog() {
           {access.owner ? (
             <li className="ts-share-row is-owner" data-control="dialog.share.owner">
               <IdentityChip identity={access.owner} size={24} />
-              <span className="ts-share-row-name">{personName(access.owner)}</span>
+              <span className="ts-share-row-who">
+                <span className="ts-share-row-name">
+                  {personName(access.owner)}
+                  <PersonTrust identity={access.owner} />
+                </span>
+              </span>
               <span className="ts-share-row-chip" aria-hidden="true" />
               <span className="ts-share-row-role">{DIALOGS.share.roles.owner}</span>
             </li>
@@ -1026,15 +1059,21 @@ export function ShareDialog() {
           {access.pendingOwner ? (
             <li className="ts-share-row is-pending-owner" data-control="dialog.share.pendingOwner">
               <IdentityChip identity={access.pendingOwner} size={24} />
-              <span className="ts-share-row-name">{personName(access.pendingOwner)}</span>
+              <span className="ts-share-row-who">
+                <span className="ts-share-row-name">
+                  {personName(access.pendingOwner)}
+                  <PersonTrust identity={access.pendingOwner} />
+                </span>
+              </span>
               <span className="ts-share-row-chip">{DIALOGS.share.pending}</span>
               <span className="ts-share-row-role">{DIALOGS.share.pendingOwnership}</span>
             </li>
           ) : null}
-          {grants.map((grant) => (
+          {grants.map((grant, index) => (
             <GrantRow
               key={whoKey(grant)}
               grant={grant}
+              index={index}
               name={grant.principal === undefined ? who(grant) : personName(grant.principal)}
               canShare={canShare}
               canTransfer={owner && may('transfer')}
@@ -1536,8 +1575,19 @@ function RequestRow({
   );
 }
 
+/**
+ * The word after a person's name on a Share row (docs/PEOPLE.md 3.7, 3.10): the badge for a
+ * signed in account, " · guest" for a typed name, nothing for a label.
+ */
+function PersonTrust({ identity }: { identity: IdentityView }) {
+  if (trustMarkOf(identity) !== null) return <TrustMark identity={identity} />;
+  const word = trustWordOf(identity);
+  return word === null ? null : <span className="ts-share-row-trust"> · {word}</span>;
+}
+
 function GrantRow({
   grant,
+  index,
   name,
   canShare,
   canTransfer,
@@ -1550,6 +1600,8 @@ function GrantRow({
   onTransfer,
 }: {
   grant: AccessGrantView;
+  /** the row's place in the list, for the email line's control id (docs/PEOPLE.md 5.2) */
+  index: number;
   /** the name the row shows: You for this browser (rank 4), else the person's name or address */
   name?: string;
   canShare: boolean;
@@ -1576,8 +1628,18 @@ function GrantRow({
       ) : (
         <span className="ts-chip is-blank" />
       )}
-      <span className="ts-share-row-name" title={grant.email}>
-        {name ?? who(grant)}
+      {/* the name, the badge or the guest word after it, and for a sharer the address as an 11 px
+          line under the name in place of the title attribute it was (docs/PEOPLE.md 3.10) */}
+      <span className="ts-share-row-who">
+        <span className="ts-share-row-name">
+          {name ?? who(grant)}
+          {identity ? <PersonTrust identity={identity} /> : null}
+        </span>
+        {canShare && grant.email !== undefined && (name ?? who(grant)) !== grant.email ? (
+          <span className="ts-share-row-email" data-control={`dialog.share.row.${index}.email`}>
+            {grant.email}
+          </span>
+        ) : null}
       </span>
       <span className="ts-share-row-chip">
         {status === 'pending'

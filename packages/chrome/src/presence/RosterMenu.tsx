@@ -7,13 +7,14 @@ import { isPresent, itemById } from '../menus/model';
 import type { MenuContext } from '../menus/model';
 import { PRESENCE, stubClause } from '../menus/strings';
 import { tipProps } from '../Tooltip';
-import { IdentityChip } from './IdentityChip';
+import { IdentityChip, TrustMark, trustMarkOf } from './IdentityChip';
 import { PlateMenu } from './PlateMenu';
 import {
   canFollow,
   displayNameFor,
   rosterRoleWord,
   slideNumberOf,
+  trustSentenceFor,
   trustWordFor,
 } from './presence-model';
 import type { ViewerFacts } from './presence-model';
@@ -108,22 +109,27 @@ export function RosterMenu({
         const name = self
           ? (participant.name ?? participant.label)
           : displayNameFor(participant, viewer);
-        const trust = trustWordFor(participant);
+        /* the word after the name: " · guest" for a typed name; a verified account draws the
+           badge in its place and keeps "signed in" as the accessible word (docs/PEOPLE.md 3.7) */
+        const trust = trustMarkOf(participant) === null ? trustWordFor(participant) : null;
         const following = presence.following === participant.clientId;
         const follow = !self && canFollow(participant, capabilities);
+        /* the tooltip's doc line opens with the trust sentence (3.7): "Signed in as <email>" for a
+           reader who may see the address, else the state's sentence; the action sentence follows */
+        const trustSentence = trustSentenceFor(participant, viewer);
         const tip = self
           ? {
               name: `${name} ${PRESENCE.you}`,
-              doc: 'Your name and avatar, and the ways to sign in and out',
+              doc: `${trustSentence} Your name and avatar, and the ways to sign in and out`,
             }
           : follow
             ? {
                 name: PRESENCE.follow,
-                doc: 'Jumps to that person’s slide and moves with them; your own edit or click stops it',
+                doc: `${trustSentence} Jumps to that person’s slide and moves with them; your own edit or click stops it`,
               }
             : {
                 name: n === null ? name : PRESENCE.goToSlide(n),
-                doc: 'A one time jump to the slide that person has open',
+                doc: `${trustSentence} A one time jump to the slide that person has open`,
               };
         return (
           <button
@@ -159,6 +165,7 @@ export function RosterMenu({
                 {name}
                 {self ? ` ${PRESENCE.you}` : ''}
                 {trust !== null ? <span className="ts-roster-trust"> · {trust}</span> : null}
+                <TrustMark identity={participant} />
               </span>
               <span className="ts-roster-meta">
                 {self ? '' : rosterRoleWord(participant)}

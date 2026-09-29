@@ -226,8 +226,38 @@
   min-height: 36px;
 }
 
+/* the row's columns: the 16 px mark, the body, the More button; Restore leaves the grid and
+   overlays the meta line's right end on hover and focus (docs/PEOPLE.md 3.19), so the meta line
+   keeps the body column at 320 px and "<name> · guest · 3 changes · current" reads whole at rest.
+   The button is 20 px tall on the row's bottom line and never covers the note line above it: the
+   pick button stretches across the body column, and a centred 32 px overlay took its clicks (the
+   walk's versions.pick and versions.undo-restore read red on this lane's first run) */
 .ts-versions.is-history .ts-version {
-  grid-template-columns: 16px minmax(0, 1fr) auto auto;
+  position: relative;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+}
+
+.ts-versions.is-history .ts-version-restore {
+  position: absolute;
+  right: 36px;
+  bottom: 5px;
+  display: none;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 12px;
+  line-height: 20px;
+  background: var(--pt-paper);
+}
+
+.ts-versions.is-history .ts-version:hover .ts-version-restore,
+.ts-versions.is-history .ts-version:focus-within .ts-version-restore {
+  display: inline-flex;
+}
+
+/* the badge after the author word sits on the meta line's baseline, outside the 140 px author
+   span so it never truncates (3.7) */
+.ts-version-meta .ts-trust-mark {
+  vertical-align: bottom;
 }
 
 .ts-version-mark {
@@ -239,6 +269,13 @@
 }
 
 .ts-chip-16 {
+  width: 16px;
+  height: 16px;
+}
+
+/* the blank chip of an Earlier edits row in the 16 px column: presence.css sizes .ts-chip.is-blank
+   at 24 px at a higher specificity, so the versions list names both classes (docs/PEOPLE.md 3.1) */
+.ts-chip.is-blank.ts-chip-16 {
   width: 16px;
   height: 16px;
 }
@@ -281,7 +318,9 @@
 .ts-version-window-row {
   appearance: none;
   display: grid;
-  grid-template-columns: 70px minmax(0, 1fr) 16px;
+  /* the marks strip sizes to its authors (docs/PEOPLE.md 3.2): a one author window's text starts
+     at the standalone rows' text column, a four author window's moves right by its marks */
+  grid-template-columns: auto minmax(0, 1fr) 16px;
   gap: 8px;
   align-items: center;
   box-sizing: border-box;
@@ -308,17 +347,25 @@
   outline-offset: -1px;
 }
 
-/* the marks strip: a fixed 70 px for four 16 px marks at 2 px gaps and the +N */
+/* every shell button takes the plate on hover (docs/PRODUCT.md 3.1; authorship 9) */
+.ts-versions.is-history .ts-version-window-row:hover {
+  background: var(--pt-plate);
+}
+
+/* the marks strip: as wide as its marks at 2 px gaps and the +N, never under one mark */
 .ts-version-marks {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  width: 70px;
+  width: auto;
+  min-width: 16px;
 }
 
+/* the +N count in the chrome's smallest size, 11 px tabular in ink-2 (authorship 15) */
 .ts-version-marks-more {
-  font: 500 9px/1 var(--pt-display);
+  font: 500 11px/1 var(--pt-display);
   font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-variant-numeric: tabular-nums;
   color: var(--pt-ink-2);
 }
 
@@ -327,8 +374,13 @@
   font-size: 11px;
 }
 
+/* the expanded window's rule stands under the parent mark's centre (the mark spans x 17 to 32; the
+   rule's pixel is x 24 with the panel's 1 px border, its content edge x 25), and the child rows
+   keep their own 16 px inset, so their marks land at x 41, the parent's text column (authorship 2;
+   docs/PEOPLE.md 3.2); the rule no longer doubles the panel's border at x 1 */
 .ts-versions-list.is-window {
-  padding-left: 12px;
+  margin-left: 23px;
+  padding-left: 0;
   border-left: 1px solid var(--pt-hair-soft);
   margin-bottom: 4px;
 }

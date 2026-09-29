@@ -51,6 +51,7 @@ import type { BlockId } from './ids.ts';
 import { derivedLayout } from './layouts.ts';
 import type { Position } from './position.ts';
 import { normalizeRotation } from './position.ts';
+import type { Typography } from './typography.ts';
 import type { Box } from './render.ts';
 import { CONTENT_BOX, SHEET_HEIGHT, SHEET_WIDTH } from './render.ts';
 
@@ -285,11 +286,16 @@ export function toCanvas(slide: Slide, boxes: CanvasBoxes): ToCanvasResult | nul
       fields.mark = { ...slide.mark };
       const mark: MarkBlock = { id: markId, type: 'mark', w: slide.mark.w, h: slide.mark.h };
       state.place(mark, boxes.mark ?? boxes.blocks[markId]);
+      /* a field's own typography (build/field-fonts.md 2) rides onto the block it becomes, so a
+         drag keeps the face; fromCanvas carries it back */
       const heading: HeadingBlock = {
         id: headingId,
         type: 'heading',
         level: 'h1',
         text: slide.heading,
+        ...(slide.typography?.heading !== undefined
+          ? { typography: { ...slide.typography.heading } }
+          : {}),
         autofit: 'shrink',
       };
       state.autofit.push(headingId);
@@ -301,6 +307,9 @@ export function toCanvas(slide: Slide, boxes: CanvasBoxes): ToCanvasResult | nul
         tone: 'muted',
         measure: 56,
         text: slide.lead,
+        ...(slide.typography?.lead !== undefined
+          ? { typography: { ...slide.typography.lead } }
+          : {}),
         autofit: 'shrink',
       };
       state.autofit.push(leadId);
@@ -314,7 +323,8 @@ export function toCanvas(slide: Slide, boxes: CanvasBoxes): ToCanvasResult | nul
         type: 'heading',
         level: 'big',
         text: slide.big,
-        typography: { align: 'center' },
+        /* the conversion's centre, then the field's own record (build/field-fonts.md 2) */
+        typography: { ...STATEMENT_CONVERSION_TYPOGRAPHY, ...slide.typography?.big },
         autofit: 'shrink',
       };
       state.autofit.push('big');
@@ -457,6 +467,42 @@ export function canvasUnmoved(slide: ContentSlide, record: GrammarRecord): boole
   });
 }
 
+/** The typography the statement's conversion writes on its big heading: centred, as the kind draws it. */
+const STATEMENT_CONVERSION_TYPOGRAPHY: Typography = { align: 'center' };
+
+/**
+ * A field's own record read back from the block it became (build/field-fonts.md 2): the block's
+ * typography minus the declarations the conversion wrote itself, undefined when nothing is left,
+ * so a slide converted and restored with no face of its own reads byte for byte as before.
+ */
+function restoredFieldTypography(
+  block: Block | undefined,
+  conversion: Typography = {},
+): Typography | undefined {
+  const typography =
+    block !== undefined && 'typography' in block && typeof block.typography === 'object'
+      ? (block.typography as Typography | undefined)
+      : undefined;
+  if (typography === undefined) return undefined;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(typography)) {
+    if (value === undefined) continue;
+    if ((conversion as Record<string, unknown>)[key] === value) continue;
+    out[key] = value;
+  }
+  return Object.keys(out).length > 0 ? (out as Typography) : undefined;
+}
+
+/** The `typography` map of a restored kind from its fields' records; nothing when every field is bare. */
+function restoredFieldMap<K extends string>(
+  records: Record<K, Typography | undefined>,
+): { typography: Partial<Record<K, Typography>> } | Record<string, never> {
+  const map: Partial<Record<K, Typography>> = {};
+  for (const [field, record] of Object.entries(records) as [K, Typography | undefined][])
+    if (record !== undefined) map[field] = record;
+  return Object.keys(map).length > 0 ? { typography: map } : {};
+}
+
 /** A block with `pos` dropped and the conversion's `autofit` removed where the record says it was added. */
 function restoreBlock(block: Block, added: ReadonlySet<string>): Block {
   const bare = stripPos(block);
@@ -552,6 +598,10 @@ export function fromCanvas(slide: Slide): FromCanvasResult | null {
           mark: { ...markSize },
           heading: textOf(heading),
           lead: textOf(lead),
+          ...restoredFieldMap({
+            heading: restoredFieldTypography(heading),
+            lead: restoredFieldTypography(lead),
+          }),
         },
       };
     }
@@ -564,6 +614,9 @@ export function fromCanvas(slide: Slide): FromCanvasResult | null {
           kind: 'statement',
           big: textOf(big),
           ...(record.fields?.measure !== undefined ? { measure: record.fields.measure } : {}),
+          ...restoredFieldMap({
+            big: restoredFieldTypography(big, STATEMENT_CONVERSION_TYPOGRAPHY),
+          }),
         },
       };
     }

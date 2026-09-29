@@ -20,6 +20,8 @@ import type { Box, Theme } from '@turboslide/schema/render';
 import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 import { importResidual } from '@turboslide/schema/ext';
 import { grammarRecordOf } from '@turboslide/schema/canvas';
+import { slideFieldTypography } from '@turboslide/schema/field-typography';
+import { typographyDeclarations } from '@turboslide/schema/typography';
 import type { SlotPosition } from '@turboslide/schema/brand';
 import type { FontSrc } from './fonts.ts';
 import { deckFontsCss, routeFontSrc } from './fonts.ts';
@@ -293,10 +295,15 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
       // it or moves it to a corner; a deck without a record draws the GT mark as before.
       const slot = titleMarkSlot(deck, slide.mark, ctx);
       const mark = slot.inFlow;
+      /* a field's own typography (build/field-fonts.md 2) draws inline, the declarations a block
+         draws: the face through `--ts-font-<id>` over the kit's `--display` and `--text` */
       const h1 = el(
         'h1',
         {
-          style: 'margin-top:44px',
+          style: style(
+            'margin-top:44px',
+            ...typographyDeclarations(slideFieldTypography(slide, 'heading')),
+          ),
           ...(ctx.blockAttrs
             ? { 'data-block': 'heading', 'data-type': 'heading', 'data-run': 'heading/text' }
             : {}),
@@ -307,7 +314,10 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
         'p',
         {
           class: 'lead muted max-p',
-          style: 'margin-top:26px',
+          style: style(
+            'margin-top:26px',
+            ...typographyDeclarations(slideFieldTypography(slide, 'lead')),
+          ),
           ...(ctx.blockAttrs
             ? { 'data-block': 'lead', 'data-type': 'paragraph', 'data-run': 'lead/text' }
             : {}),
@@ -336,7 +346,10 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
         'div',
         {
           class: classes('big', measure.className),
-          style: measure.style,
+          style: style(
+            measure.style,
+            ...typographyDeclarations(slideFieldTypography(slide, 'big')),
+          ),
           ...(ctx.blockAttrs
             ? { 'data-block': 'big', 'data-type': 'heading', 'data-run': 'big/text' }
             : {}),

@@ -19,6 +19,8 @@ import type { Position } from './position.ts';
 import { positionObjectSchema } from './position.ts';
 import type { Text } from './text.ts';
 import { multilineTextSchema, plainText, textSchema } from './text.ts';
+import type { Typography } from './typography.ts';
+import { typographyObjectSchema } from './typography.ts';
 
 export const SCHEMA_VERSION = 1;
 
@@ -262,14 +264,31 @@ export type ClosingSlide = SlideBase & {
   plate: Plate;
   mark?: { w: number; h: number };
 };
+/**
+ * The typography a fixed kind's text field carries of its own (the field fonts hotfix,
+ * build/field-fonts.md 2): the block record (`Typography`, the shape every block's `typography`
+ * uses) keyed by the field's id, so the toolbar's Font dropdown writes `slide.set
+ * /typography/<field>` the way it writes `block.set /typography` on a block. An absent map or
+ * field means the kit's face for the field's role, as before the hotfix, so every stored deck
+ * validates and renders byte for byte.
+ */
+export type TitleFieldTypography = { heading?: Typography; lead?: Typography };
+export type StatementFieldTypography = { big?: Typography };
+
 export type TitleSlide = SlideBase & {
   kind: 'title';
   mark: { w: number; h: number };
   heading: Text;
   lead: Text;
+  typography?: TitleFieldTypography;
 };
 /** measure in ch */
-export type StatementSlide = SlideBase & { kind: 'statement'; big: Text; measure?: number };
+export type StatementSlide = SlideBase & {
+  kind: 'statement';
+  big: Text;
+  measure?: number;
+  typography?: StatementFieldTypography;
+};
 
 export type Slide =
   ContentSlide | OpenerSlide | MoodSlide | ClosingSlide | TitleSlide | StatementSlide;
@@ -522,6 +541,21 @@ export const closingSlideSchema = z.strictObject({
   mark: markSizeSchema.optional(),
 }) satisfies z.ZodType<ClosingSlide>;
 
+/* the field fonts hotfix (build/field-fonts.md 2): the map of a fixed kind's field records, the
+   block record per field; the inspector skips the key (generate.ts SLIDE_SKIP), the Font
+   dropdown and Format > Text > Font are its surface */
+const FIELD_TYPOGRAPHY_HELP =
+  'The face and type settings a text field carries of its own, per field; the brand kit’s face for the field’s role when absent.';
+
+export const titleFieldTypographySchema = z.strictObject({
+  heading: typographyObjectSchema.optional(),
+  lead: typographyObjectSchema.optional(),
+}) satisfies z.ZodType<TitleFieldTypography>;
+
+export const statementFieldTypographySchema = z.strictObject({
+  big: typographyObjectSchema.optional(),
+}) satisfies z.ZodType<StatementFieldTypography>;
+
 export const titleSlideSchema = z.strictObject({
   ...slideBase,
   kind: z.literal('title'),
@@ -531,6 +565,12 @@ export const titleSlideSchema = z.strictObject({
      rather than ending the session (build-4/hotfix-4.md cause W4); a one line lead is one
      paragraph, so every existing deck validates and renders byte for byte */
   lead: annotate(multilineTextSchema, { label: 'Lead', control: 'textarea', group: 'Text' }),
+  typography: annotate(titleFieldTypographySchema.optional(), {
+    label: 'Field typography',
+    control: 'json',
+    group: 'Text',
+    help: FIELD_TYPOGRAPHY_HELP,
+  }),
 }) satisfies z.ZodType<TitleSlide>;
 
 export const statementSlideSchema = z.strictObject({
@@ -542,6 +582,12 @@ export const statementSlideSchema = z.strictObject({
     control: 'number',
     snap: [22, 32],
     group: 'Layout',
+  }),
+  typography: annotate(statementFieldTypographySchema.optional(), {
+    label: 'Field typography',
+    control: 'json',
+    group: 'Text',
+    help: FIELD_TYPOGRAPHY_HELP,
   }),
 }) satisfies z.ZodType<StatementSlide>;
 

@@ -8,6 +8,7 @@
 import type { Block } from '@turboslide/schema/blocks';
 import type { Deck, Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
+import { slideFieldTypographies } from '@turboslide/schema/field-typography';
 import type { FontId } from '@turboslide/schema/fonts';
 import { DEFAULT_FONT_ID, FONT_IDS, isFontId } from '@turboslide/schema/fonts';
 
@@ -22,13 +23,20 @@ export function blockFamilies(block: Block, out: Set<FontId>): void {
 
 /**
  * The catalog faces a deck uses, in FONT_IDS order: every `typography.family` of every block of
- * the given slides and every role of the brand kit's `fonts` (docs/PRODUCT.md 4.1). The theme's
- * default face (Inter) is never in the answer because the base stylesheet always carries it.
+ * the given slides, every face a fixed kind's field carries of its own (the cover's heading and
+ * lead, a statement's big line; build/field-fonts.md 2) and every role of the brand kit's `fonts`
+ * (docs/PRODUCT.md 4.1). The theme's default face (Inter) is never in the answer because the base
+ * stylesheet always carries it.
  */
 export function usedFontIds(deck: Pick<Deck, 'brand'>, slides: Iterable<Slide>): FontId[] {
   const used = new Set<FontId>();
-  for (const slide of slides)
+  for (const slide of slides) {
     for (const { block } of slideBlocks(slide)) blockFamilies(block, used);
+    for (const record of slideFieldTypographies(slide)) {
+      const family = record.family;
+      if (typeof family === 'string' && isFontId(family)) used.add(family);
+    }
+  }
   const roles = deck.brand?.fonts;
   if (roles !== undefined)
     for (const family of Object.values(roles))

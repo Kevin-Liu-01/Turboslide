@@ -42,7 +42,7 @@
 // Marks keep server order (`transformMarkAgainstMark`: the later arrival wins the flag), which
 // is what last writer wins means for them.
 import type { MarkMutation, Mutation, SpliceMutation, TextOp } from './mutations.ts';
-import { isSlideFieldPath } from './mutations.ts';
+import { isFieldTypographyPath, isSlideFieldPath } from './mutations.ts';
 import type { RunFlagKey, RunFlags } from './text.ts';
 import { RUN_FLAG_KEYS } from './text.ts';
 
@@ -362,6 +362,9 @@ export function rewritesText(against: Mutation, op: TextOp): boolean {
       // names the field as its blockId and the field's pointer as its path (mutations.ts)
       if (isSlideFieldPath(against.path))
         return op.path === against.path && op.blockId === against.path.slice(1);
+      // a field's own face (build/field-fonts.md 2: `/typography/<field>`) rewrites no Text: a
+      // colleague's typing in the lead stays while the title's face changes
+      if (isFieldTypographyPath(against.path)) return false;
       return true;
     case 'slide.replace':
     case 'slide.remove':

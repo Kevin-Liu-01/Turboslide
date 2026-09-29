@@ -129,6 +129,16 @@ export function isSlideFieldPath(path: string): path is `/${SlideFieldId}` {
 }
 
 /**
+ * True for a `slide.set` pointer under the fields' typography map (`/typography` or
+ * `/typography/<field>...`; deck.ts `TitleSlide.typography`, build/field-fonts.md 2): a write of
+ * a field's face rewrites no Text, so the transform keeps a colleague's typing and the comment
+ * anchors stay where they are.
+ */
+export function isFieldTypographyPath(path: string): boolean {
+  return path === '/typography' || path.startsWith('/typography/');
+}
+
+/**
  * The slide field a `blockId` names on a slide, by the slide's kind: `heading` and `lead` on a
  * title slide, `big` on a statement slide; null on any other slide, where the id is a block's
  * (a content slide may carry a block whose id is `heading`). The one rule the reducer, the

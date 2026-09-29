@@ -9,18 +9,20 @@
 // spelled here; packages/fonts/src/catalog.test.ts pins the names to the catalog. No React, no
 // DOM: font-picker-model.test.ts runs in Node.
 //
-// The fixed kinds' fields (the cover's heading and lead, a statement's big line, a picture kind's
-// plate; editor-shell.ts pseudoBlockOf) carry no `typography`: the brand kit's Display face draws
-// the heading and its Text face the rest (packages/render/src/theme-css.ts writes `--display` and
-// `--text` from the kit), so the Font control on such a field reads the kit's face for the
-// field's role and says where it is set, instead of reading the theme's face and opening nothing
-// (the features round's fix round, docs/gslides-parity/focus/VERIFICATION.md F.5 F8). Whether the
-// fields take a typography of their own is Kevin's call (F.10 item 5); until then the control is
-// honest about the kit path.
+// The fixed kinds' text fields (the cover's heading and lead, a statement's big line;
+// editor-shell.ts pseudoBlockOf) take a face of their own since the field fonts hotfix
+// (docs/gslides-parity/features/build/field-fonts.md 2; Kevin's call on VERIFICATION.md F.10
+// item 5): the record lives on the slide under `typography.<field>` (@turboslide/schema/field-typography)
+// and the Font control writes it through `slide.update`; absent, the brand kit's Display face
+// draws the heading and its Text face the lead (packages/render/src/theme-css.ts writes
+// `--display` and `--text` from the kit), which is what the control's label reads then. A picture
+// kind's plate and photograph carry no text of their own, so on them the control still reads the
+// kit's face and says where it is set (the features round's fix round, VERIFICATION.md F.5 F8).
 import type { BrandKit, KitFonts } from '@turboslide/schema/brand';
 import type { Block } from '@turboslide/schema/blocks';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
+import { slideFieldTypographies } from '@turboslide/schema/field-typography';
 import type { FontCategory, FontId, FontLicence } from '@turboslide/schema/fonts';
 import { DEFAULT_FONT_ID, FONT_CATEGORIES, FONT_IDS, isFontId } from '@turboslide/schema/fonts';
 
@@ -187,12 +189,18 @@ function blockFamilies(block: Block, out: Set<FontId>): void {
 /**
  * The catalog faces a document uses, in FONT_IDS order (the same walk as
  * @turboslide/fonts/used, which the chrome cannot import): every `typography.family` of every
- * block of every slide and every role of the brand kit's fonts, never the theme's default face.
+ * block of every slide, every face a fixed kind's field carries of its own (build/field-fonts.md
+ * 2) and every role of the brand kit's fonts, never the theme's default face.
  */
 export function usedFamilies(document: DeckDocument): FontId[] {
   const used = new Set<FontId>();
-  for (const slide of Object.values(document.slides))
+  for (const slide of Object.values(document.slides)) {
     for (const { block } of slideBlocks(slide)) blockFamilies(block, used);
+    for (const record of slideFieldTypographies(slide)) {
+      const family = record.family;
+      if (typeof family === 'string' && isFontId(family)) used.add(family);
+    }
+  }
   const roles = document.deck.brand?.fonts;
   if (roles !== undefined)
     for (const family of Object.values(roles))

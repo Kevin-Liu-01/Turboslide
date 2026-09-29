@@ -14,6 +14,8 @@ import {
   WIDTH_SLACK_IN,
   addShapeText,
   bulletCharacterCode,
+  catalogFace,
+  familyFor,
   guardLinkSpaces,
   layerInsetNetOfPreset,
   shapeKindOf,
@@ -46,6 +48,23 @@ const options: TextEmitOptions = {
   families: new Set(),
   namePrefix: 'ts:t',
 };
+
+describe('a field’s own face in the scene (build/field-fonts.md 2)', () => {
+  // the cover's heading and lead and a statement's big line draw their own family inline, so the
+  // scene's run (measure.ts firstFamily over the computed font-family) carries the catalog name;
+  // familyFor names it as is, the way it names a block's, and the theme's face keeps the set's pick
+  it('names the catalog face the field computed, and the set’s pick for the theme face', () => {
+    expect(familyFor({ ...style, family: 'Fraunces', size: 88, weight: 500 }, 'exact')).toBe(
+      'Fraunces',
+    );
+    expect(familyFor({ ...style, family: 'Manrope', size: 26, weight: 400 }, 'exact')).toBe(
+      'Manrope',
+    );
+    expect(catalogFace({ ...style, family: 'Fraunces' })).toBe('Fraunces');
+    expect(catalogFace({ ...style, family: 'Inter' })).toBeNull();
+    expect(catalogFace({ ...style, family: 'Fraunces', mono: true })).toBeNull();
+  });
+});
 
 describe('the GT run under the mark', () => {
   it('is spaced to the mark box: (mark width minus letters width) per character, in points', () => {

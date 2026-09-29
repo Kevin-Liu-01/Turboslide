@@ -161,7 +161,15 @@ const NODE_SERVER_ENV = {
   TURBOSLIDE_DOWNLOAD_SECRET: 'check-node-server-download-secret-0000000000',
 };
 // The environment the runner's dev server carries (SPEC-3 16.1 step 26; server/tokens.ts).
+/** The tree's commit, stamped into every server the runner starts so /api/agent names it (docs/POLISH.md section 0 item 1). */
+function headCommit() {
+  const out = spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' });
+  const sha = (out.stdout ?? '').trim();
+  return /^[0-9a-f]{40}$/.test(sha) ? sha : '';
+}
+
 const SERVER_ENV = {
+  TURBOSLIDE_BUILD_COMMIT: headCommit(),
   TURBOSLIDE_EXPORT_BATCH: EXPORT_BATCH,
   TURBOSLIDE_REALTIME: 'memory',
   TURBOSLIDE_AUTH_DB: '.turboslide/auth.sqlite',

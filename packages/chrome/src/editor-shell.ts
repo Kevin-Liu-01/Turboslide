@@ -1419,6 +1419,10 @@ export function buildMenuContext(
     ...(block?.type === 'table'
       ? { tableHeader: (block as TableBlock).rows[0]?.header === true }
       : {}),
+    /* the polish round (docs/POLISH.md 2.6 item 74): the Tabular figures check row reads the block */
+    tabularFigures:
+      (block as { typography?: { numerals?: string } } | undefined)?.typography?.numerals ===
+      'tabular',
     linked: block?.link !== undefined,
     order: { forward, front: forward, backward, back: backward },
     /* round two (SPEC-2 4.1, 1.1): every top level block of every slide kind is an object; the
@@ -2019,8 +2023,6 @@ export const PANEL_SECTION_OF: Readonly<Record<string, string>> = {
   'format.altText': 'altText',
   'format.editData': 'chart',
   'format.image.imageOptions': 'picture',
-  /* the features round (docs/FEATURES.md 3.1 item 4): the Tabular figures row opens the Text section */
-  'format.text.tabularFigures': 'text',
 };
 
 /** The mark a text row toggles (SPEC-2 4.1), read from the effect's input. */
@@ -2971,6 +2973,16 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
         },
         label: item.label,
       };
+    }
+    case 'format.text.tabularFigures': {
+      /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 40): the row toggles the
+         block's numerals; the panel's Text section keeps its own control */
+      if (target === undefined) return { refused: SELECT_TEXT };
+      if (target.type === 'table') return { refused: 'Tabular figures apply to a text block' };
+      const typography = typographyOf(target);
+      if (typography.numerals === 'tabular') delete typography.numerals;
+      else typography.numerals = 'tabular';
+      return blockSet(facts, target.id, '/typography', typography, item.label);
     }
     case 'format.text.size.increase':
     case 'format.text.size.decrease': {

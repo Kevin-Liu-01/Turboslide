@@ -1,13 +1,21 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { TABLE_MAX_COLUMNS, TABLE_MAX_ROWS } from '@turboslide/schema/blocks/table';
+import {
+  TABLE_MAX_COLUMNS,
+  TABLE_MAX_ROWS,
+  tableRowsThatFit,
+} from '@turboslide/schema/blocks/table';
+import { CONTENT_BOX } from '@turboslide/schema/render';
 
 import { cn } from '../lib/cn';
 import { PICKERS } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 
 import './TableGrid.css';
+
+/** The rows the content box holds at the insert's 20 px text (docs/POLISH.md 2.2 item 6; polish/build/b2.md R9): past it the caption says so. */
+const ROWS_THAT_FIT = tableRowsThatFit(CONTENT_BOX[3], 20);
 
 /**
  * Insert > Table (gslides-parity SPEC-2 0.26, 4.1, 6): Google's hover grid as a plate inside the
@@ -123,7 +131,7 @@ export function TableGrid({ onPick, autoFocus = false, control = 'insert.table' 
         ))}
       </div>
       <p className="ts-tablegrid-size" aria-live="polite" data-control={`${control}.size`}>
-        {words.size(pick.columns, pick.rows)}
+        {words.size(pick.columns, pick.rows, ROWS_THAT_FIT)}
       </p>
     </div>
   );

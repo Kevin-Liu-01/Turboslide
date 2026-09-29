@@ -552,11 +552,10 @@ function spanAndCellWrites(
  * (`columns[].align`), so a column's setting stays one field; on any other range or on the
  * caret's cell it writes the cells (docs/POLISH.md 2.2 item 10).
  */
-export function rangeIsWholeColumns(
-  block: Pick<TableBlock, 'rows'>,
-  range: CellRange,
-): boolean {
-  return Math.min(range.r0, range.r1) === 0 && Math.max(range.r0, range.r1) === block.rows.length - 1;
+export function rangeIsWholeColumns(block: Pick<TableBlock, 'rows'>, range: CellRange): boolean {
+  return (
+    Math.min(range.r0, range.r1) === 0 && Math.max(range.r0, range.r1) === block.rows.length - 1
+  );
 }
 
 /**

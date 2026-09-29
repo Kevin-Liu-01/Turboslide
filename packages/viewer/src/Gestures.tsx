@@ -1759,7 +1759,10 @@ export function drawDraftMutation(
      (item 33; b3.md request 2b); the field stays out when no attached site asks for an axis */
   const axis =
     block.shape === 'elbow' || block.shape === 'curved'
-      ? connectorAxis(connect, new Map(canvasObjects(slide).map((each) => [each.id, each] as const)))
+      ? connectorAxis(
+          connect,
+          new Map(canvasObjects(slide).map((each) => [each.id, each] as const)),
+        )
       : undefined;
   return {
     ...mutation,

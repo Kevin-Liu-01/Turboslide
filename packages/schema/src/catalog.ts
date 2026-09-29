@@ -64,6 +64,9 @@ export const CATALOG: Readonly<Record<BlockType, BlockCatalogEntry>> = {
     assetPaths: [],
     iconPaths: [],
     export: 'native',
+    /* the polish round (docs/POLISH.md 2.3 item 19): a heading takes paragraph breaks, so Enter in
+       its session makes a line instead of ending it, as Google's title placeholder does */
+    multilineTextPaths: ['/text'],
     make: (id) => ({ id, type: 'heading', level: 'h2', text: 'Heading' }),
   }),
   paragraph: entry({

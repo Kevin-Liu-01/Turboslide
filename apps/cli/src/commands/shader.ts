@@ -138,7 +138,9 @@ async function frame(ctx: CommandContext): Promise<number> {
     }),
   );
   ctx.out.result(result);
-  ctx.out.human(`frame ${result.assetId} (${result.size[0]} by ${result.size[1]}): revision ${result.revision}`);
+  ctx.out.human(
+    `frame ${result.assetId} (${result.size[0]} by ${result.size[1]}): revision ${result.revision}`,
+  );
   return 0;
 }
 
@@ -156,7 +158,9 @@ async function capture(ctx: CommandContext): Promise<number> {
     }),
   );
   ctx.out.result(result);
-  ctx.out.human(`captured ${result.assetId} (${result.size[0]} by ${result.size[1]}): revision ${result.revision}`);
+  ctx.out.human(
+    `captured ${result.assetId} (${result.size[0]} by ${result.size[1]}): revision ${result.revision}`,
+  );
   return 0;
 }
 
@@ -184,6 +188,8 @@ async function render(ctx: CommandContext): Promise<number> {
   const path = isAbsolute(out) ? out : resolve(ctx.cwd, out);
   writeFileSync(path, Buffer.from(result.png, 'base64'));
   ctx.out.result({ ...result, png: undefined, out: path });
-  ctx.out.human(`rendered ${materialId} at ${result.width} by ${result.height} in ${result.ms} ms to ${path}`);
+  ctx.out.human(
+    `rendered ${materialId} at ${result.width} by ${result.height} in ${result.ms} ms to ${path}`,
+  );
   return 0;
 }

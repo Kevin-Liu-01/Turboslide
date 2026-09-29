@@ -254,7 +254,12 @@ describe("the cover title before it converts (RETURN.md 2.14 item 1): the plans 
       input: {
         slideId: 'title',
         mutations: [
-          { op: 'text.mark', blockId: 'heading', path: '/text', edit: { kind: 'marks', set: { b: true } } },
+          {
+            op: 'text.mark',
+            blockId: 'heading',
+            path: '/text',
+            edit: { kind: 'marks', set: { b: true } },
+          },
         ],
       },
     });
@@ -672,7 +677,12 @@ describe('menuActionPlan', () => {
           layout: { type: 'freeform' },
           slots: {
             main: [
-              { id: 'bare', type: 'shape', shape: 'rect', pos: { x: 0, y: 0, w: 200, h: 100, z: 0 } },
+              {
+                id: 'bare',
+                type: 'shape',
+                shape: 'rect',
+                pos: { x: 0, y: 0, w: 200, h: 100, z: 0 },
+              },
               {
                 id: 'labelled',
                 type: 'shape',

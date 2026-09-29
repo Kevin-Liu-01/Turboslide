@@ -22,13 +22,19 @@ describe('tailEditable', () => {
   it('is false in Commenting and Viewing mode even with the write capability', () => {
     const settings = DEFAULT_MENU_CONTEXT.settings;
     expect(
-      tailEditable(ctx({ capabilities: ['write', 'comment'], settings: { ...settings, mode: 'commenting' } })),
+      tailEditable(
+        ctx({ capabilities: ['write', 'comment'], settings: { ...settings, mode: 'commenting' } }),
+      ),
     ).toBe(false);
     expect(
-      tailEditable(ctx({ capabilities: ['write', 'comment'], settings: { ...settings, mode: 'viewing' } })),
+      tailEditable(
+        ctx({ capabilities: ['write', 'comment'], settings: { ...settings, mode: 'viewing' } }),
+      ),
     ).toBe(false);
     expect(
-      tailEditable(ctx({ capabilities: ['write', 'comment'], settings: { ...settings, mode: 'editing' } })),
+      tailEditable(
+        ctx({ capabilities: ['write', 'comment'], settings: { ...settings, mode: 'editing' } }),
+      ),
     ).toBe(true);
   });
 });
@@ -39,7 +45,13 @@ describe('tailEditable', () => {
 describe('the tail controls of the polish round', () => {
   const table = (over: Partial<MenuContext['selection']>): MenuContext => ({
     ...DEFAULT_MENU_CONTEXT,
-    selection: { ...DEFAULT_MENU_CONTEXT.selection, block: 'table', blocks: 1, tableCell: true, ...over },
+    selection: {
+      ...DEFAULT_MENU_CONTEXT.selection,
+      block: 'table',
+      blocks: 1,
+      tableCell: true,
+      ...over,
+    },
   });
   const ids = (ctx: MenuContext) => presentControls(tailFor('table'), ctx).map((c) => c.control);
 

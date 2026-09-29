@@ -226,7 +226,8 @@ import {
 import { isPictureKind } from '@turboslide/viewer/model';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { applyTheme, readTheme } from '@turboslide/viewer/theme';
-import { createShaderFrameCapturer,
+import {
+  createShaderFrameCapturer,
   FRAME_UPLOAD_ABOVE_BYTES,
   SHADER_FRAME_FAILED_SENTENCE,
 } from '@turboslide/viewer/shader-frame';
@@ -1017,7 +1018,9 @@ export async function presignUpload(
   });
   if (!issued.ok) {
     const body = await issued.text().catch(() => '');
-    throw new Error(`the upload was refused (HTTP ${issued.status})${body ? `: ${body.slice(0, 160)}` : ''}`);
+    throw new Error(
+      `the upload was refused (HTTP ${issued.status})${body ? `: ${body.slice(0, 160)}` : ''}`,
+    );
   }
   const grant = (await issued.json()) as { key?: unknown; url?: unknown; method?: unknown };
   if (typeof grant.key !== 'string' || typeof grant.url !== 'string')

@@ -137,6 +137,7 @@ function optionsItems(state: { laser: boolean; fullscreen: boolean }): MenuItem[
     {
       id: 'present.options.autoPlay',
       label: PRESENT_TEXT.autoPlay,
+      icon: 'play',
       status: 'later',
       stubReason: PRESENT_TEXT.autoPlayStub,
       google: 'Auto advance options',
@@ -147,6 +148,7 @@ function optionsItems(state: { laser: boolean; fullscreen: boolean }): MenuItem[
       status: 'now',
       effect: run,
       key: shortcut('L', 'L'),
+      icon: 'cursor-arrow-rays',
     },
     {
       id: 'present.options.fullScreen',

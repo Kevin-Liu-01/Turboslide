@@ -753,7 +753,6 @@
         },
         "alt": {
           "type": "string",
-          "minLength": 1,
           "title": "Alt text",
           "x-inspector": {
             "label": "Alt text",
@@ -3483,7 +3482,7 @@
               "title": "Text",
               "x-inspector": {
                 "label": "Text",
-                "control": "text",
+                "control": "textarea",
                 "group": "Text"
               }
             },
@@ -7828,7 +7827,11 @@
                   "enum": [
                     1,
                     1.5,
-                    2
+                    2,
+                    3,
+                    4,
+                    8,
+                    12
                   ]
                 },
                 "color": {
@@ -10613,7 +10616,9 @@
                           "bars-3-center-left",
                           "bars-3-bottom-right",
                           "bell",
-                          "inbox"
+                          "inbox",
+                          "cursor-arrow-rays",
+                          "arrow-down-tray"
                         ]
                       },
                       "x": {
@@ -14767,6 +14772,25 @@
               "minimum": 0,
               "maximum": 1
             },
+            "axis": {
+              "title": "Axis",
+              "x-inspector": {
+                "label": "Axis",
+                "control": "select",
+                "snap": [
+                  "horizontal",
+                  "vertical"
+                ],
+                "group": "Block",
+                "help": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33)."
+              },
+              "description": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33).",
+              "type": "string",
+              "enum": [
+                "horizontal",
+                "vertical"
+              ]
+            },
             "points": {
               "title": "Points",
               "x-inspector": {
@@ -16414,7 +16438,9 @@
                 "bars-3-center-left",
                 "bars-3-bottom-right",
                 "bell",
-                "inbox"
+                "inbox",
+                "cursor-arrow-rays",
+                "arrow-down-tray"
               ],
               "title": "Icon",
               "x-inspector": {
@@ -17348,6 +17374,27 @@
                       }
                     },
                     "additionalProperties": false
+                  },
+                  "align": {
+                    "title": "Cell align",
+                    "x-inspector": {
+                      "label": "Cell align",
+                      "control": "select",
+                      "snap": [
+                        "left",
+                        "center",
+                        "right"
+                      ],
+                      "group": "Block",
+                      "help": "The text alignment of this cell; the column’s alignment unless set."
+                    },
+                    "description": "The text alignment of this cell; the column’s alignment unless set.",
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "center",
+                      "right"
+                    ]
                   }
                 },
                 "required": [
@@ -18491,7 +18538,11 @@
                   "enum": [
                     1,
                     1.5,
-                    2
+                    2,
+                    3,
+                    4,
+                    8,
+                    12
                   ]
                 },
                 "color": {
@@ -30264,7 +30315,9 @@
             "bars-3-center-left",
             "bars-3-bottom-right",
             "bell",
-            "inbox"
+            "inbox",
+            "cursor-arrow-rays",
+            "arrow-down-tray"
           ],
           "title": "Icon",
           "x-inspector": {
@@ -32213,6 +32266,11 @@
                     }
                   ]
                 },
+                "size": {
+                  "type": "integer",
+                  "minimum": 6,
+                  "maximum": 200
+                },
                 "b": {
                   "type": "boolean",
                   "const": true
@@ -32357,6 +32415,11 @@
                             }
                           ]
                         },
+                        "size": {
+                          "type": "integer",
+                          "minimum": 6,
+                          "maximum": 200
+                        },
                         "b": {
                           "type": "boolean",
                           "const": true
@@ -32380,6 +32443,7 @@
                           "sub",
                           "color",
                           "hl",
+                          "size",
                           "b",
                           "link"
                         ]
@@ -41937,7 +42001,7 @@
               "title": "Heading",
               "x-inspector": {
                 "label": "Heading",
-                "control": "text",
+                "control": "textarea",
                 "group": "Text"
               }
             },
@@ -43245,7 +43309,7 @@
           "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
         },
         "id": {
-          "description": "The slide id; <layout>-<n> with the first free n when absent",
+          "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/POLISH.md 2.8 item 99)",
           "type": "string",
           "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
         },
@@ -46497,6 +46561,19 @@
                       "pattern": "^#[0-9a-fA-F]{6}$"
                     }
                   ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "size": {
+              "description": "The size of the range in pixels, 6 to 200; null clears it",
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 6,
+                  "maximum": 200
                 },
                 {
                   "type": "null"
@@ -49938,7 +50015,7 @@
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
           "id": {
-            "description": "The slide id; <layout>-<n> with the first free n when absent",
+            "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/POLISH.md 2.8 item 99)",
             "type": "string",
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
@@ -52705,7 +52782,7 @@
     {
       "name": "deck_style_text",
       "action": "text.style",
-      "description": "Marks a range of a Text italic, underlined, struck, superscript or subscript, or gives it a text or highlight colour (true sets, false clears, null clears a colour), as one text.replace of the whole Text; the output returns the new markup.",
+      "description": "Marks a range of a Text italic, underlined, struck, superscript or subscript, gives it a text or highlight colour, or a size in pixels (true sets, false clears, null clears a colour or the size), as one text.replace of the whole Text; the output returns the new markup.",
       "inputSchema": {
         "$id": "#/$defs/TextStyleInput",
         "type": "object",
@@ -52819,6 +52896,19 @@
                         "pattern": "^#[0-9a-fA-F]{6}$"
                       }
                     ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "size": {
+                "description": "The size of the range in pixels, 6 to 200; null clears it",
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 6,
+                    "maximum": 200
                   },
                   {
                     "type": "null"
@@ -55830,7 +55920,6 @@
           },
           "alt": {
             "type": "string",
-            "minLength": 1,
             "title": "Alt text",
             "x-inspector": {
               "label": "Alt text",
@@ -57601,7 +57690,6 @@
           },
           "alt": {
             "type": "string",
-            "minLength": 1,
             "title": "Alt text",
             "x-inspector": {
               "label": "Alt text",

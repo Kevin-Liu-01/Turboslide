@@ -429,8 +429,18 @@ export type MenuPredicate =
   | 'rename'
   | 'trash'
   | 'follow'
-  /** the comment capability while the mode allows it (Viewing mode hides the comment controls, 5.3) */
+  /**
+   * The comment capability while the mode allows it (Viewing mode hides the comment controls,
+   * 5.3), with something to comment on: an object, a text range or a slide card (docs/POLISH.md
+   * 2.6 item 66; audit-chrome item 12: the row was enabled with nothing selected)
+   */
   | 'canComment'
+  /**
+   * The write capability in Editing mode (docs/POLISH.md 2.6 item 58): the toolbar's write
+   * controls draw for an editor alone; a reader at /edit and Commenting mode keep the view
+   * controls, the comment button and Slideshow
+   */
+  | 'canEdit'
   /** `history`, or `comment` when the owner allows commenters into the Activity panel (5.7) */
   | 'activity'
   /** a viewer on the editor route: the View only button (6.3) */
@@ -447,7 +457,8 @@ export type MenuPredicate =
  * carries (the Header row row reads the selected table's first row).
  */
 export type MenuCheck =
-  { setting: MenuSetting; value?: string | boolean } | { selection: 'tableHeader' };
+  | { setting: MenuSetting; value?: string | boolean }
+  | { selection: 'tableHeader' | 'tabularFigures' };
 
 export type MenuItem = {
   /** dotted, stable: `file.download.pptx`; the audit's `data-menu-item` */
@@ -647,6 +658,11 @@ const SHEET_CENTER_Y = 450;
 
 /* SPEC-3 5.3: Viewing mode hides the Add comment controls; the sentence names the way back, never a role */
 const COMMENT_IN_MODE = 'Switch to Commenting or Editing under View > Mode to comment';
+/** Insert > Comment's reason (item 66): the mode first, else the missing selection. */
+const commentReason = (ctx: MenuContext): string =>
+  ctx.settings.mode === 'viewing'
+    ? COMMENT_IN_MODE
+    : 'Select an object, some text or a slide first';
 
 /**
  * The role gate of a menu (SPEC-3 13.4, 09 2.3): every row of the menu that carries no `when` of
@@ -930,7 +946,9 @@ const FILE: Menu = {
         advanced: true,
       }),
     ]),
-    now('file.open', 'Open…', dialog('Open'), {
+    /* the polish round (docs/POLISH.md 2.6 item 73; audit-chrome item 31): no ellipsis */
+    now('file.open', 'Open', dialog('Open'), {
+      google: 'Open…',
       key: shortcut('Cmd+O'),
       icon: 'document',
     }),
@@ -993,12 +1011,6 @@ const FILE: Menu = {
         now('file.download.pdf', 'PDF Document (.pdf)', dialog('Download'), {
           doc: 'One slide per page',
         }),
-        /* the product round (docs/PRODUCT.md section 2 rank 8): the two rows above start their
-           download at once; this row opens the whole dialog */
-        now('file.download.options', 'Download options', dialog('Download options'), {
-          turboslide: true,
-          doc: 'The file type and the modes, Include skipped slides and Include speaker notes',
-        }),
         /* docs/FOCUS.md 3.2 parked the text, picture, web page and bundle downloads. The return
            round returns the pictures (with the signed render url of docs/RETURN.md 2.19, since the
            tab answered 401 on production, audit-export rows 22, 23) and the bundle (2.17); the
@@ -1032,6 +1044,14 @@ const FILE: Menu = {
         now('file.download.zip', 'Turboslide bundle (.zip)', action('deck.pack'), {
           turboslide: true,
           doc: 'The file Open and Import slides read',
+        }),
+        /* the product round (docs/PRODUCT.md section 2 rank 8): the format rows start their
+           download at once; this row opens the whole dialog. The polish round (docs/POLISH.md
+           2.6 item 73; audit-chrome item 33) lists it last, after a divider */
+        now('file.download.options', 'Download options', dialog('Download options'), {
+          turboslide: true,
+          dividerBefore: true,
+          doc: 'The file type and the modes, Include skipped slides and Include speaker notes',
         }),
       ],
       /* SPEC-3 6.2: the Download rows follow the export capability (the owner's download switch) */
@@ -1231,13 +1251,13 @@ const VIEW: Menu = {
         'view.guides.addVertical',
         'Add vertical guide',
         action('deck.guides', { add: [{ axis: 'x', at: SHEET_CENTER_X }] }),
-        { doc: 'A guide at the centre of the slide; drag it into place' },
+        { doc: 'A guide at the center of the slide; drag it into place' },
       ),
       now(
         'view.guides.addHorizontal',
         'Add horizontal guide',
         action('deck.guides', { add: [{ axis: 'y', at: SHEET_CENTER_Y }] }),
-        { doc: 'A guide at the centre of the slide; drag it into place' },
+        { doc: 'A guide at the center of the slide; drag it into place' },
       ),
       later('view.guides.edit', 'Edit guides', GUIDES_BY_HAND),
       now('view.guides.clear', 'Clear guides', action('deck.guides', { clear: true }), {
@@ -1371,7 +1391,12 @@ const VIEW: Menu = {
         now('view.appearance.dark', 'Dark', toggle('appearance', 'dark')),
         now('view.appearance.match', 'Match the presentation', toggle('appearance', 'match')),
       ],
-      { turboslide: true, icon: 'swatch' },
+      {
+        turboslide: true,
+        icon: 'swatch',
+        /* docs/POLISH.md 2.9 item 120 (audit-assist item 31): one sentence for the two words */
+        doc: 'Light or dark chrome. Match follows the presentation’s own appearance',
+      },
     ),
   ],
 };
@@ -1607,7 +1632,7 @@ const INSERT: Menu = {
       icon: 'chat',
       when: 'comment',
       enabled: 'canComment',
-      disabledReason: COMMENT_IN_MODE,
+      disabledReason: commentReason,
       doc: 'A comment on the selected object, text or cell, or on the slide',
     }),
     now('insert.newSlide', 'New slide', action('slide.new'), {
@@ -1633,7 +1658,7 @@ const INSERT: Menu = {
     now('insert.shader', 'Shader', action('block.insert'), {
       turboslide: true,
       icon: 'cube',
-      doc: 'A moving shader in your brand kit’s colours; every export carries its still',
+      doc: 'A moving shader in your brand kit’s colors; every export carries its still',
       terms: ['shader', 'material', 'animation', 'gradient', 'motion'],
     }),
   ],
@@ -1686,14 +1711,17 @@ const FORMAT: Menu = {
           turboslide: true,
           enabled: 'textBlockSelected',
           dividerBefore: true,
-          doc: 'The face of the selected text; More fonts lists every face with its licence',
+          doc: 'The face of the selected text; More fonts lists every face with its license',
         }),
         /* the features round (docs/FEATURES.md 3.1 item 4; build/b2.md R1): the Tabular figures row
            opens Format options at its Text section, and the finder terms list it for a seller who
            never heard the word */
-        now('format.text.tabularFigures', 'Tabular figures', panel('Format options'), {
+        /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 40): a check row that
+           toggles the block's numerals instead of opening the panel */
+        now('format.text.tabularFigures', 'Tabular figures', action('block.set'), {
           turboslide: true,
           enabled: 'textBlockSelected',
+          checked: { selection: 'tabularFigures' },
           doc: 'Every digit takes the same width, so numbers line up in a column',
           terms: ['tabular', 'numbers', 'digits', 'line up numbers', 'align numbers'],
         }),
@@ -1710,7 +1738,8 @@ const FORMAT: Menu = {
               enabled: 'textBlockSelected',
             }),
           ],
-          { dividerBefore: true },
+          /* docs/POLISH.md 2.6 item 74 (audit-chrome item 32): the row reads disabled with its two grey rows */
+          { dividerBefore: true, enabled: 'textBlockSelected' },
         ),
         sub(
           'format.text.capitalization',
@@ -2043,7 +2072,7 @@ const FORMAT: Menu = {
     now('format.clearFormatting', 'Clear formatting', action('block.set'), {
       key: shortcut('Cmd+\\', 'Ctrl+\\ or Ctrl+Space'),
       enabled: 'blockSelected',
-      doc: 'Removes the size, weight, colour and border overrides',
+      doc: 'Removes the size, weight, color and border overrides',
     }),
     /* 4.3: on the right-click menus and in Search the menus; Format options carries the sections */
     /* docs/FOCUS.md 3.2, 3.4 parked Alt text, Drop shadow, Change shape, Edit data, Edit HTML and
@@ -2054,9 +2083,9 @@ const FORMAT: Menu = {
     now('format.altText', 'Alt text', panel('Format options'), {
       key: shortcut('Cmd+Option+Y'),
       /* the product round returns Alt text to the default view (docs/PRODUCT.md section 5;
-         docs/RETURN.md question 6's default) */
+         docs/RETURN.md question 6's default); the polish round draws it on the Format menu too
+         (docs/POLISH.md 2.6 item 74; audit-chrome item 39: Google lists it there) */
       enabled: 'blockSelected',
-      contextOnly: true,
       doc: 'The description a screen reader reads',
     }),
     /* docs/FOCUS.md 2.3 lists Text fitting among the Format menu's rows and the matrix row
@@ -2074,7 +2103,7 @@ const FORMAT: Menu = {
       advanced: true,
       enabled: 'blockSelected',
       contextOnly: true,
-      doc: 'Colour, transparency, angle, distance and blur',
+      doc: 'Color, transparency, angle, distance and blur',
     }),
     /* SPEC-2 4.3: the shape and chart right-click menus; Turboslide additions (section 10) */
     now(
@@ -2180,7 +2209,7 @@ const SLIDE: Menu = {
       enabled: 'hasSlide',
       icon: 'photo',
       dividerBefore: true,
-      doc: 'A colour or a picture behind the slide',
+      doc: 'A color or a picture behind the slide',
     }),
     now(
       'slide.applyLayout',
@@ -2197,7 +2226,7 @@ const SLIDE: Menu = {
        colours, faces, logo, footer, slide numbers and frame */
     now('slide.editTheme', 'Edit theme', panel('Brand kit'), {
       dividerBefore: true,
-      doc: 'The colours, faces, logo, footer, slide numbers and frame of this presentation',
+      doc: 'The colors, faces, logo, footer, slide numbers and frame of this presentation',
     }),
     /* docs/FOCUS.md 3.2 parked Change theme; it returns as the appearance switch between the GT
        light and dark appearances (docs/RETURN.md 2.13), the Appearance section of the Brand kit panel */
@@ -2492,7 +2521,9 @@ const TOOLS: Menu = {
     parked(
       sub(
         'tools.advanced',
-        'Advanced',
+        /* docs/POLISH.md 2.9 item 120 (audit-assist item 30): the submenu under Advanced tools is
+           the developer's, so it says so instead of repeating the switch's word */
+        'Developer',
         [
           now('tools.advanced.showSource', 'Show source', toggle('sourceDrawer'), {
             turboslide: true,
@@ -2652,6 +2683,209 @@ export const MENUS: ReadonlyArray<Menu> = [
   HELP,
 ];
 
+/**
+ * A glyph on every menu row (docs/POLISH.md 2.6 item 57; audit-chrome item 25; polish/build/b1.md
+ * R1 names the glyphs, Heroicons 20 solid from icons.tsx). A row that names its own icon keeps
+ * it; the rest read this table by id, a family by its prefix (the dash, line start and line end
+ * rows). The right click menus resolve through the same items, so every target's rows carry a
+ * glyph too.
+ */
+const ROW_ICONS: Readonly<Record<string, IconName>> = {
+  'file.new': 'document-plus',
+  'file.new.presentation': 'document-plus',
+  'file.importSlides': 'arrow-down-on-square',
+  'file.makeCopy': 'document-duplicate',
+  'file.makeCopy.entire': 'document-duplicate',
+  'file.makeCopy.selected': 'document-duplicate',
+  'file.saveAsTemplate': 'swatch',
+  'file.share.withOthers': 'user-group',
+  'file.share.publish': 'external',
+  'file.share.copyLink': 'link',
+  'file.download': 'arrow-down-tray',
+  'file.download.pptx': 'arrow-down-tray',
+  'file.download.odp': 'arrow-down-tray',
+  'file.download.pdf': 'arrow-down-tray',
+  'file.download.txt': 'arrow-down-tray',
+  'file.download.jpg': 'arrow-down-tray',
+  'file.download.png': 'arrow-down-tray',
+  'file.download.svg': 'arrow-down-tray',
+  'file.download.html': 'arrow-down-tray',
+  'file.download.zip': 'arrow-down-tray',
+  'file.download.options': 'cog-6-tooth',
+  'file.rename': 'pencil',
+  'file.versionHistory': 'clock',
+  'file.versionHistory.nameCurrent': 'tag',
+  'file.versionHistory.see': 'clock',
+  'file.printPreview': 'eye',
+  'file.print': 'printer',
+  'file.email': 'envelope',
+  'file.move': 'folder-open',
+  'file.addShortcut': 'folder-plus',
+  'file.approvals': 'check-badge',
+  'file.offline': 'cloud',
+  'file.language': 'language',
+  'edit.undo': 'arrow-uturn-left',
+  'edit.redo': 'arrow-uturn-right',
+  'edit.cut': 'scissors',
+  'edit.copy': 'document-duplicate',
+  'edit.paste': 'clipboard',
+  'edit.pasteWithoutFormatting': 'clipboard-document',
+  'edit.delete': 'trash',
+  'edit.duplicate': 'square-2-stack',
+  'edit.selectAll': 'squares-2x2',
+  'edit.selectNone': 'square-2-stack',
+  'edit.find': 'search',
+  'view.zoom': 'magnifying-glass-plus',
+  'view.zoom.in': 'magnifying-glass-plus',
+  'view.zoom.out': 'magnifying-glass-minus',
+  'view.zoom.fit': 'viewfinder-circle',
+  'view.zoom.50': 'viewfinder-circle',
+  'view.zoom.100': 'viewfinder-circle',
+  'view.zoom.200': 'viewfinder-circle',
+  'view.showRuler': 'bars-2',
+  'view.guides': 'view-columns',
+  'view.snapTo': 'squares-plus',
+  'view.comments': 'chat',
+  'view.showSpeakerNotes': 'document',
+  'view.mode': 'pencil',
+  'view.mode.editing': 'pencil',
+  'view.mode.commenting': 'chat',
+  'view.mode.viewing': 'eye',
+  'view.playShaders': 'play',
+  'view.appearance.light': 'sun',
+  'view.appearance.dark': 'moon',
+  'view.appearance.match': 'computer-desktop',
+  'view.motion': 'film',
+  'view.themeBuilder': 'swatch',
+  'insert.image.stockWeb': 'photo',
+  'insert.image.drivePhotos': 'photo',
+  'insert.image.camera': 'photo',
+  'insert.chart.fromSheets': 'table-cells',
+  'insert.animation': 'play',
+  'insert.placeholder': 'box',
+  'insert.speakerSpotlight': 'user-circle',
+  'insert.templates': 'swatch',
+  'insert.buildingBlocks': 'squares-plus',
+  'insert.wordArt': 'word-art',
+  'format.text.superscript': 'arrow-up-right',
+  'format.text.subscript': 'arrow-down-right',
+  'format.text.font': 'language',
+  'format.text.tabularFigures': 'hashtag',
+  'format.text.size': 'plus',
+  'format.text.size.increase': 'plus',
+  'format.text.size.decrease': 'minus',
+  'format.text.capitalization': 'text',
+  'format.alignIndent': 'bars-3-center-left',
+  'format.spacing': 'bars-arrow-down',
+  'format.spacing.addBefore': 'bars-arrow-up',
+  'format.spacing.addAfter': 'bars-arrow-down',
+  'format.bulletsNumbering': 'list-bullet',
+  'format.table.insertRowAbove': 'squares-plus',
+  'format.table.insertRowBelow': 'squares-plus',
+  'format.table.insertColumnLeft': 'squares-plus',
+  'format.table.insertColumnRight': 'squares-plus',
+  'format.table.deleteRow': 'trash',
+  'format.table.deleteColumn': 'trash',
+  'format.table.deleteTable': 'trash',
+  'format.table.distributeRows': 'arrows-up-down',
+  'format.table.distributeColumns': 'arrows-right-left',
+  'format.table.headerRow': 'table',
+  'format.table.mergeCells': 'arrows-pointing-in',
+  'format.table.unmergeCells': 'table-cells',
+  'format.bordersLines.borderDash': 'line-dash',
+  'format.bordersLines.lineStart': 'line-start',
+  'format.bordersLines.lineEnd': 'line-end',
+  'format.clearFormatting': 'backspace',
+  'format.altText': 'information-circle',
+  'format.chartType.bar': 'chart-bars',
+  'format.chartType.column': 'chart-bars',
+  'format.chartType.line': 'chart-line',
+  'format.chartType.pie': 'chart-pie',
+  'slide.deleteSlide': 'trash',
+  'slide.skipSlide': 'eye-slash',
+  'slide.moveSlide': 'bars-arrow-up',
+  'slide.moveSlide.up': 'bars-arrow-up',
+  'slide.moveSlide.toBeginning': 'bars-arrow-up',
+  'slide.moveSlide.down': 'bars-arrow-down',
+  'slide.moveSlide.toEnd': 'bars-arrow-down',
+  'slide.editTheme': 'swatch',
+  'arrange.order.bringToFront': 'chevron-up',
+  'arrange.order.bringForward': 'chevron-up',
+  'arrange.order.sendBackward': 'chevron-down',
+  'arrange.order.sendToBack': 'chevron-down',
+  'arrange.align.left': 'bars-3-bottom-left',
+  'arrange.align.center': 'bars-3-center-left',
+  'arrange.align.right': 'bars-3-bottom-right',
+  'arrange.align.top': 'bars-3',
+  'arrange.align.middle': 'bars-3',
+  'arrange.align.bottom': 'bars-3',
+  'arrange.distribute': 'arrows-right-left',
+  'arrange.distribute.horizontally': 'arrows-right-left',
+  'arrange.distribute.vertically': 'arrows-up-down',
+  'arrange.centerOnPage': 'viewfinder-circle',
+  'arrange.centerOnPage.horizontally': 'viewfinder-circle',
+  'arrange.centerOnPage.vertically': 'viewfinder-circle',
+  'arrange.rotate.clockwise': 'arrow-path',
+  'arrange.rotate.counterClockwise': 'arrow-uturn-left',
+  'arrange.rotate.flipHorizontally': 'arrows-right-left',
+  'arrange.rotate.flipVertically': 'arrows-up-down',
+  'arrange.ungroup': 'rectangle-group',
+  'arrange.regroup': 'rectangle-group',
+  'tools.preferences': 'cog-6-tooth',
+  'tools.preferences.linkDetection': 'cog-6-tooth',
+  'tools.accessibilitySettings': 'eye',
+  'tools.accessibilitySettings.collaboratorAnnouncements': 'eye',
+  'tools.accessibilitySettings.screenReader': 'eye',
+  'tools.accessibilitySettings.braille': 'eye',
+  'tools.assist': 'sparkles',
+  'tools.advancedTools': 'wrench-screwdriver',
+  'tools.explore': 'search',
+  'tools.linkedObjects': 'link',
+  'tools.dictionary': 'book',
+  'tools.qaHistory': 'chat',
+  'tools.dictateNotes': 'speaker-wave',
+  'help.keyboardShortcuts': 'command-line',
+  'help.improve': 'light-bulb',
+  'help.training': 'academic-cap',
+  'help.updates': 'information-circle',
+  'help.privacyPolicy': 'lock-closed',
+  'help.termsOfService': 'document',
+  /* the rows behind Tools > Advanced tools and the Later stubs: a glyph on those too */
+  'file.pageSetup': 'adjustments',
+  'view.livePointers': 'cursor-arrow-rays',
+  'view.showSections': 'queue-list',
+  'format.image.dither': 'grid',
+  'format.editHtml': 'code',
+  'slide.transition': 'film',
+  'tools.spelling': 'check',
+  'tools.notificationSettings': 'bell',
+  'tools.activityDashboard': 'clock',
+  'tools.advanced.sideBySide': 'columns',
+  'tools.advanced.suggestionMarks': 'sparkles',
+  'tools.advanced.showIds': 'hashtag',
+  'tools.advanced.renderSlide': 'photo',
+  'tools.advanced.sectionsTree': 'queue-list',
+  'tools.advanced.runAction': 'command-line',
+};
+
+/** The glyph of a row: its own, its id's, else its family's (the longest prefix in the table). */
+function rowIconOf(id: string): IconName | undefined {
+  const own = ROW_ICONS[id];
+  if (own !== undefined) return own;
+  for (let cut = id.lastIndexOf('.'); cut > 0; cut = id.lastIndexOf('.', cut - 1)) {
+    const family = ROW_ICONS[id.slice(0, cut)];
+    if (family !== undefined) return family;
+  }
+  return undefined;
+}
+
+for (const menu of MENUS)
+  for (const item of walkItems(menu.items))
+    if (item.icon === undefined) {
+      const icon = rowIconOf(item.id);
+      if (icon !== undefined) item.icon = icon;
+    }
+
 /** Google menus the bar does not carry at all, with the reason. */
 export const OMITTED_MENUS: ReadonlyArray<{ label: string; reason: string }> = [
   {
@@ -2710,6 +2944,7 @@ export const TOOLBAR_HEAD: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'slide.newSlide',
     arrow: 'slide.applyLayout',
+    when: 'canEdit',
     doc: 'The arrow picks a layout for the new slide',
   },
   {
@@ -2719,6 +2954,7 @@ export const TOOLBAR_HEAD: ReadonlyArray<ToolbarControl> = [
     key: shortcut('Cmd+Z'),
     status: 'now',
     item: 'edit.undo',
+    when: 'canEdit',
     enabled: 'canUndo',
   },
   {
@@ -2728,6 +2964,7 @@ export const TOOLBAR_HEAD: ReadonlyArray<ToolbarControl> = [
     key: shortcut('Cmd+Y'),
     status: 'now',
     item: 'edit.redo',
+    when: 'canEdit',
     enabled: 'canRedo',
   },
   {
@@ -2746,6 +2983,7 @@ export const TOOLBAR_HEAD: ReadonlyArray<ToolbarControl> = [
     icon: 'paint-brush',
     key: shortcut('Cmd+Option+C or Cmd+Option+V'),
     status: 'now',
+    when: 'canEdit',
     enabled: 'blockSelected',
     doc: 'Click once to copy the look of the selection, then click the block to paint; double click keeps it armed and Esc disarms',
   },
@@ -2764,7 +3002,8 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
   {
     control: 'toolbar.select',
     label: 'Select',
-    icon: 'cursor-arrow-rays',
+    /* docs/POLISH.md 2.6 item 72: the plain arrow; the pointer toggle keeps the rays */
+    icon: 'cursor-arrow',
     status: 'now',
     dividerBefore: true,
     doc: 'The pointer; a draw tool returns here when it finishes',
@@ -2775,6 +3014,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     icon: 'text',
     status: 'now',
     item: 'insert.textBox',
+    when: 'canEdit',
   },
   {
     control: 'toolbar.insertImage',
@@ -2783,6 +3023,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'insert.image',
     arrow: 'insert.image',
+    when: 'canEdit',
   },
   /* cycle 2: the two buttons left the default view with Insert > Shape and Insert > Line under
      ruling (1) (docs/FOCUS.md section 4, build/b3.md R14); they returned with their rows in the
@@ -2794,6 +3035,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'insert.shape',
     arrow: 'insert.shape',
+    when: 'canEdit',
   },
   {
     control: 'toolbar.insertLine',
@@ -2802,6 +3044,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'insert.line',
     arrow: 'insert.line',
+    when: 'canEdit',
   },
   {
     control: 'toolbar.insertComment',
@@ -2812,7 +3055,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     item: 'insert.comment',
     when: 'comment',
     enabled: 'canComment',
-    disabledReason: COMMENT_IN_MODE,
+    disabledReason: 'Select an object, some text or a slide first',
     doc: 'A comment on the selected object, text or cell, or on the slide',
   },
   {
@@ -2822,8 +3065,9 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'slide.changeBackground',
     enabled: 'hasSlide',
+    when: 'canEdit',
     dividerBefore: true,
-    doc: 'A colour or a picture behind the slide',
+    doc: 'A color or a picture behind the slide',
   },
   {
     control: 'toolbar.layout',
@@ -2832,6 +3076,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'slide.applyLayout',
     arrow: 'slide.applyLayout',
+    when: 'canEdit',
   },
   /* docs/FOCUS.md 3.3 parked Theme, Transition (Later) and Hide the menus; Theme returned with
      Change theme (docs/RETURN.md 2.13) and the Hide the menus chevron returns if its row
@@ -2843,6 +3088,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     text: true,
     status: 'now',
     item: 'slide.changeTheme',
+    when: 'canEdit',
   },
   {
     control: 'toolbar.transition',
@@ -2878,7 +3124,10 @@ export type ContextTarget =
   | 'group'
   | 'chart'
   | 'cellRange'
-  | 'guide';
+  | 'guide'
+  /* the polish round (docs/POLISH.md 2.6 item 71): a right click on a table's ring or padding is
+     the object's menu; a cell inside keeps the cell menu */
+  | 'table';
 
 /**
  * A menu item by id, a divider, or an item (or a divider, `id: DIVIDER`) shown only while a
@@ -2925,7 +3174,8 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     DIVIDER,
     'slide.newSlide',
     'slide.duplicateSlide',
-    'edit.delete',
+    /* docs/POLISH.md 2.6 item 73 (audit-chrome item 49): "Delete slide" on the card as on the sheet */
+    'slide.deleteSlide',
     'slide.skipSlide',
     DIVIDER,
     'slide.changeBackground',
@@ -2971,25 +3221,24 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     DIVIDER,
     'insert.comment',
   ],
+  /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 50): Google's fifteen rows.
+     Add a caption, Use on every slide and Image options stay under Format > Image; Group draws
+     with two objects, Reset image once the picture is edited */
   image: [
     ...OBJECT_CLIPBOARD,
     DIVIDER,
     'arrange.order',
     'arrange.rotate',
-    'arrange.group',
+    { id: 'arrange.group', when: 'canGroup' },
     'arrange.centerOnPage',
     'arrange.align',
     DIVIDER,
     'format.image.replaceImage',
     'format.image.cropImage',
-    /* the product round (docs/PRODUCT.md section 2 rank 10, 4.4): the caption and the kit's logo */
-    'format.image.addCaption',
     'format.image.maskImage',
-    'format.image.resetImage',
-    'format.image.useOnEverySlide',
+    { id: 'format.image.resetImage', when: 'imageEdited' },
     /* SPEC-3 13.2: the picture's Dither toggle sits with the image rows */
     'format.image.dither',
-    'format.image.imageOptions',
     'format.formatOptions',
     'format.altText',
     DIVIDER,
@@ -3058,6 +3307,18 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     DIVIDER,
     'format.editData',
     'format.chartType',
+    'format.formatOptions',
+    'format.altText',
+    DIVIDER,
+    'insert.comment',
+  ],
+  table: [
+    ...OBJECT_CLIPBOARD,
+    DIVIDER,
+    ...OBJECT_ARRANGE,
+    DIVIDER,
+    'format.table',
+    'format.dropShadow',
     'format.formatOptions',
     'format.altText',
     DIVIDER,
@@ -3160,6 +3421,8 @@ export type MenuContext = {
     tableCell: boolean;
     /** the selected table's first row is its header row (`rows[0].header`), read by the Header row check (docs/OBJECTS.md 3.3 item 4) */
     tableHeader?: boolean;
+    /** the selected block's typography reads tabular numerals (the Tabular figures check row; docs/POLISH.md 2.6 item 74) */
+    tabularFigures?: boolean;
     /** the selected run or block carries a link */
     linked: boolean;
     order: { forward: boolean; backward: boolean; front: boolean; back: boolean };
@@ -3396,7 +3659,13 @@ export function evaluate(predicate: MenuPredicate | undefined, ctx: MenuContext)
     case 'follow':
       return hasCapability(ctx, predicate);
     case 'canComment':
-      return hasCapability(ctx, 'comment') && ctx.settings.mode !== 'viewing';
+      return (
+        hasCapability(ctx, 'comment') &&
+        ctx.settings.mode !== 'viewing' &&
+        (selection.blocks > 0 || ctx.focus === 'text' || ctx.focus === 'filmstrip')
+      );
+    case 'canEdit':
+      return hasCapability(ctx, 'write') && (ctx.settings.mode ?? 'editing') === 'editing';
     case 'activity':
       return (
         hasCapability(ctx, 'history') ||
@@ -3588,10 +3857,10 @@ export function itemPath(itemId: string): string[] {
  */
 export function visibleItems(
   items: ReadonlyArray<MenuItem>,
-  options: { contextOnly?: boolean; context?: MenuContext } = {},
+  options: { contextOnly?: boolean; context?: MenuContext; collapseSingles?: boolean } = {},
 ): MenuItem[] {
   const ctx = options.context;
-  return items.filter(
+  const present = items.filter(
     (item) =>
       item.status !== 'omit' &&
       (options.contextOnly === true || item.contextOnly !== true) &&
@@ -3599,6 +3868,27 @@ export function visibleItems(
         (isPresent(item, ctx) &&
           !isEmptyContainer(item, { contextOnly: options.contextOnly, ctx }))),
   );
+  if (ctx === undefined || options.collapseSingles !== true) return present;
+  /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 30): a plain submenu whose
+     visible rows number one draws as that row (Make a copy with Selected slides parked,
+     Preferences, Accessibility settings); the ids stay, so the finder and the drivers read the
+     row by its own id. The menus ask for it (Menu.tsx); the title row's chips and the surfaces
+     that count a container's rows read the table as it is */
+  return present.map((item) => {
+    if (
+      item.items === undefined ||
+      item.effect === undefined ||
+      item.effect.kind !== 'submenu' ||
+      item.effect.dynamic !== undefined
+    )
+      return item;
+    const children = visibleItems(item.items, {
+      contextOnly: options.contextOnly,
+      context: ctx,
+      collapseSingles: true,
+    });
+    return children.length === 1 && children[0] !== undefined ? children[0] : item;
+  });
 }
 
 /** True for a plain submenu row whose children are all absent in the context. */

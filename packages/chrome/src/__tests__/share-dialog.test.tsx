@@ -903,7 +903,9 @@ describe('the two stages of the Share dialog (product round)', () => {
     expect(accessSentence('link', 'viewer', 'shadow')).toBe(
       'Anyone with the link can open it and cannot change it',
     );
-    expect(accessSentence('restricted', 'viewer', 'shadow')).toBe('Only you can open this presentation');
+    expect(accessSentence('restricted', 'viewer', 'shadow')).toBe(
+      'Only you can open this presentation',
+    );
     expect(accessSentence('restricted', 'viewer', 'enforce')).toBe(
       'Only you can open this presentation',
     );

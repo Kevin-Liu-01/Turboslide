@@ -286,7 +286,9 @@ export function ImportSlidesDialog() {
                   doc: 'A Turboslide bundle (.zip); its slides are listed next',
                 })}
               >
-                <span className="pt-lb">{busy ? 'Uploading' : 'Select a file from your device'}</span>
+                <span className="pt-lb">
+                  {busy ? 'Uploading' : 'Select a file from your device'}
+                </span>
               </button>
             </div>
           )}

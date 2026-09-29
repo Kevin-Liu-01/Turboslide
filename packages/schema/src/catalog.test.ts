@@ -81,8 +81,9 @@ describe('the block catalog', () => {
     // placeholder makes a line rather than ending the session
     expect(isMultilineType('paragraph', '/text')).toBe(true);
     expect(isMultilineType('box', '/text')).toBe(true);
-    // a title's heading and a statement's big are headings, single line: Enter ends the session
-    expect(isMultilineType('heading', '/text')).toBe(false);
+    // a title's heading and a statement's big are headings, multiline since the polish round
+    // (docs/POLISH.md 2.3 item 19): Enter breaks the line, as Google's title placeholder does
+    expect(isMultilineType('heading', '/text')).toBe(true);
     // an unknown type or a pointer the type does not take is not multiline
     expect(isMultilineType('mark', '/text')).toBe(false);
     expect(isMultilineType('paragraph', '/notes')).toBe(false);
@@ -158,7 +159,8 @@ describe('the action table', () => {
     // 69 Heroicons plus gt-mark: M5 added lock-closed (slide 83), the editor depth round the three
     // bars glyphs of the arrange bar's align buttons, the Google Slides parity round three bell and
     // inbox for the inbox plate and Notification settings (merge 1, build-3/b6.md request 2)
-    expect(ICON_NAMES).toHaveLength(70);
-    expect(new Set(ICON_NAMES).size).toBe(70);
+    // the polish round adds cursor-arrow-rays and arrow-down-tray for the home page's sections
+    expect(ICON_NAMES).toHaveLength(72);
+    expect(new Set(ICON_NAMES).size).toBe(72);
   });
 });

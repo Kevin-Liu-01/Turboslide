@@ -373,7 +373,8 @@ export const assetSchema = z.strictObject({
     snap: ASSET_ROLES,
     group: 'Asset',
   }),
-  alt: annotate(z.string().min(1), { label: 'Alt text', control: 'textarea', group: 'Asset' }),
+  /* the polish round (docs/POLISH.md 2.5 item 45): a description may start empty, as Google's does */
+  alt: annotate(z.string(), { label: 'Alt text', control: 'textarea', group: 'Asset' }),
   kind: z.literal('svg').optional(),
   vector: assetTwinsSchema.optional(),
   twins: assetTwinsSchema,

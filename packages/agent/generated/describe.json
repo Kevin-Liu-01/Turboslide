@@ -780,7 +780,7 @@
     },
     "text.style": {
       "label": "Text style",
-      "doc": "Marks a range of a Text italic, underlined, struck, superscript or subscript, or gives it a text or highlight colour (true sets, false clears, null clears a colour), as one text.replace of the whole Text; the output returns the new markup.",
+      "doc": "Marks a range of a Text italic, underlined, struck, superscript or subscript, gives it a text or highlight colour, or a size in pixels (true sets, false clears, null clears a colour or the size), as one text.replace of the whole Text; the output returns the new markup.",
       "mutates": true,
       "milestone": "GS2",
       "group": "block"

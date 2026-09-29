@@ -33,7 +33,7 @@ const CARD_ORDER = [
   '-',
   'New slide',
   'Duplicate slide',
-  'Delete',
+  'Delete slide',
   'Skip slide',
   '-',
   'Change background',

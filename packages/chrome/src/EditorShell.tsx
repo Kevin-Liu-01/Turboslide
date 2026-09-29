@@ -805,7 +805,11 @@ export function EditorShell({
         })
         .catch((error: unknown) => {
           /* a refused download is one sentence (item 82): the cause stays in the console */
-          if (plan.action === 'render.slide' || plan.action === 'deck.pack' || plan.action === 'build.run') {
+          if (
+            plan.action === 'render.slide' ||
+            plan.action === 'deck.pack' ||
+            plan.action === 'build.run'
+          ) {
             console.error(`turboslide download: ${plan.action} was refused`, error);
             say(
               DOWNLOAD_WORDS.notMade(

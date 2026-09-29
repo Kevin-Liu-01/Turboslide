@@ -100,12 +100,7 @@ export const KEPT_ELEMENTS: ReadonlySet<string> = new Set([
 const TEXT_ELEMENTS: ReadonlySet<string> = new Set(['text', 'tspan', 'textPath']);
 
 /** The elements whose drop changes the look (4.7), beside a subtree that holds a shape. */
-const DRAWING_DROPS: ReadonlySet<string> = new Set([
-  'image',
-  'foreignObject',
-  'marker',
-  'switch',
-]);
+const DRAWING_DROPS: ReadonlySet<string> = new Set(['image', 'foreignObject', 'marker', 'switch']);
 
 /** The elements whose drop changes nothing drawn: metadata, links, scripts, media, animation, an editor's namespaces. */
 const SILENT_DROPS: ReadonlySet<string> = new Set([

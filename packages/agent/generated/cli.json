@@ -988,7 +988,7 @@
           "flag": "--id",
           "type": "string",
           "required": false,
-          "description": "The slide id; <layout>-<n> with the first free n when absent"
+          "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/POLISH.md 2.8 item 99)"
         },
         {
           "key": "baseRevision",
@@ -2013,7 +2013,7 @@
     },
     {
       "action": "text.style",
-      "usage": "turboslide text style <slideId>#<blockId> <path> --range <range> --italic --underline --strike --superscript --subscript --color <color> --highlight <highlight>",
+      "usage": "turboslide text style <slideId>#<blockId> <path> --range <range> --italic --underline --strike --superscript --subscript --color <color> --highlight <highlight> --size <px>",
       "command": [
         "text",
         "style"
@@ -2053,6 +2053,10 @@
         {
           "flag": "--highlight",
           "template": "<highlight>"
+        },
+        {
+          "flag": "--size",
+          "template": "<px>"
         }
       ],
       "mutates": true,

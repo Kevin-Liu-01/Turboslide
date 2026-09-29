@@ -348,7 +348,13 @@ describe('placeInsert, the polish round', () => {
 
   it('still shrinks a chart to the room on both axes and skips a rectangle under the minimum', () => {
     const tall = canvas([
-      { id: 'h', type: 'heading', level: 'h2', text: 'Two lines', pos: { x: CX, y: CY, w: CW, h: 120 } },
+      {
+        id: 'h',
+        type: 'heading',
+        level: 'h2',
+        text: 'Two lines',
+        pos: { x: CX, y: CY, w: CW, h: 120 },
+      },
     ]);
     const chart = placeInsert(tall, 'chart', [960, 540]);
     expect(chart.pos.h).toBe(bodyRect(tall).h);

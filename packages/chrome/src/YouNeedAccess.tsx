@@ -174,7 +174,6 @@ export function YouNeedAccess({
         </form>
       ) : null}
       <section className="ts-access-signin" aria-label="Sign in" data-control="access.signIn">
-        <p className="ts-access-invited">{ACCESS_PAGE.invited}</p>
         <div className="ts-access-signin-form">{signIn}</div>
       </section>
     </main>

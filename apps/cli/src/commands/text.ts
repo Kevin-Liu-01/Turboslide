@@ -39,7 +39,7 @@ const USAGE = `usage: turboslide text <replace|style|case|insert|list|spacing|co
                                     every occurrence in the deck's visible text and the notes (text.replaceAll)
   text style <slideId>#<blockId> <pointer> --range <start:end> [--italic|--no-italic] [--underline|--no-underline]
              [--strike|--no-strike] [--superscript|--no-superscript] [--subscript|--no-subscript]
-             [--color <color>|--no-color] [--highlight <color>|--no-highlight]
+             [--color <color>|--no-color] [--highlight <color>|--no-highlight] [--size <px>|--no-size]
                                     marks and colours on a range of the Text (text.style)
   text case <slideId>#<blockId> <pointer> --range <start:end> lower|upper|title
                                     the characters of the range rewritten (text.case)
@@ -164,6 +164,14 @@ async function style(ctx: CommandContext): Promise<number> {
     if (value !== undefined) marks[key] = value;
     else if (flagBoolean(ctx.args, `no-${key}`)) marks[key] = null;
   }
+  /* the polish round (docs/POLISH.md 2.3 item 16): the range's size in pixels, --no-size clears it */
+  const size = flagString(ctx.args, 'size');
+  if (size !== undefined) {
+    const px = Number(size);
+    if (!Number.isInteger(px) || px < 6 || px > 200)
+      throw new UsageError(`--size wants a whole number of pixels from 6 to 200\n${USAGE}`);
+    (marks as Record<string, unknown>).size = px;
+  } else if (flagBoolean(ctx.args, 'no-size')) marks.size = null;
   if (Object.keys(marks).length === 0)
     throw new UsageError(`text style wants at least one mark flag\n${USAGE}`);
   const store = openStore(ctx);

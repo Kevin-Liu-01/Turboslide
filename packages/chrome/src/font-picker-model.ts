@@ -266,9 +266,7 @@ export function groupRows(
   if (recentRows.length > 0)
     groups.push({ id: 'recent', title: FONT_PICKER.recent, rows: recentRows });
   for (const category of FONT_CATEGORIES) {
-    const inCategory = shown.filter(
-      (row) => row.category === category && !brand.includes(row.id),
-    );
+    const inCategory = shown.filter((row) => row.category === category && !brand.includes(row.id));
     if (inCategory.length > 0)
       groups.push({ id: category, title: FONT_CATEGORY_LABELS[category], rows: inCategory });
   }

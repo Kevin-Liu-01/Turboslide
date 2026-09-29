@@ -116,6 +116,9 @@ export function contextMenuLabel(target: ContextTarget): string {
       return 'Chart menu';
     case 'guide':
       return 'Guide menu';
+    /* the polish round (docs/POLISH.md 2.6 item 71): the table's frame is the object's menu */
+    case 'table':
+      return 'Object menu';
   }
 }
 

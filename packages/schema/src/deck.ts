@@ -526,7 +526,8 @@ export const titleSlideSchema = z.strictObject({
   ...slideBase,
   kind: z.literal('title'),
   mark: markSizeSchema,
-  heading: annotate(textSchema, { label: 'Heading', control: 'text', group: 'Text' }),
+  /* the title placeholder takes paragraph breaks too since the polish round (docs/POLISH.md 2.3 item 19) */
+  heading: annotate(multilineTextSchema, { label: 'Heading', control: 'textarea', group: 'Text' }),
   /* the subtitle placeholder takes paragraph breaks like Google's, so Enter in it makes a line
      rather than ending the session (build-4/hotfix-4.md cause W4); a one line lead is one
      paragraph, so every existing deck validates and renders byte for byte */

@@ -169,7 +169,13 @@ describe('a preset on the sheet', () => {
     expect(paths(curve)[0]).toContain('d="M0.5,0.5 C0.5,80.5 239.5,80.5 239.5,159.5"');
     /* the bend runs along y; the decorations point up at the start and down at the end */
     const headed = renderBlock(
-      shape({ shape: 'elbow', axis: 'vertical', bend: 0.25, lineStart: 'fillArrow', lineEnd: 'fillArrow' }),
+      shape({
+        shape: 'elbow',
+        axis: 'vertical',
+        bend: 0.25,
+        lineStart: 'fillArrow',
+        lineEnd: 'fillArrow',
+      }),
       context(),
     );
     expect(paths(headed)[0]).toContain('V40.5 H239.5');

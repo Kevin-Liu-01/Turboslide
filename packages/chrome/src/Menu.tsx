@@ -313,7 +313,7 @@ function MenuList({
 
   /* a row a role cannot use is absent, never disabled (SPEC-3 13.4) */
   const visible = useMemo(
-    () => visibleItems(items, { contextOnly: includeContextOnly, context }),
+    () => visibleItems(items, { contextOnly: includeContextOnly, context, collapseSingles: true }),
     [items, includeContextOnly, context],
   );
   const enabled = useMemo(

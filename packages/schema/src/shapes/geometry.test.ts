@@ -274,7 +274,9 @@ describe('the arcs in a scaled path space (the polish round, docs/POLISH.md item
       const last = parsed.arcs[parsed.arcs.length - 1];
       if (start === undefined || last === undefined) throw new Error('no arcs');
       /* the file's own rounding leaves 140 of 43200 units between the chain's end and its start */
-      expect(Math.hypot(last.x2 - start.x, last.y2 - start.y), `${w}x${h}`).toBeLessThanOrEqual(1.5);
+      expect(Math.hypot(last.x2 - start.x, last.y2 - start.y), `${w}x${h}`).toBeLessThanOrEqual(
+        1.5,
+      );
       expect(outline.d.endsWith('Z')).toBe(true);
     }
   });

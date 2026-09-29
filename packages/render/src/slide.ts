@@ -301,7 +301,8 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
             ? { 'data-block': 'heading', 'data-type': 'heading', 'data-run': 'heading/text' }
             : {}),
         },
-        renderTextOrPrompt(slide.heading, ctx, undefined, '/heading'),
+        /* the title placeholder takes paragraph breaks since the polish round (docs/POLISH.md 2.3 item 19) */
+        renderMultiline(slide.heading, ctx, undefined, '/heading'),
       );
       const lead = el(
         'p',

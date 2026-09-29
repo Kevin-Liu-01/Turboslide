@@ -8,12 +8,7 @@ import type { TableBlock } from '@turboslide/schema/blocks/table';
 import { emptyTable } from '@turboslide/schema/blocks/table';
 import type { BlockContext } from '../blocks/context.ts';
 import { renderBlock } from '../blocks/render-block.ts';
-import {
-  TABLE_CELL_PROMPT,
-  renderTable,
-  tableColumnsTemplate,
-  tableRowsTemplate,
-} from '../blocks/table.ts';
+import { renderTable, tableColumnsTemplate, tableRowsTemplate } from '../blocks/table.ts';
 
 function context(extra: Partial<BlockContext> = {}): BlockContext {
   return {
@@ -183,9 +178,8 @@ describe('renderTable', () => {
   });
 
   it('writes no prompt words into a cell (docs/POLISH.md 2.1 item 1; the stage draws none since the polish round)', () => {
-    expect(TABLE_CELL_PROMPT).toBe('Type to add text');
     expect(renderTable(emptyTable('t', 1, 1), context({ live: true }))).not.toContain(
-      TABLE_CELL_PROMPT,
+      'Type to add text',
     );
   });
 

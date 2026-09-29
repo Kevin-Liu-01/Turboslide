@@ -27,7 +27,9 @@ export function paraSpacingDeclarations(typography: Typography | undefined): str
 }
 
 export function renderHeading(block: BlockOf<'heading'>, ctx: BlockContext): string {
-  const text = renderTextOrPrompt(block.text, ctx, block, '/text');
+  /* one of the multiline pointers since the polish round (docs/POLISH.md 2.3 item 19): a
+     paragraph break is one .para span each; a one paragraph heading renders as before */
+  const text = renderMultiline(block.text, ctx, block, '/text');
   const inline = style(
     block.marginTop !== undefined && `margin-top:${block.marginTop}px`,
     block.marginBottom !== undefined && `margin-bottom:${block.marginBottom}px`,

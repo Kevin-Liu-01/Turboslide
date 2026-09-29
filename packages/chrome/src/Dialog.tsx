@@ -130,7 +130,8 @@ export function recentMenuRow(): string | null {
  */
 export function focusableIn(root: HTMLElement): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-    (el) => el.getAttribute('aria-hidden') !== 'true' && !el.hidden && !insideClosedDetails(el, root),
+    (el) =>
+      el.getAttribute('aria-hidden') !== 'true' && !el.hidden && !insideClosedDetails(el, root),
   );
 }
 

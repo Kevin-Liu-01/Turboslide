@@ -237,7 +237,12 @@ export function parseMarks(list: string): RunMarks | null {
     const value = token.slice(2);
     if (kind === 'z') {
       const size = Number(value);
-      if (!/^\d+$/.test(value) || !Number.isInteger(size) || size < MIN_RUN_SIZE || size > MAX_RUN_SIZE)
+      if (
+        !/^\d+$/.test(value) ||
+        !Number.isInteger(size) ||
+        size < MIN_RUN_SIZE ||
+        size > MAX_RUN_SIZE
+      )
         return null;
       marks.size = size;
       continue;

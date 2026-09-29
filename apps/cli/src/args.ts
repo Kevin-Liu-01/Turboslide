@@ -137,6 +137,8 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'blur',
   'range',
   'highlight',
+  /* the polish round (docs/POLISH.md 2.3 item 16): text style --size <px> */
+  'size',
   'marker',
   'items',
   'level',

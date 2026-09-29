@@ -169,7 +169,9 @@ describe('the sanitizer (4.7)', () => {
       `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M0 0h8v8z" fill="#000"/><text x="2" y="20" font-family="Inter" font-weight="600">Acme<tspan dx="2">Corp</tspan></text></svg>`,
     );
     /* the polish round keeps the words (docs/POLISH.md item 32; audit-objects item 15) */
-    expect(kept.svg).toContain('<text x="2" y="20" font-family="Inter" font-weight="600">Acme<tspan dx="2">Corp</tspan></text>');
+    expect(kept.svg).toContain(
+      '<text x="2" y="20" font-family="Inter" font-weight="600">Acme<tspan dx="2">Corp</tspan></text>',
+    );
     expect(kept.removed).toEqual([]);
     expect(kept.draws).toBe(false);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M0 0h8v8z" fill="#000"/><foreignObject x="2" y="20" width="40" height="20"><div>Acme</div></foreignObject></svg>`;

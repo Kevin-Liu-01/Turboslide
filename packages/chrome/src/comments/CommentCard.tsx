@@ -436,7 +436,8 @@ export function CommentCard({
     else {
       /* a resolve closes the card and says so with Undo (docs/POLISH.md item 98; audit-pages
          item 42: the tick turned into an arrow and the card stayed open with no word) */
-      const settle = assigned && comments.done ? comments.done(thread.id) : comments.resolve?.(thread.id);
+      const settle =
+        assigned && comments.done ? comments.done(thread.id) : comments.resolve?.(thread.id);
       run(
         settle?.then(() => {
           setSettled('resolved');

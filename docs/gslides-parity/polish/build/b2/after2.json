@@ -18,21 +18,9 @@
       "z": 2
     },
     "rows": [
-      [
-        "",
-        "",
-        ""
-      ],
-      [
-        "Alpha",
-        "Beta",
-        "Gamma"
-      ],
-      [
-        "",
-        "",
-        ""
-      ]
+      ["", "", ""],
+      ["Alpha", "Beta", "Gamma"],
+      ["", "", ""]
     ]
   },
   {
@@ -50,21 +38,9 @@
     },
     "s1": "after2-01-row-head-clicked.png",
     "cells": [
-      [
-        "",
-        "",
-        ""
-      ],
-      [
-        "",
-        "",
-        ""
-      ],
-      [
-        "",
-        "",
-        ""
-      ]
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""]
     ],
     "s2": "after2-02-row-head-delete-key.png"
   },
@@ -73,38 +49,14 @@
     "step": "S Cmd+Z, click row 2 head, Cmd+B",
     "at": "2026-09-28T22:45:16.016Z",
     "restored": [
-      [
-        "",
-        "",
-        ""
-      ],
-      [
-        "Alpha",
-        "Beta",
-        "Gamma"
-      ],
-      [
-        "",
-        "",
-        ""
-      ]
+      ["", "", ""],
+      ["Alpha", "Beta", "Gamma"],
+      ["", "", ""]
     ],
     "cells": [
-      [
-        "",
-        "",
-        ""
-      ],
-      [
-        "*Alpha*",
-        "*Beta*",
-        "*Gamma*"
-      ],
-      [
-        "",
-        "",
-        ""
-      ]
+      ["", "", ""],
+      ["*Alpha*", "*Beta*", "*Gamma*"],
+      ["", "", ""]
     ],
     "active": "div",
     "shot": "after2-03-row-head-cmd-b.png"
@@ -133,11 +85,7 @@
     "at": "2026-09-28T22:45:23.949Z",
     "tail": true,
     "option": null,
-    "columns": [
-      {},
-      {},
-      {}
-    ],
+    "columns": [{}, {}, {}],
     "shot": "after2-04-header-range-center.png"
   },
   {

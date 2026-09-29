@@ -1182,8 +1182,8 @@ export function ToolbarTail() {
                         : control.control === 'toolbar.insertShape'
                           ? 'Shapes, arrows, callouts and equation symbols'
                           : control.control === 'toolbar.insertImage'
-                          ? 'Upload from computer, By URL or a picture of this presentation'
-                          : 'Another style'),
+                            ? 'Upload from computer, By URL or a picture of this presentation'
+                            : 'Another style'),
                 })}
               >
                 <Icon name="chevron-down" />
@@ -1467,7 +1467,8 @@ function FontSizeField({ control, block }: { control: TailControl; block: Block 
       );
       if (next > ceiling) shell.say(`A table's text is ${ceiling} px at most`);
       else if (next < floor) shell.say(`A table's text is ${floor} px at least`);
-      else if (step !== next) shell.say(`Font size ${step}: the nearest step of the table's ladder`);
+      else if (step !== next)
+        shell.say(`Font size ${step}: the nearest step of the table's ladder`);
       shell.input
         .dispatch('block.set', {
           slideId: shell.input.slideId,

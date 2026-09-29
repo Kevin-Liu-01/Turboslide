@@ -142,7 +142,9 @@ describe('the Brand group', () => {
     /* a used or recent face keeps its category row, so the catalog reads whole */
     const used = groupRows(ROWS, ['lora'], '', ['inter'], ['roboto']);
     expect(used.find((group) => group.id === 'serif')?.rows.map((row) => row.id)).toContain('lora');
-    expect(used.find((group) => group.id === 'sans')?.rows.map((row) => row.id)).toContain('roboto');
+    expect(used.find((group) => group.id === 'sans')?.rows.map((row) => row.id)).toContain(
+      'roboto',
+    );
   });
 });
 

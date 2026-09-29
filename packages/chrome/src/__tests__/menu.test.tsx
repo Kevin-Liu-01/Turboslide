@@ -30,7 +30,18 @@ const ITEMS: MenuItem[] = assignAccessKeys([
     doc: 'Two more rows',
     effect: { kind: 'submenu' },
     items: [
-      { id: 'edit.more.alpha', label: 'Alpha', status: 'now', effect: { kind: 'client', handler: 'copy' } },
+      {
+        id: 'edit.more.alpha',
+        label: 'Alpha',
+        status: 'now',
+        effect: { kind: 'client', handler: 'copy' },
+      },
+      {
+        id: 'edit.more.beta',
+        label: 'Beta',
+        status: 'now',
+        effect: { kind: 'client', handler: 'copy' },
+      },
     ],
   },
   {
@@ -199,8 +210,19 @@ describe('the glyphs (item 57)', () => {
     for (const name of named) expect(ICON_NAMES, name).toContain(name);
   });
 
-  it.todo(
-    'draws a glyph on every row of the ten menus and the eight right click menus (a read of the model; flips when polish/build/b1.md R1 lands in menus/model.ts): ' +
-      `${[...MENUS.flatMap((menu) => walkItems(menu.items)), ...Object.values(CONTEXT_MENUS).flat().filter((id): id is string => typeof id === 'string' && id !== '-').map((id) => itemById(id))].filter((item) => item.status !== 'omit' && item.status !== 'later' && item.advanced !== true && item.icon === undefined).length} rows without one today`,
-  );
+  it('draws a glyph on every row of the ten menus and every right click menu (a read of the model; polish/build/b1.md R1 landed in menus/model.ts)', () => {
+    const rows = [
+      ...MENUS.flatMap((menu) => walkItems(menu.items)),
+      ...Object.values(CONTEXT_MENUS)
+        .flat()
+        .map((entry) => (typeof entry === 'string' ? entry : entry.id))
+        .filter((id) => id !== '-')
+        .map((id) => itemById(id)),
+    ];
+    const without = rows
+      .filter((item) => item.status !== 'omit' && item.icon === undefined)
+      .map((item) => item.id);
+    expect(without).toEqual([]);
+    for (const item of rows) if (item.icon !== undefined) expect(ICON_NAMES).toContain(item.icon);
+  });
 });

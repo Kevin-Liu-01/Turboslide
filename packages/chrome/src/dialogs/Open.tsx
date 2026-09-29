@@ -171,7 +171,8 @@ export function OpenDialog() {
                   >
                     <span className="ts-dialog-row-title">{deck.title}</span>
                     <span className="ts-dialog-row-meta">
-                      {deck.slides} slide{deck.slides === 1 ? '' : 's'} · {formatWhen(deck.updatedAt)}
+                      {deck.slides} slide{deck.slides === 1 ? '' : 's'} ·{' '}
+                      {formatWhen(deck.updatedAt)}
                     </span>
                   </button>
                 </li>

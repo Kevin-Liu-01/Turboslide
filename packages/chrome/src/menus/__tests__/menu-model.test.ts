@@ -1106,10 +1106,18 @@ describe('the role predicates of SPEC-3 13.4', () => {
       'rename',
       'trash',
       'follow',
-      'canComment',
       'activity',
     ] as const)
       expect(evaluate(predicate, DEFAULT_MENU_CONTEXT), predicate).toBe(true);
+    /* docs/POLISH.md 2.6 item 66: Comment waits for an object, a text range or a slide card */
+    expect(evaluate('canComment', DEFAULT_MENU_CONTEXT)).toBe(false);
+    expect(evaluate('canComment', { ...DEFAULT_MENU_CONTEXT, focus: 'filmstrip' })).toBe(true);
+    expect(
+      evaluate('canComment', {
+        ...DEFAULT_MENU_CONTEXT,
+        selection: { ...DEFAULT_MENU_CONTEXT.selection, blocks: 1 },
+      }),
+    ).toBe(true);
     expect(evaluate('viewOnly', DEFAULT_MENU_CONTEXT)).toBe(false);
     expect(evaluate('signedIn', DEFAULT_MENU_CONTEXT)).toBe(false);
     expect(evaluate('canSignIn', DEFAULT_MENU_CONTEXT)).toBe(false);
@@ -1216,7 +1224,13 @@ describe('the role predicates of SPEC-3 13.4', () => {
     expect(visibleItems(insert.items, { context: commenter }).map((item) => item.id)).toEqual([
       'insert.comment',
     ]);
-    expect(isEnabled(itemById('insert.comment'), commenter)).toBe(true);
+    expect(isEnabled(itemById('insert.comment'), commenter)).toBe(false);
+    expect(
+      isEnabled(itemById('insert.comment'), {
+        ...commenter,
+        selection: { ...commenter.selection, blocks: 1 },
+      }),
+    ).toBe(true);
     /* View > Mode returned with the view rows (docs/RETURN.md 2.16) and follows the role alone;
        Notification settings and the Activity dashboard stay parked (docs/FOCUS.md 3.2; RETURN.md
        2.16, section 8): their role rules are asserted with the switch on, their absence with it off */
@@ -1294,6 +1308,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
     );
     const commenting = {
       ...DEFAULT_MENU_CONTEXT,
+      focus: 'filmstrip' as const,
       settings: { ...DEFAULT_MENU_CONTEXT.settings, mode: 'commenting' },
     };
     expect(isEnabled(itemById('insert.comment'), commenting)).toBe(true);
@@ -1392,6 +1407,10 @@ describe('every Google item of R01', () => {
         paths.add([menu.menu, ...entry.path, entry.label].join(' > ').toLowerCase());
     /* R01 describes this submenu by reference ("the same sources as Insert > Image"), so its children are checked under Insert > Image */
     const byReference = new Set(['format.image.replaceImage']);
+    /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 39): Google's Format menu
+       lists Alt text under Format options, which R01's table recorded on the right click menus
+       alone; the row draws in the menu bar as Google's does */
+    const polishRows = new Set(['format.altText']);
     const check = (
       menuLabel: string,
       items: ReadonlyArray<MenuItem>,
@@ -1400,7 +1419,8 @@ describe('every Google item of R01', () => {
     ) => {
       for (const item of items) {
         const here = [...path, item.google ?? item.label];
-        const own = ours || item.turboslide === true || item.contextOnly === true;
+        const own =
+          ours || item.turboslide === true || item.contextOnly === true || polishRows.has(item.id);
         if (!own) {
           expect(
             paths.has([menuLabel, ...here].join(' > ').toLowerCase()),
@@ -1969,7 +1989,7 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
       '-',
       'New slide',
       'Duplicate slide',
-      'Delete',
+      'Delete slide',
       'Skip slide',
       '-',
       'Change background',
@@ -3008,7 +3028,9 @@ describe('the features round, ship one: the Logo rows and the Tabular figures ro
     expect(listed('line up numbers')).toContain('format.text.tabularFigures');
     const row = itemById('format.text.tabularFigures');
     expect(row.status).toBe('now');
-    expect(row.effect).toEqual({ kind: 'panel', title: 'Format options' });
+    /* the polish round (docs/POLISH.md 2.6 item 74): a check row over the block's numerals */
+    expect(row.effect).toEqual({ kind: 'action', id: 'block.set' });
+    expect(row.checked).toEqual({ selection: 'tabularFigures' });
     expect(row.enabled).toBe('textBlockSelected');
     expect(tooltipDoc(row, OFF)).toBe(
       'Every digit takes the same width, so numbers line up in a column',
@@ -3153,6 +3175,7 @@ describe('the vector round: the seven Shape rows, the icons on the visual rows, 
       'format.chartType': 'chart-bar',
     };
     for (const [id, icon] of Object.entries(expected)) expect(itemById(id).icon, id).toBe(icon);
+    /* the polish round (docs/POLISH.md 2.6 item 57): the rows that named a setting by a word carry a glyph too */
     for (const id of [
       'format.text.font',
       'format.text.size',
@@ -3161,7 +3184,7 @@ describe('the vector round: the seven Shape rows, the icons on the visual rows, 
       'format.clearFormatting',
       'format.altText',
     ])
-      expect(itemById(id).icon, `${id} stays a word`).toBeUndefined();
+      expect(itemById(id).icon, `${id} carries a glyph`).toBeDefined();
   });
 
   it('unflags Change shape and Mask image, on the shape and picture menus in the default view', () => {

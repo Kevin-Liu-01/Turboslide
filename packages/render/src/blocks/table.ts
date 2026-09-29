@@ -67,7 +67,7 @@ export const TABLE_DEFAULT_BORDER: TableBorderWeight = 1;
  * exported only while packages/viewer Editor.tsx `promptHoveredCell` imports it; it leaves with
  * that hunk (build/b2.md, the request to B1).
  */
-export const TABLE_CELL_PROMPT = 'Type to add text';
+/* the polish round (docs/POLISH.md 2.1 item 1): a table cell draws no prompt; the words left with the stage's last reader */
 
 /**
  * The row tracks of the table's grid: `auto` for a row with no set height, so its floor is its

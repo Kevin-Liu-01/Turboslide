@@ -1266,7 +1266,6 @@ function plainOf(text: Markup): string {
     .join('\n');
 }
 
-
 /** The four arrows as the direction a cell session leaves in (docs/FEATURES.md 2.2 rank 5). */
 export type CellArrow = 'left' | 'right' | 'up' | 'down';
 
@@ -2319,8 +2318,7 @@ export function InlineText({
       if (parked.current && !done.current && !insideEditable) {
         const inPopover =
           e.target instanceof Node && (popover.current?.contains(e.target) ?? false);
-        if (!inPopover && !isTransientTarget(e.target) && !isParkingField(e.target))
-          finish('blur');
+        if (!inPopover && !isTransientTarget(e.target) && !isParkingField(e.target)) finish('blur');
       }
     };
     /* the same end on the pointer event, which the browser fires before the mouse event: the
@@ -2472,7 +2470,8 @@ export function InlineText({
     const above = anchor[1] * k - height - POPOVER_GAP;
     const fitsBelow = stage === undefined || stage.top + below + height <= window.innerHeight - 8;
     const top = fitsBelow || above < 0 ? below : above;
-    const room = stage === undefined ? Number.POSITIVE_INFINITY : window.innerWidth - 8 - stage.left;
+    const room =
+      stage === undefined ? Number.POSITIVE_INFINITY : window.innerWidth - 8 - stage.left;
     const left = Math.max(0, Math.min(anchor[0] * k, room - width));
     return { left, top };
   };

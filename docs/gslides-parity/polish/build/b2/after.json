@@ -42,11 +42,7 @@
     "cellRing": null,
     "rangeRing": null,
     "editing": false,
-    "rowH": [
-      38.1,
-      38.1,
-      38.1
-    ],
+    "rowH": [38.1, 38.1, 38.1],
     "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row0Font": "20px"
@@ -70,11 +66,7 @@
     "cellRing": null,
     "rangeRing": null,
     "editing": false,
-    "rowH": [
-      38.1,
-      38.1,
-      38.1
-    ],
+    "rowH": [38.1, 38.1, 38.1],
     "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row0Font": "20px",
@@ -118,11 +110,7 @@
       "rangeRing": null,
       "chip": "Table",
       "editing": true,
-      "rowH": [
-        38.1,
-        38.1,
-        38.1
-      ],
+      "rowH": [38.1, 38.1, 38.1],
       "row0Rule": "1px solid rgb(7, 7, 7)",
       "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
       "row0Font": "20px"
@@ -146,21 +134,13 @@
       "cellRing": null,
       "rangeRing": null,
       "editing": false,
-      "rowH": [
-        38.1,
-        38.1,
-        38.1
-      ],
+      "rowH": [38.1, 38.1, 38.1],
       "row0Rule": "1px solid rgb(7, 7, 7)",
       "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
       "row0Font": "20px"
     },
     "s2": "after-04-3x3-header-north-escaped.png",
-    "cells": [
-      "North",
-      "",
-      ""
-    ]
+    "cells": ["North", "", ""]
   },
   {
     "n": 5,
@@ -191,18 +171,7 @@
     "cellRing": null,
     "rangeRing": null,
     "editing": false,
-    "rowH": [
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1
-    ],
+    "rowH": [38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1],
     "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row0Font": "20px"
@@ -211,18 +180,7 @@
     "n": 6,
     "step": "S2 10x10: hover the last cell of row 2, then the first cell",
     "at": "2026-09-28T22:36:35.034Z",
-    "before": [
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1
-    ],
+    "before": [38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1],
     "onLast": {
       "prompts": {
         "elements": 1,
@@ -239,18 +197,7 @@
       "cellRing": null,
       "rangeRing": null,
       "editing": false,
-      "rowH": [
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1
-      ],
+      "rowH": [38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1],
       "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
       "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
       "row0Font": "20px"
@@ -272,18 +219,7 @@
       "cellRing": null,
       "rangeRing": null,
       "editing": false,
-      "rowH": [
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1
-      ],
+      "rowH": [38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1],
       "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
       "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
       "row0Font": "20px"
@@ -318,18 +254,7 @@
       "rangeRing": null,
       "chip": "Table",
       "editing": true,
-      "rowH": [
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1
-      ],
+      "rowH": [38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1],
       "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
       "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
       "row0Font": "20px"
@@ -347,18 +272,7 @@
       "cellRing": null,
       "rangeRing": null,
       "editing": false,
-      "rowH": [
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1,
-        38.1
-      ],
+      "rowH": [38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1],
       "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
       "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
       "row0Font": "20px"
@@ -405,26 +319,8 @@
     "rangeRing": null,
     "editing": false,
     "rowH": [
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1,
-      38.1
+      38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1,
+      38.1, 38.1, 38.1, 38.1, 38.1
     ],
     "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
@@ -565,11 +461,7 @@
     "rangeRing": null,
     "chip": "Table",
     "editing": false,
-    "rowH": [
-      38.1,
-      38.1,
-      38.1
-    ],
+    "rowH": [38.1, 38.1, 38.1],
     "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row0Font": "20px"
@@ -632,11 +524,7 @@
     "rangeRing": null,
     "chip": "Table",
     "editing": false,
-    "rowH": [
-      38.1,
-      38.1,
-      38.1
-    ],
+    "rowH": [38.1, 38.1, 38.1],
     "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row0Font": "20px"
@@ -684,12 +572,7 @@
     "rangeRing": null,
     "chip": "Table",
     "editing": false,
-    "rowH": [
-      38.1,
-      38.1,
-      38.1,
-      38.1
-    ],
+    "rowH": [38.1, 38.1, 38.1, 38.1],
     "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
     "row0Font": "20px"
@@ -706,21 +589,9 @@
       "z": 2
     },
     "rows": [
-      [
-        "",
-        "",
-        ""
-      ],
-      [
-        "Alpha",
-        "Beta",
-        "Gamma"
-      ],
-      [
-        "",
-        "",
-        ""
-      ]
+      ["", "", ""],
+      ["Alpha", "Beta", "Gamma"],
+      ["", "", ""]
     ]
   },
   {
@@ -742,11 +613,7 @@
     "step": "S5 header range, Center from the tail",
     "at": "2026-09-28T22:37:32.182Z",
     "tail": true,
-    "columns": [
-      {},
-      {},
-      {}
-    ],
+    "columns": [{}, {}, {}],
     "shot": "after-15-header-range-center.png"
   },
   {

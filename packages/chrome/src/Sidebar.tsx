@@ -73,6 +73,12 @@ export type SidebarEdit = {
    * with the handle on mount and null on unmount.
    */
   registerHandle?: (handle: FilmstripHandle | null) => void;
+  /**
+   * A reader's filmstrip (docs/POLISH.md 2.6 item 58; polish/build/b5.md R11): the cards, the
+   * follow and the keys without the drag, the drop and the row menu, so a viewer at /edit keeps
+   * the editor's column instead of the tree
+   */
+  readOnly?: true;
 };
 
 /** What the filmstrip exposes to the shell and the route (SPEC-2 8.6). */

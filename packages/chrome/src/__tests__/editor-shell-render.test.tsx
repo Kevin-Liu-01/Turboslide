@@ -200,7 +200,8 @@ describe('the editor shell in its default state', () => {
     /* SPEC-3 5.3: Insert comment is live for an editor in Editing mode; Transition, the Later
        control, is absent while the switch is off (asserted behind the switch below) */
     const comment = toolbar.querySelector('[data-control="toolbar.insertComment"]') as HTMLElement;
-    expect(comment.getAttribute('aria-disabled')).toBeNull();
+    /* docs/POLISH.md 2.6 item 66: with nothing selected the button waits for a selection */
+    expect(comment.getAttribute('aria-disabled')).toBe('true');
     expect(toolbar.querySelector('[data-control="toolbar.transition"]')).toBeNull();
     /* the return round (docs/RETURN.md 3.2): Paint format, Insert shape, Insert line, Theme and
        the Hide the menus chevron are back in the default view */
@@ -281,7 +282,9 @@ describe('the editor shell in its default state', () => {
     const file = container.querySelector('[data-control="menubar.file"]') as HTMLElement;
     fireEvent.click(file);
     const menu = screen.getByRole('menu', { name: 'File menu' });
-    expect(menu.querySelector('[data-menu-item="file.makeCopy"]')).not.toBeNull();
+    /* docs/POLISH.md 2.6 item 74: Make a copy draws as its one visible row, Entire presentation */
+    expect(menu.querySelector('[data-menu-item="file.makeCopy.entire"]')).not.toBeNull();
+    expect(menu.querySelector('[data-menu-item="file.makeCopy"]')).toBeNull();
     /* SPEC-3 13.3's Email row is Later, so it is absent while Tools > Advanced tools is off
        (docs/FOCUS.md 3.1; the test above asserts it behind the switch); Open returned to the
        default view in the return round (docs/RETURN.md 2.17) */
@@ -589,9 +592,9 @@ describe('the Insert menu, compact mode and the title row', () => {
       gallery.container.querySelector('[data-control="toolbar.insertShape.arrow"]') as HTMLElement,
     );
     expect(
-      [
-        ...document.querySelectorAll('#ts-menu-toolbar\\.insertShape\\.arrow [data-menu-item]'),
-      ].map((el) => el.getAttribute('data-menu-item')),
+      [...document.querySelectorAll('#ts-menu-toolbar\\.insertShape\\.arrow [data-menu-item]')].map(
+        (el) => el.getAttribute('data-menu-item'),
+      ),
     ).toEqual([
       'insert.shape.shapes.rectangle',
       'insert.shape.shapes.rounded',

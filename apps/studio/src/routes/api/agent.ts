@@ -42,7 +42,9 @@ type InstanceFacts = {
 };
 
 /** The build's commit from the environment, or null on a build that carries none. */
-export function buildCommit(env: Readonly<Record<string, string | undefined>> = process.env): string | null {
+export function buildCommit(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): string | null {
   const sha = env.VERCEL_GIT_COMMIT_SHA ?? env.TURBOSLIDE_BUILD_COMMIT ?? '';
   return /^[0-9a-f]{7,40}$/i.test(sha) ? sha.toLowerCase() : null;
 }

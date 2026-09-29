@@ -191,11 +191,12 @@ export function frameBandHtml(band: FrameBand): string {
  */
 export function bandForSlide(
   band: FrameBand,
-  slide: { kind?: string } | null | undefined,
+  _slide: { kind?: string } | null | undefined,
 ): FrameBand {
-  if (slide?.kind !== 'title' || band.text === undefined) return band;
-  const { text: _text, ...rest } = band;
-  return rest;
+  /* the polish round (docs/POLISH.md 2.5 item 49; polish/build/b4.md I3): the footer text draws
+     on the title slide too, as the Brand kit panel's sentence says; docs/PRODUCT.md 4.4's "every
+     slide but the title" is superseded */
+  return band;
 }
 
 export type StageOptions = {

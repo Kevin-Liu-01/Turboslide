@@ -419,7 +419,10 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
       : (kit?.positions?.footerLogo ?? 'bottom-left');
     const options: { value: string; label: string }[] = [
       ...(isMark ? [{ value: MARK_POSITION_FLOW, label: MARK_POSITION_FLOW_LABEL }] : []),
-      ...SLOT_POSITIONS.map((position) => ({ value: position, label: SLOT_POSITION_LABELS[position] })),
+      ...SLOT_POSITIONS.map((position) => ({
+        value: position,
+        label: SLOT_POSITION_LABELS[position],
+      })),
     ];
     return (
       <label className="ts-brand-field">

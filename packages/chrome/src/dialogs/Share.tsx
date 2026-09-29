@@ -946,7 +946,10 @@ export function ShareDialog() {
                 }
               })
             }
-            {...tipProps({ name: DIALOGS.share.rotate, doc: 'A new address; the old one stops working' })}
+            {...tipProps({
+              name: DIALOGS.share.rotate,
+              doc: 'A new address; the old one stops working',
+            })}
           >
             <span className="pt-lb">{DIALOGS.share.rotate}</span>
           </button>

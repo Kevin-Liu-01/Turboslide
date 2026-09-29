@@ -193,7 +193,10 @@ export function freeSuffixedSlideId(
   suffix: string,
   taken: ReadonlySet<string>,
 ): string {
-  const tail = suffix.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 4);
+  const tail = suffix
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .slice(0, 4);
   if (tail === '') return freeLayoutSlideId(layout as LayoutId, taken);
   for (let n = 1; n < 100_000; n += 1) {
     const candidate = `${layout}-${n}-${tail}`;

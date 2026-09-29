@@ -530,7 +530,9 @@ export type EditorContextTarget =
   | 'group'
   | 'chart'
   | 'cellRange'
-  | 'guide';
+  | 'guide'
+  /** a right click on a table's ring or padding (docs/POLISH.md 2.6 item 71): the object's menu with the Table submenu; a cell inside answers tableCell */
+  | 'table';
 
 /** A right-click on the stage, or Shift F10 with a block selected. */
 export type EditorContextMenu = {
@@ -1973,7 +1975,9 @@ export function Editor({
       /* a connector moved by its body detaches from every target that did not move in the same
          write (docs/POLISH.md 2.4 item 27; polish/build/b3.md request 2): the free move and the
          arrow keys alone, never a resize and never the line end gesture that wrote the attachment */
-      return options.detach === true ? [...followed, ...detachMovedConnectors(after, moved)] : followed;
+      return options.detach === true
+        ? [...followed, ...detachMovedConnectors(after, moved)]
+        : followed;
     } catch {
       return [];
     }
@@ -2329,9 +2333,7 @@ export function Editor({
       committedText.current = text;
       const after = slideAfter(mutations);
       const grow = growAfterBurst(current, after);
-      commit(
-        grow === null ? mutations : [...mutations, ...(Array.isArray(grow) ? grow : [grow])],
-      );
+      commit(grow === null ? mutations : [...mutations, ...(Array.isArray(grow) ? grow : [grow])]);
       const docText = after && readRunText(after, current.blockId, current.pointer);
       expectedDocText.current = docText ?? committedText.current;
       /* the document's markup after the splice can differ from the editable's in its marks alone
@@ -2398,12 +2400,15 @@ export function Editor({
       const wanted = new Map(
         typographyDeclarations(typography)
           .map((declaration) => declaration.split(':') as [string, string])
-          .filter(([name]) => name === 'text-align' || name === 'line-height' || name === 'padding-left'),
+          .filter(
+            ([name]) => name === 'text-align' || name === 'line-height' || name === 'padding-left',
+          ),
       );
       for (const name of ['text-align', 'line-height', 'padding-left']) {
         const value = wanted.get(name);
         if (value === undefined) blockEl.style.removeProperty(name);
-        else if (blockEl.style.getPropertyValue(name) !== value) blockEl.style.setProperty(name, value);
+        else if (blockEl.style.getPropertyValue(name) !== value)
+          blockEl.style.setProperty(name, value);
       }
     }
     /* a list item's level written under the session (Tab, Shift Tab, Cmd ] and Cmd [ in the
@@ -2565,7 +2570,8 @@ export function Editor({
     window.clearTimeout(reconcileTimer.current);
     reconcileTimer.current = 0;
     setEditing(null);
-    selectedByKey.current = reason === 'enter' || reason === 'escape' || reason === 'tab' || reason === 'shift-tab';
+    selectedByKey.current =
+      reason === 'enter' || reason === 'escape' || reason === 'tab' || reason === 'shift-tab';
     /* a printable key that opened a session never leaves its character behind for the next one:
        the handle callback consumes it on mount, and a session ending clears any unconsumed value */
     pendingInsert.current = null;
@@ -5359,8 +5365,7 @@ export function Editor({
   const contextTargetFor = (slideNow: Slide, id: string): EditorContextTarget => {
     const ids = selectedIds(selectionRef.current, extraRef.current);
     if (ids.includes(id) && ids.length > 1 && sharedGroup(slideNow, ids) !== null) return 'group';
-    const target = objectContextTarget(slideNow, id);
-    return target === 'table' ? 'textBlock' : target;
+    return objectContextTarget(slideNow, id);
   };
 
   /* the edit-mode keys (SPEC 6.9; gslides-parity SPEC 10.1, 10.2), in the capture phase so the
@@ -7047,7 +7052,8 @@ export function Editor({
     const el = body.current;
     const slideNow = slideRef.current;
     const rect = stageRect();
-    if (!el || !slideNow || !rect || editingRef.current !== null || gesture.current !== null) return;
+    if (!el || !slideNow || !rect || editingRef.current !== null || gesture.current !== null)
+      return;
     const run = resolveRun(anchor, el);
     if (run === null) return;
     const href = anchor.getAttribute('href');
@@ -7095,9 +7101,7 @@ export function Editor({
         const el = body.current;
         const slideNow = slideRef.current;
         if (!el || !slideNow) return;
-        const runEl = el.querySelector<HTMLElement>(
-          `[data-run="${chip.blockId}/${chip.pointer}"]`,
-        );
+        const runEl = el.querySelector<HTMLElement>(`[data-run="${chip.blockId}/${chip.pointer}"]`);
         setLinkChip(null);
         if (!runEl) return;
         const anchor = runEl.querySelector<HTMLElement>(`a[href="${CSS.escape(chip.href)}"]`);

@@ -151,7 +151,12 @@ export function ImageByUrlDialog({ target }: { target?: PictureTarget }) {
           await input.dispatch('block.insert', {
             slideId: where.slideId,
             slot,
-            block: { id: `shot-${Date.now().toString(36)}`, type: 'shot', asset: asset.id, border: false },
+            block: {
+              id: `shot-${Date.now().toString(36)}`,
+              type: 'shot',
+              asset: asset.id,
+              border: false,
+            },
             baseRevision: revision,
           });
         }

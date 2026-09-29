@@ -137,7 +137,6 @@ const settled = async (rooms: ReturnType<typeof createRoomClient>[]): Promise<vo
   await new Promise((resolve) => setTimeout(resolve, 20));
 };
 
-
 /**
  * The wire is cut for the client (docs/POLISH.md item 100): a failed POST or a 5xx reads as a
  * write the client is sending again (`resending`) while the browser has no word on the network,

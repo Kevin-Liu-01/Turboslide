@@ -202,6 +202,7 @@ export function DeckViewer({
         sections={sections}
         modes={MODES}
         initialMode={mode}
+        initialPresent={present}
         thumb="shot"
         keys="paged"
         hash={embed ? 'n' : 'id'}

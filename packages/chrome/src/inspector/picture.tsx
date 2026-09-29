@@ -35,7 +35,10 @@ import type { SectionWrite } from './fields';
 const PICTURE_WORDS = { border: 'Border', name: 'Name' } as const;
 
 /** The picture's name as a seller reads it: the asset's id with its dashes as spaces. */
-export function pictureNameOfAsset(asset: { id: AssetId } | undefined, fallback = 'Picture'): string {
+export function pictureNameOfAsset(
+  asset: { id: AssetId } | undefined,
+  fallback = 'Picture',
+): string {
   if (asset === undefined) return fallback;
   const words = asset.id.replace(/[-_]+/g, ' ').trim();
   return words === '' ? fallback : words[0]?.toUpperCase() + words.slice(1);
@@ -154,7 +157,10 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
     write.report(
       write.dispatch('slide.update', {
         slideId: write.slideId,
-        mutations: writes.map(([path, value]) => ({ op: 'block.set' as const, ...field(path, value) })),
+        mutations: writes.map(([path, value]) => ({
+          op: 'block.set' as const,
+          ...field(path, value),
+        })),
         baseRevision: write.revision,
       }),
     );

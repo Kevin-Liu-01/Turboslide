@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { allItems, itemById } from '../model.ts';
 import {
-  ACCESS_PAGE,
   ACCOUNT,
   AGENT_SENTENCES,
   CANVAS,
@@ -113,9 +112,6 @@ describe('the default view strings of SPEC-3 15', () => {
     expect(AGENT_SENTENCES.materializeFirst).toBe('materialize first');
     expect(AGENT_SENTENCES.noContinuousSource).toBe(
       'the asset has no continuous source (sourceFile); the committed twins are already dithered',
-    );
-    expect(ACCESS_PAGE.invited).toBe(
-      'Invited by email? Sign in with the address the invitation went to.',
     );
   });
 

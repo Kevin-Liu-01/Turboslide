@@ -514,8 +514,14 @@ export type SwatchesBlock = BlockBase & {
 export type ShotTrim = { left: number; right: number; top: number; bottom: number };
 /** Transparency 0 to 1, brightness and contrast -1 to 1 (SPEC-2 2.5.3). */
 export type ShotAdjust = { transparency?: number; brightness?: number; contrast?: number };
+/**
+ * The picture's border weights in px (SPEC-2 2.5.5; docs/POLISH.md 2.5 item 44: Google's list),
+ * one list for the toolbar's picker, the panel and the schema.
+ */
+export const SHOT_FRAME_WEIGHTS = [1, 1.5, 2, 3, 4, 8, 12] as const;
+export type ShotFrameWeight = (typeof SHOT_FRAME_WEIGHTS)[number];
 /** The picture's border (SPEC-2 2.5.5); `border: true` stays the hairline frame. */
-export type ShotFrame = { weight?: 1 | 1.5 | 2; color?: Color; dash?: Dash };
+export type ShotFrame = { weight?: ShotFrameWeight; color?: Color; dash?: Dash };
 
 export type ShotBlock = BlockBase & {
   type: 'shot';
@@ -967,7 +973,8 @@ export const headingBlockSchema = z.strictObject({
     group: 'Block',
     help: 'h1 88 px, h2 44 px, big 72 px, title 44 px on a mood plate (head:59-61).',
   }),
-  text: annotate(textSchema, { label: 'Text', control: 'text', group: 'Text' }),
+  /* the polish round (docs/POLISH.md 2.3 item 19): paragraph breaks, one .para span each */
+  text: annotate(multilineTextSchema, { label: 'Text', control: 'textarea', group: 'Text' }),
   marginTop: annotate(z.number().optional(), {
     label: 'Margin top',
     control: 'number',
@@ -1293,7 +1300,7 @@ const pictureToolFields = {
   frame: annotate(
     z
       .strictObject({
-        weight: z.literal([1, 1.5, 2]).optional(),
+        weight: z.literal([...SHOT_FRAME_WEIGHTS]).optional(),
         color: colorField('Frame color', 'The frame colour; the hairline token unless set.'),
         dash: dashField,
       })

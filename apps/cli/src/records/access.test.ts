@@ -45,13 +45,21 @@ describe('share.setGeneralAccess', () => {
       record: newDeckRecord('q4-review', 'anon_owner', legacyAssetKey('q4-review'), NOW),
     };
     const deps = depsFor(dir, stored);
-    const first = await shareSetGeneralAccess(deps, { mode: 'link', role: 'viewer', baseRevision: 0 });
+    const first = await shareSetGeneralAccess(deps, {
+      mode: 'link',
+      role: 'viewer',
+      baseRevision: 0,
+    });
     expect(first.url).toMatch(/^https:\/\/x\.test\/s\/[A-Za-z0-9_-]{22}$/);
     const minted = first.record.links[0];
     expect(minted).toBeDefined();
     expect(first.record.generalAccess).toEqual({ mode: 'link', role: 'viewer' });
 
-    const second = await shareSetGeneralAccess(deps, { mode: 'link', role: 'editor', baseRevision: 1 });
+    const second = await shareSetGeneralAccess(deps, {
+      mode: 'link',
+      role: 'editor',
+      baseRevision: 1,
+    });
     /* no new address: the same link, its hash unchanged, its role rewritten */
     expect(second.url).toBeUndefined();
     expect(second.record.links).toHaveLength(1);
@@ -74,7 +82,11 @@ describe('share.setGeneralAccess', () => {
     expect(restricted.record.generalAccess.mode).toBe('restricted');
     expect(restricted.record.links.every((link) => !linkIsLive(link, NOW))).toBe(true);
     /* Anyone with the link again mints a fresh link: the old token is gone for good */
-    const again = await shareSetGeneralAccess(deps, { mode: 'link', role: 'viewer', baseRevision: 2 });
+    const again = await shareSetGeneralAccess(deps, {
+      mode: 'link',
+      role: 'viewer',
+      baseRevision: 2,
+    });
     expect(again.url).toBeDefined();
     expect(again.record.links.filter((link) => linkIsLive(link, NOW))).toHaveLength(1);
   });

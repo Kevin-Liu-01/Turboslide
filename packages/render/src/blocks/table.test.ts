@@ -81,7 +81,10 @@ describe('the header rule with text (2.1 item 3; the row tables.header.rule-with
     const empty = renderTable(grid, context());
     expect(empty).toContain('class="td first" style="border-bottom:1px solid var(--hair)"');
     expect(empty).not.toContain('var(--ink)');
-    const typed: TableBlock = { ...grid, rows: [{ cells: ['Plan', ''], header: true }, grid.rows[1]!] };
+    const typed: TableBlock = {
+      ...grid,
+      rows: [{ cells: ['Plan', ''], header: true }, grid.rows[1]!],
+    };
     const html = renderTable(typed, context());
     expect(html).toContain('class="td first" style="border-bottom:1px solid var(--ink)"');
     expect(rowTags(html)[0]).toBe('<div class="tr header has-text">');

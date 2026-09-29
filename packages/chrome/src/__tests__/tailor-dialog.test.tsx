@@ -116,9 +116,7 @@ describe('TailorDialog', () => {
       fireEvent.click(control('dialog.tailor.apply') as HTMLButtonElement);
     });
     expect(closeDialog).toHaveBeenCalledTimes(1);
-    expect(say).toHaveBeenCalledWith(
-      'The slide changed while this was written; ask again',
-    );
+    expect(say).toHaveBeenCalledWith('The slide changed while this was written; ask again');
   });
 
   it('draws Find the <To> logo once the finder knows the name, stores the mark on a click and names it in the one deck.tailor', async () => {

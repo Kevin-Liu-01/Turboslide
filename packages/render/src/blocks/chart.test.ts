@@ -37,7 +37,10 @@ const chart = (fields: Record<string, unknown>): Block =>
   }) as Block;
 
 /** The category label texts with their x, y and the width the renderer's own measure gives them. */
-function labelBoxes(html: string, size: number): { text: string; x: number; y: number; w: number }[] {
+function labelBoxes(
+  html: string,
+  size: number,
+): { text: string; x: number; y: number; w: number }[] {
   const group = html.match(/<g class="categories"[^>]*>([\s\S]*?)<\/g>/)?.[1] ?? '';
   return Array.from(group.matchAll(/<text x="([^"]+)" y="([^"]+)"[^>]*>([^<]*)<\/text>/g)).map(
     (match) => ({
@@ -66,7 +69,9 @@ describe('the type scale', () => {
       context(),
     );
     /* 18 by 0.6 is 11 for the labels, 20 by 0.6 is 12 for the title, 15 by 0.6 is 9 for the values */
-    expect(small).toContain('class="title" data-run="c/title" x="4.8" y="16.8" style="font-size:12px"');
+    expect(small).toContain(
+      'class="title" data-run="c/title" x="4.8" y="16.8" style="font-size:12px"',
+    );
     expect(small).toMatch(/<g class="categories"[^>]*><text [^>]*style="font-size:11px"/);
     expect(small).toMatch(/class="value" [^>]*style="font-size:9px"/);
   });
@@ -76,7 +81,12 @@ describe('the category labels fitted to their slots (item 31)', () => {
   it('keeps every label that fits and skips every other one when a label needs two slots', () => {
     const fits = fitCategoryLabels(['Jan', 'Feb', 'Mar'], 18, 200, 'width');
     expect(fits).toEqual({ labels: ['Jan', 'Feb', 'Mar'], fit: undefined });
-    const two = fitCategoryLabels(['Category 1', 'Category 2', 'Category 3', 'Category 4'], 11, 40, 'width');
+    const two = fitCategoryLabels(
+      ['Category 1', 'Category 2', 'Category 3', 'Category 4'],
+      11,
+      40,
+      'width',
+    );
     expect(two.labels).toEqual(['Category 1', null, 'Category 3', null]);
     expect(two.fit).toBe('skip');
   });

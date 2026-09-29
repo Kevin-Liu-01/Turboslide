@@ -106,13 +106,17 @@ describe('normalization', () => {
     expect(outHeading?.type === 'heading' && outHeading.text).toBe('A \\* in the heading');
   });
 
-  it('rejects a line break inside a Text', () => {
+  it('rejects a carriage return inside a Text and takes a paragraph break in a heading (docs/POLISH.md 2.3 item 19)', () => {
     const slide = clone(CONTENT_RULE);
     if (slide.kind !== 'content') throw new Error('fixture');
     const heading = slide.slots.left?.[0];
     if (heading?.type !== 'heading') throw new Error('fixture');
-    heading.text = 'two\nlines';
+    heading.text = 'two\rlines';
     expect(validateSlide(slide).issues.map((row) => row.pointer)).toContain('/slots/left/0/text');
+    heading.text = 'two\nlines';
+    expect(validateSlide(slide).issues.map((row) => row.pointer)).not.toContain(
+      '/slots/left/0/text',
+    );
   });
 
   it('flags a slot the layout does not have', () => {
@@ -288,7 +292,7 @@ describe('the gslides-parity fields (SPEC 7.2)', () => {
     );
   });
 
-  it('accepts a paragraph break in a title slide lead but not in its heading (hotfix-4 W4)', () => {
+  it('accepts a paragraph break in a title slide lead and, since the polish round, in its heading; a carriage return is refused (hotfix-4 W4; docs/POLISH.md 2.3 item 19)', () => {
     const lead = validateSlide({
       schemaVersion: 1,
       id: 'title',
@@ -306,8 +310,17 @@ describe('the gslides-parity fields (SPEC 7.2)', () => {
       heading: 'Two\nlines',
       lead: 'A subtitle.',
     });
-    expect(heading.ok).toBe(false);
-    expect(heading.issues.some((issue) => issue.pointer === '/heading')).toBe(true);
+    expect(heading.ok).toBe(true);
+    const broken = validateSlide({
+      schemaVersion: 1,
+      id: 'title',
+      kind: 'title',
+      mark: { w: 160, h: 100 },
+      heading: 'Two\rlines',
+      lead: 'A subtitle.',
+    });
+    expect(broken.ok).toBe(false);
+    expect(broken.issues.some((issue) => issue.pointer === '/heading')).toBe(true);
   });
 
   it('accepts an empty picture reference on a figure and skips its reference check', () => {

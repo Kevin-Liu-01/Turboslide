@@ -1808,7 +1808,9 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .describe("The section; the anchor's section, or the last section, when absent"),
       id: slugSchema
         .optional()
-        .describe('The slide id; <layout>-<n> with the first free n when absent'),
+        .describe(
+          'The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/POLISH.md 2.8 item 99)',
+        ),
       baseRevision,
     }),
     output: z.strictObject({ slide: slideSchema, revision, outline: outlineSchema }),
@@ -3442,7 +3444,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'text.style': action({
     id: 'text.style',
     label: 'Text style',
-    doc: 'Marks a range of a Text italic, underlined, struck, superscript or subscript, or gives it a text or highlight colour (true sets, false clears, null clears a colour), as one text.replace of the whole Text; the output returns the new markup.',
+    doc: 'Marks a range of a Text italic, underlined, struck, superscript or subscript, gives it a text or highlight colour, or a size in pixels (true sets, false clears, null clears a colour or the size), as one text.replace of the whole Text; the output returns the new markup.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -3460,13 +3462,23 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         sub: z.boolean().optional(),
         color: colorSchema.nullable().optional(),
         highlight: colorSchema.nullable().optional(),
+        /* the polish round (docs/POLISH.md 2.3 item 16; polish/build/b1.md R3): the run's size in
+           pixels, serialized as z:<px> in the run's mark list (text.ts RunMarks.size) */
+        size: z
+          .number()
+          .int()
+          .min(6)
+          .max(200)
+          .nullable()
+          .optional()
+          .describe('The size of the range in pixels, 6 to 200; null clears it'),
       }),
       baseRevision,
     }),
     output: slideResultSchema.extend({ text: z.string() }),
     cli: {
       usage:
-        'turboslide text style <slideId>#<blockId> <path> --range <range> --italic --underline --strike --superscript --subscript --color <color> --highlight <highlight>',
+        'turboslide text style <slideId>#<blockId> <path> --range <range> --italic --underline --strike --superscript --subscript --color <color> --highlight <highlight> --size <px>',
     },
     mcp: 'deck_style_text',
     example: {

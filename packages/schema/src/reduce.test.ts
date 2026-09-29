@@ -659,7 +659,7 @@ describe('the gslides-parity fields (SPEC 7.2)', () => {
     }
   });
 
-  it('accepts a paragraph break in text.replace on a paragraph and refuses it on a heading', () => {
+  it('accepts a paragraph break in text.replace on a paragraph and, since the polish round, on a heading; a carriage return is refused', () => {
     const document = base();
     const ok = applyWrite(
       document,
@@ -693,7 +693,22 @@ describe('the gslides-parity fields (SPEC 7.2)', () => {
         },
       ]),
     );
-    expect(refused.ok).toBe(false);
+    /* docs/POLISH.md 2.3 item 19: Enter in a heading breaks the line */
+    expect(refused.ok).toBe(true);
+    const cr = applyWrite(
+      document,
+      write([
+        {
+          op: 'text.replace',
+          slideId: 'content-rule',
+          blockId: 'h',
+          path: '/text',
+          range: [0, 0],
+          text: 'Two\rlines ',
+        },
+      ]),
+    );
+    expect(cr.ok).toBe(false);
   });
 });
 
@@ -1043,7 +1058,7 @@ describe('the multiplayer text ops (gslides-parity SPEC-3 3.1)', () => {
     },
   );
 
-  it('refuses a splice or a mark outside the text, on a non string pointer and a break on a heading', () => {
+  it('refuses a splice or a mark outside the text, on a non string pointer and a carriage return on a heading', () => {
     const document = marked();
     const outside = applyWrite(
       document,
@@ -1089,7 +1104,7 @@ describe('the multiplayer text ops (gslides-parity SPEC-3 3.1)', () => {
             path: '/text',
             at: 3,
             remove: 0,
-            insert: '\n',
+            insert: '\r',
           },
         ],
         413,
@@ -1253,7 +1268,7 @@ describe('the slide fields as text runs (the sync round, docs/SYNC.md 3.4)', () 
     expect(stable(back)).toEqual(stable(document));
   });
 
-  it('refuses a field addressed at another pointer, a break in the heading, and a field name on a slide without it', () => {
+  it('refuses a field addressed at another pointer, a carriage return in the heading, and a field name on a slide without it', () => {
     const document = base();
     const wrongPath = applyWrite(
       document,
@@ -1264,7 +1279,7 @@ describe('the slide fields as text runs (the sync round, docs/SYNC.md 3.4)', () 
     expect(wrongPath.message).toMatch(/addressed at \/heading, got \/text/);
     const broken = applyWrite(
       document,
-      write([{ op: 'text.splice', ...heading, at: 3, remove: 0, insert: '\n' }]),
+      write([{ op: 'text.splice', ...heading, at: 3, remove: 0, insert: '\r' }]),
     );
     expect(broken.ok).toBe(false);
     // `big` on a title slide is a block id there, and the slide has no such block

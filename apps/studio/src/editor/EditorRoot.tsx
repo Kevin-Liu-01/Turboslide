@@ -1627,6 +1627,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     },
   };
 
+  /* a reader keeps the editor's filmstrip without its writes (docs/POLISH.md 2.6 item 58;
+     polish/build/b5.md R11): the cards follow the stage, the drag, the drop and the menu are off */
   const sidebarEdit: SidebarEdit | undefined = editing
     ? {
         revision,
@@ -1643,7 +1645,18 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         onFocusCanvas: () => handleRef.current?.focus(),
         clipboard: clipboardStore,
       }
-    : undefined;
+    : trashed
+      ? undefined
+      : {
+          revision,
+          dispatch: controller.invoke,
+          deck,
+          document: snap.document,
+          deckId,
+          onSelectionChange: setSelectedSlideIds,
+          onFocusCanvas: () => handleRef.current?.focus(),
+          readOnly: true,
+        };
 
   return (
     <div

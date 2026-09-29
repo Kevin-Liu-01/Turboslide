@@ -213,6 +213,8 @@ type FilmCardProps = {
   /** the shared window's ref callback for this card */
   track: (el: HTMLElement | null) => void;
   follow?: (el: HTMLElement | null) => void;
+  /** a reader's card: no drag, no menu (polish/build/b5.md R11) */
+  readOnly?: boolean;
 };
 
 /** The current slide's card carries the name the route transition of SPEC-4 0.40 animates. */
@@ -272,6 +274,7 @@ const FilmCard = memo(function FilmCardBase({
   handlers,
   track,
   follow,
+  readOnly = false,
 }: FilmCardProps) {
   const n = item.n ? String(Number(item.n)) : '';
   const name = `Slide ${n}${facts.skip ? ', skipped' : ''}`;
@@ -310,7 +313,7 @@ const FilmCard = memo(function FilmCardBase({
       data-drop={drop ?? undefined}
       data-near={near ? '' : undefined}
       style={current ? CURRENT_CARD_STYLE : undefined}
-      draggable
+      draggable={!readOnly}
       onClick={(event) => onPick(item, event)}
       onDoubleClick={(event) => {
         event.preventDefault();
@@ -318,9 +321,10 @@ const FilmCard = memo(function FilmCardBase({
       }}
       onContextMenu={(event) => {
         event.preventDefault();
+        if (readOnly) return;
         onMenu(item, { x: event.clientX, y: event.clientY }, event.currentTarget);
       }}
-      onDragStart={(event) => onDragStart(item, event)}
+      onDragStart={(event) => (readOnly ? event.preventDefault() : onDragStart(item, event))}
       onDragOver={(event) => onDragOver(item, event)}
       onDrop={onDrop}
       onDragEnd={onDragEnd}
@@ -683,6 +687,7 @@ export function Filmstrip({
 
   /** Cmd Up and Down move the selected slides one place; Shift to the beginning or the end (SPEC 4.1). */
   const moveSelected = (where: 'up' | 'down' | 'start' | 'end') => {
+    if (edit.readOnly === true) return;
     const ids = order.filter((id) => selectedRef.current.includes(id));
     const first = ids[0];
     const last = ids[ids.length - 1];
@@ -1099,6 +1104,7 @@ export function Filmstrip({
                 handlers={handlers}
                 track={window_.track(item.id)}
                 follow={item.id === active ? follow : undefined}
+                readOnly={edit.readOnly === true}
               />
             ))}
           </Fragment>

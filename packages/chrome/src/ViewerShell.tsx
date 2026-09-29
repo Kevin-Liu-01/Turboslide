@@ -107,6 +107,11 @@ export type ViewerShellProps = {
   modes: readonly ShellMode[];
   /** the mode the route asked for (?mode=), ahead of the saved one */
   initialMode?: ShellMode;
+  /**
+   * The show from the first paint (docs/POLISH.md 2.7 item 105): /deck/<id>?present=1 renders
+   * present mode on the server, so no viewer bar shows before the mount effect hides it
+   */
+  initialPresent?: boolean;
   thumb: ShellThumb;
   /** the hash form the shell writes on every move, or false to leave the address alone */
   hash: SlideHashForm | false;
@@ -189,6 +194,7 @@ export function ViewerShell({
   active: initialActive,
   modes,
   initialMode,
+  initialPresent,
   thumb,
   hash,
   onSelect,
@@ -224,7 +230,7 @@ export function ViewerShell({
   const [sbMotion, setSbMotion] = useState<SidebarMotion | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [present, setPresentState] = useState(false);
+  const [present, setPresentState] = useState(initialPresent === true);
   /* the editor's compact mode (SPEC 1.1): EditorShell owns the state and reports it here, so the
      root carries `is-compact` for EditorShell.css and the parity audit */
   const [compact, setCompact] = useState(false);

@@ -86,7 +86,6 @@ html:has(.ts-home-page) {
   height: 40px;
 }
 
-
 /* ---- the empty states (SPEC-4 1.10; EmptyFigure): the figure, the title, one sentence, one action ---- */
 .ts-home-empty-figure {
   margin: 20px 0 0;

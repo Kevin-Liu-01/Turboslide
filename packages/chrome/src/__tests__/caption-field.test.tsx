@@ -83,7 +83,13 @@ describe('the caption field', () => {
     expect(dispatch).toHaveBeenLastCalledWith('slide.update', {
       slideId: 'cv',
       mutations: [
-        { op: 'block.set', slideId: 'cv', blockId: 'shot', path: '/caption', value: 'Team photo, Q3' },
+        {
+          op: 'block.set',
+          slideId: 'cv',
+          blockId: 'shot',
+          path: '/caption',
+          value: 'Team photo, Q3',
+        },
         {
           op: 'block.set',
           slideId: 'cv',

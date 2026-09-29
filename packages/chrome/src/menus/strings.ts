@@ -270,7 +270,6 @@ export const ACCESS_PAGE = {
   message: 'Message',
   email: 'Email',
   requestAccess: 'Request access',
-  invited: 'Invited by email? Sign in with the address the invitation went to.',
   asked: REFUSALS.requested,
 } as const;
 

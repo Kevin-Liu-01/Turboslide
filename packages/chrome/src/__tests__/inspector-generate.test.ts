@@ -193,7 +193,8 @@ describe('slideControls', () => {
   it('marks the title slide texts as Text fields', () => {
     const controls = slideControls(TITLE).controls;
     const heading = controls.find((spec) => spec.path === '/heading');
-    expect(heading?.kind).toBe('text');
+    /* a textarea since the polish round (docs/POLISH.md 2.3 item 19): the heading takes paragraph breaks like the lead */
+    expect(heading?.kind).toBe('textarea');
     expect(heading?.text).toBe(true);
     expect(controls.find((spec) => spec.path === '/mark/w')?.kind).toBe('number');
   });

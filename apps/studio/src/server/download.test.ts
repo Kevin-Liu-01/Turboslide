@@ -7,7 +7,9 @@ import { STORE_RETRY_MS, putWithOneRetry } from './export-sync';
 // caller's to word; any other error is thrown at once.
 
 function busy(retryAfter?: number): Error {
-  const error = new Error('Vercel Blob: Too many requests please lower the number of concurrent requests');
+  const error = new Error(
+    'Vercel Blob: Too many requests please lower the number of concurrent requests',
+  );
   if (retryAfter !== undefined) Object.assign(error, { retryAfter });
   return error;
 }

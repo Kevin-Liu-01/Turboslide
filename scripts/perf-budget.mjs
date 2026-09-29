@@ -222,23 +222,24 @@ const BUDGETS = {
   },
   deployment: {
     routes: {
+      /* the polish round (docs/POLISH.md 3.5): the remade page's rows */
       '/home': {
         cold: {
           ttfb: 150,
-          lcp: 800,
-          ready: 800,
+          lcp: 500,
+          ready: 500,
           jsDecoded: 600_000,
-          imagesBeforeReady: 500_000,
-          imagesAfterScroll: 2_000_000,
+          imagesBeforeReady: 300_000,
+          imagesAfterScroll: 800_000,
           lcpElement: true,
         },
         warm: {
           ttfb: 100,
-          lcp: 400,
-          ready: 400,
+          lcp: 250,
+          ready: 250,
           jsDecoded: 600_000,
-          imagesBeforeReady: 500_000,
-          imagesAfterScroll: 2_000_000,
+          imagesBeforeReady: 300_000,
+          imagesAfterScroll: 800_000,
           lcpElement: true,
         },
       },
@@ -533,9 +534,10 @@ function assertFlag(check, name, ok, asserted) {
   );
 }
 
-/** SPEC-4 2.3, 0.47: the LCP element of /home is the plate's text or the twin. The recorder gives the element as TAG.firstClass and the entry's URL when it has one. */
+/** SPEC-4 2.3, 0.47 and docs/POLISH.md 3.5: the LCP element of /home is the hero picture (a /home/ image since the polish round), the plate's text or the twin. The recorder gives the element as TAG.firstClass and the entry's URL when it has one. */
 function lcpIsPlateOrTwin(el, url) {
   if (typeof url === 'string' && /\/brand\//.test(url)) return true;
+  if (typeof url === 'string' && /\/home\//.test(url) && /^IMG(?:\.|$)/.test(el ?? '')) return true;
   return typeof el === 'string' && /^(?:H1|H2|P|SPAN|A|STRONG|EM)(?:\.|$)/.test(el);
 }
 

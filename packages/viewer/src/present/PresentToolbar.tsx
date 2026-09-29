@@ -177,15 +177,6 @@ export function PresentToolbar({
         <PresentIcon name="laser" icons={icons} />
       </Button>
       <Button
-        control="present.captions"
-        name={PRESENT_TEXT.captions}
-        doc={PRESENT_TEXT.captionsStub}
-        disabled
-        tip={tip}
-      >
-        <PresentIcon name="captions" icons={icons} />
-      </Button>
-      <Button
         control="present.fullScreen"
         name={fullscreen ? PRESENT_TEXT.exitFullScreen : PRESENT_TEXT.enterFullScreen}
         keyLabel={platform === 'mac' ? `${mod} Shift F` : 'F11'}

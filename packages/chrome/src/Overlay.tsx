@@ -512,12 +512,17 @@ export function Overlay({ view }: OverlayProps) {
   /* the frame of an object is its drag surface (gslides-parity SPEC 10.2, R09 A1): four edge
      strips start the same free-move gesture as the chip */
   const frameEdges =
-    chipHandle && chipHandle.kind === 'free-move' && ringBox && frameLive && !view.crop && !lineSelected
+    chipHandle &&
+    chipHandle.kind === 'free-move' &&
+    ringBox &&
+    frameLive &&
+    !view.crop &&
+    !lineSelected
       ? frameEdgeStyles(rotated ? [0, 0, ringBox[2], ringBox[3]] : ringBox, k)
       : null;
   /* the chip of a line sits by its start handle, the way its box would be a ring's corner */
   const chipBox: Box | null = lineSelected
-    ? (lineEnds.find((handle) => handle.index === 0) ?? lineEnds[0])?.box ?? ringBox
+    ? ((lineEnds.find((handle) => handle.index === 0) ?? lineEnds[0])?.box ?? ringBox)
     : ringBox;
   const angle = view.selectionPos?.rotate ?? 0;
   /* the handles of a turned object are placed relative to its own box inside the turning layer */
@@ -707,7 +712,11 @@ export function Overlay({ view }: OverlayProps) {
           }}
           onMouseDown={(e) => e.preventDefault()}
         >
-          <span className="ts-link-chip-href" data-control="chip.link.href" title={view.linkChip.href}>
+          <span
+            className="ts-link-chip-href"
+            data-control="chip.link.href"
+            title={view.linkChip.href}
+          >
             {view.linkChip.href.length > 56
               ? `${view.linkChip.href.slice(0, 55)}\u2026`
               : view.linkChip.href}

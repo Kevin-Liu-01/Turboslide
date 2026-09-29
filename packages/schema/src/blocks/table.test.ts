@@ -76,13 +76,16 @@ describe('the table block', () => {
     expect(tableBlockSchema.safeParse(CATALOG.table.make('t')).success).toBe(true);
   });
 
-  it('refuses a carriage return in a cell and a line break in a heading', () => {
+  it('refuses a carriage return in a cell and in a heading, and takes a paragraph break in a heading since the polish round', () => {
     const table = emptyTable('t', 2, 2);
     table.rows[1]!.cells[0] = 'a\rb';
     expect(tableBlockSchema.safeParse(table).success).toBe(false);
     const slide = slideWith(emptyTable('t', 2, 2));
     const heading = slide.slots.headLeft?.[0];
+    /* docs/POLISH.md 2.3 item 19: a heading takes paragraph breaks, so Enter breaks the line */
     if (heading?.type === 'heading') heading.text = 'Two\nlines';
+    expect(validateSlide(slide).ok).toBe(true);
+    if (heading?.type === 'heading') heading.text = 'Two\rlines';
     expect(validateSlide(slide).ok).toBe(false);
   });
 
@@ -461,12 +464,12 @@ describe('the polish round', () => {
   });
 
   it('parses a cell’s own alignment and keeps a cell styled by its alignment alone through a fill clear', () => {
-    expect(
-      tableCellStyleSchema.safeParse({ row: 0, column: 1, align: 'center' }).success,
-    ).toBe(true);
-    expect(
-      tableCellStyleSchema.safeParse({ row: 0, column: 1, align: 'justify' }).success,
-    ).toBe(false);
+    expect(tableCellStyleSchema.safeParse({ row: 0, column: 1, align: 'center' }).success).toBe(
+      true,
+    );
+    expect(tableCellStyleSchema.safeParse({ row: 0, column: 1, align: 'justify' }).success).toBe(
+      false,
+    );
     const table: TableBlock = {
       ...emptyTable('t', 2, 2),
       cells: [{ row: 0, column: 0, align: 'center', fill: 'plate' }],

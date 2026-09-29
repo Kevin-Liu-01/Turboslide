@@ -404,19 +404,6 @@ export function PresenterConsole({
             >
               {PRESENT_TEXT.notes}
             </button>
-            <button
-              type="button"
-              role="tab"
-              id="ts-presenter-tab-audience"
-              className="ts-presenter-tab is-disabled"
-              aria-selected="false"
-              aria-disabled="true"
-              tabIndex={0}
-              data-control="presenter.tab.audience"
-              {...tip({ name: PRESENT_TEXT.audienceTools, doc: PRESENT_TEXT.audienceToolsStub })}
-            >
-              {PRESENT_TEXT.audienceTools}
-            </button>
           </div>
           <div
             id="ts-presenter-notes"

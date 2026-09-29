@@ -17,7 +17,8 @@ export const ASSIST = {
   provider:
     'Your slide text is sent to the assistant’s model provider under General Translation’s account to write these suggestions',
   /** the panel on a deployment with no model (item 113): Tailor stays, the model starters and the composer leave */
-  unconfigured: 'The assistant is not set up on this Turboslide yet. Tailor for a customer works without it',
+  unconfigured:
+    'The assistant is not set up on this Turboslide yet. Tailor for a customer works without it',
   offMode: 'The assistant is off on this Turboslide. Tailor for a customer works without it',
   starters: {
     tailor: 'Tailor for a customer',

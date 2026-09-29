@@ -428,9 +428,26 @@ export const CARD_MENU_ITEMS: ReadonlyArray<MenuItem> = [
   { id: 'home.card.openNewTab', label: 'Open in new tab', icon: 'external', status: 'now' },
   { id: 'home.card.present', label: 'Present', icon: 'present', status: 'now', turboslide: true },
   { id: 'home.card.rename', label: 'Rename', icon: 'pencil', status: 'now', dividerBefore: true },
-  { id: 'home.card.copy', label: DIALOGS.makeCopy.title, status: 'now' },
-  { id: 'home.card.download', label: 'Download', status: 'now', turboslide: true },
-  { id: 'home.card.trash', label: 'Move to trash', status: 'now', dividerBefore: true },
+  {
+    id: 'home.card.copy',
+    label: DIALOGS.makeCopy.title,
+    icon: 'document-duplicate',
+    status: 'now',
+  },
+  {
+    id: 'home.card.download',
+    label: 'Download',
+    icon: 'arrow-down-tray',
+    status: 'now',
+    turboslide: true,
+  },
+  {
+    id: 'home.card.trash',
+    label: 'Move to trash',
+    icon: 'trash',
+    status: 'now',
+    dividerBefore: true,
+  },
 ];
 
 type CardMenuState = { deckId: string; anchor: HTMLElement };
@@ -1505,7 +1522,12 @@ export function Thumb({
   }, [failed, attempt]);
   useEffect(() => {
     const el = box.current;
-    if (!failed || el === null || askedInView.current || typeof IntersectionObserver === 'undefined')
+    if (
+      !failed ||
+      el === null ||
+      askedInView.current ||
+      typeof IntersectionObserver === 'undefined'
+    )
       return undefined;
     if (THUMB_RETRY_MS[attempt] !== undefined) return undefined;
     const observer = new IntersectionObserver((entries) => {

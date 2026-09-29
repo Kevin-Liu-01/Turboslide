@@ -397,10 +397,37 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
         Object.entries(chrome.tokens).map(([role, names]) => [role, readToken(names)]),
       )
     : null;
-  const roleOf = (color: string): string | null => {
+  /* the stage wrapper and the overlay layer carry the sheet's own appearance as their data-theme
+     since the polish round (docs/POLISH.md 2.5 item 49; packages/chrome/src/tokens.css): an
+     element under such a scope draws that appearance's tokens, so its colours are matched
+     against the tokens read from the scope, not the root's */
+  const scopeRoles = new Map<Element, Record<string, number[] | null>>();
+  const rolesFor = (el: Element | null): Record<string, number[] | null> | null => {
+    if (!chrome || !ROLES) return null;
+    const scope = el?.closest('[data-theme]') ?? null;
+    if (!scope || scope === document.documentElement) return ROLES;
+    if (scope.getAttribute('data-theme') === document.documentElement.dataset.theme) return ROLES;
+    let roles = scopeRoles.get(scope);
+    if (roles === undefined) {
+      const cs = getComputedStyle(scope);
+      roles = Object.fromEntries(
+        Object.entries(chrome.tokens).map(([role, names]) => {
+          for (const name of names) {
+            const v = cs.getPropertyValue(name).trim();
+            if (v) return [role, rgba(v)];
+          }
+          return [role, ROLES[role] ?? null];
+        }),
+      );
+      scopeRoles.set(scope, roles);
+    }
+    return roles;
+  };
+  const roleOf = (color: string, el: Element | null = null): string | null => {
     const c = rgba(color);
-    if (!ROLES) return null;
-    for (const [role, value] of Object.entries(ROLES)) if (sameColor(c, value)) return role;
+    const roles = rolesFor(el);
+    if (!roles) return null;
+    for (const [role, value] of Object.entries(roles)) if (sameColor(c, value)) return role;
     return null;
   };
   const activeNear = (el: Element): boolean => {
@@ -448,7 +475,7 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
       const w = parseFloat(prop(cs, `border-${side.toLowerCase()}-width`));
       const color = prop(cs, `border-${side.toLowerCase()}-color`);
       if (!(w >= 1) || !visible(color)) continue;
-      const role = roleOf(color);
+      const role = roleOf(color, el);
       if (role && SEAM_ROLES.includes(role)) continue;
       if ((role === 'ink' || role === 'hairOnInk') && activeNear(el)) continue;
       if (collabColor(el, color)) continue;
@@ -478,7 +505,7 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
     }
     const ow = parseFloat(cs.outlineWidth);
     if (cs.outlineStyle !== 'none' && ow >= 1 && visible(cs.outlineColor)) {
-      const role = roleOf(cs.outlineColor);
+      const role = roleOf(cs.outlineColor, el);
       const selectRing =
         role === 'select' && Boolean(chrome.select) && el.matches(chrome.select ?? '');
       if ((!role || !RING_ROLES.includes(role)) && !selectRing && !collabColor(el, cs.outlineColor))

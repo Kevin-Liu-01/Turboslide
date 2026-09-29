@@ -42,7 +42,13 @@ export async function run(t) {
     async () => {
       const r = await t.reachRow('view', 'view.appearance', 'view.appearance.light');
       if (!r.present) return { ok: false, observed: 'View > Appearance is not reachable' };
-      const deck = (await t.state()).theme;
+      /* the presentation's own appearance is the stage's data-theme since the polish round
+         (docs/POLISH.md 2.5 item 49: the sheet keeps it whatever the chrome's theme); the
+         describe state's theme is the chrome's */
+      const deck =
+        (await page.evaluate(
+          () => document.querySelector('.ts-stagewrap')?.getAttribute('data-theme') ?? null,
+        )) ?? (await t.state()).theme;
       const facts = [];
       let ok = true;
       for (const [row, want] of [

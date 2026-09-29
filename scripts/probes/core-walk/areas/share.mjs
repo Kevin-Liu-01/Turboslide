@@ -479,10 +479,16 @@ async function productRound(t) {
     async () => {
       await openHistory();
       await t.clickControl('versionHistory.nameCurrent');
-      await t.waitControl('versionHistory.nameCurrent.field', 6000);
-      const radius = await t.styleOf('[data-control="versionHistory.nameCurrent.field"]', [
-        'border-radius',
-      ]);
+      /* the polish round (docs/POLISH.md 2.7 item 96, B5): Name current version opens the Name
+         version dialog; an older build drew the field inline in the panel */
+      const field = page
+        .locator(
+          '[data-control="dialog.nameVersion.name"], [data-control="versionHistory.nameCurrent.field"]',
+        )
+        .first();
+      await field.waitFor({ state: 'visible', timeout: 6000 });
+      const fieldControl = await field.getAttribute('data-control');
+      const radius = await t.styleOf(`[data-control="${fieldControl}"]`, ['border-radius']);
       await t.press('Escape');
       await closeHistory();
       return {

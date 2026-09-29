@@ -17,6 +17,10 @@ export const IDS = [
   'versions.panel.author-you',
   'versions.field.square',
   'comments.panel.empty-gesture',
+  /* the people round (docs/PEOPLE.md 3.1, 3.2, 3.19, 6.1): the window row's mark column and
+     Restore in the row's More menu */
+  'versions.window-mark-column',
+  'versions.restore-in-more',
 ];
 
 export async function run(t) {
@@ -173,15 +177,20 @@ export async function run(t) {
       const current = await fingerprint();
       const revisionBefore = (await t.state()).revision;
       await expandWindows();
-      const restores = await page.evaluate(() =>
-        [
-          ...document.querySelectorAll(
-            '[data-control^="versionHistory."][data-control$=".restore"], [data-control^="version.restore."]',
-          ),
-        ]
-          .filter((el) => el.getClientRects().length > 0)
-          .map((el) => el.getAttribute('data-control')),
-      );
+      /* the row's Restore button is drawn on the row's hover and focus since the people round
+         (docs/PEOPLE.md 3.19), so the controls are read by their rows being drawn, not by the
+         button's own box, and the row is hovered before the click, as a person does */
+      const readRestores = () =>
+        page.evaluate(() =>
+          [
+            ...document.querySelectorAll(
+              '[data-control^="versionHistory."][data-control$=".restore"], [data-control^="version.restore."]',
+            ),
+          ]
+            .filter((el) => (el.closest('li.ts-version') ?? el).getClientRects().length > 0)
+            .map((el) => el.getAttribute('data-control')),
+        );
+      const restores = await readRestores();
       let restoreCtl = restores[restores.length - 1] ?? null;
       if (!restoreCtl) {
         const rows = await versionRows();
@@ -189,19 +198,19 @@ export async function run(t) {
         if (earliest) {
           await t.clickControl(earliest);
           await t.sleep(500);
-          const again = await page.evaluate(() =>
-            [
-              ...document.querySelectorAll(
-                '[data-control^="versionHistory."][data-control$=".restore"], [data-control^="version.restore."]',
-              ),
-            ]
-              .filter((el) => el.getClientRects().length > 0)
-              .map((el) => el.getAttribute('data-control')),
-          );
+          const again = await readRestores();
           restoreCtl = again[0] ?? null;
         }
       }
       if (!restoreCtl) return { ok: false, observed: 'no Restore control in the panel' };
+      const restoreRow = page
+        .locator(`[data-control="${restoreCtl}"]`)
+        .first()
+        .locator('xpath=ancestor::li[contains(@class, "ts-version")][1]');
+      if ((await restoreRow.count()) > 0) {
+        await restoreRow.hover();
+        await t.sleep(250);
+      }
       await t.clickControl(restoreCtl);
       await t.sleep(800);
       /* the restore has landed when the revision moved (the restore's own write); what it changed
@@ -387,6 +396,7 @@ export async function run(t) {
   );
   await t.advancedBack('the versions rows');
   await productRound(t);
+  await peopleRound(t);
 }
 
 /**
@@ -530,6 +540,286 @@ async function productRound(t) {
           facts.search === 0 &&
           facts.filter === 0,
         observed: `sentence ${facts.sentence}; gesture line ${facts.gesture}; tabs ${facts.tabs}, search ${facts.search}, filter ${facts.filter}; text "${facts.text}"`,
+      };
+    },
+  );
+}
+
+/**
+ * The people round's rows (docs/PEOPLE.md 3.1, 3.2, 3.19, 6.1): the window row's mark column in
+ * Version history (the first mark 16 px from the panel's left edge, level with the standalone
+ * rows and the day heading; the expanded window's rule at x 25 and its rows' marks at x 41; a one
+ * author window's text in the standalone rows' text column; the "+N" count at 11 px) and Restore
+ * this version first in a row's More menu, the row's Restore button drawn on hover and focus only
+ * and the meta line unclipped at the panel's 320 px. One browser makes one author windows, so the
+ * four author strip is not read and the "+N" size is read through a probe element of its class.
+ * B2 owns the panel.
+ */
+async function peopleRound(t) {
+  const { page } = t;
+  await t.clickCard(t.deck.titleSlide);
+  await t.clearAll();
+  const openHistory = async () => {
+    if (!(await t.visible('panel.versionHistory'))) {
+      await t.menuPath('file', 'file.versionHistory', 'file.versionHistory.see');
+      await t.waitControl('panel.versionHistory', 8000);
+    }
+    await t.sleep(300);
+  };
+  const closeHistory = async () => {
+    if (await t.visible('panel.versionHistory.close'))
+      await t.clickControl('panel.versionHistory.close');
+    else await t.press('Escape');
+    await t.sleep(200);
+  };
+  const visibleRows = (selector) =>
+    page.evaluate(
+      (s) =>
+        [...document.querySelectorAll(s)]
+          .filter((el) => el.getClientRects().length > 0)
+          .map((el) => el.getAttribute('data-control')),
+      selector,
+    );
+  await t.step(
+    'versions.window-mark-column',
+    "Version history; read a window row's first mark, the standalone rows' marks and the day heading; expand the window and read its rule and its rows' marks; read the +N size",
+    "the window row's first chip is 16 px from the panel's left edge, level with the standalone marks and the day heading; the expanded rule at x 25, its marks at x 41; a one author window's text in the standalone text column; +N at 11 px",
+    async () => {
+      await openHistory();
+      /* the windows are read collapsed first: the row's own mark column */
+      const facts = await page.evaluate(() => {
+        const visible = (el) => el.getClientRects().length > 0;
+        const panel = document.querySelector('[data-control="panel.versionHistory"]');
+        if (!panel) return null;
+        const pr = panel.getBoundingClientRect();
+        const left = (el) =>
+          el ? Math.round((el.getBoundingClientRect().left - pr.left) * 10) / 10 : null;
+        const windows = [...panel.querySelectorAll('.ts-version-window-row')].filter(visible);
+        const standalone = [...panel.querySelectorAll('li.ts-version')].filter(
+          (el) => visible(el) && el.closest('.ts-versions-list.is-window') === null,
+        );
+        const heading = panel.querySelector('.ts-versions-day-head');
+        const bodyLeft = (row) => left(row.querySelector('.ts-version-body'));
+        const marksOf = (row) => row.querySelectorAll('.ts-chip').length;
+        const oneAuthor = windows.find((row) => marksOf(row) === 1) ?? null;
+        const first = windows[0] ?? null;
+        const probe = document.createElement('span');
+        probe.className = 'ts-version-marks-more';
+        probe.textContent = '+2';
+        (first?.querySelector('.ts-version-marks') ?? panel).appendChild(probe);
+        const moreSize = getComputedStyle(probe).fontSize;
+        probe.remove();
+        return {
+          panelWidth: Math.round(pr.width),
+          windows: windows.length,
+          authorsOfFirst: first ? marksOf(first) : null,
+          firstControl: first?.getAttribute('data-control') ?? null,
+          chipLeft: first ? left(first.querySelector('.ts-chip')) : null,
+          standaloneChipLeft: standalone[0] ? left(standalone[0].querySelector('.ts-chip')) : null,
+          headingLeft: left(heading),
+          oneAuthorBody: oneAuthor ? bodyLeft(oneAuthor) : null,
+          standaloneBody: standalone[0] ? bodyLeft(standalone[0]) : null,
+          moreSize,
+        };
+      });
+      if (!facts) return { ok: false, observed: 'no Version history panel' };
+      if (facts.windows === 0) {
+        await closeHistory();
+        return {
+          ok: null,
+          observed:
+            'not driven: the panel lists no window row (two records within 15 minutes by one author, unnamed)',
+        };
+      }
+      /* the expanded window: its rule and its rows' marks */
+      await t.clickControl(facts.firstControl);
+      await page
+        .locator('.ts-versions-list.is-window')
+        .first()
+        .waitFor({ timeout: 4000 })
+        .catch(() => undefined);
+      const expanded = await page.evaluate(() => {
+        const panel = document.querySelector('[data-control="panel.versionHistory"]');
+        const pr = panel.getBoundingClientRect();
+        const list = document.querySelector('.ts-versions-list.is-window');
+        if (!list) return null;
+        const lr = list.getBoundingClientRect();
+        const cs = getComputedStyle(list);
+        const rule =
+          cs.borderLeftWidth !== '0px' ? Math.round((lr.left - pr.left) * 10) / 10 : null;
+        const marks = [...list.querySelectorAll('.ts-version .ts-chip')]
+          .filter((el) => el.getClientRects().length > 0)
+          .map((el) => Math.round((el.getBoundingClientRect().left - pr.left) * 10) / 10);
+        return { rule, borderLeft: `${cs.borderLeftWidth} ${cs.borderLeftColor}`, marks };
+      });
+      await t.clickControl(facts.firstControl).catch(() => undefined);
+      await closeHistory();
+      const near = (a, b, tol) => a !== null && b !== null && Math.abs(a - b) <= tol;
+      /* 16 px from the panel's content edge, x 17 from its outer edge with the 1 px border
+         (AUDIT.md defect 1): either reading of the same column */
+      const column = facts.chipLeft !== null && facts.chipLeft >= 15.5 && facts.chipLeft <= 17.5;
+      const level =
+        near(facts.chipLeft, facts.standaloneChipLeft, 0.5) &&
+        near(facts.chipLeft, facts.headingLeft, 0.5);
+      const rule = expanded !== null && expanded.rule !== null && near(expanded.rule, 25, 1);
+      const marks =
+        expanded !== null &&
+        expanded.marks.length > 0 &&
+        expanded.marks.every((x) => near(x, 41, 1));
+      const oneAuthorColumn =
+        facts.oneAuthorBody === null ? null : near(facts.oneAuthorBody, facts.standaloneBody, 0.5);
+      const more = facts.moreSize === '11px';
+      return {
+        ok: column && level && rule && marks && oneAuthorColumn !== false && more,
+        observed: `panel ${facts.panelWidth} px; ${facts.windows} window rows (the first by ${facts.authorsOfFirst} author(s)); first mark at x ${facts.chipLeft}, standalone marks at x ${facts.standaloneChipLeft}, day heading at x ${facts.headingLeft}; expanded rule at x ${expanded?.rule ?? 'none'} (${expanded?.borderLeft ?? 'no list'}), its marks at x ${expanded?.marks.join(', ') || 'none'}; one author window's text at x ${facts.oneAuthorBody ?? 'no such window'} against the standalone text at x ${facts.standaloneBody}; +N reads ${facts.moreSize} through a probe element`,
+      };
+    },
+  );
+  await t.step(
+    'versions.restore-in-more',
+    "Version history; a row's More menu; Restore this version; Cmd+Z; the row's Restore button at rest and on hover; every meta line's scrollWidth",
+    "More lists Restore this version first and a click restores (the revision moves) and Cmd+Z returns; the Restore button is drawn on hover and focus only; no meta line is clipped at the panel's 320 px",
+    async () => {
+      const fingerprint = async () => {
+        const ids = await t.slideOrder();
+        const slides = [];
+        for (const id of ids) slides.push(await t.slideJson(id));
+        return JSON.stringify({ ids, slides });
+      };
+      const current = await fingerprint();
+      const revisionBefore = (await t.state()).revision;
+      await openHistory();
+      for (const w of await visibleRows('[data-control^="versionHistory.window."]'))
+        await t.clickControl(w).catch(() => undefined);
+      await t.sleep(300);
+      const picks = await visibleRows('[data-control^="versionHistory."][data-control$=".pick"]');
+      const notCurrent = [];
+      for (const pick of picks) {
+        const n = pick.split('.')[1];
+        const isCurrent = await page.evaluate(
+          (v) =>
+            document
+              .querySelector(`li.ts-version[data-version="${v}"]`)
+              ?.classList.contains('is-current') ?? false,
+          n,
+        );
+        if (!isCurrent) notCurrent.push(n);
+      }
+      const n = notCurrent[notCurrent.length - 1];
+      if (n === undefined) {
+        await closeHistory();
+        return { ok: false, observed: `no version row but the current one (${picks.length} rows)` };
+      }
+      const rowSel = `li.ts-version[data-version="${n}"]`;
+      const restoreFacts = () =>
+        page.evaluate((sel) => {
+          const btn = document.querySelector(`${sel} .ts-version-restore`);
+          if (!btn) return { present: false };
+          const cs = getComputedStyle(btn);
+          const drawn =
+            btn.getClientRects().length > 0 &&
+            cs.display !== 'none' &&
+            cs.visibility !== 'hidden' &&
+            parseFloat(cs.opacity) > 0;
+          return { present: true, drawn };
+        }, rowSel);
+      const clip = await page.evaluate(() => {
+        const panel = document.querySelector('[data-control="panel.versionHistory"]');
+        const rows = [...panel.querySelectorAll('.ts-version-meta')].filter(
+          (el) => el.getClientRects().length > 0,
+        );
+        const clipped = rows.filter((el) => el.scrollWidth > el.clientWidth + 0.5);
+        return {
+          width: Math.round(panel.getBoundingClientRect().width),
+          metas: rows.length,
+          clipped: clipped.map((el) => el.textContent?.trim().slice(0, 60) ?? ''),
+        };
+      });
+      await page.mouse.move(8, 8);
+      await t.sleep(200);
+      const atRest = await restoreFacts();
+      await page.locator(rowSel).first().hover();
+      await t.sleep(300);
+      const onHover = await restoreFacts();
+      await page.mouse.move(8, 8);
+      await t.sleep(200);
+      /* the More menu of the row */
+      await t.clickControl(`versionHistory.${n}.more`);
+      await t.sleep(300);
+      const menuRows = await page.evaluate(() => {
+        const menus = [...document.querySelectorAll('[role="menu"]')].filter(
+          (el) => el.getClientRects().length > 0,
+        );
+        const menu = menus[menus.length - 1];
+        if (!menu) return [];
+        return [...menu.querySelectorAll('[role="menuitem"], [role="menuitemcheckbox"]')].map(
+          (el) => ({
+            id: el.getAttribute('data-menu-item') ?? el.getAttribute('data-control') ?? '',
+            text: el.textContent?.trim() ?? '',
+            disabled: el.getAttribute('aria-disabled') === 'true',
+          }),
+        );
+      });
+      const first = menuRows[0] ?? null;
+      const firstIsRestore =
+        first !== null &&
+        (first.id === 'version.restore' || /^Restore this version/.test(first.text)) &&
+        !first.disabled;
+      let restored = false;
+      let back = false;
+      let revisionAfter = revisionBefore;
+      let words = null;
+      if (firstIsRestore) {
+        /* the row by its own id (build/b2.md item 6d: `menu.version.restore`, `data-menu-item`
+           `version.restore`), never the first item of whichever menu the DOM holds */
+        const row = page
+          .locator(
+            '[role="menu"] [data-menu-item="version.restore"], [data-control="menu.version.restore"]',
+          )
+          .filter({ visible: true })
+          .first();
+        if ((await row.count()) === 0)
+          await page.locator('[role="menu"] [role="menuitem"]').first().click();
+        else await row.click();
+        const wrote =
+          (await t.pollUntil(
+            async () => (await t.state()).revision,
+            (r) => r !== revisionBefore,
+            15_000,
+          )) !== revisionBefore;
+        words = await t.textOf('deck.saveState');
+        const after = await t
+          .pollUntil(fingerprint, (f) => f !== current, 35_000, 500)
+          .catch(fingerprint);
+        const notice = await page.evaluate(
+          () => document.querySelector('.ts-versions-notice')?.textContent?.trim() ?? null,
+        );
+        revisionAfter = (await t.state()).revision;
+        restored = wrote && (after !== current || /restored/i.test(notice ?? ''));
+        await t.settled();
+        await t.clearAll();
+        await t.press('Meta+z');
+        back = await t
+          .pollUntil(
+            async () =>
+              (await t.state()).revision !== revisionAfter && (await fingerprint()) === current,
+            (x) => x,
+            15_000,
+          )
+          .catch(() => false);
+        await t.settled();
+      } else await t.press('Escape');
+      await closeHistory();
+      return {
+        ok:
+          firstIsRestore &&
+          restored &&
+          back &&
+          atRest.present &&
+          atRest.drawn === false &&
+          onHover.drawn === true &&
+          clip.clipped.length === 0,
+        observed: `More menu rows ${menuRows.map((r) => `${r.id || r.text}${r.disabled ? ' (disabled)' : ''}`).join(', ') || 'none'}; restore of row ${n} wrote ${restored} (revision ${revisionBefore} -> ${revisionAfter}; save words "${words ?? 'not read'}"); Cmd+Z brought the current version back ${back}; Restore button at rest ${atRest.present ? (atRest.drawn ? 'drawn' : 'hidden') : 'absent'}, on hover ${onHover.drawn ? 'drawn' : 'hidden'}; ${clip.metas} meta lines at ${clip.width} px, clipped ${clip.clipped.length}${clip.clipped.length > 0 ? ` ("${clip.clipped[0]}")` : ''}`,
       };
     },
   );

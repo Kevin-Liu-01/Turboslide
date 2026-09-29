@@ -8,7 +8,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { UNPARKABLE_FEATURES } from '../../../scripts/probes/core-matrix.mjs';
+import { LOCAL_SPEC_DRIVERS, UNPARKABLE_FEATURES } from '../../../scripts/probes/core-matrix.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(here, '..', '..', '..');
@@ -207,7 +207,9 @@ function readme() {
   const held = [];
   for (const [key, heading] of FEATURES) {
     const mine = rows.filter((r) => r.feature === key);
-    const red = mine.filter((r) => r.today !== 'works');
+    /* a local row (docs/PEOPLE.md 6.2, the accounts spec on a node server with an identity
+       database) never holds a paragraph: production cannot drive it; it is listed apart below */
+    const red = mine.filter((r) => r.today !== 'works' && !LOCAL_SPEC_DRIVERS.includes(r.driver));
     if (red.length === 0) passing.push(key);
     else held.push([key, heading, red]);
   }
@@ -237,6 +239,13 @@ function readme() {
       `- ${heading} (${code(key)}), held by ${red.length} of ${rows.filter((r) => r.feature === key).length} rows: ${red.map((r) => code(r.id)).join(', ')}.`,
     );
     lines.push(`  Held paragraph: ${README[key]}`);
+  }
+  const local = rows.filter((r) => LOCAL_SPEC_DRIVERS.includes(r.driver));
+  if (local.length > 0) {
+    lines.push('');
+    lines.push(
+      `The local rows of docs/PEOPLE.md 6.2 (driven by ${LOCAL_SPEC_DRIVERS.map(code).join(', ')} on a node server with an identity database, never on production, and never holding a paragraph): ${local.map((r) => code(r.id)).join(', ')}.`,
+    );
   }
   return lines.join('\n');
 }

@@ -12,8 +12,10 @@ import {
   CORE_FEATURES,
   CORE_MATRIX,
   CORE_IDS,
+  isLocalRow,
   isManualRow,
   isMeasureRow,
+  localRows,
   tally,
 } from '../../scripts/probes/core-matrix.mjs';
 import { FEATURES, LEAD, OUTPUTS_SENTENCE } from './what-works-data.mjs';
@@ -73,11 +75,13 @@ describe('renderSection', () => {
       const rows = CORE_MATRIX.filter((r) => r.feature === f.key);
       /* a manual row (ruling (3)) left not driven holds nothing; it is listed as walked by hand.
          A measurement row (PRODUCT.md 8.2) holds nothing either; it is listed as measured */
+      /* a local row (docs/PEOPLE.md 6.2) is absent from the matrix's own reading and listed apart */
       const red = rows.filter(
         (r) =>
           results[r.id] !== 'passed' &&
           !(results[r.id] === 'not driven' && isManualRow(r)) &&
-          !isMeasureRow(r),
+          !isMeasureRow(r) &&
+          !(results[r.id] === undefined && isLocalRow(r)),
       );
       if (red.length === 0) {
         expect(section).toContain(f.paragraph);
@@ -97,9 +101,19 @@ describe('renderSection', () => {
     );
     /* the measurement rows of PRODUCT.md 8.2 hold nothing; a red one is listed as measured */
     const measuredRed = CORE_MATRIX.filter((r) => isMeasureRow(r) && results[r.id] !== 'passed');
+    /* the local rows of docs/PEOPLE.md 6.2 are left out of the matrix's own reading and listed apart */
+    const local = localRows().filter((r) => results[r.id] === undefined);
     expect(holding).toBe(
-      t.broken + t.flaky + t['not driven'] - manualNotDriven.length - measuredRed.length,
+      t.broken +
+        t.flaky +
+        t['not driven'] -
+        manualNotDriven.length -
+        measuredRed.length -
+        local.length,
     );
+    expect(local.length).toBe(localRows().length);
+    expect(section).toContain('Driven on a node server with an identity database');
+    for (const r of local) expect(section).toContain(`\`${r.id}\``);
     expect(section).toContain('Walked by hand, never counted as passed by a run');
     for (const r of manualNotDriven) expect(section).toContain(`\`${r.id}\``);
     if (measuredRed.length > 0) {

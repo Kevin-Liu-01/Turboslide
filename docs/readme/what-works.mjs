@@ -15,7 +15,10 @@
 // on production on the date the matrix names. With `--results` the file is a run of FOCUS.md 6.2:
 // `{ "commit", "origin", "date", "results": { "<id>": "passed" | "failed" | "not driven" } }`, or
 // the `results` map alone; an id the run does not name is not driven (the rule of
-// `parkedFeaturesOf`). Node only; no dependency.
+// `parkedFeaturesOf`), except a local row of docs/PEOPLE.md 6.2 (the accounts spec's on a node
+// server with an identity database), which a reading that did not record it lists apart and
+// never holds a paragraph by; the matrix's own reading leaves the local rows out for the same
+// reason. Node only; no dependency.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,6 +30,7 @@ import {
   RUN_RESULTS,
   coreRow,
   isManualRow,
+  isLocalRow,
   isMeasureRow,
   parkedFeaturesOf,
 } from '../../scripts/probes/core-matrix.mjs';
@@ -51,12 +55,19 @@ export function matrixDate() {
   return m[1];
 }
 
-/** The results the matrix's `today` field implies: works passed, broken and flaky failed. */
+/**
+ * The results the matrix's `today` field implies: works passed, broken and flaky failed. A local
+ * row (docs/PEOPLE.md 6.2; `isLocalRow`) is left out: its `today` is what production could not
+ * drive (no identity database there), so the reading lists it apart the way a deployment run does
+ * and a feature's paragraph is never held by it.
+ */
 export function resultsFromToday() {
   const out = {};
-  for (const row of CORE_MATRIX)
+  for (const row of CORE_MATRIX) {
+    if (isLocalRow(row)) continue;
     out[row.id] =
       row.today === 'works' ? 'passed' : row.today === 'not driven' ? 'not driven' : 'failed';
+  }
   return out;
 }
 
@@ -88,7 +99,7 @@ export function renderSection(run) {
   const featureOf = new Map(FEATURES.map((f) => [f.key, f]));
   for (const key of CORE_FEATURES)
     if (!featureOf.has(key)) throw new Error(`what-works-data.mjs has no entry for ${key}`);
-  const { red } = parkedFeaturesOf(results);
+  const { red, local } = parkedFeaturesOf(results);
   const rowsOf = (key) => CORE_MATRIX.filter((r) => r.feature === key);
   /* from the matrix's own reading the row keeps its audit word (broken, flaky, not driven); from a run it carries the run's */
   const wordOf = (r) => (run.fromToday ? coreRow(r.id).today : r.result);
@@ -137,6 +148,17 @@ export function renderSection(run) {
     lines.push('');
     lines.push(
       `Walked by hand, never counted as passed by a run (docs/gslides-parity/focus/manual-checklist.md): ${manual
+        .map((r) => code(r.id))
+        .join(', ')}.`,
+    );
+  }
+  /* the local rows of docs/PEOPLE.md 6.2 this reading did not record: driven by the accounts spec
+     on a node server with an identity database, never by a deployment run; listed apart, never
+     counted as passed and never holding a feature's paragraph */
+  if (local.length > 0) {
+    lines.push('');
+    lines.push(
+      `Driven on a node server with an identity database, never on the deployment this reading comes from (docs/PEOPLE.md 6.2; the gate's \`--only accounts\` run judges them): ${local
         .map((r) => code(r.id))
         .join(', ')}.`,
     );

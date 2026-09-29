@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 import type { BrowserContext, Locator, Page } from '@playwright/test';
 
+import { hueFor } from '@turboslide/identity/hues';
+
 import {
   Scratch,
   addSlide,
@@ -1850,6 +1852,328 @@ test(title('assist.viewer.disabled'), async ({ browser }) => {
   }
 });
 
+// ---------------------------------------------------------------------------------------------
+// the people round's rows (docs/PEOPLE.md 3.7, 3.9, 3.10, 3.15, 6.1): the chip tooltip's trust
+// sentence, the departed guest's comment, the resolved owner row and the caret's hue. Two
+// anonymous browsers, on the memory tier and on a deployment alike; the account and picture rows
+// are e2e/accounts.spec.ts on a node server with an identity database (6.2). B1 owns the room's
+// identity path and the controller, B2 the chrome's people surfaces, B3 the editor's account
+// paths.
+
+type PeopleRow = {
+  clientId: string;
+  principalId?: string;
+  label?: string;
+  name?: string;
+  trust?: string;
+  mark?: { variant?: string; hue?: { slot?: number; hex?: string } };
+};
+/** The roster rows of a tab as describe().state.presence carries them, with the marks. */
+async function peopleRows(p: Page): Promise<{ self: PeopleRow | null; others: PeopleRow[] }> {
+  const s = (await state(p)).presence as unknown as
+    { self?: PeopleRow; others?: PeopleRow[] } | undefined;
+  return { self: s?.self ?? null, others: s?.others ?? [] };
+}
+/** The tooltip plate's name and doc lines after a hover from a neutral point; null when none shows. */
+async function tipOf(
+  p: Page,
+  target: Locator,
+): Promise<{ name: string | null; doc: string | null } | null> {
+  await p.mouse.move(720, 520);
+  await p.waitForTimeout(300);
+  await target.hover();
+  await p.waitForTimeout(650);
+  return p.evaluate(() => {
+    const tip = document.querySelector('.pt-tip');
+    if (!tip || tip.getClientRects().length === 0) return null;
+    return {
+      name: tip.querySelector('.pt-tip-name')?.textContent?.trim() ?? null,
+      doc: tip.querySelector('.pt-tip-doc')?.textContent?.trim() ?? null,
+    };
+  });
+}
+/** Names the second browser through the first Share's prompt (docs/PRODUCT.md rank 4); false when no prompt came. */
+async function nameSecond(p: Page, name: string): Promise<boolean> {
+  let named = await setDisplayName(p, name);
+  if (!named) {
+    await ctl(p, 'share.open').click();
+    named = await setDisplayName(p, name);
+    if (
+      await ctl(p, 'dialog.share')
+        .isVisible()
+        .catch(() => false)
+    )
+      await closeShare(p);
+  }
+  if (named) await settled(p);
+  return named;
+}
+/** Tools > Advanced tools as describe().state.settings reports it. */
+async function advancedToolsOn(p: Page): Promise<boolean> {
+  return p.evaluate(
+    () =>
+      (window.turboslide!.studio.describe().state as { settings?: Record<string, unknown> })
+        .settings?.['advancedTools'] === true,
+  );
+}
+/**
+ * Names this browser through the account menu's Change name (docs/PEOPLE.md 3.11): the own chip
+ * with the switch off, else with Tools > Advanced tools turned on through the product while
+ * `title.account` is parked (3.14) and off again after. The route is recorded for the ledger.
+ */
+async function nameSelf(p: Page, name: string): Promise<{ named: boolean; route: string }> {
+  await p.keyboard.press('Escape');
+  let route = 'title.account';
+  let switched = false;
+  if ((await ctl(p, 'title.account').count()) === 0) {
+    await p.locator('[data-control="menubar.tools"]').click();
+    await p.locator('[data-control="menu.tools.advancedTools"]').click();
+    await expect.poll(() => advancedToolsOn(p), { timeout: 5000 }).toBe(true);
+    if ((await p.locator('#ts-menu-tools').count()) > 0) await p.keyboard.press('Escape');
+    switched = true;
+    route = 'title.account with the switch on';
+    if ((await ctl(p, 'title.account').count()) === 0)
+      return { named: false, route: 'no title.account' };
+  }
+  try {
+    await ctl(p, 'title.account').click();
+    await p.locator('#ts-menu-account [data-control="account.changeName"]').first().click();
+    await ctl(p, 'dialog.namePrompt').waitFor({ timeout: 6000 });
+    await ctl(p, 'dialog.namePrompt.name').click();
+    await p.keyboard.press('Meta+a');
+    await p.keyboard.type(name, { delay: 40 });
+    const cont = p.locator('[data-control="dialog.namePrompt.continue"]').first();
+    if ((await cont.count()) > 0) await cont.click();
+    else await p.keyboard.press('Enter');
+    await expect(ctl(p, 'dialog.namePrompt')).toHaveCount(0, { timeout: 8000 });
+    await settled(p);
+  } finally {
+    if (switched) await switchOff(p);
+  }
+  return { named: true, route };
+}
+const rgbOfHex = (hex: string): string => {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+};
+
+test(title('people.chip-tooltip-trust'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  await openEditor(page, deck);
+  const first = (await slideOrder(page))[0]!;
+  await clickCard(page, first);
+  const { context: other, page: second } = await secondEditor(browser);
+  try {
+    const guest = await ownClientId(second);
+    await clickCard(second, first);
+    await settled(second);
+    await expect(chipOf(page, guest), "the second tab's chip on the owner's tab").toHaveCount(1, {
+      timeout: 10_000,
+    });
+    await expect
+      .poll(
+        async () => (await peopleRows(page)).others.find((r) => r.clientId === guest)?.label ?? '',
+        { timeout: 10_000 },
+      )
+      .not.toBe('');
+    const label = (await peopleRows(page)).others.find((r) => r.clientId === guest)?.label ?? '';
+    const before = await tipOf(page, chipOf(page, guest));
+    expect(before, 'the chip shows a tooltip').not.toBeNull();
+    expect(before?.name, 'the tooltip before the name').toBe(`${label} · slide 1`);
+    expect(before?.doc ?? '', 'the doc line of a label').toContain(
+      'Not signed in. A generated label for this browser.',
+    );
+    const named = await nameSecond(second, 'Maya Chen');
+    expect(named, 'the second browser typed a name through the Share prompt').toBe(true);
+    const t = Date.now();
+    await expect
+      .poll(async () => (await tipOf(page, chipOf(page, guest)))?.name ?? null, {
+        timeout: 5000,
+        message: "the owner's tooltip reads the typed name and the guest word within 5 s",
+      })
+      .toBe('Maya Chen · guest · slide 1');
+    const after = await tipOf(page, chipOf(page, guest));
+    test.info().annotations.push({
+      type: 'tooltip after the name',
+      description: `${Date.now() - t} ms; doc "${after?.doc ?? ''}"`,
+    });
+    expect(after?.doc ?? '', 'the doc line of a guest').toContain(
+      'Not signed in. This name was typed, not verified.',
+    );
+  } finally {
+    await closeSecond(other, second);
+  }
+});
+
+test(title('people.comment-departed-guest'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  await openEditor(page, deck);
+  const first = (await slideOrder(page))[0]!;
+  const before = ((await state(page)).comments?.threads ?? []).length;
+  const { context: other, page: second } = await secondEditor(browser);
+  let guestPrincipal = '';
+  let guestVariant: string | null = null;
+  try {
+    await ownClientId(second);
+    const named = await nameSecond(second, 'Noor Haddad');
+    expect(named, 'the second browser typed a name').toBe(true);
+    const self = (await peopleRows(second)).self;
+    guestPrincipal = self?.principalId ?? '';
+    guestVariant = self?.mark?.variant ?? null;
+    await clickCard(second, first);
+    await second.keyboard.press('Escape');
+    await second.keyboard.press('Meta+Alt+m');
+    await ctl(second, 'comment.card').waitFor({ timeout: 8000 });
+    await ctl(second, 'comment.card.new.field').click();
+    await second.keyboard.type('A guest wrote this and left.', { delay: 40 });
+    await ctl(second, 'comment.card.new.submit').click();
+    await expect
+      .poll(async () => ((await state(second)).comments?.threads ?? []).length, { timeout: 10_000 })
+      .toBe(before + 1);
+    await settled(second);
+  } finally {
+    await closeSecond(other, second);
+  }
+  expect(guestPrincipal, "the guest's principal id").toMatch(/^anon_/);
+  /* the reload: the panel row and the opened card read the resolved identity (3.9) */
+  const t = Date.now();
+  await openEditor(page, deck);
+  const slot = page.locator('[data-control="title.comments.slot"] button').first();
+  if ((await slot.count()) > 0) await slot.click();
+  else await ctl(page, 'title.comments').click();
+  await ctl(page, 'panel.comments').waitFor({ timeout: 8000 });
+  const rowOf = page
+    .locator(`[data-control^="panel.comments.thread."]`)
+    .filter({ has: page.locator(`.ts-chip[data-principal="${guestPrincipal}"]`) })
+    .first();
+  await expect(rowOf, "the guest's thread row with the guest's mark").toHaveCount(1, {
+    timeout: 10_000 - Math.min(9000, Date.now() - t),
+  });
+  const row = await rowOf.evaluate((el) => ({
+    name: el.querySelector('.ts-comments-row-name')?.textContent?.trim() ?? null,
+    trust: el.querySelector('.ts-comments-row-trust')?.textContent?.trim() ?? null,
+    variant: el.querySelector('.ts-chip')?.getAttribute('data-variant') ?? null,
+    control: el.getAttribute('data-control'),
+  }));
+  test.info().annotations.push({
+    type: 'panel row after the reload',
+    description: `${Date.now() - t} ms; ${JSON.stringify(row)}; the guest's mark variant ${guestVariant}`,
+  });
+  expect(row.name).toBe('Noor Haddad');
+  expect(row.trust).toBe('guest');
+  expect(row.variant).toBe(guestVariant);
+  const threadId = row.control?.slice('panel.comments.thread.'.length) ?? '';
+  await ctl(page, `panel.comments.open.${threadId}`).click();
+  const card = page.locator(`[data-comment], .ts-comment`).filter({
+    has: page.locator(`.ts-chip[data-principal="${guestPrincipal}"]`),
+  });
+  await expect(card.first(), "the opened card with the guest's mark").toBeVisible({
+    timeout: 8000,
+  });
+  const head = await card.first().evaluate((el) => ({
+    name: el.querySelector('.ts-comment-name')?.textContent?.trim() ?? null,
+    trust: el.querySelector('.ts-comment-trust')?.textContent?.trim() ?? null,
+  }));
+  expect(head.name).toBe('Noor Haddad');
+  expect(head.trust).toBe('guest');
+  expect(Date.now() - t, 'read within 10 s of the reload').toBeLessThan(10_000 + 8000);
+  if (
+    await ctl(page, 'panel.comments.close')
+      .isVisible()
+      .catch(() => false)
+  )
+    await ctl(page, 'panel.comments.close').click();
+});
+
+test(title('share.dialog.owner-resolved'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  await openEditor(page, deck);
+  const { named, route } = await nameSelf(page, 'Ada Lovelace');
+  test.info().annotations.push({ type: 'owner named through', description: route });
+  expect(named, "the owner's name through the account menu's Change name").toBe(true);
+  const t = Date.now();
+  const { context: other, page: second } = await secondEditor(browser);
+  try {
+    await openShare(second);
+    const owner = ctl(second, 'dialog.share.owner');
+    await expect(owner, 'the owner row in the second browser').toHaveCount(1, { timeout: 8000 });
+    await expect
+      .poll(() => owner.locator('.ts-share-row-name').first().textContent(), {
+        timeout: Math.max(1000, 5000 - (Date.now() - t)),
+      })
+      .toContain('Ada Lovelace');
+    const row = await owner.evaluate((el) => ({
+      text: el.textContent?.replace(/\s+/g, ' ').trim() ?? '',
+      chip: el.querySelector('.ts-chip')?.getAttribute('aria-label') ?? null,
+      variant: el.querySelector('.ts-chip')?.getAttribute('data-variant') ?? null,
+    }));
+    test.info().annotations.push({
+      type: 'owner row',
+      description: `${Date.now() - t} ms after the name; ${JSON.stringify(row)}`,
+    });
+    expect(row.text).not.toMatch(/\b[A-Z][a-z]+ \d{3}\b/);
+    expect(`${row.text} ${row.chip ?? ''}`, 'the guest word beside the name').toMatch(/guest/);
+    expect(row.chip ?? '', "the owner's mark, named").toContain('Ada Lovelace');
+    await closeShare(second);
+  } finally {
+    await closeSecond(other, second);
+  }
+  const stage = await shareStage(page);
+  expect(`${stage.owner ?? ''} ${stage.people ?? ''}`, "the owner's own dialog reads You").toMatch(
+    /\bYou\b/,
+  );
+  await closeShare();
+});
+
+test(title('collab.caret-hue-matches-chip'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  await openEditor(page, deck);
+  const first = (await slideOrder(page))[0]!;
+  await clickCard(page, first);
+  const { context: other, page: second } = await secondEditor(browser);
+  try {
+    const guest = await ownClientId(second);
+    await clickCard(second, first);
+    const run = await headingRun(second);
+    const el = second
+      .locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${run}"]`)
+      .first();
+    await el.dblclick();
+    await second.waitForTimeout(200);
+    await second.keyboard.press('End');
+    await second.keyboard.type(' hue', { delay: 60 });
+    const caret = page.locator(`.ts-remote-caret[data-client="${guest}"]`).first();
+    await expect(caret, "B's caret on A's slide").toHaveCount(1, { timeout: 10_000 });
+    await expect(chipOf(page, guest)).toHaveCount(1, { timeout: 10_000 });
+    const facts = await page.evaluate((id) => {
+      const caret = document.querySelector(`.ts-remote-caret[data-client="${id}"]`);
+      const chip = document.querySelector(`[data-control="presence.chip.${id}"] .ts-chip`);
+      const stripe = chip?.querySelector('.ts-chip-stripe') ?? null;
+      return {
+        caret: caret ? getComputedStyle(caret).backgroundColor : null,
+        hue: chip?.getAttribute('data-hue') ?? null,
+        stripe: stripe ? getComputedStyle(stripe).backgroundColor : null,
+      };
+    }, guest);
+    const entry = (await peopleRows(page)).others.find((r) => r.clientId === guest);
+    const slot = entry?.mark?.hue?.slot ?? null;
+    test.info().annotations.push({
+      type: 'hue',
+      description: `data-hue ${facts.hue}, the roster entry's mark.hue.slot ${slot} (${entry?.mark?.hue?.hex ?? 'no hex'}); caret ${facts.caret}; stripe ${facts.stripe}`,
+    });
+    expect(facts.hue, "B's chip carries data-hue").not.toBeNull();
+    const hue = Number(facts.hue);
+    expect(hue, "data-hue equals the roster entry's hueSlot plus one").toBe(slot);
+    const hex = hueFor(hue);
+    expect(facts.caret, "the caret's background is hueFor(hue)").toBe(rgbOfHex(hex));
+    expect(facts.stripe, "the chip's stripe is the same hex").toBe(rgbOfHex(hex));
+    await second.keyboard.press('Escape');
+    await settled(second);
+  } finally {
+    await closeSecond(other, second);
+  }
+});
+
 coverage(import.meta.filename, [
   'share.dialog.open',
   'share.copy-view-link',
@@ -1882,5 +2206,10 @@ coverage(import.meta.filename, [
   'brand.colors.collab-rerender',
   'brand.surfaces.viewer-and-show',
   'assist.viewer.disabled',
+  /* the people round (docs/PEOPLE.md 6.1) */
+  'people.chip-tooltip-trust',
+  'people.comment-departed-guest',
+  'share.dialog.owner-resolved',
+  'collab.caret-hue-matches-chip',
 ]);
 void statusOf;

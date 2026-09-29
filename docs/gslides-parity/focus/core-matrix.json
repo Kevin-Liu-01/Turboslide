@@ -1,5 +1,5 @@
 {
-  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship. The vector round (docs/VECTOR.md section 6) added 43 rows on 2026-09-24 and extended one (shapes.insert.named-rows reads the seven Insert > Shape rows): the shapes rows of the geometry interpreter, the glyph grids, Change shape and Mask image (parks naming the gallery row or the control each measures, so a red one re parks that category alone and never the three named rows; shapes.geometry.pinned-three, .text-rect and shapes.icons.named-rows carry no parks, being core rows of an earlier round's feature), the menus area whose rows are the chrome's (AREA_FEATURE menus: chrome, unparkable: the icons on the visual rows), the parkable feature svg (the intake by the chooser, a paste, a drop and a URL, the sheet at two zooms, the gestures, the copy, the sanitizer and the exports; every row parks one or more of the six ids of VECTOR.md 4.8 declared in core-matrix.mjs) and logos.export.svgblip; `today` is what the tree at 2be923e and the audits show on 2026-09-24 (a row of a control that does not exist is not driven with the document's reading as its evidence; a behaviour production shows red is broken with the audit's severity), and `note` names the round, the VECTOR.md section and the lane. The row logos.intake.svg-sentence left with its sentence (4.7); svg.import.upload measures the upload. features round, ship two (docs/FEATURES.md 5, 7.1) added the 29 rows of the shader library on 2026-09-24 under the new parkable feature `shaders` and the existing export and view: `today` is what audit-shaders under docs/gslides-parity/features/ saw on production at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship two P0 or P1) with the lane and the FEATURES.md section, `parks` names the FEATURES.md control ids the row alone guards (a dialog or Shader section control is hidden through packages/chrome/src/parked-controls.ts), the four export rows of the shaders area carry the feature export and the View row the feature view (ROW_FEATURE), so a red one blocks the ship or parks its own control and never the shader library, and `shaders.perf.editor-frame` carries `measure` (7.2): its number is recorded and never holds the ship. The objects round (docs/OBJECTS.md section 6) added 33 rows on 2026-09-25 and carried five (tables.seam.row-drag, tables.edge.add-row-column, tables.heads.select-row-column, tables.cells.prompt-hovered-only, wordart.tail.fill-outline; each keeps its id, its note gains the round and the section): nineteen under the new area `gestures`, whose rows are the arrange feature's (AREA_FEATURE gestures: arrange, unparkable, so a red gesture row fails the ship; the live gestures of section 2: the draw drawn as it grows, the click placement, the object and the ring equal at every frame of a resize, a seam drag, a move and a rotation, the connector during a move, the frame cadence and its budget read from describe().state.gesture, the readout, and one watch row), the tables rows of section 3 (the ring with a cell open, the cell ring, the editor guide grid, the show's rules, the box from the rows, the rows that grow, the seams with a cell open, the header toggle from the row head, the Table section's words), and one row each under charts, diagrams and lines (section 4). `today` is what docs/OBJECTS.md measured on production on 2026-09-26 (the return round plus ship one) and on the worktree at 5bf158a, in the four words; a row of a control that does not exist is not driven with the item that measured its absence as evidence; a broken row's severity follows the item's value by the product round's rule; `note` names the round, the OBJECTS.md section and the lane; `setup` names the block.insert and slide.new writes a driver makes before its steps. The frame rows read the gesture record of the window API (docs/OBJECTS.md 2.4), a field the integrator lands by B1's request; on a build without it they read not driven with the field named. The field fonts hotfix (docs/gslides-parity/features/build/field-fonts.md) added one row on 2026-09-28 under fonts (`fonts.field.own-face`): `today` is what Kevin reported and a Playwright probe measured on production at 877eb690 that day (the Font control disabled on the cover's title and subtitle), severity 3 by the product round's rule for an item of the highest value, and `note` names the hotfix and its document shape.",
+  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship. The vector round (docs/VECTOR.md section 6) added 43 rows on 2026-09-24 and extended one (shapes.insert.named-rows reads the seven Insert > Shape rows): the shapes rows of the geometry interpreter, the glyph grids, Change shape and Mask image (parks naming the gallery row or the control each measures, so a red one re parks that category alone and never the three named rows; shapes.geometry.pinned-three, .text-rect and shapes.icons.named-rows carry no parks, being core rows of an earlier round's feature), the menus area whose rows are the chrome's (AREA_FEATURE menus: chrome, unparkable: the icons on the visual rows), the parkable feature svg (the intake by the chooser, a paste, a drop and a URL, the sheet at two zooms, the gestures, the copy, the sanitizer and the exports; every row parks one or more of the six ids of VECTOR.md 4.8 declared in core-matrix.mjs) and logos.export.svgblip; `today` is what the tree at 2be923e and the audits show on 2026-09-24 (a row of a control that does not exist is not driven with the document's reading as its evidence; a behaviour production shows red is broken with the audit's severity), and `note` names the round, the VECTOR.md section and the lane. The row logos.intake.svg-sentence left with its sentence (4.7); svg.import.upload measures the upload. features round, ship two (docs/FEATURES.md 5, 7.1) added the 29 rows of the shader library on 2026-09-24 under the new parkable feature `shaders` and the existing export and view: `today` is what audit-shaders under docs/gslides-parity/features/ saw on production at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship two P0 or P1) with the lane and the FEATURES.md section, `parks` names the FEATURES.md control ids the row alone guards (a dialog or Shader section control is hidden through packages/chrome/src/parked-controls.ts), the four export rows of the shaders area carry the feature export and the View row the feature view (ROW_FEATURE), so a red one blocks the ship or parks its own control and never the shader library, and `shaders.perf.editor-frame` carries `measure` (7.2): its number is recorded and never holds the ship. The objects round (docs/OBJECTS.md section 6) added 33 rows on 2026-09-25 and carried five (tables.seam.row-drag, tables.edge.add-row-column, tables.heads.select-row-column, tables.cells.prompt-hovered-only, wordart.tail.fill-outline; each keeps its id, its note gains the round and the section): nineteen under the new area `gestures`, whose rows are the arrange feature's (AREA_FEATURE gestures: arrange, unparkable, so a red gesture row fails the ship; the live gestures of section 2: the draw drawn as it grows, the click placement, the object and the ring equal at every frame of a resize, a seam drag, a move and a rotation, the connector during a move, the frame cadence and its budget read from describe().state.gesture, the readout, and one watch row), the tables rows of section 3 (the ring with a cell open, the cell ring, the editor guide grid, the show's rules, the box from the rows, the rows that grow, the seams with a cell open, the header toggle from the row head, the Table section's words), and one row each under charts, diagrams and lines (section 4). `today` is what docs/OBJECTS.md measured on production on 2026-09-26 (the return round plus ship one) and on the worktree at 5bf158a, in the four words; a row of a control that does not exist is not driven with the item that measured its absence as evidence; a broken row's severity follows the item's value by the product round's rule; `note` names the round, the OBJECTS.md section and the lane; `setup` names the block.insert and slide.new writes a driver makes before its steps. The frame rows read the gesture record of the window API (docs/OBJECTS.md 2.4), a field the integrator lands by B1's request; on a build without it they read not driven with the field named. The field fonts hotfix (docs/gslides-parity/features/build/field-fonts.md) added one row on 2026-09-28 under fonts (`fonts.field.own-face`): `today` is what Kevin reported and a Playwright probe measured on production at 877eb690 that day (the Font control disabled on the cover's title and subtitle), severity 3 by the product round's rule for an item of the highest value, and `note` names the hotfix and its document shape. The people round (docs/PEOPLE.md section 6) added 21 rows on 2026-09-29 under the area people (AREA_FEATURE people: share, unparkable, so a red people row blocks the ship unless it carries parks) and the existing versions, collab and share: the chip geometry, the two renderers' agreement, the own chip following the name and the avatar, the anonymous picture refusal, the version panel's mark column and Restore in the More menu, the chip tooltip's trust sentence, the departed guest's comment, the resolved owner row, the caret's hue, and ten local rows whose driver is e2e/accounts.spec.ts (LOCAL_SPEC_DRIVERS): the badge, the aliased author, the label suffix, the grant's email line and the six picture rows. today is what the audit under docs/gslides-parity/people/ measured on production on 2026-09-29 at bc01ccf4 in the four words (a row of a state production cannot hold, an account, a picture or a label collision, is not driven with the audit item that measured its absence as evidence; a broken row's severity follows the item's weight by the product round's rule); note names the round, the PEOPLE.md section and the lane; a local row is driven by the accounts spec on a node server with an identity database and never by a deployment run (6.2): absent from a run's results it is listed apart under local, never counted as passed and never a reason to park; the picture rows and the two own chip rows carry parks (6.1); people.comment-departed-guest is the comments feature's and people.versions-author-account the versions feature's (ROW_FEATURE).",
   "rows": [
     {
       "id": "decks.home.new-presentation",
@@ -4810,7 +4810,8 @@
       "driver": "core/share.spec.ts",
       "today": "broken",
       "evidence": "audit-seller 4 (Copper 859)",
-      "severity": 3
+      "severity": 3,
+      "note": "People round; docs/PEOPLE.md 3.11"
     },
     {
       "id": "share.name-prompt.first-share",
@@ -5271,7 +5272,8 @@
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-interface 31",
-      "severity": 1
+      "severity": 1,
+      "note": "People round; docs/PEOPLE.md 3.11"
     },
     {
       "id": "versions.field.square",
@@ -7868,6 +7870,212 @@
       "evidence": "docs/gslides-parity/objects/audit/c26-lines-elbow-selected.png (chip \"Shape\")",
       "severity": 1,
       "note": "Objects round; docs/OBJECTS.md 4.2 item 5 (packages/viewer/src/model.ts blockDisplayName); B3"
+    },
+    {
+      "id": "people.chip-plate-size",
+      "feature": "share",
+      "interaction": "With Advanced tools off, every 24 px .ts-chip in the title row, the roster and the builder's strip holds an svg.ts-chip-plate or img.ts-chip-picture whose box is 20 by 20 and 2 px inside the chip's outer edge on every side; a 16 px chip's is 12 by 12; the live stripe's box is 1 px inside the chip's inner edge on its left, right and bottom; the other chips' computed border colour is --pt-edge in light and dark chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "AUDIT.md defects 3, 4, 32; facts.json slot.*.svg (12 px); zoom-A-own-chip.png",
+      "note": "People round; docs/PEOPLE.md 3.3, 3.4 (B2). One browser: the walk reads the own chip, the account head's chip, the roster's own row (Shift+Tab opens the roster), the builder's 24 px cell, a 16 px version row chip and a comment card's chip; the stripe on the roster's own row; the other chips' border in the light and the dark appearance"
+    },
+    {
+      "id": "people.mark-renderers-agree",
+      "feature": "share",
+      "interaction": "The own chip's lit cells read from the DOM at 24 px equal the field of renderMarkBits(state.account.mark, 24, 'light') from packages/identity, before and after Change avatar > Glyph > Apply, and the 16 px version row chip equals the 16 px field",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "AUDIT.md defect 5 (22 to 48 of 130 to 192 shared ink pixels for a glyph)",
+      "note": "People round; docs/PEOPLE.md 3.5 (B2; B1 exposes the own mark on describe().state.account.mark, read as presence.self.mark until then). The walk imports renderMarkBits from packages/identity/src/marks-render.ts and compares the field's bits; the ring is the chip's border and the initials are text, so both stay out of the comparison"
+    },
+    {
+      "id": "people.own-chip-follows-name",
+      "feature": "share",
+      "interaction": "On a deck made from /new with Advanced tools off the own chip, its hair rule and the roster's \"(you)\" row are drawn; the name prompt fires on the first edit; after Change name the own chip's accessible name, the account menu's head and the roster's own row read the new name within 2 s with no reload, and the account menu lists no Sessions row for an anonymous person",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "AUDIT.md defects 11, 14; production 1 and 2; A-account-menu-named.png",
+      "parks": ["title.account", "title.presence.me"],
+      "note": "People round; docs/PEOPLE.md 3.11, 3.14 (B3, B1; the integrator unparks the two ids). The prompt of the first edit is the one the toolkit closes before the step that follows the walk's title, recorded on t.prompts.namePrompt"
+    },
+    {
+      "id": "people.own-chip-follows-avatar",
+      "feature": "share",
+      "interaction": "Change avatar > Glyph > Apply: the own chip's data-variant reads glyph within 2 s with no reload and after a reload; the builder reopened shows Glyph selected; the roster's own row draws the same cells as the own chip",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "AUDIT.md defects 11, 13; avatars 4, 5; A-slot-after-glyph-avatar.png",
+      "parks": ["title.account.changeAvatar"],
+      "note": "People round; docs/PEOPLE.md 3.11, 3.13 (B3, B4, B1). The reading after the reload has 10 s on a deployment (6.4, the per instance identity cache) and is rerun once with the instance named from sync.status"
+    },
+    {
+      "id": "people.avatar-anonymous-refused",
+      "feature": "share",
+      "interaction": "Anonymous: the builder's Picture tab reads \"Sign in to upload a picture\" with Apply disabled, and account.setAvatar with a picture data URL through the window API answers that sentence and writes nothing under u/",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "production, \"Profile and avatar builder in A\"; avatar.test.ts 141",
+      "note": "People round; docs/PEOPLE.md 4.3 (B4). The window API refuses every account action without the page's nonce (docs/security.md section 9), so its answer is recorded and the server's sentence is read through the agent surface with the bearer, which an agent principal meets too (setPictureAvatar refuses every non account principal); the own chip's variant is read unchanged after both"
+    },
+    {
+      "id": "versions.window-mark-column",
+      "feature": "versions",
+      "interaction": "In Version history a window row's first .ts-chip has its left edge 16 px from the panel's left edge, level with the standalone rows' marks and the day heading; the expanded window's rule stands at x 25 and its rows' marks at x 41; a one author window's text starts at the standalone rows' text column; the \"+N\" count is 11 px",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "AUDIT.md defects 1, 2; facts.json versions.A.markEdge (0 px); authorship 2, 3, 15",
+      "note": "People round; docs/PEOPLE.md 3.1, 3.2 (B2). One browser makes one author windows, so the four author strip is not read; the \"+N\" size is read from the panel's rule through a probe element of its class"
+    },
+    {
+      "id": "versions.restore-in-more",
+      "feature": "versions",
+      "interaction": "A version row's More menu lists Restore this version first and a click restores (the title row's save words change and Cmd+Z returns); the row's Restore button is drawn on hover and focus only; the row's meta line is not clipped (scrollWidth at most clientWidth) at the panel's 320 px",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "AUDIT.md defect 23; authorship 5 (\"kevinliu · gu\")",
+      "note": "People round; docs/PEOPLE.md 3.19 (B2: version.restore first in MORE_ITEMS, the button on hover and focus)"
+    },
+    {
+      "id": "people.chip-tooltip-trust",
+      "feature": "share",
+      "interaction": "Two browsers: the other person's chip tooltip in A reads \"<label> · slide 1\" with the doc \"Not signed in. A generated label for this browser.\"; after B types a name it reads \"<name> · guest · slide 1\" with \"Not signed in. This name was typed, not verified.\" within 5 s",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "AUDIT.md defect 7; parity 11 (trustTooltip has no caller); A-chip-tooltip-anonymous.png",
+      "note": "People round; docs/PEOPLE.md 3.7 (B2, B1)"
+    },
+    {
+      "id": "people.comment-departed-guest",
+      "feature": "comments",
+      "interaction": "B types a name, comments on slide 1 and closes its context; after a reload A's Comments panel row and the opened card read the name and \"guest\" with B's mark, within 10 s of the reload",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "AUDIT.md defect 9; parity 5",
+      "note": "People round; docs/PEOPLE.md 3.9 (B1); the feature is comments (ROW_FEATURE)"
+    },
+    {
+      "id": "share.dialog.owner-resolved",
+      "feature": "share",
+      "interaction": "A names itself; B, an editor by link, opens Share: the owner row reads A's name and \"guest\" with A's mark, not A's label, within 5 s of the name; A's own dialog reads \"You\" on the row",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "AUDIT.md defect 10; parity 3 (\"Cobalt 512\")",
+      "note": "People round; docs/PEOPLE.md 3.10 (B2, B3, B1). A names itself through the account menu's Change name, the switch turned on through the product while title.account is parked and off again after"
+    },
+    {
+      "id": "collab.caret-hue-matches-chip",
+      "feature": "share",
+      "interaction": "While B types in a heading on A's slide, B's caret in A reads a background equal to hueFor(hue) for the data-hue on B's chip, the chip's stripe reads the same hex, and data-hue equals the roster entry's hueSlot plus one",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "AUDIT.md defect 15; presence 2 (slot 1 in ink)",
+      "note": "People round; docs/PEOPLE.md 3.15 (B1). The roster entry's hueSlot plus one is read as the entry's mark.hue.slot on describe().state.presence.others, which the room computes from the same slot (room.ts rosterEntryFor)"
+    },
+    {
+      "id": "people.verified-badge",
+      "feature": "share",
+      "interaction": "Local: A signs in with the captured code and names itself; B (an editor by email grant) reads on A's roster row, A's comment head, A's version row and, in A's own tab, the account head a 14 px check-badge after the name and the accessible word \"signed in\", with the tooltip \"Signed in as <email>\"; a guest row carries \"guest\" and no badge; an account without a typed name reads its label with the badge, never the address",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "AUDIT.md defects 6, 7, 21; accounts 4, 5, 7; production has no account (AUDIT.md section 1)",
+      "note": "People round; docs/PEOPLE.md 3.6, 3.7, 3.18 (B1, B2). Local: the accounts spec on a node server with an identity database (6.2); the badge is read as [data-badge=\"check-badge\"] (build/b5.md, the request to B2)"
+    },
+    {
+      "id": "people.versions-author-account",
+      "feature": "versions",
+      "interaction": "Local: a record written before sign in and one written after: after a reload both read the account's name with no guest word and one mark (the alias), and A's own rows read \"You\"",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "AUDIT.md defects 6, 8; SPEC-3 452, 7.4",
+      "note": "People round; docs/PEOPLE.md 3.6, 3.8 (B1). Local; the feature is versions (ROW_FEATURE)"
+    },
+    {
+      "id": "people.labels-disambiguated",
+      "feature": "share",
+      "interaction": "Local, seeded: two principal records whose ids share a label, each with one version record on the deck; the version list and the roster (one of them present) read \"<label>\" and \"<label> (2)\" by first appearance, the tooltip carries the suffix, and the two chips' plates differ",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "AUDIT.md defect 18 (disambiguateLabels has no caller); production gap 2",
+      "note": "People round; docs/PEOPLE.md 3.17 (B1; B4's seed modes principals and cookie). Local, seeded: the two records' browsers write through the product with the seed's sealed cookies"
+    },
+    {
+      "id": "share.dialog.grant-email-line",
+      "feature": "share",
+      "interaction": "Local: a grant by email to B; A (the owner) opens Share and the grant row prints B's email as a line under the name and carries no title; C, a viewer by link, opens the dialog and sees no email",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "AUDIT.md defect 10; authorship 16 (title={grant.email})",
+      "note": "People round; docs/PEOPLE.md 3.10 (B2, B3, B1). Local"
+    },
+    {
+      "id": "people.avatar-upload",
+      "feature": "share",
+      "interaction": "Local, signed in: the builder's Picture tab takes a 1200 by 900 JPEG built by the seed, the crop box shows it, Apply closes the dialog, the own chip's <img src> matches /\\/u\\/[A-Za-z0-9_-]{22}\\/[0-9a-f]{64}-64\\.webp$/ with a srcset naming the 32 and 64 px files within 5 s, the Profile head reads the 128 px file, and B's chip for A draws the same URL within 10 s; the request's body was under 700 KB",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "AUDIT.md defect 12; avatars 1, 2, 3, 12; production gap 3",
+      "parks": ["dialog.avatarBuilder.panel.picture", "dialog.avatarBuilder.file"],
+      "note": "People round; docs/PEOPLE.md 4.1 to 4.4 (B3, B4, B2, B1). Local; the fixture apps/studio/e2e/fixtures/portrait-1200x900.jpg is the seed's picture jpeg 1200 900, committed so setInputFiles has a path"
+    },
+    {
+      "id": "people.avatar-cap-refusal",
+      "feature": "share",
+      "interaction": "Local, signed in: with toBlob stubbed to answer a 600 KB blob the dialog's error row reads the cap sentence and no account.setAvatar request leaves; a 600 KB WebP data URL through the window API answers the cap sentence from the server and writes nothing under u/",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "avatars 7 (the caps do not line up: 5 MB, 1 MB, 4.5 MB)",
+      "parks": ["dialog.avatarBuilder.panel.picture", "dialog.avatarBuilder.file"],
+      "note": "People round; docs/PEOPLE.md 4.1, 4.2 (B3, B4). Local; the server half goes through the localhost server's agent surface, since the window API refuses account actions without the page's nonce; the store is read as the folder under the server's state folder"
+    },
+    {
+      "id": "people.avatar-rotation",
+      "feature": "share",
+      "interaction": "Local: a second upload answers a new key, the chip's URL changes within 5 s, and the first URL answers 404 on the checkout route within 5 s",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "avatar.test.ts 155 (the server half); no chrome row drives it (avatars 17)",
+      "parks": ["dialog.avatarBuilder.panel.picture", "dialog.avatarBuilder.file"],
+      "note": "People round; docs/PEOPLE.md 4.3 (B4, B3). Local"
+    },
+    {
+      "id": "people.avatar-fallback-plate",
+      "feature": "share",
+      "interaction": "Local: after the upload the key's folder under .turboslide/users/u/ is removed; after a reload the own chip draws the initials plate with no <img> and no empty box within 5 s",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "parity, \"the picture's limits and fallbacks\"; IdentityChip.tsx 145 to 146 (no onError)",
+      "parks": ["dialog.avatarBuilder.panel.picture", "dialog.avatarBuilder.file"],
+      "note": "People round; docs/PEOPLE.md 4.4 (B2). Local; the folder is the server's state folder (TURBOSLIDE_OVERLAY_DIR/.turboslide/users/u on a tmp store, the checkout's .turboslide/users/u on the file store)"
+    },
+    {
+      "id": "people.avatar-link-visitor",
+      "feature": "share",
+      "interaction": "Local: A signed in with a picture on a deck open to anyone with the link as editor, the owner's names switch off; C by link sees A's chip as the role initial (\"E\") on a plate that is not A's and no <img>, and the tooltip \"An editor · slide 1\"; with the switch on, A's name and picture",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "AUDIT.md defect 27; SPEC-3 0.12",
+      "note": "People round; docs/PEOPLE.md 3.21, 4.5 (B1). Local. A owns the deck, so the role word the room grants A is the owner's (\"The owner\", the initial O; room.ts roleWord); the driver reads the word of the role A holds"
+    },
+    {
+      "id": "people.avatar-metadata-stripped",
+      "feature": "share",
+      "interaction": "Local: the seed's orientation 6 JPEG uploaded; the served 256 px PNG and 64 px WebP carry no Exif bytes and the PNG's first row is the picture's left column (upright)",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "avatar.test.ts 117 (the unit half); accounts.spec.ts 350 to 368 (the seeded route only)",
+      "parks": ["dialog.avatarBuilder.panel.picture", "dialog.avatarBuilder.file"],
+      "note": "People round; docs/PEOPLE.md 4.1, 4.3 (B3, B4). Local; the seed's oriented mode: a red ramp along the source's width and a blue ramp along its height, so an upright first row holds one red and a spread of blue"
     }
   ]
 }

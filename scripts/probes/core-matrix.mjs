@@ -57,7 +57,15 @@
 // new control id: the table handles of 3.3 item 4 and the word art tail of 4.2 item 4 keep the
 // ids the features round declared below (`handle.table.row`, `.add.column`, `.add.row`,
 // `.head.column`, `.head.row`, `toolbar.wordart.outline`), read as `handle.<block>.<part>`
-// families where the overlay templates them.
+// families where the overlay templates them. The people round (docs/PEOPLE.md section 6) added
+// the area `people` whose rows belong to the unparkable `share` (how a person is drawn: the chip
+// geometry, the two renderers' agreement, the own chip, the tooltip sentences, the pictures), two
+// rows of that area that belong to `comments` and `versions` (ROW_FEATURE), the local spec driver
+// `e2e/accounts.spec.ts` (LOCAL_SPEC_DRIVERS: the accounts spec on a node server with an identity
+// database, never a deployment run; a local row absent from a run's results is listed apart under
+// `local` by the two ship helpers, never counted as passed and never a reason to park, and a local
+// row present in the results is judged like any row, 6.2), the builder and the version panel among
+// the control sources, and the ids PEOPLE.md 5.2 declares before the lanes' files hold them.
 //
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
@@ -137,6 +145,9 @@ export const AREA_FEATURE = Object.freeze({
   /* the objects round (docs/OBJECTS.md 6.1): the live gesture rows are the arrange feature's,
      which is unparkable, so a red gesture row fails the ship */
   gestures: 'arrange',
+  /* the people round (docs/PEOPLE.md 6.1): how a person is drawn is the share feature's, which
+     is unparkable, so a red people row blocks the ship unless it carries `parks` */
+  people: 'share',
 });
 
 /**
@@ -158,6 +169,10 @@ export const ROW_FEATURE = Object.freeze({
   'shaders.export.html-frame': 'export',
   'shaders.export.missing-frame-row': 'export',
   'shaders.view.play-setting': 'view',
+  /* the people round (docs/PEOPLE.md 6.1): the departed guest's comment is the comments feature's
+     and the aliased author of the version rows the versions feature's; both unparkable */
+  'people.comment-departed-guest': 'comments',
+  'people.versions-author-account': 'versions',
 });
 
 /** The four words of the audits for what production did; nothing else is a state. */
@@ -206,7 +221,25 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
   'core/svg.spec.ts',
 ]);
 
-export const CORE_DRIVERS = Object.freeze([PROBE_DRIVER, ...CORE_SPEC_DRIVERS, COST_PROBE_DRIVER]);
+/**
+ * The local spec drivers (docs/PEOPLE.md 6.1, 6.2): a Playwright spec under apps/studio/e2e/ that
+ * runs on a node server with an identity database (`TURBOSLIDE_AUTH_DB`, `TURBOSLIDE_MAIL=capture`)
+ * and never on a deployment, which has no account, no session and no picture. The gate runs it
+ * with `--only accounts` and judges its rows alone; in any other run a local row is absent from
+ * the results and is listed apart under `local`, never counted as passed and never a reason to
+ * park (`parkedFeaturesOf`, `shipVerdict`).
+ */
+export const LOCAL_SPEC_DRIVERS = Object.freeze(['e2e/accounts.spec.ts']);
+
+export const CORE_DRIVERS = Object.freeze([
+  PROBE_DRIVER,
+  ...CORE_SPEC_DRIVERS,
+  COST_PROBE_DRIVER,
+  ...LOCAL_SPEC_DRIVERS,
+]);
+
+/** The reason a local row absent from a run's results carries in the table (6.2). */
+export const LOCAL_ABSENT_REASON = 'no identity database on this base';
 
 /** `area.feature.interaction`: two to four parts of lower case letters, digits and hyphens. */
 export const CORE_ID_PATTERN = /^[a-z][a-z0-9]*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*){1,3}$/;
@@ -293,6 +326,10 @@ export const CONTROL_SOURCE_PATHS = Object.freeze(
     /* the features round, ship two (docs/FEATURES.md 5.4, 5.10): the Background dialog's Shader row
        and its P1 Add to theme row */
     '../../packages/chrome/src/dialogs/Background.tsx',
+    /* the people round (docs/PEOPLE.md 5.2): the avatar builder's Picture panel and file input,
+       and the version panel's More menu row */
+    '../../packages/chrome/src/dialogs/AvatarBuilder.tsx',
+    '../../packages/chrome/src/VersionsPanel.tsx',
   ].map((rel) => fileURLToPath(new URL(rel, import.meta.url))),
 );
 
@@ -401,6 +438,17 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'intake.svg.url',
   'picture.svg.copy',
   'export.svg.vector',
+  /* the people round (docs/PEOPLE.md 5.2): the Picture panel is templated in AvatarBuilder.tsx
+     (`dialog.avatarBuilder.panel.${tab}`) and never one literal; the More menu's Restore row
+     (B2, VersionsPanel.tsx MORE_ITEMS), the three sentences of the Picture panel (B3) and the
+     grant row's email line (B2, the family `dialog.share.row.<i>.email`) are declared before the
+     lanes' files hold them */
+  'dialog.avatarBuilder.panel.picture',
+  'version.restore',
+  'dialog.avatarBuilder.capSentence',
+  'dialog.avatarBuilder.privacySentence',
+  'dialog.avatarBuilder.cacheSentence',
+  'dialog.share.row.email',
 ]);
 
 let controlSourceText = null;
@@ -575,15 +623,28 @@ export function rowsForFeature(feature) {
 }
 
 /**
- * The rows a driver carries: `probe --core`, `cost-probe` or a `core/<area>.spec.ts` file name
- * (`core/` optional).
+ * The rows a driver carries: `probe --core`, `cost-probe`, a `core/<area>.spec.ts` file name
+ * (`core/` optional) or a local spec (`e2e/accounts.spec.ts`).
  */
 export function rowsForDriver(driver) {
   const name =
-    driver === PROBE_DRIVER || driver === COST_PROBE_DRIVER || driver.startsWith('core/')
+    driver === PROBE_DRIVER ||
+    driver === COST_PROBE_DRIVER ||
+    driver.startsWith('core/') ||
+    driver.startsWith('e2e/')
       ? driver
       : `core/${driver}`;
   return CORE_MATRIX.filter((row) => row.driver === name);
+}
+
+/** True for a local row (docs/PEOPLE.md 6.2): its driver is one of `LOCAL_SPEC_DRIVERS`. */
+export function isLocalRow(row) {
+  return LOCAL_SPEC_DRIVERS.includes(row?.driver);
+}
+
+/** The local rows, in the file's order: driven by the accounts spec on a node server with an identity database alone. */
+export function localRows() {
+  return CORE_MATRIX.filter(isLocalRow);
 }
 
 /** The rows the walk probe drives in --core mode. */
@@ -610,9 +671,12 @@ export function tally(rows = CORE_MATRIX) {
  * would stay parked (`parkedRows`, each `{ id, parks, result }`: a red row carrying `parks` parks
  * those ids alone, never its feature), the rows of an unparkable feature that would block the ship
  * (`blocking`), the red measurement rows recorded for the ship note (`measured`, PRODUCT.md 8.2;
- * they park nothing and block nothing) and the red rows by feature, so the ship note renders the
- * list instead of typing it. `rows` narrows the reading to one driver's rows (the walk probe judges its own rows, the gate
- * judges the whole matrix).
+ * they park nothing and block nothing), the local rows the run did not record (`local`, docs/PEOPLE.md
+ * 6.2: a row the accounts spec drives on a node server with an identity database, listed apart
+ * with the reason, never counted as passed and never a reason to park; a local row the run did
+ * record is judged like any row) and the red rows by feature, so the ship note renders the list
+ * instead of typing it. `rows` narrows the reading to one driver's rows (the walk probe judges its
+ * own rows, the gate judges the whole matrix).
  */
 export function parkedFeaturesOf(results, rows = CORE_MATRIX) {
   const red = new Map();
@@ -620,9 +684,15 @@ export function parkedFeaturesOf(results, rows = CORE_MATRIX) {
   const parkingFeatures = new Set();
   const blocking = [];
   const measured = [];
+  const local = [];
   for (const row of rows) {
     const result = results[row.id] ?? 'not driven';
     if (!RUN_RESULTS.includes(result)) throw new RangeError(`${row.id}: unknown result ${result}`);
+    /* a local row the run did not record is the accounts run's, listed apart (PEOPLE.md 6.2) */
+    if (results[row.id] === undefined && isLocalRow(row)) {
+      local.push({ id: row.id, feature: row.feature, reason: LOCAL_ABSENT_REASON });
+      continue;
+    }
     if (result === 'passed') continue;
     /* a manual row not driven is the checklist's, never a reason to park (ruling (3)) */
     if (result === 'not driven' && isManualRow(row)) continue;
@@ -642,7 +712,7 @@ export function parkedFeaturesOf(results, rows = CORE_MATRIX) {
     else blocking.push({ id: row.id, feature: row.feature, result });
   }
   const parked = CORE_FEATURES.filter((feature) => parkingFeatures.has(feature));
-  return { parked, parkedRows, blocking, measured, red: Object.fromEntries(red) };
+  return { parked, parkedRows, blocking, measured, local, red: Object.fromEntries(red) };
 }
 
 /** The features and rows of a parked list: an array of features (the focus round's form) or the object. */
@@ -706,9 +776,11 @@ export function readParkedList(path) {
  * `passed` unless its feature is in `parkedFeatures` or the row itself is in `parkedRows` (a row
  * carrying `parks`, whose own controls stay behind the switch for the ship); an unparkable
  * feature cannot be listed. `parked` is the array of features (the focus round's form) or the
- * object `readParkedList` returns. Returns `ok`, the ids that fail it with their result, and the
- * red measurement rows (`measured`) the verdict recorded and did not count. `rows` narrows the
- * rule to one driver's rows.
+ * object `readParkedList` returns. Returns `ok`, the ids that fail it with their result, the
+ * red measurement rows (`measured`) the verdict recorded and did not count, and the local rows
+ * the run did not record (`local`, docs/PEOPLE.md 6.2: the accounts run's, never counted as
+ * passed and never a failure here; a local row the run did record is judged like any row).
+ * `rows` narrows the rule to one driver's rows.
  */
 export function shipVerdict(results, parked = [], rows = CORE_MATRIX) {
   const { parkedFeatures, parkedRows } = parkedOf(parked);
@@ -716,9 +788,14 @@ export function shipVerdict(results, parked = [], rows = CORE_MATRIX) {
   const parkedIds = new Set(parkedRows.map((entry) => entry.id));
   const failures = [];
   const measured = [];
+  const local = [];
   for (const row of rows) {
     const result = results[row.id] ?? 'not driven';
     if (!RUN_RESULTS.includes(result)) throw new RangeError(`${row.id}: unknown result ${result}`);
+    if (results[row.id] === undefined && isLocalRow(row)) {
+      local.push({ id: row.id, feature: row.feature, reason: LOCAL_ABSENT_REASON });
+      continue;
+    }
     if (result === 'passed' || parkedFeatures.includes(row.feature) || parkedIds.has(row.id))
       continue;
     if (result === 'not driven' && isManualRow(row)) continue;
@@ -729,7 +806,7 @@ export function shipVerdict(results, parked = [], rows = CORE_MATRIX) {
     }
     failures.push({ id: row.id, feature: row.feature, result });
   }
-  return { ok: failures.length === 0, failures, measured };
+  return { ok: failures.length === 0, failures, measured, local };
 }
 
 // -----------------------------------------------------------------------------------------------
@@ -845,8 +922,9 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.
     const measure = CORE_MATRIX.filter((row) => isMeasureRow(row) && !isCostRow(row));
     const cost = CORE_MATRIX.filter(isCostRow);
     const manual = CORE_MATRIX.filter(isManualRow);
+    const local = localRows();
     console.log(
-      `  ${withParks.length} rows carry parks; ${measure.length} measurement rows (${measure.map((r) => r.id).join(', ') || 'none'}); ${cost.length} cost probe rows (${cost.map((r) => r.id).join(', ') || 'none'}); ${manual.length} manual rows; unparkable features: ${UNPARKABLE_FEATURES.join(', ')}`,
+      `  ${withParks.length} rows carry parks; ${measure.length} measurement rows (${measure.map((r) => r.id).join(', ') || 'none'}); ${cost.length} cost probe rows (${cost.map((r) => r.id).join(', ') || 'none'}); ${manual.length} manual rows; ${local.length} local rows (${LOCAL_SPEC_DRIVERS.join(', ')}); unparkable features: ${UNPARKABLE_FEATURES.join(', ')}`,
     );
   }
 }

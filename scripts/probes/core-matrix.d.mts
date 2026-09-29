@@ -64,7 +64,13 @@ export type CoreSpecDriver =
 /** The cost probe of docs/SYNC.md 6.3 (scripts/probes/sync-cost-probe.mjs), run by the gate. */
 export type CostProbeDriver = 'cost-probe';
 
-export type CoreDriver = 'probe --core' | CoreSpecDriver | CostProbeDriver;
+/**
+ * The local spec of docs/PEOPLE.md 6.2: apps/studio/e2e/accounts.spec.ts on a node server with an
+ * identity database, run by the gate's `--only accounts` and never by a deployment run.
+ */
+export type LocalSpecDriver = 'e2e/accounts.spec.ts';
+
+export type CoreDriver = 'probe --core' | CoreSpecDriver | CostProbeDriver | LocalSpecDriver;
 
 /** One row of docs/gslides-parity/focus/core-matrix.json. */
 export type CoreRow = {
@@ -124,6 +130,10 @@ export const RUN_RESULTS: readonly RunResult[];
 export const PROBE_DRIVER: 'probe --core';
 export const COST_PROBE_DRIVER: 'cost-probe';
 export const CORE_SPEC_DRIVERS: readonly CoreSpecDriver[];
+/** The local spec drivers of docs/PEOPLE.md 6.2 (the accounts spec on a node server with an identity database). */
+export const LOCAL_SPEC_DRIVERS: readonly LocalSpecDriver[];
+/** The reason a local row absent from a run's results carries: "no identity database on this base". */
+export const LOCAL_ABSENT_REASON: string;
 export const CORE_DRIVERS: readonly CoreDriver[];
 export const CORE_ID_PATTERN: RegExp;
 export const CONTROL_ID_PATTERN: RegExp;
@@ -161,6 +171,10 @@ export function rowsForDriver(driver: string): CoreRow[];
 export function probeRows(): CoreRow[];
 /** The rows the cost probe drives (docs/SYNC.md 6.3). */
 export function costRows(): CoreRow[];
+/** True for a local row (docs/PEOPLE.md 6.2): its driver is one of LOCAL_SPEC_DRIVERS. */
+export function isLocalRow(row: CoreRow | undefined): boolean;
+/** The local rows, in the file's order. */
+export function localRows(): CoreRow[];
 export function tally(rows?: readonly CoreRow[]): Tally;
 export function parkedFeaturesOf(
   results: Readonly<Record<string, RunResult>>,
@@ -171,6 +185,8 @@ export function parkedFeaturesOf(
   blocking: Array<{ id: string; feature: CoreFeature; result: RunResult }>;
   /** the red measurement rows, recorded and not counted (PRODUCT.md 8.2) */
   measured: Array<{ id: string; feature: CoreFeature; result: RunResult }>;
+  /** the local rows the run did not record, listed apart with the reason (PEOPLE.md 6.2) */
+  local: Array<{ id: string; feature: CoreFeature; reason: string }>;
   red: Record<string, Array<{ id: string; result: RunResult }>>;
 };
 export function shipVerdict(
@@ -182,6 +198,8 @@ export function shipVerdict(
   failures: Array<{ id: string; feature: CoreFeature; result: RunResult }>;
   /** the red measurement rows the verdict recorded and did not count */
   measured: Array<{ id: string; feature: CoreFeature; result: RunResult }>;
+  /** the local rows the run did not record: never a failure here (PEOPLE.md 6.2) */
+  local: Array<{ id: string; feature: CoreFeature; reason: string }>;
 };
 /** The committed parked list of a ship, `ship-<commit>.json` (6.2); an unparkable feature is refused. */
 export function readParkedList(path: string): ParkedList;

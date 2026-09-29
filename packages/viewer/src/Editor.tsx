@@ -7733,6 +7733,9 @@ export function Editor({
           on the overlay) */}
       <div
         className="ts-overlay ts-chrome"
+        /* the sheet's own appearance (docs/POLISH.md 2.5 item 49): the layer is a sibling of the
+           stage root, so it carries the stage's theme itself for the selection tokens (tokens.css) */
+        data-theme={theme}
         data-active-handle={activeHandle ?? undefined}
         data-alt={alt ? '' : undefined}
         data-freeform={freeform ? '' : undefined}

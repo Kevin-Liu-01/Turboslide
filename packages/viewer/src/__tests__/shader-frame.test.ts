@@ -431,4 +431,114 @@ describe('the capturer', () => {
     expect(quiet).toEqual([]);
     capturer2.dispose();
   });
+
+  it('gives the capture the cap, so a PNG over it comes back as a WebP inside the write, a PNG over it with no WebP takes the presigned path, and a WebP still over it asks the hosted job (docs/POLISH.md item 36)', async () => {
+    const doc = documentWith([shader('shader')]);
+    const c = clock();
+    /* the fake pixel path: a 6 byte PNG, and a 2 byte WebP when the capture is given a cap under 6 */
+    const caps: (number | undefined)[] = [];
+    const capture =
+      (webp: Uint8Array | null) =>
+      async (
+        target: MaterialBlock,
+        palette: Parameters<typeof frameKeyOf>[1],
+        options?: { maxBytes?: number },
+      ) => {
+        caps.push(options?.maxBytes);
+        const png = new Uint8Array([1, 2, 3, 4, 5, 6]);
+        const over = options?.maxBytes !== undefined && png.length > options.maxBytes;
+        return {
+          bytes: over && webp !== null ? webp : png,
+          type: (over && webp !== null ? 'image/webp' : 'image/png') as 'image/png' | 'image/webp',
+          width: 3200,
+          height: 1814,
+          renderer: 'ANGLE (test)',
+          frameKey: frameKeyOf(target, palette),
+        };
+      };
+
+    // the WebP under the cap travels as base64 and the upload is not asked
+    const writes: ShaderFrameWrite[] = [];
+    const capturer = createShaderFrameCapturer({
+      document: () => doc,
+      write: async (input) => {
+        writes.push(input);
+        return { ok: true, revision: 2 };
+      },
+      upload: async () => {
+        throw new Error('not asked');
+      },
+      uploadAbove: 4,
+      capture: capture(new Uint8Array([9, 9])),
+      canCapture: () => true,
+      now: c.now,
+      setTimer: c.setTimer,
+      clearTimer: c.clearTimer,
+    });
+    capturer.scheduleStale();
+    await c.advance(800);
+    expect(caps).toEqual([4]);
+    expect(writes).toHaveLength(1);
+    expect(writes[0]?.bytes).toBe('CQk=');
+    expect(writes[0]?.upload).toBeUndefined();
+    capturer.dispose();
+
+    // no WebP from this browser: the PNG over the cap takes the presigned path as before
+    const uploads: number[] = [];
+    const presigned: ShaderFrameWrite[] = [];
+    const capturer2 = createShaderFrameCapturer({
+      document: () => doc,
+      write: async (input) => {
+        presigned.push(input);
+        return { ok: true, revision: 3 };
+      },
+      upload: async (bytes) => {
+        uploads.push(bytes.length);
+        return 'uploads/p/png';
+      },
+      uploadAbove: 4,
+      capture: capture(null),
+      canCapture: () => true,
+      now: c.now,
+      setTimer: c.setTimer,
+      clearTimer: c.clearTimer,
+    });
+    capturer2.scheduleStale();
+    await c.advance(800);
+    expect(uploads).toEqual([6]);
+    expect(presigned[0]?.upload).toBe('uploads/p/png');
+    expect(presigned[0]?.bytes).toBeUndefined();
+    capturer2.dispose();
+
+    // a WebP still over the cap never takes the PNG grant: the hosted job draws it
+    const hosted: string[] = [];
+    const none: ShaderFrameWrite[] = [];
+    let grants = 0;
+    const capturer3 = createShaderFrameCapturer({
+      document: () => doc,
+      write: async (input) => {
+        none.push(input);
+        return { ok: true, revision: 4 };
+      },
+      upload: async () => {
+        grants += 1;
+        return 'uploads/p/never';
+      },
+      captureHosted: async (_slideId, blockId) => {
+        hosted.push(blockId);
+      },
+      uploadAbove: 4,
+      capture: capture(new Uint8Array([7, 7, 7, 7, 7])),
+      canCapture: () => true,
+      now: c.now,
+      setTimer: c.setTimer,
+      clearTimer: c.clearTimer,
+    });
+    capturer3.scheduleStale();
+    await c.advance(800);
+    expect(grants).toBe(0);
+    expect(hosted).toEqual(['shader']);
+    expect(none).toEqual([]);
+    capturer3.dispose();
+  });
 });

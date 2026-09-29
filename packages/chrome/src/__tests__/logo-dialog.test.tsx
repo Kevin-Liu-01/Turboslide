@@ -736,6 +736,76 @@ describe('LogoDialog', () => {
     );
   });
 
+  it('Replace image > Logo takes the picture route, which refits the box, unless the mark also goes on every slide (docs/POLISH.md item 37)', async () => {
+    const { calls } = stubRoute();
+    const target: PictureTarget = {
+      kind: 'block',
+      slideId: 'content-rule',
+      blockId: 'pic-old',
+      path: '/asset',
+    };
+    const insertLogoAsset = vi.fn(() => Promise.resolve());
+    const insertPictureAsset = vi.fn(() => Promise.resolve());
+    const { Host, dispatch } = makeHost({
+      input: { editor: editorWith({ insertLogoAsset, insertPictureAsset }) },
+    });
+    render(
+      <Host>
+        <LogoDialog target={target} />
+      </Host>,
+    );
+    await search('figma');
+    await act(async () => {
+      fireEvent.click(control('dialog.logo.insert') as HTMLButtonElement);
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(insertPictureAsset).toHaveBeenCalledTimes(1));
+    /* the handler stored the asset alone; the picture route swaps the block's asset and refits
+       the box to the mark's aspect (Editor.tsx placePictureAsset) */
+    expect(insertRequest(dispatch, calls)).toEqual({
+      slug: 'figma',
+      variant: 'default',
+      baseRevision: 412,
+    });
+    expect(insertPictureAsset).toHaveBeenCalledWith(
+      { id: 'figma', size: [480, 480] },
+      { blockId: 'pic-old' },
+    );
+    expect(insertLogoAsset).not.toHaveBeenCalled();
+  });
+
+  it('a replace with the every slide box checked keeps the logo route, which writes the kit slots', async () => {
+    stubRoute();
+    const target: PictureTarget = {
+      kind: 'block',
+      slideId: 'content-rule',
+      blockId: 'pic-old',
+      path: '/asset',
+    };
+    const insertLogoAsset = vi.fn(() => Promise.resolve());
+    const insertPictureAsset = vi.fn(() => Promise.resolve());
+    const { Host } = makeHost({
+      input: { editor: editorWith({ insertLogoAsset, insertPictureAsset }) },
+    });
+    render(
+      <Host>
+        <LogoDialog target={target} />
+      </Host>,
+    );
+    await search('figma');
+    fireEvent.click(control('dialog.logo.everySlide') as HTMLInputElement);
+    await act(async () => {
+      fireEvent.click(control('dialog.logo.insert') as HTMLButtonElement);
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(insertLogoAsset).toHaveBeenCalledTimes(1));
+    expect(insertLogoAsset).toHaveBeenCalledWith(
+      { id: 'figma', size: [480, 480] },
+      { title: 'Figma', variant: 'default', everySlide: true, blockId: 'pic-old' },
+    );
+    expect(insertPictureAsset).not.toHaveBeenCalled();
+  });
+
   it('asks once more after a 503 with retry-after, keeping the last results drawn and the search on, and reads the empty state only when the retry fails too (build/hotfix.md 9)', async () => {
     /* a route whose answers are scripted per call: 200, then 503 with a one second retry, then
        200 again; then 503 twice for the same query */

@@ -8,12 +8,14 @@
 // a key the block no longer has as a conflict; `shader.capture` and `shader.render` drive the
 // capture browser and are covered by capture.test.ts. The ids are named here for the coverage
 // test: shader.list, shader.insert, shader.set, shader.frame, shader.capture, shader.render.
-import { cpSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { deflateSync } from 'node:zlib';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import { reencodeContinuous } from '@turboslide/headless/capture/intake';
 
 import type { Asset } from '@turboslide/schema/assets';
 import type { MaterialBlock } from '@turboslide/schema/blocks/material';
@@ -25,6 +27,7 @@ import type { FileStore } from '@turboslide/store/file-store';
 import {
   SHADER_ACTION_ID_STRINGS,
   SHADER_INSERT_SIZE,
+  frameBytesAsPng,
   pngSize,
   shaderFrame,
   shaderInsert,
@@ -329,5 +332,58 @@ describe('shader.insert, shader.set and shader.frame on a file store', () => {
       (a) => a.source.kind === 'material' && a.role === 'frame',
     );
     expect(finalAssets).toHaveLength(1);
+  });
+
+  it('writes a WebP frame as the PNG twin at the same size, and refuses bytes that are neither (docs/POLISH.md item 36)', async () => {
+    const slideId = 'canvas-opener';
+    deps.placeInsert = () => ({ x: 200, y: 300, w: 480, h: 272 });
+    const inserted = await shaderInsert(deps, ctx, {
+      baseRevision: await revision(),
+      slideId,
+      materialId: 'paper:god-rays',
+    });
+    const current = await document();
+    const block = (current.slides[slideId] as { slots: { main: MaterialBlock[] } }).slots.main.find(
+      (b) => b.id === inserted.blockId,
+    ) as MaterialBlock;
+    const key = frameKeyOf(block);
+    const png = pngOf(3200, 1814, [90, 60, 30]);
+    const webp = (await reencodeContinuous(png, { format: 'webp' })).bytes;
+    expect(Array.from(webp.subarray(0, 4))).toEqual([0x52, 0x49, 0x46, 0x46]);
+    expect(webp.length).toBeLessThan(png.length);
+    // the transcode alone: a PNG of the WebP's pixels at the frame's size
+    const back = await frameBytesAsPng(webp);
+    expect(pngSize(back)).toEqual([3200, 1814]);
+    expect(await frameBytesAsPng(png)).toBe(png);
+    await expect(frameBytesAsPng(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]))).rejects.toThrow(
+      'a shader frame is a PNG or a WebP',
+    );
+    // the write: the twin is a PNG file named as before, the asset's size the frame's
+    const written = await shaderFrame(deps, ctx, {
+      baseRevision: current.deck.revision,
+      slideId,
+      blockId: inserted.blockId,
+      frameKey: key,
+      bytes: base64(webp),
+      renderer: 'ANGLE (Apple, test)',
+    });
+    expect(written.size).toEqual([3200, 1814]);
+    const asset = (await document()).deck.assets[written.assetId] as Asset;
+    expect(asset.size).toEqual([3200, 1814]);
+    const neutral = 'neutral' in asset.twins ? asset.twins.neutral : '';
+    expect(neutral).toBe(`assets/${written.assetId}@2x.png`);
+    const stored = new Uint8Array(readFileSync(join(dir, neutral)));
+    expect(pngSize(stored)).toEqual([3200, 1814]);
+    // a WebP of another size is refused by the size rule as a PNG is
+    const small = (await reencodeContinuous(pngOf(64, 36, [1, 2, 3]), { format: 'webp' })).bytes;
+    await expect(
+      shaderFrame(deps, ctx, {
+        baseRevision: (await document()).deck.revision,
+        slideId,
+        blockId: inserted.blockId,
+        frameKey: frameKeyOf(block),
+        bytes: base64(small),
+      }),
+    ).rejects.toThrow(RangeError);
   });
 });

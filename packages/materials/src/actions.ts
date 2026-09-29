@@ -32,7 +32,7 @@
 import { join } from 'node:path';
 
 import { renderVariant } from '@turboslide/effects/io';
-import { addAsset, scaleSource } from '@turboslide/headless/capture/intake';
+import { addAsset, reencodeContinuous, scaleSource } from '@turboslide/headless/capture/intake';
 import type { AssetIntakeRequest } from '@turboslide/headless/capture/intake';
 import { capturePage } from '@turboslide/headless/capture/page';
 import type { PageCaptureRequest } from '@turboslide/headless/capture/page';
@@ -40,6 +40,7 @@ import {
   imageInfo,
   readInput,
   slugify,
+  sniffImage,
   type PlateSide,
   type TwoToneRequestParams,
 } from '@turboslide/headless/capture/shared';
@@ -978,6 +979,19 @@ export function pngSize(bytes: Uint8Array): [number, number] {
   return [view.getUint32(16, false), view.getUint32(20, false)];
 }
 
+/**
+ * The frame's bytes as the PNG the twin is written from: a PNG as it came; a WebP decoded and
+ * written as a lossless PNG at the same size (the client's fallback for a PNG over the function's
+ * body cap, viewer shader-frame.ts and docs/POLISH.md item 36, so the stored twin, the exports and
+ * the card read one format as before). Anything else is refused as a frame.
+ */
+export async function frameBytesAsPng(bytes: Uint8Array): Promise<Uint8Array> {
+  const format = sniffImage(bytes);
+  if (format === 'png') return bytes;
+  if (format === 'webp') return (await reencodeContinuous(bytes, { format: 'png' })).bytes;
+  throw new RangeError('a shader frame is a PNG or a WebP');
+}
+
 /** The credit line of a frame (5.5): "Shader: Liquid metal, Paper Shaders, rendered in Turboslide". */
 export function frameCredit(entry: MaterialEntry): string {
   const upstream = entry.family === 'paper' ? 'Paper Shaders' : 'Prototemplate';
@@ -1049,12 +1063,13 @@ export async function commitFrame(
   slideId: string,
   block: MaterialBlock,
   frameKey: string,
-  png: Uint8Array,
+  bytes: Uint8Array,
   backend: 'client' | 'angle-metal' | 'swiftshader',
   renderer: string,
 ): Promise<ShaderFrameOutput> {
   const palette = shaderPaletteOfDeck(document.deck);
   const entry = entryWithPalette(requireMaterial(block.materialId), palette);
+  const png = await frameBytesAsPng(bytes);
   const size = pngSize(png);
   const wanted = frameSizeFor(materialAspectOf(block));
   if (Math.max(size[0], size[1]) !== wanted[0] && Math.max(size[0], size[1]) !== wanted[1])
@@ -1149,7 +1164,7 @@ export async function shaderFrame(
     const read = await deps.readUpload(input.upload);
     if (read === null) throw new RangeError(`shader.frame: no upload "${input.upload}"`);
     png = read;
-  } else throw new TypeError('shader.frame wants bytes (base64 PNG) or an upload key');
+  } else throw new TypeError('shader.frame wants bytes (base64 PNG or WebP) or an upload key');
   return commitFrame(
     deps,
     ctx,

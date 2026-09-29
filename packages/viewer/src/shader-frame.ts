@@ -43,14 +43,34 @@ export const FRAME_DEBOUNCE_MS = 800;
 const CAPTURE_WAIT_FRAMES = 240;
 
 export type ShaderFrameCapture = {
-  /** The PNG bytes of the frame. */
+  /** The frame's bytes: a PNG, or a WebP when the PNG was over the cap the capture was given. */
   bytes: Uint8Array;
+  /** The encoding of `bytes`; a PNG when absent (the fakes of the tests). */
+  type?: FrameEncoding;
   width: number;
   height: number;
   /** The WebGL renderer string of the client, for the asset's source. */
   renderer: string;
   frameKey: string;
 };
+
+export type FrameEncoding = 'image/png' | 'image/webp';
+
+export type CaptureOptions = {
+  /**
+   * Over this many bytes the PNG is encoded again as a WebP on the same canvas before the mount is
+   * disposed (docs/POLISH.md item 36: a god rays frame at the content box is a PNG of several MB,
+   * over the function's body cap on every path a deployment has). Absent, the PNG is answered as
+   * it is.
+   */
+  maxBytes?: number;
+};
+
+/**
+ * The WebP qualities tried in turn for a frame over the cap: the first keeps a shader's grain and
+ * bloom at a fraction of the PNG's bytes, the second is the floor before the hosted job draws it.
+ */
+export const FRAME_WEBP_QUALITIES: ReadonlyArray<number> = [0.92, 0.8];
 
 let canCaptureAnswer: boolean | null = null;
 
@@ -109,6 +129,25 @@ function captureHost(size: [number, number]): HTMLDivElement {
 }
 
 /**
+ * The canvas as a WebP under `maxBytes` when a quality of FRAME_WEBP_QUALITIES gets there, else the
+ * smallest WebP the qualities gave; null when this browser encodes no WebP (Safari answers a PNG
+ * blob for the type, which is read off `blob.type`) so the caller keeps the PNG.
+ */
+async function encodeWebp(canvas: HTMLCanvasElement, maxBytes: number): Promise<Uint8Array | null> {
+  let smallest: Uint8Array | null = null;
+  for (const quality of FRAME_WEBP_QUALITIES) {
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((result) => resolve(result), 'image/webp', quality),
+    );
+    if (blob === null || blob.type !== 'image/webp') return null;
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    if (bytes.length <= maxBytes) return bytes;
+    if (smallest === null || bytes.length < smallest.length) smallest = bytes;
+  }
+  return smallest;
+}
+
+/**
  * Draws the frame of a block in this browser (5.5, the client's pixel path). Throws when WebGL
  * is unavailable or the canvas never reaches the frame size, so the caller falls back to the
  * hosted `shader.capture`.
@@ -116,6 +155,7 @@ function captureHost(size: [number, number]): HTMLDivElement {
 export async function captureShaderFrame(
   block: FrameKeyBlock,
   palette: ShaderPalette,
+  options: CaptureOptions = {},
 ): Promise<ShaderFrameCapture> {
   const size = frameSizeFor(materialAspectOf(block));
   const anchor = anchorOf(block);
@@ -172,8 +212,16 @@ export async function captureShaderFrame(
         else resolve(result);
       }, 'image/png');
     });
-    const bytes = new Uint8Array(await blob.arrayBuffer());
-    return { bytes, width: canvas.width, height: canvas.height, renderer, frameKey };
+    let bytes: Uint8Array = new Uint8Array(await blob.arrayBuffer());
+    let type: FrameEncoding = 'image/png';
+    if (options.maxBytes !== undefined && bytes.length > options.maxBytes) {
+      const webp = await encodeWebp(canvas, options.maxBytes);
+      if (webp !== null) {
+        bytes = webp;
+        type = 'image/webp';
+      }
+    }
+    return { bytes, type, width: canvas.width, height: canvas.height, renderer, frameKey };
   } finally {
     handle?.dispose();
     host.remove();
@@ -187,7 +235,7 @@ export type ShaderFrameWrite = {
   slideId: string;
   blockId: string;
   frameKey: string;
-  /** The PNG as base64, or an upload key when the deps uploaded the bytes first. */
+  /** The PNG or WebP as base64, or an upload key when the deps uploaded a PNG first. */
   bytes?: string;
   upload?: string;
   renderer: string;
@@ -206,14 +254,21 @@ export type ShaderCapturerDeps = {
   write: (input: ShaderFrameWrite) => Promise<ShaderFrameWriteOutcome>;
   /** The hosted fallback when the client cannot draw (`shader.capture`); absent leaves the block without a frame. */
   captureHosted?: (slideId: string, blockId: string) => Promise<unknown>;
-  /** Uploads bytes over the presign threshold and answers the key (`shader.frame { upload }`). */
+  /**
+   * Uploads a PNG over the presign threshold and answers the key (`shader.frame { upload }`); the
+   * grant the controller asks declares `image/png`, so a WebP never takes this path.
+   */
   upload?: (bytes: Uint8Array) => Promise<string>;
-  /** Above this many bytes the frame goes through `upload` (the function's body cap; 3 MB as the picture path). */
+  /** Above this many bytes the frame is a WebP, or goes through `upload` (the function's body cap; 3 MB as the picture path). */
   uploadAbove?: number;
   /** The rest after the last change; FRAME_DEBOUNCE_MS by default. */
   delayMs?: number;
   /** The capture itself; the real one by default, a fake in a test. */
-  capture?: (block: MaterialBlock, palette: ShaderPalette) => Promise<ShaderFrameCapture>;
+  capture?: (
+    block: MaterialBlock,
+    palette: ShaderPalette,
+    options?: CaptureOptions,
+  ) => Promise<ShaderFrameCapture>;
   canCapture?: () => boolean;
   onError?: (error: unknown) => void;
   now?: () => number;
@@ -334,14 +389,20 @@ export const SHADER_FRAME_FAILED_SENTENCE =
  * One capturer per editor (5.5, the shared editor rule): debounced per block, one capture at a
  * time, the write through the controller's queue, the 409 rule, the hosted fallback.
  *
- * The frame over the function's cap (docs/POLISH.md item 36): a PNG over `uploadAbove` (3 MB,
- * the picture path's presign threshold; the function's body is capped at 4.5 MB and base64 grows
- * the bytes by a third) goes up through `deps.upload`, the presigned PUT the picture intake uses,
- * and the write names the upload's key; without an `upload` dep the hosted `shader.capture` draws
- * and stores the frame inside the function instead, so no frame is ever sent through a body it
- * cannot fit. A failed capture, put or write is tried once more, and when the second attempt
- * fails too `onError` is called once with the error, so the editor shows one sentence
- * (`SHADER_FRAME_FAILED_SENTENCE`) and never one per attempt.
+ * The frame over the function's cap (docs/POLISH.md item 36; the polish round's verifier, pass 1
+ * finding 2: a god rays PNG at the content box answered 413 on the presigned PUT too, since a
+ * deployment's upload route is a function with the same 4.5 MB body cap, and the retry's grant
+ * answered 429 while the first upload's slot was held). The capture is given `uploadAbove` (3 MB,
+ * the picture path's presign threshold; base64 grows the bytes by a third) as its cap, and a PNG
+ * over it comes back as a WebP of the same pixels from the same canvas, a fraction of the bytes,
+ * which travels inside the write as base64 and which the server writes as the PNG twin
+ * (materials actions.ts `frameBytesAsPng`). A PNG still over the cap (a browser that encodes no
+ * WebP) goes up through `deps.upload`, the presigned PUT the picture intake uses, and the write
+ * names the upload's key; a WebP still over the cap, or a PNG over it on a page without an upload
+ * path, asks the hosted `shader.capture`, which draws and stores the frame inside the function, so
+ * no frame is ever sent through a body it cannot fit. A failed capture, put or write is tried once
+ * more, and when the second attempt fails too `onError` is called once with the error, so the
+ * editor shows one sentence (`SHADER_FRAME_FAILED_SENTENCE`) and never one per attempt.
  */
 export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrameCapturer {
   const delay = deps.delayMs ?? FRAME_DEBOUNCE_MS;
@@ -375,7 +436,8 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
       await deps.captureHosted?.(slideId, blockId);
       return;
     }
-    const frame = await capture(block, palette);
+    const cap = deps.uploadAbove ?? FRAME_UPLOAD_ABOVE_BYTES;
+    const frame = await capture(block, palette, { maxBytes: cap });
     if (disposed) return;
     const input: ShaderFrameWrite = {
       slideId,
@@ -383,17 +445,19 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
       frameKey: frame.frameKey,
       renderer: frame.renderer,
     };
-    const overCap = frame.bytes.length > (deps.uploadAbove ?? FRAME_UPLOAD_ABOVE_BYTES);
-    if (overCap && deps.upload !== undefined) input.upload = await deps.upload(frame.bytes);
-    else if (overCap) {
-      // no presigned path on this page: the hosted job draws and stores the frame in the function
+    const overCap = frame.bytes.length > cap;
+    const png = (frame.type ?? 'image/png') === 'image/png';
+    if (!overCap) input.bytes = bytesToBase64(frame.bytes);
+    else if (png && deps.upload !== undefined) input.upload = await deps.upload(frame.bytes);
+    else {
+      // no path for these bytes on this page: the hosted job draws and stores the frame in the function
       if (deps.captureHosted === undefined)
         throw new Error(
           `the frame is ${frame.bytes.length} bytes, over the function's cap, and the page has no upload path`,
         );
       await deps.captureHosted(slideId, blockId);
       return;
-    } else input.bytes = bytesToBase64(frame.bytes);
+    }
     const outcome = await deps.write(input);
     if (outcome.ok) return;
     if (!outcome.conflict) throw outcome.error;

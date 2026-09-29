@@ -814,7 +814,19 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
         /* written now, not in a state updater: the dialog closes after the insert and an
            updater queued on an unmounting component never runs (the store write is inside) */
         setRecent(pushRecent(recent, pick.row));
-        if (editor?.insertLogoAsset !== undefined) {
+        if (
+          where.kind === 'block' &&
+          !everySlide &&
+          editorPlaces &&
+          editor?.insertPictureAsset !== undefined
+        ) {
+          /* Replace image > Logo (docs/POLISH.md 2.5 item 37): the picture route swaps the
+             block's asset and refits its box to the mark's aspect around the same centre in one
+             write (Editor.tsx placePictureAsset, the replacing branch), as Upload and By URL do;
+             the logo route below keeps the box, and stays for a replace that also takes the kit's
+             slots (build/b4.md, the fix round's request to B1) */
+          await editor.insertPictureAsset(answer.asset, { blockId: where.blockId });
+        } else if (editor?.insertLogoAsset !== undefined) {
           await editor.insertLogoAsset(answer.asset, {
             title: pick.row.title,
             ...(choice === null ? {} : { variant: choice.variant }),

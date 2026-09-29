@@ -772,6 +772,7 @@ function HomePage() {
               (query.trim() === '' ||
                 entry.title.toLowerCase().includes(query.trim().toLowerCase())),
           )}
+          listed={listedIds !== null}
           mounted={mounted}
           now={now}
           onOpen={(entry) => {
@@ -830,11 +831,14 @@ export const RECENT_ROW_SENTENCE =
  */
 function RecentRow({
   entries,
+  listed,
   mounted,
   now,
   onOpen,
 }: {
   entries: ReadonlyArray<RecentEntry>;
+  /** true once the listing has answered, so a card's thumbnail is asked for a deck that exists */
+  listed: boolean;
   mounted: boolean;
   now: Date;
   onOpen: (entry: RecentEntry) => void;
@@ -853,6 +857,7 @@ function RecentRow({
             key={entry.id}
             entry={entry}
             index={index}
+            listed={listed}
             mounted={mounted}
             now={now}
             onOpen={() => onOpen(entry)}
@@ -867,12 +872,14 @@ function RecentRow({
 function RecentCard({
   entry,
   index,
+  listed,
   mounted,
   now,
   onOpen,
 }: {
   entry: RecentEntry;
   index: number;
+  listed: boolean;
   mounted: boolean;
   now: Date;
   onOpen: () => void;
@@ -892,7 +899,7 @@ function RecentCard({
         onClick={onOpen}
         {...tipProps({ name: entry.title, doc: 'Opens the presentation.' })}
       >
-        <Thumb card={entry} eager />
+        <Thumb card={entry} eager plate={!listed} />
       </Link>
       <div className="ts-hm-card-body">
         <span className="ts-hm-card-title">{entry.title}</span>
@@ -1347,13 +1354,16 @@ export const THUMB_RETRY_MS: ReadonlyArray<number> = [3000, 6000];
 export function Thumb({
   card,
   eager = false,
+  plate = false,
 }: {
   card: Pick<DeckCard, 'id' | 'title' | 'firstSlide' | 'appearance' | 'revision'>;
   eager?: boolean;
+  /** true draws the plate alone: the Recent row before the listing confirms the deck still exists */
+  plate?: boolean;
 }) {
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
-  const base = cardThumbUrl(card);
+  const base = plate ? null : cardThumbUrl(card);
   const url = base === null ? null : attempt === 0 ? base : `${base}&retry=${attempt}`;
   useEffect(() => {
     if (!failed) return undefined;

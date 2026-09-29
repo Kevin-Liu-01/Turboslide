@@ -6775,7 +6775,7 @@
     {
       "id": "fonts.preload.italic-on-edit-only",
       "feature": "fonts",
-      "interaction": "/decks carries one font preload link (the upright); /edit carries two",
+      "interaction": "/decks carries one font preload link (the upright); /edit carries two: the upright preload and the italic prefetch (a prefetch since the console hotfix of 2026-09-29, so the browser draws no unused preload warning)",
       "driver": "core/brand.spec.ts",
       "today": "not driven",
       "evidence": "audit-fonts 12 (__root.tsx 124 to 137)",

@@ -297,6 +297,12 @@
   cursor: pointer;
 }
 
+/* the window row sits at the same inset as a version row (16 px from the panel's edge), so its
+   marks never touch the panel border the way they did when the row had no horizontal padding */
+.ts-versions.is-history .ts-version-window-row {
+  padding: 4px 8px 4px 16px;
+}
+
 .ts-version-window-row:focus-visible {
   outline: 1px solid var(--pt-ink);
   outline-offset: -1px;

@@ -167,7 +167,12 @@ export async function run(t) {
       leading: blk.leading ?? ty.leading ?? null,
       weight,
       indent: blk.indent ?? ty.indent ?? null,
-      bold: (weight !== null && Number(weight) >= 500) || flags.has('b'),
+      /* the polish round (docs/POLISH.md 2.3 item 12): Bold is the inline bold run, the whole text
+         grouped in one *…* (schema text.ts), never the block's weight 500 override */
+      bold:
+        (weight !== null && Number(weight) >= 500) ||
+        flags.has('b') ||
+        /^\s*\*[^*]+\*\s*$/.test(raw),
       italic: flags.has('i'),
       underline: flags.has('u'),
       strike: flags.has('s'),
@@ -479,19 +484,25 @@ export async function run(t) {
   );
   await t.step(
     'text.title.enter-commits',
-    'Enter on the single line title',
-    'the session ends and the text is kept',
+    'Enter on the single line title, then Escape',
+    'Enter breaks the line and keeps the session; Escape ends it with the words kept',
     async () => {
+      /* the polish round (docs/POLISH.md 2.3 item 19): a heading takes paragraph breaks, so Enter
+         in the title makes a line as Google's title placeholder does; the session ends on Escape */
       const before = await text(HEAD);
       await t.press('Enter');
       await t.sleep(500);
       const on = await t.editing();
+      await t.press('Escape');
+      await t.sleep(300);
+      const off = await t.editing();
       await t.settled();
       const now = await text(HEAD);
       // the product trims the run's edge whitespace on commit; the words are what is kept
+      const words = (s) => norm(s).replace(/\s+/g, ' ').trim();
       return {
-        ok: !on && norm(now) === norm(before),
-        observed: `editing ${on}; "${before}" -> "${now}"`,
+        ok: on && !off && words(now) === words(before),
+        observed: `editing after Enter ${on}, after Escape ${off}; "${before}" -> "${now}"`,
       };
     },
   );
@@ -2112,12 +2123,21 @@ export async function run(t) {
       const el = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`);
       if (!el) return null;
       const cs = getComputedStyle(el);
-      return { weight: cs.fontWeight, align: cs.textAlign, size: parseFloat(cs.fontSize) };
+      /* the polish round (docs/POLISH.md 2.3 item 12): Bold is the inline bold run, so the run's
+         own bold child is read beside the block's weight */
+      const boldRun = [...el.querySelectorAll('b, strong, [data-mark~="b"]')].some(
+        (child) =>
+          Number(getComputedStyle(child).fontWeight) >= 600 && child.textContent.trim() !== '',
+      );
+      return { weight: cs.fontWeight, align: cs.textAlign, size: parseFloat(cs.fontSize), boldRun };
     }, HEAD);
     const slide = await t.slideJson(T);
     const blockId = (await t.blockOfRun(HEAD)) ?? HEAD_BLOCK;
-    const stored = (await t.blockOf(T, blockId))?.block?.typography ?? slide.typography ?? null;
-    return { drawn, stored, kind: slide.kind ?? slide.template ?? null, blockId };
+    const block = (await t.blockOf(T, blockId))?.block;
+    const stored = block?.typography ?? slide.typography ?? null;
+    const storedText = typeof block?.text === 'string' ? block.text : (slide.heading ?? '');
+    const boldRun = drawn?.boldRun === true || /^\s*\*[^*]+\*\s*$/.test(String(storedText));
+    return { drawn, stored, kind: slide.kind ?? slide.template ?? null, blockId, boldRun };
   };
   /** The stored typography weight of the title's facts, a number or null where none is stored. */
   const storedWeight = (f) =>
@@ -2185,9 +2205,11 @@ export async function run(t) {
      no pixel: the write is judged on the stored typography (weight 500 landing where it was not)
      with the drawn weight at 500 or above, or on a drawn weight above the one before. */
   const bolder = (a, b) =>
-    Number(b.drawn?.weight) >= 500 &&
-    (Number(b.drawn?.weight) > Number(a.drawn?.weight) ||
-      (storedWeight(b) === 500 && storedWeight(a) !== 500));
+    /* the polish round: the bold run over the title's whole text (item 12), or the older weight */
+    (b.boldRun === true && a.boldRun !== true) ||
+    (Number(b.drawn?.weight) >= 500 &&
+      (Number(b.drawn?.weight) > Number(a.drawn?.weight) ||
+        (storedWeight(b) === 500 && storedWeight(a) !== 500)));
   await titleRow(
     'text.title.bold-menu',
     'click the cover title once, Format > Text > Bold',

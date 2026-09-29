@@ -1123,7 +1123,7 @@
     {
       "id": "text.title.enter-commits",
       "feature": "text",
-      "interaction": "Enter on the single line title ends the session and keeps the text",
+      "interaction": "Enter on the single line title breaks the line and keeps the session; Escape ends it with both lines kept (Google's title placeholder; docs/POLISH.md 2.3 item 19 since the polish round)",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-text row 12"

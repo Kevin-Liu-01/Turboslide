@@ -1056,6 +1056,32 @@ function boxesFromPositions(slide: Slide, measured: MeasuredBoxes): MeasuredBoxe
 const LIST_LEVEL_INDENT_PX = 36;
 
 /** The next smaller ladder size, or undefined at the bottom (the store action's ladderStepDown). */
+/** A heading level's own size (docs/grammar.md, head:58-61): the height a shrinking placeholder keeps is one line of it. */
+const HEADING_OWN_SIZE: Readonly<Record<'h1' | 'h2' | 'big' | 'title', number>> = {
+  h1: 88,
+  h2: 44,
+  big: 72,
+  title: 44,
+};
+
+/**
+ * The height a shrinking placeholder keeps under a session (docs/POLISH.md 2.3 item 21): one
+ * line at the level's own size, in client px at the stage's scale. Reading the element's own
+ * height instead let a title an earlier session had stepped down (one line at 60 px) shrink
+ * again the next time it was opened, until a long title sat on one line at 34 px (the
+ * integrator's gate on the merged tree, text.autofit.title-wraps); the placeholder's box is the
+ * layout's, not the last session's.
+ */
+function placeholderFitHeight(element: HTMLElement, level: keyof typeof HEADING_OWN_SIZE): number {
+  const rect = element.getBoundingClientRect();
+  const cs = window.getComputedStyle(element);
+  const drawn = parseFloat(cs.fontSize);
+  const line = parseFloat(cs.lineHeight);
+  const scale = element.offsetWidth > 0 ? rect.width / element.offsetWidth : 1;
+  if (!(drawn > 0) || !(line > 0) || !(scale > 0)) return rect.height;
+  return (line / drawn) * HEADING_OWN_SIZE[level] * scale;
+}
+
 function ladderStepDown(size: number): number | undefined {
   const sorted = [...TYPE_LADDER].sort((a, b) => b - a);
   return sorted.find((step) => step < size);
@@ -2115,7 +2141,9 @@ export function Editor({
         'autofit' in block &&
         block.autofit === 'shrink') ||
       (block === undefined && slideNow.kind === 'title' && run.blockId === 'heading');
-    const found = shrinkPlaceholder ? run.element.getBoundingClientRect().height : 0;
+    const found = shrinkPlaceholder
+      ? placeholderFitHeight(run.element, block?.type === 'heading' ? block.level : 'h1')
+      : 0;
     placeholderFit.current = found > 0 ? found : null;
     placeholderSize.current = null;
     setEditing({ ...run, caret, multiline, ...(options.link ? { link: true } : {}) });

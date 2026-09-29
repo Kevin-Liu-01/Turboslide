@@ -3887,7 +3887,11 @@ export function visibleItems(
       context: ctx,
       collapseSingles: true,
     });
-    return children.length === 1 && children[0] !== undefined ? children[0] : item;
+    const only = children.length === 1 ? children[0] : undefined;
+    if (only === undefined) return item;
+    /* a dialog reached by the one row takes the container's name (Make a copy opens the Make a
+       copy dialog for the whole presentation); a toggle keeps its own words (Link detection) */
+    return only.effect?.kind === 'dialog' ? { ...only, label: item.label } : only;
   });
 }
 

@@ -117,9 +117,15 @@
 }
 
 /* ---- the profile and the avatar builder: 560 by 640 ---- */
-.ts-profile,
-.ts-avatar-builder {
+.ts-profile {
   height: 640px;
+}
+
+/* the builder: the tabs, the strip (two rows of 24, 32, 64 and 128), the 292 px panel that holds
+   the Picture tab's 256 px crop box, and the error row, in one fixed box; the dialog's own
+   max-height scrolls the body on a short screen (docs/PEOPLE.md 4.1; build/b3.md) */
+.ts-avatar-builder {
+  height: 800px;
 }
 
 .ts-profile .ts-dialog-body,
@@ -216,11 +222,15 @@
   border-top: 1px solid var(--pt-hair-soft);
 }
 
-/* the avatar builder's preview strip: eight fixed boxes, 24, 32, 64 and 256 in light and dark */
+/* the avatar builder's preview strip: eight fixed boxes, 24, 32, 64 and 128 in light and dark,
+   from first paint (research 11 8 P8 named 256 for the largest; two rows of 256 never fit the
+   dialog with the panel under them, so the panel was unreachable on every tab; 128 keeps the
+   pattern legible and the Picture tab's 256 px box shows the picture itself) */
 .ts-avatar-strip {
+  flex: 0 0 auto;
   display: grid;
-  grid-template-columns: 24px 32px 64px 256px;
-  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 24px 32px 64px 128px;
+  grid-template-rows: 128px 128px;
   gap: 8px 12px;
   align-items: center;
   justify-items: center;
@@ -244,36 +254,70 @@
   background: #070707;
 }
 
-.ts-avatar-scaled {
-  transform-origin: top left;
-  image-rendering: pixelated;
-}
-
 .ts-avatar-panel {
+  flex: 0 0 auto;
   box-sizing: border-box;
-  height: 320px;
-  margin-top: 12px;
+  height: 292px;
   overflow: hidden;
 }
 
+/* the Picture tab (docs/PEOPLE.md 4.1): the 256 px crop box on the left, the control and the
+   three sentences on the right, inside the 320 px panel */
+.ts-avatar-picture {
+  display: grid;
+  grid-template-columns: 256px minmax(0, 1fr);
+  gap: 8px 16px;
+  align-items: start;
+}
+
+.ts-avatar-picture-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-avatar-picture-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+/* the box is the crop: the decoded picture drawn on the canvas at its scale and offset, moved by a
+   pointer drag or the arrow keys; --pt-plate shows before a file is chosen */
 .ts-avatar-crop {
-  position: relative;
+  display: block;
+  box-sizing: content-box;
   width: 256px;
   height: 256px;
-  margin: 8px auto 0;
+  margin: 8px 0 0;
   border: 1px solid var(--pt-edge);
   background: var(--pt-plate);
-  overflow: hidden;
+  touch-action: none;
+  user-select: none;
 }
 
-.ts-avatar-crop img {
-  position: absolute;
-  max-width: none;
+.ts-avatar-crop.is-loaded {
   cursor: grab;
-  user-select: none;
+}
+
+.ts-avatar-crop.is-loaded:active {
+  cursor: grabbing;
+}
+
+.ts-avatar-crop:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
 }
 
 .ts-avatar-sentence {
   margin: 12px 0 0;
   color: var(--pt-ink-2);
+}
+
+.ts-avatar-picture-box .ts-avatar-sentence {
+  margin-top: 8px;
+}
+
+.ts-avatar-picture-side .ts-avatar-sentence {
+  margin-top: 12px;
 }

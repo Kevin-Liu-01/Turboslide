@@ -1,0 +1,289 @@
+{
+  "base": "http://localhost:4463",
+  "at": "2026-09-29T20:18:04.640Z",
+  "load": "13:18  up 5 days,  3:15, 2 users, load averages: 5.17 7.48 8.86",
+  "fixture": {
+    "mime": "image/jpeg",
+    "bytes": 27540
+  },
+  "signIn.status": 200,
+  "deck": {
+    "title": "B3 avatar drive",
+    "revision": 1
+  },
+  "identity": {
+    "self": {
+      "clientId": "a0630e3800bcd63608f9abaa46205326",
+      "principalId": "usr_CRuZheZXjVslpsg52GuOFv3mlhsDJnpr",
+      "kind": "human",
+      "label": "Indium 562",
+      "trust": "verified",
+      "mark": {
+        "density": 1,
+        "glyphSeed": 1845112350,
+        "presenter": false,
+        "self": false,
+        "trust": "verified",
+        "label": "Indium 562",
+        "variant": "initials",
+        "initials": "I5",
+        "hue": {
+          "slot": 6,
+          "hex": "#5533ff"
+        }
+      },
+      "role": "owner",
+      "presenting": false,
+      "idle": false,
+      "lastSeenAt": "2026-09-29T20:18:06.831Z",
+      "email": "b3-1790713084920@example.test"
+    },
+    "account": {
+      "principalId": "usr_CRuZheZXjVslpsg52GuOFv3mlhsDJnpr",
+      "label": "Indium 562",
+      "trust": "verified",
+      "signedIn": true,
+      "signInAvailable": true
+    }
+  },
+  "shot.before.initials": "build/b3/01-builder-before-initials.png",
+  "picture.empty": {
+    "cap": "Cropped to a square and sent at 256 px, under 512 KB. JPEG, PNG, WebP or GIF",
+    "privacy": "Your picture shows on every presentation you open while signed in, to people invited by email. People who arrive by a link see a role initial instead",
+    "cache": "A replaced or removed picture can stay readable at its old address for up to a year in caches",
+    "loaded": "false",
+    "applyDisabled": true,
+    "panelHeight": 292,
+    "panelScroll": 292
+  },
+  "shot.before.picture": "build/b3/02-builder-before-picture.png",
+  "picture.loaded": {
+    "cropSentence": "Drag to crop",
+    "applyDisabled": false,
+    "stripPictures": 8,
+    "objectPosition": "50% 50%",
+    "error": ""
+  },
+  "shot.loaded": "build/b3/03-builder-picture-loaded.png",
+  "picture.dragged": {
+    "objectPosition": "100% 50%"
+  },
+  "shot.dragged": "build/b3/04-builder-picture-dragged.png",
+  "ownChip.before": {
+    "variant": "initials",
+    "label": "Indium 562, signed in",
+    "size": {
+      "w": 24,
+      "h": 24
+    },
+    "img": null,
+    "plate": "svg",
+    "inset": {
+      "l": 2,
+      "t": 2,
+      "r": 2,
+      "b": 2
+    }
+  },
+  "apply": {
+    "closed": true,
+    "error": null,
+    "ms": 84,
+    "requests": [
+      {
+        "url": "http://localhost:4463/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIv",
+        "bytes": 379
+      }
+    ]
+  },
+  "ownChip.after": {
+    "variant": "picture",
+    "label": "Indium 562, signed in",
+    "size": {
+      "w": 24,
+      "h": 24
+    },
+    "img": {
+      "src": "/api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+      "srcset": "/api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+      "decoding": "async",
+      "complete": true,
+      "naturalWidth": 32
+    },
+    "plate": null,
+    "inset": {
+      "l": 2,
+      "t": 2,
+      "r": 2,
+      "b": 2
+    },
+    "ms": 85
+  },
+  "ownChip.urlGrammar": true,
+  "shot.ownChip.after": "build/b3/05-own-chip-after.png",
+  "picture.served": {
+    "status": 200,
+    "type": "image/webp",
+    "cache": "public, max-age=31536000, immutable",
+    "bytes": 202
+  },
+  "me": {
+    "principal": {
+      "id": "usr_CRuZheZXjVslpsg52GuOFv3mlhsDJnpr",
+      "kind": "account",
+      "email": "b3-1790713084920@example.test",
+      "admin": false
+    },
+    "trust": "verified",
+    "label": "Indium 562",
+    "mark": {
+      "density": 1,
+      "glyphSeed": 1845112350,
+      "presenter": false,
+      "self": true,
+      "trust": "verified",
+      "label": "Indium 562",
+      "variant": "picture",
+      "initials": "",
+      "pictureUrl": "/api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+      "hue": null
+    },
+    "avatar": {
+      "variant": "picture",
+      "url": "/api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp"
+    },
+    "sessions": [
+      {
+        "id": "lOVWmSGG3pjWbeCtZL3S5Rj4BZzjwCX5",
+        "createdAt": "2026-09-29T20:18:05.322Z",
+        "lastSeenAt": "2026-09-29T20:18:05.322Z",
+        "current": true,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+      }
+    ]
+  },
+  "shot.accountMenu": "build/b3/06-account-menu-after.png",
+  "accountMenu.chip": {
+    "src": "/api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+    "srcset": "/api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x"
+  },
+  "profile.head": {
+    "src": "/api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp",
+    "srcset": "/api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 1x, /api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp 2x",
+    "trust": "Signed in as b3-1790713084920@example.test, verified"
+  },
+  "shot.profile": "build/b3/07-profile-head.png",
+  "reopened": {
+    "panel": "dialog.avatarBuilder.panel.picture",
+    "strip": [
+      {
+        "size": "24",
+        "src": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp",
+        "srcset": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, 54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "naturalWidth": 32
+      },
+      {
+        "size": "32",
+        "src": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp",
+        "srcset": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, 54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "naturalWidth": 32
+      },
+      {
+        "size": "64",
+        "src": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 1x, 54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp 2x",
+        "naturalWidth": 64
+      },
+      {
+        "size": "128",
+        "src": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp",
+        "srcset": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp 1x, 54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-256.webp 2x",
+        "naturalWidth": 128
+      },
+      {
+        "size": "24",
+        "src": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp",
+        "srcset": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, 54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "naturalWidth": 32
+      },
+      {
+        "size": "32",
+        "src": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp",
+        "srcset": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, 54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "naturalWidth": 32
+      },
+      {
+        "size": "64",
+        "src": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 1x, 54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp 2x",
+        "naturalWidth": 64
+      },
+      {
+        "size": "128",
+        "src": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp",
+        "srcset": "54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp 1x, 54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-256.webp 2x",
+        "naturalWidth": 128
+      }
+    ],
+    "applyDisabled": false
+  },
+  "shot.reopened": "build/b3/08-builder-reopened-current-picture.png",
+  "ownChip.afterReload": {
+    "variant": "picture",
+    "label": "Indium 562, signed in",
+    "size": {
+      "w": 24,
+      "h": 24
+    },
+    "img": {
+      "src": "/api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+      "srcset": "/api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/By9GN-nYezHi9KmkMKybMg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+      "decoding": "async",
+      "complete": true,
+      "naturalWidth": 32
+    },
+    "plate": null,
+    "inset": {
+      "l": 2,
+      "t": 2,
+      "r": 2,
+      "b": 2
+    }
+  },
+  "capRefusal": {
+    "error": "The resized picture is over 512 KB. Choose another picture",
+    "dialogOpen": true,
+    "requests": 0
+  },
+  "shot.capRefusal": "build/b3/09-builder-cap-refusal.png",
+  "glyph.ownChip": {
+    "variant": "glyph",
+    "ms": 126
+  },
+  "shot.glyph": "build/b3/10-own-chip-glyph.png",
+  "glyph.reopened": {
+    "panel": "dialog.avatarBuilder.panel.glyph",
+    "tab": "true"
+  },
+  "name.ownChip": {
+    "label": "Ada B3, signed in",
+    "variant": "glyph",
+    "ms": 400
+  },
+  "shot.dark": "build/b3/11-builder-picture-dark.png",
+  "deck.B": {
+    "title": "B3 anonymous drive",
+    "revision": 1
+  },
+  "anonymous": {
+    "sentence": "Sign in to upload a picture",
+    "file": 0,
+    "applyDisabled": true
+  },
+  "shot.anonymous": "build/b3/12-builder-anonymous-picture.png",
+  "anonymous.api": {
+    "ok": false,
+    "message": "Sign in to upload a picture"
+  },
+  "loadAfter": "13:18  up 5 days,  3:15, 2 users, load averages: 5.72 7.46 8.82"
+}

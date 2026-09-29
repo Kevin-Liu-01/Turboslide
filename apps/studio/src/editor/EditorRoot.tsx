@@ -11,6 +11,7 @@ import type { ExportCapabilities } from '@turboslide/chrome/ExportMenu';
 import { ContextMenu, contextMenuLabel } from '@turboslide/chrome/ContextMenu';
 import type { EditorDispatch } from '@turboslide/chrome/dispatch';
 import type {
+  AvatarChoiceView,
   CommentAnchorView,
   CommentBodyInput,
   DrawTool,
@@ -26,6 +27,7 @@ import type {
   EditorSync,
   IdentityView,
   PictureTarget,
+  PresenceParticipant,
   ShellSettings,
 } from '@turboslide/chrome/editor-shell';
 import { useEditorShell } from '@turboslide/chrome/editor-shell-context';
@@ -118,6 +120,14 @@ import {
   toViewerDeck,
   triggerDownload,
 } from './controller';
+import {
+  meAnswerFacts,
+  ownPictureUrlOf,
+  ownPrincipalOf,
+  rosterKeyOf,
+  shellIdentitiesOf,
+} from './own-identity';
+import type { MeAnswerFacts } from './own-identity';
 import type {
   EditorController,
   EditorSnapshot,
@@ -244,6 +254,19 @@ async function authPost(path: string, body: unknown): Promise<unknown> {
 function signInReturnAddress(): string {
   return `${window.location.origin}${window.location.pathname}${window.location.search}`;
 }
+
+/**
+ * The facts of the caller the page payload carries beside `EditorIdentity` (docs/PEOPLE.md
+ * 3.11, 4.1; build/b3.md R1): the server's mark and the avatar choice. Read through this
+ * intersection until `EditorIdentity` names them; then it is a no op.
+ */
+type IdentityPayloadFacts = { mark?: IdentityView['mark']; avatar?: AvatarChoiceView | null };
+/** The resolved identities the payload carries for the stored surfaces (3.8; build/b3.md R2). */
+type IdentitiesPayload = { identities?: Readonly<Record<string, IdentityView>> };
+/** The merged map the controller exposes once it lands (3.8, 3.17; build/b3.md R3). */
+type IdentitiesSnapshot = {
+  identities?: ReadonlyMap<string, IdentityView> | Readonly<Record<string, IdentityView>>;
+};
 
 function toSections(
   deck: ViewerDeck,
@@ -761,6 +784,13 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     () => partitionRoster(rosterRows, new Set(snap.ownClientIds), ownClientId),
     [rosterRows, snap.ownClientIds, ownClientId],
   );
+  /* the last answer of Change name or Change avatar, with the own row's key at the moment it
+     arrived; read by the account block below (docs/PEOPLE.md 3.11; own-identity.ts) */
+  const [me, setMe] = useState<{ facts: MeAnswerFacts; rosterKey: string } | null>(null);
+  /* the choice the last answer carried: the roster never carries it, so it outlives the overlay */
+  const [chosenAvatar, setChosenAvatar] = useState<AvatarChoiceView | null | undefined>(undefined);
+  const ownRowRef = useRef<PresenceParticipant | null>(null);
+  ownRowRef.current = ownRow;
   const presence: EditorPresence = {
     ...(ownRow !== null ? { self: ownRow } : {}),
     others: otherRows,
@@ -798,34 +828,60 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         }
       : {}),
   };
-  const selfIdentity = identityView(payload.identity, author);
+  /* the caller as every own surface reads it (docs/PEOPLE.md 3.11): the payload's identity with
+     the server's mark and choice when the payload carries them (build/b3.md R1), under the
+     roster's own row while the room holds one, under the answer of Change name or Change avatar
+     until the room's own row moves past the state it held when the answer arrived */
+  const payloadFacts = payload.identity as (EditorIdentity & IdentityPayloadFacts) | undefined;
+  const payloadIdentity: IdentityView = {
+    ...identityView(payload.identity, author),
+    ...(payloadFacts?.mark !== undefined ? { mark: payloadFacts.mark } : {}),
+  };
+  const rosterKey = rosterKeyOf(ownRow);
+  const overlay = me !== null && me.rosterKey === rosterKey ? me.facts : null;
+  const principal = ownPrincipalOf(payloadIdentity, ownRow, overlay);
+  const avatarChoice: AvatarChoiceView | undefined =
+    (chosenAvatar !== undefined ? chosenAvatar : payloadFacts?.avatar) ?? undefined;
+  const pictureUrl = ownPictureUrlOf(avatarChoice, principal.mark);
+  /* the answer of a write is the newest fact: written back into the account and the room asked
+     to re-read the identity, so the own chip changes with no reload and the other browsers'
+     chips inside the matrix's 5 s (b1.md R18; docs/PEOPLE.md 3.11) */
+  const takeAnswer = (answer: unknown): unknown => {
+    const facts = meAnswerFacts(answer);
+    setMe({ facts, rosterKey: rosterKeyOf(ownRowRef.current) });
+    if (facts.avatar !== undefined) setChosenAvatar(facts.avatar);
+    controller.refreshPresence();
+    return answer;
+  };
   /* the deployment's sign in facts (SPEC-3 7.3): the row exists when a database is configured;
      the dialog's exchanges run over better-auth's own routes and the page reloads with the
      account's identity once one lands (B2 R19; VERIFICATION-3 finding 9) */
   const auth = payload.auth;
   const account: EditorAccount = {
-    principal: selfIdentity,
+    principal,
     signedIn: payload.identity?.kind === 'account',
     signInAvailable: auth?.signIn ?? false,
     passkeysAvailable: auth?.passkeys ?? false,
     githubAvailable: auth?.github ?? false,
+    ...(avatarChoice !== undefined ? { avatar: avatarChoice } : {}),
+    ...(pictureUrl !== undefined ? { pictureUrl } : {}),
     namePrompt: {
       open: snap.namePrompt,
       prefilled: payload.identity?.name ?? payload.identity?.label ?? author.name,
     },
     onNamePrompt: (open) => controller.promptName(open),
-    setName: (name) =>
-      controller.invoke('account.setName', { name }).then((answer) => {
-        /* the chip in the other browsers inside the matrix's 5 s (b1.md R18) */
-        controller.refreshPresence();
-        return answer;
-      }),
+    setName: (name) => controller.invoke('account.setName', { name }).then(takeAnswer),
+    /* the picture travels as the data URL the builder encoded (docs/PEOPLE.md 4.1); the salt as
+       the number the server stores */
     setAvatar: (choice) =>
-      controller.invoke('account.setAvatar', {
-        variant: choice.variant,
-        ...(choice.initials !== undefined ? { initials: choice.initials } : {}),
-        ...(choice.salt !== undefined ? { salt: Number(choice.salt) } : {}),
-      }),
+      controller
+        .invoke('account.setAvatar', {
+          variant: choice.variant,
+          ...(choice.initials !== undefined ? { initials: choice.initials } : {}),
+          ...(choice.salt !== undefined ? { salt: choice.salt } : {}),
+          ...(choice.picture !== undefined ? { picture: choice.picture } : {}),
+        })
+        .then(takeAnswer),
     forget: () => controller.invoke('account.forget', {}),
     ...(auth?.email === true
       ? {
@@ -868,6 +924,24 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         }
       : {}),
   };
+  /* the room's own row moved past the state the answer overlaid: the room is the source again */
+  useEffect(() => {
+    if (me !== null && me.rosterKey !== rosterKey) setMe(null);
+  }, [me, rosterKey]);
+  /* the resolved identities of the stored surfaces (docs/PEOPLE.md 3.8, 3.10; build/b3.md R2,
+     R3): the payload's map for the Share dialog's people; for the version rows the controller's
+     merged map when it carries one, else the payload's map under the roster rows and the caller */
+  const payloadIdentities = (payload as EditorDeck & IdentitiesPayload).identities;
+  const identities = shellIdentitiesOf(
+    (snap as EditorSnapshot & IdentitiesSnapshot).identities,
+    payloadIdentities,
+    rosterRows,
+    principal,
+  );
+  /* a person of the access record as the payload resolved them (name, trust, mark, the email a
+     sharer may see), else the view built from the id alone */
+  const personOf = (principalId: string, fallback: IdentityView): IdentityView =>
+    payloadIdentities?.[principalId] ?? fallback;
   const record = snap.access.record ?? undefined;
   const access: EditorAccess | undefined =
     record === undefined
@@ -877,26 +951,26 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
           owner:
             record.owner === null
               ? null
-              : {
+              : personOf(record.owner, {
                   principalId: record.owner,
                   label: labelFor(record.owner),
                   trust: record.owner.startsWith('usr_') ? 'verified' : 'label',
                   kind: record.owner.startsWith('usr_') ? 'account' : 'anonymous',
-                },
+                }),
           pendingOwner:
             record.pendingOwner === null || record.pendingOwner.principalId === null
               ? null
-              : {
+              : personOf(record.pendingOwner.principalId, {
                   principalId: record.pendingOwner.principalId,
                   label: labelFor(record.pendingOwner.principalId),
                   trust: 'verified',
                   kind: 'account',
-                },
+                }),
           generalAccess: record.generalAccess,
           grants: record.grants.map((grant) => ({
             ...(grant.principalId !== null
               ? {
-                  principal: {
+                  principal: personOf(grant.principalId, {
                     principalId: grant.principalId,
                     label: labelFor(grant.principalId),
                     trust: grant.principalId.startsWith('usr_')
@@ -905,7 +979,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
                     kind: grant.principalId.startsWith('usr_')
                       ? ('account' as const)
                       : ('anonymous' as const),
-                  },
+                  }),
                 }
               : {}),
             ...(grant.email !== null ? { email: grant.email } : {}),
@@ -937,12 +1011,12 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
               id: request.id,
               ...(request.principalId !== null
                 ? {
-                    principal: {
+                    principal: personOf(request.principalId, {
                       principalId: request.principalId,
                       label: labelFor(request.principalId),
                       trust: 'label' as const,
                       kind: 'anonymous' as const,
-                    },
+                    }),
                   }
                 : {}),
               ...(request.email !== null ? { email: request.email } : {}),
@@ -1296,7 +1370,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const mentionables = useMemo<IdentityView[]>(() => {
     const seen = new Map<string, IdentityView>();
     for (const row of rosterRows) seen.set(row.principalId, row);
-    seen.set(selfIdentity.principalId, selfIdentity);
+    seen.set(principal.principalId, principal);
     for (const thread of threadViews) {
       for (const comment of [thread.comment, ...thread.replies]) {
         if (!seen.has(comment.author.principalId))
@@ -1304,7 +1378,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       }
     }
     return [...seen.values()];
-  }, [rosterRows, selfIdentity.principalId, threadViews]);
+  }, [rosterRows, principal, threadViews]);
   /* a viewer or a commenter whose role holds readComments takes the editing stage too, in the
      role's forced mode (Viewing or Commenting, SPEC-3 5.3): the comment markers mount inside the
      stage's overlay, and the plain Stage has none (docs/FOCUS.md `comments.reaches-second-browser`
@@ -1457,6 +1531,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     presence,
     sync,
     account,
+    /* the version rows and the comment authors the route resolved (docs/PEOPLE.md 3.8) */
+    identities,
     ...(comments !== undefined ? { comments } : {}),
     inbox,
     ...(access !== undefined ? { access } : {}),

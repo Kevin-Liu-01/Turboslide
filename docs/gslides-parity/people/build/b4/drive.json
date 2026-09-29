@@ -1,11 +1,7 @@
 {
   "base": "http://localhost:4464",
   "at": "2026-09-29T20:13:24.746Z",
-  "load": [
-    8.0859375,
-    8.73046875,
-    9.6064453125
-  ],
+  "load": [8.0859375, 8.73046875, 9.6064453125],
   "steps": {
     "probe": {
       "getSession": 200
@@ -14,9 +10,7 @@
       "status": 400,
       "sentence": "Sign in to upload a picture",
       "keysOnDisk": 0,
-      "cookie": [
-        "__Host-ts_id"
-      ]
+      "cookie": ["__Host-ts_id"]
     },
     "sign-in": {
       "asked": 200,
@@ -28,11 +22,7 @@
         "avatar": {
           "variant": "initials"
         },
-        "cookies": [
-          "__Host-ts_id",
-          "__Secure-ts.session_token",
-          "__Secure-ts.session_data"
-        ]
+        "cookies": ["__Host-ts_id", "__Secure-ts.session_token", "__Secure-ts.session_data"]
       }
     },
     "upload-1": {
@@ -143,9 +133,7 @@
       "status": 200,
       "newKey": true,
       "oldUrlStatus": 404,
-      "keysOnDisk": [
-        "NbbmHsUc1n-JSVOksFQeZg"
-      ],
+      "keysOnDisk": ["NbbmHsUc1n-JSVOksFQeZg"],
       "keysOnDiskCount": 1,
       "onlyNewKeyOnDisk": true,
       "png": {
@@ -259,9 +247,7 @@
       "seeded": {
         "orphanKey": "B4orphanB4orphanB4orph",
         "youngKey": "B4youngB4youngB4youngB",
-        "namedKeys": [
-          "Wd41BDbQc_eB5DsWNtpKkQ"
-        ]
+        "namedKeys": ["Wd41BDbQc_eB5DsWNtpKkQ"]
       },
       "sweep": {
         "dry": {
@@ -269,9 +255,7 @@
           "scanned": 3,
           "kept": 1,
           "young": 1,
-          "orphans": [
-            "B4orphanB4orphanB4orph"
-          ],
+          "orphans": ["B4orphanB4orphanB4orph"],
           "filesRemoved": 0
         },
         "run": {
@@ -279,22 +263,13 @@
           "scanned": 3,
           "kept": 1,
           "young": 1,
-          "orphans": [
-            "B4orphanB4orphanB4orph"
-          ],
+          "orphans": ["B4orphanB4orphanB4orph"],
           "filesRemoved": 1
         },
         "profileKeys": 1
       },
-      "keysOnDiskAfter": [
-        "B4youngB4youngB4youngB",
-        "Wd41BDbQc_eB5DsWNtpKkQ"
-      ]
+      "keysOnDiskAfter": ["B4youngB4youngB4youngB", "Wd41BDbQc_eB5DsWNtpKkQ"]
     }
   },
-  "loadAfter": [
-    7.67822265625,
-    8.63525390625,
-    9.5673828125
-  ]
+  "loadAfter": [7.67822265625, 8.63525390625, 9.5673828125]
 }

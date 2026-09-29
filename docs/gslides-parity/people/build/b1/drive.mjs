@@ -13,7 +13,9 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { chromium } = require('/Users/kevinliu/repos/Turboslide-people/node_modules/.pnpm/playwright@1.62.1/node_modules/playwright');
+const {
+  chromium,
+} = require('/Users/kevinliu/repos/Turboslide-people/node_modules/.pnpm/playwright@1.62.1/node_modules/playwright');
 
 const BASE = process.env.B1_BASE ?? 'http://localhost:4461';
 const ROOT = '/Users/kevinliu/repos/Turboslide-people';
@@ -69,7 +71,10 @@ async function settled(page, timeout = 20_000) {
     const words = await ctl(page, 'deck.saveState')
       .textContent()
       .catch(() => null);
-    if ((s.sync?.pending ?? s.pending ?? 0) === 0 && (words === null || /All changes saved|Not saved yet/.test(words)))
+    if (
+      (s.sync?.pending ?? s.pending ?? 0) === 0 &&
+      (words === null || /All changes saved|Not saved yet/.test(words))
+    )
       return s;
     await page.waitForTimeout(150);
   }
@@ -78,17 +83,23 @@ async function settled(page, timeout = 20_000) {
 
 async function headingRun(page) {
   // the editing stage mounts its text runs after the viewer settles: wait for one
-  await page.locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run]').first().waitFor({ timeout: 20_000 }).catch(() => {});
+  await page
+    .locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run]')
+    .first()
+    .waitFor({ timeout: 20_000 })
+    .catch(() => {});
   const runs = await page.evaluate(() =>
-    [...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run]')].map(
-      (el) => el.getAttribute('data-run') ?? '',
-    ),
+    [
+      ...document.querySelectorAll('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run]'),
+    ].map((el) => el.getAttribute('data-run') ?? ''),
   );
   return runs.find((r) => /heading/.test(r)) ?? runs[0] ?? '';
 }
 
 async function typeInto(page, run, text) {
-  const el = page.locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${run}"]`).first();
+  const el = page
+    .locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${run}"]`)
+    .first();
   await el.dblclick();
   await page.waitForTimeout(200);
   await page.keyboard.press('Meta+a');
@@ -99,7 +110,9 @@ async function typeInto(page, run, text) {
 
 /** Types without closing the inline session, so the caret stays for the other browsers to draw. */
 async function typeOpen(page, run, text) {
-  const el = page.locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${run}"]`).first();
+  const el = page
+    .locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${run}"]`)
+    .first();
   await el.dblclick();
   await page.waitForTimeout(200);
   await page.keyboard.press('End');
@@ -170,7 +183,11 @@ function presenceState(s) {
           markHueSlot: p.mark?.hue?.slot ?? null,
           markPicture: p.mark?.pictureUrl ?? null,
         };
-  return { self: strip(s.presence?.self), others: (s.presence?.others ?? []).map(strip), count: s.presence?.count };
+  return {
+    self: strip(s.presence?.self),
+    others: (s.presence?.others ?? []).map(strip),
+    count: s.presence?.count,
+  };
 }
 
 function slotFacts(page) {
@@ -248,7 +265,9 @@ async function openAccountMenu(page) {
       chip: menu.querySelector('.ts-chip')?.getAttribute('aria-label') ?? null,
       chipTrust: menu.querySelector('.ts-chip')?.getAttribute('data-trust') ?? null,
       chipVariant: menu.querySelector('.ts-chip')?.getAttribute('data-variant') ?? null,
-      rows: [...menu.querySelectorAll('[role="menuitem"]')].map((r) => r.getAttribute('data-control')),
+      rows: [...menu.querySelectorAll('[role="menuitem"]')].map((r) =>
+        r.getAttribute('data-control'),
+      ),
     };
   });
 }
@@ -317,7 +336,12 @@ const browser = await chromium.launch({ headless: true });
    websocket alone is routed to nowhere: the page's socket opens and never receives a message,
    so nothing hot updates and nothing reloads. The room's stream is a fetch, not a socket. */
 const mk = async () => {
-  const ctx = await browser.newContext({ baseURL: BASE, viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2, colorScheme: 'light' });
+  const ctx = await browser.newContext({
+    baseURL: BASE,
+    viewport: { width: 1440, height: 900 },
+    deviceScaleFactor: 2,
+    colorScheme: 'light',
+  });
   await ctx.routeWebSocket(/.*/, () => {});
   return ctx;
 };
@@ -348,7 +372,10 @@ try {
   await advancedOn(A);
   say('before.A.slot', await slotFacts(A));
   say('before.A.accountMenu', await openAccountMenu(A));
-  say('shot.before.A.accountMenu', await shotMenu(A, '#ts-menu-account', 'A-account-menu-before-anonymous'));
+  say(
+    'shot.before.A.accountMenu',
+    await shotMenu(A, '#ts-menu-account', 'A-account-menu-before-anonymous'),
+  );
   await A.keyboard.press('Escape');
 
   // ---- A signs in (the room routes read the session before the cookie, 3.6)
@@ -360,10 +387,21 @@ try {
   say('after.A.account', after.account);
   say('after.A.presence', presenceState(after));
   say('after.A.identities.self', identityOf(after, after.account.principalId));
-  say('after.A.alias', JSON.parse(execFileSync('node', [SEED, 'alias', AUTH_DB, anonA ?? ''], { encoding: 'utf8' }).trim().split('\n').pop() ?? '{}').userId === userA);
+  say(
+    'after.A.alias',
+    JSON.parse(
+      execFileSync('node', [SEED, 'alias', AUTH_DB, anonA ?? ''], { encoding: 'utf8' })
+        .trim()
+        .split('\n')
+        .pop() ?? '{}',
+    ).userId === userA,
+  );
   say('after.A.slot', await slotFacts(A));
   say('after.A.accountMenu', await openAccountMenu(A));
-  say('shot.after.A.accountMenu', await shotMenu(A, '#ts-menu-account', 'A-account-menu-after-signed-in'));
+  say(
+    'shot.after.A.accountMenu',
+    await shotMenu(A, '#ts-menu-account', 'A-account-menu-after-signed-in'),
+  );
   await A.keyboard.press('Escape');
 
   // ---- A's first edit creates the deck as the account (the owner is usr_)
@@ -375,11 +413,19 @@ try {
   const deckId = info.id;
   decks.push(deckId);
   say('deck.id', deckId);
-  say('after.A.namePromptFired', await ctl(A, 'dialog.namePrompt').isVisible().catch(() => false));
+  say(
+    'after.A.namePromptFired',
+    await ctl(A, 'dialog.namePrompt')
+      .isVisible()
+      .catch(() => false),
+  );
   const sA = await state(A);
   say('after.A.access', { role: sA.access?.role, via: sA.access?.via, owner: sA.access?.owner });
   const v1 = await invoke(A, 'version.list', {});
-  say('versions.A.afterSignIn', (v1.versions ?? v1).map((v) => ({ n: v.n, author: v.author })));
+  say(
+    'versions.A.afterSignIn',
+    (v1.versions ?? v1).map((v) => ({ n: v.n, author: v.author })),
+  );
 
   // ---- A opens the deck to anyone with the link as an editor; B follows
   const share = await invoke(A, 'share.get', { id: deckId });
@@ -403,7 +449,13 @@ try {
   say('linkVisitor.B.identities.A', identityOf(await state(B), sA.account.principalId));
   say('linkVisitor.B.slot', await slotFacts(B));
   say('linkVisitor.B.tip', await chipTip(B));
-  say('shot.linkVisitor.B.tip', await B.screenshot({ path: join(OUT, 'B-chip-tooltip-link-visitor.png'), clip: { x: 560, y: 0, width: 880, height: 150 } }).then(() => 'B-chip-tooltip-link-visitor.png'));
+  say(
+    'shot.linkVisitor.B.tip',
+    await B.screenshot({
+      path: join(OUT, 'B-chip-tooltip-link-visitor.png'),
+      clip: { x: 560, y: 0, width: 880, height: 150 },
+    }).then(() => 'B-chip-tooltip-link-visitor.png'),
+  );
   say('linkVisitor.B.roster', await openRoster(B));
   say('shot.linkVisitor.B.roster', await shotMenu(B, '#ts-menu-roster', 'B-roster-link-visitor'));
   await B.keyboard.press('Escape');
@@ -418,16 +470,27 @@ try {
     showNamesToLinkVisitors: true,
     baseRevision: share2.record?.revision ?? share2.revision,
   });
-  say('share.settings', { showNames: switched.record?.settings?.showNamesToLinkVisitors ?? switched.settings?.showNamesToLinkVisitors ?? null });
+  say('share.settings', {
+    showNames:
+      switched.record?.settings?.showNamesToLinkVisitors ??
+      switched.settings?.showNamesToLinkVisitors ??
+      null,
+  });
   await B.reload();
   await waitEditor(B);
-  await poll(async () => (await state(B)).presence?.others?.some((p) => p.trust === 'verified'), 40_000);
+  await poll(
+    async () => (await state(B)).presence?.others?.some((p) => p.trust === 'verified'),
+    40_000,
+  );
   await B.waitForTimeout(800);
   say('namesOn.B.presence', presenceState(await state(B)));
   say('namesOn.B.identities.A', identityOf(await state(B), sA.account.principalId));
   say('namesOn.B.tip', await chipTip(B));
   say('namesOn.B.roster', await openRoster(B));
-  say('shot.namesOn.B.roster', await shotMenu(B, '#ts-menu-roster', 'B-roster-names-on-account-label'));
+  say(
+    'shot.namesOn.B.roster',
+    await shotMenu(B, '#ts-menu-roster', 'B-roster-names-on-account-label'),
+  );
   await B.keyboard.press('Escape');
 
   // ---- A types a name: the account's name reaches B within the poll, still verified (3.18)
@@ -438,34 +501,65 @@ try {
   await ctl(A, 'dialog.namePrompt.name').type('Kevin B1', { delay: TYPE_DELAY });
   await ctl(A, 'dialog.namePrompt.continue').click();
   await A.waitForTimeout(800);
-  say('changeName.error', await ctl(A, 'dialog.namePrompt.error').textContent().catch(() => null));
-  await poll(async () => (await state(B)).presence?.others?.some((p) => p.name === 'Kevin B1'), 40_000);
+  say(
+    'changeName.error',
+    await ctl(A, 'dialog.namePrompt.error')
+      .textContent()
+      .catch(() => null),
+  );
+  await poll(
+    async () => (await state(B)).presence?.others?.some((p) => p.name === 'Kevin B1'),
+    40_000,
+  );
   await B.waitForTimeout(500);
   say('named.B.presence', presenceState(await state(B)));
   say('named.A.presence', presenceState(await state(A)));
   say('named.A.account', (await state(A)).account);
   say('named.B.tip', await chipTip(B));
-  say('shot.named.B.tip', await B.screenshot({ path: join(OUT, 'B-chip-tooltip-account-named.png'), clip: { x: 560, y: 0, width: 880, height: 150 } }).then(() => 'B-chip-tooltip-account-named.png'));
+  say(
+    'shot.named.B.tip',
+    await B.screenshot({
+      path: join(OUT, 'B-chip-tooltip-account-named.png'),
+      clip: { x: 560, y: 0, width: 880, height: 150 },
+    }).then(() => 'B-chip-tooltip-account-named.png'),
+  );
   say('named.B.roster', await openRoster(B));
   say('shot.named.B.roster', await shotMenu(B, '#ts-menu-roster', 'B-roster-account-named'));
   await B.keyboard.press('Escape');
   say('named.A.accountMenu', await openAccountMenu(A));
-  say('shot.named.A.accountMenu', await shotMenu(A, '#ts-menu-account', 'A-account-menu-after-named'));
+  say(
+    'shot.named.A.accountMenu',
+    await shotMenu(A, '#ts-menu-account', 'A-account-menu-after-named'),
+  );
   await A.keyboard.press('Escape');
 
   // ---- the hue (3.15): B types in the heading; A reads B's caret, chip and roster hue
   await typeOpen(B, await headingRun(B), ' by B');
-  const caretDrawn = await poll(async () => (await A.locator('.ts-remote-caret, .ts-remote-outline').count()) > 0, 20_000);
+  const caretDrawn = await poll(
+    async () => (await A.locator('.ts-remote-caret, .ts-remote-outline').count()) > 0,
+    20_000,
+  );
   await A.waitForTimeout(400);
   say('hue.A.caretDrawn', Boolean(caretDrawn));
-  say('hue.A.selectionOfB', (await state(A)).presence.others.map((p) => ({ name: p.name ?? p.label, selection: p.selection ?? null, slideId: p.slideId })));
+  say(
+    'hue.A.selectionOfB',
+    (await state(A)).presence.others.map((p) => ({
+      name: p.name ?? p.label,
+      selection: p.selection ?? null,
+      slideId: p.slideId,
+    })),
+  );
   const hueFacts = await A.evaluate(() => {
-    const caret = document.querySelector('.ts-remote-caret') ?? document.querySelector('.ts-remote-outline');
+    const caret =
+      document.querySelector('.ts-remote-caret') ?? document.querySelector('.ts-remote-outline');
     const chip = document.querySelector('[data-control^="presence.chip."] .ts-chip');
     const stripe = chip?.querySelector('.ts-chip-stripe');
     return {
       caret: caret ? getComputedStyle(caret).backgroundColor : null,
-      caretHueVar: caret?.style.getPropertyValue('--ts-hue') ?? caret?.closest('[style]')?.style.getPropertyValue('--ts-hue') ?? null,
+      caretHueVar:
+        caret?.style.getPropertyValue('--ts-hue') ??
+        caret?.closest('[style]')?.style.getPropertyValue('--ts-hue') ??
+        null,
       chipHue: chip?.getAttribute('data-hue') ?? null,
       chipHueVar: chip?.style.getPropertyValue('--ts-hue') ?? null,
       stripe: stripe ? getComputedStyle(stripe).backgroundColor : null,
@@ -473,8 +567,22 @@ try {
     };
   });
   const bRow = (await state(A)).presence.others.find((p) => p.name !== 'Kevin B1');
-  say('hue.A.readsB', { ...hueFacts, hue: bRow?.hue, markHueSlot: bRow?.mark?.hue?.slot, markHueHex: bRow?.mark?.hue?.hex });
-  if (caretDrawn) say('shot.hue.A.caret', await shotAround(A, A.locator('.ts-remote-caret, .ts-remote-outline').first(), 'A-caret-of-B-hue', 80));
+  say('hue.A.readsB', {
+    ...hueFacts,
+    hue: bRow?.hue,
+    markHueSlot: bRow?.mark?.hue?.slot,
+    markHueHex: bRow?.mark?.hue?.hex,
+  });
+  if (caretDrawn)
+    say(
+      'shot.hue.A.caret',
+      await shotAround(
+        A,
+        A.locator('.ts-remote-caret, .ts-remote-outline').first(),
+        'A-caret-of-B-hue',
+        80,
+      ),
+    );
   else say('shot.hue.A.slot', await shotAround(A, ctl(A, 'title.presence'), 'A-slot-hue-of-B', 20));
   await B.keyboard.press('Escape');
   await settled(B);
@@ -495,7 +603,14 @@ try {
   await B.waitForTimeout(1200);
   const order2 = (await state(A)).presence.others.map((p) => p.clientId);
   await B.keyboard.press('Escape');
-  say('order.A', { before: order0, afterC: order1, afterB: order2, held: JSON.stringify(order0) === JSON.stringify(order1) && JSON.stringify(order1) === JSON.stringify(order2) });
+  say('order.A', {
+    before: order0,
+    afterC: order1,
+    afterB: order2,
+    held:
+      JSON.stringify(order0) === JSON.stringify(order1) &&
+      JSON.stringify(order1) === JSON.stringify(order2),
+  });
   say('shot.order.A.slot', await shotAround(A, ctl(A, 'title.presence'), 'A-slot-two-others', 20));
   await settled(B);
   await settled(C);
@@ -512,8 +627,15 @@ try {
   await ctl(C, 'dialog.namePrompt.continue').click();
   await C.waitForTimeout(800);
   const slideId = stC.activeSlide ?? stC.document?.deck?.sections?.[0]?.slideIds?.[0] ?? null;
-  const added = await invoke(C, 'comment.add', { anchor: slideId ? { kind: 'slide', slideId } : { kind: 'deck' }, body: { text: 'A comment from a guest who leaves', mentions: [] } }).catch((e) => ({ error: String(e) }));
-  say('comment.C.added', { ok: added?.thread !== undefined || added?.id !== undefined, error: added?.error ?? null, author: added?.thread?.comment?.author ?? null });
+  const added = await invoke(C, 'comment.add', {
+    anchor: slideId ? { kind: 'slide', slideId } : { kind: 'deck' },
+    body: { text: 'A comment from a guest who leaves', mentions: [] },
+  }).catch((e) => ({ error: String(e) }));
+  say('comment.C.added', {
+    ok: added?.thread !== undefined || added?.id !== undefined,
+    error: added?.error ?? null,
+    author: added?.thread?.comment?.author ?? null,
+  });
   await C.waitForTimeout(600);
   await ctxC.close();
   await poll(async () => ((await state(A)).presence?.others?.length ?? 0) <= 1, 40_000);
@@ -543,12 +665,33 @@ try {
   say('reload.A.identities.usrB', identityOf(sA2, sB.account.principalId));
   say('reload.A.identities.self', identityOf(sA2, sA2.account.principalId));
   say('reload.A.identities.keys', Object.keys(sA2.identities ?? {}).length);
-  say('reload.A.comment.author', sA2.comments?.threads?.[0]?.comment?.author ? (({ principalId, label, name, trust, kind }) => ({ principalId, label, name, trust, kind }))(sA2.comments.threads[0].comment.author) : null);
+  say(
+    'reload.A.comment.author',
+    sA2.comments?.threads?.[0]?.comment?.author
+      ? (({ principalId, label, name, trust, kind }) => ({
+          principalId,
+          label,
+          name,
+          trust,
+          kind,
+        }))(sA2.comments.threads[0].comment.author)
+      : null,
+  );
   const v2 = await invoke(A, 'version.list', {});
-  say('versions.A.final', (v2.versions ?? v2).map((v) => ({ n: v.n, author: v.author })));
-  await ctl(A, 'title.comments').click().catch(() => {});
+  say(
+    'versions.A.final',
+    (v2.versions ?? v2).map((v) => ({ n: v.n, author: v.author })),
+  );
+  await ctl(A, 'title.comments')
+    .click()
+    .catch(() => {});
   await A.waitForTimeout(800);
-  say('shot.reload.A.comments', await A.screenshot({ path: join(OUT, 'A-comments-departed-guest.png') }).then(() => 'A-comments-departed-guest.png'));
+  say(
+    'shot.reload.A.comments',
+    await A.screenshot({ path: join(OUT, 'A-comments-departed-guest.png') }).then(
+      () => 'A-comments-departed-guest.png',
+    ),
+  );
   await A.keyboard.press('Escape');
 
   // ---- the anonymous creator who signs in later (the gap named in b1.md): D creates, signs in, reloads
@@ -561,12 +704,23 @@ try {
   const dInfo = await invoke(D, 'deck.info');
   decks.push(dInfo.id);
   const dBefore = await state(D);
-  say('creator.D.before', { role: dBefore.access?.role, via: dBefore.access?.via, owner: dBefore.access?.owner, principalId: dBefore.account.principalId });
+  say('creator.D.before', {
+    role: dBefore.access?.role,
+    via: dBefore.access?.via,
+    owner: dBefore.access?.owner,
+    principalId: dBefore.account.principalId,
+  });
   await signIn(D, EMAIL_D);
   await D.reload();
   await waitEditor(D);
   const dAfter = await state(D);
-  say('creator.D.afterSignIn', { role: dAfter.access?.role, via: dAfter.access?.via, owner: dAfter.access?.owner, principalId: dAfter.account.principalId, ownerView: identityOf(dAfter, dAfter.access?.owner) });
+  say('creator.D.afterSignIn', {
+    role: dAfter.access?.role,
+    via: dAfter.access?.via,
+    owner: dAfter.access?.owner,
+    principalId: dAfter.account.principalId,
+    ownerView: identityOf(dAfter, dAfter.access?.owner),
+  });
   say('uptime.end', execFileSync('uptime', { encoding: 'utf8' }).trim());
 } catch (error) {
   say('error', error instanceof Error ? `${error.message}\n${error.stack}` : String(error));
@@ -580,8 +734,16 @@ try {
     const trash = await post('deck.trash', deckId, { id: deckId, baseRevision: rev });
     const info2 = await post('deck.info', deckId, {});
     rev = info2.json?.revision ?? rev;
-    const remove = await post('deck.remove', deckId, { id: deckId, confirm: true, baseRevision: rev });
-    say(`teardown.${deckId}`, { trash: trash.status, remove: remove.status, error: remove.json?.error ?? null });
+    const remove = await post('deck.remove', deckId, {
+      id: deckId,
+      confirm: true,
+      baseRevision: rev,
+    });
+    say(`teardown.${deckId}`, {
+      trash: trash.status,
+      remove: remove.status,
+      error: remove.json?.error ?? null,
+    });
   }
   writeFileSync(join(OUT, 'facts.json'), JSON.stringify(facts, null, 2));
 }

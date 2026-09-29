@@ -11,7 +11,15 @@
 //   node docs/gslides-parity/people/build/b4/drive.mjs <b4-env.json>
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, utimesSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  utimesSync,
+  writeFileSync,
+} from 'node:fs';
 import { loadavg } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -40,7 +48,10 @@ const step = (name, value) => {
 };
 
 function seed(mode, ...args) {
-  const out = execFileSync('node', [SEED, mode, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  const out = execFileSync('node', [SEED, mode, ...args], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
   return JSON.parse(out.trim().split('\n').pop() ?? '{}');
 }
 
@@ -76,7 +87,10 @@ async function action(id, input, extra = {}) {
     body: JSON.stringify(input),
   });
 }
-const errorOf = (answer) => answer.body?.error?.message ?? answer.body?.message ?? (typeof answer.body === 'string' ? answer.body : JSON.stringify(answer.body));
+const errorOf = (answer) =>
+  answer.body?.error?.message ??
+  answer.body?.message ??
+  (typeof answer.body === 'string' ? answer.body : JSON.stringify(answer.body));
 const keysOnDisk = () => (existsSync(USERS_U) ? readdirSync(USERS_U) : []);
 const dataUrl = (mime, base64) => `data:${mime};base64,${base64}`;
 
@@ -110,29 +124,63 @@ step('probe', { getSession: (await call('/api/auth/get-session')).status });
 
 // 2. an anonymous principal is refused before anything is written
 const small = seed('picture', 'png', '64', '64');
-const anonymous = await action('account.setAvatar', { variant: 'picture', picture: dataUrl(small.mime, small.base64) });
-step('anonymous-refused', { status: anonymous.status, sentence: errorOf(anonymous), keysOnDisk: keysOnDisk().length, cookie: [...jar.keys()] });
+const anonymous = await action('account.setAvatar', {
+  variant: 'picture',
+  picture: dataUrl(small.mime, small.base64),
+});
+step('anonymous-refused', {
+  status: anonymous.status,
+  sentence: errorOf(anonymous),
+  keysOnDisk: keysOnDisk().length,
+  cookie: [...jar.keys()],
+});
 
 // 3. sign in with the captured code
 const email = ENV.DRIVE_EMAIL ?? `b4-${Date.now()}@example.test`;
-const asked = await call('/api/auth/sign-in/magic-link', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, callbackURL: '/decks' }) });
+const asked = await call('/api/auth/sign-in/magic-link', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ email, callbackURL: '/decks' }),
+});
 const mail = seed('mail', AUTH_DB, email);
-const verified = await call('/api/auth/sign-in/email-otp', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, otp: mail.code }) });
+const verified = await call('/api/auth/sign-in/email-otp', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ email, otp: mail.code }),
+});
 const me0 = await action('account.me', {});
-step('sign-in', { asked: asked.status, code: mail.code ? 'captured' : 'missing', verified: verified.status, me: { kind: me0.body?.principal?.kind, trust: me0.body?.trust, avatar: me0.body?.avatar, cookies: [...jar.keys()] } });
+step('sign-in', {
+  asked: asked.status,
+  code: mail.code ? 'captured' : 'missing',
+  verified: verified.status,
+  me: {
+    kind: me0.body?.principal?.kind,
+    trust: me0.body?.trust,
+    avatar: me0.body?.avatar,
+    cookies: [...jar.keys()],
+  },
+});
 const principalId = me0.body?.principal?.id;
 
 // 4. the first upload: a 640 by 480 JPEG, the answer, the five served files
 const first = seed('picture', 'jpeg', '640', '480');
-const up1 = await action('account.setAvatar', { variant: 'picture', picture: dataUrl(first.mime, first.base64) });
+const up1 = await action('account.setAvatar', {
+  variant: 'picture',
+  picture: dataUrl(first.mime, first.base64),
+});
 const url1 = up1.body?.avatar?.url ?? '';
 const served1 = {};
-for (const size of [32, 64, 128, 256]) served1[`webp${size}`] = await servedFile(url1.replace(/-64\.webp$/, `-${size}.webp`), size === 64 ? 'served-first-64.webp' : undefined);
+for (const size of [32, 64, 128, 256])
+  served1[`webp${size}`] = await servedFile(
+    url1.replace(/-64\.webp$/, `-${size}.webp`),
+    size === 64 ? 'served-first-64.webp' : undefined,
+  );
 served1.png256 = await servedFile(url1.replace(/-64\.webp$/, '-256.png'), 'served-first-256.png');
 step('upload-1', {
   status: up1.status,
   sentence: up1.status >= 400 ? errorOf(up1) : null,
-  requestBytes: JSON.stringify({ variant: 'picture', picture: dataUrl(first.mime, first.base64) }).length,
+  requestBytes: JSON.stringify({ variant: 'picture', picture: dataUrl(first.mime, first.base64) })
+    .length,
   fixtureBytes: first.bytes,
   avatar: up1.body?.avatar,
   markVariant: up1.body?.mark?.variant,
@@ -153,7 +201,11 @@ const walk = (dir) => {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     if (statSync(p).isDirectory()) walk(p);
-    else if (name === 'decks.json' && p.includes(String(principalId).replace(/[^A-Za-z0-9_-]/g, '_'))) indexFiles.push(p);
+    else if (
+      name === 'decks.json' &&
+      p.includes(String(principalId).replace(/[^A-Za-z0-9_-]/g, '_'))
+    )
+      indexFiles.push(p);
   }
 };
 walk(join(OVERLAY, '.turboslide'));
@@ -162,7 +214,11 @@ const readIndex = () => (indexFiles[0] ? JSON.parse(readFileSync(indexFiles[0], 
 const indexAfterGlyph = readIndex();
 step('glyph-on-index', {
   meAfterUploadPictureUrl: me1.body?.mark?.pictureUrl,
-  glyph: { status: glyph.status, avatar: glyph.body?.avatar, markVariant: glyph.body?.mark?.variant },
+  glyph: {
+    status: glyph.status,
+    avatar: glyph.body?.avatar,
+    markVariant: glyph.body?.mark?.variant,
+  },
   keysOnDiskAfterGlyph: keysOnDisk().length,
   indexFile: indexFiles[0]?.replace(OVERLAY, '<overlay>') ?? null,
   indexAvatar: indexAfterGlyph?.avatar ?? null,
@@ -170,7 +226,10 @@ step('glyph-on-index', {
 
 // 6. the second upload: the oriented JPEG; rotation of the key, the old URL 404, the PNG upright with no Exif
 const oriented = seed('oriented');
-const up2 = await action('account.setAvatar', { variant: 'picture', picture: dataUrl(oriented.mime, oriented.base64) });
+const up2 = await action('account.setAvatar', {
+  variant: 'picture',
+  picture: dataUrl(oriented.mime, oriented.base64),
+});
 const url2 = up2.body?.avatar?.url ?? '';
 const key2 = url2.split('/').at(-2);
 const old64 = await servedFile(url1);
@@ -178,9 +237,15 @@ const png2 = await servedFile(url2.replace(/-64\.webp$/, '-256.png'), 'served-or
 const webp2 = await servedFile(url2);
 let upright = null;
 if (png2.status === 200) {
-  const { data, info } = await sharp(join(HERE, 'served-oriented-256.png')).raw().toBuffer({ resolveWithObject: true });
+  const { data, info } = await sharp(join(HERE, 'served-oriented-256.png'))
+    .raw()
+    .toBuffer({ resolveWithObject: true });
   const red = (x, y) => data[(y * info.width + x) * info.channels];
-  upright = { redFlatAlongX: Math.abs(red(16, 16) - red(240, 16)) < 24, redRampsAlongY: red(128, 240) - red(128, 16) > 60, samples: { r16_16: red(16, 16), r240_16: red(240, 16), r128_240: red(128, 240) } };
+  upright = {
+    redFlatAlongX: Math.abs(red(16, 16) - red(240, 16)) < 24,
+    redRampsAlongY: red(128, 240) - red(128, 16) > 60,
+    samples: { r16_16: red(16, 16), r240_16: red(240, 16), r128_240: red(128, 240) },
+  };
 }
 step('upload-2-oriented', {
   status: up2.status,
@@ -197,19 +262,40 @@ step('upload-2-oriented', {
 
 // 7. the cap: a string over the bound that is no data URL, and a real WebP over 512 KB
 const before = keysOnDisk();
-const long = await action('account.setAvatar', { variant: 'picture', picture: 'x'.repeat(699_200) });
+const long = await action('account.setAvatar', {
+  variant: 'picture',
+  picture: 'x'.repeat(699_200),
+});
 const noise = seed('picture', 'webp', '900', '900', 'noise');
-const big = await action('account.setAvatar', { variant: 'picture', picture: dataUrl(noise.mime, noise.base64) });
+const big = await action('account.setAvatar', {
+  variant: 'picture',
+  picture: dataUrl(noise.mime, noise.base64),
+});
 step('cap-refusal', {
   longString: { length: 699_200, status: long.status, sentence: errorOf(long) },
-  noiseWebp: { bytes: noise.bytes, overCap: noise.bytes > 512 * 1024, dataUrlLength: dataUrl(noise.mime, noise.base64).length, status: big.status, sentence: errorOf(big) },
+  noiseWebp: {
+    bytes: noise.bytes,
+    overCap: noise.bytes > 512 * 1024,
+    dataUrlLength: dataUrl(noise.mime, noise.base64).length,
+    status: big.status,
+    sentence: errorOf(big),
+  },
   keysOnDiskUnchanged: JSON.stringify(keysOnDisk()) === JSON.stringify(before),
 });
 
 // 8. the pixel cap: a flat 2048 by 2048 PNG is small in bytes and large in pixels
 const wide = seed('picture', 'png', '2048', '2048');
-const pixels = await action('account.setAvatar', { variant: 'picture', picture: dataUrl(wide.mime, wide.base64) });
-step('pixel-cap', { fixtureBytes: wide.bytes, underByteCap: wide.bytes <= 512 * 1024, status: pixels.status, sentence: errorOf(pixels), keysOnDiskUnchanged: JSON.stringify(keysOnDisk()) === JSON.stringify(before) });
+const pixels = await action('account.setAvatar', {
+  variant: 'picture',
+  picture: dataUrl(wide.mime, wide.base64),
+});
+step('pixel-cap', {
+  fixtureBytes: wide.bytes,
+  underByteCap: wide.bytes <= 512 * 1024,
+  status: pixels.status,
+  sentence: errorOf(pixels),
+  keysOnDiskUnchanged: JSON.stringify(keysOnDisk()) === JSON.stringify(before),
+});
 
 // 9. the CLI through an API key of the same account: --picture, a read only key, the cap, --avatar-png
 const rw = seed('key', AUTH_DB, email, 'b4-cli', 'read,write');
@@ -237,24 +323,63 @@ function cli(secret, args) {
   } catch {
     json = null;
   }
-  return { status: out.status, json, stderr: out.stderr.trim().split('\n').slice(-3).join(' | ').slice(0, 300) };
+  return {
+    status: out.status,
+    json,
+    stderr: out.stderr.trim().split('\n').slice(-3).join(' | ').slice(0, 300),
+  };
 }
-const cliUp = cli(rw.secret, ['account', 'avatar', '--variant', 'picture', '--picture', cliPicture]);
+const cliUp = cli(rw.secret, [
+  'account',
+  'avatar',
+  '--variant',
+  'picture',
+  '--picture',
+  cliPicture,
+]);
 const cliRo = cli(ro.secret, ['account', 'avatar', '--variant', 'glyph', '--another']);
 const cliCap = cli(rw.secret, ['account', 'avatar', '--variant', 'picture', '--picture', cliBig]);
-const cliText1 = cli(rw.secret, ['account', 'avatar', '--variant', 'picture', '--picture', cliText]);
+const cliText1 = cli(rw.secret, [
+  'account',
+  'avatar',
+  '--variant',
+  'picture',
+  '--picture',
+  cliText,
+]);
 const cliPng = join(HERE, 'cli-me-avatar.png');
 const cliMe = cli(rw.secret, ['account', 'me', '--avatar-png', cliPng]);
 const pngMeta = existsSync(cliPng) ? await sharp(cliPng).metadata() : null;
 const me2 = await action('account.me', {});
 step('cli', {
-  upload: { status: cliUp.status, principal: cliUp.json?.principal, avatarUrl: cliUp.json?.avatar?.url, markVariant: cliUp.json?.mark?.variant, urlGrammar: URL_64.test(cliUp.json?.avatar?.url ?? ''), stderr: cliUp.stderr },
+  upload: {
+    status: cliUp.status,
+    principal: cliUp.json?.principal,
+    avatarUrl: cliUp.json?.avatar?.url,
+    markVariant: cliUp.json?.mark?.variant,
+    urlGrammar: URL_64.test(cliUp.json?.avatar?.url ?? ''),
+    stderr: cliUp.stderr,
+  },
   keysOnDiskAfterCli: keysOnDisk().length,
   sessionSeesCliPicture: me2.body?.avatar?.url === cliUp.json?.avatar?.url,
   readOnlyKey: { status: cliRo.status, stderr: cliRo.stderr },
   overCap: { status: cliCap.status, stderr: cliCap.stderr },
   notAPicture: { status: cliText1.status, stderr: cliText1.stderr },
-  avatarPng: { status: cliMe.status, principalKind: cliMe.json?.principal?.kind, markVariant: cliMe.json?.mark?.variant, avatarPng: cliMe.json?.avatarPng?.replace(HERE, '<b4>'), file: pngMeta ? { width: pngMeta.width, height: pngMeta.height, format: pngMeta.format, depth: pngMeta.depth, channels: pngMeta.channels } : null },
+  avatarPng: {
+    status: cliMe.status,
+    principalKind: cliMe.json?.principal?.kind,
+    markVariant: cliMe.json?.mark?.variant,
+    avatarPng: cliMe.json?.avatarPng?.replace(HERE, '<b4>'),
+    file: pngMeta
+      ? {
+          width: pngMeta.width,
+          height: pngMeta.height,
+          format: pngMeta.format,
+          depth: pngMeta.depth,
+          channels: pngMeta.channels,
+        }
+      : null,
+  },
 });
 
 // 10. the janitor: the action through the bootstrap bearer, and the function over the server's own folder
@@ -270,7 +395,10 @@ utimesSync(orphanFile, old, old);
 const youngKey = 'B4youngB4youngB4youngB';
 mkdirSync(join(USERS_U, youngKey), { recursive: true });
 writeFileSync(join(USERS_U, youngKey, `${'e'.repeat(64)}-32.webp`), new Uint8Array(16));
-const sweepOut = spawnSync('node', [join(HERE, 'sweep-local.mts'), OVERLAY, AUTH_DB], { cwd: WORKTREE, encoding: 'utf8' });
+const sweepOut = spawnSync('node', [join(HERE, 'sweep-local.mts'), OVERLAY, AUTH_DB], {
+  cwd: WORKTREE,
+  encoding: 'utf8',
+});
 let sweep = null;
 try {
   sweep = JSON.parse(sweepOut.stdout.trim().split('\n').pop() ?? 'null');
@@ -279,7 +407,11 @@ try {
 }
 step('janitor', {
   action: { status: sweepAction.status, sentence: errorOf(sweepAction) },
-  seeded: { orphanKey, youngKey, namedKeys: keysOnDisk().filter((k) => k !== orphanKey && k !== youngKey) },
+  seeded: {
+    orphanKey,
+    youngKey,
+    namedKeys: keysOnDisk().filter((k) => k !== orphanKey && k !== youngKey),
+  },
   sweep,
   keysOnDiskAfter: keysOnDisk(),
 });

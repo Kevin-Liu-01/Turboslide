@@ -88,9 +88,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          1
-        ]
+        "steps": [1]
       },
       {
         "id": "decks.new.ground-paint",
@@ -98,9 +96,7 @@
         "today": "flaky",
         "result": "passed",
         "reason": "",
-        "steps": [
-          2
-        ]
+        "steps": [2]
       },
       {
         "id": "decks.new.first-write",
@@ -108,9 +104,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          3
-        ]
+        "steps": [3]
       },
       {
         "id": "decks.title.save-words",
@@ -118,9 +112,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          5
-        ]
+        "steps": [5]
       },
       {
         "id": "decks.title.rename-enter",
@@ -128,9 +120,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          6
-        ]
+        "steps": [6]
       },
       {
         "id": "decks.title.rename-escape",
@@ -138,9 +128,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          7
-        ]
+        "steps": [7]
       },
       {
         "id": "decks.title.rename-blur",
@@ -148,9 +136,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          8
-        ]
+        "steps": [8]
       },
       {
         "id": "decks.title.rename-empty",
@@ -158,9 +144,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          9
-        ]
+        "steps": [9]
       },
       {
         "id": "decks.title.file-rename",
@@ -168,9 +152,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          10
-        ]
+        "steps": [10]
       },
       {
         "id": "decks.title.tab-title-after-rename",
@@ -178,9 +160,7 @@
         "today": "broken",
         "result": "passed",
         "reason": "",
-        "steps": [
-          11
-        ]
+        "steps": [11]
       },
       {
         "id": "decks.title.mark-to-list",
@@ -188,9 +168,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          12
-        ]
+        "steps": [12]
       },
       {
         "id": "decks.edit.reload-keeps-slide",
@@ -198,9 +176,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          13
-        ]
+        "steps": [13]
       },
       {
         "id": "decks.save.acknowledged",
@@ -208,9 +184,7 @@
         "today": "flaky",
         "result": "passed",
         "reason": "",
-        "steps": [
-          30
-        ]
+        "steps": [30]
       },
       {
         "id": "decks.editor.move-to-trash",
@@ -2306,9 +2280,7 @@
         "today": "not driven",
         "result": "passed",
         "reason": "",
-        "steps": [
-          17
-        ]
+        "steps": [17]
       },
       {
         "id": "versions.open-from-last-edit",
@@ -2316,9 +2288,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          18
-        ]
+        "steps": [18]
       },
       {
         "id": "versions.pick",
@@ -2326,9 +2296,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          19
-        ]
+        "steps": [19]
       },
       {
         "id": "versions.name-current",
@@ -2336,9 +2304,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          20
-        ]
+        "steps": [20]
       },
       {
         "id": "versions.undo-restore",
@@ -2346,9 +2312,7 @@
         "today": "not driven",
         "result": "passed",
         "reason": "",
-        "steps": [
-          21
-        ]
+        "steps": [21]
       },
       {
         "id": "export.download-submenu",
@@ -3612,9 +3576,7 @@
         "today": "broken",
         "result": "passed",
         "reason": "",
-        "steps": [
-          4
-        ]
+        "steps": [4]
       },
       {
         "id": "decks.file.open-list-search",
@@ -3622,9 +3584,7 @@
         "today": "works",
         "result": "failed",
         "reason": "File > Open; read the list; type in the search; clear it: 56 decks listed after 0 ms, first untitled-20260929-tvae; filtered by nonsense 0; cleared 56",
-        "steps": [
-          14
-        ]
+        "steps": [14]
       },
       {
         "id": "decks.file.import-slides-deck",
@@ -3632,9 +3592,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          15
-        ]
+        "steps": [15]
       },
       {
         "id": "decks.file.details",
@@ -3642,9 +3600,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          16
-        ]
+        "steps": [16]
       },
       {
         "id": "slides.numbers.apply",
@@ -3660,9 +3616,7 @@
         "today": "works",
         "result": "passed",
         "reason": "",
-        "steps": [
-          22
-        ]
+        "steps": [22]
       },
       {
         "id": "versions.show-changes-marks",
@@ -3670,9 +3624,7 @@
         "today": "not driven",
         "result": "failed",
         "reason": "a heading edit and an added box after the named version; pick the older version with Show changes on; then off: picked versionHistory.11.pick (named row versionHistory.11.pick); marks with Show changes on 0 (); off 0",
-        "steps": [
-          23
-        ]
+        "steps": [23]
       },
       {
         "id": "help.check-slides",
@@ -3872,9 +3824,7 @@
         "today": "broken",
         "result": "passed",
         "reason": "",
-        "steps": [
-          27
-        ]
+        "steps": [27]
       },
       {
         "id": "versions.panel.author-you",
@@ -3882,9 +3832,7 @@
         "today": "broken",
         "result": "passed",
         "reason": "",
-        "steps": [
-          25
-        ]
+        "steps": [25]
       },
       {
         "id": "versions.field.square",
@@ -3892,9 +3840,7 @@
         "today": "broken",
         "result": "passed",
         "reason": "",
-        "steps": [
-          26
-        ]
+        "steps": [26]
       },
       {
         "id": "help.shortcuts.no-duplicates",
@@ -5318,9 +5264,7 @@
         "today": "broken",
         "result": "passed",
         "reason": "",
-        "steps": [
-          28
-        ]
+        "steps": [28]
       },
       {
         "id": "versions.restore-in-more",
@@ -5328,9 +5272,7 @@
         "today": "broken",
         "result": "passed",
         "reason": "",
-        "steps": [
-          29
-        ]
+        "steps": [29]
       }
     ],
     "verdict": {

@@ -21,7 +21,9 @@ const OUT = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(OUT, '..', '..', '..', '..', '..');
 /* Playwright is the workspace's own, as the audit's drive script loads it */
 const require = createRequire(import.meta.url);
-const { chromium } = require(join(ROOT, 'node_modules/.pnpm/playwright@1.62.1/node_modules/playwright'));
+const { chromium } = require(
+  join(ROOT, 'node_modules/.pnpm/playwright@1.62.1/node_modules/playwright'),
+);
 const SEED = join(ROOT, 'apps', 'studio', 'e2e', 'identity-seed.mts');
 const AUTH_DB = process.env.TURBOSLIDE_AUTH_DB ?? '.turboslide/auth-b3.sqlite';
 mkdirSync(OUT, { recursive: true });
@@ -123,7 +125,12 @@ function ownChipFacts(page) {
         : null,
       plate: plate ? 'svg' : null,
       inset: inner
-        ? { l: inner.left - r.left, t: inner.top - r.top, r: r.right - inner.right, b: r.bottom - inner.bottom }
+        ? {
+            l: inner.left - r.left,
+            t: inner.top - r.top,
+            r: r.right - inner.right,
+            b: r.bottom - inner.bottom,
+          }
         : null,
     };
   });
@@ -173,14 +180,17 @@ const isSetAvatar = (request) => {
   }
 };
 A.on('request', (request) => {
-  if (isSetAvatar(request)) requests.push({ url: request.url().slice(0, 60), bytes: request.postData().length });
+  if (isSetAvatar(request))
+    requests.push({ url: request.url().slice(0, 60), bytes: request.postData().length });
 });
 const invoke = (page, action, input) =>
   page.evaluate(([a, i]) => window.turboslide.studio.invoke(a, i), [action, input]);
 /* a draft of /new holds no deck until its first write, and the account actions run through the
    deck's dispatcher, so the drive writes the title first */
 async function createDeck(page, title) {
-  const revision = await page.evaluate(() => window.turboslide.studio.describe().state.revision ?? 0);
+  const revision = await page.evaluate(
+    () => window.turboslide.studio.describe().state.revision ?? 0,
+  );
   const renamed = await invoke(page, 'deck.rename', { name: title, baseRevision: revision });
   await page.waitForTimeout(800);
   return renamed;
@@ -192,38 +202,81 @@ try {
   await A.goto('/new');
   await waitEditor(A);
   say('deck', await createDeck(A, 'B3 avatar drive'));
-  say('identity', await A.evaluate(() => {
-    const s = window.turboslide.studio.describe().state;
-    return { self: s.presence?.self ?? null, account: s.account ?? null };
-  }));
+  say(
+    'identity',
+    await A.evaluate(() => {
+      const s = window.turboslide.studio.describe().state;
+      return { self: s.presence?.self ?? null, account: s.account ?? null };
+    }),
+  );
 
   // ---- the builder before: the Initials tab, then the empty Picture tab
   await openBuilder(A);
-  say('shot.before.initials', await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '01-builder-before-initials', 24));
+  say(
+    'shot.before.initials',
+    await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '01-builder-before-initials', 24),
+  );
   await ctl(A, 'dialog.avatarBuilder.tab.picture').click();
   await ctl(A, 'dialog.avatarBuilder.panel.picture').waitFor({ timeout: 5000 });
-  say('picture.empty', await A.evaluate(() => ({
-    cap: document.querySelector('[data-control="dialog.avatarBuilder.capSentence"]')?.textContent ?? null,
-    privacy: document.querySelector('[data-control="dialog.avatarBuilder.privacySentence"]')?.textContent ?? null,
-    cache: document.querySelector('[data-control="dialog.avatarBuilder.cacheSentence"]')?.textContent ?? null,
-    loaded: document.querySelector('[data-control="dialog.avatarBuilder.crop"]')?.getAttribute('data-loaded') ?? null,
-    applyDisabled: document.querySelector('[data-control="dialog.avatarBuilder.apply"]')?.disabled ?? null,
-    panelHeight: document.querySelector('.ts-avatar-panel')?.getBoundingClientRect().height ?? null,
-    panelScroll: document.querySelector('.ts-avatar-panel')?.scrollHeight ?? null,
-  })));
-  say('shot.before.picture', await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '02-builder-before-picture', 24));
+  say(
+    'picture.empty',
+    await A.evaluate(() => ({
+      cap:
+        document.querySelector('[data-control="dialog.avatarBuilder.capSentence"]')?.textContent ??
+        null,
+      privacy:
+        document.querySelector('[data-control="dialog.avatarBuilder.privacySentence"]')
+          ?.textContent ?? null,
+      cache:
+        document.querySelector('[data-control="dialog.avatarBuilder.cacheSentence"]')
+          ?.textContent ?? null,
+      loaded:
+        document
+          .querySelector('[data-control="dialog.avatarBuilder.crop"]')
+          ?.getAttribute('data-loaded') ?? null,
+      applyDisabled:
+        document.querySelector('[data-control="dialog.avatarBuilder.apply"]')?.disabled ?? null,
+      panelHeight:
+        document.querySelector('.ts-avatar-panel')?.getBoundingClientRect().height ?? null,
+      panelScroll: document.querySelector('.ts-avatar-panel')?.scrollHeight ?? null,
+    })),
+  );
+  say(
+    'shot.before.picture',
+    await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '02-builder-before-picture', 24),
+  );
 
   // ---- the file: decoded, drawn in the box, the crop dragged
-  await ctl(A, 'dialog.avatarBuilder.file').setInputFiles({ name: 'seed-1200x900.jpg', mimeType: 'image/jpeg', buffer: jpeg });
-  await A.locator('[data-control="dialog.avatarBuilder.crop"][data-loaded="true"]').waitFor({ timeout: 10_000 });
-  say('picture.loaded', await A.evaluate(() => ({
-    cropSentence: document.querySelector('[data-control="dialog.avatarBuilder.cropSentence"]')?.textContent ?? null,
-    applyDisabled: document.querySelector('[data-control="dialog.avatarBuilder.apply"]')?.disabled ?? null,
-    stripPictures: document.querySelectorAll('[data-control="dialog.avatarBuilder.strip"] img.ts-chip-picture').length,
-    objectPosition: document.querySelector('[data-control="dialog.avatarBuilder.strip"] img.ts-chip-picture')?.style.objectPosition ?? null,
-    error: document.querySelector('[data-control="dialog.avatarBuilder.error"]')?.textContent ?? null,
-  })));
-  say('shot.loaded', await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '03-builder-picture-loaded', 24));
+  await ctl(A, 'dialog.avatarBuilder.file').setInputFiles({
+    name: 'seed-1200x900.jpg',
+    mimeType: 'image/jpeg',
+    buffer: jpeg,
+  });
+  await A.locator('[data-control="dialog.avatarBuilder.crop"][data-loaded="true"]').waitFor({
+    timeout: 10_000,
+  });
+  say(
+    'picture.loaded',
+    await A.evaluate(() => ({
+      cropSentence:
+        document.querySelector('[data-control="dialog.avatarBuilder.cropSentence"]')?.textContent ??
+        null,
+      applyDisabled:
+        document.querySelector('[data-control="dialog.avatarBuilder.apply"]')?.disabled ?? null,
+      stripPictures: document.querySelectorAll(
+        '[data-control="dialog.avatarBuilder.strip"] img.ts-chip-picture',
+      ).length,
+      objectPosition:
+        document.querySelector('[data-control="dialog.avatarBuilder.strip"] img.ts-chip-picture')
+          ?.style.objectPosition ?? null,
+      error:
+        document.querySelector('[data-control="dialog.avatarBuilder.error"]')?.textContent ?? null,
+    })),
+  );
+  say(
+    'shot.loaded',
+    await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '03-builder-picture-loaded', 24),
+  );
   const box = await ctl(A, 'dialog.avatarBuilder.crop').boundingBox();
   await A.mouse.move(box.x + 128, box.y + 128);
   await A.mouse.down();
@@ -231,10 +284,18 @@ try {
   await A.mouse.move(box.x + 48, box.y + 128, { steps: 8 });
   await A.mouse.up();
   await A.waitForTimeout(300);
-  say('picture.dragged', await A.evaluate(() => ({
-    objectPosition: document.querySelector('[data-control="dialog.avatarBuilder.strip"] img.ts-chip-picture')?.style.objectPosition ?? null,
-  })));
-  say('shot.dragged', await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '04-builder-picture-dragged', 24));
+  say(
+    'picture.dragged',
+    await A.evaluate(() => ({
+      objectPosition:
+        document.querySelector('[data-control="dialog.avatarBuilder.strip"] img.ts-chip-picture')
+          ?.style.objectPosition ?? null,
+    })),
+  );
+  say(
+    'shot.dragged',
+    await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '04-builder-picture-dragged', 24),
+  );
 
   // ---- Apply: the request, the dialog closing, the own chip
   const chipBefore = await ownChipFacts(A);
@@ -246,12 +307,17 @@ try {
     .waitFor({ state: 'detached', timeout: 15_000 })
     .then(() => true)
     .catch(async () => {
-      applyError = await ctl(A, 'dialog.avatarBuilder.error').textContent().catch(() => null);
+      applyError = await ctl(A, 'dialog.avatarBuilder.error')
+        .textContent()
+        .catch(() => null);
       return false;
     });
   say('apply', { closed, error: applyError, ms: Date.now() - t0, requests });
   if (!closed) {
-    say('shot.applyError', await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '05-builder-apply-error', 24));
+    say(
+      'shot.applyError',
+      await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '05-builder-apply-error', 24),
+    );
     await closeDialog(A);
   }
   let chipAfter = null;
@@ -261,31 +327,66 @@ try {
     await A.waitForTimeout(200);
   }
   say('ownChip.after', { ...chipAfter, ms: Date.now() - t0 });
-  say('ownChip.urlGrammar', typeof chipAfter?.img?.src === 'string' && /\/u\/[A-Za-z0-9_-]{22}\/[0-9a-f]{64}-64\.webp$/.test(chipAfter.img.src));
+  say(
+    'ownChip.urlGrammar',
+    typeof chipAfter?.img?.src === 'string' &&
+      /\/u\/[A-Za-z0-9_-]{22}\/[0-9a-f]{64}-64\.webp$/.test(chipAfter.img.src),
+  );
   say('shot.ownChip.after', await shotAround(A, ctl(A, 'title.presence'), '05-own-chip-after', 20));
   if (chipAfter?.img?.src) {
-    const served = await A.request.get(chipAfter.img.src, { headers: { origin: BASE, 'sec-fetch-site': 'same-origin' } });
-    say('picture.served', { status: served.status(), type: served.headers()['content-type'] ?? null, cache: served.headers()['cache-control'] ?? null, bytes: (await served.body()).length });
+    const served = await A.request.get(chipAfter.img.src, {
+      headers: { origin: BASE, 'sec-fetch-site': 'same-origin' },
+    });
+    say('picture.served', {
+      status: served.status(),
+      type: served.headers()['content-type'] ?? null,
+      cache: served.headers()['cache-control'] ?? null,
+      bytes: (await served.body()).length,
+    });
   }
-  say('me', await A.evaluate(() => window.turboslide.studio.invoke('account.me', {})).catch((error) => String(error)));
+  say(
+    'me',
+    await A.evaluate(() => window.turboslide.studio.invoke('account.me', {})).catch((error) =>
+      String(error),
+    ),
+  );
 
   // ---- the Profile head at 128, and the account menu head
   await A.keyboard.press('Escape');
   await ctl(A, 'title.account').click();
   await A.locator('#ts-menu-account').waitFor({ timeout: 8000 });
-  say('shot.accountMenu', await A.screenshot({ path: join(OUT, '06-account-menu-after.png'), clip: { x: 900, y: 0, width: 540, height: 260 } }).then(() => 'build/b3/06-account-menu-after.png'));
-  say('accountMenu.chip', await A.evaluate(() => {
-    const img = document.querySelector('#ts-menu-account img.ts-chip-picture');
-    return img ? { src: img.getAttribute('src'), srcset: img.getAttribute('srcset') } : null;
-  }));
+  say(
+    'shot.accountMenu',
+    await A.screenshot({
+      path: join(OUT, '06-account-menu-after.png'),
+      clip: { x: 900, y: 0, width: 540, height: 260 },
+    }).then(() => 'build/b3/06-account-menu-after.png'),
+  );
+  say(
+    'accountMenu.chip',
+    await A.evaluate(() => {
+      const img = document.querySelector('#ts-menu-account img.ts-chip-picture');
+      return img ? { src: img.getAttribute('src'), srcset: img.getAttribute('srcset') } : null;
+    }),
+  );
   const sessions = A.getByRole('menuitem', { name: 'Sessions' });
   if ((await sessions.count()) > 0) {
     await sessions.click();
     await ctl(A, 'dialog.profile').waitFor({ timeout: 8000 });
-    say('profile.head', await A.evaluate(() => {
-      const img = document.querySelector('[data-control="dialog.profile.head"] img.ts-chip-picture');
-      return { src: img?.getAttribute('src') ?? null, srcset: img?.getAttribute('srcset') ?? null, trust: document.querySelector('[data-control="dialog.profile.trust"]')?.textContent ?? null };
-    }));
+    say(
+      'profile.head',
+      await A.evaluate(() => {
+        const img = document.querySelector(
+          '[data-control="dialog.profile.head"] img.ts-chip-picture',
+        );
+        return {
+          src: img?.getAttribute('src') ?? null,
+          srcset: img?.getAttribute('srcset') ?? null,
+          trust:
+            document.querySelector('[data-control="dialog.profile.trust"]')?.textContent ?? null,
+        };
+      }),
+    );
     say('shot.profile', await shotAround(A, ctl(A, 'dialog.profile.head'), '07-profile-head', 24));
     await A.keyboard.press('Escape');
     await A.waitForTimeout(300);
@@ -293,12 +394,28 @@ try {
 
   // ---- the builder reopened on the current picture
   await openBuilder(A);
-  say('reopened', await A.evaluate(() => ({
-    panel: document.querySelector('.ts-avatar-panel')?.getAttribute('data-control') ?? null,
-    strip: [...document.querySelectorAll('[data-control="dialog.avatarBuilder.strip"] img.ts-chip-picture')].map((img) => ({ size: img.closest('.ts-avatar-cell')?.getAttribute('data-size'), src: img.getAttribute('src')?.replace(/^.*\//, ''), srcset: (img.getAttribute('srcset') ?? '').replace(/[^ ,]*\//g, ''), naturalWidth: img.naturalWidth })),
-    applyDisabled: document.querySelector('[data-control="dialog.avatarBuilder.apply"]')?.disabled ?? null,
-  })));
-  say('shot.reopened', await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '08-builder-reopened-current-picture', 24));
+  say(
+    'reopened',
+    await A.evaluate(() => ({
+      panel: document.querySelector('.ts-avatar-panel')?.getAttribute('data-control') ?? null,
+      strip: [
+        ...document.querySelectorAll(
+          '[data-control="dialog.avatarBuilder.strip"] img.ts-chip-picture',
+        ),
+      ].map((img) => ({
+        size: img.closest('.ts-avatar-cell')?.getAttribute('data-size'),
+        src: img.getAttribute('src')?.replace(/^.*\//, ''),
+        srcset: (img.getAttribute('srcset') ?? '').replace(/[^ ,]*\//g, ''),
+        naturalWidth: img.naturalWidth,
+      })),
+      applyDisabled:
+        document.querySelector('[data-control="dialog.avatarBuilder.apply"]')?.disabled ?? null,
+    })),
+  );
+  say(
+    'shot.reopened',
+    await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '08-builder-reopened-current-picture', 24),
+  );
   await closeDialog(A);
 
   // ---- the cap refusal: toBlob stubbed to a 600 KB blob on the next load
@@ -313,16 +430,27 @@ try {
   say('ownChip.afterReload', await ownChipFacts(A));
   await openBuilder(A);
   await ctl(A, 'dialog.avatarBuilder.tab.picture').click();
-  await ctl(A, 'dialog.avatarBuilder.file').setInputFiles({ name: 'seed-1200x900.jpg', mimeType: 'image/jpeg', buffer: jpeg });
-  await A.locator('[data-control="dialog.avatarBuilder.crop"][data-loaded="true"]').waitFor({ timeout: 10_000 });
+  await ctl(A, 'dialog.avatarBuilder.file').setInputFiles({
+    name: 'seed-1200x900.jpg',
+    mimeType: 'image/jpeg',
+    buffer: jpeg,
+  });
+  await A.locator('[data-control="dialog.avatarBuilder.crop"][data-loaded="true"]').waitFor({
+    timeout: 10_000,
+  });
   await ctl(A, 'dialog.avatarBuilder.apply').click();
   await A.waitForTimeout(1200);
   say('capRefusal', {
-    error: await ctl(A, 'dialog.avatarBuilder.error').textContent().catch(() => null),
+    error: await ctl(A, 'dialog.avatarBuilder.error')
+      .textContent()
+      .catch(() => null),
     dialogOpen: (await ctl(A, 'dialog.avatarBuilder').count()) > 0,
     requests: requests.length,
   });
-  say('shot.capRefusal', await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '09-builder-cap-refusal', 24));
+  say(
+    'shot.capRefusal',
+    await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '09-builder-cap-refusal', 24),
+  );
   await closeDialog(A);
 
   // ---- Glyph > Apply: the own chip's variant within 2 s, the builder reopened on Glyph
@@ -340,10 +468,16 @@ try {
   say('glyph.ownChip', { variant: glyph?.variant ?? null, ms: Date.now() - g0 });
   say('shot.glyph', await shotAround(A, ctl(A, 'title.presence'), '10-own-chip-glyph', 20));
   await openBuilder(A);
-  say('glyph.reopened', await A.evaluate(() => ({
-    panel: document.querySelector('.ts-avatar-panel')?.getAttribute('data-control') ?? null,
-    tab: document.querySelector('[data-control="dialog.avatarBuilder.tab.glyph"]')?.getAttribute('aria-selected') ?? null,
-  })));
+  say(
+    'glyph.reopened',
+    await A.evaluate(() => ({
+      panel: document.querySelector('.ts-avatar-panel')?.getAttribute('data-control') ?? null,
+      tab:
+        document
+          .querySelector('[data-control="dialog.avatarBuilder.tab.glyph"]')
+          ?.getAttribute('aria-selected') ?? null,
+    })),
+  );
   await closeDialog(A);
 
   // ---- Change name: the same write back path; the own chip's accessible name within 2 s
@@ -361,22 +495,37 @@ try {
     if ((named?.label ?? '').startsWith('Ada B3')) break;
     await A.waitForTimeout(100);
   }
-  say('name.ownChip', { label: named?.label ?? null, variant: named?.variant ?? null, ms: Date.now() - n0 });
+  say('name.ownChip', {
+    label: named?.label ?? null,
+    variant: named?.variant ?? null,
+    ms: Date.now() - n0,
+  });
   await closeDialog(A);
   if ((await ctl(A, 'dialog.namePrompt').count()) > 0) await A.keyboard.press('Escape');
 
   // ---- dark chrome: the Picture tab with a file loaded
   await A.evaluate(() => {
-    try { localStorage.setItem('gt-theme', 'dark'); } catch {}
+    try {
+      localStorage.setItem('gt-theme', 'dark');
+    } catch {}
     document.documentElement.setAttribute('data-theme', 'dark');
     window.postMessage({ type: 'gt-theme', theme: 'dark' }, '*');
   });
   await A.waitForTimeout(400);
   await openBuilder(A);
   await ctl(A, 'dialog.avatarBuilder.tab.picture').click();
-  await ctl(A, 'dialog.avatarBuilder.file').setInputFiles({ name: 'seed-1200x900.jpg', mimeType: 'image/jpeg', buffer: jpeg });
-  await A.locator('[data-control="dialog.avatarBuilder.crop"][data-loaded="true"]').waitFor({ timeout: 10_000 });
-  say('shot.dark', await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '11-builder-picture-dark', 24));
+  await ctl(A, 'dialog.avatarBuilder.file').setInputFiles({
+    name: 'seed-1200x900.jpg',
+    mimeType: 'image/jpeg',
+    buffer: jpeg,
+  });
+  await A.locator('[data-control="dialog.avatarBuilder.crop"][data-loaded="true"]').waitFor({
+    timeout: 10_000,
+  });
+  say(
+    'shot.dark',
+    await shotAround(A, ctl(A, 'dialog.avatarBuilder'), '11-builder-picture-dark', 24),
+  );
   await closeDialog(A);
 
   // ---- an anonymous browser: the sentence and Apply disabled
@@ -388,18 +537,34 @@ try {
   await openBuilder(B);
   await ctl(B, 'dialog.avatarBuilder.tab.picture').click();
   await ctl(B, 'dialog.avatarBuilder.panel.picture').waitFor({ timeout: 5000 });
-  say('anonymous', await B.evaluate(() => ({
-    sentence: document.querySelector('[data-control="dialog.avatarBuilder.signInSentence"]')?.textContent ?? null,
-    file: document.querySelectorAll('[data-control="dialog.avatarBuilder.file"]').length,
-    applyDisabled: document.querySelector('[data-control="dialog.avatarBuilder.apply"]')?.disabled ?? null,
-  })));
-  say('shot.anonymous', await shotAround(B, ctl(B, 'dialog.avatarBuilder'), '12-builder-anonymous-picture', 24));
-  say('anonymous.api', await B.evaluate(() =>
-    window.turboslide.studio
-      .invoke('account.setAvatar', { variant: 'picture', picture: 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=' })
-      .then((answer) => ({ ok: true, answer }))
-      .catch((error) => ({ ok: false, message: String(error?.message ?? error) })),
-  ));
+  say(
+    'anonymous',
+    await B.evaluate(() => ({
+      sentence:
+        document.querySelector('[data-control="dialog.avatarBuilder.signInSentence"]')
+          ?.textContent ?? null,
+      file: document.querySelectorAll('[data-control="dialog.avatarBuilder.file"]').length,
+      applyDisabled:
+        document.querySelector('[data-control="dialog.avatarBuilder.apply"]')?.disabled ?? null,
+    })),
+  );
+  say(
+    'shot.anonymous',
+    await shotAround(B, ctl(B, 'dialog.avatarBuilder'), '12-builder-anonymous-picture', 24),
+  );
+  say(
+    'anonymous.api',
+    await B.evaluate(() =>
+      window.turboslide.studio
+        .invoke('account.setAvatar', {
+          variant: 'picture',
+          picture:
+            'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=',
+        })
+        .then((answer) => ({ ok: true, answer }))
+        .catch((error) => ({ ok: false, message: String(error?.message ?? error) })),
+    ),
+  );
   await ctxB.close();
 } catch (error) {
   say('error', String(error?.stack ?? error));

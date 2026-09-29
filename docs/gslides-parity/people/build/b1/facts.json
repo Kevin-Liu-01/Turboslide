@@ -459,16 +459,11 @@
     {
       "name": "Lithium 799",
       "selection": {
-        "blockIds": [
-          "heading"
-        ],
+        "blockIds": ["heading"],
         "caret": {
           "blockId": "heading",
           "path": "/text",
-          "range": [
-            25,
-            25
-          ]
+          "range": [25, 25]
         }
       },
       "slideId": "title"
@@ -486,18 +481,9 @@
   },
   "shot.hue.A.caret": "A-caret-of-B-hue.png",
   "order.A": {
-    "before": [
-      "edbe39a422a2e245e83f78a2891727a7",
-      "15ac57209ccd25533b697c14650258bb"
-    ],
-    "afterC": [
-      "edbe39a422a2e245e83f78a2891727a7",
-      "15ac57209ccd25533b697c14650258bb"
-    ],
-    "afterB": [
-      "edbe39a422a2e245e83f78a2891727a7",
-      "15ac57209ccd25533b697c14650258bb"
-    ],
+    "before": ["edbe39a422a2e245e83f78a2891727a7", "15ac57209ccd25533b697c14650258bb"],
+    "afterC": ["edbe39a422a2e245e83f78a2891727a7", "15ac57209ccd25533b697c14650258bb"],
+    "afterB": ["edbe39a422a2e245e83f78a2891727a7", "15ac57209ccd25533b697c14650258bb"],
     "held": true
   },
   "shot.order.A.slot": "A-slot-two-others.png",

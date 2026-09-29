@@ -9,10 +9,10 @@
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, openSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
-const HERE = process.env.B4_SCRATCH ?? join(tmpdir(), "turboslide-b4");
+const HERE = process.env.B4_SCRATCH ?? join(tmpdir(), 'turboslide-b4');
 const WORKTREE = '/Users/kevinliu/repos/Turboslide-people';
 const PORT = '4464';
 const OVERLAY = join(HERE, 'b4-overlay');

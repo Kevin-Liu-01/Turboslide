@@ -2,7 +2,10 @@
 // avatar store under <overlay>/.turboslide/users and the profile rows of the server's SQLite
 // identity database, a dry run then a run. Prints one JSON line.
 //   node docs/gslides-parity/people/build/b4/sweep-local.mts <overlayRoot> <authDbPath>
-import { fileAvatarStore, sweepOrphanAvatars } from '../../../../../apps/studio/src/server/auth/avatar.ts';
+import {
+  fileAvatarStore,
+  sweepOrphanAvatars,
+} from '../../../../../apps/studio/src/server/auth/avatar.ts';
 import { openAuthDb } from '../../../../../apps/studio/src/server/auth/db.ts';
 import { dbProfileStore } from '../../../../../apps/studio/src/server/auth/profile.ts';
 

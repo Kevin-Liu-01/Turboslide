@@ -1,0 +1,756 @@
+[
+  {
+    "n": 1,
+    "step": "new deck",
+    "at": "2026-09-28T19:31:28.857Z",
+    "id": "untitled-20260928-q539",
+    "url": "https://turboslide.vercel.app/edit/untitled-20260928-q539",
+    "viewport": "1440x900"
+  },
+  {
+    "n": 2,
+    "step": "insert 3x3",
+    "at": "2026-09-28T19:31:33.376Z",
+    "words": "3 x 3",
+    "id": "table",
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "k": 0.705,
+    "shot": "c-01-inserted.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 114.9
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 114.91497802734375
+    },
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1
+    ]
+  },
+  {
+    "n": 3,
+    "step": "empty header row: the rule under it, close",
+    "at": "2026-09-28T19:31:33.404Z",
+    "row0": {
+      "box": {
+        "x": 509.5999755859375,
+        "y": 311.3949890136719,
+        "w": 676.7999267578125,
+        "h": 38.07000732421875
+      },
+      "header": true,
+      "borderBottom": "1px solid rgb(7, 7, 7)",
+      "cells": [
+        {
+          "box": {
+            "x": 509.5999755859375,
+            "y": 311.3949890136719,
+            "w": 225.5999755859375,
+            "h": 37.365020751953125
+          },
+          "fontSize": "20px",
+          "padding": "12px 16px 12px 0px",
+          "shadow": "rgba(7, 7, 7, 0.18) -1px 0px 0px 0px inset",
+          "text": "",
+          "promptText": null,
+          "promptLines": 0
+        },
+        {
+          "box": {
+            "x": 735.199951171875,
+            "y": 311.3949890136719,
+            "w": 225.60003662109375,
+            "h": 37.365020751953125
+          },
+          "fontSize": "20px",
+          "padding": "12px 16px",
+          "shadow": "rgba(7, 7, 7, 0.18) -1px 0px 0px 0px inset",
+          "text": "",
+          "promptText": null,
+          "promptLines": 0
+        },
+        {
+          "box": {
+            "x": 960.7999877929688,
+            "y": 311.3949890136719,
+            "w": 225.59991455078125,
+            "h": 37.365020751953125
+          },
+          "fontSize": "20px",
+          "padding": "12px 0px 12px 16px",
+          "shadow": "none",
+          "text": "",
+          "promptText": null,
+          "promptLines": 0
+        }
+      ]
+    },
+    "borderTop": "1px solid rgba(7, 7, 7, 0.18)",
+    "shot": "c-02-header-rule-close.png"
+  },
+  {
+    "n": 4,
+    "step": "one click on cell 1,1, then one click on cell 2,2 with the session open",
+    "at": "2026-09-28T19:31:35.590Z",
+    "sessionAfterFirstClick": {
+      "row": 1,
+      "column": 1,
+      "run": "table/rows/1/cells/1"
+    },
+    "sessionAfterSecondClick": {
+      "row": 1,
+      "column": 1,
+      "run": "table/rows/1/cells/1"
+    },
+    "cellsAfterTyping": [
+      [
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "OneTwo",
+        ""
+      ],
+      [
+        "",
+        "",
+        ""
+      ]
+    ],
+    "shot": "c-03-click-other-cell-with-session.png",
+    "shot2": "c-04-typed-after-click-other-cell.png"
+  },
+  {
+    "n": 5,
+    "step": "Escape, click cell 2,2, type, Tab from the last cell",
+    "at": "2026-09-28T19:31:38.691Z",
+    "sessionBefore": {
+      "row": 2,
+      "column": 2,
+      "run": "table/rows/2/cells/2"
+    },
+    "posBefore": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "posAfter": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 217,
+      "z": 2
+    },
+    "rows": 4,
+    "session": {
+      "row": 3,
+      "column": 0,
+      "run": "table/rows/3/cells/0"
+    },
+    "shot": "c-05-tab-from-last-cell.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 153
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 152.9849853515625
+    },
+    "gapRingToLastRule": 0,
+    "cellRing": {
+      "x": 509.6,
+      "y": 425.6,
+      "w": 225.6,
+      "h": 38.1
+    },
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": true,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1,
+      38.1
+    ]
+  },
+  {
+    "n": 6,
+    "step": "hover the se handle and the column seam: the tooltips",
+    "at": "2026-09-28T19:31:44.784Z",
+    "seTip": "table: Resize seDrag the bottom right corner to resize; Shift keeps the aspect ratio, Option resizes from the centre. Arrows step 1 px, Shift 10 px.",
+    "seShot": "c-06-tooltip-resize-se.png",
+    "seamTip": "table: Row seam 2Drag to resize the row; the rows below move and the table grows. Up and Down step 1 px, Shift 10 px.",
+    "seamShot": "c-07-tooltip-column-seam.png",
+    "rowSeamTip": "table: Row seam 2Drag to resize the row; the rows below move and the table grows. Up and Down step 1 px, Shift 10 px.",
+    "rowSeamShot": "c-08-tooltip-row-seam.png",
+    "headTip": "Column 2Click to select the whole column or row; right click for its menu",
+    "headShot": "c-09-tooltip-column-head.png"
+  },
+  {
+    "n": 7,
+    "step": "drag the column seam 0 right by 90 (selected, no cell open)",
+    "at": "2026-09-28T19:31:45.062Z",
+    "skipped": "no column seam",
+    "handles": []
+  },
+  {
+    "n": 8,
+    "step": "drag the row seam 1 down by 40 (selected)",
+    "at": "2026-09-28T19:31:45.063Z",
+    "skipped": "no row seam",
+    "handles": []
+  },
+  {
+    "n": 9,
+    "step": "drag the last row seam down by 60 (grows the table)",
+    "at": "2026-09-28T19:31:45.066Z",
+    "skipped": "no last row seam",
+    "handles": []
+  },
+  {
+    "n": 10,
+    "step": "column seam drag with a cell open",
+    "at": "2026-09-28T19:31:47.252Z",
+    "editingBefore": true,
+    "mid": {
+      "readout": null,
+      "editing": false
+    },
+    "editingAfter": false,
+    "session": null,
+    "widthsBefore": [
+      {},
+      {},
+      {}
+    ],
+    "widthsAfter": [
+      {},
+      {},
+      {}
+    ],
+    "shot": "c-10-column-seam-with-cell-open-after.png"
+  },
+  {
+    "n": 11,
+    "step": "a long sentence in cell 1,0 grows its row and the box",
+    "at": "2026-09-28T19:31:56.408Z",
+    "posBefore": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 217,
+      "z": 2
+    },
+    "mid": {
+      "shot": "c-11-long-text-mid.png",
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 153
+      },
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 173.42999267578125
+      },
+      "gapRingToLastRule": -20.4,
+      "cellRing": {
+        "x": 509.6,
+        "y": 349.5,
+        "w": 225.6,
+        "h": 58.5
+      },
+      "rangeRing": null,
+      "chip": "Table",
+      "editing": true,
+      "rowH": [
+        38.1,
+        58.5,
+        38.1,
+        38.1
+      ],
+      "pos": {
+        "x": 320,
+        "y": 218,
+        "w": 960,
+        "h": 246,
+        "z": 2
+      }
+    },
+    "typed": {
+      "shot": "c-12-long-text-typed.png",
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 214.3
+      },
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 214.32000732421875
+      },
+      "gapRingToLastRule": 0,
+      "cellRing": {
+        "x": 509.6,
+        "y": 349.5,
+        "w": 225.6,
+        "h": 99.4
+      },
+      "rangeRing": null,
+      "chip": "Table",
+      "editing": true,
+      "rowH": [
+        38.1,
+        99.4,
+        38.1,
+        38.1
+      ],
+      "pos": {
+        "x": 320,
+        "y": 218,
+        "w": 960,
+        "h": 304,
+        "z": 2
+      }
+    },
+    "afterEscape": {
+      "shot": "c-13-long-text-after-escape.png",
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 214.3
+      },
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 214.32000732421875
+      },
+      "gapRingToLastRule": 0,
+      "cellRing": null,
+      "rangeRing": null,
+      "chip": "Table",
+      "editing": false,
+      "rowH": [
+        38.1,
+        99.4,
+        38.1,
+        38.1
+      ],
+      "pos": {
+        "x": 320,
+        "y": 218,
+        "w": 960,
+        "h": 304,
+        "z": 2
+      }
+    }
+  },
+  {
+    "n": 12,
+    "step": "the header band as a range: drag 0,0 to 0,2, Bold, centre, font size plus, colour",
+    "at": "2026-09-28T19:32:04.093Z",
+    "rangeRing": null,
+    "chip": "Table",
+    "toolbar": [
+      "toolbar.mergeCells",
+      "toolbar.unmergeCells",
+      "toolbar.fontSize",
+      "toolbar.fontSize.minus",
+      "toolbar.fontSize.value",
+      "toolbar.fontSize.plus",
+      "toolbar.bold",
+      "toolbar.textColor",
+      "toolbar.align"
+    ],
+    "alignPicks": [],
+    "fontSizeWords": "",
+    "colorSwatches": [
+      "toolbar.textColor.menu",
+      "toolbar.textColor.kit.text",
+      "toolbar.textColor.kit.background",
+      "toolbar.textColor.kit.caption",
+      "toolbar.textColor.kit.hint",
+      "toolbar.textColor.kit.primary",
+      "toolbar.textColor.kit.accent",
+      "toolbar.textColor.ink",
+      "toolbar.textColor.paper",
+      "toolbar.textColor.ink-2",
+      "toolbar.textColor.titanium",
+      "toolbar.textColor.hair"
+    ],
+    "header": {
+      "cells": [
+        "",
+        "",
+        ""
+      ],
+      "header": true
+    },
+    "columns": [
+      {},
+      {},
+      {}
+    ],
+    "marks": null,
+    "shot": "c-14-header-range-formatted.png"
+  },
+  {
+    "n": 13,
+    "step": "Distribute columns from Format > Table",
+    "at": "2026-09-28T19:32:07.078Z",
+    "columns": [
+      {},
+      {},
+      {}
+    ],
+    "shot": "c-15-distribute-columns.png"
+  },
+  {
+    "n": 14,
+    "step": "Insert row below, then Undo",
+    "at": "2026-09-28T19:32:09.930Z",
+    "rowsAfterInsert": 5,
+    "posAfterInsert": {
+      "x": 960,
+      "y": 224,
+      "w": 960,
+      "h": 358,
+      "z": 2
+    },
+    "rowsAfterUndo": 4,
+    "posAfterUndo": {
+      "x": 960,
+      "y": 224,
+      "w": 960,
+      "h": 304,
+      "z": 2
+    },
+    "s1": "c-16-row-inserted.png",
+    "shot": "c-17-row-insert-undone.png",
+    "ring": {
+      "x": 960.8,
+      "y": 314.9,
+      "w": 676.8,
+      "h": 214.3
+    },
+    "table": {
+      "x": 960.7999877929688,
+      "y": 314.91998291015625,
+      "w": 676.7999877929688,
+      "h": 214.32000732421875
+    },
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      38.1,
+      99.4,
+      38.1,
+      38.1
+    ]
+  },
+  {
+    "n": 15,
+    "step": "right click the column head 1",
+    "at": "2026-09-28T19:32:10.216Z",
+    "skipped": "no column head"
+  },
+  {
+    "n": 16,
+    "step": "Cmd+D duplicates the selected table",
+    "at": "2026-09-28T19:32:16.565Z",
+    "fresh": [
+      "table:table-2 {\"x\":976,\"y\":240,\"w\":960,\"h\":304,\"z\":3}"
+    ],
+    "shot": "c-18-duplicated.png",
+    "chip": "Table",
+    "duplicateRemovedByDelete": true
+  },
+  {
+    "n": 17,
+    "step": "Delete key on the selected table",
+    "at": "2026-09-28T19:32:18.592Z",
+    "removed": true,
+    "toast": [
+      "Table deletedUndo"
+    ],
+    "shot": "c-19-table-deleted.png"
+  },
+  {
+    "n": 18,
+    "step": "insert 10x10",
+    "at": "2026-09-28T19:32:21.441Z",
+    "words": "10 x 10",
+    "id": "table",
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 541,
+      "z": 2
+    },
+    "cellW": 67.6800537109375,
+    "shot": "c-20-10x10-inserted.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 381.4
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 381.40496826171875
+    },
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1
+    ]
+  },
+  {
+    "n": 19,
+    "step": "10x10: hover the last cell of row 1, then the first",
+    "at": "2026-09-28T19:32:22.858Z",
+    "last": {
+      "prompt": "Type to add text",
+      "lines": 2,
+      "cellH": 57.80999755859375,
+      "rowH": 58.514984130859375,
+      "rowsH": [
+        38,
+        59,
+        38,
+        38,
+        38,
+        38,
+        38,
+        38,
+        38,
+        38
+      ]
+    },
+    "s1": "c-21-10x10-hover-last-cell.png",
+    "first": {
+      "prompt": "Type to add text",
+      "lines": 2,
+      "cellW": 67.6800537109375
+    },
+    "shot": "c-22-10x10-hover-first-cell.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 381.4
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 381.40496826171875
+    },
+    "gapRingToLastRule": -20.4,
+    "cellRing": null,
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      38.1,
+      58.5,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1
+    ]
+  },
+  {
+    "n": 20,
+    "step": "10x10: one click on cell 1,0, type a long word",
+    "at": "2026-09-28T19:32:25.248Z",
+    "oneClick": {
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 381.4
+      },
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 381.40496826171875
+      },
+      "gapRingToLastRule": 0,
+      "cellRing": {
+        "x": 509.6,
+        "y": 349.5,
+        "w": 67.7,
+        "h": 38.1
+      },
+      "rangeRing": null,
+      "chip": "Table",
+      "editing": true,
+      "rowH": [
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1
+      ]
+    },
+    "s1": "c-23-10x10-one-click.png",
+    "typed": {
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 401.8
+      },
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 401.8499755859375
+      },
+      "gapRingToLastRule": 0,
+      "cellRing": {
+        "x": 509.6,
+        "y": 349.5,
+        "w": 67.7,
+        "h": 58.5
+      },
+      "rangeRing": null,
+      "chip": "Table",
+      "editing": true,
+      "rowH": [
+        38.1,
+        58.5,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1
+      ]
+    },
+    "s2": "c-24-10x10-typed-long-word.png",
+    "afterEscape": {
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 401.8
+      },
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 401.8499755859375
+      },
+      "gapRingToLastRule": 0,
+      "cellRing": null,
+      "rangeRing": null,
+      "chip": "Table",
+      "editing": false,
+      "rowH": [
+        38.1,
+        58.5,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1
+      ],
+      "pos": {
+        "x": 320,
+        "y": 218,
+        "w": 960,
+        "h": 570,
+        "z": 2
+      }
+    },
+    "shot": "c-25-10x10-after-escape.png"
+  },
+  {
+    "n": 21,
+    "step": "10x10: the show",
+    "at": "2026-09-28T19:32:29.568Z",
+    "shot": "c-26-10x10-show.png"
+  },
+  {
+    "n": 22,
+    "step": "console errors",
+    "at": "2026-09-28T19:32:29.568Z",
+    "count": 0,
+    "first": []
+  },
+  {
+    "n": 23,
+    "step": "teardown",
+    "at": "2026-09-28T19:33:01.442Z",
+    "trashed": true,
+    "deleted": true,
+    "status404": 404
+  }
+]

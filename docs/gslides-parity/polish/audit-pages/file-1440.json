@@ -1,0 +1,259 @@
+{
+  "base": "https://www.turboslide.com",
+  "width": 1440,
+  "at": "2026-09-28T19:27:14.692Z",
+  "rows": [
+    {
+      "id": "file.menu.rows",
+      "did": "open File and every submenu",
+      "observed": "rows file.new, file.open, file.importSlides, file.makeCopy, file.share, file.download, file.rename, file.moveToTrash, file.versionHistory, file.details, file.printPreview, file.print; with submenus 14",
+      "ok": true,
+      "shots": [
+        "file-01-file-menu-open.png",
+        "file-02-file-sub-new.png",
+        "file-03-file-sub-makeCopy.png",
+        "file-04-file-sub-share.png",
+        "file-05-file-sub-download.png",
+        "file-06-file-sub-versionHistory.png"
+      ],
+      "at": "2026-09-28T19:24:10.239Z"
+    },
+    {
+      "id": "file.later-rows.tooltips",
+      "did": "hover the later and omitted rows",
+      "observed": "{\"file.pageSetup\":\"absent\",\"file.move\":\"absent\",\"file.addShortcut\":\"absent\",\"file.approvals\":\"absent\",\"file.offline\":\"absent\",\"file.language\":\"absent\",\"file.download.odp\":\"absent\",\"file.download.svg\":\"absent\"}",
+      "ok": true,
+      "shots": [
+        "file-07-file-later-download-svg.png"
+      ],
+      "at": "2026-09-28T19:24:12.915Z"
+    },
+    {
+      "id": "file.new.presentation",
+      "did": "File > New > Presentation",
+      "observed": "new tab /new; editor still /edit/untitled-20260928-ud9y#s/title",
+      "ok": true,
+      "shots": [
+        "file-file-new-tab.png"
+      ],
+      "at": "2026-09-28T19:24:15.810Z"
+    },
+    {
+      "id": "file.open.dialog",
+      "did": "Cmd+O, search, Escape",
+      "observed": "0 decks listed, 10 after \"acme\" (mine listed true); Escape closed true; words \"OpenPresentationsUploadTables audit: Acme, Q3 20261 slides · Sep 28, 12:24 PMPipeline review: Acme Q3 20262 slides · Sep 28, 12:24 PMAcme pricing review, Q3 20263 slides · Sep 28, 12:23 PMAcme pricing\"",
+      "ok": false,
+      "shots": [
+        "file-08-file-open-dialog.png",
+        "file-09-file-open-search.png"
+      ],
+      "at": "2026-09-28T19:24:18.964Z"
+    },
+    {
+      "id": "file.open.pick",
+      "did": "Open… then pick a deck",
+      "observed": "picked untitled-20260928-50n8; landed /edit/untitled-20260928-ud9y#s/title",
+      "ok": true,
+      "shots": [
+        "file-10-file-open-picked.png"
+      ],
+      "at": "2026-09-28T19:24:40.596Z"
+    },
+    {
+      "id": "file.makeCopy.entire",
+      "did": "File > Make a copy > Entire presentation",
+      "observed": "dialog name \"Copy of Pipeline review: Acme Q3 2026\"; copy copy-of-pipeline-review-acme-q3-2026 opened in a new tab in 3940 ms, titled \"Copy of Pipeline review: Acme Q3 2026\"; words \"Make a copyNameRemove speaker notesCopy commentsCancelMake a copy\"",
+      "ok": true,
+      "shots": [
+        "file-11-file-copy-dialog.png",
+        "file-file-copy-popup.png",
+        "file-12-file-copy-after.png"
+      ],
+      "at": "2026-09-28T19:24:47.634Z"
+    },
+    {
+      "id": "file.importSlides",
+      "did": "File > Import slides from the copy",
+      "observed": "threw: locator.waitFor: Timeout 15000ms exceeded.",
+      "ok": false,
+      "shots": [
+        "file-14-file.importSlides-threw.png"
+      ],
+      "at": "2026-09-28T19:25:05.855Z"
+    },
+    {
+      "id": "file.importSlides.upload-tab",
+      "did": "the Upload tab of Import slides",
+      "observed": "words \"Import slidesPresentationsUploadPowerPoint import is not available in Turboslide yet. Import a Turboslide bundle (.zip), or open the file in Google Slides and paste the text\"",
+      "ok": true,
+      "shots": [
+        "file-15-file-import-upload-tab.png"
+      ],
+      "at": "2026-09-28T19:25:09.160Z"
+    },
+    {
+      "id": "file.share.copyLink",
+      "did": "File > Share > Copy link",
+      "observed": "snackbar \"Link copied\"; clipboard \"https://www.turboslide.com/deck/untitled-20260928-ud9y\"",
+      "ok": true,
+      "shots": [
+        "file-16-file-copy-link-snackbar.png"
+      ],
+      "at": "2026-09-28T19:25:12.872Z"
+    },
+    {
+      "id": "file.download.pptx",
+      "did": "File > Download > PowerPoint, the dialog, Download, the file opened",
+      "observed": "threw: locator.waitFor: Timeout 8000ms exceeded.",
+      "ok": false,
+      "shots": [
+        "file-17-file.download.pptx-threw.png"
+      ],
+      "at": "2026-09-28T19:25:23.623Z"
+    },
+    {
+      "id": "file.download.pdf",
+      "did": "File > Download > PDF (direct), the file opened",
+      "observed": "Pipeline review Acme Q3 2026.pdf 59997 bytes in 7270 ms; 2 pages for 2 slides; dialog shown false; words Saved Pipeline review Acme Q3 2026.pptxDetails > Preparing your PDF, about 10 seconds for 2 slides; snackbar \"Saved Pipeline review Acme Q3 2026.pdfDetails\"; details \"Export: PPTX PerfectPassed in 4.3 sModepdf Perfect (flatten), lightPages2 (one per slide per theme)Perfectno: see the residual linesWorst fractionnot verifiedRaster blocks0Fonts embedded1 (exact set)Geometryin boundsRevisionr4Pipeline review Acme Q3 2026.pdf58.6 KiBDownloadrenderer: chrome-headless-shell 147.0.7727.0, SwiftShader, Googlepdf: 2 page(s) at 960 by 540 pt (13.333 by 7.5 in), 59997 byt\"",
+      "ok": true,
+      "shots": [
+        "file-18-download-pdf-progress.png",
+        "file-19-download-pdf-saved.png",
+        "file-20-download-pdf-details.png"
+      ],
+      "at": "2026-09-28T19:25:33.601Z"
+    },
+    {
+      "id": "file.download.options",
+      "did": "File > Download > Download options",
+      "observed": "threw: locator.waitFor: Timeout 8000ms exceeded.",
+      "ok": false,
+      "shots": [
+        "file-21-file.download.options-threw.png"
+      ],
+      "at": "2026-09-28T19:25:44.618Z"
+    },
+    {
+      "id": "file.download.jpg",
+      "did": "File > Download > JPG of the current slide",
+      "observed": "untitled-20260928-ud9y-title.jpg 121128 bytes in 14185 ms; {\"h\":1800,\"w\":3200}; words ; snackbar null",
+      "ok": true,
+      "shots": [
+        "file-22-download-jpg-after-click.png",
+        "file-23-download-jpg-saved.png"
+      ],
+      "at": "2026-09-28T19:26:00.473Z"
+    },
+    {
+      "id": "file.download.png",
+      "did": "File > Download > PNG of the current slide",
+      "observed": "untitled-20260928-ud9y-title.png 87669 bytes in 5409 ms; {\"w\":3200,\"h\":1800}; words ; snackbar null",
+      "ok": true,
+      "shots": [
+        "file-24-download-png-after-click.png",
+        "file-25-download-png-saved.png"
+      ],
+      "at": "2026-09-28T19:26:07.577Z"
+    },
+    {
+      "id": "file.download.html",
+      "did": "File > Download > Web page",
+      "observed": "untitled-20260928-ud9y.html 569675 bytes in 3614 ms; title in page true; words The web page is ready; snackbar \"The web page is ready\"",
+      "ok": true,
+      "shots": [
+        "file-26-download-html-progress.png",
+        "file-27-download-html-saved.png"
+      ],
+      "at": "2026-09-28T19:26:12.024Z"
+    },
+    {
+      "id": "file.download.zip",
+      "did": "File > Download > Turboslide bundle",
+      "observed": "untitled-20260928-ud9y-r4.zip 401642 bytes in 3824 ms; entries manifest.json, decks/untitled-20260928-ud9y/deck.json, decks/untitled-20260928-ud9y/slides/split-1.json, decks/untitled-20260928-ud9y/slides/title.json, decks/untitled-20260928-ud9y/versions/1.json, decks/untitled-20260928-ud9y/versions/2.json, decks/untitled-20260928-ud9y/versions/3.json, decks/untitled-20260928-ud9y/versions/4.json, decks/untitled-20260928-ud9y/assets/mood-earth-dark.jpg, decks/untitled-20260928-ud9y/assets/mood-earth-light.jpg +6; snackbar \"The bundle is at untitled-20260928-ud9y.zip\"",
+      "ok": true,
+      "shots": [
+        "file-28-download-zip-progress.png",
+        "file-29-download-zip-saved.png"
+      ],
+      "at": "2026-09-28T19:26:16.678Z"
+    },
+    {
+      "id": "file.versionHistory.nameCurrent",
+      "did": "File > Version history > Name current version",
+      "observed": "dialog [{\"id\":\"dialog.nameVersion\",\"words\":\"Name current versionNameCancelSave\"}]; after Enter: panel open false, snackbar \"Saved the version Sent to Acme\", url /edit/untitled-20260928-ud9y#s/title",
+      "ok": true,
+      "shots": [
+        "file-30-file-name-version.png",
+        "file-31-file-name-version-typed.png",
+        "file-32-file-name-version-after.png"
+      ],
+      "at": "2026-09-28T19:26:22.808Z"
+    },
+    {
+      "id": "file.versionHistory.see",
+      "did": "File > Version history > See version history",
+      "observed": "panel words \"Version historyOnly show named versionsName this versionTodayX4Sent to AcmeSep 28, 12:26 PM · You · named · currentX412:23 PM to 12:23 PMYou · 1 change▸\"; closed on Escape true",
+      "ok": true,
+      "shots": [
+        "file-33-file-version-history-panel.png"
+      ],
+      "at": "2026-09-28T19:26:26.743Z"
+    },
+    {
+      "id": "file.details",
+      "did": "File > Details",
+      "observed": "close=; title=Pipeline review: Acme Q3 2026; slides=2; sections=1; created=Sep 28, 12:23 PM; lastEdit=Sep 28, 12:23 PM (change 4); done=Done",
+      "ok": true,
+      "shots": [
+        "file-34-file-details.png"
+      ],
+      "at": "2026-09-28T19:26:29.720Z"
+    },
+    {
+      "id": "file.printPreview",
+      "did": "File > Print settings and preview",
+      "observed": "bar \"Close previewPipeline review: Acme Q3 2026Layout1 slide without notes1 slide with notesHandout (2 slides per page)Handout (3 slides per page)Handout (4 slides per page)Handout (6 slides per page)Handout (9 slides per page)Include skipped slidesDownload as PDFPrint\"; 1 pages; notes layout 2 note blocks; window.print called 1; PDF Pipeline review Acme Q3 2026.pdf 59997 bytes in 1713 ms, 2 pages; words ; back to /edit/untitled-20260928-ud9y",
+      "ok": true,
+      "shots": [
+        "file-35-print-preview.png",
+        "file-36-print-preview-full.png",
+        "file-37-print-preview-notes.png",
+        "file-38-print-preview-notes-full.png",
+        "file-39-print-preview-skipped.png",
+        "file-40-print-print-hover.png",
+        "file-41-print-pdf-progress.png",
+        "file-42-print-pdf-saved.png",
+        "file-43-print-closed-back.png"
+      ],
+      "at": "2026-09-28T19:26:43.065Z"
+    },
+    {
+      "id": "file.print.cmd-p",
+      "did": "Cmd+P in the editor",
+      "observed": "landed file-44-print-cmd-p.png; back to /edit/untitled-20260928-ud9y",
+      "ok": true,
+      "shots": [
+        "file-44-print-cmd-p.png"
+      ],
+      "at": "2026-09-28T19:26:45.134Z"
+    },
+    {
+      "id": "file.print.dark",
+      "did": "the print page in the dark appearance",
+      "observed": "shot",
+      "ok": true,
+      "shots": [
+        "file-45-print-dark.png"
+      ],
+      "at": "2026-09-28T19:26:47.102Z"
+    },
+    {
+      "id": "teardown",
+      "did": "every scratch deck trashed and deleted forever",
+      "observed": "untitled-20260928-ud9y: File > Move to trash; Delete forever on /decks/trash; /edit/untitled-20260928-ud9y answers 404 || copy-of-pipeline-review-acme-q3-2026: File > Move to trash; Delete forever on /decks/trash; /edit/copy-of-pipeline-review-acme-q3-2026 answers 404",
+      "ok": true,
+      "shots": [],
+      "at": "2026-09-28T19:27:14.692Z"
+    }
+  ]
+}

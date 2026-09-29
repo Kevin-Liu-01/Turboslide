@@ -1,0 +1,207 @@
+{
+  "base": "https://www.turboslide.com",
+  "width": 1440,
+  "at": "2026-09-28T19:40:28.081Z",
+  "rows": [
+    {
+      "id": "versions.open-from-last-edit",
+      "did": "hover and click the Last edit words",
+      "observed": "words \"\"; opened in 809 ms; panel {\"x\":1120,\"y\":112,\"w\":320,\"h\":788,\"cx\":1280,\"cy\":506}; stage {\"x\":256,\"y\":112,\"w\":864,\"h\":724,\"cx\":688,\"cy\":474}; windows w5:I112:37 PM to 12:38 PMYou · 1 ; 0 versions: ; panel words \"Version history Only show named versions Name this version Today I1 12:37 PM to 12:38 PM You · 1 change ▸\"",
+      "ok": false,
+      "shots": [
+        "versions-01-last-edit-hover.png",
+        "versions-02-versions-panel.png"
+      ],
+      "at": "2026-09-28T19:38:25.351Z"
+    },
+    {
+      "id": "versions.pick",
+      "did": "click an earlier version",
+      "observed": "only 0 versions listed",
+      "ok": null,
+      "shots": [],
+      "at": "2026-09-28T19:38:25.352Z"
+    },
+    {
+      "id": "versions.restore",
+      "did": "Restore this version",
+      "observed": "no Restore button visible",
+      "ok": false,
+      "shots": [],
+      "at": "2026-09-28T19:38:25.353Z"
+    },
+    {
+      "id": "versions.undo-restore",
+      "did": "Cmd+Z after the restore",
+      "observed": "sheet \"Pipeline review: Acme Q3 2026 Second body text, edited\" -> \"Pipeline review: Acme Q3 2026 First body text\"; revision 5 -> 6; snackbar null",
+      "ok": true,
+      "shots": [
+        "versions-03-versions-undo-restore.png"
+      ],
+      "at": "2026-09-28T19:38:28.764Z"
+    },
+    {
+      "id": "versions.name-current",
+      "did": "Name current version in the panel",
+      "observed": "field {\"x\":1306.171875,\"y\":165.34375,\"w\":129.828125,\"h\":28,\"cx\":1371.0859375,\"cy\":179.34375}; list I1 Sent to Acme Sep 28, 12:38 PM · You · named · current",
+      "ok": true,
+      "shots": [
+        "versions-04-versions-name-hover.png",
+        "versions-05-versions-name-field.png",
+        "versions-06-versions-name-typed.png",
+        "versions-07-versions-named.png"
+      ],
+      "at": "2026-09-28T19:38:38.343Z"
+    },
+    {
+      "id": "versions.named-only",
+      "did": "Only show named versions",
+      "observed": "1 -> 1 rows",
+      "ok": true,
+      "shots": [
+        "versions-08-versions-named-only.png"
+      ],
+      "at": "2026-09-28T19:38:41.150Z"
+    },
+    {
+      "id": "versions.more-menu",
+      "did": "a version row More menu",
+      "observed": "rows version.name:Name this version | version.copy:Make a copy",
+      "ok": true,
+      "shots": [
+        "versions-09-versions-more-menu.png"
+      ],
+      "at": "2026-09-28T19:38:42.988Z"
+    },
+    {
+      "id": "versions.panel.full",
+      "did": "the panel bottom and Escape",
+      "observed": "panel {\"bottom\":900,\"innerHeight\":900,\"scroll\":false}; closed on Escape true",
+      "ok": true,
+      "shots": [
+        "versions-10-versions-panel-bottom.png"
+      ],
+      "at": "2026-09-28T19:38:43.930Z"
+    },
+    {
+      "id": "comments.panel.empty",
+      "did": "Show all comments with none",
+      "observed": "words \"Comments0 No comments yet Select something on a slide, then Insert > Comment (Cmd+Option+M) Notification settings\"",
+      "ok": true,
+      "shots": [
+        "versions-11-comments-button-hover.png",
+        "versions-12-comments-panel-empty.png"
+      ],
+      "at": "2026-09-28T19:38:48.578Z"
+    },
+    {
+      "id": "comments.on-slide",
+      "did": "Cmd+Alt+M on the slide, type, Comment",
+      "observed": "card {\"x\":308,\"y\":181,\"w\":300,\"h\":146.375,\"cx\":458,\"cy\":254.1875}; posted in 2261 ms; markers 1; filmstrip marks [\"\",\"1\"]; card words null",
+      "ok": true,
+      "shots": [
+        "versions-13-comment-card-open.png",
+        "versions-14-comment-card-typed.png",
+        "versions-15-comment-posted.png"
+      ],
+      "at": "2026-09-28T19:38:57.478Z"
+    },
+    {
+      "id": "comments.on-object",
+      "did": "a comment on a selected text box",
+      "observed": "markers 2; last anchor {\"kind\":\"slide\",\"slideId\":\"split-1\"}",
+      "ok": true,
+      "shots": [
+        "versions-16-comment-on-object-card.png",
+        "versions-17-comment-on-object-posted.png"
+      ],
+      "at": "2026-09-28T19:39:09.097Z"
+    },
+    {
+      "id": "comments.on-title-placeholder",
+      "did": "a comment on the title placeholder of slide 1",
+      "observed": "chip \"Title\"; refusal null",
+      "ok": true,
+      "shots": [
+        "versions-18-comment-on-title-posted.png"
+      ],
+      "at": "2026-09-28T19:39:17.511Z"
+    },
+    {
+      "id": "comments.reply",
+      "did": "open a marker, reply",
+      "observed": "thread 01m3mree49ajfcy9tfs61pd3rg; card \"I Iridium 139 now ☺ This box needs the new logo. I Iridium 139 now ☺ Done, the logo is in. Reply or add others with @\"",
+      "ok": true,
+      "shots": [
+        "versions-19-comment-marker-hover.png",
+        "versions-20-comment-thread-open.png",
+        "versions-21-comment-reply-typed.png",
+        "versions-22-comment-replied.png"
+      ],
+      "at": "2026-09-28T19:39:28.791Z"
+    },
+    {
+      "id": "comments.resolve",
+      "did": "Resolve the thread",
+      "observed": "markers after resolve 1; card still open true; snackbar null",
+      "ok": true,
+      "shots": [
+        "versions-23-comment-resolve-hover.png",
+        "versions-24-comment-resolved.png"
+      ],
+      "at": "2026-09-28T19:39:36.993Z"
+    },
+    {
+      "id": "comments.panel",
+      "did": "Show all comments with threads",
+      "observed": "tabs all*, forYou; 3 threads: I Iridium 139 slide 1 Rename the customer here. now | I Iridium 139 slide 2 A slide level note for the reviewer. now | I Iridium 139 slide 2 This box needs the new logo. 1 reply now Re-open; reopened -> open 3; words \"Comments3 All For you All Open Resolved Slide order I Iridium 139 slide 2 This box needs the new logo. 1 reply now I Iridium 139 slide 1 Rename the customer here. now I Iridium 139 slide 2 A slide level note for the reviewer. now Notification settings\"",
+      "ok": true,
+      "shots": [
+        "versions-25-comments-panel.png",
+        "versions-26-comments-panel-reopened.png",
+        "versions-27-comments-panel-open-thread.png"
+      ],
+      "at": "2026-09-28T19:39:42.606Z"
+    },
+    {
+      "id": "comments.toolbar-and-menu-routes",
+      "did": "the toolbar comment button and Insert > Comment",
+      "observed": "toolbar opens the card true; Insert > Comment opens the card true",
+      "ok": true,
+      "shots": [
+        "versions-28-comment-toolbar-hover.png",
+        "versions-29-comment-from-insert-menu.png"
+      ],
+      "at": "2026-09-28T19:39:49.392Z"
+    },
+    {
+      "id": "comments.reload",
+      "did": "reload, the threads and markers come back",
+      "observed": "3 threads; markers 2; filmstrip marks [\"1\",\"2\"]",
+      "ok": true,
+      "shots": [
+        "versions-30-comments-after-reload.png"
+      ],
+      "at": "2026-09-28T19:39:52.700Z"
+    },
+    {
+      "id": "versions.dark",
+      "did": "the version history panel in the dark appearance",
+      "observed": "shots",
+      "ok": true,
+      "shots": [
+        "versions-31-versions-panel-dark.png",
+        "versions-32-comments-panel-dark.png"
+      ],
+      "at": "2026-09-28T19:39:59.154Z"
+    },
+    {
+      "id": "teardown",
+      "did": "every scratch deck trashed and deleted forever",
+      "observed": "untitled-20260928-lyx5: File > Move to trash; Delete forever on /decks/trash; /edit/untitled-20260928-lyx5 answers 404",
+      "ok": true,
+      "shots": [],
+      "at": "2026-09-28T19:40:28.081Z"
+    }
+  ]
+}

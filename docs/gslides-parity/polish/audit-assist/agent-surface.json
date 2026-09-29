@@ -1,0 +1,560 @@
+{
+  "base": "https://www.turboslide.com",
+  "at": "2026-09-28T19:20:57.218Z",
+  "bearer": true,
+  "manifestNoBearer": {
+    "status": 401,
+    "body": "{\"error\":{\"name\":\"Error\",\"status\":401,\"message\":\"bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN> or an API key\",\"code\":\"unauthorized\"}}",
+    "ms": 242
+  },
+  "manifest": {
+    "status": 200,
+    "keys": [
+      "name",
+      "schemaVersion",
+      "description",
+      "discovery",
+      "transports",
+      "rules",
+      "execution",
+      "skills",
+      "actionCount",
+      "resources",
+      "version",
+      "actions",
+      "actionsByGroup",
+      "window",
+      "implemented",
+      "notImplemented",
+      "http",
+      "auth",
+      "sessions",
+      "defaultDeck"
+    ],
+    "actionCount": 172,
+    "implemented": 167,
+    "notImplemented": [
+      {
+        "id": "deck.pack",
+        "milestone": "M6",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "deck.unpack",
+        "milestone": "M6",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "deck.push",
+        "milestone": "M6",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "deck.pull",
+        "milestone": "M6",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "view.goto",
+        "milestone": "M3",
+        "transports": [
+          "window",
+          "mcp"
+        ]
+      },
+      {
+        "id": "view.mode",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "view.theme",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "view.present",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "view.zoom",
+        "milestone": "GS1",
+        "transports": [
+          "window",
+          "mcp"
+        ]
+      },
+      {
+        "id": "export.check",
+        "milestone": "M6",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "fonts.build",
+        "milestone": "M2",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "import.run",
+        "milestone": "M1",
+        "transports": [
+          "cli"
+        ]
+      },
+      {
+        "id": "source.read",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "source.apply",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "controls.list",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "control.activate",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "control.set",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "artifact.download",
+        "milestone": "M3",
+        "transports": [
+          "window"
+        ]
+      },
+      {
+        "id": "deck.follow",
+        "milestone": "GS3",
+        "transports": [
+          "cli"
+        ]
+      }
+    ],
+    "instance": {
+      "effectsBackend": "typescript",
+      "glibcVersionRuntime": "2.34",
+      "node": "v24.18.1",
+      "platform": "linux"
+    },
+    "assistActions": [
+      "template.list",
+      "template.slides",
+      "template.create",
+      "template.update",
+      "template.rename",
+      "template.delete",
+      "template.setDefault",
+      "deck.tailor",
+      "assist.propose",
+      "assist.accept",
+      "notification.list",
+      "notification.markRead",
+      "notification.settings"
+    ],
+    "ms": 778
+  },
+  "openapi": {
+    "status": 200,
+    "paths": 170,
+    "title": "Turboslide agent API",
+    "version": "0.1.0",
+    "ms": 232
+  },
+  "llms": {
+    "status": 200,
+    "bytes": 6602,
+    "head": "# Turboslide /  / > A block document with a validator and a grammar linter; every operation is a named action in one table, reachable from the CLI, MCP, HTTP and the studio window API (SPEC 1, 7.1). /  / Turboslide holds the GT brand deck as typed JSON (deck.json plus slides/<id>.json), renders it w",
+    "ms": 104
+  },
+  "mcpNoBearer": {
+    "status": 401,
+    "body": "{\"error\":{\"name\":\"Error\",\"status\":401,\"message\":\"bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN> or an API key\",\"code\":\"unauthorized\"}}",
+    "ms": 90
+  },
+  "mcpInitialize": {
+    "status": 200,
+    "session": true,
+    "server": {
+      "name": "turboslide",
+      "title": "Turboslide",
+      "version": "0.0.0"
+    },
+    "instructions": "Turboslide MCP: one deck, edited as a typed document. Read deck_get_info first, then deck_get_slide for the slide you touch and keep its revision. Every write takes the baseRevision you read and returns the normalized result; a stale revision is refused with a 409 error body that carries the current",
+    "capabilities": [
+      "tools",
+      "resources",
+      "prompts"
+    ],
+    "ms": 1993
+  },
+  "mcpTools": {
+    "status": 200,
+    "count": 161,
+    "names": [
+      "deck_get_info",
+      "deck_create",
+      "deck_rename",
+      "deck_set",
+      "deck_list",
+      "deck_copy",
+      "deck_trash",
+      "deck_restore",
+      "deck_set_background",
+      "deck_set_guides",
+      "deck_list_templates",
+      "deck_template_slides",
+      "deck_create_template",
+      "deck_update_template",
+      "deck_rename_template",
+      "deck_delete_template",
+      "deck_set_default_template",
+      "deck_list_slides",
+      "deck_get_slide",
+      "deck_insert_slide",
+      "deck_remove_slide",
+      "deck_move_slide",
+      "deck_update_slide",
+      "deck_replace_slide",
+      "deck_set_layout",
+      "deck_new_slide",
+      "deck_duplicate_slide",
+      "deck_skip_slide",
+      "deck_apply_layout",
+      "deck_import_slides",
+      "deck_slide_to_canvas",
+      "deck_set_slide_background",
+      "deck_replace_text",
+      "deck_update_block",
+      "deck_insert_block",
+      "deck_remove_block",
+      "deck_move_block",
+      "deck_align_blocks",
+      "deck_distribute_blocks",
+      "deck_order_block",
+      "deck_duplicate_block",
+      "deck_group_blocks",
+      "deck_ungroup_blocks",
+      "deck_regroup_blocks",
+      "deck_rotate_block",
+      "deck_flip_block",
+      "deck_crop_image",
+      "deck_mask_image",
+      "deck_reset_image",
+      "deck_adjust_image",
+      "deck_set_alt_text",
+      "deck_set_shadow",
+      "deck_set_autofit",
+      "deck_style_text",
+      "deck_set_list",
+      "deck_set_spacing",
+      "deck_set_columns",
+      "deck_indent_text",
+      "deck_set_case",
+      "deck_insert_text",
+      "deck_set_chart_data",
+      "deck_set_chart_kind",
+      "deck_merge_cells",
+      "deck_unmerge_cells",
+      "deck_insert_rows",
+      "deck_insert_columns",
+      "deck_delete_rows",
+      "deck_delete_columns",
+      "deck_distribute_table",
+      "deck_style_cells",
+      "deck_set_shape",
+      "deck_set_line",
+      "deck_insert_diagram",
+      "deck_set_sections",
+      "deck_lease_slide",
+      "deck_asset_add",
+      "deck_asset_dither",
+      "deck_asset_capture",
+      "deck_material_capture",
+      "deck_material_list",
+      "deck_render",
+      "deck_sheet",
+      "deck_lint",
+      "deck_fix",
+      "deck_diff",
+      "deck_version_save",
+      "deck_version_list",
+      "deck_version_restore",
+      "deck_judge_bundle",
+      "deck_export",
+      "deck_export_text",
+      "deck_build",
+      "deck_validate",
+      "deck_tailor",
+      "deck_assist_propose",
+      "deck_assist_accept",
+      "deck_brand_get",
+      "deck_brand_set",
+      "deck_brand_reset",
+      "deck_fonts_list",
+      "deck_logo_search",
+      "deck_logo_insert",
+      "deck_logo_refresh",
+      "deck_list_presence",
+      "deck_follow_client",
+      "deck_unfollow",
+      "deck_set_pointer",
+      "deck_sync_status",
+      "deck_watch",
+      "deck_add_comment",
+      "deck_reply_comment",
+      "deck_edit_comment",
+      "deck_delete_comment",
+      "deck_resolve_comment",
+      "deck_reopen_comment",
+      "deck_assign_comment",
+      "deck_done_comment",
+      "deck_react_comment",
+      "deck_list_comments",
+      "deck_get_comment",
+      "deck_comment_link",
+      "deck_list_notifications",
+      "deck_mark_notifications_read",
+      "deck_notification_settings",
+      "deck_list_activity",
+      "deck_version_diff",
+      "deck_get_share",
+      "deck_set_general_access",
+      "deck_create_share_link",
+      "deck_revoke_share_link",
+      "deck_rotate_share_link",
+      "deck_stop_sharing",
+      "deck_invite",
+      "deck_set_role",
+      "deck_remove_access",
+      "deck_set_access_expiry",
+      "deck_share_settings",
+      "deck_request_access",
+      "deck_list_access_requests",
+      "deck_respond_access_request",
+      "deck_transfer_ownership",
+      "deck_accept_ownership",
+      "deck_decline_ownership",
+      "deck_claim",
+      "deck_email_collaborators",
+      "deck_publish",
+      "deck_unpublish",
+      "deck_list_my_decks",
+      "deck_list_tokens",
+      "deck_revoke_token",
+      "deck_get_me",
+      "deck_set_my_name",
+      "deck_set_my_avatar",
+      "deck_list_sessions",
+      "deck_sign_out",
+      "deck_assign_owner",
+      "deck_admin_flag",
+      "deck_dither_picture",
+      "deck_materialize_pictures",
+      "deck_set_slide_background_picture",
+      "deck_set_slide_background_material"
+    ],
+    "assist": [
+      "deck_list_templates",
+      "deck_template_slides",
+      "deck_create_template",
+      "deck_update_template",
+      "deck_rename_template",
+      "deck_delete_template",
+      "deck_set_default_template",
+      "deck_tailor",
+      "deck_assist_propose",
+      "deck_assist_accept",
+      "deck_logo_search",
+      "deck_logo_insert",
+      "deck_logo_refresh",
+      "deck_list_notifications",
+      "deck_mark_notifications_read",
+      "deck_notification_settings"
+    ],
+    "destructive": 20,
+    "sample": [
+      {
+        "name": "deck_get_info",
+        "title": "Deck info",
+        "description": "Title, theme, sections with slide ids and titles, counts (the canvas slides, charts and guides included) and the current revision."
+      },
+      {
+        "name": "deck_create",
+        "title": "New deck",
+        "description": "Creates a deck under decks/ from a template of the index (template.list), the GT brand template or one title slide, and returns its id, revision and counts. Req"
+      }
+    ],
+    "ms": 1826
+  },
+  "mcpPrompts": {
+    "status": 200,
+    "prompts": [
+      "deck_review",
+      "deck_assist"
+    ],
+    "ms": 91
+  },
+  "mcpResources": {
+    "status": 200,
+    "resources": [
+      "deck://gt-brand/manifest",
+      "deck://lint/gt-brand",
+      "deck://grammar",
+      "deck://grammar/prose",
+      "deck://catalog/blocks",
+      "deck://catalog/icons",
+      "deck://theme",
+      "deck://sheet/light",
+      "deck://sheet/dark",
+      "deck://gt-brand/slides/opener-brand",
+      "deck://gt-brand/slides/title",
+      "deck://gt-brand/slides/thesis",
+      "deck://gt-brand/slides/reputation",
+      "deck://gt-brand/slides/why",
+      "deck://gt-brand/slides/mood-earth",
+      "deck://gt-brand/slides/positioning",
+      "deck://gt-brand/slides/audience",
+      "deck://gt-brand/slides/values",
+      "deck://gt-brand/slides/mood-rosetta",
+      "deck://gt-brand/slides/character",
+      "deck://gt-brand/slides/voice",
+      "deck://gt-brand/slides/inspirations",
+      "deck://gt-brand/slides/naming",
+      "deck://gt-brand/slides/mark",
+      "deck://gt-brand/slides/opener-design-system",
+      "deck://gt-brand/slides/compression",
+      "deck://gt-brand/slides/color",
+      "deck://gt-brand/slides/type",
+      "deck://gt-brand/slides/multilingual",
+      "deck://gt-brand/slides/ladder",
+      "deck://gt-brand/slides/lines",
+      "deck://gt-brand/slides/doubled-line",
+      "deck://gt-brand/slides/mood-calligraphy",
+      "deck://gt-brand/slides/diagrams",
+      "deck://gt-brand/slides/dither",
+      "deck://gt-brand/slides/iso",
+      "deck://gt-brand/slides/language-as-material",
+      "deck://gt-brand/slides/motion",
+      "deck://gt-brand/slides/avoid",
+      "deck://gt-brand/slides/opener-website",
+      "deck://gt-brand/slides/surfaces",
+      "deck://gt-brand/slides/site",
+      "deck://gt-brand/slides/dark-mode",
+      "deck://gt-brand/slides/pages-a",
+      "deck://gt-brand/slides/pages-b",
+      "deck://gt-brand/slides/mood-lighthouse",
+      "deck://gt-brand/slides/details",
+      "deck://gt-brand/slides/details-two",
+      "deck://gt-brand/slides/shell-numbers",
+      "deck://gt-brand/slides/horizon",
+      "deck://gt-brand/slides/opener-documentation",
+      "deck://gt-brand/slides/docs",
+      "deck://gt-brand/slides/nearest-page-routing",
+      "deck://gt-brand/slides/mood-dictionary",
+      "deck://gt-brand/slides/docs-for-agents",
+      "deck://gt-brand/slides/opener-blog",
+      "deck://gt-brand/slides/blog-index",
+      "deck://gt-brand/slides/blog-covers",
+      "deck://gt-brand/slides/mood-devanagari",
+      "deck://gt-brand/slides/gem-smoke",
+      "deck://gt-brand/slides/blog-vision",
+      "deck://gt-brand/slides/content-rule",
+      "deck://gt-brand/slides/two-registers",
+      "deck://gt-brand/slides/off-the-site",
+      "deck://gt-brand/slides/opener-developer-experience",
+      "deck://gt-brand/slides/dx",
+      "deck://gt-brand/slides/mood-cable",
+      "deck://gt-brand/slides/cli",
+      "deck://gt-brand/slides/opener-prototemplate",
+      "deck://gt-brand/slides/lab",
+      "deck://gt-brand/slides/knowledge-base",
+      "deck://gt-brand/slides/skills-marks",
+      "deck://gt-brand/slides/viewer-shell",
+      "deck://gt-brand/slides/shell-views",
+      "deck://gt-brand/slides/line-law",
+      "deck://gt-brand/slides/presenter-compare",
+      "deck://gt-brand/slides/dossier",
+      "deck://gt-brand/slides/directions",
+      "deck://gt-brand/slides/mood-wave",
+      "deck://gt-brand/slides/archive",
+      "deck://gt-brand/slides/engines",
+      "deck://gt-brand/slides/build-log",
+      "deck://gt-brand/slides/glyphfield",
+      "deck://gt-brand/slides/glyphfield-tools",
+      "deck://gt-brand/slides/books-and-templates",
+      "deck://gt-brand/slides/glyphfield-materials",
+      "deck://gt-brand/slides/agent-api",
+      "deck://gt-brand/slides/opener-status",
+      "deck://gt-brand/slides/state",
+      "deck://gt-brand/slides/mood-compass",
+      "deck://gt-brand/slides/identity-project",
+      "deck://gt-brand/slides/fixed-points",
+      "deck://gt-brand/slides/goals",
+      "deck://gt-brand/slides/closing"
+    ],
+    "templates": [
+      "deck://{deckId}/manifest",
+      "deck://{deckId}/slides/{slideId}",
+      "deck://render/{slideId}/{theme}",
+      "deck://sheet/{theme}",
+      "deck://sheet/{theme}/map",
+      "deck://lint/{deckId}",
+      "deck://{deckId}/comments",
+      "deck://{deckId}/presence"
+    ],
+    "ms": 2322
+  },
+  "mcpDeckInfo": {
+    "status": 200,
+    "isError": null,
+    "text": "",
+    "structured": null,
+    "ms": 94
+  },
+  "mcpAssistPropose": {
+    "status": 200,
+    "isError": true,
+    "text": "{\n  \"error\": {\n    \"name\": \"AssistUnavailableError\",\n    \"status\": 500,\n    \"message\": \"The assistant is not set up on this Turboslide yet\",\n    \"action\": \"assist.propose\"\n  }\n}",
+    "ms": 235
+  }
+}

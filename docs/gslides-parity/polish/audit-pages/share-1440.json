@@ -1,0 +1,214 @@
+{
+  "base": "https://www.turboslide.com",
+  "width": 1440,
+  "at": "2026-09-28T19:30:53.997Z",
+  "rows": [
+    {
+      "id": "share.button.hover",
+      "did": "hover the Share button",
+      "observed": "tooltip \"ShareWho can open this presentation, and the link to send\"; button {\"x\":1350.40625,\"y\":5.5,\"w\":77.59375,\"h\":32,\"cx\":1389.203125,\"cy\":21.5}",
+      "ok": true,
+      "shots": [
+        "share-01-share-button-hover.png"
+      ],
+      "at": "2026-09-28T19:29:32.634Z"
+    },
+    {
+      "id": "share.name-prompt.first-share",
+      "did": "click Share on a browser with no name",
+      "observed": "prompt \"Your name, shown to collaborators Skip Continue\"; continued with dialog.namePrompt.continue",
+      "ok": true,
+      "shots": [
+        "share-02-share-first-click.png",
+        "share-03-share-name-typed.png",
+        "share-04-share-dialog-after-name.png"
+      ],
+      "at": "2026-09-28T19:29:37.666Z"
+    },
+    {
+      "id": "share.dialog.read",
+      "did": "the Share dialog as it opens",
+      "observed": "box {\"x\":460,\"y\":216.953125,\"w\":520,\"h\":466.078125,\"cx\":720,\"cy\":449.9921875}; general {\"value\":\"link\",\"options\":[\"Restricted\",\"Anyone with the link\"]}; controls dialog.share.close, dialog.share.general, dialog.share.mode, dialog.share.linkRole, dialog.share.accessSentence, dialog.share.addressRow, dialog.share.address, dialog.share.copy, dialog.share.slideshow, dialog.share.people, dialog.share.owner, dialog.share.more, dialog.share.error, dialog.share.done; words \"Share Shared review: Acme Q3 2026 General access Restricted Anyone with the link Viewer Commenter Editor Anyone with this link can open and edit this presentation. Pick Viewer before you send it to a customer Copy link Open as a slideshow T Tantalum 978 Owner More Done\"",
+      "ok": true,
+      "shots": [
+        "share-05-share-dialog.png"
+      ],
+      "at": "2026-09-28T19:29:38.214Z"
+    },
+    {
+      "id": "share.dialog.more",
+      "did": "the More row",
+      "observed": "rows visible before false; rows dialog.share.view:View link · ViewerCopy link | dialog.share.view.copy:Copy link | dialog.share.present:Present link · Viewer, opens as a showCo | dialog.share.present.copy:Copy link | dialog.share.edit:Edit link · EditorCopy link | dialog.share.edit.copy:Copy link",
+      "ok": true,
+      "shots": [
+        "share-06-share-dialog-more.png"
+      ],
+      "at": "2026-09-28T19:29:39.475Z"
+    },
+    {
+      "id": "share.copy-view-link",
+      "did": "Copy on the View row",
+      "observed": "clipboard \"https://www.turboslide.com/s/XkKKUqmHgbmqVdFpqoONvh\"; snackbar \"Link copied\"; error \"\"",
+      "ok": true,
+      "shots": [
+        "share-07-share-copied-view.png"
+      ],
+      "at": "2026-09-28T19:29:41.035Z"
+    },
+    {
+      "id": "share.copy-present-link",
+      "did": "Copy on the Present row",
+      "observed": "clipboard \"https://www.turboslide.com/s/DwYw-AZJNTU3X3s79Vcsnj?present=1\"",
+      "ok": true,
+      "shots": [],
+      "at": "2026-09-28T19:29:41.998Z"
+    },
+    {
+      "id": "share.copy-edit-link",
+      "did": "Copy on the Edit row",
+      "observed": "clipboard \"https://www.turboslide.com/s/KdwWZgTl4Ym9aPiBlonHe3\"",
+      "ok": true,
+      "shots": [
+        "share-08-share-copied-edit.png"
+      ],
+      "at": "2026-09-28T19:29:43.623Z"
+    },
+    {
+      "id": "share.access.anyone-with-link",
+      "did": "General access: Anyone with the link, then the roles",
+      "observed": "address \"https://www.turboslide.com/s/Q7p73HA8-11Cy-uwFBCQ3E\"; sentences {\"viewer\":\"Anyone with this link can open it and cannot change it\",\"commenter\":\"Anyone with this link can open it and leave comments\",\"editor\":\"Anyone with this link can open and edit this presentation. Pick Viewer before you send it to a customer\"}; error \"\"",
+      "ok": true,
+      "shots": [
+        "share-09-share-general-hover.png",
+        "share-10-share-general-link.png",
+        "share-11-share-role-commenter.png",
+        "share-12-share-role-editor.png"
+      ],
+      "at": "2026-09-28T19:29:50.484Z"
+    },
+    {
+      "id": "share.copy-general-link",
+      "did": "Copy link on the address row",
+      "observed": "clipboard \"https://www.turboslide.com/s/uwWbKkW36LyVeSYnALiiBp\"; button reads \"Copy link\"; snackbar \"Link copied\"",
+      "ok": true,
+      "shots": [
+        "share-13-share-copy-general.png"
+      ],
+      "at": "2026-09-28T19:29:52.632Z"
+    },
+    {
+      "id": "share.access.restricted",
+      "did": "General access back to Restricted",
+      "observed": "sentence \"Only you can open this address on this Turboslide until sign in arrives; pick Anyone with the link to share it\"",
+      "ok": true,
+      "shots": [
+        "share-14-share-general-restricted.png"
+      ],
+      "at": "2026-09-28T19:29:54.551Z"
+    },
+    {
+      "id": "share.dialog.people",
+      "did": "the Add people field and the footer",
+      "observed": "words \"Share Shared review: Acme Q3 2026 General access Restricted Anyone with the link Only you can open this address on this Turboslide until sign in arrives; pick Anyone with the link to share it Copy link Open as a slideshow T Tantalum 978 Owner Settings No pending requests Viewer Commenter Editor Send Notify people Links View link · Viewer · Created 9/28/2026 Copy link Present link · Viewer, opens as a show · Created 9/28/2026 Copy link Edit link · Editor · Created 9/28/2026 Copy link View link Viewer Created 9/28/2026 Rotate Revoke Present link Viewer Created 9/28/2026 Rotate Revoke Edit link Editor Created 9/28/2026 Rotate Revoke Anyone with the link Viewer Created 9/28/2026 Rotate Revoke Pe\"",
+      "ok": true,
+      "shots": [
+        "share-15-share-people-typed.png",
+        "share-16-share-dialog-full.png"
+      ],
+      "at": "2026-09-28T19:29:57.521Z"
+    },
+    {
+      "id": "share.escape",
+      "did": "Escape closes the dialog",
+      "observed": "closed on Escape true",
+      "ok": true,
+      "shots": [
+        "share-17-share-after-escape.png"
+      ],
+      "at": "2026-09-28T19:29:57.926Z"
+    },
+    {
+      "id": "share.file-menu-share-with-others",
+      "did": "File > Share > Share with others",
+      "observed": "dialog shown true",
+      "ok": true,
+      "shots": [
+        "share-18-share-from-file-menu.png"
+      ],
+      "at": "2026-09-28T19:30:01.378Z"
+    },
+    {
+      "id": "share.view-link-lands-viewer",
+      "did": "a stranger opens the View link",
+      "observed": "settled in 1135 ms; {\"url\":\"/deck/untitled-20260928-9wq9\",\"title\":\"Shared review: Acme Q3 2026, Turboslide\",\"menubar\":false,\"toolbar\":false,\"editor\":false,\"show\":false,\"words\":\"Turboslide 2 slides Deck 01 Shared review: Acme Q3 2026 Shared review: Acme Q3 2026 02 Second slide Second slide 01 / 02 Shared review: Acme Q3 2026 Assist Slide Grid Book ◐ Theme Present Help 01 / 02 Shared review: Acme Q3 2026 Arrow keys move. Press ? for ev\"}; after dblclick and ArrowRight {\"hash\":\"#s/split-1\",\"editing\":false,\"notes\":false}",
+      "ok": true,
+      "shots": [
+        "share-visitor-view-link.png",
+        "share-visitor-view-dblclick.png",
+        "share-visitor-view-next.png"
+      ],
+      "at": "2026-09-28T19:30:06.900Z"
+    },
+    {
+      "id": "share.present-link-lands-show",
+      "did": "a stranger opens the Present link",
+      "observed": "settled in 1300 ms; {\"url\":\"/deck/untitled-20260928-9wq9?present=1\",\"title\":\"Shared review: Acme Q3 2026, Turboslide\",\"menubar\":false,\"toolbar\":false,\"editor\":false,\"show\":true,\"words\":\"01 / 02 Shared review: Acme Q3 2026 1 of 2 ● ⋯ Arrow keys move. Press ? for every shortcut.\"}",
+      "ok": true,
+      "shots": [
+        "share-visitor-present-link.png",
+        "share-visitor-present-next.png",
+        "share-visitor-present-bar.png"
+      ],
+      "at": "2026-09-28T19:30:12.335Z"
+    },
+    {
+      "id": "share.edit-link-lands-editor",
+      "did": "a stranger opens the Edit link",
+      "observed": "settled in 1290 ms; {\"url\":\"/edit/untitled-20260928-9wq9\",\"title\":\"Shared review: Acme Q3 2026, editor, Turboslide\",\"menubar\":true,\"toolbar\":true,\"editor\":true,\"show\":false,\"words\":\"Shared review: Acme Q3 2026 All changes saved ST Assist Slideshow Share File Edit View Insert Format Slide Arrange Tools Help T Background Layout Theme 1 Shared review: Acme Q3 2026 ST 2 Second slide 01 / 02 Shared review: Acme Q3 2026 Click to add subtitle\"}; name prompt false",
+      "ok": true,
+      "shots": [
+        "share-visitor-edit-link.png",
+        "share-visitor-edit-after-1s.png"
+      ],
+      "at": "2026-09-28T19:30:16.999Z"
+    },
+    {
+      "id": "share.stranger-edit-address",
+      "did": "a stranger opens /edit/<id> with no link",
+      "observed": "settled in 828 ms; {\"url\":\"/edit/untitled-20260928-9wq9\",\"title\":\"Shared review: Acme Q3 2026, editor, Turboslide\",\"menubar\":true,\"toolbar\":true,\"editor\":false,\"show\":false,\"words\":\"Shared review: Acme Q3 2026 ST C Slideshow Share File View Tools Help T Background Layout Theme View only Turboslide 2 slides Deck 01 Shared review: Acme Q3 2026 Shared review: Acme Q3 2026 1 ST +1 02 Second slide Second slide 01 / 02 Shared review: Acme Q3 20\"}",
+      "ok": true,
+      "shots": [
+        "share-stranger-edit-address.png"
+      ],
+      "at": "2026-09-28T19:30:19.708Z"
+    },
+    {
+      "id": "share.stranger-deck-address",
+      "did": "a stranger opens /deck/<id> with no link",
+      "observed": "settled in 1377 ms; {\"url\":\"/deck/untitled-20260928-9wq9\",\"title\":\"Shared review: Acme Q3 2026, Turboslide\",\"menubar\":false,\"toolbar\":false,\"editor\":false,\"show\":false,\"words\":\"Turboslide 2 slides Deck 01 Shared review: Acme Q3 2026 Shared review: Acme Q3 2026 02 Second slide Second slide 01 / 02 Shared review: Acme Q3 2026 Assist Slide Grid Book ◐ Theme Present Help 01 / 02 Shared review: Acme Q3 2026 Arrow keys move. Press ? for ev\"}",
+      "ok": true,
+      "shots": [
+        "share-stranger-deck-address.png"
+      ],
+      "at": "2026-09-28T19:30:22.764Z"
+    },
+    {
+      "id": "share.dialog.dark",
+      "did": "the Share dialog in the dark appearance",
+      "observed": "shot",
+      "ok": true,
+      "shots": [
+        "share-19-share-dialog-dark.png"
+      ],
+      "at": "2026-09-28T19:30:26.133Z"
+    },
+    {
+      "id": "teardown",
+      "did": "every scratch deck trashed and deleted forever",
+      "observed": "untitled-20260928-9wq9: File > Move to trash; Delete forever on /decks/trash; /edit/untitled-20260928-9wq9 answers 404",
+      "ok": true,
+      "shots": [],
+      "at": "2026-09-28T19:30:53.997Z"
+    }
+  ]
+}

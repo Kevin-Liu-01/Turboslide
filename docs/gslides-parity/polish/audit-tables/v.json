@@ -1,0 +1,2605 @@
+[
+  {
+    "n": 1,
+    "step": "new deck",
+    "at": "2026-09-28T19:24:15.554Z",
+    "id": "untitled-20260928-50n8",
+    "url": "https://turboslide.vercel.app/edit/untitled-20260928-50n8"
+  },
+  {
+    "n": 2,
+    "step": "title and body slide",
+    "at": "2026-09-28T19:24:20.141Z",
+    "slide": "split-1",
+    "k": 0.705,
+    "shot": "v-01-slide-title-and-body.png"
+  },
+  {
+    "n": 3,
+    "step": "insert 3x3",
+    "at": "2026-09-28T19:24:22.669Z",
+    "words": "3 x 3",
+    "id": "table",
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "columns": [
+      {},
+      {},
+      {}
+    ],
+    "rows": [
+      {
+        "header": true,
+        "cells": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "cells": [
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "cells": [
+          "",
+          "",
+          ""
+        ]
+      }
+    ],
+    "shot": "v-03-table-3x3-inserted.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 114.9
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 114.91497802734375
+    },
+    "lastRowBottom": 425.60498046875,
+    "ringBottom": 425.6,
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w",
+      "handle.table.rotate"
+    ],
+    "edges": 4,
+    "editing": false,
+    "gridRows": "54px 54px 54px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 38.1,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 349,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 388,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 4,
+    "step": "hover empty cell 1,1",
+    "at": "2026-09-28T19:24:23.190Z",
+    "prompt": "Type to add text",
+    "promptLines": 1,
+    "shot": "v-04-table-3x3-hover-cell-1-1.png"
+  },
+  {
+    "n": 5,
+    "step": "one click on cell 1,1",
+    "at": "2026-09-28T19:24:24.034Z",
+    "session": {
+      "row": 1,
+      "column": 1,
+      "run": "table/rows/1/cells/1"
+    },
+    "active": "span[contenteditable][run table/rows/1/cells/1]",
+    "prompt": null,
+    "shot": "v-05-table-3x3-one-click-cell-1-1.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 114.9
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 114.91497802734375
+    },
+    "lastRowBottom": 425.60498046875,
+    "ringBottom": 425.6,
+    "gapRingToLastRule": 0,
+    "cellRing": {
+      "x": 735.2,
+      "y": 349.5,
+      "w": 225.6,
+      "h": 38.1
+    },
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w"
+    ],
+    "edges": 4,
+    "editing": true,
+    "gridRows": "54px 54px 54px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 38.1,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 349,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 388,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 6,
+    "step": "hover cell 2,2 while cell 1,1 is open",
+    "at": "2026-09-28T19:24:24.658Z",
+    "prompt": null,
+    "promptLines": 0,
+    "shot": "v-06-table-3x3-hover-2-2-with-1-1-open.png"
+  },
+  {
+    "n": 7,
+    "step": "type in cell 1,1 then Tab x2",
+    "at": "2026-09-28T19:24:26.715Z",
+    "s1": "v-07-table-3x3-typed-alpha.png",
+    "cells": [
+      [
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Alpha",
+        "Beta"
+      ],
+      [
+        "Gamma",
+        "",
+        ""
+      ]
+    ],
+    "session": {
+      "row": 2,
+      "column": 0,
+      "run": "table/rows/2/cells/0"
+    },
+    "shot": "v-08-table-3x3-tab-tab.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 114.9
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 114.91497802734375
+    },
+    "lastRowBottom": 425.60498046875,
+    "ringBottom": 425.6,
+    "gapRingToLastRule": 0,
+    "cellRing": {
+      "x": 509.6,
+      "y": 387.5,
+      "w": 225.6,
+      "h": 38.1
+    },
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w"
+    ],
+    "edges": 4,
+    "editing": true,
+    "gridRows": "54px 54px 54px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 38.1,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 349,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 388,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 8,
+    "step": "Shift+Tab, ArrowUp, ArrowLeft",
+    "at": "2026-09-28T19:24:27.114Z",
+    "afterShiftTab": {
+      "row": 1,
+      "column": 2,
+      "run": "table/rows/1/cells/2"
+    },
+    "afterUp": {
+      "row": 1,
+      "column": 2,
+      "run": "table/rows/1/cells/2"
+    },
+    "afterLeft": {
+      "row": 1,
+      "column": 1,
+      "run": "table/rows/1/cells/1"
+    },
+    "afterLeftAgain": {
+      "row": 1,
+      "column": 1,
+      "run": "table/rows/1/cells/1"
+    },
+    "shot": "v-09-table-3x3-arrows.png"
+  },
+  {
+    "n": 9,
+    "step": "Tab from the last cell appends a row",
+    "at": "2026-09-28T19:24:29.801Z",
+    "before": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "after": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "rows": 3,
+    "session": {
+      "row": 1,
+      "column": 2,
+      "run": "table/rows/1/cells/2"
+    },
+    "shot": "v-10-table-tab-last-appends-row.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 114.9
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 114.91497802734375
+    },
+    "lastRowBottom": 425.60498046875,
+    "ringBottom": 425.6,
+    "gapRingToLastRule": 0,
+    "cellRing": {
+      "x": 960.8,
+      "y": 349.5,
+      "w": 225.6,
+      "h": 38.1
+    },
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w"
+    ],
+    "edges": 4,
+    "editing": true,
+    "gridRows": "54px 54px 54px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 38.1,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 349,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 388,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 10,
+    "step": "Escape twice, click the table once",
+    "at": "2026-09-28T19:24:30.998Z",
+    "s1": "v-11-table-after-escape-1.png",
+    "escape1": {
+      "chip": "Table",
+      "editing": false,
+      "rings": 1
+    },
+    "s2": "v-12-table-after-escape-2.png",
+    "escape2": {
+      "rings": 0
+    },
+    "shot": "v-13-table-selected-one-click-header-cell.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 114.9
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 114.91497802734375
+    },
+    "lastRowBottom": 425.60498046875,
+    "ringBottom": 425.6,
+    "gapRingToLastRule": 0,
+    "cellRing": {
+      "x": 735.2,
+      "y": 311.4,
+      "w": 225.6,
+      "h": 38.1
+    },
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w"
+    ],
+    "edges": 4,
+    "editing": true,
+    "gridRows": "54px 54px 54px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 38.1,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 349,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 388,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 11,
+    "step": "type on the selected table appends in the remembered cell",
+    "at": "2026-09-28T19:24:32.761Z",
+    "chipBefore": "Table",
+    "editingBefore": false,
+    "session": {
+      "row": 1,
+      "column": 0,
+      "run": "table/rows/1/cells/0"
+    },
+    "cell": " more",
+    "shot": "v-14-table-selected-typing-appends.png"
+  },
+  {
+    "n": 12,
+    "step": "range by drag from cell 0,0 to 1,1 on the selected table",
+    "at": "2026-09-28T19:24:34.535Z",
+    "during": {
+      "rings": [
+        {
+          "cls": "ts-select is-selected",
+          "box": {
+            "x": 509.6,
+            "y": 310.7,
+            "w": 676.8,
+            "h": 114.9
+          }
+        },
+        {
+          "cls": "ts-select is-selected is-cells",
+          "box": {
+            "x": 509.6,
+            "y": 311.4,
+            "w": 451.2,
+            "h": 75.4
+          }
+        }
+      ],
+      "cellRing": null,
+      "chip": "Table"
+    },
+    "after": {
+      "rings": [
+        {
+          "cls": "ts-select is-selected",
+          "box": {
+            "x": 509.6,
+            "y": 310.7,
+            "w": 676.8,
+            "h": 114.9
+          }
+        },
+        {
+          "cls": "ts-select is-selected is-cells",
+          "box": {
+            "x": 509.6,
+            "y": 311.4,
+            "w": 451.2,
+            "h": 75.4
+          }
+        }
+      ],
+      "cellRing": null,
+      "chip": "Table"
+    },
+    "shot": "v-16-table-range-0-0-to-1-1.png"
+  },
+  {
+    "n": 13,
+    "step": "Cmd+B on the range",
+    "at": "2026-09-28T19:24:35.296Z",
+    "cells": [
+      [
+        "",
+        "",
+        ""
+      ],
+      [
+        "*more*",
+        "*AlphEnda*",
+        "Beta"
+      ],
+      [
+        "Gamma",
+        "",
+        ""
+      ]
+    ],
+    "marks": null,
+    "shot": "v-17-table-range-bold.png"
+  },
+  {
+    "n": 14,
+    "step": "Shift+ArrowRight extends the range",
+    "at": "2026-09-28T19:24:35.782Z",
+    "rings": [
+      {
+        "cls": "ts-select is-selected",
+        "box": {
+          "x": 509.6,
+          "y": 310.7,
+          "w": 676.8,
+          "h": 114.9
+        }
+      },
+      {
+        "cls": "ts-select is-selected is-cells",
+        "box": {
+          "x": 509.6,
+          "y": 311.4,
+          "w": 676.8,
+          "h": 75.4
+        }
+      }
+    ],
+    "cellRing": null,
+    "chip": "Table",
+    "shot": "v-18-table-range-shift-right.png"
+  },
+  {
+    "n": 15,
+    "step": "right click cell 1,1",
+    "at": "2026-09-28T19:24:37.260Z",
+    "opened": true,
+    "rows": [
+      {
+        "id": "menu.format.table.insertRowAbove",
+        "text": "Insert row above",
+        "disabled": false
+      },
+      {
+        "id": "menu.format.table.insertRowBelow",
+        "text": "Insert row below",
+        "disabled": false
+      },
+      {
+        "id": "menu.format.table.insertColumnLeft",
+        "text": "Insert column left",
+        "disabled": false
+      },
+      {
+        "id": "menu.format.table.insertColumnRight",
+        "text": "Insert column right",
+        "disabled": false
+      },
+      {
+        "id": "menu.format.table.deleteRow",
+        "text": "Delete row",
+        "disabled": false
+      },
+      {
+        "id": "menu.format.table.deleteColumn",
+        "text": "Delete column",
+        "disabled": false
+      },
+      {
+        "id": "menu.format.table.deleteTable",
+        "text": "Delete table",
+        "disabled": false
+      },
+      {
+        "id": "menu.format.table.headerRow",
+        "text": "Header row",
+        "disabled": false
+      },
+      {
+        "id": "menu.format.table.distributeRows",
+        "text": "Distribute rows",
+        "disabled": false
+      },
+      {
+        "id": "menu.format.table.distributeColumns",
+        "text": "Distribute columns",
+        "disabled": false
+      },
+      {
+        "id": "menu.format.table.mergeCells",
+        "text": "Merge cells",
+        "disabled": true
+      },
+      {
+        "id": "menu.format.table.unmergeCells",
+        "text": "Unmerge cells",
+        "disabled": true
+      },
+      {
+        "id": "menu.edit.cut",
+        "text": "Cut⌘X",
+        "disabled": false
+      },
+      {
+        "id": "menu.edit.copy",
+        "text": "Copy⌘C",
+        "disabled": false
+      },
+      {
+        "id": "menu.edit.paste",
+        "text": "Paste⌘V",
+        "disabled": false
+      },
+      {
+        "id": "menu.insert.link",
+        "text": "Link⌘K",
+        "disabled": false
+      },
+      {
+        "id": "menu.format.formatOptions",
+        "text": "Format options",
+        "disabled": false
+      }
+    ],
+    "shot": "v-19-table-context-menu.png"
+  },
+  {
+    "n": 16,
+    "step": "Insert row below from the menu",
+    "at": "2026-09-28T19:24:38.538Z",
+    "before": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "after": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 217,
+      "z": 2
+    },
+    "rows": 4,
+    "session": {
+      "row": 1,
+      "column": 1,
+      "run": "table/rows/1/cells/1"
+    },
+    "shot": "v-20-table-row-inserted-below.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 153
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 152.9849853515625
+    },
+    "lastRowBottom": 463.67498779296875,
+    "ringBottom": 463.7,
+    "gapRingToLastRule": 0,
+    "cellRing": {
+      "x": 735.2,
+      "y": 349.5,
+      "w": 225.6,
+      "h": 38.1
+    },
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.add.row",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w"
+    ],
+    "edges": 4,
+    "editing": true,
+    "gridRows": "54px 54px 54px 54px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 38.1,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 349,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 388,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 426,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 17,
+    "step": "Insert column right from the menu",
+    "at": "2026-09-28T19:24:40.074Z",
+    "columns": [
+      {},
+      {},
+      {},
+      {}
+    ],
+    "rows": 4,
+    "shot": "v-21-table-column-inserted-right.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 153
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 152.9849853515625
+    },
+    "lastRowBottom": 463.67498779296875,
+    "ringBottom": 463.7,
+    "gapRingToLastRule": 0,
+    "cellRing": {
+      "x": 678.8,
+      "y": 349.5,
+      "w": 169.2,
+      "h": 38.1
+    },
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.add.row",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w"
+    ],
+    "edges": 4,
+    "editing": true,
+    "gridRows": "54px 54px 54px 54px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 38.1,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 349,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 388,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 426,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 18,
+    "step": "Delete row and Delete column from the menu",
+    "at": "2026-09-28T19:24:43.073Z",
+    "s1": "v-22-table-row-deleted.png",
+    "columns": [
+      {},
+      {},
+      {}
+    ],
+    "rows": 3,
+    "cells": [
+      [
+        "",
+        "",
+        ""
+      ],
+      [
+        "*more*",
+        "*AlphEnda*",
+        "Beta"
+      ],
+      [
+        "Gamma",
+        "",
+        ""
+      ]
+    ],
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 217,
+      "z": 2
+    },
+    "shot": "v-23-table-column-deleted.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 153
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 152.9849853515625
+    },
+    "lastRowBottom": 463.67498779296875,
+    "ringBottom": 463.7,
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w"
+    ],
+    "edges": 4,
+    "editing": true,
+    "gridRows": "72px 72px 72px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 50.8,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 362,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 413,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 19,
+    "step": "hover the right edge for the add column \"+\"",
+    "at": "2026-09-28T19:24:45.117Z",
+    "addColumn": {
+      "id": "handle.table.add.column",
+      "box": {
+        "x": 1192.4,
+        "y": 379.2,
+        "w": 16,
+        "h": 16
+      },
+      "visible": true
+    },
+    "handles": [
+      "handle.table.head.column.0@510,295 226x12",
+      "handle.table.head.column.1@735,295 226x12",
+      "handle.table.head.column.2@961,295 226x12",
+      "handle.table.head.row.0@494,311 12x51",
+      "handle.table.head.row.1@494,362 12x51",
+      "handle.table.head.row.2@494,413 12x51",
+      "handle.table.add.column@1192,379 16x16",
+      "handle.table.move@510,291 46x18",
+      "handle.table.column.0@731,311 9x153",
+      "handle.table.column.1@956,311 9x153",
+      "handle.table.row.0@510,357 677x9",
+      "handle.table.row.1@510,408 677x9",
+      "handle.table.row.2@510,459 677x9",
+      "handle.table.resize.nw@504,305 11x11",
+      "handle.table.resize.n@843,305 11x11",
+      "handle.table.resize.ne@1181,305 11x11",
+      "handle.table.resize.e@1181,382 11x11",
+      "handle.table.resize.se@1181,458 11x11",
+      "handle.table.resize.s@843,458 11x11",
+      "handle.table.resize.sw@504,458 11x11",
+      "handle.table.resize.w@504,382 11x11",
+      "handle.table.rotate@842,281 12x12"
+    ],
+    "shot": "v-24-table-edge-hover-right.png"
+  },
+  {
+    "n": 20,
+    "step": "click the add column \"+\"",
+    "at": "2026-09-28T19:24:46.486Z",
+    "columnsBefore": 3,
+    "columnsAfter": 4,
+    "widths": [
+      {
+        "width": 320
+      },
+      {
+        "width": 320
+      },
+      {
+        "width": 320
+      },
+      {
+        "width": 320
+      }
+    ],
+    "shot": "v-25-table-edge-add-column-clicked.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 902.4,
+      "h": 153
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 902.4000244140625,
+      "h": 152.9849853515625
+    },
+    "lastRowBottom": 463.67498779296875,
+    "ringBottom": 463.7,
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.add.column",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w",
+      "handle.table.rotate"
+    ],
+    "edges": 4,
+    "editing": false,
+    "gridRows": "72px 72px 72px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 50.8,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 362,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 413,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 21,
+    "step": "hover the bottom edge and click the add row \"+\"",
+    "at": "2026-09-28T19:24:48.695Z",
+    "s1": "v-26-table-edge-hover-bottom.png",
+    "rowsBefore": 3,
+    "rowsAfter": 4,
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 1280,
+      "h": 289,
+      "z": 2
+    },
+    "shot": "v-27-table-edge-add-row-clicked.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 902.4,
+      "h": 203.7
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 902.4000244140625,
+      "h": 203.7449951171875
+    },
+    "lastRowBottom": 514.4349975585938,
+    "ringBottom": 514.4,
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.add.row",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w",
+      "handle.table.rotate"
+    ],
+    "edges": 4,
+    "editing": false,
+    "gridRows": "72px 72px 72px 72px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 50.8,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 362,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 413,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 464,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 22,
+    "step": "hover and click the column head of column 1",
+    "at": "2026-09-28T19:24:50.460Z",
+    "s1": "v-28-table-head-column-hover.png",
+    "head": {
+      "x": 735.2,
+      "y": 294.7,
+      "w": 225.6,
+      "h": 12
+    },
+    "rings": [
+      {
+        "cls": "ts-select is-selected",
+        "box": {
+          "x": 509.6,
+          "y": 310.7,
+          "w": 902.4,
+          "h": 203.7
+        }
+      },
+      {
+        "cls": "ts-select is-selected is-cells",
+        "box": {
+          "x": 735.2,
+          "y": 311.4,
+          "w": 225.6,
+          "h": 202.3
+        }
+      }
+    ],
+    "cellRing": null,
+    "chip": "Table",
+    "shot": "v-29-table-head-column-clicked.png"
+  },
+  {
+    "n": 23,
+    "step": "click the row head of row 1, then right click it for Header row",
+    "at": "2026-09-28T19:24:53.224Z",
+    "s1": "v-30-table-head-row-clicked.png",
+    "rangeRings": [
+      {
+        "cls": "ts-select is-selected",
+        "box": {
+          "x": 509.6,
+          "y": 310.7,
+          "w": 902.4,
+          "h": 203.7
+        }
+      },
+      {
+        "cls": "ts-select is-selected is-cells",
+        "box": {
+          "x": 509.6,
+          "y": 362.1,
+          "w": 902.4,
+          "h": 50
+        }
+      }
+    ],
+    "s2": "v-31-table-head-row-menu.png",
+    "menuRows": [
+      "menu.format.table.headerRow",
+      "menu.format.table.insertRowAbove",
+      "menu.format.table.insertRowBelow",
+      "menu.format.table.deleteRow",
+      "menu.format.table.distributeRows"
+    ],
+    "row0rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "s3": "v-32-table-header-toggled-off.png"
+  },
+  {
+    "n": 24,
+    "step": "toggle the header back on from Format > Table",
+    "at": "2026-09-28T19:24:56.238Z",
+    "header": true,
+    "shot": "v-33-table-header-toggled-on.png"
+  },
+  {
+    "n": 25,
+    "step": "drag the first column seam right by 90",
+    "at": "2026-09-28T19:24:58.191Z",
+    "seam": {
+      "x": 509.6,
+      "y": 294.7,
+      "w": 225.6,
+      "h": 12
+    },
+    "mid": {
+      "readout": null,
+      "shot": "v-34-table-seam-column-during.png"
+    },
+    "widthsBefore": [
+      {
+        "width": 320
+      },
+      {
+        "width": 320
+      },
+      {
+        "width": 320
+      },
+      {
+        "width": 320
+      }
+    ],
+    "widthsAfter": [
+      {
+        "width": 320
+      },
+      {
+        "width": 320
+      },
+      {
+        "width": 320
+      },
+      {
+        "width": 320
+      }
+    ],
+    "shot": "v-35-table-seam-column-after.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 902.4,
+      "h": 203.7
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 902.4000244140625,
+      "h": 203.7449951171875
+    },
+    "lastRowBottom": 514.4349975585938,
+    "ringBottom": 514.4,
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w"
+    ],
+    "edges": 4,
+    "editing": false,
+    "gridRows": "72px 72px 72px 72px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 50.8,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 362,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 413,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 464,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 26,
+    "step": "drag the row seam under row 1 down by 40",
+    "at": "2026-09-28T19:24:59.922Z",
+    "seam": {
+      "x": 493.6,
+      "y": 362.1,
+      "w": 12,
+      "h": 50.8
+    },
+    "mid": {
+      "readout": null,
+      "shot": "v-36-table-seam-row-during.png"
+    },
+    "heightsBefore": [
+      null,
+      null,
+      null,
+      null
+    ],
+    "heightsAfter": [
+      null,
+      null,
+      null,
+      null
+    ],
+    "posBefore": {
+      "x": 320,
+      "y": 218,
+      "w": 1280,
+      "h": 289,
+      "z": 2
+    },
+    "posAfter": {
+      "x": 320,
+      "y": 218,
+      "w": 1280,
+      "h": 289,
+      "z": 2
+    },
+    "shot": "v-37-table-seam-row-after.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 902.4,
+      "h": 203.7
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 902.4000244140625,
+      "h": 203.7449951171875
+    },
+    "lastRowBottom": 514.4349975585938,
+    "ringBottom": 514.4,
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w"
+    ],
+    "edges": 4,
+    "editing": false,
+    "gridRows": "72px 72px 72px 72px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 50.8,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 362,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 413,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 464,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 27,
+    "step": "seams visible with a cell open",
+    "at": "2026-09-28T19:25:00.737Z",
+    "editing": true,
+    "seams": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3"
+    ],
+    "heads": 8,
+    "shot": "v-38-table-seams-with-cell-open.png"
+  },
+  {
+    "n": 28,
+    "step": "merge cells 0,0 to 0,1 from the right click menu",
+    "at": "2026-09-28T19:25:03.992Z",
+    "opened": true,
+    "s1": "v-39-table-range-context-menu.png",
+    "mergeDisabled": false,
+    "spans": [
+      {
+        "row": 0,
+        "column": 0,
+        "rows": 1,
+        "columns": 2
+      }
+    ],
+    "classes": "table grid",
+    "s2": "v-40-table-merged.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 902.4,
+      "h": 203.7
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 902.4000244140625,
+      "h": 203.7449951171875
+    },
+    "lastRowBottom": 0,
+    "ringBottom": 514.4,
+    "gapRingToLastRule": 514.4,
+    "cellRing": null,
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w"
+    ],
+    "edges": 4,
+    "editing": false,
+    "gridRows": "72px 72px 72px 72px",
+    "rowBoxes": [
+      {
+        "y": 0,
+        "h": 0,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 0,
+        "h": 0,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 0,
+        "h": 0,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 0,
+        "h": 0,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 29,
+    "step": "unmerge from the right click menu",
+    "at": "2026-09-28T19:25:06.225Z",
+    "unmergeDisabled": false,
+    "shot": "v-41-table-unmerged.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 902.4,
+      "h": 203.7
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 902.4000244140625,
+      "h": 203.7449951171875
+    },
+    "lastRowBottom": 514.4349975585938,
+    "ringBottom": 514.4,
+    "gapRingToLastRule": 0,
+    "cellRing": {
+      "x": 509.6,
+      "y": 311.4,
+      "w": 225.6,
+      "h": 50.8
+    },
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 509.6,
+        "y": 290.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w"
+    ],
+    "edges": 4,
+    "editing": false,
+    "gridRows": "72px 72px 72px 72px",
+    "rowBoxes": [
+      {
+        "y": 311,
+        "h": 50.8,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 362,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 413,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 464,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 30,
+    "step": "move the table by a drag from an unselected cell",
+    "at": "2026-09-28T19:25:08.823Z",
+    "s0": "v-42-table-deselected.png",
+    "before": {
+      "x": 320,
+      "y": 218,
+      "w": 1280,
+      "h": 289,
+      "z": 2
+    },
+    "after": {
+      "x": 150,
+      "y": 306,
+      "w": 1280,
+      "h": 289,
+      "z": 2
+    },
+    "mid": {
+      "readout": null,
+      "ring": {
+        "x": 389.8,
+        "y": 372.7,
+        "w": 902.4,
+        "h": 203.7
+      },
+      "table": {
+        "x": 389.75,
+        "y": 372.72998046875,
+        "w": 902.39990234375,
+        "h": 203.7449951171875
+      },
+      "shot": "v-43-table-move-during.png"
+    },
+    "shot": "v-44-table-move-after.png",
+    "ring": {
+      "x": 389.8,
+      "y": 372.7,
+      "w": 902.4,
+      "h": 203.7
+    },
+    "table": {
+      "x": 389.75,
+      "y": 372.72998046875,
+      "w": 902.39990234375,
+      "h": 203.7449951171875
+    },
+    "lastRowBottom": 576.4749755859375,
+    "ringBottom": 576.4,
+    "gapRingToLastRule": -0.1,
+    "cellRing": null,
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 389.8,
+        "y": 352.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w",
+      "handle.table.rotate"
+    ],
+    "edges": 4,
+    "editing": false,
+    "gridRows": "72px 72px 72px 72px",
+    "rowBoxes": [
+      {
+        "y": 373,
+        "h": 50.8,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 424,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 475,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 526,
+        "h": 50.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 31,
+    "step": "resize from the se handle by +160,+120",
+    "at": "2026-09-28T19:25:10.670Z",
+    "before": {
+      "x": 150,
+      "y": 306,
+      "w": 1280,
+      "h": 289,
+      "z": 2
+    },
+    "after": {
+      "x": 150,
+      "y": 306,
+      "w": 1507,
+      "h": 465,
+      "z": 2
+    },
+    "mid": {
+      "readout": "1507 × 465",
+      "ring": {
+        "x": 389.8,
+        "y": 372.7,
+        "w": 1062.4,
+        "h": 327.8
+      },
+      "table": {
+        "x": 389.75,
+        "y": 372.72998046875,
+        "w": 1062.4349365234375,
+        "h": 327.82501220703125
+      },
+      "rowBoxes": [
+        {
+          "y": 373,
+          "h": 81.8,
+          "header": true,
+          "rule": "1px solid rgb(7, 7, 7)"
+        },
+        {
+          "y": 455,
+          "h": 81.8,
+          "header": false,
+          "rule": "1px solid rgba(7, 7, 7, 0.18)"
+        },
+        {
+          "y": 537,
+          "h": 81.8,
+          "header": false,
+          "rule": "1px solid rgba(7, 7, 7, 0.18)"
+        },
+        {
+          "y": 619,
+          "h": 81.8,
+          "header": false,
+          "rule": "1px solid rgba(7, 7, 7, 0.18)"
+        }
+      ]
+    },
+    "heights": [
+      null,
+      null,
+      null,
+      null
+    ],
+    "shot": "v-46-table-resize-se-after.png",
+    "ring": {
+      "x": 389.8,
+      "y": 372.7,
+      "w": 1062.4,
+      "h": 327.8
+    },
+    "table": {
+      "x": 389.75,
+      "y": 372.72998046875,
+      "w": 1062.4349365234375,
+      "h": 327.82501220703125
+    },
+    "lastRowBottom": 700.5549926757812,
+    "ringBottom": 700.5,
+    "gapRingToLastRule": -0.1,
+    "cellRing": null,
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 389.8,
+        "y": 352.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w",
+      "handle.table.rotate"
+    ],
+    "edges": 4,
+    "editing": false,
+    "gridRows": "116px 116px 116px 116px",
+    "rowBoxes": [
+      {
+        "y": 373,
+        "h": 81.8,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 455,
+        "h": 81.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 537,
+        "h": 81.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 619,
+        "h": 81.8,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 32,
+    "step": "resize from the n handle up by 80 (shrink below the rows)",
+    "at": "2026-09-28T19:25:12.475Z",
+    "before": {
+      "x": 150,
+      "y": 306,
+      "w": 1507,
+      "h": 465,
+      "z": 2
+    },
+    "after": {
+      "x": 150,
+      "y": 306,
+      "w": 1507,
+      "h": 217,
+      "z": 2
+    },
+    "mid": {
+      "readout": "1507 × 217",
+      "ring": {
+        "x": 389.8,
+        "y": 372.7,
+        "w": 1062.4,
+        "h": 153
+      },
+      "table": {
+        "x": 389.75,
+        "y": 372.72998046875,
+        "w": 1062.4349365234375,
+        "h": 152.9849853515625
+      }
+    },
+    "shot": "v-48-table-resize-s-shrink-after.png",
+    "ring": {
+      "x": 389.8,
+      "y": 372.7,
+      "w": 1062.4,
+      "h": 153
+    },
+    "table": {
+      "x": 389.75,
+      "y": 372.72998046875,
+      "w": 1062.4349365234375,
+      "h": 152.9849853515625
+    },
+    "lastRowBottom": 525.7149658203125,
+    "ringBottom": 525.7,
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 389.8,
+        "y": 352.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w",
+      "handle.table.rotate"
+    ],
+    "edges": 4,
+    "editing": false,
+    "gridRows": "54px 54px 54px 54px",
+    "rowBoxes": [
+      {
+        "y": 373,
+        "h": 38.1,
+        "header": true,
+        "rule": "1px solid rgb(7, 7, 7)"
+      },
+      {
+        "y": 412,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 450,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      },
+      {
+        "y": 488,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 33,
+    "step": "Format options with a cell open",
+    "at": "2026-09-28T19:25:13.607Z",
+    "count": 123,
+    "first": "formatOptions.section.table",
+    "table": [
+      "formatOptions.table",
+      "formatOptions.table.headerRow",
+      "formatOptions.table.border.weight",
+      "formatOptions.table.border.dash",
+      "formatOptions.table.border.color",
+      "formatOptions.table.border.color.none",
+      "formatOptions.table.border.color.ink",
+      "formatOptions.table.border.color.paper",
+      "formatOptions.table.border.color.ink-2",
+      "formatOptions.table.border.color.titanium",
+      "formatOptions.table.border.color.hair",
+      "formatOptions.table.border.color.hair-soft",
+      "formatOptions.table.border.color.plate",
+      "formatOptions.table.border.color.edge",
+      "formatOptions.table.border.color.green",
+      "formatOptions.table.border.color.amber",
+      "formatOptions.table.border.color.red",
+      "formatOptions.table.border.color.blue",
+      "formatOptions.table.border.color.accent",
+      "formatOptions.table.height",
+      "formatOptions.table.distributeRows",
+      "formatOptions.table.distributeColumns",
+      "formatOptions.table.cell.fill",
+      "formatOptions.table.cell.fill.none",
+      "formatOptions.table.cell.fill.ink",
+      "formatOptions.table.cell.fill.paper",
+      "formatOptions.table.cell.fill.ink-2",
+      "formatOptions.table.cell.fill.titanium",
+      "formatOptions.table.cell.fill.hair",
+      "formatOptions.table.cell.fill.hair-soft",
+      "formatOptions.table.cell.fill.plate",
+      "formatOptions.table.cell.fill.edge",
+      "formatOptions.table.cell.fill.green",
+      "formatOptions.table.cell.fill.amber",
+      "formatOptions.table.cell.fill.red",
+      "formatOptions.table.cell.fill.blue",
+      "formatOptions.table.cell.fill.accent",
+      "formatOptions.table.cell.border.weight",
+      "formatOptions.table.cell.border.dash",
+      "formatOptions.table.cell.border.color",
+      "formatOptions.table.cell.border.color.none",
+      "formatOptions.table.cell.border.color.ink",
+      "formatOptions.table.cell.border.color.paper",
+      "formatOptions.table.cell.border.color.ink-2",
+      "formatOptions.table.cell.border.color.titanium",
+      "formatOptions.table.cell.border.color.hair",
+      "formatOptions.table.cell.border.color.hair-soft",
+      "formatOptions.table.cell.border.color.plate",
+      "formatOptions.table.cell.border.color.edge",
+      "formatOptions.table.cell.border.color.green",
+      "formatOptions.table.cell.border.color.amber",
+      "formatOptions.table.cell.border.color.red",
+      "formatOptions.table.cell.border.color.blue",
+      "formatOptions.table.cell.border.color.accent",
+      "formatOptions.table.merge",
+      "formatOptions.table.unmerge"
+    ],
+    "words": [
+      "Header rowBorderWeightNone1 px1.5 px2 px",
+      "None1 px1.5 px2 px",
+      "SolidDotDashDash dotLong dashLong dash d",
+      "Distribute rows",
+      "Distribute columns",
+      "Table’sNone1 px1.5 px2 px",
+      "Table’sSolidDotDashDash dotLong dashLong",
+      "Merge cells",
+      "Unmerge cells"
+    ],
+    "toolbar": [
+      "toolbar.head",
+      "toolbar.search",
+      "toolbar.newSlide.split",
+      "toolbar.newSlide",
+      "toolbar.newSlide.arrow",
+      "toolbar.undo",
+      "toolbar.redo",
+      "toolbar.print",
+      "toolbar.paintFormat",
+      "toolbar.zoom",
+      "toolbar.tail",
+      "toolbar.borderColor",
+      "toolbar.borderWeight",
+      "toolbar.borderDash",
+      "toolbar.fillColor",
+      "toolbar.mergeCells",
+      "toolbar.unmergeCells",
+      "toolbar.font",
+      "toolbar.fontSize",
+      "toolbar.fontSize.minus",
+      "toolbar.fontSize.value",
+      "toolbar.fontSize.plus",
+      "toolbar.bold",
+      "toolbar.italic",
+      "toolbar.underline",
+      "toolbar.textColor",
+      "toolbar.highlightColor",
+      "toolbar.insertLink",
+      "toolbar.insertComment",
+      "toolbar.align",
+      "toolbar.spacing",
+      "toolbar.bulletedList",
+      "toolbar.bulletedList.arrow",
+      "toolbar.numberedList",
+      "toolbar.numberedList.arrow",
+      "toolbar.decreaseIndent",
+      "toolbar.increaseIndent",
+      "toolbar.clearFormatting",
+      "toolbar.formatOptions",
+      "toolbar.more",
+      "toolbar.end",
+      "toolbar.pointer",
+      "toolbar.hideMenus"
+    ],
+    "shot": "v-49-table-format-options.png"
+  },
+  {
+    "n": 34,
+    "step": "close the panel",
+    "at": "2026-09-28T19:25:14.158Z"
+  },
+  {
+    "n": 35,
+    "step": "the other appearance",
+    "at": "2026-09-28T19:25:19.012Z",
+    "before": "rgba(0, 0, 0, 0)",
+    "tiles": [
+      {
+        "id": "themes.gt.light",
+        "checked": "true"
+      },
+      {
+        "id": "themes.gt.dark",
+        "checked": "false"
+      }
+    ],
+    "current": "themes.gt.light",
+    "picked": "dark",
+    "groundAfter": "rgba(0, 0, 0, 0)",
+    "rule": "1px solid rgb(242, 242, 240)",
+    "cellShadow": "rgba(242, 242, 240, 0.22) -1px 0px 0px 0px inset",
+    "s1": "v-50-table-appearance-dark-cell-open.png",
+    "s2": "v-51-table-appearance-dark-selected.png",
+    "ring": {
+      "x": 389.8,
+      "y": 372.7,
+      "w": 1062.4,
+      "h": 153
+    },
+    "table": {
+      "x": 389.75,
+      "y": 372.72998046875,
+      "w": 1062.4349365234375,
+      "h": 152.9849853515625
+    },
+    "lastRowBottom": 525.7149658203125,
+    "ringBottom": 525.7,
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "chip": {
+      "text": "Table",
+      "box": {
+        "x": 389.8,
+        "y": 352.7,
+        "w": 45.9,
+        "h": 18
+      }
+    },
+    "handles": [
+      "handle.table.head.column.0",
+      "handle.table.head.column.1",
+      "handle.table.head.column.2",
+      "handle.table.head.column.3",
+      "handle.table.head.row.0",
+      "handle.table.head.row.1",
+      "handle.table.head.row.2",
+      "handle.table.head.row.3",
+      "handle.table.move",
+      "handle.table.column.0",
+      "handle.table.column.1",
+      "handle.table.column.2",
+      "handle.table.row.0",
+      "handle.table.row.1",
+      "handle.table.row.2",
+      "handle.table.row.3",
+      "handle.table.resize.nw",
+      "handle.table.resize.n",
+      "handle.table.resize.ne",
+      "handle.table.resize.e",
+      "handle.table.resize.se",
+      "handle.table.resize.s",
+      "handle.table.resize.sw",
+      "handle.table.resize.w",
+      "handle.table.rotate"
+    ],
+    "edges": 4,
+    "editing": false,
+    "gridRows": "54px 54px 54px 54px",
+    "rowBoxes": [
+      {
+        "y": 373,
+        "h": 38.1,
+        "header": true,
+        "rule": "1px solid rgb(242, 242, 240)"
+      },
+      {
+        "y": 412,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(242, 242, 240, 0.22)"
+      },
+      {
+        "y": 450,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(242, 242, 240, 0.22)"
+      },
+      {
+        "y": 488,
+        "h": 38.1,
+        "header": false,
+        "rule": "1px solid rgba(242, 242, 240, 0.22)"
+      }
+    ]
+  },
+  {
+    "n": 36,
+    "step": "the show",
+    "at": "2026-09-28T19:25:23.808Z",
+    "present": true,
+    "table": true,
+    "cells": [
+      "",
+      "",
+      "",
+      "",
+      "more",
+      "AlphEnda",
+      "Beta",
+      "",
+      "Gamma",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "editable": false,
+    "seamShadow": "none",
+    "url": "https://turboslide.vercel.app/edit/untitled-20260928-50n8#s/split-1",
+    "shot": "v-52-table-show.png"
+  },
+  {
+    "n": 37,
+    "step": "reload keeps the table",
+    "at": "2026-09-28T19:25:25.685Z",
+    "same": true,
+    "posBefore": {
+      "x": 150,
+      "y": 306,
+      "w": 1507,
+      "h": 217,
+      "z": 2
+    },
+    "posAfter": {
+      "x": 150,
+      "y": 306,
+      "w": 1507,
+      "h": 217,
+      "z": 2
+    },
+    "shot": "v-53-table-after-reload.png"
+  },
+  {
+    "n": 38,
+    "step": "PDF download",
+    "at": "2026-09-28T19:25:32.470Z",
+    "s0": "v-54-download-dialog-pdf.png",
+    "path": "/Users/kevinliu/repos/Turboslide-live/docs/gslides-parity/polish/audit-tables/v-table.pdf",
+    "name": "Tables audit Acme, Q3 2026.pdf",
+    "ms": 4651,
+    "text": "Tables audit: Acme, Q3 2026\n\n                              01 / 02\n\fmore    AlphEnda   Beta\n\nGamma\n\n\n\n\n                          02 / 02\n\f"
+  },
+  {
+    "n": 39,
+    "step": "PowerPoint download (Editable text)",
+    "at": "2026-09-28T19:25:38.170Z",
+    "s0": "v-55-download-dialog-pptx.png",
+    "controls": [
+      "dialog.download.pptx",
+      "dialog.download.pptx.close",
+      "dialog.download.type",
+      "dialog.download.type.pptx",
+      "dialog.download.type.pdf",
+      "dialog.download.tableSentence",
+      "dialog.download.mode.flatten",
+      "dialog.download.mode.native",
+      "dialog.download.includeNotes",
+      "dialog.download.includeSkipped",
+      "dialog.download.more",
+      "dialog.download.theme",
+      "dialog.download.fonts",
+      "dialog.download.embedFonts",
+      "dialog.download.headings",
+      "dialog.download.pptx.cancel",
+      "dialog.download.ok"
+    ],
+    "path": "/Users/kevinliu/repos/Turboslide-live/docs/gslides-parity/polish/audit-tables/v-table.pptx",
+    "name": "Tables audit Acme, Q3 2026 (editable).pptx",
+    "ms": 3689,
+    "tbl": {
+      "slides": 2,
+      "hasTbl": true,
+      "rows": 4,
+      "tcs": 16,
+      "texts": [
+        "Slide 2",
+        "more",
+        "AlphEnda",
+        "Beta",
+        "Gamma",
+        "02 / 02"
+      ],
+      "gridCols": [
+        2870835,
+        2870835,
+        2870835,
+        2870835
+      ],
+      "rowH": [
+        411480,
+        411480,
+        411480,
+        411480
+      ],
+      "hasPic": false
+    }
+  },
+  {
+    "n": 40,
+    "step": "console errors",
+    "at": "2026-09-28T19:25:38.170Z",
+    "count": 0,
+    "first": []
+  },
+  {
+    "n": 41,
+    "step": "teardown",
+    "at": "2026-09-28T19:25:57.247Z",
+    "trashed": true,
+    "deleted": true,
+    "status404": 500
+  }
+]

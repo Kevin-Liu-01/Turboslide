@@ -1,0 +1,431 @@
+{
+  "base": "https://www.turboslide.com",
+  "width": 1280,
+  "at": "2026-09-28T19:44:28.704Z",
+  "rows": [
+    {
+      "id": "decks.list.cold",
+      "did": "open /decks in a fresh browser",
+      "observed": "hydrated in 676 ms; 90 cards; recent {\"sentence\":null,\"entries\":[]}; words Turboslide | Start a new presentation | Template gallery | Blank presentation | GT brand deck | Recent presentations | Every presentation on this Turboslide is listed here | Sort byLast opened by meLast modifiedTitle | Tables audit sizes: Acme, Q3 2026 | Edited today at 12:40 PM | Chrome audit | Edited today at 12:39 PM | Polish perf audit 40 slides | Edited today at 12:32 PM | Untitled presentation | Edited today at 12:01 PM | sss | Edited today at 11:59 AM | Introduction to Artificial Intelligence | Edited Sep 26, 2026 | Name prompt deck | Edited Sep 26, 2026 | Untitled presentation | Edited Sep 26, 2026 | Import bundle source mui012xf | Edited Sep 25, 2026 | Northwind renewal v2 without notes | Edited Sep 25, 2026 | GT brand deck | Edited Sep 25, 2026",
+      "ok": true,
+      "shots": [
+        "decks-01-home-cold-1280.png",
+        "decks-02-home-cold-after-2s-1280.png"
+      ],
+      "at": "2026-09-28T19:41:02.192Z"
+    },
+    {
+      "id": "decks.list.full-page",
+      "did": "the whole /decks page",
+      "observed": "scrollHeight 5768",
+      "ok": true,
+      "shots": [
+        "decks-03-home-full-1280.png"
+      ],
+      "at": "2026-09-28T19:41:03.081Z"
+    },
+    {
+      "id": "decks.list.hover-card",
+      "did": "hover the first card",
+      "observed": "tooltip \"Tables audit sizes: Acme, Q3 2026Opens the presentation.\"",
+      "ok": true,
+      "shots": [
+        "decks-04-home-card-hover-1280.png"
+      ],
+      "at": "2026-09-28T19:41:04.757Z"
+    },
+    {
+      "id": "decks.home.blank",
+      "did": "click Blank presentation in the strip",
+      "observed": "untitled-20260928-jonk; editor ready 136 ms; save words \"\"; tab \"Untitled presentation, editor, Turboslide\"; name prompt false",
+      "ok": true,
+      "shots": [
+        "decks-05-home-blank-hover-1280.png",
+        "decks-06-new-first-paint-1280.png",
+        "decks-07-new-draft-1280.png"
+      ],
+      "at": "2026-09-28T19:41:09.267Z"
+    },
+    {
+      "id": "decks.new.first-write",
+      "did": "double click the title, type the deck name, Escape",
+      "observed": "url /edit/untitled-20260928-jonk; revision 1; words seen Saving… > All changes saved; tab \"Pipeline review: Acme Q3 2026, editor, Turboslide\"; name \"Pipeline review: Acme Q3 2026\"",
+      "ok": true,
+      "shots": [
+        "decks-08-new-title-caret-1280.png",
+        "decks-09-new-title-typed-1280.png",
+        "decks-10-edit-after-first-write-1280.png"
+      ],
+      "at": "2026-09-28T19:41:14.594Z"
+    },
+    {
+      "id": "decks.title.rename-enter",
+      "did": "click the name, type a new one, Enter",
+      "observed": "field opened with \"Pipeline review: Acme Q3 2026\"; stored \"Acme renewal, Q3\"; tab \"Acme renewal, Q3, editor, Turboslide\"; shown \"Acme renewal, Q3\"",
+      "ok": true,
+      "shots": [
+        "decks-11-title-field-open-1280.png",
+        "decks-12-title-field-typed-1280.png",
+        "decks-13-title-renamed-1280.png"
+      ],
+      "at": "2026-09-28T19:41:25.235Z"
+    },
+    {
+      "id": "decks.title.rename-escape",
+      "did": "type into the name, Escape",
+      "observed": "stored \"Acme renewal, Q3\"; shown \"Acme renewal, Q3\"",
+      "ok": true,
+      "shots": [
+        "decks-14-title-escape-1280.png"
+      ],
+      "at": "2026-09-28T19:41:27.206Z"
+    },
+    {
+      "id": "decks.title.rename-blur",
+      "did": "type into the name, click the sheet",
+      "observed": "stored \"Acme renewal, Q3 (blur)\"",
+      "ok": true,
+      "shots": [
+        "decks-15-title-blur-1280.png"
+      ],
+      "at": "2026-09-28T19:41:31.556Z"
+    },
+    {
+      "id": "decks.title.rename-empty",
+      "did": "clear the name, Enter",
+      "observed": "stored \"Acme renewal, Q3 (blur)\"; shown \"Acme renewal, Q3 (blur)\"; tab \"Acme renewal, Q3 (blur), editor, Turboslide\"",
+      "ok": true,
+      "shots": [
+        "decks-16-title-empty-field-1280.png",
+        "decks-17-title-empty-after-1280.png"
+      ],
+      "at": "2026-09-28T19:41:34.012Z"
+    },
+    {
+      "id": "decks.title.file-rename",
+      "did": "File > Rename, type, Enter",
+      "observed": "stored \"Pipeline review: Acme Q3 2026\"; tab \"Pipeline review: Acme Q3 2026, editor, Turboslide\"",
+      "ok": true,
+      "shots": [
+        "decks-18-file-menu-1280.png",
+        "decks-19-file-rename-focus-1280.png"
+      ],
+      "at": "2026-09-28T19:41:39.616Z"
+    },
+    {
+      "id": "decks.title.long-name",
+      "did": "a 70 character name in the title row",
+      "observed": "name box {\"x\":44,\"y\":5.5,\"w\":269.78125,\"h\":32,\"cx\":178.890625,\"cy\":21.5}; stored length 72",
+      "ok": true,
+      "shots": [
+        "decks-20-title-long-1280.png"
+      ],
+      "at": "2026-09-28T19:41:52.389Z"
+    },
+    {
+      "id": "decks.title.mark-to-list",
+      "did": "click the mark in the title row",
+      "observed": "mine undefined; recent {\"sentence\":null,\"entries\":[]}",
+      "ok": false,
+      "shots": [
+        "decks-21-home-with-deck-1280.png",
+        "decks-22-home-with-deck-after-4s-1280.png"
+      ],
+      "at": "2026-09-28T19:41:58.048Z"
+    },
+    {
+      "id": "decks.list.search",
+      "did": "type into Search presentations",
+      "observed": "acme: 8 cards; zzzz: 0 cards; words No presentation matches \"zzzz\"",
+      "ok": false,
+      "shots": [
+        "decks-23-home-search-acme-1280.png",
+        "decks-24-home-search-none-1280.png"
+      ],
+      "at": "2026-09-28T19:42:01.277Z"
+    },
+    {
+      "id": "decks.list.sort",
+      "did": "open the sort select and pick Title",
+      "observed": "by title: A | Acme pricing review, Q3 2026 | Acme pricing review, Q3 2026 | Acme pricing review, Q3 2026 | Acme renewal deck v3 | Acme renewal deck v3 (sorted true); by modified first Tables audit sizes: Acme, Q3 2026",
+      "ok": true,
+      "shots": [
+        "decks-25-home-sort-hover-1280.png",
+        "decks-26-home-sort-title-1280.png",
+        "decks-27-home-sort-modified-1280.png"
+      ],
+      "at": "2026-09-28T19:42:04.820Z"
+    },
+    {
+      "id": "decks.list.view-list",
+      "did": "switch to the list view and back",
+      "observed": "{\"rows\":93,\"head\":[\"Title\",\"Last edit\",\"Slides\",\"Actions\"]}; row height 32",
+      "ok": true,
+      "shots": [
+        "decks-28-home-list-view-1280.png",
+        "decks-29-home-grid-view-back-1280.png"
+      ],
+      "at": "2026-09-28T19:42:07.910Z"
+    },
+    {
+      "id": "decks.card.menu-open-escape",
+      "did": "open the card menu, Escape",
+      "observed": "rows Open, Open in new tab, Present, Rename, Make a copy, Download, Move to trash; closed on Escape true",
+      "ok": true,
+      "shots": [
+        "decks-30-card-more-hover-1280.png",
+        "decks-31-card-menu-1280.png"
+      ],
+      "at": "2026-09-28T19:42:10.761Z"
+    },
+    {
+      "id": "decks.card.rename-enter",
+      "did": "card menu > Rename, type, Enter",
+      "observed": "card title \"Acme renewal (card)\"; snackbar null",
+      "ok": true,
+      "shots": [
+        "decks-32-card-rename-field-1280.png",
+        "decks-33-card-renamed-1280.png"
+      ],
+      "at": "2026-09-28T19:42:15.617Z"
+    },
+    {
+      "id": "decks.card.rename-escape",
+      "did": "card menu > Rename, type, Escape",
+      "observed": "card title \"Acme renewal (card)\"",
+      "ok": true,
+      "shots": [
+        "decks-34-card-rename-escape-1280.png"
+      ],
+      "at": "2026-09-28T19:42:18.156Z"
+    },
+    {
+      "id": "decks.card.make-a-copy",
+      "did": "card menu > Make a copy",
+      "observed": "dialog name \"Copy of Acme renewal (card)\"; popup /edit/copy-of-acme-renewal-card in 3452 ms; copy in list false; snackbar null; dialog words \"Make a copyNameRemove speaker notesCancelMake a copy\"",
+      "ok": true,
+      "shots": [
+        "decks-35-card-copy-dialog-1280.png",
+        "decks-copy-popup-1280.png",
+        "decks-36-card-copy-after-1280.png"
+      ],
+      "at": "2026-09-28T19:42:24.373Z"
+    },
+    {
+      "id": "decks.card.open-in-new-tab",
+      "did": "card menu > Open in new tab",
+      "observed": "tab /edit/untitled-20260928-jonk",
+      "ok": true,
+      "shots": [
+        "decks-card-open-new-tab-1280.png"
+      ],
+      "at": "2026-09-28T19:42:37.243Z"
+    },
+    {
+      "id": "decks.card.present",
+      "did": "card menu > Present",
+      "observed": "tab /deck/untitled-20260928-jonk?present=1; words \"01 / 01\\nPipeline review: Acme Q3 2026\\n\\n1 of 1\\n●\\n⋯\\nArrow keys move. Press ? for every shortcut.\"",
+      "ok": true,
+      "shots": [
+        "decks-card-present-1280.png"
+      ],
+      "at": "2026-09-28T19:42:39.980Z"
+    },
+    {
+      "id": "decks.card.download",
+      "did": "card menu > Download",
+      "observed": "download untitled-20260928-jonk-r7.zip 402657 bytes; snackbar null; dialogs []",
+      "ok": true,
+      "shots": [
+        "decks-37-card-download-after-click-1280.png"
+      ],
+      "at": "2026-09-28T19:42:42.096Z"
+    },
+    {
+      "id": "decks.card.move-to-trash-undo",
+      "did": "card menu > Move to trash, then Undo",
+      "observed": "snackbar \"Moved to trashUndo\"; card left true; back after Undo true",
+      "ok": true,
+      "shots": [
+        "decks-38-card-trashed-snackbar-1280.png",
+        "decks-39-card-undo-1280.png"
+      ],
+      "at": "2026-09-28T19:42:46.261Z"
+    },
+    {
+      "id": "decks.editor.move-to-trash",
+      "did": "File > Move to trash from the copy deck editor",
+      "observed": "landed on /decks in 12712 ms; snackbar \"Moved to trashUndo\"; copy listed false",
+      "ok": true,
+      "shots": [
+        "decks-40-file-move-to-trash-hover-1280.png",
+        "decks-41-editor-trash-landing-1280.png"
+      ],
+      "at": "2026-09-28T19:43:02.859Z"
+    },
+    {
+      "id": "decks.trash.page",
+      "did": "open /decks/trash from the Trash link",
+      "observed": "cards [{\"id\":\"copy-of-acme-renewal-card\",\"title\":\"Copy of Acme renewal (card)\",\"when\":\"Trashed 12:42 PM · 1 slide\"},{\"id\":\"general-translation-brand-deck-muie3l7ssv7x\",\"title\":\"General Translation brand deck\",\"when\":\"Trashed Sep 26, 2026 · 85 slides\"},{\"id\":\"untitled-20260926-dmrh\",\"title\":\"Hello!\",\"when\"; empty button {\"disabled\":false,\"text\":\"Empty trash\"}; words Turboslide | Trash | Presentations moved to the trash stay here until they are restored or deleted forever. | Recent presentations | Empty trash | Trashed 12:42 PM · 1 slide | Restore | Delete forever | Trashed Sep 26, 2026 · 85 slides | Restore | Delete forever | Trashed Sep 26, 2026 · 1 slide",
+      "ok": true,
+      "shots": [
+        "decks-42-trash-page-1280.png"
+      ],
+      "at": "2026-09-28T19:43:05.158Z"
+    },
+    {
+      "id": "decks.trash.restore",
+      "did": "Restore the copy from the trash",
+      "observed": "snackbar \"Restored Copy of Acme renewal (card)\"; card still listed false; words Turboslide | Trash | Presentations moved to the trash stay here until they are restored or deleted forever. | Recent presentations | Empty trash | Trashed Sep 26, 2026 · 85 slides | Restore | Delete forever",
+      "ok": true,
+      "shots": [
+        "decks-43-trash-restore-hover-1280.png",
+        "decks-44-trash-restored-1280.png",
+        "decks-45-trash-after-restore-1280.png"
+      ],
+      "at": "2026-09-28T19:43:11.779Z"
+    },
+    {
+      "id": "decks.trash.lists-after-restore",
+      "did": "back to the list, the copy is there",
+      "observed": "copy listed false; 0 cards",
+      "ok": false,
+      "shots": [
+        "decks-46-home-after-restore-1280.png"
+      ],
+      "at": "2026-09-28T19:43:13.878Z"
+    },
+    {
+      "id": "decks.trash.delete-forever-cancel",
+      "did": "trash the copy again from the card, Delete forever, Cancel",
+      "observed": "threw: no control home.more.copy-of-acme-renewal-card",
+      "ok": false,
+      "shots": [
+        "decks-47-decks.trash.delete-forever-cancel-threw-1280.png"
+      ],
+      "at": "2026-09-28T19:43:14.213Z"
+    },
+    {
+      "id": "decks.trash.delete-forever-enter",
+      "did": "Delete forever, then Enter in the dialog",
+      "observed": "threw: no control trash.delete.copy-of-acme-renewal-card",
+      "ok": false,
+      "shots": [
+        "decks-48-decks.trash.delete-forever-enter-threw-1280.png"
+      ],
+      "at": "2026-09-28T19:43:14.539Z"
+    },
+    {
+      "id": "decks.trash.delete-forever-button",
+      "did": "Delete forever with the button",
+      "observed": "threw: no control trash.delete.copy-of-acme-renewal-card",
+      "ok": false,
+      "shots": [
+        "decks-49-decks.trash.delete-forever-button-threw-1280.png"
+      ],
+      "at": "2026-09-28T19:43:14.876Z"
+    },
+    {
+      "id": "decks.file.template-gallery",
+      "did": "Template gallery link from the strip",
+      "observed": "cards templates.card.gt-brand, templates.card.blank; words Turboslide | Template gallery | Start a presentation from a template. The copy is yours to edit, and the template stays as it is. | Recent presentations | Your organisation | Templates saved on this Turboslide. Open a presentation and choose File > Save as template to add one. | This section covers the company, its values, its voice, the name, and the mark. | General Translation brand deck | ⋮ | Turboslide | Turboslide's own templates. | Click to add title | Click to add subtitle | Blank",
+      "ok": true,
+      "shots": [
+        "decks-50-templates-page-1280.png",
+        "decks-51-templates-page-full-1280.png"
+      ],
+      "at": "2026-09-28T19:43:24.401Z"
+    },
+    {
+      "id": "decks.nav.back-forward",
+      "did": "open the deck from the card, browser back, forward",
+      "observed": "back 443 ms (0 cards); forward 34 ms to /edit/untitled-20260928-jonk",
+      "ok": false,
+      "shots": [
+        "decks-52-nav-back-to-list-1280.png",
+        "decks-53-nav-forward-to-editor-1280.png"
+      ],
+      "at": "2026-09-28T19:43:26.566Z"
+    },
+    {
+      "id": "decks.edit.reload-mid-edit",
+      "did": "type into the body without leaving the session, reload",
+      "observed": "words while typing \"All changes saved\"; after reload sheet holds the text true; url /edit/untitled-20260928-jonk",
+      "ok": true,
+      "shots": [
+        "decks-54-reload-typing-1280.png",
+        "decks-55-reload-after-1280.png"
+      ],
+      "at": "2026-09-28T19:43:32.493Z"
+    },
+    {
+      "id": "decks.edit.reload-keeps-slide",
+      "did": "add a slide, reload with the hash",
+      "observed": "url /edit/untitled-20260928-jonk#s/split-1; active after reload split-1 (added split-1)",
+      "ok": true,
+      "shots": [
+        "decks-56-reload-keeps-slide-1280.png"
+      ],
+      "at": "2026-09-28T19:43:35.777Z"
+    },
+    {
+      "id": "decks.notfound.page",
+      "did": "open /edit/<unknown>",
+      "observed": "title \"Turboslide\"; words You need access | This presentation is not available to you, or does not exist. | Your presentations | New presentation | Invited by email? Sign in with the address the invitation went to. | Sign in from your presentations, then open this address again. | Sign in from your presentations",
+      "ok": true,
+      "shots": [
+        "decks-57-access-unknown-edit-1280.png"
+      ],
+      "at": "2026-09-28T19:43:37.853Z"
+    },
+    {
+      "id": "decks.notfound.route",
+      "did": "open /nope",
+      "observed": "words Not found | No page at this address. Start a new presentation, open your presentations or read what Turboslide is. | New presentation | Your presentations | About Turboslide",
+      "ok": true,
+      "shots": [
+        "decks-58-not-found-route-1280.png"
+      ],
+      "at": "2026-09-28T19:43:39.853Z"
+    },
+    {
+      "id": "decks.trash.empty-state",
+      "did": "the trash page when empty",
+      "observed": "24 cards in the trash; words Turboslide | Trash | Presentations moved to the trash stay here until they are restored or deleted forever. | Recent presentations | Empty trash | Trashed Sep 26, 2026 · 85 slides | Restore | Delete forever | Trashed Sep 26, 2026 · 1 slide | Restore",
+      "ok": true,
+      "shots": [
+        "decks-59-trash-empty-or-not-1280.png"
+      ],
+      "at": "2026-09-28T19:43:42.737Z"
+    },
+    {
+      "id": "decks.root.redirect",
+      "did": "open / and /home",
+      "observed": "/ lands on /new",
+      "ok": true,
+      "shots": [
+        "decks-60-root-1280.png"
+      ],
+      "at": "2026-09-28T19:43:44.639Z"
+    },
+    {
+      "id": "decks.dark.list",
+      "did": "the list in the dark appearance",
+      "observed": "data-theme dark",
+      "ok": true,
+      "shots": [
+        "decks-61-home-dark-1280.png",
+        "decks-62-trash-dark-1280.png"
+      ],
+      "at": "2026-09-28T19:44:03.618Z"
+    },
+    {
+      "id": "teardown",
+      "did": "every scratch deck trashed and deleted forever",
+      "observed": "untitled-20260928-jonk: File > Move to trash; Delete forever on /decks/trash; /edit/untitled-20260928-jonk answers 404 || copy-of-acme-renewal-card: File > Move to trash; Delete forever on /decks/trash; /edit/copy-of-acme-renewal-card answers 404",
+      "ok": true,
+      "shots": [],
+      "at": "2026-09-28T19:44:28.704Z"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+ "base": "https://turboslide.vercel.app",
+ "theme": "light",
+ "viewport": {
+  "width": 1280,
+  "height": 800
+ },
+ "startedAt": "2026-09-28T19:50:44.083Z",
+ "steps": [
+  {
+   "step": "hexagon by a drag; selected: the tail",
+   "ms": 5348,
+   "observed": "shape; tail toolbar.head, toolbar.search, toolbar.newSlide, toolbar.undo, toolbar.redo, toolbar.print, toolbar.paintFormat, toolbar.zoom, toolbar.tail, toolbar.changeShape, toolbar.fillColor, toolbar.font, toolbar.fontSize, toolbar.bold, toolbar.italic, toolbar.underline, toolbar.textColor, toolbar.insertLink, toolbar.insertComment, toolbar.align, toolbar.spacing, toolbar.formatOptions, toolbar.more, toolbar.end, toolbar.pointer, toolbar.hideMenus; toolbar {\"scrollWidth\":1280,\"clientWidth\":1280,\"more\":true}",
+   "shot": "nw-1280-01-shape-selected.png"
+  },
+  {
+   "step": "Format options at 1280",
+   "ms": 2184,
+   "observed": "sections formatOptions.section.size, formatOptions.section.position, formatOptions.section.textFitting, formatOptions.section.text, formatOptions.section.colour, formatOptions.section.shape, formatOptions.section.altText, formatOptions.section.block; panel {\"x\":960,\"y\":112,\"w\":320,\"h\":688}; sheet {\"x\":284,\"y\":242,\"w\":648,\"h\":364.5}",
+   "shot": "nw-1280-02-format-options.png",
+   "shotShape": "nw-1280-03-format-options-shape-section.png"
+  },
+  {
+   "step": "a column chart double clicked at 1280",
+   "ms": 4641,
+   "observed": "chart; grid {\"x\":981,\"y\":240,\"w\":339.390625,\"h\":113}; wrap {\"scrollWidth\":347,\"clientWidth\":279}",
+   "shot": "nw-1280-04-chart-grid-two-series.png"
+  },
+  {
+   "step": "word art typed, resized by se, then Bold: the size",
+   "ms": 10130,
+   "observed": "after resize size 161 weight 500 pos 400,390 1000x220; after 1.5 s (revision 6 server 6 pending 0) size 161; after Bold size 161 weight undefined",
+   "shotBar": "nw-1280-05-wordart-bar.png",
+   "shot": "nw-1280-06-wordart-after-bold.png"
+  },
+  {
+   "step": "the sheet at 1280 with everything",
+   "ms": 411,
+   "observed": "bad responses so far []",
+   "shot": "nw-1280-07-everything.png"
+  }
+ ],
+ "consoleErrors": [],
+ "badResponses": [
+  {
+   "status": 502,
+   "url": "/api/render/title?deck=untitled-20260915-84sh&theme=dark&w=320&r=15",
+   "at": "19:51:27"
+  }
+ ],
+ "finishedAt": "2026-09-28T19:51:28.874Z",
+ "deckId": "untitled-20260928-82av",
+ "destroyed": {
+  "trashed": true,
+  "status": 404
+ }
+}

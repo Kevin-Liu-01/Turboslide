@@ -1,0 +1,471 @@
+{
+ "base": "https://turboslide.vercel.app",
+ "theme": "light",
+ "viewport": {
+  "width": 1440,
+  "height": 900
+ },
+ "startedAt": "2026-09-28T19:41:24.137Z",
+ "steps": [
+  {
+   "step": "Insert > Diagram: the panel",
+   "ms": 1845,
+   "observed": "types grid, hierarchy, timeline, process, relationship, cycle; styles outline, plate, ink; count 4; panel {\"x\":1120,\"y\":112,\"w\":320,\"h\":788}; controls insert.diagram.count.less, insert.diagram.count, insert.diagram.count.more, insert.diagram.preview, insert.diagram.insert",
+   "shot": "dg-01-diagram-panel.png"
+  },
+  {
+   "step": "diagram grid: pick, one more step, Insert",
+   "ms": 2997,
+   "observed": "count 3 -> 4; landed 4 objects in 1 group(s): {\"shape\":4}; panel open true; chip Group; labels Item 1 | Item 2 | Item 3 | Item 4",
+   "shotPanel": "dg-02-panel-grid.png",
+   "shot": "dg-03-inserted-grid.png",
+   "page": "dg-04-inserted-grid-page.png"
+  },
+  {
+   "step": "diagram hierarchy: pick, one more step, Insert",
+   "ms": 3107,
+   "observed": "count 3 -> 4; landed 13 objects in 1 group(s): {\"shape\":13}; panel open true; chip Group; labels Level 1 | Level 2 | Level 2 | Level 3 | Level 3 | Level 4 | Level 4",
+   "shotPanel": "dg-05-panel-hierarchy.png",
+   "shot": "dg-06-inserted-hierarchy.png",
+   "page": "dg-07-inserted-hierarchy-page.png"
+  },
+  {
+   "step": "diagram timeline: pick, one more step, Insert",
+   "ms": 2945,
+   "observed": "count 4 -> 5; landed 11 objects in 1 group(s): {\"shape\":6,\"text\":5}; panel open true; chip Group; labels Date 1 | Date 2 | Date 3 | Date 4 | Date 5",
+   "shotPanel": "dg-08-panel-timeline.png",
+   "shot": "dg-09-inserted-timeline.png",
+   "page": "dg-10-inserted-timeline-page.png"
+  },
+  {
+   "step": "diagram process: pick, one more step, Insert",
+   "ms": 3532,
+   "observed": "count 4 -> 5; landed 9 objects in 1 group(s): {\"shape\":9}; panel open true; chip Group; labels Step 1 | Step 2 | Step 3 | Step 4 | Step 5",
+   "shotPanel": "dg-11-panel-process.png",
+   "shot": "dg-12-inserted-process.png",
+   "page": "dg-13-inserted-process-page.png"
+  },
+  {
+   "step": "diagram relationship: pick, one more step, Insert",
+   "ms": 3102,
+   "observed": "count 3 -> 4; landed 4 objects in 1 group(s): {\"shape\":4}; panel open true; chip Group; labels Item 1 | Item 2 | Item 3 | Item 4",
+   "shotPanel": "dg-14-panel-relationship.png",
+   "shot": "dg-15-inserted-relationship.png",
+   "page": "dg-16-inserted-relationship-page.png"
+  },
+  {
+   "step": "diagram cycle: pick, one more step, Insert",
+   "ms": 3013,
+   "observed": "count 4 -> 5; landed 10 objects in 1 group(s): {\"shape\":10}; panel open true; chip Group; labels Step 1 | Step 2 | Step 3 | Step 4 | Step 5",
+   "shotPanel": "dg-17-panel-cycle.png",
+   "shot": "dg-18-inserted-cycle.png",
+   "page": "dg-19-inserted-cycle-page.png"
+  },
+  {
+   "step": "process: one click on step 2 selects the group",
+   "ms": 441,
+   "observed": "chip Group; handles handle.step-2.move, handle.step-2.resize.nw, handle.step-2.resize.n, handle.step-2.resize.ne, handle.step-2.resize.e, handle.step-2.resize.se, handle.step-2.resize.s, handle.step-2.resize.sw, handle.step-2.resize.w, handle.step-2.rotate",
+   "shot": "dg-20-process-group-selected.png"
+  },
+  {
+   "step": "process: double click step 2 opens its label; type \" plus\"",
+   "ms": 2483,
+   "observed": "session true; chip Shape; selection at open {\"collapsed\":true,\"text\":\"\"}; stored text \"Ste plusp 2\"; after Escape chip Shape; 9 objects in 1 group(s): {\"shape\":9}",
+   "shotOpen": "dg-21-process-label-open.png",
+   "shotTyped": "dg-22-process-label-typed.png",
+   "shot": "dg-23-process-label-done.png"
+  },
+  {
+   "step": "process: Enter on the selected group opens the first label; Tab to the next",
+   "ms": 3291,
+   "observed": "Enter: {\"session\":true,\"chip\":\"Shape\",\"sel\":\"\"}; Tab: {\"session\":true,\"sel\":\"Ste plusp 2\",\"active\":\"step-2\"}; labels now Step 1 | Second | Step 3 | Step 4 | Step 5",
+   "shot1": "dg-24-process-enter-first-label.png",
+   "shot2": "dg-25-process-tab-next-label.png",
+   "shot": "dg-26-process-after-tab-edit.png"
+  },
+  {
+   "step": "process: double click step 3, Escape, Cmd+D adds a node; Delete removes it",
+   "ms": 3700,
+   "observed": "after Escape chip Shape, member handles true; Cmd+D: 9 -> 10 objects, copy link-1 group process at +-261.1,+76; Delete: -> 9",
+   "shotMember": "dg-27-process-member-selected.png",
+   "shotDup": "dg-28-process-node-duplicated.png",
+   "shotDel": "dg-29-process-node-deleted.png"
+  },
+  {
+   "step": "process: Delete a member alone; its link goes too; Cmd+Z",
+   "ms": 3403,
+   "observed": "9 -> 8 (8 objects in 1 group(s): {\"shape\":8}); after Cmd+Z 9",
+   "shot": "dg-30-process-last-member-deleted.png",
+   "shotUndo": "dg-31-process-member-delete-undone.png"
+  },
+  {
+   "step": "process: the group moved from inside by +100,+120",
+   "ms": 2477,
+   "observed": "step 2 523.5,370 145.9x160 -> 626.5,490 145.9x160",
+   "shot": "dg-32-process-group-moved.png"
+  },
+  {
+   "step": "process: the group resized from se by -200,-100 watched",
+   "ms": 3448,
+   "observed": "handle handle.step-2.resize.se; frames with the last member still at its start box during the 12 steps: 0; labels Step 1 | Second | Step 3 | Step 4 | Step 5",
+   "frames": [
+    {
+     "tag": "before",
+     "member": {
+      "x": 1237.1,
+      "y": 490,
+      "w": 145.9,
+      "h": 160
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 145.9,
+      "h": 160
+     },
+     "readout": null,
+     "text": 22,
+     "shot": "dg-resize-process-se-00-before.png"
+    },
+    {
+     "tag": "down",
+     "member": {
+      "x": 1237.1,
+      "y": 490,
+      "w": 145.9,
+      "h": 160
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 145.9,
+      "h": 160
+     },
+     "readout": null,
+     "text": 22,
+     "shot": "dg-resize-process-se-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "member": {
+      "x": 1222.5,
+      "y": 490,
+      "w": 143.5,
+      "h": 152
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 143.5,
+      "h": 152
+     },
+     "readout": "943 × 152",
+     "text": 22,
+     "shot": "dg-resize-process-se-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "member": {
+      "x": 1209,
+      "y": 490,
+      "w": 141,
+      "h": 143
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 141,
+      "h": 143
+     },
+     "readout": "927 × 143",
+     "text": 22,
+     "shot": "dg-resize-process-se-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "member": {
+      "x": 1194.5,
+      "y": 490,
+      "w": 138.5,
+      "h": 135
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 138.5,
+      "h": 135
+     },
+     "readout": "910 × 135",
+     "text": 22,
+     "shot": "dg-resize-process-se-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "member": {
+      "x": 1180.5,
+      "y": 490,
+      "w": 135.5,
+      "h": 127
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 135.5,
+      "h": 127
+     },
+     "readout": "893 × 127",
+     "text": 22,
+     "shot": "dg-resize-process-se-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "member": {
+      "x": 1166.5,
+      "y": 490,
+      "w": 133.5,
+      "h": 118
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 133.5,
+      "h": 118
+     },
+     "readout": "877 × 118",
+     "text": 22,
+     "shot": "dg-resize-process-se-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "member": {
+      "x": 1152.5,
+      "y": 490,
+      "w": 130.5,
+      "h": 110
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 130.5,
+      "h": 110
+     },
+     "readout": "860 × 110",
+     "text": 22,
+     "shot": "dg-resize-process-se-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "member": {
+      "x": 1138,
+      "y": 490,
+      "w": 128,
+      "h": 102
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 128,
+      "h": 102
+     },
+     "readout": "843 × 102",
+     "text": 22,
+     "shot": "dg-resize-process-se-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "member": {
+      "x": 1124.5,
+      "y": 490,
+      "w": 125.5,
+      "h": 93
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 125.5,
+      "h": 93
+     },
+     "readout": "827 × 93",
+     "text": 22,
+     "shot": "dg-resize-process-se-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "member": {
+      "x": 1110,
+      "y": 490,
+      "w": 123,
+      "h": 85
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 123,
+      "h": 85
+     },
+     "readout": "810 × 85",
+     "text": 22,
+     "shot": "dg-resize-process-se-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "member": {
+      "x": 1095.5,
+      "y": 490,
+      "w": 120.5,
+      "h": 77
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 120.5,
+      "h": 77
+     },
+     "readout": "793 × 77",
+     "text": 22,
+     "shot": "dg-resize-process-se-11-step10.png"
+    },
+    {
+     "tag": "step11",
+     "member": {
+      "x": 1082,
+      "y": 490,
+      "w": 118,
+      "h": 68
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 118,
+      "h": 68
+     },
+     "readout": "777 × 68",
+     "text": 22,
+     "shot": "dg-resize-process-se-12-step11.png"
+    },
+    {
+     "tag": "step12",
+     "member": {
+      "x": 1067.5,
+      "y": 490,
+      "w": 115.5,
+      "h": 60
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 115.5,
+      "h": 60
+     },
+     "readout": "760 × 60",
+     "text": 22,
+     "shot": "dg-resize-process-se-13-step12.png"
+    },
+    {
+     "tag": "up+0",
+     "member": {
+      "x": 1067.5,
+      "y": 490,
+      "w": 115.5,
+      "h": 60
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 115.5,
+      "h": 60
+     },
+     "readout": null,
+     "text": 22,
+     "shot": null
+    },
+    {
+     "tag": "up+40",
+     "member": {
+      "x": 1067.5,
+      "y": 490,
+      "w": 115.5,
+      "h": 60
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 115.5,
+      "h": 60
+     },
+     "readout": null,
+     "text": 22,
+     "shot": "dg-resize-process-se-15-up+40.png"
+    },
+    {
+     "tag": "up+120",
+     "member": {
+      "x": 1067.5,
+      "y": 490,
+      "w": 115.5,
+      "h": 60
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 115.5,
+      "h": 60
+     },
+     "readout": null,
+     "text": 22,
+     "shot": "dg-resize-process-se-16-up+120.png"
+    },
+    {
+     "tag": "up+400",
+     "member": {
+      "x": 1067.5,
+      "y": 490,
+      "w": 115.5,
+      "h": 60
+     },
+     "ring": {
+      "x": 423,
+      "y": 490,
+      "w": 115.5,
+      "h": 60
+     },
+     "readout": null,
+     "text": 22,
+     "shot": "dg-resize-process-se-17-up+400.png"
+    }
+   ],
+   "shot": "dg-33-process-group-resized.png"
+  },
+  {
+   "step": "process: Arrange > Ungroup, then Cmd+Z",
+   "ms": 7472,
+   "observed": "9 objects in 0 group(s): {\"shape\":9}; after Cmd+Z 9 objects in 1 group(s): {\"shape\":9}",
+   "shot": "dg-34-process-ungrouped.png"
+  },
+  {
+   "step": "hierarchy: double click a box and type",
+   "ms": 2759,
+   "observed": "stored \"Level 1 CEO\"",
+   "shot": "dg-35-hierarchy-label-edited.png"
+  },
+  {
+   "step": "timeline: the labels and dots",
+   "ms": 811,
+   "observed": "11 objects in 1 group(s): {\"shape\":6,\"text\":5}; labels Date 1 | Date 2 | Date 3 | Date 4 | Date 5",
+   "shot": "dg-36-timeline-close.png"
+  },
+  {
+   "step": "the diagram tail with the group selected",
+   "ms": 1180,
+   "observed": "chip Group; tail toolbar.fillColor, toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash, toolbar.formatOptions",
+   "shot": "dg-37-cycle-group-tail.png"
+  }
+ ],
+ "consoleErrors": [],
+ "finishedAt": "2026-09-28T19:42:51.865Z",
+ "deckId": "untitled-20260928-l4kn",
+ "destroyed": {
+  "trashed": true,
+  "status": 404
+ }
+}

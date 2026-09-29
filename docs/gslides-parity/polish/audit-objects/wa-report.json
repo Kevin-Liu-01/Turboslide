@@ -1,0 +1,435 @@
+{
+ "base": "https://turboslide.vercel.app",
+ "theme": "light",
+ "viewport": {
+  "width": 1440,
+  "height": 900
+ },
+ "startedAt": "2026-09-28T19:42:53.310Z",
+ "steps": [
+  {
+   "step": "Insert > Word art: the bar",
+   "ms": 1675,
+   "observed": "controls wordArt.bar, wordArt.text, wordArt.insert, wordArt.cancel; placeholder \"Type your text and press Enter\"; bar {\"x\":256,\"y\":112,\"w\":1184,\"h\":48}; focus wordArt.text",
+   "shot": "wa-01-wordart-bar.png"
+  },
+  {
+   "step": "type \"Big words\" and Enter",
+   "ms": 1501,
+   "observed": "text 400,390 800x120 type text size 88 weight 500 outline {\"color\":\"ink\",\"width\":1.5} color undefined; drawn {\"free\":{\"x\":400,\"y\":390,\"w\":800,\"h\":120},\"run\":{\"x\":400,\"y\":390,\"w\":800,\"h\":132},\"para\":{\"x\":400,\"y\":390,\"w\":800,\"h\":132},\"text\":\"Big words\",\"fontSize\":\"88px\",\"fontWeight\":\"500\",\"color\":\"rgb(7, 7, 7)\",\"stroke\":\"1.5px rgb(7, 7, 7)\",\"textAlign\":\"center\",\"chip\":\"Text box\",\"handles\":[\"handle.text.move\",\"handle.text.resize.nw\",\"handle.text.resize.n\",\"handle.text.resize.ne\",\"handle.text.resize.e\",\"handle.text.resize.se\",\"handle.text.resize.s\",\"handle.text.resize.sw\",\"handle.text.resize.w\",\"handle.text.rotate\"],\"readout\":null}",
+   "shotTyped": "wa-02-wordart-typed.png",
+   "shot": "wa-03-wordart-placed.png",
+   "page": "wa-04-wordart-placed-page.png"
+  },
+  {
+   "step": "select the word art: chip, handles, tail",
+   "ms": 802,
+   "observed": "chip Text box; handles 10; tail toolbar.fillColor, toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash, toolbar.font, toolbar.fontSize, toolbar.bold, toolbar.italic, toolbar.underline, toolbar.textColor, toolbar.highlightColor, toolbar.insertLink, toolbar.align, toolbar.spacing, toolbar.formatOptions, toolbar.more",
+   "shot": "wa-05-wordart-selected.png",
+   "page": "wa-06-wordart-selected-page.png"
+  },
+  {
+   "step": "se handle resize by +260,+120 watched: the letters scale",
+   "ms": 4755,
+   "observed": "pos 400,390 800x120 -> 400,390 1063x240; size 88 -> 176; drawn 176px; font sizes through the drag 88, 95, 103, 110, 117, 125, 132, 139, 147, 154, 161, 169, 176; readouts 822 × 130 · 95 px | 843 × 140 · 103 px | 865 × 150 · 110 px | 887 × 160 · 117 px",
+   "frames": [
+    {
+     "tag": "before",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 800,
+      "h": 120
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 820,
+      "h": 140
+     },
+     "fontSize": 88,
+     "lines": 1,
+     "readout": null,
+     "shot": "wa-resize-se-00-before.png"
+    },
+    {
+     "tag": "down",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 800,
+      "h": 120
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 820,
+      "h": 140
+     },
+     "fontSize": 88,
+     "lines": 1,
+     "readout": null,
+     "shot": "wa-resize-se-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 822,
+      "h": 130
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 842,
+      "h": 150
+     },
+     "fontSize": 95,
+     "lines": 1,
+     "readout": "822 × 130 · 95 px",
+     "shot": "wa-resize-se-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 843,
+      "h": 140
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 863,
+      "h": 160
+     },
+     "fontSize": 103,
+     "lines": 1,
+     "readout": "843 × 140 · 103 px",
+     "shot": "wa-resize-se-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 865,
+      "h": 150
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 885,
+      "h": 170
+     },
+     "fontSize": 110,
+     "lines": 1,
+     "readout": "865 × 150 · 110 px",
+     "shot": "wa-resize-se-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 887,
+      "h": 160
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 907,
+      "h": 180
+     },
+     "fontSize": 117,
+     "lines": 1,
+     "readout": "887 × 160 · 117 px",
+     "shot": "wa-resize-se-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 908,
+      "h": 170
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 928,
+      "h": 190
+     },
+     "fontSize": 125,
+     "lines": 1,
+     "readout": "908 × 170 · 125 px",
+     "shot": "wa-resize-se-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 930,
+      "h": 180
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 950,
+      "h": 200
+     },
+     "fontSize": 132,
+     "lines": 1,
+     "readout": "930 × 180 · 132 px",
+     "shot": "wa-resize-se-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 952,
+      "h": 190
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 972,
+      "h": 210
+     },
+     "fontSize": 139,
+     "lines": 1,
+     "readout": "952 × 190 · 139 px",
+     "shot": "wa-resize-se-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 973,
+      "h": 200
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 993,
+      "h": 220
+     },
+     "fontSize": 147,
+     "lines": 1,
+     "readout": "973 × 200 · 147 px",
+     "shot": "wa-resize-se-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 995,
+      "h": 210
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 1015,
+      "h": 230
+     },
+     "fontSize": 154,
+     "lines": 1,
+     "readout": "995 × 210 · 154 px",
+     "shot": "wa-resize-se-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 1017,
+      "h": 220
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 1037,
+      "h": 240
+     },
+     "fontSize": 161,
+     "lines": 1,
+     "readout": "1017 × 220 · 161 px",
+     "shot": "wa-resize-se-11-step10.png"
+    },
+    {
+     "tag": "step11",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 1038,
+      "h": 230
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 1058,
+      "h": 250
+     },
+     "fontSize": 169,
+     "lines": 1,
+     "readout": "1038 × 230 · 169 px",
+     "shot": "wa-resize-se-12-step11.png"
+    },
+    {
+     "tag": "step12",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 1063,
+      "h": 240
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 1083,
+      "h": 260
+     },
+     "fontSize": 176,
+     "lines": 1,
+     "readout": "1063 × 240 · 176 px",
+     "shot": "wa-resize-se-13-step12.png"
+    },
+    {
+     "tag": "up+0",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 1063,
+      "h": 240
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 1083,
+      "h": 260
+     },
+     "fontSize": 176,
+     "lines": 1,
+     "readout": null,
+     "shot": null
+    },
+    {
+     "tag": "up+40",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 1063,
+      "h": 240
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 1083,
+      "h": 260
+     },
+     "fontSize": 176,
+     "lines": 1,
+     "readout": null,
+     "shot": "wa-resize-se-15-up+40.png"
+    },
+    {
+     "tag": "up+120",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 1063,
+      "h": 240
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 1083,
+      "h": 260
+     },
+     "fontSize": 176,
+     "lines": 1,
+     "readout": null,
+     "shot": "wa-resize-se-16-up+120.png"
+    },
+    {
+     "tag": "up+400",
+     "free": {
+      "x": 400,
+      "y": 390,
+      "w": 1063,
+      "h": 240
+     },
+     "ring": {
+      "x": 390,
+      "y": 380,
+      "w": 1083,
+      "h": 260
+     },
+     "fontSize": 176,
+     "lines": 1,
+     "readout": null,
+     "shot": "wa-resize-se-17-up+400.png"
+    }
+   ],
+   "shot": "wa-07-wordart-resized.png"
+  },
+  {
+   "step": "Fill color: kit primary",
+   "ms": 2060,
+   "observed": "options toolbar.fillColor.menu, toolbar.fillColor.kit.text, toolbar.fillColor.kit.background, toolbar.fillColor.kit.caption, toolbar.fillColor.kit.hint, toolbar.fillColor.kit.primary, toolbar.fillColor.kit.accent, toolbar.fillColor.ink, toolbar.fillColor.paper, toolbar.fillColor.ink-2, toolbar.fillColor.titanium, toolbar.fillColor.hair, toolbar.fillColor.hair-soft, toolbar.fillColor.plate, toolbar.fillColor.edge, toolbar.fillColor.green, toolbar.fillColor.amber, toolbar.fillColor.red, toolbar.fillColor.blue, toolbar.fillColor.accent, toolbar.fillColor.none, toolbar.fillColor.hex; picked toolbar.fillColor.kit.primary; stored color \"blue\"; drawn color rgb(47, 92, 224)",
+   "shot": "wa-08-wordart-fill.png"
+  },
+  {
+   "step": "Border color red; Border weight 2; Border dash",
+   "ms": 4041,
+   "observed": "colour options 22 picked toolbar.borderColor.red; weight options  picked null; dash control {\"disabled\":true,\"tip\":\"Border dash\"}; stored outline {\"color\":\"red\",\"width\":1.5}; drawn stroke 1.5px rgb(229, 72, 77)",
+   "shotC": "wa-09-wordart-outline-red.png",
+   "shotW": "wa-10-wordart-outline-2.png"
+  },
+  {
+   "step": "double click, End, type \" now\", Escape",
+   "ms": 21908,
+   "observed": "session true; text \"Big words now\"; drawn Big words now 176px stroke 1.5px rgb(229, 72, 77)",
+   "shotOpen": "wa-11-wordart-edit-open.png",
+   "shot": "wa-12-wordart-edited.png"
+  },
+  {
+   "step": "Format options with the word art selected",
+   "ms": 2351,
+   "observed": "open true; sections formatOptions.section.size, formatOptions.section.position, formatOptions.section.textFitting, formatOptions.section.text, formatOptions.section.colour, formatOptions.section.altText; colour controls formatOptions.colour.outlineWeight, formatOptions.colour.outlineWeight.1, formatOptions.colour.outlineWeight.1.5, formatOptions.colour.outlineWeight.2",
+   "shot": "wa-13-wordart-format-options.png"
+  },
+  {
+   "step": "Bold and a bigger size from the tail",
+   "ms": 3377,
+   "observed": "weight undefined size 88; drawn 400 88px; box {\"x\":400,\"y\":390,\"w\":1063,\"h\":240} run {\"x\":400,\"y\":390,\"w\":1063,\"h\":132}",
+   "shot": "wa-14-wordart-bold-bigger.png"
+  },
+  {
+   "step": "reload: the word art holds",
+   "ms": 3508,
+   "observed": "{\"free\":{\"x\":400,\"y\":390,\"w\":1063,\"h\":240},\"run\":{\"x\":400,\"y\":390,\"w\":1063,\"h\":132},\"para\":{\"x\":400,\"y\":390,\"w\":1063,\"h\":132},\"text\":\"Big words now\",\"fontSize\":\"88px\",\"fontWeight\":\"400\",\"color\":\"rgb(47, 92, 224)\",\"stroke\":\"1.5px rgb(229, 72, 77)\",\"textAlign\":\"center\",\"chip\":null,\"handles\":[],\"readout\":null}",
+   "shot": "wa-15-wordart-after-reload.png"
+  }
+ ],
+ "consoleErrors": [
+  "Failed to load resource: the server responded with a status of 503 ()",
+  "Failed to load resource: the server responded with a status of 503 ()",
+  "Failed to load resource: the server responded with a status of 503 ()",
+  "Failed to load resource: the server responded with a status of 503 ()",
+  "Failed to load resource: the server responded with a status of 503 ()",
+  "Failed to load resource: the server responded with a status of 503 ()",
+  "Failed to load resource: the server responded with a status of 503 ()"
+ ],
+ "finishedAt": "2026-09-28T19:44:22.445Z",
+ "deckId": "untitled-20260928-agqv",
+ "destroyed": {
+  "trashed": true,
+  "status": 200
+ }
+}

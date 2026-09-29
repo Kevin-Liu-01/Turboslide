@@ -1,0 +1,483 @@
+{
+  "base": "https://www.turboslide.com",
+  "started": "2026-09-28T19:28:59.900Z",
+  "finished": "2026-09-28T19:33:02.612Z",
+  "deck": "untitled-20260928-xjfn",
+  "rows": [
+    {
+      "n": 1,
+      "name": "new-deck",
+      "expected": "open /new; the editor is ready with a title slide",
+      "observed": "deck untitled-20260928-xjfn; title slide title; runs heading/text, lead/text; title prompt \"Click to add title\" 88px; body prompt \"Click to add subtitle\" 26px; url /new",
+      "ok": true,
+      "shot": "01-new-deck.png",
+      "ms": 1233
+    },
+    {
+      "n": 2,
+      "name": "title-one-click",
+      "expected": "one click on Click to add title selects it: ring, 8 handles, rotate, chip, no caret",
+      "observed": "selected true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; ring {\"x\":373.53125,\"y\":459.28125,\"w\":948.921875,\"h\":77.359375}; text rect {\"x\":380.5849914550781,\"y\":466.34075927734375,\"w\":934.8299560546875,\"h\":63.27374267578125}; clip 03-title-one-click-ring-2x.png",
+      "ok": true,
+      "shot": "02-title-one-click.png",
+      "ms": 829
+    },
+    {
+      "n": 3,
+      "name": "title-double-click",
+      "expected": "a double click opens the session with the caret; the prompt goes",
+      "observed": "selected false; resize handles 0; rotate false; ring true; chip \"Title\"; session true; caret true; prompt now \"null\"; editable true; selection \"\"",
+      "ok": true,
+      "shot": "04-title-double-click.png",
+      "ms": 793
+    },
+    {
+      "n": 4,
+      "name": "title-type",
+      "expected": "type \"Quarterly review: Q3 2026\" at human speed",
+      "observed": "run text \"Quarterly review: Q3 2026\"; 1 line(s); 88px 500; readout null",
+      "ok": true,
+      "shot": "05-title-typed.png",
+      "ms": 2233
+    },
+    {
+      "n": 5,
+      "name": "title-escape-once",
+      "expected": "Escape commits and leaves the title selected as an object",
+      "observed": "selected true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; stored true; ring {\"x\":373.53125,\"y\":459.28125,\"w\":948.921875,\"h\":77.359375}; clip 07-title-typed-ring-2x.png",
+      "ok": true,
+      "shot": "06-title-escape-once.png",
+      "ms": 1488
+    },
+    {
+      "n": 6,
+      "name": "title-escape-twice",
+      "expected": "a second Escape clears the selection",
+      "observed": "selected false; resize handles 0; rotate false; ring false; chip none; session false; caret false",
+      "ok": true,
+      "shot": "08-title-escape-twice.png",
+      "ms": 429
+    },
+    {
+      "n": 7,
+      "name": "title-undo-redo",
+      "expected": "Cmd+Z puts the placeholder back; Cmd+Shift+Z restores the title",
+      "observed": "after undo \"\" prompt \"Click to add title\"; after redo \"Quarterly review: Q3 2026\" (10-title-redo.png)",
+      "ok": true,
+      "shot": "09-title-undo.png",
+      "ms": 1933
+    },
+    {
+      "n": 8,
+      "name": "title-caret-keys",
+      "expected": "double click at the end, Home, Shift+End selects the line, ArrowRight, Option+Backspace deletes a word",
+      "observed": "double click at the end selected \"\"; Shift+End selected \"Quarterly review: Q3 2026\"; after Option+Backspace \"Quarterly review: Q3 \" (12-title-option-backspace.png); after Cmd+Z \"Quarterly review: Q3 2026\"",
+      "ok": true,
+      "shot": "11-title-shift-end.png",
+      "ms": 6153
+    },
+    {
+      "n": 9,
+      "name": "title-long-wraps",
+      "expected": "a long title wraps inside the placeholder (Google shrinks the text to fit the box)",
+      "observed": "while typing 3 lines at 88px, box 935x190; after Escape 3 lines at 88px; vertical overlap with the subtitle 0px; ring {\"x\":373.53125,\"y\":396.015625,\"w\":948.921875,\"h\":203.90625} (14-title-long-selected.png, 15-title-long-ring-2x.png); after Cmd+Z \"Quarterly review: Q3 2026\"",
+      "ok": true,
+      "shot": "13-title-long-typing.png",
+      "ms": 7593
+    },
+    {
+      "n": 10,
+      "name": "subtitle-type-two-lines",
+      "expected": "double click the subtitle, type a line, Enter, a second line; Escape; the paragraph ring",
+      "observed": "double click (16-subtitle-double-click.png); typed \"Prepared by the revenue teamSeptember 2026\" on 2 lines at 26px (17-subtitle-typed.png); after Escape selected true; resize handles 8; rotate true; ring true; chip \"Subtitle\"; session false; caret false (18-subtitle-selected.png, 19-subtitle-ring-2x.png); stored true",
+      "ok": true,
+      "shot": "17-subtitle-typed.png",
+      "ms": 4818
+    },
+    {
+      "n": 11,
+      "name": "new-blank-slide",
+      "expected": "toolbar New slide, then Layout > Blank",
+      "observed": "slide split-1; new slide (20-new-slide.png); layout plate (21-layout-plate.png); after Blank 2 object(s), 2 run(s) (22-blank-slide.png)",
+      "ok": true,
+      "shot": "22-blank-slide.png",
+      "ms": 4253
+    },
+    {
+      "n": 12,
+      "name": "blank-leftovers",
+      "expected": "after Layout > Blank the slide is empty (Google removes every placeholder); what remains is read, then Cmd+A and Delete clear it",
+      "observed": "2 object(s) left after Blank: heading h at {\"x\":137,\"y\":129,\"w\":1326,\"h\":642,\"z\":0}; paragraph p1 at {\"x\":137,\"y\":129,\"w\":1326,\"h\":642,\"z\":1}; prompts \"Click to add title\" at 381,246 | \"Click to add text\" at 381,250 (23-blank-leftovers.png); Cmd+A handles 10 (24-blank-leftovers-select-all.png); after Delete 0 object(s) (25-blank-leftovers-deleted.png)",
+      "ok": false,
+      "shot": "23-blank-leftovers.png",
+      "ms": 1597
+    },
+    {
+      "n": 13,
+      "name": "textbox-tool-click-type",
+      "expected": "the toolbar Text box, one click on the sheet, type; Escape shows the ring and eight squares",
+      "observed": "text text at {\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":1} (26-textbox-tool-armed.png, 27-textbox-placed.png); session on place true; typed \"Onboarding plan for Acme: the first ninety days\" 1 line(s) 22px (28-textbox-typed.png); after Escape selected true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false (29-textbox-selected.png, 30-textbox-ring-2x.png); stored true",
+      "ok": true,
+      "shot": "28-textbox-typed.png",
+      "ms": 6202
+    },
+    {
+      "n": 14,
+      "name": "textbox-drag-draw",
+      "expected": "the Text box tool, a drag from (700,480) to (1150,640) sheet px, type two lines",
+      "observed": "text-2 at {\"x\":700,\"y\":480,\"w\":450,\"h\":160,\"z\":2} (drawing 31-textbox-drawing.png, 32-textbox-drawn.png); session true; typed \"Drawn box: the renewal termsSecond line of the drawn box\" 2 lines (33-textbox-drawn-typed.png); after Escape selected true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false (34-textbox-drawn-selected.png)",
+      "ok": true,
+      "shot": "32-textbox-drawn.png",
+      "ms": 7200
+    },
+    {
+      "n": 15,
+      "name": "textbox-drag-inside-moves",
+      "expected": "one click selects box A; a drag from inside its text moves it; Cmd+Z puts it back",
+      "observed": "after the click selected true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false; during the drag session false, text selected \"\" (35-textbox-dragging.png); moved dx 157 dy 90 (36-textbox-dragged.png); after Cmd+Z at {\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":1} (37-textbox-drag-undone.png)",
+      "ok": true,
+      "shot": "36-textbox-dragged.png",
+      "ms": 3616
+    },
+    {
+      "n": 16,
+      "name": "hover-ring",
+      "expected": "the pointer over a text box with nothing selected (Google draws nothing on hover)",
+      "observed": "overlay classes while hovering: ts-hover (39-hover-ring-2x.png)",
+      "ok": true,
+      "shot": "38-hover-ring.png",
+      "ms": 1365
+    },
+    {
+      "n": 17,
+      "name": "word-double-click",
+      "expected": "a double click on \"Acme\" selects the word with a visible highlight",
+      "observed": "selection \"Acme\" for the word \"Acme:\"; session true; ring {\"x\":446.140625,\"y\":305.046875,\"w\":352.5,\"h\":37.359375}; clip 41-word-selected-2x.png",
+      "ok": true,
+      "shot": "40-word-selected.png",
+      "ms": 1769
+    },
+    {
+      "n": 18,
+      "name": "bold-toolbar",
+      "expected": "Bold from the toolbar on the selected word",
+      "observed": "selected \"Acme\"; toolbar Bold; marks after []; selection kept \"Acme\"; control toolbar.bold reads true (43-bold-toolbar-2x.png); after Cmd+Z marks [] equal to before true (44-bold-toolbar-undone.png); stored now {\"id\":\"text\",\"pos\":{\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":1},\"type\":\"text\",\"text\":\"Onboarding plan for Acme: the first ninety days\",\"autofit\":\"grow\"}",
+      "ok": false,
+      "shot": "42-bold-toolbar.png",
+      "ms": 3776
+    },
+    {
+      "n": 19,
+      "name": "bold-cmd-b",
+      "expected": "Cmd+B on the selected word",
+      "observed": "selected \"Acme\"; Cmd+B; marks after [{\"tag\":\"b\",\"mark\":null,\"text\":\"Acme\",\"style\":\"\",\"href\":null}]; selection kept \"Acme\"; control toolbar.bold reads true (46-bold-cmd-b-2x.png); after Cmd+Z marks [] equal to before true (47-bold-cmd-b-undone.png); stored now {\"id\":\"text\",\"pos\":{\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":1},\"type\":\"text\",\"text\":\"Onboarding plan for Acme: the first ninety days\",\"autofit\":\"grow\"}",
+      "ok": true,
+      "shot": "45-bold-cmd-b.png",
+      "ms": 3717
+    },
+    {
+      "n": 20,
+      "name": "italic-toolbar",
+      "expected": "Italic from the toolbar on \"plan\"",
+      "observed": "selected \"plan\"; toolbar Italic; marks after [{\"tag\":\"i\",\"mark\":null,\"text\":\"plan\",\"style\":\"\",\"href\":null}]; selection kept \"plan\"; control toolbar.italic reads true (49-italic-toolbar-2x.png); after Cmd+Z marks [] equal to before true (50-italic-toolbar-undone.png); stored now {\"id\":\"text\",\"pos\":{\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":1},\"type\":\"text\",\"text\":\"Onboarding plan for Acme: the first ninety days\",\"autofit\":\"grow\"}",
+      "ok": true,
+      "shot": "48-italic-toolbar.png",
+      "ms": 3540
+    },
+    {
+      "n": 21,
+      "name": "italic-cmd-i",
+      "expected": "Cmd+I on \"plan\"",
+      "observed": "selected \"plan\"; Cmd+I; marks after [{\"tag\":\"i\",\"mark\":null,\"text\":\"plan\",\"style\":\"\",\"href\":null}]; selection kept \"plan\"; control toolbar.italic reads true (52-italic-cmd-i-2x.png); after Cmd+Z marks [] equal to before true (53-italic-cmd-i-undone.png); stored now {\"id\":\"text\",\"pos\":{\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":1},\"type\":\"text\",\"text\":\"Onboarding plan for Acme: the first ninety days\",\"autofit\":\"grow\"}",
+      "ok": true,
+      "shot": "51-italic-cmd-i.png",
+      "ms": 3893
+    },
+    {
+      "n": 22,
+      "name": "underline-toolbar",
+      "expected": "Underline from the toolbar on \"first\"",
+      "observed": "selected \"first\"; toolbar Underline; marks after [{\"tag\":\"u\",\"mark\":null,\"text\":\"first\",\"style\":\"\",\"href\":null}]; selection kept \"first\"; control toolbar.underline reads true (55-underline-toolbar-2x.png); after Cmd+Z marks [] equal to before true (56-underline-toolbar-undone.png); stored now {\"id\":\"text\",\"pos\":{\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":1},\"type\":\"text\",\"text\":\"Onboarding plan for Acme: the first ninety days\",\"autofit\":\"grow\"}",
+      "ok": true,
+      "shot": "54-underline-toolbar.png",
+      "ms": 4189
+    },
+    {
+      "n": 23,
+      "name": "underline-cmd-u",
+      "expected": "Cmd+U on \"first\"",
+      "observed": "selected \"first\"; Cmd+U; marks after [{\"tag\":\"u\",\"mark\":null,\"text\":\"first\",\"style\":\"\",\"href\":null}]; selection kept \"first\"; control toolbar.underline reads true (58-underline-cmd-u-2x.png); after Cmd+Z marks [] equal to before true (59-underline-cmd-u-undone.png); stored now {\"id\":\"text\",\"pos\":{\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":1},\"type\":\"text\",\"text\":\"Onboarding plan for Acme: the first ninety days\",\"autofit\":\"grow\"}",
+      "ok": true,
+      "shot": "57-underline-cmd-u.png",
+      "ms": 7678
+    },
+    {
+      "n": 24,
+      "name": "strike-menu",
+      "expected": "Format > Text > Strikethrough on \"ninety\"",
+      "observed": "selected \"ninety\"; Format > Text submenu (60-format-text-submenu.png); marks after [{\"tag\":\"s\",\"mark\":null,\"text\":\"ninety\",\"style\":\"\",\"href\":null}]; selection kept \"ninety\"; control toolbar.bold reads false (62-strike-menu-2x.png); after Cmd+Z marks [] equal to before true (63-strike-menu-undone.png); stored now {\"id\":\"text\",\"pos\":{\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":1},\"type\":\"text\",\"text\":\"Onboarding plan for Acme: the first ninety days\",\"autofit\":\"grow\"}",
+      "ok": true,
+      "shot": "61-strike-menu.png",
+      "ms": 4586
+    },
+    {
+      "n": 25,
+      "name": "strike-cmd-shift-x",
+      "expected": "Cmd+Shift+X on \"ninety\"",
+      "observed": "selected \"ninety\"; Cmd+Shift+X; marks after [{\"tag\":\"s\",\"mark\":null,\"text\":\"ninety\",\"style\":\"\",\"href\":null}]; selection kept \"ninety\"; control toolbar.bold reads false (65-strike-cmd-shift-x-2x.png); after Cmd+Z marks [] equal to before true (66-strike-cmd-shift-x-undone.png); stored now {\"id\":\"text\",\"pos\":{\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":1},\"type\":\"text\",\"text\":\"Onboarding plan for Acme: the first ninety days\",\"autofit\":\"grow\"}",
+      "ok": true,
+      "shot": "64-strike-cmd-shift-x.png",
+      "ms": 4660
+    },
+    {
+      "n": 26,
+      "name": "fontsize-type-enter",
+      "expected": "type 36 in the size field and press Enter; the word grows; Cmd+Z",
+      "observed": "selected \"Acme\"; field before \"20\", typed (67-fontsize-typing.png), after Enter \"34\", focus on body; word rect h 29 vs line h 23; marks []; box now 2 lines; after Cmd+Z marks [] (69-fontsize-undone.png)",
+      "ok": true,
+      "shot": "68-fontsize-36.png",
+      "ms": 4557
+    },
+    {
+      "n": 27,
+      "name": "fontsize-plus-minus",
+      "expected": "the + and - beside the size field step the size; Cmd+Z twice",
+      "observed": "selected \"Acme\"; field 20 -> + 22 (marks [], 70-fontsize-plus.png) -> - 20 (71-fontsize-minus.png); after two Cmd+Z marks []",
+      "ok": true,
+      "shot": "70-fontsize-plus.png",
+      "ms": 4462
+    },
+    {
+      "n": 28,
+      "name": "text-color-swatch",
+      "expected": "Text color opens a plate; the red swatch colours the word; Cmd+Z",
+      "observed": "selected \"Acme\"; toolbar.textColor; plate controls toolbar.textColor.menu, toolbar.textColor.kit.text, toolbar.textColor.kit.background, toolbar.textColor.kit.caption, toolbar.textColor.kit.hint, toolbar.textColor.kit.primary, toolbar.textColor.kit.accent, toolbar.textColor.ink, toolbar.textColor.paper, toolbar.textColor.ink-2, toolbar.textColor.titanium, toolbar.textColor.hair, toolbar.textColor.hair-soft, toolbar.textColor.plate, toolbar.textColor.edge, toolbar.textColor.green, toolbar.textColor.amber, toolbar.textColor.red, toolbar.textColor.blue, toolbar.textColor.accent, toolbar.textColor.none, toolbar.textColor.hex (72-text-color-plate.png); marks [{\"tag\":\"span\",\"mark\":null,\"text\":\"Acme\",\"style\":\"color:#e5484d\",\"href\":null}] (74-text-color-red-2x.png); after Cmd+Z [] (75-text-color-undone.png)",
+      "ok": true,
+      "shot": "73-text-color-red.png",
+      "ms": 4554
+    },
+    {
+      "n": 29,
+      "name": "highlight-swatch",
+      "expected": "Highlight color opens a plate; a swatch highlights the word; Cmd+Z",
+      "observed": "selected \"Acme\"; toolbar.highlightColor; plate toolbar.highlightColor.menu, toolbar.highlightColor.kit.text, toolbar.highlightColor.kit.background, toolbar.highlightColor.kit.caption, toolbar.highlightColor.kit.hint, toolbar.highlightColor.kit.primary, toolbar.highlightColor.kit.accent, toolbar.highlightColor.ink, toolbar.highlightColor.paper, toolbar.highlightColor.ink-2, toolbar.highlightColor.titanium, toolbar.highlightColor.hair, toolbar.highlightColor.hair-soft, toolbar.highlightColor.plate, toolbar.highlightColor.edge, toolbar.highlightColor.green, toolbar.highlightColor.amber, toolbar.highlightColor.red, toolbar.highlightColor.blue, toolbar.highlightColor.accent, toolbar.highlightColor.none, toolbar.highlightColor.hex (76-highlight-plate.png); picked toolbar.highlightColor.amber; marks [] (78-highlight-applied-2x.png); after Cmd+Z [] (79-highlight-undone.png)",
+      "ok": false,
+      "shot": "77-highlight-applied.png",
+      "ms": 8769
+    },
+    {
+      "n": 30,
+      "name": "align-toolbar-and-key",
+      "expected": "Align > Center from the toolbar; Cmd+Z; Cmd+Shift+E centers; Cmd+Z",
+      "observed": "session true; toolbar.align menu (80-align-menu.png); align start -> start (81-align-center.png) -> Cmd+Z start (82-align-undone.png) -> Cmd+Shift+E center (83-align-center-key.png) -> Cmd+Z start",
+      "ok": false,
+      "shot": "81-align-center.png",
+      "ms": 5398
+    },
+    {
+      "n": 31,
+      "name": "spacing-toolbar",
+      "expected": "Line spacing 1.5 from the toolbar; Cmd+Z; Format > Line & paragraph spacing > Double; Cmd+Z",
+      "observed": "session true; toolbar.spacing (84-spacing-menu.png); box h 47 line-height 33px -> 1.5: 47 33px (85-spacing-1-5.png) -> Cmd+Z 47 -> Double (86-format-spacing-submenu.png): 62 44px (87-spacing-double.png) -> Cmd+Z 47",
+      "ok": false,
+      "shot": "85-spacing-1-5.png",
+      "ms": 9199
+    },
+    {
+      "n": 32,
+      "name": "indent-toolbar",
+      "expected": "Increase indent then Decrease indent from the toolbar; Cmd+Z after each",
+      "observed": "session true; toolbar.increaseIndent; first word x 778 -> increase 778 (88-indent-increased.png) -> Cmd+Z 778 (89-indent-undone.png) -> increase then decrease 778 (90-indent-decreased.png) -> Cmd+Z twice 778; box h 47",
+      "ok": false,
+      "shot": "88-indent-increased.png",
+      "ms": 6326
+    },
+    {
+      "n": 33,
+      "name": "bullets-toolbar",
+      "expected": "Bulleted list on box B; Enter adds a third item; Tab nests it; Shift+Tab; Cmd+Z back to plain; then Numbered list; Cmd+Z",
+      "observed": "error: Cannot read properties of null (reading 'html')",
+      "ok": false,
+      "shot": "96-bullets-toolbar-failed.png",
+      "ms": 4404
+    },
+    {
+      "n": 34,
+      "name": "bullets-menu-preset",
+      "expected": "Format > Bullets & numbering > the bulleted presets plate",
+      "observed": "error: Cannot read properties of null (reading 'rect')",
+      "ok": false,
+      "shot": "97-bullets-menu-preset-failed.png",
+      "ms": 332
+    },
+    {
+      "n": 35,
+      "name": "link-cmd-k",
+      "expected": "Cmd+K on \"Acme\" opens the link popover; a URL and Enter make the link; one click shows the chip; Cmd+Z",
+      "observed": "selected \"Acme\"; popover true controls popover.link, popover.link.text, popover.link.url, popover.link.slide, popover.link.apply, popover.link.remove (98-link-popover.png); marks [{\"tag\":\"a\",\"mark\":null,\"text\":\"Acme\",\"style\":\"\",\"href\":\"https://acme.example/plan\"}] (101-link-applied-2x.png); one click on the link: chip none (102-link-chip.png); after Cmd+Z [] (103-link-undone.png)",
+      "ok": true,
+      "shot": "100-link-applied.png",
+      "ms": 7044
+    },
+    {
+      "n": 36,
+      "name": "link-toolbar-button",
+      "expected": "the toolbar Insert link opens the popover; Escape closes it",
+      "observed": "selected \"Acme\"; toolbar.insertLink; popover true; after Escape gone true, session true",
+      "ok": true,
+      "shot": "104-link-toolbar-popover.png",
+      "ms": 3032
+    },
+    {
+      "n": 37,
+      "name": "link-detect-url",
+      "expected": "typing a URL followed by a space links it on its own (Google does)",
+      "observed": "marks [{\"tag\":\"a\",\"mark\":null,\"text\":\"www.acme.example\",\"style\":\"\",\"href\":\"https://www.acme.example\"}]; 2 Cmd+Z to remove the words: \"Onboarding plan for Acme: the first ninety days\"",
+      "ok": true,
+      "shot": "105-link-detected.png",
+      "ms": 7072
+    },
+    {
+      "n": 38,
+      "name": "clear-formatting",
+      "expected": "Bold and Italic on \"Acme\", then Clear formatting from the toolbar; Cmd+Z",
+      "observed": "selected \"for\"; marks after Cmd+B, Cmd+I [{\"tag\":\"a\",\"mark\":null,\"text\":\"arding plan \",\"style\":\"\",\"href\":\"https://www.acme.example\"},{\"tag\":\"b\",\"mark\":null,\"text\":\"for\",\"style\":\"\",\"href\":null},{\"tag\":\"i\",\"mark\":null,\"text\":\"for\",\"style\":\"\",\"href\":null},{\"tag\":\"a\",\"mark\":null,\"text\":\"for\",\"style\":\"\",\"href\":\"https://www.acme.example\"},{\"tag\":\"a\",\"mark\":null,\"text\":\" \",\"style\":\"\",\"href\":\"https://www.acme.example\"}] (106-clear-formatting-before.png); toolbar.clearFormatting -> [{\"tag\":\"a\",\"mark\":null,\"text\":\"arding plan for \",\"style\":\"\",\"href\":\"https://www.acme.example\"}]; after Cmd+Z [{\"tag\":\"a\",\"mark\":null,\"text\":\"arding plan \",\"style\":\"\",\"href\":\"https://www.acme.example\"},{\"tag\":\"b\",\"mark\":null,\"text\":\"for\",\"style\":\"\",\"href\":null},{\"tag\":\"i\",\"mark\":null,\"text\":\"for\",\"style\":\"\",\"href\":null},{\"tag\":\"a\",\"mark\":null,\"text\":\"for\",\"style\":\"\",\"href\":\"https://www.acme.example\"},{\"tag\":\"a\",\"mark\":null,\"text\":\" \",\"style\":\"\",\"href\":\"https://www.acme.example\"}] (108-clear-formatting-undone.png); stored after the undos {\"id\":\"text\",\"pos\":{\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":0},\"type\":\"text\",\"text\":\"Onboarding plan for Acme: the first ninety days\",\"autofit\":\"grow\"}",
+      "ok": false,
+      "shot": "107-clear-formatting-after.png",
+      "ms": 7188
+    },
+    {
+      "n": 39,
+      "name": "font-dropdown",
+      "expected": "the Font control opens the dropdown with the search, the groups and 34 families in their faces; scroll through it",
+      "observed": "control text \"Inter\"; toolbar.font; open true; 35 rows, 34 families, groups brand, sans, serif, display, mono; list {\"x\":352,\"y\":142.5,\"w\":262,\"h\":378,\"scrollH\":1327}; faces Inter=Inter; Inter=Inter; Roboto=Roboto; Open Sans=\"Open Sans\"; Lato=Lato; Montserrat=Montserrat; Poppins=Poppins; Source Sans 3=\"Source Sans 3\"; Nunito=Nunito; Raleway=Raleway; Work Sans=\"Work Sans\"; DM Sans=\"DM Sans\" (109-font-dropdown.png; scrolled 110-font-dropdown-scroll-1.png, 111-font-dropdown-scroll-2.png, 112-font-dropdown-scroll-3.png); search \"play\" -> playfair-display, bebas-neue (113-font-search-play.png); family Inter -> \"Playfair Display\", control \"Playfair Display\" (114-font-playfair-applied.png); stored \"family\":\"playfair-display\"; after Cmd+Z Inter (115-font-undone.png)",
+      "ok": true,
+      "shot": "109-font-dropdown.png",
+      "ms": 6841
+    },
+    {
+      "n": 40,
+      "name": "font-more-fonts",
+      "expected": "More fonts at the foot of the dropdown opens the catalog dialog",
+      "observed": "More fonts row true; dialog true",
+      "ok": true,
+      "shot": "116-more-fonts-dialog.png",
+      "ms": 3279
+    },
+    {
+      "n": 41,
+      "name": "autofit-textbox-grow",
+      "expected": "a long paragraph typed into box B grows the box downward (Google: a text box grows as you type)",
+      "observed": "error: Cannot read properties of null (reading 'rect')",
+      "ok": false,
+      "shot": "117-autofit-textbox-grow-failed.png",
+      "ms": 334
+    },
+    {
+      "n": 42,
+      "name": "text-fitting-panel",
+      "expected": "Format > Text fitting opens the Format options panel at Text fitting",
+      "observed": "panel true; controls panel.formatOptions.close, formatOptions.size, formatOptions.position, formatOptions.textFitting, formatOptions.textFitting.autofit, formatOptions.textFitting.autofit.none, formatOptions.textFitting.autofit.shrink, formatOptions.textFitting.autofit.grow, formatOptions.textFitting.indent, formatOptions.padding, formatOptions.padding.top, formatOptions.padding.bottom, formatOptions.padding.left, formatOptions.padding.right, formatOptions.textFitting.valign, formatOptions.textFitting.valign.top, formatOptions.textFitting.valign.middle, formatOptions.textFitting.valign.bottom, formatOptions.text, formatOptions.colour, formatOptions.altText; words \"Format options Size & rotation Position Text fitting Do not autofit Shrink text on overflow Resize shape to fit text Indentation: Left px Padding Top px Bottom px Left px Right px Vertical alignment Top Middle Bottom Text Colour Alt text\"",
+      "ok": true,
+      "shot": "118-text-fitting-panel.png",
+      "ms": 3109
+    },
+    {
+      "n": 43,
+      "name": "format-options-panel",
+      "expected": "the toolbar Format options button on a selected text box",
+      "observed": "toolbar.formatOptions; panel true; sections formatOptions.size:true, formatOptions.position:true, formatOptions.textFitting:true, formatOptions.text:true, formatOptions.colour:true, formatOptions.altText:true; words \"Format options Size & rotation Width px Height px Rotate ° Position Top-left Center X px Y px Text fitting Do not autofit Shrink text on overflow Resize shape to fit text Indentation: Left px Padding Top px Bottom px Left px Right px Vertical alignment Top Middle Bottom Text Text Typography Size − + of 13 px Weight − + of 5 Align none left center right justify left center right justify Tracking (em) − + of 7 em Line spacing − + of 14 Space before − + of 4 Space after − + of 4 Columns none 1 2 3 1 2 3 Indent − + of 4 Font − + Tabular figures Every digit takes the same width, so numbers line up in a column off Line spacing Single 1.15 1.5 Double Custom Columns 1 2 3 Space before px Space after px Superscript Subscript Colour Color none ink paper ink-2 titanium hair hair-soft plate edge green\"",
+      "ok": true,
+      "shot": "119-format-options-panel.png",
+      "ms": 2428
+    },
+    {
+      "n": 44,
+      "name": "find-replace",
+      "expected": "Cmd+Shift+H opens Find and replace; \"Acme\" counts as you type; Replace all with Globex; Cmd+Z",
+      "observed": "dialog true (120-find-replace-dialog.png); count \"1 of 1\" (121-find-replace-count.png); after Replace all \"Replaced 1 occurrence\" (122-find-replace-replaced.png); dialog closed true; box A \"Onboarding plan for Globex: the first ninety days\" (123-find-replace-closed.png); after Cmd+Z \"Onboarding plan for Acme: the first ninety days\" (124-find-replace-undone.png)",
+      "ok": true,
+      "shot": "121-find-replace-count.png",
+      "ms": 5896
+    },
+    {
+      "n": 45,
+      "name": "context-menu-textbox",
+      "expected": "right click on box A (selected) opens the object menu; inside a session with a word selected the text menu",
+      "observed": "object menu rows Cut⌘X | Copy⌘C | Paste⌘V | Delete⌫ | Duplicate⌘D | Order | Rotate | Center on page | Align | Distribute | Group⌥⌘G | Ungroup⌥⇧⌘G | Link⌘K | Text fitting | Format options | Alt text⌥⌘Y | Comment⌥⌘M (125-context-menu-object.png); text menu rows Cut⌘X | Copy⌘C | Paste⌘V | Paste without formatting⇧⌘V | Italic⌘I | Underline⌘U | Strikethrough⇧⌘X | Superscript⌘. | Subscript⌘, | Capitalization | Link⌘K | Format options (126-context-menu-text-selection.png)",
+      "ok": true,
+      "shot": "125-context-menu-object.png",
+      "ms": 3911
+    },
+    {
+      "n": 46,
+      "name": "rings-other-appearance",
+      "expected": "View > Appearance switches the sheet; the ring and squares read on a text box, the title and the subtitle",
+      "observed": "rows menu.view.appearance.light:false, menu.view.appearance.dark:false, menu.view.appearance.match:true (127-view-appearance-submenu.png); ground rgb(255, 255, 255) theme light -> dark: rgb(7, 7, 7) theme dark (128-appearance-dark.png); text box selected true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false (129-dark-textbox-selected.png, 130-dark-textbox-ring-2x.png); title selected true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false (131-dark-title-selected.png, 132-dark-title-ring-2x.png); subtitle selected true; resize handles 8; rotate true; ring true; chip \"Subtitle\"; session false; caret false (133-dark-subtitle-selected.png, 134-dark-subtitle-ring-2x.png); session (135-dark-title-session-word.png); back to Match: rgb(255, 255, 255)",
+      "ok": true,
+      "shot": "128-appearance-dark.png",
+      "ms": 10884
+    },
+    {
+      "n": 47,
+      "name": "toolbar-tail-text",
+      "expected": "the tail with a text box selected and inside a session at 1440",
+      "observed": "selected: toolbar.head, toolbar.search, toolbar.newSlide.split, toolbar.newSlide, toolbar.newSlide.arrow, toolbar.undo, toolbar.redo, toolbar.print, toolbar.paintFormat, toolbar.zoom, toolbar.tail, toolbar.font, toolbar.fontSize, toolbar.fontSize.minus, toolbar.fontSize.value, toolbar.fontSize.plus, toolbar.bold, toolbar.italic, toolbar.underline, toolbar.textColor, toolbar.highlightColor, toolbar.insertLink, toolbar.insertComment, toolbar.align, toolbar.spacing, toolbar.bulletedList, toolbar.bulletedList.arrow, toolbar.numberedList, toolbar.numberedList.arrow, toolbar.decreaseIndent, toolbar.increaseIndent, toolbar.clearFormatting, toolbar.formatOptions, toolbar.end, toolbar.pointer, toolbar.hideMenus (136-toolbar-tail-selected-2x.png); session: toolbar.head, toolbar.search, toolbar.newSlide.split, toolbar.newSlide, toolbar.newSlide.arrow, toolbar.undo, toolbar.redo, toolbar.print, toolbar.paintFormat, toolbar.zoom, toolbar.tail, toolbar.font, toolbar.fontSize, toolbar.fontSize.minus, toolbar.fontSize.value, toolbar.fontSize.plus, toolbar.bold, toolbar.italic, toolbar.underline, toolbar.textColor, toolbar.highlightColor, toolbar.insertLink, toolbar.insertComment, toolbar.align, toolbar.spacing, toolbar.bulletedList, toolbar.bulletedList.arrow, toolbar.numberedList, toolbar.numberedList.arrow, toolbar.decreaseIndent, toolbar.increaseIndent, toolbar.clearFormatting, toolbar.formatOptions, toolbar.end, toolbar.pointer, toolbar.hideMenus (137-toolbar-tail-session-2x.png); tips toolbar.head=\"\" ; toolbar.search=\"Search the menus\" ; toolbar.newSlide.split=\"\" ; toolbar.newSlide=\"New slide\" ; toolbar.newSlide.arrow=\"New slide with layout\" ; toolbar.undo=\"Undo\" ; toolbar.redo=\"Redo\" ; toolbar.print=\"Print\" ; toolbar.paintFormat=\"Paint format\" ; toolbar.zoom=\"\" ; toolbar.tail=\"\" ; toolbar.font=\"Font\" ; toolbar.fontSize=\"\" ; toolbar.fontSize.minus=\"Decrease font size\" ; toolbar.fontSize.value=\"Font size\" ; toolbar.fontSize.plus=\"Increase font size\" ; toolbar.bold=\"Bold\" ; toolbar.italic=\"Italic\" ; toolbar.underline=\"Underline\" ; toolbar.textColor=\"Text color\" ; toolbar.highlightColor=\"Highlight color\" ; toolbar.insertLink=\"Insert link\" ; toolbar.insertComment=\"Insert comment\" ; toolbar.align=\"Align\" ; toolbar.spacing=\"Line & paragraph spacing\" ; toolbar.bulletedList=\"Bulleted list\" ; toolbar.bulletedList.arrow=\"Bulleted list\" ; toolbar.numberedList=\"Numbered list\" ; toolbar.numberedList.arrow=\"Numbered list\" ; toolbar.decreaseIndent=\"Decrease indent\" ; toolbar.increaseIndent=\"Increase indent\" ; toolbar.clearFormatting=\"Clear formatting\" ; toolbar.formatOptions=\"Format options\" ; toolbar.end=\"\" ; toolbar.pointer=\"Show my pointer\" ; toolbar.hideMenus=\"Hide the menus\"",
+      "ok": true,
+      "shot": "137-toolbar-tail-session-2x.png",
+      "ms": 2645
+    },
+    {
+      "n": 48,
+      "name": "slideshow",
+      "expected": "Slideshow from the title row: the title slide, ArrowRight to the text slide, Escape back",
+      "observed": "popup false; show at /edit/untitled-20260928-xjfn#s/title; text \"02 / 02 Onboarding plan for Acme: the first ninety days ● Drawn box: the renewal terms ● Second line of the drawn box 2 of 2 ● ⋯\"; after Escape /edit/untitled-20260928-xjfn#s/split-1",
+      "ok": true,
+      "shot": "139-show-text-slide.png",
+      "ms": 8169
+    },
+    {
+      "n": 49,
+      "name": "pdf-download",
+      "expected": "File > Download > PDF; the file arrives; pages rendered for judging",
+      "observed": "download \"Quarterly review Q3 2026.pdf\" in 7185 ms (140-file-download-submenu.png, 141-pdf-download-started.png); Creator:         Chromium; Producer:        Skia/PDF m147; Pages:           2; Page size:       960 x 540 pts; rendered as pdf-page-N.png",
+      "ok": true,
+      "shot": "141-pdf-download-started.png",
+      "ms": 9124
+    },
+    {
+      "n": 50,
+      "name": "reload-persists",
+      "expected": "a reload of /edit/<id> shows the same text on both slides",
+      "observed": "title slide (144-reload-title-slide.png); text slide runs Onboarding plan for Acme: the first ninety days | Drawn box: the renewal terms | Second line of the drawn box (145-reload-text-slide.png)",
+      "ok": true,
+      "shot": "145-reload-text-slide.png",
+      "ms": 3490
+    },
+    {
+      "n": 51,
+      "name": "viewport-1280",
+      "expected": "the same deck at 1280 by 800: the rings on the title, the subtitle and the text box; the toolbar tail",
+      "observed": "error: Cannot read properties of null (reading 'rect')",
+      "ok": false,
+      "shot": "147-viewport-1280-failed.png",
+      "ms": 2675
+    },
+    {
+      "n": 52,
+      "name": "cleanup",
+      "expected": "the scratch deck is trashed and deleted forever; /edit and /deck answer 404",
+      "observed": "File > Move to trash and Delete forever on /decks/trash; /edit/untitled-20260928-xjfn answers 404, /deck 404",
+      "ok": true,
+      "shot": null,
+      "ms": 0
+    }
+  ],
+  "consoleErrors": [
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "passed": 41,
+  "failed": 11,
+  "notDriven": 0
+}

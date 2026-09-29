@@ -1,0 +1,134 @@
+{
+  "base": "https://www.turboslide.com",
+  "deck": "untitled-20260928-9s3q",
+  "startedAt": "2026-09-28T19:34:34.948Z",
+  "seconds": 255,
+  "rows": [
+    {
+      "n": 1,
+      "step": "open /new and type the title",
+      "expected": "the editor is ready, revision 1, /edit/<id>",
+      "observed": "deck untitled-20260928-9s3q, revision 1",
+      "ok": true,
+      "at": 5.4
+    },
+    {
+      "n": 2,
+      "step": "second and third slides",
+      "expected": "slide 2 with the paragraph; slide 3 Pricing for Acme",
+      "observed": "slides split-1, split-2; Acme 3",
+      "ok": true,
+      "at": 35.1
+    },
+    {
+      "n": 3,
+      "step": "POST text.replaceAll with the bearer: the snackbar sequence over 12 s",
+      "expected": "one snackbar naming the change with Undo within 10 s",
+      "observed": "HTTP 200 in 970 ms; snackbars [{\"text\":\"Assistant changed slide 2: Our renewal proposal covers the three r… became Our contract proposal covers the three…Undo\",\"action\":\"Undo\",\"at\":123}]; written true; 12219 ms watched",
+      "ok": true,
+      "at": 48.3
+    },
+    {
+      "n": 4,
+      "step": "the outside write: Undo from the snackbar",
+      "expected": "Undo reverts the agent write",
+      "observed": "snackbar \"Assistant changed slide 2: Our contract proposal covers the three… became Our renewal proposal covers the three r…Undo\" action \"Undo\"; after Undo the text holds contract again true (the agent's renewal reverted)",
+      "ok": true,
+      "at": 51.8
+    },
+    {
+      "n": 5,
+      "step": "POST deck.tailor with the bearer: the snackbar",
+      "expected": "the snackbar names the tailor with Undo",
+      "observed": "HTTP 200 in 1325 ms; snackbars [{\"text\":\"Assistant changed slide 1Undo\",\"action\":\"Undo\",\"at\":1232}]; Acme 3 -> 0 -> 3; skipped [\"split-2\"] -> []; title \"Globex pricing review, Q3 2026\" -> \"Acme pricing review, Q3 2026\"",
+      "ok": true,
+      "at": 66.6
+    },
+    {
+      "n": 6,
+      "step": "Tools > Tailor: Apply, the dialog sampled every 300 ms until it closes",
+      "expected": "the dialog closes at once, or shows its busy state without a false count",
+      "observed": "disabled Apply tooltip \"Speaker notesCmd Option Shift SNotes for the presenter, shown in presenter view and never on the slide.\"; dialog open for 4641 ms after Apply; samples [{\"at\":484,\"hints\":[\"Not found in the text\",\"Not found in the text\"],\"label\":\"Tailor for Globex\"},{\"at\":962,\"hints\":[\"Not found in the text\",\"Not found in the text\"],\"label\":\"Tailor for Globex\"},{\"at\":1425,\"hints\":[\"Not found in the text\",\"Not found in the text\"],\"label\":\"Tailor for Globex\"},{\"at\":1901,\"hints\":[\"Not found in the text\",\"Not found in the text\"],\"label\":\"Tailor for Globex\"},{\"at\":2206,\"hints\":[\"Not found in the text\",\"Not found in the text\"],\"label\":\"Tailor for Globex\"},{\"at\":2511,\"hints\":[\"Not found in the text\",\"Not found in the text\"],\"label\":\"Tailor for Globex\"}]; snackbars [{\"text\":\"Tailored for GlobexUndo\",\"action\":\"Undo\",\"at\":2}]; Acme 3 -> 0 -> 3; title \"Globex pricing review, Q3 2026\" -> \"Acme pricing review, Q3 2026\"",
+      "ok": false,
+      "at": 81.8
+    },
+    {
+      "n": 7,
+      "step": "Search the menus with a phrase that matches nothing; Enter; click the box; Enter",
+      "expected": "the panel with the phrase; the ask sends; the deployment sentence comes back",
+      "observed": "ask row true; panel open true; focus after Enter on BODY; tooltip on screen \"Search the menusOption /\"; after Enter in the box: 9289 ms, off \"The assistant is not set up on this Turboslide yet\", sentence [], error \"null\"",
+      "ok": null,
+      "at": 96.4
+    },
+    {
+      "n": 8,
+      "step": "Search the menus, Escape: what stays on screen",
+      "expected": "no tooltip stays after the palette closes",
+      "observed": "tooltip after Escape \"Search the menusOption /\" (focus on null); after the pointer moves \"null\"",
+      "ok": false,
+      "at": 99.5
+    },
+    {
+      "n": 9,
+      "step": "Tools > Preferences > Link detection off; type an address in the body",
+      "expected": "no link is made while the setting is off; the paragraph stays",
+      "observed": "setting false; selection after the double click \"\", after End \"\"; stage before [\"Our renewal proposal covers the three regions your team asked about, adds the tw\",\"Click to add text\"]; after Enter [\"Our renewal proposal covers the three regions your team asked about, adds the tw\",\"Click to add text\"]; after typing [\"See www.example.com for the terms\",\"Click to add text\"]; markup [\"See [www.example.com](https://www.example.com) for the terms\"]; link made true; paragraph kept false",
+      "ok": false,
+      "at": 107.9
+    },
+    {
+      "n": 10,
+      "step": "Link detection on; type another address",
+      "expected": "the address becomes a link",
+      "observed": "setting true; markup [\"Then www.example.org for the prices\"]; link made false",
+      "ok": false,
+      "at": 114.9
+    },
+    {
+      "n": 11,
+      "step": "a view link: the assistant for a viewer",
+      "expected": "the panel disabled with the sentence",
+      "observed": "no view link (record revision 0): {\"error\":\"Error: page.evaluate: Error: Vercel Blob: Too many requests please lower the number of concurrent requests  - try again in 60 seconds.\\n    at Object.deserialize (https://www.turboslide.com/",
+      "ok": null,
+      "at": 116.3
+    },
+    {
+      "n": 12,
+      "step": "File > Save as template on production, measured",
+      "expected": "the dialog closes with a snackbar; the gallery lists the card",
+      "observed": "Save enabled after 154 ms; after the click: [{\"at\":1892,\"open\":true,\"label\":\"Save\",\"disabled\":true,\"err\":null},{\"at\":6897,\"open\":false,\"label\":null,\"disabled\":false,\"err\":null}]; snackbars []; template.list lists polish-audit-catg right after",
+      "ok": false,
+      "at": 131.7
+    },
+    {
+      "n": 13,
+      "step": "the gallery: the card, Rename, Delete, each measured",
+      "expected": "the card within seconds; the rename and the delete take effect",
+      "observed": "card drawn after 1205 ms; rename field true; name after Enter \"Polish audit renamed\" in 845 ms, after a reload \"Polish audit renamed\"; delete: card gone true after 9451 ms (dialog error \"null\"), still listed after a reload true; snackbar \"\"",
+      "ok": false,
+      "at": 158.5
+    },
+    {
+      "n": 14,
+      "step": "template.delete over HTTP with the bearer (the safety net)",
+      "expected": "removed",
+      "observed": "404 {\"error\":{\"name\":\"RangeError\",\"status\":404,\"message\":\"No template \\\"polish-audit-catg\\\" under decks/templates; the index",
+      "ok": false,
+      "at": 164.1
+    },
+    {
+      "n": 15,
+      "step": "cleanup",
+      "expected": "the deck trashed and deleted forever",
+      "observed": "error: page.waitForFunction: Timeout 90000ms exceeded.",
+      "ok": false,
+      "at": 254.7
+    }
+  ],
+  "facts": {},
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 503 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Error: Vercel Blob: Failed to fetch blob: 403 Forbidden\n    at https://www.turboslide.com/edit/untitled-20260928-9s3q:304:3747\n    at https://www.turboslide.com/edit/untitled-20260928-9s3q:304:3828"
+  ]
+}

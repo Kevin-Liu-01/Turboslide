@@ -1,0 +1,153 @@
+{
+  "base": "https://www.turboslide.com",
+  "width": 1440,
+  "at": "2026-09-28T19:35:58.586Z",
+  "rows": [
+    {
+      "id": "present.slideshow.button",
+      "did": "hover and click Slideshow",
+      "observed": "tooltip \"SlideshowCmd EnterPresents from the current slide; the Down arrow opens the options\"; show in 589 ms; on entry {\"index\":\"0\",\"total\":\"4\",\"blank\":null,\"laser\":null,\"slide\":\"title\",\"fullscreen\":true,\"counter\":\"1 of 4\",\"barVisible\":true,\"words\":\"1 of 4 ● ⋯\"}; after 3 s bar false",
+      "ok": true,
+      "shots": [
+        "present-02-slideshow-button-hover.png",
+        "present-03-show-on-entry.png",
+        "present-04-show-after-3s.png"
+      ],
+      "at": "2026-09-28T19:33:34.677Z"
+    },
+    {
+      "id": "present.keys",
+      "did": "every key of the show",
+      "observed": "ArrowRight: 1/4 blank null laser null; ArrowLeft: 0/4 blank null laser null; Space: 1/4 blank null laser null; PageDown: 2/4 blank null laser null; PageUp: 1/4 blank null laser null; ArrowDown: 1/4 blank null laser null; ArrowUp: 1/4 blank null laser null; Enter: 2/4 blank null laser null; Backspace: 1/4 blank null laser null; End: 3/4 blank null laser null; Home: 0/4 blank null laser null; 3 then Enter: 2/4 blank null laser null; b: 2/4 blank black laser null; b again: 2/4 blank null laser null; w: 2/4 blank white laser null; ArrowRight from white: 2/4 blank null laser null; Home: 0/4 blank null laser null; shortcuts card null; still in the show after Escape on the card false",
+      "ok": false,
+      "shots": [
+        "present-05-show-slide-2.png",
+        "present-06-show-end.png",
+        "present-07-show-digit-typed.png",
+        "present-08-show-slide-3.png",
+        "present-09-show-blank-black.png",
+        "present-10-show-blank-white.png",
+        "present-11-show-shortcuts-card.png"
+      ],
+      "at": "2026-09-28T19:33:52.053Z"
+    },
+    {
+      "id": "present.laser",
+      "did": "l for the laser, move the pointer",
+      "observed": "laser on true; dot null; off null",
+      "ok": true,
+      "shots": [
+        "present-12-show-laser.png"
+      ],
+      "at": "2026-09-28T19:34:24.806Z"
+    },
+    {
+      "id": "present.click-advances",
+      "did": "a click on the slide, the pointer to the bottom for the bar",
+      "observed": "after click index 1; bar after move true; bar buttons present.previous, present.counter, present.next, present.laser, present.captions, present.fullScreen, present.exit, present.options",
+      "ok": true,
+      "shots": [
+        "present-13-show-bar-on-move.png"
+      ],
+      "at": "2026-09-28T19:34:27.941Z"
+    },
+    {
+      "id": "present.bar.buttons",
+      "did": "the bar: previous, next, the slide list, the options menu, full screen, exit",
+      "observed": "buttons present.previous 32x32, present.counter 58x32, present.next 32x32, present.laser 32x32, present.captions 32x32, present.fullScreen 32x32, present.exit 32x32, present.options 32x32; next -> 2; prev -> 1; list rows 1Pipeline review: Acme Q3 2026 | 2Objects: text, shape, pictureA text box | 3Objects: table and chartRegionQ2Q3EMEA1 | 4Objects: diagram, line, word artRenewal | 1Pipeline review: Acme Q3 2026Pipeline r | 2Objects: text, shape, pictureA text box | 3Objects: table and chartRegionQ2Q3EMEA1 | 4Objects: diagram, line, word artRenewal; picked third -> 2; options present.options.notes:Open speaker notesS | present.options.laser:Turn on the laser pointerL | present.options.fullScreen:Exit full screen⇧⌘F | present.options.more:More | present.options.exit:ExitEsc; no Auto-play row in the default view; fullscreen -> undefined; exit -> in show false",
+      "ok": true,
+      "shots": [
+        "present-14-show-slide-list.png",
+        "present-15-show-options-menu.png",
+        "present-16-show-fullscreen-toggle.png",
+        "present-17-show-exit-hover.png"
+      ],
+      "at": "2026-09-28T19:34:41.865Z"
+    },
+    {
+      "id": "present.escape",
+      "did": "Escape leaves the show on the slide it showed",
+      "observed": "editor on split-1 (expected split-1)",
+      "ok": true,
+      "shots": [
+        "present-18-show-escaped.png"
+      ],
+      "at": "2026-09-28T19:34:45.206Z"
+    },
+    {
+      "id": "present.objects.show",
+      "did": "the show of every object slide",
+      "observed": "slide 2: index 1; blocks h 1193x44, p1 691x0, sh1 324x198, tb1 468x59, pic1 360x225 || slide 3: index 2; blocks h 1193x44, p1 691x0, tab1 576x198, ch1 612x378 || slide 4: index 3; blocks h 1193x44, p1 691x0, text 720x119, shape 576x162, dia1 504x252 || past the end: {\"index\":\"3\",\"words\":\"4 of 4 ● ⋯\"}",
+      "ok": true,
+      "shots": [
+        "present-19-show-objects-2.png",
+        "present-20-show-objects-3.png",
+        "present-21-show-objects-4.png",
+        "present-22-show-past-end.png"
+      ],
+      "at": "2026-09-28T19:34:52.140Z"
+    },
+    {
+      "id": "present.presenter-view",
+      "did": "Slideshow arrow > Presenter view",
+      "observed": "opened in 777 ms; {\"size\":[1180,760],\"controls\":[\"presenter\",\"presenter.timer\",\"presenter.elapsed\",\"presenter.pause\",\"presenter.reset\",\"presenter.connection\",\"presenter.clock\",\"presenter.previous\",\"presenter.counter\",\"presenter.next\",\"presenter.tab.notes\",\"presenter.tab.audience\",\"presenter.notesSmaller\",\"presenter.notesSize\",\"presenter.notesLarger\",\"presenter.notesText\"],\"notes\":\"Open with the renewal date and the two new logos.\",\"timer\":\"Timer0:02PauseReset\",\"words\":\"Timer 0:02 Pause Reset Pipeline review: Acme Q3 2026 Slideshow connected Time 12:34 PM Pipeline review: Acme Q3 2026 1 of 4 Pipeline review: Acme Q3 2026 ▾ Previous slide Start of the slideshow Next slide Objects: text, shape, picture A text box with two lines of body copy Speaker notes Audience tools 16 px Open with the renewal date and the two new logos.\"}; presenter next -> audience index 1; audience ArrowRight -> prese",
+      "ok": true,
+      "shots": [
+        "present-23-slideshow-arrow-hover.png",
+        "present-24-slideshow-arrow-menu.png",
+        "present-presenter-window.png",
+        "present-25-audience-window.png",
+        "present-presenter-after-next.png",
+        "present-presenter-after-3s.png",
+        "present-26-audience-after-presenter-closed.png"
+      ],
+      "at": "2026-09-28T19:35:05.530Z"
+    },
+    {
+      "id": "present.presenter-view.s-key",
+      "did": "s in the show opens the presenter",
+      "observed": "second window /present/untitled-20260928-ig3m",
+      "ok": true,
+      "shots": [],
+      "at": "2026-09-28T19:35:07.797Z"
+    },
+    {
+      "id": "present.slideshow.from-beginning",
+      "did": "Start from beginning from slide 3, then Cmd+Shift+Enter",
+      "observed": "menu row -> 0; Cmd+Shift+Enter -> 0; Cmd+Enter from slide 3 -> 2",
+      "ok": true,
+      "shots": [
+        "present-27-show-cmd-enter-from-slide-3.png"
+      ],
+      "at": "2026-09-28T19:35:13.890Z"
+    },
+    {
+      "id": "present.skipped-left-out",
+      "did": "skip slide 3, the show leaves it out",
+      "observed": "total 3 of 4; shown title, split-1, split-3",
+      "ok": true,
+      "shots": [
+        "present-28-editor-skipped-slide.png"
+      ],
+      "at": "2026-09-28T19:35:28.859Z"
+    },
+    {
+      "id": "present.dark.show",
+      "did": "the show of the deck in the dark appearance",
+      "observed": "shot",
+      "ok": true,
+      "shots": [
+        "present-29-show-dark-table-chart.png"
+      ],
+      "at": "2026-09-28T19:35:31.904Z"
+    },
+    {
+      "id": "teardown",
+      "did": "every scratch deck trashed and deleted forever",
+      "observed": "untitled-20260928-ig3m: File > Move to trash; Delete forever on /decks/trash; /edit/untitled-20260928-ig3m answers 404",
+      "ok": true,
+      "shots": [],
+      "at": "2026-09-28T19:35:58.586Z"
+    }
+  ]
+}

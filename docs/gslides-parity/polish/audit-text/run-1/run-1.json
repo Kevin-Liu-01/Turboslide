@@ -1,0 +1,464 @@
+{
+  "base": "https://www.turboslide.com",
+  "started": "2026-09-28T19:23:06.115Z",
+  "finished": "2026-09-28T19:26:00.050Z",
+  "deck": "untitled-20260928-eo3j",
+  "rows": [
+    {
+      "n": 1,
+      "name": "new-deck",
+      "expected": "open /new; the editor is ready with a title slide",
+      "observed": "deck untitled-20260928-eo3j; title slide title; runs heading/text, lead/text; title prompt \"Click to add title\" 88px; body prompt \"Click to add subtitle\" 26px; url /new",
+      "ok": true,
+      "shot": "01-new-deck.png",
+      "ms": 1215
+    },
+    {
+      "n": 2,
+      "name": "title-one-click",
+      "expected": "one click on Click to add title selects it: ring, 8 handles, rotate, chip, no caret",
+      "observed": "selected true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; ring {\"x\":373.53125,\"y\":459.28125,\"w\":948.921875,\"h\":77.359375}; text rect {\"x\":380.5849914550781,\"y\":466.34075927734375,\"w\":934.8299560546875,\"h\":63.27374267578125}; clip 03-title-one-click-ring-2x.png",
+      "ok": true,
+      "shot": "02-title-one-click.png",
+      "ms": 793
+    },
+    {
+      "n": 3,
+      "name": "title-double-click",
+      "expected": "a double click opens the session with the caret; the prompt goes",
+      "observed": "selected false; resize handles 0; rotate false; ring true; chip \"Title\"; session true; caret true; prompt now \"null\"; editable true; selection \"\"",
+      "ok": true,
+      "shot": "04-title-double-click.png",
+      "ms": 768
+    },
+    {
+      "n": 4,
+      "name": "title-type",
+      "expected": "type \"Quarterly review: Q3 2026\" at human speed",
+      "observed": "run text \"Quarterly review: Q3 2026\"; 1 line(s); 88px 500; readout null",
+      "ok": true,
+      "shot": "05-title-typed.png",
+      "ms": 2269
+    },
+    {
+      "n": 5,
+      "name": "title-escape-once",
+      "expected": "Escape commits and leaves the title selected as an object",
+      "observed": "selected true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; stored true; ring {\"x\":373.53125,\"y\":459.28125,\"w\":948.921875,\"h\":77.359375}; clip 07-title-typed-ring-2x.png",
+      "ok": true,
+      "shot": "06-title-escape-once.png",
+      "ms": 1379
+    },
+    {
+      "n": 6,
+      "name": "title-escape-twice",
+      "expected": "a second Escape clears the selection",
+      "observed": "selected false; resize handles 0; rotate false; ring false; chip none; session false; caret false",
+      "ok": true,
+      "shot": "08-title-escape-twice.png",
+      "ms": 427
+    },
+    {
+      "n": 7,
+      "name": "title-undo-redo",
+      "expected": "Cmd+Z puts the placeholder back; Cmd+Shift+Z restores the title",
+      "observed": "after undo \"\" prompt \"Click to add title\"; after redo \"Quarterly review: Q3 2026\" (10-title-redo.png)",
+      "ok": true,
+      "shot": "09-title-undo.png",
+      "ms": 2302
+    },
+    {
+      "n": 8,
+      "name": "title-caret-keys",
+      "expected": "double click at the end, Home, Shift+End selects the line, ArrowRight, Option+Backspace deletes a word",
+      "observed": "double click at the end selected \"\"; Shift+End selected \"Quarterly review: Q3 2026\"; after Option+Backspace \"Quarterly review: Q3 \" (12-title-option-backspace.png); after Cmd+Z \"Quarterly review: Q3 2026\"",
+      "ok": true,
+      "shot": "11-title-shift-end.png",
+      "ms": 3448
+    },
+    {
+      "n": 9,
+      "name": "title-long-wraps",
+      "expected": "a long title wraps inside the placeholder (Google shrinks the text to fit the box)",
+      "observed": "while typing 3 lines at 88px, box 935x190; after Escape 3 lines at 88px; vertical overlap with the subtitle 0px; ring {\"x\":373.53125,\"y\":396.015625,\"w\":948.921875,\"h\":203.90625} (14-title-long-selected.png, 15-title-long-ring-2x.png); after Cmd+Z \"Quarterly review: Q3 2026\"",
+      "ok": true,
+      "shot": "13-title-long-typing.png",
+      "ms": 7403
+    },
+    {
+      "n": 10,
+      "name": "subtitle-type-two-lines",
+      "expected": "double click the subtitle, type a line, Enter, a second line; Escape; the paragraph ring",
+      "observed": "double click (16-subtitle-double-click.png); typed \"Prepared by the revenue teamSeptember 2026\" on 2 lines at 26px (17-subtitle-typed.png); after Escape selected true; resize handles 8; rotate true; ring true; chip \"Subtitle\"; session false; caret false (18-subtitle-selected.png, 19-subtitle-ring-2x.png); stored true",
+      "ok": true,
+      "shot": "17-subtitle-typed.png",
+      "ms": 4872
+    },
+    {
+      "n": 11,
+      "name": "new-blank-slide",
+      "expected": "toolbar New slide, then Layout > Blank",
+      "observed": "slide split-1; new slide (20-new-slide.png); layout plate (21-layout-plate.png); after Blank 2 object(s), 2 run(s) (22-blank-slide.png)",
+      "ok": true,
+      "shot": "22-blank-slide.png",
+      "ms": 6187
+    },
+    {
+      "n": 12,
+      "name": "textbox-tool-click-type",
+      "expected": "the toolbar Text box, one click on the sheet, type; Escape shows the ring and eight squares",
+      "observed": "text text at {\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":2} (23-textbox-tool-armed.png, 24-textbox-placed.png); session on place true; typed \"\" 1 line(s) 44px (25-textbox-typed.png); after Escape selected true; resize handles 8; rotate true; ring true; chip \"Text box\"; session false; caret false (26-textbox-selected.png, 27-textbox-ring-2x.png); stored true",
+      "ok": true,
+      "shot": "25-textbox-typed.png",
+      "ms": 7120
+    },
+    {
+      "n": 13,
+      "name": "textbox-drag-draw",
+      "expected": "the Text box tool, a drag from (700,480) to (1150,640) sheet px, type two lines",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "ok": false,
+      "shot": "28-textbox-drag-draw-failed.png",
+      "ms": 34043
+    },
+    {
+      "n": 14,
+      "name": "textbox-drag-inside-moves",
+      "expected": "one click selects box A; a drag from inside its text moves it; Cmd+Z puts it back",
+      "observed": "after the click selected false; resize handles 0; rotate true; ring true; chip \"Text\"; session false; caret false; during the drag session false, text selected \"\" (29-textbox-dragging.png); moved dx 0 dy 0 (30-textbox-dragged.png); after Cmd+Z at {\"x\":240,\"y\":220,\"w\":480,\"h\":64,\"z\":2} (31-textbox-drag-undone.png)",
+      "ok": false,
+      "shot": "30-textbox-dragged.png",
+      "ms": 9293
+    },
+    {
+      "n": 15,
+      "name": "word-double-click",
+      "expected": "a double click on \"Acme\" selects the word with a visible highlight",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "32-word-double-click-failed.png",
+      "ms": 346
+    },
+    {
+      "n": 16,
+      "name": "bold-toolbar",
+      "expected": "Bold from the toolbar on the selected word",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "33-bold-toolbar-failed.png",
+      "ms": 343
+    },
+    {
+      "n": 17,
+      "name": "bold-cmd-b",
+      "expected": "Cmd+B on the selected word",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "34-bold-cmd-b-failed.png",
+      "ms": 303
+    },
+    {
+      "n": 18,
+      "name": "italic-toolbar",
+      "expected": "Italic from the toolbar on \"plan\"",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "35-italic-toolbar-failed.png",
+      "ms": 333
+    },
+    {
+      "n": 19,
+      "name": "italic-cmd-i",
+      "expected": "Cmd+I on \"plan\"",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "36-italic-cmd-i-failed.png",
+      "ms": 351
+    },
+    {
+      "n": 20,
+      "name": "underline-toolbar",
+      "expected": "Underline from the toolbar on \"first\"",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "37-underline-toolbar-failed.png",
+      "ms": 338
+    },
+    {
+      "n": 21,
+      "name": "underline-cmd-u",
+      "expected": "Cmd+U on \"first\"",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "38-underline-cmd-u-failed.png",
+      "ms": 328
+    },
+    {
+      "n": 22,
+      "name": "strike-menu",
+      "expected": "Format > Text > Strikethrough on \"ninety\"",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "39-strike-menu-failed.png",
+      "ms": 333
+    },
+    {
+      "n": 23,
+      "name": "strike-cmd-shift-x",
+      "expected": "Cmd+Shift+X on \"ninety\"",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "40-strike-cmd-shift-x-failed.png",
+      "ms": 351
+    },
+    {
+      "n": 24,
+      "name": "fontsize-type-enter",
+      "expected": "type 36 in the size field and press Enter; the word grows; Cmd+Z",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "41-fontsize-type-enter-failed.png",
+      "ms": 355
+    },
+    {
+      "n": 25,
+      "name": "fontsize-plus-minus",
+      "expected": "the + and - beside the size field step the size; Cmd+Z twice",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "42-fontsize-plus-minus-failed.png",
+      "ms": 307
+    },
+    {
+      "n": 26,
+      "name": "text-color-swatch",
+      "expected": "Text color opens a plate; the red swatch colours the word; Cmd+Z",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "43-text-color-swatch-failed.png",
+      "ms": 343
+    },
+    {
+      "n": 27,
+      "name": "highlight-swatch",
+      "expected": "Highlight color opens a plate; a swatch highlights the word; Cmd+Z",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "44-highlight-swatch-failed.png",
+      "ms": 335
+    },
+    {
+      "n": 28,
+      "name": "align-toolbar-and-key",
+      "expected": "Align > Center from the toolbar; Cmd+Z; Cmd+Shift+E centers; Cmd+Z",
+      "observed": "not driven: no box B",
+      "ok": null,
+      "shot": null,
+      "ms": 2
+    },
+    {
+      "n": 29,
+      "name": "spacing-toolbar",
+      "expected": "Line spacing 1.5 from the toolbar; Cmd+Z; Format > Line & paragraph spacing > Double; Cmd+Z",
+      "observed": "not driven: no box B",
+      "ok": null,
+      "shot": null,
+      "ms": 2
+    },
+    {
+      "n": 30,
+      "name": "indent-toolbar",
+      "expected": "Increase indent then Decrease indent from the toolbar; Cmd+Z after each",
+      "observed": "not driven: no box B",
+      "ok": null,
+      "shot": null,
+      "ms": 2
+    },
+    {
+      "n": 31,
+      "name": "bullets-toolbar",
+      "expected": "Bulleted list on box B; Enter adds a third item; Tab nests it; Shift+Tab; Cmd+Z back to plain; then Numbered list; Cmd+Z",
+      "observed": "not driven: no box B",
+      "ok": null,
+      "shot": null,
+      "ms": 2
+    },
+    {
+      "n": 32,
+      "name": "bullets-menu-preset",
+      "expected": "Format > Bullets & numbering > the bulleted presets plate",
+      "observed": "error: Cannot read properties of null (reading 'rect')",
+      "ok": false,
+      "shot": "45-bullets-menu-preset-failed.png",
+      "ms": 356
+    },
+    {
+      "n": 33,
+      "name": "link-cmd-k",
+      "expected": "Cmd+K on \"Acme\" opens the link popover; a URL and Enter make the link; one click shows the chip; Cmd+Z",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "46-link-cmd-k-failed.png",
+      "ms": 319
+    },
+    {
+      "n": 34,
+      "name": "link-toolbar-button",
+      "expected": "the toolbar Insert link opens the popover; Escape closes it",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "47-link-toolbar-button-failed.png",
+      "ms": 356
+    },
+    {
+      "n": 35,
+      "name": "link-detect-url",
+      "expected": "typing a URL followed by a space links it on its own (Google does)",
+      "observed": "marks []; 1 Cmd+Z to remove the words: \"\"",
+      "ok": false,
+      "shot": "48-link-detected.png",
+      "ms": 4581
+    },
+    {
+      "n": 36,
+      "name": "clear-formatting",
+      "expected": "Bold and Italic on \"Acme\", then Clear formatting from the toolbar; Cmd+Z",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "49-clear-formatting-failed.png",
+      "ms": 333
+    },
+    {
+      "n": 37,
+      "name": "font-dropdown",
+      "expected": "the Font control opens the dropdown with the search, the groups and 34 families in their faces; scroll through it",
+      "observed": "control text \"Inter\"; toolbar.font; open true; 35 rows, 34 families, groups brand, sans, serif, display, mono; list {\"x\":352,\"y\":142.5,\"w\":262,\"h\":378,\"scrollH\":1327}; faces Inter=Inter; Inter=Inter; Roboto=Roboto; Open Sans=\"Open Sans\"; Lato=Lato; Montserrat=Montserrat; Poppins=Poppins; Source Sans 3=\"Source Sans 3\"; Nunito=Nunito; Raleway=Raleway; Work Sans=\"Work Sans\"; DM Sans=\"DM Sans\" (50-font-dropdown.png; scrolled 51-font-dropdown-scroll-1.png, 52-font-dropdown-scroll-2.png, 53-font-dropdown-scroll-3.png); search \"play\" -> playfair-display, bebas-neue (54-font-search-play.png); family Inter -> Inter, control \"Playfair Display\" (55-font-playfair-applied.png); stored no font field; after Cmd+Z Inter (56-font-undone.png)",
+      "ok": false,
+      "shot": "50-font-dropdown.png",
+      "ms": 8754
+    },
+    {
+      "n": 38,
+      "name": "font-more-fonts",
+      "expected": "More fonts at the foot of the dropdown opens the catalog dialog",
+      "observed": "More fonts row true; dialog true",
+      "ok": true,
+      "shot": "57-more-fonts-dialog.png",
+      "ms": 3230
+    },
+    {
+      "n": 39,
+      "name": "autofit-textbox-grow",
+      "expected": "a long paragraph typed into box B grows the box downward (Google: a text box grows as you type)",
+      "observed": "not driven: no box B",
+      "ok": null,
+      "shot": null,
+      "ms": 8
+    },
+    {
+      "n": 40,
+      "name": "text-fitting-panel",
+      "expected": "Format > Text fitting opens the Format options panel at Text fitting",
+      "observed": "panel true; controls panel.formatOptions.close, formatOptions.size, formatOptions.position, formatOptions.textFitting, formatOptions.textFitting.autofit, formatOptions.textFitting.autofit.none, formatOptions.textFitting.autofit.shrink, formatOptions.textFitting.autofit.grow, formatOptions.textFitting.indent, formatOptions.text, formatOptions.colour, formatOptions.altText, formatOptions.block; words \"Format options Size & rotation Position Text fitting Do not autofit Shrink text on overflow Resize shape to fit text Indentation: Left px Padding and vertical alignment apply to a box, shape or text box placed on the slide Text Colour Alt text Paragraph\"",
+      "ok": true,
+      "shot": "58-text-fitting-panel.png",
+      "ms": 3251
+    },
+    {
+      "n": 41,
+      "name": "format-options-panel",
+      "expected": "the toolbar Format options button on a selected text box",
+      "observed": "toolbar.formatOptions; panel true; sections formatOptions.size:true, formatOptions.position:true, formatOptions.textFitting:true, formatOptions.text:true, formatOptions.colour:true, formatOptions.altText:true, formatOptions.block:true; words \"Format options Size & rotation Width px Height px Rotate ° Position Top-left Center X px Y px Text fitting Do not autofit Shrink text on overflow Resize shape to fit text Indentation: Left px Padding and vertical alignment apply to a box, shape or text box placed on the slide Text Text Role none body lead cap body lead cap Tone none ink muted ink muted Margin top − + Typography Size − + of 13 px Weight − + of 5 Align none left center right justify left center right justify Tracking (em) − + of 7 em Line spacing − + of 14 Space before − + of 4 Space after − + of 4 Columns none 1 2 3 1 2 3 Indent − + of 4 Font − + Tabular figures Every digit takes the same width, so numbers line up in a column off Line spacing Single 1.15 1.5 Double Custom Columns 1 2 3 Space before px Space after px Supersc\"",
+      "ok": true,
+      "shot": "59-format-options-panel.png",
+      "ms": 2500
+    },
+    {
+      "n": 42,
+      "name": "find-replace",
+      "expected": "Cmd+Shift+H opens Find and replace; \"Acme\" counts as you type; Replace all with Globex; Cmd+Z",
+      "observed": "dialog true (60-find-replace-dialog.png); count \"1 of 2\" (61-find-replace-count.png); after Replace all \"Replaced 2 occurrences\" (62-find-replace-replaced.png); dialog closed true; box A \"\" (63-find-replace-closed.png); after Cmd+Z \"\" (64-find-replace-undone.png)",
+      "ok": false,
+      "shot": "61-find-replace-count.png",
+      "ms": 5810
+    },
+    {
+      "n": 43,
+      "name": "context-menu-textbox",
+      "expected": "right click on box A (selected) opens the object menu; inside a session with a word selected the text menu",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "66-context-menu-textbox-failed.png",
+      "ms": 2047
+    },
+    {
+      "n": 44,
+      "name": "rings-other-appearance",
+      "expected": "View > Appearance switches the sheet; the ring and squares read on a text box, the title and the subtitle",
+      "observed": "rows menu.view.appearance.light:false, menu.view.appearance.dark:false, menu.view.appearance.match:true (67-view-appearance-submenu.png); ground rgba(0, 0, 0, 0) theme light -> light: rgba(0, 0, 0, 0) theme light (68-appearance-light.png); text box selected false; resize handles 0; rotate true; ring true; chip \"Text\"; session false; caret false (69-light-textbox-selected.png, 70-light-textbox-ring-2x.png); title selected true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false (71-light-title-selected.png, 72-light-title-ring-2x.png); subtitle selected true; resize handles 8; rotate true; ring true; chip \"Subtitle\"; session false; caret false (73-light-subtitle-selected.png, 74-light-subtitle-ring-2x.png); session (75-light-title-session-word.png); back to Match: rgba(0, 0, 0, 0)",
+      "ok": false,
+      "shot": "68-appearance-light.png",
+      "ms": 10973
+    },
+    {
+      "n": 45,
+      "name": "toolbar-tail-text",
+      "expected": "the tail with a text box selected and inside a session at 1440",
+      "observed": "error: Cannot read properties of null (reading 'x')",
+      "ok": false,
+      "shot": "77-toolbar-tail-text-failed.png",
+      "ms": 1299
+    },
+    {
+      "n": 46,
+      "name": "slideshow",
+      "expected": "Slideshow from the title row: the title slide, ArrowRight to the text slide, Escape back",
+      "observed": "popup false; show at /edit/untitled-20260928-eo3j#s/title; text \"02 / 02 see www.acme.example Onboarding plan for Acme: the first ninety days 2 of 2 ● ⋯\"; after Escape /edit/untitled-20260928-eo3j#s/split-1",
+      "ok": true,
+      "shot": "79-show-text-slide.png",
+      "ms": 8189
+    },
+    {
+      "n": 47,
+      "name": "pdf-download",
+      "expected": "File > Download > PDF; the file arrives; pages rendered for judging",
+      "observed": "download \"Quarterly review Q3 2026.pdf\" in 2240 ms (80-file-download-submenu.png, 81-pdf-download-started.png); Creator:         Chromium; Producer:        Skia/PDF m147; Pages:           2; Page size:       960 x 540 pts; rendered as pdf-page-N.png",
+      "ok": true,
+      "shot": "81-pdf-download-started.png",
+      "ms": 4213
+    },
+    {
+      "n": 48,
+      "name": "reload-persists",
+      "expected": "a reload of /edit/<id> shows the same text on both slides",
+      "observed": "title slide (84-reload-title-slide.png); text slide runs  | see www.acme.example | Onboarding plan for Acme: the first ninety days (85-reload-text-slide.png)",
+      "ok": true,
+      "shot": "85-reload-text-slide.png",
+      "ms": 3118
+    },
+    {
+      "n": 49,
+      "name": "viewport-1280",
+      "expected": "the same deck at 1280 by 800: the rings on the title, the subtitle and the text box; the toolbar tail",
+      "observed": "error: Cannot read properties of null (reading 'rect')",
+      "ok": false,
+      "shot": "87-viewport-1280-failed.png",
+      "ms": 1716
+    },
+    {
+      "n": 50,
+      "name": "cleanup",
+      "expected": "the scratch deck is trashed and deleted forever; /edit and /deck answer 404",
+      "observed": "File > Move to trash and Delete forever on /decks/trash; /edit/untitled-20260928-eo3j answers 404, /deck 404",
+      "ok": true,
+      "shot": null,
+      "ms": 0
+    }
+  ],
+  "consoleErrors": [
+    "console: Failed to load resource: the server responded with a status of 502 ()"
+  ],
+  "passed": 19,
+  "failed": 26,
+  "notDriven": 5
+}

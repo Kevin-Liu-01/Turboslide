@@ -1,0 +1,236 @@
+[
+  {
+    "control": "home.nav.lockup",
+    "text": "Turboslide",
+    "href": "https://www.turboslide.com/home",
+    "target": null,
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.nav.decks",
+    "text": "Your presentations",
+    "href": "https://www.turboslide.com/decks",
+    "target": null,
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.nav.docs",
+    "text": "Documentation",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.nav.agents",
+    "text": "For agents",
+    "href": "https://www.turboslide.com/home#agents",
+    "target": null,
+    "tip": "yes",
+    "status": "anchor",
+    "finalUrl": ""
+  },
+  {
+    "control": "home.nav.github",
+    "text": "GitHub",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.nav.new",
+    "text": "New Presentation",
+    "href": "https://www.turboslide.com/new",
+    "target": null,
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.hero.templates",
+    "text": "Start from a template",
+    "href": "https://www.turboslide.com/decks/templates",
+    "target": null,
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.hero.deck",
+    "text": "Open the GT Deck",
+    "href": "https://www.turboslide.com/deck/gt-brand",
+    "target": null,
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.agents.openapi",
+    "text": "Read the file on GitHub",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/openapi.json",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.agents.skills",
+    "text": "Read the file on GitHub",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-api/SKILL.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.present",
+    "text": "Present the GT deck",
+    "href": "https://www.turboslide.com/deck/gt-brand?present=1",
+    "target": null,
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.trash",
+    "text": "Trash",
+    "href": "https://www.turboslide.com/decks/trash",
+    "target": null,
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.spec",
+    "text": "The specification",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/spec/SPEC.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.parity",
+    "text": "Google Slides parity",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/gslides-parity/SPEC.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.grammar",
+    "text": "The slide rules",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/grammar.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.pptx",
+    "text": "PowerPoint export",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/pptx.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.hosting",
+    "text": "Hosting",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/hosting.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.native",
+    "text": "The Rust module",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/native.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.rules",
+    "text": "Rules for the repository",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/AGENTS.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.manifest",
+    "text": "Manifest",
+    "href": "https://www.turboslide.com/api/agent",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 401,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.llms",
+    "text": "llms.txt",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/llms.txt",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.skill-create",
+    "text": "turboslide-create",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-create/SKILL.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.skill-studio",
+    "text": "turboslide-studio",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-studio/SKILL.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.skill-verify",
+    "text": "turboslide-verify",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-verify/SKILL.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.licence",
+    "text": "MIT licence, copyright 2026 Kevin Liu",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/LICENSE",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  },
+  {
+    "control": "home.foot.notices",
+    "text": "Third party notices",
+    "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/THIRD_PARTY_NOTICES.md",
+    "target": "_blank",
+    "tip": "yes",
+    "status": 200,
+    "finalUrl": ""
+  }
+]

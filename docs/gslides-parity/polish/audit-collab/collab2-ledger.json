@@ -1,0 +1,295 @@
+{
+  "base": "https://www.turboslide.com",
+  "startedAt": "2026-09-28T19:26:18.475Z",
+  "scenarios": [
+    {
+      "name": "21 new deck and B joins",
+      "at": "2026-09-28T19:26:34.025Z",
+      "ok": true,
+      "ms": 14807,
+      "deck": "untitled-20260928-v9sk",
+      "aSeesBMs": 2551,
+      "chipOnA": true
+    },
+    {
+      "name": "22 slide added by B then A within 400 ms",
+      "at": "2026-09-28T19:26:46.032Z",
+      "ok": true,
+      "ms": 12007,
+      "before": 1,
+      "afterA": 3,
+      "afterB": 3,
+      "order": [
+        "title",
+        "split-2",
+        "split-1"
+      ],
+      "refusedTab": "nobody",
+      "cardText": null,
+      "rejects": null,
+      "wordsWithCard": null,
+      "typedReachedOtherMs": null,
+      "cardGoneAfterDismiss": null,
+      "wordsAfterDismiss": null,
+      "saveWordsA": [
+        {
+          "at": 1,
+          "words": "All changes saved"
+        },
+        {
+          "at": 768,
+          "words": "Saving…"
+        },
+        {
+          "at": 2135,
+          "words": "All changes saved"
+        }
+      ],
+      "saveWordsB": [
+        {
+          "at": 1,
+          "words": "All changes saved"
+        },
+        {
+          "at": 163,
+          "words": "Saving…"
+        },
+        {
+          "at": 1832,
+          "words": "All changes saved"
+        }
+      ]
+    },
+    {
+      "name": "23 third slide by A alone",
+      "at": "2026-09-28T19:26:49.004Z",
+      "ok": true,
+      "ms": 2972,
+      "slides": [
+        "title",
+        "split-2",
+        "split-3",
+        "split-1"
+      ],
+      "aMs": 3,
+      "bMs": 2846,
+      "elapsed": 2958
+    },
+    {
+      "name": "24 chip go to and follow",
+      "at": "2026-09-28T19:27:00.256Z",
+      "ok": true,
+      "ms": 11252,
+      "rosterMs": 1786,
+      "chipMenuItem": "title.presence.goTo",
+      "tip": "Nylon 848 · slide 3",
+      "jumpedMs": 3,
+      "following": null,
+      "aFollowedNextMove": false,
+      "participant": {
+        "kind": "human",
+        "role": "owner",
+        "trust": "label"
+      },
+      "capabilities": [
+        "read",
+        "presence",
+        "readSkipped",
+        "comment",
+        "readComments",
+        "readNotes",
+        "write",
+        "history",
+        "export",
+        "exportNotes",
+        "rename",
+        "copy",
+        "trash",
+        "restore",
+        "publish",
+        "follow",
+        "share",
+        "settings",
+        "remove",
+        "transfer"
+      ]
+    },
+    {
+      "name": "25 filmstrip reorder by B",
+      "at": "2026-09-28T19:27:03.508Z",
+      "ok": true,
+      "ms": 3252,
+      "before": [
+        "title",
+        "split-2",
+        "split-3",
+        "split-1"
+      ],
+      "afterB": [
+        "title",
+        "split-3",
+        "split-2",
+        "split-1"
+      ],
+      "afterA": [
+        "title",
+        "split-3",
+        "split-2",
+        "split-1"
+      ],
+      "bMs": 6,
+      "aMs": 1220,
+      "elapsed": 2360
+    },
+    {
+      "name": "26 move by A while B resizes, fresh B",
+      "at": "2026-09-28T19:27:11.981Z",
+      "ok": true,
+      "ms": 8473,
+      "blockSeenByBMs": 1515,
+      "before": {
+        "x": 1100,
+        "y": 820,
+        "w": 480,
+        "h": 120,
+        "z": 2
+      },
+      "after": {
+        "a": {
+          "x": 674,
+          "y": 536,
+          "w": 679,
+          "h": 205,
+          "z": 2
+        },
+        "b": {
+          "x": 674,
+          "y": 536,
+          "w": 679,
+          "h": 205,
+          "z": 2
+        }
+      },
+      "converged": true,
+      "bothChangesKept": true,
+      "convergedMs": 613,
+      "bOpsStatuses": [
+        200
+      ],
+      "bRejects": 0,
+      "bWords": "All changes saved"
+    },
+    {
+      "name": "27 thirty writes then reload",
+      "at": "2026-09-28T19:27:42.498Z",
+      "ok": true,
+      "ms": 30517,
+      "writes": 17,
+      "revisionBefore": 9,
+      "revisionAfter": 26,
+      "quietMs": 3575,
+      "writesMs": 23216,
+      "perWriteMsMean": 655,
+      "perWriteMsMax": 742,
+      "bCaughtUpMs": 306,
+      "reloadMs": 1582,
+      "revisionA": 26,
+      "revisionB": 26,
+      "sameRevision": true,
+      "textKept": true,
+      "slideKeptA": true,
+      "slideKeptB": true,
+      "textTail": "23 w24 w25 w26 w27 w28 w29 w30"
+    },
+    {
+      "name": "28 B leaves",
+      "at": "2026-09-28T19:27:43.605Z",
+      "ok": true,
+      "ms": 1107,
+      "chipGoneMs": 20
+    }
+  ],
+  "pages": {
+    "B": {
+      "consoleErrors": [],
+      "warnings": 0,
+      "failedOrErrorResponses": [],
+      "functionRequests": 27,
+      "minutes": 1.2,
+      "functionRequestsPerMinute": 22.9,
+      "byPath": {
+        "GET /edit/<id>": 2,
+        "GET /_serverFn/<x>": 4,
+        "POST /api/x/csp/report": 4,
+        "POST /_serverFn/<x>": 14,
+        "POST /api/decks/<id>/ops": 3
+      },
+      "opsPosts": [
+        200,
+        200,
+        200
+      ]
+    },
+    "A": {
+      "consoleErrors": [
+        {
+          "at": "2026-09-28T19:28:01.275Z",
+          "text": "Failed to load resource: the server responded with a status of 502 ()"
+        },
+        {
+          "at": "2026-09-28T19:28:03.224Z",
+          "text": "Failed to load resource: the server responded with a status of 502 ()"
+        }
+      ],
+      "warnings": 0,
+      "failedOrErrorResponses": [],
+      "functionRequests": 51,
+      "minutes": 1.4,
+      "functionRequestsPerMinute": 37.5,
+      "byPath": {
+        "GET /new": 1,
+        "POST /api/x/csp/report": 5,
+        "GET /_serverFn/<x>": 6,
+        "POST /_serverFn/<x>": 16,
+        "POST /api/decks/<id>/ops": 22,
+        "GET /edit/<id>": 1
+      },
+      "opsPosts": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ]
+    }
+  },
+  "teardown": {
+    "deckId": "untitled-20260928-v9sk",
+    "steps": [
+      "File > Move to trash ok",
+      "Delete forever ok (attempt 1)"
+    ],
+    "final": {
+      "edit": 404,
+      "deck": 404
+    }
+  },
+  "endedAt": "2026-09-28T19:28:05.153Z"
+}

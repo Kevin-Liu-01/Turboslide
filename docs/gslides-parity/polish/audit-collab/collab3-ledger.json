@@ -1,0 +1,231 @@
+{
+  "base": "https://www.turboslide.com",
+  "startedAt": "2026-09-28T19:28:48.484Z",
+  "scenarios": [
+    {
+      "name": "31 new deck and B joins",
+      "at": "2026-09-28T19:29:05.107Z",
+      "ok": true,
+      "ms": 16032,
+      "deck": "untitled-20260928-gukj",
+      "aSeesBMs": 4845
+    },
+    {
+      "name": "32 slide added by A then B within 300 ms",
+      "at": "2026-09-28T19:29:46.508Z",
+      "ok": true,
+      "ms": 41401,
+      "attempts": [
+        {
+          "attempt": 1,
+          "gapMs": 300,
+          "before": 1,
+          "afterA": 2,
+          "afterB": 3,
+          "cardA": 0,
+          "cardB": 0,
+          "order": [
+            "title",
+            "split-1"
+          ]
+        },
+        {
+          "attempt": 2,
+          "gapMs": 150,
+          "before": 2,
+          "afterA": 4,
+          "afterB": 4,
+          "cardA": 1,
+          "cardB": 0,
+          "order": [
+            "title",
+            "split-2",
+            "split-3",
+            "split-1"
+          ]
+        }
+      ],
+      "refusedTab": "A",
+      "cardText": "2 changes were not applied Another change landed first; the text is kept here Slide added Details Dismiss Change Details Dismiss",
+      "words": "Couldn't save, retrying",
+      "rejects": null,
+      "sync": {
+        "seq": 4,
+        "revision": 4,
+        "pending": 0,
+        "retained": 0,
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "offline": false,
+        "storeDegraded": true,
+        "streamDown": false
+      }
+    },
+    {
+      "name": "33 with the card standing: A moves while the refused tab resizes",
+      "at": "2026-09-28T19:30:00.701Z",
+      "ok": true,
+      "ms": 14192,
+      "refusedTab": "A",
+      "before": {
+        "x": 1100,
+        "y": 820,
+        "w": 480,
+        "h": 120,
+        "z": 3
+      },
+      "after": {
+        "a": {
+          "x": 538,
+          "y": 472,
+          "w": 679,
+          "h": 205,
+          "z": 3
+        },
+        "b": {
+          "x": 538,
+          "y": 472,
+          "w": 679,
+          "h": 205,
+          "z": 3
+        }
+      },
+      "converged": true,
+      "bothChangesKept": true,
+      "convergedMs": 4587,
+      "refusedTabOps": [
+        200
+      ],
+      "refusedTabSync": {
+        "seq": 7,
+        "revision": 7,
+        "pending": 0,
+        "retained": 0,
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "offline": false,
+        "storeDegraded": true,
+        "streamDown": false
+      },
+      "refusedTabRejects": 0,
+      "refusedTabWords": "Couldn't save, retrying"
+    },
+    {
+      "name": "34 the refused tab types, then dismisses",
+      "at": "2026-09-28T19:30:16.011Z",
+      "ok": true,
+      "ms": 15310,
+      "refusedTab": "A",
+      "typedReachedOtherMs": "not within 10119",
+      "wordsWithCard": "Couldn't save, retrying",
+      "cardGone": true,
+      "wordsAfterDismiss": [
+        {
+          "at": 8,
+          "words": "Couldn't save, retrying"
+        },
+        {
+          "at": 109,
+          "words": "Reconnecting…"
+        }
+      ],
+      "ops": [
+        200
+      ]
+    }
+  ],
+  "pages": {
+    "A": {
+      "consoleErrors": [
+        {
+          "at": "2026-09-28T19:30:33.234Z",
+          "text": "Failed to load resource: the server responded with a status of 502 ()"
+        },
+        {
+          "at": "2026-09-28T19:30:36.197Z",
+          "text": "Failed to load resource: the server responded with a status of 502 ()"
+        }
+      ],
+      "failedOrErrorResponses": [],
+      "functionRequests": 26,
+      "byPath": {
+        "GET /new": 1,
+        "POST /api/x/csp/report": 3,
+        "GET /_serverFn/<x>": 5,
+        "POST /_serverFn/<x>": 12,
+        "POST /api/decks/<id>/ops": 4,
+        "GET /api/decks/<id>/stream": 1
+      },
+      "ops": [
+        {
+          "at": 1790623745609,
+          "status": 200,
+          "ms": 369
+        },
+        {
+          "at": 1790623781101,
+          "status": 200,
+          "ms": 172
+        },
+        {
+          "at": 1790623792213,
+          "status": 200,
+          "ms": 561
+        },
+        {
+          "at": 1790623801997,
+          "status": 200,
+          "ms": 527
+        }
+      ]
+    },
+    "B": {
+      "consoleErrors": [],
+      "failedOrErrorResponses": [],
+      "functionRequests": 18,
+      "byPath": {
+        "GET /edit/<id>": 1,
+        "POST /api/x/csp/report": 2,
+        "GET /_serverFn/<x>": 2,
+        "POST /_serverFn/<x>": 9,
+        "POST /api/decks/<id>/ops": 4
+      },
+      "ops": [
+        {
+          "at": 1790623749639,
+          "status": 200,
+          "ms": 3931
+        },
+        {
+          "at": 1790623781724,
+          "status": 200,
+          "ms": 543
+        },
+        {
+          "at": 1790623787795,
+          "status": 200,
+          "ms": 445
+        },
+        {
+          "at": 1790623798273,
+          "status": 200,
+          "ms": 3774
+        }
+      ]
+    }
+  },
+  "teardown": {
+    "deckId": "untitled-20260928-gukj",
+    "steps": [
+      "File > Move to trash ok",
+      "Delete forever ok (attempt 1)"
+    ],
+    "final": {
+      "edit": 404,
+      "deck": 404
+    }
+  },
+  "endedAt": "2026-09-28T19:30:38.059Z"
+}

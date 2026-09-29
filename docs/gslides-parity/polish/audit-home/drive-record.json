@@ -1,0 +1,399 @@
+{
+  "steps": [
+    {
+      "key": "drive-1440-dark",
+      "name": "hover nav-decks",
+      "tip": {
+        "text": "Your presentationsEvery presentation on this Turboslide.",
+        "visible": true
+      },
+      "file": "drive-1440-dark-20-hover-nav-decks.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "hover nav-docs",
+      "tip": {
+        "text": "DocumentationThe index of the documentation on GitHub.",
+        "visible": true
+      },
+      "file": "drive-1440-dark-21-hover-nav-docs.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "hover nav-agents",
+      "tip": {
+        "text": "For agentsOne command per transport and the write rule.",
+        "visible": true
+      },
+      "file": "drive-1440-dark-22-hover-nav-agents.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "hover nav-github",
+      "tip": {
+        "text": "GitHubThe repository, under the MIT licence.",
+        "visible": true
+      },
+      "file": "drive-1440-dark-23-hover-nav-github.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "hover theme-light",
+      "tip": {
+        "text": "LightSwitches to the light appearance.",
+        "visible": true
+      },
+      "file": "drive-1440-dark-24-hover-theme-light.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "hover nav-new",
+      "tip": {
+        "text": "New PresentationOpens a fresh presentation; no account needed.",
+        "visible": true
+      },
+      "file": "drive-1440-dark-25-hover-nav-new.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "hover hero-new",
+      "tip": {
+        "text": "New PresentationOpens a fresh presentation; the first edit saves it.",
+        "visible": true
+      },
+      "file": "drive-1440-dark-26-hover-hero-new.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "hover hero-templates",
+      "tip": {
+        "text": "Start from a templateBlank, the templates saved on this Turboslide and the General Translation brand deck.",
+        "visible": true
+      },
+      "file": "drive-1440-dark-27-hover-hero-templates.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "hover hero-deck",
+      "tip": {
+        "text": "Open the GT DeckThe 85 slide brand deck in the viewer.",
+        "visible": true
+      },
+      "file": "drive-1440-dark-28-hover-hero-deck.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "hover hero-github",
+      "tip": {
+        "text": "GitHubThe repository, under the MIT licence.",
+        "visible": true
+      },
+      "file": "drive-1440-dark-29-hover-hero-github.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "hover nav-lockup",
+      "tip": {
+        "text": "TurboslideThe product page.",
+        "visible": true
+      },
+      "file": "drive-1440-dark-30-hover-nav-lockup.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "press Light",
+      "ms": 600,
+      "state": {
+        "theme": "light",
+        "stored": "light",
+        "themeColor": "#ffffff",
+        "lightPressed": "true",
+        "darkPressed": "false",
+        "darkShotVisible": false,
+        "lightShotVisible": true,
+        "heroTwin": "url(\"https://www.turboslide.com/brand/hero-light.png\")"
+      },
+      "file": "drive-1440-dark-31-theme-light-pressed.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "editor pair in light",
+      "lightPair": {
+        "complete": true,
+        "natural": "1120x700",
+        "current": "13-editor-light-9a99c28fbe.jpg"
+      },
+      "file": "drive-1440-dark-32-theme-light-editor-pair.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "press Dark",
+      "theme": "dark",
+      "file": "drive-1440-dark-33-theme-dark-pressed.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "click For agents",
+      "from": 0,
+      "to": 8258,
+      "url": "https://www.turboslide.com/home#agents",
+      "agentsTopInViewport": 0,
+      "file": "drive-1440-dark-34-anchor-agents.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "click templates",
+      "ms": 1464,
+      "waited": "url https://www.turboslide.com/decks/templates",
+      "url": "https://www.turboslide.com/decks/templates",
+      "file": "drive-1440-dark-35-click-templates.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "back from templates",
+      "url": "https://www.turboslide.com/home#agents",
+      "file": "drive-1440-dark-36-back-from-templates.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "click gt-deck",
+      "ms": 996,
+      "waited": "url https://www.turboslide.com/deck/gt-brand",
+      "url": "https://www.turboslide.com/deck/gt-brand",
+      "file": "drive-1440-dark-37-click-gt-deck.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "viewer settled",
+      "url": "https://www.turboslide.com/deck/gt-brand",
+      "file": "drive-1440-dark-38-gt-deck-settled.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "back from deck",
+      "url": "https://www.turboslide.com/home#agents",
+      "file": "drive-1440-dark-39-back-from-deck.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "click New Presentation",
+      "ms": 1976,
+      "url": "https://www.turboslide.com/new",
+      "editId": null,
+      "state": {
+        "title": "Untitled presentation, editor, Turboslide",
+        "studio": false,
+        "skeleton": null,
+        "notSaved": false
+      },
+      "file": "drive-1440-dark-40-new-presentation.png"
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "click footer lockup",
+      "scrollY": 10509,
+      "url": "https://www.turboslide.com/home",
+      "files": [
+        "drive-1440-dark-41-footer-hover-lockup.png",
+        "drive-1440-dark-42-footer-lockup-clicked.png"
+      ]
+    },
+    {
+      "key": "drive-1440-dark",
+      "name": "tab x3",
+      "focused": "home.nav.decks",
+      "file": "drive-1440-dark-43-tab-focus.png"
+    },
+    {
+      "key": "drive-390-dark",
+      "name": "nav at 390",
+      "navState": {
+        "rowWidth": 390,
+        "items": [
+          {
+            "control": "home.nav.lockup",
+            "w": 16,
+            "visible": true
+          },
+          {
+            "control": "home.nav.decks",
+            "w": 0,
+            "visible": false
+          },
+          {
+            "control": "home.nav.docs",
+            "w": 0,
+            "visible": false
+          },
+          {
+            "control": "home.nav.agents",
+            "w": 0,
+            "visible": false
+          },
+          {
+            "control": "home.nav.github",
+            "w": 0,
+            "visible": false
+          },
+          {
+            "control": "home.theme",
+            "w": 107,
+            "visible": true
+          },
+          {
+            "control": "home.theme.light",
+            "w": 52,
+            "visible": true
+          },
+          {
+            "control": "home.theme.dark",
+            "w": 51,
+            "visible": true
+          },
+          {
+            "control": "home.nav.new",
+            "w": 131,
+            "visible": true
+          }
+        ],
+        "overflow": false
+      },
+      "file": "drive-390-dark-44-nav.png"
+    },
+    {
+      "key": "drive-390-dark",
+      "name": "hero plate at 390",
+      "plate": {
+        "hero": {
+          "h": 520
+        },
+        "plate": {
+          "top": 211,
+          "h": 353,
+          "w": 390
+        },
+        "h1": {
+          "h": 44,
+          "size": "44px"
+        },
+        "sentence": {
+          "lines": 2,
+          "h": 52
+        },
+        "cta": {
+          "h": 88,
+          "rows": 2
+        },
+        "facts": {
+          "h": 78
+        },
+        "plateBelowFold": false,
+        "twinVisibleAbovePlate": 211
+      },
+      "file": "drive-390-dark-45-hero.png"
+    },
+    {
+      "key": "drive-390-dark",
+      "name": "390 numbers",
+      "info": {
+        "w": 342,
+        "h": 618,
+        "scrollW": 340,
+        "clientW": 340,
+        "sideways": false
+      },
+      "file": "drive-390-dark-46-section-numbers.png"
+    },
+    {
+      "key": "drive-390-dark",
+      "name": "390 cards",
+      "info": {
+        "w": 342,
+        "h": 5510,
+        "scrollW": 340,
+        "clientW": 340,
+        "sideways": false
+      },
+      "file": "drive-390-dark-47-section-cards.png"
+    },
+    {
+      "key": "drive-390-dark",
+      "name": "390 pipe",
+      "info": {
+        "w": 342,
+        "h": 790,
+        "scrollW": 340,
+        "clientW": 340,
+        "sideways": false
+      },
+      "file": "drive-390-dark-48-section-pipe.png"
+    },
+    {
+      "key": "drive-390-dark",
+      "name": "390 specimens",
+      "info": {
+        "w": 342,
+        "h": 841,
+        "scrollW": 342,
+        "clientW": 342,
+        "sideways": false
+      },
+      "file": "drive-390-dark-49-section-specimens.png"
+    },
+    {
+      "key": "drive-390-dark",
+      "name": "390 speed",
+      "info": {
+        "w": 342,
+        "h": 3207,
+        "scrollW": 342,
+        "clientW": 342,
+        "sideways": false
+      },
+      "file": "drive-390-dark-50-section-speed.png"
+    },
+    {
+      "key": "drive-390-dark",
+      "name": "390 agents",
+      "info": {
+        "w": 342,
+        "h": 1536,
+        "scrollW": 342,
+        "clientW": 342,
+        "sideways": false
+      },
+      "file": "drive-390-dark-51-section-agents.png"
+    },
+    {
+      "key": "drive-390-dark",
+      "name": "390 table",
+      "info": {
+        "w": 342,
+        "h": 1398,
+        "scrollW": 640,
+        "clientW": 342,
+        "sideways": true
+      },
+      "file": "drive-390-dark-52-section-table.png"
+    },
+    {
+      "key": "drive-390-dark",
+      "name": "390 footer",
+      "info": {
+        "w": 342,
+        "h": 955,
+        "scrollW": 342,
+        "clientW": 342,
+        "sideways": false
+      },
+      "file": "drive-390-dark-53-section-footer.png"
+    },
+    {
+      "key": "drive-390-dark",
+      "name": "table drag",
+      "scrollLeftAfterDrag": 0,
+      "file": "drive-390-dark-54-table-scrolled.png"
+    }
+  ],
+  "created": []
+}

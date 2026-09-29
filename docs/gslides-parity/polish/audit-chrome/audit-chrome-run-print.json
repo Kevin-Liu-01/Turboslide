@@ -1,0 +1,265 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "deckId": "untitled-20260928-wxc3",
+  "startedAt": "2026-09-28T20:30:08.115Z",
+  "finishedAt": "2026-09-28T20:31:07.986Z",
+  "viewport": "1440x900 and 1280x800",
+  "scale": 2,
+  "rows": [
+    {
+      "n": 1,
+      "section": "boot",
+      "feature": "Layout shift on load",
+      "interaction": "Load /new on a fresh browser at 1440 by 900 and read the layout-shift entries and the anchors frame by frame",
+      "result": "works",
+      "evidence": "CLS 0.0000 over 0 entries (); theme frames light; 2 distinct frames; boot theme light",
+      "shots": [
+        "001-boot-new-150ms.png",
+        "002-boot-new-500ms.png",
+        "003-boot-new-1200ms.png",
+        "004-boot-new-settled.png"
+      ]
+    },
+    {
+      "n": 2,
+      "section": "boot",
+      "feature": "Scratch deck",
+      "interaction": "Double click the title placeholder on /new, type a title, press Escape: the first write creates the deck",
+      "result": "works",
+      "evidence": "/edit/untitled-20260928-wxc3; revision 1; name prompt false; title row \"Chrome audit\"",
+      "shots": []
+    },
+    {
+      "n": 3,
+      "section": "objects",
+      "feature": "Text box",
+      "interaction": "Insert > Text box, click on the sheet, type",
+      "result": "works",
+      "evidence": "text text {\"x\":380,\"y\":300,\"w\":480,\"h\":64,\"z\":2}",
+      "shots": []
+    },
+    {
+      "n": 4,
+      "section": "objects",
+      "feature": "Shape",
+      "interaction": "Insert > Shape > Rectangle, drag on the sheet",
+      "result": "works",
+      "evidence": "shape shape {\"x\":220,\"y\":560,\"w\":400,\"h\":260,\"z\":3}",
+      "shots": []
+    },
+    {
+      "n": 5,
+      "section": "objects",
+      "feature": "Picture",
+      "interaction": "asset.add then block.insert through the window API",
+      "result": "works",
+      "evidence": "audit-pic-mulpc5m7 shot {\"x\":900,\"y\":160,\"w\":480,\"h\":320,\"z\":4}",
+      "shots": []
+    },
+    {
+      "n": 6,
+      "section": "objects",
+      "feature": "Table",
+      "interaction": "Insert > Table, pick 3 by 3 on the hover grid",
+      "result": "works",
+      "evidence": "table table {\"x\":660,\"y\":520,\"w\":803,\"h\":163,\"z\":5}",
+      "shots": [
+        "005-menu-insert-table-grid.png"
+      ]
+    },
+    {
+      "n": 7,
+      "section": "objects",
+      "feature": "The four objects",
+      "interaction": "The slide with the four objects placed",
+      "result": "note",
+      "evidence": "{\"text\":{\"id\":\"text\",\"slideId\":\"split-1\",\"type\":\"text\"},\"shape\":{\"id\":\"shape\",\"slideId\":\"split-1\",\"type\":\"shape\"},\"picture\":{\"id\":\"audit-pic-mulpc5m7\",\"slideId\":\"split-1\",\"type\":\"shot\"},\"table\":{\"id\":\"table\",\"slideId\":\"split-1\",\"type\":\"table\"}}",
+      "shots": [
+        "006-objects-placed.png"
+      ]
+    },
+    {
+      "n": 8,
+      "section": "print",
+      "feature": "The print route",
+      "interaction": "Open /print/<id> in a fresh page",
+      "result": "broken",
+      "evidence": "page.goto: net::ERR_ABORTED; maybe frame was detached?",
+      "shots": []
+    },
+    {
+      "n": 9,
+      "section": "teardown",
+      "feature": "Scratch deck",
+      "interaction": "File > Move to trash",
+      "result": "works",
+      "evidence": "/decks",
+      "shots": []
+    },
+    {
+      "n": 10,
+      "section": "teardown",
+      "feature": "Scratch deck",
+      "interaction": "The product trash path",
+      "result": "broken",
+      "evidence": "failed: page.goto: Timeout 15000ms exceeded.; falling back to the window API",
+      "shots": []
+    },
+    {
+      "n": 11,
+      "section": "teardown",
+      "feature": "Scratch deck",
+      "interaction": "GET /edit/untitled-20260928-wxc3 answers 404",
+      "result": "works",
+      "evidence": "status 404",
+      "shots": []
+    },
+    {
+      "n": 12,
+      "section": "teardown",
+      "feature": "Scratch deck",
+      "interaction": "GET /deck/untitled-20260928-wxc3 answers 404",
+      "result": "works",
+      "evidence": "status 404",
+      "shots": []
+    }
+  ],
+  "facts": {
+    "boot.new.1440.layoutShift": {
+      "entries": [],
+      "frames": [
+        {
+          "t": 105,
+          "theme": "light",
+          "fonts": "loaded",
+          "rects": {
+            "[data-control=\"title.row\"]": null,
+            "[data-control=\"menubar\"]": null,
+            "[data-control=\"toolbar.head\"]": null,
+            "[data-control=\"toolbar.tail\"]": null,
+            ".ts-stagewrap.ts-editor .pt-slide": null,
+            "[data-control=\"filmstrip\"]": null,
+            "[data-control=\"share.open\"]": null,
+            ".ts-title-name": null
+          }
+        },
+        {
+          "t": 293,
+          "theme": "light",
+          "fonts": "loaded",
+          "rects": {
+            "[data-control=\"title.row\"]": [
+              0,
+              0,
+              1440,
+              44
+            ],
+            "[data-control=\"menubar\"]": [
+              0,
+              44,
+              1440,
+              28
+            ],
+            "[data-control=\"toolbar.head\"]": [
+              8,
+              76,
+              331,
+              32
+            ],
+            "[data-control=\"toolbar.tail\"]": [
+              343,
+              76,
+              1089,
+              32
+            ],
+            ".ts-stagewrap.ts-editor .pt-slide": [
+              284,
+              157,
+              1128,
+              635
+            ],
+            "[data-control=\"filmstrip\"]": [
+              0,
+              112,
+              255,
+              788
+            ],
+            "[data-control=\"share.open\"]": [
+              1350,
+              6,
+              78,
+              32
+            ],
+            ".ts-title-name": [
+              50,
+              6,
+              157,
+              32
+            ]
+          }
+        }
+      ],
+      "marks": []
+    },
+    "objects": {
+      "text": {
+        "id": "text",
+        "slideId": "split-1",
+        "type": "text"
+      },
+      "shape": {
+        "id": "shape",
+        "slideId": "split-1",
+        "type": "shape"
+      },
+      "picture": {
+        "id": "audit-pic-mulpc5m7",
+        "slideId": "split-1",
+        "type": "shot"
+      },
+      "table": {
+        "id": "table",
+        "slideId": "split-1",
+        "type": "table"
+      },
+      "objectSlide": "split-1",
+      "titleSlide": "title"
+    }
+  },
+  "consoleErrors": [
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 ()",
+      "at": "2026-09-28T20:30:50.006Z"
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 ()",
+      "at": "2026-09-28T20:30:53.524Z"
+    },
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 ()",
+      "at": "2026-09-28T20:31:00.416Z"
+    }
+  ],
+  "failedResponses": [
+    {
+      "status": 404,
+      "url": "https://turboslide.vercel.app/api/render/pictures?deck=03-pictures-tables&theme=dark&w=320&r=0",
+      "at": "2026-09-28T20:30:50.006Z"
+    },
+    {
+      "status": 404,
+      "url": "https://turboslide.vercel.app/api/render/pictures?deck=03-pictures-tables&theme=dark&w=320&r=0&retry=1",
+      "at": "2026-09-28T20:30:53.524Z"
+    },
+    {
+      "status": 404,
+      "url": "https://turboslide.vercel.app/api/render/pictures?deck=03-pictures-tables&theme=dark&w=320&r=0&retry=2",
+      "at": "2026-09-28T20:31:00.416Z"
+    }
+  ],
+  "popups": [
+    "about:blank"
+  ],
+  "downloads": [],
+  "shots": 6
+}

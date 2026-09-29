@@ -1,0 +1,75 @@
+{
+  "base": "https://www.turboslide.com",
+  "deck": "untitled-20260928-gvep",
+  "startedAt": "2026-09-28T19:41:23.242Z",
+  "seconds": 57,
+  "rows": [
+    {
+      "n": 1,
+      "step": "open /new, the title, a second slide with a body paragraph",
+      "expected": "ready",
+      "observed": "deck untitled-20260928-gvep; slide 2 split-1; runs [{\"run\":\"h/text\",\"text\":\"Click to add title\",\"y\":248,\"h\":34},{\"run\":\"p1/text\",\"text\":\"Click to add text\",\"y\":506,\"h\":23}]; body run p1/text",
+      "ok": true,
+      "at": 10.9
+    },
+    {
+      "n": 2,
+      "step": "Link detection off: open the body session (verified), End, space, type an address and a space",
+      "expected": "no link while the setting is off",
+      "observed": "setting false; session {\"opened\":true,\"selection\":\"\",\"run\":\"p1/text\"}; still open after typing true; markup [\"The renewal covers three regions for Acme. See [www.example.com](https://www.example.com) now\"]; link made true",
+      "ok": false,
+      "at": 18.4
+    },
+    {
+      "n": 3,
+      "step": "Link detection on: the same typing with another address",
+      "expected": "the address becomes a link",
+      "observed": "setting true; session {\"opened\":true,\"selection\":\"\",\"run\":\"p1/text\"}; markup [\"The renewal covers three regions for Acme. See [www.example.com](https://www.example.com) now Then [www.example.net](https://www.example.net) today\"]; link made true",
+      "ok": true,
+      "at": 25.5
+    },
+    {
+      "n": 4,
+      "step": "a view link: the assistant for a viewer",
+      "expected": "the panel disabled with the sentence",
+      "observed": "address /deck/untitled-20260928-gvep; Assist entry drawn true; Tools menu false; menubar []; Cmd+J opened a panel null; panel words \"none\"",
+      "ok": null,
+      "at": 36.9
+    },
+    {
+      "n": 5,
+      "step": "File > Move to trash",
+      "expected": "/decks",
+      "observed": "/decks",
+      "ok": true,
+      "at": 50.6
+    },
+    {
+      "n": 6,
+      "step": "Delete forever, then GET /edit/<id> and /deck/<id>",
+      "expected": "404 and 404",
+      "observed": "404 and 404",
+      "ok": true,
+      "at": 56.5
+    }
+  ],
+  "facts": {
+    "slideTwoRuns": [
+      {
+        "run": "h/text",
+        "text": "Click to add title",
+        "y": 248,
+        "h": 34
+      },
+      {
+        "run": "p1/text",
+        "text": "Click to add text",
+        "y": 506,
+        "h": 23
+      }
+    ]
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 502 ()"
+  ]
+}

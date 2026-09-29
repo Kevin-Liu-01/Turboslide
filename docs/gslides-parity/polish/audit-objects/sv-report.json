@@ -1,0 +1,77 @@
+{
+ "base": "https://turboslide.vercel.app",
+ "theme": "light",
+ "viewport": {
+  "width": 1440,
+  "height": 900
+ },
+ "startedAt": "2026-09-28T19:44:23.938Z",
+ "steps": [
+  {
+   "step": "paste svg markup (text/plain with the XML prolog) on the stage",
+   "ms": 9025,
+   "observed": "nothing landed within 8126 ms; type undefined none asset undefined; drawn null; snack ",
+   "shot": "sv-01-svg-pasted.png",
+   "page": "sv-02-svg-pasted-page.png"
+  },
+  {
+   "step": "Insert > Image > Upload from computer with mark.svg",
+   "ms": 3000,
+   "observed": "shot within 30 ms; type shot 379,169 843x562; drawn {\"free\":{\"x\":379,\"y\":169,\"w\":843,\"h\":562},\"img\":{\"box\":{\"x\":379,\"y\":169,\"w\":843,\"h\":562},\"src\":\"https://turboslide.vercel.app/decks/untitled-20260928-6jw8/assets/pasted.svg\",\"natural\":[240,160],\"objectFit\":\"contain\",\"svgSrc\":true},\"inlineSvg\":null,\"chip\":\"Image\",\"handles\":[\"handle.shot.move\",\"handle.shot.resize.nw\",\"handle.shot.resize.n\",\"handle.shot.resize.ne\",\"handle.shot.resize.e\",\"handle.shot.resize.se\",\"handle.shot.resize.s\",\"handle.shot.resize.sw\",\"handle.shot.resize.w\",\"handle.shot.rotate\"],\"k\":0.705}; snack ",
+   "shot": "sv-03-svg-uploaded.png",
+   "page": "sv-04-svg-uploaded-page.png"
+  },
+  {
+   "step": "select the svg picture: chip, handles, tail",
+   "ms": 1428,
+   "observed": "chip Image; handles 10; tail toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash, toolbar.cropImage, toolbar.replaceImage, toolbar.imageOptions, toolbar.resetImage, toolbar.formatOptions",
+   "shot": "sv-05-svg-selected.png",
+   "page": "sv-06-svg-selected-page.png"
+  },
+  {
+   "step": "move the uploaded picture to the left half; Shift resize by the se handle",
+   "ms": 3734,
+   "observed": "-21,169 843x562 -> -21,169 1143x762 aspect 1.500 -> 1.500; drawn {\"box\":{\"x\":-21,\"y\":169,\"w\":1143,\"h\":762},\"src\":\"https://turboslide.vercel.app/decks/untitled-20260928-6jw8/assets/pasted.svg\",\"natural\":[240,160],\"objectFit\":\"contain\",\"svgSrc\":true}",
+   "shot": "sv-07-svg-shift-resized.png"
+  },
+  {
+   "step": "zoom box typed to 400",
+   "ms": 2548,
+   "observed": "zoom state 4; box 400%; sheet k 4.000 (6400 px wide); img {\"box\":{\"x\":-21,\"y\":169,\"w\":1143,\"h\":762},\"src\":\"https://turboslide.vercel.app/decks/untitled-20260928-6jw8/assets/pasted.svg\",\"natural\":[240,160],\"objectFit\":\"contain\",\"svgSrc\":true} in viewport {\"x\":35.388126373291016,\"y\":275.2068786621094,\"w\":142.16062545776367,\"h\":94.77374267578125}",
+   "shot": "sv-08-zoom-400-page.png",
+   "clip": "sv-09-zoom-400-picture.png"
+  },
+  {
+   "step": "at 400: scroll the stage to the picture and look",
+   "ms": 192,
+   "observed": "img in viewport {\"x\":35.388126373291016,\"y\":275.2068786621094,\"w\":142.16062545776367,\"h\":94.77374267578125}; scroller {\"cls\":\"pt-stagewrap\",\"scrollLeft\":0,\"scrollTop\":0,\"scrollWidth\":3792,\"clientWidth\":1184}",
+   "shot": "sv-10-zoom-400-scrolled.png",
+   "clip": "sv-11-zoom-400-picture-scrolled.png"
+  },
+  {
+   "step": "View > Zoom > Fit",
+   "ms": 2805,
+   "observed": "box Fit",
+   "shot": "sv-12-fit-again.png"
+  },
+  {
+   "step": "paste the html form (Figma copies as text/html too)",
+   "ms": 2966,
+   "observed": "shot-3 type shot 1202,377 221x147",
+   "shot": "sv-13-svg-html-pasted.png"
+  },
+  {
+   "step": "Format > Image submenu on the svg picture",
+   "ms": 1858,
+   "observed": "rows menu.format.image.cropImage, menu.format.image.maskImage, menu.format.image.replaceImage, menu.format.image.addCaption, menu.format.image.resetImage, menu.format.image.useOnEverySlide, menu.format.image.imageOptions",
+   "shot": "sv-14-format-image-svg.png"
+  }
+ ],
+ "consoleErrors": [],
+ "finishedAt": "2026-09-28T19:45:03.840Z",
+ "deckId": "untitled-20260928-6jw8",
+ "destroyed": {
+  "trashed": true,
+  "status": 404
+ }
+}

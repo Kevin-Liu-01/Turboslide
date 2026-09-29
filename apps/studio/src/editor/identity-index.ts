@@ -140,7 +140,12 @@ export function identityIndex(input: IdentityIndexInput): ReadonlyMap<string, Id
   const personOf = new Map<string, string>();
   for (const [id, identity] of Object.entries(input.resolved ?? {})) {
     const { avatar: _avatar, accountId, ...view } = identity;
-    out.set(id, identityView(view, input.author));
+    /* the account id stays on the view (build/b5.md R9): the version panel reads an aliased
+       row as the reader's own when the account is the reader */
+    out.set(id, {
+      ...identityView(view, input.author),
+      ...(accountId === undefined ? {} : { accountId }),
+    });
     if (accountId !== undefined) personOf.set(id, accountId);
   }
   for (const version of input.versions ?? []) {
@@ -156,7 +161,12 @@ export function identityIndex(input: IdentityIndexInput): ReadonlyMap<string, Id
   }
   const now = new Date().toISOString();
   for (const entry of input.roster) {
-    out.set(entry.principalId, participantOf(entry, now));
+    /* a roster row of an aliased anonymous id keeps the account the payload named for it */
+    const accountId = personOf.get(entry.principalId);
+    out.set(entry.principalId, {
+      ...participantOf(entry, now),
+      ...(accountId === undefined ? {} : { accountId }),
+    });
     note(entry.principalId);
   }
   const me = identityView(input.identity, input.author);

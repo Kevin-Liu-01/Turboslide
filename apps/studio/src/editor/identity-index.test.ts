@@ -202,7 +202,10 @@ describe('identityIndex', () => {
     expect(names.get(A)?.label).toBe('Silica 255');
     expect(names.get(USR)?.label).toBe('Silica 255');
     expect(names.get(B)?.label).toBe('Silica 255 (2)');
-    expect(names.get(A)).not.toHaveProperty('accountId');
+    /* the account id stays on the aliased view (build/b5.md R9): the version panel reads a row
+       by the reader's pre sign in id as the reader's own; a plain label carries none */
+    expect(names.get(A)?.accountId).toBe(USR);
+    expect(names.get(B)).not.toHaveProperty('accountId');
   });
 
   it('never stores the suffix: a fresh index reads the base text again', () => {

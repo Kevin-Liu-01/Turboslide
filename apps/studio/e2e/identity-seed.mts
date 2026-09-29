@@ -15,7 +15,9 @@
 //   node identity-seed.mts oriented                                    -> { base64, mime, width, height, orientation } a 64 by 32 JPEG with EXIF orientation 6 (PEOPLE.md 4.1)
 //   node identity-seed.mts picture <jpeg|png|webp|gif> <w> <h> [noise|gradient]
 //                                                                      -> { base64, mime, bytes } a picture of that size (gradient by default; noise does not compress)
+//   node identity-seed.mts cookie <principalId> <origin>              -> { name, value } the sealed identity cookie of an anonymous record (build/b5.md R2): `ts_id` on an http origin, `__Host-ts_id` on https; sealed under TURBOSLIDE_SESSION_SECRET, else the overlay's state folder's file
 import { randomUUID } from 'node:crypto';
+import { join } from 'node:path';
 
 import { anonymousPrincipalId } from '@turboslide/identity/ids';
 import { labelFor } from '@turboslide/identity/labels';
@@ -30,6 +32,8 @@ import { migrateAuthDb, openAuthDb } from '../src/server/auth/db.ts';
 import type { AuthDb } from '../src/server/auth/db.ts';
 import { dbCaptureStore } from '../src/server/auth/mail/mailer.ts';
 import { PRINCIPALS_DIR, filePrincipalStore } from '../src/server/auth/principal.ts';
+import { sessionSecret } from '../src/server/auth/secret.ts';
+import { sealPrincipalCookie } from '../src/server/auth/session.ts';
 import { dbApiKeyStore } from '../src/server/auth/tokens.ts';
 
 type SeedFormat = 'jpeg' | 'png' | 'webp' | 'gif';
@@ -251,6 +255,22 @@ async function main(): Promise<unknown> {
         mime: MIME[format],
         bytes: bytes.byteLength,
       };
+    }
+    case 'cookie': {
+      /* the sealed identity cookie of an existing anonymous record (build/b5.md R2), so a spec
+         opens a browser context as a seeded principal: the name the server accepts on the origin
+         (session.ts: `ts_id` over plain http, `__Host-ts_id` over https; the reader takes both),
+         the value sealed under the server's session secret (TURBOSLIDE_SESSION_SECRET in this
+         process's environment, else the overlay's state folder's file), never printed by name */
+      const [principalId, origin] = rest;
+      const overlay = process.env.TURBOSLIDE_OVERLAY_DIR;
+      const { secret } = sessionSecret(
+        process.env,
+        overlay === undefined || overlay === '' ? undefined : join(overlay, '.turboslide'),
+        () => undefined,
+      );
+      const value = await sealPrincipalCookie(principalId ?? '', secret);
+      return { name: (origin ?? '').startsWith('https:') ? '__Host-ts_id' : 'ts_id', value };
     }
     default:
       throw new Error(`unknown mode ${mode ?? ''}`);

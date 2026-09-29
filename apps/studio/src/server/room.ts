@@ -70,7 +70,13 @@ import { headPulse, isStoreBusy, storeRetryAfterMs } from '@turboslide/store/pul
 import { touchedSlides } from '@turboslide/store/store';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
-import { capabilitiesOf, displayNameFromIndex, effectiveAccess, readAccess } from './access';
+import {
+  avatarChoiceFromIndex,
+  capabilitiesOf,
+  displayNameFromIndex,
+  effectiveAccess,
+  readAccess,
+} from './access';
 import { agentAuth } from './auth';
 import { authorize, bootstrapAgentContext, denialBody, linkGrantsFor } from './authorize';
 import type { Capability, ShadowedDecision } from './authorize';
@@ -388,12 +394,22 @@ export async function requestIdentity(request: Request): Promise<RequestIdentity
      is a file store per instance, so the name `account.setName` wrote elsewhere rides the
      principal's deck index on the Blob store (access.ts displayNameFromIndex, the carrier the
      link grants use), read past the same 5 s cache; a record that carries a name keeps it */
-  const record =
+  const named =
     touched !== null && touched.name === undefined
       ? await displayNameFromIndex(principal.id)
           .then((name) => (name === undefined ? touched : { ...touched, name }))
           .catch(() => touched)
       : touched;
+  /* the avatar choice chosen on another instance rides the same index (docs/PEOPLE.md 3.13;
+     b4.md R4: `account.setAvatar` writes a non picture choice there and clears it on a picture):
+     the index's choice replaces the record's whenever the index carries one, unless the record's
+     choice is a picture, which the index never carries and a stale glyph must not outlive */
+  const record =
+    named !== null && named.avatar.variant !== 'picture'
+      ? await avatarChoiceFromIndex(principal.id)
+          .then((avatar) => (avatar === undefined ? named : { ...named, avatar }))
+          .catch(() => named)
+      : named;
   return {
     /* the link grants are the union of the principal record's and the deck index's, so a grant
        exchanged on another instance admits the visitor on the ops, stream, presence and comments

@@ -1114,8 +1114,13 @@ describe('the role predicates of SPEC-3 13.4', () => {
     expect(evaluate('signedIn', DEFAULT_MENU_CONTEXT)).toBe(false);
     expect(evaluate('canSignIn', DEFAULT_MENU_CONTEXT)).toBe(false);
     expect(hasCapability(DEFAULT_MENU_CONTEXT, 'write')).toBe(true);
-    /* the two identity rows read the account facts, not a role, and wait for them (7.5) */
-    const identityRows = new Set(['title.account.signIn', 'title.account.signOut']);
+    /* the three identity rows read the account facts, not a role, and wait for them (7.5); the
+       Sessions row is an account's since the people round (docs/PEOPLE.md 3.14; accounts 8) */
+    const identityRows = new Set([
+      'title.account.signIn',
+      'title.account.signOut',
+      'title.account.sessions',
+    ]);
     const on: MenuContext = {
       ...DEFAULT_MENU_CONTEXT,
       settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
@@ -1176,11 +1181,13 @@ describe('the role predicates of SPEC-3 13.4', () => {
     const viewerOn = asRole('viewer', {
       settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
     });
-    for (const id of ['title.inbox', 'title.account', 'view.livePointers.collaborators']) {
+    for (const id of ['title.inbox', 'view.livePointers.collaborators']) {
       expect(isPresent(itemById(id), viewer), id).toBe(false);
       expect(isPresent(itemById(id), viewerOn), id).toBe(true);
     }
-    for (const id of ['file.open', 'file.details']) {
+    /* the own chip's menu returned to the default view in the people round (docs/PEOPLE.md 3.14,
+       default 2), for a viewer too */
+    for (const id of ['file.open', 'file.details', 'title.account']) {
       expect(isPresent(itemById(id), viewer), id).toBe(true);
       expect(isPresent(itemById(id), viewerOn), id).toBe(true);
     }
@@ -1301,8 +1308,10 @@ describe('the role predicates of SPEC-3 13.4', () => {
     expect(isChecked(itemById('view.comments.hide'), DEFAULT_MENU_CONTEXT)).toBe(false);
     expect(isChecked(itemById('view.livePointers.collaborators'), DEFAULT_MENU_CONTEXT)).toBe(true);
     expect(isChecked(itemById('view.livePointers.mine'), DEFAULT_MENU_CONTEXT)).toBe(false);
-    /* the own chip's rows read the identity facts; the account menu is parked (docs/FOCUS.md
-       3.2), so the facts are read with the switch on and the rows are absent with it off */
+    /* the own chip's rows read the identity facts; the account menu was parked in the focus
+       round (docs/FOCUS.md 3.2) and is in the default view since the people round (docs/PEOPLE.md
+       3.14, default 2), so the rows follow the facts with the switch off too, and Sessions is an
+       account's row (accounts 8) */
     const on = { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true };
     const anonymous = {
       ...DEFAULT_MENU_CONTEXT,
@@ -1311,12 +1320,13 @@ describe('the role predicates of SPEC-3 13.4', () => {
     };
     expect(isPresent(itemById('title.account.signIn'), anonymous)).toBe(true);
     expect(isPresent(itemById('title.account.signOut'), anonymous)).toBe(false);
+    expect(isPresent(itemById('title.account.sessions'), anonymous)).toBe(false);
     expect(
       isPresent(itemById('title.account.signIn'), {
         ...anonymous,
         settings: DEFAULT_MENU_CONTEXT.settings,
       }),
-    ).toBe(false);
+    ).toBe(true);
     const signedIn = {
       ...DEFAULT_MENU_CONTEXT,
       settings: on,
@@ -1324,6 +1334,13 @@ describe('the role predicates of SPEC-3 13.4', () => {
     };
     expect(isPresent(itemById('title.account.signIn'), signedIn)).toBe(false);
     expect(isPresent(itemById('title.account.signOut'), signedIn)).toBe(true);
+    expect(isPresent(itemById('title.account.sessions'), signedIn)).toBe(true);
+    expect(
+      isPresent(itemById('title.account.sessions'), {
+        ...signedIn,
+        settings: DEFAULT_MENU_CONTEXT.settings,
+      }),
+    ).toBe(true);
     /* without DATABASE_URL the Sign in row is absent (7.3) */
     const noSignIn = {
       ...DEFAULT_MENU_CONTEXT,
@@ -1331,11 +1348,12 @@ describe('the role predicates of SPEC-3 13.4', () => {
       account: { signedIn: false, signInAvailable: false },
     };
     expect(isPresent(itemById('title.account.signIn'), noSignIn)).toBe(false);
+    /* an anonymous person is not offered a Sessions list that answers [] (docs/PEOPLE.md 3.14) */
     expect(
       visibleItems(itemById('title.account').items ?? [], { context: noSignIn }).map(
         (item) => item.label,
       ),
-    ).toEqual(['Change name', 'Change avatar', 'Forget this browser', 'Sessions']);
+    ).toEqual(['Change name', 'Change avatar', 'Forget this browser']);
   });
 });
 
@@ -2906,8 +2924,8 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       'view.livePointers.mine',
       'view.livePointers.collaborators',
       'title.presence.follow',
-      'title.presence.me',
-      'title.account',
+      /* title.presence.me and title.account left the list in the people round (docs/PEOPLE.md
+         3.14, default 2: the own chip and the roster's own row in the default view) */
       'title.inbox',
       'file.makeCopy.selected',
       'file.share.publish',

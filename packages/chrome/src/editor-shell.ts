@@ -258,6 +258,11 @@ export type IdentityView = {
   runId?: string;
   /** the account was deleted (7.4): the name reads "Deleted account" and no badge is drawn (docs/PEOPLE.md 3.7) */
   deleted?: boolean;
+  /**
+   * the account (`usr_<id>`) an aliased anonymous id renders as (7.4; docs/PEOPLE.md 3.17): the
+   * two ids are one person to the label suffix and to the version panel's You (build/b5.md R9)
+   */
+  accountId?: string;
 };
 
 /**

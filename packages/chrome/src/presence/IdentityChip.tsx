@@ -170,7 +170,6 @@ export function IdentityChip({
 }: IdentityChipProps) {
   const spec = markOf(identity, { hueSlot, self, presenter });
   const plate = plateOf(size);
-  const cells = markCells(spec, size);
   const hue = spec.hue?.hex ?? null;
   /* a picture that failed to load draws the initials field in its place, so a 404 never leaves an
      empty box (parity, "the picture's limits and fallbacks"); keyed by the URL so a new picture
@@ -183,6 +182,18 @@ export function IdentityChip({
   };
   const wanted = spec.variant === 'picture' ? (pictureUrl ?? spec.pictureUrl) : undefined;
   const picture = wanted !== undefined && failed !== wanted ? pictureSources(wanted) : undefined;
+  /* the field a picture spec falls back to (build/b5.md R10): the initials mark of the identity
+     itself (its letters, the density of its own id, the hue kept), never the picture spec's own
+     cells, which are none and drew an empty box */
+  const drawn: MarkSpec =
+    spec.variant === 'picture' && picture === undefined
+      ? markSpec(resolvedOf(identity), {
+          hueSlot: spec.hue?.slot ?? null,
+          self: spec.self,
+          presenter: spec.presenter,
+        })
+      : spec;
+  const cells = markCells(drawn, size);
   return (
     <span
       className={cn(
@@ -227,7 +238,7 @@ export function IdentityChip({
           {cells.map((cell, i) => (
             <rect key={i} x={cell.x} y={cell.y} width={cell.w} height={cell.h} />
           ))}
-          {spec.variant === 'initials' && spec.initials !== '' ? (
+          {drawn.variant === 'initials' && drawn.initials !== '' ? (
             <text
               className="ts-chip-initials"
               x={plate / 2}
@@ -236,7 +247,7 @@ export function IdentityChip({
               dominantBaseline="central"
               fontSize={initialsFontSize(size)}
             >
-              {spec.initials}
+              {drawn.initials}
             </text>
           ) : null}
         </svg>

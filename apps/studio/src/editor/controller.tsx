@@ -4104,6 +4104,10 @@ export function createEditorController(init: {
    */
   const stateOf = (): Record<string, unknown> => {
     const record = snapshot.access.record;
+    /* the caller's mark as the own chip draws it (build/b5.md R1; the row
+       people.mark-renderers-agree): the roster's own row when the room holds one (self set, the
+       picture URL on it), else the payload's own identity */
+    const ownMark = participants().self?.mark ?? identity?.mark;
     return {
       deckId,
       // the revision a caller reads is the one a base check enforces (SPEC-3 3.10; VERIFICATION-3
@@ -4203,6 +4207,7 @@ export function createEditorController(init: {
         trust: identity?.trust ?? 'guest',
         signedIn: identity?.kind === 'account',
         signInAvailable: init.payload.auth?.signIn ?? false,
+        ...(ownMark === undefined ? {} : { mark: ownMark }),
       },
       /* who is who on this deck (docs/PEOPLE.md 3.8, 3.17), as the shell input's `identities`
          reads it: the payload's resolved people under the roster and the caller, keyed by

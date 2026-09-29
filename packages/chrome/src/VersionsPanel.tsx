@@ -173,7 +173,17 @@ export function VersionsPanel({
      agent author with a name of its own reads it (the assistant's accept writes as "Assistant",
      docs/PRODUCT.md 6.1), where the presence chips word an agent by its run (nameOf) */
   const authorWord = (identity: IdentityView): string => {
-    if (me !== undefined && identity.principalId === me.principalId) return 'You';
+    /* the reader's own row by either of their ids (docs/PEOPLE.md 3.17; build/b5.md R9): a
+       record written before the sign in carries the anonymous id, which the payload's view
+       resolves to the account (accountId), and the reader may be either id */
+    if (
+      me !== undefined &&
+      (identity.principalId === me.principalId ||
+        (identity.accountId !== undefined && identity.accountId === me.principalId) ||
+        (me.accountId !== undefined && me.accountId === identity.principalId) ||
+        (identity.accountId !== undefined && identity.accountId === me.accountId))
+    )
+      return 'You';
     if (identity.trust === 'agent' && identity.name !== undefined && identity.name !== 'Agent')
       return identity.name;
     return nameOf(identity);

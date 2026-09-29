@@ -165,6 +165,27 @@ export type CspOptions = {
 
 /** The variable that names the public store's host (the twins' origin), for the policy. */
 export const PUBLIC_STORE_HOST_ENV = 'TURBOSLIDE_PUBLIC_STORE_HOST';
+
+/** The public store's host as the variable names it, trimmed of a scheme and a path; null when unset. */
+export function publicStoreHost(env: Env = process.env): string | null {
+  const raw = env[PUBLIC_STORE_HOST_ENV]?.trim();
+  if (!raw) return null;
+  const host = raw
+    .replace(/^https?:\/\//i, '')
+    .replace(/\/.*$/, '')
+    .trim();
+  return host === '' ? null : host;
+}
+
+/**
+ * The public store's origin (`https://<host>`), the base every picture avatar URL is built from
+ * on every instance (docs/PEOPLE.md 4.3: computed from the variable, never remembered per
+ * process); null when the deployment names no public store.
+ */
+export function publicStoreOrigin(env: Env = process.env): string | null {
+  const host = publicStoreHost(env);
+  return host === null ? null : `https://${host}`;
+}
 export const PRESIGN_HOST_ENV = 'TURBOSLIDE_PRESIGN_HOST';
 /** `report` (the default) ships the policy as `Content-Security-Policy-Report-Only`; `enforce` enforces it; `off` sends none. */
 export const CSP_MODE_ENV = 'TURBOSLIDE_CSP';

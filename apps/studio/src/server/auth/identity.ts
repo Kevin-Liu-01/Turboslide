@@ -342,13 +342,17 @@ async function accountProfile(
   const facts = await accountFacts(runtime, userId);
   if (facts === null) return null;
   const record = await runtime.principals.get(facts.principalId);
+  /* one source for the choice (PEOPLE.md 3.13; avatars 11): the profile row first, because it
+     outlives the principal record's 90 day sliding TTL and is the one place deletion finds the
+     files; the record second, for an account whose profile row never wrote a choice */
+  const avatar = facts.profile.avatar ?? record?.avatar;
   return {
     userId,
     name: facts.name,
     email: facts.email,
     emailVerified: facts.emailVerified,
     admin: facts.admin,
-    ...(record?.avatar !== undefined ? { avatar: record.avatar } : {}),
+    ...(avatar !== undefined && avatar !== null ? { avatar } : {}),
     ...(facts.profile.deletedAt !== null ? { deleted: true } : {}),
   };
 }
@@ -709,6 +713,9 @@ export async function identityViewFor(
     principalId,
     options.agent !== undefined ? { agent: options.agent } : {},
   );
+  /* the picture's 64 px URL rides the resolved identity itself (PEOPLE.md 4.4; resolve.ts
+     `pictureUrl`, B1), so `markSpec` draws a picture avatar with no per caller argument; the
+     option stays for a caller that already knows a URL */
   const mark = markSpec(identity, {
     ...(options.hueSlot !== undefined ? { hueSlot: options.hueSlot } : {}),
     ...(options.presenter !== undefined ? { presenter: options.presenter } : {}),

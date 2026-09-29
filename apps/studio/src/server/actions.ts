@@ -80,6 +80,7 @@ import {
   registerAdminActions as registerAccountAdminActions,
 } from './auth/actions';
 import type { ActionRequestFacts } from './auth/actions';
+import { selectAvatarStore } from './auth/avatar-tier';
 import { requestIdentity } from './auth/identity';
 import type { RequestIdentity } from './auth/identity';
 import { isSecureRequest } from './auth/session';
@@ -1253,8 +1254,17 @@ export async function deckDispatcher(
   if (request !== undefined) {
     registerRoomCommentHandlers(dispatcher, request, deckId);
     registerNotificationHandlers(dispatcher, request, deckId);
-    registerAccountActions(dispatcher, { facts: accountFactsFor(request, deckId) });
-    registerAccountAdminActions(dispatcher, { facts: accountFactsFor(request, deckId) });
+    // the picture files go to the public store on the blob tier and to the state folder
+    // elsewhere (docs/PEOPLE.md 4.3; AUDIT.md defect 12), one selection for the writer, the
+    // route and the janitor
+    registerAccountActions(dispatcher, {
+      facts: accountFactsFor(request, deckId),
+      avatarStore: selectAvatarStore,
+    });
+    registerAccountAdminActions(dispatcher, {
+      facts: accountFactsFor(request, deckId),
+      avatarStore: selectAvatarStore,
+    });
   }
   registerMigrateStorage(dispatcher);
   // the asset ids last, so the materials package's picture.materialize replaces the store

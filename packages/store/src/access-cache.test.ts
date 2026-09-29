@@ -25,6 +25,7 @@ import {
   cachedAccessStore,
   emptyDeckIndex,
   fileLinkIndex,
+  deckIndexSchema,
   indexUpdates,
   isAccessPrecondition,
   isBlobConflict,
@@ -502,5 +503,25 @@ describe('the proven read (pass 2)', () => {
     expect(indexUpdates.shared(DECK, 'viewer', NOW, 'grant')(once ?? base)?.shared).toEqual([
       { deckId: DECK, role: 'viewer', since: NOW, via: 'grant' },
     ]);
+  });
+
+  it('the avatar choice rides the index beside the name and clears with null (docs/PEOPLE.md 3.13)', () => {
+    const base = emptyDeckIndex();
+    const glyph = indexUpdates.avatar({ variant: 'glyph', salt: 7 })(base);
+    expect(glyph?.avatar).toEqual({ variant: 'glyph', salt: 7 });
+    // the same choice again is no write
+    expect(indexUpdates.avatar({ variant: 'glyph', salt: 7 })(glyph ?? base)).toBeNull();
+    const initials = indexUpdates.avatar({ variant: 'initials', initials: 'KL' })(glyph ?? base);
+    expect(initials?.avatar).toEqual({ variant: 'initials', initials: 'KL' });
+    // a picture chosen: the index never carries it, so the field goes
+    const cleared = indexUpdates.avatar(null)(initials ?? base);
+    expect(cleared).not.toBeNull();
+    expect(cleared?.avatar).toBeUndefined();
+    expect(indexUpdates.avatar(null)(cleared ?? base)).toBeNull();
+    // the schema admits the field and refuses a picture variant on it
+    expect(deckIndexSchema.safeParse({ ...base, avatar: { variant: 'dither', salt: 1 } }).success).toBe(
+      true,
+    );
+    expect(deckIndexSchema.safeParse({ ...base, avatar: { variant: 'picture' } }).success).toBe(false);
   });
 });

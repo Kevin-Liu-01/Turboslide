@@ -29,6 +29,7 @@ import type {
   AccessStore,
   CachedAccessStore,
   HeadCache,
+  IndexAvatarChoice,
   IndexStore,
   LinkIndex,
   StoredAccess,
@@ -164,8 +165,12 @@ export async function readStoredAccessFresh(deckId: string): Promise<StoredAcces
 /** How long an instance trusts the index's grants it read for a principal. */
 export const LINK_GRANT_TTL_MS = 5_000;
 
-/* the index's link grants and its display name (b1.md R17), one read per principal per 5 s */
-const grantCache = new Map<string, { grants: LinkGrant[]; name?: string; at: number }>();
+/* the index's link grants, its display name (b1.md R17) and its avatar choice (docs/PEOPLE.md
+   3.13), one read per principal per 5 s */
+const grantCache = new Map<
+  string,
+  { grants: LinkGrant[]; name?: string; avatar?: IndexAvatarChoice; at: number }
+>();
 
 /**
  * Records a link grant on the principal's deck index (`users/<principalId>/decks.json`, a `shared`
@@ -195,11 +200,11 @@ export async function linkGrantsFromIndex(
   return (await indexFactsFor(principalId, now)).grants;
 }
 
-/** The index's link grants and display name, read once per principal per 5 s (the grant cache). */
+/** The index's link grants, display name and avatar choice, read once per principal per 5 s (the grant cache). */
 async function indexFactsFor(
   principalId: string,
   now: number = Date.now(),
-): Promise<{ grants: LinkGrant[]; name?: string }> {
+): Promise<{ grants: LinkGrant[]; name?: string; avatar?: IndexAvatarChoice }> {
   const cached = grantCache.get(principalId);
   if (cached !== undefined && now - cached.at < LINK_GRANT_TTL_MS) return cached;
   const index = await (await indexStore()).read(principalId);
@@ -208,7 +213,12 @@ async function indexFactsFor(
     if (row.via !== 'link' || row.linkId === undefined) continue;
     grants.push({ linkId: row.linkId, deckId: row.deckId, role: row.role });
   }
-  const facts = { grants, ...(index.name === undefined ? {} : { name: index.name }), at: now };
+  const facts = {
+    grants,
+    ...(index.name === undefined ? {} : { name: index.name }),
+    ...(index.avatar === undefined ? {} : { avatar: index.avatar }),
+    at: now,
+  };
   grantCache.set(principalId, facts);
   return facts;
 }
@@ -230,6 +240,28 @@ export async function displayNameFromIndex(
 export async function noteDisplayName(principalId: string, name: string): Promise<void> {
   grantCache.delete(principalId);
   await (await indexStore()).update(principalId, indexUpdates.name(name));
+}
+
+/**
+ * The non picture avatar choice the principal's deck index carries (docs/PEOPLE.md 3.13; AUDIT.md
+ * defect 13): `account.setAvatar` writes a glyph, dither or initials choice here beside the
+ * record, so the instance that serves the next presence post draws the same plate. Undefined
+ * when none was chosen or the choice is a picture (which the index never carries).
+ */
+export async function avatarChoiceFromIndex(
+  principalId: string,
+  now: number = Date.now(),
+): Promise<IndexAvatarChoice | undefined> {
+  return (await indexFactsFor(principalId, now)).avatar;
+}
+
+/** Writes the non picture avatar choice onto the principal's deck index, or clears it with null. */
+export async function noteAvatarChoice(
+  principalId: string,
+  choice: IndexAvatarChoice | null,
+): Promise<void> {
+  grantCache.delete(principalId);
+  await (await indexStore()).update(principalId, indexUpdates.avatar(choice));
 }
 
 /** Forgets the cached grants (a test, a hook that knows the index moved). */

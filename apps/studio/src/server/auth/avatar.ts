@@ -1,19 +1,25 @@
-// The picture avatar (gslides-parity SPEC-3 0.22, 7.6; research 03 I4; report 10 F43): a
-// signed in principal's upload runs through sharp once and only the derived files are kept.
-// The bytes are sniffed (JPEG, PNG, WebP or GIF by their magic numbers; SVG and HEIF refused
-// before any decoder sees them), decoded with `failOn: 'error'` under `limitInputPixels`, rotated
-// by the orientation tag, cropped to the square the person dragged, resized to 32, 64, 128 and
-// 256 px WebP at quality 80 plus one 256 px PNG, metadata stripped, and stored under
-// `u/<avatarKey>/<sha256>-<size>.<ext>` where `avatarKey` is a random 128 bit value per person,
-// rotated on every change with the old prefix deleted. Anonymous principals are refused with the
-// dialog's sentence, never at the quota; ten uploads per identity per day.
+// The picture avatar (gslides-parity SPEC-3 0.22, 7.6; research 03 I4; report 10 F43;
+// docs/PEOPLE.md 4.2, 4.3, 4.6): a signed in principal's upload runs through sharp once and only
+// the derived files are kept. The browser crops a square and resizes it to 256 px WebP before the
+// request leaves (PEOPLE.md 4.1), so the request is capped at 512 KB before any decode. The bytes
+// are sniffed (JPEG, PNG, WebP or GIF by their magic numbers; SVG and HEIF refused before any
+// decoder sees them), decoded with `failOn: 'error'` under `limitInputPixels` of 1024 by 1024,
+// rotated by the orientation tag, cropped to the square the CLI's uncropped file needs, resized
+// to 32, 64, 128 and 256 px WebP at quality 80 plus one 256 px PNG, metadata stripped, and stored
+// under `u/<avatarKey>/<sha256>-<size>.<ext>` where `avatarKey` is a random 128 bit value per
+// person, rotated on every change with the old prefix deleted. Anonymous principals are refused
+// with the dialog's sentence, never at the quota; ten uploads per identity per day.
 //
-// Two stores: the public Blob store hosted (the files are public URLs like the deck twins) and
-// `.turboslide/users/` on a checkout, served by routes/api/avatar.$.ts with
-// `Cross-Origin-Resource-Policy: same-origin` and `nosniff`. sharp is a native addon reached on
-// the server only (apps/studio/vite.config.ts externalizes it).
+// Two stores: the public Blob store on the blob tier (the files are public URLs like the deck
+// twins, served for a year because the digest is in the name) and `.turboslide/users/` on a
+// checkout or a tmp store, served by routes/api/avatar.$.ts with
+// `Cross-Origin-Resource-Policy: same-origin` and `nosniff`. The public base is computed from the
+// public store's origin on every instance, never remembered per process. A failed put between the
+// files and the record write leaves files under a key nothing references; `sweepOrphanAvatars`
+// removes them (`admin.avatar.sweep`). sharp is a native addon reached on the server only
+// (apps/studio/vite.config.ts externalizes it).
 import { createHash, randomBytes } from 'node:crypto';
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, normalize, sep } from 'node:path';
 
 import sharp from 'sharp';
@@ -30,19 +36,37 @@ import type { QuotaStore } from './quota.ts';
 export const AVATAR_SIZES = [32, 64, 128, 256] as const;
 export const AVATAR_PNG_SIZE = 256;
 export const AVATAR_WEBP_QUALITY = 80;
-/** 5 MB after the browser's resize to at most 1024 px (7.6). */
-export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
-/** 16.7 megapixels: a phone photograph that skipped the client resize still decodes, a bomb does not. */
-export const AVATAR_MAX_INPUT_PIXELS = 4096 * 4096;
+/** 512 KB on the request, after the browser's 256 px resize (PEOPLE.md 4.2). */
+export const AVATAR_MAX_BYTES = 512 * 1024;
+/**
+ * The longest data URL the cap admits: the bytes in base64 plus a header such as
+ * `data:image/webp;base64,`. Checked on the string before any decode (PEOPLE.md 4.2).
+ */
+export const AVATAR_MAX_DATA_URL_LENGTH = Math.ceil(AVATAR_MAX_BYTES / 3) * 4 + 64;
+/** 1024 by 1024: the browser resized to 256 px, so anything larger is the CLI's file or a bomb. */
+export const AVATAR_MAX_INPUT_SIDE = 1024;
+export const AVATAR_MAX_INPUT_PIXELS = AVATAR_MAX_INPUT_SIDE * AVATAR_MAX_INPUT_SIDE;
+/** The header read's ceiling, the general upload pipeline's 64 megapixels; nothing is decoded under it. */
+const HEADER_MAX_PIXELS = 8192 * 8192;
 export const AVATAR_UPLOADS_PER_DAY = 10;
 export const AVATAR_PREFIX = 'u';
 /** The route a checkout serves the files from (routes/api/avatar.$.ts). */
 export const AVATAR_ROUTE = '/api/avatar';
+/** The folder under the state folder the file store writes to and the route reads from. */
+export const AVATAR_USERS_DIR = 'users';
+/** A year: the name carries the digest and the key rotates, so a URL is never rewritten. */
+export const AVATAR_CACHE_MAX_AGE_S = 31536000;
+/** A key younger than this is an upload in flight, never an orphan (PEOPLE.md 4.6). */
+export const AVATAR_ORPHAN_HOURS = 24;
 /** The Picture tab's sentence for an anonymous principal (SPEC-3 6.8). */
 export const SIGN_IN_TO_UPLOAD = 'Sign in to upload a picture';
-export const AVATAR_TOO_LARGE = 'Pictures up to 5 MB';
+export const AVATAR_TOO_LARGE = 'Pictures up to 512 KB after resizing';
+export const AVATAR_TOO_MANY_PIXELS = 'Pictures up to 1024 by 1024 pixels';
 export const AVATAR_NOT_A_PICTURE = 'Use a JPEG, PNG, WebP or GIF picture';
 export const AVATAR_QUOTA = 'You have reached today’s limit of ten pictures';
+export const AVATAR_SWEEP_NEEDS_DATABASE =
+  'The avatar sweep needs an identity database on this deployment';
+export const AVATAR_STORE_UNAVAILABLE = 'The public store is not configured on this deployment';
 
 export type AvatarFormat = 'jpeg' | 'png' | 'webp' | 'gif';
 
@@ -108,15 +132,17 @@ export async function processAvatar(
   if (bytes.byteLength > AVATAR_MAX_BYTES) throw new AvatarRefusal(AVATAR_TOO_LARGE);
   const format = sniffAvatar(bytes);
   if (format === null) throw new AvatarRefusal(AVATAR_NOT_A_PICTURE);
-  const open = (): Sharp =>
+  const open = (limitInputPixels: number = AVATAR_MAX_INPUT_PIXELS): Sharp =>
     sharp(Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength), {
       failOn: 'error',
-      limitInputPixels: AVATAR_MAX_INPUT_PIXELS,
+      limitInputPixels,
       animated: false,
     }).rotate();
   let metadata: Metadata;
   try {
-    metadata = await open().metadata();
+    // the header alone, under the general pipeline's 64 megapixel ceiling (security.md 10), so
+    // the avatar's own pixel cap can answer in words below rather than as a decode failure
+    metadata = await open(HEADER_MAX_PIXELS).metadata();
   } catch {
     throw new AvatarRefusal(AVATAR_NOT_A_PICTURE);
   }
@@ -125,6 +151,8 @@ export async function processAvatar(
   const width = rotated ? (metadata.height ?? 0) : (metadata.width ?? 0);
   const height = rotated ? (metadata.width ?? 0) : (metadata.height ?? 0);
   if (width < 8 || height < 8) throw new AvatarRefusal(AVATAR_NOT_A_PICTURE);
+  // the pixel cap in words before sharp's own limit fires inside the decode
+  if (width * height > AVATAR_MAX_INPUT_PIXELS) throw new AvatarRefusal(AVATAR_TOO_MANY_PIXELS);
   const square = (): Sharp => {
     if (crop !== undefined) {
       const size = Math.max(1, Math.min(Math.floor(crop.size), width, height));
@@ -168,6 +196,9 @@ export async function processAvatar(
   return { digest, sizes: [...AVATAR_SIZES], files };
 }
 
+/** One key under `u/` as the store lists it: the key and the newest file's time, when known. */
+export type AvatarKeyListing = { avatarKey: string; files: number; newestAt: string | null };
+
 export type AvatarStore = {
   /** Writes one file and answers its public URL. */
   put: (file: AvatarFile) => Promise<string>;
@@ -175,6 +206,8 @@ export type AvatarStore = {
   removeKey: (avatarKey: string) => Promise<number>;
   /** The URL prefix of a key's folder, without the trailing slash. */
   base: (avatarKey: string) => string;
+  /** Every key under `u/` with its file count and newest write, for the janitor. */
+  listKeys: () => Promise<AvatarKeyListing[]>;
 };
 
 const KEY = /^[A-Za-z0-9_-]{22}$/;
@@ -222,6 +255,36 @@ export function fileAvatarStore(
       return Promise.resolve(count);
     },
     base: (avatarKey) => `${routeBase}/${AVATAR_PREFIX}/${avatarKey}`,
+    listKeys() {
+      const root = pathOf(AVATAR_PREFIX);
+      let keys: string[];
+      try {
+        keys = readdirSync(root);
+      } catch {
+        return Promise.resolve([]);
+      }
+      const out: AvatarKeyListing[] = [];
+      for (const avatarKey of keys) {
+        if (!KEY.test(avatarKey)) continue;
+        let newest = 0;
+        let files = 0;
+        try {
+          for (const name of readdirSync(join(root, avatarKey))) {
+            const at = statSync(join(root, avatarKey, name)).mtimeMs;
+            files += 1;
+            if (at > newest) newest = at;
+          }
+        } catch {
+          continue;
+        }
+        out.push({
+          avatarKey,
+          files,
+          newestAt: newest > 0 ? new Date(newest).toISOString() : null,
+        });
+      }
+      return Promise.resolve(out);
+    },
     read(relative) {
       const parsed = parseAvatarPath(relative);
       if (parsed === null) return null;
@@ -239,27 +302,80 @@ export function fileAvatarStore(
   };
 }
 
-/** The public Blob store hosted: the files are public URLs, the prefix is deleted on rotation. */
-export function blobAvatarStore(client: BlobClient): AvatarStore {
-  const bases = new Map<string, string>();
+export type BlobAvatarStoreOptions = {
+  /**
+   * The public store's origin (`https://<TURBOSLIDE_PUBLIC_STORE_HOST>`), so `base` answers the
+   * same URL on every instance (PEOPLE.md 4.3; avatars 13). Without one the origin of the first
+   * put in this process stands in, and before any put the base is the relative `u/<key>`.
+   */
+  origin?: string | null;
+};
+
+/**
+ * The public Blob store of the blob tier: the files are public URLs, put once with a year of
+ * cache (the digest is in the name), the prefix deleted on rotation. The client may be lazy: a
+ * function answering the store's client, or null when the deployment has none.
+ */
+export function blobAvatarStore(
+  client: BlobClient | (() => Promise<BlobClient | null>),
+  options: BlobAvatarStoreOptions = {},
+): AvatarStore {
+  let seenOrigin: string | null = null;
+  const clientOf = async (): Promise<BlobClient> => {
+    const resolved = typeof client === 'function' ? await client() : client;
+    if (resolved === null) throw new RangeError(AVATAR_STORE_UNAVAILABLE);
+    return resolved;
+  };
+  const originOf = (): string | null => {
+    const configured = options.origin?.trim().replace(/\/+$/, '');
+    return configured ? configured : seenOrigin;
+  };
   return {
     async put(file) {
-      const entry = await client.put(file.relative, file.bytes, {
+      const entry = await (
+        await clientOf()
+      ).put(file.relative, file.bytes, {
         overwrite: false,
         contentType: file.contentType,
+        cacheControlMaxAge: AVATAR_CACHE_MAX_AGE_S,
       });
-      const folder = entry.url.slice(0, entry.url.lastIndexOf('/'));
-      bases.set(file.relative.split('/')[1] ?? '', folder);
+      try {
+        seenOrigin ??= new URL(entry.url).origin;
+      } catch {
+        // a relative URL from a fake client: the base stays relative
+      }
       return entry.url;
     },
     async removeKey(avatarKey) {
       if (!KEY.test(avatarKey)) return 0;
-      const entries = await client.list(`${AVATAR_PREFIX}/${avatarKey}/`);
-      if (entries.length > 0) await client.del(entries.map((entry) => entry.pathname));
-      bases.delete(avatarKey);
+      const resolved = await clientOf();
+      const entries = await resolved.list(`${AVATAR_PREFIX}/${avatarKey}/`);
+      if (entries.length > 0) await resolved.del(entries.map((entry) => entry.pathname));
       return entries.length;
     },
-    base: (avatarKey) => bases.get(avatarKey) ?? `${AVATAR_PREFIX}/${avatarKey}`,
+    base(avatarKey) {
+      const origin = originOf();
+      const relative = `${AVATAR_PREFIX}/${avatarKey}`;
+      return origin === null ? relative : `${origin}/${relative}`;
+    },
+    async listKeys() {
+      const entries = await (await clientOf()).list(`${AVATAR_PREFIX}/`);
+      const keys = new Map<string, AvatarKeyListing>();
+      for (const entry of entries) {
+        const parsed = parseAvatarPath(entry.pathname);
+        if (parsed === null) continue;
+        const row = keys.get(parsed.avatarKey) ?? {
+          avatarKey: parsed.avatarKey,
+          files: 0,
+          newestAt: null,
+        };
+        row.files += 1;
+        const at = entry.uploadedAt ?? null;
+        if (at !== null && (row.newestAt === null || at > row.newestAt)) row.newestAt = at;
+        keys.set(parsed.avatarKey, row);
+      }
+      return [...keys.values()];
+    },
   };
 }
 
@@ -332,4 +448,67 @@ export async function removePictureFiles(
   const profile = await deps.profiles.get(userId);
   if (profile === null || profile.avatarKey === null) return 0;
   return deps.store.removeKey(profile.avatarKey);
+}
+
+export type SweepOptions = {
+  /** Lists what would go and removes nothing. */
+  dryRun?: boolean;
+  /** A key whose newest file is younger than this is an upload in flight; default 24. */
+  olderThanHours?: number;
+  now?: () => Date;
+};
+
+export type SweepReport = {
+  dryRun: boolean;
+  /** Keys found under `u/`. */
+  scanned: number;
+  /** Keys a profile names. */
+  kept: number;
+  /** Keys younger than the window, or whose age the store does not report. */
+  young: number;
+  /** The orphan keys, removed unless `dryRun`. */
+  orphans: string[];
+  /** Files removed; zero on a dry run. */
+  filesRemoved: number;
+};
+
+/**
+ * The janitor for orphan files under `u/` (PEOPLE.md 4.6): every key a profile's `avatarKey`
+ * names stays, every key younger than the window stays (an upload in flight writes its files
+ * before its record), and the rest is removed by key. It is never a sweep by date or by name of
+ * anything outside `u/`. The caller refuses it without an identity database, because with no
+ * profiles every key would read as an orphan.
+ */
+export async function sweepOrphanAvatars(
+  store: Pick<AvatarStore, 'listKeys' | 'removeKey'>,
+  profiles: Pick<ProfileStore, 'avatarKeys'>,
+  options: SweepOptions = {},
+): Promise<SweepReport> {
+  const dryRun = options.dryRun ?? false;
+  const hours = options.olderThanHours ?? AVATAR_ORPHAN_HOURS;
+  const now = (options.now ?? (() => new Date()))().getTime();
+  const named = new Set(await profiles.avatarKeys());
+  const listed = await store.listKeys();
+  const report: SweepReport = {
+    dryRun,
+    scanned: listed.length,
+    kept: 0,
+    young: 0,
+    orphans: [],
+    filesRemoved: 0,
+  };
+  for (const row of listed) {
+    if (named.has(row.avatarKey)) {
+      report.kept += 1;
+      continue;
+    }
+    const at = row.newestAt === null ? Number.NaN : Date.parse(row.newestAt);
+    if (Number.isNaN(at) || now - at < hours * 60 * 60 * 1000) {
+      report.young += 1;
+      continue;
+    }
+    report.orphans.push(row.avatarKey);
+    if (!dryRun) report.filesRemoved += await store.removeKey(row.avatarKey);
+  }
+  return report;
 }

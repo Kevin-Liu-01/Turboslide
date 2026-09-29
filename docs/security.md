@@ -328,11 +328,17 @@ production.
 ## 10. Uploads and the dependency gate
 
 `apps/studio/src/server/upload.ts`, `packages/headless/src/capture/intake.ts` (0.29, 8.5). One
-pipeline for every picture: a size cap by tier (25 MB anonymous, 50 MB signed in, 5 MB avatar),
-the magic byte sniff (png, jpeg, webp, gif; svg refused hosted), sharp 0.35.4 with
-`limitInputPixels` at 64 megapixels and `failOn: 'error'`, HEIF and JXL blocked at process start,
-animated GIFs flattened, a re-encode hosted so no byte of the input survives, digest named twins
-through the store's `putAsset` with nothing ever overwritten. Above 3 MB hosted the presigned path:
+pipeline for every picture: a size cap by tier (25 MB anonymous, 50 MB signed in, 512 KB avatar
+after the browser's 256 px resize, checked on the data URL string before any decode and again on
+the bytes; `limitInputPixels` 1024 by 1024 for that path, docs/PEOPLE.md 4.2), the magic byte
+sniff (png, jpeg, webp, gif; svg refused hosted), sharp 0.35.4 with `limitInputPixels` at 64
+megapixels and `failOn: 'error'`, HEIF and JXL blocked at process start, animated GIFs flattened,
+a re-encode hosted so no byte of the input survives, digest named twins through the store's
+`putAsset` with nothing ever overwritten. The avatar files land under the public `u/<avatarKey>/`
+prefix of the public store on the blob tier, put once with a year of cache because the digest is
+in the name and the key rotates on every change; a replaced picture can stay readable at its old
+unguessable address until that cache expires, and only `admin.avatar.sweep` removes files under
+`u/`, by key, never a sweep by date or name. Above 3 MB hosted the presigned path:
 `POST /api/x/upload/picture` runs `authorize(write)`, the `uploads` switch and the picture quotas
 and issues a ten minute token for `uploads/<principalId>/<uuid>`; the browser PUTs the bytes (on
 the local backend to `/api/x/upload/put/<token>`, streamed under the cap and sniffed before it is

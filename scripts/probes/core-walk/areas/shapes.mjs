@@ -2550,10 +2550,12 @@ export async function run(t) {
       };
       const m = judge(menu);
       let dropdown = [];
-      const button = (await t.visible('toolbar.insertShape'))
-        ? 'toolbar.insertShape'
-        : (await t.visible('toolbar.insertShape.arrow'))
-          ? 'toolbar.insertShape.arrow'
+      /* the polish round (docs/POLISH.md 2.6 item 74): the Shape button is a split like Image and
+         Line, its main half arms the rectangle tool and its arrow opens the dropdown */
+      const button = (await t.visible('toolbar.insertShape.arrow'))
+        ? 'toolbar.insertShape.arrow'
+        : (await t.visible('toolbar.insertShape'))
+          ? 'toolbar.insertShape'
           : null;
       if (button !== null) {
         await t.clickControl(button);

@@ -15,7 +15,13 @@
    Imported once, from the studio's root route. Every other file under
    packages/chrome/src imports only its own sheet. */
 
-:root {
+/* The stage wrapper and the overlay layer carry the sheet's own appearance as their data-theme
+   (docs/POLISH.md 2.5 item 49; the integrator's merge): the chrome that sits over the sheet (the
+   selection ring and chip, the table's seams and heads, the guides, the marquee, the readouts)
+   reads the sheet's tokens, so a dark presentation under a light chrome keeps its contrast. */
+:root,
+.ts-stagewrap[data-theme='light'],
+.ts-overlay[data-theme='light'] {
   --pt-paper: #ffffff;
   --pt-ink: #070707;
   --pt-ink-2: #3a3d44;
@@ -143,7 +149,9 @@
 
 /* Dark is a token remap. --pt-scrim, --pt-panel-ink and --pt-panel-text do
    not change. */
-:root[data-theme='dark'] {
+:root[data-theme='dark'],
+.ts-stagewrap[data-theme='dark'],
+.ts-overlay[data-theme='dark'] {
   --pt-paper: #070707;
   --pt-ink: #f2f2f0;
   --pt-ink-2: #b9bcc3;
@@ -163,23 +171,6 @@
   --pt-thumb: rgba(242, 242, 240, 0.32);
   /* the selection colour on dark chrome (ruling 1): #3d86f0 is 5.63:1 on #070707 and 3.58:1 on
      #ffffff; #f0397a is 5.34:1 and 3.77:1 */
-  --pt-select: #3d86f0;
-  --pt-guide: #f0397a;
-}
-
-/* The sheet draws the presentation's own appearance whatever the chrome's (docs/POLISH.md 2.5
-   item 49; the integrator's merge): the selection ring, the handles, the chip and the guides sit
-   over the sheet, so their colours follow the stage's appearance, which the stage wrapper carries
-   as its own data-theme, not the chrome's. The contrast rule above holds on the sheet's paper and
-   ink either way. */
-.ts-stagewrap[data-theme='light'],
-.ts-overlay[data-theme='light'] {
-  --pt-select: #1a73e8;
-  --pt-guide: #d6336c;
-}
-
-.ts-stagewrap[data-theme='dark'],
-.ts-overlay[data-theme='dark'] {
   --pt-select: #3d86f0;
   --pt-guide: #f0397a;
 }

@@ -21,6 +21,10 @@ import {
   title,
   typeInto,
   waitEditor,
+  agentHeaders,
+  pasteText,
+  svgFixture,
+  pictureImg,
 } from './lib';
 
 // Pictures, the spec rows (docs/FOCUS.md 2.4, section 5 ranks 5 and 6, 6.4 `images.*` with the
@@ -816,6 +820,265 @@ test(title('images.insert.by-url'), async () => {
 /* the row `logos.intake.svg-sentence` of the features round left with its sentence in the vector
    round (docs/VECTOR.md 4.7); the svg intake's rows are core/svg.spec.ts's */
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 2.5 items 35, 50 and 51, 5.1 `images.*`): no external write
+// banner after the tab's own asset write, the By URL preview contained, a dropped picture clamped
+// to the sheet, and a picture's natural size.
+
+/** The external write banner as drawn, or null. */
+async function externalBanner(p: Page): Promise<string | null> {
+  return p.evaluate(() => {
+    const el = [
+      ...document.querySelectorAll(
+        '[data-control^="sync.external"], .ts-external, [role="status"], [role="alert"]',
+      ),
+    ].find(
+      (e) =>
+        /arrived from outside|changed elsewhere/i.test(e.textContent ?? '') &&
+        e.getClientRects().length > 0,
+    );
+    return el ? (el.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 160) : null;
+  });
+}
+
+test(title('images.insert.no-external-banner'), async () => {
+  test.setTimeout(240_000);
+  if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const origin = new URL(page.url()).origin;
+  const notes: string[] = [];
+  const failures: string[] = [];
+  const check = async (label: string, act: () => Promise<void>) => {
+    const before = await pictureCount(slideId);
+    await act();
+    await expect
+      .poll(() => pictureCount(slideId), { timeout: 20_000 })
+      .toBeGreaterThan(before)
+      .catch(() => undefined);
+    let banner: string | null = null;
+    const until = Date.now() + 10_000;
+    while (Date.now() < until && banner === null) {
+      banner = await externalBanner(page);
+      if (banner === null) await page.waitForTimeout(500);
+    }
+    notes.push(`${label}: ${banner === null ? 'no banner within 10 s' : `banner "${banner}"`}`);
+    if (banner !== null) failures.push(`${label}: "${banner}"`);
+    await page.keyboard.press('Escape');
+    await settled(page);
+  };
+  await check('upload', async () => {
+    await uploadThrough(
+      () => menuPath(page, 'insert', 'insert.image', 'insert.image.upload'),
+      'banner.png',
+    );
+  });
+  await check('By URL', async () => {
+    const reach = async () => {
+      await ctl(page, 'menubar.insert').click();
+      await page.locator('#ts-menu-insert').waitFor({ timeout: 8000 });
+      await ctl(page, 'menu.insert.image').hover();
+      await page.waitForTimeout(350);
+      const there = await ctl(page, 'menu.insert.image.byUrl')
+        .isVisible()
+        .catch(() => false);
+      await page.keyboard.press('Escape');
+      await page.keyboard.press('Escape');
+      return there;
+    };
+    if (!(await reach())) await menuPath(page, 'tools', 'tools.advancedTools');
+    await menuPath(page, 'insert', 'insert.image', 'insert.image.byUrl');
+    await ctl(page, 'dialog.imageByUrl.url').waitFor({ timeout: 8000 });
+    await ctl(page, 'dialog.imageByUrl.url').click();
+    await page.keyboard.type(`${origin}/apple-touch-icon.png`, { delay: 40 });
+    await page.waitForTimeout(900);
+    await ctl(page, 'dialog.imageByUrl.ok').click();
+  });
+  await check('paste', async () => {
+    await page.locator('.ts-stagewrap.ts-editor').click({ position: { x: 20, y: 20 } });
+    await pastePng();
+  });
+  await check('svg paste', async () => {
+    await page.locator('.ts-stagewrap.ts-editor').click({ position: { x: 20, y: 20 } });
+    await pasteText(page, { 'text/plain': svgFixture().toString('utf8') });
+  });
+  /* an agent's write over HTTP: the banner reads This presentation changed elsewhere */
+  const headers = agentHeaders(origin);
+  let agentBanner: string | null = null;
+  if (headers !== null) {
+    const s = await settled(page);
+    const res = await page.request.post(
+      `${origin}/api/actions/block.insert?deck=${encodeURIComponent(deck)}`,
+      {
+        headers,
+        data: {
+          slideId,
+          slot: 'main',
+          block: {
+            id: 'agent-text',
+            type: 'text',
+            text: 'From the agent',
+            pos: { x: 100, y: 700, w: 400, h: 60 },
+          },
+          baseRevision: s.revision,
+        },
+        timeout: 60_000,
+      },
+    );
+    const until = Date.now() + 15_000;
+    while (Date.now() < until && agentBanner === null) {
+      agentBanner = await externalBanner(page);
+      if (agentBanner === null) await page.waitForTimeout(500);
+    }
+    notes.push(
+      `the agent's write answered ${res.status()}: ${agentBanner === null ? 'no banner within 15 s' : `"${agentBanner}"`}`,
+    );
+    if (agentBanner === null || !/This presentation changed elsewhere/.test(agentBanner))
+      failures.push(`the agent's write: ${agentBanner ?? 'no banner'}`);
+  } else notes.push("the agent's write: no bearer for this origin");
+  test.info().annotations.push({ type: 'banner', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+});
+
+test(title('images.byurl.preview-contained'), async () => {
+  test.setTimeout(150_000);
+  if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
+  await openEditor(page, deck);
+  const origin = new URL(page.url()).origin;
+  const reach = async () => {
+    await ctl(page, 'menubar.insert').click();
+    await page.locator('#ts-menu-insert').waitFor({ timeout: 8000 });
+    await ctl(page, 'menu.insert.image').hover();
+    await page.waitForTimeout(350);
+    const there = await ctl(page, 'menu.insert.image.byUrl')
+      .isVisible()
+      .catch(() => false);
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    return there;
+  };
+  let switched = false;
+  if (!(await reach())) {
+    await menuPath(page, 'tools', 'tools.advancedTools');
+    switched = true;
+  }
+  await menuPath(page, 'insert', 'insert.image', 'insert.image.byUrl');
+  await ctl(page, 'dialog.imageByUrl.url').waitFor({ timeout: 8000 });
+  await ctl(page, 'dialog.imageByUrl.url').click();
+  await page.keyboard.type(`${origin}/apple-touch-icon.png`, { delay: 40 });
+  const preview = ctl(page, 'dialog.imageByUrl.preview');
+  await preview.waitFor({ timeout: 10_000 }).catch(() => undefined);
+  await page.waitForTimeout(1200);
+  const facts = await page.evaluate(() => {
+    const box = document.querySelector('[data-control="dialog.imageByUrl.preview"]');
+    const img = (
+      box?.tagName.toLowerCase() === 'img' ? box : box?.querySelector('img')
+    ) as HTMLImageElement | null;
+    if (!box || !img) return null;
+    const outer = (img === box ? img.parentElement! : box).getBoundingClientRect();
+    const inner = img.getBoundingClientRect();
+    return {
+      fit: getComputedStyle(img).objectFit,
+      inside:
+        inner.left >= outer.left - 1 &&
+        inner.right <= outer.right + 1 &&
+        inner.top >= outer.top - 1 &&
+        inner.bottom <= outer.bottom + 1,
+      natural: img.naturalWidth,
+      drawn: Math.round(inner.width),
+      outer: Math.round(outer.width),
+      clipped: img.scrollWidth > img.clientWidth + 1,
+    };
+  });
+  await page.keyboard.press('Escape');
+  if (switched) await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
+  test.info().annotations.push({ type: 'preview', description: JSON.stringify(facts) });
+  expect(facts, 'a preview image').not.toBeNull();
+  expect(facts!.fit, 'object-fit contain').toBe('contain');
+  expect(facts!.inside, 'the img inside the preview box').toBe(true);
+});
+
+test(title('images.drop.clamped'), async () => {
+  test.setTimeout(120_000);
+  if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const before = await pictureCount(slideId);
+  await dropAt(800, 700, 'clamped.png');
+  const pic = await expectPictureWithin(slideId, before, 20_000);
+  test.info().annotations.push({
+    type: 'drop',
+    description: `${pic.id} ${JSON.stringify(pic.pos)} (bottom ${pic.pos.y + pic.pos.h})`,
+  });
+  expect(pic.pos.y + pic.pos.h, 'pos.y + pos.h at most 900').toBeLessThanOrEqual(900);
+  await noRefusal();
+});
+
+test(title('images.polish.natural-size'), async () => {
+  test.setTimeout(240_000);
+  if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
+  await openEditor(page, deck);
+  const origin = new URL(page.url()).origin;
+  const reach = async () => {
+    await ctl(page, 'menubar.insert').click();
+    await page.locator('#ts-menu-insert').waitFor({ timeout: 8000 });
+    await ctl(page, 'menu.insert.image').hover();
+    await page.waitForTimeout(350);
+    const there = await ctl(page, 'menu.insert.image.byUrl')
+      .isVisible()
+      .catch(() => false);
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    return there;
+  };
+  let switched = false;
+  if (!(await reach())) {
+    await menuPath(page, 'tools', 'tools.advancedTools');
+    switched = true;
+  }
+  const byUrl = async (slideId: string) => {
+    const before = await pictureCount(slideId);
+    await menuPath(page, 'insert', 'insert.image', 'insert.image.byUrl');
+    await ctl(page, 'dialog.imageByUrl.url').waitFor({ timeout: 8000 });
+    await ctl(page, 'dialog.imageByUrl.url').click();
+    await page.keyboard.type(`${origin}/apple-touch-icon.png`, { delay: 40 });
+    await page.waitForTimeout(900);
+    await ctl(page, 'dialog.imageByUrl.ok').click();
+    const pic = await expectPictureWithin(slideId, before, 20_000);
+    await page.keyboard.press('Escape');
+    return pic;
+  };
+  const empty = await addSlide(page);
+  const first = await byUrl(empty);
+  const beside = await addSlide(page);
+  const s = await state(page);
+  await invoke(page, 'block.insert', {
+    baseRevision: s.revision,
+    slideId: beside,
+    slot: 'main',
+    block: {
+      id: 'beside-table',
+      type: 'table',
+      columns: [{}, {}, {}],
+      rows: [0, 1, 2].map((r) => ({ cells: ['', '', ''], ...(r === 0 ? { header: true } : {}) })),
+      pos: { x: 137, y: 129, w: 960, h: 162 },
+    },
+  });
+  await settled(page);
+  const second = await byUrl(beside);
+  if (switched) await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
+  const natural = await pictureImg(page, second.id);
+  test.info().annotations.push({
+    type: 'size',
+    description: `on the empty slide ${first.pos.w} by ${first.pos.h}; beside the table ${second.pos.w} by ${second.pos.h}; natural ${natural?.natural.width} by ${natural?.natural.height}`,
+  });
+  expect(
+    Math.round(first.pos.w),
+    'the 180 px picture lands at 180 sheet px on the empty slide',
+  ).toBe(180);
+  expect(Math.round(second.pos.w), 'and beside the table').toBe(180);
+});
+
 coverage(import.meta.filename, [
   'images.insert.first-on-new-deck',
   'images.insert.upload',
@@ -832,4 +1095,9 @@ coverage(import.meta.filename, [
   'images.insert.menu-direct',
   'images.upload.failure-snackbar',
   'images.insert.by-url',
+  /* the polish round (docs/POLISH.md 2.5 items 35, 50 and 51) */
+  'images.insert.no-external-banner',
+  'images.byurl.preview-contained',
+  'images.drop.clamped',
+  'images.polish.natural-size',
 ]);

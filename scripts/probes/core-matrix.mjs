@@ -59,6 +59,19 @@
 // `.head.column`, `.head.row`, `toolbar.wordart.outline`), read as `handle.<block>.<part>`
 // families where the overlay templates them.
 //
+// The polish round (docs/POLISH.md section 5) added 130 rows on 2026-09-28 (the acceptance rows of
+// 5.1, every one written so a person's screenshot judges it: a pixel read of the frame, a box read
+// of the DOM through the walk toolkit's `pixelAt` and `boxesOf`, or a spec assertion on the file an
+// export wrote), replaced `tables.cells.prompt-hovered-only` with `tables.cells.no-prompt`, rewrote
+// the two home rows the redesign changes and read four rows again with the day's reading; the rows'
+// `today` is what the nine polish audits measured on production on 2026-09-28, the severity of a
+// broken row is its item's, and `note` names the round, the POLISH.md item and the lane. No new
+// feature and no new area: `menus` stays the chrome's and `collab` the share feature's. One new
+// declared id, `formatOptions.picture.shadow` (2.5 item 41), and one measurement row,
+// `decks.home.load-budget` (3.5). A row whose driver the table names twice carries the spec
+// (`core/export.spec.ts` for the two table and chart rows whose PDF half needs the file,
+// `core/logos.spec.ts` for the plate row, `core/decks.spec.ts` for the pages sweep).
+//
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
 //   node scripts/probes/core-matrix.mjs --emit-parked docs/gslides-parity/focus/ship-<commit>.json
@@ -401,6 +414,10 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'intake.svg.url',
   'picture.svg.copy',
   'export.svg.vector',
+  /* the polish round (docs/POLISH.md 2.5 item 41, 5.1): the picture's Drop shadow section, B4's
+     in inspector/shadow.tsx by request to B1's format-sections.ts; the row
+     `images.panel.drop-shadow` parks it alone until the section is on the build */
+  'formatOptions.picture.shadow',
 ]);
 
 let controlSourceText = null;

@@ -47,6 +47,8 @@ import {
   fetchBytes,
   objectsOf as objectsOfLib,
   placeSvgPicture,
+  placeBlock,
+  snackbarText,
 } from './lib';
 import { shapeAdjustDefaults, textInset } from '@turboslide/schema/shapes';
 
@@ -816,7 +818,12 @@ async function objectsOfSlide(page: Page, slideId: string) {
 async function tableRules(page: Page, rootSelector: string, blockId: string) {
   return page.evaluate(
     ([sel, id]) => {
-      const root = document.querySelector(`${sel} [data-block="${id}"]`);
+      const root = document.querySelector(
+        sel
+          .split(',')
+          .map((s) => `${s.trim()} [data-block="${id}"]`)
+          .join(', '),
+      );
       if (!root) return null;
       const rows = [...root.querySelectorAll('.tr')];
       let seams = 0;
@@ -2787,6 +2794,554 @@ test(title('shaders.export.missing-frame-row'), async () => {
   expect(pdfImages(pdf.bytes), 'the file carries the frame').toBeGreaterThan(0);
 });
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 2.1 item 3, 2.4 item 31, 2.7 items 77, 80, 82, 83, 86 and 87,
+// 5.1): the header rule under text alone, a small chart's labels in their slot, the print
+// preview in the deck's appearance and opening on an old deck, the download's Details as a
+// seller's card, a refused download's sentence and its retry, one name rule for every file and
+// the picture exports' progress.
+
+/** The header row's rule and weight on a root: row 1 against row 2. */
+async function headerRuleOf(page: Page, rootSelector: string, blockId: string) {
+  return page.evaluate(
+    ([sel, id]) => {
+      const root = document.querySelector(
+        sel
+          .split(',')
+          .map((s) => `${s.trim()} [data-block="${id}"]`)
+          .join(', '),
+      );
+      if (!root) return null;
+      const rows = [...root.querySelectorAll('.tr')];
+      const read = (tr: Element | undefined) => {
+        if (!tr) return null;
+        const cs = getComputedStyle(tr);
+        const cell = tr.querySelector('.td');
+        return {
+          width: parseFloat(cs.borderBottomWidth) || 0,
+          color: cs.borderBottomColor,
+          weight: cell ? getComputedStyle(cell).fontWeight : cs.fontWeight,
+          hasText: tr.classList.contains('has-text'),
+          header: tr.classList.contains('header'),
+        };
+      };
+      return { first: read(rows[0]), second: read(rows[1]) };
+    },
+    [rootSelector, blockId] as const,
+  );
+}
+const inkRule = (
+  r: { width: number; color: string } | null | undefined,
+  hair: { width: number; color: string } | null | undefined,
+) =>
+  Boolean(
+    r &&
+    hair &&
+    (r.width > hair.width + 0.4 ||
+      (r.color !== hair.color &&
+        /rgb\((\d+), (\d+), (\d+)/.test(r.color) &&
+        Number(/rgb\((\d+)/.exec(r.color)![1]) < 80)),
+  );
+
+test(title('tables.header.rule-with-text'), async () => {
+  test.setTimeout(240_000);
+  const { page, deck } = await plainDeck(1);
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const id = 'header-rule';
+  await placeBlock(page, slideId, {
+    id,
+    type: 'table',
+    columns: [{}, {}, {}],
+    rows: [0, 1, 2].map((r) => ({ cells: ['', '', ''], ...(r === 0 ? { header: true } : {}) })),
+    pos: { x: 320, y: 200, w: 960, h: 162 },
+  });
+  await clickCard(page, slideId);
+  await page.keyboard.press('Escape');
+  const stage = await headerRuleOf(page, '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)', id);
+  const card = await headerRuleOf(page, `[data-control="filmstrip.slide.${slideId}"]`, id);
+  await ctl(page, 'present.open').click();
+  await ctl(page, 'present.show').waitFor({ timeout: 10_000 });
+  await page.waitForTimeout(800);
+  /* the show's slide is the stage's sheet in present mode (`.ts-stagewrap.is-present`, as
+     present.spec.ts reads it), not a sheet under the show's overlay */
+  const show = await headerRuleOf(
+    page,
+    '.ts-stagewrap.is-present .pt-slide:not(.is-leaving), .pt-viewer.is-present .pt-slide:not(.is-leaving), [data-control="present.show"] .pt-slide:not(.is-leaving)',
+    id,
+  );
+  await page.keyboard.press('Escape');
+  await ctl(page, 'present.show')
+    .waitFor({ state: 'detached', timeout: 10_000 })
+    .catch(() => undefined);
+  /* the print document, what Chromium prints as the PDF */
+  await menuPath(page, 'file', 'file.printPreview');
+  await page.waitForURL(/\/print\//, { timeout: 20_000 });
+  await page.waitForSelector('[data-control="print.page"][data-hydrated]', { timeout: 20_000 });
+  const printed = await headerRuleOf(page, '[data-control="print.page"]', id);
+  await ctl(page, 'print.close').click();
+  await page.waitForURL(/\/edit\//, { timeout: 20_000 });
+  await waitEditor(page);
+  /* "North" typed into cell 1,1 */
+  await clickCard(page, slideId);
+  await typeInto(page, `${id}/rows/0/cells/0`, 'North');
+  await settled(page);
+  await page.keyboard.press('Escape');
+  const typed = await headerRuleOf(page, '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)', id);
+  const say = (r: Awaited<ReturnType<typeof headerRuleOf>>) =>
+    r
+      ? `row 1 ${r.first?.width}px ${r.first?.color} weight ${r.first?.weight}${r.first?.hasText ? ' has-text' : ''}, row 2 ${r.second?.width}px ${r.second?.color} weight ${r.second?.weight}`
+      : 'no table';
+  test.info().annotations.push({
+    type: 'header rule',
+    description: `stage ${say(stage)}; card ${say(card)}; show ${say(show)}; print ${say(printed)}; after North ${say(typed)}`,
+  });
+  for (const [where, r] of [
+    ['stage', stage],
+    ['card', card],
+    ['show', show],
+    ['print', printed],
+  ] as const) {
+    expect(r, `the table is drawn on the ${where}`).not.toBeNull();
+    expect(inkRule(r!.first, r!.second), `no ink rule under an empty header on the ${where}`).toBe(
+      false,
+    );
+    expect(Number(r!.first?.weight), `no display weight on the ${where}`).toBeLessThan(500);
+  }
+  expect(inkRule(typed!.first, typed!.second), 'the ink rule once the header holds text').toBe(
+    true,
+  );
+  expect(Number(typed!.first?.weight), 'and the display weight').toBeGreaterThanOrEqual(500);
+});
+
+test(title('charts.labels.fit-slot'), async () => {
+  test.setTimeout(240_000);
+  const { page, deck } = await plainDeck(0);
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const id = 'small-chart';
+  await placeBlock(page, slideId, {
+    id,
+    type: 'chart',
+    kind: 'column',
+    categories: ['Category 1', 'Category 2', 'Category 3', 'Category 4'],
+    series: [{ name: 'Series 1', values: [30, 45, 20, 35] }],
+    pos: { x: 300, y: 200, w: 240, h: 140 },
+  });
+  await clickCard(page, slideId);
+  await page.keyboard.press('Escape');
+  const labelsOf = (root: string) =>
+    page.evaluate(
+      ([sel, blockId]) => {
+        const el = document.querySelector(
+          sel
+            .split(',')
+            .map((s) => `${s.trim()} [data-block="${blockId}"]`)
+            .join(', '),
+        );
+        const svg = el?.tagName.toLowerCase() === 'svg' ? el : el?.querySelector('svg');
+        if (!svg) return null;
+        const texts = [...svg.querySelectorAll('text')].filter(
+          (t) => /Category|Cat/.test(t.textContent ?? '') || /…/.test(t.textContent ?? ''),
+        );
+        const boxes = texts.map((t) => {
+          const r = t.getBoundingClientRect();
+          return {
+            text: (t.textContent ?? '').trim(),
+            x: r.x,
+            right: r.right,
+            y: r.y,
+            bottom: r.bottom,
+          };
+        });
+        let overlaps = 0;
+        for (let i = 0; i < boxes.length; i += 1)
+          for (let j = i + 1; j < boxes.length; j += 1) {
+            const a = boxes[i]!;
+            const b = boxes[j]!;
+            if (
+              a.x < b.right - 0.5 &&
+              b.x < a.right - 0.5 &&
+              a.y < b.bottom - 0.5 &&
+              b.y < a.bottom - 0.5
+            )
+              overlaps += 1;
+          }
+        return { labels: boxes.map((b) => b.text), overlaps };
+      },
+      [root, id] as const,
+    );
+  const sheet = await labelsOf('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+  await menuPath(page, 'file', 'file.printPreview');
+  await page.waitForURL(/\/print\//, { timeout: 20_000 });
+  await page.waitForSelector('[data-control="print.page"][data-hydrated]', { timeout: 20_000 });
+  const printed = await labelsOf('[data-control="print.page"]');
+  await ctl(page, 'print.close').click();
+  await page.waitForURL(/\/edit\//, { timeout: 20_000 });
+  await waitEditor(page);
+  test.info().annotations.push({
+    type: 'labels',
+    description: `sheet ${sheet ? `${sheet.labels.join(' | ')} (${sheet.overlaps} overlaps)` : 'no chart'}; print ${printed ? `${printed.labels.join(' | ')} (${printed.overlaps} overlaps)` : 'no chart'}`,
+  });
+  expect(sheet, 'the chart is on the sheet').not.toBeNull();
+  expect(sheet!.overlaps, 'no two category labels intersect on the sheet').toBe(0);
+  expect(printed, 'the chart is on the print page').not.toBeNull();
+  expect(printed!.overlaps, "no two intersect on the PDF's page").toBe(0);
+});
+
+test(title('export.print.deck-appearance'), async () => {
+  test.setTimeout(240_000);
+  const { page, deck } = await plainDeck(1);
+  await openEditor(page, deck);
+  const s = await settled(page);
+  await invoke(page, 'deck.set', {
+    path: '/defaults/appearance',
+    value: 'light',
+    baseRevision: s.revision,
+  });
+  await settled(page);
+  await menuPath(page, 'file', 'file.printPreview');
+  await page.waitForURL(/\/print\//, { timeout: 20_000 });
+  await page.waitForSelector('[data-control="print.page"][data-hydrated]', { timeout: 20_000 });
+  const facts = await page.evaluate(() => {
+    const root = document.querySelector('[data-control="print.page"]');
+    /* the sheet's ground is painted by the first element under the page with an opaque
+       background (the slide wrapper is transparent; the theme paints the sheet inside it) */
+    const candidates = root
+      ? [
+          ...root.querySelectorAll(
+            '.pt-slide .sheet, .sheet, .ts-print-sheet, .ts-sheet, .pt-slide, .pt-slide > *',
+          ),
+          root,
+        ]
+      : [];
+    const opaque = (el: Element) => {
+      const c = getComputedStyle(el).backgroundColor;
+      const m = /rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?\)/.exec(c);
+      return m !== null && (m[4] === undefined || Number(m[4]) > 0.5);
+    };
+    const sheet = candidates.find(opaque) ?? root;
+    const cs = sheet ? getComputedStyle(sheet) : null;
+    const bg = cs?.backgroundColor ?? null;
+    const m = bg ? /rgba?\((\d+), (\d+), (\d+)/.exec(bg) : null;
+    const lum = m
+      ? (0.2126 * Number(m[1]) + 0.7152 * Number(m[2]) + 0.0722 * Number(m[3])) / 255
+      : null;
+    return { theme: root?.getAttribute('data-theme') ?? null, bg, lum };
+  });
+  const pdf = await download(page, () => ctl(page, 'print.pdf').click(), 45_000);
+  await ctl(page, 'print.close').click();
+  await page.waitForURL(/\/edit\//, { timeout: 20_000 });
+  await waitEditor(page);
+  /* the PDF's first page: a light page carries a paper fill (a high grey) as its first painted rect */
+  const streams = pdfStreams(pdf.bytes);
+  const fills = [...streams.matchAll(/([\d.]+) ([\d.]+) ([\d.]+) rg/g)]
+    .slice(0, 12)
+    .map((m) => [Number(m[1]), Number(m[2]), Number(m[3])] as const);
+  const firstFill = fills[0] ?? null;
+  const lightPdf = firstFill ? (firstFill[0] + firstFill[1] + firstFill[2]) / 3 > 0.8 : null;
+  test.info().annotations.push({
+    type: 'appearance',
+    description: `the print page data-theme ${facts.theme}, sheet ${facts.bg} (luminance ${facts.lum?.toFixed(2)}); the PDF's first fills ${
+      fills
+        .slice(0, 3)
+        .map((f) => f.join(','))
+        .join(' | ') || 'none'
+    } (light ${lightPdf})`,
+  });
+  expect(facts.theme, "the print page shows the deck's light appearance").toBe('light');
+  expect(facts.lum ?? 0, "the page's sheet reads paper").toBeGreaterThan(0.8);
+  if (lightPdf !== null) expect(lightPdf, 'the PDF is light').toBe(true);
+});
+
+test(title('export.details.seller-card'), async () => {
+  test.setTimeout(240_000);
+  const { page, deck } = await plainDeck(1);
+  await openEditor(page, deck);
+  const pdf = await download(page, async () => {
+    await menuPath(page, 'file', 'file.download', 'file.download.pdf');
+    const ok = ctl(page, 'dialog.download.ok');
+    if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
+  });
+  await closeDialogs(page).catch(() => undefined);
+  const action = page
+    .locator('[data-control="snackbar.download.details"], [data-control="snackbar.action"]')
+    .first();
+  const label = await action.textContent({ timeout: 4000 }).catch(() => null);
+  let card: {
+    title: string;
+    sentence: string;
+    files: string[];
+    text: string;
+    advanced: boolean;
+  } | null = null;
+  if (label && /Details/.test(label)) {
+    await action.click();
+    await ctl(page, 'export.report')
+      .waitFor({ timeout: 8000 })
+      .catch(() => undefined);
+    card = await page.evaluate(() => {
+      const root = document.querySelector('[data-control="export.report"]');
+      if (!root) return null;
+      return {
+        title: (
+          root.querySelector('[data-control="export.report.title"]')?.textContent ?? ''
+        ).trim(),
+        sentence: (
+          root.querySelector('[data-control="export.report.sentence"]')?.textContent ?? ''
+        ).trim(),
+        files: [...root.querySelectorAll('[data-control="export.report.file"]')].map((el) =>
+          (el.textContent ?? '').replace(/\s+/g, ' ').trim(),
+        ),
+        /* the seller's words: the card without the gate rows under Advanced tools (the
+           `export.report.advanced` details holds SwiftShader, Perfect and the fractions by design) */
+        text: (() => {
+          const clone = root.cloneNode(true) as HTMLElement;
+          clone.querySelector('[data-control="export.report.advanced"]')?.remove();
+          return (clone.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 400);
+        })(),
+        advanced: root.querySelector('[data-control="export.report.advanced"]') !== null,
+      };
+    });
+    await page.keyboard.press('Escape');
+  }
+  test.info().annotations.push({
+    type: 'details',
+    description: `${pdf.name}; the snackbar's action "${label}"; the card ${card ? `title "${card.title}", sentence "${card.sentence}", files ${card.files.join(' | ')}, advanced ${card.advanced}, text "${card.text.slice(0, 160)}"` : 'did not open'}`,
+  });
+  expect(label ?? '', 'the snackbar offers Details').toMatch(/Details/);
+  expect(card, 'the card opens').not.toBeNull();
+  expect(card!.title, 'the heading names PDF').toMatch(/PDF/);
+  expect(card!.title, 'and not PPTX').not.toMatch(/PPTX|Perfect/);
+  expect(
+    card!.files.some((f) => f.includes(pdf.name)),
+    'the file row names the file',
+  ).toBe(true);
+  expect(card!.text, 'no SwiftShader and no Perfect').not.toMatch(
+    /SwiftShader|Perfect|Worst fraction/,
+  );
+});
+
+test(title('export.refusal.sentence-and-retry'), async () => {
+  test.setTimeout(240_000);
+  const base = (process.env['PLAYWRIGHT_BASE_URL'] ?? '').replace(/\/$/, '');
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(base))
+    test.skip(
+      true,
+      "not driven on the tmp store: the blob put's 429 cannot be injected on a localhost base (docs/POLISH.md 2.7 item 82; apps/studio/src/server/download.test.ts judges the retry); drive it on the enforce preview",
+    );
+  const { page, deck } = await plainDeck(2);
+  await openEditor(page, deck);
+  const blob = /public\.blob\.vercel-storage\.com|blob\.vercel-storage\.com/;
+  let seen = 0;
+  const answerOnce = async (route: import('@playwright/test').Route) => {
+    if (route.request().method() === 'PUT' && seen === 0) {
+      seen += 1;
+      return route.fulfill({
+        status: 429,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Too many requests please lower the number of requests' }),
+      });
+    }
+    return route.continue();
+  };
+  await page.route(blob, answerOnce);
+  const once = await download(
+    page,
+    async () => {
+      await menuPath(page, 'file', 'file.download', 'file.download.pptx');
+      const ok = ctl(page, 'dialog.download.ok');
+      if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
+    },
+    90_000,
+  ).catch((error: unknown) => ({ error: error instanceof Error ? error.message : String(error) }));
+  await page.unroute(blob);
+  await closeDialogs(page).catch(() => undefined);
+  let twice = 0;
+  await page.route(blob, async (route) => {
+    if (route.request().method() === 'PUT' && twice < 2) {
+      twice += 1;
+      return route.fulfill({
+        status: 429,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Too many requests please lower the number of requests' }),
+      });
+    }
+    return route.continue();
+  });
+  const refused = await download(
+    page,
+    async () => {
+      await menuPath(page, 'file', 'file.download', 'file.download.pptx');
+      const ok = ctl(page, 'dialog.download.ok');
+      if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
+    },
+    60_000,
+  ).catch((error: unknown) => ({ error: error instanceof Error ? error.message : String(error) }));
+  await page.unroute(blob);
+  const words = await snackbarText(page);
+  await closeDialogs(page).catch(() => undefined);
+  test.info().annotations.push({
+    type: '429',
+    description: `one 429 (${seen} injected): ${'name' in once ? `${once.name} arrived` : once.error}; two 429s (${twice} injected): ${'name' in refused ? `${refused.name} arrived` : refused.error}; snackbar "${words}"`,
+  });
+  expect('name' in once, 'after one 429 the PowerPoint arrives').toBe(true);
+  expect('name' in refused, 'after two 429s no file').toBe(false);
+  expect(words ?? '', 'the sentence').toMatch(
+    /The PowerPoint could not be made\. Try again in a minute/,
+  );
+  expect(words ?? '', 'no Vercel').not.toMatch(/Vercel/);
+});
+
+test(title('export.print.opens'), async () => {
+  test.setTimeout(240_000);
+  const { page, deck } = await plainDeck(1);
+  await openEditor(page, deck);
+  /* five writes */
+  const run = await headingRun(page);
+  for (const word of [' one', ' two', ' three', ' four', ' five']) {
+    await typeInto(page, run, word);
+    await settled(page);
+  }
+  const t0 = Date.now();
+  await menuPath(page, 'file', 'file.printPreview');
+  await page.waitForURL(/\/print\//, { timeout: 20_000 });
+  const drawn = await page
+    .locator('[data-control="print.page"][data-hydrated]')
+    .waitFor({ timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  const ms = Date.now() - t0;
+  const facts = await page.evaluate(() => ({
+    error:
+      (
+        document.querySelector('.ts-error-card, [data-control="print.error"], [role="alert"]')
+          ?.textContent ?? ''
+      ).trim() || null,
+    pages: Number(
+      document.querySelector('[data-control="print.pages"]')?.getAttribute('data-count') ?? 0,
+    ),
+    tick: (() => {
+      const box = document.querySelector(
+        '[data-control^="print.notes"], [data-control="print.skipped"]',
+      );
+      const input = box?.querySelector('input') ?? (box as HTMLInputElement | null);
+      const checked = input && 'checked' in input ? (input as HTMLInputElement).checked : null;
+      const svg = box?.querySelector('svg') !== null;
+      return {
+        checked,
+        svg,
+        native:
+          input?.tagName.toLowerCase() === 'input' &&
+          getComputedStyle(input as Element).appearance !== 'none' &&
+          (input as HTMLElement).getClientRects().length > 0 &&
+          getComputedStyle(input as Element).opacity !== '0',
+      };
+    })(),
+  }));
+  const first = await download(page, () => ctl(page, 'print.pdf').click(), 45_000);
+  const enabled = await expect
+    .poll(() => ctl(page, 'print.pdf').isEnabled(), { timeout: 10_000 })
+    .toBe(true)
+    .then(() => true)
+    .catch(() => false);
+  await ctl(page, 'print.close').click();
+  await page.waitForURL(/\/edit\//, { timeout: 20_000 });
+  await waitEditor(page);
+  test.info().annotations.push({
+    type: 'print',
+    description: `pages drawn ${drawn} after ${ms} ms, ${facts.pages} pages, error ${facts.error ?? 'none'}; the checked box ${JSON.stringify(facts.tick)}; ${first.name} in ${first.ms} ms; Download as PDF enabled after ${enabled}`,
+  });
+  expect(drawn, 'the pages draw within 5 s').toBe(true);
+  expect(facts.error, 'no error card').toBeNull();
+  expect(
+    facts.tick.svg || facts.tick.native === false,
+    "the checked box shows the chrome's tick",
+  ).toBe(true);
+  expect(enabled, 'Download as PDF stays enabled after one file').toBe(true);
+});
+
+test(title('export.download.one-name-rule'), async () => {
+  test.setTimeout(300_000);
+  const { page, deck } = await plainDeck(4);
+  await openEditor(page, deck);
+  const info = await invoke<{ title?: string; name?: string }>(page, 'deck.info');
+  const titleWord = (info.title ?? info.name ?? 'GT pitch').split(' ')[0]!;
+  const names: string[] = [];
+  const snackbars: string[] = [];
+  for (const row of ['jpg', 'png', 'html', 'zip'] as const) {
+    const switched = await reachDownloadRow(page, `file.download.${row}`);
+    const file = await download(
+      page,
+      async () => {
+        await menuPath(page, 'file', 'file.download', `file.download.${row}`);
+        const ok = ctl(page, 'dialog.download.ok');
+        if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
+      },
+      90_000,
+    );
+    const words = await expect
+      .poll(() => snackbarText(page), { timeout: 8000 })
+      .toMatch(/Saved/)
+      .then(() => snackbarText(page))
+      .catch(() => snackbarText(page));
+    names.push(file.name);
+    snackbars.push(words ?? 'none');
+    await closeDialogs(page).catch(() => undefined);
+    if (switched) await menuPath(page, 'tools', 'tools.advancedTools');
+  }
+  test.info().annotations.push({
+    type: 'names',
+    description: names.map((n, i) => `${n}: "${snackbars[i]}"`).join(' | '),
+  });
+  for (const [i, name] of names.entries()) {
+    expect(name.toLowerCase(), `${name} is named after the title`).toContain(
+      titleWord.toLowerCase(),
+    );
+    expect(name, 'not after the id').not.toMatch(/^untitled-\d{8}/);
+    expect(snackbars[i] ?? '', `one snackbar Saved ${name}`).toContain(`Saved ${name}`);
+  }
+});
+
+test(title('export.picture.progress-and-capture'), async () => {
+  test.setTimeout(180_000);
+  const { page, deck } = await plainDeck(1);
+  await openEditor(page, deck);
+  await settled(page);
+  await page.waitForTimeout(3000);
+  const switched = await reachDownloadRow(page, 'file.download.jpg');
+  const t0 = Date.now();
+  let progressAt: number | null = null;
+  const watcher = (async () => {
+    const until = Date.now() + 4000;
+    while (Date.now() < until) {
+      const words = await snackbarText(page).catch(() => null);
+      if (words && /Preparing your JPEG/.test(words)) {
+        progressAt = Date.now() - t0;
+        return;
+      }
+      await page.waitForTimeout(50);
+    }
+  })();
+  const file = await download(
+    page,
+    async () => {
+      await menuPath(page, 'file', 'file.download', 'file.download.jpg');
+    },
+    30_000,
+  );
+  await watcher;
+  await closeDialogs(page).catch(() => undefined);
+  if (switched) await menuPath(page, 'tools', 'tools.advancedTools');
+  test.info().annotations.push({
+    type: 'jpeg',
+    description: `Preparing your JPEG after ${progressAt ?? 'never'} ms; ${file.name} in ${file.ms} ms`,
+  });
+  expect(progressAt, 'Preparing your JPEG within 500 ms').not.toBeNull();
+  expect(progressAt!).toBeLessThanOrEqual(500 + 150);
+  expect(file.ms, 'the file within 4 s on an unchanged slide').toBeLessThanOrEqual(4000);
+});
+
 coverage(import.meta.filename, [
   'export.zip.bundle',
   'export.html.web-page',
@@ -2840,4 +3395,13 @@ coverage(import.meta.filename, [
   'svg.export.pptx-svgblip',
   'svg.export.pptx-fallback',
   'svg.export.web-page',
+  /* the polish round (docs/POLISH.md 2.1 item 3, 2.4 item 31, 2.7) */
+  'tables.header.rule-with-text',
+  'charts.labels.fit-slot',
+  'export.print.deck-appearance',
+  'export.details.seller-card',
+  'export.refusal.sentence-and-retry',
+  'export.print.opens',
+  'export.download.one-name-rule',
+  'export.picture.progress-and-capture',
 ]);

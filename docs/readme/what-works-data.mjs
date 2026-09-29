@@ -12,7 +12,9 @@
 // round, ship one (docs/FEATURES.md section 4, 7.1) the logo picker and ship two (section 5) the
 // shader library, and the vector round (docs/VECTOR.md section 4, 6.1) the SVG pictures. The objects
 // round (docs/OBJECTS.md section 2, 6.1) added the live gestures' sentence to the arrange paragraph,
-// whose rows the `gestures` area carries. Node only; no dependency.
+// whose rows the `gestures` area carries. The polish round (docs/POLISH.md section 5) added rows to
+// the features below and no paragraph: a feature's paragraph is held by its new rows like any
+// other until they pass on production. Node only; no dependency.
 
 /**
  * The features in the order of the README, keyed by the matrix's `feature` field. `heading` is the

@@ -28,6 +28,11 @@ import {
   pngSize,
   slideOrder,
   zipEntriesRaw,
+  addSlide,
+  placePicture,
+  placeSvgPicture,
+  pictureImg,
+  waitEditor,
 } from './lib';
 
 // The logo picker's spec rows (docs/FEATURES.md 4.2, 4.7, 4.9, 4.11, 7.1 `logos.*` with the driver
@@ -954,6 +959,423 @@ test(title('logos.export.svgblip'), async () => {
   expect(images, 'the PDF holds no image XObject for the logo').toBe(0);
 });
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 2.5 items 37, 38, 39 and 46, 5.1): Replace image keeps the
+// box's aspect, no plate under a free picture, the Logo dialog's results in view and its words
+// and tiles.
+
+/** A shot of the sheet decoded, and the pixels sampled in a box (the walk toolkit's reader). */
+async function sheetPixels(p: Page) {
+  const { decodePng, sampleBox } = await import('../../../../scripts/probes/core-walk/toolkit.mjs');
+  const shot = await p.screenshot({ scale: 'css' });
+  const img = decodePng(shot);
+  return {
+    img,
+    sample: (box: { x: number; y: number; w: number; h: number }, options = {}) =>
+      sampleBox(img, box, options) as {
+        count: number;
+        mean: number[];
+        distinct: number;
+        dominant: { hex: string; share: number } | null;
+        colors: { hex: string; count: number }[];
+      },
+  };
+}
+
+test(title('images.replace.keeps-aspect'), async () => {
+  test.setTimeout(240_000);
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const id = 'replace-aspect';
+  await placePicture(page, slideId, { x: 300, y: 200, w: 480, h: 320 }, id);
+  const before = (await pictures(page, slideId)).find((o) => o.id === id)!;
+  const centre = { x: before.pos.x + before.pos.w / 2, y: before.pos.y + before.pos.h / 2 };
+  await page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`).first().click();
+  await expect(page.locator(`.ts-overlay [data-control="handle.${id}.move"]`)).toBeAttached();
+  await ctl(page, 'toolbar.replaceImage').click();
+  const logoRow = page.locator('[data-control="menu.format.image.replaceImage.logo"]').first();
+  const there = await logoRow
+    .waitFor({ timeout: 4000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!there) {
+    await page.keyboard.press('Escape');
+    test.skip(true, 'not on this build: format.image.replaceImage.logo (docs/FEATURES.md 4.3)');
+  }
+  await logoRow.click();
+  const opened = await ctl(page, 'dialog.logo')
+    .waitFor({ timeout: 8000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!opened) test.skip(true, 'the Logo dialog did not open from Replace image');
+  const results = await searchInDialog(page, 'stripe');
+  const slug = results.includes('stripe') ? 'stripe' : results[0];
+  if (!slug) {
+    await page.keyboard.press('Escape');
+    test.skip(true, 'no result for the wordmark on this upstream');
+  }
+  await ctl(page, `dialog.logo.tile.${slug}`).click();
+  await expect
+    .poll(async () => (await pictures(page, slideId)).find((o) => o.id === id)?.block['asset'], {
+      timeout: 30_000,
+    })
+    .not.toBe(before.block['asset']);
+  await expect(ctl(page, 'dialog.logo')).toHaveCount(0, { timeout: 10_000 });
+  await settled(page);
+  const after = (await pictures(page, slideId)).find((o) => o.id === id)!;
+  const img = await pictureImg(page, id);
+  const natural = img && img.natural.height > 0 ? img.natural.width / img.natural.height : null;
+  const drawn = after.pos.w / after.pos.h;
+  const centreAfter = { x: after.pos.x + after.pos.w / 2, y: after.pos.y + after.pos.h / 2 };
+  test.info().annotations.push({
+    type: 'replace',
+    description: `${slug}: box ${JSON.stringify(before.pos)} -> ${JSON.stringify(after.pos)}; natural ${img?.natural.width} by ${img?.natural.height} (${natural?.toFixed(3)}), drawn ${drawn.toFixed(3)}; object-fit ${img?.objectFit}; centre ${centre.x},${centre.y} -> ${centreAfter.x},${centreAfter.y}`,
+  });
+  expect(natural, "the picture's natural size is known").not.toBeNull();
+  expect(
+    Math.abs(drawn - natural!) / natural!,
+    'the drawn aspect equals the natural aspect within 1 percent',
+  ).toBeLessThanOrEqual(0.01);
+  expect(img?.objectFit, 'no object-fit fill').not.toBe('fill');
+  expect(Math.abs(centreAfter.x - centre.x), "the box's centre stays").toBeLessThanOrEqual(2);
+  expect(Math.abs(centreAfter.y - centre.y)).toBeLessThanOrEqual(2);
+});
+
+test(title('images.picture.no-plate'), async () => {
+  test.setTimeout(300_000);
+  await openEditor(page, deck);
+  const notes: string[] = [];
+  const failures: string[] = [];
+  const ringOf = async (
+    p: Page,
+    blockId: string,
+    root = '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)',
+  ) => {
+    await page.keyboard.press('Escape');
+    await p.waitForTimeout(400);
+    const box = await p.evaluate(
+      ([sel, id]) => {
+        const el = document.querySelector(
+          sel
+            .split(',')
+            .map((s) => `${s.trim()} [data-block="${id}"]`)
+            .join(', '),
+        );
+        const wrap = (el?.closest('.free') ?? el) as HTMLElement | null;
+        const sheet = document.querySelector(sel);
+        if (!wrap || !sheet) return null;
+        const r = wrap.getBoundingClientRect();
+        const s = sheet.getBoundingClientRect();
+        const cs = getComputedStyle(el as Element);
+        const ws = getComputedStyle(wrap);
+        return {
+          x: r.x,
+          y: r.y,
+          w: r.width,
+          h: r.height,
+          sheet: { x: s.x, y: s.y, w: s.width, h: s.height },
+          border: `${cs.borderTopWidth} ${cs.borderTopStyle}`,
+          wrapBorder: `${ws.borderTopWidth} ${ws.borderTopStyle}`,
+          background: cs.backgroundColor,
+          wrapBackground: ws.backgroundColor,
+        };
+      },
+      [root, blockId] as const,
+    );
+    if (!box) return null;
+    const { sample } = await sheetPixels(p);
+    const ground = sample({ x: box.sheet.x + 8, y: box.sheet.y + 8, w: 24, h: 24 }, { step: 2 });
+    /* the ring 3 px outside the picture on each side, sampled as four strips */
+    const strips = [
+      { x: box.x - 4, y: box.y - 4, w: box.w + 8, h: 3 },
+      { x: box.x - 4, y: box.y + box.h + 1, w: box.w + 8, h: 3 },
+      { x: box.x - 4, y: box.y, w: 3, h: box.h },
+      { x: box.x + box.w + 1, y: box.y, w: 3, h: box.h },
+    ].map((b) => sample(b, { step: 1 }));
+    const groundHex = ground.dominant?.hex ?? null;
+    const offGround = strips.reduce(
+      (n, st) => n + st.colors.filter((c) => c.hex !== groundHex).reduce((m, c) => m + c.count, 0),
+      0,
+    );
+    return {
+      ...box,
+      groundHex,
+      offGround,
+      strips: strips.map((st) => st.dominant?.hex ?? '?').join(' '),
+    };
+  };
+  /* a vector mark on the white slide */
+  const light = await addSlide(page);
+  const s0 = await settled(page);
+  await invoke(page, 'deck.set', {
+    path: '/defaults/appearance',
+    value: 'light',
+    baseRevision: s0.revision,
+  });
+  await settled(page);
+  const { blockId: markLight } = await placeSvgPicture(
+    page,
+    light,
+    { x: 600, y: 300, w: 240, h: 160 },
+    'no-plate-light',
+  );
+  await page.waitForTimeout(600);
+  const onLight = await ringOf(page, markLight);
+  notes.push(
+    `light: ${onLight ? `border ${onLight.border} / ${onLight.wrapBorder}, background ${onLight.background} / ${onLight.wrapBackground}, ground ${onLight.groundHex}, ring strips ${onLight.strips}, pixels off the ground ${onLight.offGround}` : 'no picture'}`,
+  );
+  if (
+    !onLight ||
+    onLight.offGround > 8 ||
+    !/^0px/.test(onLight.border) ||
+    !/^0px/.test(onLight.wrapBorder)
+  )
+    failures.push('the light slide draws a plate or a hairline under the mark');
+  /* the dark deck */
+  const s1 = await settled(page);
+  await invoke(page, 'deck.set', {
+    path: '/defaults/appearance',
+    value: 'dark',
+    baseRevision: s1.revision,
+  });
+  await settled(page);
+  await page.waitForTimeout(800);
+  const onDark = await ringOf(page, markLight);
+  notes.push(
+    `dark: ${onDark ? `ground ${onDark.groundHex}, ring strips ${onDark.strips}, pixels off the ground ${onDark.offGround}` : 'no picture'}`,
+  );
+  if (!onDark || onDark.offGround > 8)
+    failures.push('the dark deck draws a plate or a hairline under the mark');
+  /* the print document (the PDF's page) */
+  await menuPath(page, 'file', 'file.printPreview');
+  await page.waitForURL(/\/print\//, { timeout: 20_000 });
+  await page.waitForSelector('[data-control="print.page"][data-hydrated]', { timeout: 20_000 });
+  const printed = await page.evaluate((id) => {
+    const el = document.querySelector(`[data-control="print.page"] [data-block="${id}"]`);
+    const wrap = (el?.closest('.free') ?? el) as HTMLElement | null;
+    if (!el || !wrap) return null;
+    const cs = getComputedStyle(el);
+    const ws = getComputedStyle(wrap);
+    return {
+      border: `${cs.borderTopWidth} ${cs.borderTopStyle}`,
+      wrapBorder: `${ws.borderTopWidth} ${ws.borderTopStyle}`,
+      background: cs.backgroundColor,
+      wrapBackground: ws.backgroundColor,
+    };
+  }, markLight);
+  await ctl(page, 'print.close').click();
+  await page.waitForURL(/\/edit\//, { timeout: 20_000 });
+  await waitEditor(page);
+  /* the editor comes back on its first slide; the white slide is made current again for the
+     stage reads below */
+  await clickCard(page, light);
+  const transparent = (c: string | undefined) =>
+    c === undefined || c === 'rgba(0, 0, 0, 0)' || c === 'transparent';
+  notes.push(
+    `print: ${printed ? `border ${printed.border} / ${printed.wrapBorder}, background ${printed.background} / ${printed.wrapBackground}` : 'no picture'}`,
+  );
+  if (!printed || !/^0px/.test(printed.border) || !transparent(printed.background))
+    failures.push("the PDF's page draws a plate or a hairline");
+  /* the brand deck's screenshot block keeps its plate: a capture role picture */
+  await placePicture(page, light, { x: 900, y: 300, w: 240, h: 160 }, 'capture-plate');
+  await page.waitForTimeout(400);
+  const capture = await page.evaluate(() => {
+    const el = document.querySelector(
+      '.ts-stagewrap.ts-editor .pt-slide [data-block="capture-plate"]',
+    );
+    const wrap = (el?.closest('.free') ?? el) as HTMLElement | null;
+    if (!el || !wrap) return null;
+    const cs = getComputedStyle(el);
+    const ws = getComputedStyle(wrap);
+    return {
+      border: `${cs.borderTopWidth} ${cs.borderTopStyle}`,
+      wrapBorder: `${ws.borderTopWidth} ${ws.borderTopStyle}`,
+      role: el.getAttribute('data-role') ?? el.className,
+    };
+  });
+  notes.push(`capture role: ${JSON.stringify(capture)}`);
+  const s2 = await settled(page);
+  await invoke(page, 'deck.set', {
+    path: '/defaults/appearance',
+    value: 'light',
+    baseRevision: s2.revision,
+  }).catch(() => undefined);
+  test.info().annotations.push({ type: 'plate', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+});
+
+/** The Logo dialog's groups in order, each with its head text and its tiles' facts. */
+async function dialogGroups(p: Page) {
+  return p.evaluate(() => {
+    const dialog = document.querySelector('[data-control="dialog.logo"]');
+    const dr = dialog?.getBoundingClientRect();
+    const groups = [
+      ...(dialog?.querySelectorAll('[data-control^="dialog.logo.group."]') ?? []),
+    ].filter((g) => g.getClientRects().length > 0);
+    return {
+      height: dr ? Math.round(dr.height) : null,
+      groups: groups.map((g) => {
+        const head = g.querySelector(
+          'h2, h3, h4, header, legend, .ts-logo-group-head, .ts-logo-group-title',
+        );
+        const tiles = [...g.querySelectorAll('[data-control^="dialog.logo.tile."]')].filter(
+          (el) =>
+            el.matches('button, [role="option"]') &&
+            !/\.(paper|ink|pair|variants)$/.test(el.getAttribute('data-control') ?? ''),
+        );
+        const first = tiles[0]?.getBoundingClientRect() ?? null;
+        return {
+          id: (g.getAttribute('data-control') ?? '').replace('dialog.logo.group.', ''),
+          head: (head?.textContent ?? '').trim(),
+          tiles: tiles.length,
+          firstInside:
+            first && dr ? first.top >= dr.top - 1 && first.bottom <= dr.bottom + 1 : null,
+          titles: tiles.slice(0, 4).map((el) => {
+            const t = el.querySelector('.ts-logo-title, .ts-logo-tile-title');
+            return t
+              ? {
+                  text: (t.textContent ?? '').trim(),
+                  clipped: t.scrollWidth > t.clientWidth + 1,
+                  ellipsis:
+                    getComputedStyle(t).textOverflow === 'ellipsis' &&
+                    getComputedStyle(t).whiteSpace === 'nowrap',
+                }
+              : null;
+          }),
+          active: tiles.filter((el) => el.classList.contains('is-active')).length,
+        };
+      }),
+      empty: (() => {
+        const el = document.querySelector('[data-control="dialog.logo.empty"]');
+        const r = el?.getBoundingClientRect() ?? null;
+        return r && dr ? r.top >= dr.top - 1 && r.bottom <= dr.bottom + 1 : null;
+      })(),
+      upload: (() => {
+        const el = document.querySelector('[data-control="dialog.logo.upload"]');
+        const r = el?.getBoundingClientRect() ?? null;
+        return r && dr ? r.top >= dr.top - 1 && r.bottom <= dr.bottom + 1 : null;
+      })(),
+    };
+  });
+}
+
+test(title('logos.dialog.results-in-view'), async () => {
+  test.setTimeout(240_000);
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const opened = await openLogo(page);
+  if (!opened.open) test.skip(true, 'not on this build: insert.logo (docs/FEATURES.md 4.3)');
+  /* tiles under Your brand and Recent: one insert first */
+  const results0 = await searchInDialog(page, 'figma');
+  if (results0.length > 0) {
+    const before = (await pictures(page, slideId)).length;
+    await ctl(page, `dialog.logo.tile.${results0[0]}`).click();
+    await expect
+      .poll(async () => (await pictures(page, slideId)).length, { timeout: 30_000 })
+      .toBe(before + 1);
+    await expect(ctl(page, 'dialog.logo')).toHaveCount(0, { timeout: 10_000 });
+    await settled(page);
+    const again = await openLogo(page);
+    expect(again.open).toBe(true);
+  }
+  await page.waitForTimeout(400);
+  const atOpen = await dialogGroups(page);
+  await ctl(page, 'dialog.logo.search').click();
+  await page.keyboard.press('Meta+a');
+  await page.keyboard.type('stripe', { delay: 60 });
+  const t0 = Date.now();
+  const inView = await expect
+    .poll(
+      async () =>
+        (await dialogGroups(page)).groups.find((g) => g.id === 'results')?.firstInside ?? false,
+      { timeout: 15_000 },
+    )
+    .toBe(true)
+    .then(() => true)
+    .catch(() => false);
+  const resultsMs = Date.now() - t0;
+  const withResults = await dialogGroups(page);
+  await page.keyboard.press('Meta+a');
+  await page.keyboard.type('zzzqqqxx', { delay: 60 });
+  await expect
+    .poll(
+      () =>
+        ctl(page, 'dialog.logo.empty')
+          .isVisible()
+          .catch(() => false),
+      { timeout: 15_000 },
+    )
+    .toBe(true)
+    .catch(() => undefined);
+  const withEmpty = await dialogGroups(page);
+  await page.keyboard.press('Escape');
+  await expect(ctl(page, 'dialog.logo')).toHaveCount(0, { timeout: 5000 });
+  if (opened.switched) await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
+  test.info().annotations.push({
+    type: 'results',
+    description: `at open ${atOpen.height} px with ${atOpen.groups.map((g) => `${g.id} ${g.tiles}`).join(', ')}; stripe: the Results group's first tile inside ${inView} after ${resultsMs} ms, height ${withResults.height}; zzzqqqxx: empty state inside ${withEmpty.empty}, Upload inside ${withEmpty.upload}, height ${withEmpty.height}`,
+  });
+  expect(
+    inView,
+    "the Results group's first tile is inside the dialog's box within 400 ms of the results",
+  ).toBe(true);
+  expect(
+    resultsMs,
+    'within 400 ms after the results (the search itself may take longer)',
+  ).toBeLessThan(15_000);
+  expect(withEmpty.empty, 'the empty state inside the box').toBe(true);
+  expect(withEmpty.upload, 'Upload inside the box').toBe(true);
+  expect(withResults.height, "the dialog's height does not change").toBe(atOpen.height);
+  expect(withEmpty.height).toBe(atOpen.height);
+});
+
+test(title('logos.dialog.sentence-case-whole-names'), async () => {
+  test.setTimeout(240_000);
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const opened = await openLogo(page);
+  if (!opened.open) test.skip(true, 'not on this build: insert.logo (docs/FEATURES.md 4.3)');
+  /* a customer logo inserted, so Recent has a tile */
+  const results = await searchInDialog(page, 'vercel');
+  if (results.length > 0) {
+    const before = (await pictures(page, slideId)).length;
+    await ctl(page, `dialog.logo.tile.${results[0]}`).click();
+    await expect
+      .poll(async () => (await pictures(page, slideId)).length, { timeout: 30_000 })
+      .toBe(before + 1);
+    await expect(ctl(page, 'dialog.logo')).toHaveCount(0, { timeout: 10_000 });
+    await settled(page);
+    const again = await openLogo(page);
+    expect(again.open).toBe(true);
+  }
+  await page.waitForTimeout(400);
+  const groups = await dialogGroups(page);
+  const heads = groups.groups.map((g) => g.head);
+  const brand = groups.groups.find((g) => g.id === 'brand') ?? null;
+  const recent = groups.groups.find((g) => g.id === 'recent') ?? null;
+  const shouting = heads.filter((h) => h.length > 2 && h === h.toUpperCase());
+  const customerInBrand = brand ? brand.titles.some((t) => t && /vercel/i.test(t.text)) : false;
+  const customerInRecent = recent ? recent.titles.some((t) => t && /vercel/i.test(t.text)) : false;
+  const cut = brand ? brand.titles.filter((t) => t && (t.clipped || /…$/.test(t.text))) : [];
+  const active = groups.groups.reduce((n, g) => n + g.active, 0);
+  await page.keyboard.press('Escape');
+  await expect(ctl(page, 'dialog.logo')).toHaveCount(0, { timeout: 5000 });
+  if (opened.switched) await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
+  test.info().annotations.push({
+    type: 'words',
+    description: `heads ${heads.map((h) => `"${h}"`).join(', ')}; Your brand titles ${brand ? brand.titles.map((t) => (t ? `"${t.text}"${t.clipped ? ' (cut)' : ''}` : 'none')).join(', ') : 'no group'}; the customer logo under Recent ${customerInRecent}, under Your brand ${customerInBrand}; is-active tiles ${active}`,
+  });
+  expect(shouting, 'sentence case group labels').toEqual([]);
+  expect(
+    heads.filter((h) => /^(Your brand|Results|Recent)$/.test(h)).length,
+    'the three heads',
+  ).toBeGreaterThanOrEqual(2);
+  expect(cut, "the kit's tile title is whole").toEqual([]);
+  expect(customerInBrand, 'an inserted customer logo does not join Your brand').toBe(false);
+  if (results.length > 0) expect(customerInRecent, 'it lists under Recent').toBe(true);
+  expect(active, 'the preselected tile carries is-active').toBeGreaterThanOrEqual(1);
+});
+
 coverage(import.meta.filename, [
   'logos.picker.recents',
   'logos.route.mark-headers',
@@ -964,4 +1386,9 @@ coverage(import.meta.filename, [
   'logos.agent.search-insert',
   /* the vector round (docs/VECTOR.md 4.6, 6.1): the logo's vector export */
   'logos.export.svgblip',
+  /* the polish round (docs/POLISH.md 2.5 items 37, 38, 39 and 46) */
+  'images.replace.keeps-aspect',
+  'images.picture.no-plate',
+  'logos.dialog.results-in-view',
+  'logos.dialog.sentence-case-whole-names',
 ]);

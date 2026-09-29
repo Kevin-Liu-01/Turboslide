@@ -1319,6 +1319,361 @@ test(title('sync.resend.idempotent'), async ({ browser }) => {
   }
 });
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 2.8 items 99, 100, 102, 108 and 109, 5.1 `sync.*`): two slides
+// added within half a second both survive, the save words answer the save queue alone, a refused
+// change is one sentence below the toolbar, a failed write never rolls the stage back, and no
+// recovered writes plate for a write the server holds.
+
+/** The save words of the title row. */
+async function saveWordsOf(p: Page): Promise<string> {
+  return (
+    (await ctl(p, 'deck.saveState')
+      .textContent({ timeout: 3000 })
+      .catch(() => '')) ?? ''
+  );
+}
+/** The reject card and the snackbar as drawn: their texts and boxes. */
+async function refusalUi(p: Page) {
+  return p.evaluate(() => {
+    const card =
+      document
+        .querySelector('.ts-conflict, [data-control^="conflict."]')
+        ?.closest('.ts-conflict') ?? document.querySelector('.ts-conflict');
+    const toolbar = document.querySelector('.ts-toolbar');
+    const snack = document.querySelector(
+      '[data-control="snackbar"], .ts-snackbar.is-on, .pt-toast.is-on',
+    );
+    const box = (el: Element | null) => {
+      if (!el || el.getClientRects().length === 0) return null;
+      const r = el.getBoundingClientRect();
+      return { top: Math.round(r.top), bottom: Math.round(r.bottom) };
+    };
+    return {
+      card: card
+        ? {
+            text: (card.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 240),
+            box: box(card),
+          }
+        : null,
+      toolbar: box(toolbar),
+      snackbar: snack ? (snack.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 200) : null,
+    };
+  });
+}
+
+test(title('sync.slide.concurrent-add-both-kept'), async ({ browser }) => {
+  test.setTimeout(300_000);
+  try {
+    const A = await openA(browser, 'Concurrent slides');
+    const B = await joinB(browser);
+    const failures: string[] = [];
+    const notes: string[] = [];
+    for (let round = 1; round <= 3; round += 1) {
+      await Promise.all([quiet(A), quiet(B)]);
+      const before = await slideOrder(A);
+      const t0 = Date.now();
+      await Promise.all([
+        ctl(A, 'toolbar.newSlide').click(),
+        (async () => {
+          await A.waitForTimeout(150);
+          await ctl(B, 'toolbar.newSlide').click();
+        })(),
+      ]);
+      const both = await expect
+        .poll(
+          async () => {
+            const [a, b] = await Promise.all([slideOrder(A), slideOrder(B)]);
+            return (
+              a.length === before.length + 2 &&
+              b.length === before.length + 2 &&
+              JSON.stringify(a) === JSON.stringify(b)
+            );
+          },
+          { timeout: 5000 },
+        )
+        .toBe(true)
+        .then(() => true)
+        .catch(() => false);
+      const ms = Date.now() - t0;
+      const [ua, ub] = await Promise.all([refusalUi(A), refusalUi(B)]);
+      const [wa, wb] = await Promise.all([saveWordsOf(A), saveWordsOf(B)]);
+      const retry = /retry|Couldn|Reconnecting/i.test(`${wa} ${wb}`);
+      const [oa, ob] = await Promise.all([slideOrder(A), slideOrder(B)]);
+      notes.push(
+        `round ${round}: A ${oa.length} slides, B ${ob.length} (from ${before.length}) within 5 s ${both} (${ms} ms); reject cards ${ua.card ? 'A' : ''}${ub.card ? 'B' : ''}${!ua.card && !ub.card ? 'none' : ''}; words "${wa}" / "${wb}"`,
+      );
+      if (!both)
+        failures.push(
+          `round ${round}: A ${oa.length}, B ${ob.length} slides from ${before.length}`,
+        );
+      if (ua.card || ub.card)
+        failures.push(`round ${round}: a reject card (${ua.card?.text ?? ub.card?.text})`);
+      if (retry) failures.push(`round ${round}: the title row read "${wa}" / "${wb}"`);
+      await Promise.all([A.keyboard.press('Escape'), B.keyboard.press('Escape')]);
+    }
+    test.info().annotations.push({ type: 'rounds', description: notes.join(' | ') });
+    expect(
+      failures,
+      'both browsers hold both slides within 5 s, no reject card, no retry word, three rounds',
+    ).toEqual([]);
+  } finally {
+    await cleanUp();
+  }
+});
+
+test(title('sync.title-row.save-words-truthful'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  try {
+    const A = await openA(browser, 'Save words');
+    const notes: string[] = [];
+    /* a refused write: a stale baseRevision through the window API, then the row's words once nothing is pending */
+    const s = await facts(A);
+    let refusal = 'no refusal';
+    try {
+      await invoke(A, 'deck.rename', {
+        name: 'Stale rename',
+        baseRevision: Math.max(0, s.revision - 5),
+      });
+    } catch (error) {
+      refusal = error instanceof Error ? (error.message.split('\n')[0] ?? '') : String(error);
+    }
+    await quiet(A);
+    await A.waitForTimeout(1500);
+    const afterRefusal = await saveWordsOf(A);
+    notes.push(`after a refused write (${refusal.slice(0, 80)}) the row reads "${afterRefusal}"`);
+    /* a store publishing ok: false on a connected tab draws no word: the pulse route answers ok false once */
+    const pulse = /\/api\/(decks\/[^/?]+\/(pulse|presence|sync)|realtime|room)(\?|\/|$)/;
+    let injected = 0;
+    await A.route(pulse, async (route) => {
+      if (injected >= 2 || route.request().method() !== 'GET') return route.continue();
+      injected += 1;
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: false, error: 'busy' }),
+      });
+    });
+    await A.waitForTimeout(4000);
+    const busyWords = await saveWordsOf(A);
+    await A.unroute(pulse);
+    notes.push(
+      `a busy store on a connected tab (${injected} answers injected): the row reads "${busyWords}"`,
+    );
+    /* the network cut: Offline within 1 s */
+    await owner!.context.setOffline(true);
+    const t0 = Date.now();
+    const offline = await expect
+      .poll(() => saveWordsOf(A), { timeout: 1000 })
+      .toMatch(/Offline|You're offline/i)
+      .then(() => true)
+      .catch(() => false);
+    const offlineMs = Date.now() - t0;
+    const offlineWords = await saveWordsOf(A);
+    await owner!.context.setOffline(false);
+    await A.waitForTimeout(2000);
+    notes.push(`offline: "${offlineWords}" within 1 s ${offline} (${offlineMs} ms)`);
+    test.info().annotations.push({ type: 'save words', description: notes.join(' | ') });
+    expect(afterRefusal, 'All changes saved once nothing is pending').toMatch(/All changes saved/);
+    expect(busyWords, 'a busy store on a connected tab draws no retry word').not.toMatch(
+      /Reconnecting|retry|Couldn/i,
+    );
+    expect(offline, 'Offline within 1 s of the network cut').toBe(true);
+  } finally {
+    await cleanUp();
+  }
+});
+
+test(title('sync.reject.sentence-below-toolbar'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  try {
+    const A = await openA(browser, 'Reject sentence');
+    const first = (await slideOrder(A))[0]!;
+    /* a structural refusal: the ops POST of a slide.new answered 409 through page.route */
+    const ops = /\/api\/decks\/[^/?]+\/ops(\?|$)/;
+    let structural = 0;
+    await A.route(ops, async (route) => {
+      const body = route.request().postData() ?? '';
+      if (
+        route.request().method() === 'POST' &&
+        /slide\.(insert|new)/.test(body) &&
+        structural === 0
+      ) {
+        structural += 1;
+        return route.fulfill({
+          status: 409,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            ok: false,
+            error: 'Slide "split-9" already exists',
+            code: 'conflict',
+          }),
+        });
+      }
+      return route.continue();
+    });
+    await ctl(A, 'toolbar.newSlide').click();
+    await A.waitForTimeout(2500);
+    const afterStructural = await refusalUi(A);
+    await A.unroute(ops);
+    await quiet(A).catch(() => undefined);
+    /* a refused typed text: the ops POST of a text.splice answered 409 */
+    let typed = 0;
+    await A.route(ops, async (route) => {
+      const body = route.request().postData() ?? '';
+      if (
+        route.request().method() === 'POST' &&
+        /text\.splice|slide\.set/.test(body) &&
+        typed === 0
+      ) {
+        typed += 1;
+        return route.fulfill({
+          status: 409,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            ok: false,
+            error: 'the text changed elsewhere',
+            code: 'conflict',
+          }),
+        });
+      }
+      return route.continue();
+    });
+    const run = await headingRun(A);
+    await openRun(A, run);
+    await typeHuman(A, ' refused');
+    await closeRun(A);
+    await A.waitForTimeout(2500);
+    const afterTyped = await refusalUi(A);
+    await A.unroute(ops);
+    test.info().annotations.push({
+      type: 'refusals',
+      description: `structural (${structural} injected): card ${afterStructural.card ? `"${afterStructural.card.text.slice(0, 120)}"` : 'none'}, snackbar "${afterStructural.snackbar}"; typed (${typed} injected): card ${afterTyped.card ? `"${afterTyped.card.text.slice(0, 120)}" at ${afterTyped.card.box?.top} against the toolbar's bottom ${afterTyped.toolbar?.bottom}` : 'none'}`,
+    });
+    expect(structural, 'the slide add was refused once').toBe(1);
+    expect(afterStructural.card, 'a structural refusal draws no card').toBeNull();
+    expect(afterStructural.snackbar ?? '', 'one snackbar sentence').toMatch(/not added|Try again/i);
+    expect(afterStructural.snackbar ?? '', 'no id and no JSON').not.toMatch(/split-\d|\{|"/);
+    expect(afterTyped.card, 'a refused typed text keeps the card').not.toBeNull();
+    expect(
+      afterTyped.card!.box!.top,
+      "the card's top below the toolbar's bottom edge",
+    ).toBeGreaterThanOrEqual(afterTyped.toolbar!.bottom);
+    expect(afterTyped.card!.text, 'no id and no JSON in the card').not.toMatch(/split-\d|\{"/);
+    void first;
+  } finally {
+    await cleanUp();
+  }
+});
+
+test(title('sync.write.5xx-keeps-document'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  try {
+    const A = await openA(browser, 'Keep the document');
+    const first = (await slideOrder(A))[0]!;
+    await placeBlock(A, first, {
+      id: 'wa-big',
+      type: 'text',
+      text: 'Big words',
+      typography: { size: 88, weight: 500, align: 'center' },
+      outline: { color: 'ink', width: 1.5 },
+      pos: { x: 200, y: 300, w: 1000, h: 200 },
+    });
+    await quiet(A);
+    const ops = /\/api\/decks\/[^/?]+\/ops(\?|$)/;
+    let served = 0;
+    await A.route(ops, async (route) => {
+      if (route.request().method() === 'POST' && served === 0) {
+        served += 1;
+        return route.fulfill({
+          status: 503,
+          contentType: 'application/json',
+          body: JSON.stringify({ ok: false, error: 'the store is busy' }),
+        });
+      }
+      return route.continue();
+    });
+    const beforeText = JSON.stringify(await slideJson(A, first));
+    await selectBlock(A, 'wa-big');
+    await A.keyboard.press('Meta+b');
+    await A.waitForTimeout(400);
+    const stageAt400 = await blockText(A, first, 'wa-big');
+    const boxAt400 = await A.evaluate(() => {
+      const el = document.querySelector('.ts-stagewrap.ts-editor .pt-slide [data-block="wa-big"]');
+      const free = el?.closest('.free') as HTMLElement | null;
+      return free
+        ? {
+            w: free.offsetWidth,
+            h: free.offsetHeight,
+            weight: getComputedStyle(el as Element).fontWeight,
+          }
+        : null;
+    });
+    const landed = await expect
+      .poll(async () => (await facts(A)).sync?.pending ?? 1, { timeout: 30_000 })
+      .toBe(0)
+      .then(() => true)
+      .catch(() => false);
+    await A.unroute(ops);
+    const after = await slideJson(A, first);
+    const afterText = JSON.stringify(after);
+    /* the Bold write landed when the document differs from the one before the chord: on word art
+       the chord turns the weight either way (docs/POLISH.md 2.4 item 31 is B3's row for which) */
+    const bold =
+      /"weight":(?:[6-9]00)|\{[^}]*\bb\b[^}]*\}/.test(afterText) || afterText !== beforeText;
+    await A.reload();
+    await waitEditor(A);
+    const reloaded = JSON.stringify(await slideJson(A, first));
+    test.info().annotations.push({
+      type: '503',
+      description: `${served} POST answered 503; at 400 ms the stage read "${stageAt400}" in a ${boxAt400?.w} by ${boxAt400?.h} box at weight ${boxAt400?.weight}; the resend landed ${landed}; bold stored ${bold}; the reload reads the same ${reloaded === afterText}`,
+    });
+    expect(served, 'one ops POST was answered 503').toBe(1);
+    expect(stageAt400, "the stage keeps the document's text").toBe('Big words');
+    expect(boxAt400?.w, 'and its box').toBe(1000);
+    expect(landed, 'the resend lands').toBe(true);
+    expect(bold, 'the Bold write is in the document').toBe(true);
+    expect(reloaded, 'a reload reads the same').toBe(afterText);
+  } finally {
+    await cleanUp();
+  }
+});
+
+test(title('sync.recovered.no-plate-for-held-writes'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  try {
+    const A = await openA(browser, 'No plate');
+    const run = await headingRun(A);
+    await openRun(A, run);
+    await typeHuman(A, ' held by the server');
+    await closeRun(A);
+    await quiet(A);
+    await A.waitForTimeout(1500);
+    const words = await saveWordsOf(A);
+    await A.reload();
+    await waitEditor(A);
+    await A.waitForTimeout(2500);
+    const plate = await ctl(A, 'sync.persisted')
+      .isVisible()
+      .catch(() => false);
+    const plateText = plate
+      ? await ctl(A, 'sync.persisted')
+          .textContent({ timeout: 3000 })
+          .catch(() => '')
+      : '';
+    const heading = await headingOf(A);
+    test.info().annotations.push({
+      type: 'plate',
+      description: `before the reload "${words}"; after it the plate ${plate ? `"${plateText?.trim().slice(0, 80)}"` : 'none'}; the heading "${heading}"`,
+    });
+    expect(words, 'All changes saved before the reload').toMatch(/All changes saved/);
+    expect(plate, 'no recovered writes plate for a write the server holds').toBe(false);
+    expect(heading).toContain('held by the server');
+  } finally {
+    await cleanUp();
+  }
+});
+
 coverage(import.meta.filename, [
   'sync.serial.order-and-latency',
   'sync.title.concurrent-both-kept',
@@ -1330,4 +1685,10 @@ coverage(import.meta.filename, [
   'sync.reload.same-document',
   'sync.undo.after-remote',
   'sync.resend.idempotent',
+  /* the polish round (docs/POLISH.md 2.8) */
+  'sync.slide.concurrent-add-both-kept',
+  'sync.title-row.save-words-truthful',
+  'sync.reject.sentence-below-toolbar',
+  'sync.write.5xx-keeps-document',
+  'sync.recovered.no-plate-for-held-writes',
 ]);

@@ -150,3 +150,74 @@ describe('readoutsOf', () => {
     expect(readoutsOf(null, /x/).every).toBe(false);
   });
 });
+
+// The polish round (docs/POLISH.md 5.1): the pixel read and the boxes read of the frame capture,
+// pure over a scripted shot.
+import { boxGap, boxInside, boxIntersects, pixelAt, sampleBox } from './toolkit.mjs';
+
+/** A 10 by 10 shot: black, with a white 4 by 4 square at 3,3 and one amber pixel at 9,9. */
+const shot = {
+  width: 10,
+  height: 10,
+  pixel: (x, y) =>
+    x === 9 && y === 9
+      ? [255, 191, 0]
+      : x >= 3 && x < 7 && y >= 3 && y < 7
+        ? [255, 255, 255]
+        : [0, 0, 0],
+};
+
+describe('pixelAt', () => {
+  it('reads a pixel of the shot and answers null outside it', () => {
+    expect(pixelAt(shot, 0, 0)).toEqual({ rgb: [0, 0, 0], hex: '#000000' });
+    expect(pixelAt(shot, 4.4, 3.6)).toEqual({ rgb: [255, 255, 255], hex: '#ffffff' });
+    expect(pixelAt(shot, 9, 9).hex).toBe('#ffbf00');
+    expect(pixelAt(shot, 10, 0)).toBeNull();
+    expect(pixelAt(shot, -1, 0)).toBeNull();
+    expect(pixelAt(null, 0, 0)).toBeNull();
+  });
+});
+
+describe('sampleBox', () => {
+  it('names the dominant colour of a box and the distinct colours it holds', () => {
+    const inside = sampleBox(shot, { x: 3, y: 3, w: 4, h: 4 }, { step: 1 });
+    expect(inside.count).toBe(16);
+    expect(inside.distinct).toBe(1);
+    expect(inside.dominant).toEqual({ hex: '#ffffff', share: 1 });
+    const whole = sampleBox(shot, { x: 0, y: 0, w: 10, h: 10 }, { step: 1 });
+    expect(whole.count).toBe(100);
+    expect(whole.distinct).toBe(3);
+    expect(whole.dominant.hex).toBe('#000000');
+    expect(whole.dominant.share).toBe(0.83);
+    expect(whole.colors.map((c) => c.hex)).toEqual(['#000000', '#ffffff', '#ffbf00']);
+  });
+
+  it('keeps an inset and answers an empty reading for a box outside the shot', () => {
+    const inset = sampleBox(shot, { x: 2, y: 2, w: 6, h: 6 }, { step: 1, inset: 1 });
+    expect(inset.count).toBe(16);
+    expect(inset.dominant.hex).toBe('#ffffff');
+    expect(sampleBox(shot, { x: 20, y: 20, w: 4, h: 4 }).count).toBe(0);
+    expect(sampleBox(null, { x: 0, y: 0, w: 1, h: 1 }).count).toBe(0);
+  });
+});
+
+describe('the box reads', () => {
+  const a = { x: 0, y: 0, w: 10, h: 10 };
+  it('tell an overlap from a touch and a gap', () => {
+    expect(boxIntersects(a, { x: 5, y: 5, w: 10, h: 10 })).toBe(true);
+    expect(boxIntersects(a, { x: 10, y: 0, w: 10, h: 10 })).toBe(false);
+    expect(boxIntersects(a, { x: 9.5, y: 0, w: 10, h: 10 }, 1)).toBe(false);
+    expect(boxIntersects(a, null)).toBe(false);
+  });
+  it('read a box inside another within a tolerance', () => {
+    expect(boxInside({ x: 1, y: 1, w: 8, h: 8 }, a)).toBe(true);
+    expect(boxInside({ x: 1, y: 1, w: 10, h: 8 }, a)).toBe(false);
+    expect(boxInside({ x: 1, y: 1, w: 10, h: 8 }, a, 1)).toBe(true);
+    expect(boxInside(null, a)).toBe(false);
+  });
+  it('measure the gap on each axis, negative over an overlap', () => {
+    expect(boxGap(a, { x: 14, y: 0, w: 4, h: 4 })).toEqual({ dx: 4, dy: -4 });
+    expect(boxGap(a, { x: 0, y: 12.5, w: 4, h: 4 })).toEqual({ dx: -4, dy: 2.5 });
+    expect(boxGap(a, null)).toBeNull();
+  });
+});

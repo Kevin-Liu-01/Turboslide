@@ -27,6 +27,8 @@ import {
   title,
   waitEditor,
   sweepTemplateLeftovers,
+  slideOrder,
+  clickCard,
 } from './lib';
 
 // The brand kit and the templates, the spec rows (docs/PRODUCT.md 4.1 to 4.3, 8.1 `templates.*`,
@@ -1028,6 +1030,173 @@ test(title('fonts.preload.italic-on-edit-only'), async () => {
   expect(edit.length, '/edit carries two').toBe(2);
 });
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 2.5 item 49, 5.1 `brand.panel.words-match-sheet`): the Brand
+// kit's words match the sheet.
+
+test(title('brand.panel.words-match-sheet'), async () => {
+  test.setTimeout(240_000);
+  await openEditor(page, deck);
+  await menuPath(page, 'slide', 'slide.changeTheme');
+  const panel = await Promise.race([
+    ctl(page, 'panel.brand')
+      .waitFor({ timeout: 10_000 })
+      .then(() => 'brand' as const),
+    ctl(page, 'panel.themes')
+      .waitFor({ timeout: 10_000 })
+      .then(() => 'themes' as const),
+  ]).catch(() => 'none' as const);
+  if (panel !== 'brand')
+    test.skip(
+      true,
+      `not on this build: panel.brand (docs/PRODUCT.md 7.1); Slide > Change theme opened ${panel === 'themes' ? 'the Themes panel' : 'no panel'}`,
+    );
+  const notes: string[] = [];
+  const failures: string[] = [];
+  /* the footer text on the title slide and slide 2 */
+  const s = await settled(page);
+  await invoke(page, 'brand.set', {
+    path: '/footer/text',
+    value: 'Acme',
+    baseRevision: s.revision,
+  }).catch(() => undefined);
+  await settled(page);
+  const order = await slideOrder(page);
+  const footerOn = async (id: string) => {
+    await clickCard(page, id);
+    await page.waitForTimeout(600);
+    return page.evaluate((slideId) => {
+      const stage = document.querySelector('.ts-stagewrap.ts-editor .ts-stage');
+      const sheet = stage?.querySelector(`.pt-slide:not(.is-leaving)[data-slide-id="${slideId}"]`);
+      const visible = (el: Element | null) =>
+        el !== null &&
+        el.getClientRects().length > 0 &&
+        getComputedStyle(el).visibility !== 'hidden' &&
+        getComputedStyle(el).opacity !== '0';
+      const footers = [...(stage?.querySelectorAll('.ts-kit-footer') ?? [])].filter(visible);
+      return (
+        footers.some((el) => /Acme/.test(el.textContent ?? '')) ||
+        /Acme/.test(sheet?.textContent ?? '')
+      );
+    }, id);
+  };
+  const onTitle = await footerOn(order[0]!);
+  const onSecond = await footerOn(order[1]!);
+  notes.push(`footer text on the title slide ${onTitle}, on slide 2 ${onSecond}`);
+  if (!onTitle || !onSecond)
+    failures.push(`the footer text draws on the title slide ${onTitle} and slide 2 ${onSecond}`);
+  /* the position label names where the mark is drawn on the title slide */
+  await clickCard(page, order[0]!);
+  await page.waitForTimeout(400);
+  const position = await page.evaluate(() => {
+    const select = document.querySelector(
+      '[data-control="panel.brand.logo.position"]',
+    ) as HTMLSelectElement | null;
+    const label = select ? (select.options[select.selectedIndex]?.text ?? select.value) : null;
+    const stage = document.querySelector('.ts-stagewrap.ts-editor');
+    const sheet = stage?.querySelector('.pt-slide:not(.is-leaving)');
+    const mark = stage?.querySelector(
+      '.pt-slide:not(.is-leaving) .mark, .pt-slide:not(.is-leaving) [data-block="mark"], .pt-slide:not(.is-leaving) .ts-kit-mark, .pt-slide:not(.is-leaving) .ts-mark',
+    );
+    const heading = stage?.querySelector(
+      '.pt-slide:not(.is-leaving) h1, .pt-slide:not(.is-leaving) [data-run$="/heading"]',
+    );
+    if (!sheet || !mark) return { label, drawn: null };
+    const sr = sheet.getBoundingClientRect();
+    const mr = mark.getBoundingClientRect();
+    const hr = heading?.getBoundingClientRect() ?? null;
+    const vertical =
+      mr.top + mr.height / 2 < sr.top + sr.height / 3
+        ? 'top'
+        : mr.top + mr.height / 2 > sr.top + (sr.height * 2) / 3
+          ? 'bottom'
+          : 'middle';
+    const horizontal =
+      mr.left + mr.width / 2 < sr.left + sr.width / 3
+        ? 'left'
+        : mr.left + mr.width / 2 > sr.left + (sr.width * 2) / 3
+          ? 'right'
+          : 'centre';
+    return {
+      label,
+      drawn: `${vertical} ${horizontal}${hr && mr.bottom <= hr.top ? ' above the title' : ''}`,
+    };
+  });
+  notes.push(
+    `the position label "${position.label}" while the mark is drawn ${position.drawn ?? 'nowhere'}`,
+  );
+  if (position.label && position.drawn) {
+    const l = position.label.toLowerCase();
+    const d = position.drawn;
+    const agrees =
+      (/bottom/.test(l) && /^bottom/.test(d)) ||
+      (/top|above/.test(l) && (/^top/.test(d) || /above the title/.test(d))) ||
+      (/left/.test(l) && /left/.test(d) && !/bottom|top/.test(l));
+    if (!agrees)
+      failures.push(
+        `the position label "${position.label}" names another place than the drawn ${d}`,
+      );
+  }
+  /* the Dark tile leaves the chrome light and switches the Colors tab */
+  const chromeBefore = await page.evaluate(() =>
+    document.documentElement.getAttribute('data-theme'),
+  );
+  const dark = ctl(page, 'panel.brand.appearance.dark');
+  let chromeAfter: string | null = null;
+  let colorsTab: string | null = null;
+  if ((await dark.count()) > 0) {
+    await dark.click();
+    await settled(page);
+    await page.waitForTimeout(600);
+    chromeAfter = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    colorsTab = await page.evaluate(() => {
+      const pressed = document.querySelector(
+        '[data-control^="panel.brand.color.appearance."][aria-pressed="true"], [data-control^="panel.brand.color.appearance."].is-active',
+      );
+      return (
+        pressed?.getAttribute('data-control')?.replace('panel.brand.color.appearance.', '') ?? null
+      );
+    });
+    await ctl(page, 'panel.brand.appearance.light')
+      .click({ timeout: 3000 })
+      .catch(() => undefined);
+    await settled(page);
+  } else notes.push('no Dark tile');
+  notes.push(
+    `the chrome ${chromeBefore} -> ${chromeAfter} after the Dark tile; the Colors tab reads ${colorsTab}`,
+  );
+  if (chromeAfter !== null && chromeAfter !== chromeBefore)
+    failures.push(`the Dark tile turned the chrome ${chromeAfter}`);
+  if (colorsTab !== null && colorsTab !== 'dark')
+    failures.push(`the Colors tab stayed on ${colorsTab}`);
+  /* Inter listed once in the font picker */
+  const fontButton = page
+    .locator('[data-control="panel.brand.font.display"], [data-control="panel.brand.font.text"]')
+    .first();
+  let inters: number | null = null;
+  if ((await fontButton.count()) > 0) {
+    await fontButton.click();
+    await page.waitForTimeout(500);
+    inters = await page.evaluate(
+      () =>
+        [
+          ...document.querySelectorAll(
+            '[role="listbox"] [role="option"], [role="menu"] [role="menuitem"], [role="menu"] [role="menuitemradio"], .ts-font-list li, [data-control^="toolbar.font."]',
+          ),
+        ].filter((el) => /^Inter$/.test((el.textContent ?? '').trim())).length,
+    );
+    await page.keyboard.press('Escape');
+  }
+  notes.push(`Inter listed ${inters ?? 'unread'} time(s)`);
+  if (inters !== null && inters !== 1) failures.push(`the font picker lists Inter ${inters} times`);
+  const s2 = await settled(page);
+  await invoke(page, 'brand.reset', { path: '/footer/text', baseRevision: s2.revision }).catch(
+    () => undefined,
+  );
+  test.info().annotations.push({ type: 'brand', description: notes.join('; ') });
+  expect(failures).toEqual([]);
+});
+
 coverage(import.meta.filename, [
   'templates.save.as-template',
   'templates.save.same-name-replaces',
@@ -1041,4 +1210,6 @@ coverage(import.meta.filename, [
   'fonts.picker.specimen-rows',
   'fonts.picker.recent-group',
   'fonts.preload.italic-on-edit-only',
+  /* the polish round (docs/POLISH.md 2.5 item 49) */
+  'brand.panel.words-match-sheet',
 ]);

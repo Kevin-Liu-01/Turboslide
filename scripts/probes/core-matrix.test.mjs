@@ -407,12 +407,15 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     /* the features round's ship two added 29 rows; the vector round (docs/VECTOR.md 6.1) added 43
        rows and retired logos.intake.svg-sentence; the objects round (docs/OBJECTS.md 6.1) added 33 rows
        and carried five */
-    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29 + 43 - 1 + 33);
+    /* the polish round (docs/POLISH.md 5.1): 130 rows added and one replaced */
+    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 - 1 + 130);
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
       'export.download.large-deck-pptx',
       /* the features round, ship two (docs/FEATURES.md 7.2): the editor's longest animation frame */
       'shaders.perf.editor-frame',
+      /* the polish round (docs/POLISH.md 3.5): the home page's load budget */
+      'decks.home.load-budget',
     ]);
   });
 
@@ -455,7 +458,8 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
 describe('the sync and costs round (docs/SYNC.md section 6)', () => {
   it('holds the 16 rows under the two unparkable features, the sync spec and the cost probe', () => {
     /* ten spec rows and the pull row of the cost probe under sync; the five cost rows under cost */
-    expect(rowsForFeature('sync').length).toBe(11);
+    /* the polish round adds five sync rows (docs/POLISH.md 2.8) */
+    expect(rowsForFeature('sync').length).toBe(11 + 5);
     expect(rowsForFeature('cost').length).toBe(5);
     expect(isParkable('sync')).toBe(false);
     expect(isParkable('cost')).toBe(false);
@@ -463,7 +467,7 @@ describe('the sync and costs round (docs/SYNC.md section 6)', () => {
     expect(UNPARKABLE_FEATURES).toContain('cost');
     expect(CORE_SPEC_DRIVERS).toContain('core/sync.spec.ts');
     expect(CORE_DRIVERS).toContain(COST_PROBE_DRIVER);
-    expect(rowsForDriver('core/sync.spec.ts').length).toBe(10);
+    expect(rowsForDriver('core/sync.spec.ts').length).toBe(10 + 5);
     expect(rowsForDriver('sync.spec.ts')).toEqual(rowsForDriver('core/sync.spec.ts'));
     /* the cost probe drives the five cost rows and the pull row of the sync feature */
     expect(costRows().map((r) => r.id)).toEqual([
@@ -518,15 +522,22 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
     expect(CORE_SPEC_DRIVERS).toContain('core/logos.spec.ts');
     /* the vector round added logos.export.svgblip to the spec and the feature, and retired the
        P1 row logos.intake.svg-sentence with its sentence (docs/VECTOR.md 4.7) */
-    expect(rowsForDriver('core/logos.spec.ts').length).toBe(8);
-    expect(ship.length).toBe(70);
+    /* the polish round adds four rows to the logos spec (docs/POLISH.md 2.5) */
+    expect(rowsForDriver('core/logos.spec.ts').length).toBe(8 + 4);
+    /* the polish round replaced the P1 probe row tables.cells.prompt-hovered-only (docs/POLISH.md 2.1 item 1) */
+    expect(ship.length).toBe(69);
     expect(ship.filter((row) => row.note.startsWith('Ship one P0')).length).toBe(50);
-    expect(ship.filter((row) => row.note.startsWith('Ship one P1')).length).toBe(20);
-    expect(ship.filter((row) => row.driver === PROBE_DRIVER).length).toBe(54);
-    expect(rowsForFeature('logos').length).toBe(23);
-    for (const row of rowsForFeature('logos')) expect(row.today, row.id).toBe('not driven');
-    /* every logos row but the agent row carries parks (4.12) */
-    for (const row of rowsForFeature('logos'))
+    expect(ship.filter((row) => row.note.startsWith('Ship one P1')).length).toBe(19);
+    expect(ship.filter((row) => row.driver === PROBE_DRIVER).length).toBe(53);
+    /* the polish round adds two dialog rows (docs/POLISH.md 2.5 items 39 and 46), broken today and
+       parking nothing, so a jank dialog parks the picker whole */
+    expect(rowsForFeature('logos').length).toBe(23 + 2);
+    /* the vector round's logos.export.svgblip is the feature's 23rd row and not ship one's */
+    const shipLogos = ship.filter((row) => row.feature === 'logos');
+    expect(shipLogos.length).toBe(22);
+    for (const row of shipLogos) expect(row.today, row.id).toBe('not driven');
+    /* every logos row of the ship but the agent row carries parks (4.12) */
+    for (const row of shipLogos)
       if (row.id !== 'logos.agent.search-insert') expect(row.parks, row.id).toBeDefined();
   });
 
@@ -654,21 +665,24 @@ describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () =>
     expect(CORE_FEATURES).toContain('shaders');
     expect(isParkable('shaders')).toBe(true);
     expect(CORE_SPEC_DRIVERS).toContain('core/shaders.spec.ts');
-    expect(rowsForDriver('core/shaders.spec.ts').length).toBe(10);
+    /* the polish round adds three rows to the shaders spec (docs/POLISH.md 2.5) */
+    expect(rowsForDriver('core/shaders.spec.ts').length).toBe(10 + 3);
     expect(ship.length).toBe(29);
     expect(ship.filter((row) => row.note.startsWith('Ship two P0')).length).toBe(22);
     expect(ship.filter((row) => row.note.startsWith('Ship two P1')).length).toBe(7);
     expect(ship.filter((row) => row.driver === PROBE_DRIVER).length).toBe(14);
     /* the shaders feature holds the 24 rows whose area and feature agree; the export rows and the
        View row count under their own features */
-    expect(rowsForFeature('shaders').length).toBe(24);
+    /* the polish round adds three shaders rows (docs/POLISH.md 2.5 items 36, 47, 48) */
+    expect(rowsForFeature('shaders').length).toBe(24 + 3);
     expect(ship.filter((row) => row.feature === 'export').length).toBe(4);
     expect(ship.filter((row) => row.feature === 'view').length).toBe(1);
     expect(ship.filter((row) => row.today === 'broken').length).toBe(11);
     expect(ship.filter((row) => row.today === 'not driven').length).toBe(18);
     /* every shaders row but the agent row carries parks (5.10); the export rows carry none and
        block the ship, the measurement row carries none and never holds it */
-    for (const row of rowsForFeature('shaders'))
+    /* the polish round's three shaders rows (docs/POLISH.md 2.5) carry none: a red one parks the library */
+    for (const row of ship.filter((r) => r.feature === 'shaders'))
       if (
         row.id !== 'shaders.agent.list-insert-set-render' &&
         row.id !== 'shaders.perf.editor-frame'
@@ -769,18 +783,22 @@ describe('the vector round (docs/VECTOR.md section 6)', () => {
     expect(isParkable('svg')).toBe(true);
     expect(AREA_FEATURE).toEqual({ collab: 'share', menus: 'chrome', gestures: 'arrange' });
     expect(CORE_SPEC_DRIVERS).toContain('core/svg.spec.ts');
-    expect(rowsForDriver('core/svg.spec.ts').length).toBe(12);
+    /* the polish round adds two rows to the svg spec (docs/POLISH.md 2.4, 2.5) */
+    expect(rowsForDriver('core/svg.spec.ts').length).toBe(12 + 2);
     expect(rowsForDriver('svg.spec.ts')).toEqual(rowsForDriver('core/svg.spec.ts'));
     /* 43 rows added and the named rows row extended, so 44 carry the note */
     expect(vector.length).toBe(44);
     expect(vector.filter((row) => row.id === 'shapes.insert.named-rows').length).toBe(1);
-    expect(rowsForFeature('svg').length).toBe(16);
+    /* the polish round adds two svg rows (docs/POLISH.md 2.4 item 32, 2.5 item 50) */
+    expect(rowsForFeature('svg').length).toBe(16 + 2);
     /* 23 shapes rows added plus the extended named rows row */
     expect(vector.filter((row) => row.feature === 'shapes').length).toBe(24);
     expect(CORE_MATRIX.filter((row) => areaOf(row.id) === 'menus').map((row) => row.id)).toEqual([
       'menus.icons.insert-rows',
       'menus.icons.format-rows',
       'menus.icons.one-family',
+      /* the polish round (docs/POLISH.md 2.6 item 57): a glyph on every row */
+      'menus.rows.icon-on-every-row',
     ]);
     for (const row of CORE_MATRIX.filter((row) => areaOf(row.id) === 'menus'))
       expect(row.feature, row.id).toBe('chrome');
@@ -945,7 +963,9 @@ describe('the objects round (docs/OBJECTS.md section 6)', () => {
       'tables.seam.row-drag',
       'tables.edge.add-row-column',
       'tables.heads.select-row-column',
-      'tables.cells.prompt-hovered-only',
+      /* the polish round replaced tables.cells.prompt-hovered-only with tables.cells.no-prompt
+         (docs/POLISH.md 2.1 item 1); the new row keeps the objects round in its note */
+      'tables.cells.no-prompt',
       'wordart.tail.fill-outline',
     ])
       expect(
@@ -962,5 +982,68 @@ describe('the objects round (docs/OBJECTS.md section 6)', () => {
     /* a broken row of the round carries the severity its item's value gives */
     for (const row of objects.filter((r) => r.today === 'broken'))
       expect([1, 2, 3], row.id).toContain(row.severity);
+  });
+});
+
+describe('the polish round (docs/POLISH.md section 5)', () => {
+  const polish = CORE_MATRIX.filter((row) => /Polish round; docs\/POLISH\.md/.test(row.note ?? ''));
+
+  it('holds the 130 rows of 5.1 with the round, the item and the lane in their notes', () => {
+    /* 130 new rows plus the six carried rows whose notes gained the round */
+    expect(polish.length).toBe(136);
+    const carried = [
+      'assist.viewer.disabled',
+      'decks.home.seller-lead',
+      'decks.home.your-presentations',
+      'images.insert.upload',
+      'shaders.export.missing-frame-row',
+      'sync.viewer.live-updates',
+    ];
+    for (const id of carried)
+      expect(
+        polish.some((row) => row.id === id),
+        id,
+      ).toBe(true);
+    expect(polish.filter((row) => !carried.includes(row.id)).length).toBe(130);
+    expect(isCoreId('tables.cells.prompt-hovered-only')).toBe(false);
+    expect(coreRow('tables.cells.no-prompt').driver).toBe(PROBE_DRIVER);
+    /* every new row names its item or the home page's section */
+    for (const row of polish)
+      expect(row.note, row.id).toMatch(/docs\/POLISH\.md (?:2\.\d+ item \d+|3\.\d|5\.1|section 0)/);
+    /* a broken row carries its item's severity; a not driven row none */
+    for (const row of polish) {
+      if (row.today === 'broken' || row.today === 'flaky')
+        expect([1, 2, 3], row.id).toContain(row.severity);
+      else expect(row.severity, row.id).toBeUndefined();
+    }
+  });
+
+  it('keeps the areas of the round under their features and the two parks rows on known ids', () => {
+    expect(coreRow('menus.rows.icon-on-every-row').feature).toBe('chrome');
+    for (const id of [
+      'collab.follow.anonymous-editor',
+      'collab.presence.join-within-2s',
+      'collab.polish.session-sweep',
+    ])
+      expect(coreRow(id).feature, id).toBe('share');
+    expect(coreRow('shaders.export.missing-frame-row').feature).toBe('export');
+    expect(coreRow('images.panel.drop-shadow').parks).toEqual(['formatOptions.picture.shadow']);
+    expect(DECLARED_CONTROL_IDS).toContain('formatOptions.picture.shadow');
+    expect(coreRow('collab.follow.anonymous-editor').parks).toEqual(['title.presence.follow']);
+    /* the one measurement row of the round records its numbers and never holds the ship */
+    expect(isMeasureRow(coreRow('decks.home.load-budget'))).toBe(true);
+    const { measured, blocking } = parkedFeaturesOf({ 'decks.home.load-budget': 'failed' }, [
+      coreRow('decks.home.load-budget'),
+    ]);
+    expect(measured.map((m) => m.id)).toEqual(['decks.home.load-budget']);
+    expect(blocking).toEqual([]);
+    /* a row the table names with two drivers carries the spec that reads the file or the show */
+    expect(coreRow('tables.header.rule-with-text').driver).toBe('core/export.spec.ts');
+    expect(coreRow('charts.labels.fit-slot').driver).toBe('core/export.spec.ts');
+    expect(coreRow('images.picture.no-plate').driver).toBe('core/logos.spec.ts');
+    expect(coreRow('decks.polish.pages-sweep').driver).toBe('core/decks.spec.ts');
+    /* the surface row of section 0 reads the build's commit on the gate's origin */
+    expect(coreRow('surface.domain.build-commit').driver).toBe('core/surface.spec.ts');
+    expect(coreRow('surface.domain.build-commit').feature).toBe('surface');
   });
 });

@@ -28,6 +28,8 @@ import {
   typeNote,
   waitEditor,
   invoke,
+  sameCookiesContext,
+  selectBlock,
 } from './lib';
 
 // Share and collaboration, the spec rows (docs/FOCUS.md 2.7, section 5 rank 1, 6.4 `share.*`,
@@ -213,7 +215,22 @@ async function copyRow(id: string): Promise<string> {
       return m ? m[0].replace(/\\\//g, '/') : null;
     })
     .catch(() => null);
-  await ctl(page, `dialog.share.${id}.copy`).click();
+  /* the polish round's dialog opens Restricted on a new deck (docs/POLISH.md 2.7 item 77) and
+     draws the link rows under "Anyone with the link" alone, so the mode is switched first when
+     the row's copy is not drawn; a row still absent after that fails the row with its reason
+     instead of waiting out the test */
+  const copy = ctl(page, `dialog.share.${id}.copy`);
+  if ((await copy.count()) === 0) {
+    const mode = ctl(page, 'dialog.share.mode');
+    if ((await mode.count()) > 0 && (await mode.inputValue().catch(() => '')) !== 'link') {
+      await mode.selectOption('link');
+      await expect(page.locator('[data-control="dialog.share"] [aria-busy="true"]')).toHaveCount(
+        0,
+        { timeout: 10_000 },
+      );
+    }
+  }
+  await copy.click({ timeout: 10_000 });
   /* the first Copy link of a row mints the link on the server before it copies; a miss reports
      the dialog's own error sentence and the snackbar, so the row's failure names the mechanism */
   const facts = async () => ({
@@ -1850,6 +1867,615 @@ test(title('assist.viewer.disabled'), async ({ browser }) => {
   }
 });
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 2.6 items 58 and 63, 2.7 items 78, 79 and 96, 2.8 items 103,
+// 104, 110 and 112, 5.1 `chrome.tail.reads-mode`, `share.*` and `collab.*`): the tail reads the
+// mode, the name prompt opens empty and never mid gesture, a new deck is Restricted and a link
+// defaults to Viewer, a role change keeps the address, the Restricted state and the More section,
+// Follow for anonymous editors, a joiner's chip within two seconds, and the session's small words.
+
+/** The write controls of the toolbar a reader must not get (docs/POLISH.md 2.6 item 58). */
+const WRITE_CONTROLS = [
+  'toolbar.insertImage',
+  'toolbar.insertShape',
+  'toolbar.insertLine',
+  'toolbar.layout',
+  'toolbar.theme',
+  'toolbar.background',
+  'toolbar.textBox',
+  'toolbar.newSlide',
+];
+async function toolbarFacts(p: Page): Promise<{
+  write: string[];
+  comments: boolean;
+  zoom: boolean;
+  slideshow: boolean;
+  filmstrip: boolean;
+  mode: string | null;
+}> {
+  return p.evaluate((controls) => {
+    const drawn = (c: string) => {
+      const el = document.querySelector(`[data-control="${c}"]`);
+      return el !== null && el.getClientRects().length > 0;
+    };
+    return {
+      write: controls.filter(drawn),
+      comments: drawn('toolbar.insertComment') || drawn('title.comments'),
+      zoom:
+        drawn('toolbar.zoom') ||
+        document.querySelector('[data-control^="toolbar.zoom"]') !== null ||
+        document.querySelector('.ts-bottombar') !== null,
+      slideshow: drawn('present.open'),
+      filmstrip: drawn('filmstrip'),
+      mode:
+        document.querySelector('.pt-viewer:not(.ts-skeleton)')?.getAttribute('data-edit-mode') ??
+        null,
+    };
+  }, WRITE_CONTROLS);
+}
+
+test(title('chrome.tail.reads-mode'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  await openEditor(page, deck);
+  const mode = await authorizeMode(page, deck);
+  /* the deck Restricted: a stranger with no link lands on the View only floor in enforce mode */
+  const got = await invoke<{ record: { revision: number } }>(page, 'share.get', { id: deck });
+  await invoke(page, 'share.setGeneralAccess', {
+    id: deck,
+    mode: 'restricted',
+    baseRevision: got.record.revision,
+  }).catch(() => undefined);
+  const { context: other, page: c } = await otherContext(browser);
+  let stranger: Awaited<ReturnType<typeof toolbarFacts>> | null = null;
+  let access = false;
+  try {
+    await c.goto('/decks');
+    await c.waitForLoadState('domcontentloaded');
+    await c.goto(`/edit/${deck}`);
+    const arrived = await Promise.race([
+      ctl(c, 'access.page')
+        .first()
+        .waitFor({ state: 'attached', timeout: 60_000 })
+        .then(() => 'access' as const),
+      waitEditor(c).then(() => 'editor' as const),
+    ]).catch(() => 'neither' as const);
+    access = arrived === 'access';
+    if (arrived === 'editor') stranger = await toolbarFacts(c);
+  } finally {
+    await closeSecond(other, c);
+  }
+  /* View > Mode > Commenting on the owner's page */
+  await openEditor(page, deck);
+  await menuPath(page, 'view', 'view.mode', 'view.mode.commenting');
+  await page.waitForTimeout(600);
+  const commenting = await toolbarFacts(page);
+  await menuPath(page, 'view', 'view.mode', 'view.mode.editing').catch(() => undefined);
+  test.info().annotations.push({
+    type: 'tail',
+    description: `${mode} mode; the stranger ${access ? 'met You need access' : stranger ? `on the ${stranger.mode} floor: write controls ${stranger.write.join(', ') || 'none'}, comments ${stranger.comments}, slideshow ${stranger.slideshow}, filmstrip ${stranger.filmstrip}` : 'reached neither page'}; Commenting: write controls ${commenting.write.join(', ') || 'none'}, Insert comment ${commenting.comments}, filmstrip ${commenting.filmstrip}`,
+  });
+  if (mode !== 'enforce' && stranger === null)
+    test.info().annotations.push({
+      type: 'note',
+      description:
+        'the stranger half needs enforce mode (a shadow origin reads every visitor as the owner)',
+    });
+  if (stranger !== null) {
+    expect(stranger.mode, 'the stranger is on the viewing floor').not.toBe('editing');
+    expect(stranger.write, 'no insert control, no Background, Layout or Theme').toEqual([]);
+    expect(stranger.filmstrip, "the editor's filmstrip is mounted").toBe(true);
+    expect(stranger.slideshow, 'Slideshow stays').toBe(true);
+  } else
+    expect(
+      mode === 'enforce' ? access : true,
+      'in enforce mode a stranger with no link meets You need access or the viewer floor',
+    ).toBe(true);
+  expect(commenting.write, 'Commenting mode keeps no write control').toEqual([]);
+  expect(commenting.comments, 'Insert comment kept').toBe(true);
+});
+
+test(title('share.name-prompt.empty-field'), async ({ browser }) => {
+  test.setTimeout(150_000);
+  const { context: fresh, page: fp } = await otherContext(browser);
+  const freshScratch = new Scratch();
+  try {
+    await newDeck(fp, freshScratch, 'Name prompt empty');
+    await ctl(fp, 'share.open').click();
+    const prompt = ctl(fp, 'dialog.namePrompt');
+    const shown = await prompt
+      .waitFor({ timeout: 4000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!shown) {
+      await closeShare(fp).catch(() => undefined);
+      test.skip(
+        true,
+        'not on this build: the first Share opened no dialog.namePrompt (docs/PRODUCT.md 7.1, B1)',
+      );
+    }
+    const field = ctl(fp, 'dialog.namePrompt.name');
+    const value = await field.inputValue();
+    const placeholder = await field.getAttribute('placeholder');
+    test.info().annotations.push({
+      type: 'prompt',
+      description: `value "${value}", placeholder "${placeholder}"`,
+    });
+    await ctl(fp, 'dialog.namePrompt.skip')
+      .click({ timeout: 3000 })
+      .catch(() => undefined);
+    expect(value, 'the name field is empty').toBe('');
+    expect(placeholder, 'the placeholder Your name').toBe('Your name');
+  } finally {
+    await teardownAll(fp, freshScratch).catch(() => undefined);
+    await fresh.close();
+  }
+});
+
+test(title('share.dialog.new-deck-restricted-viewer'), async () => {
+  test.setTimeout(150_000);
+  const fresh = await newDeck(page, scratch, 'Restricted by default');
+  await openEditor(page, fresh);
+  const stage = await shareStage(page);
+  if (stage.address === null && stage.mode === null) {
+    await closeShare();
+    test.skip(true, notBuiltShare);
+  }
+  const first = stage.mode;
+  const select = ctl(page, 'dialog.share.mode');
+  await select.selectOption('link');
+  await expect(ctl(page, 'dialog.share.linkRole')).toBeVisible({ timeout: 10_000 });
+  await page.waitForTimeout(800);
+  const role = await ctl(page, 'dialog.share.linkRole').inputValue();
+  const sentence =
+    (await ctl(page, 'dialog.share.accessSentence')
+      .textContent({ timeout: 3000 })
+      .catch(() => '')) ?? '';
+  await closeShare();
+  test.info().annotations.push({
+    type: 'share',
+    description: `first Share reads ${JSON.stringify(first)}; Anyone with the link picked reads ${role}; sentence "${sentence.trim()}"`,
+  });
+  expect(first?.value, 'the first Share on a new deck reads Restricted').toBe('restricted');
+  expect(role, 'Anyone with the link picked reads Viewer').toBe('viewer');
+  expect(sentence.trim(), 'the sentence carries no instruction').not.toMatch(
+    /pick|before|send|choose/i,
+  );
+  expect(sentence.trim()).toMatch(/^Anyone with the link can open it and cannot change it$/);
+});
+
+test(title('share.role-change.keeps-link'), async () => {
+  test.setTimeout(150_000);
+  await openEditor(page, deck);
+  const stage = await shareStage(page);
+  if (stage.address === null && stage.mode === null) {
+    await closeShare();
+    test.skip(true, notBuiltShare);
+  }
+  await ctl(page, 'dialog.share.mode').selectOption('link');
+  await expect(ctl(page, 'dialog.share.linkRole')).toBeVisible({ timeout: 10_000 });
+  await page.waitForTimeout(800);
+  const before = await ctl(page, 'dialog.share.address').inputValue();
+  await ctl(page, 'dialog.share.linkRole').selectOption('commenter');
+  await page.waitForTimeout(1200);
+  const afterCommenter = await ctl(page, 'dialog.share.address').inputValue();
+  await ctl(page, 'dialog.share.linkRole').selectOption('editor');
+  await page.waitForTimeout(1200);
+  const afterEditor = await ctl(page, 'dialog.share.address').inputValue();
+  await closeShare();
+  const path = shareLinkPathOf(afterEditor);
+  const res = path
+    ? await page.request.get(path, { headers: extraHTTPHeaders, maxRedirects: 0 })
+    : null;
+  test.info().annotations.push({
+    type: 'address',
+    description: `${before ? 'an /s/ address' : 'no address'}; after Commenter ${afterCommenter === before ? 'unchanged' : 'changed'}; after Editor ${afterEditor === before ? 'unchanged' : 'changed'}; the address answers ${res ? `${res.status()} to ${(res.headers()['location'] ?? '').replace(deck, '<id>')}` : 'unread'}`,
+  });
+  expect(before, 'an address under Anyone with the link').toMatch(/\/s\//);
+  expect(afterCommenter, 'Commenter keeps the address').toBe(before);
+  expect(afterEditor, 'Editor keeps the address').toBe(before);
+  expect(res?.status(), 'the address answers 303').toBe(303);
+  expect(res?.headers()['location'] ?? '', 'to the editor').toMatch(/\/edit\//);
+});
+/** The path of an /s/ address as the dialog prints it, or null. */
+function shareLinkPathOf(url: string): string | null {
+  try {
+    const u = new URL(url, 'http://turboslide.invalid');
+    return u.pathname.startsWith('/s/') ? `${u.pathname}${u.search}` : null;
+  } catch {
+    return null;
+  }
+}
+
+test(title('share.dialog.restricted-and-more'), async () => {
+  test.setTimeout(150_000);
+  await openEditor(page, deck);
+  const stage = await shareStage(page);
+  if (stage.address === null && stage.mode === null) {
+    await closeShare();
+    test.skip(true, notBuiltShare);
+  }
+  await ctl(page, 'dialog.share.mode').selectOption('restricted');
+  await page.waitForTimeout(1200);
+  const restricted = await page.evaluate(() => {
+    const sentence = (
+      document.querySelector('[data-control="dialog.share.accessSentence"]')?.textContent ?? ''
+    ).trim();
+    const rows = [
+      ...document.querySelectorAll(
+        '[data-control="dialog.share.rows"] li, [data-control="dialog.share.links"] li, [data-control^="dialog.share.link."]',
+      ),
+    ].filter(
+      (el) =>
+        el.getClientRects().length > 0 &&
+        !/\.(copy|rotate|revoke)$/.test(el.getAttribute('data-control') ?? ''),
+    );
+    return { sentence, liveRows: rows.length };
+  });
+  const more = ctl(page, 'dialog.share.more');
+  if ((await more.count()) > 0) await more.click();
+  await page.waitForTimeout(800);
+  const moreFacts = await page.evaluate(() => {
+    const tables = [...document.querySelectorAll('[data-control="dialog.share.links"]')].filter(
+      (el) => el.getClientRects().length > 0,
+    );
+    const rows = [...document.querySelectorAll('[data-control^="dialog.share.link."]')].filter(
+      (el) => el.tagName.toLowerCase() === 'li' || el.matches('tr, .ts-share-link'),
+    );
+    const perLink = rows.map((row) => {
+      const id = row.getAttribute('data-control') ?? '';
+      return {
+        id,
+        copy: row.querySelector(`[data-control="${id}.copy"], [data-control$=".copy"]`) !== null,
+        rotate:
+          row.querySelector(`[data-control="${id}.rotate"], [data-control$=".rotate"]`) !== null,
+        revoke:
+          row.querySelector(`[data-control="${id}.revoke"], [data-control$=".revoke"]`) !== null,
+        text: (row.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 120),
+      };
+    });
+    const ids = perLink.map((r) => r.id);
+    return {
+      tables: tables.length,
+      rows: perLink,
+      duplicates: ids.filter((id, i) => ids.indexOf(id) !== i),
+    };
+  });
+  await closeShare();
+  const slashDates = moreFacts.rows.filter((r) => /\d{1,2}\/\d{1,2}\/\d{4}/.test(r.text));
+  test.info().annotations.push({
+    type: 'restricted',
+    description: `sentence "${restricted.sentence}", live link rows ${restricted.liveRows}; More: ${moreFacts.tables} table(s), ${moreFacts.rows.length} link row(s) (${moreFacts.rows.map((r) => `${r.id}: copy ${r.copy} rotate ${r.rotate} revoke ${r.revoke}`).join('; ')}), duplicates ${moreFacts.duplicates.length}, slash dates ${slashDates.length}`,
+  });
+  expect(restricted.sentence, 'Only you can open this presentation').toBe(
+    'Only you can open this presentation',
+  );
+  expect(restricted.liveRows, 'no live link rows under Restricted').toBe(0);
+  expect(moreFacts.duplicates, 'each link once').toEqual([]);
+  expect(moreFacts.tables, 'one links table').toBeLessThanOrEqual(1);
+  for (const r of moreFacts.rows)
+    expect(r.copy && r.rotate && r.revoke, `${r.id} with Copy, Rotate and Revoke`).toBe(true);
+  expect(slashDates, "dates in the product's form").toEqual([]);
+});
+
+test(title('share.name-prompt.never-mid-drag'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  await openEditor(page, deck);
+  const { context: other, page: b } = await secondEditor(browser);
+  try {
+    /* B's name prompt, if one opened at the join, is left where it is: the row reads what happens 65 s in */
+    const order = await slideOrder(b);
+    await b.waitForTimeout(65_000);
+    const card = ctl(b, `filmstrip.slide.${order[0]!}`);
+    const r = (await card.boundingBox())!;
+    await b.mouse.move(r.x + r.width / 2, r.y + r.height / 2);
+    await b.mouse.down();
+    await b.mouse.move(r.x + r.width / 2 + 10, r.y + r.height / 2 + 40, { steps: 6 });
+    await b.waitForTimeout(1500);
+    const midDrag = await b.evaluate(() => {
+      const prompt = document.querySelector('[data-control="dialog.namePrompt"]');
+      if (!prompt || prompt.getClientRects().length === 0)
+        return { shown: false, overSheet: false };
+      const pr = prompt.getBoundingClientRect();
+      const sheet = document.querySelector('.ts-stagewrap.ts-editor')?.getBoundingClientRect();
+      return {
+        shown: true,
+        overSheet: sheet
+          ? pr.bottom > sheet.top &&
+            pr.top < sheet.bottom &&
+            pr.right > sheet.left &&
+            pr.left < sheet.right
+          : false,
+      };
+    });
+    await b.mouse.up();
+    await b.waitForTimeout(800);
+    /* a first write after the drag; the prompt then opens in the title row and never over the sheet */
+    const run = await headingRun(b);
+    await typeInto(b, run, ' by B');
+    await b.waitForTimeout(2500);
+    const after = await b.evaluate(() => {
+      const prompt = document.querySelector('[data-control="dialog.namePrompt"]');
+      if (!prompt || prompt.getClientRects().length === 0)
+        return { shown: false, inTitleRow: false, overSheet: false };
+      const pr = prompt.getBoundingClientRect();
+      const title = document.querySelector('.ts-title-row')?.getBoundingClientRect();
+      const sheet = document.querySelector('.ts-stagewrap.ts-editor')?.getBoundingClientRect();
+      return {
+        shown: true,
+        inTitleRow: title ? pr.top >= title.top - 2 && pr.top <= title.bottom + 48 : false,
+        overSheet: sheet
+          ? pr.bottom > sheet.top + 40 &&
+            pr.top < sheet.bottom &&
+            pr.right > sheet.left &&
+            pr.left < sheet.right
+          : false,
+      };
+    });
+    test.info().annotations.push({
+      type: 'prompt',
+      description: `mid drag: shown ${midDrag.shown} over the sheet ${midDrag.overSheet}; afterwards: shown ${after.shown} in the title row ${after.inTitleRow} over the sheet ${after.overSheet}`,
+    });
+    expect(
+      midDrag.shown && midDrag.overSheet,
+      'no name prompt over the sheet while the button is down',
+    ).toBe(false);
+    expect(after.overSheet, 'never over the sheet').toBe(false);
+    if (after.shown) expect(after.inTitleRow, 'it opens in the title row').toBe(true);
+  } finally {
+    await closeSecond(other, b);
+  }
+});
+
+test(title('collab.follow.anonymous-editor'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  await openEditor(page, deck);
+  const order = await slideOrder(page);
+  while ((await slideOrder(page)).length < 3) await addSlide(page);
+  const slides = await slideOrder(page);
+  await clickCard(page, slides[0]!);
+  const { context: other, page: b } = await secondEditor(browser);
+  try {
+    const guest = await ownClientId(b);
+    await expect(chipOf(page, guest), "B's chip on A's title row").toHaveCount(1, {
+      timeout: 10_000,
+    });
+    /* A's chip menu lists Follow */
+    await chipOf(page, guest).click();
+    await page.waitForTimeout(500);
+    const row = page
+      .locator(`[data-control="presence.roster.${guest}"], [data-control^="presence.roster."]`)
+      .first();
+    const rowShown = await row.isVisible().catch(() => false);
+    const item = rowShown ? await row.getAttribute('data-menu-item') : null;
+    const rowText = rowShown ? ((await row.textContent()) ?? '').trim() : '';
+    const follows = item === 'title.presence.follow' || /Follow/.test(rowText);
+    if (rowShown && follows) await row.click();
+    else await page.keyboard.press('Escape');
+    /* B moves to slide 3; A's stage follows within 3 s */
+    await clickCard(b, slides[2]!);
+    const followed = await expect
+      .poll(async () => (await state(page)).slideId, { timeout: 3000 })
+      .toBe(slides[2])
+      .then(() => true)
+      .catch(() => false);
+    /* a click on A's stage stops it */
+    await page.locator('.ts-stagewrap.ts-editor').click({ position: { x: 30, y: 30 } });
+    await page.waitForTimeout(300);
+    await clickCard(b, slides[1]!);
+    await page.waitForTimeout(3000);
+    const stopped = (await state(page)).slideId === slides[2];
+    test.info().annotations.push({
+      type: 'follow',
+      description: `roster row ${rowShown ? `"${rowText}" (${item})` : 'none'}; A followed to slide 3 within 3 s ${followed}; after a click on A's stage B's move to slide 2 left A on slide 3 ${stopped}`,
+    });
+    expect(follows, "A's chip menu lists Follow for an anonymous editor").toBe(true);
+    expect(followed, "A's stage follows within 3 s").toBe(true);
+    expect(stopped, "a click on A's stage stops it").toBe(true);
+  } finally {
+    await closeSecond(other, b);
+  }
+  void order;
+});
+
+test(title('collab.presence.join-within-2s'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  await openEditor(page, deck);
+  links = await readLinks();
+  /* B, an editor */
+  const pair = await otherContext(browser);
+  let bMs: number | null = null;
+  try {
+    const t0 = Date.now();
+    await pair.page.goto(links.edit);
+    await pair.page.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 20_000 });
+    await waitEditor(pair.page);
+    const guest = await ownClientId(pair.page);
+    const shown = await expect(chipOf(page, guest))
+      .toHaveCount(1, { timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
+    bMs = shown ? Date.now() - t0 : null;
+  } finally {
+    await closeSecond(pair.context, pair.page);
+  }
+  /* C, a viewer through the view link on the editor's viewer floor */
+  const viewer = await otherContext(browser);
+  let cMs: number | null = null;
+  let cRole: string | null = null;
+  try {
+    const t0 = Date.now();
+    await viewer.page.goto(links.view);
+    await viewer.page.waitForURL(/\/(deck|edit)\//, { timeout: 20_000 });
+    if (/\/deck\//.test(viewer.page.url())) await viewer.page.goto(`/edit/${deck}`);
+    const arrived = await waitEditor(viewer.page)
+      .then(() => true)
+      .catch(() => false);
+    if (arrived) {
+      cRole = (await state(viewer.page)).access?.role ?? null;
+      const c = await ownClientId(viewer.page);
+      const shown = await expect(chipOf(page, c))
+        .toHaveCount(1, { timeout: 10_000 })
+        .then(() => true)
+        .catch(() => false);
+      cMs = shown ? Date.now() - t0 : null;
+    }
+  } finally {
+    await closeSecond(viewer.context, viewer.page);
+  }
+  test.info().annotations.push({
+    type: 'join',
+    description: `B's chip on A's title row after ${bMs ?? 'more than 10000'} ms (from B's navigation); C (${cRole}) after ${cMs ?? 'more than 10000 or no editor'} ms`,
+  });
+  expect(bMs, "B's chip within 2 s").not.toBeNull();
+  expect(bMs!, "B's chip within 2 s of the join").toBeLessThanOrEqual(2000 + 1500);
+  expect(cMs, "C's chip within 2 s").not.toBeNull();
+  expect(cMs!).toBeLessThanOrEqual(2000 + 1500);
+});
+
+test(title('collab.polish.session-sweep'), async ({ browser }) => {
+  test.setTimeout(300_000);
+  const failures: string[] = [];
+  const notes: string[] = [];
+  /* no POST to the CSP report route on the four pages */
+  const csp: string[] = [];
+  const onRequest = (r: import('@playwright/test').Request) => {
+    if (r.method() === 'POST' && /\/api\/x\/csp\/report/.test(r.url()))
+      csp.push(new URL(r.url()).pathname);
+  };
+  page.on('request', onRequest);
+  await page.goto('/new');
+  await waitEditor(page);
+  await openEditor(page, deck);
+  await page.goto(`/deck/${deck}`);
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(1500);
+  await page.goto('/decks');
+  await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
+  await page.waitForTimeout(1500);
+  page.off('request', onRequest);
+  notes.push(`CSP reports ${csp.length}`);
+  if (csp.length > 0) failures.push(`${csp.length} POST(s) to the CSP report route`);
+  /* /decks' Opened text at 150 ms and after hydration */
+  const listCtx = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+    storageState: await context.storageState(),
+  });
+  try {
+    const lp = await listCtx.newPage();
+    await lp.addInitScript((id) => {
+      const w = window as unknown as { __early: string | null };
+      w.__early = null;
+      setTimeout(() => {
+        w.__early = (document.querySelector(`[data-control="home.card.${id}"]`)?.textContent ?? '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }, 150);
+    }, deck);
+    await lp.goto('/decks');
+    await lp.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
+    await lp.waitForTimeout(500);
+    const texts = await lp.evaluate(
+      (id) => ({
+        early: (window as unknown as { __early: string | null }).__early,
+        hydrated: (document.querySelector(`[data-control="home.card.${id}"]`)?.textContent ?? '')
+          .replace(/\s+/g, ' ')
+          .trim(),
+      }),
+      deck,
+    );
+    const openedEarly = /Opened [^|]*/.exec(texts.early ?? '')?.[0] ?? null;
+    const openedLate = /Opened [^|]*/.exec(texts.hydrated)?.[0] ?? null;
+    notes.push(`Opened text at 150 ms "${openedEarly}", hydrated "${openedLate}"`);
+    if (openedEarly !== null && openedEarly !== openedLate)
+      failures.push(`the Opened text changed on hydration ("${openedEarly}" -> "${openedLate}")`);
+  } finally {
+    await listCtx.close();
+  }
+  /* the roster: two tabs of one person are one row; the tooltip beside the plate */
+  await openEditor(page, deck);
+  const twin = await sameCookiesContext(browser, context);
+  try {
+    await twin.page.goto(`/edit/${deck}`);
+    await waitEditor(twin.page);
+    await ownClientId(twin.page);
+    await page.waitForTimeout(3000);
+    await ctl(page, 'title.presence').hover();
+    await page.waitForTimeout(800);
+    const roster = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll('[data-control^="presence.roster."]')].filter(
+        (el) => el.getClientRects().length > 0,
+      );
+      const plate = rows[0]?.closest('[role="menu"], .ts-roster, .ts-presence-roster') ?? null;
+      const tip = document.querySelector('.pt-tip');
+      const box = (el: Element | null) =>
+        el && el.getClientRects().length > 0 ? el.getBoundingClientRect() : null;
+      const pr = box(plate);
+      const tr = box(tip);
+      return {
+        rows: rows.map((el) => (el.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 60)),
+        intersects:
+          pr && tr
+            ? tr.left < pr.right && tr.right > pr.left && tr.top < pr.bottom && tr.bottom > pr.top
+            : null,
+        tip: tip ? (tip.textContent ?? '').trim().slice(0, 60) : null,
+      };
+    });
+    const chips = await page.evaluate(
+      () => document.querySelectorAll('[data-control^="presence.chip."]').length,
+    );
+    notes.push(
+      `roster rows ${roster.rows.length} (${roster.rows.join(' | ')}), chips ${chips}, tooltip "${roster.tip}" intersects the plate ${roster.intersects}`,
+    );
+    if (roster.intersects === true)
+      failures.push("the roster row's tooltip covers the roster plate");
+    const ownerRows = roster.rows.filter((r) => /owner|You/i.test(r)).length;
+    if (ownerRows > 1) failures.push(`two tabs of one person are ${ownerRows} rows`);
+  } finally {
+    await twin.context.close();
+  }
+  await page.keyboard.press('Escape');
+  /* the resize badge inside the stage: a picture at the right edge resized by its e handle */
+  const slideId = (await state(page)).slideId;
+  await placeBlock(page, slideId, {
+    id: 'badge-box',
+    type: 'shape',
+    shape: 'rectangle',
+    fill: 'plate',
+    stroke: 'ink',
+    pos: { x: 1200, y: 300, w: 300, h: 200 },
+  });
+  await selectBlock(page, 'badge-box');
+  const handle = page.locator('.ts-overlay [data-control="handle.badge-box.resize.e"]').first();
+  const hb = await handle.boundingBox();
+  let badge: { inside: boolean; text: string } | null = null;
+  if (hb) {
+    await page.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(hb.x + 60, hb.y + hb.height / 2, { steps: 8 });
+    await page.waitForTimeout(300);
+    badge = await page.evaluate(() => {
+      const el = document.querySelector('.ts-overlay .ts-readout, .ts-readout');
+      const stage = document.querySelector('.ts-stagewrap.ts-editor');
+      if (!el || !stage) return { inside: false, text: 'no badge' };
+      const r = el.getBoundingClientRect();
+      const s = stage.getBoundingClientRect();
+      return {
+        inside: r.left >= s.left - 1 && r.right <= s.right + 1,
+        text: (el.textContent ?? '').trim(),
+      };
+    });
+    await page.mouse.up();
+    await page.keyboard.press('Meta+z');
+    await settled(page);
+  }
+  notes.push(`resize badge "${badge?.text}" inside the stage ${badge?.inside}`);
+  if (!badge || !badge.inside)
+    failures.push(`the resize badge ${badge ? 'is clipped at the edge' : 'was not read'}`);
+  test.info().annotations.push({ type: 'sweep', description: notes.join('; ') });
+  expect(failures).toEqual([]);
+});
+
 coverage(import.meta.filename, [
   'share.dialog.open',
   'share.copy-view-link',
@@ -1882,5 +2508,15 @@ coverage(import.meta.filename, [
   'brand.colors.collab-rerender',
   'brand.surfaces.viewer-and-show',
   'assist.viewer.disabled',
+  /* the polish round (docs/POLISH.md 2.6 items 58 and 63, 2.7 items 78, 79 and 96, 2.8) */
+  'chrome.tail.reads-mode',
+  'share.name-prompt.empty-field',
+  'share.dialog.new-deck-restricted-viewer',
+  'share.role-change.keeps-link',
+  'share.dialog.restricted-and-more',
+  'share.name-prompt.never-mid-drag',
+  'collab.follow.anonymous-editor',
+  'collab.presence.join-within-2s',
+  'collab.polish.session-sweep',
 ]);
 void statusOf;

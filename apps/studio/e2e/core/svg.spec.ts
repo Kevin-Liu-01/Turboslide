@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { expect, test } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
 
@@ -880,6 +883,66 @@ test(title('svg.sanitize.broken'), async () => {
   );
 });
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 2.4 item 32, 2.5 item 50, 5.1 `svg.*`): a pasted svg keeps its
+// text, and an svg that opens with a long comment is accepted.
+
+const SVG_WITH_TEXT = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="80" viewBox="0 0 200 80"><rect width="200" height="80" fill="#e8e8e8"/><text x="20" y="50" font-size="28" fill="#1b1b1b">Vector mark</text></svg>`;
+
+test(title('svg.paste.keeps-text'), async () => {
+  test.setTimeout(150_000);
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  await page.locator('.ts-stagewrap.ts-editor').click({ position: { x: 20, y: 20 } });
+  const n0 = (await pictures(slideId)).length;
+  await pasteText(page, { 'text/plain': SVG_WITH_TEXT });
+  const pasted = await expectPictureWithin(slideId, n0);
+  await settled(page);
+  const pastedImg = await pictureImg(page, pasted.id);
+  const pastedFile = await fetchBytes(page, pastedImg?.src ?? '');
+  const pastedText = pastedFile.bytes.toString('utf8');
+  await page.keyboard.press('Escape');
+  const n1 = (await pictures(slideId)).length;
+  await uploadThrough(Buffer.from(SVG_WITH_TEXT, 'utf8'), 'with-text.svg');
+  const uploaded = await expectPictureWithin(slideId, n1);
+  await settled(page);
+  const uploadedImg = await pictureImg(page, uploaded.id);
+  const uploadedFile = await fetchBytes(page, uploadedImg?.src ?? '');
+  const uploadedText = uploadedFile.bytes.toString('utf8');
+  test.info().annotations.push({
+    type: 'text',
+    description: `pasted ${pasted.id}: ${pastedFile.status} ${pastedFile.contentType}, <text> ${/<text[\s>]/.test(pastedText)}; uploaded ${uploaded.id}: ${uploadedFile.status} ${uploadedFile.contentType}, <text> ${/<text[\s>]/.test(uploadedText)}`,
+  });
+  expect(pastedFile.status, "the pasted picture's markup is served").toBe(200);
+  expect(pastedText, 'the pasted markup carries the text').toMatch(/<text[\s>][\s\S]*Vector mark/);
+  expect(uploadedText, 'the upload of the same bytes the same').toMatch(
+    /<text[\s>][\s\S]*Vector mark/,
+  );
+});
+
+test(title('svg.intake.long-comment'), async () => {
+  test.setTimeout(150_000);
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  const icon = readFileSync(resolve(import.meta.dirname, '..', '..', 'public', 'icon.svg'));
+  const comment =
+    /^\s*<\?xml[^>]*>\s*<!--([\s\S]*?)-->/.exec(icon.toString('utf8'))?.[1] ??
+    /<!--([\s\S]*?)-->/.exec(icon.toString('utf8'))?.[1] ??
+    '';
+  const before = (await pictures(slideId)).length;
+  await dropFileAt(page, 800, 450, icon, 'icon.svg', 'image/svg+xml');
+  const landed = await expectPictureWithin(slideId, before, 15_000).catch(() => null);
+  const words = await snackbarText(page);
+  const vector = landed ? await drawsVector(landed.id) : false;
+  test.info().annotations.push({
+    type: 'intake',
+    description: `icon.svg (${icon.length} B, a ${comment.length} character comment at its head): ${landed ? `${landed.id} landed, vector ${vector}` : 'nothing landed'}; snackbar ${words ? `"${words}"` : 'none'}`,
+  });
+  expect(landed, 'a picture lands').not.toBeNull();
+  expect(vector, 'a vector picture').toBe(true);
+  expect(words ?? '', 'not refused as not a picture').not.toMatch(/not a picture/i);
+});
+
 coverage(import.meta.filename, [
   'svg.import.upload',
   'svg.import.paste-file',
@@ -893,4 +956,7 @@ coverage(import.meta.filename, [
   'svg.sanitize.data-image-kept',
   'svg.sanitize.cap',
   'svg.sanitize.broken',
+  /* the polish round (docs/POLISH.md 2.4 item 32, 2.5 item 50) */
+  'svg.paste.keeps-text',
+  'svg.intake.long-comment',
 ]);

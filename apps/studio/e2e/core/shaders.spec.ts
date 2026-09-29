@@ -13,6 +13,7 @@ import {
   ctl,
   download,
   ensureShader,
+  waitEditor,
   extraHTTPHeaders,
   fetchPageFile,
   frameAssetIdOf,
@@ -43,6 +44,10 @@ import {
   title,
   waitFrame,
   waitFrameDrawn,
+  openShaderGallery,
+  headingRun,
+  typeInto,
+  snackbarText,
 } from './lib';
 
 // The shader library's spec rows (docs/FEATURES.md 5.5, 5.6, 5.8, 7.1 `shaders.*` with the driver
@@ -985,6 +990,272 @@ test(title('shaders.show.frame-when-off'), async () => {
   expect(motion.frame, 'the frame is shown').toBe(true);
 });
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 2.5 items 36, 47 and 48, 5.1 `shaders.*`): a large frame lands
+// or a sentence says it did not, the gallery's and the section's words, and the insert on a blank
+// slide.
+
+test(title('shaders.frame.large-png-lands'), async () => {
+  test.setTimeout(300_000);
+  await openEditor(page, deck);
+  const own = await addSlide(page);
+  const made = await ensureShader(page, own, {
+    materialId: 'paper:god-rays',
+    pos: { x: 436, y: 244, w: 727, h: 412 },
+  });
+  const t0 = Date.now();
+  const frame = await waitFrame(page, own, made.id, { timeout: 8000 });
+  const ms = Date.now() - t0;
+  const file = frame.asset ? await frameFile(page, made.id) : null;
+  const size = file ? pngSize(file.bytes) : null;
+  /* the card, the show and the print page draw it: a pixel read finds no plate grey */
+  const plateGrey = (hex: string) =>
+    /^#(e[0-9a-f]|f[0-9a-f]|d[0-9a-f]){3}$/.test(hex) || /^#([0-9a-f]{2})\1\1$/.test(hex);
+  const sampleAt = async (root: string, blockId: string) => {
+    const box = await page.evaluate(
+      ([sel, id]) => {
+        const el = document.querySelector(
+          sel
+            .split(',')
+            .map((s) => `${s.trim()} [data-block="${id}"]`)
+            .join(', '),
+        );
+        const r = el?.getBoundingClientRect();
+        return r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null;
+      },
+      [root, blockId] as const,
+    );
+    if (!box || box.width < 4) return null;
+    const rgb = await sampleClip(
+      page,
+      box,
+      [
+        [0.5, 0.5],
+        [0.25, 0.5],
+        [0.75, 0.5],
+      ],
+      0.02,
+    );
+    if (!rgb) return null;
+    const hexes = rgb.rgb.map(
+      (c) => `#${c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`,
+    );
+    return { hexes, grey: hexes.every((h) => plateGrey(h)) };
+  };
+  await page.keyboard.press('Escape');
+  const card = await sampleAt(`[data-control="filmstrip.slide.${own}"]`, made.id);
+  await ctl(page, 'present.open').click();
+  await ctl(page, 'present.show').waitFor({ timeout: 10_000 });
+  await page.waitForTimeout(1200);
+  /* the show's slide is the stage's sheet in present mode (`.ts-stagewrap.is-present`) */
+  const show = await sampleAt(
+    '.ts-stagewrap.is-present .pt-slide:not(.is-leaving), .pt-viewer.is-present .pt-slide:not(.is-leaving), [data-control="present.show"] .pt-slide:not(.is-leaving)',
+    made.id,
+  );
+  await page.keyboard.press('Escape');
+  await ctl(page, 'present.show')
+    .waitFor({ state: 'detached', timeout: 10_000 })
+    .catch(() => undefined);
+  await menuPath(page, 'file', 'file.printPreview');
+  await page.waitForURL(/\/print\//, { timeout: 20_000 });
+  await page.waitForSelector('[data-control="print.page"][data-hydrated]', { timeout: 20_000 });
+  await page.waitForTimeout(800);
+  const printed = await sampleAt('[data-control="print.page"]', made.id);
+  await ctl(page, 'print.close').click();
+  await page.waitForURL(/\/edit\//, { timeout: 20_000 });
+  /* the editor comes back on its first slide; the shader's slide is made current again before
+     the block is selected on the stage */
+  await waitEditor(page);
+  await clickCard(page, own);
+  /* a put forced to 413: the frame's upload route answered 413 through page.route; one sentence and one retry */
+  const uploads =
+    /\/api\/x\/upload\/|\/api\/actions\/asset\.add|\/api\/actions\/shader\.frame|\/api\/decks\/[^/?]+\/assets/;
+  let refused = 0;
+  const puts: string[] = [];
+  await page.route(uploads, async (route) => {
+    const method = route.request().method();
+    if ((method === 'POST' || method === 'PUT') && refused < 1) {
+      refused += 1;
+      puts.push(`${method} ${new URL(route.request().url()).pathname} -> 413`);
+      return route.fulfill({
+        status: 413,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'FUNCTION_PAYLOAD_TOO_LARGE' }),
+      });
+    }
+    puts.push(`${method} ${new URL(route.request().url()).pathname} -> through`);
+    return route.continue();
+  });
+  const how = await changeRecipe(page, made.id, 1.25, 6300);
+  const second = await waitFrame(page, own, made.id, { not: frame.asset, timeout: 25_000 });
+  const words = await snackbarText(page);
+  await page.unroute(uploads);
+  const retried = puts.filter((p) => /-> through$/.test(p)).length;
+  test.info().annotations.push({
+    type: 'frame',
+    description: `${made.how}; the frame ${frame.asset ?? 'none'} after ${ms} ms (${size ? `${size.width} by ${size.height}` : 'unread'}); card ${card ? `${card.hexes.join(' ')} grey ${card.grey}` : 'unread'}, show ${show ? `${show.hexes.join(' ')} grey ${show.grey}` : 'unread'}, print ${printed ? `${printed.hexes.join(' ')} grey ${printed.grey}` : 'unread'}; ${how}; 413 injected ${refused} (${puts.join('; ')}); the second frame ${second.asset ?? 'none'} after ${second.ms} ms; snackbar "${words}"`,
+  });
+  expect(frame.asset, 'the frame asset exists within 8 s').not.toBeNull();
+  expect(card?.grey, 'the filmstrip card draws it').toBe(false);
+  expect(show?.grey, 'the show draws it').toBe(false);
+  expect(printed?.grey, "the PDF's page draws it").toBe(false);
+  expect(refused, 'one put was forced to 413').toBe(1);
+  expect(retried, 'one retry').toBeGreaterThanOrEqual(1);
+  expect(
+    second.asset !== null || /frame|still|could not|try again/i.test(words ?? ''),
+    'the frame lands on the retry or one sentence says it did not',
+  ).toBe(true);
+});
+
+test(title('shaders.gallery.words-and-head'), async () => {
+  test.setTimeout(240_000);
+  await openEditor(page, deck);
+  await clickCard(page, slideId);
+  const gallery = await openShaderGallery(page);
+  if (!gallery.open) test.skip(true, 'not on this build: insert.shader (docs/FEATURES.md 5.10)');
+  const tips = await page.evaluate(() => {
+    const cards = [
+      ...document.querySelectorAll(
+        '[data-control^="dialog.shader.tile."], [data-control^="dialog.shader.card."]',
+      ),
+    ].filter(
+      (e) =>
+        e.getClientRects().length > 0 &&
+        /* the tile itself carries the tip; its thumb and title parts (`.thumb`, `.title`) are
+           sub controls without one */
+        /^dialog\.shader\.(tile|card)\.[^.]+(?::[^.]+)?$/.test(
+          e.getAttribute('data-control') ?? '',
+        ),
+    );
+    return cards.map((c) => ({
+      id: c.getAttribute('data-control') ?? '',
+      tip:
+        c.getAttribute('data-tip-doc') ??
+        c.getAttribute('data-tip') ??
+        c.getAttribute('title') ??
+        '',
+    }));
+  });
+  const sentence =
+    (await page.evaluate(() =>
+      (document.querySelector('[data-control="dialog.shader.sentence"]')?.textContent ?? '').trim(),
+    )) ?? '';
+  const heightBefore = await ctl(page, 'dialog.shader').evaluate(
+    (el) => el.getBoundingClientRect().height,
+  );
+  await ctl(page, 'dialog.shader.search').click();
+  await page.keyboard.type('zzzqqq', { delay: 60 });
+  await page.waitForTimeout(800);
+  const heightAfter = await ctl(page, 'dialog.shader').evaluate(
+    (el) => el.getBoundingClientRect().height,
+  );
+  await page.keyboard.press('Escape');
+  await expect(ctl(page, 'dialog.shader')).toHaveCount(0, { timeout: 5000 });
+  if (gallery.switched) await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
+  /* the Shader section's head: the name, the still and Change, and no Text section or second Height stepper */
+  await selectBlock(page, shader!.id);
+  const opened = await openShaderSection(page, shader!.id);
+  const section = opened
+    ? await page.evaluate(() => {
+        const panel = document.querySelector('[data-control="panel.formatOptions"]')!;
+        const shaderSection = panel.querySelector('[data-section="shader"]');
+        const head = shaderSection?.querySelector(
+          '.ts-shader-head, .ts-fo-shader-head, .ts-panel-section-body > .ts-fo-row:first-child',
+        );
+        const name = head?.querySelector('b, strong, .ts-shader-name, .ts-fo-shader-name');
+        const change = shaderSection?.querySelector(
+          'button:not([data-control*="preset"]):not([data-control*="color"])',
+        );
+        const changeBtn =
+          [...(shaderSection?.querySelectorAll('button') ?? [])].find((b) =>
+            /^Change$/.test((b.textContent ?? '').trim()),
+          ) ?? change;
+        const nr = name?.getBoundingClientRect() ?? null;
+        const cr = changeBtn?.getBoundingClientRect() ?? null;
+        const sections = [...panel.querySelectorAll('[data-section]')].map(
+          (s) => s.getAttribute('data-section') ?? '',
+        );
+        const heights = [...panel.querySelectorAll('.ts-fo-field-label, label')].filter((l) =>
+          /^Height$/.test((l.textContent ?? '').trim()),
+        ).length;
+        return {
+          gap: nr && cr ? Math.round(cr.left - nr.right) : null,
+          name: (name?.textContent ?? '').trim(),
+          change: (changeBtn?.textContent ?? '').trim(),
+          sections,
+          heights,
+          text: sections.includes('text'),
+        };
+      })
+    : null;
+  const bad = tips.filter(
+    (t) =>
+      t.tip.length === 0 ||
+      t.tip.length >= 120 ||
+      /Prototemplate|Glyphfield|GT\b/.test(t.tip) ||
+      (t.tip.match(/[.!?](\s|$)/g) ?? []).length > 1,
+  );
+  test.info().annotations.push({
+    type: 'gallery',
+    description: `${tips.length} tiles; tips over 120 characters, naming a product or more than one sentence: ${bad.length}${
+      bad.length > 0
+        ? ` (${bad
+            .slice(0, 3)
+            .map((t) => `${t.id}: "${t.tip.slice(0, 80)}"`)
+            .join(' | ')})`
+        : ''
+    }; the sentence "${sentence}"; height ${Math.round(heightBefore)} -> ${Math.round(heightAfter)} on no match; the section ${section ? `name "${section.name}" to Change "${section.change}" ${section.gap} px; sections ${section.sections.join(', ')}; Height labels ${section.heights}` : 'not open'}`,
+  });
+  expect(bad, 'every tile tooltip is one sentence under 120 characters naming no product').toEqual(
+    [],
+  );
+  expect(sentence, 'a true sentence about the swatches (not black and white previews)').not.toMatch(
+    /black and white/i,
+  );
+  expect(Math.round(heightAfter), "the dialog's height holds on no match").toBe(
+    Math.round(heightBefore),
+  );
+  expect(section, 'the Shader section opened').not.toBeNull();
+  expect(
+    section!.gap ?? 0,
+    "the section head's name and Change 8 px apart or more",
+  ).toBeGreaterThanOrEqual(8);
+  expect(section!.text, 'no Text section for a material').toBe(false);
+  expect(section!.heights, 'one Height stepper').toBeLessThanOrEqual(1);
+});
+
+test(title('shaders.insert.free-rectangle'), async () => {
+  test.setTimeout(240_000);
+  await openEditor(page, deck);
+  const empty = await addSlide(page);
+  const s = await settled(page);
+  await invoke(page, 'slide.set', {
+    slideId: empty,
+    path: '/layout',
+    value: 'blank',
+    baseRevision: s.revision,
+  }).catch(() => undefined);
+  await settled(page);
+  const onEmpty = await ensureShader(page, empty);
+  const under = await addSlide(page);
+  const run = await headingRun(page);
+  await typeInto(page, run, 'A title above');
+  await settled(page);
+  const underTitle = await ensureShader(page, under);
+  const pos = (b: Record<string, unknown>) =>
+    b['pos'] as { x: number; y: number; w: number; h: number };
+  const a = pos(onEmpty.block);
+  const b = pos(underTitle.block);
+  test.info().annotations.push({
+    type: 'placement',
+    description: `empty slide (${onEmpty.how}): ${JSON.stringify(a)}; under a title (${underTitle.how}): ${JSON.stringify(b)}`,
+  });
+  expect(onEmpty.how, 'the insert went through the product').toMatch(/Insert > Shader/);
+  expect([a.x, a.y, a.w, a.h], 'the content box on an empty slide').toEqual([137, 129, 1326, 642]);
+  expect(b.y, 'under a title the free rectangle').toBeGreaterThan(129);
+  expect(b.h, 'the free rectangle, not the 480 by 272 default').toBeGreaterThan(272);
+});
+
 coverage(import.meta.filename, [
   'shaders.frame.auto-capture',
   'shaders.frame.box-aspect',
@@ -996,4 +1267,8 @@ coverage(import.meta.filename, [
   'shaders.library.glyph-engines-render',
   'shaders.show.plays-when-on',
   'shaders.show.frame-when-off',
+  /* the polish round (docs/POLISH.md 2.5 items 36, 47 and 48) */
+  'shaders.frame.large-png-lands',
+  'shaders.gallery.words-and-head',
+  'shaders.insert.free-rectangle',
 ]);

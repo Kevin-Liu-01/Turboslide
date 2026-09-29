@@ -17,6 +17,9 @@ import {
   state,
   teardownAll,
   title,
+  snackbarText,
+  typeInto,
+  runsOfBlock,
 } from './lib';
 
 // The documents, the spec rows (docs/RETURN.md 2.5, section 5 `charts.data.paste-rows` with the
@@ -277,9 +280,216 @@ test(title('tables.paste.into-cell-spreads'), async () => {
   ]);
 });
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 2.7 items 91, 92 and 95, 5.1 `versions.*` and
+// `comments.marker.one-per-anchor`): the versions panel's rows, the Last edit words inline, one
+// comment marker per anchor.
+
+test(title('versions.panel.rows-read-clean'), async () => {
+  test.setTimeout(150_000);
+  await openEditor(page, deck);
+  const slideId = (await state(page)).slideId;
+  await placeBlock(page, slideId, {
+    id: 'vh-box',
+    type: 'text',
+    text: 'Versions',
+    pos: { x: 200, y: 500, w: 500, h: 100 },
+  });
+  const run = (await runsOfBlock(page, 'vh-box'))[0]!;
+  await typeInto(page, run, ' written once');
+  await settled(page);
+  await menuPath(page, 'file', 'file.versionHistory', 'file.versionHistory.see');
+  await ctl(page, 'panel.versionHistory').waitFor({ timeout: 8000 });
+  await page.waitForTimeout(800);
+  const rows = await page.evaluate(() => {
+    const panel = document.querySelector('[data-control="panel.versionHistory"]')!;
+    const pr = panel.getBoundingClientRect();
+    const windows = [...panel.querySelectorAll('[data-control^="versionHistory.window."]')].map(
+      (el) => {
+        const r = el.getBoundingClientRect();
+        const mark = el.querySelector('.ts-version-mark, .ts-chip');
+        const mr = mark?.getBoundingClientRect() ?? null;
+        return {
+          text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(),
+          markInside: mr ? mr.x >= pr.x - 1 && mr.right <= pr.right + 1 && mr.x >= r.x - 1 : null,
+        };
+      },
+    );
+    const clipped = [
+      ...panel.querySelectorAll('.ts-version-meta, .ts-version-note, .ts-version-body'),
+    ].filter(
+      (el) =>
+        el.scrollWidth > el.clientWidth + 1 &&
+        getComputedStyle(el).textOverflow === 'ellipsis' &&
+        /…$|\.\.\.$/.test((el.textContent ?? '').trim()),
+    ).length;
+    return {
+      windows,
+      clipped,
+      text: (panel.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 300),
+    };
+  });
+  /* the same time from and to: one time on the row */
+  const sameTwice = rows.windows.filter((w) => /(\d{1,2}:\d{2} [AP]M) to \1/.test(w.text));
+  /* Name this version opens the dialog and the snackbar reads Saved the version <name> */
+  await menuPath(page, 'file', 'file.versionHistory', 'file.versionHistory.nameCurrent');
+  const dialog = await ctl(page, 'dialog.nameVersion.name')
+    .waitFor({ timeout: 8000 })
+    .then(() => true)
+    .catch(() => false);
+  let words: string | null = null;
+  if (dialog) {
+    await ctl(page, 'dialog.nameVersion.name').click();
+    await page.keyboard.type('Sent to Acme', { delay: 40 });
+    await ctl(page, 'dialog.nameVersion.save').click();
+    words = await expect
+      .poll(() => snackbarText(page), { timeout: 6000 })
+      .toMatch(/version/i)
+      .then(() => snackbarText(page))
+      .catch(() => snackbarText(page));
+  }
+  test.info().annotations.push({
+    type: 'versions',
+    description: `${rows.windows.length} window rows (${rows.windows.map((w) => `"${w.text.slice(0, 60)}" mark inside ${w.markInside}`).join(' | ')}); a time twice ${sameTwice.length}; clipped rows ${rows.clipped}; the dialog ${dialog}; snackbar "${words}"`,
+  });
+  expect(rows.windows.length, 'a window row after one write').toBeGreaterThan(0);
+  expect(sameTwice, 'one time when start and end agree').toEqual([]);
+  expect(
+    rows.windows.every((w) => w.markInside !== false),
+    'the mark inside the row',
+  ).toBe(true);
+  expect(rows.clipped, "no tail cut to 'cur…'").toBe(0);
+  expect(dialog, 'Name this version opens the dialog').toBe(true);
+  expect(words ?? '', 'Saved the version Sent to Acme').toMatch(/Saved the version Sent to Acme/);
+});
+
+test(title('versions.title-row.last-edit-inline'), async () => {
+  test.setTimeout(90_000);
+  const out: string[] = [];
+  const failures: string[] = [];
+  /* one write first, so the deck holds a record for the words to name (the span is empty on a
+     deck with no edit yet); the write is setup, never a driven step */
+  await openEditor(page, deck);
+  const slideId = await addSlide(page);
+  await placeBlock(page, slideId, {
+    id: 'last-edit-box',
+    type: 'text',
+    text: 'A word for the record',
+    pos: { x: 200, y: 200, w: 600, h: 60 },
+  });
+  await settled(page);
+  await page.waitForTimeout(2500);
+  for (const width of [1440, 1280]) {
+    await page.setViewportSize({ width, height: width === 1440 ? 900 : 800 });
+    await openEditor(page, deck);
+    await page.waitForTimeout(500);
+    const facts = await page.evaluate(() => {
+      /* the words beside the clock (item 92): `deck.lastEdit.words` in the slot
+         `deck.lastEdit.slot`, a span drawn from 1280 px up; the clock button's own text is its
+         icon alone */
+      const slot =
+        document.querySelector('[data-control="deck.lastEdit.slot"]') ??
+        document.querySelector('[data-control="deck.lastEdit"]')?.parentElement ??
+        null;
+      if (!slot) return null;
+      const words = slot.querySelector('[data-control="deck.lastEdit.words"]');
+      const clone = slot.cloneNode(true) as HTMLElement;
+      for (const svg of clone.querySelectorAll('svg')) svg.remove();
+      const text = (clone.textContent ?? '').replace(/\s+/g, ' ').trim();
+      const drawn = (el: Element | null) =>
+        el !== null &&
+        (el.textContent ?? '').trim().length > 0 &&
+        el.getClientRects().length > 0 &&
+        getComputedStyle(el).visibility !== 'hidden' &&
+        getComputedStyle(el).display !== 'none' &&
+        el.getBoundingClientRect().width > 8;
+      const visible =
+        drawn(words) || [...slot.querySelectorAll('span, b, em')].some((el) => drawn(el));
+      return {
+        text,
+        visible,
+        tip: slot.querySelector('[data-tip]')?.getAttribute('data-tip') ?? null,
+      };
+    });
+    out.push(
+      `${width}: ${facts ? `"${facts.text}" visible ${facts.visible} (tip "${facts.tip}")` : 'no Last edit slot'}`,
+    );
+    if (!facts || !/Last edit/.test(facts.text) || !facts.visible)
+      failures.push(`${width}: the words are not inline`);
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  test.info().annotations.push({ type: 'last edit', description: out.join('; ') });
+  expect(failures).toEqual([]);
+});
+
+test(title('comments.marker.one-per-anchor'), async () => {
+  test.setTimeout(120_000);
+  await openEditor(page, deck);
+  const slideId = (await state(page)).slideId;
+  await placeBlock(page, slideId, {
+    id: 'marker-shape',
+    type: 'shape',
+    shape: 'rectangle',
+    fill: 'plate',
+    stroke: 'ink',
+    pos: { x: 900, y: 500, w: 240, h: 160 },
+  });
+  await selectBlock(page, 'marker-shape');
+  await page.keyboard.press('Meta+Alt+m');
+  await ctl(page, 'comment.card').waitFor({ timeout: 8000 });
+  await ctl(page, 'comment.card.new.field').click();
+  await page.keyboard.type('One marker please', { delay: 40 });
+  await ctl(page, 'comment.card.new.submit').click();
+  await expect
+    .poll(() => page.locator('[data-control="comment.marker"]').count(), { timeout: 20_000 })
+    .toBeGreaterThan(0);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(600);
+  const markers = await page.evaluate(() => {
+    const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+    const sr = sheet?.getBoundingClientRect();
+    const k = sr ? sr.width / 1600 : 1;
+    const els = [
+      ...document.querySelectorAll(
+        '[data-control="comment.marker"], .ts-comment-marker, .ts-comment-marker-btn',
+      ),
+    ].filter((el) => el.getClientRects().length > 0);
+    const tiles = [
+      ...document.querySelectorAll('.ts-overlay [class*="comment"], .ts-collab [class*="comment"]'),
+    ].filter(
+      (el) => el.getClientRects().length > 0 && !el.closest('[data-control="comment.card"]'),
+    );
+    return {
+      markers: els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return {
+          x: sr ? Math.round((r.x - sr.x) / k) : 0,
+          y: sr ? Math.round((r.y - sr.y) / k) : 0,
+          w: Math.round(r.width),
+          h: Math.round(r.height),
+          count: el.getAttribute('data-count'),
+          avatar: el.querySelector('.ts-chip, img, svg') !== null,
+        };
+      }),
+      tiles: tiles.length,
+    };
+  });
+  test.info().annotations.push({
+    type: 'markers',
+    description: `${markers.markers.length} marker(s): ${markers.markers.map((m) => `${m.x},${m.y} ${m.w}x${m.h} count ${m.count} avatar ${m.avatar}`).join(' | ')}; comment elements on the overlay ${markers.tiles}`,
+  });
+  expect(markers.markers.length, 'one marker element at the anchor').toBe(1);
+  expect(markers.markers[0]!.avatar, 'with the avatar').toBe(true);
+  expect(markers.markers[0]!.count, 'and the count').toBe('1');
+});
+
 coverage(import.meta.filename, [
   'charts.data.paste-rows',
   /* the features round, ship one (docs/FEATURES.md 2.3 item 5) */
   'tables.paste.tsv-makes-table',
   'tables.paste.into-cell-spreads',
+  /* the polish round (docs/POLISH.md 2.7 items 91, 92 and 95) */
+  'versions.panel.rows-read-clean',
+  'versions.title-row.last-edit-inline',
+  'comments.marker.one-per-anchor',
 ]);

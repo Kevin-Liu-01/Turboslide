@@ -57,6 +57,21 @@
 // 0.38), and with `--template-copy` one deck is created from the GT template through
 // `deck.create`, moved to the trash and deleted forever, so the row leaves the store as it found
 // it (the row writes; pass it against a preview or a store you own).
+//
+// The polish round (docs/POLISH.md section 0 item 2, 3.7; polish/build/b7.md request 2): two rows
+// that read the build a domain serves, so the table stops reading green on a stale deployment
+// (audit-chrome section 0 and item 1: www.turboslide.com served a bundle from ship one with every
+// other row passing). `build commit` reads `/api/agent`'s `instance.commit` (B5's stamp, section 0
+// item 1) and fails when the field is missing or, with `--sha <commit>`, when it differs from the
+// commit named (a prefix of either matches the other); off localhost the field needs the bearer,
+// so without `--token-env` the row is listed as skipped. `View > Play shaders` reads the client
+// the shell loads: on a built deployment it walks the module graph from the shell's scripts
+// (`assets/*.js`, the static imports and the `import()` chunks, bounded) until one module carries
+// the row id `view.playShaders` and the label "Play shaders"; on a Vite dev server (the shell's
+// entry under `/@id/`) it reads the menu model through `/@fs/<checkout>/packages/chrome/src/menus/model.ts`.
+// The `/home` row's marks are the remade page's (section 3): the root `class="ts-product"` (the
+// element carries `id="top"` first), the hero lead's second sentence as React escapes it, and the
+// Speculation Rules script.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -76,6 +91,7 @@ function parseArgs(argv) {
     shareToken: null,
     publishToken: null,
     templateCopy: false,
+    sha: null,
   };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -90,6 +106,7 @@ function parseArgs(argv) {
     else if (arg === '--restricted') out.restricted = argv[++i] ?? null;
     else if (arg === '--share-token') out.shareToken = argv[++i] ?? null;
     else if (arg === '--publish-token') out.publishToken = argv[++i] ?? null;
+    else if (arg === '--sha') out.sha = argv[++i] ?? null;
     else if (arg === '--help' || arg === '-h') out.help = true;
     else if (out.url === null) out.url = arg;
   }
@@ -322,10 +339,14 @@ const SHELL_MARKS = ['<!DOCTYPE html>', 'gt-theme', '<script'];
 // meta may carry further attributes after `content`
 const NOINDEX_META = /<meta\s+name="robots"\s+content="noindex"[^>]*\/?>/;
 
-/** SPEC-4 2.6: what the served /home carries (the hero sentence's fragment as React escapes it). */
+/**
+ * What the served /home carries (SPEC-4 2.6; the polish round's page, docs/POLISH.md section 3,
+ * b7.md request 2): the root's class (`<main id="top" class="ts-product"`), the hero lead's second
+ * sentence as React escapes it (the apostrophe is `&#x27;`), the Speculation Rules script.
+ */
 const HOME_MARKS = [
-  '<main class="ts-product"',
-  'Google Slides&#x27; menus, toolbar and shortcuts',
+  'class="ts-product"',
+  'It has Google Slides&#x27; menus and shortcuts.',
   '<script type="speculationrules"',
 ];
 
@@ -437,8 +458,9 @@ function checks(deck, asset) {
       detail: (r) => `${r.bytes} chars`,
     },
     {
-      // gslides-parity SPEC-4 2.6 (build-4/b2.md R4): the product page's root, the hero sentence
-      // as React serialises it (the apostrophe is &#x27;), the Speculation Rules script, indexable
+      // gslides-parity SPEC-4 2.6 (build-4/b2.md R4), the polish round's page (docs/POLISH.md 3.7):
+      // the product page's root, the hero lead's sentence as React serialises it (the apostrophe
+      // is &#x27;), the Speculation Rules script, indexable
       name: '/home',
       path: '/home',
       expect:
@@ -815,6 +837,151 @@ async function backendRow(base, headers, timeoutMs) {
 }
 
 /**
+ * The build's commit as `/api/agent` reports it (docs/POLISH.md section 0 items 1 and 2; row
+ * `surface.domain.build-commit`): the row fails when the instance block names no commit (a build
+ * before the stamp, the stale domain's) and, with `--sha`, when the commit named is not the one
+ * served. Off localhost the block needs the bearer; a 401 without one is a skip, never a pass.
+ */
+async function commitRow(base, headers, timeoutMs, sha) {
+  const r = await probe(base, '/api/agent', timeoutMs, { headers });
+  let commit = null;
+  try {
+    const instance = JSON.parse(r.text)?.instance ?? null;
+    commit =
+      typeof instance?.commit === 'string' && instance.commit !== '' ? instance.commit : null;
+  } catch {
+    // not JSON
+  }
+  if (r.status === 401 && headers.authorization === undefined)
+    return {
+      skip: 'build commit: pass --token-env <VAR> (the row reads /api/agent with the bearer)',
+    };
+  const wanted = sha === null ? null : sha.trim().toLowerCase();
+  const served = commit === null ? null : commit.toLowerCase();
+  const same =
+    wanted === null || served === null
+      ? false
+      : served.startsWith(wanted) || wanted.startsWith(served);
+  const ok = r.status === 200 && commit !== null && (wanted === null || same);
+  return {
+    row: {
+      name: 'build commit',
+      expect:
+        wanted === null
+          ? 'instance.commit on /api/agent (the stamp of docs/POLISH.md section 0 item 1)'
+          : `instance.commit on /api/agent equal to ${wanted}`,
+      detail: () =>
+        commit === null
+          ? `${r.status}: no instance.commit (${r.text.slice(0, 120).replace(/\s+/g, ' ')})`
+          : `serves ${commit}${wanted === null ? '' : same ? ' (the commit named)' : `, not ${wanted}`}`,
+    },
+    r,
+    ok,
+  };
+}
+
+/** The marks of the one row only the current build draws: View > Play shaders (docs/FEATURES.md 5.6). */
+const PLAY_SHADERS_MARKS = ['view.playShaders', 'Play shaders'];
+/** The module graph walk's bounds: modules fetched and bytes read before the row gives up. */
+const GRAPH_MODULES = 400;
+const GRAPH_BYTES = 40 * 1024 * 1024;
+
+/** A text body from the origin whatever its content type (the JS modules the shell loads). */
+async function fetchText(url, timeoutMs) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: protectionHeaders(),
+    });
+    return { status: response.status, text: response.status === 200 ? await response.text() : '' };
+  } catch (error) {
+    return { status: 0, text: '', error: error instanceof Error ? error.message : String(error) };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** The module specifiers a JS module imports, static and dynamic, as written. */
+function importsOf(source) {
+  const out = new Set();
+  const patterns = [
+    /\bfrom\s*["']([^"'\n]+)["']/g,
+    /\bimport\s*\(\s*["']([^"'\n]+)["']\s*\)/g,
+    /\bimport\s*["']([^"'\n]+)["']/g,
+  ];
+  for (const pattern of patterns) {
+    let match;
+    while ((match = pattern.exec(source)) !== null) out.add(match[1]);
+  }
+  return [...out];
+}
+
+/**
+ * Whether the client the shell loads carries the marks: the shell's scripts and module preloads,
+ * then the graph they import, breadth first, until a module carries every mark or the bounds are
+ * met. A Vite dev server serves no bundle (the shell's entry is `/@id/…`), so there the menu model
+ * is read through `/@fs/` from the checkout beside this script.
+ */
+async function playShadersRow(base, timeoutMs) {
+  const shell = await probe(base, '/new', timeoutMs);
+  const roots = [];
+  for (const match of shell.text.matchAll(/<script[^>]*\ssrc="([^"]+)"/g)) roots.push(match[1]);
+  for (const match of shell.text.matchAll(/<link[^>]*rel="modulepreload"[^>]*\shref="([^"]+)"/g))
+    roots.push(match[1]);
+  const origin = new URL(base).origin;
+  const devServer = roots.some((src) => src.startsWith('/@id/') || src.startsWith('/@vite/'));
+  let found = null;
+  let visited = 0;
+  let bytes = 0;
+  let note = '';
+  const carries = (text) => PLAY_SHADERS_MARKS.every((m) => text.includes(m));
+  if (devServer) {
+    const model = `${origin}/@fs${join(ROOT, 'packages', 'chrome', 'src', 'menus', 'model.ts')}`;
+    const r = await fetchText(model, timeoutMs);
+    visited = 1;
+    bytes = r.text.length;
+    if (r.status === 200 && carries(r.text)) found = 'packages/chrome/src/menus/model.ts';
+    note = `dev server: the menu model read through /@fs (${r.status})`;
+  } else {
+    const queue = roots
+      .map((src) => new URL(src, `${origin}/`).toString())
+      .filter((url) => url.startsWith(origin));
+    const seen = new Set(queue);
+    while (queue.length > 0 && found === null && visited < GRAPH_MODULES && bytes < GRAPH_BYTES) {
+      const url = queue.shift();
+      const r = await fetchText(url, timeoutMs);
+      visited += 1;
+      bytes += r.text.length;
+      if (r.status !== 200) continue;
+      if (carries(r.text)) {
+        found = new URL(url).pathname;
+        break;
+      }
+      for (const spec of importsOf(r.text)) {
+        if (!/^(\.|\/)/.test(spec)) continue;
+        const next = new URL(spec, url).toString();
+        if (!next.startsWith(origin) || seen.has(next)) continue;
+        seen.add(next);
+        queue.push(next);
+      }
+    }
+    note = `${visited} module${visited === 1 ? '' : 's'} read from ${roots.length} shell script${roots.length === 1 ? '' : 's'}, ${Math.round(bytes / 1024)} KB`;
+  }
+  return {
+    row: {
+      name: 'View > Play shaders',
+      expect: 'the served client carries view.playShaders and "Play shaders" (the current build)',
+      detail: () => (found === null ? `not found; ${note}` : `in ${found}; ${note}`),
+    },
+    r: { status: shell.status, ms: shell.ms },
+    ok: shell.status === 200 && found !== null,
+  };
+}
+
+/**
  * One template copy (MILESTONES-4 "Integrator": "one render and one template copy"): deck.create
  * from the GT template, then deck.trash and deck.remove with the revisions the answers name, so
  * the store is as it was. A failure leaves the deck id in the row for a hand cleanup.
@@ -933,7 +1100,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || args.url === null) {
     console.log(
-      'usage: node scripts/hosted-smoke.mjs <url> [--deck gt-brand] [--asset <file>] [--timeout <ms>]',
+      'usage: node scripts/hosted-smoke.mjs <url> [--deck gt-brand] [--asset <file>] [--timeout <ms>] [--sha <commit>] [--token-env <VAR>]',
     );
     process.exit(args.help ? 0 : 2);
   }
@@ -954,6 +1121,12 @@ async function main() {
   results.push(...(await thumbnailRows(base, args.deck, args.timeoutMs)));
   // the round two rows, with the bearer (SPEC-2 8.1, 8.2)
   const headers = bearerHeaders(args.tokenEnv);
+  // the polish round's build rows (docs/POLISH.md section 0 item 2): the client's Play shaders row
+  // without a bearer, the build's commit with it (or on localhost without one)
+  results.push(await playShadersRow(base, args.timeoutMs));
+  const commit = await commitRow(base, headers, args.timeoutMs, args.sha);
+  if (commit.skip !== undefined) console.log(`skip  ${commit.skip}`);
+  else results.push(commit);
   if (args.tokenEnv === null) {
     console.log(
       'skip  effects backend: pass --token-env <VAR> (the row reads /api/agent with the bearer)',

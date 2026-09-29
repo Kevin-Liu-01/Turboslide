@@ -1,5 +1,5 @@
 {
-  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship. The vector round (docs/VECTOR.md section 6) added 43 rows on 2026-09-24 and extended one (shapes.insert.named-rows reads the seven Insert > Shape rows): the shapes rows of the geometry interpreter, the glyph grids, Change shape and Mask image (parks naming the gallery row or the control each measures, so a red one re parks that category alone and never the three named rows; shapes.geometry.pinned-three, .text-rect and shapes.icons.named-rows carry no parks, being core rows of an earlier round's feature), the menus area whose rows are the chrome's (AREA_FEATURE menus: chrome, unparkable: the icons on the visual rows), the parkable feature svg (the intake by the chooser, a paste, a drop and a URL, the sheet at two zooms, the gestures, the copy, the sanitizer and the exports; every row parks one or more of the six ids of VECTOR.md 4.8 declared in core-matrix.mjs) and logos.export.svgblip; `today` is what the tree at 2be923e and the audits show on 2026-09-24 (a row of a control that does not exist is not driven with the document's reading as its evidence; a behaviour production shows red is broken with the audit's severity), and `note` names the round, the VECTOR.md section and the lane. The row logos.intake.svg-sentence left with its sentence (4.7); svg.import.upload measures the upload. features round, ship two (docs/FEATURES.md 5, 7.1) added the 29 rows of the shader library on 2026-09-24 under the new parkable feature `shaders` and the existing export and view: `today` is what audit-shaders under docs/gslides-parity/features/ saw on production at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship two P0 or P1) with the lane and the FEATURES.md section, `parks` names the FEATURES.md control ids the row alone guards (a dialog or Shader section control is hidden through packages/chrome/src/parked-controls.ts), the four export rows of the shaders area carry the feature export and the View row the feature view (ROW_FEATURE), so a red one blocks the ship or parks its own control and never the shader library, and `shaders.perf.editor-frame` carries `measure` (7.2): its number is recorded and never holds the ship. The objects round (docs/OBJECTS.md section 6) added 33 rows on 2026-09-25 and carried five (tables.seam.row-drag, tables.edge.add-row-column, tables.heads.select-row-column, tables.cells.prompt-hovered-only, wordart.tail.fill-outline; each keeps its id, its note gains the round and the section): nineteen under the new area `gestures`, whose rows are the arrange feature's (AREA_FEATURE gestures: arrange, unparkable, so a red gesture row fails the ship; the live gestures of section 2: the draw drawn as it grows, the click placement, the object and the ring equal at every frame of a resize, a seam drag, a move and a rotation, the connector during a move, the frame cadence and its budget read from describe().state.gesture, the readout, and one watch row), the tables rows of section 3 (the ring with a cell open, the cell ring, the editor guide grid, the show's rules, the box from the rows, the rows that grow, the seams with a cell open, the header toggle from the row head, the Table section's words), and one row each under charts, diagrams and lines (section 4). `today` is what docs/OBJECTS.md measured on production on 2026-09-26 (the return round plus ship one) and on the worktree at 5bf158a, in the four words; a row of a control that does not exist is not driven with the item that measured its absence as evidence; a broken row's severity follows the item's value by the product round's rule; `note` names the round, the OBJECTS.md section and the lane; `setup` names the block.insert and slide.new writes a driver makes before its steps. The frame rows read the gesture record of the window API (docs/OBJECTS.md 2.4), a field the integrator lands by B1's request; on a build without it they read not driven with the field named.",
+  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship. The vector round (docs/VECTOR.md section 6) added 43 rows on 2026-09-24 and extended one (shapes.insert.named-rows reads the seven Insert > Shape rows): the shapes rows of the geometry interpreter, the glyph grids, Change shape and Mask image (parks naming the gallery row or the control each measures, so a red one re parks that category alone and never the three named rows; shapes.geometry.pinned-three, .text-rect and shapes.icons.named-rows carry no parks, being core rows of an earlier round's feature), the menus area whose rows are the chrome's (AREA_FEATURE menus: chrome, unparkable: the icons on the visual rows), the parkable feature svg (the intake by the chooser, a paste, a drop and a URL, the sheet at two zooms, the gestures, the copy, the sanitizer and the exports; every row parks one or more of the six ids of VECTOR.md 4.8 declared in core-matrix.mjs) and logos.export.svgblip; `today` is what the tree at 2be923e and the audits show on 2026-09-24 (a row of a control that does not exist is not driven with the document's reading as its evidence; a behaviour production shows red is broken with the audit's severity), and `note` names the round, the VECTOR.md section and the lane. The row logos.intake.svg-sentence left with its sentence (4.7); svg.import.upload measures the upload. features round, ship two (docs/FEATURES.md 5, 7.1) added the 29 rows of the shader library on 2026-09-24 under the new parkable feature `shaders` and the existing export and view: `today` is what audit-shaders under docs/gslides-parity/features/ saw on production at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship two P0 or P1) with the lane and the FEATURES.md section, `parks` names the FEATURES.md control ids the row alone guards (a dialog or Shader section control is hidden through packages/chrome/src/parked-controls.ts), the four export rows of the shaders area carry the feature export and the View row the feature view (ROW_FEATURE), so a red one blocks the ship or parks its own control and never the shader library, and `shaders.perf.editor-frame` carries `measure` (7.2): its number is recorded and never holds the ship. The objects round (docs/OBJECTS.md section 6) added 33 rows on 2026-09-25 and carried five (tables.seam.row-drag, tables.edge.add-row-column, tables.heads.select-row-column, tables.cells.prompt-hovered-only, wordart.tail.fill-outline; each keeps its id, its note gains the round and the section): nineteen under the new area `gestures`, whose rows are the arrange feature's (AREA_FEATURE gestures: arrange, unparkable, so a red gesture row fails the ship; the live gestures of section 2: the draw drawn as it grows, the click placement, the object and the ring equal at every frame of a resize, a seam drag, a move and a rotation, the connector during a move, the frame cadence and its budget read from describe().state.gesture, the readout, and one watch row), the tables rows of section 3 (the ring with a cell open, the cell ring, the editor guide grid, the show's rules, the box from the rows, the rows that grow, the seams with a cell open, the header toggle from the row head, the Table section's words), and one row each under charts, diagrams and lines (section 4). `today` is what docs/OBJECTS.md measured on production on 2026-09-26 (the return round plus ship one) and on the worktree at 5bf158a, in the four words; a row of a control that does not exist is not driven with the item that measured its absence as evidence; a broken row's severity follows the item's value by the product round's rule; `note` names the round, the OBJECTS.md section and the lane; `setup` names the block.insert and slide.new writes a driver makes before its steps. The frame rows read the gesture record of the window API (docs/OBJECTS.md 2.4), a field the integrator lands by B1's request; on a build without it they read not driven with the field named. The polish round (docs/POLISH.md section 5) added 130 rows on 2026-09-28, the acceptance rows of 5.1: `today` is what the nine polish audits under docs/gslides-parity/polish/ measured on production on 2026-09-28 in the four words (the text, pages, collab and assist audits drove www.turboslide.com, the older build; the tables, objects, media and chrome audits read every code path against 877eb690 on turboslide.vercel.app), the severity of a broken row is its section 2 item's, `note` names the round, the POLISH.md item and the lane, `setup` names the window API writes a driver makes before its steps, and every row is written so a person's screenshot judges it (a pixel read of the frame or a box read of the DOM through the walk toolkit's `pixelAt` and `boxesOf`, or a spec assertion on the DOM's boxes or the file an export wrote). tables.cells.prompt-hovered-only is replaced by tables.cells.no-prompt (2.1 item 1); decks.home.seller-lead and decks.home.your-presentations are rewritten for the redesigned page (section 3); shaders.export.missing-frame-row, sync.viewer.live-updates, assist.viewer.disabled and images.insert.upload are read again with the day's reading. decks.home.load-budget carries `measure: true` (3.5). A row the table names with two drivers carries the spec that reads the file or the show.",
   "rows": [
     {
       "id": "decks.home.new-presentation",
@@ -12,10 +12,11 @@
     {
       "id": "decks.home.your-presentations",
       "feature": "decks",
-      "interaction": "On /home click Your presentations; /decks is hydrated",
+      "interaction": "On /home click Your presentations (in the footer after the redesign); /decks is hydrated",
       "driver": "core/decks.spec.ts",
       "today": "works",
-      "evidence": "audit-decks row 4"
+      "evidence": "audit-decks row 4",
+      "note": "Polish round; docs/POLISH.md 3.2 item 8 and 3.7 (the link moves to the footer); B7"
     },
     {
       "id": "decks.root.redirect",
@@ -1614,7 +1615,8 @@
       "driver": "core/images.spec.ts",
       "today": "flaky",
       "severity": 3,
-      "evidence": "audit-images row 6"
+      "evidence": "audit-images row 6",
+      "note": "Polish round; docs/POLISH.md 5.1 (Kevin's named row, red twice on production at the last ship: the first upload's 5 s bound on the blob store, read three times at 2.0 s on www by audit-media; kept for the owner, B4)"
     },
     {
       "id": "images.insert.upload-while-pending",
@@ -3467,20 +3469,22 @@
     {
       "id": "tables.cell.align-menu",
       "feature": "tables",
-      "interaction": "With a cell session open in column 2, Format > Align & indent > Center; column 2 alone reads center and the cell draws centred",
+      "interaction": "With a cell session open in cell 2,2, Format > Align & indent > Center; the caret's cell alone reads center in cells[], columns[] is unchanged and the cell draws centred",
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-objects rows 57, 95",
-      "severity": 2
+      "severity": 2,
+      "note": "Objects round (docs/OBJECTS.md); rewritten in the polish round by B2's R10 (docs/POLISH.md 2.2 item 10): a session writes the caret's cell, a column head's click keeps writing columns[]"
     },
     {
       "id": "tables.cell.align-toolbar",
       "feature": "tables",
-      "interaction": "With a cell session open, the table tail's Align list opens and Right writes the caret's column",
+      "interaction": "With a cell session open in cell 2,2, the table tail's Align list opens and Right writes the caret's cell in cells[] ({ row, column, align }); columns[] is unchanged",
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-objects rows 96, 112",
-      "severity": 2
+      "severity": 2,
+      "note": "Objects round (docs/OBJECTS.md); rewritten in the polish round by B2's R10 (docs/POLISH.md 2.2 item 10): a session writes the caret's cell, a column head's click keeps writing columns[]"
     },
     {
       "id": "tables.select.resize",
@@ -4858,11 +4862,12 @@
     {
       "id": "decks.home.seller-lead",
       "feature": "decks",
-      "interaction": "/home's hero sentence names the deck a seller makes; the first band's button reads Start from a template and opens the gallery page",
+      "interaction": "/home's h1 reads \"Build the pitch, present it and send the link\"; the lead's first sentence names the editor (\"Turboslide is a slides editor in the browser\"); the second hero button reads Open the Example Deck and opens /deck/gt-brand",
       "driver": "core/decks.spec.ts",
       "today": "broken",
-      "evidence": "audit-seller 24",
-      "severity": 1
+      "evidence": "audit-home section 1 and items 1, 2, 12 (the h1 today ends \", in one place\" and the buttons are Start from a template and Open the GT Deck)",
+      "severity": 2,
+      "note": "Polish round; docs/POLISH.md 3.2 item 1 and 3.7 (the h1, the lead and the second button change with the redesign); B7"
     },
     {
       "id": "decks.card.thumbnail-slide-1",
@@ -5902,7 +5907,8 @@
       "interaction": "A view link visitor sees the panel disabled with \"Commenters and editors can use the assistant\"",
       "driver": "core/share.spec.ts",
       "today": "not driven",
-      "evidence": "audit-assist 5"
+      "evidence": "audit-assist 5",
+      "note": "Polish round; docs/POLISH.md 2.9 item 115 (a reader gets no Assist button on the view link; the row reads the panel's sentence on the editor's viewer floor instead); B5"
     },
     {
       "id": "assist.agent.propose-accept",
@@ -5979,7 +5985,7 @@
       "severity": 3,
       "evidence": "audit-ordering item 2; run 1; run 2 (0 of 30)",
       "setup": "share.setGeneralAccess to Anyone with the link, Viewer through the window API before C opens",
-      "note": "B1 (docs/SYNC.md 3.7: canSeeOps gains viewer with the notes stripped)."
+      "note": "B1 (docs/SYNC.md 3.7: canSeeOps gains viewer with the notes stripped). Polish round; docs/POLISH.md 2.8 item 101 (the Viewer link lands on /deck/<id>, which opens no stream; landingPath sends a viewer to the editor's viewer floor); B5"
     },
     {
       "id": "sync.reload.same-document",
@@ -6643,16 +6649,6 @@
       "note": "Ship one P1; docs/FEATURES.md 2.3 item 8 (B3: the outlined text resize in Editor.tsx and editor-shell.ts); lands only under the P1 condition"
     },
     {
-      "id": "tables.cells.prompt-hovered-only",
-      "feature": "tables",
-      "interaction": "Carried: no prompt until a cell is hovered, then \"Type to add text\" in that cell alone; the filmstrip card draws none",
-      "driver": "probe --core",
-      "today": "works",
-      "evidence": "docs/gslides-parity/objects/audit/b02-table-one-click-empty.png (no prompt drawn); the words measured \"Click to add text\" on production",
-      "setup": "block.insert of an empty 5 by 6 table through the window API",
-      "note": "Ship one P1; docs/FEATURES.md 2.3 item 9 (B3: render/blocks/table.ts); lands only under the P1 condition. Objects round; docs/OBJECTS.md 3.3 item 7 (the words become Type to add text once the table's ring and the cell ring are drawn); B2"
-    },
-    {
       "id": "wordart.tail.fill-outline",
       "feature": "wordart",
       "interaction": "Carried (ship one P1 item 10): the word art tail reads Fill color, Border color, Border weight, Border dash before the text controls; Fill writes color, Border color outline.color, weight outline.width, each drawn on the letters; Border dash writes outline.dash once the text schema takes it and, on a build whose outline draws solid, reads aria-disabled with the sentence \"Word art's outline is solid in this version\" (docs/OBJECTS.md section 7)",
@@ -7227,7 +7223,7 @@
       "today": "not driven",
       "evidence": "audit-shaders 9 (export-pdf-report.json: raster [] and no shader row)",
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
-      "note": "Ship two P0; docs/FEATURES.md 5.5 (B7 the report module's row; B1 dialogs/Download.tsx draws it by request); the feature is export (7.1); the Download dialog is opened first and the recipe change is block.set /anchor through the window API with the dialog open, so OK follows the change within 800 ms"
+      "note": "Ship two P0; docs/FEATURES.md 5.5 (B7 the report module's row; B1 dialogs/Download.tsx draws it by request); the feature is export (7.1); the Download dialog is opened first and the recipe change is block.set /anchor through the window API with the dialog open, so OK follows the change within 800 ms Polish round; docs/POLISH.md 2.5 item 36 (Kevin's named row, red twice on production at the last ship: the export's race with the frame capture; read again with the day's reading, not driven); B4 with B5's controller.tsx hunk"
     },
     {
       "id": "shaders.perf.one-context",
@@ -7858,6 +7854,1358 @@
       "evidence": "docs/gslides-parity/objects/audit/c26-lines-elbow-selected.png (chip \"Shape\")",
       "severity": 1,
       "note": "Objects round; docs/OBJECTS.md 4.2 item 5 (packages/viewer/src/model.ts blockDisplayName); B3"
+    },
+    {
+      "id": "surface.domain.build-commit",
+      "feature": "surface",
+      "interaction": "`GET /api/agent` on the gate's origin answers `instance.commit` equal to the ship's sha and the View menu lists Play shaders; `scripts/hosted-smoke.mjs` exits 1 when either differs",
+      "driver": "core/surface.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-chrome section 0; audit-media item 1",
+      "note": "Polish round; docs/POLISH.md section 0 items 1 and 2 (B5 the commit in instanceFacts, B6 the smoke's rows); the gate's origin is www.turboslide.com when it serves the ship's commit, else turboslide.vercel.app"
+    },
+    {
+      "id": "tables.cells.no-prompt",
+      "feature": "tables",
+      "interaction": "A 10 by 10 and a 20 by 20 table, the pointer over the last cell of row 2 and over the first cell: no `.prompt` element in any cell, every row track equal to the unhovered read within 1 px, the guide grid's last rule within 1 px of the ring's bottom edge (a pixel read of the frame); the same on 6 by 1 and 7 by 1 (replaces `tables.cells.prompt-hovered-only`)",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-tables item 2",
+      "setup": "block.insert of empty 10 by 10, 20 by 20, 6 by 1 and 7 by 1 tables through the window API, each on its own blank slide",
+      "note": "Objects round; docs/OBJECTS.md 3.3 item 7 (the carried row tables.cells.prompt-hovered-only, replaced). Polish round; docs/POLISH.md 2.1 item 1; B2"
+    },
+    {
+      "id": "tables.rows.ring-follows-typing",
+      "feature": "tables",
+      "interaction": "Forty words typed into cell 1,1 of a 960 wide table at 60 ms per key: at every fifth key the ring's bottom edge is within 2 px of the last row rule and the wrapper's height equals the rows' sum; Escape writes `pos.h` equal to the rows within 2 px",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-tables item 5",
+      "setup": "block.insert of an empty 960 wide 3 by 3 table through the window API",
+      "note": "Polish round; docs/POLISH.md 2.1 item 2; B2 with B1's `Editor.tsx` hunk by request"
+    },
+    {
+      "id": "tables.header.rule-with-text",
+      "feature": "tables",
+      "interaction": "An inserted 3 by 3 table draws a hairline under row 1 and no ink rule on the stage, the card, the show and the PDF's page; \"North\" typed into cell 1,1 draws the ink rule and the display weight",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-tables item 9",
+      "note": "Polish round; docs/POLISH.md 2.1 item 3; B2"
+    },
+    {
+      "id": "tables.cell.click-moves-caret",
+      "feature": "tables",
+      "interaction": "With the caret in cell 2,2 one click on cell 3,3: the session is in 3,3 within 100 ms, \"Two\" typed lands in 3,3 and 2,2 keeps \"One\"",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-tables item 3",
+      "setup": "block.insert of an empty 3 by 3 table through the window API",
+      "note": "Polish round; docs/POLISH.md 2.2 item 4; B1's `Editor.tsx` hunk by B2's request"
+    },
+    {
+      "id": "tables.tail.size-step-ladder",
+      "feature": "tables",
+      "interaction": "The header row selected as a range: the tail's \"−\" writes 18 then 17 and the field reads them; at 20 \"+\" reads `aria-disabled` with its sentence; no snackbar with a pointer",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-tables item 4",
+      "setup": "block.insert of a typed 3 by 3 table with a header row through the window API",
+      "note": "Polish round; docs/POLISH.md 2.2 item 5; B1's `ToolbarTail.tsx` by B2's request"
+    },
+    {
+      "id": "tables.insert.box-never-shorter-than-rows",
+      "feature": "tables",
+      "interaction": "A 12 by 4 pick under a title lands with `pos.h` equal to its rows' floor within 2 px and its top at the free rectangle's top; the grid's size words name the rows the slide holds",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-tables item 6",
+      "setup": "slide.new of a Title and body slide with its title typed through the window API",
+      "note": "Polish round; docs/POLISH.md 2.2 item 6; B2"
+    },
+    {
+      "id": "tables.heads.keys-act-on-range",
+      "feature": "tables",
+      "interaction": "A click on row 2's head, then Delete: the row's cells are empty; Cmd+B marks them; `document.activeElement` is the stage root and no focus ring is drawn beside the table (a pixel read of the band)",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-tables items 8, 19",
+      "setup": "block.insert of a typed 3 by 3 table through the window API",
+      "note": "Polish round; docs/POLISH.md 2.2 item 7; B2"
+    },
+    {
+      "id": "tables.insert.one-placement-rule",
+      "feature": "tables",
+      "interaction": "1 by 1, 1 by 2 and 3 by 3 inserted on a title and body slide each land at `pos.y` 218",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-tables item 10",
+      "setup": "slide.new of a Title and body slide through the window API before each pick; Cmd+Z after",
+      "note": "Polish round; docs/POLISH.md 2.2 item 8; B2"
+    },
+    {
+      "id": "tables.edge.stays-inside-sheet",
+      "feature": "tables",
+      "interaction": "The right edge \"+\" on a 960 wide table at x 320: the table's right edge stays at most at the content box's edge (1463); a second \"+\" keeps the width and splits it; the bottom \"+\" on a table at the content box's bottom keeps `pos.y + pos.h` at most 771",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-tables item 12",
+      "setup": "block.insert of a 960 wide 3 by 3 table at x 320 and of a table whose bottom edge sits at the content box's bottom through the window API",
+      "note": "Polish round; docs/POLISH.md 2.2 item 9; B2"
+    },
+    {
+      "id": "tables.range.align-cells-only",
+      "feature": "tables",
+      "interaction": "The header cells selected, Center from the tail: the header cells centre and the body cells' text boxes keep their x within 1 px; Cmd+Z restores",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-tables item 14",
+      "setup": "block.insert of a typed 3 by 3 table with a header row through the window API",
+      "note": "Polish round; docs/POLISH.md 2.2 item 10; B2 with B1's `editor-shell.ts` hunk by request"
+    },
+    {
+      "id": "tables.context.object-menu-on-frame",
+      "feature": "tables",
+      "interaction": "A right click on the selected table's ring lists Order, Align and Alt text; a right click on a cell lists Insert row above",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 23",
+      "setup": "block.insert of a typed 3 by 3 table through the window API",
+      "note": "Polish round; docs/POLISH.md 2.6 item 71; B1's `Editor.tsx` 6784 to 6795 with the integrator's `CONTEXT_MENUS` table target"
+    },
+    {
+      "id": "tables.polish.seams-snap-grid",
+      "feature": "tables",
+      "interaction": "At a column seam's middle the tooltip reads \"Column seam 2\" and a 12 step drag right writes the widths; the se handle dragged 160 px right stops at the content box's edge; the Table grid plate stays while the pointer moves 30 px left inside its first column",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-tables items 16 to 18",
+      "setup": "block.insert of a 3 by 3 table through the window API",
+      "note": "Polish round; docs/POLISH.md 2.2 item 11; B2 with B1's hunks by request"
+    },
+    {
+      "id": "text.bold.toolbar-marks-run",
+      "feature": "text",
+      "interaction": "\"Acme\" selected in a text box, the tail's Bold: the run carries the `b` mark at weight 700 and the rest of the box keeps 400; Format > Text > Bold the same; the box selected by one click, Bold marks every run",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-text item 1",
+      "setup": "block.insert of a text box reading \"Acme renews in Q3\" through the window API",
+      "note": "Polish round; docs/POLISH.md 2.3 item 12; B1"
+    },
+    {
+      "id": "slides.layout.blank-empty",
+      "feature": "slides",
+      "interaction": "Layout > Blank on an untyped title slide: the slide holds no block and draws no prompt; on a typed slide the typed box stays",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-text item 2",
+      "note": "Polish round; docs/POLISH.md 2.3 item 13; B1"
+    },
+    {
+      "id": "text.paragraph.toolbar-live",
+      "feature": "text",
+      "interaction": "With a session open, Center from the tail: the paragraph's box moves within one frame while the caret stays; 1.5 and Increase indent the same",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-text item 3",
+      "setup": "block.insert of a text box with two lines through the window API",
+      "note": "Polish round; docs/POLISH.md 2.3 item 14; B1"
+    },
+    {
+      "id": "text.list.enter-tab-no-error",
+      "feature": "text",
+      "interaction": "Bulleted list on a text box, Enter, \"Two\", Tab: three items with the second nested and no error element over the stage; Cmd+Z three times restores the box",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-text item 4",
+      "setup": "block.insert of a text box reading \"One\" through the window API",
+      "note": "Polish round; docs/POLISH.md 2.3 item 15; B1"
+    },
+    {
+      "id": "text.size.run-and-typed-value",
+      "feature": "text",
+      "interaction": "\"Acme\" selected, 36 typed in the size field, Enter: the run draws at 36 px and the box's other runs keep 20",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-text item 5",
+      "setup": "block.insert of a text box reading \"Acme renews in Q3\" at 20 px through the window API",
+      "note": "Polish round; docs/POLISH.md 2.3 item 16; B1"
+    },
+    {
+      "id": "text.marks.whole-block-from-menu",
+      "feature": "text",
+      "interaction": "A text box selected by one click: Format > Text > Italic, Underline, Strikethrough, Superscript and Subscript each mark every run; Cmd+I presses Italic; a shape with a label the same; nothing selected, the rows are disabled",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-chrome item 4",
+      "setup": "block.insert of a text box and of a rectangle with a label through the window API",
+      "note": "Polish round; docs/POLISH.md 2.3 item 17; B1"
+    },
+    {
+      "id": "text.tail.heading-takes-list-indent",
+      "feature": "text",
+      "interaction": "The title placeholder selected: Bulleted list writes a list on the heading, Increase indent writes, Paint format arms; a button whose plan refuses reads `aria-disabled` with the plan's sentence",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 17",
+      "note": "Polish round; docs/POLISH.md 2.3 item 18; B1"
+    },
+    {
+      "id": "text.heading.enter-keeps-session",
+      "feature": "text",
+      "interaction": "Double click a title, End, Enter, \"more\": the session is open with two lines and the first line is kept; no paragraph is replaced",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-assist section 6",
+      "note": "Polish round; docs/POLISH.md 2.3 item 19; B1"
+    },
+    {
+      "id": "text.link.chip-on-click",
+      "feature": "text",
+      "interaction": "One click on a linked word in an unselected box: the chip with the address, Open, Copy, Change and Remove draws within 300 ms and no session is open",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-text item 6",
+      "setup": "block.insert of a text box with one linked run through the window API",
+      "note": "Polish round; docs/POLISH.md 2.3 item 20; B1"
+    },
+    {
+      "id": "text.title.shrink-on-overflow",
+      "feature": "text",
+      "interaction": "Twelve words typed into the title placeholder: the drawn size steps down the ladder until the text fits and the ring's height stays the placeholder's",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-text item 7",
+      "note": "Polish round; docs/POLISH.md 2.3 item 21; B1"
+    },
+    {
+      "id": "text.link.popover-anchored",
+      "feature": "text",
+      "interaction": "Cmd+K with a text box selected: the Link bar's top is within 8 px below the selection's ring and inside the viewport; the slides dropdown's label is whole",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 22",
+      "setup": "block.insert of a text box through the window API",
+      "note": "Polish round; docs/POLISH.md 2.6 item 70; B5's `EditorShell.tsx` 846 to 856 by B1's request; `Link.tsx` B1"
+    },
+    {
+      "id": "text.link.detection-setting",
+      "feature": "text",
+      "interaction": "Tools > Preferences > Link detection off, \"See www.example.com now\" typed: no link mark; on, a link mark",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-assist item 3",
+      "setup": "block.insert of an empty text box through the window API before each typing",
+      "note": "Polish round; docs/POLISH.md 2.9 item 114; B5"
+    },
+    {
+      "id": "text.tail.size-reads-heading",
+      "feature": "text",
+      "interaction": "A title session open: the tail's size field reads 88; a subtitle's 32",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-collab item 22",
+      "note": "Polish round; docs/POLISH.md 2.3 item 22; B1"
+    },
+    {
+      "id": "text.polish.highlight-console",
+      "feature": "text",
+      "interaction": "Highlight amber on a word paints a band whose sampled colour is the amber token; an editor load logs no 404 and no 502",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-text items 8, 10",
+      "setup": "block.insert of a text box through the window API",
+      "note": "Polish round; docs/POLISH.md 2.3 item 23; B1 and B5"
+    },
+    {
+      "id": "lines.hit.stroke-only",
+      "feature": "lines",
+      "interaction": "A curved connector between A and B: a press at B's centre moves B by 150 by 100 and the connector's end follows; a click on B's corner selects B with eight handles; a click 3 px from the connector's stroke selects the connector",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects item 2",
+      "setup": "block.insert of two rectangles A and B and a curved connector from A's right site to B's left site through the window API",
+      "note": "Polish round; docs/POLISH.md 2.4 item 24; B3 with B1's hunks by request"
+    },
+    {
+      "id": "shapes.geometry.cloud-callout-closed",
+      "feature": "shapes",
+      "interaction": "cloudCallout placed by a click and by a drag: one closed path; the geometry test's arc ends within 0.5 units of the next command's start; a pixel read along the outline finds no gap",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects item 3",
+      "note": "Polish round; docs/POLISH.md 2.4 item 25; B3"
+    },
+    {
+      "id": "charts.grid.every-series-in-view",
+      "feature": "charts",
+      "interaction": "Two series on a column chart: the grid's second header reads \"Series 2\" whole and its value cells are inside the panel's box at 1280 and at 1440; a third series shows a scrollbar",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects item 4",
+      "setup": "block.insert of a column chart with two series through the window API; a third series through the grid",
+      "note": "Polish round; docs/POLISH.md 2.4 item 26; B3"
+    },
+    {
+      "id": "chrome.format-options.fields-by-kind",
+      "feature": "chrome",
+      "interaction": "A rectangle's Format options lists no Arrowheads, Orientation or Height and one Shape section; a line's lists Arrowheads and Orientation with the segment's box inside the panel",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-chrome item 7; audit-objects item 13",
+      "setup": "block.insert of a rectangle and of a line through the window API",
+      "note": "Polish round; docs/POLISH.md 2.6 item 52; B1 with B3's `blocks.ts`"
+    },
+    {
+      "id": "lines.move.detaches",
+      "feature": "lines",
+      "interaction": "A connected connector moved by its body by 150 by 100: `connect` is undefined after the release and its ends stay when A moves",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects item 7",
+      "setup": "block.insert of two rectangles and a connector between them through the window API",
+      "note": "Polish round; docs/POLISH.md 2.4 item 27; B3 with B1's hunk by request"
+    },
+    {
+      "id": "lines.select.handles-no-ring",
+      "feature": "lines",
+      "interaction": "A selected line, arrow and curved connector each draw two end handles and no `.ts-select` ring; the chip sits by the start handle",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects item 9",
+      "setup": "block.insert of a line, an arrow and a connected curved connector through the window API",
+      "note": "Polish round; docs/POLISH.md 2.4 item 28; B1's `Overlay.tsx` by B3's request"
+    },
+    {
+      "id": "arrange.select.no-browser-highlight",
+      "feature": "arrange",
+      "interaction": "Three shapes Shift clicked: `window.getSelection()` is empty and no pixel of the svg picture reads the selection tint; a double click on a chart the same",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects items 10, 11",
+      "setup": "block.insert of three shapes and a column chart through the window API",
+      "note": "Polish round; docs/POLISH.md 2.4 item 29; B1's `Editor.tsx` hunks by B3's request; `chart.ts` B3"
+    },
+    {
+      "id": "diagrams.label.double-click-selects-word",
+      "feature": "diagrams",
+      "interaction": "Double click on \"Step 2\" of a process diagram, \" plus\" typed: the label reads \"Step plus\"; a text box keeps the caret at the click point",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects item 12",
+      "setup": "block.insert of a text box through the window API; the process diagram is placed through Insert > Diagram (the panel, Step count 3), since the diagram block form is the panel's own",
+      "note": "Polish round; docs/POLISH.md 2.4 item 30; B1's `Selection.tsx` by B3's request; question 5"
+    },
+    {
+      "id": "charts.labels.fit-slot",
+      "feature": "charts",
+      "interaction": "A column chart resized to 240 by 140: no two category label boxes intersect on the sheet or on the PDF's page",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects item 14",
+      "setup": "block.insert of a column chart with four categories through the window API, then block.set /pos to 240 by 140",
+      "note": "Polish round; docs/POLISH.md 2.4 item 31; B3"
+    },
+    {
+      "id": "svg.paste.keeps-text",
+      "feature": "svg",
+      "interaction": "Svg markup with a `<text>` pasted: the picture's markup carries the text; the upload of the same bytes the same",
+      "driver": "core/svg.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects item 15",
+      "note": "Polish round; docs/POLISH.md 2.4 item 32; B4's `logo-sanitize.ts` by B3's request; parks the paste intake alone, by the vector round's rule for every svg row (docs/VECTOR.md 6.1; the 5.1 table names no parks)",
+      "parks": ["intake.svg.paste"]
+    },
+    {
+      "id": "lines.connector.perpendicular-at-sites",
+      "feature": "lines",
+      "interaction": "A curved connector from A's bottom site to B's top site: the path leaves and arrives within 10 degrees of vertical; the elbow the same after a 90 degree rotation of A",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-objects item 16",
+      "setup": "block.insert of A above B and a curved connector from A's bottom site to B's top site, then an elbow the same, through the window API; block.set /rotation 90 on A for the second half",
+      "note": "Polish round; docs/POLISH.md 2.4 item 33; B3"
+    },
+    {
+      "id": "wordart.bar.closes",
+      "feature": "wordart",
+      "interaction": "Insert > Word art, then Escape with the focus on the sheet: the bar is gone; reopened, a pointer down on the sheet closes it; reopened, File > Details closes it",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 13",
+      "note": "Polish round; docs/POLISH.md 2.6 item 67; B3"
+    },
+    {
+      "id": "wordart.polish.chip-weight-arming",
+      "feature": "wordart",
+      "interaction": "Word art inserted: the chip reads \"Word art\", the tail's B is unpressed and one press bolds the letters; arming the elbow tool clears the previous ring and chip",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-objects items 18, 19",
+      "note": "Polish round; docs/POLISH.md 2.4 item 34; B3 and B4"
+    },
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "interaction": "Upload, By URL, paste and an svg paste each land with no external write banner within 10 s; an agent's write over HTTP shows \"This presentation changed elsewhere\"",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-media item 3; audit-objects item 5",
+      "note": "Polish round; docs/POLISH.md 2.5 item 35; B5's `controller.tsx` hunk by B4's request; the words B5's"
+    },
+    {
+      "id": "shaders.frame.large-png-lands",
+      "feature": "shaders",
+      "interaction": "God rays inserted at 727 by 412: the frame asset exists within 8 s and the filmstrip card, the show and the PDF's page draw it (a pixel read finds no plate grey); a put forced to 413 by `page.route` shows one sentence and one retry",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-media item 2",
+      "note": "Polish round; docs/POLISH.md 2.5 item 36; B4 with B5's `controller.tsx` hunk by request"
+    },
+    {
+      "id": "images.replace.keeps-aspect",
+      "feature": "images",
+      "interaction": "Replace image > Logo with a wordmark: the drawn aspect equals the picture's natural aspect within 1 percent and the box's centre stays within 2 px",
+      "driver": "core/logos.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-media item 4",
+      "note": "Polish round; docs/POLISH.md 2.5 item 37; B4"
+    },
+    {
+      "id": "images.picture.no-plate",
+      "feature": "images",
+      "interaction": "A logo inserted on a white slide and on the dark deck: the pixels around the mark read the slide's ground with no hairline; the PDF's page the same; the brand deck's screenshot block keeps its plate",
+      "driver": "core/logos.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-media item 5; audit-objects item 20",
+      "note": "Polish round; docs/POLISH.md 2.5 item 38; B4 with B2's `sheet.css` hunk by request"
+    },
+    {
+      "id": "logos.dialog.results-in-view",
+      "feature": "logos",
+      "interaction": "With tiles under Your brand and Recent, \"stripe\" typed: the Results group's first tile is inside the dialog's box within 400 ms; \"zzzqqqxx\" shows the empty state and Upload inside the box; the dialog's height does not change",
+      "driver": "core/logos.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-media item 6",
+      "note": "Polish round; docs/POLISH.md 2.5 item 39; B4"
+    },
+    {
+      "id": "images.panel.seller-words",
+      "feature": "images",
+      "interaction": "A picture's Format options: no label matches asset, role, resample, neutral or Frame; every label sentence case; one Caption field; Border in the panel as on the tail",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 7; audit-chrome item 14",
+      "setup": "asset.add and block.insert of a picture through the window API",
+      "note": "Polish round; docs/POLISH.md 2.5 item 40; B4"
+    },
+    {
+      "id": "images.panel.drop-shadow",
+      "feature": "images",
+      "interaction": "The picture's panel lists Drop shadow; distance 8 writes `block.shadow` and the sheet draws it",
+      "driver": "probe --core",
+      "today": "not driven",
+      "evidence": "audit-media item 8",
+      "setup": "asset.add and block.insert of a picture through the window API",
+      "parks": ["formatOptions.picture.shadow"],
+      "note": "Polish round; docs/POLISH.md 2.5 item 41; B4"
+    },
+    {
+      "id": "images.mask.picker-fits-panel",
+      "feature": "images",
+      "interaction": "The Mask button's grid: every tile's box inside the panel's box, group labels sentence case, the other sections still mounted",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 9",
+      "setup": "asset.add and block.insert of a picture through the window API",
+      "note": "Polish round; docs/POLISH.md 2.5 item 42; B3's `ShapePicker.tsx` and `Pickers.css` by B4's request"
+    },
+    {
+      "id": "images.caption.grows-box",
+      "feature": "images",
+      "interaction": "Add a caption on a 480 by 320 picture: `pos.h` grows by the caption's line, the img's drawn height stays 320, the chip stays at the picture's top edge",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 10",
+      "setup": "asset.add and block.insert of a 480 by 320 picture through the window API",
+      "note": "Polish round; docs/POLISH.md 2.5 item 43; B4 with B1's `Editor.tsx` hunk by request"
+    },
+    {
+      "id": "images.border.color-draws-at-once",
+      "feature": "images",
+      "interaction": "Border color > ink with the weight at None: a 1 px ink border draws; the weight menu lists 3, 4, 8 and 12 px and 8 draws",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 11",
+      "setup": "asset.add and block.insert of a picture through the window API",
+      "note": "Polish round; docs/POLISH.md 2.5 item 44; B1's `toolbar-tails.ts` and `editor-shell.ts` hunks by B4's request"
+    },
+    {
+      "id": "images.alt.focused-empty",
+      "feature": "images",
+      "interaction": "Alt text from the right click menu: `document.activeElement` is the description field and it is empty",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 12",
+      "setup": "asset.add and block.insert of a picture through the window API",
+      "note": "Polish round; docs/POLISH.md 2.5 item 45; B4 with B1's `Editor.tsx` hunk by request"
+    },
+    {
+      "id": "logos.dialog.sentence-case-whole-names",
+      "feature": "logos",
+      "interaction": "The dialog's group heads read \"Your brand\", \"Results\" and \"Recent\"; the kit's tile title is whole; an inserted customer logo lists under Recent; the preselected tile carries `is-active`",
+      "driver": "core/logos.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 16; audit-chrome item 41",
+      "note": "Polish round; docs/POLISH.md 2.5 item 46; B4"
+    },
+    {
+      "id": "shaders.gallery.words-and-head",
+      "feature": "shaders",
+      "interaction": "Every tile tooltip is one sentence under 120 characters naming no product; the dialog's height holds on no match; the section head's name and Change are 8 px apart or more; no Text section and one Height stepper for a material",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media items 17, 18; audit-chrome item 43",
+      "note": "Polish round; docs/POLISH.md 2.5 item 47; B4"
+    },
+    {
+      "id": "shaders.insert.free-rectangle",
+      "feature": "shaders",
+      "interaction": "A shader inserted on an empty slide: `pos` is the content box 137,129 1326 by 642; under a title, the free rectangle",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 19",
+      "note": "Polish round; docs/POLISH.md 2.5 item 48; B4 with B1's `editor-shell.ts` hunk by request"
+    },
+    {
+      "id": "brand.panel.words-match-sheet",
+      "feature": "brand",
+      "interaction": "Footer text \"Acme\" draws on the title slide and on slide 2; the position label names where the mark is drawn; the Dark tile leaves the chrome light and switches the Colors tab; Inter is listed once",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 20",
+      "note": "Polish round; docs/POLISH.md 2.5 item 49; B4"
+    },
+    {
+      "id": "images.byurl.preview-contained",
+      "feature": "images",
+      "interaction": "A 180 px icon by URL: the preview img's box is inside the preview box with `object-fit: contain`",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 21",
+      "note": "Polish round; docs/POLISH.md 2.5 item 50; B4"
+    },
+    {
+      "id": "svg.intake.long-comment",
+      "feature": "svg",
+      "interaction": "`apps/studio/public/icon.svg` dropped: a vector picture lands",
+      "driver": "core/svg.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 22",
+      "note": "Polish round; docs/POLISH.md 2.5 item 50; B4; parks the drop intake alone, by the vector round's rule for every svg row (docs/VECTOR.md 6.1; the 5.1 table names no parks)",
+      "parks": ["intake.svg.drop"]
+    },
+    {
+      "id": "images.drop.clamped",
+      "feature": "images",
+      "interaction": "A picture dropped at 800,700: `pos.y + pos.h` is at most 900",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 23",
+      "note": "Polish round; docs/POLISH.md 2.5 item 50; B4"
+    },
+    {
+      "id": "images.crop.dims-outside",
+      "feature": "images",
+      "interaction": "Crop with the east edge dragged in 100 px: the cut part's sampled luminance differs from the kept part's; the chip reads \"Crop\"",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 24",
+      "setup": "asset.add and block.insert of a picture through the window API",
+      "note": "Polish round; docs/POLISH.md 2.5 item 50; B4"
+    },
+    {
+      "id": "images.polish.natural-size",
+      "feature": "images",
+      "interaction": "The same 180 px picture by URL on an empty slide and beside a table lands at 180 sheet px both times",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-media item 26",
+      "note": "Polish round; docs/POLISH.md 2.5 item 51; the integrator and B4"
+    },
+    {
+      "id": "chrome.plate.fits-viewport",
+      "feature": "chrome",
+      "interaction": "Change shape with a shape selected and the Mask arrow with a picture selected at 1440 by 900: the plate's bottom is inside the viewport and its last row is reachable by a scroll inside the plate",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-chrome item 5",
+      "setup": "block.insert of a rectangle and of a picture through the window API",
+      "note": "Polish round; docs/POLISH.md 2.6 item 53; B1"
+    },
+    {
+      "id": "formatting.spacing.table-cells",
+      "feature": "formatting",
+      "interaction": "Table selected, Format > Line and paragraph spacing > Double: the cells' leading is written or a sentence refuses; Redo afterwards prints no path",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-chrome item 2",
+      "setup": "block.insert of a typed 3 by 3 table through the window API",
+      "note": "Polish round; docs/POLISH.md 2.6 item 54; B1 with B5's `controller.tsx` hunk by request"
+    },
+    {
+      "id": "help.check-slides.plain-sentence",
+      "feature": "help",
+      "interaction": "Tools > Check slides on a slide with an empty 3 by 3 table: one finding \"The table has 9 empty cells\"; no finding carries a parenthesis or \"SPEC\"",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-chrome item 3",
+      "setup": "block.insert of an empty 3 by 3 table through the window API on a slide of its own",
+      "note": "Polish round; docs/POLISH.md 2.6 item 55; B1"
+    },
+    {
+      "id": "slides.background.picture-grid",
+      "feature": "slides",
+      "interaction": "Slide > Change background > Image with three pictures in the deck: three tiles with an img each and names ellipsised at one width",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-chrome item 6",
+      "setup": "asset.add of three pictures through the window API",
+      "note": "Polish round; docs/POLISH.md 2.6 item 56; B1"
+    },
+    {
+      "id": "chrome.tail.reads-mode",
+      "feature": "chrome",
+      "interaction": "C with no link on a Restricted deck at `/edit/<id>`: the toolbar has no insert control, no Background, Layout or Theme, and the editor's filmstrip is mounted; View > Mode > Commenting the same with Insert comment kept",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-pages item 6; audit-chrome item 27",
+      "note": "Polish round; docs/POLISH.md 2.6 item 58; B1 with B5's `EditorShell.tsx` and `EditorRoot.tsx` hunks by request"
+    },
+    {
+      "id": "menus.rows.icon-on-every-row",
+      "feature": "chrome",
+      "interaction": "Every row of the ten menus, the eight right click menus, the card menu and the show's options draws an svg glyph (a read of the model and of the DOM)",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 25; audit-pages item 33",
+      "note": "Polish round; docs/POLISH.md 2.6 item 57; the integrator with B1's list on day 0"
+    },
+    {
+      "id": "chrome.snackbar.refusal-sentence",
+      "feature": "chrome",
+      "interaction": "A write the validator refuses (22 typed into the size field on a table): the snackbar's text carries no \"/\" pointer and no \"Invalid option\"",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-tables item 11",
+      "setup": "block.insert of a typed 3 by 3 table through the window API",
+      "note": "Polish round; docs/POLISH.md 2.6 item 59; B5's `EditorShell.tsx` hunk by B1's request"
+    },
+    {
+      "id": "chrome.handles.tooltip-words",
+      "feature": "chrome",
+      "interaction": "The tooltips of a shape's, a picture's and a table's handles: none contains the block's id or a compass code",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 19; audit-tables item 7",
+      "setup": "block.insert of a rectangle, a picture and a table through the window API",
+      "note": "Polish round; docs/POLISH.md 2.6 item 60; B1"
+    },
+    {
+      "id": "chrome.tooltips.only-on-hover",
+      "feature": "chrome",
+      "interaction": "Hover a disabled row and a submenu row: no plate; hover the toolbar's Image and click it: the plate hides; close the palette with Escape: no plate on screen; hover a `/decks` card: no plate",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 21; audit-assist item 13",
+      "note": "Polish round; docs/POLISH.md 2.6 item 61; B1"
+    },
+    {
+      "id": "chrome.chip.above-ring",
+      "feature": "chrome",
+      "interaction": "A 120 px picture and a logo selected: the chip's box intersects no handle's box and not the rotate stem",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-media item 14",
+      "setup": "asset.add and block.insert of a 120 px picture through the window API; a logo through the dialog when the fixture answers, else a second small picture",
+      "note": "Polish round; docs/POLISH.md 2.6 item 62; B1's `Overlay.tsx` by B4's request"
+    },
+    {
+      "id": "share.name-prompt.empty-field",
+      "feature": "share",
+      "interaction": "Share on a fresh browser: the name field is empty with the placeholder \"Your name\"",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 10; audit-pages item 25",
+      "note": "Polish round; docs/POLISH.md 2.6 item 63; B1's `NamePrompt.tsx`, B5's `EditorRoot.tsx` 150"
+    },
+    {
+      "id": "chrome.dialog.no-loading-jump",
+      "feature": "chrome",
+      "interaction": "File > Open and Import slides: the dialog's height at 100 ms equals its height at 3 s; a row reads \"1 slide\"",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 11; audit-pages item 17",
+      "note": "Polish round; docs/POLISH.md 2.6 item 64; B5's `Open.tsx` and `ImportSlides.tsx`, B1's `Dialog.css` 396"
+    },
+    {
+      "id": "chrome.dialog.focus-return-and-trap",
+      "feature": "chrome",
+      "interaction": "Escape on Details opened from File: the focus is the File menubar button; eight Tabs in the Logo dialog stay inside it",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome items 15, 16",
+      "note": "Polish round; docs/POLISH.md 2.6 item 65; B1"
+    },
+    {
+      "id": "comments.insert.needs-selection",
+      "feature": "comments",
+      "interaction": "Nothing selected: Insert > Comment is disabled; a shape selected: the card's box is within 24 px of the shape's ring",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 12",
+      "setup": "block.insert of a rectangle through the window API",
+      "note": "Polish round; docs/POLISH.md 2.6 item 66; the integrator's `model.ts` 3398 with B5's `CommentCard.tsx` 55"
+    },
+    {
+      "id": "chrome.context.escape-closes-submenu",
+      "feature": "chrome",
+      "interaction": "The card's right click menu with Apply layout open: one Escape closes the list and keeps the menu; a second closes the menu",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 18",
+      "note": "Polish round; docs/POLISH.md 2.6 item 68; B1"
+    },
+    {
+      "id": "formatting.border-weight.menu-opens",
+      "feature": "formatting",
+      "interaction": "A picture selected: Format > Borders and lines > Border weight opens the weights and 2 px writes",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 20",
+      "note": "Polish round; docs/POLISH.md 2.6 item 69; B5's `EditorShell.tsx` by B1's request"
+    },
+    {
+      "id": "chrome.toolbar.select-glyph",
+      "feature": "chrome",
+      "interaction": "The Select control's svg differs from the pointer toggle's",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-chrome item 9",
+      "note": "Polish round; docs/POLISH.md 2.6 item 72; the integrator's `model.ts` 2767 and `toolbar-tails.ts` 714 with B1's `icons.tsx` 621"
+    },
+    {
+      "id": "chrome.words.one-spelling",
+      "feature": "chrome",
+      "interaction": "No \"colour\", \"centre\", \"licence\" or \"posterised\" in any label or tooltip of the chrome; File lists \"Open\"; Download lists the formats, a divider, then Download options; Details' Last edit has no \"(change\"; the Download dialog's modes read Pictures and Editable text; the shortcuts dialog lists Paint format once",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-chrome items 29 to 52",
+      "note": "Polish round; docs/POLISH.md 2.6 item 73; B1 with B5's files by request"
+    },
+    {
+      "id": "chrome.menus.structure-sweep",
+      "feature": "chrome",
+      "interaction": "A disabled row's key chip reads `--pt-disabled`; no submenu with one visible row; Format > Text > Size disabled with nothing selected; the Format menu lists Alt text; Tabular figures is a check row; the three insert buttons share one form; the table tail lists no Merge with no range; a right click menu opens with no row lit; the picture menu has 15 rows",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-chrome items 28 to 51",
+      "note": "Polish round; docs/POLISH.md 2.6 item 74; B1 with the integrator's `model.ts` rows by request"
+    },
+    {
+      "id": "decks.recent.keeps-new-deck",
+      "feature": "decks",
+      "interaction": "A deck made from `/new`, the mark clicked: the deck's card is on `/decks` within 1 s of the ready mark, and again after a reload while the listing lags; File > Open lists it",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-pages item 1",
+      "note": "Polish round; docs/POLISH.md 2.7 item 75; B5; the store half is section 6"
+    },
+    {
+      "id": "decks.card.rename-everywhere",
+      "feature": "decks",
+      "interaction": "Rename from the card: every card of that deck reads the new name within 500 ms and the deck appears once",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-pages item 2",
+      "note": "Polish round; docs/POLISH.md 2.7 item 76; B5"
+    },
+    {
+      "id": "decks.list.one-card-per-deck",
+      "feature": "decks",
+      "interaction": "`/decks` with a deck this browser opened: one card for it in the grid, no Recent row head, the line \"Opened just now\"",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 10",
+      "note": "Polish round; docs/POLISH.md 2.7 item 76; B5"
+    },
+    {
+      "id": "export.print.deck-appearance",
+      "feature": "export",
+      "interaction": "Print settings and preview on a light deck: the page's sheet background reads paper; the PDF it downloads is light",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-pages item 3",
+      "note": "Polish round; docs/POLISH.md 2.7 item 77; B5"
+    },
+    {
+      "id": "share.dialog.new-deck-restricted-viewer",
+      "feature": "share",
+      "interaction": "The first Share on a new deck reads Restricted; Anyone with the link picked reads Viewer; the sentence carries no instruction",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-pages item 4",
+      "note": "Polish round; docs/POLISH.md 2.7 item 78; B5"
+    },
+    {
+      "id": "share.role-change.keeps-link",
+      "feature": "share",
+      "interaction": "Anyone with the link on, the address read; Commenter then Editor picked: the address is unchanged and answers 303 to the editor",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-pages item 5",
+      "note": "Polish round; docs/POLISH.md 2.7 item 79; B5"
+    },
+    {
+      "id": "export.details.seller-card",
+      "feature": "export",
+      "interaction": "Details on a saved PDF: the heading names PDF; the card shows the file's name, size and Download and one sentence; no \"SwiftShader\" and no \"Perfect\"",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-pages item 7",
+      "note": "Polish round; docs/POLISH.md 2.7 item 80; B5"
+    },
+    {
+      "id": "decks.trash.leaves-at-once",
+      "feature": "decks",
+      "interaction": "File > Move to trash: `/decks` is the address within 1.5 s with \"Moved to trash, Undo\"",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-pages item 8",
+      "note": "Polish round; docs/POLISH.md 2.7 item 81; B5"
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "interaction": "A blob put answering 429 once through `page.route`: the PowerPoint arrives; twice: the snackbar reads \"The PowerPoint could not be made. Try again in a minute\" and no \"Vercel\"",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-pages item 9",
+      "note": "Polish round; docs/POLISH.md 2.7 item 82; B5"
+    },
+    {
+      "id": "export.print.opens",
+      "feature": "export",
+      "interaction": "File > Print settings and preview on a deck five writes old: the pages draw within 5 s with no error card; the checked box shows a tick; Download as PDF stays enabled after one file",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-chrome item 8; audit-pages item 39",
+      "note": "Polish round; docs/POLISH.md 2.7 item 83; B5"
+    },
+    {
+      "id": "decks.card.title-ellipsis",
+      "feature": "decks",
+      "interaction": "A deck titled with 60 characters: the card's title ends with an ellipsis on `/decks` and in the trash",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 11",
+      "note": "Polish round; docs/POLISH.md 2.7 item 84; B5"
+    },
+    {
+      "id": "decks.card.download-powerpoint",
+      "feature": "decks",
+      "interaction": "The card's Download: a `.pptx` named after the title and \"Saved <name>\"",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 13",
+      "note": "Polish round; docs/POLISH.md 2.7 item 85; B5"
+    },
+    {
+      "id": "export.download.one-name-rule",
+      "feature": "export",
+      "interaction": "JPEG, PNG, the web page and the bundle each arrive named after the title with one snackbar \"Saved <name>\"",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 14",
+      "note": "Polish round; docs/POLISH.md 2.7 item 86; B5"
+    },
+    {
+      "id": "export.picture.progress-and-capture",
+      "feature": "export",
+      "interaction": "Download > JPEG: \"Preparing your JPEG\" within 500 ms and the file within 4 s on an unchanged slide",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 15",
+      "note": "Polish round; docs/POLISH.md 2.7 item 87; B5"
+    },
+    {
+      "id": "decks.import.upload-drop-zone",
+      "feature": "decks",
+      "interaction": "Import slides > Upload: a button and a drop target, no native file control visible",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 16",
+      "note": "Polish round; docs/POLISH.md 2.7 item 88; B5"
+    },
+    {
+      "id": "decks.back.list-restored",
+      "feature": "decks",
+      "interaction": "Back from the editor: `/decks` paints its cards within 300 ms with no grey frames",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 18",
+      "note": "Polish round; docs/POLISH.md 2.7 item 89; B5"
+    },
+    {
+      "id": "decks.card.thumbnail-or-plate",
+      "feature": "decks",
+      "interaction": "The cold list: every card draws an img or the title plate at first paint; a card scrolled into view asks again",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 19",
+      "note": "Polish round; docs/POLISH.md 2.7 item 90; B5"
+    },
+    {
+      "id": "versions.panel.rows-read-clean",
+      "feature": "versions",
+      "interaction": "Version history after one write: one time on the window row, its mark inside the row, Name this version opens the dialog and the snackbar reads \"Saved the version <name>\"",
+      "driver": "core/documents.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages items 20, 43",
+      "note": "Polish round; docs/POLISH.md 2.7 item 91; B5"
+    },
+    {
+      "id": "versions.title-row.last-edit-inline",
+      "feature": "versions",
+      "interaction": "At 1280 and 1440 the title row draws \"Last edit\" as text beside the clock",
+      "driver": "core/documents.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 21",
+      "note": "Polish round; docs/POLISH.md 2.7 item 92; B5"
+    },
+    {
+      "id": "present.bar.no-dead-control",
+      "feature": "present",
+      "interaction": "The show's bar: every control's click changes the state; no captions control",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 22",
+      "note": "Polish round; docs/POLISH.md 2.7 item 93; B5"
+    },
+    {
+      "id": "present.laser.visible",
+      "feature": "present",
+      "interaction": "L on: the laser's drawn diameter is 14 px with a paper ring (a pixel read)",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 23",
+      "note": "Polish round; docs/POLISH.md 2.7 item 94; B5"
+    },
+    {
+      "id": "comments.marker.one-per-anchor",
+      "feature": "comments",
+      "interaction": "A comment posted on a shape: one marker element at the anchor with the avatar and the count",
+      "driver": "core/documents.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 24",
+      "note": "Polish round; docs/POLISH.md 2.7 item 95; B5"
+    },
+    {
+      "id": "share.dialog.restricted-and-more",
+      "feature": "share",
+      "interaction": "Restricted reads \"Only you can open this presentation\" with no live link rows; More lists each link once with Copy, Rotate and Revoke and dates as \"Sep 28, 2026\"",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages items 26, 27",
+      "note": "Polish round; docs/POLISH.md 2.7 item 96; effort 1 and 2, B5"
+    },
+    {
+      "id": "decks.trash.enter-confirms",
+      "feature": "decks",
+      "interaction": "Delete forever, Enter: the deck is deleted",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 32",
+      "note": "Polish round; docs/POLISH.md 2.7 item 97; B5"
+    },
+    {
+      "id": "decks.card.rename-field-fits",
+      "feature": "decks",
+      "interaction": "Rename on the card: the field spans the card body and the title's start is visible",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 30",
+      "note": "Polish round; docs/POLISH.md 2.7 item 97; B5"
+    },
+    {
+      "id": "decks.trash.empty-not-primary",
+      "feature": "decks",
+      "interaction": "`/decks/trash`: the Empty trash button carries no `is-solid`",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-pages item 12",
+      "note": "Polish round; docs/POLISH.md 2.7 item 97; B5"
+    },
+    {
+      "id": "decks.polish.pages-sweep",
+      "feature": "decks",
+      "interaction": "ArrowRight past the last slide shows the end plate and a click leaves; the access page's link is ink; the card's Make a copy lists Copy comments; the presenter's pane has no Audience tools tab; the comment card has no empty header and Resolve reads \"Resolved\" with Undo; at 1280 by 800 the show's bar does not intersect the sheet; `/edit/<id>` answers 404 within 1 s of Delete forever",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-pages items 34 to 44; audit-tables item 20",
+      "note": "Polish round; docs/POLISH.md 2.7 item 98; B5"
+    },
+    {
+      "id": "sync.slide.concurrent-add-both-kept",
+      "feature": "sync",
+      "interaction": "A and B press New slide 150 ms apart, three rounds: both browsers hold both slides within 5 s, no reject card, the title row never reads a retry word",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-collab item 1",
+      "note": "Polish round; docs/POLISH.md 2.8 item 99; B5"
+    },
+    {
+      "id": "sync.title-row.save-words-truthful",
+      "feature": "sync",
+      "interaction": "After a refused write the row reads \"All changes saved\" once nothing is pending; a store publishing `ok: false` on a connected tab draws no word; the network cut reads Offline within 1 s",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-collab items 3, 5, 17; audit-pages item 31",
+      "note": "Polish round; docs/POLISH.md 2.8 item 100; B5"
+    },
+    {
+      "id": "sync.reject.sentence-below-toolbar",
+      "feature": "sync",
+      "interaction": "A structural refusal: one snackbar sentence with no id and no JSON; a refused typed text: the card's top below the toolbar's bottom edge",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-collab item 7",
+      "note": "Polish round; docs/POLISH.md 2.8 item 102; B5"
+    },
+    {
+      "id": "share.name-prompt.never-mid-drag",
+      "feature": "share",
+      "interaction": "B drags a filmstrip card 65 s after joining: no name prompt while the button is down; it opens in the title row afterwards",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-collab item 6",
+      "note": "Polish round; docs/POLISH.md 2.8 item 103; B5"
+    },
+    {
+      "id": "collab.follow.anonymous-editor",
+      "feature": "share",
+      "interaction": "Two anonymous editors: A's chip menu lists Follow; B moves to slide 3 and A's stage follows within 3 s; a click on A's stage stops it",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-collab item 8",
+      "parks": ["title.presence.follow"],
+      "note": "Polish round; docs/POLISH.md 2.8 item 104; B5"
+    },
+    {
+      "id": "present.link.first-paint-show",
+      "feature": "present",
+      "interaction": "`/deck/<id>?present=1`: the frame at 150 ms holds the show and no viewer bar; CLS 0",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-collab item 9",
+      "setup": "a deck with two slides through the window API before the present address opens",
+      "note": "Polish round; docs/POLISH.md 2.8 item 105; B5"
+    },
+    {
+      "id": "surface.skeleton.matches-editor",
+      "feature": "surface",
+      "interaction": "`/new` at 150 ms: a white ground, the menu list equal to the editor's, the plate within 4 px of the sheet's final box",
+      "driver": "core/surface.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-collab item 10",
+      "setup": "none; the frame is read at 150 ms of a cold /new",
+      "note": "Polish round; docs/POLISH.md 2.8 item 106; B5"
+    },
+    {
+      "id": "slides.filmstrip.follows-every-move",
+      "feature": "slides",
+      "interaction": "On a 40 slide deck End, Home, Slide > Duplicate slide and a window API `slide.new` each leave the current card inside the list's box",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-collab item 11",
+      "setup": "slide.new through the window API until the deck holds 40 slides; slide.remove of the extra slides after",
+      "note": "Polish round; docs/POLISH.md 2.8 item 107; B5"
+    },
+    {
+      "id": "sync.write.5xx-keeps-document",
+      "feature": "sync",
+      "interaction": "An ops POST answered 503 once through `page.route` during a word art Bold: the stage keeps the document's text, size and box; the resend lands and a reload reads the same",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-objects item 6",
+      "setup": "block.insert of a word art block through the window API; page.route answers one ops POST 503",
+      "note": "Polish round; docs/POLISH.md 2.8 item 108; B5"
+    },
+    {
+      "id": "sync.recovered.no-plate-for-held-writes",
+      "feature": "sync",
+      "interaction": "A reload after a write the server answered: no recovered writes plate",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-tables item 13; audit-assist section 6",
+      "note": "Polish round; docs/POLISH.md 2.8 item 109; B5"
+    },
+    {
+      "id": "collab.presence.join-within-2s",
+      "feature": "share",
+      "interaction": "B joins: A's title row draws B's chip within 2 s; C, a viewer, the same",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-collab item 13",
+      "note": "Polish round; docs/POLISH.md 2.8 item 110; B5"
+    },
+    {
+      "id": "decks.thumbnail.never-502",
+      "feature": "decks",
+      "interaction": "`/decks` cold and 60 s idle: no `/api/render` response is 502; an editor load logs no console error",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-collab item 2; audit-chrome item 24",
+      "note": "Polish round; docs/POLISH.md 2.8 item 111; B5"
+    },
+    {
+      "id": "collab.polish.session-sweep",
+      "feature": "share",
+      "interaction": "The roster row's tooltip does not intersect the roster plate; two tabs of one person are one row; `/decks`' Opened text is the same at 150 ms and after hydration; the resize badge's box is inside the stage; no POST to `/api/x/csp/report` on `/new`, `/edit`, `/deck` and `/decks`",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-collab items 18 to 23",
+      "note": "Polish round; docs/POLISH.md 2.8 item 112; B5 and B1"
+    },
+    {
+      "id": "assist.panel.mode-aware",
+      "feature": "assist",
+      "interaction": "On a deployment with no model the panel lists Tailor for a customer and one sentence, no composer and no model starter, and the palette offers no Ask row; with a model the starters stay after an answer",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-assist item 1",
+      "note": "Polish round; docs/POLISH.md 2.9 item 113; B1 with B5's `assist.ts` hunk by request"
+    },
+    {
+      "id": "assist.tailor.one-pass",
+      "feature": "assist",
+      "interaction": "Tailor with Acme in three places: the count once, no disabled checkbox, Apply closes the dialog within 300 ms and the snackbar carries the count with Undo",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-assist items 5, 7, 11, 18 to 21",
+      "note": "Polish round; docs/POLISH.md 2.9 item 116; B1"
+    },
+    {
+      "id": "assist.snackbar.names-change",
+      "feature": "assist",
+      "interaction": "An agent's `text.splice` replacing \"renewal\" with \"contract\": the snackbar reads \"renewal became contract\" with Undo; `deck.tailor` reads \"Assistant tailored this presentation for Globex\"",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-assist items 12, 22",
+      "setup": "text.splice and deck.tailor over HTTP with the bearer, or through the window API on localhost",
+      "note": "Polish round; docs/POLISH.md 2.9 item 117; B5"
+    },
+    {
+      "id": "assist.panel.words-and-layout",
+      "feature": "assist",
+      "interaction": "The panel: the provider line under the composer alone, the placeholder inside its box, the slide label one line, the textarea focused after the Ask row, no glyph on the starters, the starters' bottom within 16 px of the composer",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-assist items 8, 9, 16, 17, 23, 33",
+      "note": "Polish round; docs/POLISH.md 2.9 item 118; B1"
+    },
+    {
+      "id": "assist.polish.agent-sweep",
+      "feature": "assist",
+      "interaction": "`POST /api/actions/assist.propose` with no model answers 503; `info` prints \"1 section\"; `deck pull` and `info` agree on the asset count; the Save as template hint has no \"<title>\"; Tools lists Developer under Advanced tools; Run an action opens the palette's actions section",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-assist items 24 to 32",
+      "note": "Polish round; docs/POLISH.md 2.9 item 120; B5 with the integrator's `model.ts` rows"
+    },
+    {
+      "id": "decks.home.pictures-three-widths",
+      "feature": "decks",
+      "interaction": "`/home` at 1440, 1280 and 390 in both appearances: the section paddings of 3.4, the `h1` at weight 500, `align-items: start` on every two column block, 1 px `--pt-edge` picture frames, no element wider than the viewport, the page under 5,000 px at 1440 and 8,500 at 390; the verifier's pictures judged against 3.4",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-home items 1, 2, 11, 13, 22",
+      "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+    },
+    {
+      "id": "decks.home.copy-rules",
+      "feature": "decks",
+      "interaction": "`copy.test.ts` passes with the rules of 3.1; the rendered page holds under 350 words, no semicolon, no comma in a heading, no \"Advanced tools\", no file path outside the command box",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-home items 4, 5, 14, 16, 19",
+      "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+    },
+    {
+      "id": "decks.home.product-pictures",
+      "feature": "decks",
+      "interaction": "The hero and the two crops carry the Turboslide mark in the title row and no Extensions menu (`shots.test.ts`); each drawn at 1:1 or larger of its CSS size except the hero at 0.78; the same picture in both appearances",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-home items 3, 20, 24",
+      "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+    },
+    {
+      "id": "decks.home.links-and-card",
+      "feature": "decks",
+      "interaction": "Every href answers 200; `og:url` and `og:image` name www.turboslide.com; the card prints www.turboslide.com; the footer lockup scrolls to the top",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-home items 8, 9, 10, 28",
+      "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+    },
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "interaction": "Measure: first byte 150 ms, LCP 500 with the hero or the `h1`, ready 500, images before the first scroll 300 KB and after a full scroll 800 KB, the document under 60 KB, no long frame over 100 ms; JavaScript reported against 600 KB",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-home items 30, 31",
+      "measure": true,
+      "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+    },
+    {
+      "id": "decks.home.layout-shift",
+      "feature": "decks",
+      "interaction": "CLS 0 at the three widths in both appearances over the load and a full scroll; the theme buttons' pressed state at 150 ms equals the hydrated state",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-collab item 20",
+      "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
     }
   ]
 }

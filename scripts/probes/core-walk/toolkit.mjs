@@ -23,7 +23,9 @@
 // and handle drags over it: a drag in steps with the object's own box on the sheet and the ring's
 // box read after every step, in sheet px) and the pure frame comparison exported at the end
 // (`compareFrame`, `boxCorners`, `cornersDistance`, `readoutsOf`), which the gestures area's
-// rows read at the tenth step of a 12 step drag.
+// rows read at the tenth step of a 12 step drag. The polish round (docs/POLISH.md 5.1) added the
+// pixel and box reads (`pixelAt`, `sampleBox`, `boxesOf`, `boxIntersects`, `boxInside`,
+// `boxGap`), so a row is judged from what the frame draws.
 import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { inflateRawSync, inflateSync } from 'node:zlib';
@@ -1722,6 +1724,65 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   t.runsAlongColumn = runsAlongColumn;
   t.contrastRgb = contrast;
   t.hexOf = hex;
+  // the polish round (docs/POLISH.md 5.1): every row is written so a screenshot judges it. Two
+  // reads join the frame capture: a pixel of a shot at a viewport point (`pixelAt`) and the boxes
+  // of every element a selector matches (`boxesOf`), so a row reads "the ring's bottom edge is
+  // within 1 px of the last rule" or "the chip's box intersects no handle's box" from what is
+  // drawn, never from a class name alone. The pure halves are exported at the end of this file.
+  /**
+   * The colour under a viewport point in a 1x shot of the page: `{ rgb, hex }`, or null outside
+   * the shot. `img` is a decoded shot (`t.shotPixels()`); without one a fresh full page shot is
+   * taken, so a row that reads several points takes one shot and passes it in.
+   */
+  t.pixelAt = async (x, y, img = null) => pixelAt(img ?? (await t.shotPixels()), x, y);
+  /**
+   * The colours inside a viewport box of a shot, sampled every `step` px inside an `inset`: the
+   * mean, the distinct colours with their counts and the share of the dominant one, so a row reads
+   * "the plate behind the picture is the slide's ground" or "the band paints the amber token".
+   */
+  t.sampleBox = async (box, options = {}, img = null) =>
+    sampleBox(img ?? (await t.shotPixels()), box, options);
+  /**
+   * The viewport boxes of every drawn element a selector matches, with its text and its control
+   * id: `[{ x, y, w, h, text, control, index }]`. `sheet: true` answers sheet px (1600 by 900)
+   * instead of viewport px; `root` narrows the query to one element's subtree.
+   */
+  t.boxesOf = (selector, { root = null, sheet = false, limit = 200 } = {}) =>
+    page.evaluate(
+      ([sel, rootSel, inSheet, max, sheetSel]) => {
+        const scope = rootSel ? document.querySelector(rootSel) : document;
+        if (!scope) return [];
+        const sheetEl = inSheet ? document.querySelector(sheetSel) : null;
+        const sr = sheetEl ? sheetEl.getBoundingClientRect() : null;
+        const k = sr ? sr.width / 1600 : 1;
+        const r1 = (n) => Math.round(n * 10) / 10;
+        return [...scope.querySelectorAll(sel)]
+          .filter((el) => el.getClientRects().length > 0)
+          .slice(0, max)
+          .map((el, index) => {
+            const r = el.getBoundingClientRect();
+            const cs = getComputedStyle(el);
+            return {
+              index,
+              x: r1(sr ? (r.x - sr.x) / k : r.x),
+              y: r1(sr ? (r.y - sr.y) / k : r.y),
+              w: r1(r.width / k),
+              h: r1(r.height / k),
+              text: (el.textContent ?? '').trim().slice(0, 120),
+              control: el.getAttribute('data-control'),
+              hidden: cs.visibility === 'hidden' || cs.display === 'none' || cs.opacity === '0',
+            };
+          });
+      },
+      [selector, root, sheet, limit, SHEET],
+    );
+  /** The first box of `boxesOf`, or null. */
+  t.boxOfSel = async (selector, options = {}) => (await t.boxesOf(selector, options))[0] ?? null;
+  t.pixelAtOf = pixelAt;
+  t.sampleBoxOf = sampleBox;
+  t.boxIntersects = boxIntersects;
+  t.boxInside = boxInside;
+  t.boxGap = boxGap;
 
   // ---------------------------------------------------------------------------------------------
   // the product round (docs/PRODUCT.md section 8): the not built reading, the agent surface, the
@@ -2499,6 +2560,83 @@ export function runsAlongRow(img, y, x0, x1) {
  */
 export function thinRuns(runs, max = 4) {
   return runs.filter((r) => r.thickness >= 1 && r.thickness <= max);
+}
+
+// -----------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 5.1): the pixel and box reads, pure, pinned by toolkit.test.mjs
+
+/** The colour of a decoded shot at a point, `{ rgb, hex }`, or null outside it. */
+export function pixelAt(img, x, y) {
+  const px = Math.round(x);
+  const py = Math.round(y);
+  if (!img || px < 0 || py < 0 || px >= img.width || py >= img.height) return null;
+  const rgb = img.pixel(px, py);
+  return { rgb, hex: hex(rgb) };
+}
+
+/**
+ * The colours inside a box of a decoded shot, sampled every `step` px inside an `inset`:
+ * `{ count, mean, distinct, dominant: { hex, share } }`; `count` 0 for a box outside the shot.
+ * `tolerance` groups colours within that distance per channel as one.
+ */
+export function sampleBox(img, box, { inset = 0, step = 2, tolerance = 6 } = {}) {
+  const out = { count: 0, mean: [0, 0, 0], distinct: 0, dominant: null, colors: [] };
+  if (!img || !box) return out;
+  const x0 = Math.max(0, Math.ceil(box.x + inset));
+  const y0 = Math.max(0, Math.ceil(box.y + inset));
+  const x1 = Math.min(img.width - 1, Math.floor(box.x + box.w - inset - 1));
+  const y1 = Math.min(img.height - 1, Math.floor(box.y + box.h - inset - 1));
+  const groups = [];
+  const sum = [0, 0, 0];
+  for (let y = y0; y <= y1; y += step)
+    for (let x = x0; x <= x1; x += step) {
+      const rgb = img.pixel(x, y);
+      out.count += 1;
+      for (let i = 0; i < 3; i += 1) sum[i] += rgb[i];
+      const group = groups.find((g) => g.rgb.every((v, i) => Math.abs(v - rgb[i]) <= tolerance));
+      if (group) group.count += 1;
+      else groups.push({ rgb, count: 1 });
+    }
+  if (out.count === 0) return out;
+  out.mean = sum.map((v) => Math.round(v / out.count));
+  groups.sort((a, b) => b.count - a.count);
+  out.distinct = groups.length;
+  out.colors = groups.slice(0, 6).map((g) => ({ hex: hex(g.rgb), count: g.count }));
+  out.dominant = {
+    hex: hex(groups[0].rgb),
+    share: Math.round((groups[0].count / out.count) * 1000) / 1000,
+  };
+  return out;
+}
+
+/** True when two boxes overlap by more than `tolerance` px on both axes. */
+export function boxIntersects(a, b, tolerance = 0) {
+  if (!a || !b) return false;
+  return (
+    a.x + a.w - tolerance > b.x &&
+    b.x + b.w - tolerance > a.x &&
+    a.y + a.h - tolerance > b.y &&
+    b.y + b.h - tolerance > a.y
+  );
+}
+
+/** True when `inner` sits inside `outer` on every side within `tolerance` px. */
+export function boxInside(inner, outer, tolerance = 0) {
+  if (!inner || !outer) return false;
+  return (
+    inner.x >= outer.x - tolerance &&
+    inner.y >= outer.y - tolerance &&
+    inner.x + inner.w <= outer.x + outer.w + tolerance &&
+    inner.y + inner.h <= outer.y + outer.h + tolerance
+  );
+}
+
+/** The gap between two boxes on each axis (negative when they overlap on that axis). */
+export function boxGap(a, b) {
+  if (!a || !b) return null;
+  const dx = Math.max(b.x - (a.x + a.w), a.x - (b.x + b.w));
+  const dy = Math.max(b.y - (a.y + a.h), a.y - (b.y + b.h));
+  return { dx: Math.round(dx * 10) / 10, dy: Math.round(dy * 10) / 10 };
 }
 
 /** The boundary points: an x on each horizontal seam where nothing but the rows sits (audit-chrome.mjs). */

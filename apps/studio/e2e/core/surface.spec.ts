@@ -1,3 +1,6 @@
+import { spawnSync } from 'node:child_process';
+import { resolve } from 'node:path';
+
 import { expect, test } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
 
@@ -22,6 +25,9 @@ import {
   teardownAll,
   title,
   waitEditor,
+  agentHeaders,
+  extraHTTPHeaders,
+  isLocalBase,
 } from './lib';
 
 // The switch, Tools > Advanced tools (docs/FOCUS.md section 3, 6.4 `surface.*` with the driver
@@ -519,6 +525,159 @@ test(title('surface.parked-block-core-rows'), async () => {
   expect(await invoke(page, 'deck.info')).toBeTruthy();
 });
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md section 0 and 2.8 item 106, 5.1 `surface.*`): the build's
+// commit on the gate's origin, and the skeleton as the editor's frame.
+
+test(title('surface.domain.build-commit'), async () => {
+  test.setTimeout(120_000);
+  const base = new URL(
+    page.url() === 'about:blank'
+      ? `${process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:4321'}/`
+      : page.url(),
+  ).origin;
+  /* the ship's sha: the checkout the gate runs from (read only git) */
+  const root = resolve(import.meta.dirname, '..', '..', '..', '..');
+  const head =
+    spawnSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).stdout?.trim() ?? '';
+  const headers = agentHeaders(base);
+  const res =
+    headers === null
+      ? null
+      : await page.request.get(`${base}/api/agent`, { headers, maxRedirects: 0 });
+  const body = res
+    ? ((await res.json().catch(() => null)) as { instance?: { commit?: string } } | null)
+    : null;
+  const commit = body?.instance?.commit ?? null;
+  /* View lists Play shaders on the build the round ships (the row only the current build draws) */
+  await openEditor(page, deck);
+  await ctl(page, 'menubar.view').click();
+  await page.locator('#ts-menu-view').waitFor({ timeout: 8000 });
+  let playShaders = await ctl(page, 'menu.view.playShaders')
+    .isVisible()
+    .catch(() => false);
+  await page.keyboard.press('Escape');
+  let switched = false;
+  if (!playShaders) {
+    await setAdvanced(page, true);
+    switched = true;
+    await ctl(page, 'menubar.view').click();
+    await page.locator('#ts-menu-view').waitFor({ timeout: 8000 });
+    playShaders = await ctl(page, 'menu.view.playShaders')
+      .isVisible()
+      .catch(() => false);
+    await page.keyboard.press('Escape');
+    await setAdvanced(page, false);
+  }
+  test.info().annotations.push({
+    type: 'build',
+    description: `HEAD ${head.slice(0, 12)}; /api/agent ${res ? res.status() : 'no bearer for this origin'} instance.commit ${commit ?? 'none'}; View > Play shaders drawn ${playShaders}${switched ? ' with the switch on' : ''}`,
+  });
+  expect(
+    res,
+    'the agent surface answered (a bearer on a deployment, open on localhost)',
+  ).not.toBeNull();
+  expect(res!.status()).toBe(200);
+  expect(commit, 'instance.commit is on the answer').not.toBeNull();
+  expect(
+    head.startsWith(commit!) || commit!.startsWith(head.slice(0, 7)),
+    `instance.commit ${commit} equals the checkout's HEAD ${head.slice(0, 12)}`,
+  ).toBe(true);
+  expect(playShaders, 'the View menu lists Play shaders').toBe(true);
+  void isLocalBase;
+});
+
+test(title('surface.skeleton.matches-editor'), async ({ browser }) => {
+  test.setTimeout(120_000);
+  const fresh = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+  });
+  const p = await fresh.newPage();
+  try {
+    await p.addInitScript(() => {
+      const w = window as unknown as {
+        __skel: {
+          at: number;
+          ground: string;
+          menus: string[];
+          plate: { x: number; y: number; w: number; h: number } | null;
+        } | null;
+      };
+      w.__skel = null;
+      const read = () => {
+        const sk = document.querySelector('.ts-skeleton');
+        if (!sk || w.__skel !== null) return;
+        const plate = sk.querySelector('.ts-skeleton-sheet');
+        const r = plate?.getBoundingClientRect() ?? null;
+        w.__skel = {
+          at: performance.now(),
+          ground: getComputedStyle(sk).backgroundColor,
+          menus: [...sk.querySelectorAll('.ts-skeleton-menu')].map((el) =>
+            (el.textContent ?? '').trim(),
+          ),
+          plate: r ? { x: r.x, y: r.y, w: r.width, h: r.height } : null,
+        };
+      };
+      new MutationObserver(read).observe(document, { childList: true, subtree: true });
+      setTimeout(read, 150);
+    });
+    await p.goto('/new');
+    await waitEditor(p);
+    const facts = await p.evaluate(() => {
+      const w = window as unknown as {
+        __skel: {
+          at: number;
+          ground: string;
+          menus: string[];
+          plate: { x: number; y: number; w: number; h: number } | null;
+        } | null;
+      };
+      const menus = [...document.querySelectorAll('[data-control^="menubar."]')]
+        .filter((el) => el.tagName.toLowerCase() === 'button' && el.getClientRects().length > 0)
+        .map((el) => (el.textContent ?? '').trim());
+      const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+      const r = sheet?.getBoundingClientRect() ?? null;
+      const probe = document.createElement('div');
+      probe.style.background = 'var(--pt-paper, #fff)';
+      document.body.append(probe);
+      const paper = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      return {
+        skeleton: w.__skel,
+        menus,
+        sheet: r ? { x: r.x, y: r.y, w: r.width, h: r.height } : null,
+        paper,
+      };
+    });
+    const sk = facts.skeleton;
+    const white = sk
+      ? /^rgb\(255, 255, 255\)$/.test(sk.ground) || sk.ground === facts.paper
+      : false;
+    const plateOff =
+      sk?.plate && facts.sheet
+        ? Math.max(
+            Math.abs(sk.plate.x - facts.sheet.x),
+            Math.abs(sk.plate.y - facts.sheet.y),
+            Math.abs(sk.plate.w - facts.sheet.w),
+            Math.abs(sk.plate.h - facts.sheet.h),
+          )
+        : null;
+    test.info().annotations.push({
+      type: 'skeleton',
+      description: sk
+        ? `at ${Math.round(sk.at)} ms: ground ${sk.ground} (paper ${facts.paper}), menus ${sk.menus.join(', ')} against the editor's ${facts.menus.join(', ')}; plate ${sk.plate ? `${Math.round(sk.plate.x)},${Math.round(sk.plate.y)} ${Math.round(sk.plate.w)}x${Math.round(sk.plate.h)}` : 'none'} against the sheet ${facts.sheet ? `${Math.round(facts.sheet.x)},${Math.round(facts.sheet.y)} ${Math.round(facts.sheet.w)}x${Math.round(facts.sheet.h)}` : 'none'} (off by ${plateOff === null ? '?' : Math.round(plateOff)} px)`
+        : 'no skeleton was drawn',
+    });
+    expect(sk, 'a skeleton was drawn at 150 ms').not.toBeNull();
+    expect(white, 'a white ground').toBe(true);
+    expect(sk!.menus, "the menu list equal to the editor's").toEqual(facts.menus);
+    expect(plateOff, "the plate within 4 px of the sheet's final box").toBeLessThanOrEqual(4);
+  } finally {
+    await fresh.close();
+  }
+});
+
 coverage(import.meta.filename, [
   'surface.advanced.off-by-default',
   'surface.advanced.on-shows-parked',
@@ -526,4 +685,7 @@ coverage(import.meta.filename, [
   'surface.parked-blocks-render',
   'surface.parked-shortcut-unbound',
   'surface.parked-block-core-rows',
+  /* the polish round (docs/POLISH.md section 0, 2.8 item 106) */
+  'surface.domain.build-commit',
+  'surface.skeleton.matches-editor',
 ]);

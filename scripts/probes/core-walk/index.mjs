@@ -55,6 +55,13 @@ import * as tables from './areas/tables.mjs';
 import * as text from './areas/text.mjs';
 import * as view from './areas/view.mjs';
 import * as wordart from './areas/wordart.mjs';
+/* the polish round (docs/POLISH.md 5.1): the acceptance rows, one module per audit area, each on
+   its own slides after the chrome area, so `--areas polish-tables` drives Kevin's table rows alone */
+import * as polishTables from './areas/polish-tables.mjs';
+import * as polishText from './areas/polish-text.mjs';
+import * as polishObjects from './areas/polish-objects.mjs';
+import * as polishMedia from './areas/polish-media.mjs';
+import * as polishChrome from './areas/polish-chrome.mjs';
 
 /**
  * The areas in the order the walk runs them; each declares the rows it drives. The return round
@@ -97,6 +104,14 @@ export const AREAS = [
   assist,
   inbox,
   chrome,
+  /* the polish round (docs/POLISH.md 5.1): the acceptance rows of the nine audits' areas, after
+     the chrome area (whose 900 px reads resize the viewport and put it back) and before the
+     switch's row; each module makes its own slides and turns the switch back off */
+  polishTables,
+  polishText,
+  polishObjects,
+  polishMedia,
+  polishChrome,
   surface,
 ];
 

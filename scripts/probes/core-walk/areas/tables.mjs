@@ -50,7 +50,6 @@ export const IDS = [
   'tables.bar.row-column-buttons',
   'tables.command.keeps-caret',
   'tables.cells.tabular-figures',
-  'tables.cells.prompt-hovered-only',
   /* the objects round (docs/OBJECTS.md section 3, 6.1): the table's ring with a cell open, the
      cell ring, the editor guide grid, the box from the rows, the rows that grow, the seams with a
      cell open, the header toggle from the row head and the Table section's words; driven by
@@ -833,22 +832,32 @@ export async function run(t) {
     },
   );
 
+  /* the caret's cell as stored: the polish round (docs/POLISH.md 2.2 item 10, b2.md R5 and R10)
+     writes a session's alignment to `cells[]` ({ row, column, align }) and leaves `columns[]` as
+     it was; a column head's click keeps writing `columns[]` */
+  const cellAlign = (b, row, column) =>
+    b?.cells?.find((c) => c.row === row && c.column === column)?.align ?? '-';
+  const columnAligns = (b) => b?.columns?.map((c) => c.align ?? '-') ?? [];
+
   await t.step(
     'tables.cell.align-menu',
-    'with a cell session open in column 2, Format > Align & indent > Center',
-    'column 2 alone reads center and the cell draws centred; Cmd+Z',
+    'with a cell session open in cell 2,2, Format > Align & indent > Center',
+    "the caret's cell alone reads center in `cells[]`, `columns[]` unchanged, and the cell draws centred; Cmd+Z",
     async () => {
+      const before = columnAligns(await block(T));
       const on = await openCell(T, 1, 1);
       await t.menuPath('format', 'format.alignIndent', 'format.alignIndent.center');
       await t.settled();
       const b = await t
         .pollUntil(
           () => block(T),
-          (x) => x?.columns?.[1]?.align === 'center',
+          (x) => cellAlign(x, 1, 1) === 'center',
           8000,
         )
         .catch(() => block(T));
-      const aligns = b?.columns?.map((c) => c.align ?? '-') ?? [];
+      const aligns = columnAligns(b);
+      const cellsCentred = (b?.cells ?? []).filter((c) => c.align === 'center').length;
+      const own = cellAlign(b, 1, 1);
       await endSession();
       const style = await t
         .pollUntil(
@@ -860,16 +869,17 @@ export async function run(t) {
       const other = await cellStyle(T, 1, 0);
       await t.clearAll();
       await undo();
-      const after = (await block(T))?.columns?.map((c) => c.align ?? '-') ?? [];
+      const after = cellAlign(await block(T), 1, 1);
       return {
         ok:
           on &&
-          aligns[1] === 'center' &&
-          aligns.filter((a) => a === 'center').length === 1 &&
+          own === 'center' &&
+          cellsCentred === 1 &&
+          aligns.join(',') === before.join(',') &&
           style?.textAlign === 'center' &&
           other?.textAlign !== 'center' &&
-          after[1] !== 'center',
-        observed: `session ${on}; column aligns ${aligns.join(',')}; cell 1,1 text-align ${style?.textAlign}, cell 1,0 ${other?.textAlign}; after Cmd+Z ${after.join(',')}`,
+          after !== 'center',
+        observed: `session ${on}; cell 2,2 stored align ${own} (${cellsCentred} cell(s) centred); column aligns ${before.join(',')} -> ${aligns.join(',')}; cell 1,1 text-align ${style?.textAlign}, cell 1,0 ${other?.textAlign}; after Cmd+Z the cell reads ${after}`,
       };
     },
   );
@@ -897,9 +907,10 @@ export async function run(t) {
 
   await t.step(
     'tables.cell.align-toolbar',
-    "with a cell session open in column 2, the table tail's Align list, Right",
-    "the list opens on the table tail and Right writes the caret's column",
+    "with a cell session open in cell 2,2, the table tail's Align list, Right",
+    "the list opens on the table tail and Right writes the caret's cell in `cells[]`, `columns[]` unchanged",
     async () => {
+      const before = columnAligns(await block(T));
       const on = await openCell(T, 1, 1);
       const tail = await t.visible('toolbar.align');
       const { pick, options } = tail
@@ -912,22 +923,25 @@ export async function run(t) {
       const b = await t
         .pollUntil(
           () => block(T),
-          (x) => x?.columns?.[1]?.align === 'right',
+          (x) => cellAlign(x, 1, 1) === 'right',
           8000,
         )
         .catch(() => block(T));
-      const aligns = b?.columns?.map((c) => c.align ?? '-') ?? [];
+      const aligns = columnAligns(b);
+      const own = cellAlign(b, 1, 1);
+      const cellsRight = (b?.cells ?? []).filter((c) => c.align === 'right').length;
       const still = await t.editing();
       await t.clearAll();
-      if (aligns[1] === 'right') await undo();
+      if (own === 'right') await undo();
       return {
         ok:
           on &&
           tail &&
           pick !== null &&
-          aligns[1] === 'right' &&
-          aligns.filter((a) => a === 'right').length === 1,
-        observed: `session ${on}; Align on the tail ${tail}; list options ${options.join(', ') || 'none'}; picked ${pick}; column aligns ${aligns.join(',')}; session after ${still}`,
+          own === 'right' &&
+          cellsRight === 1 &&
+          aligns.join(',') === before.join(','),
+        observed: `session ${on}; Align on the tail ${tail}; list options ${options.join(', ') || 'none'}; picked ${pick}; cell 2,2 stored align ${own} (${cellsRight} cell(s) right); column aligns ${before.join(',')} -> ${aligns.join(',')}; session after ${still}`,
       };
     },
   );
@@ -2512,73 +2526,8 @@ async function featuresRound(t, S, h) {
     );
     return { ok: Boolean(obj), observed: obj?.id ?? 'none' };
   });
-  await t.step(
-    'tables.cells.prompt-hovered-only',
-    'read the prompts of the empty table with the pointer away; hover cell 2,2; read the filmstrip card',
-    'no prompt until a cell is hovered, then one in that cell alone; the card draws no prompt rows',
-    async () => {
-      await t.clearAll();
-      await page.mouse.move(20, 450);
-      await t.sleep(400);
-      const prompts = () =>
-        page.evaluate((id) => {
-          const root = document.querySelector(
-            `.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`,
-          );
-          const list = [...(root?.querySelectorAll('[data-prompt], .prompt') ?? [])].filter(
-            (p) =>
-              p.getClientRects().length > 0 &&
-              getComputedStyle(p).visibility !== 'hidden' &&
-              (p.textContent ?? '').trim().length > 0,
-          );
-          /* the words are "Type to add text" since the objects round (docs/OBJECTS.md 3.3
-             item 7: one click already places the caret); the older words are counted too and
-             the words read are recorded */
-          const byText = [...(root?.querySelectorAll('.td') ?? [])].filter((td) =>
-            /(Click|Type) to add text/.test(td.textContent ?? ''),
-          ).length;
-          const words =
-            list.map((p) => p.textContent?.trim() ?? '').find((w) => w.length > 0) ??
-            (/Type to add text/.test(root?.textContent ?? '')
-              ? 'Type to add text'
-              : /Click to add text/.test(root?.textContent ?? '')
-                ? 'Click to add text'
-                : null);
-          return {
-            count: Math.max(list.length, byText),
-            cells: list.map((p) => p.closest('[data-run]')?.getAttribute('data-run') ?? '?'),
-            words,
-          };
-        }, T4);
-      const idle = await prompts();
-      const p = await cellPoint(T4, 2, 2);
-      await page.mouse.move(p.x, p.y);
-      await t.sleep(500);
-      const hovered = await prompts();
-      const card = await page.evaluate((slideId) => {
-        const card = document.querySelector(`[data-control="filmstrip.slide.${slideId}"]`);
-        const text = card?.textContent ?? '';
-        return {
-          prompts: (text.match(/(Click|Type) to add text/g) ?? []).length,
-          kind: card?.querySelector('img')
-            ? 'image'
-            : card?.querySelector('.pt-slide, .ts-sheet')
-              ? 'clone'
-              : 'other',
-        };
-      }, S3);
-      await page.mouse.move(20, 450);
-      return {
-        ok:
-          idle.count === 0 &&
-          hovered.count === 1 &&
-          hovered.cells.every((c) => c.endsWith('/rows/2/cells/2')) &&
-          hovered.words === 'Type to add text' &&
-          card.prompts === 0,
-        observed: `prompts with the pointer away ${idle.count}; hovering cell 2,2: ${hovered.count} (${hovered.cells.join(', ') || 'none'}) reading ${hovered.words === null ? 'no words' : `"${hovered.words}"`}; the filmstrip card (${card.kind}) draws ${card.prompts} prompt(s)${idle.count === 0 ? '' : ` (FEATURES.md 2.3 item 9, ${LANE})`}${hovered.words === 'Type to add text' || hovered.words === null ? '' : ' (docs/OBJECTS.md 3.3 item 7: the words become Type to add text, B2)'}`,
-      };
-    },
-  );
+  /* tables.cells.prompt-hovered-only left with the polish round (docs/POLISH.md 2.1 item 1): the
+     editor draws no prompt in a table cell; its successor tables.cells.no-prompt is polish-tables.mjs's */
   await t.clickCard(S);
 }
 

@@ -57,7 +57,9 @@ const FEATURES = [
   ['logos', 'FEATURES 4 The logo picker'],
   /* the features round, ship two (docs/FEATURES.md section 5, 7.1): the shader library */
   ['shaders', 'FEATURES 5 The shader library'],
-  /* the vector round (docs/VECTOR.md section 4, 6.1): the SVG pictures */
+  /* the vector round (docs/VECTOR.md section 4, 6.1): the SVG pictures. The polish round
+     (docs/POLISH.md section 5, 2026-09-28) added its 130 rows to these features and no feature of
+     its own; the `decks.home.*` rows of the remade home page (section 3) count under decks */
   ['svg', 'VECTOR 4 SVG pictures'],
   ['surface', '3 The switch'],
 ];

@@ -60,6 +60,10 @@
 // skipped, degraded) with the animation frames the drag had, so a frame row red on the preview
 // alone with fewer than 6 animation frames (a throttled headless tab) is the recorded class of 6.3,
 // rerun once, and a second reading fails the row; nothing here changes the merge or the verdict.
+// The polish round (docs/POLISH.md 5.1): `--areas` names the walk's modules (core-walk/index.mjs
+// AREAS, the names the walk's `--only` takes), and a module's rows are the ids it declares, so
+// `--areas polish-tables` runs and judges the polish round's table rows alone while `--areas
+// tables` keeps the tables module's own rows.
 // `--matrix <path>` also writes the merged summary (the rows by id with their result and reason,
 // the counts, the verdict and the `results` map) to that path, the ledger copy a ship note or the
 // verifier keeps under docs/gslides-parity/focus/verification/. `--report <dir>` runs no driver:
@@ -103,6 +107,7 @@ import {
   rowsForDriver,
   shipVerdict,
 } from './core-matrix.mjs';
+import { declaredIds } from './core-walk/index.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const argv = process.argv.slice(2);
@@ -149,6 +154,8 @@ const listArg = (name) => {
  */
 const ROWS_ONLY = listArg('rows');
 const AREAS_ONLY = listArg('areas');
+/** Every probe row's walk module (core-walk/index.mjs `declaredIds`: id to module name). */
+const WALK_MODULE_OF = declaredIds();
 if (ROWS_ONLY !== null) {
   if (ONLY !== 'specs') {
     console.error(
@@ -188,7 +195,11 @@ if (AREAS_ONLY !== null) {
     console.error(USAGE);
     process.exit(2);
   }
-  const known = new Set(rowsForDriver(PROBE_DRIVER).map((row) => areaOf(row.id)));
+  /* the walk's own modules (core-walk/index.mjs AREAS), the names its `--only` takes: since the
+     polish round (docs/POLISH.md 5.1) a module's name can differ from its rows' id area
+     (`polish-tables` drives `tables.*` rows), so a run over an area judges the rows the named
+     modules declare, never every row whose id starts with the name */
+  const known = new Set([...WALK_MODULE_OF.values()]);
   const unknown = AREAS_ONLY.filter((area) => !known.has(area));
   if (AREAS_ONLY.length === 0 || unknown.length > 0) {
     console.error(
@@ -228,7 +239,7 @@ const specRowsJudged = CORE_MATRIX.filter(
     (ROWS_ONLY === null || ROWS_ONLY.includes(r.id)),
 );
 const probeRowsJudged = rowsForDriver(PROBE_DRIVER).filter(
-  (r) => AREAS_ONLY === null || AREAS_ONLY.includes(areaOf(r.id)),
+  (r) => AREAS_ONLY === null || AREAS_ONLY.includes(WALK_MODULE_OF.get(r.id) ?? areaOf(r.id)),
 );
 const costRowsJudged = costRows().filter(
   (r) => !COST_ROWS || COST_ROWS.split(',').some((id) => id.trim() === r.id),

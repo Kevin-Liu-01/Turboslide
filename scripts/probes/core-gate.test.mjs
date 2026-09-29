@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { CORE_MATRIX, CORE_SPEC_DRIVERS } from './core-matrix.mjs';
+import { AREAS } from './core-walk/index.mjs';
 
 // The core gate's tail (docs/FOCUS.md 6.2; VERIFICATION.md F3): after the drivers the gate merges
 // every row by id, writes core-gate.json, core-matrix.md and the `--matrix` ledger copy, prints
@@ -425,8 +426,10 @@ describe('the gate narrows one driver to rows or areas (the objects round fix ro
   }, 30_000);
 
   it('plans an --areas run over the walk probe and refuses an unknown area or another driver', () => {
+    /* the tables module's own rows (the polish round's `tables.*` rows live in polish-tables) */
+    const tablesIds = new Set(AREAS.find((area) => area.NAME === 'tables').IDS);
     const tables = CORE_MATRIX.filter(
-      (row) => row.driver === 'probe --core' && row.id.startsWith('tables.'),
+      (row) => row.driver === 'probe --core' && tablesIds.has(row.id),
     );
     const run = dryRun(['--only', 'probe', '--areas', 'tables']);
     expect(run.stderr, run.stderr).toBe('');
@@ -444,8 +447,10 @@ describe('the gate narrows one driver to rows or areas (the objects round fix ro
   }, 30_000);
 
   it('judges the --areas named alone from a finished walk', () => {
+    /* the tables module's own rows (the polish round's `tables.*` rows live in polish-tables) */
+    const tablesIds = new Set(AREAS.find((area) => area.NAME === 'tables').IDS);
     const tables = CORE_MATRIX.filter(
-      (row) => row.driver === 'probe --core' && row.id.startsWith('tables.'),
+      (row) => row.driver === 'probe --core' && tablesIds.has(row.id),
     );
     const dir = mkdtempSync(join(tmpdir(), 'core-gate-areas-'));
     writeFileSync(

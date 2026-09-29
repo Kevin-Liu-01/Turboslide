@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
 
+import { spawnSync } from 'node:child_process';
+import { resolve } from 'node:path';
+
 import {
   OIDC,
   Scratch,
@@ -8,15 +11,21 @@ import {
   coverage,
   ctl,
   deleteForever,
+  download,
   extraHTTPHeaders,
+  fetchBytes,
   invoke,
   menuPath,
   newDeck,
   openEditor,
   ownerContext,
+  placeBlock,
+  pngSize,
+  selectBlock,
   settled,
   slideJson,
   slideOrder,
+  snackbarText,
   state,
   statusOf,
   teardownAll,
@@ -1345,14 +1354,20 @@ test(title('decks.home.seller-lead'), async () => {
       for (const rules of document.querySelectorAll('script[type="speculationrules"]'))
         rules.remove();
     });
+  /* the redesigned page (docs/POLISH.md 3.2 item 1): the h1, the lead's first sentence and the
+     second hero button */
   const hero = await page.locator('main h1').first().textContent();
-  expect(hero?.trim(), "the hero leads with the seller's sentence").toBe(
-    'Build the pitch, present it and send the link, in one place',
+  expect(hero?.trim(), "the h1 reads the seller's sentence").toBe(HOME_H1);
+  const lead = await page.locator('main .ts-product-lead, main p').first().textContent();
+  expect(lead?.trim(), "the lead's first sentence names the editor").toMatch(
+    /^Turboslide is a slides editor in the browser\./,
   );
-  const start = page.locator('main a, main button', { hasText: /^Start from a template$/ }).first();
-  await expect(start, "the first band's button reads Start from a template").toBeVisible();
-  await start.click();
-  await page.waitForURL(/\/decks\/templates/, { timeout: 20_000 });
+  const deckButton = page.locator('main a[href="/deck/gt-brand"]').first();
+  await expect(deckButton, 'the second button opens the example deck').toHaveText(
+    'Open the Example Deck',
+  );
+  await deckButton.click();
+  await page.waitForURL(/\/deck\/gt-brand/, { timeout: 20_000 });
 });
 
 test(title('decks.card.thumbnail-slide-1'), async () => {
@@ -1843,6 +1858,1183 @@ test(title('brand.appearance.default'), async () => {
   expect(gtAppearance, 'a deck from a template whose kit says dark opens dark').toBe('dark');
 });
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 2.7 and section 3, 5.1 `decks.*` with the driver
+// core/decks.spec.ts): the home page remade, judged from the DOM's boxes at three widths in both
+// appearances, its copy against 3.1, its pictures, its links and its card, its load and its
+// layout shift (a measure row); and the list and the trash: the Recent row keeping this
+// browser's deck, one card per deck renamed everywhere, Move to trash leaving at once, the
+// titles' ellipsis, the card's PowerPoint, the Upload drop zone, Back restoring the list, a
+// thumbnail or a plate on every card, Enter confirming Delete forever, the rename field, Empty
+// trash not primary, the thumbnail route never 502 and the pages' small words and states.
+
+const HOME_H1 = 'Build the pitch, present it and send the link';
+/** The report words of 3.1 that never appear on the page. */
+const HOME_REPORT_WORDS = [
+  'Advanced tools',
+  'default view',
+  'acceptance',
+  'audit',
+  'verification',
+  'revision',
+];
+type HomeTheme = 'light' | 'dark';
+const HOME_WIDTHS: readonly { width: number; height: number }[] = [
+  { width: 1440, height: 900 },
+  { width: 1280, height: 800 },
+  { width: 390, height: 844 },
+];
+
+/** A fresh context on /home at a viewport in an appearance, with the layout shift and long frame observers armed before the load. */
+async function homeContext(
+  browser: import('@playwright/test').Browser,
+  size: { width: number; height: number },
+  theme: HomeTheme,
+): Promise<{ context: BrowserContext; page: Page }> {
+  const fresh = await browser.newContext({ extraHTTPHeaders, viewport: size });
+  const p = await fresh.newPage();
+  await p.addInitScript((value) => {
+    try {
+      localStorage.setItem('gt-theme', value);
+    } catch {
+      // private mode
+    }
+  }, theme);
+  await p.addInitScript(() => {
+    const w = window as unknown as {
+      __cls: number[];
+      __loaf: number[];
+      __lcp: { ms: number; element: string } | null;
+      __pressedEarly: string | null;
+    };
+    w.__cls = [];
+    w.__loaf = [];
+    w.__lcp = null;
+    w.__pressedEarly = null;
+    try {
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as (PerformanceEntry & {
+          hadRecentInput?: boolean;
+          value?: number;
+        })[])
+          if (!entry.hadRecentInput) w.__cls.push(Number((entry.value ?? 0).toFixed(4)));
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch {
+      // no layout shift entries in this browser
+    }
+    try {
+      /* LCP entries reach an observer alone (getEntriesByType lists none); the last entry is the
+         candidate that stood when the first input or the read arrived */
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as (PerformanceEntry & {
+          element?: Element;
+          renderTime?: number;
+          loadTime?: number;
+        })[]) {
+          const el = entry.element;
+          w.__lcp = {
+            ms: Math.round(entry.renderTime || entry.loadTime || entry.startTime),
+            element: el
+              ? `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}${el.getAttribute('data-shot') ? `[${el.getAttribute('data-shot')}]` : ''}`
+              : '',
+          };
+        }
+      }).observe({ type: 'largest-contentful-paint', buffered: true });
+    } catch {
+      // no LCP entries in this browser
+    }
+    try {
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) w.__loaf.push(Math.round(entry.duration));
+      }).observe({ type: 'long-animation-frame', buffered: true });
+    } catch {
+      // no long animation frame entries in this browser
+    }
+    setTimeout(() => {
+      const pressed = [
+        ...document.querySelectorAll('[data-control^="home.theme"][aria-pressed="true"]'),
+      ].map((el) => el.getAttribute('data-control') ?? '');
+      w.__pressedEarly = pressed.join(',');
+    }, 150);
+  });
+  return { context: fresh, page: p };
+}
+async function homeOpen(p: Page): Promise<number> {
+  const t0 = Date.now();
+  const response = await p.goto('/home');
+  expect(response?.status(), '/home answers 200').toBe(200);
+  await p
+    .locator('main.ts-product[data-hydrated], main[data-hydrated]')
+    .first()
+    .waitFor({ timeout: 30_000 });
+  await p.evaluate(() => document.fonts.ready);
+  return Date.now() - t0;
+}
+async function homeScroll(p: Page): Promise<void> {
+  const height = await p.evaluate(() => document.documentElement.scrollHeight);
+  const vh = await p.evaluate(() => innerHeight);
+  for (let y = 0; y < height - vh; y += 640) {
+    await p.mouse.wheel(0, 640);
+    await p.waitForTimeout(120);
+  }
+  await p.waitForTimeout(400);
+}
+test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
+  test.setTimeout(300_000);
+  const failures: string[] = [];
+  const notes: string[] = [];
+  for (const size of HOME_WIDTHS)
+    for (const theme of ['dark', 'light'] as const) {
+      const { context: fresh, page: p } = await homeContext(browser, size, theme);
+      try {
+        await homeOpen(p);
+        const narrow = size.width === 390;
+        const facts = await p.evaluate((isNarrow) => {
+          const num = (v: string) => Math.round(parseFloat(v));
+          const pad = (sel: string) => {
+            const el = document.querySelector(sel);
+            if (!el) return null;
+            const cs = getComputedStyle(el);
+            return { top: num(cs.paddingTop), bottom: num(cs.paddingBottom) };
+          };
+          const bands = [...document.querySelectorAll('main [data-band]')].map((el) => ({
+            band: el.getAttribute('data-band') ?? '',
+            pad: (() => {
+              const cs = getComputedStyle(el);
+              return { top: num(cs.paddingTop), bottom: num(cs.paddingBottom) };
+            })(),
+          }));
+          const h1 = document.querySelector('main h1');
+          const twos = [...document.querySelectorAll('main .ts-product-two')].map((el) => {
+            const cs = getComputedStyle(el);
+            return { align: cs.alignItems, columns: cs.gridTemplateColumns, gap: cs.columnGap };
+          });
+          const frames = [...document.querySelectorAll('main figure')].map((el) => {
+            const cs = getComputedStyle(el);
+            return `${cs.borderTopWidth} ${cs.borderTopStyle}`;
+          });
+          const wide = [...document.querySelectorAll('main *')].filter(
+            (el) => el.getBoundingClientRect().right > innerWidth + 1,
+          ).length;
+          return {
+            hero: pad('[data-band="hero"]'),
+            bands,
+            h1Weight: h1 ? getComputedStyle(h1).fontWeight : null,
+            h1Size: h1 ? num(getComputedStyle(h1).fontSize) : null,
+            twos,
+            frames,
+            wide,
+            height: document.documentElement.scrollHeight,
+            overflow: document.documentElement.scrollWidth > innerWidth,
+            narrow: isNarrow,
+          };
+        }, narrow);
+        const label = `${size.width} ${theme}`;
+        notes.push(
+          `${label}: hero ${JSON.stringify(facts.hero)}, bands ${facts.bands.map((b) => `${b.band} ${b.pad.top}/${b.pad.bottom}`).join(', ')}, h1 ${facts.h1Weight} at ${facts.h1Size}px, two column ${facts.twos.map((t) => `${t.align} ${t.gap}`).join('; ')}, frames ${facts.frames.join(', ')}, height ${facts.height}, overflow ${facts.overflow}, wide ${facts.wide}`,
+        );
+        const sectionPad = narrow ? 72 : 112;
+        const heroTop = narrow ? 56 : 96;
+        if (!facts.hero || facts.hero.top !== heroTop)
+          failures.push(`${label}: hero padding top ${facts.hero?.top} (3.4 says ${heroTop})`);
+        for (const b of facts.bands)
+          if (
+            b.band !== 'hero' &&
+            b.band !== 'footer' &&
+            (b.pad.top !== sectionPad || b.pad.bottom !== sectionPad)
+          )
+            failures.push(
+              `${label}: ${b.band} padding ${b.pad.top}/${b.pad.bottom} (3.4 says ${sectionPad})`,
+            );
+        if (facts.h1Weight !== '500') failures.push(`${label}: h1 weight ${facts.h1Weight}`);
+        if (facts.h1Size !== (narrow ? 40 : 56)) failures.push(`${label}: h1 size ${facts.h1Size}`);
+        if (!narrow)
+          for (const [i, two] of facts.twos.entries())
+            if (two.align !== 'start')
+              failures.push(`${label}: two column block ${i} align-items ${two.align}`);
+        if (facts.frames.length === 0 || facts.frames.some((f) => !/^1px solid/.test(f)))
+          failures.push(`${label}: picture frames ${facts.frames.join(', ') || 'none'}`);
+        if (facts.overflow || facts.wide > 0)
+          failures.push(`${label}: ${facts.wide} elements wider than the viewport`);
+        if (facts.height >= (narrow ? 8500 : 5000))
+          failures.push(`${label}: the page is ${facts.height} px tall`);
+      } finally {
+        await fresh.close();
+      }
+    }
+  test.info().annotations.push({ type: 'home', description: notes.join(' | ') });
+  expect(
+    failures,
+    'the numbers of docs/POLISH.md 3.4 at 1440, 1280 and 390 in both appearances',
+  ).toEqual([]);
+});
+
+test(title('decks.home.copy-rules'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  /* copy.test.ts with the rules of 3.1, run from the checkout beside the spec */
+  const root = resolve(import.meta.dirname, '..', '..', '..', '..');
+  const vitest = spawnSync(
+    resolve(root, 'node_modules', '.bin', 'vitest'),
+    ['run', 'apps/studio/src/components/home/copy.test.ts'],
+    { cwd: root, encoding: 'utf8', timeout: 180_000 },
+  );
+  const tail = `${vitest.stdout ?? ''}${vitest.stderr ?? ''}`
+    .split('\n')
+    .filter((l) => /Tests|Test Files|FAIL|✓|×/.test(l))
+    .slice(-6)
+    .join(' | ');
+  test
+    .info()
+    .annotations.push({ type: 'copy.test.ts', description: `exit ${vitest.status}: ${tail}` });
+  const { context: fresh, page: p } = await homeContext(
+    browser,
+    { width: 1440, height: 900 },
+    'dark',
+  );
+  try {
+    await homeOpen(p);
+    const copy = await p.evaluate(() => {
+      const main = document.querySelector('main.ts-product, main') as HTMLElement;
+      const headings = [...main.querySelectorAll('h1, h2')].map((h) =>
+        (h.textContent ?? '').trim(),
+      );
+      const clone = main.cloneNode(true) as HTMLElement;
+      for (const el of clone.querySelectorAll('pre, script, style')) el.remove();
+      document.body.append(clone);
+      const prose = clone.innerText;
+      clone.remove();
+      return {
+        headings,
+        prose,
+        all: main.innerText,
+        code: main.querySelectorAll('pre code').length,
+      };
+    });
+    const words = copy.all.trim().split(/\s+/).filter(Boolean).length;
+    const commaHeadings = copy.headings.filter((h) => h.includes(','));
+    const report = HOME_REPORT_WORDS.filter((w) => new RegExp(`\\b${w}\\b`, 'i').test(copy.prose));
+    const paths = copy.prose.match(/\b[\w-]+\/[\w./-]+/g) ?? [];
+    test.info().annotations.push({
+      type: 'copy',
+      description: `${words} words; ${copy.headings.length} headings; semicolons ${(copy.prose.match(/;/g) ?? []).length}; report words ${report.join(', ') || 'none'}; paths ${paths.join(', ') || 'none'}; command boxes ${copy.code}`,
+    });
+    expect(vitest.status, 'copy.test.ts passes').toBe(0);
+    expect(words, 'under 350 words').toBeLessThan(350);
+    expect(copy.prose, 'no semicolon').not.toContain(';');
+    expect(commaHeadings, 'no comma in a heading').toEqual([]);
+    expect(report, 'no report word').toEqual([]);
+    expect(paths, 'no file path outside the command box').toEqual([]);
+  } finally {
+    await fresh.close();
+  }
+});
+
+test(title('decks.home.product-pictures'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  const root = resolve(import.meta.dirname, '..', '..', '..', '..');
+  const vitest = spawnSync(
+    resolve(root, 'node_modules', '.bin', 'vitest'),
+    ['run', 'apps/studio/src/components/home/shots.test.ts'],
+    { cwd: root, encoding: 'utf8', timeout: 180_000 },
+  );
+  const tail = `${vitest.stdout ?? ''}${vitest.stderr ?? ''}`
+    .split('\n')
+    .filter((l) => /Tests|Test Files|FAIL/.test(l))
+    .slice(-4)
+    .join(' | ');
+  test
+    .info()
+    .annotations.push({ type: 'shots.test.ts', description: `exit ${vitest.status}: ${tail}` });
+  const failures: string[] = [];
+  const notes: string[] = [];
+  for (const theme of ['dark', 'light'] as const) {
+    const { context: fresh, page: p } = await homeContext(
+      browser,
+      { width: 1440, height: 900 },
+      theme,
+    );
+    try {
+      await homeOpen(p);
+      const shots = await p.evaluate(() =>
+        [...document.querySelectorAll<HTMLImageElement>('main img[data-shot]')].map((img) => {
+          const r = img.getBoundingClientRect();
+          return {
+            shot: img.getAttribute('data-shot') ?? '',
+            width: Number(img.getAttribute('width')),
+            height: Number(img.getAttribute('height')),
+            drawn: Math.round(r.width),
+            shown: r.width > 0 && getComputedStyle(img).display !== 'none',
+            natural: img.naturalWidth,
+          };
+        }),
+      );
+      notes.push(
+        `${theme}: ${shots.map((s) => `${s.shot} ${s.drawn}/${s.width}${s.shown ? '' : ' hidden'}`).join(', ')}`,
+      );
+      const shown = shots.filter((s) => s.shown);
+      for (const kind of ['hero', 'canvas', 'menus']) {
+        const own = shown.find((s) => s.shot.startsWith(`${kind}-`)) ?? null;
+        if (!own) {
+          failures.push(`${theme}: no ${kind} picture shown`);
+          continue;
+        }
+        const scale = own.width > 0 ? own.drawn / own.width : 0;
+        if (kind === 'hero' ? Math.abs(scale - 0.78) > 0.03 : scale < 0.99)
+          failures.push(`${theme}: ${own.shot} drawn at ${scale.toFixed(2)} of its size`);
+        if (!/-(dark|light)$/.test(own.shot) || !own.shot.endsWith(theme))
+          failures.push(`${theme}: the shown ${kind} picture is ${own.shot}`);
+      }
+      /* the same picture in both appearances: a dark and a light file of every capture, the same size */
+      for (const kind of ['hero', 'canvas', 'menus']) {
+        const pair = shots.filter((s) => s.shot === `${kind}-dark` || s.shot === `${kind}-light`);
+        if (
+          pair.length !== 2 ||
+          pair[0]!.width !== pair[1]!.width ||
+          pair[0]!.height !== pair[1]!.height
+        )
+          failures.push(
+            `${theme}: ${kind} pair ${pair.map((s) => `${s.shot} ${s.width}x${s.height}`).join(', ') || 'missing'}`,
+          );
+      }
+    } finally {
+      await fresh.close();
+    }
+  }
+  test.info().annotations.push({ type: 'pictures', description: notes.join(' | ') });
+  expect(
+    vitest.status,
+    'shots.test.ts passes (the mark in the title row crop, no Extensions menu)',
+  ).toBe(0);
+  expect(failures).toEqual([]);
+});
+
+test(title('decks.home.links-and-card'), async ({ browser, request }) => {
+  test.setTimeout(240_000);
+  const { context: fresh, page: p } = await homeContext(
+    browser,
+    { width: 1440, height: 900 },
+    'dark',
+  );
+  try {
+    await homeOpen(p);
+    const links = await p.evaluate(() =>
+      [...document.querySelectorAll<HTMLAnchorElement>('a[href]')].map(
+        (a) => a.getAttribute('href') ?? '',
+      ),
+    );
+    const seen = new Set<string>();
+    const failures: string[] = [];
+    let checked = 0;
+    for (const href of links) {
+      if (href.startsWith('#') || seen.has(href) || href.startsWith('mailto:')) continue;
+      seen.add(href);
+      try {
+        const res = await request.get(href.startsWith('/') ? href : href, {
+          maxRedirects: 5,
+          headers: href.startsWith('/') ? extraHTTPHeaders : {},
+        });
+        checked += 1;
+        if (res.status() !== 200) failures.push(`${href} ${res.status()}`);
+      } catch (error) {
+        failures.push(
+          `${href} ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+        );
+      }
+    }
+    const meta = await p.evaluate(() => ({
+      url: document.querySelector('meta[property="og:url"]')?.getAttribute('content') ?? null,
+      image: document.querySelector('meta[property="og:image"]')?.getAttribute('content') ?? null,
+    }));
+    const card = meta.image ? await fetchBytes(p, meta.image) : null;
+    const size = card ? pngSize(card.bytes) : null;
+    /* the footer lockup after a full scroll */
+    await homeScroll(p);
+    const before = await p.evaluate(() => scrollY);
+    const lockup = p.locator('[data-control="home.foot.lockup"], footer a[href="#top"]').first();
+    await lockup.click();
+    await p.waitForTimeout(600);
+    const after = await p.evaluate(() => scrollY);
+    test.info().annotations.push({
+      type: 'links',
+      description: `${checked} links checked; og:url ${meta.url}; og:image ${meta.image} (${card ? `${card.status} ${card.contentType} ${size ? `${size.width} by ${size.height}` : 'not a PNG'}` : 'unread'}); the lockup scrolled ${before} -> ${after}`,
+    });
+    expect(failures, 'every href answers 200').toEqual([]);
+    expect(meta.url ?? '', 'og:url names www.turboslide.com').toContain('www.turboslide.com');
+    expect(meta.image ?? '', 'og:image names www.turboslide.com').toContain('www.turboslide.com');
+    expect(card?.status, 'the card answers').toBe(200);
+    expect(size, 'the card is 1200 by 630').toEqual({ width: 1200, height: 630 });
+    expect(after, 'the footer lockup scrolls to the top').toBe(0);
+  } finally {
+    await fresh.close();
+  }
+});
+
+test(title('decks.home.load-budget'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  const { context: fresh, page: p } = await homeContext(
+    browser,
+    { width: 1440, height: 900 },
+    'dark',
+  );
+  try {
+    const readyMs = await homeOpen(p);
+    await p.waitForTimeout(1500);
+    const before = await p.evaluate(() => {
+      const nav = performance.getEntriesByType('navigation')[0] as
+        PerformanceNavigationTiming | undefined;
+      const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+      const bytesOf = (kind: RegExp) =>
+        resources
+          .filter((r) => kind.test(r.initiatorType) || kind.test(r.name))
+          .reduce((n, r) => n + (r.transferSize || r.encodedBodySize || 0), 0);
+      const decodedJs = resources
+        .filter((r) => r.initiatorType === 'script' || /\.m?js(\?|$)/.test(r.name))
+        .reduce((n, r) => n + (r.decodedBodySize || 0), 0);
+      const w = window as unknown as {
+        __loaf: number[];
+        __lcp: { ms: number; element: string } | null;
+      };
+      const lcp = w.__lcp?.ms ?? 0;
+      const lcpElement = w.__lcp?.element ?? '';
+      return {
+        ttfb: nav ? Math.round(nav.responseStart) : null,
+        documentBytes: nav ? nav.transferSize || nav.encodedBodySize : null,
+        images: bytesOf(/^img$|\.(png|jpe?g|webp|avif|svg)(\?|$)/),
+        js: decodedJs,
+        lcp,
+        lcpElement,
+        longFrames: w.__loaf.filter((d) => d > 100),
+      };
+    });
+    await homeScroll(p);
+    await p.waitForTimeout(1000);
+    const after = await p.evaluate(() => {
+      const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+      return resources
+        .filter(
+          (r) => r.initiatorType === 'img' || /\.(png|jpe?g|webp|avif|svg)(\?|$)/.test(r.name),
+        )
+        .reduce((n, r) => n + (r.transferSize || r.encodedBodySize || 0), 0);
+    });
+    const lines = [
+      `first byte ${before.ttfb} ms (budget 150)`,
+      `LCP ${before.lcp} ms on ${before.lcpElement || 'no element'} (budget 500, the hero picture or the h1)`,
+      `ready ${readyMs} ms (budget 500)`,
+      `images before the first scroll ${before.images} B (budget 300000)`,
+      `images after a full scroll ${after} B (budget 800000)`,
+      `document ${before.documentBytes} B (budget 60000)`,
+      `long animation frames over 100 ms ${before.longFrames.length}`,
+      `JavaScript decoded ${before.js} B (reported against 600000)`,
+    ];
+    for (const line of lines) test.info().annotations.push({ type: 'measure', description: line });
+    expect(before.ttfb ?? 9999, lines[0]).toBeLessThanOrEqual(150);
+    expect(before.lcp, lines[1]).toBeLessThanOrEqual(500);
+    expect(/^(img|h1)/.test(before.lcpElement), lines[1]).toBe(true);
+    expect(readyMs, lines[2]).toBeLessThanOrEqual(500);
+    expect(before.images, lines[3]).toBeLessThanOrEqual(300_000);
+    expect(after, lines[4]).toBeLessThanOrEqual(800_000);
+    expect(before.documentBytes ?? 0, lines[5]).toBeLessThan(60_000);
+    expect(before.longFrames, lines[6]).toEqual([]);
+  } finally {
+    await fresh.close();
+  }
+});
+
+test(title('decks.home.layout-shift'), async ({ browser }) => {
+  test.setTimeout(300_000);
+  const failures: string[] = [];
+  const notes: string[] = [];
+  for (const size of HOME_WIDTHS)
+    for (const theme of ['dark', 'light'] as const) {
+      const { context: fresh, page: p } = await homeContext(browser, size, theme);
+      try {
+        await homeOpen(p);
+        await p.waitForTimeout(400);
+        await homeScroll(p);
+        const facts = await p.evaluate(() => {
+          const w = window as unknown as { __cls: number[]; __pressedEarly: string | null };
+          const pressed = [
+            ...document.querySelectorAll('[data-control^="home.theme"][aria-pressed="true"]'),
+          ]
+            .map((el) => el.getAttribute('data-control') ?? '')
+            .join(',');
+          return {
+            cls: w.__cls.reduce((a, b) => a + b, 0),
+            shifts: w.__cls.length,
+            early: w.__pressedEarly,
+            hydrated: pressed,
+          };
+        });
+        const label = `${size.width} ${theme}`;
+        notes.push(
+          `${label}: CLS ${facts.cls.toFixed(4)} over ${facts.shifts} shifts; pressed at 150 ms "${facts.early}", hydrated "${facts.hydrated}"`,
+        );
+        if (facts.cls > 0) failures.push(`${label}: CLS ${facts.cls.toFixed(4)}`);
+        if (facts.early !== facts.hydrated)
+          failures.push(
+            `${label}: the pressed appearance at 150 ms (${facts.early}) differs from the hydrated one (${facts.hydrated})`,
+          );
+      } finally {
+        await fresh.close();
+      }
+    }
+  test.info().annotations.push({ type: 'layout shift', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+});
+
+// ---- the list and the trash (docs/POLISH.md 2.7)
+
+/** The cards of a deck on /decks, with the line under each title. */
+async function cardsOf(
+  id: string,
+  p: Page = page,
+): Promise<{ count: number; titles: string[]; lines: string[]; recentHead: boolean }> {
+  return p.evaluate((deckId) => {
+    const cards = [...document.querySelectorAll(`[data-control="home.card.${deckId}"]`)];
+    return {
+      count: cards.length,
+      titles: cards.map((c) =>
+        (
+          c.querySelector(`[data-control="home.title.${deckId}"]`)?.textContent ??
+          c.textContent ??
+          ''
+        ).trim(),
+      ),
+      lines: cards.map((c) =>
+        (
+          c.querySelector('.ts-hm-card-line, .ts-hm-card-meta, .ts-hm-card-when')?.textContent ?? ''
+        ).trim(),
+      ),
+      recentHead:
+        document.querySelector(
+          '[data-control="home.recent"] h2, [data-control="home.recent"] .ts-hm-recent-head, [data-control="home.recent.sentence"]',
+        ) !== null,
+    };
+  }, id);
+}
+
+test(title('decks.recent.keeps-new-deck'), async () => {
+  test.setTimeout(150_000);
+  const fresh = await newDeck(page, scratch, 'Recent keeps me');
+  /* the mark clicked: the list within 1 s of its ready mark */
+  await ctl(page, 'title.home').click();
+  await page.waitForURL(/\/decks/, { timeout: 20_000 });
+  await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
+  const t0 = Date.now();
+  const listed = await expect
+    .poll(async () => (await cardsOf(fresh)).count, { timeout: 1000 })
+    .toBeGreaterThan(0)
+    .then(() => true)
+    .catch(() => false);
+  const afterMark = Date.now() - t0;
+  await gotoDecks();
+  const afterReload = (await cardsOf(fresh)).count;
+  await openEditor(page, deck);
+  await menuPath(page, 'file', 'file.open');
+  await ctl(page, 'dialog.open').waitFor({ timeout: 8000 });
+  const inOpen = await expect
+    .poll(() => ctl(page, `dialog.open.deck.${fresh}`).count(), { timeout: 8000 })
+    .toBeGreaterThan(0)
+    .then(() => true)
+    .catch(() => false);
+  await page.keyboard.press('Escape');
+  test.info().annotations.push({
+    type: 'recent',
+    description: `card within 1 s of the mark ${listed} (${afterMark} ms); after a reload ${afterReload}; File > Open lists it ${inOpen}`,
+  });
+  expect(listed, "the deck's card is on /decks within 1 s of the ready mark").toBe(true);
+  expect(afterReload, 'and again after a reload').toBeGreaterThan(0);
+  expect(inOpen, 'File > Open lists it').toBe(true);
+});
+
+test(title('decks.card.rename-everywhere'), async () => {
+  test.setTimeout(120_000);
+  await gotoDecks();
+  const name = `Renamed everywhere ${Date.now().toString(36)}`;
+  await cardMenuRow(deck, /^Rename$/);
+  const field = ctl(page, `home.rename.${deck}`);
+  await field.waitFor({ timeout: 6000 });
+  await field.fill(name);
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(500);
+  const cards = await cardsOf(deck);
+  test.info().annotations.push({
+    type: 'rename',
+    description: `${cards.count} card(s): ${cards.titles.join(' | ')}`,
+  });
+  deckName = name;
+  expect(cards.count, 'the deck appears once').toBe(1);
+  expect(
+    cards.titles.every((t) => t === name),
+    'every card of the deck reads the new name within 500 ms',
+  ).toBe(true);
+});
+
+test(title('decks.list.one-card-per-deck'), async () => {
+  test.setTimeout(90_000);
+  await openEditor(page, deck);
+  await gotoDecks();
+  const cards = await cardsOf(deck);
+  test.info().annotations.push({
+    type: 'cards',
+    description: `${cards.count} card(s); recent head ${cards.recentHead}; lines ${cards.lines.join(' | ')}`,
+  });
+  expect(cards.count, 'one card for the deck this browser opened').toBe(1);
+  expect(cards.recentHead, 'no Recent row head').toBe(false);
+  expect(cards.lines.join(' '), 'the line reads Opened just now').toMatch(/Opened just now/);
+});
+
+test(title('decks.trash.leaves-at-once'), async () => {
+  test.setTimeout(120_000);
+  const other = await newDeck(page, scratch, 'Leaves at once');
+  await page.keyboard.press('Escape');
+  await menuPath(page, 'file', 'file.moveToTrash');
+  const t0 = Date.now();
+  await page.waitForURL(/\/decks/, { timeout: 20_000 });
+  const ms = Date.now() - t0;
+  const words = await expect
+    .poll(() => snackbarText(page), { timeout: 5000 })
+    .toMatch(/Moved to trash/)
+    .then(() => snackbarText(page))
+    .catch(() => snackbarText(page));
+  const undo = await ctl(page, 'snackbar.action')
+    .textContent({ timeout: 3000 })
+    .catch(() => null);
+  test.info().annotations.push({
+    type: 'trash',
+    description: `/decks after ${ms} ms; snackbar "${words}" with "${undo}"`,
+  });
+  expect(ms, '/decks is the address within 1.5 s').toBeLessThan(1500);
+  expect(words ?? '', 'Moved to trash').toMatch(/Moved to trash/);
+  expect(undo ?? '', 'with Undo').toMatch(/Undo/);
+  void other;
+});
+
+test(title('decks.card.title-ellipsis'), async () => {
+  test.setTimeout(150_000);
+  const long = 'A sixty character presentation title that runs past the card';
+  const other = await newDeck(page, scratch, long.slice(0, 60));
+  await gotoDecks();
+  const onList = await page.evaluate((id) => {
+    const el = document.querySelector(
+      `[data-control="home.title.${id}"] .ts-hm-card-title-text, [data-control="home.title.${id}"]`,
+    ) as HTMLElement | null;
+    if (!el) return null;
+    const cs = getComputedStyle(el);
+    return {
+      ellipsis: cs.textOverflow === 'ellipsis',
+      nowrap: cs.whiteSpace === 'nowrap',
+      overflow: cs.overflow,
+      truncated: el.scrollWidth > el.clientWidth + 1,
+    };
+  }, other);
+  await trashFromEditor(other);
+  await gotoTrash();
+  const inTrash = await page.evaluate((id) => {
+    const card = document.querySelector(`[data-control="trash.card.${id}"]`);
+    const el = (card?.querySelector('.ts-hm-card-title-text, .ts-hm-card-title, .ts-trash-title') ??
+      null) as HTMLElement | null;
+    if (!el) return null;
+    const cs = getComputedStyle(el);
+    return {
+      ellipsis: cs.textOverflow === 'ellipsis',
+      nowrap: cs.whiteSpace === 'nowrap',
+      overflow: cs.overflow,
+      truncated: el.scrollWidth > el.clientWidth + 1,
+    };
+  }, other);
+  test.info().annotations.push({
+    type: 'ellipsis',
+    description: `list ${JSON.stringify(onList)}; trash ${JSON.stringify(inTrash)}`,
+  });
+  expect(
+    onList?.ellipsis && onList.nowrap && onList.overflow !== 'visible',
+    'the list title ends in an ellipsis',
+  ).toBe(true);
+  expect(
+    inTrash?.ellipsis && inTrash.nowrap && inTrash.overflow !== 'visible',
+    'the trash title ends in an ellipsis',
+  ).toBe(true);
+});
+
+test(title('decks.card.download-powerpoint'), async () => {
+  test.setTimeout(150_000);
+  await openEditor(page, deck);
+  await gotoDecks();
+  const file = await download(page, () => cardMenuRow(deck, /^Download$/), 60_000);
+  const words = await expect
+    .poll(() => snackbarText(page), { timeout: 8000 })
+    .toMatch(/Saved/)
+    .then(() => snackbarText(page))
+    .catch(() => snackbarText(page));
+  test.info().annotations.push({
+    type: 'download',
+    description: `${file.name} (${file.bytes.length} B) in ${file.ms} ms; snackbar "${words}"`,
+  });
+  expect(file.name, 'a .pptx').toMatch(/\.pptx$/);
+  expect(file.name.toLowerCase(), 'named after the title').toContain(
+    deckName
+      .split(' ')[0]!
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, ''),
+  );
+  expect(words ?? '', 'Saved <name>').toMatch(
+    new RegExp(`Saved .*${file.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`),
+  );
+});
+
+test(title('decks.import.upload-drop-zone'), async () => {
+  test.setTimeout(90_000);
+  await openEditor(page, deck);
+  await menuPath(page, 'file', 'file.importSlides');
+  await ctl(page, 'dialog.importSlides').waitFor({ timeout: 8000 });
+  const upload = page
+    .locator(
+      '[data-control="dialog.importSlides.tab.upload"], [data-control="dialog.importSlides.tab"] [role="tab"]:has-text("Upload")',
+    )
+    .first();
+  if ((await upload.count()) > 0) await upload.click();
+  await page.waitForTimeout(300);
+  const facts = await page.evaluate(() => {
+    const dialog = document.querySelector('[data-control="dialog.importSlides"]');
+    const inputs = [...(dialog?.querySelectorAll('input[type="file"]') ?? [])];
+    /* a native input the dialog keeps in the tree but clips away (upload.css: `clip: rect(0 0 0 0)`,
+       a 1 px box) is not visible; one a person can see has a box and no clip */
+    const visibleNative = inputs.filter((i) => {
+      const cs = getComputedStyle(i);
+      const box = i.getBoundingClientRect();
+      return (
+        (i as HTMLElement).offsetParent !== null &&
+        cs.opacity !== '0' &&
+        cs.visibility !== 'hidden' &&
+        (cs.clip === 'auto' || cs.clip === '') &&
+        cs.clipPath === 'none' &&
+        box.width >= 8 &&
+        box.height >= 8
+      );
+    }).length;
+    /* the styled button (B5's `dialog.importSlides.upload.button`) over the hidden input the
+       dialog keeps as `dialog.importSlides.file` */
+    const button =
+      dialog?.querySelector(
+        '[data-control="dialog.importSlides.upload.button"], [data-control="dialog.importSlides.upload"] button, button[data-control^="dialog.importSlides.upload"]',
+      ) ?? dialog?.querySelector('[data-control="dialog.importSlides.file"]');
+    /* the drop target: the dialog card takes a drop (b5.md: the card is the target), which a
+       drop zone shows by cancelling dragover; a marked zone element counts as well */
+    const marked =
+      dialog?.querySelector(
+        '[data-drop], .ts-dialog-drop, [data-control="dialog.importSlides.drop"]',
+      ) ??
+      button?.closest('[data-drop], .ts-dialog-drop') ??
+      null;
+    const accepts = (el: Element | null) => {
+      if (!el) return false;
+      try {
+        const ev = new DragEvent('dragover', {
+          bubbles: true,
+          cancelable: true,
+          dataTransfer: new DataTransfer(),
+        });
+        el.dispatchEvent(ev);
+        return ev.defaultPrevented;
+      } catch {
+        return false;
+      }
+    };
+    const zone =
+      marked ??
+      (accepts(dialog?.querySelector('[data-control="dialog.importSlides.upload"]') ?? null) ||
+      accepts(dialog)
+        ? dialog
+        : null);
+    return {
+      inputs: inputs.length,
+      visibleNative,
+      button: button ? button.tagName.toLowerCase() : null,
+      buttonText: (button?.textContent ?? '').trim(),
+      zone: zone !== null,
+    };
+  });
+  await page.keyboard.press('Escape');
+  test.info().annotations.push({ type: 'upload tab', description: JSON.stringify(facts) });
+  expect(facts.visibleNative, 'no native file control visible').toBe(0);
+  expect(facts.button, 'a button opens the hidden input').toBe('button');
+  expect(facts.zone, 'the dialog is a drop target').toBe(true);
+});
+
+test(title('decks.back.list-restored'), async () => {
+  test.setTimeout(120_000);
+  await gotoDecks();
+  await ctl(page, `home.open.${deck}`)
+    .first()
+    .click({ timeout: 5000 })
+    .catch(async () => {
+      await ctl(page, `home.card.${deck}`).first().click();
+    });
+  await page.waitForURL(/\/edit\//, { timeout: 20_000 });
+  await waitEditor(page);
+  const t0 = Date.now();
+  await page.goBack();
+  await page.waitForURL(/\/decks/, { timeout: 20_000 });
+  const painted = await expect
+    .poll(
+      async () =>
+        page.evaluate(() => document.querySelectorAll('[data-control^="home.card."]').length),
+      { timeout: 300 },
+    )
+    .toBeGreaterThan(0)
+    .then(() => true)
+    .catch(() => false);
+  const ms = Date.now() - t0;
+  const frames = await page.evaluate(
+    () =>
+      document.querySelectorAll(
+        '[data-control="home.pending"], .ts-hm-card.is-pending, .ts-hm-skeleton',
+      ).length,
+  );
+  test.info().annotations.push({
+    type: 'back',
+    description: `cards painted ${painted} after ${ms} ms; grey frames ${frames}`,
+  });
+  expect(painted, 'the cards paint within 300 ms of Back').toBe(true);
+  expect(frames, 'no grey frames').toBe(0);
+});
+
+test(title('decks.card.thumbnail-or-plate'), async ({ browser }) => {
+  test.setTimeout(150_000);
+  await openEditor(page, deck);
+  const fresh = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+  });
+  const p = await fresh.newPage();
+  const renders: string[] = [];
+  p.on('request', (r) => {
+    if (/\/api\/render\//.test(r.url())) renders.push(r.url());
+  });
+  try {
+    await p.goto('/decks');
+    await p.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
+    const first = await p.evaluate(() =>
+      [...document.querySelectorAll('[data-control^="home.card."]')].map((card) => ({
+        id: card.getAttribute('data-control') ?? '',
+        img: card.querySelector('.ts-hm-card-thumb img, img') !== null,
+        plate: card.querySelector('.ts-hm-card-plate') !== null,
+      })),
+    );
+    const blank = first.filter((c) => !c.img && !c.plate);
+    /* a card scrolled into view asks again */
+    const before = renders.length;
+    await p.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await p.waitForTimeout(2500);
+    const asked = renders.length - before;
+    test.info().annotations.push({
+      type: 'thumbnails',
+      description: `${first.length} cards at first paint, ${blank.length} blank; ${asked} render request(s) after the scroll`,
+    });
+    expect(first.length).toBeGreaterThan(0);
+    expect(blank, 'every card draws an img or the title plate at first paint').toEqual([]);
+  } finally {
+    await fresh.close();
+  }
+});
+
+test(title('decks.trash.enter-confirms'), async () => {
+  test.setTimeout(120_000);
+  const other = await newDeck(page, scratch, 'Enter confirms');
+  await trashFromEditor(other);
+  await gotoTrash();
+  await ctl(page, `trash.delete.${other}`).click();
+  await expect(page.locator('[data-control="trash.confirm"][role="dialog"]')).toBeVisible();
+  const focused = await page.evaluate(
+    () =>
+      document.activeElement?.getAttribute('data-control') ??
+      document.activeElement?.tagName.toLowerCase() ??
+      'none',
+  );
+  await page.keyboard.press('Enter');
+  const gone = await expect(ctl(page, `trash.card.${other}`))
+    .toHaveCount(0, { timeout: 20_000 })
+    .then(() => true)
+    .catch(() => false);
+  test.info().annotations.push({
+    type: 'confirm',
+    description: `the focus on open ${focused}; Enter deleted ${gone}`,
+  });
+  expect(focused, 'the primary button holds the focus').toBe('trash.confirm.ok');
+  expect(gone, 'Enter deletes').toBe(true);
+  await expect
+    .poll(() => statusOf(page, `/edit/${other}`), { timeout: 20_000, intervals: [2000] })
+    .toBe(404);
+  scratch.ids.delete(other);
+});
+
+test(title('decks.card.rename-field-fits'), async () => {
+  test.setTimeout(90_000);
+  await gotoDecks();
+  await cardMenuRow(deck, /^Rename$/);
+  const field = ctl(page, `home.rename.${deck}`);
+  await field.waitFor({ timeout: 6000 });
+  const facts = await page.evaluate((id) => {
+    const input = document.querySelector(
+      `[data-control="home.rename.${id}"]`,
+    ) as HTMLInputElement | null;
+    const body = input?.closest('.ts-hm-card-body, .ts-hm-card') ?? null;
+    if (!input || !body) return null;
+    const ir = input.getBoundingClientRect();
+    const br = body.getBoundingClientRect();
+    return {
+      field: Math.round(ir.width),
+      body: Math.round(br.width),
+      scrollLeft: input.scrollLeft,
+      startVisible: input.scrollLeft === 0,
+    };
+  }, deck);
+  await page.keyboard.press('Escape');
+  test.info().annotations.push({ type: 'rename field', description: JSON.stringify(facts) });
+  expect(facts, 'the field and the card body').not.toBeNull();
+  expect(facts!.field, 'the field spans the card body').toBeGreaterThanOrEqual(facts!.body - 32);
+  expect(facts!.startVisible, "the title's start is visible").toBe(true);
+});
+
+test(title('decks.trash.empty-not-primary'), async () => {
+  await gotoTrash();
+  const cls = (await ctl(page, 'trash.empty').getAttribute('class')) ?? '';
+  test.info().annotations.push({ type: 'empty trash', description: `class "${cls}"` });
+  expect(cls.split(/\s+/), 'Empty trash carries no is-solid').not.toContain('is-solid');
+});
+
+test(title('decks.thumbnail.never-502'), async ({ browser }) => {
+  test.setTimeout(150_000);
+  const fresh = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+  });
+  const p = await fresh.newPage();
+  const bad: string[] = [];
+  const errors: string[] = [];
+  p.on('response', (r) => {
+    if (/\/api\/render\//.test(r.url()) && r.status() === 502) bad.push(r.url());
+  });
+  p.on('console', (m) => {
+    if (m.type() === 'error') errors.push(m.text().slice(0, 120));
+  });
+  p.on('pageerror', (e) => errors.push(String(e).slice(0, 120)));
+  try {
+    await p.goto('/decks');
+    await p.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
+    await p.waitForTimeout(60_000);
+    const listErrors = errors.length;
+    await p.goto(`/edit/${deck}`);
+    await waitEditor(p);
+    await p.waitForTimeout(3000);
+    test.info().annotations.push({
+      type: '502',
+      description: `${bad.length} render responses 502 over 60 s idle; console errors on the list ${listErrors}, on the editor load ${errors.length - listErrors}${errors.length > 0 ? ` (${errors.slice(0, 3).join(' | ')})` : ''}`,
+    });
+    expect(bad, 'no /api/render response is 502').toEqual([]);
+    expect(errors.slice(listErrors), 'an editor load logs no console error').toEqual([]);
+  } finally {
+    await fresh.close();
+  }
+});
+
+test(title('decks.polish.pages-sweep'), async ({ browser }) => {
+  test.setTimeout(300_000);
+  const failures: string[] = [];
+  const notes: string[] = [];
+  /* the end plate: ArrowRight past the last slide, a click leaves */
+  await openEditor(page, deck);
+  const order = await slideOrder(page);
+  await clickCard(page, order[order.length - 1]!);
+  await ctl(page, 'present.open').click();
+  const show = page.locator('[data-control="present.show"]');
+  await show.waitFor({ timeout: 10_000 });
+  await page.waitForTimeout(800);
+  await page.keyboard.press('ArrowRight');
+  await page.waitForTimeout(500);
+  const endPlate = (await ctl(page, 'present.end').count()) > 0;
+  if (endPlate) {
+    await ctl(page, 'present.end').click();
+    await page.waitForTimeout(800);
+  }
+  const left = (await show.count()) === 0;
+  notes.push(`end plate ${endPlate}, a click leaves ${left}`);
+  if (!endPlate || !left) failures.push(`the end plate: shown ${endPlate}, a click leaves ${left}`);
+  if (!left) {
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
+  }
+  /* the access page's link is ink */
+  const stranger = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+  });
+  try {
+    const sp = await stranger.newPage();
+    await sp.goto('/deck/no-such-deck-polish-sweep');
+    await sp.locator('[data-control="access.page"]').first().waitFor({ timeout: 30_000 });
+    const link = await sp.evaluate(() => {
+      const a = document.querySelector(
+        '[data-control="access.links"] a, [data-control="access.page"] a',
+      ) as HTMLElement | null;
+      if (!a) return null;
+      const color = getComputedStyle(a).color;
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--pt-ink)';
+      document.body.append(probe);
+      const ink = getComputedStyle(probe).color;
+      probe.remove();
+      const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(color);
+      const blue = m ? Number(m[3]) > Number(m[1]) + 60 : false;
+      return {
+        color,
+        ink,
+        blue,
+        sentence: (
+          document.querySelector('[data-control="access.sentence"]')?.textContent ?? ''
+        ).trim(),
+      };
+    });
+    notes.push(
+      `access link ${link ? `${link.color} (ink ${link.ink}, blue ${link.blue}); sentence "${link.sentence}"` : 'none'}`,
+    );
+    if (!link || link.blue || /\?/.test(link.sentence))
+      failures.push(
+        `the access page: link ${link?.color ?? 'none'}, sentence "${link?.sentence ?? ''}"`,
+      );
+  } finally {
+    await stranger.close();
+  }
+  /* the card's Make a copy lists Copy comments */
+  await gotoDecks();
+  await cardMenuRow(deck, /Make a copy/);
+  const copyDialog = await ctl(page, 'dialog.makeCopy')
+    .waitFor({ timeout: 8000 })
+    .then(() => true)
+    .catch(() => false);
+  const copyComments = copyDialog
+    ? (await ctl(page, 'dialog.makeCopy.copyComments').count()) > 0
+    : false;
+  await page.keyboard.press('Escape');
+  notes.push(`Make a copy dialog ${copyDialog} with Copy comments ${copyComments}`);
+  if (!copyComments) failures.push("the card's Make a copy lists no Copy comments");
+  /* the presenter's pane has no Audience tools tab */
+  const presenter = await page.goto(`/present/${deck}`, { waitUntil: 'domcontentloaded' });
+  await page
+    .locator('[data-control="presenter"]')
+    .first()
+    .waitFor({ timeout: 30_000 })
+    .catch(() => undefined);
+  const audience = await ctl(page, 'presenter.tab.audience').count();
+  notes.push(`presenter ${presenter?.status()}: Audience tools tab ${audience}`);
+  if (audience > 0) failures.push("the presenter's Audience tools tab is drawn");
+  /* the comment card: no empty header, Resolve reads Resolved with Undo */
+  await openEditor(page, deck);
+  const slideId = (await state(page)).slideId;
+  await placeBlock(page, slideId, {
+    id: 'sweep-box',
+    type: 'shape',
+    shape: 'rectangle',
+    fill: 'plate',
+    stroke: 'ink',
+    pos: { x: 900, y: 500, w: 240, h: 160 },
+  });
+  await selectBlock(page, 'sweep-box');
+  await page.keyboard.press('Meta+Alt+m');
+  const card = await ctl(page, 'comment.card')
+    .waitFor({ timeout: 8000 })
+    .then(() => true)
+    .catch(() => false);
+  if (card) {
+    const emptyHead = await page.evaluate(() => {
+      const head = document.querySelector('[data-control="comment.card"] .ts-comment-card-head');
+      return (
+        head !== null &&
+        (head.textContent ?? '').trim() === '' &&
+        head.getClientRects().length > 0 &&
+        head.getBoundingClientRect().height > 8
+      );
+    });
+    await ctl(page, 'comment.card.new.field').click();
+    await page.keyboard.type('Sweep comment', { delay: 40 });
+    await ctl(page, 'comment.card.new.submit').click();
+    await page.waitForTimeout(1500);
+    const resolve = page.locator('[data-control$=".resolve"]').first();
+    let resolvedWords: string | null = null;
+    let undo: string | null = null;
+    if ((await resolve.count()) > 0) {
+      await resolve.click();
+      resolvedWords = await expect
+        .poll(() => snackbarText(page), { timeout: 5000 })
+        .toMatch(/Resolved/)
+        .then(() => snackbarText(page))
+        .catch(() => snackbarText(page));
+      undo = await ctl(page, 'snackbar.action')
+        .textContent({ timeout: 3000 })
+        .catch(() => null);
+    }
+    notes.push(
+      `comment card: empty header ${emptyHead}; after Resolve "${resolvedWords}" with "${undo}"`,
+    );
+    if (emptyHead || !/Resolved/.test(resolvedWords ?? '') || !/Undo/.test(undo ?? ''))
+      failures.push(
+        `the comment card: empty header ${emptyHead}, resolve words "${resolvedWords}", action "${undo}"`,
+      );
+    await page.keyboard.press('Escape');
+  } else failures.push('no comment card after Cmd+Alt+M on the shape');
+  /* at 1280 by 800 the show's bar does not intersect the sheet */
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await ctl(page, 'present.open').click();
+  await show.waitFor({ timeout: 10_000 });
+  await page.waitForTimeout(800);
+  await page.mouse.move(640, 400);
+  await page.mouse.move(660, 420);
+  await page.waitForTimeout(300);
+  const boxes = await page.evaluate(() => {
+    const bar = document.querySelector('[data-control="present.toolbar"]');
+    /* the show's slide is the stage's sheet in present mode (`.ts-stagewrap.is-present`) */
+    const sheet = document.querySelector(
+      '.ts-stagewrap.is-present .pt-slide:not(.is-leaving), [data-control="present.show"] .pt-slide:not(.is-leaving), .pt-viewer.is-present .pt-slide:not(.is-leaving)',
+    );
+    if (!bar || !sheet) return null;
+    const b = bar.getBoundingClientRect();
+    const s = sheet.getBoundingClientRect();
+    return {
+      barTop: Math.round(b.top),
+      sheetBottom: Math.round(s.bottom),
+      intersects: b.top < s.bottom && b.bottom > s.top && b.left < s.right && b.right > s.left,
+    };
+  });
+  await page.keyboard.press('Escape');
+  await expect.poll(() => show.count(), { timeout: 8000 }).toBe(0);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  notes.push(
+    `show at 1280 by 800: ${boxes ? `bar top ${boxes.barTop}, sheet bottom ${boxes.sheetBottom}, intersects ${boxes.intersects}` : 'unread'}`,
+  );
+  if (!boxes || boxes.intersects)
+    failures.push(`the show's bar at 1280 by 800: ${boxes ? 'intersects the sheet' : 'unread'}`);
+  /* /edit/<id> answers 404 within 1 s of Delete forever */
+  const victim = await newDeck(page, scratch, 'Deleted within a second');
+  await trashFromEditor(victim);
+  await gotoTrash();
+  await ctl(page, `trash.delete.${victim}`).click();
+  await ctl(page, 'trash.confirm.ok').click();
+  await ctl(page, `trash.card.${victim}`).waitFor({ state: 'detached', timeout: 30_000 });
+  const t0 = Date.now();
+  let status = 0;
+  while (Date.now() - t0 < 1000) {
+    status = await statusOf(page, `/edit/${victim}`);
+    if (status === 404) break;
+    await page.waitForTimeout(100);
+  }
+  notes.push(`/edit/<id> answered ${status} ${Date.now() - t0} ms after Delete forever`);
+  if (status !== 404) failures.push(`/edit/<id> answered ${status} within 1 s of Delete forever`);
+  if (status === 404) scratch.ids.delete(victim);
+  test.info().annotations.push({ type: 'sweep', description: notes.join('; ') });
+  expect(failures).toEqual([]);
+});
+
 coverage(import.meta.filename, [
   'decks.home.new-presentation',
   'decks.home.your-presentations',
@@ -1896,4 +3088,25 @@ coverage(import.meta.filename, [
   'templates.gallery.strip-and-link',
   'chrome.appearance.first-visit-follows-os',
   'brand.appearance.default',
+  /* the polish round (docs/POLISH.md 2.7, section 3, 5.1) */
+  'decks.home.pictures-three-widths',
+  'decks.home.copy-rules',
+  'decks.home.product-pictures',
+  'decks.home.links-and-card',
+  'decks.home.load-budget',
+  'decks.home.layout-shift',
+  'decks.recent.keeps-new-deck',
+  'decks.card.rename-everywhere',
+  'decks.list.one-card-per-deck',
+  'decks.trash.leaves-at-once',
+  'decks.card.title-ellipsis',
+  'decks.card.download-powerpoint',
+  'decks.import.upload-drop-zone',
+  'decks.back.list-restored',
+  'decks.card.thumbnail-or-plate',
+  'decks.trash.enter-confirms',
+  'decks.card.rename-field-fits',
+  'decks.trash.empty-not-primary',
+  'decks.thumbnail.never-502',
+  'decks.polish.pages-sweep',
 ]);

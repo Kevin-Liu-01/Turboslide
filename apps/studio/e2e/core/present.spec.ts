@@ -27,6 +27,7 @@ import {
   title,
   typeInto,
   typeNote,
+  extraHTTPHeaders,
 } from './lib';
 
 // Present and comments, the spec rows (docs/FOCUS.md 2.7, 6.4 `present.*`, `comments.*` and
@@ -1001,6 +1002,204 @@ test(title('brand.frame.toggles'), async () => {
     ]);
 });
 
+// ---------------------------------------------------------------------------------------------
+// the polish round (docs/POLISH.md 2.7 items 93, 94 and 2.8 item 105, 5.1 `present.*`): no dead
+// control in the show's bar, the laser's size, and the present link's first paint.
+
+test(title('present.bar.no-dead-control'), async () => {
+  test.setTimeout(120_000);
+  await openEditor(page, deck);
+  await clickCard(page, slides[0]!);
+  await startShow();
+  await page.mouse.move(700, 450);
+  await page.mouse.move(740, 470);
+  await page.waitForTimeout(400);
+  const buttons = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-control="present.toolbar"] button[data-control]')].map(
+      (el) => ({
+        control: el.getAttribute('data-control') ?? '',
+        disabled: (el as HTMLButtonElement).disabled || el.getAttribute('aria-disabled') === 'true',
+      }),
+    ),
+  );
+  const captions = buttons.filter((b) => /captions/i.test(b.control));
+  const facts: string[] = [];
+  const dead: string[] = [];
+  const stateOf = () =>
+    page.evaluate(() => {
+      const s = document.querySelector('[data-control="present.show"]');
+      return {
+        index: s?.getAttribute('data-index') ?? null,
+        laser: s?.getAttribute('data-laser') ?? null,
+        list: document.querySelector('[data-control="present.list"]') !== null,
+        options: document.querySelectorAll('[data-control^="menu.present.options."]').length,
+        full: document.fullscreenElement !== null,
+        shown: s !== null,
+      };
+    });
+  for (const b of buttons.filter((x) => !/captions/i.test(x.control))) {
+    if (b.control === 'present.exit') continue;
+    const before = await stateOf();
+    await page.mouse.move(700, 450);
+    await page.mouse.move(720, 460);
+    await page.waitForTimeout(250);
+    await ctl(page, b.control)
+      .click({ timeout: 5000 })
+      .catch(() => undefined);
+    await page.waitForTimeout(500);
+    const after = await stateOf();
+    const changed = JSON.stringify(before) !== JSON.stringify(after);
+    facts.push(`${b.control}: ${changed ? 'changed the state' : 'changed nothing'}`);
+    if (!changed) dead.push(b.control);
+    /* put the show back: the list and the options closed, the laser off, full screen left */
+    await page.keyboard.press('Escape').catch(() => undefined);
+    await page.waitForTimeout(200);
+    if (!(await stateOf()).shown) {
+      await startShow();
+      await page.mouse.move(700, 450);
+      await page.mouse.move(740, 470);
+      await page.waitForTimeout(400);
+    }
+    if ((await stateOf()).laser === 'true') await page.keyboard.press('l');
+  }
+  await leaveShow();
+  test.info().annotations.push({
+    type: 'bar',
+    description: `${buttons.length} controls (${buttons.map((b) => b.control).join(', ')}); captions ${captions.length}; ${facts.join('; ')}`,
+  });
+  expect(captions, 'no captions control').toEqual([]);
+  expect(dead, "every control's click changes the state").toEqual([]);
+});
+
+test(title('present.laser.visible'), async () => {
+  test.setTimeout(90_000);
+  await openEditor(page, deck);
+  await clickCard(page, slides[0]!);
+  await startShow();
+  await page.keyboard.press('l');
+  await expect(show()).toHaveAttribute('data-laser', 'true');
+  await page.mouse.move(640, 400);
+  await page.mouse.move(700, 440);
+  await page.waitForTimeout(300);
+  const dot = await page.evaluate(() => {
+    const el = document.querySelector('[data-control="present.laserDot"], .ts-present-laser');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    return {
+      w: r.width,
+      h: r.height,
+      x: r.x,
+      y: r.y,
+      background: cs.backgroundColor,
+      shadow: cs.boxShadow,
+    };
+  });
+  /* a pixel read across the dot: the ink core and the paper ring around it */
+  let read: { core: string; ring: string; diameter: number } | null = null;
+  if (dot) {
+    const shot = await page.screenshot({
+      clip: {
+        x: Math.max(0, dot.x - 12),
+        y: Math.max(0, dot.y - 12),
+        width: dot.w + 24,
+        height: dot.h + 24,
+      },
+      scale: 'css',
+    });
+    const { decodePng } = await import('../../../../scripts/probes/core-walk/toolkit.mjs');
+    const img = decodePng(shot);
+    const cx = Math.round(12 + dot.w / 2);
+    const cy = Math.round(12 + dot.h / 2);
+    const px = (x: number, y: number) =>
+      img.pixel(Math.min(img.width - 1, Math.max(0, x)), Math.min(img.height - 1, Math.max(0, y)));
+    const hex = (rgb: number[]) => `#${rgb.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+    const core = px(cx, cy);
+    /* the drawn diameter: the run of pixels darker than the ground along the row through the centre, ring included */
+    const ground = px(2, 2);
+    const dark = (rgb: number[]) => rgb.some((v, i) => Math.abs(v - ground[i]!) > 40);
+    let left = cx;
+    while (left > 0 && dark(px(left - 1, cy))) left -= 1;
+    let right = cx;
+    while (right < img.width - 1 && dark(px(right + 1, cy))) right += 1;
+    read = { core: hex(core), ring: hex(px(right - 1, cy)), diameter: right - left + 1 };
+  }
+  await page.keyboard.press('l');
+  await leaveShow();
+  test.info().annotations.push({
+    type: 'laser',
+    description: `${dot ? `${dot.w} by ${dot.h} px, ${dot.background}, shadow ${dot.shadow}` : 'no dot'}; pixels ${read ? `core ${read.core}, ring ${read.ring}, drawn diameter ${read.diameter}` : 'unread'}`,
+  });
+  expect(dot, 'the laser dot is drawn').not.toBeNull();
+  expect(read?.diameter ?? 0, 'the drawn diameter is 14 px with its ring').toBeGreaterThanOrEqual(
+    13,
+  );
+  expect(Math.max(dot!.w, dot!.h), 'a 14 px dot').toBeGreaterThanOrEqual(13);
+});
+
+test(title('present.link.first-paint-show'), async ({ browser }) => {
+  test.setTimeout(120_000);
+  const fresh = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+  });
+  const p = await fresh.newPage();
+  try {
+    await p.addInitScript(() => {
+      const w = window as unknown as {
+        __cls: number[];
+        __first: { show: boolean; bar: boolean; at: number } | null;
+      };
+      w.__cls = [];
+      w.__first = null;
+      try {
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as (PerformanceEntry & {
+            hadRecentInput?: boolean;
+            value?: number;
+          })[])
+            if (!entry.hadRecentInput) w.__cls.push(Number((entry.value ?? 0).toFixed(4)));
+        }).observe({ type: 'layout-shift', buffered: true });
+      } catch {
+        // no layout shift entries
+      }
+      setTimeout(() => {
+        w.__first = {
+          show:
+            document.querySelector('[data-control="present.show"], .pt-viewer.is-present') !== null,
+          bar:
+            document.querySelector(
+              '.ts-viewer-bar, [data-control="viewer.bar"], .pt-viewer:not(.is-present) .ts-title-row',
+            ) !== null,
+          at: Math.round(performance.now()),
+        };
+      }, 150);
+    });
+    await p.goto(`/deck/${deck}?present=1`);
+    await p
+      .locator('[data-control="present.show"], .pt-viewer.is-present')
+      .first()
+      .waitFor({ timeout: 30_000 });
+    await p.waitForTimeout(1500);
+    const facts = await p.evaluate(() => {
+      const w = window as unknown as {
+        __cls: number[];
+        __first: { show: boolean; bar: boolean; at: number } | null;
+      };
+      return { first: w.__first, cls: w.__cls.reduce((a, b) => a + b, 0), shifts: w.__cls.length };
+    });
+    test.info().annotations.push({
+      type: 'first paint',
+      description: `at 150 ms: show ${facts.first?.show}, viewer bar ${facts.first?.bar}; CLS ${facts.cls.toFixed(4)} over ${facts.shifts} shifts`,
+    });
+    expect(facts.first?.show, 'the frame at 150 ms holds the show').toBe(true);
+    expect(facts.first?.bar, 'and no viewer bar').toBe(false);
+    expect(facts.cls, 'CLS 0').toBe(0);
+  } finally {
+    await fresh.close();
+  }
+});
+
 coverage(import.meta.filename, [
   'present.slideshow.button',
   'present.slideshow.cmd-enter',
@@ -1033,4 +1232,8 @@ coverage(import.meta.filename, [
   'present.show.bar-on-entry',
   'present.presenter.sentence-case',
   'brand.frame.toggles',
+  /* the polish round (docs/POLISH.md 2.7 items 93 and 94, 2.8 item 105) */
+  'present.bar.no-dead-control',
+  'present.laser.visible',
+  'present.link.first-paint-show',
 ]);

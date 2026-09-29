@@ -93,7 +93,7 @@ import { PicturesPanel } from './PicturesPanel';
 import { AnnouncerRegion } from './presence/Announcer';
 import { FollowingPlate } from './presence/FollowingPlate';
 import { openRoster } from './presence/roster-hook';
-import { displayNameFor, viewerFactsOf } from './presence/presence-model';
+import { displayNameFor, meOf, viewerFactsOf } from './presence/presence-model';
 import { usePtShell } from './shell-context';
 import type { ShellState } from './shell-context';
 import type { FilmstripHandle } from './Sidebar';
@@ -1905,10 +1905,11 @@ export function EditorShell({
               dispatch={input.dispatch}
               history
               identities={input.identities}
-              /* this browser's own principal: the account when signed in, else the anonymous
-                 principal the room knows this tab by (the account record carries a null principal
-                 id while anonymous, and the rows then never read You) */
-              me={input.account?.signedIn ? input.account.principal : input.presence?.self}
+              /* this browser's own principal through the one reader of docs/PEOPLE.md 3.11
+                 (presence-model.ts meOf; build/b2.md request 2): the account when signed in, else
+                 the roster's own row, else the payload's principal, so the panel's You, the Share
+                 dialog's You, the own chip and the two heads read one source */
+              me={meOf({ account: input.account, presence: input.presence }) ?? undefined}
               showChanges={effectiveSettings.showChanges === true}
               selected={selectedVersion}
               menuContext={menuContext}

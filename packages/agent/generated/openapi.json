@@ -15075,6 +15075,144 @@
         }
       }
     },
+    "/api/actions/admin.avatar.sweep": {
+      "post": {
+        "operationId": "admin.avatar.sweep",
+        "summary": "Sweep orphan pictures",
+        "description": "Removes picture avatar files under u/ that no profile names and that are older than a day (an upload that never reached its record); by key, never by date or name; refused without an identity database.",
+        "tags": [
+          "admin"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "http"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminAvatarSweepInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAvatarSweepOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/actions/presence.list": {
       "post": {
         "operationId": "presence.list",
@@ -61158,6 +61296,61 @@
         ],
         "additionalProperties": false
       },
+      "AdminAvatarSweepInput": {
+        "$id": "#/components/schemas/AdminAvatarSweepInput",
+        "type": "object",
+        "properties": {
+          "dryRun": {
+            "description": "List the orphans and remove nothing",
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminAvatarSweepOutput": {
+        "$id": "#/components/schemas/AdminAvatarSweepOutput",
+        "type": "object",
+        "properties": {
+          "dryRun": {
+            "type": "boolean"
+          },
+          "scanned": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "kept": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "young": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "orphans": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filesRemoved": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "dryRun",
+          "scanned",
+          "kept",
+          "young",
+          "orphans",
+          "filesRemoved"
+        ],
+        "additionalProperties": false
+      },
       "PresenceListOutput": {
         "$id": "#/components/schemas/PresenceListOutput",
         "type": "object",
@@ -71596,8 +71789,9 @@
             "maximum": 9007199254740991
           },
           "picture": {
-            "description": "A file path or a data URL; sharp re-encodes it and keeps no original",
-            "type": "string"
+            "description": "A data URL of a JPEG, PNG, WebP or GIF under 512 KB; sharp re-encodes it and keeps no original",
+            "type": "string",
+            "maxLength": 700000
           }
         },
         "required": [

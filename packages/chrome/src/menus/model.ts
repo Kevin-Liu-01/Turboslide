@@ -792,9 +792,10 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
         doc: 'A one time jump to the slide that person has open',
       }),
       later('title.presence.joinChat', 'Join chat', CHAT_LATER, { dividerBefore: true }),
+      /* the people round (docs/PEOPLE.md 3.14, default 2): the roster's own row is in the default
+         view with the own chip; the row `people.own-chip-follows-name` parks it again on a red */
       now('title.presence.me', 'You', client('accountMenu'), {
         turboslide: true,
-        advanced: true,
         dividerBefore: true,
         doc: 'Your name and avatar, and the ways to sign in and out',
       }),
@@ -862,45 +863,48 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
     icon: 'link',
     doc: 'Who can open this presentation, and the link to send',
   }),
-  /* SPEC-3 0.21, 7.5, 13.1: the own chip's menu is the one place accounts appear; parked whole
-     (docs/FOCUS.md 3.2) */
-  parked(
-    sub(
-      'title.account',
-      'Account',
-      [
-        now('title.account.changeName', 'Change name', dialog('Change name'), {
-          turboslide: true,
-          doc: 'How others see you in this presentation',
-        }),
-        now('title.account.changeAvatar', 'Change avatar', dialog('Change avatar'), {
-          turboslide: true,
-          doc: 'Initials, a pattern from your name, or a picture',
-        }),
-        now('title.account.signIn', 'Sign in', dialog('Sign in'), {
-          turboslide: true,
-          when: 'canSignIn',
-          dividerBefore: true,
-          doc: 'Keep your name across browsers and receive invitations by email',
-        }),
-        now('title.account.signOut', 'Sign out', action('account.signOut'), {
-          turboslide: true,
-          when: 'signedIn',
-          dividerBefore: true,
-          doc: 'Ends the sign in on this browser; your edits keep your name',
-        }),
-        now('title.account.forget', 'Forget this browser', action('account.forget'), {
-          turboslide: true,
-          doc: 'Clears your name, avatar and unsaved changes from this browser; earlier edits keep the old name',
-        }),
-        now('title.account.sessions', 'Sessions', dialog('Sessions'), {
-          turboslide: true,
-          dividerBefore: true,
-          doc: 'The browsers signed in as you, with Sign out for each',
-        }),
-      ],
-      { google: 'Account avatar', doc: 'Your name and avatar; nothing else asks for an account' },
-    ),
+  /* SPEC-3 0.21, 7.5, 13.1: the own chip's menu is the one place accounts appear. Parked whole
+     in the focus round (docs/FOCUS.md 3.2); in the default view since the people round
+     (docs/PEOPLE.md 3.14, default 2: the own chip, its hair rule and the roster's "(you)" row
+     are drawn with Advanced tools off), the row `people.own-chip-follows-name` parking it again
+     on a red. The Sessions row is an account's (accounts 8): an anonymous person is not offered
+     a list that answers []. */
+  sub(
+    'title.account',
+    'Account',
+    [
+      now('title.account.changeName', 'Change name', dialog('Change name'), {
+        turboslide: true,
+        doc: 'How others see you in this presentation',
+      }),
+      now('title.account.changeAvatar', 'Change avatar', dialog('Change avatar'), {
+        turboslide: true,
+        doc: 'Initials, a pattern from your name, or a picture',
+      }),
+      now('title.account.signIn', 'Sign in', dialog('Sign in'), {
+        turboslide: true,
+        when: 'canSignIn',
+        dividerBefore: true,
+        doc: 'Keep your name across browsers and receive invitations by email',
+      }),
+      now('title.account.signOut', 'Sign out', action('account.signOut'), {
+        turboslide: true,
+        when: 'signedIn',
+        dividerBefore: true,
+        doc: 'Ends the sign in on this browser; your edits keep your name',
+      }),
+      now('title.account.forget', 'Forget this browser', action('account.forget'), {
+        turboslide: true,
+        doc: 'Clears your name, avatar and unsaved changes from this browser; earlier edits keep the old name',
+      }),
+      now('title.account.sessions', 'Sessions', dialog('Sessions'), {
+        turboslide: true,
+        when: 'signedIn',
+        dividerBefore: true,
+        doc: 'The browsers signed in as you, with Sign out for each',
+      }),
+    ],
+    { google: 'Account avatar', doc: 'Your name and avatar; nothing else asks for an account' },
   ),
   omit('title.gemini', 'Ask Gemini', GOOGLE_SERVICE),
 ];

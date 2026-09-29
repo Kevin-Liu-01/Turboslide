@@ -60,21 +60,11 @@ const ACCEPTED = /^image\/(png|jpeg|webp|gif)$/;
 const NUDGE_PX = 4;
 
 /**
- * The builder's sentences (docs/PEOPLE.md 4.1, 4.5): one thought per sentence. They live here so
- * the file compiles before the chrome lane merges (`build/b3.md` R8 names them for
- * `ACCOUNT.avatar`).
+ * The builder's sentences (docs/PEOPLE.md 4.1, 4.5): one thought per sentence, the chrome's
+ * words of `ACCOUNT.avatar` (build/b3.md R8 named the keys, build/b2.md request 5 landed them
+ * there; the integrator swapped the lane's copy for the strings at B2's merge).
  */
-export const AVATAR_SENTENCES = {
-  original: 'Pictures up to 25 MB',
-  sizes: 'Cropped to a square and sent at 256 px, under 512 KB. JPEG, PNG, WebP or GIF',
-  overCap: 'The resized picture is over 512 KB. Choose another picture',
-  privacy:
-    'Your picture shows on every presentation you open while signed in, to people invited by email. People who arrive by a link see a role initial instead',
-  cache:
-    'A replaced or removed picture can stay readable at its old address for up to a year in caches',
-  unreadable: 'That picture could not be read. Choose another picture',
-  formats: 'JPEG, PNG, WebP or GIF',
-} as const;
+export const AVATAR_SENTENCES = ACCOUNT.avatar;
 
 /** A random 31 bit salt for "Another". */
 export function rerollSalt(random: () => number = Math.random): number {

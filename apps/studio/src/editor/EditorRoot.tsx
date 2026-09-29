@@ -255,19 +255,6 @@ function signInReturnAddress(): string {
   return `${window.location.origin}${window.location.pathname}${window.location.search}`;
 }
 
-/**
- * The facts of the caller the page payload carries beside `EditorIdentity` (docs/PEOPLE.md
- * 3.11, 4.1; build/b3.md R1): the server's mark and the avatar choice. Read through this
- * intersection until `EditorIdentity` names them; then it is a no op.
- */
-type IdentityPayloadFacts = { mark?: IdentityView['mark']; avatar?: AvatarChoiceView | null };
-/** The resolved identities the payload carries for the stored surfaces (3.8; build/b3.md R2). */
-type IdentitiesPayload = { identities?: Readonly<Record<string, IdentityView>> };
-/** The merged map the controller exposes once it lands (3.8, 3.17; build/b3.md R3). */
-type IdentitiesSnapshot = {
-  identities?: ReadonlyMap<string, IdentityView> | Readonly<Record<string, IdentityView>>;
-};
-
 function toSections(
   deck: ViewerDeck,
   findings: readonly Finding[],
@@ -829,19 +816,18 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       : {}),
   };
   /* the caller as every own surface reads it (docs/PEOPLE.md 3.11): the payload's identity with
-     the server's mark and choice when the payload carries them (build/b3.md R1), under the
-     roster's own row while the room holds one, under the answer of Change name or Change avatar
-     until the room's own row moves past the state it held when the answer arrived */
-  const payloadFacts = payload.identity as (EditorIdentity & IdentityPayloadFacts) | undefined;
+     the server's mark and choice (write.ts EditorIdentity, build/b3.md R1), under the roster's
+     own row while the room holds one, under the answer of Change name or Change avatar until the
+     room's own row moves past the state it held when the answer arrived */
   const payloadIdentity: IdentityView = {
     ...identityView(payload.identity, author),
-    ...(payloadFacts?.mark !== undefined ? { mark: payloadFacts.mark } : {}),
+    ...(payload.identity?.mark !== undefined ? { mark: payload.identity.mark } : {}),
   };
   const rosterKey = rosterKeyOf(ownRow);
   const overlay = me !== null && me.rosterKey === rosterKey ? me.facts : null;
   const principal = ownPrincipalOf(payloadIdentity, ownRow, overlay);
   const avatarChoice: AvatarChoiceView | undefined =
-    (chosenAvatar !== undefined ? chosenAvatar : payloadFacts?.avatar) ?? undefined;
+    (chosenAvatar !== undefined ? chosenAvatar : payload.identity?.avatar) ?? undefined;
   const pictureUrl = ownPictureUrlOf(avatarChoice, principal.mark);
   /* the answer of a write is the newest fact: written back into the account and the room asked
      to re-read the identity, so the own chip changes with no reload and the other browsers'
@@ -928,12 +914,14 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   useEffect(() => {
     if (me !== null && me.rosterKey !== rosterKey) setMe(null);
   }, [me, rosterKey]);
-  /* the resolved identities of the stored surfaces (docs/PEOPLE.md 3.8, 3.10; build/b3.md R2,
-     R3): the payload's map for the Share dialog's people; for the version rows the controller's
-     merged map when it carries one, else the payload's map under the roster rows and the caller */
-  const payloadIdentities = (payload as EditorDeck & IdentitiesPayload).identities;
+  /* the resolved identities of the stored surfaces (docs/PEOPLE.md 3.8, 3.10, 3.17; build/b3.md
+     R2, R3): the payload's map for the Share dialog's people; for the version rows and the
+     roster the controller's merged and disambiguated map (controller.identities(), cached per
+     roster, threads and versions and read here on every snapshot), with the payload's map under
+     the roster rows and the caller as the fallback should the controller answer none */
+  const payloadIdentities = payload.identities;
   const identities = shellIdentitiesOf(
-    (snap as EditorSnapshot & IdentitiesSnapshot).identities,
+    controller.identities(),
     payloadIdentities,
     rosterRows,
     principal,

@@ -314,6 +314,9 @@ export const ACTION_IDS = [
   'shader.frame',
   'shader.capture',
   'shader.render',
+  // the people round's janitor for orphan pictures under u/ (docs/PEOPLE.md 4.6; B4, build/b4.md
+  // R2), before the round three block so GS3_ACTION_IDS keeps its slice
+  'admin.avatar.sweep',
   // the Google Slides parity round three (gslides-parity SPEC-3 12): 64 actions, counted once here
   'presence.list',
   'presence.follow',
@@ -414,6 +417,8 @@ export const NO_REVISION_WRITES: ReadonlySet<ActionId> = new Set<ActionId>([
   'admin.bootstrap',
   'admin.flag',
   'admin.migrateStorage',
+  /* the people round (docs/PEOPLE.md 4.6): the sweep removes files under u/ by key, no record */
+  'admin.avatar.sweep',
 ]);
 
 // ---------------------------------------------------------------------------------------------
@@ -5422,13 +5427,22 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       variant: z.enum(AVATAR_VARIANTS),
       initials: z.string().max(3).optional(),
       salt: z.number().int().nonnegative().optional().describe('Another glyph or plate'),
+      /* the people round (docs/PEOPLE.md 4.2): the bound admits 512 KB of picture in base64 with
+         the header (AVATAR_MAX_DATA_URL_LENGTH in auth/avatar.ts is 699,116) and refuses the JSON
+         at validation on every transport; a file path never worked (avatars 8) */
       picture: z
         .string()
+        .max(700_000)
         .optional()
-        .describe('A file path or a data URL; sharp re-encodes it and keeps no original'),
+        .describe(
+          'A data URL of a JPEG, PNG, WebP or GIF under 512 KB; sharp re-encodes it and keeps no original',
+        ),
     }),
     output: meSchema,
-    cli: { usage: 'turboslide account avatar --variant <variant> --another' },
+    cli: {
+      usage:
+        'turboslide account avatar --variant <variant> [--initials <XY>] [--another] [--picture <file>]',
+    },
     mcp: 'deck_set_my_avatar',
     example: { variant: 'glyph' },
   }),
@@ -5574,6 +5588,31 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     }),
     cli: { usage: 'turboslide admin mail --to <to> --since <since>' },
     example: {},
+  }),
+  /* the people round's janitor (docs/PEOPLE.md 4.6; B4, build/b4.md R2): the handler in
+     auth/actions.ts registers itself behind isActionId once this row exists; the milestone is the
+     later rounds' (P1), since the GS3 slice is counted once (actions-gs3.test.ts) */
+  'admin.avatar.sweep': action({
+    id: 'admin.avatar.sweep',
+    label: 'Sweep orphan pictures',
+    doc: 'Removes picture avatar files under u/ that no profile names and that are older than a day (an upload that never reached its record); by key, never by date or name; refused without an identity database.',
+    group: 'admin',
+    mutates: true,
+    transports: ['cli', 'http'],
+    milestone: 'P1',
+    input: z.strictObject({
+      dryRun: z.boolean().optional().describe('List the orphans and remove nothing'),
+    }),
+    output: z.strictObject({
+      dryRun: z.boolean(),
+      scanned: z.number().int(),
+      kept: z.number().int(),
+      young: z.number().int(),
+      orphans: z.array(z.string()),
+      filesRemoved: z.number().int(),
+    }),
+    cli: { usage: 'turboslide admin avatar-sweep --to <to> [--dry-run]' },
+    example: { dryRun: true },
   }),
   'picture.dither': action({
     id: 'picture.dither',

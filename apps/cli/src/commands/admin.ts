@@ -1,17 +1,18 @@
 // The admin commands (gslides-parity SPEC-3 7.9, 8.12, 11.5, 12): `admin flag <name> [on|off]`
 // reads or flips a kill switch (`.turboslide/flags.json` on a checkout, Redis hosted), `admin
 // assign-owner <id> --email|--principal` sets a deck's owner, and `admin bootstrap`, `admin
-// migrate-storage <step>` and `admin mail` run on a hosted studio only (`--to <url>`).
+// migrate-storage <step>`, `admin mail` and `admin avatar-sweep` run on a hosted studio only
+// (`--to <url>`).
 import { FLAG_NAMES } from '@turboslide/schema/access';
 import { MIGRATION_STEPS } from '@turboslide/schema/actions';
 
-import { flagNumber, flagString } from '../args.ts';
+import { flagBoolean, flagNumber, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
 import { runDeckAction } from '../dispatch.ts';
 import { UsageError } from '../exit.ts';
 import { deckIdArg, whoFlag } from './share.ts';
 
-export const ADMIN_USAGE = `usage: turboslide admin <flag|assign-owner|bootstrap|migrate-storage|mail> ...
+export const ADMIN_USAGE = `usage: turboslide admin <flag|assign-owner|bootstrap|migrate-storage|mail|avatar-sweep> ...
   admin flag <name> [on|off]        read or flip a kill switch (admin.flag); names: ${FLAG_NAMES.join(', ')}
   admin assign-owner <id> --email <a@x>|--principal <id>
                                     set a deck's owner (admin.assignOwner)
@@ -20,7 +21,9 @@ export const ADMIN_USAGE = `usage: turboslide admin <flag|assign-owner|bootstrap
   admin migrate-storage <plan|copy|verify|cutover|delete|rollback> --to <url> [--batch <n>]
                                     one step of the storage layout v2 migration (admin.migrateStorage)
   admin mail --to <url> [--since <iso>] [--limit <n>]
-                                    the mail captured under TURBOSLIDE_MAIL=capture (admin.mail.list)`;
+                                    the mail captured under TURBOSLIDE_MAIL=capture (admin.mail.list)
+  admin avatar-sweep --to <url> [--dry-run]
+                                    remove picture files under u/ that no profile names (admin.avatar.sweep)`;
 
 export async function admin(ctx: CommandContext): Promise<number> {
   const [sub, ...rest] = ctx.rest;
@@ -140,6 +143,24 @@ export async function admin(ctx: CommandContext): Promise<number> {
       ctx.out.result(result);
       for (const row of result.mail)
         ctx.out.human(`${row.sentAt}  ${row.kind.padEnd(12)} ${row.to}  ${row.subject}`);
+      return 0;
+    }
+    case 'avatar-sweep': {
+      /* the people round's janitor (docs/PEOPLE.md 4.6; build/b4.md R3): the orphans under u/ by
+         key, listed on a dry run and removed on a run; refused without an identity database */
+      const dryRun = flagBoolean(ctx.args, 'dry-run');
+      const result = await runDeckAction<{
+        dryRun: boolean;
+        scanned: number;
+        kept: number;
+        young: number;
+        orphans: string[];
+        filesRemoved: number;
+      }>(ctx, 'admin.avatar.sweep', dryRun ? { dryRun: true } : {}, { hostedOnly: true });
+      ctx.out.result(result);
+      ctx.out.human(
+        `${result.scanned} scanned, ${result.kept} kept, ${result.young} young, ${result.orphans.length} orphan${result.orphans.length === 1 ? '' : 's'}; ${result.dryRun ? 'a dry run, nothing removed' : `${result.filesRemoved} file${result.filesRemoved === 1 ? '' : 's'} removed`}`,
+      );
       return 0;
     }
     default:

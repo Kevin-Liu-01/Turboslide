@@ -4812,7 +4812,7 @@
           "flag": "--bytes",
           "type": "string",
           "required": false,
-          "description": "The PNG as base64"
+          "description": "The PNG, or the WebP the editor sends for a PNG over the function's cap, as base64"
         },
         {
           "key": "upload",

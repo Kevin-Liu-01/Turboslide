@@ -1067,14 +1067,35 @@ test(title('shaders.frame.large-png-lands'), async () => {
      the block is selected on the stage */
   await waitEditor(page);
   await clickCard(page, own);
-  /* a put forced to 413: the frame's upload route answered 413 through page.route; one sentence and one retry */
+  /* a put forced to 413: the frame's write answered 413 through page.route; one sentence and one
+     retry. The editor's shader.frame travels inside the server function POST (/_serverFn/<id>,
+     runDeckActionFn), not the actions or upload routes, and with the WebP fallback its bytes are
+     under the cap on every tier, so every POST and PUT of the page is routed and the first one
+     that is the frame's write (an upload route, or a server function POST whose body names
+     shader.frame) is refused (the fix round, B4's F4) */
   const uploads =
     /\/api\/x\/upload\/|\/api\/actions\/asset\.add|\/api\/actions\/shader\.frame|\/api\/decks\/[^/?]+\/assets/;
+  const isFrameWrite = (request: {
+    method(): string;
+    url(): string;
+    postData(): string | null;
+  }) => {
+    const method = request.method();
+    if (method !== 'POST' && method !== 'PUT') return false;
+    const path = new URL(request.url()).pathname;
+    if (uploads.test(path)) return true;
+    return (
+      method === 'POST' &&
+      path.startsWith('/_serverFn/') &&
+      (request.postData() ?? '').includes('shader.frame')
+    );
+  };
   let refused = 0;
   const puts: string[] = [];
-  await page.route(uploads, async (route) => {
+  await page.route('**/*', async (route) => {
     const method = route.request().method();
-    if ((method === 'POST' || method === 'PUT') && refused < 1) {
+    if (!isFrameWrite(route.request())) return route.continue();
+    if (refused < 1) {
       refused += 1;
       puts.push(`${method} ${new URL(route.request().url()).pathname} -> 413`);
       return route.fulfill({
@@ -1089,7 +1110,7 @@ test(title('shaders.frame.large-png-lands'), async () => {
   const how = await changeRecipe(page, made.id, 1.25, 6300);
   const second = await waitFrame(page, own, made.id, { not: frame.asset, timeout: 25_000 });
   const words = await snackbarText(page);
-  await page.unroute(uploads);
+  await page.unroute('**/*');
   const retried = puts.filter((p) => /-> through$/.test(p)).length;
   test.info().annotations.push({
     type: 'frame',

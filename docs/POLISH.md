@@ -554,6 +554,8 @@ Each with the audit item and the reason it does not fit a day and a half or belo
 - The prompt's "Click to add" words under A1 (audit-text item 9): question 3.
 - `svg.copy.markup` (`picture.svg.copy`): stays parked as the vector round's owner's, per the parked list of record.
 - The three and four bend connector routing (`bentConnector4` and `bentConnector5`; the fix round, B3's request 16): a site that faces away from its corner (A's bottom site facing left with B below and to the right) leaves through A's own box under the fix round's L (`horizontal-vertical`, `vertical-horizontal`); Google routes such a pair with more bends. The PPTX export writes the S (`bentConnector3`, `curvedConnector3`) for the L until the round's request 13 lands.
+- The lint's remaining proposals with a citation in a parenthesis (`packages/lint/src/static/color.ts`, `copy.ts` 250 to 311, `icon.ts`, `structure.ts`, `asset.ts`, `picture.ts`, `dia.ts` 144 and 200, `chart.ts`; the fix round, B1's request): a later sweep under item 55's rule, which the export listing follows now.
+- `ToolbarHead.tsx` `ToolbarButton` carrying `data-tip-doc` for a disabled control's reason, as the size steppers do since the fix round (B1's request), so item 18's disabled tail buttons read their sentence by machine; the walk accepts the name today.
 
 ## 7. Open questions for Kevin
 

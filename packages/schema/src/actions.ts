@@ -2191,7 +2191,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .describe('A path on the machine, or a data: URL from the studio’s drop or paste'),
       url: z.string().url().optional().describe('An http(s) URL to fetch, 25 MB at most'),
       role: z.enum(ASSET_ROLES),
-      alt: z.string().min(1),
+      alt: z.string(),
       source: assetSourceSchema
         .optional()
         .describe(
@@ -4366,7 +4366,12 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       slideId: slugSchema,
       blockId: blockIdSchema,
       frameKey: z.string().regex(/^sha256:[0-9a-f]{64}$/),
-      bytes: z.string().optional().describe('The PNG as base64'),
+      bytes: z
+        .string()
+        .optional()
+        .describe(
+          "The PNG, or the WebP the editor sends for a PNG over the function's cap, as base64",
+        ),
       upload: z
         .string()
         .optional()

@@ -1704,8 +1704,7 @@
           ]
         },
         "alt": {
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "source": {
           "description": "The provenance record; built from title, artist, license and sourceUrl when omitted",
@@ -34551,7 +34550,7 @@
           "pattern": "^sha256:[0-9a-f]{64}$"
         },
         "bytes": {
-          "description": "The PNG as base64",
+          "description": "The PNG, or the WebP the editor sends for a PNG over the function's cap, as base64",
           "type": "string"
         },
         "upload": {
@@ -55437,8 +55436,7 @@
             ]
           },
           "alt": {
-            "type": "string",
-            "minLength": 1
+            "type": "string"
           },
           "source": {
             "description": "The provenance record; built from title, artist, license and sourceUrl when omitted",
@@ -64584,7 +64582,7 @@
             "pattern": "^sha256:[0-9a-f]{64}$"
           },
           "bytes": {
-            "description": "The PNG as base64",
+            "description": "The PNG, or the WebP the editor sends for a PNG over the function's cap, as base64",
             "type": "string"
           },
           "upload": {

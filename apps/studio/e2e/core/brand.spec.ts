@@ -12,6 +12,7 @@ import {
   coverage,
   ctl,
   extraHTTPHeaders,
+  isLocalBase,
   isProductionBase,
   headingRun,
   invoke,
@@ -45,6 +46,16 @@ import {
 // whose control is not on the build is skipped with the control's id, which the gate reads as not
 // driven with that reason (8.1: "a row of a control that does not exist is not driven").
 //
+// The default template (VERIFICATION.md "Polish round, pass 1" finding 3): on 2026-09-28 a
+// preview run without a bearer for its origin set the shared store's default to this file's
+// template, the page path timed out on the blob tier and production's /new opened as "Brand spec
+// deck" until a hand reset. So `templates.default.use-for-new` reads the store's default through
+// the agent surface before its write and is not driven where the surface does not answer (no
+// bearer off localhost; the open localhost surface answers without one); the default it found
+// goes back through `template.setDefault` after the page's own restore, in the row and again in
+// the teardown, and a read after each says whether it is. The row never writes what the run
+// cannot put back.
+//
 // PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/brand.spec.ts
 
 const scratch = new Scratch();
@@ -60,8 +71,11 @@ const TEMPLATE_PREFIX = 'Core spec template ';
 const TEMPLATE_NAME = `${TEMPLATE_PREFIX}${STAMP}`;
 /** The slug of the template this file saved, for its removal at the end. */
 let savedSlug: string | null = null;
-/** Whether this file set a deployment default, so the end restores Blank. */
-let defaultSet = false;
+/** The store's default template id as this file found it before its write, to put back; null while this file set none or once it is back. */
+let defaultToRestore: string | null = null;
+/** The reason the default row is not driven where the agent surface cannot put the default back. */
+const DEFAULT_NO_RESET_SKIP =
+  'not driven: the row sets the default template of a store every deployment shares and puts it back through the agent surface, which did not answer; off localhost that needs a bearer for this origin (TURBOSLIDE_TOKEN or ~/.config/turboslide/hosts.json)';
 const PRIMARY = '#0b3d91';
 
 test.beforeAll(async ({ browser }) => {
@@ -71,39 +85,90 @@ test.beforeAll(async ({ browser }) => {
   await addSlide(page);
 });
 /**
- * The deployment's default back on Blank through the agent surface, with the bearer, before the
- * page path: the page path timed out on 2026-09-25 and left a test deck as production's default
- * for two hours (hotfix.md 16). Answers whether the API took it; no bearer answers false.
+ * One agent action through the surface, with the bearer off localhost (the open localhost
+ * surface takes none): the status, the parsed body and the reason for anything but 200. A
+ * deployment without a bearer for its origin answers status 0 and the reason, and sends nothing.
  */
-async function resetDefaultThroughApi(): Promise<boolean> {
+async function surfacePost(
+  action: string,
+  input: unknown,
+): Promise<{ status: number; body: Record<string, unknown> | null; reason: string }> {
   const bearer = agentBearer(BASE);
-  if (bearer === null && !/^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(BASE)) return false;
+  if (bearer === null && !isLocalBase(BASE))
+    return { status: 0, body: null, reason: 'no bearer for this origin' };
   try {
-    const r = await fetch(new URL('/api/actions/template.setDefault', BASE), {
+    const r = await fetch(new URL(`/api/actions/${action}`, BASE), {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
         ...(bearer === null ? {} : { authorization: `Bearer ${bearer}` }),
         ...extraHTTPHeaders,
       },
-      body: JSON.stringify({ id: 'blank' }),
+      body: JSON.stringify(input),
     });
-    if (!r.ok) return false;
-    const body = (await r.json()) as { default?: string };
-    return body.default === 'blank';
-  } catch {
-    return false;
+    const body = r.ok
+      ? ((await r.json().catch(() => null)) as Record<string, unknown> | null)
+      : null;
+    return { status: r.status, body, reason: r.ok ? '' : `${action} answered ${r.status}` };
+  } catch (error) {
+    return {
+      status: 0,
+      body: null,
+      reason: `${action}: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+    };
   }
+}
+/** The store's default template id through `template.list` (the answer's `default`), or null with the reason. */
+async function readDefaultThroughApi(): Promise<{ id: string | null; reason: string }> {
+  const r = await surfacePost('template.list', {});
+  if (r.status !== 200) return { id: null, reason: r.reason };
+  const raw =
+    r.body?.['default'] ?? (r.body?.['output'] as { default?: unknown } | undefined)?.default;
+  return typeof raw === 'string' && raw !== ''
+    ? { id: raw, reason: '' }
+    : { id: null, reason: 'template.list answered without a default' };
+}
+/** `template.setDefault` through the surface; true when the answer reads the id. */
+async function setDefaultThroughApi(id: string): Promise<boolean> {
+  const r = await surfacePost('template.setDefault', { id });
+  if (r.status !== 200) return false;
+  const raw =
+    r.body?.['default'] ?? (r.body?.['output'] as { default?: unknown } | undefined)?.default;
+  return raw === id;
+}
+/**
+ * The store's default back as this file found it, through the surface (the page's own restore,
+ * the row's last step, goes before it): a read first, `template.setDefault` where the read
+ * differs (the page path once more when the target is Blank and the surface refused), then a
+ * read again. Answers null when the default reads as found and clears `defaultToRestore`; else
+ * the sentence for the failures list, with `defaultToRestore` kept for the teardown's attempt.
+ * The page path alone timed out on 2026-09-25 (hotfix.md 16) and on 2026-09-28 (the polish
+ * round's pass 1, finding 3), each time leaving a test deck as production's default.
+ */
+async function putDefaultBack(): Promise<string | null> {
+  if (defaultToRestore === null) return null;
+  const target = defaultToRestore;
+  let now = await readDefaultThroughApi();
+  if (now.id !== target) {
+    const set = await setDefaultThroughApi(target);
+    if (!set && target === 'blank') await restoreBlankDefault().catch(() => undefined);
+    now = await readDefaultThroughApi();
+  }
+  if (now.id === target) {
+    defaultToRestore = null;
+    return null;
+  }
+  return `the deployment default reads ${now.id ?? `unread (${now.reason})`}, not ${target}`;
 }
 
 test.afterAll(async () => {
   test.setTimeout(300_000);
   const failures: string[] = [];
   try {
-    if (defaultSet) {
+    if (defaultToRestore !== null) {
       try {
-        if (await resetDefaultThroughApi()) defaultSet = false;
-        else await restoreBlankDefault();
+        const left = await putDefaultBack();
+        if (left !== null) failures.push(left);
       } catch (error) {
         failures.push(
           `the deployment default: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
@@ -234,13 +299,12 @@ async function deleteTemplate(slug: string): Promise<void> {
   await expect(card).toHaveCount(0, { timeout: 20_000 });
   if (savedSlug === slug) savedSlug = null;
 }
-/** Use for new presentations on Blank, from its card menu. */
+/** Use for new presentations on Blank, from its card menu (the page path; `putDefaultBack` reads whether it landed). */
 async function restoreBlankDefault(): Promise<void> {
   await gotoGallery();
   await ctl(page, 'templates.card.blank.menu').click();
   await ctl(page, 'menu.templates.card.blank.useForNew').click();
   await expect(ctl(page, 'templates.card.blank.default')).toBeVisible({ timeout: 10_000 });
-  defaultSet = false;
 }
 /** Saves the file's deck as a template with the file's name; answers the dialog's facts. */
 async function saveAsTemplate(): Promise<{ replaceSentence: string | null }> {
@@ -407,9 +471,18 @@ test(title('templates.default.use-for-new'), async () => {
   }
   expect(savedSlug, 'a template of this file with a kit').not.toBeNull();
   const slug = savedSlug!;
+  /* the store's default as found, read through the surface that puts it back: where the surface
+     does not answer the row is not driven, never a write the run cannot undo (the polish round's
+     pass 1, finding 3) */
+  const found = await readDefaultThroughApi();
+  if (found.id === null) {
+    test.skip(true, `${DEFAULT_NO_RESET_SKIP}; ${found.reason}`);
+    return;
+  }
+  test.info().annotations.push({ type: 'default', description: `before: ${found.id}` });
+  defaultToRestore = found.id;
   await ctl(page, `templates.card.${slug}.menu`).click();
   await ctl(page, `menu.templates.card.${slug}.useForNew`).click();
-  defaultSet = true;
   await expect(
     ctl(page, `templates.card.${slug}.default`),
     'the card is marked as used for new presentations',
@@ -440,6 +513,10 @@ test(title('templates.default.use-for-new'), async () => {
   await waitEditor(page);
   const restored = await record(page);
   expect(JSON.stringify(restored ?? {}), "today's draft is back").not.toContain(PRIMARY);
+  /* the store as found, through the surface, now rather than in the teardown: the read after
+     the page's restore says whether Blank landed, and a default other than Blank goes back */
+  const left = await putDefaultBack();
+  expect(left, 'the default reads as this file found it').toBeNull();
 });
 
 test(title('templates.deck.read-only'), async () => {

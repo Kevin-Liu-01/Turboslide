@@ -4997,7 +4997,8 @@
       "driver": "core/brand.spec.ts",
       "today": "not driven",
       "evidence": "judge-seller addition 3; audit-brand section 3",
-      "parks": ["panel.brand.template.useForNew"]
+      "parks": ["panel.brand.template.useForNew"],
+      "note": "The polish fix round (VERIFICATION.md polish pass 1 finding 3): the row reads the store's default through the agent surface (template.list) before its write and puts that default back through template.setDefault after the page's own restore, in the row and again in the teardown, with a read after each; a base the surface does not answer on (no bearer for the origin off localhost) is not driven with the reason, never a write the run cannot undo. On 2026-09-28 a preview run without a bearer left this file's template as production's default until a hand reset."
     },
     {
       "id": "templates.deck.read-only",

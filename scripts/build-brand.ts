@@ -2117,6 +2117,16 @@ function checkStepCount(): number {
   return run.stdout.split('\n').filter((line) => /^\s*\d+\s/.test(line)).length;
 }
 
+/**
+ * The origins a deployment profile run counts as production: the domain, and the project origin
+ * that served main while the domain was two ship rounds behind it (docs/POLISH.md section 0; the
+ * same pair packages/theme/src/brand.test.ts accepts for facts.measured.base).
+ */
+const PRODUCTION_ORIGINS: readonly string[] = [
+  SITE.productionOrigin,
+  'https://turboslide.vercel.app',
+];
+
 /** The newest verifier run with the deployment profile against production, by the date in its name. */
 function newestPerfRun(): {
   path: string;
@@ -2134,7 +2144,7 @@ function newestPerfRun(): {
         rows: Facts['measured']['rows'];
       },
     }))
-    .filter((c) => c.json.profile === 'deployment' && c.json.base === SITE.productionOrigin)
+    .filter((c) => c.json.profile === 'deployment' && PRODUCTION_ORIGINS.includes(c.json.base))
     .sort((a, b) => b.json.startedAt.localeCompare(a.json.startedAt));
   const best = candidates[0];
   if (best === undefined)

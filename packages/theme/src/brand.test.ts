@@ -415,12 +415,14 @@ describe('the selection colour (the orchestrator’s ruling 1; Kevin’s directi
 
 describe('site.ts (SPEC-4 1.4, 1.6)', () => {
   it('states the description, the alt text and the manifest with start_url /home and one purpose per icon', () => {
+    /* the polish round (docs/POLISH.md 3.6): the hero's lead, shared by the head, the manifest and the card */
     expect(SITE.description).toBe(
-      "An agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export.",
+      "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.",
     );
     expect(SITE.description).not.toMatch(/—|!/);
+    /* the card of docs/POLISH.md 3.6: the lead's first sentence and the address on the plate */
     expect(SITE.imageAlt).toBe(
-      'The Turboslide mark and name on a plate cut from a two tone dithered liquid metal frame',
+      'The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser and the address www.turboslide.com, on a plate cut from a two tone dithered frame',
     );
     expect(SITE.manifest.start_url).toBe('/home');
     expect(SITE.manifest.description).toBe(SITE.description);
@@ -437,7 +439,9 @@ describe('site.ts (SPEC-4 1.4, 1.6)', () => {
     const before = process.env.TURBOSLIDE_PUBLIC_ORIGIN;
     delete process.env.TURBOSLIDE_PUBLIC_ORIGIN;
     try {
-      expect(SITE.origin()).toBe('https://turboslide.vercel.app');
+      /* docs/POLISH.md section 0 item 3: the production origin is the domain */
+      expect(SITE.productionOrigin).toBe('https://www.turboslide.com');
+      expect(SITE.origin()).toBe('https://www.turboslide.com');
       expect(SITE.origin('https://preview.example.com/')).toBe('https://preview.example.com');
       process.env.TURBOSLIDE_PUBLIC_ORIGIN = 'https://slides.example.org/';
       expect(SITE.origin('https://preview.example.com')).toBe('https://slides.example.org');
@@ -554,7 +558,9 @@ describe('facts.json (SPEC-4 0.25)', () => {
     expect(existsSync(`${REPO}/${facts.parityRows.source}`)).toBe(true);
     expect(facts.measured.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(facts.measured.profile).toBe('deployment');
-    expect(facts.measured.base).toBe(SITE.productionOrigin);
+    /* the numbers were measured on the deployment that served main when the domain was two
+       ship rounds behind it (docs/POLISH.md section 0); either origin is the production build's */
+    expect([SITE.productionOrigin, 'https://turboslide.vercel.app']).toContain(facts.measured.base);
     expect(existsSync(`${REPO}/${facts.measured.source}`)).toBe(true);
     expect(facts.measured.rows.length).toBeGreaterThan(50);
     for (const row of facts.measured.rows) {

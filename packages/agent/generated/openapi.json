@@ -35683,7 +35683,9 @@
                             "bars-3-center-left",
                             "bars-3-bottom-right",
                             "bell",
-                            "inbox"
+                            "inbox",
+                            "cursor-arrow-rays",
+                            "arrow-down-tray"
                           ]
                         },
                         "x": {
@@ -41484,7 +41486,9 @@
                   "bars-3-center-left",
                   "bars-3-bottom-right",
                   "bell",
-                  "inbox"
+                  "inbox",
+                  "cursor-arrow-rays",
+                  "arrow-down-tray"
                 ],
                 "title": "Icon",
                 "x-inspector": {
@@ -44373,7 +44377,9 @@
               "bars-3-center-left",
               "bars-3-bottom-right",
               "bell",
-              "inbox"
+              "inbox",
+              "cursor-arrow-rays",
+              "arrow-down-tray"
             ],
             "title": "Icon",
             "x-inspector": {

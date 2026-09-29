@@ -78,6 +78,9 @@ export const ICON_NAMES = [
   // round three (gslides-parity SPEC-3 5.3, 5.5; build-3/b6.md request 2): the inbox plate and Notification settings
   'bell',
   'inbox',
+  // the polish round (docs/POLISH.md 3.3 item 3; polish/build/b7.md request 5): the home page's section glyphs
+  'cursor-arrow-rays',
+  'arrow-down-tray',
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];

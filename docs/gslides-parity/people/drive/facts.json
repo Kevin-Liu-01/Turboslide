@@ -1,0 +1,1736 @@
+{
+  "deck.id": "untitled-20260929-kved",
+  "build": {
+    "title": "Untitled presentation, editor, Turboslide",
+    "build": null,
+    "theme": "light"
+  },
+  "state.deckId": {
+    "deckId": "untitled-20260929-kved",
+    "keys": [
+      "deckId",
+      "revision",
+      "serverRevision",
+      "pending",
+      "slideId",
+      "blockId",
+      "mode",
+      "theme",
+      "zoom",
+      "settings",
+      "gesture",
+      "assets",
+      "author",
+      "sync",
+      "presence",
+      "access",
+      "account",
+      "comments",
+      "inbox"
+    ]
+  },
+  "namePrompt.firstEdit": false,
+  "share.link": "https://www.turboslide.com/s/<token>",
+  "B.access": {
+    "deckId": "untitled-20260929-kved",
+    "revision": 1,
+    "owner": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+    "pendingOwner": null,
+    "generalAccess": {
+      "mode": "link",
+      "role": "editor"
+    },
+    "links": [
+      {
+        "id": "lnk_NNKhE9FzkAlxaPdm",
+        "role": "editor",
+        "createdAt": "2026-09-29T18:56:17.526Z",
+        "createdBy": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+        "revokedAt": "2026-09-29T18:56:19.449Z",
+        "expiresAt": null,
+        "label": "Anyone with the link",
+        "useCount": 0
+      },
+      {
+        "id": "lnk_NJgoy8EdNFH_GH4u",
+        "role": "editor",
+        "createdAt": "2026-09-29T18:56:19.449Z",
+        "createdBy": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+        "revokedAt": null,
+        "expiresAt": null,
+        "label": "Anyone with the link",
+        "useCount": 0
+      }
+    ],
+    "publish": null,
+    "grants": [],
+    "requests": [],
+    "settings": {
+      "editorsCanShare": true,
+      "viewersCanDownload": true,
+      "viewersCanSeeComments": false,
+      "showNamesToLinkVisitors": false,
+      "allowHtmlBlocks": false
+    },
+    "claimable": false,
+    "role": "editor",
+    "via": "link",
+    "capabilities": [
+      "read",
+      "presence",
+      "readSkipped",
+      "comment",
+      "readComments",
+      "readNotes",
+      "write",
+      "history",
+      "export",
+      "exportNotes",
+      "rename",
+      "copy",
+      "trash",
+      "restore",
+      "publish",
+      "follow",
+      "share"
+    ],
+    "mode": "link"
+  },
+  "presence.A.anon": {
+    "self": {
+      "clientId": "06a21a4a41fc1b3b0adafb12895ce899",
+      "principalId": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+      "label": "Bismuth 168",
+      "trust": "label",
+      "kind": "human",
+      "role": "owner",
+      "markVariant": "initials",
+      "markInitials": "B",
+      "markLabel": "Bismuth 168"
+    },
+    "others": [
+      {
+        "clientId": "b3163b052bbf13bc37ee6793b57527ac",
+        "principalId": "anon_a29c121d-26a1-4e74-bdb9-47c4c5896160",
+        "label": "Copper 183",
+        "trust": "label",
+        "kind": "human",
+        "role": "viewer",
+        "slideId": "title",
+        "markVariant": "initials",
+        "markInitials": "C",
+        "markLabel": "Copper 183"
+      }
+    ],
+    "count": 1
+  },
+  "presence.B.anon": {
+    "self": {
+      "clientId": "b3163b052bbf13bc37ee6793b57527ac",
+      "principalId": "anon_a29c121d-26a1-4e74-bdb9-47c4c5896160",
+      "label": "Copper 183",
+      "trust": "label",
+      "kind": "human",
+      "role": "viewer",
+      "slideId": "title",
+      "markVariant": "initials",
+      "markInitials": "C",
+      "markLabel": "Copper 183"
+    },
+    "others": [
+      {
+        "clientId": "06a21a4a41fc1b3b0adafb12895ce899",
+        "principalId": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+        "label": "Bismuth 168",
+        "trust": "label",
+        "kind": "human",
+        "role": "owner",
+        "markVariant": "initials",
+        "markInitials": "B",
+        "markLabel": "Bismuth 168"
+      }
+    ],
+    "count": 1
+  },
+  "slot.A.anon": {
+    "count": "1",
+    "tip": "Collaborators",
+    "chips": [
+      {
+        "holder": "presence.chip.b3163b052bbf13bc37ee6793b57527ac",
+        "ariaLabel": "Copper 183",
+        "variant": "initials",
+        "trust": "label",
+        "hue": "4",
+        "hueVar": "#1d8fc8",
+        "classes": "ts-chip is-live",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "border": "1px solid rgba(7, 7, 7, 0.62)",
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        },
+        "initials": "C",
+        "stripe": true,
+        "cells": 49,
+        "svg": {
+          "w": 12,
+          "h": 22,
+          "attrW": "22",
+          "cssW": "12px"
+        },
+        "cellsExtent": {
+          "fromLeft": 6,
+          "fromTop": 6,
+          "fromRight": 6,
+          "fromBottom": 6
+        },
+        "initialsBox": {
+          "w": 4.40625,
+          "h": 7,
+          "fontSize": "11px",
+          "fill": "rgb(7, 7, 7)",
+          "stroke": "rgb(255, 255, 255)"
+        }
+      }
+    ],
+    "more": {
+      "classes": "ts-presence-more",
+      "label": "Collaborators",
+      "text": ""
+    },
+    "ownChip": false,
+    "rule": false
+  },
+  "slot.B.anon": {
+    "count": "1",
+    "tip": "Collaborators",
+    "chips": [
+      {
+        "holder": "presence.chip.06a21a4a41fc1b3b0adafb12895ce899",
+        "ariaLabel": "Bismuth 168",
+        "variant": "initials",
+        "trust": "label",
+        "hue": "1",
+        "hueVar": "#2f5ce0",
+        "classes": "ts-chip is-live",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "border": "1px solid rgba(7, 7, 7, 0.62)",
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        },
+        "initials": "B",
+        "stripe": true,
+        "cells": 61,
+        "svg": {
+          "w": 12,
+          "h": 22,
+          "attrW": "22",
+          "cssW": "12px"
+        },
+        "cellsExtent": {
+          "fromLeft": 6,
+          "fromTop": 6,
+          "fromRight": 6,
+          "fromBottom": 6
+        },
+        "initialsBox": {
+          "w": 3.953125,
+          "h": 7,
+          "fontSize": "11px",
+          "fill": "rgb(7, 7, 7)",
+          "stroke": "rgb(255, 255, 255)"
+        }
+      }
+    ],
+    "more": {
+      "classes": "ts-presence-more",
+      "label": "Collaborators",
+      "text": ""
+    },
+    "ownChip": false,
+    "rule": false
+  },
+  "shot.slot.A.anon": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-slot-anonymous.png",
+  "shot.slot.B.anon": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-slot-anonymous.png",
+  "shot.titlerow.A.anon": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-title-row-anonymous.png",
+  "tooltip.A.anon": "Copper 183 · slide 1Go to slide 1",
+  "shot.tooltip.A.anon": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-chip-tooltip-anonymous.png",
+  "roster.A.anon": {
+    "label": "Collaborators",
+    "rows": [
+      {
+        "control": "presence.roster.b3163b052bbf13bc37ee6793b57527ac",
+        "classes": "ts-roster-row",
+        "name": "Copper 183",
+        "meta": "editor · slide 1",
+        "act": "Go to slide 1",
+        "chip": "Copper 183",
+        "chipVariant": "initials",
+        "hue": "4"
+      }
+    ],
+    "width": 240
+  },
+  "shot.roster.A.anon": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-roster-anonymous.png",
+  "roster.B.anon": {
+    "label": "Collaborators",
+    "rows": [
+      {
+        "control": "presence.roster.06a21a4a41fc1b3b0adafb12895ce899",
+        "classes": "ts-roster-row",
+        "name": "Bismuth 168",
+        "meta": "owner",
+        "act": "",
+        "chip": "Bismuth 168",
+        "chipVariant": "initials",
+        "hue": "1"
+      }
+    ],
+    "width": 240
+  },
+  "shot.roster.B.anon": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-roster-anonymous.png",
+  "advanced.A": true,
+  "slot.A.advanced": {
+    "count": "1",
+    "tip": "Collaborators",
+    "chips": [
+      {
+        "holder": "presence.chip.b3163b052bbf13bc37ee6793b57527ac",
+        "ariaLabel": "Copper 183",
+        "variant": "initials",
+        "trust": "label",
+        "hue": "4",
+        "hueVar": "#1d8fc8",
+        "classes": "ts-chip is-live",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "border": "1px solid rgba(7, 7, 7, 0.62)",
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        },
+        "initials": "C",
+        "stripe": true,
+        "cells": 49,
+        "svg": {
+          "w": 12,
+          "h": 22,
+          "attrW": "22",
+          "cssW": "12px"
+        },
+        "cellsExtent": {
+          "fromLeft": 6,
+          "fromTop": 6,
+          "fromRight": 6,
+          "fromBottom": 6
+        },
+        "initialsBox": {
+          "w": 4.40625,
+          "h": 7,
+          "fontSize": "11px",
+          "fill": "rgb(7, 7, 7)",
+          "stroke": "rgb(255, 255, 255)"
+        }
+      },
+      {
+        "holder": "title.account",
+        "ariaLabel": "studio, guest",
+        "variant": "initials",
+        "trust": "guest",
+        "hue": null,
+        "hueVar": "",
+        "classes": "ts-chip is-self",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "border": "1px solid rgb(7, 7, 7)",
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        },
+        "initials": "ST",
+        "stripe": false,
+        "cells": 18,
+        "svg": {
+          "w": 12,
+          "h": 22,
+          "attrW": "22",
+          "cssW": "12px"
+        },
+        "cellsExtent": {
+          "fromLeft": 6,
+          "fromTop": 6,
+          "fromRight": 6,
+          "fromBottom": 6
+        },
+        "initialsBox": {
+          "w": 7.765625,
+          "h": 7,
+          "fontSize": "11px",
+          "fill": "rgb(7, 7, 7)",
+          "stroke": "rgb(255, 255, 255)"
+        }
+      }
+    ],
+    "more": {
+      "classes": "ts-presence-more",
+      "label": "Collaborators",
+      "text": ""
+    },
+    "ownChip": true,
+    "rule": true
+  },
+  "shot.slot.A.advanced": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-slot-advanced-own-chip.png",
+  "accountMenu.A.anon": {
+    "name": "studio",
+    "sentence": "Not signed in",
+    "chip": "studio, guest",
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.forget",
+      "account.sessions"
+    ]
+  },
+  "shot.accountMenu.A.anon": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-account-menu-anonymous.png",
+  "changeName.dialog": {
+    "title": "How should others see you?",
+    "size": {
+      "w": 360,
+      "h": 168
+    },
+    "text": "How should others see you?Continue",
+    "controls": [
+      "dialog.namePrompt.close",
+      "dialog.namePrompt.name",
+      "dialog.namePrompt.error",
+      "dialog.namePrompt.continue"
+    ],
+    "chips": []
+  },
+  "shot.changeName": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-change-name-dialog.png",
+  "changeName.error": "",
+  "presence.A.named": {
+    "self": {
+      "clientId": "06a21a4a41fc1b3b0adafb12895ce899",
+      "principalId": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+      "label": "Ada Lovelace",
+      "trust": "guest",
+      "kind": "human",
+      "role": "owner",
+      "slideId": "title",
+      "markVariant": "initials",
+      "markInitials": "AL",
+      "markLabel": "Ada Lovelace, guest"
+    },
+    "others": [
+      {
+        "clientId": "b3163b052bbf13bc37ee6793b57527ac",
+        "principalId": "anon_a29c121d-26a1-4e74-bdb9-47c4c5896160",
+        "label": "Copper 183",
+        "trust": "label",
+        "kind": "human",
+        "role": "editor",
+        "slideId": "title",
+        "markVariant": "initials",
+        "markInitials": "C",
+        "markLabel": "Copper 183"
+      }
+    ],
+    "count": 1
+  },
+  "presence.B.named": {
+    "self": {
+      "clientId": "b3163b052bbf13bc37ee6793b57527ac",
+      "principalId": "anon_a29c121d-26a1-4e74-bdb9-47c4c5896160",
+      "label": "Copper 183",
+      "trust": "label",
+      "kind": "human",
+      "role": "editor",
+      "slideId": "title",
+      "markVariant": "initials",
+      "markInitials": "C",
+      "markLabel": "Copper 183"
+    },
+    "others": [
+      {
+        "clientId": "06a21a4a41fc1b3b0adafb12895ce899",
+        "principalId": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+        "label": "Ada Lovelace",
+        "trust": "guest",
+        "kind": "human",
+        "role": "owner",
+        "slideId": "title",
+        "markVariant": "initials",
+        "markInitials": "AL",
+        "markLabel": "Ada Lovelace, guest"
+      }
+    ],
+    "count": 1
+  },
+  "account.A.named": {
+    "principalId": null,
+    "label": "studio",
+    "trust": "guest",
+    "signedIn": false,
+    "signInAvailable": false
+  },
+  "slot.A.named": {
+    "count": "1",
+    "tip": "Collaborators",
+    "chips": [
+      {
+        "holder": "presence.chip.b3163b052bbf13bc37ee6793b57527ac",
+        "ariaLabel": "Copper 183",
+        "variant": "initials",
+        "trust": "label",
+        "hue": "4",
+        "hueVar": "#1d8fc8",
+        "classes": "ts-chip is-live",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "border": "1px solid rgba(7, 7, 7, 0.62)",
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        },
+        "initials": "C",
+        "stripe": true,
+        "cells": 49,
+        "svg": {
+          "w": 12,
+          "h": 22,
+          "attrW": "22",
+          "cssW": "12px"
+        },
+        "cellsExtent": {
+          "fromLeft": 6,
+          "fromTop": 6,
+          "fromRight": 6,
+          "fromBottom": 6
+        },
+        "initialsBox": {
+          "w": 4.40625,
+          "h": 7,
+          "fontSize": "11px",
+          "fill": "rgb(7, 7, 7)",
+          "stroke": "rgb(255, 255, 255)"
+        }
+      },
+      {
+        "holder": "title.account",
+        "ariaLabel": "studio, guest",
+        "variant": "initials",
+        "trust": "guest",
+        "hue": null,
+        "hueVar": "",
+        "classes": "ts-chip is-self",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "border": "1px solid rgb(7, 7, 7)",
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        },
+        "initials": "ST",
+        "stripe": false,
+        "cells": 18,
+        "svg": {
+          "w": 12,
+          "h": 22,
+          "attrW": "22",
+          "cssW": "12px"
+        },
+        "cellsExtent": {
+          "fromLeft": 6,
+          "fromTop": 6,
+          "fromRight": 6,
+          "fromBottom": 6
+        },
+        "initialsBox": {
+          "w": 7.765625,
+          "h": 7,
+          "fontSize": "11px",
+          "fill": "rgb(7, 7, 7)",
+          "stroke": "rgb(255, 255, 255)"
+        }
+      }
+    ],
+    "more": {
+      "classes": "ts-presence-more",
+      "label": "Collaborators",
+      "text": ""
+    },
+    "ownChip": true,
+    "rule": true
+  },
+  "slot.B.named": {
+    "count": "1",
+    "tip": "Collaborators",
+    "chips": [
+      {
+        "holder": "presence.chip.06a21a4a41fc1b3b0adafb12895ce899",
+        "ariaLabel": "Ada Lovelace, guest",
+        "variant": "initials",
+        "trust": "guest",
+        "hue": "1",
+        "hueVar": "#2f5ce0",
+        "classes": "ts-chip is-live",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "border": "1px solid rgba(7, 7, 7, 0.62)",
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        },
+        "initials": "AL",
+        "stripe": true,
+        "cells": 61,
+        "svg": {
+          "w": 12,
+          "h": 22,
+          "attrW": "22",
+          "cssW": "12px"
+        },
+        "cellsExtent": {
+          "fromLeft": 6,
+          "fromTop": 6,
+          "fromRight": 6,
+          "fromBottom": 6
+        },
+        "initialsBox": {
+          "w": 7.65625,
+          "h": 7,
+          "fontSize": "11px",
+          "fill": "rgb(7, 7, 7)",
+          "stroke": "rgb(255, 255, 255)"
+        }
+      }
+    ],
+    "more": {
+      "classes": "ts-presence-more",
+      "label": "Collaborators",
+      "text": ""
+    },
+    "ownChip": false,
+    "rule": false
+  },
+  "shot.slot.A.named": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-slot-named.png",
+  "shot.slot.B.named": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-slot-named.png",
+  "tooltip.B.named": "Ada Lovelace · guest · slide 1Go to slide 1",
+  "shot.tooltip.B.named": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-chip-tooltip-named.png",
+  "roster.A.named": {
+    "label": "Collaborators",
+    "rows": [
+      {
+        "control": "presence.roster.06a21a4a41fc1b3b0adafb12895ce899",
+        "classes": "ts-roster-row is-self",
+        "name": "Ada Lovelace (you) · guest",
+        "meta": "slide 1",
+        "act": null,
+        "chip": "Ada Lovelace, guest",
+        "chipVariant": "initials",
+        "hue": "1"
+      },
+      {
+        "control": "presence.roster.b3163b052bbf13bc37ee6793b57527ac",
+        "classes": "ts-roster-row",
+        "name": "Copper 183",
+        "meta": "editor · slide 1",
+        "act": "Go to slide 1",
+        "chip": "Copper 183",
+        "chipVariant": "initials",
+        "hue": "4"
+      },
+      {
+        "control": null,
+        "classes": "ts-roster-row is-stub",
+        "name": "Join chat",
+        "meta": null,
+        "act": null,
+        "chip": null,
+        "chipVariant": null,
+        "hue": null
+      }
+    ],
+    "width": 240
+  },
+  "shot.roster.A.named": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-roster-named.png",
+  "roster.B.named": {
+    "label": "Collaborators",
+    "rows": [
+      {
+        "control": "presence.roster.06a21a4a41fc1b3b0adafb12895ce899",
+        "classes": "ts-roster-row",
+        "name": "Ada Lovelace · guest",
+        "meta": "owner · slide 1",
+        "act": "Go to slide 1",
+        "chip": "Ada Lovelace, guest",
+        "chipVariant": "initials",
+        "hue": "1"
+      }
+    ],
+    "width": 240
+  },
+  "shot.roster.B.named": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-roster-named.png",
+  "accountMenu.A.named": {
+    "name": "studio",
+    "sentence": "Not signed in",
+    "chip": "studio, guest",
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.forget",
+      "account.sessions"
+    ]
+  },
+  "shot.accountMenu.A.named": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-account-menu-named.png",
+  "versions.A.light": {
+    "rows": [
+      {
+        "author": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+        "word": "You",
+        "meta": "You · named · current",
+        "chip": "Ada Lovelace, guest",
+        "chipClasses": "ts-chip",
+        "chipSize": "16"
+      },
+      {
+        "author": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+        "word": "You",
+        "meta": "You · 1 change",
+        "chip": "Bismuth 168, guest",
+        "chipClasses": "ts-chip",
+        "chipSize": "16"
+      }
+    ],
+    "windows": [
+      {
+        "text": "AL11:56 AM to 11:56 AMYou · 1 change▾",
+        "marks": [
+          "Ada Lovelace, guest"
+        ]
+      }
+    ]
+  },
+  "versions.A.markEdge": [
+    {
+      "label": "Ada Lovelace, guest",
+      "size": "16",
+      "w": 16,
+      "h": 16,
+      "leftOfPanel": 0,
+      "leftOfHost": 0,
+      "hostClass": "ts-panel-body pt-scroll",
+      "hostOverflow": "hidden",
+      "panelPaddingLeft": "0px"
+    },
+    {
+      "label": "Ada Lovelace, guest",
+      "size": "16",
+      "w": 16,
+      "h": 16,
+      "leftOfPanel": 29,
+      "leftOfHost": 29,
+      "hostClass": "ts-panel-body pt-scroll",
+      "hostOverflow": "hidden",
+      "panelPaddingLeft": "0px"
+    },
+    {
+      "label": "Bismuth 168, guest",
+      "size": "16",
+      "w": 16,
+      "h": 16,
+      "leftOfPanel": 29,
+      "leftOfHost": 29,
+      "hostClass": "ts-panel-body pt-scroll",
+      "hostOverflow": "hidden",
+      "panelPaddingLeft": "0px"
+    }
+  ],
+  "shot.versions.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-version-history-light.png",
+  "shot.versions.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-version-history-dark.png",
+  "shot.slot.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-slot-dark.png",
+  "shot.roster.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-roster-dark.png",
+  "versions.B.light": {
+    "rows": [
+      {
+        "author": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+        "word": "Ada Lovelace · guest",
+        "meta": "Ada Lovelace · guest · named · current",
+        "chip": "Ada Lovelace, guest",
+        "chipClasses": "ts-chip",
+        "chipSize": "16"
+      },
+      {
+        "author": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+        "word": "Bismuth 168 · guest",
+        "meta": "Bismuth 168 · guest · named",
+        "chip": "Bismuth 168, guest",
+        "chipClasses": "ts-chip",
+        "chipSize": "16"
+      }
+    ],
+    "windows": [
+      {
+        "text": "AL11:56 AM to 11:56 AMAda Lovelace · 0 changes▾",
+        "marks": [
+          "Ada Lovelace, guest"
+        ]
+      }
+    ]
+  },
+  "versions.B.markEdge": [
+    {
+      "label": "Ada Lovelace, guest",
+      "size": "16",
+      "w": 16,
+      "h": 16,
+      "leftOfPanel": 0,
+      "leftOfHost": 0,
+      "hostClass": "ts-panel-body pt-scroll",
+      "hostOverflow": "hidden",
+      "panelPaddingLeft": "0px"
+    },
+    {
+      "label": "Ada Lovelace, guest",
+      "size": "16",
+      "w": 16,
+      "h": 16,
+      "leftOfPanel": 29,
+      "leftOfHost": 29,
+      "hostClass": "ts-panel-body pt-scroll",
+      "hostOverflow": "hidden",
+      "panelPaddingLeft": "0px"
+    },
+    {
+      "label": "Bismuth 168, guest",
+      "size": "16",
+      "w": 16,
+      "h": 16,
+      "leftOfPanel": 29,
+      "leftOfHost": 29,
+      "hostClass": "ts-panel-body pt-scroll",
+      "hostOverflow": "hidden",
+      "panelPaddingLeft": "0px"
+    }
+  ],
+  "shot.versions.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-version-history-light.png",
+  "shot.versions.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-version-history-dark.png",
+  "shot.slot.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-slot-dark.png",
+  "shot.roster.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-roster-dark.png",
+  "shot.comment.A.compose": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-comment-compose.png",
+  "comments.B.threads": [
+    {
+      "id": "01m3q8e01k1q5yhyqvcvcq3bsj",
+      "author": {
+        "principalId": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+        "label": "Ada Lovelace",
+        "name": "Ada Lovelace",
+        "trust": "guest",
+        "kind": "anonymous",
+        "mark": {
+          "density": 4,
+          "glyphSeed": 605717442,
+          "presenter": false,
+          "self": false,
+          "trust": "guest",
+          "label": "Ada Lovelace, guest",
+          "variant": "initials",
+          "initials": "AL",
+          "hue": {
+            "slot": 2,
+            "hex": "#789000"
+          }
+        },
+        "clientId": "06a21a4a41fc1b3b0adafb12895ce899",
+        "role": "owner",
+        "hue": 1,
+        "slideId": "title",
+        "selection": {
+          "blockIds": []
+        },
+        "pointer": null,
+        "following": null,
+        "presenting": false,
+        "idle": false,
+        "lastSeenAt": "2026-09-29T18:57:00.240Z"
+      }
+    }
+  ],
+  "comments.B.state": {
+    "threads": [
+      {
+        "id": "01m3q8e01k1q5yhyqvcvcq3bsj",
+        "anchor": {
+          "kind": "slide",
+          "slideId": "title"
+        },
+        "comment": {
+          "id": "01m3q8e01k1q5yhyqvcvcq3bsj",
+          "author": {
+            "principalId": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+            "label": "Ada Lovelace",
+            "name": "Ada Lovelace",
+            "trust": "guest",
+            "kind": "anonymous",
+            "mark": {
+              "density": 4,
+              "glyphSeed": 605717442,
+              "presenter": false,
+              "self": false,
+              "trust": "guest",
+              "label": "Ada Lovelace, guest",
+              "variant": "initials",
+              "initials": "AL",
+              "hue": {
+                "slot": 2,
+                "hex": "#789000"
+              }
+            },
+            "clientId": "06a21a4a41fc1b3b0adafb12895ce899",
+            "role": "owner",
+            "hue": 1,
+            "slideId": "title",
+            "selection": {
+              "blockIds": []
+            },
+            "pointer": null,
+            "following": null,
+            "presenting": false,
+            "idle": false,
+            "lastSeenAt": "2026-09-29T18:57:00.240Z"
+          },
+          "createdAt": "2026-09-29T18:56:59.952Z",
+          "text": "Can you check the title on this slide?",
+          "mentions": []
+        },
+        "replies": [],
+        "assignee": null,
+        "createdAt": "2026-09-29T18:56:59.952Z",
+        "updatedAt": "2026-09-29T18:56:59.952Z",
+        "forMe": false
+      }
+    ],
+    "revision": 1,
+    "display": "all",
+    "openThreadId": null,
+    "loaded": true
+  },
+  "comment.A.card": null,
+  "comment.A.cardAfterPost": "the card closed after Comment",
+  "shot.comment.A.marker": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-comment-marker.png",
+  "comment.B.panel": {
+    "panelText": "Comments1AllFor youAllOpenResolvedSlide orderALAda Lovelaceguestslide 1Can you check the title on this slide?nowNotification settings",
+    "card": {
+      "name": "Ada Lovelace",
+      "trust": "guest",
+      "chip": "Ada Lovelace, guest",
+      "chipVariant": "initials"
+    },
+    "rows": [
+      {
+        "text": "ALAda Lovelaceguestslide 1Can you check the title on this slide?now",
+        "chip": "Ada Lovelace, guest"
+      }
+    ]
+  },
+  "shot.comment.B": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-comment-by-A.png",
+  "shot.comment.B.panel": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-comments-panel.png",
+  "comment.B.afterMarker": {
+    "name": "Ada Lovelace",
+    "trust": "guest",
+    "chip": "Ada Lovelace, guest",
+    "chipVariant": "initials",
+    "chipHue": "2",
+    "classes": "ts-chip"
+  },
+  "shot.comment.B.card": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-comment-card.png",
+  "profile.A": {
+    "title": "Profile",
+    "size": {
+      "w": 560,
+      "h": 640
+    },
+    "text": "ProfileSTstudioYou are known by the name you typedChange nameChange avatarSessionsNot signed inDone",
+    "controls": [
+      "dialog.profile.close",
+      "dialog.profile.head",
+      "dialog.profile.trust",
+      "dialog.profile.changeName",
+      "dialog.profile.changeAvatar",
+      "dialog.profile.sessions",
+      "dialog.profile.error",
+      "dialog.profile.done"
+    ],
+    "chips": [
+      {
+        "size": {
+          "w": 24,
+          "h": 24
+        },
+        "label": "studio, guest",
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      }
+    ]
+  },
+  "shot.profile.A": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-profile-dialog.png",
+  "shot.profile.A.head": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-profile-head.png",
+  "shot.profile.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-profile-dialog-dark.png",
+  "avatar.A.initials": {
+    "title": "Change avatar",
+    "size": {
+      "w": 560,
+      "h": 640
+    },
+    "text": "Change avatarInitialsGlyphDitherPictureST1ST1.3333333333333333ST2.6666666666666665ST10.666666666666666ST1ST1.3333333333333333ST2.6666666666666665ST10.666666666666666InitialsCancelApply",
+    "controls": [
+      "dialog.avatarBuilder.close",
+      "dialog.avatarBuilder.tab.initials",
+      "dialog.avatarBuilder.tab.glyph",
+      "dialog.avatarBuilder.tab.dither",
+      "dialog.avatarBuilder.tab.picture",
+      "dialog.avatarBuilder.strip",
+      "dialog.avatarBuilder.panel.initials",
+      "dialog.avatarBuilder.initials",
+      "dialog.avatarBuilder.error",
+      "dialog.avatarBuilder.cancel",
+      "dialog.avatarBuilder.apply"
+    ],
+    "chips": [
+      {
+        "size": {
+          "w": 24,
+          "h": 24
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 32,
+          "h": 32
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 64,
+          "h": 64
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 256,
+          "h": 256
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 24,
+          "h": 24
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 32,
+          "h": 32
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 64,
+          "h": 64
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 256,
+          "h": 256
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      }
+    ]
+  },
+  "shot.avatar.A.initials": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-avatar-builder-initials.png",
+  "avatar.A.glyph": {
+    "title": "Change avatar",
+    "size": {
+      "w": 560,
+      "h": 640
+    },
+    "text": "Change avatarInitialsGlyphDitherPicture11.33333333333333332.666666666666666510.66666666666666611.33333333333333332.666666666666666510.666666666666666AnotherCancelApply",
+    "controls": [
+      "dialog.avatarBuilder.close",
+      "dialog.avatarBuilder.tab.initials",
+      "dialog.avatarBuilder.tab.glyph",
+      "dialog.avatarBuilder.tab.dither",
+      "dialog.avatarBuilder.tab.picture",
+      "dialog.avatarBuilder.strip",
+      "dialog.avatarBuilder.panel.glyph",
+      "dialog.avatarBuilder.another",
+      "dialog.avatarBuilder.error",
+      "dialog.avatarBuilder.cancel",
+      "dialog.avatarBuilder.apply"
+    ],
+    "chips": [
+      {
+        "size": {
+          "w": 24,
+          "h": 24
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 32,
+          "h": 32
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 64,
+          "h": 64
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 256,
+          "h": 256
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 24,
+          "h": 24
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 32,
+          "h": 32
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 64,
+          "h": 64
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 256,
+          "h": 256
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      }
+    ]
+  },
+  "shot.avatar.A.glyph": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-avatar-builder-glyph.png",
+  "avatar.A.dither": {
+    "title": "Change avatar",
+    "size": {
+      "w": 560,
+      "h": 640
+    },
+    "text": "Change avatarInitialsGlyphDitherPicture11.33333333333333332.666666666666666510.66666666666666611.33333333333333332.666666666666666510.666666666666666AnotherCancelApply",
+    "controls": [
+      "dialog.avatarBuilder.close",
+      "dialog.avatarBuilder.tab.initials",
+      "dialog.avatarBuilder.tab.glyph",
+      "dialog.avatarBuilder.tab.dither",
+      "dialog.avatarBuilder.tab.picture",
+      "dialog.avatarBuilder.strip",
+      "dialog.avatarBuilder.panel.dither",
+      "dialog.avatarBuilder.another",
+      "dialog.avatarBuilder.error",
+      "dialog.avatarBuilder.cancel",
+      "dialog.avatarBuilder.apply"
+    ],
+    "chips": [
+      {
+        "size": {
+          "w": 24,
+          "h": 24
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 32,
+          "h": 32
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 64,
+          "h": 64
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 256,
+          "h": 256
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 24,
+          "h": 24
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 32,
+          "h": 32
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 64,
+          "h": 64
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 256,
+          "h": 256
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      }
+    ]
+  },
+  "shot.avatar.A.dither": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-avatar-builder-dither.png",
+  "avatar.A.picture": {
+    "title": "Change avatar",
+    "size": {
+      "w": 560,
+      "h": 640
+    },
+    "text": "Change avatarInitialsGlyphDitherPicture11.33333333333333332.666666666666666510.66666666666666611.33333333333333332.666666666666666510.666666666666666Sign in to upload a pictureCancelApply",
+    "controls": [
+      "dialog.avatarBuilder.close",
+      "dialog.avatarBuilder.tab.initials",
+      "dialog.avatarBuilder.tab.glyph",
+      "dialog.avatarBuilder.tab.dither",
+      "dialog.avatarBuilder.tab.picture",
+      "dialog.avatarBuilder.strip",
+      "dialog.avatarBuilder.panel.picture",
+      "dialog.avatarBuilder.signInSentence",
+      "dialog.avatarBuilder.error",
+      "dialog.avatarBuilder.cancel",
+      "dialog.avatarBuilder.apply"
+    ],
+    "chips": [
+      {
+        "size": {
+          "w": 24,
+          "h": 24
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 32,
+          "h": 32
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 64,
+          "h": 64
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 256,
+          "h": 256
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 24,
+          "h": 24
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 32,
+          "h": 32
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 64,
+          "h": 64
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      },
+      {
+        "size": {
+          "w": 256,
+          "h": 256
+        },
+        "label": null,
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        }
+      }
+    ]
+  },
+  "shot.avatar.A.picture": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-avatar-builder-picture.png",
+  "avatar.A.picture.upload": {
+    "file": 0,
+    "uploadLabel": null,
+    "sentence": "Sign in to upload a picture",
+    "signIn": "Sign in to upload a picture",
+    "apply": true
+  },
+  "shot.avatar.A.strip": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-avatar-builder-strip.png",
+  "shot.avatar.A.picture.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-avatar-builder-picture-dark.png",
+  "avatar.A.applyError": null,
+  "presence.B.afterAvatar": {
+    "self": {
+      "clientId": "b3163b052bbf13bc37ee6793b57527ac",
+      "principalId": "anon_a29c121d-26a1-4e74-bdb9-47c4c5896160",
+      "label": "Copper 183",
+      "trust": "label",
+      "kind": "human",
+      "role": "editor",
+      "slideId": "title",
+      "markVariant": "initials",
+      "markInitials": "C",
+      "markLabel": "Copper 183"
+    },
+    "others": [
+      {
+        "clientId": "06a21a4a41fc1b3b0adafb12895ce899",
+        "principalId": "anon_97258ec0-a437-4f57-ba9d-e6a4a771661f",
+        "label": "Ada Lovelace",
+        "trust": "guest",
+        "kind": "human",
+        "role": "owner",
+        "slideId": "title",
+        "markVariant": "glyph",
+        "markInitials": "",
+        "markLabel": "Ada Lovelace, guest"
+      }
+    ],
+    "count": 1
+  },
+  "slot.B.afterAvatar": {
+    "count": "1",
+    "tip": "Collaborators",
+    "chips": [
+      {
+        "holder": "presence.chip.06a21a4a41fc1b3b0adafb12895ce899",
+        "ariaLabel": "Ada Lovelace, guest",
+        "variant": "glyph",
+        "trust": "guest",
+        "hue": "1",
+        "hueVar": "#2f5ce0",
+        "classes": "ts-chip is-live",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "border": "1px solid rgba(7, 7, 7, 0.62)",
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        },
+        "initials": null,
+        "stripe": true,
+        "cells": 11,
+        "svg": {
+          "w": 12,
+          "h": 22,
+          "attrW": "22",
+          "cssW": "12px"
+        },
+        "cellsExtent": {
+          "fromLeft": 6.54547119140625,
+          "fromTop": 7.363636016845703,
+          "fromRight": 6.54547119140625,
+          "fromBottom": 6.818181991577148
+        },
+        "initialsBox": null
+      }
+    ],
+    "more": {
+      "classes": "ts-presence-more",
+      "label": "Collaborators",
+      "text": ""
+    },
+    "ownChip": false,
+    "rule": false
+  },
+  "slot.A.afterAvatar": {
+    "count": "1",
+    "tip": "Collaborators",
+    "chips": [
+      {
+        "holder": "presence.chip.b3163b052bbf13bc37ee6793b57527ac",
+        "ariaLabel": "Copper 183",
+        "variant": "initials",
+        "trust": "label",
+        "hue": "4",
+        "hueVar": "#1d8fc8",
+        "classes": "ts-chip is-live",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "border": "1px solid rgba(7, 7, 7, 0.62)",
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        },
+        "initials": "C",
+        "stripe": true,
+        "cells": 49,
+        "svg": {
+          "w": 12,
+          "h": 22,
+          "attrW": "22",
+          "cssW": "12px"
+        },
+        "cellsExtent": {
+          "fromLeft": 6,
+          "fromTop": 6,
+          "fromRight": 6,
+          "fromBottom": 6
+        },
+        "initialsBox": {
+          "w": 4.40625,
+          "h": 7,
+          "fontSize": "11px",
+          "fill": "rgb(7, 7, 7)",
+          "stroke": "rgb(255, 255, 255)"
+        }
+      },
+      {
+        "holder": "title.account",
+        "ariaLabel": "studio, guest",
+        "variant": "initials",
+        "trust": "guest",
+        "hue": null,
+        "hueVar": "",
+        "classes": "ts-chip is-self",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "border": "1px solid rgb(7, 7, 7)",
+        "plateInset": {
+          "l": 6,
+          "t": 1,
+          "r": 6,
+          "b": 1
+        },
+        "initials": "ST",
+        "stripe": false,
+        "cells": 18,
+        "svg": {
+          "w": 12,
+          "h": 22,
+          "attrW": "22",
+          "cssW": "12px"
+        },
+        "cellsExtent": {
+          "fromLeft": 6,
+          "fromTop": 6,
+          "fromRight": 6,
+          "fromBottom": 6
+        },
+        "initialsBox": {
+          "w": 7.765625,
+          "h": 7,
+          "fontSize": "11px",
+          "fill": "rgb(7, 7, 7)",
+          "stroke": "rgb(255, 255, 255)"
+        }
+      }
+    ],
+    "more": {
+      "classes": "ts-presence-more",
+      "label": "Collaborators",
+      "text": ""
+    },
+    "ownChip": true,
+    "rule": true
+  },
+  "shot.slot.B.afterAvatar": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/B-slot-after-glyph-avatar.png",
+  "shot.slot.A.afterAvatar": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/drive/A-slot-after-glyph-avatar.png",
+  "B.ownChip": {
+    "account": 0,
+    "rule": 0
+  },
+  "teardown.info": {
+    "status": 200,
+    "revision": 3
+  },
+  "teardown.trash": {
+    "status": 200,
+    "revision": 3,
+    "error": null
+  },
+  "teardown.remove": {
+    "status": 200,
+    "body": {
+      "id": "untitled-20260929-kved",
+      "removed": true
+    }
+  },
+  "teardown.editStatus": 404
+}

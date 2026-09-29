@@ -1,5 +1,5 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useEditorShell } from './editor-shell-context';
 import type { IdentityView, LinkComponent } from './editor-shell';
@@ -207,6 +207,9 @@ function TitleField() {
 }
 
 /** The longest of the six phrases: the cell is as wide as this one so nothing to its right moves (05 rule 4); the clock sits to its left since 2026-09-25. */
+/** How long a stream stays down before the row says Reconnecting (item 100). */
+export const RECONNECTING_GRACE_MS = 3000;
+
 const LONGEST_SAVE_WORDS = [
   TITLE_ROW.saved,
   TITLE_ROW.saving,
@@ -224,10 +227,21 @@ function SaveState() {
      or the server would paint the long sentence and the row would move when the stream connects
      (VERIFICATION-3 finding 26: the clock slot moved 158 px left after hydration) */
   const offline = shell.input.sync?.offline === true;
-  /* the stream is down or the store refuses its poll and the client is reopening (C3-F1; R46):
-     Reconnecting once every write is acknowledged, while a write in flight keeps its own word */
-  const reconnecting =
-    !offline && (shell.input.sync?.streamDown === true || shell.input.sync?.storeDegraded === true);
+  /* the stream is down and the client is reopening it (C3-F1; R46): Reconnecting once every
+     write is acknowledged and the stream has been down for a few seconds (docs/POLISH.md item
+     100: a busy store on a connected tab shows no word, its pulse backs off silently; a stream
+     that reopens within the grace shows none either) */
+  const streamDown = shell.input.sync?.streamDown === true;
+  const [downForAWhile, setDownForAWhile] = useState(false);
+  useEffect(() => {
+    if (!streamDown) {
+      setDownForAWhile(false);
+      return undefined;
+    }
+    const timer = window.setTimeout(() => setDownForAWhile(true), RECONNECTING_GRACE_MS);
+    return () => window.clearTimeout(timer);
+  }, [streamDown]);
+  const reconnecting = !offline && streamDown && downForAWhile;
   const words = saveWords(save.state, save.draft === true, offline, reconnecting);
   const item = itemById('title.saveState');
   /* Google shows a viewer and a commenter no save words: the cell is absent below `write`
@@ -294,6 +308,11 @@ function LastEdit() {
         menuItem={item.id}
         onClick={() => shell.runItem(item)}
       />
+      {/* the words beside the clock from 1280 px up (docs/POLISH.md item 92): a seller read
+          them in the tooltip alone */}
+      <span className="ts-title-clock-words" data-control="deck.lastEdit.words" aria-hidden="true">
+        {ago === null ? '' : words}
+      </span>
       <i className="ts-title-dot" aria-hidden="true" />
     </span>
   );

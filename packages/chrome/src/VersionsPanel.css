@@ -288,7 +288,9 @@
   width: 100%;
   min-height: 40px;
   margin: 0;
-  padding: 4px 0;
+  /* the marks inside the row, at the version rows' inset (docs/POLISH.md item 91: the avatar
+     straddled the panel's edge) */
+  padding: 4px 8px 4px 16px;
   border: 0;
   background: none;
   color: var(--pt-ink);
@@ -300,6 +302,13 @@
 .ts-version-window-row:focus-visible {
   outline: 1px solid var(--pt-ink);
   outline-offset: -1px;
+}
+
+/* the meta line wraps instead of clipping (item 91: the tail read "cur…") */
+.ts-versions.is-history .ts-version-meta {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 /* the marks strip: a fixed 70 px for four 16 px marks at 2 px gaps and the +N */

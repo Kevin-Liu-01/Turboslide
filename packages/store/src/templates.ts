@@ -1124,6 +1124,12 @@ export type CopyDeckInput = {
   slideIds?: ReadonlyArray<string>;
   /** leave the speaker notes out of the copy */
   removeNotes?: boolean;
+  /**
+   * carry the comment threads (the polish round, docs/POLISH.md item 98): the sidecar's index
+   * and thread files copied under the new id; off, the copy starts with no comments, Google's
+   * default
+   */
+  copyComments?: boolean;
 };
 
 export type CopyDeckResult = {
@@ -1236,6 +1242,7 @@ export function copyDeck(
   const assetsDir = join(sourceDir, 'assets');
   if (existsSync(assetsDir) && statSync(assetsDir).isDirectory())
     cpSync(assetsDir, join(dir, 'assets'), { recursive: true, dereference: true });
+  if (input.copyComments === true) copyCommentsSidecar(sourceDir, dir, deckId);
   writeManifest(dir, document.deck);
   const loaded = loadDeckDir(dir);
   const blocking = loaded.issues.filter((issue) => issue.severity === 3);
@@ -1259,6 +1266,36 @@ export function copyDeck(
       assets: Object.keys(deck.assets).length,
     },
   };
+}
+
+/** The folder of the comments sidecar under a deck folder (blob-store.ts COMMENTS_DIR, comments-store.ts). */
+const COMMENTS_FOLDER = 'comments';
+
+/**
+ * Copies the comments sidecar of a deck under the copy's id (Make a copy with Copy comments,
+ * docs/POLISH.md item 98): every JSON file of `comments/` whose `deckId` names the source is
+ * rewritten to the copy's id, the rest of each file kept as it is (the thread ids, the authors
+ * and the times stay, as Google's copy keeps them). A source with no sidecar copies nothing.
+ */
+function copyCommentsSidecar(sourceDir: string, dir: string, deckId: string): void {
+  const from = join(sourceDir, COMMENTS_FOLDER);
+  if (!existsSync(from) || !statSync(from).isDirectory()) return;
+  const to = join(dir, COMMENTS_FOLDER);
+  mkdirSync(to, { recursive: true });
+  for (const name of readdirSync(from)) {
+    if (!name.endsWith('.json')) continue;
+    const bytes = readFileSync(join(from, name), 'utf8');
+    let out = bytes;
+    try {
+      const parsed: unknown = JSON.parse(bytes);
+      if (typeof parsed === 'object' && parsed !== null && 'deckId' in parsed) {
+        out = JSON.stringify({ ...(parsed as Record<string, unknown>), deckId }, null, 2);
+      }
+    } catch {
+      // not JSON: copied as it is
+    }
+    writeFileSync(join(to, name), out);
+  }
 }
 
 export type TrashState = { id: string; trashedAt: string | null; revision: number };

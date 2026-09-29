@@ -2816,6 +2816,9 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       // the copy takes the assets folder whole, so every twin of the source must be on disk
       await overlay.ensureAssets(input.id);
       await source.pullAssets();
+      // Copy comments (docs/POLISH.md item 98): the source's sidecar on disk first, so copyDeck
+      // copies the threads this instance may never have pulled
+      if (input.copyComments === true) await pullSidecar(c, input.id, join(decksDir, input.id));
       if (baseRevision !== undefined) checkRevision(decksDir, input.id, baseRevision);
       const deckId = deckIdFor({
         name: input.name,

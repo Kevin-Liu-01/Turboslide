@@ -51,6 +51,8 @@ export type VersionsPanelProps = {
   history?: boolean;
   /** Make a copy at a version: opens the Make a copy dialog */
   onMakeCopy?: (version: Version) => void;
+  /** Name current version opens the chrome's dialog (docs/POLISH.md item 91); the inline field without it */
+  onNameCurrent?: () => void;
   /** the resolved identities of the records' authors, by principal id (SPEC-3 7.8) */
   identities?: Readonly<Record<string, IdentityView>>;
   /** this browser's own identity: its rows read You (docs/PRODUCT.md 3.2; audit-interface 31) */
@@ -86,6 +88,13 @@ function formatTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+/** A window's time: one time when its start and end read the same minute, else "12:37 PM to 12:38 PM" (item 91). */
+export function windowTime(from: string, to: string): string {
+  const start = formatTime(from);
+  const end = formatTime(to);
+  return start === end ? start : `${start} to ${end}`;
 }
 
 /** The day heading of a version: Today, Yesterday, or the date. */
@@ -148,6 +157,7 @@ export function VersionsPanel({
   embedded = false,
   history = false,
   onMakeCopy,
+  onNameCurrent,
   identities,
   showChanges = false,
   selected = null,
@@ -193,7 +203,7 @@ export function VersionsPanel({
       setNotice(PANELS.versionHistory.namedCap(cap.oldest ?? ''));
       return;
     }
-    run(dispatch('version.save', { note: trimmed }), `Saved "${trimmed}" at r${revision}`);
+    run(dispatch('version.save', { note: trimmed }), `Saved the version ${trimmed}`);
   };
 
   const save = () => {
@@ -372,7 +382,7 @@ export function VersionsPanel({
           data-control={`versionHistory.window.${window.key}`}
           onClick={() => toggleWindow(window.key)}
           {...tipProps({
-            name: `${formatTime(window.from)} to ${formatTime(window.to)}`,
+            name: windowTime(window.from, window.to),
             doc: `${window.versions.length} versions by ${window.authors.length === 1 ? 'one person' : `${window.authors.length} people`}; click to list them`,
           })}
         >
@@ -387,9 +397,7 @@ export function VersionsPanel({
             {more > 0 ? <span className="ts-version-marks-more">+{more}</span> : null}
           </span>
           <span className="ts-version-body">
-            <span className="ts-version-note">
-              {formatTime(window.from)} to {formatTime(window.to)}
-            </span>
+            <span className="ts-version-note">{windowTime(window.from, window.to)}</span>
             <span className="ts-version-meta">
               {window.authors.map(authorWord).join(', ')} ·{' '}
               {PANELS.versionHistory.changes(window.changes)}
@@ -441,7 +449,7 @@ export function VersionsPanel({
               className="pt-ib is-text"
               data-control="versionHistory.nameCurrent"
               data-menu-item="file.versionHistory.nameCurrent"
-              onClick={() => setNamingCurrent('')}
+              onClick={() => (onNameCurrent ? onNameCurrent() : setNamingCurrent(''))}
               {...tipProps({
                 name: PANELS.versionHistory.nameCurrent,
                 doc: `Up to ${40} named versions`,

@@ -107,14 +107,17 @@ export function rosterRoleWord(participant: PresenceParticipant): string {
 
 /**
  * Follow is offered on editors and owners with a slide selected and refused for viewers,
- * commenters, anonymous people and agents (4.4); the caller needs the `follow` capability (6.2).
+ * commenters and agents (4.4); the caller needs the `follow` capability (6.2). An anonymous
+ * editor can be followed (the polish round, docs/POLISH.md item 104): every seller on a
+ * deployment without sign in is anonymous, and the rule that followed accounts alone offered
+ * "Go to slide 3" and never Follow there.
  */
 export function canFollow(
   participant: PresenceParticipant,
   capabilities: readonly EditorCapability[] | undefined,
 ): boolean {
   if (capabilities !== undefined && !capabilities.includes('follow')) return false;
-  if (participant.trust === 'agent' || participant.kind !== 'account') return false;
+  if (participant.trust === 'agent') return false;
   if (participant.role !== 'editor' && participant.role !== 'owner') return false;
   return participant.slideId !== undefined;
 }

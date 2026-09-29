@@ -43,7 +43,52 @@
   visibility: hidden;
 }
 
+/* no dead control on the bar (docs/POLISH.md item 93): the Captions button leaves until
+   captions exist; the toolbar's own file drops it on the integrator's request (build/b5.md R4) */
+.ts-slideshow [data-control='present.captions'] {
+  display: none;
+}
+
+/* the laser reads (item 94): a 14 px ink dot with a paper ring, over the layer's 12 px rule */
+.ts-slideshow .ts-present-laser {
+  left: -7px;
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  background: var(--pt-panel-ink, #101010);
+  box-shadow:
+    0 0 0 2px var(--pt-panel-text, rgba(255, 255, 255, 0.92)),
+    0 0 0 3px var(--pt-panel-ink, #101010);
+}
+
+/* the end plate (item 98; audit-pages item 34): past the last slide the show draws its end over
+   the sheet; a click or the next key leaves, the previous key returns to the last slide */
+.ts-present-end {
+  position: absolute;
+  inset: 0;
+  z-index: 24;
+  display: grid;
+  place-items: center;
+  background: var(--pt-panel-ink, #101010);
+  color: var(--pt-panel-text, rgba(255, 255, 255, 0.87));
+  font: 500 18px/1.4 var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  cursor: pointer;
+}
+
+.ts-present-end small {
+  display: block;
+  margin-top: 8px;
+  font: 400 13px/1.4 var(--pt-text);
+  color: var(--pt-panel-text-2, rgba(255, 255, 255, 0.6));
+  text-align: center;
+}
+
 .ts-slideshow .ts-snackbar-action,
 .ts-slideshow .ts-snackbar-x {
   color: inherit;
 }
+
+/* the bar clears the sheet on a short viewport (docs/POLISH.md item 98; audit-pages item 44):
+   show-stage.ts takes the bar's row off the stage box the sheet fits, since the shell measures
+   the box's clientHeight and a padding rule here would leave the fit as it was */

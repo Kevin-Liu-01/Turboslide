@@ -115,6 +115,26 @@
   margin-top: 16px;
 }
 
+/* the gate's rows behind Advanced tools (docs/POLISH.md item 80) */
+.ts-report-advanced {
+  margin-top: 12px;
+}
+
+.ts-report-advanced summary {
+  cursor: pointer;
+  color: var(--pt-ink-2);
+  font-size: 12.5px;
+}
+
+.ts-report-verdict {
+  margin: 8px 0 0;
+  color: var(--pt-ink-2);
+}
+
+.ts-report-verdict[data-passed='false'] {
+  color: var(--pt-ink);
+}
+
 @media (max-width: 600px) {
   .ts-report-row {
     grid-template-columns: 1fr;

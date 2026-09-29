@@ -175,7 +175,32 @@ export type StoreActionDeps = {
    * write with the sentence naming the pipeline.
    */
   materialize?: Materializer;
+  /**
+   * The suffix a browser tab's minted slide ids carry (docs/POLISH.md item 99): two tabs that
+   * press New slide within the propagation window mint `<layout>-<n>` from their own copies and
+   * the second is refused as a duplicate; with a suffix drawn from the client id the ids never
+   * meet. The CLI and the agents mint the plain form.
+   */
+  idSuffix?: string;
 };
+
+/**
+ * A slide id that is free on the deck and carries the client's suffix: `<layout>-<n>-<suffix>`
+ * with the first free n (item 99). The suffix is four lower case base36 characters at most.
+ */
+export function freeSuffixedSlideId(
+  layout: string,
+  suffix: string,
+  taken: ReadonlySet<string>,
+): string {
+  const tail = suffix.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 4);
+  if (tail === '') return freeLayoutSlideId(layout as LayoutId, taken);
+  for (let n = 1; n < 100_000; n += 1) {
+    const candidate = `${layout}-${n}-${tail}`;
+    if (!taken.has(candidate)) return candidate;
+  }
+  throw new RangeError(`No free slide id for ${layout}`);
+}
 
 /** The write half of picture.materialize (SPEC-3 10.4): one variant per key, the files under assets/. */
 export type Materializer = (request: {
@@ -1237,7 +1262,10 @@ export async function slideNew(
     if (taken.has(input.id)) throw new TypeError(`Slide "${input.id}" exists already`);
     id = input.id;
   } else {
-    id = freeLayoutSlideId(input.layout, taken);
+    id =
+      deps.idSuffix === undefined
+        ? freeLayoutSlideId(input.layout, taken)
+        : freeSuffixedSlideId(input.layout, deps.idSuffix, taken);
   }
   const entry = layoutEntry(input.layout);
   const made = entry.make(id, current.deck, cursor.sectionId);

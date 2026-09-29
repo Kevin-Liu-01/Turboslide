@@ -40,28 +40,26 @@ import type { DeckHead } from './templates.ts';
 export type StoredAccess = { record: AccessRecord; etag: string };
 
 /**
- * The general access a deck created from `/new` starts with (the product round, docs/PRODUCT.md
- * section 1's decision and question 10; section 2 rank 3; the row
- * `share.dialog.co-edit-from-copied-link`): on a deployment with anonymous principals (no sign in
- * provider, production today) a colleague who opens the copied address must edit at once, so the
- * record starts as Anyone with the link, Editor, and the Share dialog's sentence asks the seller
- * to pick Viewer before sending it to a customer. On a deployment whose principals sign in the
- * record starts restricted, as SPEC-3 6.1 says. The studio's `recordNewDeck` (server/access.ts)
- * takes the deployment's answer from here; a checkout's synthesized record stays restricted
- * (apps/cli/src/records/access.ts loadRecord: the folder's holder is its owner).
+ * The general access a deck created from `/new` starts with: Restricted, and Viewer for the link
+ * once the seller turns link sharing on, on every deployment (the polish round, docs/POLISH.md
+ * item 78; SPEC-3 6.1). The product round had made a deck on a deployment with anonymous
+ * principals start as Anyone with the link, Editor, so a copied address edited at once, and the
+ * dialog's sentence asked the seller to pick Viewer before sending it to a customer
+ * (docs/PRODUCT.md question 10); the polish audit read that as the first Share on a minute old
+ * deck already editable by anyone and an instruction in the dialog (audit-pages item 4). Google's
+ * new file is Restricted and its link defaults to Viewer; the seller picks Editor for a
+ * colleague. The studio's `recordNewDeck` (server/access.ts) takes the answer from here; a
+ * checkout's synthesized record is restricted too (apps/cli/src/records/access.ts loadRecord:
+ * the folder's holder is its owner). The parameter stays so a deployment can be told apart in a
+ * later round without a signature change.
  *
  * The word is `link`, never `open` (the product round fix round; VERIFICATION.md "Product round,
- * pass 1" finding 1): the Share dialog reads `open` as the legacy row of a deck with no record
- * (the plain address, no access select, no owner row), so a new deck under `open` showed a seller
- * "Anyone with the address can view (legacy)" and Copy link copied the plain `/edit/<id>`
- * address, and the 28 rows of core/share.spec.ts cascaded on both tiers.
+ * pass 1" finding 1): the Share dialog reads `open` as the legacy row of a deck with no record.
  */
-export function defaultGeneralAccessFor(deployment: {
+export function defaultGeneralAccessFor(_deployment: {
   anonymousPrincipals: boolean;
 }): GeneralAccess {
-  return deployment.anonymousPrincipals
-    ? { mode: 'link', role: 'editor' }
-    : { mode: 'restricted', role: 'viewer' };
+  return { mode: 'restricted', role: 'viewer' };
 }
 
 /** The label of the general access link, the one `share.setGeneralAccess` mints and rotates (apps/cli/src/records/access.ts). */

@@ -110,7 +110,10 @@ export function RosterMenu({
           : displayNameFor(participant, viewer);
         const trust = trustWordFor(participant);
         const following = presence.following === participant.clientId;
-        const follow = !self && canFollow(participant, capabilities);
+        /* Follow while its row is offered (docs/POLISH.md item 104: an anonymous editor can be
+           followed once the parked row returns); until then the row is a one time jump, in word
+           and in click, never a hidden control */
+        const follow = !self && showFollowWord && canFollow(participant, capabilities);
         const tip = self
           ? {
               name: `${name} ${PRESENCE.you}`,

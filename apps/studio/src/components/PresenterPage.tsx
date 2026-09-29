@@ -26,6 +26,8 @@ import { PRESENTER_ICONS } from './presenter-icons';
 import { useMountEffect } from './useMountEffect';
 import { useStudioSession } from './useStudioSession';
 
+import './PresenterPage.css';
+
 /**
  * Presenter view's page (gslides-parity SPEC 9.3; MILESTONES B6 item 3; docs/spec/SPEC.md 6.10),
  * moved verbatim from routes/present.$deckId.tsx in round four (gslides-parity SPEC-4 0.36, 0.44;

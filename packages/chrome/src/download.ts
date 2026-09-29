@@ -18,6 +18,55 @@
 /** What a page download saved: the file's name, its size and its media type. */
 export type PageDownload = { name: string; bytes: number; type: string };
 
+/** The file kinds the download words name. */
+export type DownloadKind = 'pptx' | 'pdf' | 'jpg' | 'png' | 'html' | 'zip';
+
+/** The seller's word for a file kind: "PDF", "PowerPoint file", "JPEG", "PNG", "web page", "bundle". */
+export function downloadKindWord(kind: DownloadKind): string {
+  switch (kind) {
+    case 'pdf':
+      return 'PDF';
+    case 'pptx':
+      return 'PowerPoint file';
+    case 'jpg':
+      return 'JPEG';
+    case 'png':
+      return 'PNG';
+    case 'html':
+      return 'web page';
+    default:
+      return 'bundle';
+  }
+}
+
+/** The characters a file name never carries: `" \ / : * ? < > |` and the control characters. */
+// eslint-disable-next-line no-control-regex
+const UNSAFE_FILE_NAME = /["\\/:*?<>|\u0000-\u001f]/g;
+
+/**
+ * One name rule for every download (docs/POLISH.md item 86): the deck's title with the unsafe
+ * characters removed, then the extension; an untitled deck keeps its id. The same rule the
+ * Download dialog applies to a PDF and a PowerPoint file (dialogs/Download.tsx downloadFileName
+ * adds the appearance and mode tags on top of it).
+ */
+export function fileNameOf(title: string, deckId: string, extension: string): string {
+  const cleaned = title.replace(UNSAFE_FILE_NAME, '').replace(/\s+/g, ' ').trim();
+  const base = cleaned === '' || cleaned === 'Untitled presentation' ? deckId : cleaned;
+  return `${base}.${extension}`;
+}
+
+/**
+ * The words of every download (docs/POLISH.md items 82, 86 and 87): one progress sentence with no
+ * estimate, one saved sentence naming the file, and one refusal sentence naming the kind. No
+ * store's or worker's sentence reaches the seller; the cause stays in the console.
+ */
+export const DOWNLOAD_WORDS = {
+  preparing: (kind: DownloadKind): string => `Preparing your ${downloadKindWord(kind)}`,
+  saved: (name: string): string => `Saved ${name}`,
+  notMade: (kind: DownloadKind): string =>
+    `The ${downloadKindWord(kind)} could not be made. Try again in a minute`,
+} as const;
+
 /** The I/O a page download uses; every field has the window's default, a test hands fakes. */
 export type PageDownloadIo = {
   fetch: typeof fetch;

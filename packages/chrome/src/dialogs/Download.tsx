@@ -9,6 +9,7 @@ import { useEditorShell } from '../editor-shell-context';
 import { Icon } from '../icons';
 import { cn } from '../lib/cn';
 import { DIALOGS } from '../menus/strings';
+import { DOWNLOAD_WORDS } from '../download';
 import { useMountEffect } from '../lib/useMountEffect';
 import { isParked } from '../parked-controls';
 import { tipProps } from '../Tooltip';
@@ -129,12 +130,14 @@ function preparingHead(format: 'pptx' | 'pdf'): string {
 export function progressSentence(
   format: 'pptx' | 'pdf',
   progress: { label?: string; line?: string } | null | undefined,
-  slides: number,
+  _slides: number,
 ): string {
   const line = progress?.line ?? progress?.label ?? '';
   const perSlide = /slide\s+\d+\s+of\s+\d+/i.exec(line);
   if (perSlide !== null) return `${preparingHead(format)}, ${perSlide[0].toLowerCase()}`;
-  return estimateSentence(slides, format);
+  /* no estimate (docs/POLISH.md item 87; audit-pages item 45): the sentence promised "about 10
+     seconds for 2 slides" and the file came at 7 s */
+  return preparingHead(format);
 }
 
 /** The characters a file name never carries (rank 7: `" \ / : * ? < > |` and the control characters). */
@@ -314,11 +317,14 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
         shell.closeDialog();
       })
       .catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : String(err);
+        /* one sentence for a refused download (docs/POLISH.md item 82): the store's and the
+           worker's words stay in the console */
+        console.error(`turboslide download: the ${format} export was refused`, err);
+        const sentence = DOWNLOAD_WORDS.notMade(format);
         setState('failed');
-        setError(message);
+        setError(sentence);
         if (direct) {
-          shell.say(`The download did not finish: ${message}`);
+          shell.say(sentence);
           shell.closeDialog();
         }
       });
@@ -327,7 +333,7 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
   /* the direct path starts at once and speaks through the snackbar alone */
   useMountEffect(() => {
     if (!direct) return;
-    shell.say(estimateSentence(slides, format));
+    shell.say(DOWNLOAD_WORDS.preparing(format));
     run({
       mode: 'flatten',
       theme: deckAppearance(input.document.deck),
@@ -459,7 +465,7 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
       ) : (
         <p>
           One slide per page, 13.333 by 7.5 inches. The speaker notes are not in the PDF; File &gt;
-          Print preview prints them under each slide.
+          Print settings and preview prints them under each slide
         </p>
       )}
       {format === 'pptx' ? (

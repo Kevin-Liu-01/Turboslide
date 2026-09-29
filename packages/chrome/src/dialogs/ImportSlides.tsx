@@ -1,5 +1,5 @@
-import type { MouseEvent as ReactMouseEvent } from 'react';
-import { useEffect, useState } from 'react';
+import type { DragEvent, MouseEvent as ReactMouseEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { sectionOfSlide } from '@turboslide/schema/deck';
 
@@ -10,6 +10,8 @@ import { cn } from '../lib/cn';
 import { DIALOGS, IMPORT_PPTX } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 import { formatWhen } from '../VersionsPanel';
+
+import './upload.css';
 
 /**
  * The words on the Import button: the count of the picked slides, as Google's "Import slides"
@@ -66,6 +68,34 @@ export function ImportSlidesDialog() {
   const [anchor, setAnchor] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [over, setOver] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  /* the Upload tab is a drop zone with a button (docs/POLISH.md item 88): a dropped or picked
+     bundle is uploaded and its slides listed next */
+  const takeFile = (file: File | null | undefined) => {
+    if (!file) return;
+    if (/\.pptx$/i.test(file.name)) {
+      setError(IMPORT_PPTX);
+      return;
+    }
+    if (input.uploadBundle === undefined) {
+      setError('Upload a bundle from the home page, then import from it here');
+      return;
+    }
+    setError(null);
+    setBusy(true);
+    input
+      .uploadBundle(file)
+      .then(({ id }) => choose(id))
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
+      .finally(() => setBusy(false));
+  };
+  const onDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setOver(false);
+    takeFile(event.dataTransfer.files[0]);
+  };
 
   useEffect(() => {
     const list =
@@ -187,7 +217,7 @@ export function ImportSlidesDialog() {
           {tab === 'presentations' ? (
             <>
               {decks === null && error === null ? (
-                <p className="ts-dialog-empty">Loading…</p>
+                <ul className="ts-dialog-list is-loading" aria-busy="true" aria-label="Loading" />
               ) : null}
               {decks !== null && decks.length === 0 ? (
                 <p className="ts-dialog-empty">No other presentations on this Turboslide</p>
@@ -210,11 +240,13 @@ export function ImportSlidesDialog() {
                         onClick={() => choose(deck.id)}
                         {...tipProps({
                           name: deck.title,
-                          doc: `${deck.slides} slides, edited ${formatWhen(deck.updatedAt)}; click to pick its slides`,
+                          doc: `${deck.slides} slide${deck.slides === 1 ? '' : 's'}, edited ${formatWhen(deck.updatedAt)}; click to pick its slides`,
                         })}
                       >
                         <span className="ts-dialog-row-title">{deck.title}</span>
-                        <span className="ts-dialog-row-meta">{deck.slides} slides</span>
+                        <span className="ts-dialog-row-meta">
+                          {deck.slides} slide{deck.slides === 1 ? '' : 's'}
+                        </span>
                       </button>
                     </li>
                   ))}
@@ -222,39 +254,41 @@ export function ImportSlidesDialog() {
               ) : null}
             </>
           ) : (
-            <>
+            <div
+              className={cn('ts-upload-zone', over && 'is-over')}
+              data-control="dialog.importSlides.upload"
+              onDragOver={(event) => {
+                event.preventDefault();
+                setOver(true);
+              }}
+              onDragLeave={() => setOver(false)}
+              onDrop={onDrop}
+            >
+              <p>Drop a Turboslide bundle (.zip) here, or pick one from your device</p>
               <p>{IMPORT_PPTX}</p>
               <input
+                ref={fileInput}
                 type="file"
                 accept=".zip,application/zip"
                 aria-label="Bundle file"
                 data-control="dialog.importSlides.file"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (!file) return;
-                  if (/\.pptx$/i.test(file.name)) {
-                    setError(IMPORT_PPTX);
-                    return;
-                  }
-                  if (input.uploadBundle === undefined) {
-                    setError('Upload a bundle from the home page, then import from it here');
-                    return;
-                  }
-                  setBusy(true);
-                  input
-                    .uploadBundle(file)
-                    .then(({ id }) => choose(id))
-                    .catch((err: unknown) =>
-                      setError(err instanceof Error ? err.message : String(err)),
-                    )
-                    .finally(() => setBusy(false));
-                }}
+                tabIndex={-1}
+                onChange={(event) => takeFile(event.target.files?.[0])}
+              />
+              <button
+                type="button"
+                className="pt-ib"
+                disabled={busy}
+                data-control="dialog.importSlides.upload.button"
+                onClick={() => fileInput.current?.click()}
                 {...tipProps({
-                  name: 'Bundle file',
+                  name: 'Select a file from your device',
                   doc: 'A Turboslide bundle (.zip); its slides are listed next',
                 })}
-              />
-            </>
+              >
+                <span className="pt-lb">{busy ? 'Uploading' : 'Select a file from your device'}</span>
+              </button>
+            </div>
           )}
         </>
       ) : (

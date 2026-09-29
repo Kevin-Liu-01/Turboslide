@@ -36,6 +36,8 @@ export type PackedBundle = {
   manifest: BundleManifest;
   /** `<deckId>-r<revision>.zip` */
   fileName: string;
+  /** the deck's title, for a download named after it (docs/POLISH.md item 86) */
+  title: string;
   counts: { documents: number; assets: number; versions: number; comments: number };
 };
 
@@ -111,6 +113,7 @@ export function packDeckDir(dir: string, options: PackOptions = {}): PackedBundl
     zip,
     manifest,
     fileName: bundleFileName(deck.id, deck.revision),
+    title: deck.title,
     counts: {
       documents: files.documents.length,
       assets: files.assets.length,

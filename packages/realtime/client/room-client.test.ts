@@ -137,6 +137,17 @@ const settled = async (rooms: ReturnType<typeof createRoomClient>[]): Promise<vo
   await new Promise((resolve) => setTimeout(resolve, 20));
 };
 
+
+/**
+ * The wire is cut for the client (docs/POLISH.md item 100): a failed POST or a 5xx reads as a
+ * write the client is sending again (`resending`) while the browser has no word on the network,
+ * and as Offline when the browser says so (`navigator.onLine`, the events); in Node there is no
+ * navigator, so the tests read either.
+ */
+function cutOff(status: { offline: boolean; resending: boolean }): boolean {
+  return status.offline || status.resending;
+}
+
 describe('createRoomClient', () => {
   it('lets two clients type in one paragraph and converge on the server document', async () => {
     const h = harness();
@@ -220,7 +231,7 @@ describe('createRoomClient', () => {
     a.transport.offline(true);
     a.room.apply([splice(0, 0, 'o')], 'type');
     a.room.apply([splice(1, 0, 'f')], 'type', 'now');
-    await until(() => a.room.status().offline, 3000);
+    await until(() => cutOff(a.room.status()), 3000);
     expect(a.room.status().pending).toBe(2);
     const persisted = await store.load('gt-brand');
     expect(persisted).toHaveLength(1);
@@ -261,7 +272,7 @@ describe('createRoomClient', () => {
     await until(() => a.room.status().connected);
     a.room.apply([splice(0, 0, 'q')], 'type', 'now');
     // the 503 puts the client offline with the op still pending; nothing is refused
-    await until(() => a.room.status().offline, 3000);
+    await until(() => cutOff(a.room.status()), 3000);
     expect(a.room.status().pending).toBe(1);
     expect(rejects).toHaveLength(0);
     // the resend lands once the room answers
@@ -320,7 +331,7 @@ describe('createRoomClient', () => {
     a.room.apply([splice(0, 0, 'Q')], 'type');
     a.room.apply([splice(1, 0, 'R')], 'type');
     a.room.apply([splice(2, 0, 'S')], 'type', 'now');
-    await until(() => a.room.status().offline, 3000);
+    await until(() => cutOff(a.room.status()), 3000);
     await a.room.stop();
     let offer:
       { count: number; apply: () => Promise<void>; discard: () => Promise<void> } | undefined;
@@ -1050,7 +1061,7 @@ describe('the blob tier and a lost POST (the focus round, cycle 3; VERIFICATION 
     await until(() => h.room.status().connected);
     h.room.apply([splice(0, 0, 'q')], 'type', 'now');
     await until(() => h.posted.length === 1);
-    await until(() => h.room.status().offline, 3000);
+    await until(() => cutOff(h.room.status()), 3000);
     expect(h.room.status().pending).toBe(1);
     expect(h.serverText()).toBe(`q${original}`);
     // the commit's echo arrives before the resend: the op is acknowledged at its revision
@@ -1210,7 +1221,7 @@ describe('the blob tier and a lost POST (the focus round, cycle 3; VERIFICATION 
     await until(() => room.status().connected);
     room.apply([splice(0, 0, 'q')], 'type', 'now');
     await until(() => posted.length === 1);
-    await until(() => room.status().offline, 3000);
+    await until(() => cutOff(room.status()), 3000);
     // the stream delivers the commit and another author's write after it, with the fold of the
     // commit not the client's (the server placed the write differently), so the echo is a remote
     // write here and the position moves to r0 + 2 before the resend is answered
@@ -1275,7 +1286,7 @@ describe('the blob tier and a lost POST (the focus round, cycle 3; VERIFICATION 
     h.room.start();
     await until(() => h.room.status().connected);
     h.room.apply([splice(0, 0, 'q')], 'type', 'now');
-    await until(() => h.room.status().offline, 3000);
+    await until(() => cutOff(h.room.status()), 3000);
     // another author's word at the same base: the pending op moves past it and stays pending
     h.echo([splice(0, 0, 'zz')]);
     expect(h.room.status().pending).toBe(1);
@@ -1469,7 +1480,7 @@ describe('the persisted queue across a reconnect (the seam step of the cycle 3 s
     // a burst typed while the POSTs fail, then the stream goes: the offline blip of the row
     a.transport.offline(true);
     a.room.apply([splice(0, 0, 'Q')], 'type', 'now');
-    await until(() => a.room.status().offline, 3000);
+    await until(() => cutOff(a.room.status()), 3000);
     expect(store.queues.has(pendingKey('gt-brand', firstId!))).toBe(true);
     h.server.kill();
     await until(() => !a.room.status().connected);

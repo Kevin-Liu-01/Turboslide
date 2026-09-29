@@ -10,6 +10,7 @@ import { awaitAcknowledged } from './ack-wait';
 import { slideToConvertFor } from './convert-first';
 import { createExportModeGate } from './export-mode';
 import { refusalSentence } from './refusal';
+import { refusalText } from '@turboslide/chrome/error-text';
 import {
   OWN_WRITE_LANDED_MAX_MS,
   OWN_WRITE_STREAM_WAIT_MS,
@@ -142,6 +143,7 @@ import { brandGet, brandResetPlan, brandSetPlan, fontList } from '@turboslide/cl
 import type { BrandResetInput, BrandSetInput } from '@turboslide/cli/brand-actions';
 import type { ExportMenuInput, ExportProgress } from '@turboslide/chrome/ExportMenu';
 import { downloadFromPage } from '@turboslide/chrome/download';
+import type { PageDownload } from '@turboslide/chrome/download';
 import type {
   CommentAnchorView,
   CommentThreadView,
@@ -224,7 +226,10 @@ import {
 import { isPictureKind } from '@turboslide/viewer/model';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { applyTheme, readTheme } from '@turboslide/viewer/theme';
-import { createShaderFrameCapturer } from '@turboslide/viewer/shader-frame';
+import { createShaderFrameCapturer,
+  FRAME_UPLOAD_ABOVE_BYTES,
+  SHADER_FRAME_FAILED_SENTENCE,
+} from '@turboslide/viewer/shader-frame';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import {
@@ -253,6 +258,7 @@ import { renderSlideImages } from '../server/render';
 import { warmThumbnails } from '../server/warm';
 import {
   DECK_CREATED_EVENT,
+  heldOpIds,
   leaseSlide,
   listVersions,
   readEditorDeck,
@@ -932,6 +938,100 @@ function outlineOf(document: DeckDocument) {
   }));
 }
 
+/**
+ * The words that changed between two texts (docs/POLISH.md item 117): the common head and tail
+ * of the word lists leave, and what is left reads "renewal became contract"; an insertion reads
+ * "added <words>", a deletion "removed <words>". Each side is cut at 40 characters.
+ */
+export function changedWords(from: string, to: string): string {
+  const a = from.split(/\s+/).filter((word) => word !== '');
+  const b = to.split(/\s+/).filter((word) => word !== '');
+  let head = 0;
+  while (head < a.length && head < b.length && a[head] === b[head]) head += 1;
+  let tail = 0;
+  while (
+    tail < a.length - head &&
+    tail < b.length - head &&
+    a[a.length - 1 - tail] === b[b.length - 1 - tail]
+  )
+    tail += 1;
+  const cut = (text: string): string =>
+    text.length > 40 ? `${text.slice(0, 39).trimEnd()}…` : text;
+  const removed = cut(a.slice(head, a.length - tail).join(' '));
+  const added = cut(b.slice(head, b.length - tail).join(' '));
+  if (removed === '' && added === '') return cut(to);
+  if (removed === '') return `added ${added}`;
+  if (added === '') return `removed ${removed}`;
+  return `${removed} became ${added}`;
+}
+
+/**
+ * The validator's refusal of a write, or null when every slide it touches validates after it
+ * (B1's R10). The reducer runs on a clone; a reducer refusal (a missing slide or block) is left
+ * to the room's own apply, whose sentence the card carries.
+ */
+export function validateBeforeApply(
+  document: DeckDocument,
+  mutations: ReadonlyArray<Mutation>,
+): TypeError | null {
+  let next: DeckDocument;
+  try {
+    next = applyMutations(document, mutations).document;
+  } catch {
+    return null;
+  }
+  const touched = new Set<string>();
+  for (const mutation of mutations) {
+    const slideId = (mutation as { slideId?: unknown }).slideId;
+    if (typeof slideId === 'string') touched.add(slideId);
+  }
+  for (const slideId of touched) {
+    const slide = next.slides[slideId];
+    if (slide === undefined) continue;
+    const result = validateSlide(slide, `slides/${slideId}.json`);
+    const blocking = result.issues.find((issue) => issue.severity === 3);
+    if (!result.ok && blocking !== undefined)
+      return new TypeError(
+        `${blocking.file ?? `slides/${slideId}.json`}${blocking.pointer ?? ''}: ${blocking.message}`,
+      );
+  }
+  return null;
+}
+
+/**
+ * Uploads bytes through the picture intake's presigned path (B4's R17; server/upload.ts): the
+ * grant from `POST /api/x/upload/picture`, the `PUT` of the bytes to the grant's address, and the
+ * key the write names. A non 2xx answer at either step throws with the server's sentence.
+ */
+export async function presignUpload(
+  deckId: string,
+  contentType: string,
+  bytes: Uint8Array,
+  fetchFn: typeof fetch = (input, init) => fetch(input, init),
+): Promise<string> {
+  const issued = await fetchFn('/api/x/upload/picture', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify({ deckId, contentType, bytes: bytes.byteLength }),
+  });
+  if (!issued.ok) {
+    const body = await issued.text().catch(() => '');
+    throw new Error(`the upload was refused (HTTP ${issued.status})${body ? `: ${body.slice(0, 160)}` : ''}`);
+  }
+  const grant = (await issued.json()) as { key?: unknown; url?: unknown; method?: unknown };
+  if (typeof grant.key !== 'string' || typeof grant.url !== 'string')
+    throw new Error('the upload grant named no key or address');
+  const put = await fetchFn(grant.url, {
+    method: typeof grant.method === 'string' ? grant.method : 'PUT',
+    credentials: 'same-origin',
+    headers: { 'content-type': contentType },
+    body: new Blob([bytes as BlobPart], { type: contentType }),
+  });
+  if (!put.ok) throw new Error(`the upload did not land (HTTP ${put.status})`);
+  return grant.key;
+}
+
 export function slideOrder(document: DeckDocument): string[] {
   return document.deck.sections.flatMap((section) => section.slideIds);
 }
@@ -982,8 +1082,8 @@ export function errorMessage(error: unknown): string {
  * address on another origin (the public Blob host's stored copies) is the anchor click
  * (@turboslide/chrome/download; the return round fix round, VERIFICATION.md R1-F5).
  */
-export async function triggerDownload(url: string): Promise<void> {
-  await downloadFromPage(url);
+export async function triggerDownload(url: string): Promise<PageDownload | null> {
+  return downloadFromPage(url);
 }
 
 /**
@@ -1212,6 +1312,8 @@ export function createEditorController(init: {
    * unchanged after the revision moved on the preview).
    */
   let ownAnsweredRevision = 0;
+  /** True for a document that holds the tab's own server side write while it settles (B4's R16). */
+  let ownWriteMatch: ((document: DeckDocument) => boolean) | null = null;
   /* the typing group (SPEC 7.2.15): consecutive bursts on one Text inside 400 ms are one Cmd Z */
   let lastTyping: { entryId: number; key: string; at: number } | null = null;
   let versionsTimer: ReturnType<typeof setTimeout> | undefined;
@@ -1556,6 +1658,18 @@ export function createEditorController(init: {
     if (latest().following !== null) publish({ following: null });
   };
 
+  /** The one sentence of a refused change that carried no typed text (item 102), by what it was. */
+  const structuralRefusalSentence = (mutations: ReadonlyArray<Mutation>): string => {
+    const ops = new Set(mutations.map((mutation) => mutation.op));
+    if (ops.has('slide.insert')) return 'Your new slide was not added. Try again';
+    if (ops.has('slide.move')) return 'Your slide was not moved. Try again';
+    if (ops.has('slide.remove')) return 'Your slide was not deleted. Try again';
+    if (ops.has('block.insert')) return 'Your new object was not added. Try again';
+    if (ops.has('block.move')) return 'Your object was not moved. Try again';
+    if (ops.has('block.remove')) return 'Your object was not deleted. Try again';
+    return 'Your change was not applied. Try again';
+  };
+
   /**
    * A collaborator's entry changed a Text (SPEC-3 3.5): every open inline session on that run
    * absorbs the document's new markup (InlineText's TEXT_CHANGED_EVENT), so two people typing in
@@ -1614,18 +1728,23 @@ export function createEditorController(init: {
           const from = was === undefined ? undefined : readRunText(was, mutation.blockId, pointer);
           const to = now === undefined ? undefined : readRunText(now, mutation.blockId, pointer);
           if (from !== undefined && to !== undefined && from !== to) {
-            const cut = (text: string): string =>
-              text.length > 40 ? `${text.slice(0, 39).trimEnd()}…` : text;
-            change = `: ${cut(from)} became ${cut(to)}`;
+            /* the changed words alone (docs/POLISH.md item 117): "renewal became contract", not
+               two cut sentences */
+            change = `: ${changedWords(from, to)}`;
             break;
           }
         }
       }
     }
+    const tailored = mine
+      .map((entry) => entry.note)
+      .find((note): note is string => typeof note === 'string' && /^Tailor for /.test(note));
     const sentence =
-      slideId === undefined
-        ? `${who} changed this presentation`
-        : `${who} changed slide ${n}${change}`;
+      tailored !== undefined
+        ? `${who} tailored this presentation for ${tailored.slice('Tailor for '.length)}`
+        : slideId === undefined
+          ? `${who} changed this presentation`
+          : `${who} changed slide ${n}${change}`;
     let inverse: Mutation[] | null = null;
     if (before !== null) {
       try {
@@ -1949,6 +2068,13 @@ export function createEditorController(init: {
       },
       onReject: (rejected) => {
         const notice = rejectNoticeOf(rejected);
+        /* a structural refusal (a slide add, a move, a resize: nothing typed to keep) is one
+           snackbar sentence (docs/POLISH.md item 102); the card stays for typed text, whose
+           words a seller would otherwise lose */
+        if (notice.text === '') {
+          say(structuralRefusalSentence(notice.mutations));
+          return;
+        }
         publish({ rejects: [...latest().rejects, notice], error: notice.message ?? null });
       },
       onUnplaceable: (op) => {
@@ -1989,6 +2115,16 @@ export function createEditorController(init: {
         }
         if (payload === null) return null;
         const fresh = payload.document.deck.revision;
+        /* a reload that lands below the revision this tab acknowledged is an older document from
+           a lagging instance (docs/POLISH.md item 108: seven 503s in one run drew the old words
+           over the stage): the tab keeps its own document and the next event asks again */
+        if (fresh < latest().serverRevision) return null;
+        /* the tab's own server side write reached the store without answering its revision
+           (asset.add answers the asset record; B4's R16): the reload that brought the document
+           this tab waited for is its own, so the acknowledgement moves with it and no banner
+           names the write as external */
+        if (ownWriteMatch !== null && ownWriteMatch(payload.document))
+          ownAnsweredRevision = acknowledgeAnswered(ownAnsweredRevision, fresh);
         // a reload that lands at or below the revision this tab acknowledged brought nothing the
         // tab has not applied (its own write, refused one revision low by another instance's
         // mirror, is re-sent after it): the history and its clocks stay and no banner names the
@@ -2011,6 +2147,12 @@ export function createEditorController(init: {
           serverRevision: Math.max(fresh, latest().serverRevision),
         });
         return { document: payload.document, ...resyncOriginsOf(payload) };
+      },
+      /* the plate offers only what the server does not hold (docs/POLISH.md item 109) */
+      heldOps: async (opIds) => {
+        if (opIds.length === 0) return new Set<string>();
+        const answer = await heldOpIds({ deckId, opIds: [...opIds] });
+        return new Set(answer.held);
       },
       onPersisted: (offer) => {
         publish({
@@ -2312,6 +2454,16 @@ export function createEditorController(init: {
       return draftCommit(mutations, label, kind);
     }
     wroteInSession = true;
+    /* a client write is validated before it is applied (docs/POLISH.md item 54; B1's R10): a
+       write the schema refuses (a spacing field the table has no schema for, a size outside the
+       ladder) never reaches the stage, the room or the undo stack, so Redo never prints a path;
+       the pointer stays in the console and the snackbar reads the shell's sentence */
+    const invalid = validateBeforeApply(latest().document, mutations);
+    if (invalid !== null) {
+      console.warn('turboslide: a write was refused before it was applied', invalid.message);
+      say(refusalText(invalid));
+      return Promise.reject(invalid);
+    }
     const base = latest().serverRevision;
     let applied;
     try {
@@ -2357,7 +2509,7 @@ export function createEditorController(init: {
         // is an edit, so the dialog waits for the inline session to end rather than taking the
         // caret mid word (measured: the first 100 keystroke run lost every character after the
         // first burst to the prompt's field)
-        if (inlineActive) namePromptDue = true;
+        if (inlineActive || pointerHeld) namePromptDue = true;
         else openNamePrompt();
       }
     }
@@ -2387,6 +2539,21 @@ export function createEditorController(init: {
   /* an inline text session is open (the Editor reports the caret); the name prompt waits for its end */
   let inlineActive = false;
   let namePromptDue = false;
+  /* a pointer button is down (a drag of a card or a block may be live): the prompt waits for
+     the release (docs/POLISH.md item 103: it opened over the stage mid drag) */
+  let pointerHeld = false;
+  const onPointerHeld = (): void => {
+    pointerHeld = true;
+  };
+  const onPointerFree = (): void => {
+    pointerHeld = false;
+    if (namePromptDue && !inlineActive && !promptedName) openNamePrompt();
+  };
+  if (typeof document !== 'undefined') {
+    document.addEventListener('pointerdown', onPointerHeld, true);
+    document.addEventListener('pointerup', onPointerFree, true);
+    document.addEventListener('pointercancel', onPointerFree, true);
+  }
   const openNamePrompt = (): void => {
     promptedName = true;
     namePromptDue = false;
@@ -2714,7 +2881,8 @@ export function createEditorController(init: {
     await idle();
     const version = await saveVersion({ deckId, author, note });
     publish({ versions: [...snapshot.versions, version], versionPrompt: false });
-    say(`Version ${version.n} saved`);
+    /* the one sentence is the caller's (the Name version dialog, the panel's notice; docs/POLISH.md
+       item 91): "Saved the version <name>", never a second "Version 7 saved" beside it */
     return version;
   };
 
@@ -2942,9 +3110,17 @@ export function createEditorController(init: {
    * snapshot (the store's read is the local document).
    */
   const measureOptions = () => ({ assetBase: ASSET_BASE(deckId) });
+  /** The tail of this tab's client id, so a minted slide id never meets another tab's (item 99). */
+  const idSuffix = (): string | undefined => {
+    const id = room?.clientId();
+    if (id === null || id === undefined) return undefined;
+    const clean = id.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return clean === '' ? undefined : clean.slice(-4);
+  };
   const storeDeps = (label: string): StoreActionDeps => ({
     store: editorStore(label),
     lint: lintLists(),
+    ...(idSuffix() === undefined ? {} : { idSuffix: idSuffix() }),
     measureCanvas: async (_deck, slides) => {
       const out: Record<string, CanvasBoxes> = {};
       for (const slide of slides)
@@ -3175,7 +3351,23 @@ export function createEditorController(init: {
         // answer carries no revision, so its reload still lands one above what the tab
         // acknowledged, Kevin's list). The memory tier's follower streams the write within
         // milliseconds, so it keeps the wait alone
-        await settleOwnWrite(revision, landed);
+        /* the answer of asset.add is the Asset record and carries no revision (B4's R16, item
+           35): the document that holds the ids is the tab's own write, acknowledged when the
+           reload brings it, so no banner names it as external */
+        ownWriteMatch =
+          ids.length > 0
+            ? (document) => ids.every((asset) => document.deck.assets[asset] !== undefined)
+            : null;
+        try {
+          await settleOwnWrite(revision, landed);
+          if (typeof revision !== 'number' && landed())
+            ownAnsweredRevision = acknowledgeAnswered(
+              ownAnsweredRevision,
+              latest().document.deck.revision,
+            );
+        } finally {
+          ownWriteMatch = null;
+        }
         // no snackbar on success (rank 14): the picture is on the sheet and selected; the ids
         // are in the answer for the agent transports
         /* a server side write of this tab (shader.insert, shader.set, a kit colour through the
@@ -4366,7 +4558,14 @@ export function createEditorController(init: {
         () => typeof revision === 'number' && latest().document.deck.revision >= revision,
       );
     },
-    onError: (error) => console.warn('shader frame', error),
+    /* the presigned path for a frame over the function's body cap (B4's R17, docs/POLISH.md
+       item 36): the picture intake's grant, then the PUT, then the key `shader.frame` reads */
+    upload: (bytes) => presignUpload(deckId, 'image/png', bytes),
+    uploadAbove: FRAME_UPLOAD_ABOVE_BYTES,
+    onError: (error) => {
+      console.warn('shader frame', error);
+      say(SHADER_FRAME_FAILED_SENTENCE);
+    },
   });
 
   const controller: EditorController = {

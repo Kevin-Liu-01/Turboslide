@@ -263,27 +263,29 @@ describe('the shared presence roster, two instances over one Blob store', () => 
     const time = fakeClock();
     const a = instance(client, time.now, { pushSpacingMs: 60_000 });
     const b = instance(client, time.now);
-    // a pushed another row a moment ago, so its spacing holds the next push
-    await a.presence.set(DECK, C2, row(C2, 1, 'Cobalt 12'), TTL);
-    const before = puts(client);
-    // a's set of C1 is pending; the tab closes and the beacon lands on b
+    // a's row of C1 landed (a join pushes at once, docs/POLISH.md item 110), so the spacing
+    // holds a's next push of it
     await a.presence.set(DECK, C1, row(C1, 1, 'Titanium 471'), TTL);
+    await a.presence.flush(DECK);
+    const before = puts(client);
+    // a's refresh of C1 is pending under the spacing; the tab closes and the beacon lands on b
+    await a.presence.set(DECK, C1, row(C1, 2, 'Titanium 471'), TTL);
     expect(puts(client)).toBe(before);
     time.advance(100);
     await b.presence.leave(DECK, C1);
     const leftAt = time.now();
-    // a's late push meets the tombstone: the row never lands and a's listeners see the leave
+    // a's late push meets the tombstone: the refresh never lands and a's listeners see the leave
     time.advance(100);
     await a.presence.flush(DECK);
-    expect(a.seen.slice(1)).toEqual([
-      { type: 'presence', clientId: C1, clock: 1, state: row(C1, 1, 'Titanium 471') },
+    expect(a.seen.filter((event) => event.type === 'leave')).toEqual([
       { type: 'leave', clientId: C1 },
     ]);
     const stored = parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes);
-    expect([...stored.rows.keys()]).toEqual([C2]);
+    expect([...stored.rows.keys()]).toEqual([]);
     expect(stored.left.get(C1)).toEqual({ at: leftAt });
     await b.presence.poll(DECK);
-    expect(b.seen.filter((e) => e.type === 'presence').map((e) => e.clientId)).toEqual([C2]);
+    // b never announces the buried row
+    expect(b.seen.filter((e) => e.type === 'presence').map((e) => e.clientId)).toEqual([]);
   });
 
   it('lands both rows when two instances write at once: the loser of the ifMatch race pushes again on its next push, not inside the same one', async () => {

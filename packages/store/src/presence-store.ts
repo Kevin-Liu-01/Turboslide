@@ -467,6 +467,15 @@ export function sharedPresence<T extends PresenceRow>(
   const needsPush = (d: DeckPresence<T>, t: number): boolean =>
     [...d.pending.keys()].some((clientId) => material(d, clientId, t));
 
+  /** True when a pending set is a live local row the record holds no live row for: a join (item 110). */
+  const joinPending = (d: DeckPresence<T>, t: number): boolean =>
+    [...d.pending].some(
+      ([clientId, change]) =>
+        change.kind === 'set' &&
+        alive(d.local.get(clientId), t) &&
+        !alive(d.remote.rows.get(clientId), t),
+    );
+
   /**
    * When the timer pushes the earliest deferred heartbeat's row, or null when nothing is
    * deferred: at `refreshTimer` of the record's row's life left, after the heartbeat that would
@@ -752,7 +761,10 @@ export function sharedPresence<T extends PresenceRow>(
           scheduleAt(deckId, d, nextRefreshAt(d, t));
           return;
         }
-        if (d.lastPushAt + spacing > t) {
+        // a new row the record does not hold (a join) pushes at once (docs/POLISH.md item 110:
+        // a joiner's chip took 2.5 to 10 s); the spacing floor holds the refreshes and the
+        // changes of a row the record already carries
+        if (d.lastPushAt + spacing > t && !joinPending(d, t)) {
           scheduleAt(deckId, d, d.lastPushAt + spacing);
           return;
         }

@@ -8,8 +8,6 @@ import { registerStudioAutomation, viewerActionIds } from '@turboslide/agent/win
 import type { ShellItem, ShellMode, ShellSection } from '@turboslide/chrome/shell-data';
 import type { ShellState } from '@turboslide/chrome/shell-context';
 import { usePtShell, usePtStage } from '@turboslide/chrome/shell-context';
-import { AssistViewerPanel } from '@turboslide/chrome/panels/AssistViewerPanel';
-import { ToolButton } from '@turboslide/chrome/ToolButton';
 import { ViewerShell } from '@turboslide/chrome/ViewerShell';
 import type { ActionId } from '@turboslide/schema/actions';
 import { BookView } from '@turboslide/viewer/BookView';
@@ -30,6 +28,7 @@ import type { Theme } from '@turboslide/viewer/theme';
 import { getDeckSlides } from '../server/decks';
 import type { DeckPayload, DeckSlidesPayload, GetDeckInput } from '../server/decks';
 import { renderSlideImages } from '../server/render';
+import { showStageSize } from './show-stage';
 import { deferredSlidesOf, mergeDeferredSlides } from './deferred-slides';
 import { Slideshow } from './Slideshow';
 import type { SlideshowState } from './Slideshow';
@@ -155,9 +154,6 @@ export function DeckViewer({
   /* the other slides once they arrive (SPEC-4 3.11); the server and the first client render agree
      on none, and the request leaves after the mount so the document is the shell and one slide */
   const [deferred, setDeferred] = useState<Readonly<Record<string, string>> | null>(null);
-  /* the Assist entry a view link visitor sees (docs/PRODUCT.md 6.3): the panel with its one
-     sentence, since a viewer cannot write; not in an embed, whose frame is the customer's */
-  const [assistOpen, setAssistOpen] = useState(false);
   useEffect(() => {
     if (rest === undefined || rest === null || payload.partial !== true) return;
     let alive = true;
@@ -222,21 +218,11 @@ export function DeckViewer({
                 fixture
               </span>
             ) : null}
-            {embed ? null : (
-              <ToolButton
-                icon="sparkles"
-                title="Assist"
-                label="Assist"
-                doc="The assistant: commenters and editors can use it on this presentation"
-                pressed={assistOpen}
-                quiet
-                control="title.assist"
-                onClick={() => setAssistOpen((open) => !open)}
-              />
-            )}
+            {/* no Assist for a reader (docs/POLISH.md item 115): a viewer cannot write, and the
+                button opened nothing; the assistant's sentence for a viewer is the editor's
+                viewer floor's (packages/chrome/src/panels/Assist.tsx) */}
           </>
         }
-        panel={assistOpen ? <AssistViewerPanel onClose={() => setAssistOpen(false)} /> : undefined}
       >
         <StageBridge deck={deck} serverTheme={theme ?? 'dark'} show={show} />
         <PresentOnLoad on={present} />
@@ -300,7 +286,8 @@ function StageBridge({
         slide={slide}
         index={Math.max(0, shell.index)}
         total={shell.total}
-        stageSize={stageSize}
+        /* a show's sheet sits above the bar's row on a short viewport (docs/POLISH.md item 98) */
+        stageSize={shell.present ? showStageSize(stageSize) : stageSize}
         mode={shell.mode}
         present={shell.present}
         narrow={shell.narrow}

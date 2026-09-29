@@ -144,6 +144,12 @@ export type EditorDeck = {
   /** the store this studio runs on, for the banner over a store whose edits do not persist */
   hosting: HostingFacts;
   /**
+   * What the assistant can do on this deployment (docs/POLISH.md item 113; server/assist.ts
+   * assistMode): the panel draws Tailor and one sentence when it is not set up, the starters
+   * and the composer when a model answers
+   */
+  assistMode?: 'fixture' | 'off' | 'model' | 'unconfigured';
+  /**
    * The deployment's default kit (docs/PRODUCT.md 4.1, 4.3): the template new presentations start
    * from, its name for "Reset to <name>", the appearance a new presentation opens in and the kit
    * record; the Brand kit panel reads it through the shell's input
@@ -304,6 +310,13 @@ function sendMintedCookie(setCookieValue: string | undefined): void {
   });
 }
 
+/** True for the store's answer to a deck whose files are gone: a RangeError, or the missing file's words. */
+function isGoneDeck(error: unknown): boolean {
+  if (error instanceof RangeError) return true;
+  const message = error instanceof Error ? error.message : String(error);
+  return /no deck|not found|ENOENT|does not exist|is not in the store/i.test(message);
+}
+
 const readEditorDeckFn = createServerFn({ method: 'GET' })
   .validator((input: string) => {
     const parsed = parseJsonInput<{ deckId: unknown; atLeast?: unknown; since?: unknown }>(input);
@@ -342,12 +355,24 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     // (`atLeast`, the editor's resync after a version.restore) gets a document at or above it
     // (room.ts liveAtLeast). The show's loader reads here too, so a slide skipped a moment
     // before the show opened is left out on every instance (b4.md FR8)
-    const live = await room.liveAtLeast(deckRoom, data.atLeast);
-    const [read, versions, leases] = await Promise.all([
-      deckRoom.store.read(),
-      deckRoom.store.listVersions(),
-      deckRoom.store.leases(),
-    ]);
+    let live: Awaited<ReturnType<typeof room.liveAtLeast>>;
+    let read: Awaited<ReturnType<typeof deckRoom.store.read>>;
+    let versions: Awaited<ReturnType<typeof deckRoom.store.listVersions>>;
+    let leases: Awaited<ReturnType<typeof deckRoom.store.leases>>;
+    try {
+      live = await room.liveAtLeast(deckRoom, data.atLeast);
+      [read, versions, leases] = await Promise.all([
+        deckRoom.store.read(),
+        deckRoom.store.listVersions(),
+        deckRoom.store.leases(),
+      ]);
+    } catch (error) {
+      /* a deck deleted forever a moment ago (docs/POLISH.md item 98; audit-tables item 20): the
+         listing still names it while the index catches up and the read meets no files; the
+         address answers 404, never 500 */
+      if (isGoneDeck(error)) return JSON.stringify(null);
+      throw error;
+    }
     // the resync read's answer (docs/SYNC.md 3.2): the origins of the records above the tab's
     // old position, off the mirror the reads above synced (no store call of its own), so the
     // client drops every pending op a record already names instead of re-folding it
@@ -373,6 +398,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       ...(origins === undefined ? {} : { origins }),
       leases,
       hosting: hostingFacts(),
+      assistMode: (await import('./assist')).assistMode(),
       /* the deployment's default kit (docs/PRODUCT.md 4.1): the name Reset reads, the default logo;
          the store's template index is pulled first so a default set on another instance holds */
       defaultKit: await defaultKitOfCollection(),
@@ -410,6 +436,48 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
         : {}),
     });
   });
+
+/**
+ * Which of the given op ids the deck's records already hold (docs/POLISH.md item 109): the
+ * recovered writes plate offers a saved queue of an earlier tab only for the ops no record
+ * names, so a write the server acknowledged but the tab never persisted as acknowledged (a
+ * reload right after the answer) is never offered again. A caller without the read right, or a
+ * deck the store does not hold, answers none held.
+ */
+const heldOpIdsFn = createServerFn({ method: 'POST' })
+  .validator((input: { deckId: string; opIds: string[] }) => ({
+    deckId: requireSlug(input.deckId, 'deckId'),
+    opIds: Array.isArray(input.opIds)
+      ? input.opIds.filter((id): id is string => typeof id === 'string').slice(0, 500)
+      : [],
+  }))
+  .handler(async ({ data }): Promise<{ held: string[] }> => {
+    if (data.opIds.length === 0 || !(await hasStoredDeck(data.deckId))) return { held: [] };
+    const room = await import('./room');
+    const identity = await room.requestIdentity(getRequest());
+    const decision = await room.decideFor(identity, data.deckId, 'read', 'heldOpIds');
+    if (!decision.ok) return { held: [] };
+    const deckRoom = await room.roomFor(data.deckId);
+    let records: ReadonlyArray<VersionRecord>;
+    try {
+      records = await deckRoom.store.records();
+    } catch {
+      return { held: [] };
+    }
+    const wanted = new Set(data.opIds);
+    const held: string[] = [];
+    for (const record of records) {
+      for (const opId of record.origin?.opIds ?? []) if (wanted.has(opId)) held.push(opId);
+    }
+    return { held };
+  });
+
+export async function heldOpIds(input: {
+  deckId: string;
+  opIds: string[];
+}): Promise<{ held: string[] }> {
+  return heldOpIdsFn({ data: input });
+}
 
 /**
  * The raw normalized document with the trimmed version log (SPEC-4 0.34: the newest 50 records

@@ -101,7 +101,7 @@ describe('names, trust and follow (4.4, 4.8, 0.12)', () => {
     ).toBe('Agent · ci-42');
   });
 
-  it('offers Follow on editors and owners with a slide selected and refuses the rest', () => {
+  it('offers Follow on editors and owners with a slide selected, anonymous ones included, and refuses the rest', () => {
     expect(canFollow({ ...verified, slideId: firstSlide }, undefined)).toBe(true);
     expect(canFollow({ ...verified, role: 'owner', slideId: firstSlide }, ['follow'])).toBe(true);
     expect(canFollow({ ...verified, slideId: firstSlide }, ['read'])).toBe(false);
@@ -110,10 +110,14 @@ describe('names, trust and follow (4.4, 4.8, 0.12)', () => {
     );
     expect(canFollow({ ...verified, role: 'viewer', slideId: firstSlide }, undefined)).toBe(false);
     expect(canFollow({ ...verified, slideId: undefined }, undefined)).toBe(false);
-    expect(canFollow(person('a', { slideId: firstSlide }), undefined)).toBe(false);
+    /* an anonymous editor with a slide open can be followed (docs/POLISH.md item 104) */
+    expect(canFollow(person('a', { slideId: firstSlide }), undefined)).toBe(true);
+    expect(canFollow(person('a', { role: 'viewer', slideId: firstSlide }), undefined)).toBe(false);
+    expect(canFollow(person('a', { slideId: undefined }), undefined)).toBe(false);
     expect(
       canFollow(person('x', { kind: 'account', trust: 'agent', slideId: firstSlide }), undefined),
     ).toBe(false);
+    expect(canFollow(person('y', { trust: 'agent', slideId: firstSlide }), undefined)).toBe(false);
   });
 
   it('words the roster row and the chip tooltip', () => {

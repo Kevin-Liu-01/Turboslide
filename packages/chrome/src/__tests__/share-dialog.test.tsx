@@ -455,7 +455,9 @@ describe('ShareDialog', () => {
     const { state, say } = host(
       baseInput({
         dispatch: dispatch as unknown as EditorShellInput['dispatch'],
-        access: restricted(),
+        /* the links table is drawn under Anyone with the link alone (docs/POLISH.md item 96):
+           under Restricted no link opens the presentation */
+        access: restricted({ generalAccess: { mode: 'link' as const, role: 'viewer' as const } }),
         role: 'owner',
         capabilities: ['read', 'share', 'settings', 'publish', 'transfer'],
       }),
@@ -467,11 +469,11 @@ describe('ShareDialog', () => {
     );
     await flush();
     /* the link rows live behind More (rank 3): the first stage holds the one address field */
-    expect(document.querySelector('[data-control="dialog.share.rows"]')).toBeNull();
+    expect(document.querySelector('[data-control="dialog.share.links"]')).toBeNull();
     expect(document.querySelector('[data-control="dialog.share.address"]')).not.toBeNull();
     openMore();
-    /* the three rows in order, with their role words */
-    const rows = [...document.querySelectorAll('[data-control="dialog.share.rows"] > li')];
+    /* the three rows in order, with their role words, in the one links table (item 96) */
+    const rows = [...document.querySelectorAll('[data-control="dialog.share.links"] > li')];
     expect(rows.map((row) => row.getAttribute('data-control'))).toEqual([
       'dialog.share.view',
       'dialog.share.present',
@@ -536,6 +538,7 @@ describe('ShareDialog', () => {
       baseInput({
         dispatch: dispatch as unknown as EditorShellInput['dispatch'],
         access: restricted({
+          generalAccess: { mode: 'link' as const, role: 'viewer' as const },
           links: [
             {
               id: 'lnk_view',
@@ -636,7 +639,7 @@ describe('ShareDialog', () => {
       Promise.resolve(
         new Response(
           JSON.stringify({
-            record: record({ revision }),
+            record: record({ revision, generalAccess: { mode: 'link', role: 'viewer' } }),
             role: 'owner',
             via: 'owner',
             capabilities: ['read', 'share'],
@@ -680,7 +683,7 @@ describe('ShareDialog', () => {
     expect(document.querySelector('[data-control="dialog.share.mode"]')).not.toBeNull();
     expect(
       (document.querySelector('[data-control="dialog.share.mode"]') as HTMLSelectElement).value,
-    ).toBe('restricted');
+    ).toBe('link');
     openMore();
     expect(document.querySelector('[data-control="dialog.share.owner"]')).not.toBeNull();
     fireEvent.click(document.querySelector('[data-control="dialog.share.edit.copy"]')!);
@@ -699,6 +702,7 @@ describe('ShareDialog', () => {
     const { texts } = clipboard();
     const minted = record({
       revision: 4,
+      generalAccess: { mode: 'link', role: 'viewer' },
       links: [
         {
           id: 'lnk_view',
@@ -739,7 +743,7 @@ describe('ShareDialog', () => {
     );
     const input = baseInput({
       dispatch: dispatch as unknown as EditorShellInput['dispatch'],
-      access: restricted(),
+      access: restricted({ generalAccess: { mode: 'link' as const, role: 'viewer' as const } }),
       role: 'owner',
       capabilities: ['read', 'share'],
     });
@@ -890,14 +894,18 @@ describe('the two stages of the Share dialog (product round)', () => {
     ...extra,
   });
 
-  it('names what each access does in one sentence', () => {
-    expect(accessSentence('link', 'editor', 'shadow')).toContain('Pick Viewer');
-    expect(accessSentence('link', 'viewer', 'shadow')).toBe(
-      'Anyone with this link can open it and cannot change it',
+  it('names what each access does in one sentence, with no instruction after it', () => {
+    /* docs/POLISH.md items 78 and 96: one statement per access, the same on every deployment */
+    expect(accessSentence('link', 'editor', 'shadow')).toBe(
+      'Anyone with the link can open and edit this presentation',
     );
-    expect(accessSentence('restricted', 'viewer', 'shadow')).toContain('Only you can open');
+    expect(accessSentence('link', 'editor', 'shadow')).not.toContain('Pick Viewer');
+    expect(accessSentence('link', 'viewer', 'shadow')).toBe(
+      'Anyone with the link can open it and cannot change it',
+    );
+    expect(accessSentence('restricted', 'viewer', 'shadow')).toBe('Only you can open this presentation');
     expect(accessSentence('restricted', 'viewer', 'enforce')).toBe(
-      'Only people with access can open it',
+      'Only you can open this presentation',
     );
     expect(accessSentence('open', 'editor', undefined)).toBe(LEGACY_SENTENCE);
   });
@@ -942,7 +950,7 @@ describe('the two stages of the Share dialog (product round)', () => {
     ).toBe('editor');
     expect(
       document.querySelector('[data-control="dialog.share.accessSentence"]')?.textContent,
-    ).toContain('Pick Viewer before you send it to a customer');
+    ).toBe('Anyone with the link can open and edit this presentation');
     /* one Copy link in the first stage, and it copies the field */
     expect(document.querySelectorAll('[data-control$=".copy"]')).toHaveLength(1);
     fireEvent.click(document.querySelector('[data-control="dialog.share.copy"]')!);
@@ -956,14 +964,14 @@ describe('the two stages of the Share dialog (product round)', () => {
     expect(address?.value).toBe('https://x.test/s/generaltokentokentokentok');
     /* the invite row, the link rows and the gear wait behind More, which reads Settings once open */
     expect(document.querySelector('[data-control="dialog.share.emails"]')).toBeNull();
-    expect(document.querySelector('[data-control="dialog.share.rows"]')).toBeNull();
+    expect(document.querySelector('[data-control="dialog.share.links"]')).toBeNull();
     expect(document.querySelector('[data-control="dialog.share.footer"]')).toBeNull();
     const more = document.querySelector('[data-control="dialog.share.more"]');
     expect(more?.textContent).toContain('More');
     openMore();
     expect(more?.textContent).toContain('Settings');
     expect(document.querySelector('[data-control="dialog.share.emails"]')).not.toBeNull();
-    expect(document.querySelector('[data-control="dialog.share.rows"]')).not.toBeNull();
+    expect(document.querySelector('[data-control="dialog.share.links"]')).not.toBeNull();
     expect(document.querySelector('[data-control="dialog.share.gear"]')).not.toBeNull();
     /* the own row reads You (rank 4) */
     expect(document.querySelector('[data-control="dialog.share.owner"]')?.textContent).toContain(

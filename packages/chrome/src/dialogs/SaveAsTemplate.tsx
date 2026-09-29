@@ -27,7 +27,7 @@ export const SAVE_AS_TEMPLATE = {
   title: 'Save as template',
   name: 'Name',
   sentence: 'Sentence',
-  sentenceHint: 'One sentence the gallery card shows; "Saved from <title>" when empty',
+  sentenceHint: 'One sentence the gallery card shows; "Saved from" and the presentation\u2019s title when empty',
   cover: 'Cover',
   coverDoc: 'The first slide, drawn on the gallery card',
   replace: (name: string) => `Replace the template ${name}`,

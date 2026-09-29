@@ -245,6 +245,8 @@ export function Slideshow({
 
   const [blank, setBlank] = useState<BlankSlide | null>(null);
   const [laser, setLaser] = useState(false);
+  /* past the last slide (docs/POLISH.md item 98): the end plate, which a click or the next key leaves */
+  const [ended, setEnded] = useState(false);
   const [pointer, setPointer] = useState({ x: -100, y: -100 });
   const [fullscreen, setFullscreen] = useState(isFullscreen);
   const [barShown, setBarShown] = useState(false);
@@ -269,15 +271,30 @@ export function Slideshow({
     const target = live.current.play[to];
     if (target !== undefined && target.id !== live.current.activeId) live.current.onGoto(target.id);
   }, []);
-  const step = useCallback(
-    (delta: number) => goto(stepPlayIndex(live.current.index, delta, live.current.total)),
-    [goto],
-  );
-
   const exit = useCallback(() => {
     exitPresentFullscreen();
     live.current.onExit();
   }, []);
+
+  const step = useCallback(
+    (delta: number) => {
+      const { index: at, total: count } = live.current;
+      if (endedRef.current) {
+        /* on the end plate: back returns to the last slide, forward leaves the show */
+        if (delta < 0) setEnded(false);
+        else exit();
+        return;
+      }
+      if (delta > 0 && count > 0 && at >= count - 1) {
+        setEnded(true);
+        return;
+      }
+      goto(stepPlayIndex(at, delta, count));
+    },
+    [goto, exit],
+  );
+  const endedRef = useRef(false);
+  endedRef.current = ended;
 
   const toggleFullscreen = useCallback(() => {
     if (isFullscreen()) exitPresentFullscreen();
@@ -673,6 +690,21 @@ export function Slideshow({
           icons={ICONS}
           tip={tip}
         />
+      ) : null}
+      {ended ? (
+        <div
+          className="ts-present-end"
+          data-control="present.end"
+          role="button"
+          tabIndex={-1}
+          aria-label={PRESENT_TEXT.endOfShow}
+          onClick={exit}
+        >
+          <span>
+            {PRESENT_TEXT.endOfShow}
+            <small>Click to leave the slideshow</small>
+          </span>
+        </div>
       ) : null}
       {blank !== null ? <BlankLayer blank={blank} onDismiss={() => setBlank(null)} /> : null}
       {laser ? <LaserPointer x={pointer.x} y={pointer.y} /> : null}

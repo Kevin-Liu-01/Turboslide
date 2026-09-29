@@ -16,17 +16,17 @@ import {
   newHostedDeckRecord,
 } from './access-store.ts';
 
-// The general access a deck created from `/new` starts with (the product round, docs/PRODUCT.md
-// section 1's decision, question 10; the row share.dialog.co-edit-from-copied-link): Anyone with
-// the link, Editor on a deployment with anonymous principals, restricted where people sign in.
-// The word is `link` with one live general link minted in the record (the fix round; pass 1
-// finding 1: `open` is the Share dialog's legacy row, which draws no access select and no link).
+// The general access a deck created from `/new` starts with (the polish round, docs/POLISH.md
+// item 78; the row share.dialog.new-deck-restricted-viewer): Restricted on every deployment, and
+// Viewer for the link once link sharing is on; the product round's Anyone with the link, Editor
+// on an anonymous deployment is gone. The minted general link keeps its shape for the dialog's
+// Copy link path (the fix round; pass 1 finding 1: `open` is the legacy row).
 
 describe('the default general access of a new deck', () => {
-  it('is Anyone with the link, Editor on a deployment with anonymous principals and restricted otherwise', () => {
+  it('is Restricted with Viewer for the link on every deployment', () => {
     expect(defaultGeneralAccessFor({ anonymousPrincipals: true })).toEqual({
-      mode: 'link',
-      role: 'editor',
+      mode: 'restricted',
+      role: 'viewer',
     });
     expect(defaultGeneralAccessFor({ anonymousPrincipals: false })).toEqual({
       mode: 'restricted',
@@ -58,23 +58,18 @@ describe('the default general access of a new deck', () => {
     expect(again.id).not.toBe(link.id);
   });
 
-  it('shapes the record as the schema’s new deck record with the deployment’s access, and validates', () => {
+  it('shapes the record as the schema’s new deck record, restricted with no link, and validates', () => {
     const now = '2026-09-19T12:00:00.000Z';
     const key = legacyAssetKey('q4-review');
-    const shared = newHostedDeckRecord('q4-review', 'anon_1', key, now, {
+    const anonymous = newHostedDeckRecord('q4-review', 'anon_1', key, now, {
       anonymousPrincipals: true,
     });
-    expect(accessRecordSchema.safeParse(shared).success).toBe(true);
-    expect(shared.generalAccess).toEqual({ mode: 'link', role: 'editor' });
-    expect(shared.owner).toBe('anon_1');
-    expect(shared.revision).toBe(0);
-    expect(shared.links).toHaveLength(1);
-    expect(shared.links[0]).toMatchObject({
-      role: 'editor',
-      label: GENERAL_LINK_LABEL,
-      createdBy: 'anon_1',
-      revokedAt: null,
-    });
+    expect(accessRecordSchema.safeParse(anonymous).success).toBe(true);
+    expect(anonymous).toEqual(newDeckRecord('q4-review', 'anon_1', key, now));
+    expect(anonymous.generalAccess).toEqual({ mode: 'restricted', role: 'viewer' });
+    expect(anonymous.owner).toBe('anon_1');
+    expect(anonymous.revision).toBe(0);
+    expect(anonymous.links).toEqual([]);
     const restricted = newHostedDeckRecord('q4-review', 'acct_1', key, now, {
       anonymousPrincipals: false,
     });

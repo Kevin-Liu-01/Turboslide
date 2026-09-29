@@ -1,7 +1,10 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { Link, createFileRoute, notFound } from '@tanstack/react-router';
+import type { ErrorComponentProps } from '@tanstack/react-router';
 
+import { DialogCheck } from '@turboslide/chrome/Dialog';
+import { DOWNLOAD_WORDS, downloadFromPage, fileNameOf } from '@turboslide/chrome/download';
 import { PRESENT, SNACKBARS, STUB_PREFIX } from '@turboslide/chrome/menus/strings';
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
@@ -17,6 +20,7 @@ import type { Theme } from '@turboslide/viewer/theme';
 import { useMountEffect } from '../components/useMountEffect';
 import { getDeck } from '../server/decks';
 import { AccessPage } from './-access-page';
+import { REFUSED_PAGE, RouteRefused } from './-refused-page';
 import {
   EXPORT_POLL_MS,
   exportCapabilities,
@@ -24,7 +28,6 @@ import {
   startExport,
   syncExport,
 } from '../server/download';
-import { triggerDownload } from './decks.index';
 
 import './print.css';
 
@@ -58,22 +61,51 @@ export function validatePrintSearch(search: Record<string, unknown>): PrintSearc
   return out;
 }
 
+/** True for the store's "not now" answers (packages/store/src/pulse.ts isStoreBusy's words). */
+export function isBusyRefusal(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /too many requests|currently not available|failed to fetch blob|fetch failed|network|socket hang up|ECONNRESET|ETIMEDOUT|EAI_AGAIN|did not answer|store is busy/i.test(
+    message,
+  );
+}
+
+/** The pauses before the loader's second and third read of a busy store. */
+export const PRINT_READ_RETRY_MS: ReadonlyArray<number> = [400, 900];
+
+/**
+ * The deck for the print page (docs/POLISH.md item 83): the same read the viewer routes make,
+ * tried again twice when the store answers "not now" (a 429, a deadline: the polish audit met the
+ * refusal on a deck four writes old and the page drew the error card at once), so the preview
+ * opens on the head the editor holds; a refusal that stands is the route's own page with Reload
+ * (PrintRefused), never an aborted document.
+ */
+async function readPrintDeck(
+  deckId: string,
+  theme: Theme | undefined,
+  sleep: (ms: number) => Promise<void> = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+) {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await getDeck({
+        data: { deckId, theme, notes: true, includeSkipped: true, includeTrashed: true },
+      });
+    } catch (error) {
+      const wait = PRINT_READ_RETRY_MS[attempt];
+      if (wait === undefined || !isBusyRefusal(error)) throw error;
+      await sleep(wait);
+    }
+  }
+}
+
 export const Route = createFileRoute('/print/$deckId')({
   validateSearch: validatePrintSearch,
   loaderDeps: ({ search }) => ({ theme: search.theme }),
   loader: async ({ params, deps }) => {
-    const payload = await getDeck({
-      data: {
-        deckId: params.deckId,
-        theme: deps.theme,
-        notes: true,
-        includeSkipped: true,
-        includeTrashed: true,
-      },
-    });
+    const payload = await readPrintDeck(params.deckId, deps.theme);
     if (!payload) throw notFound();
     return payload;
   },
+  errorComponent: PrintRefused,
   head: ({ loaderData }) => ({
     meta: [
       { title: loaderData ? `${loaderData.deck.title}, print, Turboslide` : 'Print, Turboslide' },
@@ -96,10 +128,6 @@ const LAYOUTS: ReadonlyArray<{ value: string; label: string; later?: true }> = [
 
 const HANDOUT_STUB = `${STUB_PREFIX}. Handouts need a page layout the renderer does not have`;
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -112,7 +140,9 @@ function PrintPage() {
   const [layout, setLayout] = useState<PrintLayout>(search.layout ?? 'slides');
   const [includeSkipped, setIncludeSkipped] = useState(search.skipped === 1);
   const [pdf, setPdf] = useState<string | null>(null);
-  const theme: Theme = search.theme ?? 'dark';
+  /* the deck's own appearance unless the address names one (docs/POLISH.md item 77): the preview
+     drew every light deck as black pages while the PDF it downloaded was light */
+  const theme: Theme = search.theme ?? payload.theme;
   const skipped = useMemo(() => new Set(payload.skipped), [payload.skipped]);
   /* the page announces hydration (`data-hydrated`, the home page's convention): the server
      renders the bar, and a click on Include skipped slides before React attaches its handler
@@ -127,18 +157,18 @@ function PrintPage() {
     [payload.deck.slides, includeSkipped, skipped],
   );
 
+  const [pdfBusy, setPdfBusy] = useState(false);
   const downloadPdf = async () => {
-    if (pdf !== null) return;
-    const count = slides.length;
-    setPdf(
-      `Preparing your PDF, about ${Math.max(1, Math.ceil(count / 12))} minute${count > 12 ? 's' : ''} for ${count} slide${count === 1 ? '' : 's'}`,
-    );
+    if (pdfBusy) return;
+    setPdfBusy(true);
+    setPdf(DOWNLOAD_WORDS.preparing('pdf'));
     /* the file follows the preview (docs/FOCUS.md rank 25, `export.print.download-pdf-follows-preview`):
        the builder drops a skipped slide unless `includeSkipped` travels, whatever `slideIds` says
        (packages/render/src/print.ts `renderPrintDocument`), and the notes layout asks for the notes
        with `includeNotes` (the builder carries them once it draws the notes page) */
     const input = {
       format: 'pdf' as const,
+      theme: [theme],
       slideIds: slides.map((slide) => slide.id),
       ...(includeSkipped ? { includeSkipped: true } : {}),
       ...(layout === 'notes' ? { includeNotes: true } : {}),
@@ -162,13 +192,19 @@ function PrintPage() {
         }
       }
       if (url === null) throw new Error('the export produced no PDF');
-      setPdf('Your file is ready');
-      triggerDownload(url);
+      /* the file is named after the title, and the button is live again the moment the file is
+         saved (docs/POLISH.md items 83 and 86; audit-pages item 39) */
+      const name = fileNameOf(payload.deck.title, deckId, 'pdf');
+      const saved = await downloadFromPage(url, { name });
+      setPdf(null);
+      snackbar.show(DOWNLOAD_WORDS.saved(saved?.name ?? name));
     } catch (error) {
       // the worker has no PDF builder yet, or the gate refused it: the browser's dialog stands in
-      snackbar.show(`${SNACKBARS.pdfUnavailable} (${errorMessage(error)})`);
+      console.error('turboslide print: the PDF export was refused', error);
+      setPdf(null);
+      snackbar.show(SNACKBARS.pdfUnavailable);
     } finally {
-      window.setTimeout(() => setPdf(null), 1500);
+      setPdfBusy(false);
     }
   };
 
@@ -229,22 +265,15 @@ function PrintPage() {
             ))}
           </select>
         </label>
-        <label
-          className="ts-print-check"
-          {...tipProps({
-            name: 'Include skipped slides',
-            doc: `Prints the ${payload.skipped.length} skipped slide${payload.skipped.length === 1 ? '' : 's'} too.`,
-          })}
-        >
-          <input
-            type="checkbox"
-            checked={includeSkipped}
-            data-control="print.skipped"
-            onChange={(event) => setIncludeSkipped(event.target.checked)}
-          />
-          <span className="ts-hm-dialog-box" aria-hidden="true" />
-          <span>Include skipped slides</span>
-        </label>
+        {/* the chrome's DialogCheck (docs/POLISH.md item 83; audit-pages item 39): a tick in the
+            box, not a filled square */}
+        <DialogCheck
+          label="Include skipped slides"
+          checked={includeSkipped}
+          onChange={setIncludeSkipped}
+          control="print.skipped"
+          doc={`Prints the ${payload.skipped.length} skipped slide${payload.skipped.length === 1 ? '' : 's'} too`}
+        />
         <span className="ts-print-spacer" />
         {pdf !== null ? (
           <span className="ts-print-progress" role="status">
@@ -255,7 +284,7 @@ function PrintPage() {
           type="button"
           className="pt-ib is-text"
           data-control="print.pdf"
-          disabled={pdf !== null}
+          disabled={pdfBusy}
           onClick={() => void downloadPdf()}
           {...tipProps({
             name: 'Download as PDF',
@@ -385,6 +414,17 @@ function PrintPage1({
 function PrintMissing() {
   const { deckId } = Route.useParams();
   return <AccessPage deckId={deckId} />;
+}
+
+/** The route's refusal (item 83): the product's page with Reload, in place of an aborted document. */
+function PrintRefused({ error }: ErrorComponentProps) {
+  return (
+    <RouteRefused
+      error={error}
+      loaderHeading={REFUSED_PAGE.notOpened}
+      renderHeading={REFUSED_PAGE.notOpened}
+    />
+  );
 }
 
 /**

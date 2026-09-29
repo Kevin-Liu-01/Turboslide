@@ -8,6 +8,7 @@ import type { ExportJobResult, VerifyOutcome } from '@turboslide/render-worker/j
 import type { ExportReport } from '@turboslide/schema/export';
 import { exportReportSchema } from '@turboslide/schema/export';
 import type { BlobClient } from '@turboslide/store/blob-store';
+import { isStoreBusy } from '@turboslide/store/pulse';
 
 import { displayNameOf, exportFileName } from '@turboslide/export/batch/plan';
 
@@ -163,17 +164,56 @@ export async function storeExportFiles(
       });
       continue;
     }
-    const entry = await client.put(
+    const entry = await putWithOneRetry(
+      client,
       storedExportPath(result.deckId, result.jobId, file.name),
       file.data,
-      {
-        overwrite: true,
-        contentType: file.contentType,
-      },
+      file.contentType,
     );
     files.push({ ...file, url: entry.url, stored: true });
   }
   return { ...result, files };
+}
+
+/** How long the store's second try waits when the refusal names no `retryAfter`. */
+export const STORE_RETRY_MS = 1500;
+
+/** The longest wait a `retryAfter` can ask for before the file is given up. */
+const STORE_RETRY_CAP_MS = 4000;
+
+/**
+ * One put with one retry on a busy store (docs/POLISH.md item 82): the store's concurrency limit
+ * answers 429 while several people export at once, and the SDK's own retry loop is off
+ * (blob-vercel.ts), so the file was refused after one try and the seller read "Vercel Blob: Too
+ * many requests". The second try waits the seconds the refusal names, capped, then the refusal
+ * is the caller's to word. `sleep` is a parameter so the test runs in no time.
+ */
+export async function putWithOneRetry(
+  client: {
+    put: (
+      pathname: string,
+      bytes: Uint8Array,
+      options: { overwrite: boolean; contentType: string },
+    ) => Promise<{ url: string }>;
+  },
+  pathname: string,
+  bytes: Uint8Array,
+  contentType: string,
+  sleep: (ms: number) => Promise<void> = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+): Promise<{ url: string }> {
+  const options = { overwrite: true, contentType };
+  try {
+    return await client.put(pathname, bytes, options);
+  } catch (error) {
+    if (!isStoreBusy(error)) throw error;
+    const named = (error as { retryAfter?: unknown }).retryAfter;
+    const wait =
+      typeof named === 'number' && Number.isFinite(named) && named > 0
+        ? Math.min(named * 1000, STORE_RETRY_CAP_MS)
+        : STORE_RETRY_MS;
+    await sleep(wait);
+    return client.put(pathname, bytes, options);
+  }
 }
 
 export type SyncExportOptions = {

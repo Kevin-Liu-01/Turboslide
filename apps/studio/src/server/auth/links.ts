@@ -33,9 +33,14 @@ import type {
   ShareLinkLookupOptions,
 } from './identity.ts';
 
-/** Where a role lands after the exchange (SPEC-3 0.13). */
-export function landingPath(deckId: string, role: GrantRole): string {
-  return role === 'viewer' ? `/deck/${deckId}` : `/edit/${deckId}`;
+/**
+ * Where a role lands after the exchange (SPEC-3 0.13; the polish round, docs/POLISH.md item
+ * 101): every role lands on the editor page, whose stream carries the ops, so a viewer sees an
+ * edit within a second instead of on a reload; the editor draws its viewer floor for a viewer
+ * (no write tools). `/deck/<id>` stays the viewer for the present link and the example deck.
+ */
+export function landingPath(deckId: string, _role: GrantRole): string {
+  return `/edit/${deckId}`;
 }
 
 export type FetchMetadata = { mode: string | null; dest: string | null; site: string | null };

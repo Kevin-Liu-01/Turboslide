@@ -266,7 +266,7 @@ function TrashBody({
           </Link>
           <button
             type="button"
-            className="pt-ib is-text is-solid"
+            className="pt-ib is-text"
             data-control="trash.empty"
             disabled={shown === null || shown.length === 0 || busy.size > 0}
             onClick={() => (shown === null ? undefined : onEmpty(shown))}
@@ -345,7 +345,9 @@ function TrashCard({
     >
       <Thumb card={card} />
       <div className="ts-hm-card-body">
-        <span className="ts-hm-card-title">{card.title}</span>
+        <span className="ts-hm-card-title">
+          <span className="ts-hm-card-title-text">{card.title}</span>
+        </span>
         <span className="ts-hm-card-when" suppressHydrationWarning>
           {`Trashed ${mounted ? shortDate(trashed, now) : trashed.slice(0, 10)} · ${card.slides} slide${card.slides === 1 ? '' : 's'}`}
         </span>

@@ -50,8 +50,9 @@ export async function info(ctx: CommandContext): Promise<number> {
   ctx.out.human(
     `${loaded.deck.title} (${loaded.deck.id}), theme ${loaded.deck.theme}, revision ${loaded.deck.revision}`,
   );
+  const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? '' : 's'}`;
   ctx.out.human(
-    `${rows.length} slides in ${loaded.deck.sections.length} sections, ${result.counts.assets} assets`,
+    `${plural(rows.length, 'slide')} in ${plural(loaded.deck.sections.length, 'section')}, ${plural(result.counts.assets, 'asset')}`,
   );
   for (const section of result.sections) {
     ctx.out.human(`  ${section.name} (${section.id}): ${section.slides.length} slides`);

@@ -184,8 +184,10 @@ describe('the navigation rule and the landing', () => {
     expect(isNavigation(new Request('http://localhost:4332/s/x', { headers: seen }))).toBe(false);
   });
 
-  test('a viewer lands on /deck, a commenter and an editor on /edit (0.13)', () => {
-    expect(landingPath('q4', 'viewer')).toBe('/deck/q4');
+  test('every role lands on /edit, the viewer on its viewer floor (0.13; docs/POLISH.md item 101)', () => {
+    /* every role lands on the editor page, whose stream carries the ops (docs/POLISH.md item
+       101): a viewer sees an edit within a second on its viewer floor, never on a reload */
+    expect(landingPath('q4', 'viewer')).toBe('/edit/q4');
     expect(landingPath('q4', 'commenter')).toBe('/edit/q4');
     expect(landingPath('q4', 'editor')).toBe('/edit/q4');
   });
@@ -254,7 +256,7 @@ describe('the exchange', () => {
     });
     expect(outcome).toEqual({
       kind: 'redirect',
-      location: '/deck/q4-review',
+      location: '/edit/q4-review',
       grant: { linkId: 'lnk_viewer1', deckId: 'q4-review', role: 'viewer' },
     });
     // the exchange reads past any record cache: a mint seconds old counts on every instance

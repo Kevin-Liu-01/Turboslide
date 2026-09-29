@@ -5,13 +5,14 @@ import type { ExportMenuInput } from './ExportMenu';
 import './ExportReportCard.css';
 
 /**
- * The summary card after an export or a build (SPEC 8.5: the report is the claim). For an
- * export.run it reads the ExportReport: mode and themes, the pages (one entry per slide per
- * theme), whether the file is perfect (flatten with every page raster within 0.1 percent of its
- * shot), the page raster formats and their size, the worst verified fraction, the raster blocks,
- * the fonts embedded, then the files with a Download button each and the residual lines. For a
- * build.run it shows the file, its size against the budget and the assertions. The card draws the
- * ink frame the conflict card draws: the one dialog state (SPEC 2.2).
+ * The summary card after an export or a build (SPEC 8.5: the report is the claim; the polish
+ * round, docs/POLISH.md item 80: a seller's card first). The head names the file kind the run
+ * made (PDF, PowerPoint file, web page), the files follow with their name, their size and a
+ * Download button each, and one sentence says what the file holds and how long it took. The gate's
+ * rows (the mode, the pages, Perfect, the page rasters, the worst fraction, the raster blocks, the
+ * fonts, the geometry, the revision) and the residual lines sit behind Advanced tools, for the
+ * person who reads reports; a seller never meets "SwiftShader" or "Perfect: no". The card draws
+ * the ink frame the conflict card draws: the one dialog state (SPEC 2.2).
  */
 export type ExportDownload = {
   /** the file's base name: gt-brand-light.pptx */
@@ -126,9 +127,25 @@ export function reportRows(report: ExportReport): { key: string; value: string }
   return rows;
 }
 
+/** The seller's word for what a run made: "PDF", "PowerPoint file" or "web page" (item 80). */
+export function runKindWord(run: ArtifactRun): string {
+  if (run.kind === 'build') return 'web page';
+  return run.report.format === 'pdf' ? 'PDF' : 'PowerPoint file';
+}
+
+/** The one sentence under the files: what the file holds and how long the run took. */
+export function runSentence(run: ArtifactRun): string {
+  const seconds = `${(run.ms / 1000).toFixed(1)} s`;
+  if (run.kind === 'build') return `One file, made in ${seconds}`;
+  const themes = new Set(run.report.slides.map((slide) => slide.theme ?? run.report.theme));
+  const pages = Math.max(1, Math.round(run.report.slides.length / Math.max(1, themes.size)));
+  const unit = run.report.format === 'pdf' ? 'page' : 'slide';
+  return `${pages} ${unit}${pages === 1 ? '' : 's'}${themes.size > 1 ? ` in ${themes.size} appearances` : ''}, made in ${seconds}`;
+}
+
 export function ExportReportCard({ run, downloads, onDownload, onClose }: ExportReportCardProps) {
-  const title =
-    run.kind === 'export' ? `Export: PPTX ${modeLabel(run.report.mode)}` : 'Build: standalone HTML';
+  const kind = runKindWord(run);
+  const title = `Your ${kind}`;
   const passed =
     run.kind === 'export' ? run.report.passed : run.assertions.every((entry) => entry.passed);
   const rows =
@@ -152,21 +169,13 @@ export function ExportReportCard({ run, downloads, onDownload, onClose }: Export
       data-perfect={run.kind === 'export' && run.report.perfect ? 'true' : undefined}
     >
       <div className="ts-report-head">
-        <b>{title}</b>
-        <span>{`${passed ? 'Passed' : 'Did not pass'} in ${(run.ms / 1000).toFixed(1)} s`}</span>
+        <b data-control="export.report.title">{title}</b>
+        <span data-control="export.report.sentence">{runSentence(run)}</span>
       </div>
-      <dl className="ts-report-rows">
-        {rows.map((row) => (
-          <div key={row.key} className="ts-report-row">
-            <dt>{row.key}</dt>
-            <dd>{row.value}</dd>
-          </div>
-        ))}
-      </dl>
       {run.downloads.length > 0 ? (
         <ul className="ts-report-files">
           {run.downloads.map((file) => (
-            <li key={file.name}>
+            <li key={file.name} data-control="export.report.file">
               <span className="ts-report-file">{file.name}</span>
               <span className="ts-report-bytes">{formatBytes(file.bytes)}</span>
               {downloads ? (
@@ -186,13 +195,28 @@ export function ExportReportCard({ run, downloads, onDownload, onClose }: Export
           ))}
         </ul>
       ) : null}
-      {run.kind === 'export' && run.report.residual.length > 0 ? (
-        <ul className="ts-report-residual">
-          {run.report.residual.map((line) => (
-            <li key={line}>{line}</li>
+      {/* the gate's rows and the residual lines, for the person who reads reports (item 80) */}
+      <details className="ts-report-advanced" data-control="export.report.advanced">
+        <summary>Advanced tools</summary>
+        <p className="ts-report-verdict" data-passed={passed ? 'true' : 'false'}>
+          {`${passed ? 'Passed' : 'Did not pass'} the gate in ${(run.ms / 1000).toFixed(1)} s`}
+        </p>
+        <dl className="ts-report-rows">
+          {rows.map((row) => (
+            <div key={row.key} className="ts-report-row">
+              <dt>{row.key}</dt>
+              <dd>{row.value}</dd>
+            </div>
           ))}
-        </ul>
-      ) : null}
+        </dl>
+        {run.kind === 'export' && run.report.residual.length > 0 ? (
+          <ul className="ts-report-residual">
+            {run.report.residual.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        ) : null}
+      </details>
       <div className="ts-report-actions">
         <button
           type="button"

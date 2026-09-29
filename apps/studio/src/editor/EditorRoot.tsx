@@ -97,6 +97,7 @@ import {
 } from '../components/presentActions';
 import type { PresentHost } from '../components/presentActions';
 import { Slideshow } from '../components/Slideshow';
+import { showStageSize } from '../components/show-stage';
 import { useMountEffect } from '../components/useMountEffect';
 import { bundleDownloadTicket, bundleUploadTicket, connectFacts } from '../server/bundle';
 import { listDecks, readSourceDeckSlides, restoreStoredDeck } from '../server/decks';
@@ -105,7 +106,7 @@ import { rememberLinkUrl } from '@turboslide/chrome/dialogs/share-links';
 import { DECK_CREATED_EVENT, holdDraft } from '../server/write';
 import type { DeckCreatedDetail, EditorDeck, EditorIdentity } from '../server/write';
 import { RouterLinkSlot } from '../routes/-link-slot';
-import { recordDeckOpened } from '../routes/-recent';
+import { readRecent, recordDeckOpened, updateDeckFacts } from '../routes/-recent';
 import type { DeckOpenFacts } from '../routes/-recent';
 import {
   ASSET_BASE,
@@ -518,7 +519,10 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     if (typeof document === 'undefined') return;
     const next = `${deckTitle}, editor, Turboslide`;
     if (document.title !== next) document.title = next;
-  }, [deckTitle]);
+    /* the mirror's card reads the new name too (docs/POLISH.md item 76): a rename in the title
+       field or through File > Rename reaches /decks before the listing catches up */
+    if (!draft) updateDeckFacts(snap.deckId, { title: deckTitle });
+  }, [deckTitle, draft, snap.deckId]);
   /* the caret's marks and range inside a run (the toolbar's pressed state and Format options' Text
      colour), reported by the stage; a state so the shell re-reads the selection facts on change */
   const [caret, setCaret] = useState<CaretInfo | null>(null);
@@ -662,10 +666,13 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     }
   }, [refusedByControl, controller]);
 
-  /* the save words (SPEC-3 3.6): Saving… while anything is pending or retained, the retry word
-     while the wire is down; a reject notice is the one conflict state left */
+  /* the save words answer the save queue alone (docs/POLISH.md item 100; SPEC-3 3.6): Saving…
+     while anything is pending or retained, the retry word while the client is sending a write
+     again after a failed POST or a 5xx, Offline from the browser's own word; a reject notice is
+     the card's or the snackbar's and never touches the save state (audit-collab item 3: the row
+     read "Couldn't save, retrying" for minutes while nothing retried) */
   const status: SaveState =
-    conflicts.length > 0
+    snap.sync?.resending === true
       ? 'conflict'
       : snap.sync?.offline === true
         ? 'unsaved'
@@ -811,7 +818,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     githubAvailable: auth?.github ?? false,
     namePrompt: {
       open: snap.namePrompt,
-      prefilled: payload.identity?.name ?? payload.identity?.label ?? author.name,
+      /* a name the person chose alone, never the generated label or the fallback author
+         "studio" (B1's R13, docs/POLISH.md item 63): the prompt opens empty otherwise */
+      prefilled: payload.identity?.name ?? '',
     },
     onNamePrompt: (open) => controller.promptName(open),
     setName: (name) =>
@@ -1107,8 +1116,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
          triggerDownload): a refused ticket rejects with the server's sentence and the shell says
          it instead of "The bundle is at" */
       return bundleDownloadTicket({ deckId }).then(async ({ url }) => {
-        await triggerDownload(url);
-        return { path: `${deckId}.zip`, url };
+        const saved = await triggerDownload(url);
+        return { path: saved?.name ?? `${deckId}.zip`, url, name: saved?.name };
       });
     }
     return controller.invoke(action, input);
@@ -1559,7 +1568,25 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       onClearRun: controller.clearArtifact,
       onShowReport: () => setReportOpen(true),
     },
-    listDecks: () => listDecks(),
+    /* the store's listing with this browser's own decks folded in above it (docs/POLISH.md item
+       75): a deck made a moment ago is in File > Open and Import slides before the blob tier's
+       listing holds it; the mirror's facts stand in for the head's */
+    listDecks: async () => {
+      const listed = await listDecks();
+      const ids = new Set(listed.map((row) => row.id));
+      const mine = readRecent()
+        .filter((entry) => !ids.has(entry.id))
+        .map((entry) => ({
+          id: entry.id,
+          title: entry.title,
+          slides: entry.slides ?? 0,
+          sections: entry.slides === undefined ? 0 : 1,
+          revision: entry.revision,
+          updatedAt: entry.at,
+          createdAt: entry.at,
+        }));
+      return [...mine, ...listed];
+    },
     readDeck: async (id) => {
       const read = await readSourceDeckSlides({ deckId: id });
       if (read === null) throw new RangeError(`No presentation named ${id}`);
@@ -1821,6 +1848,8 @@ function EditorStage({
           document={snap.document}
           slideId={slide.id}
           theme={theme}
+          /* Tools > Preferences > Link detection reaches the stage (docs/POLISH.md item 114) */
+          linkDetection={editorShell.settings.linkDetection !== false}
           assetBase={ASSET_BASE(snap.deckId)}
           stageSize={stageSize}
           index={Math.max(0, shell.index)}
@@ -1904,7 +1933,8 @@ function EditorStage({
           slide={slide}
           index={Math.max(0, shell.index)}
           total={shell.total}
-          stageSize={stageSize}
+          /* a show's sheet sits above the bar's row on a short viewport (docs/POLISH.md item 98) */
+          stageSize={shell.present ? showStageSize(stageSize) : stageSize}
           mode={shell.mode}
           present={shell.present}
           narrow={shell.narrow}
@@ -2272,8 +2302,9 @@ function ExternalRevisionBanner({
 }) {
   return (
     <div className="ts-banner ts-chrome" role="status" data-state="external">
+      {/* one sentence, no revision number (docs/POLISH.md item 35; B1's R20; audit-chrome 38) */}
       <span>
-        {`Revision r${external.revision}${external.author ? ` by ${authorDisplay(external.author)}` : ''} arrived from outside this editor and is shown${external.note ? `: ${external.note}` : ''}.`}
+        {`This presentation changed elsewhere${external.author ? `, by ${authorDisplay(external.author)}` : ''}${external.note ? `: ${external.note}` : ''}`}
       </span>
       <button
         type="button"

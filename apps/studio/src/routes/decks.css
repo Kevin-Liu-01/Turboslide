@@ -86,11 +86,6 @@ html:has(.ts-home-page) {
   height: 40px;
 }
 
-.ts-hm-card-recent .ts-hm-card-body {
-  display: grid;
-  gap: 2px;
-  padding: 10px 12px 12px;
-}
 
 /* ---- the empty states (SPEC-4 1.10; EmptyFigure): the figure, the title, one sentence, one action ---- */
 .ts-home-empty-figure {
@@ -318,7 +313,11 @@ html:has(.ts-home-page) {
   background: var(--pt-plate);
 }
 
+/* the capture draws over the plate (docs/POLISH.md item 90): the plate is the first paint and the
+   picture replaces it when it has loaded */
 .ts-hm-card-thumb img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
@@ -383,6 +382,16 @@ html:has(.ts-home-page) {
   flex: none;
 }
 
+/* the title's text in its own box, so the ellipsis draws (docs/POLISH.md item 84: an inline flex
+   link clips its text at the box's edge, mid letter) */
+.ts-hm-card-title-text {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .ts-hm-card-title:hover {
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -405,9 +414,12 @@ html:has(.ts-home-page) {
   align-self: center;
 }
 
-/* the in place rename: the title's box becomes the field */
+/* the in place rename: the field spans the card body, the More button leaves for its duration
+   (docs/POLISH.md item 97: the field was the title's column and scrolled the start away) */
 .ts-hm-card-rename {
-  grid-column: 1;
+  grid-column: 1 / -1;
+  grid-row: 1 / span 2;
+  align-self: center;
   margin: 0;
   min-width: 0;
 }
@@ -582,21 +594,5 @@ html:has(.ts-home-page) {
   }
 }
 
-/* ---- the Recent row (SPEC-4 0.29): this browser's own decks, one row above the store's cards,
-   captioned so the two grids read as two things ---- */
-.ts-recent-row {
-  margin: 20px 0 0;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--pt-hair-soft);
-}
-
-.ts-recent-row-title {
-  margin: 0;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--pt-ink-2);
-}
-
-.ts-recent-row .ts-cards {
-  margin-top: 12px;
-}
+/* ---- this browser's own decks are the first cards of the grid (docs/POLISH.md item 76): no
+   second row, no caption ---- */

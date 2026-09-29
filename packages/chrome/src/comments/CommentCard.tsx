@@ -433,9 +433,23 @@ export function CommentCard({
   const resolve = () => {
     if (!thread) return;
     if (resolved) run(comments.reopen?.(thread.id)?.then(() => setSettled('open')));
-    else if (assigned && comments.done)
-      run(comments.done(thread.id).then(() => setSettled('resolved')));
-    else run(comments.resolve?.(thread.id)?.then(() => setSettled('resolved')));
+    else {
+      /* a resolve closes the card and says so with Undo (docs/POLISH.md item 98; audit-pages
+         item 42: the tick turned into an arrow and the card stayed open with no word) */
+      const settle = assigned && comments.done ? comments.done(thread.id) : comments.resolve?.(thread.id);
+      run(
+        settle?.then(() => {
+          setSettled('resolved');
+          onClose();
+          say(COMMENTS.resolved, {
+            label: 'Undo',
+            run: () => {
+              void comments.reopen?.(thread.id);
+            },
+          });
+        }),
+      );
+    }
   };
 
   /* the chords inside a card (section 14): j, k, r, e, u and Esc, outside the editor's map */
@@ -520,28 +534,32 @@ export function CommentCard({
       style={style}
       onKeyDown={onKeyDown}
     >
-      <div className="ts-comment-card-head">
-        {thread?.anchor.orphaned === true ? (
-          <span className="ts-comment-orphan">{COMMENTS.removedObject}</span>
-        ) : thread?.anchor.kind === 'text' && thread.anchor.quote !== undefined ? (
-          <q className="ts-comment-quote">{thread.anchor.quote}</q>
-        ) : (
-          <span />
-        )}
-        <span className="ts-comment-card-tools">
-          {head}
-          <button
-            type="button"
-            className="pt-ib pt-icon ts-comment-close"
-            data-control={`${control}.close`}
-            aria-label="Close"
-            onClick={onClose}
-            {...tipProps({ name: 'Close', key: 'Esc' })}
-          >
-            <Icon name="close" />
-          </button>
-        </span>
-      </div>
+      {/* no header without content (item 98): a new comment's card starts at its composer, and
+          Escape or Cancel closes it */}
+      {thread ? (
+        <div className="ts-comment-card-head">
+          {thread.anchor.orphaned === true ? (
+            <span className="ts-comment-orphan">{COMMENTS.removedObject}</span>
+          ) : thread.anchor.kind === 'text' && thread.anchor.quote !== undefined ? (
+            <q className="ts-comment-quote">{thread.anchor.quote}</q>
+          ) : (
+            <span />
+          )}
+          <span className="ts-comment-card-tools">
+            {head}
+            <button
+              type="button"
+              className="pt-ib pt-icon ts-comment-close"
+              data-control={`${control}.close`}
+              aria-label="Close"
+              onClick={onClose}
+              {...tipProps({ name: 'Close', key: 'Esc' })}
+            >
+              <Icon name="close" />
+            </button>
+          </span>
+        </div>
+      ) : null}
       {thread ? (
         <div className="ts-comment-list pt-scroll">
           <CommentRow

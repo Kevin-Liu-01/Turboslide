@@ -92,7 +92,9 @@ export const Route = createFileRoute('/api/decks/$deckId/bundle')({
             ...common,
             'content-type': BUNDLE_MEDIA_TYPE,
             'content-length': String(packed.zip.byteLength),
-            'content-disposition': contentDisposition(packed.fileName),
+            'content-disposition': contentDisposition(
+              titledFileName(packed.title, packed.manifest.deckId, 'zip'),
+            ),
             'x-content-type-options': 'nosniff',
           },
         });
@@ -100,3 +102,18 @@ export const Route = createFileRoute('/api/decks/$deckId/bundle')({
     },
   },
 });
+
+/** The characters a file name never carries: `" \ / : * ? < > |` and the control characters. */
+// eslint-disable-next-line no-control-regex
+const UNSAFE_FILE_NAME = /["\\/:*?<>|\u0000-\u001f]/g;
+
+/**
+ * One name rule for every download (docs/POLISH.md item 86; @turboslide/chrome/download
+ * fileNameOf spells the same rule for the page): the title with the unsafe characters removed,
+ * then the extension; an untitled deck keeps its id.
+ */
+export function titledFileName(title: string, deckId: string, extension: string): string {
+  const cleaned = title.replace(UNSAFE_FILE_NAME, '').replace(/\s+/g, ' ').trim();
+  const base = cleaned === '' || cleaned === 'Untitled presentation' ? deckId : cleaned;
+  return `${base}.${extension}`;
+}

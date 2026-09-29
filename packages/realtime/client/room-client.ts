@@ -256,8 +256,14 @@ export type SyncStatus = {
   tier: RealtimeTier;
   transport: 'sse' | 'poll' | 'none';
   connected: boolean;
-  /** the stream is down and the last POST failed */
+  /** the browser is offline (`navigator.onLine` false, the `offline` event), or the last POST failed while it could not say */
   offline: boolean;
+  /**
+   * A write the client is sending again after a failed POST or a 5xx while the browser is
+   * online (docs/POLISH.md item 100): the title row's retry word is for this state alone, never
+   * for a refusal the card carries.
+   */
+  resending: boolean;
   /**
    * The room's store refuses its poll (a `store` event with `ok: false`; the blob tier alone
    * sends one): the title row reads Reconnecting until a poll succeeds (the focus round, cycle 3
@@ -345,6 +351,12 @@ export type RoomClientOptions = {
   onResync?: (revision: number, since: number) => Promise<DeckDocument | ResyncAnswer | null>;
   /** a persisted queue from an earlier tab of this browser (SPEC-3 0.7) */
   onPersisted?: (offer: PersistedOffer) => void;
+  /**
+   * Which of the given op ids the server's records already hold (docs/POLISH.md item 109): a
+   * queue saved before its acknowledgement was persisted offers nothing the server has; absent,
+   * every unsaved op is offered.
+   */
+  heldOps?: (opIds: ReadonlyArray<string>) => Promise<ReadonlySet<string>>;
   /** a pending op that no longer applies after a remote change was returned to its author */
   onUnplaceable?: (op: PendingOp) => void;
 };
@@ -549,8 +561,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let overCeiling = false;
   let connected = false;
   let offline = false;
+  let resending = false;
   let storeDegraded = false;
   let streamDown = false;
+  /** The browser's own word on the network (item 100): offline at once, on the event, not on the next failed POST. */
+  const browserOffline = (): boolean =>
+    typeof navigator !== 'undefined' && navigator.onLine === false;
   /**
    * Whether the server's binding of `clientId` stands: true from a hello, false after the ops
    * route answered `client_unbound` (a long sleep, a lapsed TTL), when the ops wait for the
@@ -622,6 +638,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     transport: 'sse',
     connected,
     offline,
+    resending,
     storeDegraded,
     streamDown,
     clientId,
@@ -1234,7 +1251,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         bound = true;
         streamDown = false;
         streamBackoff = 0;
-        offline = false;
+        offline = browserOffline();
         backoff = 0;
         if (event.revision > revision) revision = event.revision;
         // the ops retained at or below the seq the last checkpoint covered are saved: the
@@ -1431,13 +1448,17 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         // the answer is lost, the write may not be: the record stays for the store echo of its
         // commit, which settles the ops before they are resent
         for (const op of batch) op.inflight = false;
-        offline = true;
+        // the browser says whether the network is gone; a POST that failed while it is up is a
+        // write the client sends again (item 100)
+        offline = browserOffline();
+        resending = !offline;
         emitStatus();
         backoff = Math.min(BACKOFF_MAX_MS, backoff === 0 ? 500 : backoff * 2);
         timers.setTimeout(() => void flush(), backoff);
         return;
       }
       offline = false;
+      resending = false;
       if (response.ok) {
         backoff = 0;
         // what landed under the admitted entries first, so they drain at once (C3S-F8); an
@@ -1503,7 +1524,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         // POST that threw is, never returned to the author as a refusal. On the cycle 2 enforce
         // preview a stalled Blob head landed here as "A change was not applied HTTPError" and
         // every later row failed in the stuck save state (the integrator at the cycle 2 merge)
-        offline = true;
+        offline = browserOffline();
+        resending = true;
         emitStatus();
         backoff = Math.min(BACKOFF_MAX_MS, backoff === 0 ? 500 : backoff * 2);
         timers.setTimeout(() => void flush(), response.retryAfterMs ?? backoff);
@@ -1699,8 +1721,32 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     const store = options.pendingStore;
     if (store === undefined || options.onPersisted === undefined) return;
     const queues = await store.load(deckId, now());
-    const others = queues.filter((queue) => queue.clientId !== clientId && unsavedCount(queue) > 0);
+    let others = queues.filter((queue) => queue.clientId !== clientId && unsavedCount(queue) > 0);
     if (others.length === 0) return;
+    // the ops the server's records already hold leave the offer (item 109); a queue with nothing
+    // left is removed as if discarded
+    if (options.heldOps !== undefined) {
+      const unsaved = others.flatMap((queue) =>
+        queue.entries.filter((op) => op.seq === undefined).map((op) => op.opId),
+      );
+      let held: ReadonlySet<string> = new Set();
+      try {
+        held = await options.heldOps(unsaved);
+      } catch {
+        held = new Set();
+      }
+      if (held.size > 0) {
+        const kept: typeof others = [];
+        for (const queue of others) {
+          const entries = queue.entries.filter((op) => op.seq !== undefined || !held.has(op.opId));
+          const trimmed = { ...queue, entries };
+          if (unsavedCount(trimmed) > 0) kept.push(trimmed);
+          else await store.remove(queue.key).catch(() => undefined);
+        }
+        others = kept;
+      }
+      if (others.length === 0) return;
+    }
     const count = others.reduce((sum, queue) => sum + unsavedCount(queue), 0);
     options.onPersisted({
       count,
@@ -1729,15 +1775,35 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     });
   };
 
+  /* the browser's offline and online events (item 100): Offline reads within a second of the
+     cut, and the return flushes what waited */
+  const onBrowserOffline = (): void => {
+    offline = true;
+    emitStatus();
+  };
+  const onBrowserOnline = (): void => {
+    offline = false;
+    emitStatus();
+    scheduleFlush('now');
+  };
   const client: RoomClient = {
     start() {
       if (stream !== null || stopped) return;
+      if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+        window.addEventListener('offline', onBrowserOffline);
+        window.addEventListener('online', onBrowserOnline);
+        offline = browserOffline();
+      }
       openStream();
       heartbeat();
       void offerPersisted();
     },
     async stop() {
       stopped = true;
+      if (typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
+        window.removeEventListener('offline', onBrowserOffline);
+        window.removeEventListener('online', onBrowserOnline);
+      }
       if (flushTimer !== undefined) timers.clearTimeout(flushTimer);
       if (presenceTimer !== undefined) timers.clearTimeout(presenceTimer);
       if (heartbeatTimer !== undefined) timers.clearTimeout(heartbeatTimer);

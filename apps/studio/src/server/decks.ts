@@ -69,6 +69,11 @@ export type DeckCard = DeckHead & {
 
 export type DeckPayload = {
   deck: ViewerDeck;
+  /**
+   * the appearance the slides were rendered in: the caller's `theme`, else the deck's own
+   * (docs/POLISH.md item 77: the print route draws and downloads the deck as it is)
+   */
+  theme: 'light' | 'dark';
   /** the theme's icon sprite (63 Heroicons plus gt-mark), inlined once per page */
   sprite: string;
   /** validation issues at severity 3, for the console and the sidebar later */
@@ -413,6 +418,8 @@ export type CopyDeckRequest = {
   name: string;
   slideIds?: string[];
   removeNotes?: boolean;
+  /** carry the comment threads (docs/POLISH.md item 98) */
+  copyComments?: boolean;
   baseRevision?: number;
 };
 
@@ -439,6 +446,7 @@ const copyDeckFn = createServerFn({ method: 'POST' })
       name: input.name.trim(),
       ...(input.slideIds !== undefined ? { slideIds: input.slideIds } : {}),
       ...(input.removeNotes === true ? { removeNotes: true } : {}),
+      ...(input.copyComments === true ? { copyComments: true } : {}),
       ...(baseRevision !== undefined ? { baseRevision } : {}),
     };
   })
@@ -459,6 +467,7 @@ const copyDeckFn = createServerFn({ method: 'POST' })
       name: data.name,
       ...(data.slideIds !== undefined ? { slideIds: data.slideIds } : {}),
       ...(data.removeNotes === true ? { removeNotes: true } : {}),
+      ...(data.copyComments === true ? { copyComments: true } : {}),
     };
     const copied = await mapStale(async () => (await ensureDecks()).copy(input, data.baseRevision));
     // the copy is a new deck: restricted, the copier its owner (SPEC-3 6.1; VERIFICATION-3 finding 4)
@@ -579,6 +588,51 @@ const deckDetailsFn = createServerFn({ method: 'GET' })
 
 export async function deckDetails(input: { deckId: string }): Promise<DeckDetails | null> {
   return deckDetailsFn({ data: input });
+}
+
+/**
+ * One deck's card from its own head (the polish round, docs/POLISH.md item 75): the home page
+ * keeps a deck this browser opened on its grid until the store's listing holds it, and asks here
+ * for the ones the listing does not hold yet. The answer is the card the listing would carry
+ * (the title, the slide count, the appearance, the first slide), null for a deck that is
+ * missing, in the trash or not readable by the caller, which is when the page forgets it. One
+ * deck's read, not the whole listing, so a fresh deck costs one head sync.
+ */
+const readDeckCardFn = createServerFn({ method: 'GET' })
+  .validator((input: { deckId: string }) => ({ deckId: requireSlug(input.deckId, 'deckId') }))
+  .handler(async ({ data }): Promise<DeckCard | null> => {
+    const { authorize, requestContext } = await import('./authorize');
+    const ctx = await requestContext();
+    const read = await authorize(ctx, data.deckId, 'read', {
+      action: 'deck.details',
+      transport: 'window',
+    });
+    if (!read.ok) return null;
+    let document: DeckDocument;
+    try {
+      document = (await (await openDeckStore(data.deckId)).read()).document;
+    } catch (error) {
+      if (error instanceof RangeError || error instanceof TypeError) return null;
+      throw error;
+    }
+    const deck = document.deck;
+    if (isTrashed(deck)) return null;
+    const slideIds = deck.sections.flatMap((section) => section.slideIds);
+    return {
+      id: deck.id,
+      title: deck.title,
+      slides: slideIds.length,
+      sections: deck.sections.length,
+      revision: deck.revision,
+      createdAt: deck.createdAt,
+      updatedAt: deck.updatedAt,
+      appearance: deckAppearance(deck),
+      firstSlide: slideIds[0] ?? null,
+    };
+  });
+
+export async function readDeckCard(input: { deckId: string }): Promise<DeckCard | null> {
+  return readDeckCardFn({ data: input });
 }
 
 export type SourceDeckSlides = {
@@ -882,6 +936,7 @@ export const getDeck = createServerFn({ method: 'GET' })
     });
     return {
       deck: built.deck,
+      theme,
       sprite: sprite(),
       issues: loaded.issues,
       skipped: built.skipped,

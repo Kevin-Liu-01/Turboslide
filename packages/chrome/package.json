@@ -15,6 +15,7 @@
     "./dispatch": "./src/dispatch.ts",
     "./logo-model": "./src/logo-model.ts",
     "./download": "./src/download.ts",
+    "./error-text": "./src/error-text.ts",
     "./icons": "./src/icons.tsx",
     "./GtMark": "./src/GtMark.tsx",
     "./TurboslideMark": "./src/TurboslideMark.tsx",

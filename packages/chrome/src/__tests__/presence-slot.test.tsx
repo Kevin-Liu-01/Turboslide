@@ -212,10 +212,11 @@ describe('the title row slots', () => {
     expect(presence.querySelectorAll('.ts-presence-chip')).toHaveLength(4);
     expect(presence.querySelector('[data-control="presence.more"]')?.textContent).toBe('+16');
     expect(presence.getAttribute('data-count')).toBe('20');
-    /* a label's chip cannot be followed: the click is a one time jump */
+    /* an anonymous editor with a slide open can be followed (docs/POLISH.md item 104): the
+       chip's click follows; the one time jump is the roster row's while the Follow row is parked */
     fireEvent.click(presence.querySelector('[data-control="presence.chip.c1"]')!);
-    expect(onGoTo).toHaveBeenCalledWith('c1');
-    expect(onFollow).not.toHaveBeenCalled();
+    expect(onFollow).toHaveBeenCalledWith('c1');
+    expect(onGoTo).not.toHaveBeenCalled();
     fireEvent.click(presence.querySelector('[data-control="presence.more"]')!);
     const roster = document.getElementById('ts-menu-roster')!;
     expect(roster.getAttribute('role')).toBe('menu');
@@ -225,8 +226,9 @@ describe('the title row slots', () => {
     expect(roster.querySelector('[data-control="presence.roster.me"]')?.textContent).toContain(
       PRESENCE.you,
     );
+    /* with the Follow row present (Advanced tools on) the row offers Follow (item 104) */
     expect(roster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
-      'Go to slide',
+      PRESENCE.follow,
     );
     const stub = roster.querySelector('[data-menu-item="title.presence.joinChat"]')!;
     expect(stub.getAttribute('aria-disabled')).toBe('true');

@@ -1,3 +1,4 @@
+import type { DragEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { Dialog, DialogTabs } from '../Dialog';
@@ -7,6 +8,8 @@ import { cn } from '../lib/cn';
 import { DIALOGS, IMPORT_PPTX } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 import { formatWhen } from '../VersionsPanel';
+
+import './upload.css';
 
 /**
  * File > Open (gslides-parity SPEC 2.1, 12 "Dialogs"; Cmd+O): a search field and this studio's
@@ -23,7 +26,19 @@ export function OpenDialog() {
   const [picked, setPicked] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [over, setOver] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  /* the zone takes a dropped file (docs/POLISH.md item 88) */
+  const takeFile = (picked: File | null | undefined) => {
+    setError(null);
+    setFile(picked ?? null);
+  };
+  const onDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setOver(false);
+    takeFile(event.dataTransfer.files[0]);
+  };
 
   useEffect(() => {
     const list =
@@ -127,7 +142,9 @@ export function OpenDialog() {
             {...searchTip}
             onChange={(event) => setQuery(event.target.value)}
           />
-          {decks === null && error === null ? <p className="ts-dialog-empty">Loading…</p> : null}
+          {decks === null && error === null ? (
+            <ul className="ts-dialog-list is-loading" aria-busy="true" aria-label="Loading" />
+          ) : null}
           {decks !== null && rows.length === 0 ? (
             <p className="ts-dialog-empty">No presentations match</p>
           ) : null}
@@ -149,12 +166,12 @@ export function OpenDialog() {
                     }}
                     {...tipProps({
                       name: deck.title,
-                      doc: `${deck.slides} slides, edited ${formatWhen(deck.updatedAt)}`,
+                      doc: `${deck.slides} slide${deck.slides === 1 ? '' : 's'}, edited ${formatWhen(deck.updatedAt)}`,
                     })}
                   >
                     <span className="ts-dialog-row-title">{deck.title}</span>
                     <span className="ts-dialog-row-meta">
-                      {deck.slides} slides · {formatWhen(deck.updatedAt)}
+                      {deck.slides} slide{deck.slides === 1 ? '' : 's'} · {formatWhen(deck.updatedAt)}
                     </span>
                   </button>
                 </li>
@@ -163,21 +180,44 @@ export function OpenDialog() {
           ) : null}
         </>
       ) : (
-        <>
-          <p>A Turboslide bundle (.zip) from Download, or from the command line.</p>
+        <div
+          className={cn('ts-upload-zone', over && 'is-over')}
+          data-control="dialog.open.upload"
+          onDragOver={(event) => {
+            event.preventDefault();
+            setOver(true);
+          }}
+          onDragLeave={() => setOver(false)}
+          onDrop={onDrop}
+        >
+          <p>Drop a Turboslide bundle (.zip) here, or pick one from your device</p>
           <input
             ref={fileInput}
             type="file"
             accept=".zip,application/zip"
             aria-label="Bundle file"
             data-control="dialog.open.file"
-            onChange={(event) => {
-              setError(null);
-              setFile(event.target.files?.[0] ?? null);
-            }}
-            {...tipProps({ name: 'Bundle file', doc: 'A Turboslide bundle (.zip)' })}
+            tabIndex={-1}
+            onChange={(event) => takeFile(event.target.files?.[0])}
           />
-        </>
+          <button
+            type="button"
+            className="pt-ib"
+            data-control="dialog.open.upload.button"
+            onClick={() => fileInput.current?.click()}
+            {...tipProps({
+              name: 'Select a file from your device',
+              doc: 'A Turboslide bundle (.zip) from Download, or from the command line',
+            })}
+          >
+            <span className="pt-lb">Select a file from your device</span>
+          </button>
+          {file !== null ? (
+            <span className="ts-upload-file" data-control="dialog.open.upload.name">
+              {file.name}
+            </span>
+          ) : null}
+        </div>
       )}
       {error !== null ? (
         <p className="ts-dialog-error" role="alert">

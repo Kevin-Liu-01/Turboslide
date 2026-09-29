@@ -24,6 +24,7 @@ import type { MenuItem } from '@turboslide/chrome/menus/model';
 import { DIALOGS, HOME, SNACKBARS } from '@turboslide/chrome/menus/strings';
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
+import { DOWNLOAD_WORDS, downloadFromPage, fileNameOf } from '@turboslide/chrome/download';
 
 import { useMountEffect } from '../components/useMountEffect';
 import {
@@ -33,26 +34,36 @@ import {
   restoringStep,
   sessionMarkerStorage,
 } from './-restoring';
-import { bundleDownloadTicket } from '../server/bundle';
 import {
   copyStoredDeck,
   createNewDeck,
   listDecks,
+  readDeckCard,
   renameStoredDeck,
   restoreStoredDeck,
   trashStoredDeck,
 } from '../server/decks';
 import type { DeckCard } from '../server/decks';
+import {
+  EXPORT_POLL_MS,
+  exportCapabilities,
+  pollExport,
+  startExport,
+  syncExport,
+} from '../server/download';
 import { getServerHealth } from '../server/health';
 import { RouterLinkSlot } from './-link-slot';
 import {
+  TRASH_REFUSED_EVENT,
+  forgetDeckOpened,
   parseRecentCookie,
   readOpened,
   readRecent,
   recordDeckOpened,
   takeTrashedMarker,
+  updateDeckFacts,
 } from './-recent';
-import type { DeckOpenFacts, RecentEntry } from './-recent';
+import type { DeckOpenFacts, RecentEntry, TrashRefusedDetail } from './-recent';
 
 import './decks.css';
 
@@ -106,8 +117,18 @@ export const Route = createFileRoute('/decks/')({
   loader: async () => {
     const [health, cookies] = await Promise.all([getServerHealth(), readHomeCookies()]);
     // the store listing is not awaited: the router streams it behind the shell (SPEC-4 0.29)
-    return { decks: listDecks(), node: health.node, prefs: cookies.prefs, recent: cookies.recent };
+    return {
+      decks: listDecks(),
+      node: health.node,
+      prefs: cookies.prefs,
+      recent: cookies.recent,
+      now: cookies.now,
+    };
   },
+  /* Back from the editor paints the cards it left (docs/POLISH.md item 89): a match younger than
+     this reuses its loader data instead of streaming the listing again behind grey frames; a
+     rename, a copy and an undo still refetch through `router.invalidate()` */
+  staleTime: 30_000,
   head: () => ({ meta: [{ title: `${HOME.recent}, Turboslide` }] }),
   component: HomePage,
 });
@@ -130,9 +151,6 @@ const DEFAULT_SETTINGS: HomeSettings = { sort: 'opened', view: 'grid' };
 
 /** the cards that preload the editor's loader on viewport entry (SPEC-4 0.39) */
 export const VIEWPORT_PRELOAD_CARDS = 12;
-
-/** the Recent row's length: one row of the grid */
-export const RECENT_ROW_CARDS = 4;
 
 /**
  * The saved view and sort as a cookie the loader reads (gslides-parity SPEC-3 9.2 L1; research-3
@@ -170,16 +188,19 @@ export function homeCookieValue(settings: HomeSettings): string {
 }
 
 /**
- * The two cookies of the request: the saved settings (or null) and this browser's Recent row
- * (SPEC-4 0.29); the client keeps both beside localStorage.
+ * The two cookies of the request: the saved settings (or null) and this browser's Recent entries
+ * (SPEC-4 0.29); the client keeps both beside localStorage. `now` is the request's time, so the
+ * server and the first client render word "Opened 2 minutes ago" from one clock (docs/POLISH.md
+ * item 112: the server drew the ISO date and hydration replaced it with the relative words).
  */
 const readHomeCookies = createServerFn({ method: 'GET' }).handler(
-  (): { prefs: HomeSettings | null; recent: RecentEntry[] } => {
+  (): { prefs: HomeSettings | null; recent: RecentEntry[]; now: string } => {
+    const now = new Date().toISOString();
     try {
       const cookie = getRequest().headers.get('cookie');
-      return { prefs: parseHomeCookie(cookie), recent: parseRecentCookie(cookie) };
+      return { prefs: parseHomeCookie(cookie), recent: parseRecentCookie(cookie), now };
     } catch {
-      return { prefs: null, recent: [] };
+      return { prefs: null, recent: [], now };
     }
   },
 );
@@ -350,11 +371,52 @@ export function sortCards(
   });
 }
 
-/** The Recent row's entries as an opened map, so the server's order and the first render agree. */
+/** The Recent entries as an opened map, so the server's order and the first render agree. */
 function openedOf(recent: ReadonlyArray<RecentEntry>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const entry of recent) out[entry.id] = entry.at;
   return out;
+}
+
+/**
+ * A card drawn from this browser's Recent record alone (docs/POLISH.md items 75 and 76): the
+ * facts the mirror kept when the deck was opened, standing in for the store's card until the
+ * listing holds the deck. The slide count is the mirror's when the writer knew it, else 0, and
+ * the list view's column reads it.
+ */
+export function cardOfRecent(entry: RecentEntry): DeckCard {
+  return {
+    id: entry.id,
+    title: entry.title,
+    slides: entry.slides ?? 0,
+    sections: entry.slides === undefined ? 0 : 1,
+    revision: entry.revision,
+    updatedAt: entry.at,
+    createdAt: entry.at,
+    appearance: entry.appearance,
+    firstSlide: entry.firstSlide,
+  };
+}
+
+/**
+ * The listing with this browser's decks folded in (items 75 and 76): a deck the listing holds is
+ * the store's card; one it does not hold yet (a deck made from `/new` a moment ago, a copy, a
+ * restore, while the blob tier's listing catches up) is drawn from the mirror, and once from the
+ * store's own head (`readDeckCard`) when the page has asked for it. One card per deck, never two.
+ */
+export function foldRecent(
+  list: ReadonlyArray<DeckCard>,
+  recent: ReadonlyArray<RecentEntry>,
+  heads: Readonly<Record<string, DeckCard>> = {},
+): DeckCard[] {
+  const listed = new Set(list.map((card) => card.id));
+  const extra: DeckCard[] = [];
+  for (const entry of recent) {
+    if (listed.has(entry.id)) continue;
+    listed.add(entry.id);
+    extra.push(heads[entry.id] ?? cardOfRecent(entry));
+  }
+  return extra.length === 0 ? [...list] : [...extra, ...list];
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -391,7 +453,7 @@ export const HOME_EMPTY = {
 } as const;
 
 function HomePage() {
-  const { decks, node, prefs: cookiePrefs, recent } = Route.useLoaderData();
+  const { decks, node, prefs: cookiePrefs, recent, now: serverNow } = Route.useLoaderData();
   const router = useRouter();
   const navigate = useNavigate();
   /* the old Template gallery anchor on a full load (docs/PRODUCT.md 4.3): the hash never reaches
@@ -410,8 +472,11 @@ function HomePage() {
   /* this browser's opens: the cookie's row first (the server rendered the same), then the whole
      localStorage record after hydration */
   const [opened, setOpened] = useState<Record<string, string>>(() => openedOf(recent));
-  /* the Recent row: the cookie's entries on the server and at hydration, localStorage's after */
+  /* this browser's decks: the cookie's entries on the server and at hydration, localStorage's
+     after; they are the first cards of the grid until the listing holds them (item 76) */
   const [recentRow, setRecentRow] = useState<ReadonlyArray<RecentEntry>>(recent);
+  /* the store's own card for a deck the listing did not hold, read once per page (item 75) */
+  const [heads, setHeads] = useState<Readonly<Record<string, DeckCard>>>({});
   const [mounted, setMounted] = useState(false);
   /* decks moved to the trash from this page and not yet reloaded: hidden at once, Undo shows them */
   const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
@@ -420,8 +485,9 @@ function HomePage() {
      (docs/FOCUS.md rank 7: the /decks listing lags the store by up to a minute on the blob tier) */
   const [renamed, setRenamed] = useState<Readonly<Record<string, RenamedCard>>>({});
   const [creating, setCreating] = useState(false);
-  /* the ids the store's listing holds once it has landed: the Recent row drops the rest (rank 15) */
-  const [listedIds, setListedIds] = useState<ReadonlySet<string> | null>(null);
+  /* the decks this page has asked the store about, so an unlisted deck costs one read per page */
+  const asked = useRef<Set<string>>(new Set());
+  const [busyDownload, setBusyDownload] = useState<string | null>(null);
 
   useMountEffect(() => {
     /* this browser's history is read after hydration, so the server's HTML and the first client
@@ -463,6 +529,25 @@ function HomePage() {
       });
     }
   });
+
+  /* the editor's Move to trash write refused after it left for this page (docs/POLISH.md item
+     81): the card comes back and the list's snackbar says so */
+  useEffect(() => {
+    const onRefused = (event: Event) => {
+      const detail = (event as CustomEvent<TrashRefusedDetail>).detail;
+      if (detail === undefined) return;
+      setHidden((current) => {
+        const next = new Set(current);
+        next.delete(detail.id);
+        return next;
+      });
+      recordDeckOpened(detail.id);
+      setRecentRow(readRecent());
+      snackbar.show(`Move to trash: ${detail.message}`);
+    };
+    window.addEventListener(TRASH_REFUSED_EVENT, onRefused);
+    return () => window.removeEventListener(TRASH_REFUSED_EVENT, onRefused);
+  }, [snackbar]);
 
   /* a restore the trash page requested moments ago (docs/FOCUS.md rank 7; build/b7.md R9,
      routes/-restoring.ts): while its marker is young and the listing does not hold the deck, the
@@ -529,12 +614,22 @@ function HomePage() {
     window.open(presentPath(card.id), '_blank', 'noopener');
   };
 
-  const download = async (deckId: string) => {
+  /* the card's Download is the PowerPoint file File > Download gives (docs/POLISH.md item 85):
+     the same export.run as the editor's row, the file named after the title, "Saved <name>" when
+     it lands; the bundle stays under the editor's File > Download */
+  const download = async (card: DeckCard) => {
+    if (busyDownload !== null) return;
+    setBusyDownload(card.id);
+    snackbar.show(DOWNLOAD_WORDS.preparing('pptx'));
     try {
-      const { url } = await bundleDownloadTicket({ deckId });
-      triggerDownload(url);
+      const name = fileNameOf(card.title, card.id, 'pptx');
+      const url = await exportPowerPoint(card.id);
+      const saved = await downloadFromPage(url, { name });
+      snackbar.show(DOWNLOAD_WORDS.saved(saved?.name ?? name));
     } catch (error) {
-      snackbar.show(`Download: ${errorMessage(error)}`);
+      snackbar.show(exportRefusal('pptx', error));
+    } finally {
+      setBusyDownload(null);
     }
   };
 
@@ -588,6 +683,10 @@ function HomePage() {
         ...current,
         [card.id]: { title: result.title, revision: result.revision },
       }));
+      /* the mirror reads the new name too (item 76), so the card the mirror draws before the
+         listing catches up, the Open dialog and Import slides all read it */
+      updateDeckFacts(card.id, { title: result.title, revision: result.revision });
+      setRecentRow(readRecent());
       await refresh();
     } catch (error) {
       snackbar.show(`Rename: ${errorMessage(error)}`);
@@ -611,7 +710,35 @@ function HomePage() {
     }
   };
 
-  const now = new Date();
+  /* one clock for the server's HTML and the first client render (item 112), the live one after */
+  const now = mounted ? new Date() : new Date(serverNow);
+  /* a deck this browser opened that the listing does not hold (item 75): the store's own head
+     says whether it exists (its card replaces the mirror's), is in the trash or is gone (the
+     mirror forgets it); asked once per deck and page */
+  const onUnlisted = useCallback((ids: ReadonlyArray<string>) => {
+    for (const id of ids) {
+      if (asked.current.has(id)) continue;
+      asked.current.add(id);
+      void readDeckCard({ deckId: id })
+        .then((card) => {
+          if (card === null) {
+            forgetDeckOpened(id);
+            setRecentRow((current) => current.filter((entry) => entry.id !== id));
+            return;
+          }
+          setHeads((current) => ({ ...current, [id]: card }));
+          updateDeckFacts(id, {
+            title: card.title,
+            revision: card.revision,
+            appearance: card.appearance,
+            firstSlide: card.firstSlide,
+            slides: card.slides,
+          });
+        })
+        .catch(() => undefined);
+    }
+  }, []);
+  const visibleRecent = recentRow.filter((entry) => !hidden.has(entry.id));
   const listProps: ListProps = {
     query,
     settings,
@@ -620,14 +747,17 @@ function HomePage() {
     now,
     hidden,
     renamed,
+    recent: visibleRecent,
+    heads,
+    busyDownload,
     onOpen: open,
     onPresent: present,
-    onDownload: (deckId) => void download(deckId),
+    onDownload: (card) => void download(card),
     onTrash: (card) => void moveToTrash(card),
     onRename: (card, name) => void rename(card, name),
     onCopied: () => void refresh(),
     onError: (message) => snackbar.show(message),
-    onListed: (ids) => setListedIds(new Set(ids)),
+    onUnlisted,
   };
 
   return (
@@ -762,27 +892,11 @@ function HomePage() {
           </div>
         </div>
 
-        {/* this browser's Recent row, whole at first byte (SPEC-4 0.29): the cookie's entries on
-            the server, localStorage's after hydration; the trashed and the searched away leave it */}
-        <RecentRow
-          entries={recentRow.filter(
-            (entry) =>
-              !hidden.has(entry.id) &&
-              (listedIds === null || listedIds.has(entry.id)) &&
-              (query.trim() === '' ||
-                entry.title.toLowerCase().includes(query.trim().toLowerCase())),
-          )}
-          mounted={mounted}
-          now={now}
-          onOpen={(entry) => {
-            recordDeckOpened(entry.id);
-            setOpened((current) => ({ ...current, [entry.id]: new Date().toISOString() }));
-          }}
-        />
-
-        {/* the store's cards stream behind the shell (SPEC-4 0.29): the card grid's frames stand
-            in until they arrive; a refetch keeps the cards on the page */}
-        <Suspense fallback={<GridFrame view={settings.view} />}>
+        {/* the store's cards stream behind the shell (SPEC-4 0.29): this browser's own decks
+            are drawn as the first cards at first byte and the grid's frames stand in for the rest
+            until the listing arrives; a refetch keeps the cards on the page; Back from the editor
+            paints the listing it left (item 89) */}
+        <Suspense fallback={<GridFrame view={settings.view} {...listProps} />}>
           <StoreList promise={decks} {...listProps} />
         </Suspense>
       </section>
@@ -808,109 +922,26 @@ function HomePage() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The Recent row, and the frame while the store list streams (SPEC-4 0.29; PP 3.1 item 3)
+// The frame while the store list streams (SPEC-4 0.29; PP 3.1 item 3)
 
 /** how many card frames fill the first row of the grid at the rail's width */
 const FRAME_COLUMNS = 4;
 
-/** The Recent row's caption (sentence case, no period): this browser's own decks, not the store's. */
-export const RECENT_ROW_LABEL = 'Opened on this device';
-
-/** The sentence under the caption (docs/PRODUCT.md section 2 rank 4): the list is this browser's. */
-export const RECENT_ROW_SENTENCE =
-  'Presentations this browser opened. On another computer, open a presentation from its link';
-
 /**
- * This browser's Recent row (SPEC-4 0.29): one row of the newest decks this browser opened, drawn
- * whole from the record of ./-recent.ts (the cookie on the server, localStorage after hydration),
- * with real links to the editor that preload its loader on viewport entry, so the row is in the
- * server's HTML and clickable before the store answers. The controls are `home.recent.<id>` so a
- * spec that addresses `home.card.<id>` finds the store's card alone. Absent when the browser has
- * opened nothing here.
+ * The card grid's frame while the store listing streams (SPEC-4 0.29): this browser's own decks
+ * as real cards first (the mirror's facts, in the server's HTML and clickable before the store
+ * answers; docs/POLISH.md item 76), then one row of empty card boxes at the card's size, or the
+ * rows' head with empty rows, so the cards arrive into the same height. `aria-busy` names the
+ * wait. The recent cards keep their ids and their order in the listed grid, so the swap is in
+ * place.
  */
-function RecentRow({
-  entries,
-  mounted,
-  now,
-  onOpen,
-}: {
-  entries: ReadonlyArray<RecentEntry>;
-  mounted: boolean;
-  now: Date;
-  onOpen: (entry: RecentEntry) => void;
-}) {
-  const row = entries.slice(0, RECENT_ROW_CARDS);
-  if (row.length === 0) return null;
-  return (
-    <div className="ts-recent-row" data-control="home.recent">
-      <h3 className="ts-recent-row-title">{RECENT_ROW_LABEL}</h3>
-      <p className="ts-recent-row-sentence" data-control="home.recent.sentence">
-        {RECENT_ROW_SENTENCE}
-      </p>
-      <ul className="ts-cards ts-cards-recent" aria-label={RECENT_ROW_LABEL}>
-        {row.map((entry, index) => (
-          <RecentCard
-            key={entry.id}
-            entry={entry}
-            index={index}
-            mounted={mounted}
-            now={now}
-            onOpen={() => onOpen(entry)}
-          />
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-/** One card of the Recent row: the record's facts, the thumbnail URL the store's card would carry. */
-function RecentCard({
-  entry,
-  index,
-  mounted,
-  now,
-  onOpen,
-}: {
-  entry: RecentEntry;
-  index: number;
-  mounted: boolean;
-  now: Date;
-  onOpen: () => void;
-}) {
-  return (
-    <li
-      className="ts-hm-card ts-hm-card-recent"
-      data-deck={entry.id}
-      data-control={`home.recent.${entry.id}`}
-    >
-      <Link
-        to="/edit/$deckId"
-        params={{ deckId: entry.id }}
-        preload={index < VIEWPORT_PRELOAD_CARDS ? 'viewport' : 'intent'}
-        className="ts-hm-card-open"
-        data-control={`home.recent.open.${entry.id}`}
-        onClick={onOpen}
-        {...tipProps({ name: entry.title, doc: 'Opens the presentation.' })}
-      >
-        <Thumb card={entry} eager />
-      </Link>
-      <div className="ts-hm-card-body">
-        <span className="ts-hm-card-title">{entry.title}</span>
-        <span className="ts-hm-card-when" suppressHydrationWarning>
-          {HOME.opened(mounted ? timeAgo(entry.at, now) : entry.at.slice(0, 10))}
-        </span>
-      </div>
-    </li>
-  );
-}
-
-/**
- * The card grid's frame while the store listing streams (SPEC-4 0.29): one row of empty card
- * boxes at the card's size, or the rows' head with empty rows, so the cards arrive into the same
- * height. `aria-busy` names the wait.
- */
-function GridFrame({ view }: { view: HomeView }) {
+function GridFrame({ view, ...props }: ListProps & { view: HomeView }) {
   const blanks = Array.from({ length: FRAME_COLUMNS }, (_, i) => i);
+  const recentCards = foldRecent([], props.recent, props.heads).filter(
+    (card) =>
+      props.query.trim() === '' ||
+      card.title.toLowerCase().includes(props.query.trim().toLowerCase()),
+  );
   if (view === 'list') {
     return (
       <table
@@ -930,6 +961,22 @@ function GridFrame({ view }: { view: HomeView }) {
           </tr>
         </thead>
         <tbody>
+          {recentCards.map((card, index) => (
+            <DeckRowView
+              key={card.id}
+              card={card}
+              index={index}
+              mounted={props.mounted}
+              now={props.now}
+              openedAt={props.opened[card.id]}
+              renaming={false}
+              menuOpen={false}
+              onOpen={() => props.onOpen(card)}
+              onMenu={() => undefined}
+              onRename={() => undefined}
+              onCancelRename={() => undefined}
+            />
+          ))}
           {blanks.map((i) => (
             <tr key={`frame-${i}`} className="ts-row ts-row-frame" aria-hidden="true">
               <td className="ts-row-title">
@@ -951,6 +998,22 @@ function GridFrame({ view }: { view: HomeView }) {
       aria-busy="true"
       aria-label={`${HOME.recent}, loading`}
     >
+      {recentCards.map((card, index) => (
+        <DeckCardView
+          key={card.id}
+          card={card}
+          index={index}
+          mounted={props.mounted}
+          now={props.now}
+          openedAt={props.opened[card.id]}
+          renaming={false}
+          menuOpen={false}
+          onOpen={() => props.onOpen(card)}
+          onMenu={() => undefined}
+          onRename={() => undefined}
+          onCancelRename={() => undefined}
+        />
+      ))}
       {blanks.map((i) => (
         <li key={`frame-${i}`} className="ts-hm-card ts-hm-card-frame" aria-hidden="true">
           <span className="ts-hm-card-thumb" />
@@ -995,8 +1058,53 @@ export function useStreamedList<T>(promise: Promise<T>): T {
   return value;
 }
 
+/**
+ * The last listing this browser drew, kept in the module (docs/POLISH.md item 89): Back from the
+ * editor mounts the page again with a new loader promise, and without this the grid would show
+ * its frames until the store answered; with it the cards paint at once and the new listing
+ * replaces them when it lands. Never read on the server, where the module is shared by every
+ * request.
+ */
+let lastListing: DeckCard[] | null = null;
+
+function rememberListing(list: ReadonlyArray<DeckCard>): void {
+  if (typeof window !== 'undefined') lastListing = [...list];
+}
+
 function StoreList({ promise, ...props }: ListProps & { promise: Promise<DeckCard[]> }) {
+  const kept = typeof window === 'undefined' ? null : lastListing;
+  return kept === null ? (
+    <StreamedStoreList promise={promise} {...props} />
+  ) : (
+    <KeptStoreList promise={promise} kept={kept} {...props} />
+  );
+}
+
+function StreamedStoreList({ promise, ...props }: ListProps & { promise: Promise<DeckCard[]> }) {
   const list = useStreamedList(promise);
+  useEffect(() => rememberListing(list), [list]);
+  return <DeckList list={list} {...props} />;
+}
+
+function KeptStoreList({
+  promise,
+  kept,
+  ...props
+}: ListProps & { promise: Promise<DeckCard[]>; kept: DeckCard[] }) {
+  const [list, setList] = useState<DeckCard[]>(kept);
+  useEffect(() => {
+    let alive = true;
+    promise
+      .then((next) => {
+        if (!alive) return;
+        rememberListing(next);
+        setList(next);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [promise]);
   return <DeckList list={list} {...props} />;
 }
 
@@ -1025,15 +1133,21 @@ type ListProps = {
   hidden: ReadonlySet<string>;
   /** the renames the store answered, applied over the listing until it catches up (rank 7) */
   renamed: Readonly<Record<string, RenamedCard>>;
+  /** this browser's decks, folded into the grid as its first cards (items 75 and 76) */
+  recent: ReadonlyArray<RecentEntry>;
+  /** the store's own card for an unlisted deck the page asked about (item 75) */
+  heads: Readonly<Record<string, DeckCard>>;
+  /** the card whose PowerPoint file is being made (item 85) */
+  busyDownload: string | null;
   onOpen: (card: DeckCard, newTab?: boolean) => void;
   onPresent: (card: DeckCard) => void;
-  onDownload: (deckId: string) => void;
+  onDownload: (card: DeckCard) => void;
   onTrash: (card: DeckCard) => void;
   onRename: (card: DeckCard, name: string) => void;
   onCopied: (deckId: string) => void;
   onError: (message: string) => void;
-  /** the ids the listing holds, each time it lands: the Recent row drops the rest (rank 15) */
-  onListed?: (ids: ReadonlyArray<string>) => void;
+  /** the decks of this browser the listing does not hold, each time it lands (item 75) */
+  onUnlisted?: (ids: ReadonlyArray<string>) => void;
 };
 
 function DeckList({
@@ -1045,6 +1159,9 @@ function DeckList({
   now,
   hidden,
   renamed,
+  recent,
+  heads,
+  busyDownload,
   onOpen,
   onPresent,
   onDownload,
@@ -1052,15 +1169,23 @@ function DeckList({
   onRename,
   onCopied,
   onError,
-  onListed,
+  onUnlisted,
 }: ListProps & { list: ReadonlyArray<DeckCard> }) {
-  const list = useMemo(() => applyRenames(listed, renamed), [listed, renamed]);
+  const list = useMemo(
+    () => foldRecent(applyRenames(listed, renamed), recent, heads),
+    [listed, renamed, recent, heads],
+  );
+  /* the decks of this browser the listing does not hold, once the listing has landed */
   const listedKey = listed.map((card) => card.id).join('|');
-  const onListedRef = useRef(onListed);
-  onListedRef.current = onListed;
+  const unlistedKey = recent
+    .filter((entry) => !listed.some((card) => card.id === entry.id))
+    .map((entry) => entry.id)
+    .join('|');
+  const onUnlistedRef = useRef(onUnlisted);
+  onUnlistedRef.current = onUnlisted;
   useEffect(() => {
-    onListedRef.current?.(listedKey === '' ? [] : listedKey.split('|'));
-  }, [listedKey]);
+    if (unlistedKey !== '') onUnlistedRef.current?.(unlistedKey.split('|'));
+  }, [listedKey, unlistedKey]);
   const [menu, setMenu] = useState<CardMenuState | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [copying, setCopying] = useState<DeckCard | null>(null);
@@ -1100,7 +1225,7 @@ function DeckList({
         setCopying(card);
         return;
       case 'home.card.download':
-        onDownload(card.id);
+        onDownload(card);
         return;
       case 'home.card.trash':
         onTrash(card);
@@ -1159,6 +1284,7 @@ function DeckList({
               openedAt={opened[card.id]}
               renaming={renaming === card.id}
               menuOpen={menu?.deckId === card.id}
+              busy={busyDownload === card.id}
               onOpen={() => onOpen(card)}
               onMenu={(anchor) => setMenu({ deckId: card.id, anchor })}
               onRename={(name) => rename(card, name)}
@@ -1186,8 +1312,10 @@ function DeckList({
                 index={index}
                 mounted={mounted}
                 now={now}
+                openedAt={opened[card.id]}
                 renaming={renaming === card.id}
                 menuOpen={menu?.deckId === card.id}
+                busy={busyDownload === card.id}
                 onOpen={() => onOpen(card)}
                 onMenu={(anchor) => setMenu({ deckId: card.id, anchor })}
                 onRename={(name) => rename(card, name)}
@@ -1241,6 +1369,8 @@ type CardViewProps = {
   openedAt?: string;
   renaming: boolean;
   menuOpen: boolean;
+  /** the card's PowerPoint file is being made (item 85) */
+  busy?: boolean;
   onOpen: () => void;
   onMenu: (anchor: HTMLElement) => void;
   onRename: (name: string) => void;
@@ -1303,8 +1433,12 @@ function RenameField({
   const [value, setValue] = useState(card.title);
   const field = useRef<HTMLInputElement>(null);
   useMountEffect(() => {
-    field.current?.focus();
-    field.current?.select();
+    const el = field.current;
+    if (!el) return;
+    el.focus();
+    el.select();
+    /* the whole title selected scrolls the field to its end; the seller reads the start (item 97) */
+    el.scrollLeft = 0;
   });
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -1353,6 +1487,10 @@ export function Thumb({
 }) {
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  /* a card that entered the viewport after its retries stopped asks once more (item 90) */
+  const askedInView = useRef(false);
+  const box = useRef<HTMLSpanElement>(null);
   const base = cardThumbUrl(card);
   const url = base === null ? null : attempt === 0 ? base : `${base}&retry=${attempt}`;
   useEffect(() => {
@@ -1365,14 +1503,35 @@ export function Thumb({
     }, wait);
     return () => window.clearTimeout(timer);
   }, [failed, attempt]);
+  useEffect(() => {
+    const el = box.current;
+    if (!failed || el === null || askedInView.current || typeof IntersectionObserver === 'undefined')
+      return undefined;
+    if (THUMB_RETRY_MS[attempt] !== undefined) return undefined;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      askedInView.current = true;
+      observer.disconnect();
+      setFailed(false);
+      setAttempt((n) => n + 1);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [failed, attempt]);
+  const capture = url !== null && !failed;
   return (
     <span
+      ref={box}
       className="ts-hm-card-thumb"
       data-theme={card.appearance}
-      data-thumb={url !== null && !failed ? 'capture' : 'plate'}
+      data-thumb={capture ? 'capture' : 'plate'}
+      data-loaded={capture && loaded ? '' : undefined}
       aria-hidden="true"
     >
-      {url !== null && !failed ? (
+      {/* the title plate stands under the capture from the first paint (item 90): a card is never
+          a grey box while its picture loads or after its retries stop */}
+      <span className="ts-hm-card-plate">{card.title}</span>
+      {capture ? (
         <img
           key={url}
           src={url}
@@ -1381,11 +1540,13 @@ export function Thumb({
           alt=""
           loading={eager ? 'eager' : 'lazy'}
           decoding="async"
-          onError={() => setFailed(true)}
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            setLoaded(false);
+            setFailed(true);
+          }}
         />
-      ) : (
-        <span className="ts-hm-card-plate">{card.title}</span>
-      )}
+      ) : null}
     </span>
   );
 }
@@ -1398,13 +1559,19 @@ function DeckCardView({
   openedAt,
   renaming,
   menuOpen,
+  busy = false,
   onOpen,
   onMenu,
   onRename,
   onCancelRename,
 }: CardViewProps) {
   return (
-    <li className="ts-hm-card" data-deck={card.id} data-control={`home.card.${card.id}`}>
+    <li
+      className={renaming ? 'ts-hm-card is-renaming' : 'ts-hm-card'}
+      data-deck={card.id}
+      data-control={`home.card.${card.id}`}
+      data-busy={busy ? '' : undefined}
+    >
       <Link
         to="/edit/$deckId"
         params={{ deckId: card.id }}
@@ -1435,13 +1602,15 @@ function DeckCardView({
               onOpen();
             }}
           >
-            {card.title}
+            <span className="ts-hm-card-title-text">{card.title}</span>
           </Link>
         )}
-        <span className="ts-hm-card-when" suppressHydrationWarning>
-          {whenLine(card, mounted, now, openedAt)}
-        </span>
-        <MoreButton card={card} open={menuOpen} onMenu={onMenu} />
+        {renaming ? null : (
+          <span className="ts-hm-card-when" suppressHydrationWarning>
+            {busy ? DOWNLOAD_WORDS.preparing('pptx') : whenLine(card, mounted, now, openedAt)}
+          </span>
+        )}
+        {renaming ? null : <MoreButton card={card} open={menuOpen} onMenu={onMenu} />}
       </div>
     </li>
   );
@@ -1452,15 +1621,22 @@ function DeckRowView({
   index,
   mounted,
   now,
+  openedAt,
   renaming,
   menuOpen,
+  busy = false,
   onOpen,
   onMenu,
   onRename,
   onCancelRename,
-}: Omit<CardViewProps, 'openedAt'>) {
+}: CardViewProps) {
   return (
-    <tr className="ts-row" data-deck={card.id} data-control={`home.card.${card.id}`}>
+    <tr
+      className="ts-row"
+      data-deck={card.id}
+      data-control={`home.card.${card.id}`}
+      data-busy={busy ? '' : undefined}
+    >
       <td className="ts-row-title">
         {renaming ? (
           <RenameField card={card} onRename={onRename} onCancel={onCancelRename} />
@@ -1478,12 +1654,16 @@ function DeckRowView({
             }}
           >
             <Icon name="deck" />
-            <span>{card.title}</span>
+            <span className="ts-hm-card-title-text">{card.title}</span>
           </Link>
         )}
       </td>
       <td className="ts-row-when" suppressHydrationWarning>
-        {mounted ? shortDate(card.updatedAt, now) : card.updatedAt.slice(0, 10)}
+        {openedAt !== undefined
+          ? HOME.opened(timeAgo(openedAt, now))
+          : mounted
+            ? shortDate(card.updatedAt, now)
+            : card.updatedAt.slice(0, 10)}
       </td>
       <td className="ts-row-count">{card.slides}</td>
       <td className="ts-row-more">
@@ -1491,6 +1671,56 @@ function DeckRowView({
       </td>
     </tr>
   );
+}
+
+// ---------------------------------------------------------------------------------------------
+// The card's Download (docs/POLISH.md item 85): the PowerPoint file of the whole deck
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * The stored address of a PowerPoint file of the deck: `export.run` with the Perfect mode in the
+ * deck's own appearance, through the same server functions the editor's row and the print route
+ * use (a sync export on a deployment, a job on a checkout). The address answers the file as an
+ * attachment; `downloadFromPage` saves it under the title.
+ */
+async function exportPowerPoint(deckId: string): Promise<string> {
+  const input = { format: 'pptx' as const, mode: 'flatten' as const, verify: false };
+  const caps = await exportCapabilities();
+  if (caps.sync) {
+    const answer = await syncExport({ deckId, input });
+    const file = answer.files.find((each) => each.name.endsWith('.pptx'));
+    if (file?.url === undefined || file.url === null) throw new Error('no PowerPoint file');
+    return downloadAddress(file.url);
+  }
+  const job = await startExport({ deckId, input });
+  for (;;) {
+    const poll = await pollExport({ jobId: job.jobId });
+    if (poll.status === 'failed') throw new Error(poll.error ?? 'the export failed');
+    if (poll.status === 'done') {
+      const file = poll.downloads?.find((each) => each.name.endsWith('.pptx'));
+      if (file === undefined) throw new Error('no PowerPoint file');
+      return downloadAddress(file.url);
+    }
+    await sleep(EXPORT_POLL_MS);
+  }
+}
+
+/** A stored copy is asked for as an attachment (Vercel Blob honours `download=1`); a route of ours already is one. */
+function downloadAddress(url: string): string {
+  if (url.startsWith('/')) return url;
+  return `${url}${url.includes('?') ? '&' : '?'}download=1`;
+}
+
+/**
+ * The one sentence a refused export shows (docs/POLISH.md item 82): the store's and the worker's
+ * words never reach the seller; the format is named and the advice is to try again.
+ */
+export function exportRefusal(format: 'pptx' | 'pdf', error: unknown): string {
+  console.error(`turboslide download: the ${format} export was refused`, error);
+  return DOWNLOAD_WORDS.notMade(format);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1509,6 +1739,7 @@ function CopyDialog({
 }) {
   const [name, setName] = useState(`Copy of ${card.title}`);
   const [removeNotes, setRemoveNotes] = useState(false);
+  const [copyComments, setCopyComments] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
@@ -1524,12 +1755,14 @@ function CopyDialog({
         deckId: card.id,
         name: name.trim(),
         removeNotes,
+        ...(copyComments ? { copyComments: true } : {}),
       });
       recordDeckOpened(copy.deckId, {
         title: name.trim(),
         appearance: card.appearance,
         firstSlide: card.firstSlide,
         revision: 0,
+        slides: card.slides,
       });
       if (tab !== null) tab.location.href = editPath(copy.deckId);
       else window.location.assign(editPath(copy.deckId));
@@ -1580,6 +1813,13 @@ function CopyDialog({
         onChange={setRemoveNotes}
         control="home.copy.remove-notes"
         doc="The copy carries no speaker notes"
+      />
+      <DialogCheck
+        label={DIALOGS.makeCopy.copyComments}
+        checked={copyComments}
+        onChange={setCopyComments}
+        control="home.copy.copy-comments"
+        doc="The comment threads travel with the copy"
       />
     </Dialog>
   );

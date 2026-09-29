@@ -163,6 +163,27 @@
   color: var(--pt-titanium);
 }
 
+/* the Last edit words beside the clock (docs/POLISH.md item 92), hidden under 1280 px */
+.ts-title-clock-words {
+  color: var(--pt-titanium);
+  font-size: 12.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+  padding-right: 6px;
+}
+
+.ts-title-clock-words:empty {
+  display: none;
+}
+
+@media (max-width: 1279px) {
+  .ts-title-clock-words {
+    display: none;
+  }
+}
+
 .ts-title-comments,
 .ts-title-panel {
   color: var(--pt-titanium);

@@ -143,7 +143,8 @@ describe('the one click downloads (product round)', () => {
     expect(id).toBe('export.run');
     expect(input.format).toBe('pdf');
     expect(input).not.toHaveProperty('includeNotes');
-    expect(say.mock.calls[0]?.[0]).toMatch(/^Preparing your PDF, about/);
+    /* no estimate (docs/POLISH.md item 87) */
+    expect(say.mock.calls[0]?.[0]).toBe('Preparing your PDF');
     await act(async () => {
       await Promise.resolve();
       await Promise.resolve();

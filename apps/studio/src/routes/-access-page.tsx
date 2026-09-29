@@ -9,6 +9,8 @@ import { YouNeedAccess } from '@turboslide/chrome/YouNeedAccess';
 import { useMountEffect } from '../components/useMountEffect';
 import { RouterLinkSlot } from './-link-slot';
 
+import './-access-page.css';
+
 /**
  * The You need access page as the `notFoundComponent` of the deck, edit and present routes
  * (gslides-parity SPEC-3 6.5, 6.8, 9.3; VERIFICATION-3 finding 53; the round four orchestrator's
@@ -73,18 +75,21 @@ export function AccessPage({ deckId }: { deckId: string }) {
       requestForm={requestForm ?? true}
       linkComponent={RouterLinkSlot}
       signIn={
+        /* one sentence with the link in ink (docs/POLISH.md item 98; audit-pages item 35) */
         <p className="ts-access-signin-line" data-control="access.signin.line">
+          If you were invited by email, sign in with that address from{' '}
           <Link
             to="/decks"
             data-control="access.signin.decks"
+            style={{ color: 'var(--pt-ink)' }}
             {...tipProps({
               name: 'Your presentations',
               doc: 'Sign in from the account chip on your presentations, then open the link again',
             })}
           >
-            Sign in from your presentations
+            your presentations
           </Link>
-          , then open this address again.
+          , then open this address again
         </p>
       }
     />

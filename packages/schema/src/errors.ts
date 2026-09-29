@@ -70,8 +70,11 @@ export class GoneError extends Error {
   }
 }
 
-/** The HTTP status an error class maps to on the agent transport. */
+/** The HTTP status an error class maps to on the agent transport; a numeric `status` the error carries wins (docs/POLISH.md item 120: the assistant's 503 answered 500). */
 export function errorStatus(error: unknown): number {
+  const carried = (error as { status?: unknown } | null)?.status;
+  if (typeof carried === 'number' && Number.isInteger(carried) && carried >= 400 && carried < 600)
+    return carried;
   if (error instanceof ConflictError) return 409;
   if (error instanceof NotImplementedError) return 501;
   if (error instanceof ForbiddenError) return 403;

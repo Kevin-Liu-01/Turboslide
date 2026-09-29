@@ -275,6 +275,9 @@ export async function shareGet(deps: AccessDeps): Promise<{
   return { record, role: mine.role, via: mine.via, capabilities };
 }
 
+/** The label of the general access link (packages/store/src/access-store.ts GENERAL_LINK_LABEL). */
+const GENERAL_LABEL = 'Anyone with the link';
+
 export async function shareSetGeneralAccess(
   deps: AccessDeps,
   input: { mode: 'restricted' | 'link'; role?: GrantRole; baseRevision: number },
@@ -286,11 +289,25 @@ export async function shareSetGeneralAccess(
       require(next, deps.caller, now, 'share', 'share.setGeneralAccess');
       const role = input.role ?? 'viewer';
       if (input.mode === 'restricted') {
+        // Restricted means no link opens the presentation (docs/POLISH.md item 96; Google's
+        // Restricted): every live link is revoked with the mode, the people's grants stay
         next.generalAccess = { mode: 'restricted', role };
+        for (const existing of next.links) if (linkIsLive(existing, now)) existing.revokedAt = now;
         return { url: undefined as string | undefined, token: undefined as string | undefined };
       }
       next.generalAccess = { mode: 'link', role };
-      // the general access link: one live link per role mode, minted once and rotated by share.stop
+      // the general access link: one live link, minted once; a later call with a role alone
+      // rewrites the live link's role and keeps its token, so the address a seller already sent
+      // keeps opening (the polish round, docs/POLISH.md item 79: picking Commenter then Editor
+      // minted a new address and the one already sent answered 404); rotation stays the Rotate
+      // row's job (share.rotateLink) and share.stop revokes
+      const live = next.links.find(
+        (existing) => existing.label === GENERAL_LABEL && linkIsLive(existing, now),
+      );
+      if (live !== undefined) {
+        live.role = role;
+        return { url: undefined as string | undefined, token: undefined as string | undefined };
+      }
       const token = shareToken();
       const link: ShareLink = {
         id: recordId('lnk'),
@@ -300,13 +317,9 @@ export async function shareSetGeneralAccess(
         createdBy: deps.caller.principalId,
         revokedAt: null,
         expiresAt: null,
-        label: 'Anyone with the link',
+        label: GENERAL_LABEL,
         useCount: 0,
       };
-      for (const existing of next.links) {
-        if (existing.label === 'Anyone with the link' && existing.revokedAt === null)
-          existing.revokedAt = now;
-      }
       next.links.push(link);
       return { url: shareUrl(deps, token), token };
     },

@@ -310,12 +310,11 @@ export async function recordNewDeck(
   const owner = creatorOf(ctx);
   if (owner === null) return null;
   const now = options.now ?? new Date().toISOString();
-  /* the deployment's default general access (docs/PRODUCT.md section 1, question 10; build/b7.md
-     R1): a deck an anonymous principal creates starts as Anyone with the link, Editor, with the
-     general link minted in the record (the word is `link`; `open` is the dialog's legacy row,
-     pass 1 finding 1), so Copy link is the co edit path in one click; a signed in account's deck
-     stays restricted. The minted link's token rides the answer once (b7.md FR1), so the page that
-     created the deck can hold the address in the Share dialog's field; the record keeps the hash */
+  /* the deployment's default general access (the polish round, docs/POLISH.md item 78): every
+     new deck starts Restricted with Viewer for the link, as Google's does; the product round's
+     Anyone with the link, Editor for an anonymous creator (docs/PRODUCT.md question 10; build/b7.md
+     R1) is gone. `newHostedDeckRecordWithToken` keeps its shape: were a deployment to start a
+     deck under a link again, the minted token would ride the answer once (b7.md FR1) */
   const { record, general } = newHostedDeckRecordWithToken(
     deckId,
     owner,

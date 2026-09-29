@@ -14,7 +14,8 @@ import { anchorAtSelection, canvasOrder, stepThread } from './comments/comments-
 import { CommentsPanel } from './comments/CommentsPanel';
 import { NamePromptDialog } from './dialogs/NamePrompt';
 import { WordArtBar } from './dialogs/WordArtBar';
-import { downloadFromPage } from './download';
+import { DOWNLOAD_WORDS, downloadFromPage, fileNameOf } from './download';
+import { isValidatorRefusal, validatorSentence } from './error-text';
 import {
   APPEARANCE_STORAGE,
   DEFAULT_SETTINGS,
@@ -80,6 +81,7 @@ import type { MenuId, MenuItem, MenuSetting, Platform } from './menus/model';
 import { CANVAS_NOTICES, PANELS, REFUSALS, SNACKBARS } from './menus/strings';
 import type { TailControl } from './menus/toolbar-tails';
 import { Palette } from './Palette';
+import type { PaletteGroupId } from './palette-data';
 import { Panel } from './Panel';
 import { AssistPanel } from './panels/Assist';
 import { ColorPlate } from './pickers/ColorPlate';
@@ -285,9 +287,11 @@ function store(key: string, value: string): void {
 function readAppearance(): 'light' | 'dark' | 'match' {
   const saved = load(APPEARANCE_STORAGE);
   if (saved === 'light' || saved === 'dark' || saved === 'match') return saved;
-  /* nothing chosen: a stored gt-theme is the reader's (or a test's) explicit choice, else match */
+  /* nothing chosen: a stored gt-theme is the reader's (or a test's) explicit choice, else light
+     (B4's R18, docs/POLISH.md item 49: with Match the Brand kit's Dark tile turned the chrome
+     dark along with the slides, where Google's theme changes the slides alone) */
   const theme = load('gt-theme');
-  return theme === 'light' || theme === 'dark' ? theme : 'match';
+  return theme === 'light' || theme === 'dark' ? theme : 'light';
 }
 
 /** The sessionStorage key the home page reads for the editor's Move to trash (-recent.ts TRASHED_KEY). */
@@ -333,9 +337,27 @@ const TEXT_LINK_TYPES: ReadonlySet<string> = new Set([
   'table',
 ]);
 
+/** The snackbar's text for a refused write (docs/POLISH.md item 59; error-text.ts): a sentence, never a pointer. */
 function errorText(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+  const message = error instanceof Error ? error.message : String(error);
+  if (isValidatorRefusal(message)) {
+    console.warn('turboslide: a write was refused by the validator', message);
+    return validatorSentence(message);
+  }
+  return message;
 }
+
+/** The picture kind a render.slide input asks for: `jpg` or `png` (File > Download > JPEG image, PNG image). */
+function pictureKindOf(input: { format?: string }): 'jpg' | 'png' {
+  return input.format === 'jpg' ? 'jpg' : 'png';
+}
+
+/**
+ * The window event Move to trash raises when the trash write is refused after the page has left
+ * for /decks (docs/POLISH.md item 81); the home page shows the sentence and keeps the card
+ * (apps/studio/src/routes/-recent.ts TRASH_REFUSED_EVENT spells the same name).
+ */
+const TRASH_REFUSED_EVENT = 'turboslide:trash-refused';
 
 export function EditorShell({
   input,
@@ -371,6 +393,9 @@ export function EditorShell({
   /* the phrase Search the menus hands the Assist panel ("Ask the assistant: <phrase>", docs/PRODUCT.md 6.1) */
   const [assistPrompt, setAssistPrompt] = useState<string | undefined>(undefined);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  /* the groups the palette opens with: every group, or the actions section alone from Tools >
+     Run an action (B1's R19) */
+  const [paletteGroups, setPaletteGroups] = useState<ReadonlyArray<PaletteGroupId> | null>(null);
   const [wordArtOpen, setWordArtOpen] = useState(false);
   const [anchoredPicker, setAnchoredPicker] = useState<AnchoredPicker | null>(null);
   const [lastLayout, setLastLayout] = useState<LayoutId | null>(null);
@@ -469,14 +494,14 @@ export function EditorShell({
      when no choice of this menu is stored, so a chrome that matched the deck once and reloaded
      came back pinned to that theme and stopped following the deck (the light appearance rows read
      the dark selection colour on a light deck after a reload: return/build/b4.md request 4,
-     `arrange.selection-colour.light`). With nothing chosen and no gt-theme set before the mount,
+     `arrange.selection-color.light`). With nothing chosen and no gt-theme set before the mount,
      the choice is recorded as `match`; a gt-theme a reader or a test stored before the page opened
      keeps its meaning */
   useEffect(() => {
     if (load(APPEARANCE_STORAGE) !== null) return;
     const stored = load('gt-theme');
     if (stored === 'light' || stored === 'dark') return;
-    store(APPEARANCE_STORAGE, 'match');
+    store(APPEARANCE_STORAGE, 'light');
   }, []);
 
   /* the deck's appearance changed while the chrome matches it */
@@ -694,20 +719,32 @@ export function EditorShell({
         for (const input of inputs) result = await current.dispatch(plan.action, input);
         return result;
       };
+      if (plan.action === 'deck.trash') {
+        /* Move to trash leaves at once (docs/POLISH.md item 81): the marker /decks reads on
+           landing is written and the page navigates before the write answers (the blob tier
+           took 12 s to answer it, and the editor stood for those seconds); the trash stamp lands
+           behind the page, and a refusal reaches the list as its snackbar through the window
+           event the home page listens for (routes/-recent.ts TRASH_REFUSED_EVENT) */
+        writeTrashedMarker(current);
+        navigate('/decks');
+        dispatchAll().catch((error: unknown) => {
+          window.dispatchEvent(
+            new CustomEvent(TRASH_REFUSED_EVENT, {
+              detail: { id: current.deckId, message: errorText(error) },
+            }),
+          );
+        });
+        return;
+      }
+      /* the picture's progress reads at once (item 87): a JPEG or PNG took 5 to 14 s with
+         nothing on screen */
+      if (plan.action === 'render.slide')
+        say(DOWNLOAD_WORDS.preparing(pictureKindOf(plan.input as { format?: string })));
       dispatchAll()
         .then(async (result) => {
           if (plan.action === 'view.zoom') {
             const zoom = (plan.input as { zoom: number | 'fit' }).zoom;
             setSetting('zoom', zoom === 'fit' ? 'fit' : String(Math.round(zoom * 100)));
-          }
-          if (plan.action === 'deck.trash') {
-            /* the marker /decks reads on landing (docs/PRODUCT.md section 2 ranks 15 and 16;
-               apps/studio/src/routes/-recent.ts takeTrashedMarker): the home page drops the deck
-               from its Opened on this device row and shows Moved to trash with Undo there, since
-               this page leaves before its own snackbar can be read */
-            writeTrashedMarker(current);
-            navigate('/decks');
-            return;
           }
           if (plan.action === 'export.text') {
             const text = (result as { text?: string }).text ?? '';
@@ -715,9 +752,12 @@ export function EditorShell({
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${current.deckId}.txt`;
+            /* one name rule for every file: the title (item 86) */
+            const name = fileNameOf(current.document.deck.title, current.deckId, 'txt');
+            a.download = name;
             a.click();
             setTimeout(() => URL.revokeObjectURL(url), 1000);
+            say(DOWNLOAD_WORDS.saved(name));
             return;
           }
           if (plan.action === 'render.slide') {
@@ -737,24 +777,49 @@ export function EditorShell({
                 first.startsWith('/') ||
                 (typeof window !== 'undefined' && first.startsWith(window.location.origin));
               if (sameOrigin) {
-                const format = (plan.input as { format?: string }).format ?? 'png';
-                await downloadFromPage(first, { name: `${current.deckId}.${format}` });
+                const kind = pictureKindOf(plan.input as { format?: string });
+                const name = fileNameOf(current.document.deck.title, current.deckId, kind);
+                const saved = await downloadFromPage(first, { name });
+                say(DOWNLOAD_WORDS.saved(saved?.name ?? name));
               } else window.open(first, '_blank', 'noopener');
             } else say(`Rendered ${images.length} image${images.length === 1 ? '' : 's'}`);
             return;
           }
           if (plan.action === 'deck.pack') {
-            const path = (result as { path?: string }).path;
-            say(path === undefined ? 'The bundle is ready' : `The bundle is at ${path}`);
+            /* one snackbar for every download (item 86): the controller saved the bundle under
+               the title's name and answers it */
+            const name =
+              (result as { name?: string }).name ??
+              fileNameOf(current.document.deck.title, current.deckId, 'zip');
+            say(DOWNLOAD_WORDS.saved(name));
             return;
           }
           if (plan.action === 'build.run') {
-            say('The web page is ready');
+            const name =
+              (result as { name?: string }).name ??
+              fileNameOf(current.document.deck.title, current.deckId, 'html');
+            say(DOWNLOAD_WORDS.saved(name));
             return;
           }
           if (plan.snackbar !== undefined) say(plan.snackbar, undoAction);
         })
-        .catch((error: unknown) => say(errorText(error)));
+        .catch((error: unknown) => {
+          /* a refused download is one sentence (item 82): the cause stays in the console */
+          if (plan.action === 'render.slide' || plan.action === 'deck.pack' || plan.action === 'build.run') {
+            console.error(`turboslide download: ${plan.action} was refused`, error);
+            say(
+              DOWNLOAD_WORDS.notMade(
+                plan.action === 'render.slide'
+                  ? pictureKindOf(plan.input as { format?: string })
+                  : plan.action === 'deck.pack'
+                    ? 'zip'
+                    : 'html',
+              ),
+            );
+            return;
+          }
+          say(errorText(error));
+        });
     },
     [facts, navigate, openDialog, runBuilt, say, setSetting],
   );
@@ -956,6 +1021,8 @@ export function EditorShell({
           setToolFinderOpen(true);
           return;
         case 'runAction':
+          /* Tools > Run an action opens the palette at its actions section (B1's R19, item 120) */
+          setPaletteGroups(['actions']);
           setPaletteOpen(true);
           return;
         /* round two (SPEC-2 4.1) */
@@ -967,14 +1034,26 @@ export function EditorShell({
           setWordArtOpen(true);
           return;
         case 'borderColorPicker':
-        case 'borderWeightPicker':
-          if (anchor)
+        case 'borderWeightPicker': {
+          /* from the Format menu the row carries no anchor: the list opens on the toolbar's
+             own button (B1's R15, docs/POLISH.md item 69) */
+          const at =
+            anchor ??
+            (typeof document === 'undefined'
+              ? null
+              : document.querySelector<HTMLElement>(
+                  handler === 'borderColorPicker'
+                    ? '[data-control="toolbar.borderColor"]'
+                    : '[data-control="toolbar.borderWeight"]',
+                ));
+          if (at)
             setAnchoredPicker({
               kind: handler === 'borderColorPicker' ? 'color' : 'weight',
-              anchor,
+              anchor: at,
             });
-          else say(`${item.label} opens from the Format menu or the toolbar`);
+          else say(`${item.label} opens from the toolbar`);
           return;
+        }
         case 'selectNone':
           current.editor?.selectNone?.();
           current.onSelectBlock?.(undefined);
@@ -1921,6 +2000,7 @@ export function EditorShell({
                 setMakeCopySelected(false);
                 openDialog('makeCopy');
               }}
+              onNameCurrent={() => openDialog('nameVersion')}
             />
           </Panel>
         );
@@ -2383,7 +2463,11 @@ export function EditorShell({
         open={paletteOpen}
         entries={input.paletteEntries ?? []}
         dispatch={input.dispatch}
-        onClose={() => setPaletteOpen(false)}
+        {...(paletteGroups === null ? {} : { groups: paletteGroups })}
+        onClose={() => {
+          setPaletteOpen(false);
+          setPaletteGroups(null);
+        }}
         onNotice={say}
       />
       <Snackbar message={snackbar.message} onDismiss={snackbar.dismiss} />

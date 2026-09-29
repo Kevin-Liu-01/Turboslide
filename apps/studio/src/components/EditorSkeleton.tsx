@@ -18,18 +18,19 @@
  * never shows it. Nothing here carries `data-settled`: the specs and the audit wait for the real
  * shell's mark.
  */
-const MENU_TITLES = [
-  'File',
-  'Edit',
-  'View',
-  'Insert',
-  'Format',
-  'Slide',
-  'Arrange',
-  'Tools',
-  'Extensions',
-  'Help',
-] as const;
+import { DEFAULT_MENU_CONTEXT, visibleMenus } from '@turboslide/chrome/menus/model';
+
+/**
+ * The editor's own menu list in the default view (docs/POLISH.md item 106; audit-collab item
+ * 10: the skeleton drew an Extensions menu the editor has not got), read from the model once so
+ * the row's type sits where the menu bar's will.
+ */
+const MENU_TITLES: ReadonlyArray<string> = visibleMenus(DEFAULT_MENU_CONTEXT).map(
+  (menu) => menu.label,
+);
+
+/** The notes pane's default height (packages/chrome/src/NotesPane.tsx NOTES_DEFAULT_HEIGHT): the plate centres in the stage above it, as the sheet does. */
+const NOTES_HEIGHT = 64;
 
 export type EditorSkeletonProps = {
   /** the filmstrip frames to draw: one for a fresh draft, the deck's slide count where known */
@@ -81,12 +82,19 @@ export function EditorSkeleton({ frames = DEFAULT_FRAMES }: EditorSkeletonProps 
         </div>
       </aside>
       <section className="pt-main ts-skeleton-main" aria-hidden="true">
-        <div className="pt-stagewrap ts-skeleton-stagewrap">
+        {/* the ground is the editor's paper and the notes slot holds the pane's height, so the
+            plate centres where the sheet will (item 106: a grey ground and a plate 32 px low) */}
+        <div
+          className="pt-stagewrap ts-skeleton-stagewrap"
+          style={{ background: 'var(--pt-paper)' }}
+        >
           <div className="ts-curtain-host">
             <div className="ts-skeleton-sheet" />
           </div>
         </div>
-        <div className="ts-notes-slot" />
+        <div className="ts-notes-slot">
+          <div className="ts-skeleton-notes" style={{ height: NOTES_HEIGHT }} />
+        </div>
       </section>
     </div>
   );

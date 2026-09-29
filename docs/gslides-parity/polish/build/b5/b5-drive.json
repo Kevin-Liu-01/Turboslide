@@ -1,0 +1,382 @@
+{
+  "base": "http://localhost:4445",
+  "at": "2026-09-29T00:22:54.376Z",
+  "rows": [
+    {
+      "item": 78,
+      "what": "a new deck opens Restricted with one sentence",
+      "result": "works",
+      "evidence": "mode restricted; sentence \"Only you can open this presentation\"; links tables 0",
+      "shots": [
+        "after-78-share-first-open-restricted.png"
+      ]
+    },
+    {
+      "item": 78,
+      "what": "Anyone with the link defaults to Viewer",
+      "result": "works",
+      "evidence": "role viewer; address http://localhost:4445/s/KsHA5LqBgMSChsVvKhlJ9l",
+      "shots": [
+        "after-78-share-link-viewer.png"
+      ]
+    },
+    {
+      "item": 79,
+      "what": "a role change keeps the address",
+      "result": "works",
+      "evidence": "before http://localhost:4445/s/KsHA5LqBgMSChsVvKhlJ9l, after http://localhost:4445/s/KsHA5LqBgMSChsVvKhlJ9l; the first address lands on http://localhost:4445/edit/untitled-20260929-na3j; sentence \"Anyone with the link can open and edit this presentation\"",
+      "shots": [
+        "after-79-share-role-editor-same-link.png"
+      ]
+    },
+    {
+      "item": 96,
+      "what": "More lists each link once with the product date form",
+      "result": "works",
+      "evidence": "rows 4, old rows 0, dates [\"Editor · Created Sep 28, 2026\",\"Viewer\",\"Viewer, opens as a show\",\"Editor\"]",
+      "shots": [
+        "after-96-share-more-one-table.png"
+      ]
+    },
+    {
+      "item": 96,
+      "what": "Restricted reads one sentence with no live link rows",
+      "result": "works",
+      "evidence": "sentence \"Only you can open this presentation\", link tables 0",
+      "shots": [
+        "after-96-share-restricted-no-links.png"
+      ]
+    },
+    {
+      "item": 88,
+      "what": "the Upload tab is a drop zone with a button",
+      "result": "works",
+      "evidence": "button 1, native control visible false",
+      "shots": [
+        "after-88-import-upload-drop-zone.png"
+      ]
+    },
+    {
+      "item": 91,
+      "what": "the versions panel rows read clean",
+      "result": "works",
+      "evidence": "window rows 0, mark inside null, times []",
+      "shots": [
+        "after-91-versions-panel.png"
+      ]
+    },
+    {
+      "item": 92,
+      "what": "the Last edit words read inline",
+      "result": "works",
+      "evidence": "words \"Last edit just now by Manganese 343\"",
+      "shots": [
+        "after-91-versions-panel.png"
+      ]
+    },
+    {
+      "item": 91,
+      "what": "Name this version opens the dialog and says one sentence",
+      "result": "works",
+      "evidence": "dialog 1; snackbar \"Saved the version Sent to Acme\"",
+      "shots": [
+        "after-91-name-version-dialog.png"
+      ]
+    },
+    {
+      "item": 77,
+      "what": "the print preview shows the deck appearance",
+      "result": "works",
+      "evidence": "data-theme light; sheet background rgb(255, 255, 255)",
+      "shots": [
+        "after-77-print-preview-light.png"
+      ]
+    },
+    {
+      "item": 83,
+      "what": "the print page opens with the chrome check box",
+      "result": "works",
+      "evidence": "DialogCheck box true",
+      "shots": [
+        "after-77-print-preview-light.png"
+      ]
+    },
+    {
+      "item": 75,
+      "what": "the new deck is on /decks at once",
+      "result": "works",
+      "evidence": "card visible after 324 ms of the click; line \"Opened just now\"; recent row heads: 0",
+      "shots": [
+        "after-75-decks-new-deck-card.png"
+      ]
+    },
+    {
+      "item": 76,
+      "what": "one card per deck",
+      "result": "works",
+      "evidence": "1 element(s) carry the deck id",
+      "shots": [
+        "after-75-decks-new-deck-card.png"
+      ]
+    },
+    {
+      "item": 97,
+      "what": "the rename field spans the card body and shows the start",
+      "result": "works",
+      "evidence": "field 231 px of body 251 px, scrollLeft 0",
+      "shots": [
+        "after-97-rename-field-spans-body.png"
+      ]
+    },
+    {
+      "item": 76,
+      "what": "rename from the card writes every card of the deck",
+      "result": "works",
+      "evidence": "titles: [\"Introduction to Artificial Intelligence for the Acme Q3 renewal team\"]",
+      "shots": [
+        "after-76-renamed-everywhere.png"
+      ]
+    },
+    {
+      "item": 84,
+      "what": "a long title ends in an ellipsis",
+      "result": "works",
+      "evidence": "{\"overflow\":\"ellipsis\",\"clipped\":true}",
+      "shots": [
+        "after-84-title-ellipsis-card.png"
+      ]
+    },
+    {
+      "item": 89,
+      "what": "Back from the editor paints the cards",
+      "result": "works",
+      "evidence": "cards at 73 ms after Back, pending frames: 0",
+      "shots": [
+        "after-89-back-list-restored.png"
+      ]
+    },
+    {
+      "item": 90,
+      "what": "every card has a thumbnail or the title plate",
+      "result": "works",
+      "evidence": "51 cards, 0 bare",
+      "shots": [
+        "after-89-back-list-restored.png"
+      ]
+    },
+    {
+      "item": 98,
+      "what": "the access page reads one sentence with an ink link",
+      "result": "works",
+      "evidence": "line \"If you were invited by email, sign in with that address from your presentations, then open this address again\", link colour rgb(7, 7, 7), visible questions []",
+      "shots": [
+        "after-98-access-page.png"
+      ]
+    },
+    {
+      "item": 106,
+      "what": "the skeleton lists the editor menus",
+      "result": "works",
+      "evidence": "skeleton [\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Help\"]; editor [\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Help\"]",
+      "shots": [
+        "after-106-skeleton-150ms.png",
+        "after-106-editor-settled.png"
+      ]
+    },
+    {
+      "item": 107,
+      "what": "the filmstrip follows End",
+      "result": "works",
+      "evidence": "{\"top\":true,\"bottom\":true}",
+      "shots": [
+        "after-107-filmstrip-follows-end.png"
+      ]
+    },
+    {
+      "item": 110,
+      "what": "a joiner's chip appears within two seconds",
+      "result": "works",
+      "evidence": "chip after 1198 ms",
+      "shots": [
+        "after-110-joiner-chip.png"
+      ]
+    },
+    {
+      "item": 99,
+      "what": "two slides added 150 ms apart both survive, three rounds",
+      "result": "works",
+      "evidence": "3 of 3 rounds kept both in both browsers",
+      "shots": [
+        "after-99-both-slides-kept.png"
+      ]
+    },
+    {
+      "item": 100,
+      "what": "the network cut reads Offline within a second",
+      "result": "works",
+      "evidence": "Offline after 22 ms; words \"Offline. Changes will save when you reconnect\"",
+      "shots": [
+        "after-100-offline-at-once.png"
+      ]
+    },
+    {
+      "item": 100,
+      "what": "the words after the network returns",
+      "result": "works",
+      "evidence": "\"All changes saved\"",
+      "shots": [
+        "after-100-offline-at-once.png"
+      ]
+    },
+    {
+      "item": 104,
+      "what": "Follow is offered on an anonymous editor",
+      "result": "works",
+      "evidence": "chip menu item title.presence.follow; B came in by http://localhost:4445/s/Y98Vqy9ZIeKivCfAACKYws and landed on http://localhost:4445/edit/untitled-20260929-3zuz#s/split-3-da39",
+      "shots": [
+        "after-104-chip-follow.png"
+      ]
+    },
+    {
+      "item": 98,
+      "what": "a new comment card has no empty header",
+      "result": "works",
+      "evidence": "header rows 0",
+      "shots": [
+        "after-98-new-comment-card.png"
+      ]
+    },
+    {
+      "item": 95,
+      "what": "one marker per anchor with the avatar and the count",
+      "result": "works",
+      "evidence": "markers 1, box {\"x\":958.5625,\"y\":390.203125,\"width\":20,\"height\":20}",
+      "shots": [
+        "after-95-one-comment-marker.png"
+      ]
+    },
+    {
+      "item": 98,
+      "what": "Resolve closes the card and reads Resolved with Undo",
+      "result": "works",
+      "evidence": "snackbar \"ResolvedUndo\", card open 0",
+      "shots": [
+        "after-98-comment-resolved.png"
+      ]
+    },
+    {
+      "item": 93,
+      "what": "the show bar has no captions control",
+      "result": "works",
+      "evidence": "captions visible false",
+      "shots": [
+        "after-93-show-bar-no-captions.png"
+      ]
+    },
+    {
+      "item": 94,
+      "what": "the laser is a 14 px ink dot",
+      "result": "works",
+      "evidence": "box {\"x\":693,\"y\":443,\"width\":14,\"height\":14}",
+      "shots": [
+        "after-94-laser-14px.png"
+      ]
+    },
+    {
+      "item": 98,
+      "what": "ArrowRight past the last slide shows the end plate and a click leaves",
+      "result": "works",
+      "evidence": "end plate 1, show after the click 0",
+      "shots": [
+        "after-98-show-end-plate.png"
+      ]
+    },
+    {
+      "item": 81,
+      "what": "Move to trash leaves at once",
+      "result": "works",
+      "evidence": "/decks after 1077 ms; snackbar \"Moved to trashUndo\"",
+      "shots": [
+        "after-81-trash-leaves-at-once.png"
+      ]
+    },
+    {
+      "item": 97,
+      "what": "Empty trash is not the page primary",
+      "result": "works",
+      "evidence": "is-solid false",
+      "shots": [
+        "after-97-trash-head.png"
+      ]
+    },
+    {
+      "item": 97,
+      "what": "Delete forever: Enter confirms",
+      "result": "works",
+      "evidence": "focus on trash.confirm.ok; /edit answers 404",
+      "shots": [
+        "after-97-delete-forever-focus.png"
+      ]
+    },
+    {
+      "item": 98,
+      "what": "/edit answers 404 after Delete forever",
+      "result": "works",
+      "evidence": "status 404",
+      "shots": [
+        "after-97-delete-forever-focus.png"
+      ]
+    },
+    {
+      "item": 98,
+      "what": "at 1280 by 800 the show bar does not intersect the sheet",
+      "result": "works",
+      "evidence": "{\"sheetBottom\":733,\"barTop\":748,\"barControl\":\"present.toolbar\"}",
+      "shots": [
+        "after-98-show-bar-1280x800.png"
+      ]
+    }
+  ],
+  "teardown": [
+    {
+      "id": "untitled-20260928-hy5f",
+      "status": 404
+    },
+    {
+      "id": "untitled-20260929-ltuk",
+      "status": 404
+    },
+    {
+      "id": "untitled-20260929-z8qp",
+      "status": "teardown failed: locator.waitFor: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menu.file.moveToTrash\"]').first() to be visible\n"
+    },
+    {
+      "id": "untitled-20260929-na3j",
+      "status": 404
+    },
+    {
+      "id": "untitled-20260929-wzal",
+      "status": "teardown failed: page.waitForSelector: Timeout 20000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"trash.delete.untitled-20260929-wzal\"]') to be visible\n"
+    },
+    {
+      "id": "untitled-20260929-jg2e",
+      "status": "teardown failed: locator.waitFor: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menu.file.moveToTrash\"]').first() to be visible\n"
+    },
+    {
+      "id": "untitled-20260929-rhy7",
+      "status": 404
+    },
+    {
+      "id": "untitled-20260929-5arx",
+      "status": 200
+    },
+    {
+      "id": "untitled-20260929-3zuz",
+      "status": 404
+    },
+    {
+      "id": "untitled-20260929-p60u",
+      "status": "teardown failed: locator.waitFor: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menu.file.moveToTrash\"]').first() to be visible\n"
+    }
+  ]
+}

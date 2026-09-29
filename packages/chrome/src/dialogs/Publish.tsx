@@ -79,7 +79,7 @@ export function PublishDialog({ tab: initialTab = 'link' }: { tab?: 'link' | 'em
 
   return (
     <Dialog
-      title={DIALOGS.publish.title}
+      title="Publish to web"
       onClose={shell.closeDialog}
       width={560}
       control="dialog.publish"

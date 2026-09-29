@@ -70,6 +70,9 @@ const EXPIRY_DAYS: ReadonlyArray<{ id: string; label: string; days: number | nul
 
 export type ShareLinkRowId = 'view' | 'present' | 'edit';
 
+/** The label of the general access link (packages/store/src/access-store.ts GENERAL_LINK_LABEL). */
+export const GENERAL_LINK_LABEL = 'Anyone with the link';
+
 /**
  * The three link rows (docs/FOCUS.md 2.7, the rows `share.copy-view-link`,
  * `share.copy-present-link`, `share.copy-edit-link`): the label is the one the minted link carries
@@ -189,17 +192,26 @@ export function authorizeSentence(mode: AuthorizeMode | undefined): string | nul
 export function accessSentence(
   mode: 'restricted' | 'link' | 'open',
   role: EditorRole,
-  authorize: AuthorizeMode | undefined,
+  _authorize: AuthorizeMode | undefined,
 ): string {
   if (mode === 'open') return LEGACY_SENTENCE;
   if (mode === 'link') {
-    if (role === 'editor')
-      return 'Anyone with this link can open and edit this presentation. Pick Viewer before you send it to a customer';
-    if (role === 'commenter') return 'Anyone with this link can open it and leave comments';
-    return 'Anyone with this link can open it and cannot change it';
+    /* one statement, no instruction after it (docs/POLISH.md item 78) */
+    if (role === 'editor') return 'Anyone with the link can open and edit this presentation';
+    if (role === 'commenter') return 'Anyone with the link can open it and leave comments';
+    return 'Anyone with the link can open it and cannot change it';
   }
-  if (authorize === 'enforce') return DIALOGS.share.restrictedDoc;
-  return 'Only you can open this address on this Turboslide until sign in arrives; pick Anyone with the link to share it';
+  return RESTRICTED_SENTENCE;
+}
+
+/** The sentence under Restricted (docs/POLISH.md item 96): no link opens the presentation. */
+export const RESTRICTED_SENTENCE = 'Only you can open this presentation';
+
+/** `Sep 28, 2026`: the product's date form for a link's Created and Expires (item 96). */
+export function shareDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 /** The browser's memory that the first Share already asked for a name (rank 4). */
@@ -834,6 +846,20 @@ export function ShareDialog() {
       copy(rowAddress(row.id, known));
       return;
     }
+    const live = mine[0];
+    if (live !== undefined) {
+      /* the row's link exists and this browser never held its token: a rotation hands a fresh
+         one and the old address dies, instead of a second link under the same label (item 96:
+         More listed every link three times) */
+      write('share.rotateLink', { linkId: live.id }, (result) => {
+        const answer = result as { url?: string; link?: { id?: string } };
+        if (answer.url === undefined) return;
+        if (answer.link?.id !== undefined)
+          rememberLinkUrl(input.deckId, answer.link.id, answer.url);
+        copy(rowAddress(row.id, answer.url));
+      });
+      return;
+    }
     write('share.createLink', { role: row.role, label: row.label }, (result) => {
       const answer = result as { url?: string; link?: { id?: string } };
       if (answer.url === undefined) return;
@@ -841,16 +867,113 @@ export function ShareDialog() {
       copy(rowAddress(row.id, answer.url));
     });
   };
+
+  /** Copy for a link of the table: the address this browser remembers, else a rotation that hands a fresh one. */
+  const copyLink = (link: AccessLinkView) => {
+    const remembered = pruneLinkUrls(
+      input.deckId,
+      (access.links ?? []).filter((each) => linkIsLive(each)).map((each) => each.id),
+    );
+    const rowId = LINK_ROWS.find((row) => row.label === link.label)?.id ?? 'view';
+    const known = remembered[link.id];
+    if (known !== undefined) {
+      copy(rowId === 'present' ? rowAddress('present', known) : known);
+      return;
+    }
+    write('share.rotateLink', { linkId: link.id }, (result) => {
+      const answer = result as { url?: string; link?: { id?: string } };
+      if (answer.url === undefined) return;
+      if (answer.link?.id !== undefined) rememberLinkUrl(input.deckId, answer.link.id, answer.url);
+      if (link.label === GENERAL_LINK_LABEL) setLinkUrl(answer.url);
+      copy(rowId === 'present' ? rowAddress('present', answer.url) : answer.url);
+    });
+  };
   const showRows = legacy || canShare;
   const sentence = accessSentence(mode, access.generalAccess.role, authorize);
+  /** One live link of the table: its label, its role, its dates, Copy, Rotate and Revoke. */
+  const linkRow = (link: AccessLinkView, rowId: ShareLinkRowId | 'general') => (
+    <li
+      key={link.id}
+      className="ts-share-row is-link"
+      data-control={rowId === 'general' ? `dialog.share.link.${link.id}` : `dialog.share.${rowId}`}
+      data-link={link.id}
+      data-minted={1}
+    >
+      {/* the name on one line, the role and the dates under it (item 96): a row with three
+          buttons has no room for three columns of words, and "Anyone…" with "Created…" is what
+          the seller read */}
+      <span className="ts-share-row-text">
+        <span className="ts-share-row-name">{link.label ?? DIALOGS.share.anyoneWithLink}</span>
+        <span className="ts-share-row-meta">
+          {ROLES.find((each) => each.value === link.role)?.label ?? link.role}
+          {' · '}
+          {DIALOGS.share.links.created} {shareDate(link.createdAt)}
+          {link.expiresAt ? ` · ${DIALOGS.share.links.expires} ${shareDate(link.expiresAt)}` : ''}
+        </span>
+      </span>
+      {canShare ? (
+        <span className="ts-share-row-acts">
+          <button
+            type="button"
+            className="pt-ib is-text"
+            disabled={busy}
+            data-control={
+              rowId === 'general'
+                ? `dialog.share.link.${link.id}.copy`
+                : `dialog.share.${rowId}.copy`
+            }
+            onClick={() => copyLink(link)}
+            {...tipProps({
+              name: DIALOGS.share.copyLink,
+              doc: 'Copies the address; a link this browser never held is rotated first',
+            })}
+          >
+            <span className="pt-lb">{DIALOGS.share.copyLink}</span>
+          </button>
+          <button
+            type="button"
+            className="pt-ib is-text"
+            disabled={busy}
+            data-control={`dialog.share.link.${link.id}.rotate`}
+            onClick={() =>
+              write('share.rotateLink', { linkId: link.id }, (result) => {
+                const answer = result as { url?: string; link?: { id?: string } };
+                if (answer.url) {
+                  if (answer.link?.id !== undefined)
+                    rememberLinkUrl(input.deckId, answer.link.id, answer.url);
+                  if (link.label === GENERAL_LINK_LABEL) setLinkUrl(answer.url);
+                  copy(rowId === 'present' ? rowAddress('present', answer.url) : answer.url);
+                }
+              })
+            }
+            {...tipProps({ name: DIALOGS.share.rotate, doc: 'A new address; the old one stops working' })}
+          >
+            <span className="pt-lb">{DIALOGS.share.rotate}</span>
+          </button>
+          <button
+            type="button"
+            className="pt-ib is-text"
+            disabled={busy}
+            data-control={`dialog.share.link.${link.id}.revoke`}
+            onClick={() =>
+              write('share.revokeLink', { linkId: link.id }, () => {
+                if (link.label === GENERAL_LINK_LABEL) setLinkUrl(null);
+              })
+            }
+            {...tipProps({
+              name: DIALOGS.share.revoke,
+              doc: 'The address stops working for everyone who has it',
+            })}
+          >
+            <span className="pt-lb">{DIALOGS.share.revoke}</span>
+          </button>
+        </span>
+      ) : null}
+    </li>
+  );
   /* the people rows of the first stage (rank 3, rank 4): the owner's row reading You, then the
      pending owner and each grant; drawn whenever the record names an owner */
   const peopleRows = access.owner !== null || grants.length > 0 || access.pendingOwner !== null;
-  const createdOf = (row: (typeof LINK_ROWS)[number]): string | null => {
-    if (legacy) return null;
-    const newest = liveLinksFor(access.links, row.label)[0];
-    return newest === undefined ? null : new Date(newest.createdAt).toLocaleDateString();
-  };
   const addressTip = tipProps({
     name: 'Link',
     doc:
@@ -1206,8 +1329,11 @@ export function ShareDialog() {
             </section>
           ) : null}
 
-          {/* the three link rows (docs/FOCUS.md 2.7) with their Created dates (rank 3) */}
-          {showRows ? (
+          {/* one links table (docs/POLISH.md item 96; docs/FOCUS.md 2.7): the plain addresses of
+              a legacy deck, else every live link once, the general link first, then the View,
+              Present and Edit rows with Copy, Rotate and Revoke on a minted link and Copy link on
+              one not minted yet; nothing under Restricted, where no link opens the presentation */}
+          {legacy ? (
             <section className="ts-share-rows" aria-labelledby="ts-share-links">
               <h3 id="ts-share-links" className="ts-dialog-field-label">
                 Links
@@ -1215,26 +1341,17 @@ export function ShareDialog() {
               <ul className="ts-dialog-list" data-control="dialog.share.rows">
                 {LINK_ROWS.map((row) => {
                   const found = plain.find((link) => link.id === row.id);
-                  const note = legacy ? found?.note : row.note;
-                  const minted = legacy ? 0 : liveLinksFor(access.links, row.label).length;
-                  const created = createdOf(row);
                   return (
                     <li
                       key={row.id}
                       className="ts-dialog-row"
                       data-control={`dialog.share.${row.id}`}
-                      data-minted={minted}
+                      data-minted={0}
                     >
                       <span className="ts-dialog-row-title">
                         <b>{row.label}</b>
-                        {note !== undefined ? (
-                          <span className="ts-dialog-hint"> · {note}</span>
-                        ) : null}
-                        {created !== null ? (
-                          <span className="ts-dialog-hint">
-                            {' '}
-                            · {DIALOGS.share.links.created} {created}
-                          </span>
+                        {found?.note !== undefined ? (
+                          <span className="ts-dialog-hint"> · {found.note}</span>
                         ) : null}
                       </span>
                       <button
@@ -1243,12 +1360,7 @@ export function ShareDialog() {
                         disabled={busy}
                         data-control={`dialog.share.${row.id}.copy`}
                         onClick={() => copyRow(row)}
-                        {...tipProps({
-                          name: DIALOGS.share.copyLink,
-                          doc: legacy
-                            ? (found?.url ?? '')
-                            : `A link that opens the presentation as ${row.note.toLowerCase()}; it can be revoked below`,
-                        })}
+                        {...tipProps({ name: DIALOGS.share.copyLink, doc: found?.url ?? '' })}
                       >
                         <span className="pt-lb">{DIALOGS.share.copyLink}</span>
                       </button>
@@ -1256,18 +1368,59 @@ export function ShareDialog() {
                   );
                 })}
               </ul>
-              {legacy ? (
-                <p
-                  className="ts-share-quiet ts-share-legacy-sentence"
-                  data-control="dialog.share.open"
-                >
-                  {LEGACY_SENTENCE}
-                </p>
-              ) : null}
+              <p
+                className="ts-share-quiet ts-share-legacy-sentence"
+                data-control="dialog.share.open"
+              >
+                {LEGACY_SENTENCE}
+              </p>
+            </section>
+          ) : mode !== 'restricted' && showRows ? (
+            <section className="ts-share-rows" aria-labelledby="ts-share-links">
+              <h3 id="ts-share-links" className="ts-dialog-field-label">
+                Links
+              </h3>
+              <ul className="ts-share-links pt-scroll" data-control="dialog.share.links">
+                {links
+                  .filter((link) => link.label === GENERAL_LINK_LABEL)
+                  .map((link) => linkRow(link, 'general'))}
+                {LINK_ROWS.map((row) => {
+                  const live = liveLinksFor(access.links, row.label)[0];
+                  if (live !== undefined) return linkRow(live, row.id);
+                  return (
+                    <li
+                      key={row.id}
+                      className="ts-share-row is-link"
+                      data-control={`dialog.share.${row.id}`}
+                      data-minted={0}
+                    >
+                      <span className="ts-share-row-text">
+                        <span className="ts-share-row-name">{row.label}</span>
+                        <span className="ts-share-row-meta">{row.note}</span>
+                      </span>
+                      <span className="ts-share-row-acts">
+                        <button
+                          type="button"
+                          className="pt-ib is-text"
+                          disabled={busy}
+                          data-control={`dialog.share.${row.id}.copy`}
+                          onClick={() => copyRow(row)}
+                          {...tipProps({
+                            name: DIALOGS.share.copyLink,
+                            doc: `A link that opens the presentation as ${row.note.toLowerCase()}; it can be revoked here`,
+                          })}
+                        >
+                          <span className="pt-lb">{DIALOGS.share.copyLink}</span>
+                        </button>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
             </section>
           ) : null}
 
-          {/* the general access links with Rotate and Revoke, Switch to a link for a legacy deck, Stop sharing */}
+          {/* Switch to a link for a legacy deck, Stop sharing */}
           {legacy && canShare ? (
             <button
               type="button"
@@ -1286,70 +1439,6 @@ export function ShareDialog() {
             >
               <span className="pt-lb">{DIALOGS.share.switchToLink}</span>
             </button>
-          ) : null}
-          {links.length > 1 || (links.length === 1 && canShare) ? (
-            <ul className="ts-share-links pt-scroll" data-control="dialog.share.links">
-              {links.map((link) => (
-                <li
-                  key={link.id}
-                  className="ts-share-row is-link"
-                  data-control={`dialog.share.link.${link.id}`}
-                >
-                  <span className="ts-share-row-name">
-                    {link.label ?? DIALOGS.share.anyoneWithLink}
-                  </span>
-                  <span className="ts-share-row-role">
-                    {ROLES.find((each) => each.value === link.role)?.label ?? link.role}
-                  </span>
-                  <span className="ts-share-row-meta">
-                    {DIALOGS.share.links.created} {new Date(link.createdAt).toLocaleDateString()}
-                    {link.expiresAt
-                      ? ` · ${DIALOGS.share.links.expires} ${new Date(link.expiresAt).toLocaleDateString()}`
-                      : ''}
-                  </span>
-                  {canShare ? (
-                    <span className="ts-share-row-acts">
-                      <button
-                        type="button"
-                        className="pt-ib is-text"
-                        disabled={busy}
-                        data-control={`dialog.share.link.${link.id}.rotate`}
-                        onClick={() =>
-                          write('share.rotateLink', { linkId: link.id }, (result) => {
-                            const answer = result as { url?: string; link?: { id?: string } };
-                            if (answer.url) {
-                              if (answer.link?.id !== undefined)
-                                rememberLinkUrl(input.deckId, answer.link.id, answer.url);
-                              setLinkUrl(answer.url);
-                              copy(answer.url);
-                            }
-                          })
-                        }
-                        {...tipProps({
-                          name: DIALOGS.share.rotate,
-                          doc: 'A new address; the old one stops working',
-                        })}
-                      >
-                        <span className="pt-lb">{DIALOGS.share.rotate}</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="pt-ib is-text"
-                        disabled={busy}
-                        data-control={`dialog.share.link.${link.id}.revoke`}
-                        onClick={() => write('share.revokeLink', { linkId: link.id })}
-                        {...tipProps({
-                          name: DIALOGS.share.revoke,
-                          doc: 'The address stops working for everyone who has it',
-                        })}
-                      >
-                        <span className="pt-lb">{DIALOGS.share.revoke}</span>
-                      </button>
-                    </span>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
           ) : null}
           {mode !== 'restricted' && !legacy && canShare ? (
             <button

@@ -774,7 +774,11 @@ const runBuildFn = createServerFn({ method: 'POST' })
     const dir = await requireDeck(data.deckId);
     const outDir = buildsDir(data.deckId);
     mkdirSync(outDir, { recursive: true });
-    const name = `${data.deckId}.html`;
+    /* the file is named after the title (docs/POLISH.md item 86); the id stands in for an
+       untitled deck */
+    const { deckTitleOf } = await import('./export-sync');
+    const { titledFileName } = await import('../routes/api/decks.$deckId.bundle');
+    const name = titledFileName((await deckTitleOf(data.deckId)) ?? '', data.deckId, 'html');
     const out = join(outDir, name);
     const { parseJsonResult, runTurboslide } = await import('@turboslide/render-worker/cli');
     const run = await runTurboslide(

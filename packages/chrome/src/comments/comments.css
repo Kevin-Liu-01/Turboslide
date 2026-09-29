@@ -370,13 +370,27 @@
   gap: 4px;
 }
 
-/* ---- the markers (11 6.8, 8 P3) ---- */
+/* a slide comment's card sits beside the sheet, at its right edge (docs/POLISH.md item 66;
+   audit-chrome item 12: it stood over the top left of the page) */
+.ts-comment-card[data-anchor='slide'] {
+  left: auto !important;
+  right: 0;
+  top: 0 !important;
+  transform: translateX(calc(100% + 12px));
+}
+
+/* ---- the markers (11 6.8, 8 P3; docs/POLISH.md item 95: one plate per anchor) ---- */
 .ts-comment-marker-btn {
   position: absolute;
   z-index: 3;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
+  box-sizing: border-box;
+  height: var(--ts-marker, 20px);
+  padding: 0 5px 0 1px;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
   margin: 0;
   padding: 0;
   border: 0;
@@ -391,23 +405,8 @@
   outline-offset: 1px;
 }
 
-.ts-comment-marker-plate {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--ts-marker, 20px);
-  height: var(--ts-marker, 20px);
-  background: var(--pt-ink);
-  color: var(--pt-paper);
-}
-
-.ts-comment-marker-plate svg {
-  fill: currentColor;
-}
-
-.ts-comment-marker-btn.is-open .ts-comment-marker-plate {
-  outline: 1px solid var(--pt-paper);
-  outline-offset: -2px;
+.ts-comment-marker-btn.is-open {
+  border-color: var(--pt-ink);
 }
 
 .ts-comment-count-chip {
@@ -415,11 +414,11 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  min-width: var(--ts-count-min-w, 20px);
+  min-width: 8px;
   height: 16px;
-  padding: 0 4px;
-  border: 1px solid var(--pt-edge);
-  background: var(--pt-paper);
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--pt-ink);
   font: 500 11px/1 var(--pt-display);
   font-feature-settings: 'cv11', 'ss01', 'tnum';

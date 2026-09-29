@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import { Dialog } from '../Dialog';
 import { DIALOGS } from '../menus/strings';
 
@@ -46,6 +48,17 @@ export function DeleteForeverDialog({
   onClose,
   busy = false,
 }: DeleteForeverDialogProps) {
+  /* the primary button holds the focus once the frame has settled (docs/POLISH.md item 97;
+     audit-pages item 32): the opener's own focus return (a card menu closing after the dialog
+     mounted) moved it to Cancel, and Enter cancelled while the tooltip said Enter deletes */
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined;
+    const frame = requestAnimationFrame(() => {
+      const ok = document.querySelector<HTMLElement>('[data-control="trash.confirm.ok"]');
+      if (ok !== null && document.activeElement !== ok) ok.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
   return (
     <Dialog
       title={deleteForeverTitle(title, count)}

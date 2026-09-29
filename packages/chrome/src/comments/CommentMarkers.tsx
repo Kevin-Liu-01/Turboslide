@@ -2,7 +2,6 @@ import { COLLAB_CLASSES, COLLAB_GEOMETRY } from '@turboslide/render/collab';
 import type { EditorOverlayView } from '@turboslide/viewer/Editor';
 
 import type { CommentThreadView, EditorComments } from '../editor-shell';
-import { Icon } from '../icons';
 import { cn } from '../lib/cn';
 import { COMMENTS } from '../menus/strings';
 import { IdentityChip } from '../presence/IdentityChip';
@@ -11,13 +10,14 @@ import { countName, markerPlace } from './comments-model';
 import type { CommentsDisplay } from '../menus/model';
 
 /**
- * The comment markers of the overlay (gslides-parity SPEC-3 5.3; research 11 6.8, 8 P3): one
- * 20 by 20 ink plate with the chat glyph at the anchored object's top right outside its box (the
- * slide's top left for a slide thread), the author's 16 px mark before it, and a count chip of
- * `min-width: 20px` in tabular figures drawn from count 1 so a second thread moves nothing; the
- * two ring halo over pictures. A click or Enter expands the card; hover shows the first line.
- * Hidden in present mode, the embed and the Hide comments display mode; Minimize draws the
- * markers alone. Every marker is absolute inside the overlay.
+ * The comment markers of the overlay (gslides-parity SPEC-3 5.3; research 11 6.8, 8 P3; the
+ * polish round, docs/POLISH.md item 95): one 20 px marker per anchor at the anchored object's
+ * top right outside its box (the slide's top left for a slide thread), a paper plate with an edge
+ * holding the author's 16 px mark and the thread count in tabular figures, so a second thread
+ * moves nothing; the two ring halo over pictures. The three tiles of the earlier rounds (the
+ * mark, an ink chat plate, a count chip) are one element now. A click or Enter expands the card;
+ * hover shows the first line. Hidden in present mode, the embed and the Hide comments display
+ * mode; Minimize draws the markers alone. Every marker is absolute inside the overlay.
  */
 export type CommentMarkersProps = {
   view: EditorOverlayView;
@@ -94,9 +94,6 @@ export function CommentMarkers({
             })}
           >
             <IdentityChip identity={first.comment.author} size={16} halo={halo} />
-            <span className="ts-comment-marker-plate" aria-hidden="true">
-              <Icon name="chat" size={12} />
-            </span>
             <span
               className={cn(COLLAB_CLASSES.commentCount, 'ts-comment-count-chip')}
               aria-hidden="true"

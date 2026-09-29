@@ -3,7 +3,7 @@ import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { clampNotesHeight, NOTES_BURST_MS, NOTES_DEFAULT_HEIGHT, NotesPane } from '../NotesPane';
-import { hideTooltip } from '../Tooltip';
+import { hideTooltip, resetTooltipTiming } from '../Tooltip';
 
 // The speaker notes pane (gslides-parity SPEC 8): the prompt, one write per 400 ms pause, the
 // write on blur and on a slide change, the handle's drag and keys, the focus key.
@@ -14,6 +14,7 @@ beforeEach(() => {
 
 afterEach(() => {
   hideTooltip();
+  resetTooltipTiming();
   cleanup();
   vi.useRealTimers();
 });

@@ -218,3 +218,22 @@ describe('turboslide cli', () => {
     expect((await run(['lint', '--chrome'], root)).stderr).toContain('--url');
   }, 30_000);
 });
+
+// Every `cli.usage` line of the action table names a registered command (docs/POLISH.md item
+// 119): `turboslide assist propose` and `turboslide tailor` answered "unknown command" while the
+// table and the generated skills documented them.
+describe('the action table and the registry', () => {
+  test('every cli.usage line names a registered command', async () => {
+    const { ACTIONS } = await import('@turboslide/schema/actions');
+    const { commandNames } = await import('./cli.ts');
+    const registered = new Set(commandNames());
+    const missing: string[] = [];
+    for (const action of Object.values(ACTIONS)) {
+      const usage = (action as { cli?: { usage?: string } }).cli?.usage;
+      if (usage === undefined) continue;
+      const command = usage.replace(/^turboslide\s+/, '').split(/\s+/)[0] ?? '';
+      if (!registered.has(command)) missing.push(`${action.id}: ${usage}`);
+    }
+    expect(missing).toEqual([]);
+  });
+});

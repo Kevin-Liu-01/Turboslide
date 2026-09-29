@@ -75,6 +75,7 @@ describe('ExportMenu focus', () => {
     fireEvent.focus(bundle);
     expect(document.getElementById(TIP_ID)?.hidden ?? true).toBe(true);
     vi.useFakeTimers();
+    fireEvent.mouseMove(document.body);
     fireEvent.mouseEnter(bundle);
     act(() => {
       vi.advanceTimersByTime(TIP_DELAY_MS);

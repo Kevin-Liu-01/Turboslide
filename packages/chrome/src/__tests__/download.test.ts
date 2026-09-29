@@ -216,3 +216,24 @@ describe('downloadFromPage', () => {
     ]);
   });
 });
+
+// The words of every download and the one name rule (docs/POLISH.md items 82, 86 and 87).
+describe('the download words', () => {
+  it('names the kind in the progress, the file in the saved sentence and the kind in a refusal', async () => {
+    const { DOWNLOAD_WORDS, fileNameOf } = await import('../download');
+    expect(DOWNLOAD_WORDS.preparing('jpg')).toBe('Preparing your JPEG');
+    expect(DOWNLOAD_WORDS.preparing('pdf')).toBe('Preparing your PDF');
+    expect(DOWNLOAD_WORDS.saved('Pipeline review.pptx')).toBe('Saved Pipeline review.pptx');
+    expect(DOWNLOAD_WORDS.notMade('pptx')).toBe(
+      'The PowerPoint file could not be made. Try again in a minute',
+    );
+    expect(DOWNLOAD_WORDS.notMade('pdf')).not.toMatch(/Vercel|Blob|request/);
+    expect(fileNameOf('Pipeline review: Acme Q3 2026', 'untitled-1', 'jpg')).toBe(
+      'Pipeline review Acme Q3 2026.jpg',
+    );
+    expect(fileNameOf('Untitled presentation', 'untitled-20260928-ud9y', 'png')).toBe(
+      'untitled-20260928-ud9y.png',
+    );
+    expect(fileNameOf('   ', 'deck-1', 'html')).toBe('deck-1.html');
+  });
+});

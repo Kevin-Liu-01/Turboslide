@@ -4,6 +4,7 @@
 // set). runCli is pure over its streams so tests drive it.
 import { flagBoolean, flagString, parseArgs } from './args.ts';
 import { asset } from './commands/asset.ts';
+import { assist } from './commands/assist.ts';
 import { banner } from './commands/banner.ts';
 import { block } from './commands/block.ts';
 import { brand } from './commands/brand.ts';
@@ -28,10 +29,12 @@ import { mcp } from './commands/mcp.ts';
 import { render } from './commands/render.ts';
 import { sections } from './commands/sections.ts';
 import { shape } from './commands/shape.ts';
+import { shader } from './commands/shader.ts';
 import { sheet } from './commands/sheet.ts';
 import { slide } from './commands/slide.ts';
 import { slides } from './commands/slides.ts';
 import { table } from './commands/table.ts';
+import { tailor } from './commands/tailor.ts';
 import { template } from './commands/template.ts';
 import { text } from './commands/text.ts';
 import { validate } from './commands/validate.ts';
@@ -318,7 +321,15 @@ const COMMANDS: Record<string, Command> = {
   picture,
   login,
   logout,
+  tailor,
+  assist,
+  shader,
 };
+
+/** The registered command names, for the check that every `cli.usage` line names one (item 119). */
+export function commandNames(): string[] {
+  return Object.keys(COMMANDS);
+}
 
 export type RunOptions = {
   cwd: string;

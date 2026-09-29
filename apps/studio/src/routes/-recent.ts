@@ -43,6 +43,8 @@ export type DeckOpenFacts = {
   firstSlide: string | null;
   /** the revision the thumbnail URL carries (server/thumbs.ts) */
   revision: number;
+  /** the slide count, when the writer knew it (the editor, the store's card); the list view's column */
+  slides?: number;
 };
 
 export type RecentEntry = DeckOpenFacts & {
@@ -72,6 +74,9 @@ function storedEntryOf(value: unknown): StoredEntry | string | null {
     appearance: entry.appearance,
     firstSlide: entry.firstSlide,
     revision: entry.revision,
+    ...(typeof entry.slides === 'number' && Number.isInteger(entry.slides) && entry.slides >= 0
+      ? { slides: entry.slides }
+      : {}),
   };
 }
 
@@ -126,7 +131,9 @@ function recentOf(map: StoredMap): RecentEntry[] {
 
 /**
  * The cookie's compact form: one row per entry, `[id, at, title, appearance, firstSlide,
- * revision]`, the appearance as one letter. Percent encoded because a title may hold `;` or `,`.
+ * revision, slides]`, the appearance as one letter, the slide count null when unknown (the
+ * polish round added it; a six column row from before still parses). Percent encoded because a
+ * title may hold `;` or `,`.
  */
 export function encodeRecentCookie(entries: ReadonlyArray<RecentEntry>): string {
   const rows = entries.map((entry) => [
@@ -136,6 +143,7 @@ export function encodeRecentCookie(entries: ReadonlyArray<RecentEntry>): string 
     entry.appearance === 'light' ? 'l' : 'd',
     entry.firstSlide,
     entry.revision,
+    entry.slides ?? null,
   ]);
   return encodeURIComponent(JSON.stringify(rows));
 }
@@ -152,7 +160,7 @@ export function parseRecentCookie(header: string | null | undefined): RecentEntr
       const out: RecentEntry[] = [];
       for (const row of rows as unknown[]) {
         if (!Array.isArray(row) || row.length < 6) continue;
-        const [id, at, title, appearance, firstSlide, revision] = row as unknown[];
+        const [id, at, title, appearance, firstSlide, revision, slides] = row as unknown[];
         if (typeof id !== 'string' || typeof at !== 'string' || typeof title !== 'string') continue;
         if (appearance !== 'l' && appearance !== 'd') continue;
         if (firstSlide !== null && typeof firstSlide !== 'string') continue;
@@ -164,6 +172,9 @@ export function parseRecentCookie(header: string | null | undefined): RecentEntr
           appearance: appearance === 'l' ? 'light' : 'dark',
           firstSlide,
           revision,
+          ...(typeof slides === 'number' && Number.isInteger(slides) && slides >= 0
+            ? { slides }
+            : {}),
         });
       }
       return out.sort((a, b) => b.at.localeCompare(a.at)).slice(0, RECENT_MAX);
@@ -223,6 +234,28 @@ export function recordDeckOpened(
 }
 
 /**
+ * Rewrites the facts of a deck this browser opened without touching its time (the polish round,
+ * docs/POLISH.md item 76): a rename from the card or the editor's title field reaches the
+ * mirror, so the card the mirror draws before the listing catches up reads the new name. A deck
+ * the record does not hold is left alone; a rename is not an open.
+ */
+export function updateDeckFacts(deckId: string, patch: Partial<DeckOpenFacts>): void {
+  try {
+    const map = readStored();
+    const previous = map[deckId];
+    if (previous === undefined || typeof previous === 'string') return;
+    map[deckId] = {
+      ...previous,
+      ...patch,
+      title: (patch.title ?? previous.title).slice(0, TITLE_MAX),
+    };
+    writeStored(prune(map));
+  } catch {
+    // private mode or storage full: the listing carries the name
+  }
+}
+
+/**
  * The trashed marker (docs/PRODUCT.md section 2 ranks 15 and 16; audit-seller 15, 16): File >
  * Move to trash in the editor writes the deck's id and title here before it leaves for /decks, so
  * the home page drops the deck from its Opened on this device row, shows "Moved to trash" with
@@ -234,6 +267,15 @@ export const TRASHED_KEY = 'turboslide:trashed';
 
 /** a marker older than this is stale and is removed unread */
 export const TRASHED_MAX_AGE_MS = 15_000;
+
+/**
+ * The window event the editor raises when its Move to trash write is refused after the page has
+ * left for /decks (docs/POLISH.md item 81; packages/chrome/src/EditorShell.tsx spells the same
+ * name): the home page shows the sentence and keeps the card. `detail` is `{ id, message }`.
+ */
+export const TRASH_REFUSED_EVENT = 'turboslide:trash-refused';
+
+export type TrashRefusedDetail = { id: string; message: string };
 
 export type TrashedMarker = { id: string; title: string; at: number; facts?: DeckOpenFacts };
 

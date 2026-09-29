@@ -176,7 +176,18 @@
 }
 
 .ts-share-row.is-link {
-  grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr) auto;
+  /* the words in one column and the buttons in the other (docs/POLISH.md item 96): the name on
+     the first line, the role and the dates on the second, nothing cut */
+  grid-template-columns: minmax(0, 1fr) auto;
+  height: auto;
+  min-height: 44px;
+  padding: 6px 10px;
+}
+
+.ts-share-row-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
 }
 
 .ts-share-row:last-child {

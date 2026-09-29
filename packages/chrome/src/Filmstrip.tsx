@@ -99,7 +99,15 @@ type CardFacts = {
 /** Where dragged cards would land: before or after a card, or first in a section. */
 type FilmDrop = { id: string; half: 'before' | 'after' } | { sectionId: string };
 
-type FilmMenu = { ids: string[]; x: number; y: number; anchor: HTMLElement; layout?: LayoutId };
+type FilmMenu = {
+  ids: string[];
+  x: number;
+  y: number;
+  anchor: HTMLElement;
+  layout?: LayoutId;
+  /** opened from the keyboard (Shift F10, Cmd Shift \): the first row lights for the arrows */
+  keyboard?: boolean;
+};
 
 /** Page Up and Page Down move this many cards. */
 const PAGE_STEP = 5;
@@ -375,6 +383,19 @@ export function Filmstrip({
   const readyRef = useRef(ready ?? true);
   readyRef.current = ready ?? true;
   const [follow] = useState(() => makeFollow(listRef, readyRef));
+  /* the belt under the ref callback (docs/POLISH.md item 107): End, Home, a duplicate and a
+     window API write left the current card out of view when the callback ran before the row's
+     box settled, so the current row is followed once more a frame after it changes */
+  useEffect(() => {
+    if (!active || typeof window === 'undefined') return undefined;
+    const frame = window.requestAnimationFrame(() => {
+      const el = listRef.current?.querySelector<HTMLElement>(
+        `.ts-card[data-id="${CSS.escape(active)}"]`,
+      );
+      if (el) follow(el);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [active, follow]);
   /* one observer over the list decides which cards hold a clone (SPEC-4 0.41) */
   const window_ = useNearWindow(listRef);
 
@@ -794,12 +815,17 @@ export function Filmstrip({
 
   const [menu, setMenu] = useState<FilmMenu | null>(null);
   const platform = detectPlatform();
-  const openMenu = (item: ShellItem, point: { x: number; y: number }, anchor: HTMLElement) => {
+  const openMenu = (
+    item: ShellItem,
+    point: { x: number; y: number },
+    anchor: HTMLElement,
+    keyboard = false,
+  ) => {
     if (!selectedRef.current.includes(item.id)) pickOne(item.id);
     const ids = order.filter((id) => selectedRef.current.includes(id) || id === item.id);
     const anchorId = ids.includes(active) ? active : (ids[0] ?? item.id);
     const facts = factsOf(items.get(anchorId) ?? item);
-    setMenu({ ids, x: point.x, y: point.y, anchor, layout: facts.template });
+    setMenu({ ids, x: point.x, y: point.y, anchor, layout: facts.template, keyboard });
     /* without the document the layout of a slide with no template is derived from its record,
        read through slide.get, so the Apply layout submenu checks the right row (SPEC 5.6) */
     if (edit.document === undefined && facts.template === undefined) {
@@ -901,7 +927,7 @@ export function Filmstrip({
     if ((event.key === 'F10' && event.shiftKey) || (meta && event.shiftKey && event.key === '\\')) {
       stop();
       const item = items.get(active);
-      if (item) openMenu(item, centerOf(target), target);
+      if (item) openMenu(item, centerOf(target), target, true);
       return;
     }
     if (meta && event.key.toLowerCase() === 'a' && !event.shiftKey) {
@@ -1088,6 +1114,7 @@ export function Filmstrip({
           onLayout={(layout) => applyLayoutTo(menu.ids, layout)}
           onSelect={(item) => runMenuItem(item, menu.ids)}
           onClose={() => setMenu(null)}
+          openedBy={menu.keyboard ? 'keyboard' : 'pointer'}
         />
       ) : null}
     </aside>

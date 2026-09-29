@@ -180,9 +180,19 @@ export const Route = createFileRoute('/api/render/$slideId')({
             return thumbResponse(thumb, request_, { revisionInUrl: request_.r !== null });
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            const status =
-              error instanceof RangeError || /no deck|no slide|ENOENT/.test(message) ? 404 : 502;
-            return Response.json({ error: { message, status } }, { status });
+            /* a thumbnail is a picture the page draws a plate for (docs/POLISH.md item 111): a
+               deck or slide that does not exist is 404; an unsaved draft and a capture that is
+               not rendered yet (the store or the worker busy, the render refused) are 204, so
+               the card keeps its title plate and asks again, and no load logs a 502 */
+            const missing =
+              (error instanceof RangeError && !/until its first write/.test(message)) ||
+              /no deck|no slide|ENOENT/.test(message);
+            if (missing) return Response.json({ error: { message, status: 404 } }, { status: 404 });
+            console.warn(`turboslide thumbnail: ${deckId}/${slideId} not rendered yet: ${message}`);
+            return new Response(null, {
+              status: 204,
+              headers: { 'cache-control': 'private, no-store', 'x-turboslide-thumb': 'pending' },
+            });
           }
         }
         // a granted request is a download: the picture, never the record

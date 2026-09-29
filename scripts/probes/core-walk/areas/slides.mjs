@@ -449,7 +449,9 @@ export async function run(t) {
       const before = await t.slideOrder();
       const c = await t.cardCenter(before[before.length - 1]);
       await t.rightClickAt(c.x, c.y);
-      await t.clickContextRow('edit.delete');
+      /* the polish round (docs/POLISH.md 2.6 item 73; audit-chrome item 49): the card's row is
+         Delete slide, the sheet's row, since the integrator's model.ts landed it */
+      await t.clickContextRow('slide.deleteSlide');
       order = await orderOf(before.length - 1);
       return {
         ok: order.length === before.length - 1,

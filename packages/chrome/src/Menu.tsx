@@ -518,9 +518,9 @@ function MenuList({
     }
   };
 
-  const onRowPointerEnter = (item: MenuItem) => (event: ReactPointerEvent<HTMLElement>) => {
-    if (event.pointerType === 'touch') return;
-    if (pointerRests()) return;
+  /* the pointer settled on a row: the roving focus and, after the hover delay, its submenu (or
+     the open one's close) */
+  const armRow = (item: MenuItem) => {
     window.clearTimeout(hoverTimer.current);
     if (isEnabled(item, context)) setFocusId(item.id);
     if (hasSubmenu(item, context, renderDynamic) && isEnabled(item, context)) {
@@ -530,6 +530,15 @@ function MenuList({
     } else if (openId !== null) {
       hoverTimer.current = window.setTimeout(() => closeSubmenu(false), SUBMENU_HOVER_MS);
     }
+  };
+  const onRowPointerEnter = (item: MenuItem) => (event: ReactPointerEvent<HTMLElement>) => {
+    if (event.pointerType === 'touch') return;
+    /* the entry a resting pointer made is left alone (item 74); the row arms on its first real
+       movement instead (onMouseMove below), so a person who right clicks and moves straight
+       into Apply layout still gets the submenu (the integrator's gate on the merged tree:
+       slides.layout.context-apply waited for it) */
+    if (pointerRests()) return;
+    armRow(item);
   };
 
   const openItem = openId === null ? undefined : visible.find((item) => item.id === openId);
@@ -637,7 +646,7 @@ function MenuList({
                   isEnabled(item, context)
                 ) {
                   pointerMoved.current = true;
-                  setFocusId(item.id);
+                  armRow(item);
                 }
                 if (isOpen || quiet) return;
                 tip.onMouseMove(event);

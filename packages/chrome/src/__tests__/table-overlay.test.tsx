@@ -115,6 +115,7 @@ function viewOf(over: Partial<EditorOverlayView> = {}): EditorOverlayView {
     deckGuides: null,
     draggingGuide: null,
     crop: null,
+    linkChip: null,
     sites: [],
     drawPoints: [],
     onHandleDown: vi.fn(),
@@ -129,6 +130,7 @@ function viewOf(over: Partial<EditorOverlayView> = {}): EditorOverlayView {
 
 function shellOf(over: {
   selectCells?: ReturnType<typeof vi.fn>;
+  focus?: ReturnType<typeof vi.fn>;
   commit?: ReturnType<typeof vi.fn>;
   dispatch?: ReturnType<typeof vi.fn>;
   advanced?: boolean;
@@ -142,7 +144,10 @@ function shellOf(over: {
       revision: 4,
       dispatch,
       ...(over.commit === undefined ? {} : { commit: over.commit }),
-      editor: over.selectCells === undefined ? {} : { selectCells: over.selectCells },
+      editor: {
+        ...(over.selectCells === undefined ? {} : { selectCells: over.selectCells }),
+        ...(over.focus === undefined ? {} : { focus: over.focus }),
+      },
     },
     /* the switch on unless a test says off: the test set above parks the handle.table.* families
        (the committed set lifted them at the objects round's ship), read by the family for every
@@ -313,6 +318,22 @@ describe('the heads', () => {
     expect(selectCells).toHaveBeenLastCalledWith('t', { r0: 1, c0: 0, r1: 1, c1: 2 });
   });
 
+  it('a click hands the focus to the stage root after the range, so the keys act on the range (docs/POLISH.md 2.2 item 7)', () => {
+    const calls: string[] = [];
+    const selectCells = vi.fn(() => calls.push('select'));
+    const focus = vi.fn(() => calls.push('focus'));
+    mount(viewOf(), shellOf({ selectCells, focus }));
+    const head = control('handle.t.head.row.1')!;
+    head.focus();
+    expect(document.activeElement).toBe(head);
+    fireEvent.click(head);
+    expect(calls).toEqual(['select', 'focus']);
+    /* the right click's menu opens over the range with the same hand off */
+    fireEvent.contextMenu(control('handle.t.head.row.0')!, { clientX: 300, clientY: 200 });
+    expect(focus).toHaveBeenCalledTimes(2);
+    hideTooltip();
+  });
+
   it('a right click on a row head lists Header row checked and the row commands; the click writes /rows once', () => {
     const dispatch = vi.fn(() => Promise.resolve({}));
     mount(viewOf(), shellOf({ dispatch }));
@@ -437,9 +458,11 @@ describe('the "+" at the edges', () => {
     ];
     expect(label).toBe('Add a column');
     expect(mutations.map((mutation) => mutation.path)).toEqual(['/columns', '/rows', '/pos']);
-    expect((mutations[2]?.value as { w: number }).w).toBe(1280);
+    /* the box grows to the content box's right edge (1463) and no further (docs/POLISH.md 2.2
+       item 9): 183 of the last column's 320, the audit's table ended at the sheet's edge */
+    expect((mutations[2]?.value as { w: number }).w).toBe(1143);
     expect((mutations[0]?.value as { width: number }[]).map((column) => column.width)).toEqual([
-      320, 320, 320, 320,
+      320, 320, 320, 183,
     ]);
     /* away from the edges the "+" goes */
     fireEvent.pointerMove(window, { clientX: 300, clientY: 150 });

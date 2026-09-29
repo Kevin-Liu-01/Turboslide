@@ -214,11 +214,9 @@
   max-width: 120px;
   object-fit: contain;
 }
-/* the footer text draws on every slide but the title (docs/PRODUCT.md 4.4): the stage carries
-   is-title-slide while a title slide is on (render/stage.ts renderStage, runtime.ts) */
-.ts-sheet .ts-stage.is-title-slide .ts-kit-footer {
-  display: none;
-}
+/* the footer text draws on the title slide too (docs/POLISH.md 2.5 item 49, B4's request R13 in
+   polish/build/b4.md, with the integrator's I3 in render/stage.ts bandForSlide: the brand panel's
+   sentence says every slide, and the sheet no longer hides it while is-title-slide is on) */
 .ts-sheet .ts-kit-footer {
   position: absolute;
   left: 200px;
@@ -902,11 +900,25 @@
   align-items: var(--table-valign, start);
   border-bottom: var(--table-rule, 1px) solid var(--hair);
 }
-.ts-sheet .table > .tr.header {
+/* the header row's display weight and ink rule draw only once the row holds text (docs/POLISH.md
+   2.1 item 3; Google draws equal borders on every row and a header is styling the seller adds):
+   the renderer marks such a row `has-text` (packages/render blocks/table.ts), and on the editor's
+   stage, whose markup is frozen while a cell is edited, the first character typed into an open
+   header cell draws it at once through `:has()`, so the heavy rule never sits between two blank
+   rows in the editor, the card, the show or the PDF */
+.ts-sheet .table > .tr.header.has-text,
+.ts-sheet.ts-editor .table > .tr.header:has(.td.ts-editing .para:not(:empty)) {
   font-family: var(--display);
   font-weight: 500;
   letter-spacing: -0.01em;
   border-bottom-color: var(--ink);
+}
+/* a table cell draws no prompt (docs/POLISH.md 2.1 item 1, Kevin's screenshot: "Type to add
+   text" wrapped in a narrow cell, grew the row and ran the guide grid past the ring); the cell
+   ring and the caret say where typing goes. The stage no longer appends one; a prompt that
+   reaches a cell by any other path takes no room */
+.ts-sheet .table .td .prompt {
+  display: none;
 }
 .ts-sheet .table .td {
   display: block;
@@ -1003,7 +1015,8 @@
   border-bottom-color: var(--table-rule-color, var(--hair));
   border-bottom-style: var(--table-rule-style, solid);
 }
-.ts-sheet .table > .tr.header {
+.ts-sheet .table > .tr.header.has-text,
+.ts-sheet.ts-editor .table > .tr.header:has(.td.ts-editing .para:not(:empty)) {
   border-bottom-color: var(--ink);
 }
 

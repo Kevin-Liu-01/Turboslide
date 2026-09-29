@@ -1,0 +1,811 @@
+[
+  {
+    "n": 1,
+    "step": "new deck",
+    "at": "2026-09-28T22:36:18.311Z",
+    "id": "untitled-20260928-x4ao",
+    "url": "http://localhost:4442/edit/untitled-20260928-x4ao"
+  },
+  {
+    "n": 2,
+    "step": "S1 insert 3x3",
+    "at": "2026-09-28T22:36:24.147Z",
+    "words": "3 x 3",
+    "id": "table",
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "k": 0.705,
+    "font": {
+      "family": "Inter, \"Inter Fallback\", \"Helvetica Neue",
+      "weight": "400",
+      "rule": "1px rgba(7, 7, 7, 0.18)",
+      "classes": "tr header"
+    },
+    "prompts": {
+      "elements": 0,
+      "drawn": 0
+    },
+    "shot": "after-01-3x3-inserted-header-rule.png",
+    "ring": null,
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 114.91497802734375
+    },
+    "gapRingToLastRule": null,
+    "cellRing": null,
+    "rangeRing": null,
+    "editing": false,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1
+    ],
+    "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row0Font": "20px"
+  },
+  {
+    "n": 3,
+    "step": "S1 hover cell 1,1 of the empty table: no prompt",
+    "at": "2026-09-28T22:36:25.026Z",
+    "prompts": {
+      "elements": 1,
+      "drawn": 0
+    },
+    "ring": null,
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 114.91497802734375
+    },
+    "gapRingToLastRule": null,
+    "cellRing": null,
+    "rangeRing": null,
+    "editing": false,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1
+    ],
+    "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row0Font": "20px",
+    "shot": "after-02-3x3-hover-cell-no-prompt.png"
+  },
+  {
+    "n": 4,
+    "step": "S1 type North into the header cell 0,0: the ink rule live",
+    "at": "2026-09-28T22:36:27.215Z",
+    "session": {
+      "row": 0,
+      "column": 0,
+      "run": "table/rows/0/cells/0"
+    },
+    "live": {
+      "font": {
+        "family": "Inter, \"Inter Fallback\", \"Helvetica Neue",
+        "weight": "500",
+        "rule": "1px rgb(7, 7, 7)",
+        "classes": "tr header"
+      },
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 114.9
+      },
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 114.91497802734375
+      },
+      "gapRingToLastRule": 0,
+      "cellRing": {
+        "x": 509.6,
+        "y": 311.4,
+        "w": 225.6,
+        "h": 38.1
+      },
+      "rangeRing": null,
+      "chip": "Table",
+      "editing": true,
+      "rowH": [
+        38.1,
+        38.1,
+        38.1
+      ],
+      "row0Rule": "1px solid rgb(7, 7, 7)",
+      "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+      "row0Font": "20px"
+    },
+    "s1": "after-03-3x3-header-north-session.png",
+    "after": {
+      "font": {
+        "family": "Inter, \"Inter Fallback\", \"Helvetica Neue",
+        "weight": "500",
+        "rule": "1px rgb(7, 7, 7)",
+        "classes": "tr header has-text"
+      },
+      "ring": null,
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 114.91497802734375
+      },
+      "gapRingToLastRule": null,
+      "cellRing": null,
+      "rangeRing": null,
+      "editing": false,
+      "rowH": [
+        38.1,
+        38.1,
+        38.1
+      ],
+      "row0Rule": "1px solid rgb(7, 7, 7)",
+      "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+      "row0Font": "20px"
+    },
+    "s2": "after-04-3x3-header-north-escaped.png",
+    "cells": [
+      "North",
+      "",
+      ""
+    ]
+  },
+  {
+    "n": 5,
+    "step": "S2 insert 10x10",
+    "at": "2026-09-28T22:36:32.905Z",
+    "words": "10 x 10",
+    "id": "table",
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 541,
+      "z": 2
+    },
+    "cellW": 67.6800537109375,
+    "prompts": {
+      "elements": 0,
+      "drawn": 0
+    },
+    "ring": null,
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 381.40496826171875
+    },
+    "gapRingToLastRule": null,
+    "cellRing": null,
+    "rangeRing": null,
+    "editing": false,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1
+    ],
+    "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row0Font": "20px"
+  },
+  {
+    "n": 6,
+    "step": "S2 10x10: hover the last cell of row 2, then the first cell",
+    "at": "2026-09-28T22:36:35.034Z",
+    "before": [
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1
+    ],
+    "onLast": {
+      "prompts": {
+        "elements": 1,
+        "drawn": 0
+      },
+      "ring": null,
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 381.40496826171875
+      },
+      "gapRingToLastRule": null,
+      "cellRing": null,
+      "rangeRing": null,
+      "editing": false,
+      "rowH": [
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1
+      ],
+      "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
+      "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+      "row0Font": "20px"
+    },
+    "s1": "after-05-10x10-hover-last-cell.png",
+    "onFirst": {
+      "prompts": {
+        "elements": 1,
+        "drawn": 0
+      },
+      "ring": null,
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 381.40496826171875
+      },
+      "gapRingToLastRule": null,
+      "cellRing": null,
+      "rangeRing": null,
+      "editing": false,
+      "rowH": [
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1
+      ],
+      "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
+      "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+      "row0Font": "20px"
+    },
+    "s2": "after-06-10x10-hover-first-cell.png",
+    "rowsGrew": false
+  },
+  {
+    "n": 7,
+    "step": "S2 10x10: one click on the last cell of row 2, type a word",
+    "at": "2026-09-28T22:36:37.099Z",
+    "live": {
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 381.4
+      },
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 381.40496826171875
+      },
+      "gapRingToLastRule": 0,
+      "cellRing": {
+        "x": 1118.7,
+        "y": 349.5,
+        "w": 67.7,
+        "h": 38.1
+      },
+      "rangeRing": null,
+      "chip": "Table",
+      "editing": true,
+      "rowH": [
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1
+      ],
+      "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
+      "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+      "row0Font": "20px"
+    },
+    "s1": "after-07-10x10-typed-in-narrow-cell.png",
+    "after": {
+      "ring": null,
+      "table": {
+        "x": 509.5999755859375,
+        "y": 310.69000244140625,
+        "w": 676.7999267578125,
+        "h": 381.40496826171875
+      },
+      "gapRingToLastRule": null,
+      "cellRing": null,
+      "rangeRing": null,
+      "editing": false,
+      "rowH": [
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1,
+        38.1
+      ],
+      "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
+      "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+      "row0Font": "20px"
+    },
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 541,
+      "z": 2
+    }
+  },
+  {
+    "n": 8,
+    "step": "S3 insert 3x3 then 20x20 under it",
+    "at": "2026-09-28T22:36:45.848Z",
+    "first": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "words20": "20 x 20",
+    "second": {
+      "x": 320,
+      "y": 421,
+      "w": 960,
+      "h": 1081,
+      "z": 3
+    },
+    "rowsDrawnSheetPx": 1080,
+    "rows": 20,
+    "shot": "after-08-20x20-under-3x3-inserted.png",
+    "ring": null,
+    "table": {
+      "x": 509.5999755859375,
+      "y": 453.80499267578125,
+      "w": 676.7999267578125,
+      "h": 762.1050415039062
+    },
+    "gapRingToLastRule": null,
+    "cellRing": null,
+    "rangeRing": null,
+    "editing": false,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1
+    ],
+    "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row0Font": "20px"
+  },
+  {
+    "n": 9,
+    "step": "S4 insert 1x1: pos.y",
+    "at": "2026-09-28T22:36:52.233Z",
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 55,
+      "z": 2
+    },
+    "shot": "after-09-1x1-inserted.png"
+  },
+  {
+    "n": 10,
+    "step": "S4 insert 1x2: pos.y",
+    "at": "2026-09-28T22:36:55.317Z",
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 109,
+      "z": 2
+    },
+    "shot": null
+  },
+  {
+    "n": 11,
+    "step": "S4 insert 3x3: pos.y",
+    "at": "2026-09-28T22:36:58.527Z",
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "shot": null
+  },
+  {
+    "n": 12,
+    "step": "S4 placement",
+    "at": "2026-09-28T22:36:58.528Z",
+    "ys": {
+      "1x1": {
+        "x": 320,
+        "y": 218,
+        "w": 960,
+        "h": 55,
+        "z": 2
+      },
+      "1x2": {
+        "x": 320,
+        "y": 218,
+        "w": 960,
+        "h": 109,
+        "z": 2
+      },
+      "3x3": {
+        "x": 320,
+        "y": 218,
+        "w": 960,
+        "h": 163,
+        "z": 2
+      }
+    },
+    "sameY": true
+  },
+  {
+    "n": 13,
+    "step": "S4 insert 3x3 for the edge",
+    "at": "2026-09-28T22:37:00.823Z",
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    }
+  },
+  {
+    "n": 14,
+    "step": "S4 edge \"+\" on the right edge, once",
+    "at": "2026-09-28T22:37:05.517Z",
+    "before": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "add": {
+      "shown": true,
+      "id": "handle.table.add.column"
+    },
+    "after": {
+      "x": 320,
+      "y": 218,
+      "w": 1143,
+      "h": 163,
+      "z": 2
+    },
+    "right": 1463,
+    "columns": [
+      {
+        "width": 320
+      },
+      {
+        "width": 320
+      },
+      {
+        "width": 320
+      },
+      {
+        "width": 183
+      }
+    ],
+    "shot": "after-10-edge-add-column-first.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 805.8,
+      "h": 114.9
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 805.81494140625,
+      "h": 114.91497802734375
+    },
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1
+    ],
+    "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row0Font": "20px"
+  },
+  {
+    "n": 15,
+    "step": "S4 edge \"+\" on the right edge, second: the width kept and split",
+    "at": "2026-09-28T22:37:08.788Z",
+    "before": {
+      "x": 320,
+      "y": 218,
+      "w": 1143,
+      "h": 163,
+      "z": 2
+    },
+    "add": {
+      "shown": true,
+      "id": "handle.table.add.column"
+    },
+    "after": {
+      "x": 320,
+      "y": 218,
+      "w": 1143,
+      "h": 163,
+      "z": 2
+    },
+    "columnsBefore": 4,
+    "columns": [
+      {
+        "width": 256
+      },
+      {
+        "width": 256
+      },
+      {
+        "width": 256
+      },
+      {
+        "width": 146.4
+      },
+      {
+        "width": 228.6
+      }
+    ],
+    "shot": "after-11-edge-add-column-second.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 805.8,
+      "h": 114.9
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 805.81494140625,
+      "h": 114.91497802734375
+    },
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1
+    ],
+    "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row0Font": "20px"
+  },
+  {
+    "n": 16,
+    "step": "S4 move the table to the content box bottom, edge \"+\" on the bottom edge",
+    "at": "2026-09-28T22:37:15.898Z",
+    "moved": {
+      "x": 320,
+      "y": 608,
+      "w": 1143,
+      "h": 163,
+      "z": 2
+    },
+    "add": {
+      "shown": true,
+      "id": "handle.table.add.row"
+    },
+    "rowsBefore": 3,
+    "rows": 4,
+    "after": {
+      "x": 320,
+      "y": 554,
+      "w": 1143,
+      "h": 217,
+      "z": 2
+    },
+    "bottom": 771,
+    "shot": "after-12-edge-add-row-at-bottom.png",
+    "ring": {
+      "x": 509.6,
+      "y": 547.6,
+      "w": 805.8,
+      "h": 153
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 547.5699462890625,
+      "w": 805.81494140625,
+      "h": 152.98504638671875
+    },
+    "gapRingToLastRule": 0,
+    "cellRing": null,
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1,
+      38.1
+    ],
+    "row0Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row1Rule": "1px solid rgba(7, 7, 7, 0.18)",
+    "row0Font": "20px"
+  },
+  {
+    "n": 17,
+    "step": "S5 insert 3x3, fill row 2 through the API",
+    "at": "2026-09-28T22:37:23.448Z",
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "rows": [
+      [
+        "",
+        "",
+        ""
+      ],
+      [
+        "Alpha",
+        "Beta",
+        "Gamma"
+      ],
+      [
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  {
+    "n": 18,
+    "step": "S5 click row 2 head, then Delete",
+    "at": "2026-09-28T22:37:27.041Z",
+    "error": "Error: page.evaluate: Execution context was destroyed, most likely because of a navigation",
+    "shot": "after-13-s5-click-row-2-head-then-delete-error.png"
+  },
+  {
+    "n": 19,
+    "step": "S5 Cmd+Z, click row 2 head, Cmd+B",
+    "at": "2026-09-28T22:37:27.747Z",
+    "error": "Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'studio')",
+    "shot": "after-14-s5-cmd-z-click-row-2-head-cmd-b-error.png"
+  },
+  {
+    "n": 20,
+    "step": "S5 header range, Center from the tail",
+    "at": "2026-09-28T22:37:32.182Z",
+    "tail": true,
+    "columns": [
+      {},
+      {},
+      {}
+    ],
+    "shot": "after-15-header-range-center.png"
+  },
+  {
+    "n": 21,
+    "step": "the show on S1",
+    "at": "2026-09-28T22:37:38.162Z",
+    "rows": [],
+    "shot": "after-16-show-3x3-north.png"
+  },
+  {
+    "n": 22,
+    "step": "the show on S4 (empty header)",
+    "at": "2026-09-28T22:37:44.012Z",
+    "rows": [
+      {
+        "cls": "tr header has-text",
+        "rule": "1px rgb(7, 7, 7)",
+        "weight": "500"
+      },
+      {
+        "cls": "tr",
+        "rule": "1px rgba(7, 7, 7, 0.18)",
+        "weight": "400"
+      },
+      {
+        "cls": "tr",
+        "rule": "1px rgba(7, 7, 7, 0.18)",
+        "weight": "400"
+      }
+    ],
+    "shot": "after-17-show-empty-header.png"
+  },
+  {
+    "n": 23,
+    "step": "the filmstrip card of S1",
+    "at": "2026-09-28T22:37:44.013Z",
+    "kind": "clone",
+    "rows": [
+      {
+        "cls": "tr header has-text",
+        "rule": "1px rgb(7, 7, 7)"
+      },
+      {
+        "cls": "tr",
+        "rule": "1px rgba(7, 7, 7, 0.18)"
+      }
+    ]
+  },
+  {
+    "n": 24,
+    "step": "console errors",
+    "at": "2026-09-28T22:37:44.013Z",
+    "count": 10,
+    "first": [
+      "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4442/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 26103 MB free of 1902738 MB",
+      "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4442/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ulttyhs-a6cb29 render] turboslide render all --deck /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/decks/u",
+      "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4442/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ulttyhs-a6cb29 render] render: 1 slide(s) x light at 1x with Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Ma",
+      "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4442/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ulttyhs-a6cb29 render]    1 title light ready 5 ms, shot 46 ms",
+      "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4442/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker ulttyhs-a6cb29 render] render: 1 record(s) in 2.3 s -> /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide/.tur"
+    ]
+  }
+]

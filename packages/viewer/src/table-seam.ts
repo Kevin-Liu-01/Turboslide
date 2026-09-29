@@ -9,7 +9,9 @@
 // moved row takes its drawn height plus the drag, never below its text, the others keep theirs)
 // and the table's `pos.h` in the same commit, so the rows below move down and the seam under the
 // last row grows the table. Both are the layout's `col-seam` kind with a `blockId` and an
-// `index`; the row seam carries `axis: 'y'` and the window API id `handle.<block>.row.<n>`. The
+// `index`; the row seam carries `axis: 'y'` and the window API id `handle.<block>.row.<n>`; the
+// label a tooltip reads is the gesture alone, "Column seam 2", never the block's id (docs/POLISH.md
+// 2.6 item 60: a seller read "table-2: Column seam 2" and a hash on a pasted table). The
 // overlay draws a `v` handle as a vertical rule and tells a row seam by its axis (Overlay.tsx);
 // the Editor tells a table seam from the layout's by the block (Gestures.tsx `Handle.blockId`,
 // "absent for the slide-level handles") and routes the drag by the axis through
@@ -88,7 +90,7 @@ export function tableSeamHandles(
     blockId: block.id,
     index,
     cursor: 'col-resize',
-    label: `${block.id}: Column seam ${index + 1}`,
+    label: `Column seam ${index + 1}`,
     control: `handle.${block.id}.column.${index}`,
     shape: 'v',
     axis: 'x',
@@ -137,7 +139,7 @@ export function tableRowSeamHandles(
     blockId: block.id,
     index,
     cursor: 'ns-resize',
-    label: `${block.id}: Row seam ${index + 1}`,
+    label: `Row seam ${index + 1}`,
     control: `handle.${block.id}.row.${index}`,
     shape: 'v',
     axis: 'y',

@@ -1,0 +1,12 @@
+/* The table's own controls, the part of their look this lane owns (docs/POLISH.md 2.2 item 7;
+   TableOverlay.tsx). The layer, the cell ring, the head bands and the "+" circles are drawn by
+   Overlay.css beside the other overlay parts; the rules here refine the head band's keyboard
+   focus. A click on a head hands the focus to the stage root, so the band never keeps a focus
+   box beside the table after the click (audit-tables item 19); a keyboard user who tabs onto a
+   head sees the band's own plate tone and hairline, the hover look, and never the browser's
+   outline, which drew a grey box with a black rule over the range the click had selected. */
+.ts-table-tools .ts-table-head:focus-visible {
+  outline: none;
+  border-color: var(--pt-hair);
+  background: var(--pt-plate);
+}

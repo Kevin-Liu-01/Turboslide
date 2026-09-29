@@ -26,6 +26,8 @@ import {
   tableRowHeight,
   tableRowTrack,
   tableRowsFloor,
+  tableRowsThatFit,
+  tableCellStyleSchema,
 } from './table.ts';
 import type { TableBlock, TableCommand } from './table.ts';
 
@@ -430,5 +432,58 @@ describe('the rows and the box', () => {
     expect(rowsAfterSeamDrag(table, measure, -1, 30)).toBeNull();
     expect(rowsAfterSeamDrag(table, { top: 1, rows: [] }, 0, 30)).toBeNull();
     expect(rowsAfterSeamDrag(table, measure, 0, Number.NaN)).toBeNull();
+  });
+});
+
+// The polish round (docs/POLISH.md 2.2 items 6 and 10; section 5.5): the insert's box is the rows'
+// floor at every size of the ladder, the rows a room holds, and a cell's own alignment.
+describe('the polish round', () => {
+  it('sizes the insert’s box as the empty table’s floor at every ladder size, so the box is never shorter than its rows', () => {
+    for (const size of TABLE_SIZES)
+      for (const rows of [1, 2, 3, 5, 12, TABLE_MAX_ROWS]) {
+        const table = { ...emptyTable('t', 4, rows), size };
+        expect(tableBoxHeight(rows, size), `${rows} rows at ${size}`).toBe(
+          Math.ceil(Math.round(tableRowsFloor(table) * 100) / 100),
+        );
+      }
+    /* the 20 by 20 pick Kevin's audit landed in a 208 px box (audit-tables item 6) */
+    expect(tableBoxHeight(20)).toBe(1081);
+  });
+
+  it('counts the rows a room holds: 13 in the content box at 15 px, 11 at 20 px, 1 at least, the cap at most', () => {
+    expect(tableRowsThatFit(642)).toBe(13);
+    expect(tableRowsThatFit(642, 20)).toBe(11);
+    expect(tableRowsThatFit(553, 20)).toBe(10);
+    expect(tableRowsThatFit(30)).toBe(1);
+    expect(tableRowsThatFit(0)).toBe(1);
+    expect(tableRowsThatFit(Number.NaN)).toBe(1);
+    expect(tableRowsThatFit(100_000)).toBe(TABLE_MAX_ROWS);
+  });
+
+  it('parses a cell’s own alignment and keeps a cell styled by its alignment alone through a fill clear', () => {
+    expect(
+      tableCellStyleSchema.safeParse({ row: 0, column: 1, align: 'center' }).success,
+    ).toBe(true);
+    expect(
+      tableCellStyleSchema.safeParse({ row: 0, column: 1, align: 'justify' }).success,
+    ).toBe(false);
+    const table: TableBlock = {
+      ...emptyTable('t', 2, 2),
+      cells: [{ row: 0, column: 0, align: 'center', fill: 'plate' }],
+    };
+    expect(tableBlockSchema.safeParse(table).success).toBe(true);
+    const cleared = applyTableCommand(table, { kind: 'cellStyle', cells: [[0, 0]], fill: null });
+    if ('deleted' in cleared) throw new Error('fixture');
+    expect(cleared.cells).toEqual([{ row: 0, column: 0, align: 'center' }]);
+    const filled = applyTableCommand(table, {
+      kind: 'cellStyle',
+      cells: [[1, 1]],
+      fill: 'plate',
+    });
+    if ('deleted' in filled) throw new Error('fixture');
+    expect(filled.cells).toEqual([
+      { row: 0, column: 0, align: 'center', fill: 'plate' },
+      { row: 1, column: 1, fill: 'plate' },
+    ]);
   });
 });

@@ -1,4 +1,10 @@
-import type { CellBorder, TableBlock, TableSpan } from '@turboslide/schema/blocks/table';
+import type {
+  CellBorder,
+  TableAlign,
+  TableBlock,
+  TableCellStyle,
+  TableSpan,
+} from '@turboslide/schema/blocks/table';
 import {
   applyTableCommand,
   columnShares,
@@ -6,9 +12,11 @@ import {
   spanAt,
   TABLE_MAX_COLUMNS,
   TABLE_MAX_ROWS,
+  TABLE_MIN_COLUMN_PX,
 } from '@turboslide/schema/blocks/table';
 import type { Color } from '@turboslide/schema/color';
 import type { Position } from '@turboslide/schema/position';
+import { CONTENT_BOX } from '@turboslide/schema/render';
 
 import type { EditorSelection } from './editor-shell';
 import type { MenuActionId } from './menus/model';
@@ -24,7 +32,9 @@ import type { MenuActionId } from './menus/model';
  * Tab and Shift+Tab across merged cells (`nextCell`), the range arithmetic the sections share, the
  * facts the menu context reads (`isMergedAnchor`), and the table's own controls of the objects
  * round (docs/OBJECTS.md 3.3 item 4): the range a row or column head names (`headRange`), the
- * header row toggle (`toggleHeader`) and the one commit of the edge "+" (`edgeInsert`). No React,
+ * header row toggle (`toggleHeader`) and the one commit of the edge "+" (`edgeInsert`, which
+ * since the polish round keeps the table inside the content box, docs/POLISH.md 2.2 item 9); and
+ * the cells' own alignment a range or a session writes (`cellsWithAlign`, item 10). No React,
  * no DOM.
  */
 export type TableCommandId =
@@ -414,15 +424,37 @@ export type EdgeInsert = {
   writes: { path: string; value?: unknown }[];
   /** the table's box after the insert */
   pos: Position;
+  /** how the box changed: grown along the edge, kept with the new column an equal share, or grown up because the room below was gone */
+  box: 'grown' | 'kept' | 'grown-up';
+};
+
+/** The edges a table's box stays inside when the "+" grows it, in sheet px: the content box's. */
+export type EdgeBounds = { top: number; right: number; bottom: number };
+
+/** The content box's edges (grammar.md "The sheet": 137, 129, 1326 by 642), the default bounds. */
+export const CONTENT_EDGES: EdgeBounds = {
+  top: CONTENT_BOX[1],
+  right: CONTENT_BOX[0] + CONTENT_BOX[2],
+  bottom: CONTENT_BOX[1] + CONTENT_BOX[3],
 };
 
 /**
  * The one commit the edge "+" makes (docs/OBJECTS.md 3.3 item 4; the row
- * `tables.edge.add-row-column`: "the widths of the others hold"): a column right of the last one
- * as wide as the last column drawn (`size` px), the table's `pos.w` grown by it, so every other
- * column keeps its width; or a row under the last one, `pos.h` grown by the last row's drawn
- * height. Every column takes its drawn width in px so the grid stays proportional after the box
- * grows (`columnShares`). `total` is the table's drawn width. Null on a full table.
+ * `tables.edge.add-row-column`: "the widths of the others hold"; docs/POLISH.md 2.2 item 9, the
+ * row `tables.edge.stays-inside-sheet`): a column right of the last one as wide as the last
+ * column drawn (`size` px), the table's `pos.w` grown by it, so every other column keeps its
+ * width; or a row under the last one, `pos.h` grown by the last row's drawn height. Every column
+ * takes its drawn width in px so the grid stays proportional after the box grows
+ * (`columnShares`). `total` is the table's drawn width.
+ *
+ * The box never leaves the content box (`bounds`): a column grows the box only as far as the
+ * content box's right edge, the new column as wide as that room (a 960 wide table at x 320 grows
+ * 183 to end at 1463, not 320 to end at the sheet's edge); with less than a column's minimum
+ * width of room the column is inserted at the table's width and every column takes an equal
+ * share of it, as Google's Insert column does. A row grows the box down as far as the content
+ * box's bottom, then up as far as its top, so the rows keep their tracks inside the ring and the
+ * ring stays on the slide; a table taller than the content box grows past its bottom, as
+ * Google's does. Null on a full table.
  */
 export function edgeInsert(
   block: TableBlock,
@@ -430,13 +462,28 @@ export function edgeInsert(
   axis: HeadAxis,
   size: number,
   total: number,
+  bounds: EdgeBounds = CONTENT_EDGES,
 ): EdgeInsert | null {
-  const grow = Math.max(1, Math.round(size));
+  const want = Math.max(1, Math.round(size));
   if (axis === 'column') {
     if (block.columns.length >= TABLE_MAX_COLUMNS) return null;
     const at = block.columns.length - 1;
     const edited = applyTableCommand(block, { kind: 'insertColumns', at, where: 'right' });
     if ('deleted' in edited) return null;
+    const room = Math.floor(bounds.right - (pos.x + pos.w));
+    const grow = Math.min(want, room);
+    if (grow < TABLE_MIN_COLUMN_PX) {
+      /* no room beside the table: the column takes an equal share of the table's width */
+      return {
+        writes: [
+          { path: '/columns', value: edited.columns },
+          { path: '/rows', value: edited.rows },
+          ...spanAndCellWrites(block, edited),
+        ],
+        pos,
+        box: 'kept',
+      };
+    }
     const shares = columnShares(block.columns, total);
     const columns = edited.columns.map((column, index) => ({
       ...column,
@@ -450,12 +497,20 @@ export function edgeInsert(
         { path: '/pos', value: { ...pos, w: pos.w + grow } },
       ],
       pos: { ...pos, w: pos.w + grow },
+      box: 'grown',
     };
   }
   if (block.rows.length >= TABLE_MAX_ROWS) return null;
   const at = block.rows.length - 1;
   const edited = applyTableCommand(block, { kind: 'insertRows', at, where: 'below' });
   if ('deleted' in edited) return null;
+  const roomBelow = Math.max(0, Math.floor(bounds.bottom - (pos.y + pos.h)));
+  const down = Math.min(want, roomBelow);
+  const roomAbove = Math.max(0, Math.floor(pos.y - bounds.top));
+  const up = Math.min(want - down, roomAbove);
+  /* a table with no room either way still holds its rows: the box grows past the bottom */
+  const past = want - down - up;
+  const next: Position = { ...pos, y: pos.y - up, h: pos.h + down + up + past };
   return {
     writes: [
       { path: '/rows', value: edited.rows },
@@ -463,9 +518,10 @@ export function edgeInsert(
         ? []
         : [{ path: '/columns', value: edited.columns }]),
       ...spanAndCellWrites(block, edited),
-      { path: '/pos', value: { ...pos, h: pos.h + grow } },
+      { path: '/pos', value: next },
     ],
-    pos: { ...pos, h: pos.h + grow },
+    pos: next,
+    box: up > 0 ? 'grown-up' : 'grown',
   };
 }
 
@@ -488,6 +544,52 @@ function spanAndCellWrites(
       edited.cells === undefined ? { path: '/cells' } : { path: '/cells', value: edited.cells },
     );
   return out;
+}
+
+/**
+ * True when the range covers whole columns (every row of each column): the range a column head
+ * names, or a drag down a column. Alignment on such a range keeps writing the column
+ * (`columns[].align`), so a column's setting stays one field; on any other range or on the
+ * caret's cell it writes the cells (docs/POLISH.md 2.2 item 10).
+ */
+export function rangeIsWholeColumns(
+  block: Pick<TableBlock, 'rows'>,
+  range: CellRange,
+): boolean {
+  return Math.min(range.r0, range.r1) === 0 && Math.max(range.r0, range.r1) === block.rows.length - 1;
+}
+
+/**
+ * The `cells` field with `align` written on every cell of `range` (the covered cells of a merge
+ * skipped, since the anchor draws them), the other styles of those cells kept, a cell whose
+ * style is then empty dropped; `undefined` when no cell keeps a style, so the write removes the
+ * field. `null` clears the cells' own alignment and lets the column's show again. The alignment
+ * rows of the toolbar tail and Format > Align write this on a range or a session
+ * (docs/POLISH.md 2.2 item 10, the row `tables.range.align-cells-only`), and the renderer reads
+ * a cell's `align` before its column's.
+ */
+export function cellsWithAlign(
+  block: TableBlock,
+  range: CellRange,
+  align: TableAlign | null,
+): TableCellStyle[] | undefined {
+  const ordered = rangeOf(block, { cells: range });
+  if (ordered === null) return block.cells;
+  const targets = new Set(cellsInRange(block, ordered).map(([r, c]) => `${r},${c}`));
+  const kept: TableCellStyle[] = (block.cells ?? [])
+    .filter((cell) => !targets.has(`${cell.row},${cell.column}`))
+    .map((cell) => ({ ...cell }));
+  for (const key of targets) {
+    const [row, column] = key.split(',').map(Number) as [number, number];
+    const own = (block.cells ?? []).find((cell) => cell.row === row && cell.column === column);
+    const next: TableCellStyle = { ...(own ?? { row, column }) };
+    if (align === null) delete next.align;
+    else next.align = align;
+    if (next.fill === undefined && next.border === undefined && next.align === undefined) continue;
+    kept.push(next);
+  }
+  if (kept.length === 0) return undefined;
+  return kept.sort((a, b) => a.row - b.row || a.column - b.column);
 }
 
 /** The style of one cell, as stored: fill and border, or nothing. */

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Block } from '@turboslide/schema/blocks';
 import type { Slide } from '@turboslide/schema/deck';
+import { tableBoxHeight } from '@turboslide/schema/blocks/table';
 import { CONTENT_BOX, SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 
 import {
@@ -304,5 +305,60 @@ describe('wantsPlacement', () => {
     expect(wantsPlacement({ slot: 'body', block: { type: 'table' } })).toBe(false);
     expect(wantsPlacement({ slot: 'main', block: { type: 'shot', pos } })).toBe(false);
     expect(wantsPlacement({ slot: 'main', block: { type: 'text', pos } })).toBe(false);
+  });
+});
+
+/* The polish round (docs/POLISH.md 2.2 items 6 and 8; section 5.5): a table's box is never
+   shorter than its rows, and every insert of a kind lands by one rule. */
+describe('placeInsert, the polish round', () => {
+  it('lands 1 by 1, 1 by 2 and 3 by 3 at the same top of the body (tables.insert.one-placement-rule)', () => {
+    const ys = [1, 2, 3].map(
+      (rows) => placeInsert(titleAndBody(), 'table', [960, tableBoxHeight(rows)]).pos.y,
+    );
+    expect(ys).toEqual([CY + 48 + INSERT_GAP, CY + 48 + INSERT_GAP, CY + 48 + INSERT_GAP]);
+    /* each at its rows' floor, none shrunk, centred across the body */
+    for (const rows of [1, 2, 3]) {
+      const placed = placeInsert(titleAndBody(), 'table', [960, tableBoxHeight(rows)]);
+      expect(placed.how).toBe('free');
+      expect(placed.shrunk).toBe(false);
+      expect(placed.pos.h).toBe(tableBoxHeight(rows));
+      expect(placed.pos.x).toBe(CX + (CW - 960) / 2);
+    }
+  });
+
+  it('lands a table taller than the room at the room’s top at its full height (tables.insert.box-never-shorter-than-rows)', () => {
+    /* twenty rows under a title: 1081 px of rows in a 553 px body; the audit's 20 by 20 landed
+       as a 208 px box with the rows running off the slide */
+    const tall = placeInsert(titleAndBody(), 'table', [960, tableBoxHeight(20)]);
+    expect(tall.how).toBe('free');
+    expect(tall.pos.y).toBe(CY + 48 + INSERT_GAP);
+    expect(tall.pos.h).toBe(tableBoxHeight(20));
+    expect(tall.pos.w).toBe(960);
+    expect(tall.shrunk).toBe(false);
+    /* under an existing table the room below is shorter still: the table lands at the top of
+       that room at its full height, never shrunk to it */
+    const first = placeInsert(titleAndBody(), 'table', [960, tableBoxHeight(3)]);
+    const withTable = titleAndBody([table('t', { ...first.pos, z: 2 })]);
+    const second = placeInsert(withTable, 'table', [960, tableBoxHeight(12)]);
+    expect(second.how).toBe('free');
+    expect(second.pos.y).toBe(first.pos.y + first.pos.h + INSERT_GAP);
+    expect(second.pos.h).toBe(tableBoxHeight(12));
+    expect(overlaps(second.pos, first.pos)).toBe(false);
+  });
+
+  it('still shrinks a chart to the room on both axes and skips a rectangle under the minimum', () => {
+    const tall = canvas([
+      { id: 'h', type: 'heading', level: 'h2', text: 'Two lines', pos: { x: CX, y: CY, w: CW, h: 120 } },
+    ]);
+    const chart = placeInsert(tall, 'chart', [960, 540]);
+    expect(chart.pos.h).toBe(bodyRect(tall).h);
+    expect(chart.shrunk).toBe(true);
+    /* a strip under the minimum height is no rectangle for a table: the insert cascades */
+    const low = titleAndBody([
+      table('t', { x: CX, y: CY + 48 + INSERT_GAP, w: CW, h: CH - 48 - INSERT_GAP - 100, z: 2 }),
+    ]);
+    const placed = placeInsert(low, 'table', [960, tableBoxHeight(1)]);
+    expect(placed.how).toBe('cascade');
+    expect(placed.pos.h).toBe(tableBoxHeight(1));
   });
 });

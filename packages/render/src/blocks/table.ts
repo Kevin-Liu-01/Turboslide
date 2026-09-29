@@ -2,13 +2,20 @@
 // cells in the `.rows` idiom. The markup is a CSS grid, not a <table>: one `.table` root with a
 // hairline above, one `.tr` row per row (display grid over the column template, a rule under
 // every row, the header row at display weight 500 with an ink rule under it), one `.td` cell per
-// cell with `text-align` from its column, a plate fill when the column sets one, the vertical
-// alignment through `align-items`, tabular numerals, and the `.rows` size ladder. Every cell is
-// addressable through data-run "<blockId>/rows/<r>/cells/<c>" (the pointer the linter, find and
-// replace and the inline editor read, packages/lint/src/context.ts), and every paragraph of a
-// cell is its own `.para` span (SPEC 7.4), always, so the editor's cell contract has one shape. An
-// empty cell draws no prompt (docs/FEATURES.md 2.3 item 9): the editor's stage draws "Click to add
-// text" in the hovered empty cell alone, and the empty `.para` keeps a line box through CSS.
+// cell with `text-align` from its own style, else its column, a plate fill when the cell or the
+// column sets one, the vertical alignment through `align-items`, tabular numerals, and the `.rows`
+// size ladder. Every cell is addressable through data-run "<blockId>/rows/<r>/cells/<c>" (the
+// pointer the linter, find and replace and the inline editor read, packages/lint/src/context.ts),
+// and every paragraph of a cell is its own `.para` span (SPEC 7.4), always, so the editor's cell
+// contract has one shape. An empty cell draws no prompt anywhere (docs/POLISH.md 2.1 item 1,
+// Kevin's screenshot: the hovered prompt wrapped in a narrow cell and grew its row): the cell ring
+// and the caret say where typing goes, and the empty `.para` keeps a line box through CSS.
+//
+// The polish round (docs/POLISH.md 2.1 item 3, 2.2 item 10): the header row carries `has-text`
+// when one of its cells holds text, and the sheet draws the header's ink rule and display weight
+// from that class alone, so an inserted table reads as equal rows until the seller types a
+// heading (Google draws equal borders on every row); a cell's own `align` (`cells[].align`) is
+// read before its column's, so Center on a cell range centres those cells and not the column.
 //
 // Round two (SPEC-2 2.7): a row's `height` is written on its `.tr`; the table border's colour and
 // dash travel as `--table-rule-color` and `--table-rule-style`, weight 0 as `--table-rule: 0px`
@@ -39,6 +46,7 @@ import { isCoveredCell, spanAt } from '@turboslide/schema/blocks';
 import { colorCss } from '@turboslide/schema/color';
 import type { TableBorderWeight, TableCellStyle } from '@turboslide/schema/blocks/table';
 import { tableRowTrack } from '@turboslide/schema/blocks/table';
+import { plainOf } from '@turboslide/schema/text';
 import { classes, el, px, style } from '../html.ts';
 import { rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
@@ -52,9 +60,12 @@ export const TABLE_DEFAULT_SIZE = 20;
 export const TABLE_DEFAULT_BORDER: TableBorderWeight = 1;
 
 /**
- * The words the editor's stage draws in the hovered empty cell (docs/OBJECTS.md 3.3 item 7):
- * one click already places the caret, so the prompt names the next gesture. The renderer writes
- * no prompt; packages/viewer Editor.tsx `promptHoveredCell` appends it to the hovered cell alone.
+ * The words the editor's stage drew in the hovered empty cell until the polish round
+ * (docs/OBJECTS.md 3.3 item 7). A table cell draws no prompt now (docs/POLISH.md 2.1 item 1: the
+ * words wrapped in a cell of 160 px or less, grew the row and ran the guide grid past the ring),
+ * and the sheet hides any prompt appended to a cell (gt-ink-paper sheet.css). The constant stays
+ * exported only while packages/viewer Editor.tsx `promptHoveredCell` imports it; it leaves with
+ * that hunk (build/b2.md, the request to B1).
  */
 export const TABLE_CELL_PROMPT = 'Type to add text';
 
@@ -106,6 +117,11 @@ export function usesGridForm(block: BlockOf<'table'>): boolean {
 
 function cellStyleAt(block: BlockOf<'table'>, r: number, c: number): TableCellStyle | undefined {
   return (block.cells ?? []).find((cell) => cell.row === r && cell.column === c);
+}
+
+/** True when one cell of the row holds text past whitespace (the header's `has-text` class). */
+export function rowHasText(row: BlockOf<'table'>['rows'][number]): boolean {
+  return row.cells.some((cell) => plainOf(cell).trim() !== '');
 }
 
 /** The border declaration of one cell's rule in the grid form (SPEC-2 2.7.2, 2.7.3). */
@@ -164,8 +180,11 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
              a centre aligned cell and drew it across its whole row, over the other cells, in the
              editor, the show and the exports (audit-objects rows 97 and 85, the "one column at
              the whole table width"; measured on the checkout in docs/gslides-parity/return/build/b5.md) */
-          const align = column?.align;
-          const rule = grid ? cellRule(block, row.header === true, own) : undefined;
+          const align = own?.align ?? column?.align;
+          /* the grid form's header rule follows the same `has-text` rule as the classic form's */
+          const rule = grid
+            ? cellRule(block, row.header === true && rowHasText(row), own)
+            : undefined;
           return el(
             'span',
             {
@@ -189,9 +208,8 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
                   ? `${span.rows}x${span.columns}`
                   : undefined,
             },
-            /* an empty cell draws no prompt (docs/FEATURES.md 2.3 item 9; audit-objects 24): the
-               editor's stage appends "Click to add text" to the hovered empty cell alone, and the
-               empty `.para` keeps its line box through the sheet's CSS (block-css.ts) */
+            /* an empty cell draws no prompt, on the stage or anywhere (docs/POLISH.md 2.1
+               item 1): the empty `.para` keeps its line box through the sheet's CSS (block-css.ts) */
             cell === ''
               ? el('span', { class: 'para' }, '')
               : renderMultiline(cell, ctx, block, `/rows/${r}/cells/${c}`, true),
@@ -199,8 +217,21 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
         })
         .join('');
       /* a row's set height is its track's floor (the root's grid-template-rows above), never an
-         inline height that clipped a wrapped cell: Google's minimum row height */
-      return el('div', { class: classes('tr', row.header === true && 'header') }, cells);
+         inline height that clipped a wrapped cell: Google's minimum row height. The header row
+         carries `has-text` once a cell holds text: the sheet draws its ink rule and display
+         weight from that class, so an empty header row reads as any other row (docs/POLISH.md
+         2.1 item 3) */
+      return el(
+        'div',
+        {
+          class: classes(
+            'tr',
+            row.header === true && 'header',
+            row.header === true && rowHasText(row) && 'has-text',
+          ),
+        },
+        cells,
+      );
     })
     .join('');
   return el(

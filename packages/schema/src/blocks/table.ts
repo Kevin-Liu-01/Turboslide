@@ -45,8 +45,18 @@ export type TableSpan = { row: number; column: number; rows: number; columns: nu
 /** The border of one cell or of the table (SPEC-2 2.7.2, 2.7.3). */
 export type CellBorder = { color?: Color; weight?: TableBorderWeight; dash?: Dash };
 
-/** One styled cell (SPEC-2 2.7.2). */
-export type TableCellStyle = { row: number; column: number; fill?: Color; border?: CellBorder };
+/**
+ * One styled cell (SPEC-2 2.7.2): a fill, a border, and since the polish round its own alignment
+ * (docs/POLISH.md 2.2 item 10: Center on a cell range centres those cells and not the column;
+ * the renderer reads `align` here before the column's).
+ */
+export type TableCellStyle = {
+  row: number;
+  column: number;
+  fill?: Color;
+  border?: CellBorder;
+  align?: TableAlign;
+};
 
 export type TableBorder = { weight: TableBorderWeight; color?: Color; dash?: Dash };
 
@@ -131,6 +141,13 @@ export const tableCellStyleSchema = z.strictObject({
   column: gridIndex,
   fill: colorField('Cell fill', 'A plate fill behind the cell; none unless set.'),
   border: cellBorderSchema.optional(),
+  align: annotate(z.enum(TABLE_ALIGNS).optional(), {
+    label: 'Cell align',
+    control: 'select',
+    snap: TABLE_ALIGNS,
+    group: 'Block',
+    help: 'The text alignment of this cell; the column’s alignment unless set.',
+  }),
 }) satisfies z.ZodType<TableCellStyle>;
 
 export const tableBorderSchema = z.strictObject({
@@ -367,11 +384,26 @@ export function tableRowsFloor(block: Pick<TableFields, 'rows' | 'size' | 'borde
 
 /**
  * The box height Insert > Table gives a table of `rows` empty rows at the ladder `size` (the
- * width stays the tool's 960): `tableRowsFloor` of the empty table, whole px.
+ * width stays the tool's 960): `tableRowsFloor` of the empty table, whole px. The insert never
+ * shrinks it (docs/POLISH.md 2.2 item 6): a table taller than the free room lands at the room's
+ * top at this height and runs past the room, as Google's does.
  */
 export function tableBoxHeight(rows: number, size: number = 20): number {
   const count = Math.max(1, Math.min(TABLE_MAX_ROWS, Math.round(rows)));
-  return Math.ceil(tableRowHeight(size) * count + TABLE_RULE_DEFAULT_PX);
+  /* the sum to the hundredth first, so a float tail never costs a px (20 rows at 18 px) */
+  return Math.ceil(Math.round((tableRowHeight(size) * count + TABLE_RULE_DEFAULT_PX) * 100) / 100);
+}
+
+/**
+ * How many empty rows a `room` of sheet px holds at the ladder `size`, the hairline above
+ * included: 13 in the 642 px content box at 15 px (46.75 a row), 11 at 20 px. At least 1, at most
+ * the cap. The grid picker's size words name this count past it (docs/POLISH.md 2.2 item 6), so
+ * a seller picking twenty rows knows the table will run off the slide.
+ */
+export function tableRowsThatFit(room: number, size: number = 15): number {
+  if (!Number.isFinite(room) || room <= 0) return 1;
+  const rows = Math.floor((room - TABLE_RULE_DEFAULT_PX) / tableRowHeight(size));
+  return Math.max(1, Math.min(TABLE_MAX_ROWS, rows));
 }
 
 /**
@@ -834,7 +866,9 @@ export function applyTableCommand(
         else if (command.fill !== undefined) current.fill = command.fill;
         if (command.border === null) delete current.border;
         else if (command.border !== undefined) current.border = { ...command.border };
-        const empty = current.fill === undefined && current.border === undefined;
+        /* a cell whose only style is its alignment stays (docs/POLISH.md 2.2 item 10) */
+        const empty =
+          current.fill === undefined && current.border === undefined && current.align === undefined;
         if (index >= 0) {
           if (empty) working.cells.splice(index, 1);
           else working.cells[index] = current;

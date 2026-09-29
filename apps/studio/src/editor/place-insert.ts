@@ -9,6 +9,14 @@
 // the object cascades 40 by 40 from the last object, as Google's paste does, clamped inside the
 // sheet. The object sits at the top of its rectangle, centred across it, so a second insert has
 // the room under the first (a table centred in the body leaves two strips too thin for anything).
+//
+// The polish round (docs/POLISH.md 2.2 items 6 and 8): a table's box is never shorter than its
+// rows. Its wanted height is the rows' floor (schema `tableBoxHeight`), so a table taller than the
+// room lands at the top of the room at its full height and runs past it, as Google's does; only
+// its width shrinks to the room. And a rectangle is skipped only when the rectangle itself is
+// smaller than the kind's minimum, never because the wanted box is (a 1 by 1 table of 55 px
+// landed centred on the sheet while three rows landed at the body's top), so every insert of a
+// kind lands by one rule.
 // Pure: the controller measures the conversion and commits; nothing here reads the DOM.
 import type { Block } from '@turboslide/schema/blocks';
 import type { Slide } from '@turboslide/schema/deck';
@@ -33,9 +41,9 @@ export const CASCADE_STEP = 40;
 /** The box a chart wants when it shares the body slot with content (rank 1). */
 export const CHART_SHARED_SIZE: Size = [640, 360];
 /**
- * The smallest box an insert takes from a free rectangle before the slot counts as taken: a
- * chart under 320 by 160 has no room for its labels and legend, a table under 480 by 120 none
- * for three rows.
+ * The smallest free rectangle an insert takes before the slot counts as taken: a chart under
+ * 320 by 160 has no room for its labels and legend, a table under 480 by 120 none for two rows
+ * beside what is there. The rectangle is measured against these, never the wanted box.
  */
 export const INSERT_MIN_SIZE: Readonly<Record<PlacedKind, Size>> = {
   table: [480, 120],
@@ -187,11 +195,13 @@ const round = (value: number): number => Math.round(value);
  * The box an inserted table or chart takes on a canvas slide. `wanted` is the default box the
  * menu plan carried (its width and height); a chart that shares the slot with content wants
  * 640 by 360 at most. The object takes the free rectangle that gives it the most area, shrunk
- * to the rectangle on each axis when the rectangle is smaller, never below the kind's minimum;
- * it sits at the top of the rectangle, centred across it. When no rectangle holds the minimum
- * the slot is taken and the object cascades from the last object; an empty slide too small for
- * the minimum (never, on the 1600 by 900 sheet) centres it. `z` is left to the store action,
- * which puts the object on top of the stack.
+ * to the rectangle on each axis when the rectangle is smaller (a table on its width alone: its
+ * height is its rows' floor and never shrinks, docs/POLISH.md 2.2 item 6); a rectangle smaller
+ * than the kind's minimum is skipped (item 8); the object sits at the top of the rectangle,
+ * centred across it. When no rectangle holds the minimum the slot is taken and the object
+ * cascades from the last object; an empty slide too small for the minimum (never, on the 1600
+ * by 900 sheet) centres it. `z` is left to the store action, which puts the object on top of the
+ * stack.
  */
 export function placeInsert(slide: Slide, kind: PlacedKind, wanted: Size): Placement {
   const body = bodyRect(slide);
@@ -204,10 +214,13 @@ export function placeInsert(slide: Slide, kind: PlacedKind, wanted: Size): Place
   const [minW, minH] = INSERT_MIN_SIZE[kind];
   let best: { rect: Rect; w: number; h: number; score: number } | null = null;
   for (const rect of freeRectangles(body, occupied)) {
+    /* the rectangle's own room against the minimum, never the wanted box's (item 8) */
+    if (rect.w < minW || rect.h < minH) continue;
     const w = Math.min(wantW, rect.w);
-    const h = Math.min(wantH, rect.h);
-    if (w < minW || h < minH) continue;
-    const score = w * h;
+    /* a table keeps its rows' height; a taller table runs past the room (item 6) */
+    const h = kind === 'table' ? wantH : Math.min(wantH, rect.h);
+    /* the room the rectangle gives the box: a rectangle taller than the box scores no more */
+    const score = w * Math.min(wantH, rect.h);
     if (
       best === null ||
       score > best.score ||

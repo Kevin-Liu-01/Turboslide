@@ -55,7 +55,8 @@ describe('renderTable', () => {
     expect(html).toContain('data-type="table"');
     expect(html).toContain('role="table"');
     expect(html.match(/<div class="tr/g)?.length).toBe(3);
-    expect(html).toContain('<div class="tr header">');
+    /* the header row holds text, so it carries has-text (docs/POLISH.md 2.1 item 3) */
+    expect(html).toContain('<div class="tr header has-text">');
     expect(html.match(/<span class="td/g)?.length).toBe(9);
   });
 
@@ -181,7 +182,7 @@ describe('renderTable', () => {
     }
   });
 
-  it('names the prompt words the stage draws in the hovered empty cell (docs/OBJECTS.md 3.3 item 7)', () => {
+  it('writes no prompt words into a cell (docs/POLISH.md 2.1 item 1; the stage draws none since the polish round)', () => {
     expect(TABLE_CELL_PROMPT).toBe('Type to add text');
     expect(renderTable(emptyTable('t', 1, 1), context({ live: true }))).not.toContain(
       TABLE_CELL_PROMPT,
@@ -189,8 +190,8 @@ describe('renderTable', () => {
   });
 
   it('draws no prompt in an empty cell, on the editor stage or elsewhere, and keeps the empty paragraph (docs/FEATURES.md 2.3 item 9)', () => {
-    /* the editor's stage appends "Click to add text" to the hovered empty cell alone
-       (packages/viewer Editor.tsx promptHoveredCell); a 5 by 6 table drew thirty prompts before */
+    /* a 5 by 6 table drew thirty prompts before the features round; since the polish round no
+       prompt is drawn in a cell at all (docs/POLISH.md 2.1 item 1) */
     const live = renderTable(emptyTable('t', 2, 1), context({ live: true }));
     expect(live).not.toContain('data-prompt');
     expect(live.match(/<span class="para"><\/span>/g)?.length).toBe(2);

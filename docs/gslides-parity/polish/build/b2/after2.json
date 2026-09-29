@@ -1,0 +1,198 @@
+[
+  {
+    "n": 1,
+    "step": "deck",
+    "at": "2026-09-28T22:45:00.506Z",
+    "id": "untitled-20260928-x4ao",
+    "slides": 7
+  },
+  {
+    "n": 2,
+    "step": "S insert 3x3, fill row 2 through the API",
+    "at": "2026-09-28T22:45:08.006Z",
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "rows": [
+      [
+        "",
+        "",
+        ""
+      ],
+      [
+        "Alpha",
+        "Beta",
+        "Gamma"
+      ],
+      [
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  {
+    "n": 3,
+    "step": "S click row 2 head, then Delete",
+    "at": "2026-09-28T22:45:11.729Z",
+    "shown": true,
+    "active": "div",
+    "activeClasses": "ts-stagewrap ts-sheet ts-editor is-freeform",
+    "range": {
+      "x": 509.6,
+      "y": 349.5,
+      "w": 676.8,
+      "h": 37.4
+    },
+    "s1": "after2-01-row-head-clicked.png",
+    "cells": [
+      [
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        ""
+      ]
+    ],
+    "s2": "after2-02-row-head-delete-key.png"
+  },
+  {
+    "n": 4,
+    "step": "S Cmd+Z, click row 2 head, Cmd+B",
+    "at": "2026-09-28T22:45:16.016Z",
+    "restored": [
+      [
+        "",
+        "",
+        ""
+      ],
+      [
+        "Alpha",
+        "Beta",
+        "Gamma"
+      ],
+      [
+        "",
+        "",
+        ""
+      ]
+    ],
+    "cells": [
+      [
+        "",
+        "",
+        ""
+      ],
+      [
+        "*Alpha*",
+        "*Beta*",
+        "*Gamma*"
+      ],
+      [
+        "",
+        "",
+        ""
+      ]
+    ],
+    "active": "div",
+    "shot": "after2-03-row-head-cmd-b.png"
+  },
+  {
+    "n": 5,
+    "step": "S arrows after a column head click",
+    "at": "2026-09-28T22:45:19.397Z",
+    "before": {
+      "x": 735.2,
+      "y": 311.4,
+      "w": 225.6,
+      "h": 113.5
+    },
+    "after": {
+      "x": 735.2,
+      "y": 311.4,
+      "w": 451.2,
+      "h": 113.5
+    },
+    "active": "div"
+  },
+  {
+    "n": 6,
+    "step": "S header range, Center from the tail (B1 hunk pending)",
+    "at": "2026-09-28T22:45:23.949Z",
+    "tail": true,
+    "option": null,
+    "columns": [
+      {},
+      {},
+      {}
+    ],
+    "shot": "after2-04-header-range-center.png"
+  },
+  {
+    "n": 7,
+    "step": "the show on S (a filled body row, the header empty)",
+    "at": "2026-09-28T22:45:28.586Z",
+    "found": true,
+    "rows": [
+      {
+        "cls": "tr header",
+        "rule": "1px rgba(7, 7, 7, 0.18)",
+        "weight": "400"
+      },
+      {
+        "cls": "tr",
+        "rule": "1px rgba(7, 7, 7, 0.18)",
+        "weight": "400"
+      },
+      {
+        "cls": "tr",
+        "rule": "1px rgba(7, 7, 7, 0.18)",
+        "weight": "400"
+      }
+    ],
+    "shot": "after2-05-show-empty-header-filled-row.png"
+  },
+  {
+    "n": 8,
+    "step": "the show on slide 2 (North typed)",
+    "at": "2026-09-28T22:45:33.831Z",
+    "found": true,
+    "rows": [
+      {
+        "cls": "tr header has-text",
+        "rule": "1px rgb(7, 7, 7)",
+        "weight": "500"
+      },
+      {
+        "cls": "tr",
+        "rule": "1px rgba(7, 7, 7, 0.18)",
+        "weight": "400"
+      },
+      {
+        "cls": "tr",
+        "rule": "1px rgba(7, 7, 7, 0.18)",
+        "weight": "400"
+      }
+    ],
+    "shot": "after2-06-show-north-header.png"
+  },
+  {
+    "n": 9,
+    "step": "console errors",
+    "at": "2026-09-28T22:45:33.831Z",
+    "count": 0,
+    "first": []
+  }
+]

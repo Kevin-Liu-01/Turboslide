@@ -29,6 +29,8 @@ import {
 import type { HeadAxis, TableCommandId, TablePlan } from './table-tools';
 import { tipProps } from './Tooltip';
 
+import './TableOverlay.css';
+
 /**
  * The table's own controls in the overlay (docs/OBJECTS.md 3.3 items 1 and 4; docs/FEATURES.md
  * 2.3 items 1 and 2; Google resizes by its gridlines and selects rows and columns by their bands,
@@ -40,7 +42,11 @@ import { tipProps } from './Tooltip';
  *   inside the table Kevin's screenshot missed (3.2).
  * - The heads: a 12 px band above every column (`handle.<block>.head.column.<c>`) and left of
  *   every row (`.head.row.<r>`); a click selects the whole column or row as a range through the
- *   editor's `selectCells` (build/b5.md R2), a right click opens the head's menu: on a row head
+ *   editor's `selectCells` (build/b5.md R2) and hands the focus to the stage root, so Delete,
+ *   Backspace, the arrows and Cmd+B act on the range and no focus box stays beside the table
+ *   (docs/POLISH.md 2.2 item 7; the row `tables.heads.keys-act-on-range`); a keyboard user who
+ *   tabs onto a head sees the band's own plate, never the browser's ring (TableOverlay.css). A
+ *   right click opens the head's menu: on a row head
  *   the Header row check (`format.table.headerRow`, writing `rows[0].header`), Insert row above and
  *   below, Delete row and Distribute rows; on a column head the column rows. The menu's rows run
  *   the table plans over the head's own range, so they act before the range API lands.
@@ -49,8 +55,10 @@ import { tipProps } from './Tooltip';
  *   height (or x) while the pointer is within EDGE_BAND_PX inside that edge or over the circle
  *   itself; one click inserts a column right of the last one (a row under the last) in one commit
  *   that also grows the table's box by the new column's width (the last row's height), so every
- *   other column keeps its width (the row `tables.edge.add-row-column`); without the shell's
- *   `commit` the click falls back to the `table.insertColumns` plan. The circle sits ADD_GAP off
+ *   other column keeps its width (the row `tables.edge.add-row-column`), and never past the
+ *   content box (`edgeInsert`, docs/POLISH.md 2.2 item 9: the column takes the room left and
+ *   then an equal share of the table's width; the row grows the box down, then up); without the
+ *   shell's `commit` the click falls back to the `table.insertColumns` plan. The circle sits ADD_GAP off
  *   the edge, so it never covers the seam under the last row, the frame edge strip or a resize
  *   square, which share the edge (the verifier's pass 1 finding 3: drawn at the pointer on the
  *   edge it took the press meant for the last row's seam everywhere but the bands beside the
@@ -168,7 +176,7 @@ export function headStyle(axis: HeadAxis, area: Box, tableBox: Box, k: number): 
  * Where the "+" sits for a pointer at (x, y) in CSS pixels over a ring box in CSS pixels: beside
  * the right edge at the pointer's y when the pointer is within EDGE_BAND_PX inside that edge or
  * over the circle outside it (up to ADD_REACH_PX), else under the bottom edge at the pointer's x
- * the same way, else nowhere. `at` is the circle's centre along the edge, kept inside the edge's
+ * the same way, else nowhere. `at` is the circle's center along the edge, kept inside the edge's
  * run; the circle's centre across the edge is ADD_CENTRE_PX outside it.
  * Nothing along the run is kept clear: outside the ring the circle covers no square, seam or
  * frame edge strip, whatever its position along the edge.
@@ -193,7 +201,7 @@ export function edgeAt(
   return null;
 }
 
-/** The "+" circle's centre across its edge, measured outward from the ring's edge, in CSS px. */
+/** The "+" circle's center across its edge, measured outward from the ring's edge, in CSS px. */
 export const ADD_CENTRE_PX = ADD_GAP + ADD_PX / 2;
 
 /** The view with B1's `cellRing` (build/b5.md R4): the open cell's box, or a range's box while one is active. */
@@ -203,12 +211,13 @@ function sameBox(a: Box, b: Box): boolean {
   return a.every((v, i) => Math.abs(v - (b[i] ?? Number.NaN)) < 0.5);
 }
 
-/** The editor handle with the range API the heads call once B1 lands it (build/b5.md R2). */
+/** The editor handle with the range API the heads call (build/b5.md R2) and the stage's focus (docs/POLISH.md 2.2 item 7). */
 type HeadEditor = NonNullable<EditorShellState['input']['editor']> & {
   selectCells?: (
     blockId: string,
     cells: { r0: number; c0: number; r1: number; c1: number },
   ) => void;
+  focus?: () => void;
 };
 
 /** The id the parked set names for a table control (the family of docs/FEATURES.md 7.2: `handle.table.<part>`). */
@@ -364,13 +373,16 @@ export function TableOverlay({ view, tableBox, blockId }: TableOverlayProps) {
       );
   };
 
-  /* the head's click: the whole column or row as a range (build/b5.md R2) */
+  /* the head's click: the whole column or row as a range (build/b5.md R2), then the focus to
+     the stage root so its key table owns the next key (item 7): the head button kept it, and
+     Delete, the arrows and Cmd+B landed on the button */
   const selectHead = (axis: HeadAxis, index: number) => {
     if (block === null) return;
     const range = headRange(block, axis, index);
     if (range === null) return;
     const editor: HeadEditor | undefined = shell?.input.editor;
     editor?.selectCells?.(blockId, range);
+    editor?.focus?.();
   };
 
   /* the head's menu row: the plan over the head's own range */
@@ -385,7 +397,7 @@ export function TableOverlay({ view, tableBox, blockId }: TableOverlayProps) {
     );
   };
 
-  /* the "+" click: one commit that inserts and grows the box, else the plan */
+  /* the "+" click: one commit that inserts and grows the box inside the content box, else the plan */
   const addAtEdge = (axis: HeadAxis) => {
     if (block === null || shell === null) return;
     const last =

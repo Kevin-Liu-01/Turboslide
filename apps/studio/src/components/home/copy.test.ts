@@ -1,9 +1,7 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
 import { describe, expect, it } from 'vitest';
 
 import { forbiddenWordsIn } from '@turboslide/chrome/menus/strings';
+import { SITE } from '@turboslide/theme/brand/site';
 import {
   CONTRAST_PAIR_PATTERN,
   EM_DASH,
@@ -15,42 +13,36 @@ import {
 
 import {
   AGENTS,
-  CARDS,
-  COMPARE,
+  CANVAS,
   DEFAULT_VIEW_EXEMPT,
-  DITHERS,
-  EDITOR,
+  EXPORT,
   FOOTER,
   FORBIDDEN_PHRASES,
   FORBIDDEN_WORDS,
   HERO,
   HOME_COPY,
+  HOME_META,
   HOME_PROPER_NOUNS,
-  MEASURED,
+  LICENCE,
+  MENUS,
   NAV,
-  NUMBERS,
-  SHOT_ALT,
-  SPEED,
+  PRESENT,
+  REPORT_WORDS,
+  formatPercentWord,
 } from './copy';
 import type { Text } from './copy';
-import { FACT_KEYS, formatCount, formatPercent } from './facts';
+import { formatCount } from './facts';
 import type { HomeFacts } from './facts';
 
-// The copy lints of the /home page (gslides-parity SPEC-4 2.2, 0.20, 0.25, 0.26; MILESTONES-4 B2
-// item 3): every string of copy.ts through packages/theme copy.ts's rules (no em dash, no
-// exclamation mark, no metaphor word, no "X, not Y" pair, sentence case headings without a
-// trailing period, Title Case buttons), the default view words list of the menu model over every
-// band a rep reads, the five words of 0.26 and the two phrases of R01 6.1 item 3 nowhere, the
-// literal count rule (a count of the tree is a function of the facts, never digits in a string),
-// a source line beside every number, and the measured numbers cross checked against the
-// verifier's JSON under docs/gslides-parity/verification-4/ when it is present.
-
-const ROOT = join(import.meta.dirname, '..', '..', '..', '..', '..');
-/** The verifier's production run after the round four ship (VERIFICATION-4 section 5), the source of the measured numbers since the fixer round. */
-const PRODUCTION_JSON = join(
-  ROOT,
-  'docs/gslides-parity/verification-4/perf-budget-production-2026-09-14.json',
-);
+// The copy lints of the /home page (docs/POLISH.md 3.1 and 3.7; the round four rules of
+// gslides-parity SPEC-4 2.2 stand under them): every string of copy.ts through the theme's
+// copy rules (no em dash, no exclamation mark, no metaphor word, no "X, not Y" pair, sentence
+// case headings without a trailing period, Title Case buttons), the default view words of the
+// menu model kept out of every band a rep reads, the five words of 0.26 and the two phrases of
+// R01 6.1 item 3 nowhere, and the rules of 3.1: no comma in a heading, no semicolon and no colon
+// in any string a rep reads, every sentence one thought under 20 words, none of the report
+// words, no file path and no date outside the agents section's command box, the page under 350
+// words, and every count of the tree a function of the facts.
 
 /** Distinct primes above 99,999, so every formatted probe carries a thousands separator and no two collide. */
 const PROBE: HomeFacts = {
@@ -76,29 +68,8 @@ const PROBE_2: HomeFacts = {
   licence: 'PROBE2',
 };
 
-/** The marks a resolved string must carry to prove its figure came from the facts. */
-function probeMarkers(facts: HomeFacts): string[] {
-  return [
-    ...FACT_KEYS.map((key) => formatCount(facts[key])),
-    formatCount(facts.layouts - 11),
-    formatPercent(facts.mismatchPercent),
-    facts.licence,
-  ];
-}
-
 /** The keys whose values are addresses, ids or code, not prose. */
-const NOT_PROSE = new Set([
-  'href',
-  'path',
-  'deckId',
-  'principalId',
-  'anchor',
-  'id',
-  'external',
-  'shot',
-  'pair',
-  'icon',
-]);
+const NOT_PROSE = new Set(['href', 'path', 'deckId', 'anchor', 'id', 'external', 'shot', 'icon']);
 
 type Visit = (text: string, path: string, resolved: boolean) => void;
 
@@ -135,29 +106,81 @@ function walk(value: unknown, path: string, visit: Visit): void {
 const every: { text: string; path: string; resolved: boolean }[] = [];
 walk(HOME_COPY, '', (text, path, resolved) => every.push({ text, path, resolved }));
 
-const isCommand = (path: string): boolean => /\.command(\.|$)|\.push$/.test(path);
-const isSource = (path: string): boolean => /\.source$/.test(path);
+const isCommand = (path: string): boolean => /\.command$/.test(path);
 const isExempt = (path: string): boolean =>
-  DEFAULT_VIEW_EXEMPT.some((prefix) => path === prefix || path.startsWith(`${prefix}.`)) ||
-  isSource(path);
+  DEFAULT_VIEW_EXEMPT.some((prefix) => path === prefix || path.startsWith(`${prefix}.`));
 
 function wholeWord(word: string): RegExp {
   return new RegExp(`(^|[^A-Za-z])${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![A-Za-z])`, 'i');
 }
 
+/** The sentences of a prose string, as a reader splits them. */
+function sentencesOf(text: string): string[] {
+  return text
+    .split(/(?<=[.?!])\s+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+const wordCount = (text: string): number => text.trim().split(/\s+/).filter(Boolean).length;
+
+/** The strings a visitor sees rendered (never the head, an aria label or an alt text). */
+function visibleStrings(): string[] {
+  return [
+    NAV.lockup.word,
+    ...NAV.links.map((link) => link.label),
+    NAV.appearance.light.label,
+    NAV.appearance.dark.label,
+    NAV.newPresentation.label,
+    HERO.heading,
+    HERO.lead,
+    HERO.buttons.newPresentation.label,
+    HERO.buttons.openDeck.label,
+    CANVAS.heading,
+    CANVAS.lead,
+    MENUS.heading,
+    MENUS.lead,
+    PRESENT.heading,
+    PRESENT.lead,
+    ...Object.values(PRESENT.diagram).filter((v) => v !== PRESENT.diagram.label),
+    EXPORT.heading,
+    EXPORT.lead,
+    `${EXPORT.measured.before} ${EXPORT.measured.figure(PROBE)}${EXPORT.measured.after}`,
+    EXPORT.diagram.slide,
+    EXPORT.diagram.pdf,
+    EXPORT.diagram.pptx,
+    AGENTS.heading,
+    AGENTS.lead(PROBE),
+    AGENTS.command,
+    AGENTS.diagram.table(PROBE),
+    ...AGENTS.diagram.sources,
+    AGENTS.diagram.deck,
+    AGENTS.link.label,
+    LICENCE.heading,
+    LICENCE.lead,
+    LICENCE.button.label,
+    NAV.lockup.word,
+    ...FOOTER.links.map((link) => link.label),
+    FOOTER.closing,
+  ];
+}
+
 describe('every string of the page', () => {
   it('is collected with a path', () => {
-    expect(every.length).toBeGreaterThan(150);
-    expect(every.some((e) => e.path === 'hero.sentence')).toBe(true);
-    expect(every.some((e) => e.path === 'compare.rows.automation.turboslide')).toBe(true);
-    expect(every.some((e) => e.path === 'footer.groups.agents.heading')).toBe(true);
+    expect(every.length).toBeGreaterThan(60);
+    expect(every.some((e) => e.path === 'hero.heading')).toBe(true);
+    expect(every.some((e) => e.path === 'agents.lead' && e.resolved)).toBe(true);
+    expect(every.some((e) => e.path === 'footer.closing')).toBe(true);
   });
 
-  it('carries no em dash, en dash or exclamation mark', () => {
+  it('carries no em dash, en dash, exclamation mark, semicolon or colon', () => {
     for (const { text, path } of every) {
       expect(text, path).not.toContain(EM_DASH);
       expect(text, path).not.toContain(EN_DASH);
-      if (!isCommand(path)) expect(text, path).not.toContain(EXCLAMATION);
+      expect(text, path).not.toContain(';');
+      if (isCommand(path)) continue;
+      expect(text, path).not.toContain(EXCLAMATION);
+      expect(text, path).not.toContain(':');
     }
   });
 
@@ -169,12 +192,32 @@ describe('every string of the page', () => {
     }
   });
 
-  it('never says instant, realtime, edge, lightweight or built on Rust, and never the two phrases', () => {
+  it('never says instant, realtime, edge, lightweight or built on Rust, the two phrases or a report word', () => {
     for (const { text, path } of every) {
       for (const word of FORBIDDEN_WORDS)
         expect(wholeWord(word).test(text), `${path}: ${word}`).toBe(false);
       for (const phrase of FORBIDDEN_PHRASES)
         expect(text.toLowerCase(), path).not.toContain(phrase.toLowerCase());
+      for (const word of REPORT_WORDS)
+        expect(wholeWord(word).test(text), `${path}: ${word}`).toBe(false);
+    }
+  });
+
+  it('names no file path and no date outside the command box', () => {
+    for (const { text, path } of every) {
+      if (isCommand(path)) continue;
+      expect(/\b[\w-]+\/[\w./-]+/.test(text), `${path}: "${text}"`).toBe(false);
+      expect(/\.(ts|tsx|mjs|md|json|css)\b/.test(text), `${path}: "${text}"`).toBe(false);
+      expect(/\b20\d\d-\d\d-\d\d\b/.test(text), `${path}: "${text}"`).toBe(false);
+    }
+    expect(AGENTS.command).toContain('decks/pitch');
+  });
+
+  it('writes every sentence as one thought under 20 words', () => {
+    for (const { text, path } of every) {
+      if (isCommand(path)) continue;
+      for (const sentence of sentencesOf(text))
+        expect(wordCount(sentence), `${path}: "${sentence}"`).toBeLessThan(20);
     }
   });
 
@@ -185,43 +228,43 @@ describe('every string of the page', () => {
       checked += 1;
       expect(forbiddenWordsIn(text), `${path}: "${text}"`).toEqual([]);
     }
-    expect(checked).toBeGreaterThan(100);
-    /* the exemptions are the two technical bands, the Automation row and the footer's agents group */
-    expect(DEFAULT_VIEW_EXEMPT).toEqual([
-      'meta',
-      'speed',
-      'agents',
-      'compare.rows.automation',
-      'footer.groups.agents',
-    ]);
-    /* and they earn it: the agents band names the transport */
-    expect(forbiddenWordsIn(AGENTS.rows[1]?.label ?? '')).toEqual(['MCP']);
+    expect(checked).toBeGreaterThan(40);
+    expect(DEFAULT_VIEW_EXEMPT).toEqual(['meta', 'agents', 'licence']);
+    /* and the exemptions earn it: the agents section names the transport, the licence section says run */
+    expect(forbiddenWordsIn(AGENTS.lead(PROBE))).toContain('MCP');
+    expect(forbiddenWordsIn(LICENCE.lead)).toEqual(['run']);
+  });
+
+  it('holds the page under 350 words', () => {
+    const words = visibleStrings().reduce((sum, text) => sum + wordCount(text), 0);
+    expect(words).toBeGreaterThan(150);
+    expect(words).toBeLessThan(350);
   });
 });
 
 describe('headings and buttons', () => {
   const headings: string[] = [
-    CARDS.heading,
-    EDITOR.heading,
-    DITHERS.heading,
-    DITHERS.specimens.heading,
-    SPEED.heading,
+    HERO.heading,
+    CANVAS.heading,
+    MENUS.heading,
+    PRESENT.heading,
+    EXPORT.heading,
     AGENTS.heading,
-    COMPARE.heading,
-    COMPARE.columns.google,
-    COMPARE.columns.turboslide,
-    ...CARDS.cards.map((card) => card.title),
-    ...SPEED.rows.map((row) => row.title),
-    ...FOOTER.groups.map((group) => group.heading),
-    ...COMPARE.rows.map((row) => row.row),
+    LICENCE.heading,
   ];
 
-  it('are sentence case without a trailing period', () => {
-    expect(headings.length).toBeGreaterThan(30);
+  it('are one thought each in sentence case with no trailing period, the section headings with no comma', () => {
+    expect(headings.length).toBe(7);
     for (const heading of headings) {
       expect(wordsOutsideSentenceCase(heading, HOME_PROPER_NOUNS), heading).toEqual([]);
       expect(/[.:;,]$/.test(heading), heading).toBe(false);
+      expect(wordCount(heading), heading).toBeLessThan(10);
     }
+    for (const heading of headings.slice(1)) expect(heading, heading).not.toContain(',');
+    /* the h1 is the sentence of 3.2 item 1 and the row decks.home.seller-lead: three verbs of
+       one task with a list comma, never a clause after a comma */
+    expect(HERO.heading).toBe('Build the pitch, present it and send the link');
+    expect(/,\s+(in|on|at|with|from|which|that)\b/.test(HERO.heading)).toBe(false);
   });
 
   const buttons: string[] = [
@@ -230,7 +273,7 @@ describe('headings and buttons', () => {
     NAV.appearance.dark.label,
     HERO.buttons.newPresentation.label,
     HERO.buttons.openDeck.label,
-    HERO.buttons.github.label,
+    LICENCE.button.label,
   ];
   const SMALL = new Set(['the', 'a', 'an', 'of', 'to', 'and', 'or', 'for', 'in', 'on']);
 
@@ -246,44 +289,29 @@ describe('headings and buttons', () => {
     }
   });
 
-  it('gives every control a tooltip name and one sentence', () => {
-    const tips = [
-      NAV.lockup.tip,
-      ...NAV.links.map((link) => link.tip),
-      NAV.appearance.light.tip,
-      NAV.appearance.dark.tip,
-      NAV.newPresentation.tip,
-      HERO.buttons.newPresentation.tip,
-      HERO.buttons.openDeck.tip,
-      HERO.buttons.github.tip,
-      ...FOOTER.groups.flatMap((group) => group.links.map((link) => link.tip)),
-      FOOTER.lockupTip,
-    ];
-    expect(tips.length).toBeGreaterThan(30);
-    for (const tip of tips) {
-      expect(tip.name.trim().length, tip.name).toBeGreaterThan(0);
-      expect(/^[A-Z].*\.$/.test(tip.doc), `${tip.name}: "${tip.doc}"`).toBe(true);
-      expect(tip.doc.split('. ').length, tip.doc).toBeLessThanOrEqual(2);
-    }
+  it('puts one icon of the sprite family before every section heading, each different', () => {
+    const icons = [CANVAS.icon, MENUS.icon, PRESENT.icon, EXPORT.icon, AGENTS.icon, LICENCE.icon];
+    expect(new Set(icons).size).toBe(6);
+    expect(icons).toEqual([
+      'cursor-arrow-rays',
+      'bars-3',
+      'play',
+      'arrow-down-tray',
+      'command-line',
+      'document-text',
+    ]);
   });
 });
 
 describe('the counts of the tree (SPEC-4 0.25)', () => {
   const counted: Text[] = [
-    ...NUMBERS.map((n) => n.figure),
-    ...CARDS.cards
-      .filter((c) => ['layouts', 'objects', 'quality'].includes(c.id))
-      .map((c) => c.copy),
-    ...DITHERS.claims.filter((claim) => typeof claim !== 'string'),
-    ...SPEED.rows.filter((row) => row.id === 'contracts').map((row) => row.figure),
     AGENTS.lead,
-    ...COMPARE.rows
-      .filter((row) => ['automation', 'layouts', 'pictures'].includes(row.id))
-      .map((row) => row.turboslide),
+    AGENTS.diagram.label,
+    AGENTS.diagram.table,
+    EXPORT.measured.figure,
   ];
 
   it('flow through functions of the facts, never through digits in a string', () => {
-    expect(counted.length).toBe(15);
     for (const text of counted) {
       expect(typeof text, 'a count bearing string must be a function of the facts').toBe(
         'function',
@@ -292,161 +320,73 @@ describe('the counts of the tree (SPEC-4 0.25)', () => {
       const a = fn(PROBE);
       const b = fn(PROBE_2);
       expect(a).not.toBe(b);
-      const carries = probeMarkers(PROBE).filter((marker) => a.includes(marker));
-      expect(carries.length, a).toBeGreaterThan(0);
-      /* the derived GT layout count stays arithmetic on the facts, never a literal ten */
-      if (a.includes('GT layouts')) expect(a).toContain(formatCount(PROBE.layouts - 11));
+      const markers = [formatCount(PROBE.actions), formatPercentWord(PROBE.mismatchPercent)];
+      expect(
+        markers.some((marker) => a.includes(marker)),
+        a,
+      ).toBe(true);
     }
+    expect(formatPercentWord(0.003)).toBe('0.003 percent');
   });
 
-  it('reaches every fact key from at least one string', () => {
-    const resolved = counted.map((text) => (text as (f: HomeFacts) => string)(PROBE)).join('\n');
-    for (const key of FACT_KEYS) expect(resolved, key).toContain(formatCount(PROBE[key]));
-  });
-
-  it('has no plain string in the strip, the cards or the comparison with a three digit count', () => {
-    /* the counts the page states are 21 layouts and above; a plain string may carry a hundred
-       only as a measured fact or a product limit named in the README (1600 percent, 20 by 20,
-       170 pages, 85 slides, 12 categories), and never one of the eight counts */
-    const plain = every.filter(
-      (e) => !e.resolved && /^(numbers|cards|compare)\./.test(e.path) && !isSource(e.path),
-    );
-    expect(plain.length).toBeGreaterThan(20);
-    const allowed = new Set(['1600', '20', '170', '85', '12', '6', '409', '613', '0.003']);
-    for (const { text, path } of plain) {
+  it('keeps the plain strings free of a count of the tree', () => {
+    /* a plain string may carry the 170 pages of the example export (85 slides in two appearances) and nothing else in digits */
+    for (const { text, path, resolved } of every) {
+      if (resolved || isCommand(path)) continue;
       for (const digits of text.match(/\d[\d,.]*\d|\d/g) ?? [])
-        expect(allowed.has(digits), `${path}: ${digits} in "${text}"`).toBe(true);
+        expect(digits, `${path}: ${digits} in "${text}"`).toBe('170');
     }
   });
 });
 
-describe('the numbers and their source lines (SPEC-4 0.20)', () => {
-  it('give every figure of the strip a source naming a file or a dated document', () => {
-    expect(NUMBERS.length).toBe(6);
-    for (const figure of NUMBERS)
-      expect(figure.source, figure.id).toMatch(/\.(ts|md|json)|LICENSE/);
-    expect(NUMBERS.find((n) => n.id === 'mismatch')?.source).toMatch(/\d{4}-\d{2}-\d{2}/);
+describe('the shape of the page (POLISH.md 3.2)', () => {
+  it('shares one description with the head, the manifest and the card', () => {
+    expect(HERO.lead).toBe(SITE.description);
+    expect(HOME_META.description).toBe(SITE.description);
+    expect(SITE.manifest.description).toBe(SITE.description);
+    expect(HOME_META.title).toBe('Turboslide, a slides editor in the browser');
+    expect(sentencesOf(HERO.lead).length).toBe(3);
+    expect(sentencesOf(HERO.lead)[0]).toBe('Turboslide is a slides editor in the browser.');
   });
 
-  it('give every speed row two sentences, a figure and a source', () => {
-    expect(SPEED.rows.length).toBe(8);
-    for (const row of SPEED.rows) {
-      expect(row.body.split(/\.\s/).length, row.id).toBeGreaterThanOrEqual(2);
-      expect(row.source, row.id).toMatch(/\.(ts|mjs|md|json)/);
-      expect(row.figure, row.id).toBeTruthy();
-    }
-    /* a measured row names the date it was read */
-    for (const id of ['renderer', 'rust', 'export', 'batches', 'preload', 'immutable']) {
-      const row = SPEED.rows.find((r) => r.id === id);
-      expect(row?.source, id).toMatch(/\d{4}-\d{2}-\d{2}/);
-    }
-    expect(SPEED.closing.source).toMatch(
-      /verification-4\/perf-budget-production-2026-09-14\.json, 2026-09-14/,
-    );
+  it('routes the hero, the navigation and the licence as 3.2 says', () => {
+    expect(HERO.buttons.newPresentation.href).toBe('/new');
+    expect(NAV.newPresentation.href).toBe('/new');
+    expect(HERO.buttons.openDeck.deckId).toBe('gt-brand');
+    expect(HERO.buttons.openDeck.label).toBe('Open the Example Deck');
+    expect(NAV.links.map((link) => link.label)).toEqual(['Documentation', 'GitHub']);
+    expect(LICENCE.button.href).toBe('https://github.com/Kevin-Liu-01/Turboslide');
+    expect(AGENTS.link.href.startsWith('https://github.com/Kevin-Liu-01/Turboslide')).toBe(true);
+    expect(EXPORT.measured.href).toMatch(/\/docs\/pptx\.md$/);
+    expect(SITE.productionOrigin).toBe('https://www.turboslide.com');
   });
 
-  it('writes the Rust row and the preload row in the tense of the ship tree (PP section 4)', () => {
-    expect(SPEED.rows.find((r) => r.id === 'rust')?.body).toContain(
-      'The hosted studio runs the TypeScript stages today.',
-    );
-    /* the title row's mark is a same document link since round four (SPEC-4 0.16, 0.39): the
-       sentence is in the present tense and never says the move is a document load */
-    expect(SPEED.rows.find((r) => r.id === 'preload')?.body).toContain(
-      'keeps the page and its code',
-    );
-    expect(SPEED.rows.find((r) => r.id === 'preload')?.body).not.toContain('document load');
-    expect(SPEED.closing.text).toContain('one instance renders one slide at a time');
-  });
-
-  it("uses the verifier's post round production numbers, not the day 0 baseline or R04's", () => {
-    expect(MEASURED.preload.text).toContain(String(MEASURED.preload.decksToEditGtBrandMs));
-    expect(MEASURED.preload.text).toContain(String(MEASURED.preload.editToDecksMs));
-    for (const stale of ['858', '399', '598', '544', '723'])
-      expect(MEASURED.preload.text).not.toContain(stale);
-    expect(SPEED.closing.text).not.toContain('823');
-    expect(SPEED.closing.text).not.toContain('4.3 s');
-  });
-
-  const hasProduction = existsSync(PRODUCTION_JSON);
-
-  it.skipIf(!hasProduction)(
-    "matches the verifier's production JSON where it holds the number",
-    () => {
-      const json = JSON.parse(readFileSync(PRODUCTION_JSON, 'utf8')) as {
-        routes: {
-          route: string;
-          kind?: string;
-          ttfb?: number;
-          ready?: number;
-          jsDecoded?: number;
-          samples?: { ttfb: number }[];
-        }[];
-        transitions: { name: string; ms: number }[];
-        twins: { total: number; refetched: number };
-      };
-      const decksToEdit = json.transitions.find((t) => t.name === 'decks->edit');
-      expect(Math.round(decksToEdit?.ms ?? 0)).toBe(MEASURED.preload.decksToEditGtBrandMs);
-      const editToDecks = json.transitions.find((t) => t.name === 'edit->decks');
-      expect(Math.round(editToDecks?.ms ?? 0)).toBe(MEASURED.preload.editToDecksMs);
-      expect([json.twins.refetched, json.twins.total]).toEqual([
-        ...MEASURED.immutable.twinsRefetched,
-      ]);
-      const cold = (route: string) =>
-        json.routes.find((r) => r.route === route && r.kind === 'cold');
-      expect(Math.round(cold('/new')?.ready ?? 0)).toBe(MEASURED.closing.newReadyColdMs);
-      expect(Math.round(cold('/deck/gt-brand')?.ready ?? 0)).toBe(MEASURED.closing.deckReadyColdMs);
-      expect(Math.round(cold('/decks')?.ttfb ?? 0)).toBe(MEASURED.closing.decksTtfbColdMs);
-      const worst = Math.max(...(cold('/decks')?.samples ?? []).map((s) => s.ttfb));
-      expect(Math.round(worst)).toBe(MEASURED.closing.decksTtfbWorstMs);
-      const decoded = json.routes.map((r) => r.jsDecoded ?? 0).filter((n) => n > 0);
-      expect(Math.round(Math.min(...decoded) / 1024)).toBe(MEASURED.closing.jsDecodedKb[0]);
-      expect(Math.round(Math.max(...decoded) / 1024)).toBe(MEASURED.closing.jsDecodedKb[1]);
-    },
-  );
-});
-
-describe('the shape of the page', () => {
-  it('has twelve cards over all fifteen README pictures, six rows for agents, twelve comparison rows and four footer groups', () => {
-    expect(CARDS.cards.length).toBe(12);
-    const shown = new Set<string>();
-    for (const card of CARDS.cards) {
-      if (card.shot !== undefined) shown.add(card.shot);
-      if (card.pair !== undefined) shown.add(card.pair);
-    }
-    for (const name of [
-      '01-new-presentation',
-      '13-editor-light',
-      '06-canvas-rotation',
-      '12-slideshow-dither',
-    ])
-      shown.add(name);
-    const readme = Object.keys(SHOT_ALT).filter((name) => name !== 'hero-frame');
-    expect(readme.length).toBe(15);
-    for (const name of readme) expect(shown.has(name), name).toBe(true);
-    expect(AGENTS.rows.length).toBe(6);
-    expect(COMPARE.rows.length).toBe(12);
-    expect(FOOTER.groups.length).toBe(4);
-    for (const alt of Object.values(SHOT_ALT)) expect(alt).toMatch(/\.$/);
-  });
-
-  it('keeps the rows where Turboslide has less and the affiliation sentence', () => {
-    const turboslide = (id: string): string => {
-      const row = COMPARE.rows.find((r) => r.id === id);
-      return typeof row?.turboslide === 'string' ? row.turboslide : '';
-    };
-    expect(turboslide('export')).toContain('No ODP or SVG');
-    expect(turboslide('import')).toContain('No PowerPoint import yet');
-    expect(turboslide('transitions')).toMatch(/^None;/);
-    expect(COMPARE.lead).toContain('Google Slides is a product of Google LLC');
+  it('gives the footer the lockup to the top, six links and the closing line', () => {
+    expect(FOOTER.lockup.href).toBe('#top');
+    expect(FOOTER.links.map((link) => link.label)).toEqual([
+      'New presentation',
+      'Your presentations',
+      'Documentation',
+      'GitHub',
+      'Licence',
+      'Third party notices',
+    ]);
+    expect(FOOTER.links.find((link) => link.label === 'Your presentations')?.href).toBe('/decks');
+    expect(FOOTER.links.every((link) => !link.href.startsWith('/api/'))).toBe(true);
     expect(FOOTER.closing).toContain('Google Slides is a product of Google LLC');
   });
 
-  it('routes the hero as SPEC-4 2.5 says', () => {
-    expect(HERO.buttons.newPresentation.href).toBe('/new');
-    expect(HERO.buttons.openDeck.deckId).toBe('gt-brand');
-    expect(HERO.buttons.github.href).toBe('https://github.com/Kevin-Liu-01/Turboslide');
-    expect(HERO.credit).toBe(
-      'Material: liquid metal, Paper Shaders, one frame through the two tone screen',
+  it('gives every diagram one sentence as its name', () => {
+    for (const label of [
+      PRESENT.diagram.label,
+      EXPORT.diagram.label,
+      AGENTS.diagram.label(PROBE),
+    ]) {
+      expect(label).toMatch(/^[A-Z].*\.$/);
+      expect(sentencesOf(label).length).toBe(1);
+    }
+    expect(AGENTS.command).toBe(
+      'pnpm exec turboslide slide new --layout split --deck decks/pitch --json',
     );
   });
 });

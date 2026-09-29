@@ -1,0 +1,303 @@
+## nav
+
+Turboslide
+Your presentations
+Documentation
+For agents
+GitHub
+Light
+Dark
+New Presentation
+
+## hero
+
+Turboslide
+
+Build the pitch, present it and send the link, in one place
+New Presentation
+Start from a template
+Open the GT Deck
+GitHub
+
+Google Slides' menus, toolbar and shortcuts, a canvas on every slide, and a PowerPoint export that matches the screen pixel for pixel. No account needed to start; free under the MIT licence.
+
+## div-2
+
+Material: liquid metal, Paper Shaders, one frame through the two tone screen
+
+## section-3
+
+Google Slides' frame, on every slide a canvas
+
+The same menus, toolbar, filmstrip, speaker notes and right click menus, in Google's order, with Google's shortcuts. The default view holds what a seller uses weekly; a feature not yet tested end to end sits behind Tools > Advanced tools.
+
+Every object drags, resizes, rotates and reorders. The first drag on a slide converts it to a canvas without moving a pixel, and one undo puts the layout back.
+
+One look: Inter, paper and ink, one pixel rules, a light and a dark appearance that the stage, the thumbnails, the slideshow and every download follow.
+
+## section-4
+
+What it does
+
+Twelve groups of features. What is in the default view is driven end to end against production before a release; the rest sits behind Tools > Advanced tools until its own interactions pass.
+
+The Google Slides shell
+
+The menus, a toolbar whose tail follows the selection, the filmstrip, the notes pane and the right panels, in Google's order. Search the menus finds every row by name, every control carries its name and its key, and the rows of a feature that is not yet tested end to end sit behind Tools > Advanced tools.
+
+The canvas
+
+Drag, resize and rotate with live readouts. Snap guides, marquee selection, z order, align and centre from the Arrange menu, the zoom box with its presets, and crop mode on a picture. Rulers, guides, groups and connectors are behind Advanced tools.
+
+Layouts
+
+22 layouts in one grid: Google's eleven and the 11 GT layouts after them. Apply layout moves the slide's content into the new layout's placeholders. A new presentation opens on a Title slide with four starter pictures already in it.
+
+Text
+
+Bold, italic, underline and strikethrough on a selected word, from the keyboard or the toolbar. Font size, alignment, line spacing, bulleted and numbered lists, indent and clear formatting on the toolbar and in the Format menu; a link on a word; find and replace across the deck. Superscript, capitalization, columns and custom spacing are behind Advanced tools.
+
+Pictures
+
+Upload from your computer, drop a file on the slide or paste one; drop a file on a picture to replace it and keep the frame. Crop, adjust transparency, brightness and contrast, and colour one slide's background. Masks, drop shadows, two tone dithers and the 17 shader materials are behind Advanced tools.
+
+Tables
+
+The tables a layout places (Title and table, Ruled rows, Status board) take typing in their cells like any placeholder. Insert > Table and the table tools (rows, columns, merge, distribute, cell fills and borders) are behind Advanced tools until a tables audit runs.
+
+Charts and diagrams
+
+Insert > Chart, Diagram and Word art are behind Advanced tools. A chart or a diagram a deck already carries draws on the slide, in the show and in every download, and moves, resizes and deletes like any object.
+
+Exports
+
+PDF and PowerPoint from File > Download, with skipped slides and speaker notes left out unless you check them. The PowerPoint file is the rendered slide over searchable text, checked against the screen before the file is written, with an editable text mode beside it. Web page, plain text, JPEG and PNG are behind Advanced tools.
+
+Present
+
+Slideshow from the current slide, Presenter view in a second window with the timer, the notes and the next slide, Google's presenting keys, a laser pointer, and a present link you can send.
+
+The viewer and sharing
+
+Share offers a view link, a present link and an edit link, and the view link opens the viewer with its Slide, Grid and Book views. Publish to the web and the embed are behind Advanced tools.
+
+Home and files
+
+Recent presentations as cards with thumbnails; Open, Present, Rename, Make a copy, Download and Move to trash with Undo on every card; the trash with Restore and Delete forever; Version history with named versions and restore. Import slides, the bundle, Details and the inbox are behind Advanced tools.
+
+Quality gates
+
+Every slide is checked for overflow, contrast, type sizes and copy in both appearances, with Fix for the mechanical findings. Every feature in the default view is driven end to end against production before a release, and a 32 step acceptance chain and a 3,369 row parity audit pass before anything ships.
+
+## section-5
+
+192
+actions in one table behind the click, the command line and the API
+packages/schema/src/actions.ts
+22
+layouts, Google's eleven first and the GT layouts after them
+packages/schema/src/layouts.ts
+32
+steps in the acceptance chain a release passes first
+scripts/check.mjs --list; packages/theme/brand/facts.json
+0.003 %
+worst page mismatch on the 170 page export of the GT deck
+docs/pptx.md, 2026-09-11
+17
+shader materials with typed controls
+packages/materials/src/catalog.ts
+MIT
+licence, with the code on GitHub
+LICENSE
+
+## section-6
+
+Dithers and shaders, from the deck to the interface
+
+The GT brand deck draws its photographs as two tone dithers: an eight by eight Bayer screen at two pixel cells, cut from a toned and cropped picture, with a light version that is the exact inverse of the dark one.
+
+The Blue Marble slide of the GT deck in the slideshow, a two tone dither with its plate.
+
+The same pipeline handles any photograph or a frozen frame of a shader material from the command line and the API, reports how clear the plate stays, and is written three times with one arithmetic: in TypeScript, in a Rust addon for Node and in a Rust module for the browser, with a test that proves the three light the same cells.
+
+17 Paper Shaders materials play live on the stage with typed controls and the GT colour presets, and every one is captured as frozen frames for the thumbnails and the exports.
+
+1. The material, one frame of its clock before the screen, captured from the shader.
+
+2. The hero frame through the two tone screen at one cell per two pixels: black point 160, white point 250, gamma 1.5.
+
+3. The mark is the same construction: a slide, a plate cut from the picture, the screen filling the rest.
+
+Where the identity appears in the product
+No presentations yet
+
+Start one from the strip above.
+
+New Presentation
+
+The empty state: a crop of the figure frame in a hairline frame, a title, one sentence and one action.
+
+The loading curtain: the figure where the sheet will be and the deck's ramp as the progress texture.
+
+T
+Tungsten 857
+
+A presence chip: the identity mark of a person in the room, here an anonymous label.
+
+## section-7
+
+Why it is fast
+
+Most of the speed is structural: one renderer, contracts generated ahead of time, immutable documents and caches, and export work that runs where the browser already is. The numbers below are measured, and each one names the file that produces it and the date it was read.
+
+One renderer
+
+One function turns a slide into the same HTML and CSS for the editor, the viewer, the embed, the CLI's screenshots and the exporters. A render at one revision is the same pixels on every surface, so nothing is drawn twice and nothing has to be reconciled.
+
+170 renders of the GT deck in 18.3 s in the acceptance chain; a slide is ready in 6 ms at the median
+packages/render/src/slide.ts; docs/gslides-parity/VERIFICATION-2.md step 10, 2026-09-12; docs/M1-STATUS.md render records, 2026-09-10
+Contracts generated once
+
+Every operation is one entry in one table. The CLI parsers, the MCP tools, the HTTP contract, the window API list and the skills are generated from it and committed, so a stale copy fails the check before anything ships.
+
+192 actions, 169 MCP tools, 176 HTTP paths, from one file
+packages/schema/src/actions.ts; packages/agent/generated; packages/theme/brand/facts.json
+Rust where the arithmetic must not drift
+
+The dither and image comparison pipeline is a Rust crate compiled to a Node addon and to WebAssembly, with a TypeScript copy of the same arithmetic where neither is built. The crate exists so that a dither approved in the browser and one produced on a server light the same cells; where the addon is built it also cuts a screen in less than half the time. The hosted studio runs the TypeScript stages today.
+
+20 ms for a 1600 by 900 screen through the addon, 23 ms through wasm, 52 ms in TypeScript
+crates/turboslide-native; docs/native.md costs table, 2026-09-10, Apple M5 Max
+The export is a screenshot
+
+Perfect PowerPoint rasterises each page in Chromium at twice the sheet size, stores it in the smallest encoding that decodes within budget, then decodes it again and compares it with the shot before the file is written. The page is the screen; there is no second layout engine to disagree with it.
+
+worst decoded mismatch 0.003 percent over 170 pages; 15.5 MiB per appearance
+packages/export/src/pptx/page-raster.ts; docs/pptx.md, 2026-09-11; docs/hosting.md section 7, 2026-09-11
+Export in batches
+
+On the hosted studio a long deck exports in batches of sixty slides, each one function call, with a progress sentence and a merge at the end. A failed batch is retried on its own; the file is never started over.
+
+the 85 slide GT deck in 188 to 203 s as one call on the hosted studio; two batches of 60 and 25 on the batched path
+packages/export/src/batch/plan.ts; apps/studio/src/server/export-batch.ts; docs/hosting.md section 7, 2026-09-11
+Compute that lasts
+
+The export and render routes run on Vercel functions with an 800 second budget and 3,009 MB of memory, on fluid compute. Several requests to one deployment share one warm process, so a render never waits for a cold start when the process is already up.
+
+800 s and 3,009 MB on /api/export, /api/render and the server functions
+apps/studio/vite.deploy.config.ts; docs/hosting.md section 6
+Routes load before the click
+
+The router preloads a route's code and data as soon as the pointer reaches its link, so a presentation opened from the list is loading before the click lands. The title row's mark is a link of the same document, so leaving the editor for the list keeps the page and its code.
+
+168 ms from the click on a card to a ready editor for the 85 slide GT deck and 16 ms from the title row mark back to the list, warm, on production
+apps/studio/src/router.tsx; docs/gslides-parity/VERIFICATION-4.md section 5.2, 2026-09-14
+Immutable documents and caches
+
+Every committed write stores the whole document under the hash of its bytes, so a reader proves it has the current document from one header. Thumbnails named by their version are cached for a year, and the GT deck's pictures are static files that the CDN keeps for a day and the browser for an hour, so a second visit fetches none of them.
+
+0 of 16 pictures of the GT deck fetched again on a second visit within the hour; the icon set, the card and /home answered from the CDN's cache on their second request
+packages/store/src/snapshots.ts; apps/studio/src/server/thumbs.ts; docs/gslides-parity/VERIFICATION-4.md sections 5.1 and 5.2, 2026-09-14
+
+What is still slow is measured too: the list at /decks answers its first byte in 409 ms at the median of a cold visit and in 3.8 s in its worst sample; the viewer of the 85 slide GT deck is ready 1.07 s after a cold load; the editor is ready 0.57 s after a cold load of /new; every route loads 946 to 2,205 KB of JavaScript; and one instance renders one slide at a time. Those are the numbers the current work is measured against.
+docs/gslides-parity/VERIFICATION-4.md section 5; docs/gslides-parity/verification-4/perf-budget-production-2026-09-14.json, 2026-09-14
+
+## agents
+
+For agents
+
+Every capability of the editor is an action. The same 192 actions run on the CLI, over MCP, over HTTP and inside an open page, through one validator, and every write names the revision it read.
+
+CLI
+
+Edits a decks folder with no browser page; --json gives machine output and --base-revision names the revision the write read.
+
+pnpm exec turboslide slide new --layout split --after title --deck decks/gt-brand --json
+MCP
+
+One deck_<action> tool per action over stdio or streamable HTTP, with render tools that return PNGs and the deck_review prompt for the judge lenses.
+
+pnpm exec turboslide mcp --deck decks/gt-brand
+POST https://turboslide.vercel.app/mcp?deck=gt-brand   (with a bearer token)
+HTTP
+
+One JSON object in, the normalized result and its findings out; a stale revision is 409 with the current document.
+
+curl -X POST 'https://turboslide.vercel.app/api/actions/deck.info?deck=gt-brand' \
+  -H 'authorization: Bearer $TURBOSLIDE_TOKEN' -H 'content-type: application/json' -d '{}'
+Window API
+
+Inside an open editor, viewer or presenter page, the same actions run through the same dispatcher a click uses.
+
+window.turboslide.studio.invoke('view.goto', { slideId: 'thesis' })
+OpenAPI
+
+The OpenAPI 3.1 document, the manifest and the llms guides are generated from the action table and committed; the hosted studio answers a stub for them until the generated files ship inside its bundle.
+
+packages/agent/generated/openapi.json   (the committed file, on GitHub)
+Read the file on GitHub
+Skills
+
+Four skills with generated reference tables: discovery and the write protocol, writing slides in the grammar, driving the live page, verifying.
+
+skills/turboslide-api/SKILL.md   skills/turboslide-create/SKILL.md
+skills/turboslide-studio/SKILL.md   skills/turboslide-verify/SKILL.md
+Read the file on GitHub
+
+The hosted agent routes accept a bearer token set by the deployment's owner; a checkout serves them to localhost without one. A deck moves between a checkout and the hosted studio with turboslide deck push and deck pull. Every action stays on every transport whether or not its menu row is in the editor's default view; the rows behind Tools > Advanced tools are the advanced ones.
+
+pnpm exec turboslide deck push gt-brand --to https://turboslide.vercel.app
+
+## section-9
+
+Compared with Google Slides
+
+Turboslide follows Google Slides' structure and behaviours on purpose, so the differences are the point. Google Slides is a product of Google LLC; Turboslide is not affiliated with Google.
+
+Row
+	Google Slides	Turboslide
+Account	A Google account; the product page's calls to action are Sign in and Try Slides for work.	Optional. Anonymous by default with a label such as Wax 613; sign in by email code or magic link is behind Advanced tools.
+Where the file lives	Google Drive.	A folder in a checkout, or a Vercel Blob store on the hosted studio, with one immutable copy per saved version.
+Editing together	Live co editing with pointers, comments, assignments and a comments panel.	Several people can edit one presentation, with a roster in the title row, comments with replies and assignments, and version history by author.
+Export	PowerPoint, ODP, PDF, plain text, JPEG, PNG and SVG of the current slide.	PDF and PowerPoint in the default view, the PowerPoint one pixel identical to the screen with a report; web page, plain text, JPEG, PNG and the Turboslide bundle behind Advanced tools. No ODP or SVG.
+Import	PowerPoint and Canva files; Import slides from another presentation.	Import slides from a presentation on this studio and the Turboslide bundle, behind Advanced tools. No PowerPoint import yet.
+Automation	A REST API with presentations.get and batchUpdate, Apps Script and add-ons; the developer site lists an MCP server.	192 actions on the CLI, MCP, HTTP and the window API, generated from one table with an OpenAPI document and four skills.
+Layouts and themes	Many themes and templates; eleven predefined layouts per theme.	One theme, gt-ink-paper, with Google's eleven layouts and 11 GT layouts.
+Pictures	Stock and web images, Drive and Photos, GIFs and stickers, Gemini image generation.	Upload, drop or paste; crop and adjust. By URL, masks, two tone dithers and 17 shader materials are behind Advanced tools.
+Transitions	Slide transitions and object animations.	None; the Transition item appears, disabled, only under Advanced tools.
+Presenting	Slideshow, Presenter view, present from Meet, recording.	Slideshow, Presenter view in a second window, Google's keys, a present link.
+Offline	With the Docs Offline extension in Chrome or in a browser built on Chromium.	The slideshow keeps going after load; the editor needs the server.
+Licence and hosting	Part of Google Workspace.	MIT; start it from a checkout or deploy it to Vercel.
+
+## footer
+
+Studio
+New presentation
+Your presentations
+The GT deck
+Present the GT deck
+Trash
+Documentation
+The documentation index
+The specification
+Google Slides parity
+The slide rules
+PowerPoint export
+Hosting
+The Rust module
+Rules for the repository
+Agents
+Manifest
+OpenAPI
+llms.txt
+MCP
+turboslide-api
+turboslide-create
+turboslide-studio
+turboslide-verify
+Licence
+MIT licence, copyright 2026 Kevin Liu
+Third party notices
+GitHub
+Turboslide
+Turboslide is General Translation's slides editor. Google Slides is a product of Google LLC.

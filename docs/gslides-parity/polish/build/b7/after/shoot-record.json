@@ -1,0 +1,4988 @@
+{
+  "dark-1440": {
+    "status": 200,
+    "loadMs": 125,
+    "nav": {
+      "ttfb": 10,
+      "domContentLoaded": 65,
+      "load": 121,
+      "transfer": 66024,
+      "decoded": 65724
+    },
+    "perfBeforeScroll": {
+      "lcp": [
+        {
+          "t": 84,
+          "size": 68199,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 216,
+          "size": 480740,
+          "el": "IMG.ts-product-shot-img.ts-product-only-dark[hero-dark]",
+          "url": "http://localhost:4447/home/hero-dark-2x-bf5467c71f.jpg"
+        }
+      ],
+      "cls": [],
+      "loaf": [
+        {
+          "t": 324,
+          "d": 71
+        }
+      ]
+    },
+    "perf": {
+      "lcp": [
+        {
+          "t": 84,
+          "size": 68199,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 216,
+          "size": 480740,
+          "el": "IMG.ts-product-shot-img.ts-product-only-dark[hero-dark]",
+          "url": "http://localhost:4447/home/hero-dark-2x-bf5467c71f.jpg"
+        }
+      ],
+      "cls": [],
+      "clsTotal": 0,
+      "loaf": [
+        {
+          "t": 324,
+          "d": 71
+        }
+      ]
+    },
+    "bytes": {
+      "before": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 677759,
+          "decoded": 676859
+        },
+        "js": {
+          "count": 222,
+          "transfer": 11429166,
+          "decoded": 11362566
+        }
+      },
+      "after": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 677759,
+          "decoded": 676859
+        },
+        "js": {
+          "count": 222,
+          "transfer": 11429166,
+          "decoded": 11362566
+        }
+      }
+    },
+    "imageFiles": [
+      {
+        "path": "/home/canvas-dark-2x-525ba0e769.png",
+        "transfer": 104417,
+        "decoded": 104117,
+        "start": 79,
+        "end": 167
+      },
+      {
+        "path": "/home/hero-dark-2x-bf5467c71f.jpg",
+        "transfer": 395418,
+        "decoded": 395118,
+        "start": 79,
+        "end": 170
+      },
+      {
+        "path": "/home/menus-dark-2x-fa3790626d.png",
+        "transfer": 177924,
+        "decoded": 177624,
+        "start": 79,
+        "end": 168
+      }
+    ],
+    "measure": {
+      "page": {
+        "height": 4898,
+        "width": 1440,
+        "innerWidth": 1440,
+        "scrollWidthOverflow": false
+      },
+      "blocks": [
+        {
+          "name": "nav",
+          "box": {
+            "top": 0,
+            "left": 0,
+            "width": 1440,
+            "height": 45
+          },
+          "style": {
+            "padding-top": "0px",
+            "padding-bottom": "0px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "words": 7,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "hero",
+          "box": {
+            "top": 45,
+            "left": 0,
+            "width": 1440,
+            "height": 1237
+          },
+          "style": {
+            "padding-top": "96px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Build the pitch, present it and send the link",
+            "box": {
+              "top": 141,
+              "left": 160,
+              "width": 960,
+              "height": 118
+            },
+            "style": {
+              "font-size": "56px",
+              "line-height": "58.8px",
+              "font-weight": "500",
+              "letter-spacing": "-1.4px"
+            }
+          },
+          "lead": {
+            "text": "Turboslide is a slides editor in the browser. It has Google Slides' menus and sh",
+            "box": {
+              "top": 283,
+              "left": 160,
+              "width": 560,
+              "height": 58
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 24,
+          "figure": {
+            "box": {
+              "top": 469,
+              "left": 160,
+              "width": 1120,
+              "height": 701
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(242, 242, 240, 0.55)"
+            }
+          },
+          "words": 34,
+          "imgs": [
+            {
+              "shot": "hero-dark",
+              "w": 1118,
+              "h": 699,
+              "natural": "1120x700",
+              "current": "hero-dark-2x-bf5467c71f.jpg",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            },
+            {
+              "shot": "hero-light",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "canvas",
+          "box": {
+            "top": 1282,
+            "left": 0,
+            "width": 1440,
+            "height": 625
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Everything on a slide moves",
+            "box": {
+              "top": 1394,
+              "left": 160,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Drag, resize and rotate any object. The first drag turns the slide into a canvas",
+            "box": {
+              "top": 1446,
+              "left": 160,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 1394,
+              "left": 669,
+              "width": 611,
+              "height": 400
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(242, 242, 240, 0.55)"
+            }
+          },
+          "words": 25,
+          "imgs": [
+            {
+              "shot": "canvas-dark",
+              "w": 609,
+              "h": 398,
+              "natural": "611x399",
+              "current": "canvas-dark-2x-525ba0e769.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            },
+            {
+              "shot": "canvas-light",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "menus",
+          "box": {
+            "top": 1908,
+            "left": 0,
+            "width": 1440,
+            "height": 730
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "The menus are Google's",
+            "box": {
+              "top": 2020,
+              "left": 160,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help are in Google's",
+            "box": {
+              "top": 2071,
+              "left": 160,
+              "width": 437,
+              "height": 116
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 15,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 2020,
+              "left": 669,
+              "width": 611,
+              "height": 505
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(242, 242, 240, 0.55)"
+            }
+          },
+          "words": 29,
+          "imgs": [
+            {
+              "shot": "menus-dark",
+              "w": 609,
+              "h": 503,
+              "natural": "611x504",
+              "current": "menus-dark-2x-fa3790626d.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            },
+            {
+              "shot": "menus-light",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "present",
+          "box": {
+            "top": 2637,
+            "left": 0,
+            "width": 1440,
+            "height": 625
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Present from the browser",
+            "box": {
+              "top": 2749,
+              "left": 160,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Slideshow starts on the current slide. Presenter view opens in a second window w",
+            "box": {
+              "top": 2801,
+              "left": 160,
+              "width": 437,
+              "height": 116
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "The editor, presenter view and a phone with the show, joined by the S key and a present link.",
+              "w": 611,
+              "h": 400,
+              "bytes": 3717
+            }
+          ]
+        },
+        {
+          "name": "export",
+          "box": {
+            "top": 3262,
+            "left": 0,
+            "width": 1440,
+            "height": 525
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Export to PDF and PowerPoint",
+            "box": {
+              "top": 3374,
+              "left": 160,
+              "width": 437,
+              "height": 72
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "File > Download writes a PDF or a PowerPoint file. The PowerPoint file matches t",
+            "box": {
+              "top": 3462,
+              "left": 160,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 40,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "A slide with an arrow to two files, pitch.pdf and pitch.pptx.",
+              "w": 611,
+              "h": 300,
+              "bytes": 2437
+            }
+          ]
+        },
+        {
+          "name": "agents",
+          "box": {
+            "top": 3787,
+            "left": 0,
+            "width": 1440,
+            "height": 525
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Agents run the same actions",
+            "box": {
+              "top": 3899,
+              "left": 160,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Every editor action is a command. Agents run the same 192 actions over the CLI, ",
+            "box": {
+              "top": 3950,
+              "left": 160,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 15,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "One table of 192 actions, reached from the CLI, MCP, HTTP and the page, out to a deck.",
+              "w": 611,
+              "h": 300,
+              "bytes": 3811
+            }
+          ]
+        },
+        {
+          "name": "licence",
+          "box": {
+            "top": 4311,
+            "left": 0,
+            "width": 1440,
+            "height": 407
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Free under the MIT licence",
+            "box": {
+              "top": 4423,
+              "left": 160,
+              "width": 1120,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Run it from a checkout or deploy it to Vercel. The code is on GitHub.",
+            "box": {
+              "top": 4475,
+              "left": 160,
+              "width": 560,
+              "height": 58
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "words": 21,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "footer",
+          "box": {
+            "top": 4718,
+            "left": 0,
+            "width": 1440,
+            "height": 179
+          },
+          "style": {
+            "padding-top": "56px",
+            "padding-bottom": "64px",
+            "border-bottom-width": "0px",
+            "border-top-width": "0px"
+          },
+          "words": 25,
+          "imgs": [],
+          "svgs": []
+        }
+      ],
+      "gaps": [
+        {
+          "from": "nav",
+          "to": "hero",
+          "gap": 0
+        },
+        {
+          "from": "hero",
+          "to": "canvas",
+          "gap": 0
+        },
+        {
+          "from": "canvas",
+          "to": "menus",
+          "gap": 1
+        },
+        {
+          "from": "menus",
+          "to": "present",
+          "gap": -1
+        },
+        {
+          "from": "present",
+          "to": "export",
+          "gap": 0
+        },
+        {
+          "from": "export",
+          "to": "agents",
+          "gap": 0
+        },
+        {
+          "from": "agents",
+          "to": "licence",
+          "gap": -1
+        },
+        {
+          "from": "licence",
+          "to": "footer",
+          "gap": 0
+        }
+      ],
+      "cta": {
+        "box": {
+          "top": 373,
+          "left": 160,
+          "width": 1120,
+          "height": 40
+        },
+        "buttons": [
+          {
+            "text": "New Presentation",
+            "top": 373,
+            "left": 160,
+            "width": 151,
+            "height": 40
+          },
+          {
+            "text": "Open the Example Deck",
+            "top": 373,
+            "left": 319,
+            "width": 193,
+            "height": 40
+          }
+        ]
+      },
+      "ladder": {
+        "h1": {
+          "font-size": "56px",
+          "line-height": "58.8px",
+          "font-weight": "500",
+          "letter-spacing": "-1.4px",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 960,
+          "height": 118
+        },
+        "h2": {
+          "font-size": "32px",
+          "line-height": "35.84px",
+          "font-weight": "500",
+          "letter-spacing": "-0.8px",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 437,
+          "height": 36
+        },
+        "lead": {
+          "font-size": "20px",
+          "line-height": "29px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(185, 188, 195)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 560,
+          "height": 58
+        },
+        "cmd": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace",
+          "width": 437,
+          "height": 62
+        },
+        "foot-link": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 108,
+          "height": 16
+        },
+        "cta": {
+          "font-size": "14px",
+          "line-height": "14px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 151,
+          "height": 40
+        },
+        "nav-link": {
+          "font-size": "13px",
+          "line-height": "13px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 115,
+          "height": 32
+        }
+      },
+      "fonts": {
+        "inter500_20": true,
+        "inter400_15": true
+      },
+      "theme": "dark",
+      "themeColor": "#070707",
+      "title": "Turboslide, a slides editor in the browser",
+      "hydrated": true,
+      "pressed": [
+        "home.theme.light=false",
+        "home.theme.dark=true"
+      ]
+    }
+  },
+  "dark-1280": {
+    "status": 200,
+    "loadMs": 330,
+    "nav": {
+      "ttfb": 21,
+      "domContentLoaded": 99,
+      "load": 327,
+      "transfer": 66024,
+      "decoded": 65724
+    },
+    "perfBeforeScroll": {
+      "lcp": [
+        {
+          "t": 120,
+          "size": 68199,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 372,
+          "size": 368940,
+          "el": "IMG.ts-product-shot-img.ts-product-only-dark[hero-dark]",
+          "url": "http://localhost:4447/home/hero-dark-2x-bf5467c71f.jpg"
+        }
+      ],
+      "cls": [],
+      "loaf": [
+        {
+          "t": 572,
+          "d": 84
+        }
+      ]
+    },
+    "perf": {
+      "lcp": [
+        {
+          "t": 120,
+          "size": 68199,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 372,
+          "size": 368940,
+          "el": "IMG.ts-product-shot-img.ts-product-only-dark[hero-dark]",
+          "url": "http://localhost:4447/home/hero-dark-2x-bf5467c71f.jpg"
+        }
+      ],
+      "cls": [],
+      "clsTotal": 0,
+      "loaf": [
+        {
+          "t": 572,
+          "d": 84
+        }
+      ]
+    },
+    "bytes": {
+      "before": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 677759,
+          "decoded": 676859
+        },
+        "js": {
+          "count": 222,
+          "transfer": 11491043,
+          "decoded": 11424443
+        }
+      },
+      "after": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 677759,
+          "decoded": 676859
+        },
+        "js": {
+          "count": 222,
+          "transfer": 11491043,
+          "decoded": 11424443
+        }
+      }
+    },
+    "imageFiles": [
+      {
+        "path": "/home/canvas-dark-2x-525ba0e769.png",
+        "transfer": 104417,
+        "decoded": 104117,
+        "start": 115,
+        "end": 323
+      },
+      {
+        "path": "/home/menus-dark-2x-fa3790626d.png",
+        "transfer": 177924,
+        "decoded": 177624,
+        "start": 115,
+        "end": 325
+      },
+      {
+        "path": "/home/hero-dark-2x-bf5467c71f.jpg",
+        "transfer": 395418,
+        "decoded": 395118,
+        "start": 115,
+        "end": 327
+      }
+    ],
+    "measure": {
+      "page": {
+        "height": 4898,
+        "width": 1280,
+        "innerWidth": 1280,
+        "scrollWidthOverflow": false
+      },
+      "blocks": [
+        {
+          "name": "nav",
+          "box": {
+            "top": 0,
+            "left": 0,
+            "width": 1280,
+            "height": 45
+          },
+          "style": {
+            "padding-top": "0px",
+            "padding-bottom": "0px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "words": 7,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "hero",
+          "box": {
+            "top": 45,
+            "left": 0,
+            "width": 1280,
+            "height": 1237
+          },
+          "style": {
+            "padding-top": "96px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Build the pitch, present it and send the link",
+            "box": {
+              "top": 141,
+              "left": 80,
+              "width": 960,
+              "height": 118
+            },
+            "style": {
+              "font-size": "56px",
+              "line-height": "58.8px",
+              "font-weight": "500",
+              "letter-spacing": "-1.4px"
+            }
+          },
+          "lead": {
+            "text": "Turboslide is a slides editor in the browser. It has Google Slides' menus and sh",
+            "box": {
+              "top": 283,
+              "left": 80,
+              "width": 560,
+              "height": 58
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 24,
+          "figure": {
+            "box": {
+              "top": 469,
+              "left": 80,
+              "width": 1120,
+              "height": 701
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(242, 242, 240, 0.55)"
+            }
+          },
+          "words": 34,
+          "imgs": [
+            {
+              "shot": "hero-dark",
+              "w": 1118,
+              "h": 699,
+              "natural": "1120x700",
+              "current": "hero-dark-2x-bf5467c71f.jpg",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            },
+            {
+              "shot": "hero-light",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "canvas",
+          "box": {
+            "top": 1282,
+            "left": 0,
+            "width": 1280,
+            "height": 625
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Everything on a slide moves",
+            "box": {
+              "top": 1394,
+              "left": 80,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Drag, resize and rotate any object. The first drag turns the slide into a canvas",
+            "box": {
+              "top": 1446,
+              "left": 80,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 1394,
+              "left": 589,
+              "width": 611,
+              "height": 400
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(242, 242, 240, 0.55)"
+            }
+          },
+          "words": 25,
+          "imgs": [
+            {
+              "shot": "canvas-dark",
+              "w": 609,
+              "h": 398,
+              "natural": "611x399",
+              "current": "canvas-dark-2x-525ba0e769.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            },
+            {
+              "shot": "canvas-light",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "menus",
+          "box": {
+            "top": 1908,
+            "left": 0,
+            "width": 1280,
+            "height": 730
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "The menus are Google's",
+            "box": {
+              "top": 2020,
+              "left": 80,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help are in Google's",
+            "box": {
+              "top": 2071,
+              "left": 80,
+              "width": 437,
+              "height": 116
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 15,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 2020,
+              "left": 589,
+              "width": 611,
+              "height": 505
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(242, 242, 240, 0.55)"
+            }
+          },
+          "words": 29,
+          "imgs": [
+            {
+              "shot": "menus-dark",
+              "w": 609,
+              "h": 503,
+              "natural": "611x504",
+              "current": "menus-dark-2x-fa3790626d.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            },
+            {
+              "shot": "menus-light",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "present",
+          "box": {
+            "top": 2637,
+            "left": 0,
+            "width": 1280,
+            "height": 625
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Present from the browser",
+            "box": {
+              "top": 2749,
+              "left": 80,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Slideshow starts on the current slide. Presenter view opens in a second window w",
+            "box": {
+              "top": 2801,
+              "left": 80,
+              "width": 437,
+              "height": 116
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "The editor, presenter view and a phone with the show, joined by the S key and a present link.",
+              "w": 611,
+              "h": 400,
+              "bytes": 3717
+            }
+          ]
+        },
+        {
+          "name": "export",
+          "box": {
+            "top": 3262,
+            "left": 0,
+            "width": 1280,
+            "height": 525
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Export to PDF and PowerPoint",
+            "box": {
+              "top": 3374,
+              "left": 80,
+              "width": 437,
+              "height": 72
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "File > Download writes a PDF or a PowerPoint file. The PowerPoint file matches t",
+            "box": {
+              "top": 3462,
+              "left": 80,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 40,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "A slide with an arrow to two files, pitch.pdf and pitch.pptx.",
+              "w": 611,
+              "h": 300,
+              "bytes": 2437
+            }
+          ]
+        },
+        {
+          "name": "agents",
+          "box": {
+            "top": 3787,
+            "left": 0,
+            "width": 1280,
+            "height": 525
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Agents run the same actions",
+            "box": {
+              "top": 3899,
+              "left": 80,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Every editor action is a command. Agents run the same 192 actions over the CLI, ",
+            "box": {
+              "top": 3950,
+              "left": 80,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 15,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "One table of 192 actions, reached from the CLI, MCP, HTTP and the page, out to a deck.",
+              "w": 611,
+              "h": 300,
+              "bytes": 3811
+            }
+          ]
+        },
+        {
+          "name": "licence",
+          "box": {
+            "top": 4311,
+            "left": 0,
+            "width": 1280,
+            "height": 407
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Free under the MIT licence",
+            "box": {
+              "top": 4423,
+              "left": 80,
+              "width": 1120,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Run it from a checkout or deploy it to Vercel. The code is on GitHub.",
+            "box": {
+              "top": 4475,
+              "left": 80,
+              "width": 560,
+              "height": 58
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "words": 21,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "footer",
+          "box": {
+            "top": 4718,
+            "left": 0,
+            "width": 1280,
+            "height": 179
+          },
+          "style": {
+            "padding-top": "56px",
+            "padding-bottom": "64px",
+            "border-bottom-width": "0px",
+            "border-top-width": "0px"
+          },
+          "words": 25,
+          "imgs": [],
+          "svgs": []
+        }
+      ],
+      "gaps": [
+        {
+          "from": "nav",
+          "to": "hero",
+          "gap": 0
+        },
+        {
+          "from": "hero",
+          "to": "canvas",
+          "gap": 0
+        },
+        {
+          "from": "canvas",
+          "to": "menus",
+          "gap": 1
+        },
+        {
+          "from": "menus",
+          "to": "present",
+          "gap": -1
+        },
+        {
+          "from": "present",
+          "to": "export",
+          "gap": 0
+        },
+        {
+          "from": "export",
+          "to": "agents",
+          "gap": 0
+        },
+        {
+          "from": "agents",
+          "to": "licence",
+          "gap": -1
+        },
+        {
+          "from": "licence",
+          "to": "footer",
+          "gap": 0
+        }
+      ],
+      "cta": {
+        "box": {
+          "top": 373,
+          "left": 80,
+          "width": 1120,
+          "height": 40
+        },
+        "buttons": [
+          {
+            "text": "New Presentation",
+            "top": 373,
+            "left": 80,
+            "width": 151,
+            "height": 40
+          },
+          {
+            "text": "Open the Example Deck",
+            "top": 373,
+            "left": 239,
+            "width": 193,
+            "height": 40
+          }
+        ]
+      },
+      "ladder": {
+        "h1": {
+          "font-size": "56px",
+          "line-height": "58.8px",
+          "font-weight": "500",
+          "letter-spacing": "-1.4px",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 960,
+          "height": 118
+        },
+        "h2": {
+          "font-size": "32px",
+          "line-height": "35.84px",
+          "font-weight": "500",
+          "letter-spacing": "-0.8px",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 437,
+          "height": 36
+        },
+        "lead": {
+          "font-size": "20px",
+          "line-height": "29px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(185, 188, 195)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 560,
+          "height": 58
+        },
+        "cmd": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace",
+          "width": 437,
+          "height": 62
+        },
+        "foot-link": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 108,
+          "height": 16
+        },
+        "cta": {
+          "font-size": "14px",
+          "line-height": "14px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 151,
+          "height": 40
+        },
+        "nav-link": {
+          "font-size": "13px",
+          "line-height": "13px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 115,
+          "height": 32
+        }
+      },
+      "fonts": {
+        "inter500_20": true,
+        "inter400_15": true
+      },
+      "theme": "dark",
+      "themeColor": "#070707",
+      "title": "Turboslide, a slides editor in the browser",
+      "hydrated": true,
+      "pressed": [
+        "home.theme.light=false",
+        "home.theme.dark=true"
+      ]
+    }
+  },
+  "dark-390": {
+    "status": 200,
+    "loadMs": 209,
+    "nav": {
+      "ttfb": 20,
+      "domContentLoaded": 102,
+      "load": 206,
+      "transfer": 66024,
+      "decoded": 65724
+    },
+    "perfBeforeScroll": {
+      "lcp": [
+        {
+          "t": 120,
+          "size": 32851,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 420,
+          "size": 75864,
+          "el": "IMG.ts-product-shot-img.ts-product-only-dark[hero-dark]",
+          "url": "http://localhost:4447/home/hero-dark-e63614f9a3.jpg"
+        }
+      ],
+      "cls": [],
+      "loaf": [
+        {
+          "t": 622,
+          "d": 69
+        }
+      ]
+    },
+    "perf": {
+      "lcp": [
+        {
+          "t": 120,
+          "size": 32851,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 420,
+          "size": 75864,
+          "el": "IMG.ts-product-shot-img.ts-product-only-dark[hero-dark]",
+          "url": "http://localhost:4447/home/hero-dark-e63614f9a3.jpg"
+        }
+      ],
+      "cls": [],
+      "clsTotal": 0,
+      "loaf": [
+        {
+          "t": 622,
+          "d": 69
+        }
+      ]
+    },
+    "bytes": {
+      "before": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 437104,
+          "decoded": 436204
+        },
+        "js": {
+          "count": 222,
+          "transfer": 12490593,
+          "decoded": 12423993
+        }
+      },
+      "after": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 437104,
+          "decoded": 436204
+        },
+        "js": {
+          "count": 222,
+          "transfer": 12490593,
+          "decoded": 12423993
+        }
+      }
+    },
+    "imageFiles": [
+      {
+        "path": "/home/canvas-dark-2x-525ba0e769.png",
+        "transfer": 104417,
+        "decoded": 104117,
+        "start": 116,
+        "end": 353
+      },
+      {
+        "path": "/home/hero-dark-e63614f9a3.jpg",
+        "transfer": 154763,
+        "decoded": 154463,
+        "start": 116,
+        "end": 409
+      },
+      {
+        "path": "/home/menus-dark-2x-fa3790626d.png",
+        "transfer": 177924,
+        "decoded": 177624,
+        "start": 117,
+        "end": 409
+      }
+    ],
+    "measure": {
+      "page": {
+        "height": 4263,
+        "width": 390,
+        "innerWidth": 390,
+        "scrollWidthOverflow": false
+      },
+      "blocks": [
+        {
+          "name": "nav",
+          "box": {
+            "top": 0,
+            "left": 0,
+            "width": 390,
+            "height": 81
+          },
+          "style": {
+            "padding-top": "0px",
+            "padding-bottom": "0px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "words": 7,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "hero",
+          "box": {
+            "top": 81,
+            "left": 0,
+            "width": 390,
+            "height": 713
+          },
+          "style": {
+            "padding-top": "56px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Build the pitch, present it and send the link",
+            "box": {
+              "top": 137,
+              "left": 20,
+              "width": 350,
+              "height": 126
+            },
+            "style": {
+              "font-size": "40px",
+              "line-height": "42px",
+              "font-weight": "500",
+              "letter-spacing": "-1px"
+            }
+          },
+          "lead": {
+            "text": "Turboslide is a slides editor in the browser. It has Google Slides' menus and sh",
+            "box": {
+              "top": 279,
+              "left": 20,
+              "width": 350,
+              "height": 78
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 16,
+          "figure": {
+            "box": {
+              "top": 501,
+              "left": 20,
+              "width": 350,
+              "height": 220
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(242, 242, 240, 0.55)"
+            }
+          },
+          "words": 34,
+          "imgs": [
+            {
+              "shot": "hero-dark",
+              "w": 348,
+              "h": 218,
+              "natural": "349x218",
+              "current": "hero-dark-e63614f9a3.jpg",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            },
+            {
+              "shot": "hero-light",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "canvas",
+          "box": {
+            "top": 794,
+            "left": 0,
+            "width": 390,
+            "height": 526
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Everything on a slide moves",
+            "box": {
+              "top": 866,
+              "left": 20,
+              "width": 350,
+              "height": 29
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "Drag, resize and rotate any object. The first drag turns the slide into a canvas",
+            "box": {
+              "top": 907,
+              "left": 20,
+              "width": 350,
+              "height": 78
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "two": {
+            "style": {
+              "grid-template-columns": "350px",
+              "gap": "32px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 1017,
+              "left": 20,
+              "width": 350,
+              "height": 229
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(242, 242, 240, 0.55)"
+            }
+          },
+          "words": 25,
+          "imgs": [
+            {
+              "shot": "canvas-dark",
+              "w": 348,
+              "h": 227,
+              "natural": "350x228",
+              "current": "canvas-dark-2x-525ba0e769.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            },
+            {
+              "shot": "canvas-light",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "menus",
+          "box": {
+            "top": 1320,
+            "left": 0,
+            "width": 390,
+            "height": 612
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "The menus are Google's",
+            "box": {
+              "top": 1392,
+              "left": 20,
+              "width": 350,
+              "height": 29
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help are in Google's",
+            "box": {
+              "top": 1433,
+              "left": 20,
+              "width": 350,
+              "height": 104
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "two": {
+            "style": {
+              "grid-template-columns": "350px",
+              "gap": "32px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 1569,
+              "left": 20,
+              "width": 350,
+              "height": 289
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(242, 242, 240, 0.55)"
+            }
+          },
+          "words": 29,
+          "imgs": [
+            {
+              "shot": "menus-dark",
+              "w": 348,
+              "h": 287,
+              "natural": "350x288",
+              "current": "menus-dark-2x-fa3790626d.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            },
+            {
+              "shot": "menus-light",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "present",
+          "box": {
+            "top": 1931,
+            "left": 0,
+            "width": 390,
+            "height": 577
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Present from the browser",
+            "box": {
+              "top": 2003,
+              "left": 20,
+              "width": 350,
+              "height": 29
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "Slideshow starts on the current slide. Presenter view opens in a second window w",
+            "box": {
+              "top": 2044,
+              "left": 20,
+              "width": 350,
+              "height": 130
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "two": {
+            "style": {
+              "grid-template-columns": "350px",
+              "gap": "32px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "The editor, presenter view and a phone with the show, joined by the S key and a present link.",
+              "w": 350,
+              "h": 229,
+              "bytes": 3717
+            }
+          ]
+        },
+        {
+          "name": "export",
+          "box": {
+            "top": 2509,
+            "left": 0,
+            "width": 390,
+            "height": 544
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Export to PDF and PowerPoint",
+            "box": {
+              "top": 2581,
+              "left": 20,
+              "width": 350,
+              "height": 58
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "File > Download writes a PDF or a PowerPoint file. The PowerPoint file matches t",
+            "box": {
+              "top": 2651,
+              "left": 20,
+              "width": 350,
+              "height": 78
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "two": {
+            "style": {
+              "grid-template-columns": "350px",
+              "gap": "32px",
+              "align-items": "start"
+            }
+          },
+          "words": 40,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "A slide with an arrow to two files, pitch.pdf and pitch.pptx.",
+              "w": 350,
+              "h": 172,
+              "bytes": 2437
+            }
+          ]
+        },
+        {
+          "name": "agents",
+          "box": {
+            "top": 3052,
+            "left": 0,
+            "width": 390,
+            "height": 631
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Agents run the same actions",
+            "box": {
+              "top": 3124,
+              "left": 20,
+              "width": 350,
+              "height": 58
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "Every editor action is a command. Agents run the same 192 actions over the CLI, ",
+            "box": {
+              "top": 3194,
+              "left": 20,
+              "width": 350,
+              "height": 78
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "two": {
+            "style": {
+              "grid-template-columns": "350px",
+              "gap": "32px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "One table of 192 actions, reached from the CLI, MCP, HTTP and the page, out to a deck.",
+              "w": 350,
+              "h": 172,
+              "bytes": 3811
+            }
+          ]
+        },
+        {
+          "name": "licence",
+          "box": {
+            "top": 3683,
+            "left": 0,
+            "width": 390,
+            "height": 302
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Free under the MIT licence",
+            "box": {
+              "top": 3755,
+              "left": 20,
+              "width": 350,
+              "height": 29
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "Run it from a checkout or deploy it to Vercel. The code is on GitHub.",
+            "box": {
+              "top": 3796,
+              "left": 20,
+              "width": 350,
+              "height": 52
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(185, 188, 195)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "words": 21,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "footer",
+          "box": {
+            "top": 3985,
+            "left": 0,
+            "width": 390,
+            "height": 278
+          },
+          "style": {
+            "padding-top": "48px",
+            "padding-bottom": "56px",
+            "border-bottom-width": "0px",
+            "border-top-width": "0px"
+          },
+          "words": 25,
+          "imgs": [],
+          "svgs": []
+        }
+      ],
+      "gaps": [
+        {
+          "from": "nav",
+          "to": "hero",
+          "gap": 0
+        },
+        {
+          "from": "hero",
+          "to": "canvas",
+          "gap": 0
+        },
+        {
+          "from": "canvas",
+          "to": "menus",
+          "gap": 0
+        },
+        {
+          "from": "menus",
+          "to": "present",
+          "gap": -1
+        },
+        {
+          "from": "present",
+          "to": "export",
+          "gap": 1
+        },
+        {
+          "from": "export",
+          "to": "agents",
+          "gap": -1
+        },
+        {
+          "from": "agents",
+          "to": "licence",
+          "gap": 0
+        },
+        {
+          "from": "licence",
+          "to": "footer",
+          "gap": 0
+        }
+      ],
+      "cta": {
+        "box": {
+          "top": 381,
+          "left": 20,
+          "width": 350,
+          "height": 88
+        },
+        "buttons": [
+          {
+            "text": "New Presentation",
+            "top": 381,
+            "left": 20,
+            "width": 350,
+            "height": 40
+          },
+          {
+            "text": "Open the Example Deck",
+            "top": 429,
+            "left": 20,
+            "width": 350,
+            "height": 40
+          }
+        ]
+      },
+      "ladder": {
+        "h1": {
+          "font-size": "40px",
+          "line-height": "42px",
+          "font-weight": "500",
+          "letter-spacing": "-1px",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 350,
+          "height": 126
+        },
+        "h2": {
+          "font-size": "26px",
+          "line-height": "29.12px",
+          "font-weight": "500",
+          "letter-spacing": "-0.65px",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 350,
+          "height": 29
+        },
+        "lead": {
+          "font-size": "18px",
+          "line-height": "26.1px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(185, 188, 195)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 350,
+          "height": 78
+        },
+        "cmd": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace",
+          "width": 350,
+          "height": 62
+        },
+        "foot-link": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 108,
+          "height": 16
+        },
+        "cta": {
+          "font-size": "14px",
+          "line-height": "14px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 350,
+          "height": 40
+        },
+        "nav-link": {
+          "font-size": "13px",
+          "line-height": "13px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(242, 242, 240)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 115,
+          "height": 32
+        }
+      },
+      "fonts": {
+        "inter500_20": true,
+        "inter400_15": true
+      },
+      "theme": "dark",
+      "themeColor": "#070707",
+      "title": "Turboslide, a slides editor in the browser",
+      "hydrated": true,
+      "pressed": [
+        "home.theme.light=false",
+        "home.theme.dark=true"
+      ]
+    }
+  },
+  "light-1440": {
+    "status": 200,
+    "loadMs": 171,
+    "nav": {
+      "ttfb": 11,
+      "domContentLoaded": 69,
+      "load": 170,
+      "transfer": 66024,
+      "decoded": 65724
+    },
+    "perfBeforeScroll": {
+      "lcp": [
+        {
+          "t": 88,
+          "size": 68199,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 200,
+          "size": 480740,
+          "el": "IMG.ts-product-shot-img.ts-product-only-light[hero-light]",
+          "url": "http://localhost:4447/home/hero-light-2x-d3820cc65c.jpg"
+        }
+      ],
+      "cls": [],
+      "loaf": [
+        {
+          "t": 307,
+          "d": 67
+        }
+      ]
+    },
+    "perf": {
+      "lcp": [
+        {
+          "t": 88,
+          "size": 68199,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 200,
+          "size": 480740,
+          "el": "IMG.ts-product-shot-img.ts-product-only-light[hero-light]",
+          "url": "http://localhost:4447/home/hero-light-2x-d3820cc65c.jpg"
+        }
+      ],
+      "cls": [],
+      "clsTotal": 0,
+      "loaf": [
+        {
+          "t": 307,
+          "d": 67
+        }
+      ]
+    },
+    "bytes": {
+      "before": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 687388,
+          "decoded": 686488
+        },
+        "js": {
+          "count": 222,
+          "transfer": 11429166,
+          "decoded": 11362566
+        }
+      },
+      "after": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 687388,
+          "decoded": 686488
+        },
+        "js": {
+          "count": 222,
+          "transfer": 11429166,
+          "decoded": 11362566
+        }
+      }
+    },
+    "imageFiles": [
+      {
+        "path": "/home/hero-light-2x-d3820cc65c.jpg",
+        "transfer": 392374,
+        "decoded": 392074,
+        "start": 83,
+        "end": 167
+      },
+      {
+        "path": "/home/canvas-light-2x-09aa8d9a15.png",
+        "transfer": 106528,
+        "decoded": 106228,
+        "start": 83,
+        "end": 166
+      },
+      {
+        "path": "/home/menus-light-2x-9f5e82a0f0.png",
+        "transfer": 188486,
+        "decoded": 188186,
+        "start": 83,
+        "end": 167
+      }
+    ],
+    "measure": {
+      "page": {
+        "height": 4898,
+        "width": 1440,
+        "innerWidth": 1440,
+        "scrollWidthOverflow": false
+      },
+      "blocks": [
+        {
+          "name": "nav",
+          "box": {
+            "top": 0,
+            "left": 0,
+            "width": 1440,
+            "height": 45
+          },
+          "style": {
+            "padding-top": "0px",
+            "padding-bottom": "0px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "words": 7,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "hero",
+          "box": {
+            "top": 45,
+            "left": 0,
+            "width": 1440,
+            "height": 1237
+          },
+          "style": {
+            "padding-top": "96px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Build the pitch, present it and send the link",
+            "box": {
+              "top": 141,
+              "left": 160,
+              "width": 960,
+              "height": 118
+            },
+            "style": {
+              "font-size": "56px",
+              "line-height": "58.8px",
+              "font-weight": "500",
+              "letter-spacing": "-1.4px"
+            }
+          },
+          "lead": {
+            "text": "Turboslide is a slides editor in the browser. It has Google Slides' menus and sh",
+            "box": {
+              "top": 283,
+              "left": 160,
+              "width": 560,
+              "height": 58
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 24,
+          "figure": {
+            "box": {
+              "top": 469,
+              "left": 160,
+              "width": 1120,
+              "height": 701
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(7, 7, 7, 0.62)"
+            }
+          },
+          "words": 34,
+          "imgs": [
+            {
+              "shot": "hero-dark",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            },
+            {
+              "shot": "hero-light",
+              "w": 1118,
+              "h": 699,
+              "natural": "1120x700",
+              "current": "hero-light-2x-d3820cc65c.jpg",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "canvas",
+          "box": {
+            "top": 1282,
+            "left": 0,
+            "width": 1440,
+            "height": 625
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Everything on a slide moves",
+            "box": {
+              "top": 1394,
+              "left": 160,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Drag, resize and rotate any object. The first drag turns the slide into a canvas",
+            "box": {
+              "top": 1446,
+              "left": 160,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 1394,
+              "left": 669,
+              "width": 611,
+              "height": 400
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(7, 7, 7, 0.62)"
+            }
+          },
+          "words": 25,
+          "imgs": [
+            {
+              "shot": "canvas-dark",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            },
+            {
+              "shot": "canvas-light",
+              "w": 609,
+              "h": 398,
+              "natural": "611x399",
+              "current": "canvas-light-2x-09aa8d9a15.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "menus",
+          "box": {
+            "top": 1908,
+            "left": 0,
+            "width": 1440,
+            "height": 730
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "The menus are Google's",
+            "box": {
+              "top": 2020,
+              "left": 160,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help are in Google's",
+            "box": {
+              "top": 2071,
+              "left": 160,
+              "width": 437,
+              "height": 116
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 15,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 2020,
+              "left": 669,
+              "width": 611,
+              "height": 505
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(7, 7, 7, 0.62)"
+            }
+          },
+          "words": 29,
+          "imgs": [
+            {
+              "shot": "menus-dark",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            },
+            {
+              "shot": "menus-light",
+              "w": 609,
+              "h": 503,
+              "natural": "611x504",
+              "current": "menus-light-2x-9f5e82a0f0.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "present",
+          "box": {
+            "top": 2637,
+            "left": 0,
+            "width": 1440,
+            "height": 625
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Present from the browser",
+            "box": {
+              "top": 2749,
+              "left": 160,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Slideshow starts on the current slide. Presenter view opens in a second window w",
+            "box": {
+              "top": 2801,
+              "left": 160,
+              "width": 437,
+              "height": 116
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "The editor, presenter view and a phone with the show, joined by the S key and a present link.",
+              "w": 611,
+              "h": 400,
+              "bytes": 3717
+            }
+          ]
+        },
+        {
+          "name": "export",
+          "box": {
+            "top": 3262,
+            "left": 0,
+            "width": 1440,
+            "height": 525
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Export to PDF and PowerPoint",
+            "box": {
+              "top": 3374,
+              "left": 160,
+              "width": 437,
+              "height": 72
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "File > Download writes a PDF or a PowerPoint file. The PowerPoint file matches t",
+            "box": {
+              "top": 3462,
+              "left": 160,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 40,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "A slide with an arrow to two files, pitch.pdf and pitch.pptx.",
+              "w": 611,
+              "h": 300,
+              "bytes": 2437
+            }
+          ]
+        },
+        {
+          "name": "agents",
+          "box": {
+            "top": 3787,
+            "left": 0,
+            "width": 1440,
+            "height": 525
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Agents run the same actions",
+            "box": {
+              "top": 3899,
+              "left": 160,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Every editor action is a command. Agents run the same 192 actions over the CLI, ",
+            "box": {
+              "top": 3950,
+              "left": 160,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 15,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "One table of 192 actions, reached from the CLI, MCP, HTTP and the page, out to a deck.",
+              "w": 611,
+              "h": 300,
+              "bytes": 3811
+            }
+          ]
+        },
+        {
+          "name": "licence",
+          "box": {
+            "top": 4311,
+            "left": 0,
+            "width": 1440,
+            "height": 407
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Free under the MIT licence",
+            "box": {
+              "top": 4423,
+              "left": 160,
+              "width": 1120,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Run it from a checkout or deploy it to Vercel. The code is on GitHub.",
+            "box": {
+              "top": 4475,
+              "left": 160,
+              "width": 560,
+              "height": 58
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "words": 21,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "footer",
+          "box": {
+            "top": 4718,
+            "left": 0,
+            "width": 1440,
+            "height": 179
+          },
+          "style": {
+            "padding-top": "56px",
+            "padding-bottom": "64px",
+            "border-bottom-width": "0px",
+            "border-top-width": "0px"
+          },
+          "words": 25,
+          "imgs": [],
+          "svgs": []
+        }
+      ],
+      "gaps": [
+        {
+          "from": "nav",
+          "to": "hero",
+          "gap": 0
+        },
+        {
+          "from": "hero",
+          "to": "canvas",
+          "gap": 0
+        },
+        {
+          "from": "canvas",
+          "to": "menus",
+          "gap": 1
+        },
+        {
+          "from": "menus",
+          "to": "present",
+          "gap": -1
+        },
+        {
+          "from": "present",
+          "to": "export",
+          "gap": 0
+        },
+        {
+          "from": "export",
+          "to": "agents",
+          "gap": 0
+        },
+        {
+          "from": "agents",
+          "to": "licence",
+          "gap": -1
+        },
+        {
+          "from": "licence",
+          "to": "footer",
+          "gap": 0
+        }
+      ],
+      "cta": {
+        "box": {
+          "top": 373,
+          "left": 160,
+          "width": 1120,
+          "height": 40
+        },
+        "buttons": [
+          {
+            "text": "New Presentation",
+            "top": 373,
+            "left": 160,
+            "width": 151,
+            "height": 40
+          },
+          {
+            "text": "Open the Example Deck",
+            "top": 373,
+            "left": 319,
+            "width": 193,
+            "height": 40
+          }
+        ]
+      },
+      "ladder": {
+        "h1": {
+          "font-size": "56px",
+          "line-height": "58.8px",
+          "font-weight": "500",
+          "letter-spacing": "-1.4px",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 960,
+          "height": 118
+        },
+        "h2": {
+          "font-size": "32px",
+          "line-height": "35.84px",
+          "font-weight": "500",
+          "letter-spacing": "-0.8px",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 437,
+          "height": 36
+        },
+        "lead": {
+          "font-size": "20px",
+          "line-height": "29px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(58, 61, 68)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 560,
+          "height": 58
+        },
+        "cmd": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace",
+          "width": 437,
+          "height": 62
+        },
+        "foot-link": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 108,
+          "height": 16
+        },
+        "cta": {
+          "font-size": "14px",
+          "line-height": "14px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(255, 255, 255)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 151,
+          "height": 40
+        },
+        "nav-link": {
+          "font-size": "13px",
+          "line-height": "13px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 115,
+          "height": 32
+        }
+      },
+      "fonts": {
+        "inter500_20": true,
+        "inter400_15": true
+      },
+      "theme": "light",
+      "themeColor": "#ffffff",
+      "title": "Turboslide, a slides editor in the browser",
+      "hydrated": true,
+      "pressed": [
+        "home.theme.light=true",
+        "home.theme.dark=false"
+      ]
+    }
+  },
+  "light-1280": {
+    "status": 200,
+    "loadMs": 311,
+    "nav": {
+      "ttfb": 14,
+      "domContentLoaded": 87,
+      "load": 309,
+      "transfer": 66024,
+      "decoded": 65724
+    },
+    "perfBeforeScroll": {
+      "lcp": [
+        {
+          "t": 116,
+          "size": 68199,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 368,
+          "size": 368940,
+          "el": "IMG.ts-product-shot-img.ts-product-only-light[hero-light]",
+          "url": "http://localhost:4447/home/hero-light-2x-d3820cc65c.jpg"
+        }
+      ],
+      "cls": [],
+      "loaf": [
+        {
+          "t": 489,
+          "d": 89
+        }
+      ]
+    },
+    "perf": {
+      "lcp": [
+        {
+          "t": 116,
+          "size": 68199,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 368,
+          "size": 368940,
+          "el": "IMG.ts-product-shot-img.ts-product-only-light[hero-light]",
+          "url": "http://localhost:4447/home/hero-light-2x-d3820cc65c.jpg"
+        }
+      ],
+      "cls": [],
+      "clsTotal": 0,
+      "loaf": [
+        {
+          "t": 489,
+          "d": 89
+        }
+      ]
+    },
+    "bytes": {
+      "before": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 687388,
+          "decoded": 686488
+        },
+        "js": {
+          "count": 222,
+          "transfer": 11509808,
+          "decoded": 11443208
+        }
+      },
+      "after": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 687388,
+          "decoded": 686488
+        },
+        "js": {
+          "count": 222,
+          "transfer": 11509808,
+          "decoded": 11443208
+        }
+      }
+    },
+    "imageFiles": [
+      {
+        "path": "/home/canvas-light-2x-09aa8d9a15.png",
+        "transfer": 106528,
+        "decoded": 106228,
+        "start": 107,
+        "end": 305
+      },
+      {
+        "path": "/home/hero-light-2x-d3820cc65c.jpg",
+        "transfer": 392374,
+        "decoded": 392074,
+        "start": 107,
+        "end": 306
+      },
+      {
+        "path": "/home/menus-light-2x-9f5e82a0f0.png",
+        "transfer": 188486,
+        "decoded": 188186,
+        "start": 107,
+        "end": 305
+      }
+    ],
+    "measure": {
+      "page": {
+        "height": 4898,
+        "width": 1280,
+        "innerWidth": 1280,
+        "scrollWidthOverflow": false
+      },
+      "blocks": [
+        {
+          "name": "nav",
+          "box": {
+            "top": 0,
+            "left": 0,
+            "width": 1280,
+            "height": 45
+          },
+          "style": {
+            "padding-top": "0px",
+            "padding-bottom": "0px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "words": 7,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "hero",
+          "box": {
+            "top": 45,
+            "left": 0,
+            "width": 1280,
+            "height": 1237
+          },
+          "style": {
+            "padding-top": "96px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Build the pitch, present it and send the link",
+            "box": {
+              "top": 141,
+              "left": 80,
+              "width": 960,
+              "height": 118
+            },
+            "style": {
+              "font-size": "56px",
+              "line-height": "58.8px",
+              "font-weight": "500",
+              "letter-spacing": "-1.4px"
+            }
+          },
+          "lead": {
+            "text": "Turboslide is a slides editor in the browser. It has Google Slides' menus and sh",
+            "box": {
+              "top": 283,
+              "left": 80,
+              "width": 560,
+              "height": 58
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 24,
+          "figure": {
+            "box": {
+              "top": 469,
+              "left": 80,
+              "width": 1120,
+              "height": 701
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(7, 7, 7, 0.62)"
+            }
+          },
+          "words": 34,
+          "imgs": [
+            {
+              "shot": "hero-dark",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            },
+            {
+              "shot": "hero-light",
+              "w": 1118,
+              "h": 699,
+              "natural": "1120x700",
+              "current": "hero-light-2x-d3820cc65c.jpg",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "canvas",
+          "box": {
+            "top": 1282,
+            "left": 0,
+            "width": 1280,
+            "height": 625
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Everything on a slide moves",
+            "box": {
+              "top": 1394,
+              "left": 80,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Drag, resize and rotate any object. The first drag turns the slide into a canvas",
+            "box": {
+              "top": 1446,
+              "left": 80,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 1394,
+              "left": 589,
+              "width": 611,
+              "height": 400
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(7, 7, 7, 0.62)"
+            }
+          },
+          "words": 25,
+          "imgs": [
+            {
+              "shot": "canvas-dark",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            },
+            {
+              "shot": "canvas-light",
+              "w": 609,
+              "h": 398,
+              "natural": "611x399",
+              "current": "canvas-light-2x-09aa8d9a15.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "menus",
+          "box": {
+            "top": 1908,
+            "left": 0,
+            "width": 1280,
+            "height": 730
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "The menus are Google's",
+            "box": {
+              "top": 2020,
+              "left": 80,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help are in Google's",
+            "box": {
+              "top": 2071,
+              "left": 80,
+              "width": 437,
+              "height": 116
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 15,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 2020,
+              "left": 589,
+              "width": 611,
+              "height": 505
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(7, 7, 7, 0.62)"
+            }
+          },
+          "words": 29,
+          "imgs": [
+            {
+              "shot": "menus-dark",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            },
+            {
+              "shot": "menus-light",
+              "w": 609,
+              "h": 503,
+              "natural": "611x504",
+              "current": "menus-light-2x-9f5e82a0f0.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "present",
+          "box": {
+            "top": 2637,
+            "left": 0,
+            "width": 1280,
+            "height": 625
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Present from the browser",
+            "box": {
+              "top": 2749,
+              "left": 80,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Slideshow starts on the current slide. Presenter view opens in a second window w",
+            "box": {
+              "top": 2801,
+              "left": 80,
+              "width": 437,
+              "height": 116
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "The editor, presenter view and a phone with the show, joined by the S key and a present link.",
+              "w": 611,
+              "h": 400,
+              "bytes": 3717
+            }
+          ]
+        },
+        {
+          "name": "export",
+          "box": {
+            "top": 3262,
+            "left": 0,
+            "width": 1280,
+            "height": 525
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Export to PDF and PowerPoint",
+            "box": {
+              "top": 3374,
+              "left": 80,
+              "width": 437,
+              "height": 72
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "File > Download writes a PDF or a PowerPoint file. The PowerPoint file matches t",
+            "box": {
+              "top": 3462,
+              "left": 80,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 40,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "A slide with an arrow to two files, pitch.pdf and pitch.pptx.",
+              "w": 611,
+              "h": 300,
+              "bytes": 2437
+            }
+          ]
+        },
+        {
+          "name": "agents",
+          "box": {
+            "top": 3787,
+            "left": 0,
+            "width": 1280,
+            "height": 525
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Agents run the same actions",
+            "box": {
+              "top": 3899,
+              "left": 80,
+              "width": 437,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Every editor action is a command. Agents run the same 192 actions over the CLI, ",
+            "box": {
+              "top": 3950,
+              "left": 80,
+              "width": 437,
+              "height": 87
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 15,
+          "two": {
+            "style": {
+              "grid-template-columns": "436.656px 611.344px",
+              "gap": "72px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "One table of 192 actions, reached from the CLI, MCP, HTTP and the page, out to a deck.",
+              "w": 611,
+              "h": 300,
+              "bytes": 3811
+            }
+          ]
+        },
+        {
+          "name": "licence",
+          "box": {
+            "top": 4311,
+            "left": 0,
+            "width": 1280,
+            "height": 407
+          },
+          "style": {
+            "padding-top": "112px",
+            "padding-bottom": "112px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Free under the MIT licence",
+            "box": {
+              "top": 4423,
+              "left": 80,
+              "width": 1120,
+              "height": 36
+            },
+            "style": {
+              "font-size": "32px",
+              "line-height": "35.84px",
+              "font-weight": "500",
+              "letter-spacing": "-0.8px"
+            }
+          },
+          "lead": {
+            "text": "Run it from a checkout or deploy it to Vercel. The code is on GitHub.",
+            "box": {
+              "top": 4475,
+              "left": 80,
+              "width": 560,
+              "height": 58
+            },
+            "style": {
+              "font-size": "20px",
+              "line-height": "29px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "560px"
+            }
+          },
+          "headingToLead": 16,
+          "words": 21,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "footer",
+          "box": {
+            "top": 4718,
+            "left": 0,
+            "width": 1280,
+            "height": 179
+          },
+          "style": {
+            "padding-top": "56px",
+            "padding-bottom": "64px",
+            "border-bottom-width": "0px",
+            "border-top-width": "0px"
+          },
+          "words": 25,
+          "imgs": [],
+          "svgs": []
+        }
+      ],
+      "gaps": [
+        {
+          "from": "nav",
+          "to": "hero",
+          "gap": 0
+        },
+        {
+          "from": "hero",
+          "to": "canvas",
+          "gap": 0
+        },
+        {
+          "from": "canvas",
+          "to": "menus",
+          "gap": 1
+        },
+        {
+          "from": "menus",
+          "to": "present",
+          "gap": -1
+        },
+        {
+          "from": "present",
+          "to": "export",
+          "gap": 0
+        },
+        {
+          "from": "export",
+          "to": "agents",
+          "gap": 0
+        },
+        {
+          "from": "agents",
+          "to": "licence",
+          "gap": -1
+        },
+        {
+          "from": "licence",
+          "to": "footer",
+          "gap": 0
+        }
+      ],
+      "cta": {
+        "box": {
+          "top": 373,
+          "left": 80,
+          "width": 1120,
+          "height": 40
+        },
+        "buttons": [
+          {
+            "text": "New Presentation",
+            "top": 373,
+            "left": 80,
+            "width": 151,
+            "height": 40
+          },
+          {
+            "text": "Open the Example Deck",
+            "top": 373,
+            "left": 239,
+            "width": 193,
+            "height": 40
+          }
+        ]
+      },
+      "ladder": {
+        "h1": {
+          "font-size": "56px",
+          "line-height": "58.8px",
+          "font-weight": "500",
+          "letter-spacing": "-1.4px",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 960,
+          "height": 118
+        },
+        "h2": {
+          "font-size": "32px",
+          "line-height": "35.84px",
+          "font-weight": "500",
+          "letter-spacing": "-0.8px",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 437,
+          "height": 36
+        },
+        "lead": {
+          "font-size": "20px",
+          "line-height": "29px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(58, 61, 68)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 560,
+          "height": 58
+        },
+        "cmd": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace",
+          "width": 437,
+          "height": 62
+        },
+        "foot-link": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 108,
+          "height": 16
+        },
+        "cta": {
+          "font-size": "14px",
+          "line-height": "14px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(255, 255, 255)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 151,
+          "height": 40
+        },
+        "nav-link": {
+          "font-size": "13px",
+          "line-height": "13px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 115,
+          "height": 32
+        }
+      },
+      "fonts": {
+        "inter500_20": true,
+        "inter400_15": true
+      },
+      "theme": "light",
+      "themeColor": "#ffffff",
+      "title": "Turboslide, a slides editor in the browser",
+      "hydrated": true,
+      "pressed": [
+        "home.theme.light=true",
+        "home.theme.dark=false"
+      ]
+    }
+  },
+  "light-390": {
+    "status": 200,
+    "loadMs": 260,
+    "nav": {
+      "ttfb": 19,
+      "domContentLoaded": 95,
+      "load": 257,
+      "transfer": 66024,
+      "decoded": 65724
+    },
+    "perfBeforeScroll": {
+      "lcp": [
+        {
+          "t": 120,
+          "size": 32851,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 272,
+          "size": 75864,
+          "el": "IMG.ts-product-shot-img.ts-product-only-light[hero-light]",
+          "url": "http://localhost:4447/home/hero-light-108cd0244e.jpg"
+        }
+      ],
+      "cls": [],
+      "loaf": [
+        {
+          "t": 542,
+          "d": 90
+        }
+      ]
+    },
+    "perf": {
+      "lcp": [
+        {
+          "t": 120,
+          "size": 32851,
+          "el": "H1.ts-product-h1",
+          "url": ""
+        },
+        {
+          "t": 272,
+          "size": 75864,
+          "el": "IMG.ts-product-shot-img.ts-product-only-light[hero-light]",
+          "url": "http://localhost:4447/home/hero-light-108cd0244e.jpg"
+        }
+      ],
+      "cls": [],
+      "clsTotal": 0,
+      "loaf": [
+        {
+          "t": 542,
+          "d": 90
+        }
+      ]
+    },
+    "bytes": {
+      "before": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 448376,
+          "decoded": 447476
+        },
+        "js": {
+          "count": 222,
+          "transfer": 12490593,
+          "decoded": 12423993
+        }
+      },
+      "after": {
+        "css": {
+          "count": 19,
+          "transfer": 138512,
+          "decoded": 132812
+        },
+        "other": {
+          "count": 3,
+          "transfer": 320157,
+          "decoded": 319257
+        },
+        "font": {
+          "count": 3,
+          "transfer": 354417,
+          "decoded": 353517
+        },
+        "image": {
+          "count": 3,
+          "transfer": 448376,
+          "decoded": 447476
+        },
+        "js": {
+          "count": 222,
+          "transfer": 12490593,
+          "decoded": 12423993
+        }
+      }
+    },
+    "imageFiles": [
+      {
+        "path": "/home/hero-light-108cd0244e.jpg",
+        "transfer": 153362,
+        "decoded": 153062,
+        "start": 113,
+        "end": 254
+      },
+      {
+        "path": "/home/canvas-light-2x-09aa8d9a15.png",
+        "transfer": 106528,
+        "decoded": 106228,
+        "start": 113,
+        "end": 252
+      },
+      {
+        "path": "/home/menus-light-2x-9f5e82a0f0.png",
+        "transfer": 188486,
+        "decoded": 188186,
+        "start": 113,
+        "end": 253
+      }
+    ],
+    "measure": {
+      "page": {
+        "height": 4263,
+        "width": 390,
+        "innerWidth": 390,
+        "scrollWidthOverflow": false
+      },
+      "blocks": [
+        {
+          "name": "nav",
+          "box": {
+            "top": 0,
+            "left": 0,
+            "width": 390,
+            "height": 81
+          },
+          "style": {
+            "padding-top": "0px",
+            "padding-bottom": "0px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "words": 7,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "hero",
+          "box": {
+            "top": 81,
+            "left": 0,
+            "width": 390,
+            "height": 713
+          },
+          "style": {
+            "padding-top": "56px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Build the pitch, present it and send the link",
+            "box": {
+              "top": 137,
+              "left": 20,
+              "width": 350,
+              "height": 126
+            },
+            "style": {
+              "font-size": "40px",
+              "line-height": "42px",
+              "font-weight": "500",
+              "letter-spacing": "-1px"
+            }
+          },
+          "lead": {
+            "text": "Turboslide is a slides editor in the browser. It has Google Slides' menus and sh",
+            "box": {
+              "top": 279,
+              "left": 20,
+              "width": 350,
+              "height": 78
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 16,
+          "figure": {
+            "box": {
+              "top": 501,
+              "left": 20,
+              "width": 350,
+              "height": 220
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(7, 7, 7, 0.62)"
+            }
+          },
+          "words": 34,
+          "imgs": [
+            {
+              "shot": "hero-dark",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            },
+            {
+              "shot": "hero-light",
+              "w": 348,
+              "h": 218,
+              "natural": "349x218",
+              "current": "hero-light-108cd0244e.jpg",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "canvas",
+          "box": {
+            "top": 794,
+            "left": 0,
+            "width": 390,
+            "height": 526
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Everything on a slide moves",
+            "box": {
+              "top": 866,
+              "left": 20,
+              "width": 350,
+              "height": 29
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "Drag, resize and rotate any object. The first drag turns the slide into a canvas",
+            "box": {
+              "top": 907,
+              "left": 20,
+              "width": 350,
+              "height": 78
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "two": {
+            "style": {
+              "grid-template-columns": "350px",
+              "gap": "32px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 1017,
+              "left": 20,
+              "width": 350,
+              "height": 229
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(7, 7, 7, 0.62)"
+            }
+          },
+          "words": 25,
+          "imgs": [
+            {
+              "shot": "canvas-dark",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            },
+            {
+              "shot": "canvas-light",
+              "w": 348,
+              "h": 227,
+              "natural": "350x228",
+              "current": "canvas-light-2x-09aa8d9a15.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "menus",
+          "box": {
+            "top": 1320,
+            "left": 0,
+            "width": 390,
+            "height": 612
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "The menus are Google's",
+            "box": {
+              "top": 1392,
+              "left": 20,
+              "width": 350,
+              "height": 29
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help are in Google's",
+            "box": {
+              "top": 1433,
+              "left": 20,
+              "width": 350,
+              "height": 104
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "two": {
+            "style": {
+              "grid-template-columns": "350px",
+              "gap": "32px",
+              "align-items": "start"
+            }
+          },
+          "figure": {
+            "box": {
+              "top": 1569,
+              "left": 20,
+              "width": 350,
+              "height": 289
+            },
+            "style": {
+              "border-top-width": "1px",
+              "border-top-color": "rgba(7, 7, 7, 0.62)"
+            }
+          },
+          "words": 29,
+          "imgs": [
+            {
+              "shot": "menus-dark",
+              "w": 0,
+              "h": 0,
+              "natural": "0x0",
+              "current": "",
+              "complete": false,
+              "loading": "lazy",
+              "visible": false
+            },
+            {
+              "shot": "menus-light",
+              "w": 348,
+              "h": 287,
+              "natural": "350x288",
+              "current": "menus-light-2x-9f5e82a0f0.png",
+              "complete": true,
+              "loading": "lazy",
+              "visible": true
+            }
+          ],
+          "svgs": []
+        },
+        {
+          "name": "present",
+          "box": {
+            "top": 1931,
+            "left": 0,
+            "width": 390,
+            "height": 577
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Present from the browser",
+            "box": {
+              "top": 2003,
+              "left": 20,
+              "width": 350,
+              "height": 29
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "Slideshow starts on the current slide. Presenter view opens in a second window w",
+            "box": {
+              "top": 2044,
+              "left": 20,
+              "width": 350,
+              "height": 130
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "two": {
+            "style": {
+              "grid-template-columns": "350px",
+              "gap": "32px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "The editor, presenter view and a phone with the show, joined by the S key and a present link.",
+              "w": 350,
+              "h": 229,
+              "bytes": 3717
+            }
+          ]
+        },
+        {
+          "name": "export",
+          "box": {
+            "top": 2509,
+            "left": 0,
+            "width": 390,
+            "height": 544
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Export to PDF and PowerPoint",
+            "box": {
+              "top": 2581,
+              "left": 20,
+              "width": 350,
+              "height": 58
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "File > Download writes a PDF or a PowerPoint file. The PowerPoint file matches t",
+            "box": {
+              "top": 2651,
+              "left": 20,
+              "width": 350,
+              "height": 78
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "two": {
+            "style": {
+              "grid-template-columns": "350px",
+              "gap": "32px",
+              "align-items": "start"
+            }
+          },
+          "words": 40,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "A slide with an arrow to two files, pitch.pdf and pitch.pptx.",
+              "w": 350,
+              "h": 172,
+              "bytes": 2437
+            }
+          ]
+        },
+        {
+          "name": "agents",
+          "box": {
+            "top": 3052,
+            "left": 0,
+            "width": 390,
+            "height": 631
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Agents run the same actions",
+            "box": {
+              "top": 3124,
+              "left": 20,
+              "width": 350,
+              "height": 58
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "Every editor action is a command. Agents run the same 192 actions over the CLI, ",
+            "box": {
+              "top": 3194,
+              "left": 20,
+              "width": 350,
+              "height": 78
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "two": {
+            "style": {
+              "grid-template-columns": "350px",
+              "gap": "32px",
+              "align-items": "start"
+            }
+          },
+          "words": 45,
+          "imgs": [],
+          "svgs": [
+            {
+              "label": "One table of 192 actions, reached from the CLI, MCP, HTTP and the page, out to a deck.",
+              "w": 350,
+              "h": 172,
+              "bytes": 3811
+            }
+          ]
+        },
+        {
+          "name": "licence",
+          "box": {
+            "top": 3683,
+            "left": 0,
+            "width": 390,
+            "height": 302
+          },
+          "style": {
+            "padding-top": "72px",
+            "padding-bottom": "72px",
+            "border-bottom-width": "1px",
+            "border-top-width": "0px"
+          },
+          "heading": {
+            "text": "Free under the MIT licence",
+            "box": {
+              "top": 3755,
+              "left": 20,
+              "width": 350,
+              "height": 29
+            },
+            "style": {
+              "font-size": "26px",
+              "line-height": "29.12px",
+              "font-weight": "500",
+              "letter-spacing": "-0.65px"
+            }
+          },
+          "lead": {
+            "text": "Run it from a checkout or deploy it to Vercel. The code is on GitHub.",
+            "box": {
+              "top": 3796,
+              "left": 20,
+              "width": 350,
+              "height": 52
+            },
+            "style": {
+              "font-size": "18px",
+              "line-height": "26.1px",
+              "color": "rgb(58, 61, 68)",
+              "max-width": "none"
+            }
+          },
+          "headingToLead": 12,
+          "words": 21,
+          "imgs": [],
+          "svgs": []
+        },
+        {
+          "name": "footer",
+          "box": {
+            "top": 3985,
+            "left": 0,
+            "width": 390,
+            "height": 278
+          },
+          "style": {
+            "padding-top": "48px",
+            "padding-bottom": "56px",
+            "border-bottom-width": "0px",
+            "border-top-width": "0px"
+          },
+          "words": 25,
+          "imgs": [],
+          "svgs": []
+        }
+      ],
+      "gaps": [
+        {
+          "from": "nav",
+          "to": "hero",
+          "gap": 0
+        },
+        {
+          "from": "hero",
+          "to": "canvas",
+          "gap": 0
+        },
+        {
+          "from": "canvas",
+          "to": "menus",
+          "gap": 0
+        },
+        {
+          "from": "menus",
+          "to": "present",
+          "gap": -1
+        },
+        {
+          "from": "present",
+          "to": "export",
+          "gap": 1
+        },
+        {
+          "from": "export",
+          "to": "agents",
+          "gap": -1
+        },
+        {
+          "from": "agents",
+          "to": "licence",
+          "gap": 0
+        },
+        {
+          "from": "licence",
+          "to": "footer",
+          "gap": 0
+        }
+      ],
+      "cta": {
+        "box": {
+          "top": 381,
+          "left": 20,
+          "width": 350,
+          "height": 88
+        },
+        "buttons": [
+          {
+            "text": "New Presentation",
+            "top": 381,
+            "left": 20,
+            "width": 350,
+            "height": 40
+          },
+          {
+            "text": "Open the Example Deck",
+            "top": 429,
+            "left": 20,
+            "width": 350,
+            "height": 40
+          }
+        ]
+      },
+      "ladder": {
+        "h1": {
+          "font-size": "40px",
+          "line-height": "42px",
+          "font-weight": "500",
+          "letter-spacing": "-1px",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 350,
+          "height": 126
+        },
+        "h2": {
+          "font-size": "26px",
+          "line-height": "29.12px",
+          "font-weight": "500",
+          "letter-spacing": "-0.65px",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 350,
+          "height": 29
+        },
+        "lead": {
+          "font-size": "18px",
+          "line-height": "26.1px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(58, 61, 68)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 350,
+          "height": 78
+        },
+        "cmd": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace",
+          "width": 350,
+          "height": 62
+        },
+        "foot-link": {
+          "font-size": "13px",
+          "line-height": "20.15px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 108,
+          "height": 16
+        },
+        "cta": {
+          "font-size": "14px",
+          "line-height": "14px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(255, 255, 255)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 350,
+          "height": 40
+        },
+        "nav-link": {
+          "font-size": "13px",
+          "line-height": "13px",
+          "font-weight": "400",
+          "letter-spacing": "normal",
+          "color": "rgb(7, 7, 7)",
+          "font-family": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "width": 115,
+          "height": 32
+        }
+      },
+      "fonts": {
+        "inter500_20": true,
+        "inter400_15": true
+      },
+      "theme": "light",
+      "themeColor": "#ffffff",
+      "title": "Turboslide, a slides editor in the browser",
+      "hydrated": true,
+      "pressed": [
+        "home.theme.light=true",
+        "home.theme.dark=false"
+      ]
+    }
+  }
+}

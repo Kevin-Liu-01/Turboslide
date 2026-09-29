@@ -1,0 +1,151 @@
+{
+  "base": "http://localhost:4447",
+  "readAt": "2026-09-28T23:35:49.948Z",
+  "title": "Turboslide, a slides editor in the browser",
+  "description": "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.",
+  "words": 271,
+  "wordsByBand": [
+    {
+      "band": "hero",
+      "words": 34
+    },
+    {
+      "band": "canvas",
+      "words": 25
+    },
+    {
+      "band": "menus",
+      "words": 29
+    },
+    {
+      "band": "present",
+      "words": 45
+    },
+    {
+      "band": "export",
+      "words": 40
+    },
+    {
+      "band": "agents",
+      "words": 45
+    },
+    {
+      "band": "licence",
+      "words": 21
+    },
+    {
+      "band": "footer",
+      "words": 25
+    }
+  ],
+  "headings": [
+    {
+      "tag": "H1",
+      "text": "Build the pitch, present it and send the link"
+    },
+    {
+      "tag": "H2",
+      "text": "Everything on a slide moves"
+    },
+    {
+      "tag": "H2",
+      "text": "The menus are Google's"
+    },
+    {
+      "tag": "H2",
+      "text": "Present from the browser"
+    },
+    {
+      "tag": "H2",
+      "text": "Export to PDF and PowerPoint"
+    },
+    {
+      "tag": "H2",
+      "text": "Agents run the same actions"
+    },
+    {
+      "tag": "H2",
+      "text": "Free under the MIT licence"
+    }
+  ],
+  "links": [
+    {
+      "control": "home.nav.lockup",
+      "text": "Turboslide",
+      "href": "http://localhost:4447/home",
+      "target": null,
+      "status": 200
+    },
+    {
+      "control": "home.nav.docs",
+      "text": "Documentation",
+      "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md",
+      "target": "_blank",
+      "status": 200
+    },
+    {
+      "control": "home.nav.github",
+      "text": "GitHub",
+      "href": "https://github.com/Kevin-Liu-01/Turboslide",
+      "target": "_blank",
+      "status": 200
+    },
+    {
+      "control": "home.nav.new",
+      "text": "New Presentation",
+      "href": "http://localhost:4447/new",
+      "target": null,
+      "status": 200
+    },
+    {
+      "control": "home.hero.deck",
+      "text": "Open the Example Deck",
+      "href": "http://localhost:4447/deck/gt-brand",
+      "target": null,
+      "status": 200
+    },
+    {
+      "control": "home.export.record",
+      "text": "0.003 percent",
+      "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/pptx.md",
+      "target": "_blank",
+      "status": 200
+    },
+    {
+      "control": "home.agents.docs",
+      "text": "Read the agent documentation",
+      "href": "https://github.com/Kevin-Liu-01/Turboslide/tree/main/skills",
+      "target": "_blank",
+      "status": 200
+    },
+    {
+      "control": "home.foot.lockup",
+      "text": "Turboslide",
+      "href": "http://localhost:4447/home#top",
+      "target": null,
+      "status": "anchor"
+    },
+    {
+      "control": "home.foot.decks",
+      "text": "Your presentations",
+      "href": "http://localhost:4447/decks",
+      "target": null,
+      "status": 200
+    },
+    {
+      "control": "home.foot.licence",
+      "text": "Licence",
+      "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/LICENSE",
+      "target": "_blank",
+      "status": 200
+    },
+    {
+      "control": "home.foot.notices",
+      "text": "Third party notices",
+      "href": "https://github.com/Kevin-Liu-01/Turboslide/blob/main/THIRD_PARTY_NOTICES.md",
+      "target": "_blank",
+      "status": 200
+    }
+  ],
+  "findings": []
+}

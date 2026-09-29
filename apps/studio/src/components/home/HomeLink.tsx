@@ -2,21 +2,17 @@ import type { AnchorHTMLAttributes, ReactNode } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
-import { tipProps } from '@turboslide/chrome/Tooltip';
-
-import type { Tip } from './copy';
-
 /**
- * The page's links (gslides-parity SPEC-4 2.5, 0.39): an address inside the route tree is the
- * router's `Link` with `preload="intent"`, so its loader runs on hover and the move is a same
- * document transition; `/new` is a document navigation on purpose (an editor route whose graph
- * this page must not carry, and the Speculation Rules candidate), an in page anchor is an anchor,
- * and an external address opens in a new tab with `rel="noopener"`. Every link carries the
- * Tooltip primitive (`tipProps`), so the tooltip audit walks the page without an exclusion.
+ * The page's links (gslides-parity SPEC-4 2.5, 0.39; docs/POLISH.md 3.7): an address inside the
+ * route tree is the router's `Link` with `preload="intent"`, so its loader runs on hover and the
+ * move is a same document transition; `/new` is a document navigation on purpose (an editor route
+ * whose graph this page must not carry, and the Speculation Rules candidate), an in page anchor
+ * such as `#top` is an anchor, and an external address opens in a new tab with `rel="noopener"`.
+ * No tooltip plate: a text link's words are its name (POLISH.md question 2, the default), and
+ * `scripts/tooltip-audit.mjs` exempts `/home`.
  */
 export type HomeLinkProps = {
   href: string;
-  tip: Tip;
   external?: boolean;
   children: ReactNode;
   className?: string;
@@ -46,14 +42,13 @@ function routed(href: string): Routed | null {
 
 export function HomeLink({
   href,
-  tip,
   external = false,
   children,
   className,
   control,
   ...rest
 }: HomeLinkProps) {
-  const common = { className, 'data-control': control, ...tipProps(tip), ...rest };
+  const common = { className, 'data-control': control, ...rest };
   if (external) {
     return (
       <a href={href} target="_blank" rel="noopener" {...common}>

@@ -778,9 +778,18 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const [chosenAvatar, setChosenAvatar] = useState<AvatarChoiceView | null | undefined>(undefined);
   const ownRowRef = useRef<PresenceParticipant | null>(null);
   ownRowRef.current = ownRow;
+  /* the "(2)" suffix of a colliding label reaches the roster rows and the chip tooltips through
+     the merged map (docs/PEOPLE.md 3.17, default 4; the row people.labels-disambiguated): the
+     map's text replaces the row's own, the row's live facts stay */
+  const suffixed = controller.identities();
+  const withText = (row: PresenceParticipant): PresenceParticipant => {
+    const view = suffixed[row.principalId];
+    if (view === undefined) return row;
+    return { ...row, label: view.label, ...(view.name !== undefined ? { name: view.name } : {}) };
+  };
   const presence: EditorPresence = {
-    ...(ownRow !== null ? { self: ownRow } : {}),
-    others: otherRows,
+    ...(ownRow !== null ? { self: withText(ownRow) } : {}),
+    others: otherRows.map(withText),
     cap: 20,
     /* View > Live pointers > Show collaborator pointers (SPEC-3 4.6): the controller's setting */
     pointersVisible: snap.pointersVisible,

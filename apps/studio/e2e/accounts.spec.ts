@@ -1553,6 +1553,18 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
     if (emailB === '') {
       emailB = `people-b-${Date.now()}@example.test`;
       await inviteByEmail(A, emailB, 'editor');
+      /* the grant binds at the invitee's first read of the deck (server/access.ts
+         bindEmailGrants): a B of this row's own signs in with the address and opens the deck
+         once, so the row stands on its own after a restart cleared the badge row's B */
+      const { context: ownCtx, page: ownB } = await otherContext(browser);
+      try {
+        expect((await signInWithCode(ownB.request, ORIGIN, emailB)).status).toBe(200);
+        await ownB.goto(`/edit/${deck}`);
+        await waitEditor(ownB);
+      } finally {
+        await closeSecond(ownCtx, ownB);
+      }
+      await openEditor(A, deck);
     }
     await openShare(A);
     /* the grant row by its address: the name, the email line (drawn for a sharer when the name is

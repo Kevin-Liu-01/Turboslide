@@ -21,6 +21,7 @@ import { join } from 'node:path';
 
 import { anonymousPrincipalId } from '@turboslide/identity/ids';
 import { labelFor } from '@turboslide/identity/labels';
+import { markHash } from '@turboslide/identity/marks';
 import { newPrincipalRecord } from '@turboslide/identity/principal';
 import type { Scope } from '@turboslide/schema/access';
 import sharp from 'sharp';
@@ -215,10 +216,17 @@ async function main(): Promise<unknown> {
         const id = anonymousPrincipalId(randomUUID());
         const found = labelFor(id);
         const other = seen.get(found);
-        if (other !== undefined && other !== id) {
+        /* the pair's plates must differ too (the row reads "the two chips' plates differ"): the
+           initials field's density is two bits of the id's hash, so one pair in four draws one
+           field; such a pair is passed over and the search goes on */
+        if (
+          other !== undefined &&
+          other !== id &&
+          markHash(other).density !== markHash(id).density
+        ) {
           pair = [other, id];
           label = found;
-        } else seen.set(found, id);
+        } else if (other === undefined) seen.set(found, id);
       }
       if (pair === null) throw new Error('no label collision found');
       const now = new Date();

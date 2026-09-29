@@ -472,10 +472,19 @@ export async function requestIdentity(
     const record = bearer.record;
     void runtime.keys.touch(record.id, now).catch(() => undefined);
     const owner = await accountFacts(runtime, record.userId);
+    /* the owner's verified address and aliases, as the session branch carries them below */
+    const ownerAliases =
+      owner === null ? [] : await runtime.aliases.aliasesOf(owner.userId).catch(() => []);
     const principal: Principal | null =
       owner === null
         ? null
-        : { id: owner.principalId, kind: 'account', email: owner.email, admin: owner.admin };
+        : {
+            id: owner.principalId,
+            kind: 'account',
+            ...(owner.emailVerified ? { email: owner.email } : {}),
+            admin: owner.admin,
+            ...(ownerAliases.length > 0 ? { aliases: ownerAliases } : {}),
+          };
     const agent: AgentContext = {
       tokenId: record.id,
       ownerId: owner?.principalId ?? accountPrincipalId(record.userId),
@@ -550,14 +559,19 @@ export async function requestIdentity(
           (await runtime.principals.touch(account.principalId, now, true)) ??
           newPrincipalRecord(account.principalId, now);
         const name = account.name.trim() || displayNameOf(record, account.principalId);
+        /* the verified address and the aliased anonymous ids (docs/PEOPLE.md 3.6; b1.md R3), as
+           the room's session branch carries them (room.ts sessionIdentity): a pending grant by
+           email admits the invitee and a deck made before the sign in keeps its creator as owner */
+        const aliases = await runtime.aliases.aliasesOf(account.userId).catch(() => []);
         return {
           kind: 'account',
           ctx: {
             principal: {
               id: account.principalId,
               kind: 'account',
-              email: account.email,
+              ...(account.emailVerified ? { email: account.email } : {}),
               admin: account.admin,
+              ...(aliases.length > 0 ? { aliases } : {}),
             },
             linkGrants: record.linkGrants,
           },

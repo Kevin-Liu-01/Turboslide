@@ -52,6 +52,15 @@ the deployment admin, else the anonymous principal of the sealed `__Host-ts_id` 
 from that context (`authorFor`): the anonymous label with the principal id, an agent's token id;
 `?author=` and the body's author are never trusted for identity (8.2).
 
+A signed in account is one person with the anonymous ids the alias table links to it (SPEC-3 7.4;
+docs/PEOPLE.md 3.6): its `Principal` carries `aliases`, and `standingOf` matches the record's
+owner and grant holders against the account and its aliases, so a deck made before the sign in
+keeps its creator as the owner. The `Principal` of an account also carries its verified address
+and nothing else's: a pending grant by email admits the account whose address it names
+(`isPendingEmailGrantFor`), and the studio binds the grant to the account's id at that first read
+of the deck (`server/access.ts` `bindEmailGrants`, one announced record write; the store keeps no
+index of grants by address, so nothing binds at sign in). An unverified address admits nobody.
+
 The twenty capabilities and the matrix are 6.2; the least role a capability needs is data in the
 identity package. Deny by default: a caller who may not read a deck gets one 404 whether the deck
 exists or not; a caller who may read but lacks the capability gets 403 with the capability named;

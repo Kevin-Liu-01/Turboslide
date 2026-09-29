@@ -930,6 +930,14 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
      sharer may see), else the view built from the id alone */
   const personOf = (principalId: string, fallback: IdentityView): IdentityView =>
     payloadIdentities?.[principalId] ?? fallback;
+  /* the address of a bound grant's holder as the payload resolved it (the view carries it for a
+     sharer alone): a bound grant names a principal and no address (the schema names one or the
+     other, never both; server/access.ts bindEmailGrants), so the Share row's line under the name
+     reads it here (docs/PEOPLE.md 3.10) */
+  const inviteeEmailOf = (principalId: string | null): { email?: string } => {
+    const email = principalId === null ? undefined : payloadIdentities?.[principalId]?.email;
+    return email === undefined ? {} : { email };
+  };
   const record = snap.access.record ?? undefined;
   const access: EditorAccess | undefined =
     record === undefined
@@ -970,7 +978,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
                   }),
                 }
               : {}),
-            ...(grant.email !== null ? { email: grant.email } : {}),
+            ...(grant.email !== null ? { email: grant.email } : inviteeEmailOf(grant.principalId)),
             role: grant.role,
             invitedAt: grant.invitedAt,
             ...(grant.acceptedAt !== null ? { acceptedAt: grant.acceptedAt } : {}),

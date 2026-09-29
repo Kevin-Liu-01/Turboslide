@@ -346,7 +346,7 @@ describe('expiry, revocation and the highest standing', () => {
     expect(decide(rec, other, 'read', { now: NOW }).ok).toBe(false);
   });
 
-  test('a pending email grant binds nobody yet', () => {
+  test('a pending email grant binds nobody by id, and the account whose verified address it names by the address', () => {
     const rec = record({
       grants: [
         {
@@ -358,6 +358,47 @@ describe('expiry, revocation and the highest standing', () => {
       ],
     });
     expect(decide(rec, ctx(principal('usr_x')), 'read', { now: NOW }).ok).toBe(false);
+    /* the people round (docs/PEOPLE.md 3.10; SPEC-3 6.5): the invitee reads the deck before the
+       studio binds the grant to its id; the address is compared lower case */
+    const invitee = ctx({ ...principal('usr_x'), email: 'Lee@Example.com' });
+    expect(decide(rec, invitee, 'write', { now: NOW })).toEqual({
+      ok: true,
+      role: 'editor',
+      via: 'grant',
+    });
+    const other = ctx({ ...principal('usr_y'), email: 'kim@example.com' });
+    expect(decide(rec, other, 'read', { now: NOW }).ok).toBe(false);
+    const expired = record({
+      grants: [
+        {
+          ...grant('usr_x', 'editor'),
+          principalId: null,
+          email: 'lee@example.com',
+          acceptedAt: null,
+          expiresAt: '2026-09-01T00:00:00.000Z',
+        },
+      ],
+    });
+    expect(decide(expired, invitee, 'read', { now: NOW }).ok).toBe(false);
+  });
+
+  test('an account stands as the owner or the grant holder its aliased anonymous id is (the sign in after the deck was made)', () => {
+    /* docs/PEOPLE.md 3.6; build/b1.md R3: the deck keeps owner anon_<uuid> after the sign in */
+    const owned = record({ owner: 'anon_creator' });
+    const account = ctx({ ...principal('usr_c'), aliases: ['anon_creator'] });
+    expect(decide(owned, account, 'transfer', { now: NOW })).toEqual({
+      ok: true,
+      role: 'owner',
+      via: 'owner',
+    });
+    expect(decide(owned, ctx(principal('usr_c')), 'read', { now: NOW }).ok).toBe(false);
+    const granted = record({ grants: [grant('anon_guest', 'commenter')] });
+    const holder = ctx({ ...principal('usr_g'), aliases: ['anon_other', 'anon_guest'] });
+    expect(decide(granted, holder, 'comment', { now: NOW })).toEqual({
+      ok: true,
+      role: 'commenter',
+      via: 'grant',
+    });
   });
 
   test('the stored role of the link wins over the role the session remembers', () => {

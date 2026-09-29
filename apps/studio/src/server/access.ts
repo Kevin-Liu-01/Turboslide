@@ -38,7 +38,8 @@ import type {
 import type { ShareLinkHit, ShareLinkLookupOptions } from './auth/identity';
 import { findLinkInRecord } from './auth/links';
 import type { AuthContext } from './authorize';
-import type { LinkGrant } from '@turboslide/identity/access';
+import { isPendingEmailGrantFor } from '@turboslide/identity/access';
+import type { LinkGrant, Principal } from '@turboslide/identity/access';
 import { denialBody } from './authorize';
 import type { RequestIdentity } from './room';
 import { decksDir, exportBlobClient, stateDir, storeSelection } from './root';
@@ -532,6 +533,45 @@ export function hostedAccessHooks(
       await d.announce(deckId, parsed.revision).catch(() => undefined);
     },
   };
+}
+
+/**
+ * Binds the deck's pending grants by email to the signed in principal whose verified address they
+ * name (SPEC-3 6.5; docs/PEOPLE.md 3.10; build/b5.md R7). The store keeps no index of grants by
+ * address, so the identity runtime's `bindInvitations` hook has nothing to bind through at sign
+ * in and stays null; the binding happens where the invitee first reads the deck (the editor
+ * boot, write.ts), after `decide()` admitted them through the pure address match
+ * (identity/access.ts `isPendingEmailGrantFor`). A bound grant names the principal and drops the
+ * address (the schema names one or the other, never both); the payload's resolved view carries
+ * the address for a sharer from then on. One write, based on the fresh record, announced to the
+ * room's open tabs like a share write; a conflict with another instance's write answers null and
+ * the next read binds. Answers the bound record, or null when no grant named the address.
+ */
+export async function bindEmailGrants(
+  deckId: string,
+  principal: Pick<Principal, 'id' | 'kind' | 'email' | 'admin'>,
+  deps?: AccessHookDeps,
+): Promise<AccessRecord | null> {
+  if (principal.kind !== 'account' || principal.email === undefined) return null;
+  const hooks = hostedAccessHooks(deckId, deps);
+  const record = await hooks.load();
+  if (record === null) return null;
+  const now = (deps?.now ?? (() => new Date().toISOString()))();
+  const at = Date.parse(now);
+  const grants = record.grants.map((grant) =>
+    isPendingEmailGrantFor(grant, principal, at)
+      ? { ...grant, principalId: principal.id, email: null, acceptedAt: now, expiresAt: null }
+      : grant,
+  );
+  if (grants.every((grant, i) => grant === record.grants[i])) return null;
+  const next: AccessRecord = { ...record, grants, revision: record.revision + 1 };
+  try {
+    await hooks.save(next);
+  } catch {
+    return null;
+  }
+  dropLinkGrantCache(principal.id);
+  return next;
 }
 
 // ---------------------------------------------------------------------------------------------

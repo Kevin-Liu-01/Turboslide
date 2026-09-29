@@ -53,12 +53,21 @@ export type AccessGrant = Grant;
 export type PublishRecord = Publish;
 export { CAPABILITIES, DEFAULT_ACCESS_SETTINGS, ROLES, SCOPES };
 
-/** Who is asking: an anonymous browser (the sealed cookie) or a signed in account. */
+/**
+ * Who is asking: an anonymous browser (the sealed cookie) or a signed in account. An account
+ * carries its verified address (a pending grant by email binds to it, `standingOf`) and the
+ * anonymous ids the alias table links to it (docs/PEOPLE.md 3.6; SPEC-3 7.4; build/b1.md R3:
+ * a deck made anonymously keeps `owner: anon_<uuid>` after the sign in, and the record's owner
+ * and grants are matched against the account and its aliases, so the creator stays the owner).
+ */
 export type Principal = {
   id: string;
   kind: 'anonymous' | 'account';
+  /** the account's verified address; absent for an anonymous browser and an unverified account */
   email?: string;
   admin: boolean;
+  /** the anonymous ids linked to the account (`runtime.aliases.aliasesOf`); absent when none */
+  aliases?: readonly string[];
 };
 
 /** An API key record acting for its owner (SPEC-3 7.7). */
@@ -216,6 +225,23 @@ export function isGrantLive(grant: AccessGrant, now: number): boolean {
   return grant.principalId !== null && !isPast(grant.expiresAt, now);
 }
 
+/**
+ * A pending grant by email that names the principal's verified address (SPEC-3 6.5; docs/PEOPLE.md
+ * 3.10): an account reads the deck it was invited to before anything binds the grant to its id,
+ * and the studio binds it at that first read (`bindEmailGrants`). The address is compared lower
+ * case, the way the invite stores it; an anonymous browser and an unverified account carry none.
+ */
+export function isPendingEmailGrantFor(
+  grant: AccessGrant,
+  principal: Principal,
+  now: number,
+): boolean {
+  if (grant.principalId !== null || grant.email === null) return false;
+  if (principal.kind !== 'account' || principal.email === undefined) return false;
+  if (isPast(grant.expiresAt, now)) return false;
+  return grant.email.trim().toLowerCase() === principal.email.trim().toLowerCase();
+}
+
 type Standing = { role: Role; via: Via };
 
 const VIA_RANK: Readonly<Record<Via, number>> = {
@@ -243,11 +269,16 @@ export function standingOf(
   now: number,
 ): Standing | null {
   let standing: Standing | null = null;
+  /* the account and the anonymous ids linked to it are one person (docs/PEOPLE.md 3.6; b1.md
+     R3): a deck made before the sign in keeps the old id as its owner or grant holder */
+  const ids = new Set<string>([principal.id, ...(principal.aliases ?? [])]);
   if (principal.admin) standing = better(standing, { role: 'owner', via: 'admin' });
-  if (record.owner !== null && record.owner === principal.id)
+  if (record.owner !== null && ids.has(record.owner))
     standing = better(standing, { role: 'owner', via: 'owner' });
   for (const grant of record.grants) {
-    if (grant.principalId === principal.id && isGrantLive(grant, now))
+    if (grant.principalId !== null && ids.has(grant.principalId) && isGrantLive(grant, now))
+      standing = better(standing, { role: grant.role, via: 'grant' });
+    else if (isPendingEmailGrantFor(grant, principal, now))
       standing = better(standing, { role: grant.role, via: 'grant' });
   }
   for (const held of linkGrants) {

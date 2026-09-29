@@ -415,6 +415,12 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     sendMintedCookie(identity.setCookie);
     const decision = await room.decideFor(identity, data.deckId, 'read', 'readEditorDeck');
     if (!decision.ok) return JSON.stringify(null);
+    /* an invitation by email binds to the account whose verified address it names at that
+       account's first read of the deck (docs/PEOPLE.md 3.10; SPEC-3 6.5; access.ts
+       bindEmailGrants says why here and not at sign in): the decision above admitted the invitee
+       through the address, and the record the payload carries below names them from now on */
+    if (identity.kind === 'signedIn' && identity.ctx.principal !== null)
+      await access.bindEmailGrants(data.deckId, identity.ctx.principal).catch(() => null);
     const runtime = auth.identityRuntime();
     const deckRoom = await room.roomFor(data.deckId);
     // the head on the blob tier (the focus round, cycle 2): a page load and a tab's reload read

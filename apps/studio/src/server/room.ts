@@ -444,11 +444,16 @@ async function sessionIdentity(
       admin: facts.admin,
       avatar,
     };
+    /* the verified address, so a pending grant by email admits the invitee (identity/access.ts
+       isPendingEmailGrantFor), and the anonymous ids linked to the account, so a deck made
+       before the sign in keeps its creator as the owner (standingOf; b1.md R3) */
+    const aliases = await runtime.aliases.aliasesOf(facts.userId).catch(() => []);
     const principal: Principal = {
       id: facts.principalId,
       kind: 'account',
-      email: facts.email,
+      ...(facts.emailVerified ? { email: facts.email } : {}),
       admin: facts.admin,
+      ...(aliases.length > 0 ? { aliases } : {}),
     };
     return {
       ctx: { principal, linkGrants: await linkGrantsFor(facts.principalId, record) },

@@ -11,6 +11,7 @@ import { cn } from '../lib/cn';
 import { ShellContext } from '../shell-context';
 import type { ShellState } from '../shell-context';
 import { useSnackbar } from '../Snackbar';
+import { ACCOUNT } from '../menus/strings';
 import { hideTooltip } from '../Tooltip';
 
 // The name prompt the route opens on the first write or at the join is the title row's plate
@@ -134,6 +135,19 @@ describe('the name prompt as the title row plate', () => {
     expect(prompt.querySelector('[data-control="dialog.namePrompt.name"]')).not.toBeNull();
     expect(prompt.querySelector('[data-control="dialog.namePrompt.continue"]')).not.toBeNull();
     expect(prompt.querySelector('[data-control="dialog.namePrompt.close"]')).not.toBeNull();
+  });
+
+  it('opens empty with the placeholder "Your name"; the question is the group\'s label (item 63)', () => {
+    const { container } = render(
+      <Harness input={input({ account: account() })} shell={shellState()} />,
+    );
+    const prompt = container.querySelector('[data-control="dialog.namePrompt"]')!;
+    const field = prompt.querySelector<HTMLInputElement>(
+      '[data-control="dialog.namePrompt.name"]',
+    )!;
+    expect(field.value).toBe('');
+    expect(field.getAttribute('placeholder')).toBe('Your name');
+    expect(prompt.getAttribute('aria-label')).toBe(ACCOUNT.namePrompt.title);
   });
 
   it('is absent while the route keeps the prompt closed', () => {

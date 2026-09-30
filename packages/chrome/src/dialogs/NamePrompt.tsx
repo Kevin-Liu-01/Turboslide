@@ -91,11 +91,13 @@ function useNamePrompt(onDone: ((named: boolean) => void) | undefined) {
  * floating card at the bottom right it replaces stood over the stage while the seller worked
  * (the polish round's collaboration audit, item 6). It takes no focus of its own: a person typing
  * keeps the caret, and a click in the field brings the caret here. Enter keeps the name, the
- * cross keeps the generated label. The question is the field's placeholder, so the plate stays
- * about 340 px wide and the deck's name beside it keeps its room at 1440 (a label before the field
- * cut the title to one letter in the fix round 3's first read). The controls carry the dialog's
- * ids, so a driver reads one prompt whichever surface it has (`dialog.namePrompt`, `.name`,
- * `.continue`, `.close`, `.error`).
+ * cross keeps the generated label. The field's placeholder is "Your name" (docs/POLISH.md 2.6
+ * item 63; the row `share.name-prompt.empty-field`) and the question is the group's label, so
+ * the plate stays about 340 px wide and the deck's name beside it keeps its room at 1440 (a label
+ * before the field cut the title to one letter in the fix round 3's first read; the question as
+ * the placeholder read against item 63 at the ship step's third attempt). The controls carry the
+ * dialog's ids, so a driver reads one prompt whichever surface it has (`dialog.namePrompt`,
+ * `.name`, `.continue`, `.close`, `.error`).
  */
 export function NamePromptPlate() {
   const { shell, account, name, setName, error, setError, busy, close, submit, tip } =
@@ -116,7 +118,7 @@ export function NamePromptPlate() {
         className="ts-title-name-plate-field"
         value={name}
         maxLength={80}
-        placeholder={ACCOUNT.namePrompt.title}
+        placeholder="Your name"
         aria-label={ACCOUNT.namePrompt.name}
         aria-invalid={error !== null ? true : undefined}
         data-control="dialog.namePrompt.name"

@@ -502,6 +502,8 @@ export type PlainBlock = BlockBase & {
   numbered?: true;
   marker?: ListMarker;
   preset?: BulletPreset | NumberPreset;
+  /** The list's own look over the theme's 24 px rows: the heading's level Bulleted list on a title carries (the polish round's fix round 3, B5's R20; apps/cli store-actions.ts listTypographyOf). */
+  typography?: Typography;
   items: PlainItem[];
 };
 export type RefsBlock = BlockBase & { type: 'refs'; items: Text[] };
@@ -1132,6 +1134,7 @@ export const plainBlockSchema = z
       group: 'Block',
       help: 'Google’s bullet or numbering preset; the first of its family unless set (gslides-parity SPEC-2 2.2.13).',
     }),
+    typography: typographySchema,
     items: z.array(plainItemSchema).min(1),
   })
   .refine(

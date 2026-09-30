@@ -10,6 +10,7 @@ import {
   bulletGlyph,
   listNumerals,
 } from '@turboslide/schema/text';
+import { typographyDeclarations } from '@turboslide/schema/typography';
 import { iconSvg, rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
 import { renderTextOrPrompt } from './prompt.ts';
@@ -106,6 +107,9 @@ export function renderPlain(block: BlockOf<'plain'>, ctx: BlockContext): string 
     'div',
     rootAttrs(block, ctx, {
       className: classes('plain', size !== 24 && `plain-${size}`, numbered && 'numbered'),
+      /* the list's own typography record over the theme's rows (a heading's level carried by Bulleted
+         list on a title; the polish round's fix round 3, B5's R20), as the text blocks apply theirs */
+      style: style(...typographyDeclarations(block.typography)),
     }),
     items,
   );
@@ -185,6 +189,7 @@ function renderMarkedPlain(block: BlockOf<'plain'>, ctx: BlockContext): string {
       ),
       'data-marker': block.marker,
       'data-preset': block.preset,
+      style: style(...typographyDeclarations(block.typography)),
     }),
     items,
   );

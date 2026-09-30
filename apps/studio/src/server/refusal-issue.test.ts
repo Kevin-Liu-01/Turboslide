@@ -1,5 +1,8 @@
+// The unknown key is `leading` at the block level (a typography property outside its record): the
+// plain block admits `typography` itself since the polish round's fix round 3 (B5's R20, the list
+// keeps a heading's look), so the older example of this file moved one level down.
 // The sentence of a refused write (the focus round, cycle 2; VERIFICATION C2-F1): a `block.set
-// /typography` on a `plain` list block fails the slide's schema, the validator leaves the slide out
+// /leading` on a `plain` list block fails the slide's schema, the validator leaves the slide out
 // of its map and adds the manifest's "No slide file" reference issue, and the sort by file name
 // put that consequence first. The refusal names the cause, the slide's own issue.
 import { describe, expect, it } from 'vitest';
@@ -22,9 +25,9 @@ const unknownField: Issue = {
   code: 'unknown_field',
   severity: 3,
   file: 'slides/blank-1.json',
-  pointer: '/slots/main/0/typography',
+  pointer: '/slots/main/0/leading',
   message:
-    'Unknown field "typography"; unknown data survives only under ext on a slide, a block or an asset (SPEC 4.1)',
+    'Unknown field "leading"; unknown data survives only under ext on a slide, a block or an asset (SPEC 4.1)',
 };
 const warning: Issue = {
   code: 'migrated',
@@ -53,7 +56,7 @@ describe('refusalIssue', () => {
 describe('refusalMessage', () => {
   it('puts the slide file before the pointer and keeps the manifest issue as pointer and message', () => {
     expect(refusalMessage(unknownField)).toBe(
-      'slides/blank-1.json /slots/main/0/typography: Unknown field "typography"; unknown data survives only under ext on a slide, a block or an asset (SPEC 4.1)',
+      'slides/blank-1.json /slots/main/0/leading: Unknown field "leading"; unknown data survives only under ext on a slide, a block or an asset (SPEC 4.1)',
     );
     expect(refusalMessage(reference)).toBe(
       '/sections/0/slideIds/1: No slide file for "blank-1" (slides/blank-1.json)',
@@ -98,7 +101,7 @@ describe('the walk’s reject (C2-F1) through the validator', () => {
     },
   };
 
-  it('names the plain block’s unknown typography field, not the missing slide file', () => {
+  it('names the plain block’s unknown leading field, not the missing slide file', () => {
     const before = validateDocument(document);
     expect(before.ok, before.issues.map((issue) => issue.message).join('; ')).toBe(true);
     const { document: next } = applyMutations(document, [
@@ -106,8 +109,8 @@ describe('the walk’s reject (C2-F1) through the validator', () => {
         op: 'block.set',
         slideId: 'blank-1',
         blockId: 'text',
-        path: '/typography',
-        value: { align: 'right' },
+        path: '/leading',
+        value: 1.5,
       },
     ]);
     const validation = validateDocument(next);
@@ -117,7 +120,7 @@ describe('the walk’s reject (C2-F1) through the validator', () => {
     const issue = refusalIssue(validation.issues, ['blank-1']);
     expect(issue?.code).toBe('unknown_field');
     expect(refusalMessage(issue!)).toMatch(
-      /^slides\/blank-1\.json \/.*typography.*Unknown field "typography"/,
+      /^slides\/blank-1\.json \/.*leading.*Unknown field "leading"/,
     );
   });
 });

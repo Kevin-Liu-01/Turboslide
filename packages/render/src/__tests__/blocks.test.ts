@@ -363,3 +363,30 @@ describe('objects of the canvas scale their content with the box', () => {
     expect(BLOCK_CSS).not.toContain('.table > .tr { flex');
   });
 });
+
+describe('a plain block with its own typography (the polish round fix round 3, B5 R20)', () => {
+  const cover = { size: 88, weight: 500, tracking: -0.025, leading: 1.02 } as const;
+  const declarations = 'font-size:88px;font-weight:500;letter-spacing:-0.025em;line-height:1.02';
+
+  it('applies the record on the ruled list root and on the bulleted list root', () => {
+    const ruled = renderBlock(
+      { id: 'r', type: 'plain', items: [{ text: 'Plan' }], typography: cover },
+      context('light'),
+    );
+    const bulleted = renderBlock(
+      { id: 'b', type: 'plain', marker: 'bullet', items: [{ text: 'Plan' }], typography: cover },
+      context('light'),
+    );
+    expect(ruled).toContain(`style="${declarations}"`);
+    expect(bulleted).toContain(`style="${declarations}"`);
+    expect(bulleted).toContain('class="plain marked bulleted"');
+  });
+
+  it('writes no style when the block has no record', () => {
+    const plain = renderBlock(
+      { id: 'p', type: 'plain', marker: 'bullet', items: [{ text: 'Plan' }] },
+      context('light'),
+    );
+    expect(plain).not.toContain('style=');
+  });
+});

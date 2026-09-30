@@ -1,0 +1,2298 @@
+{
+  "base": "http://localhost:4466",
+  "tag": "local",
+  "accounts": true,
+  "uptime": "17:04  up 5 days,  7:01, 2 users, load averages: 217.99 142.47 108.79",
+  "signIn.A": 200,
+  "emailA": "people-integrator-1790726656709@example.test",
+  "deck.id": "untitled-20260930-g2fp",
+  "account.A.boot": {
+    "account": {
+      "principalId": "usr_lQ1ZDopw8ATIteRSr7zFrZit3nIWlqmb",
+      "label": "Paper 123",
+      "trust": "verified",
+      "signedIn": true,
+      "signInAvailable": true,
+      "mark": {
+        "density": 2,
+        "glyphSeed": 2961240360,
+        "presenter": false,
+        "self": false,
+        "trust": "verified",
+        "label": "Paper 123",
+        "variant": "initials",
+        "initials": "P1",
+        "hue": {
+          "slot": 3,
+          "hex": "#0f6a6a"
+        }
+      }
+    },
+    "self": {
+      "clientId": "57e8894d5b3e8cd28fa12656292e3ab8",
+      "principalId": "usr_lQ1ZDopw8ATIteRSr7zFrZit3nIWlqmb",
+      "kind": "human",
+      "label": "Paper 123",
+      "trust": "verified",
+      "mark": {
+        "density": 2,
+        "glyphSeed": 2961240360,
+        "presenter": false,
+        "self": false,
+        "trust": "verified",
+        "label": "Paper 123",
+        "variant": "initials",
+        "initials": "P1",
+        "hue": {
+          "slot": 3,
+          "hex": "#0f6a6a"
+        }
+      },
+      "role": "owner",
+      "presenting": false,
+      "idle": false,
+      "lastSeenAt": "2026-09-30T00:04:19.522Z",
+      "email": "people-integrator-1790726656709@example.test"
+    }
+  },
+  "namePrompt.firstEdit": false,
+  "setName.A": {
+    "ok": true,
+    "name": "Ada Integrator",
+    "trust": "verified"
+  },
+  "ownChip.A.afterName": [
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AI",
+      "badgeAfter": null
+    }
+  ],
+  "shot.builder.empty.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-builder-picture-empty-light.png",
+  "shot.builder.empty.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-builder-picture-empty-dark.png",
+  "shot.builder.loaded.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-builder-picture-loaded-light.png",
+  "shot.builder.loaded.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-builder-picture-loaded-dark.png",
+  "builder.sentences": {
+    "cap": "Cropped to a square and sent at 256 px, under 512 KB. JPEG, PNG, WebP or GIF",
+    "privacy": "Your picture shows on every presentation you open while signed in, to people invited by email. People who arrive by a link see a role initial instead",
+    "cache": "A replaced or removed picture can stay readable at its old address for up to a year in caches"
+  },
+  "upload.A": {
+    "ms": 403,
+    "chip": {
+      "holder": "title.account",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    }
+  },
+  "link": "minted",
+  "namesSwitch.off": {
+    "ok": true,
+    "revision": 2
+  },
+  "linkVisitor.C.off.presence": [
+    {
+      "label": "The owner",
+      "name": null,
+      "trust": "label",
+      "initials": "O",
+      "variant": "initials",
+      "picture": null
+    },
+    {
+      "label": "Iron 995",
+      "name": null,
+      "trust": "label",
+      "initials": "I",
+      "variant": "initials",
+      "picture": null
+    }
+  ],
+  "linkVisitor.C.off.identities": {
+    "usr_lQ1ZDopw8ATIteRSr7zFrZit3nIWlqmb": {
+      "label": "The owner",
+      "name": null,
+      "trust": "label",
+      "email": null
+    },
+    "anon_a19d1e1c-76ed-4936-8d4f-3414dfacb091": {
+      "label": "Iron 995",
+      "name": null,
+      "trust": "label",
+      "email": null
+    },
+    "anon_aec453a4-b39c-4b1e-a47f-37d78d14a9b1": {
+      "label": "Enamel 925",
+      "name": null,
+      "trust": "label",
+      "email": null
+    }
+  },
+  "linkVisitor.C.off.chips.light": [
+    {
+      "holder": "presence.chip.57e8894d5b3e8cd28fa12656292e3ab8",
+      "ariaLabel": "The owner",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 38,
+      "initials": "O",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.907f42413a2807d99e9326d1d4a535a6",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    }
+  ],
+  "shot.linkVisitor.off.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-link-visitor-role-initial-light.png",
+  "linkVisitor.C.off.tip.light": {
+    "name": "The owner · slide 1",
+    "text": "The owner · slide 1Signed in Click to follow; click again to stop"
+  },
+  "linkVisitor.C.off.chips.dark": [
+    {
+      "holder": "presence.chip.57e8894d5b3e8cd28fa12656292e3ab8",
+      "ariaLabel": "The owner",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 38,
+      "initials": "O",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.907f42413a2807d99e9326d1d4a535a6",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    }
+  ],
+  "shot.linkVisitor.off.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-link-visitor-role-initial-dark.png",
+  "linkVisitor.C.off.tip.dark": {
+    "name": "The owner · slide 1",
+    "text": "The owner · slide 1Signed in Click to follow; click again to stop"
+  },
+  "namesSwitch.on": {
+    "ok": true,
+    "revision": 3
+  },
+  "linkVisitor.C.on.presence": [
+    {
+      "label": "Ada Integrator",
+      "name": null,
+      "trust": "verified",
+      "picture": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp"
+    },
+    {
+      "label": "Iron 995",
+      "name": null,
+      "trust": "label",
+      "picture": null
+    }
+  ],
+  "linkVisitor.C.on.chips.light": [
+    {
+      "holder": "presence.chip.57e8894d5b3e8cd28fa12656292e3ab8",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.907f42413a2807d99e9326d1d4a535a6",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    }
+  ],
+  "shot.linkVisitor.on.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-link-visitor-names-on-light.png",
+  "linkVisitor.C.on.tip.light": {
+    "name": "Ada Integrator · signed in · slide 1",
+    "text": "Ada Integrator · signed in · slide 1Signed in Click to follow; click again to stop"
+  },
+  "linkVisitor.C.on.chips.dark": [
+    {
+      "holder": "presence.chip.57e8894d5b3e8cd28fa12656292e3ab8",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.907f42413a2807d99e9326d1d4a535a6",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    }
+  ],
+  "shot.linkVisitor.on.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-link-visitor-names-on-dark.png",
+  "linkVisitor.C.on.tip.dark": {
+    "name": "Ada Integrator · signed in · slide 1",
+    "text": "Ada Integrator · signed in · slide 1Signed in Click to follow; click again to stop"
+  },
+  "slot.A.light": [
+    {
+      "holder": "presence.chip.907f42413a2807d99e9326d1d4a535a6",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.b12a7c6282f097734adcaf41004c2fd0",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    }
+  ],
+  "shot.slot.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-slot-A-light.png",
+  "shot.zoom.own.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-zoom-own-chip-light.png",
+  "shot.zoom.other.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-zoom-other-chip-light.png",
+  "tooltip.A.light": {
+    "name": "Iron 995 · slide 1",
+    "text": "Iron 995 · slide 1Not signed in. A generated label for this browser. Go to slide 1"
+  },
+  "shot.tooltip.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-tooltip-A-light.png",
+  "slot.A.dark": [
+    {
+      "holder": "presence.chip.907f42413a2807d99e9326d1d4a535a6",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.b12a7c6282f097734adcaf41004c2fd0",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    }
+  ],
+  "shot.slot.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-slot-A-dark.png",
+  "shot.zoom.own.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-zoom-own-chip-dark.png",
+  "shot.zoom.other.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-zoom-other-chip-dark.png",
+  "tooltip.A.dark": {
+    "name": "Iron 995 · slide 1",
+    "text": "Iron 995 · slide 1Not signed in. A generated label for this browser. Go to slide 1"
+  },
+  "shot.tooltip.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-tooltip-A-dark.png",
+  "slot.B.light": [
+    {
+      "holder": "presence.chip.57e8894d5b3e8cd28fa12656292e3ab8",
+      "ariaLabel": "The owner",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 38,
+      "initials": "O",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.b12a7c6282f097734adcaf41004c2fd0",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    }
+  ],
+  "shot.slot.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-slot-B-light.png",
+  "tooltip.B.light": {
+    "name": "The owner · slide 1",
+    "text": "The owner · slide 1Signed in Click to follow; click again to stop"
+  },
+  "shot.tooltip.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-tooltip-B-light.png",
+  "slot.B.dark": [
+    {
+      "holder": "presence.chip.57e8894d5b3e8cd28fa12656292e3ab8",
+      "ariaLabel": "The owner",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 38,
+      "initials": "O",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.b12a7c6282f097734adcaf41004c2fd0",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    }
+  ],
+  "shot.slot.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-slot-B-dark.png",
+  "tooltip.B.dark": {
+    "name": "The owner · slide 1",
+    "text": "The owner · slide 1Signed in Click to follow; click again to stop"
+  },
+  "shot.tooltip.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-tooltip-B-dark.png",
+  "roster.A.light": [
+    {
+      "control": "presence.roster.57e8894d5b3e8cd28fa12656292e3ab8",
+      "name": "Ada Integrator (you)",
+      "meta": "slide 1",
+      "chip": "Ada Integrator, signed in",
+      "variant": "picture",
+      "initials": null,
+      "picture": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+      "badge": "signed in"
+    },
+    {
+      "control": "presence.roster.907f42413a2807d99e9326d1d4a535a6",
+      "name": "Iron 995",
+      "meta": "editor · slide 1",
+      "chip": "Iron 995",
+      "variant": "initials",
+      "initials": "I",
+      "picture": null,
+      "badge": null
+    },
+    {
+      "control": "presence.roster.b12a7c6282f097734adcaf41004c2fd0",
+      "name": "Enamel 925",
+      "meta": "editor · slide 1",
+      "chip": "Enamel 925",
+      "variant": "initials",
+      "initials": "E",
+      "picture": null,
+      "badge": null
+    }
+  ],
+  "rosterChips.A.light": [
+    {
+      "holder": "presence.roster.57e8894d5b3e8cd28fa12656292e3ab8",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": "signed in"
+    },
+    {
+      "holder": "presence.roster.907f42413a2807d99e9326d1d4a535a6",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.b12a7c6282f097734adcaf41004c2fd0",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    }
+  ],
+  "shot.roster.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-roster-A-light.png",
+  "roster.A.dark": [
+    {
+      "control": "presence.roster.57e8894d5b3e8cd28fa12656292e3ab8",
+      "name": "Ada Integrator (you)",
+      "meta": "slide 1",
+      "chip": "Ada Integrator, signed in",
+      "variant": "picture",
+      "initials": null,
+      "picture": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+      "badge": "signed in"
+    },
+    {
+      "control": "presence.roster.907f42413a2807d99e9326d1d4a535a6",
+      "name": "Iron 995",
+      "meta": "editor · slide 1",
+      "chip": "Iron 995",
+      "variant": "initials",
+      "initials": "I",
+      "picture": null,
+      "badge": null
+    },
+    {
+      "control": "presence.roster.b12a7c6282f097734adcaf41004c2fd0",
+      "name": "Enamel 925",
+      "meta": "editor · slide 1",
+      "chip": "Enamel 925",
+      "variant": "initials",
+      "initials": "E",
+      "picture": null,
+      "badge": null
+    }
+  ],
+  "rosterChips.A.dark": [
+    {
+      "holder": "presence.roster.57e8894d5b3e8cd28fa12656292e3ab8",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": "signed in"
+    },
+    {
+      "holder": "presence.roster.907f42413a2807d99e9326d1d4a535a6",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.b12a7c6282f097734adcaf41004c2fd0",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    }
+  ],
+  "shot.roster.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-roster-A-dark.png",
+  "roster.B.light": [
+    {
+      "control": "presence.roster.907f42413a2807d99e9326d1d4a535a6",
+      "name": "Iron 995 (you)",
+      "meta": "slide 1",
+      "chip": "Iron 995",
+      "variant": "initials",
+      "initials": "I",
+      "picture": null,
+      "badge": null
+    },
+    {
+      "control": "presence.roster.57e8894d5b3e8cd28fa12656292e3ab8",
+      "name": "The owner",
+      "meta": "owner · slide 1",
+      "chip": "The owner",
+      "variant": "initials",
+      "initials": "O",
+      "picture": null,
+      "badge": null
+    },
+    {
+      "control": "presence.roster.b12a7c6282f097734adcaf41004c2fd0",
+      "name": "Enamel 925",
+      "meta": "editor · slide 1",
+      "chip": "Enamel 925",
+      "variant": "initials",
+      "initials": "E",
+      "picture": null,
+      "badge": null
+    }
+  ],
+  "rosterChips.B.light": [
+    {
+      "holder": "presence.roster.907f42413a2807d99e9326d1d4a535a6",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.57e8894d5b3e8cd28fa12656292e3ab8",
+      "ariaLabel": "The owner",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 38,
+      "initials": "O",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.b12a7c6282f097734adcaf41004c2fd0",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    }
+  ],
+  "shot.roster.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-roster-B-light.png",
+  "roster.B.dark": [
+    {
+      "control": "presence.roster.907f42413a2807d99e9326d1d4a535a6",
+      "name": "Iron 995 (you)",
+      "meta": "slide 1",
+      "chip": "Iron 995",
+      "variant": "initials",
+      "initials": "I",
+      "picture": null,
+      "badge": null
+    },
+    {
+      "control": "presence.roster.57e8894d5b3e8cd28fa12656292e3ab8",
+      "name": "The owner",
+      "meta": "owner · slide 1",
+      "chip": "The owner",
+      "variant": "initials",
+      "initials": "O",
+      "picture": null,
+      "badge": null
+    },
+    {
+      "control": "presence.roster.b12a7c6282f097734adcaf41004c2fd0",
+      "name": "Enamel 925",
+      "meta": "editor · slide 1",
+      "chip": "Enamel 925",
+      "variant": "initials",
+      "initials": "E",
+      "picture": null,
+      "badge": null
+    }
+  ],
+  "rosterChips.B.dark": [
+    {
+      "holder": "presence.roster.907f42413a2807d99e9326d1d4a535a6",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "I",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.57e8894d5b3e8cd28fa12656292e3ab8",
+      "ariaLabel": "The owner",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 38,
+      "initials": "O",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.b12a7c6282f097734adcaf41004c2fd0",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "E",
+      "badgeAfter": null
+    }
+  ],
+  "shot.roster.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-roster-B-dark.png",
+  "accountMenu.A.light": {
+    "name": "Ada Integrator",
+    "sentence": "Signed in as people-integrator-1790726656709@example.test",
+    "chip": "Ada Integrator, signed in",
+    "badge": "signed in",
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signOut",
+      "account.forget",
+      "account.sessions"
+    ]
+  },
+  "accountChips.A.light": [
+    {
+      "holder": "account.sentence",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": "signed in"
+    }
+  ],
+  "shot.account.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-account-menu-A-light.png",
+  "accountMenu.A.dark": {
+    "name": "Ada Integrator",
+    "sentence": "Signed in as people-integrator-1790726656709@example.test",
+    "chip": "Ada Integrator, signed in",
+    "badge": "signed in",
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signOut",
+      "account.forget",
+      "account.sessions"
+    ]
+  },
+  "accountChips.A.dark": [
+    {
+      "holder": "account.sentence",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": "signed in"
+    }
+  ],
+  "shot.account.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-account-menu-A-dark.png",
+  "versions.A.light": {
+    "rows": [
+      {
+        "author": "usr_lQ1ZDopw8ATIteRSr7zFrZit3nIWlqmb",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named · current",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": null,
+        "badge": "signed in"
+      },
+      {
+        "author": "usr_lQ1ZDopw8ATIteRSr7zFrZit3nIWlqmb",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      },
+      {
+        "author": "usr_lQ1ZDopw8ATIteRSr7zFrZit3nIWlqmb",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      },
+      {
+        "author": "usr_lQ1ZDopw8ATIteRSr7zFrZit3nIWlqmb",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · 1 change",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      }
+    ],
+    "windows": [
+      {
+        "text": "05:04 PM to 05:06 PMYou · 1 change▾",
+        "firstMarkX": 17,
+        "textX": 41,
+        "more": null
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px"
+    },
+    "dayHeadX": 17
+  },
+  "versionChips.A.light": [
+    {
+      "holder": "versionHistory.window.w4",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    }
+  ],
+  "shot.versions.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-versions-A-light.png",
+  "shot.versionsHover.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-versions-hover-A-light.png",
+  "versionsMore.A.light": [
+    {
+      "id": "version.restore",
+      "text": "Restore this version"
+    },
+    {
+      "id": "version.name",
+      "text": "Name this version"
+    },
+    {
+      "id": "version.copy",
+      "text": "Make a copy"
+    }
+  ],
+  "shot.versionsMore.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-versions-more-A-light.png",
+  "versions.A.dark": {
+    "rows": [
+      {
+        "author": "usr_lQ1ZDopw8ATIteRSr7zFrZit3nIWlqmb",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named · current",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": null,
+        "badge": "signed in"
+      },
+      {
+        "author": "usr_lQ1ZDopw8ATIteRSr7zFrZit3nIWlqmb",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      },
+      {
+        "author": "usr_lQ1ZDopw8ATIteRSr7zFrZit3nIWlqmb",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      },
+      {
+        "author": "usr_lQ1ZDopw8ATIteRSr7zFrZit3nIWlqmb",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · 1 change",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      }
+    ],
+    "windows": [
+      {
+        "text": "05:04 PM to 05:06 PMYou · 1 change▾",
+        "firstMarkX": 17,
+        "textX": 41,
+        "more": null
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px"
+    },
+    "dayHeadX": 17
+  },
+  "versionChips.A.dark": [
+    {
+      "holder": "versionHistory.window.w4",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Integrator, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async"
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    }
+  ],
+  "shot.versions.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-versions-A-dark.png",
+  "shot.versionsHover.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-versions-hover-A-dark.png",
+  "versionsMore.A.dark": [
+    {
+      "id": "version.restore",
+      "text": "Restore this version"
+    },
+    {
+      "id": "version.name",
+      "text": "Name this version"
+    },
+    {
+      "id": "version.copy",
+      "text": "Make a copy"
+    }
+  ],
+  "shot.versionsMore.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-versions-more-A-dark.png",
+  "commentsPanel.B.light": [
+    {
+      "text": "OThe ownerslide 1Can you check the title on this slide?now",
+      "chip": "The owner",
+      "badge": null
+    }
+  ],
+  "shot.commentsPanel.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-comments-panel-B-light.png",
+  "commentCard.B.light": {
+    "name": "The owner",
+    "trust": null,
+    "badge": null,
+    "chip": "The owner"
+  },
+  "shot.commentCard.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-comment-card-B-light.png",
+  "commentsPanel.B.dark": [
+    {
+      "text": "OThe ownerslide 1Can you check the title on this slide?now",
+      "chip": "The owner",
+      "badge": null
+    }
+  ],
+  "shot.commentsPanel.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-comments-panel-B-dark.png",
+  "commentCard.B.dark": {
+    "name": "The owner",
+    "trust": null,
+    "badge": null,
+    "chip": "The owner"
+  },
+  "shot.commentCard.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-comment-card-B-dark.png",
+  "share.A.light": [
+    {
+      "control": "dialog.share.owner",
+      "name": "You",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": "signed in",
+      "chip": "Paper 123, signed in"
+    }
+  ],
+  "shareChips.A.light": [
+    {
+      "holder": "dialog.share.owner",
+      "ariaLabel": "Paper 123, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "P1",
+      "badgeAfter": "signed in"
+    }
+  ],
+  "shot.share.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-share-A-light.png",
+  "share.A.dark": [
+    {
+      "control": "dialog.share.owner",
+      "name": "You",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": "signed in",
+      "chip": "Paper 123, signed in"
+    }
+  ],
+  "shareChips.A.dark": [
+    {
+      "holder": "dialog.share.owner",
+      "ariaLabel": "Paper 123, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "P1",
+      "badgeAfter": "signed in"
+    }
+  ],
+  "shot.share.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-share-A-dark.png",
+  "share.B.light": "not driven: the Share dialog did not open within 10 s of share.open",
+  "share.B.dark": [
+    {
+      "control": "dialog.share.owner",
+      "name": "The owner",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": null,
+      "chip": "The owner"
+    }
+  ],
+  "shareChips.B.dark": [
+    {
+      "holder": "dialog.share.owner",
+      "ariaLabel": "The owner",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 38,
+      "initials": "O",
+      "badgeAfter": null
+    }
+  ],
+  "shot.share.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-share-B-dark.png",
+  "profileHead.A.light": {
+    "text": "Ada IntegratorSigned in as people-integrator-1790726656709@example.test, verifiedChange nameChange avatar",
+    "badge": "signed in",
+    "img": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp"
+  },
+  "shot.profileHead.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-profile-head-A-light.png",
+  "profileHead.A.dark": {
+    "text": "Ada IntegratorSigned in as people-integrator-1790726656709@example.test, verifiedChange nameChange avatar",
+    "badge": "signed in",
+    "img": "/api/avatar/u/ErUEaszOebnLwl83AFhEXg/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp"
+  },
+  "shot.profileHead.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-profile-head-A-dark.png",
+  "filmstripChips.A": [
+    {
+      "holder": "filmstrip.slide.title",
+      "ariaLabel": "Iron 995",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 5,
+      "initials": "I",
+      "badgeAfter": null
+    },
+    {
+      "holder": "filmstrip.slide.title",
+      "ariaLabel": "Enamel 925",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 9,
+      "initials": "E",
+      "badgeAfter": null
+    }
+  ],
+  "shot.filmstrip.A": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/local-filmstrip-marks-A-light.png",
+  "uptime.end": "17:07  up 5 days,  7:04, 2 users, load averages: 77.08 110.01 101.61",
+  "deck.teardown": {
+    "deckId": "untitled-20260930-g2fp",
+    "trashed": "trashed",
+    "removed": "removed",
+    "after": "still answers"
+  }
+}

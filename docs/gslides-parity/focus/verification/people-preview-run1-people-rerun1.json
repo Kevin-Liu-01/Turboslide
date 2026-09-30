@@ -1,0 +1,333 @@
+{
+  "base": "https://turboslide-jna260fp5-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T02:46:21.167Z",
+  "ms": 196873,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 195911,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/integrator/gate-preview-people-1/core-walk.json",
+    "deckId": "untitled-20260930-ga47",
+    "steps": 35
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "people",
+      "versions"
+    ],
+    "costRows": null
+  },
+  "rows": 15,
+  "passed": 11,
+  "failed": 4,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e0ef01bf",
+  "origin": "https://turboslide-jna260fp5-kl01s-projects.vercel.app",
+  "date": "2026-09-30",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "share.file-menu-share-with-others": "passed",
+    "versions.open-from-last-edit": "passed",
+    "versions.pick": "passed",
+    "versions.name-current": "passed",
+    "versions.undo-restore": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "versions.show-changes-toggle": "passed",
+    "versions.show-changes-marks": "failed",
+    "comments.panel.empty-gesture": "passed",
+    "versions.panel.author-you": "passed",
+    "versions.field.square": "passed",
+    "people.chip-plate-size": "passed",
+    "people.mark-renderers-agree": "failed",
+    "people.own-chip-follows-name": "failed",
+    "people.own-chip-follows-avatar": "failed",
+    "people.avatar-anonymous-refused": "passed",
+    "versions.window-mark-column": "passed",
+    "versions.restore-in-more": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "people.mark-renderers-agree",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "people.own-chip-follows-name",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "people.own-chip-follows-avatar",
+        "feature": "share",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "versions.show-changes-marks",
+      "parks": [
+        "file.versionHistory.showChanges"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "people.own-chip-follows-name",
+      "parks": [
+        "title.account",
+        "title.presence.me"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "people.own-chip-follows-avatar",
+      "parks": [
+        "title.account.changeAvatar"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "people.mark-renderers-agree",
+      "feature": "share",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "versions.open-from-last-edit",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.pick",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.name-current",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.undo-restore",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.show-changes-toggle",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "a heading edit and an added box after the named version; pick the older version with Show changes on; then off: picked versionHistory.11.pick (named row versionHistory.11.pick); marks with Show changes on 0 (); off 0"
+    },
+    {
+      "id": "versions.panel.author-you",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.field.square",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.chip-plate-size",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.mark-renderers-agree",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "read the own chip’s rects at 24 px against renderMarkBits of the window API’s own mark; Change avatar > Glyph > Apply; read again; read a 16 px version row chip against the 16 px field: mark from state.account.mark read on the own chip; initials 24 px initials (25 rects): 0 of 100 lit interior pixels differ; glyph 24 px initials (25 rects): 0 of 100 lit interior pixels differ (variant on the chip initials after 6191 ms); 16 px 16 px initials (6 rects): 74 of 36 lit interior pixels differ (first at 2,2 3,2 6,2 7,2)"
+    },
+    {
+      "id": "people.own-chip-follows-name",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "with the switch off read the own chip, its rule and the roster’s own row; the name prompt record of the first edit; Change name through the account menu; read the three own surfaces within 2 s; the account menu’s rows: own chip true, rule true, roster own row before \"Osmium 846 (you)\" (the opener’s DOM click); prompt of the first edit closed at 2026-09-30T02:46:33.835Z in decks (double click the title, type, Escape); after Change name: chip \"Osmium 846\" after 3752 ms, account head \"Osmium 846\", own row \"Osmium 846 (you)\" read 5073 ms after Continue, no reload; account menu rows account.changeName, account.changeAvatar, account.forget (Sessions listed false)"
+    },
+    {
+      "id": "people.own-chip-follows-avatar",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Change avatar > Glyph > Apply; read the own chip’s data-variant; reload; read again within 10 s; reopen the builder; read the roster’s own row against the own chip: via title.account; variant initials -> initials 2869 ms after Apply, glyph 5317 ms after the reload; Glyph tab aria-selected false; roster own row (the opener’s DOM click) cells equal the own chip true (34 and 34 rects)"
+    },
+    {
+      "id": "people.avatar-anonymous-refused",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.window-mark-column",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.restore-in-more",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

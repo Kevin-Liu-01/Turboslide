@@ -17,6 +17,10 @@
 // smaller than the kind's minimum, never because the wanted box is (a 1 by 1 table of 55 px
 // landed centred on the sheet while three rows landed at the body's top), so every insert of a
 // kind lands by one rule.
+// The polish round fix round 2 (B4's R4; `shaders.insert.selected-free-rectangle`): a shader is
+// opaque and covers a prompt where a picture replaces the placeholder it lands in, so for the
+// material kind every text like box takes room, prompts included; a table and a chart share the
+// slot with typed content alone, as before.
 // Pure: the controller measures the conversion and commits; nothing here reads the DOM.
 import type { Block } from '@turboslide/schema/blocks';
 import type { Slide } from '@turboslide/schema/deck';
@@ -117,13 +121,24 @@ export function bodyRect(slide: Slide): Rect {
 }
 
 /**
- * The rectangles the content objects take inside the body, each grown by the gap on every side
- * and clipped to the body; an object outside the body takes nothing from it.
+ * What takes room for a kind: a shader covers a prompt, so every text like box counts for it; a
+ * table and a chart share the slot with typed content alone (the header's last paragraph).
  */
-export function occupiedRects(slide: Slide, body: Rect): Rect[] {
+export function takesRoomFor(kind: PlacedKind): (block: Block) => boolean {
+  if (kind !== 'material') return isContentObject;
+  return (block) => block.pos !== undefined && block.type !== 'picture';
+}
+
+/**
+ * The rectangles the content objects take inside the body, each grown by the gap on every side
+ * and clipped to the body; an object outside the body takes nothing from it. `kind` names what
+ * counts as taken (`takesRoomFor`); a table's rule when absent.
+ */
+export function occupiedRects(slide: Slide, body: Rect, kind: PlacedKind = 'table'): Rect[] {
+  const takes = takesRoomFor(kind);
   const out: Rect[] = [];
   for (const block of canvasObjects(slide)) {
-    if (!isContentObject(block) || block.pos === undefined) continue;
+    if (!takes(block) || block.pos === undefined) continue;
     const own = rectOf(block.pos);
     if (!intersects(own, body)) continue;
     const grown: Rect = {
@@ -205,7 +220,7 @@ const round = (value: number): number => Math.round(value);
  */
 export function placeInsert(slide: Slide, kind: PlacedKind, wanted: Size): Placement {
   const body = bodyRect(slide);
-  const occupied = occupiedRects(slide, body);
+  const occupied = occupiedRects(slide, body, kind);
   const shares = occupied.length > 0;
   const [wantW, wantH] =
     shares && kind === 'chart'

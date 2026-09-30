@@ -21,6 +21,8 @@ import type { BlockSlot, Mutation } from '@turboslide/schema/mutations';
 import type { Position } from '@turboslide/schema/position';
 import { plainLength, styleRange } from '@turboslide/schema/text';
 import type { RunMarks, Text as Markup } from '@turboslide/schema/text';
+import { nearestLadderSize, TYPE_ALIGNS, TYPE_WEIGHTS } from '@turboslide/schema/typography';
+import type { TypeAlign, TypeWeight, Typography } from '@turboslide/schema/typography';
 import { CONTENT, CONTENT_ORIGIN } from '@turboslide/theme/tokens';
 
 /** The prefix of the system clipboard text (SPEC 2.2). */
@@ -441,6 +443,34 @@ export function paintFormatOf(block: Block, marks?: RunMarks): PaintFormat {
   }
   if (marks !== undefined && Object.keys(marks).length > 0) out.marks = { ...marks };
   return out;
+}
+
+/** The computed style reads a field object's typography is built from (`typographyOfComputedStyle`). */
+export type ComputedTypeStyle = { fontSize: string; fontWeight: string; textAlign: string };
+
+/**
+ * The look of a fixed kind's field object, in the schema's shape (the polish round fix round 2,
+ * B5's R19; `text.tail.heading-takes-list-indent`): the cover's heading and lead and a
+ * statement's big line are pseudo blocks with no fields of their own, so Paint format reads the
+ * drawn typography from the element's computed style: the size in sheet px (the stage scales by a
+ * transform, so the computed value is the sheet's), snapped to the ladder; the weight when it is
+ * one of the schema's; the alignment. Null when nothing readable is drawn.
+ */
+export function typographyOfComputedStyle(style: ComputedTypeStyle): Typography | null {
+  const out: Typography = {};
+  const size = Number.parseFloat(style.fontSize);
+  if (size > 0) out.size = nearestLadderSize(size);
+  const weight =
+    style.fontWeight === 'bold'
+      ? 700
+      : style.fontWeight === 'normal'
+        ? 400
+        : Number.parseInt(style.fontWeight, 10);
+  if ((TYPE_WEIGHTS as ReadonlyArray<number>).includes(weight)) out.weight = weight as TypeWeight;
+  const align =
+    style.textAlign === 'start' ? 'left' : style.textAlign === 'end' ? 'right' : style.textAlign;
+  if ((TYPE_ALIGNS as ReadonlyArray<string>).includes(align)) out.align = align as TypeAlign;
+  return Object.keys(out).length === 0 ? null : out;
 }
 
 /** True when a block type's schema has the field. */

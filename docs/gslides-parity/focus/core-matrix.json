@@ -5194,7 +5194,7 @@
     {
       "id": "images.caption.add",
       "feature": "images",
-      "interaction": "Right click a picture > Add a caption; the caption field prompts; typing stores the shot's caption; Cmd+Z",
+      "interaction": "Add a caption on a picture (Format > Image > Add a caption; the right click menu lists Google's rows since item 74); the caption field prompts; typing stores the shot's caption; Cmd+Z",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-seller 10"

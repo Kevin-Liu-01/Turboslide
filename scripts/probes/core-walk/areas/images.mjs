@@ -750,6 +750,11 @@ export async function run(t) {
       await closePanel();
       return { ok: false, observed: 'no Reset button in the Adjustments section' };
     }
+    /* the Reset button sits under the three sliders below the panel's fold (the polish fix round 2,
+       B4's R7: y 1064 on a 900 px page, elementFromPoint null), so it is scrolled into view before
+       its box is read, as the transparency step scrolls its slider */
+    await reset.scrollIntoViewIfNeeded().catch(() => undefined);
+    await t.sleep(200);
     const r = await reset.boundingBox();
     await t.clickAt(r.x + r.width / 2, r.y + r.height / 2);
     await t.settled();
@@ -1069,7 +1074,7 @@ async function productRound(t) {
 
   await t.step(
     'images.caption.add',
-    'right click the picture > Add a caption; type; Cmd+Z',
+    'Add a caption on the picture (the right click menu where it lists the row, else Format > Image); type; Cmd+Z',
     "the caption field prompts; typing stores the shot's caption; Cmd+Z removes it",
     async () => {
       await t.clearAll();
@@ -1078,15 +1083,17 @@ async function productRound(t) {
       const c = t.center(b.free);
       await t.rightClickAt(c.x, c.y);
       const rows = (await t.contextRows()).map((r) => r.id);
-      if (!rows.includes('format.image.addCaption')) {
+      if (rows.includes('format.image.addCaption')) {
+        await t.clickContextRow('format.image.addCaption');
+      } else {
+        /* the polish round's item 74 (model.ts CONTEXT_MENUS image): Google's rows for one picture,
+           and Add a caption stays under Format > Image, so the row is reached from the menubar (the
+           polish finish; the read "not on this build" was the driver's own) */
         await t.press('Escape');
-        return t.notBuilt(
-          'format.image.addCaption',
-          'B2',
-          `the picture's menu lists ${rows.join(', ')}`,
-        );
+        await t.sleep(200);
+        await t.selectObject(id);
+        await t.menuPath('format', 'format.image', 'format.image.addCaption');
       }
-      await t.clickContextRow('format.image.addCaption');
       await t.sleep(500);
       const prompt = await page.evaluate(
         () =>

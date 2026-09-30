@@ -110,6 +110,7 @@ import {
   svgMarkupOf,
   svgMarkupOfText,
   takenBlockIds,
+  typographyOfComputedStyle,
 } from './clipboard';
 import type { ClipboardPayload, ClipboardStore, PaintFormat } from './clipboard';
 import { cropByHandle, fullExtent, isNoTrim, NO_TRIM, normalizeTrim, panCrop } from './crop';
@@ -4059,12 +4060,35 @@ export function Editor({
     select(picked.selection, picked.extra);
   };
 
+  /**
+   * The look Paint format and Cmd+Option+C copy from the selection: the first selected block's
+   * fields, or, for a fixed kind's field object with no block (the cover's heading and lead, a
+   * statement's big line; the polish round fix round 2, B5's R19), its drawn typography read from
+   * the stage in the schema's shape, so Paint format arms on the title placeholder and paints the
+   * look on the next click. Null when the selection has no look to copy.
+   */
+  const selectionPaintFormat = (): PaintFormat | null => {
+    const marks = caretRef.current?.marks;
+    const source = selectedBlocks()[0];
+    if (source) {
+      const format = paintFormatOf(source, marks);
+      return Object.keys(format).length === 0 ? null : format;
+    }
+    const slideNow = slideRef.current;
+    const id = selectedIds(selectionRef.current, extraRef.current)[0];
+    if (!slideNow || id === undefined || !isTextBlockType(blockTypeOf(slideNow, id))) return null;
+    const element = body.current?.querySelector<HTMLElement>(`[data-block="${id}"]`);
+    if (!element) return null;
+    const typography = typographyOfComputedStyle(window.getComputedStyle(element));
+    if (typography === null) return null;
+    const format: PaintFormat = { typography };
+    if (marks !== undefined && Object.keys(marks).length > 0) format.marks = { ...marks };
+    return format;
+  };
+
   const armPaint = (keep = false): boolean => {
-    const blocks = selectedBlocks();
-    const source = blocks[0];
-    if (!source) return false;
-    const format = paintFormatOf(source, caretRef.current?.marks);
-    if (Object.keys(format).length === 0) return false;
+    const format = selectionPaintFormat();
+    if (format === null) return false;
     setPaint({ format, keep });
     return true;
   };
@@ -4082,10 +4106,8 @@ export function Editor({
    */
   const copiedFormat = useRef<PaintFormat | null>(null);
   const copyFormat = (): boolean => {
-    const source = selectedBlocks()[0];
-    if (!source) return false;
-    const format = paintFormatOf(source, caretRef.current?.marks);
-    if (Object.keys(format).length === 0) return false;
+    const format = selectionPaintFormat();
+    if (format === null) return false;
     copiedFormat.current = format;
     return true;
   };

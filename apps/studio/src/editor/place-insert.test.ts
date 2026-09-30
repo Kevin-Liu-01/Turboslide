@@ -18,6 +18,7 @@ import {
   isContentObject,
   occupiedRects,
   placeInsert,
+  takesRoomFor,
   wantsPlacement,
 } from './place-insert';
 
@@ -169,14 +170,18 @@ describe('placeInsert (docs/PRODUCT.md section 2 rank 1)', () => {
     expect(placed.pos.z).toBeUndefined();
   });
 
-  it('lands a shader under the head band, free of the title, at 480 by 272 (shaders.insert.selected-free-rectangle)', () => {
-    /* the features round, ship two (docs/FEATURES.md 5.4; build/b5/integrator-hunks.md R5) */
+  it('lands a shader under the head band, free of the title and of the body prompt (shaders.insert.selected-free-rectangle)', () => {
+    /* the features round, ship two (docs/FEATURES.md 5.4; build/b5/integrator-hunks.md R5): 480 by
+       272 under the head band; the polish round fix round 2 (B4's R4) counts the empty body prompt
+       for a shader too, so the box lands in the strip under it and shrinks to that strip's height */
     const slide = titleAndBody([], { title: 'A title', body: '' });
     const placed = placeInsert(slide, 'material', [480, 272]);
     expect(placed.how).toBe('free');
     expect(placed.pos.w).toBe(480);
-    expect(placed.pos.h).toBe(272);
+    expect(placed.pos.h).toBeGreaterThanOrEqual(INSERT_MIN_SIZE.material[1]);
+    expect(placed.pos.h).toBeLessThanOrEqual(272);
     expect(placed.pos.y).toBeGreaterThanOrEqual(CY + 48 + INSERT_GAP);
+    expect(overlaps(placed.pos, { x: CX, y: 400, w: CW, h: 66 })).toBe(false);
     expect(placed.pos.z).toBeUndefined();
     expect(INSERT_MIN_SIZE.material).toEqual([240, 135]);
   });
@@ -368,6 +373,64 @@ describe('placeInsert, the polish round', () => {
     const placed = placeInsert(low, 'table', [960, tableBoxHeight(1)]);
     expect(placed.how).toBe('cascade');
     expect(placed.pos.h).toBe(tableBoxHeight(1));
+  });
+});
+
+describe('placeInsert of a shader on a cover converted to a canvas (the polish round fix round 2, B4’s R4)', () => {
+  /* the cover's heading and lead prompts, empty, positioned by the conversion (schema toCanvas):
+     the heading sits under the head band limit, so the body is the whole content box */
+  const cover = canvas([
+    {
+      id: 'heading',
+      type: 'heading',
+      level: 'h1',
+      text: '',
+      pos: { x: 137, y: 300, w: 1326, h: 120, z: 0 },
+    },
+    { id: 'lead', type: 'paragraph', text: '', pos: { x: 137, y: 460, w: 1326, h: 60, z: 1 } },
+  ]);
+  const headingBox = { x: 137, y: 300, w: 1326, h: 120 };
+  const leadBox = { x: 137, y: 460, w: 1326, h: 60 };
+
+  it('counts the empty prompts for a shader and not for a table or a chart', () => {
+    const body = bodyRect(cover);
+    expect(occupiedRects(cover, body, 'material')).toHaveLength(2);
+    expect(occupiedRects(cover, body, 'table')).toEqual([]);
+    expect(occupiedRects(cover, body, 'chart')).toEqual([]);
+    expect(occupiedRects(cover, body)).toEqual([]);
+    expect(
+      takesRoomFor('material')({
+        id: 'p',
+        type: 'paragraph',
+        text: '',
+        pos: { x: 0, y: 0, w: 10, h: 10 },
+      }),
+    ).toBe(true);
+    expect(
+      takesRoomFor('material')({
+        id: 'bg',
+        type: 'picture',
+        asset: 'mood',
+        pos: { x: 0, y: 0, w: 10, h: 10 },
+      } as Block),
+    ).toBe(false);
+    expect(takesRoomFor('table')).toBe(isContentObject);
+  });
+
+  it('lands a shader in a strip free of the heading and the lead prompts, selected over no text box', () => {
+    const placed = placeInsert(cover, 'material', [1326, 642]);
+    expect(placed.how).toBe('free');
+    expect(overlaps(placed.pos, headingBox)).toBe(false);
+    expect(overlaps(placed.pos, leadBox)).toBe(false);
+    expect(placed.pos.w).toBeGreaterThanOrEqual(INSERT_MIN_SIZE.material[0]);
+    expect(placed.pos.h).toBeGreaterThanOrEqual(INSERT_MIN_SIZE.material[1]);
+  });
+
+  it('still lands a table over the prompts, as before', () => {
+    const placed = placeInsert(cover, 'table', [960, 320]);
+    expect(placed.how).toBe('free');
+    expect(placed.pos.y).toBe(bodyRect(cover).y);
+    expect(overlaps(placed.pos, headingBox)).toBe(true);
   });
 });
 

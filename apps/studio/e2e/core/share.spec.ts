@@ -2276,12 +2276,22 @@ test(title('collab.follow.anonymous-editor'), async ({ browser }) => {
     await expect(chipOf(page, guest), "B's chip on A's title row").toHaveCount(1, {
       timeout: 10_000,
     });
-    /* A's chip menu lists Follow */
-    await chipOf(page, guest).click();
+    /* the roster lists Follow for B (B5's fix round 2, R17: a chip's click is the one time jump
+       and opens no menu; the roster opens from the people button, PresenceSlot.tsx presence.more,
+       drawn at opacity 0 with pointer-events none while the chips fit) */
+    const more = ctl(page, 'presence.more');
+    const moreTakesPointer = await more
+      .evaluate(
+        (el) =>
+          !el.classList.contains('is-empty') &&
+          getComputedStyle(el).pointerEvents !== 'none' &&
+          getComputedStyle(el).opacity !== '0',
+      )
+      .catch(() => false);
+    if (moreTakesPointer) await more.click({ timeout: 5000 });
+    else await chipOf(page, guest).click();
     await page.waitForTimeout(500);
-    const row = page
-      .locator(`[data-control="presence.roster.${guest}"], [data-control^="presence.roster."]`)
-      .first();
+    const row = page.locator(`[data-control="presence.roster.${guest}"]`).first();
     const rowShown = await row.isVisible().catch(() => false);
     const item = rowShown ? await row.getAttribute('data-menu-item') : null;
     const rowText = rowShown ? ((await row.textContent()) ?? '').trim() : '';
@@ -2303,9 +2313,9 @@ test(title('collab.follow.anonymous-editor'), async ({ browser }) => {
     const stopped = (await state(page)).slideId === slides[2];
     test.info().annotations.push({
       type: 'follow',
-      description: `roster row ${rowShown ? `"${rowText}" (${item})` : 'none'}; A followed to slide 3 within 3 s ${followed}; after a click on A's stage B's move to slide 2 left A on slide 3 ${stopped}`,
+      description: `people button takes a pointer ${moreTakesPointer}; roster row ${rowShown ? `"${rowText}" (${item})` : 'none'}; A followed to slide 3 within 3 s ${followed}; after a click on A's stage B's move to slide 2 left A on slide 3 ${stopped}`,
     });
-    expect(follows, "A's chip menu lists Follow for an anonymous editor").toBe(true);
+    expect(follows, 'the roster lists Follow for an anonymous editor').toBe(true);
     expect(followed, "A's stage follows within 3 s").toBe(true);
     expect(stopped, "a click on A's stage stops it").toBe(true);
   } finally {

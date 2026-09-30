@@ -26,6 +26,7 @@ import {
   svgFileOf,
   svgMarkupOf,
   svgMarkupOfText,
+  typographyOfComputedStyle,
 } from '../clipboard';
 import type { ClipboardPayload } from '../clipboard';
 
@@ -351,5 +352,33 @@ describe('paint format', () => {
     /* a heading has typography and no fill or stroke */
     expect(onHeading.map((m) => (m.op === 'block.set' ? m.path : m.op))).toEqual(['/typography']);
     expect(paintFormatOf({ id: 'r', type: 'rule', orientation: 'horizontal' })).toEqual({});
+  });
+
+  it('reads a field object’s look from its computed style, in the schema’s shape (the polish fix round 2, B5’s R19)', () => {
+    /* the cover's heading as the sheet draws it fresh: 88 px, the display weight, left */
+    expect(
+      typographyOfComputedStyle({ fontSize: '88px', fontWeight: '500', textAlign: 'start' }),
+    ).toEqual({ size: 88, weight: 500, align: 'left' });
+    /* a title stepped down the ladder, a browser's word weights, a centred lead */
+    expect(
+      typographyOfComputedStyle({ fontSize: '43.2px', fontWeight: 'bold', textAlign: 'center' }),
+    ).toEqual({ size: 44, weight: 700, align: 'center' });
+    expect(
+      typographyOfComputedStyle({ fontSize: '26px', fontWeight: 'normal', textAlign: 'end' }),
+    ).toEqual({ size: 26, weight: 400, align: 'right' });
+    /* a weight off the schema's and an alignment it has no word for are left out */
+    expect(
+      typographyOfComputedStyle({ fontSize: '34px', fontWeight: '450', textAlign: 'match-parent' }),
+    ).toEqual({ size: 34 });
+    /* nothing drawn: no look to copy */
+    expect(typographyOfComputedStyle({ fontSize: '', fontWeight: '', textAlign: '' })).toBeNull();
+    /* the look paints onto a block as one block.set of /typography */
+    const typography = typographyOfComputedStyle({
+      fontSize: '88px',
+      fontWeight: '500',
+      textAlign: 'start',
+    });
+    const onHeading = paintMutations(content, heading, { typography });
+    expect(onHeading.map((m) => (m.op === 'block.set' ? m.path : m.op))).toEqual(['/typography']);
   });
 });

@@ -1,0 +1,66 @@
+{
+  "base": "https://turboslide-lav4xmwv1-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-30T05:54:33.498Z",
+  "steps": [
+    {
+      "name": "B joins: the chip on A",
+      "ok": true,
+      "facts": "B's chip on A's title row after 5744 ms"
+    },
+    {
+      "name": "A's record of B's slide",
+      "ok": true,
+      "facts": "read title after 1888 ms"
+    },
+    {
+      "name": "the chip carries the jump",
+      "ok": true,
+      "facts": "data-menu-item title.presence.goTo, aria-haspopup null, aria-label \"Go to slide 3\", tooltip \"Foil 401 · slide 3 Jumps to the slide this person has open\", doc \"Foil 401 · slide 3\""
+    },
+    {
+      "name": "Go to slide jumps on the chip click",
+      "ok": true,
+      "facts": "A on title after 3 ms; a menu opened false"
+    },
+    {
+      "name": "the roster from the people button (switch off)",
+      "ok": true,
+      "facts": "people button takes a pointer true; row \"FFoil 401editor · slide 3Go to slide 3\""
+    },
+    {
+      "name": "Tools > Advanced tools on",
+      "ok": true,
+      "facts": "advancedTools true"
+    },
+    {
+      "name": "the roster row offers Follow with the switch on",
+      "ok": true,
+      "facts": "row \"FFoil 401editor · slide 3Follow\" (title.presence.follow)"
+    },
+    {
+      "name": "the Following plate",
+      "ok": true,
+      "facts": "plate drawn true"
+    },
+    {
+      "name": "A follows B's move within 3 s",
+      "ok": false,
+      "facts": "A on title after more than 3500 ms"
+    },
+    {
+      "name": "a click on A's stage stops the follow",
+      "ok": false,
+      "facts": "plate gone true; B moved to slide 1 and A stayed on slide 2 false"
+    }
+  ],
+  "deckId": "untitled-20260930-sdt0",
+  "trash": {
+    "trashed": true,
+    "deleted": true,
+    "status": 404
+  },
+  "summary": {
+    "steps": 10,
+    "ok": 8
+  }
+}

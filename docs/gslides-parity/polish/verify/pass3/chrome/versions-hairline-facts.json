@@ -1,0 +1,208 @@
+{
+  "base": "https://turboslide-lav4xmwv1-kl01s-projects.vercel.app",
+  "at": "2026-09-30T06:02:38.607Z",
+  "reads": [
+    {
+      "scheme": "light",
+      "gap": 1,
+      "theme": "light",
+      "panel": {
+        "box": {
+          "x": 1120,
+          "y": 112,
+          "w": 320,
+          "h": 788
+        },
+        "edges": {
+          "left": "1px solid rgba(7, 7, 7, 0.18)",
+          "right": "0px none rgb(7, 7, 7)",
+          "top": "0px none rgb(7, 7, 7)",
+          "shadow": "none",
+          "outline": "3px none rgb(7, 7, 7)",
+          "bg": "rgb(255, 255, 255)"
+        },
+        "cls": "ts-panel ts-chrome"
+      },
+      "list": {
+        "box": {
+          "x": 1121,
+          "y": 269.953125,
+          "w": 315,
+          "h": 99.46875
+        },
+        "edges": {
+          "left": "1px solid rgba(7, 7, 7, 0.09)",
+          "right": "0px none rgb(7, 7, 7)",
+          "top": "0px none rgb(7, 7, 7)",
+          "shadow": "none",
+          "outline": "3px none rgb(7, 7, 7)",
+          "bg": "rgba(0, 0, 0, 0)"
+        },
+        "cls": "ts-versions-list is-window"
+      },
+      "between": [
+        {
+          "cls": "ts-version-window is-open",
+          "box": {
+            "x": 1121,
+            "y": 226.6875,
+            "w": 315,
+            "h": 142.734375
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-versions-list",
+          "box": {
+            "x": 1121,
+            "y": 226.6875,
+            "w": 315,
+            "h": 142.734375
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-versions-day",
+          "box": {
+            "x": 1121,
+            "y": 198.6875,
+            "w": 315,
+            "h": 174.734375
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-versions is-history",
+          "box": {
+            "x": 1121,
+            "y": 152,
+            "w": 315,
+            "h": 233.421875
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-panel-body pt-scroll",
+          "box": {
+            "x": 1121,
+            "y": 152,
+            "w": 319,
+            "h": 748
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        }
+      ],
+      "clipShot": "versions-hairline-light-2x.png",
+      "full": "versions-01-panel-light.png"
+    },
+    {
+      "scheme": "dark",
+      "gap": 1,
+      "theme": "light",
+      "panel": {
+        "box": {
+          "x": 1120,
+          "y": 112,
+          "w": 320,
+          "h": 788
+        },
+        "edges": {
+          "left": "1px solid rgba(7, 7, 7, 0.18)",
+          "right": "0px none rgb(7, 7, 7)",
+          "top": "0px none rgb(7, 7, 7)",
+          "shadow": "none",
+          "outline": "3px none rgb(7, 7, 7)",
+          "bg": "rgb(255, 255, 255)"
+        },
+        "cls": "ts-panel ts-chrome"
+      },
+      "list": {
+        "box": {
+          "x": 1121,
+          "y": 269.953125,
+          "w": 315,
+          "h": 99.46875
+        },
+        "edges": {
+          "left": "1px solid rgba(7, 7, 7, 0.09)",
+          "right": "0px none rgb(7, 7, 7)",
+          "top": "0px none rgb(7, 7, 7)",
+          "shadow": "none",
+          "outline": "3px none rgb(7, 7, 7)",
+          "bg": "rgba(0, 0, 0, 0)"
+        },
+        "cls": "ts-versions-list is-window"
+      },
+      "between": [
+        {
+          "cls": "ts-version-window is-open",
+          "box": {
+            "x": 1121,
+            "y": 226.6875,
+            "w": 315,
+            "h": 142.734375
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-versions-list",
+          "box": {
+            "x": 1121,
+            "y": 226.6875,
+            "w": 315,
+            "h": 142.734375
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-versions-day",
+          "box": {
+            "x": 1121,
+            "y": 198.6875,
+            "w": 315,
+            "h": 174.734375
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-versions is-history",
+          "box": {
+            "x": 1121,
+            "y": 152,
+            "w": 315,
+            "h": 233.421875
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-panel-body pt-scroll",
+          "box": {
+            "x": 1121,
+            "y": 152,
+            "w": 319,
+            "h": 748
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        }
+      ],
+      "clipShot": "versions-hairline-dark-2x.png",
+      "full": "versions-02-panel-dark.png"
+    }
+  ],
+  "consoleErrors": 0,
+  "trash": {
+    "trashed": true,
+    "deleted": true,
+    "status": 404
+  }
+}

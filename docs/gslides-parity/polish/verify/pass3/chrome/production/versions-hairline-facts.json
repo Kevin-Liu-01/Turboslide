@@ -1,0 +1,164 @@
+{
+  "base": "https://www.turboslide.com",
+  "at": "2026-09-30T06:05:29.752Z",
+  "reads": [
+    {
+      "scheme": "light",
+      "gap": 1,
+      "theme": "light",
+      "panel": {
+        "box": {
+          "x": 1120,
+          "y": 112,
+          "w": 320,
+          "h": 788
+        },
+        "edges": {
+          "left": "1px solid rgba(7, 7, 7, 0.18)",
+          "right": "0px none rgb(7, 7, 7)",
+          "top": "0px none rgb(7, 7, 7)",
+          "shadow": "none",
+          "outline": "3px none rgb(7, 7, 7)",
+          "bg": "rgb(255, 255, 255)"
+        },
+        "cls": "ts-panel ts-chrome"
+      },
+      "list": {
+        "box": {
+          "x": 1121,
+          "y": 226.6875,
+          "w": 315,
+          "h": 43.265625
+        },
+        "edges": {
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "top": "0px none rgb(7, 7, 7)",
+          "shadow": "none",
+          "outline": "3px none rgb(7, 7, 7)",
+          "bg": "rgba(0, 0, 0, 0)"
+        },
+        "cls": "ts-versions-list"
+      },
+      "between": [
+        {
+          "cls": "ts-versions-day",
+          "box": {
+            "x": 1121,
+            "y": 198.6875,
+            "w": 315,
+            "h": 71.265625
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-versions is-history",
+          "box": {
+            "x": 1121,
+            "y": 152,
+            "w": 315,
+            "h": 129.953125
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-panel-body pt-scroll",
+          "box": {
+            "x": 1121,
+            "y": 152,
+            "w": 319,
+            "h": 748
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        }
+      ],
+      "clipShot": "versions-hairline-light-2x.png",
+      "full": "versions-01-panel-light.png"
+    },
+    {
+      "scheme": "dark",
+      "gap": 1,
+      "theme": "light",
+      "panel": {
+        "box": {
+          "x": 1120,
+          "y": 112,
+          "w": 320,
+          "h": 788
+        },
+        "edges": {
+          "left": "1px solid rgba(7, 7, 7, 0.18)",
+          "right": "0px none rgb(7, 7, 7)",
+          "top": "0px none rgb(7, 7, 7)",
+          "shadow": "none",
+          "outline": "3px none rgb(7, 7, 7)",
+          "bg": "rgb(255, 255, 255)"
+        },
+        "cls": "ts-panel ts-chrome"
+      },
+      "list": {
+        "box": {
+          "x": 1121,
+          "y": 226.6875,
+          "w": 315,
+          "h": 43.265625
+        },
+        "edges": {
+          "left": "0px none rgb(7, 7, 7)",
+          "right": "0px none rgb(7, 7, 7)",
+          "top": "0px none rgb(7, 7, 7)",
+          "shadow": "none",
+          "outline": "3px none rgb(7, 7, 7)",
+          "bg": "rgba(0, 0, 0, 0)"
+        },
+        "cls": "ts-versions-list"
+      },
+      "between": [
+        {
+          "cls": "ts-versions-day",
+          "box": {
+            "x": 1121,
+            "y": 198.6875,
+            "w": 315,
+            "h": 71.265625
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-versions is-history",
+          "box": {
+            "x": 1121,
+            "y": 152,
+            "w": 315,
+            "h": 129.953125
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        },
+        {
+          "cls": "ts-panel-body pt-scroll",
+          "box": {
+            "x": 1121,
+            "y": 152,
+            "w": 319,
+            "h": 748
+          },
+          "left": "0px none rgb(7, 7, 7)",
+          "shadow": "none"
+        }
+      ],
+      "clipShot": "versions-hairline-dark-2x.png",
+      "full": "versions-02-panel-dark.png"
+    }
+  ],
+  "consoleErrors": 0,
+  "trash": {
+    "trashed": true,
+    "deleted": true,
+    "status": 404
+  }
+}

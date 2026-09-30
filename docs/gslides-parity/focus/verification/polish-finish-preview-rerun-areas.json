@@ -1,0 +1,1125 @@
+{
+  "base": "https://turboslide-lav4xmwv1-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "no bearer",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T11:55:18.997Z",
+  "ms": 842251,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 842248,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/polish/ship2/rerun-areas/core-walk.json",
+    "deckId": "untitled-20260930-r9al",
+    "steps": 126
+  },
+  "specs": null,
+  "cost": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "share",
+      "inbox",
+      "brand",
+      "fonts",
+      "logos",
+      "shaders",
+      "polish-text",
+      "polish-objects"
+    ],
+    "costRows": null
+  },
+  "rows": 95,
+  "passed": 79,
+  "failed": 10,
+  "notDriven": 6,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "commit": "abebef47",
+  "origin": "https://turboslide-lav4xmwv1-kl01s-projects.vercel.app",
+  "date": "2026-09-30",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "share.file-menu-share-with-others": "passed",
+    "versions.open-from-last-edit": "passed",
+    "versions.pick": "passed",
+    "versions.name-current": "passed",
+    "versions.undo-restore": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "failed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "versions.show-changes-toggle": "passed",
+    "versions.show-changes-marks": "failed",
+    "inbox.bell-panel-toggle": "failed",
+    "inbox.settings-persist": "passed",
+    "comments.panel.empty-gesture": "passed",
+    "versions.panel.author-you": "passed",
+    "versions.field.square": "passed",
+    "brand.panel.opens": "passed",
+    "brand.logo.use-on-every-slide": "not driven",
+    "brand.logo.remove": "passed",
+    "brand.colors.primary-live": "passed",
+    "brand.colors.palette-row": "passed",
+    "brand.colors.control-ids-unique": "passed",
+    "brand.colors.version-history-entry": "passed",
+    "brand.colors.role-tooltips": "passed",
+    "brand.background.enter-keeps-open": "passed",
+    "brand.fonts.roles": "passed",
+    "brand.counter.format": "passed",
+    "brand.reset.default-kit": "passed",
+    "brand.layout.tiles-in-kit": "passed",
+    "brand.agent.set-get": "failed",
+    "fonts.dropdown.opens": "passed",
+    "fonts.dropdown.apply-selection": "passed",
+    "fonts.dropdown.search": "passed",
+    "fonts.format-menu.row": "passed",
+    "fonts.more-fonts.licence": "passed",
+    "fonts.face.reload-and-show": "passed",
+    "fonts.agent.font-list": "failed",
+    "brand.objects.kit-colours-first": "failed",
+    "fonts.links.licence-v4-1": "passed",
+    "fonts.fallback.in-stack": "passed",
+    "fonts.display-features.inter-only": "passed",
+    "fonts.catalog.geist": "passed",
+    "fonts.catalog.six-families": "passed",
+    "fonts.picker.search-category": "passed",
+    "fonts.table.takes-family": "not driven",
+    "fonts.field.own-face": "failed",
+    "logos.insert.row": "passed",
+    "logos.picker.search": "passed",
+    "logos.picker.paper-and-ink": "passed",
+    "logos.picker.your-brand": "failed",
+    "logos.picker.empty-state": "passed",
+    "logos.picker.licence-words": "passed",
+    "logos.insert.one-click-asset": "passed",
+    "logos.insert.logo-size": "passed",
+    "logos.insert.mono-tint": "passed",
+    "logos.insert.every-slide": "passed",
+    "logos.tailor.find-customer-logo": "passed",
+    "logos.replace-image.row": "passed",
+    "logos.picker.variants": "not driven",
+    "logos.kit.find-a-logo": "not driven",
+    "logos.intake.url-sentence": "passed",
+    "shaders.insert.gallery-thumbnails": "passed",
+    "shaders.insert.selected-free-rectangle": "passed",
+    "shaders.insert.words": "passed",
+    "shaders.panel.slider-live-undo": "passed",
+    "shaders.panel.preset-tiles": "passed",
+    "shaders.panel.control-sentences": "passed",
+    "shaders.panel.kit-colours": "passed",
+    "shaders.panel.one-home": "passed",
+    "shaders.background.place-answers": "failed",
+    "shaders.perf.one-context": "passed",
+    "shaders.background.add-to-theme": "not driven",
+    "shaders.frame.scrubber-capture": "not driven",
+    "shaders.view.play-setting": "passed",
+    "shaders.insert.gallery-hover-live": "passed",
+    "text.bold.toolbar-marks-run": "passed",
+    "text.paragraph.toolbar-live": "passed",
+    "text.list.enter-tab-no-error": "passed",
+    "text.size.run-and-typed-value": "passed",
+    "text.marks.whole-block-from-menu": "passed",
+    "text.tail.heading-takes-list-indent": "failed",
+    "text.heading.enter-keeps-session": "passed",
+    "text.link.chip-on-click": "passed",
+    "text.title.shrink-on-overflow": "passed",
+    "text.title.second-session-survives-reload": "passed",
+    "text.link.popover-anchored": "passed",
+    "text.link.detection-setting": "passed",
+    "text.tail.size-reads-heading": "passed",
+    "text.polish.highlight-console": "passed",
+    "lines.hit.stroke-only": "passed",
+    "shapes.geometry.cloud-callout-closed": "passed",
+    "charts.grid.every-series-in-view": "passed",
+    "lines.move.detaches": "passed",
+    "lines.select.handles-no-ring": "passed",
+    "arrange.select.no-browser-highlight": "passed",
+    "diagrams.label.double-click-selects-word": "failed",
+    "lines.connector.perpendicular-at-sites": "passed",
+    "wordart.bar.closes": "passed",
+    "wordart.polish.chip-weight-arming": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "brand.logo.use-on-every-slide",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.agent.set-get",
+        "feature": "brand",
+        "result": "failed"
+      },
+      {
+        "id": "fonts.agent.font-list",
+        "feature": "fonts",
+        "result": "failed"
+      },
+      {
+        "id": "brand.objects.kit-colours-first",
+        "feature": "brand",
+        "result": "failed"
+      },
+      {
+        "id": "fonts.table.takes-family",
+        "feature": "fonts",
+        "result": "not driven"
+      },
+      {
+        "id": "fonts.field.own-face",
+        "feature": "fonts",
+        "result": "failed"
+      },
+      {
+        "id": "logos.picker.your-brand",
+        "feature": "logos",
+        "result": "failed"
+      },
+      {
+        "id": "text.tail.heading-takes-list-indent",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "diagrams.label.double-click-selects-word",
+        "feature": "diagrams",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [
+    "diagrams",
+    "inbox",
+    "brand",
+    "fonts"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "versions.show-changes-marks",
+      "parks": [
+        "file.versionHistory.showChanges"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "brand.logo.use-on-every-slide",
+      "parks": [
+        "format.image.useOnEverySlide"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "logos.picker.your-brand",
+      "parks": [
+        "dialog.logo.group.brand"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "logos.picker.variants",
+      "parks": [
+        "dialog.logo.kind.wordmark",
+        "dialog.logo.tone.mono"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "logos.kit.find-a-logo",
+      "parks": [
+        "panel.brand.logo.find"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "parks": [
+        "dialog.background.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "parks": [
+        "dialog.background.shader.addToTheme"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "parks": [
+        "formatOptions.shader.frame.scrubber",
+        "formatOptions.shader.frame.capture"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "text.tail.heading-takes-list-indent",
+      "feature": "text",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "share.file-menu-share-with-others",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.open-from-last-edit",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.pick",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.name-current",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.undo-restore",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.show-changes-toggle",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "a heading edit and an added box after the named version; pick the older version with Show changes on; then off: picked versionHistory.11.pick (named row versionHistory.11.pick); marks with Show changes on 0 (); off 0"
+    },
+    {
+      "id": "inbox.bell-panel-toggle",
+      "feature": "inbox",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "click the bell; read the panel; click the bell again: with the switch on; panel open true (aria-pressed true); words \"NotificationsMark all readNothing newNotification settings\"; Mark all read true; settings link true; panel still open after the second click true (aria-pressed true)"
+    },
+    {
+      "id": "inbox.settings-persist",
+      "feature": "inbox",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.panel.empty-gesture",
+      "feature": "comments",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.panel.author-you",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.field.square",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.panel.opens",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.logo.use-on-every-slide",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: format.image.useOnEverySlide (docs/PRODUCT.md 7.1, B5a); the picture's menu lists edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.rotate, arrange.centerOnPage, arrange.align, format.image.replaceImage, format.image.cropImage, format.image.maskImage, format.image.resetImage, format.image.imageOptions, format.formatOptions, format.altText, insert.comment"
+    },
+    {
+      "id": "brand.logo.remove",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.primary-live",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.palette-row",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.control-ids-unique",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.version-history-entry",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.role-tooltips",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.background.enter-keeps-open",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.fonts.roles",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.counter.format",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.reset.default-kit",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.layout.tiles-in-kit",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.agent.set-get",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "brand.set /colors/light/primary and brand.get on the window API, then over HTTP: window API: --blue #2f5ce0 -> #0b3d91; brand.get {\"brand\":{\"colors\":{\"light\":{\"primary\":\"#0b3d91\"}}},\"own\":true,\"revision\":41}; HTTP not driven: no bearer for this origin (TURBOSLIDE_TOKEN or ~/.config/turboslide/hosts.json)"
+    },
+    {
+      "id": "fonts.dropdown.opens",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.dropdown.apply-selection",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.dropdown.search",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.format-menu.row",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.more-fonts.licence",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.face.reload-and-show",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.agent.font-list",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "font.list on the window API, then over HTTP with the bearer: window API: 34 rows, 34 with a licence; HTTP not driven: no bearer for this origin"
+    },
+    {
+      "id": "brand.objects.kit-colours-first",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "the table cell's Fill color plate, the chart's series swatches, the text colour plate; a new chart's series: no table from the tables area to read"
+    },
+    {
+      "id": "fonts.links.licence-v4-1",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.fallback.in-stack",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.display-features.inter-only",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.catalog.geist",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.catalog.six-families",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.picker.search-category",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.table.takes-family",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: toolbar.font (docs/PRODUCT.md 7.1, B1); the Font control on a selected table is drawn disabled (\"Inter\"); takesFamily is P1 (FEATURES.md 3.5)"
+    },
+    {
+      "id": "fonts.field.own-face",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "select the cover title and pick Fraunces in the Font dropdown; Cmd+Z and Cmd+Shift+Z; the subtitle through Format > Text > Font, Manrope; a statement slide, its big line, Geist; a reload; the show; the PDF and the Editable text PowerPoint from the export route: title slide title-1-4e95: heading typed true, lead typed true; title: label \"Inter\" -> stored fraunces, drawn Fraunces, Georgia, \"Times New Roman\", serif, revision 60 -> 61; Cmd+Z stored none drawn Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif; Cmd+Shift+Z stored fraunces; subtitle: Format > Text > Font opened true -> stored manrope, drawn Manrope, \"Helvetica Neue\", Arial, sans-serif; statement statement-1-4e95: big line typed true; statement statement-1-4e95: stored geist, drawn Geist, \"Helvetica Neue\", Arial, sans-serif; reload: title Fraunces, Georgia, \"Times New Roman\", serif, subtitle Manrope, \"Helvetica Neue\", Arial, sans-serif; show entered true: title Fraunces, Georgia, \"Times New Roman\", serif, subtitle Manrope, \"Helvetica Neue\", Arial, sans-serif; Editable text PowerPoint not driven: no bearer for this origin; PDF not driven: no bearer"
+    },
+    {
+      "id": "logos.insert.row",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.search",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.paper-and-ink",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.your-brand",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "open the dialog; read the Your brand group; a role logo asset added through the window API; open again; click the brand tile: Your brand before the asset: kit (a tmp store has no deployment kit logo); asset.add role logo ok (brand-mark-asset); after: kit (group drawn true); the click inserted mark mark 734,408 132x84 (logo size true)"
+    },
+    {
+      "id": "logos.picker.empty-state",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.licence-words",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.insert.one-click-asset",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.insert.logo-size",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.insert.mono-tint",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.insert.every-slide",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.tailor.find-customer-logo",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.replace-image.row",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.variants",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: dialog.logo.kind.wordmark (docs/PRODUCT.md 7.1, B1); no Symbol, Wordmark, Color or Mono control in the dialog head (P1, FEATURES.md 4.11; the appearance rule chooses)"
+    },
+    {
+      "id": "logos.kit.find-a-logo",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: panel.brand.logo.find (docs/PRODUCT.md 7.1, B6); no Find a logo beside Replace in the Brand kit panel's Logo section (P1, FEATURES.md 4.5)"
+    },
+    {
+      "id": "logos.intake.url-sentence",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.gallery-thumbnails",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.selected-free-rectangle",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.words",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.slider-live-undo",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.preset-tiles",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.control-sentences",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.kit-colours",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.one-home",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Slide > Change background on the body slide; Shader; a tile; Place; read the ground, the button and the dialog: chose Liquid metal; Place dialog.background.shader.place; the ground changed after 24016 ms (covering picture background, asset liquid-metal); the button read \"Placing, 22 s\" with the seconds"
+    },
+    {
+      "id": "shaders.perf.one-context",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: dialog.background.shader.addToTheme (docs/PRODUCT.md 7.1, B1 (dialogs/Background.tsx)); no Add to theme row beside the Shader row (P1, FEATURES.md 5.2 item 1)"
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.shader.frame.scrubber (docs/PRODUCT.md 7.1, B5 (inspector/shader.tsx)); no Frame scrubber in the Shader section (P1, FEATURES.md 5.2 item 3)"
+    },
+    {
+      "id": "shaders.view.play-setting",
+      "feature": "view",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.gallery-hover-live",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.bold.toolbar-marks-run",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.paragraph.toolbar-live",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.enter-tab-no-error",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.size.run-and-typed-value",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.marks.whole-block-from-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.tail.heading-takes-list-indent",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "the title placeholder selected by one click; Bulleted list, Increase indent and Paint format from the tail; every disabled tail button read: disabled tail buttons 2 (toolbar.redo: \"Redo\"; toolbar.clearFormatting: \"Clear formatting\"); Bulleted list: written; Increase indent: written; Paint format: armed false (docs/POLISH.md 2.3 item 18, B1)"
+    },
+    {
+      "id": "text.heading.enter-keeps-session",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.chip-on-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.shrink-on-overflow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.second-session-survives-reload",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.popover-anchored",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.detection-setting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.tail.size-reads-heading",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.polish.highlight-console",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.hit.stroke-only",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.cloud-callout-closed",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.grid.every-series-in-view",
+      "feature": "charts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.move.detaches",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.select.handles-no-ring",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.no-browser-highlight",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "diagrams.label.double-click-selects-word",
+      "feature": "diagrams",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Insert > Diagram > Process; a double click on \"Step 2\" of the diagram, \" plus\" typed; a text box double clicked at a point, typed: double click selected \"2\"; the label reads \"Step  plus\"; the text box after a double click on \"caret\" and \"X\" typed reads \"Keep the Xcaret here\" (docs/POLISH.md 2.4 item 30, B1's Selection.tsx by B3's request; question 5)"
+    },
+    {
+      "id": "lines.connector.perpendicular-at-sites",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "wordart.bar.closes",
+      "feature": "wordart",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "wordart.polish.chip-weight-arming",
+      "feature": "wordart",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

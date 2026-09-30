@@ -1,0 +1,47 @@
+{
+  "tag": "pass3",
+  "base": "https://turboslide-lav4xmwv1-kl01s-projects.vercel.app",
+  "title": "Onboarding plan for Acme in ninety days with the partner desk and every regional lead",
+  "at": "2026-09-30T05:52:37.111Z",
+  "deck": "untitled-20260930-jo3l",
+  "cover": {
+    "id": "title",
+    "kind": "content",
+    "grammarKind": "title",
+    "template": "title",
+    "linesWhileTyping": 2,
+    "fontWhileTyping": 44,
+    "stored": "Onboarding plan for Acme in ninety days with the partner desk and every regional lead"
+  },
+  "newSlide": {
+    "id": "split-1-7b84",
+    "kind": "content",
+    "template": "split",
+    "prompts": [
+      "Click to add title",
+      "Click to add text"
+    ]
+  },
+  "counter": {
+    "storedKit": {
+      "show": true,
+      "skipTitle": true
+    },
+    "storedDefault": null,
+    "onCover": "",
+    "onNewSlide": "02 / 02",
+    "inShowFromCover": "",
+    "inShowSecond": "02 / 02"
+  },
+  "ok": {
+    "coverConverted": true,
+    "newSlideIsTitleAndBody": true,
+    "coverCounterEmpty": true,
+    "showCoverCounterEmpty": true
+  },
+  "trash": {
+    "trashed": true,
+    "deleted": true,
+    "status": 404
+  }
+}

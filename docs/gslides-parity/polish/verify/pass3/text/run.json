@@ -1,0 +1,60 @@
+{
+  "started": "2026-09-30T05:56:00.607Z",
+  "base": "https://turboslide-lav4xmwv1-kl01s-projects.vercel.app",
+  "deck": "untitled-20260930-jybd",
+  "rows": [
+    {
+      "n": 1,
+      "name": "new-deck",
+      "expected": "open /new; the editor is ready with a title slide; a blank slide added",
+      "observed": "deck untitled-20260930-jybd; blank slide blank-1",
+      "ok": true,
+      "shot": null,
+      "ms": 3308
+    },
+    {
+      "n": 2,
+      "name": "paragraph-live",
+      "expected": "a two line box; the session open with the caret in line 1; Center, Double and 1.5 from the tail plates, Increase indent: the text nodes move within two frames while the session stays",
+      "observed": "Center: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 33px, align start -> center, block h 47 -> 47; Double: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 44px, align center -> center, block h 47 -> 62; Increase indent: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 33px, align center -> center, block h 47 -> 47; 1.5 from the tail: line-height 33px (the sheet's own leading is 1.5, so nothing moves), session kept true, stored leading 1.5 true; pictures 01-after-14-center-live.png, 02-after-14-double-live.png",
+      "ok": true,
+      "shot": "02-after-14-double-live.png",
+      "ms": 7050
+    },
+    {
+      "n": 3,
+      "name": "check-slides-plain",
+      "expected": "a picture and an empty 3 by 3 table on a slide of its own; Tools > Check slides: no finding carries an id, a parenthesis or SPEC",
+      "observed": "4 findings: \"A picture without a dark twin keeps a 1 px frame so it reads as a plate on the dark ground.Fix\" | \"The table has 9 empty cells. Type into them or remove the rows.\" | \"In native mode an image exports as a 2x raster.\" | \"This slide is arranged by hand. Apply layout re-flows it.\"; plain true",
+      "ok": true,
+      "shot": "03-after-55-check-slides.png",
+      "ms": 8831
+    },
+    {
+      "n": 4,
+      "name": "heading-list",
+      "expected": "the title placeholder selected by one click; Bulleted list from the tail writes a list on the heading; Increase indent writes; Cmd+Z twice takes both back",
+      "observed": "Bulleted list disabled null; written true (revision 10 -> 11; the cover's kind after content, grammar title); snackbar \"\"; Increase indent written true (snackbar \"\"); Cmd+Z brought the cover back true",
+      "ok": true,
+      "shot": "04-after-18-heading-list.png",
+      "ms": 7214
+    },
+    {
+      "n": 5,
+      "name": "versions-hairline",
+      "expected": "File > Version history at 1440 light: the panel's left edge and the window list's left edge are one line, not two lines 1 px apart (check step 18 reads \"double v@1120 gap 1: ts-panel.ts-chrome | ts-versions-list.is-window\")",
+      "observed": "error: locator.waitFor: Timeout 8000ms exceeded.",
+      "ok": false,
+      "shot": "07-versions-hairline-failed.png",
+      "ms": 10170
+    }
+  ],
+  "consoleErrors": [],
+  "facts": {
+    "paragraphLive": [
+      "Center: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 33px, align start -> center, block h 47 -> 47",
+      "Double: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 44px, align center -> center, block h 47 -> 62",
+      "Increase indent: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 33px, align center -> center, block h 47 -> 47"
+    ]
+  }
+}

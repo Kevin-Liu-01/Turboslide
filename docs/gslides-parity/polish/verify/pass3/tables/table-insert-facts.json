@@ -1,0 +1,405 @@
+{
+  "base": "https://turboslide-lav4xmwv1-kl01s-projects.vercel.app",
+  "at": "2026-09-30T06:01:13.076Z",
+  "picks": [
+    {
+      "size": "1x1",
+      "before": [],
+      "words": "1 x 1",
+      "fresh": [
+        {
+          "id": "h",
+          "type": "heading",
+          "pos": {
+            "x": 137,
+            "y": 129,
+            "w": 1326,
+            "h": 48.390625,
+            "z": 0
+          }
+        },
+        {
+          "id": "p1",
+          "type": "paragraph",
+          "pos": {
+            "x": 137,
+            "y": 494.6875,
+            "w": 767.578125,
+            "h": 33,
+            "z": 1
+          }
+        },
+        {
+          "id": "table",
+          "type": "table",
+          "pos": {
+            "x": 320,
+            "y": 217,
+            "w": 960,
+            "h": 55,
+            "z": 2
+          }
+        }
+      ],
+      "table": {
+        "id": "table",
+        "pos": {
+          "x": 320,
+          "y": 217,
+          "w": 960,
+          "h": 55,
+          "z": 2
+        },
+        "rows": 1,
+        "columns": 1
+      },
+      "drawn": {
+        "table": {
+          "x": 509.5999755859375,
+          "y": 309.9849853515625,
+          "w": 676.7999267578125,
+          "h": 38.7750244140625
+        },
+        "ring": {
+          "x": 509.59375,
+          "y": 309.984375,
+          "w": 676.796875,
+          "h": 38.765625
+        },
+        "grid": null,
+        "firstCell": {
+          "box": {
+            "x": 509.5999755859375,
+            "y": 310.69000244140625,
+            "w": 676.7999267578125,
+            "h": 37.364990234375
+          },
+          "promptText": null,
+          "promptLines": 0
+        },
+        "header": true,
+        "rowCount": 1
+      },
+      "floorRead": {
+        "drawnHeightSheet": 55,
+        "posH": 55
+      },
+      "promptWrapped": false,
+      "ringBelowTable": 0,
+      "shot": "tables-02-inserted-1x1.png",
+      "ok": false,
+      "undo": {
+        "tableGone": true,
+        "layout": {
+          "type": "split",
+          "gap": 56,
+          "head": "single",
+          "body": {
+            "align": "center"
+          }
+        }
+      }
+    },
+    {
+      "size": "1x2",
+      "before": [],
+      "words": "1 x 2",
+      "fresh": [
+        {
+          "id": "h",
+          "type": "heading",
+          "pos": {
+            "x": 137,
+            "y": 129,
+            "w": 1326,
+            "h": 48.390625,
+            "z": 0
+          }
+        },
+        {
+          "id": "p1",
+          "type": "paragraph",
+          "pos": {
+            "x": 137,
+            "y": 494.6875,
+            "w": 767.578125,
+            "h": 33,
+            "z": 1
+          }
+        },
+        {
+          "id": "table",
+          "type": "table",
+          "pos": {
+            "x": 320,
+            "y": 217,
+            "w": 960,
+            "h": 109,
+            "z": 2
+          }
+        }
+      ],
+      "table": {
+        "id": "table",
+        "pos": {
+          "x": 320,
+          "y": 217,
+          "w": 960,
+          "h": 109,
+          "z": 2
+        },
+        "rows": 2,
+        "columns": 1
+      },
+      "drawn": {
+        "table": {
+          "x": 509.5999755859375,
+          "y": 309.9849853515625,
+          "w": 676.7999267578125,
+          "h": 76.84503173828125
+        },
+        "ring": {
+          "x": 509.59375,
+          "y": 309.984375,
+          "w": 676.796875,
+          "h": 76.84375
+        },
+        "grid": null,
+        "firstCell": {
+          "box": {
+            "x": 509.5999755859375,
+            "y": 310.69000244140625,
+            "w": 676.7999267578125,
+            "h": 37.364990234375
+          },
+          "promptText": null,
+          "promptLines": 0
+        },
+        "header": true,
+        "rowCount": 2
+      },
+      "floorRead": {
+        "drawnHeightSheet": 109,
+        "posH": 109
+      },
+      "promptWrapped": false,
+      "ringBelowTable": 0,
+      "shot": "tables-04-inserted-1x2.png",
+      "ok": false,
+      "undo": {
+        "tableGone": true,
+        "layout": {
+          "type": "split",
+          "gap": 56,
+          "head": "single",
+          "body": {
+            "align": "center"
+          }
+        }
+      }
+    },
+    {
+      "size": "3x3",
+      "before": [],
+      "words": "3 x 3",
+      "fresh": [
+        {
+          "id": "h",
+          "type": "heading",
+          "pos": {
+            "x": 137,
+            "y": 129,
+            "w": 1326,
+            "h": 48.390625,
+            "z": 0
+          }
+        },
+        {
+          "id": "p1",
+          "type": "paragraph",
+          "pos": {
+            "x": 137,
+            "y": 494.6875,
+            "w": 767.578125,
+            "h": 33,
+            "z": 1
+          }
+        },
+        {
+          "id": "table",
+          "type": "table",
+          "pos": {
+            "x": 320,
+            "y": 217,
+            "w": 960,
+            "h": 163,
+            "z": 2
+          }
+        }
+      ],
+      "table": {
+        "id": "table",
+        "pos": {
+          "x": 320,
+          "y": 217,
+          "w": 960,
+          "h": 163,
+          "z": 2
+        },
+        "rows": 3,
+        "columns": 3
+      },
+      "drawn": {
+        "table": {
+          "x": 509.5999755859375,
+          "y": 309.9849853515625,
+          "w": 676.7999267578125,
+          "h": 114.91500854492188
+        },
+        "ring": {
+          "x": 509.59375,
+          "y": 309.984375,
+          "w": 676.796875,
+          "h": 114.90625
+        },
+        "grid": null,
+        "firstCell": {
+          "box": {
+            "x": 509.5999755859375,
+            "y": 310.69000244140625,
+            "w": 225.5999755859375,
+            "h": 37.364990234375
+          },
+          "promptText": null,
+          "promptLines": 0
+        },
+        "header": true,
+        "rowCount": 3
+      },
+      "floorRead": {
+        "drawnHeightSheet": 163,
+        "posH": 163
+      },
+      "promptWrapped": false,
+      "ringBelowTable": 0,
+      "shot": "tables-06-inserted-3x3.png",
+      "ok": false,
+      "undo": {
+        "tableGone": true,
+        "layout": {
+          "type": "split",
+          "gap": 56,
+          "head": "single",
+          "body": {
+            "align": "center"
+          }
+        }
+      }
+    },
+    {
+      "size": "12x4",
+      "before": [],
+      "words": "12 x 4",
+      "fresh": [
+        {
+          "id": "h",
+          "type": "heading",
+          "pos": {
+            "x": 137,
+            "y": 129,
+            "w": 1326,
+            "h": 48.390625,
+            "z": 0
+          }
+        },
+        {
+          "id": "p1",
+          "type": "paragraph",
+          "pos": {
+            "x": 137,
+            "y": 494.6875,
+            "w": 767.578125,
+            "h": 33,
+            "z": 1
+          }
+        },
+        {
+          "id": "table",
+          "type": "table",
+          "pos": {
+            "x": 320,
+            "y": 217,
+            "w": 960,
+            "h": 217,
+            "z": 2
+          }
+        }
+      ],
+      "table": {
+        "id": "table",
+        "pos": {
+          "x": 320,
+          "y": 217,
+          "w": 960,
+          "h": 217,
+          "z": 2
+        },
+        "rows": 4,
+        "columns": 12
+      },
+      "drawn": {
+        "table": {
+          "x": 509.5999755859375,
+          "y": 309.9849853515625,
+          "w": 676.7999267578125,
+          "h": 152.98501586914062
+        },
+        "ring": {
+          "x": 509.59375,
+          "y": 309.984375,
+          "w": 676.796875,
+          "h": 152.984375
+        },
+        "grid": null,
+        "firstCell": {
+          "box": {
+            "x": 509.5999755859375,
+            "y": 310.69000244140625,
+            "w": 56.4000244140625,
+            "h": 37.364990234375
+          },
+          "promptText": null,
+          "promptLines": 0
+        },
+        "header": true,
+        "rowCount": 4
+      },
+      "floorRead": {
+        "drawnHeightSheet": 217,
+        "posH": 217
+      },
+      "promptWrapped": false,
+      "ringBelowTable": 0,
+      "shot": "tables-08-inserted-12x4.png",
+      "ok": false,
+      "undo": {
+        "tableGone": true,
+        "layout": {
+          "type": "split",
+          "gap": 56,
+          "head": "single",
+          "body": {
+            "align": "center"
+          }
+        }
+      }
+    }
+  ],
+  "consoleErrors": [],
+  "ok": false,
+  "trash": {
+    "trashed": true,
+    "deleted": true,
+    "status": 404
+  }
+}

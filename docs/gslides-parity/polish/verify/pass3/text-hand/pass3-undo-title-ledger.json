@@ -1,0 +1,117 @@
+{
+  "base": "https://turboslide-lav4xmwv1-kl01s-projects.vercel.app",
+  "tag": "pass3",
+  "startedAt": "2026-09-30T05:53:23.483Z",
+  "rounds": [
+    {
+      "round": 1,
+      "deckId": "untitled-20260930-mg45",
+      "typedMs": 1939,
+      "maxGapMs": 96,
+      "revision1AtMs": 1962,
+      "landedAfterLastKey": true,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly review: Q3 2026"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "afterRedo": "Quarterly review: Q3 2026",
+      "redoRestoresTitle": true,
+      "trash": {
+        "trashed": true,
+        "deleted": true,
+        "status": 404
+      }
+    },
+    {
+      "round": 2,
+      "deckId": "untitled-20260930-yod3",
+      "typedMs": 1673,
+      "maxGapMs": 95,
+      "revision1AtMs": 1720,
+      "landedAfterLastKey": true,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly review: Q3 2026"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "afterRedo": "Quarterly review: Q3 2026",
+      "redoRestoresTitle": true,
+      "trash": {
+        "trashed": true,
+        "deleted": true,
+        "status": 404
+      }
+    },
+    {
+      "round": 3,
+      "deckId": "untitled-20260930-rkf2",
+      "typedMs": 1816,
+      "maxGapMs": 94,
+      "revision1AtMs": 1882,
+      "landedAfterLastKey": true,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly review: Q3 2026"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "afterRedo": "Quarterly review: Q3 2026",
+      "redoRestoresTitle": true,
+      "trash": {
+        "trashed": true,
+        "deleted": true,
+        "status": 404
+      }
+    }
+  ],
+  "summary": {
+    "rounds": 3,
+    "wholeSessionUndone": 3,
+    "oneStep": 3,
+    "twoSteps": 0,
+    "redoRestores": 3,
+    "pauseMs": 0
+  }
+}

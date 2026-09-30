@@ -17,6 +17,7 @@ import {
   ownerContext,
   placeBlock,
   runsOfBlock,
+  sameCookiesContext,
   selectBlock,
   settled,
   skipCurrent,
@@ -27,7 +28,6 @@ import {
   title,
   typeInto,
   typeNote,
-  extraHTTPHeaders,
 } from './lib';
 
 // Present and comments, the spec rows (docs/FOCUS.md 2.7, 6.4 `present.*`, `comments.*` and
@@ -1143,11 +1143,14 @@ test(title('present.laser.visible'), async () => {
 
 test(title('present.link.first-paint-show'), async ({ browser }) => {
   test.setTimeout(120_000);
-  const fresh = await browser.newContext({
-    extraHTTPHeaders,
-    viewport: { width: 1440, height: 900 },
-  });
-  const p = await fresh.newPage();
+  /* the same seller in a second browser (lib.ts `sameCookiesContext`): under
+     TURBOSLIDE_AUTHORIZE=enforce a new deck is Restricted (docs/POLISH.md 2.7 item 78) and a
+     stranger's direct address meets the You need access page, never the show, so a fresh context
+     with no storage read the 30 s wait for the show and not its first paint (B5's R12 in the fix
+     round; the memory tier's shadow authorization let the stranger in, which is why the row was
+     green there); the owner's storage travels into the fresh context and the first paint is the
+     show's, which is the address the Present link the Share dialog mints lands on */
+  const { context: fresh, page: p } = await sameCookiesContext(browser, context);
   try {
     await p.addInitScript(() => {
       const w = window as unknown as {

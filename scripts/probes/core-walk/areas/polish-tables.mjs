@@ -515,11 +515,22 @@ export async function run(t) {
     await t.sleep(300);
     const words = await t.textOf('insert.table.size');
     await page.mouse.click(r.x + r.width / 2, r.y + r.height / 2);
-    const obj = await t.newObjectAfter(slide, before, 15_000);
+    /* the insert converts a split slide in the same write (controller.tsx `block.insert`:
+       `withCanvas`, then `placeInsert`), so the title and the body prompt gain a `pos` beside the
+       table and `newObjectAfter`'s first new object is the title, whose box the two rows then
+       judged as the table's (B2's R11); the fresh object whose type is `table` is the picker's */
+    const fresh = await t
+      .pollUntil(
+        () => t.objectsOf(slide),
+        (list) => list.some((o) => !before.includes(o.id) && o.type === 'table'),
+        15_000,
+      )
+      .catch(() => []);
+    const obj = fresh.find((o) => !before.includes(o.id) && o.type === 'table') ?? null;
     await t.settled();
     await t.press('Escape');
     await t.sleep(200);
-    return { obj, words, error: obj ? null : 'nothing inserted within 15 s' };
+    return { obj, words, error: obj ? null : 'no table inserted within 15 s' };
   };
   await t.step(
     'tables.insert.box-never-shorter-than-rows',

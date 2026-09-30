@@ -628,7 +628,7 @@ export async function run(t) {
   await t.step(
     'diagrams.label.double-click-selects-word',
     'Insert > Diagram > Process; a double click on "Step 2" of the diagram, " plus" typed; a text box double clicked at a point, typed',
-    'the label reads "Step plus"; the text box keeps the caret at the click point',
+    'the label reads "Step  plus" (the typed text in the word\'s place, the space before it kept); the text box keeps the caret at the click point',
     async () => {
       const slide = await t.setupSlide(null, 'blank');
       if (!slide) return { ok: false, observed: 'no slide' };
@@ -707,7 +707,11 @@ export async function run(t) {
             : /X/.test(caretText ?? '') && /the/.test(caretText ?? '');
       }
       await t.clickCard(S);
-      const ok = selected.trim() === '2' && label === 'Step plus' && caretOk;
+      /* the typed " plus" lands in the selected word's place, so the stored label is "Step" +
+         the space kept + " plus", two spaces, as Google keeps it; the stage collapses the pair to
+         one and B1's hand read saw "Step plus" (the verifier's pass 2 finding 9: the walk's one
+         space was the read's, not the product's) */
+      const ok = selected.trim() === '2' && label === 'Step  plus' && caretOk;
       return {
         ok,
         observed: `double click selected "${selected}"; the label reads "${label}"; the text box after a double click on "caret" and "X" typed reads "${caretText}"${ok ? '' : ` (docs/POLISH.md 2.4 item 30, B1's Selection.tsx by ${LANE}'s request; question 5)`}`,
@@ -803,6 +807,10 @@ export async function run(t) {
       await t.sleep(300);
       const chip = await t.chip();
       const pressed = (await t.attr('[data-control="toolbar.bold"]', 'aria-pressed')) === 'true';
+      /* Bold is the run mark (docs/POLISH.md 2.3 item 12): one press wraps the letters in `b`
+         elements at 700 while the paragraph's own weight stays 400 by design, so the letters'
+         weight is the marks' when they cover the text, else the paragraph's (B1's fix round
+         request to B6) */
       const weightOf = () =>
         page.evaluate((id) => {
           const el = document.querySelector(
@@ -811,7 +819,17 @@ export async function run(t) {
           const text = el?.matches('p, h1, h2, .text')
             ? el
             : (el?.querySelector('p, h1, h2, [data-run]') ?? el);
-          return text ? getComputedStyle(text).fontWeight : null;
+          if (!text) return null;
+          const own = (text.textContent ?? '').replace(/\s+/g, ' ').trim();
+          const marks = [...text.querySelectorAll('b, strong, [data-mark="b"]')];
+          const covered = marks
+            .map((m) => (m.textContent ?? '').replace(/\s+/g, ' ').trim())
+            .join(' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          if (marks.length > 0 && own.length > 0 && covered === own)
+            return String(Math.min(...marks.map((m) => Number(getComputedStyle(m).fontWeight))));
+          return getComputedStyle(text).fontWeight;
         }, obj.id);
       const weight0 = await weightOf();
       await t.tailControl('toolbar.bold');

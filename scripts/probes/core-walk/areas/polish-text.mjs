@@ -145,7 +145,9 @@ export async function run(t) {
             Boolean(mark) &&
             Number(mark.weight) >= 700 &&
             Number(rest?.weight) < 700 &&
-            /\[Acme\]\{[^}]*b[^}]*\}/.test(stored) &&
+            /* the markup's bold is the `*` pair (schema text.ts), so the run reads `*Acme*`;
+               the brace form stays for a mark written as an attribute (B1's R22a) */
+            /\[Acme\]\{[^}]*b[^}]*\}|\*Acme\*/.test(stored) &&
             wholeWeight === null,
         };
       };
@@ -168,7 +170,7 @@ export async function run(t) {
             .map((m) => m.text)
             .join('')
             .trim() === 'Acme renews in Q3') ||
-        /^\[Acme renews in Q3\]\{[^}]*b[^}]*\}$/.test(storedWhole.trim());
+        /^\[Acme renews in Q3\]\{[^}]*b[^}]*\}$|^\*Acme renews in Q3\*$/.test(storedWhole.trim());
       await t.press('Meta+z');
       await t.settled();
       const ok = tail.ok && menu.ok && wholeBold;
@@ -183,8 +185,8 @@ export async function run(t) {
   const PARA = 'pt-para';
   await t.step(
     'text.paragraph.toolbar-live',
-    'a two line text box; a session open with the caret in line 1; Center from the tail, then 1.5, then Increase indent',
-    "the paragraph's box moves within one frame while the caret stays; 1.5 and Increase indent the same",
+    'a two line text box; a session open with the caret in line 1; Center from the tail, then Double, then Increase indent',
+    "the paragraph's box moves within one frame while the caret stays; Double and Increase indent the same",
     async () => {
       const made = await placeText(PARA, 'First line here\nSecond line here', {
         x: 200,
@@ -198,13 +200,22 @@ export async function run(t) {
       const on = await t.openRun(run);
       if (!on) return { ok: false, observed: 'no session opened' };
       await t.press('Home');
+      /* the text nodes' own rects (B1's R22a): the run's contents range begins with the first
+         `.para` block box, whose x is the box's left edge whatever the alignment, so Center could
+         never move it; a text node's rect moves with the text */
       const paraBox = () =>
         page.evaluate((r) => {
           const el = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`);
           if (!el) return null;
-          const range = document.createRange();
-          range.selectNodeContents(el);
-          const rects = [...range.getClientRects()].filter((c) => c.width > 0);
+          const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+          const rects = [];
+          let node;
+          while ((node = walker.nextNode())) {
+            if (!(node.textContent ?? '').trim()) continue;
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            for (const c of range.getClientRects()) if (c.width > 0) rects.push(c);
+          }
           const first = rects[0] ?? el.getBoundingClientRect();
           const last = rects[rects.length - 1] ?? first;
           return {
@@ -248,15 +259,18 @@ export async function run(t) {
         },
         (a, b) => Math.abs(b.x - a.x) > 4,
       );
+      /* Double, not 1.5: 1.5 is the sheet's own paragraph leading (`sheet.css` `.ts-sheet p {
+         line-height: 1.5 }`), so its write lands and draws the same lines; Double moves the
+         second line (B1's R22a) */
       await readAfter(
-        '1.5',
+        'Double',
         async () => {
           await t.clickControl('toolbar.spacing');
           await page
             .locator('#ts-menu-toolbar\\.spacing, [data-control="toolbar.spacing.plate"]')
             .first()
             .waitFor({ timeout: 6000 });
-          await t.clickControl('menu.toolbar.spacing.format.spacing.1_5');
+          await t.clickControl('menu.toolbar.spacing.format.spacing.double');
         },
         (a, b) => Math.abs(b.lastY - b.firstY - (a.lastY - a.firstY)) > 2,
       );
@@ -327,10 +341,12 @@ export async function run(t) {
       const texts = items.map((it) =>
         typeof it === 'string' ? it : (it?.text ?? JSON.stringify(it)),
       );
+      /* a list level is 1 to 9 with 1 the top (SPEC-2 0.58; `render/blocks/lists.ts` `levelOf`):
+         one Tab writes level 2 and the top item carries no level (B1's R22a) */
       const nested =
         items[1] &&
         typeof items[1] === 'object' &&
-        (items[1].level === 1 ||
+        ((typeof items[1].level === 'number' && items[1].level >= 2) ||
           items[1].depth === 1 ||
           items[1].indent === 1 ||
           Array.isArray(items[1].items));
@@ -691,26 +707,35 @@ export async function run(t) {
   await t.step(
     'text.tail.size-reads-heading',
     'a title session open; the size field read; a subtitle session; the field read',
-    "the tail's size field reads 88 for the title and 32 for the subtitle",
+    "the tail's size field reads the heading's computed size (88 on a fresh title, 26 for the subtitle on this sheet)",
     async () => {
+      /* item 22: the field reads the heading's computed size from the ladder. The sheet draws a
+         fresh title at 88 and the title slide's lead at 26 (`sheet.css` `.ts-sheet .lead`), and a
+         title the rows before this one wrapped has stepped down the ladder (item 21) and stays
+         there, so the read is against the drawn size and not a constant (B1's R22a) */
       await onTitleSlide();
       await t.clearAll();
+      const headFont = (await t.runInfo(HEAD))?.font ?? null;
       await t.openRun(HEAD);
       await t.sleep(300);
       const title = await t.valueOf('toolbar.fontSize.value');
       await escapeOut();
       let sub = null;
+      let leadFont = null;
       if (LEAD) {
         await t.clearAll();
+        leadFont = (await t.runInfo(LEAD))?.font ?? null;
         await t.openRun(LEAD);
         await t.sleep(300);
         sub = await t.valueOf('toolbar.fontSize.value');
         await escapeOut();
       }
-      const ok = String(title) === '88' && (LEAD === null || String(sub) === '32');
+      const reads = (field, font) =>
+        font !== null && String(field ?? '') !== '' && Math.abs(Number(field) - font) <= 0.5;
+      const ok = reads(title, headFont) && (LEAD === null || reads(sub, leadFont));
       return {
         ok,
-        observed: `title field "${title}"; subtitle field "${sub}"${ok ? '' : ` (docs/POLISH.md 2.3 item 22, ${LANE})`}`,
+        observed: `title field "${title}" (drawn ${headFont} px); subtitle field "${sub}" (drawn ${leadFont} px)${ok ? '' : ` (docs/POLISH.md 2.3 item 22, ${LANE})`}`,
       };
     },
   );
@@ -721,15 +746,40 @@ export async function run(t) {
     'the title selected and twelve words typed over it; Escape',
     "the drawn size steps down the ladder until the text fits and the ring's height stays the placeholder's",
     async () => {
-      await clickTitle();
-      const ringBefore = (await t.frameFacts(HEAD_BLOCK))?.ring ?? null;
-      const sizeBefore = (await t.runInfo(HEAD))?.font ?? null;
+      /* a title slide of its own: the shrink steps down the ladder and never back up
+         (`text-fit.ts` `shrinkMutation`), and the heading rows before this one leave TS's title
+         at 44 (item 19's two lines), so on TS the row read 44 to 44 while the mechanism held (the
+         verifier's pass 2); the fresh placeholder draws at the sheet's 88 and the row reads the
+         step from there. The slide is removed at the end so the deck reads as the rows after it
+         expect */
+      const own = await t.setupSlide(TS, 'title');
+      if (!own) return { ok: false, observed: 'no title slide of its own' };
+      await t.clickCard(own);
+      await page
+        .waitForSelector(`.pt-viewer[data-active="${own}"]`, { timeout: 5000 })
+        .catch(() => undefined);
+      await t.sleep(300);
+      await t.clearAll();
+      const ownRuns = await t.runs();
+      const ownHead = ownRuns.find((r) => /heading/.test(r)) ?? ownRuns[0];
+      const ownBlock = (await t.blockOfRun(ownHead)) ?? 'lead';
+      const clickOwn = async () => {
+        await t.clearAll();
+        const at = await t.runInfo(ownHead);
+        return t.clickSelect(ownBlock, {
+          x: at.rect.x + at.rect.w / 2,
+          y: at.rect.y + at.rect.h / 2,
+        });
+      };
+      await clickOwn();
+      const ringBefore = (await t.frameFacts(ownBlock))?.ring ?? null;
+      const sizeBefore = (await t.runInfo(ownHead))?.font ?? null;
       await t.typeHuman('Twelve words that run on and on across the whole title placeholder now');
       await t.sleep(300);
       await escapeOut();
-      await clickTitle();
-      const ringAfter = (await t.frameFacts(HEAD_BLOCK))?.ring ?? null;
-      const info = await t.runInfo(HEAD);
+      await clickOwn();
+      const ringAfter = (await t.frameFacts(ownBlock))?.ring ?? null;
+      const info = await t.runInfo(ownHead);
       const sheet = await t.sheetRect();
       const k = sheet ? sheet.w / 1600 : 1;
       const inside = info && sheet ? info.rect.y + info.rect.h <= sheet.y + sheet.h + 1 : false;
@@ -737,8 +787,11 @@ export async function run(t) {
       const ringKept = ringBefore && ringAfter ? Math.abs(ringAfter.h - ringBefore.h) <= 4 : false;
       const ok = shrank && ringKept && inside;
       await t.clearAll();
-      await t.press('Meta+z');
+      const s = await t.state();
+      await t.invoke('slide.remove', { baseRevision: s.revision, slideId: own });
+      await t.pollUntil(t.slideOrder, (o) => !o.includes(own), 15_000).catch(() => undefined);
       await t.settled();
+      await onTitleSlide();
       return {
         ok,
         observed: `font ${sizeBefore} -> ${info?.font} px over ${info?.lines} lines; ring height ${ringBefore ? r1(ringBefore.h) : '?'} -> ${ringAfter ? r1(ringAfter.h) : '?'} sheet px (kept ${ringKept}); text inside the sheet ${inside} (k ${r1(k)})${ok ? '' : ` (docs/POLISH.md 2.3 item 21, ${LANE})`}`,
@@ -916,28 +969,37 @@ export async function run(t) {
     'Tools > Preferences > Link detection off, "See www.example.com now" typed into an empty box; on, typed again into another',
     'off: no link mark; on: a link mark',
     async () => {
+      /* Preferences holds one row, and a one row submenu is drawn as its row in the parent
+         (model.ts `collapseSingles`, docs/POLISH.md 2.6 item 74; the toggle keeps its own words),
+         so Link detection sits in Tools itself with its id `tools.preferences.linkDetection`; the
+         row is read where it is drawn, and the hover on a Preferences row that is not there (the
+         30 s `boundingBox` wait of the verifier's pass 2) is taken only when the submenu is */
       const rowState = async () => {
         await t.surfaceClear();
         await t.openMenu('tools');
-        await t.hoverRow(
-          'tools.preferences',
-          '[data-control="menu.tools.preferences.linkDetection"]',
-        );
+        const flat = await t.has('[data-control="menu.tools.preferences.linkDetection"]');
+        if (!flat)
+          await t.hoverRow(
+            'tools.preferences',
+            '[data-control="menu.tools.preferences.linkDetection"]',
+          );
         const row =
           (await t.menuRows('tools')).find((r) => r.id === 'tools.preferences.linkDetection') ??
           null;
         await t.press('Escape', 2);
         await t.sleep(150);
-        return row;
+        return { row, flat };
       };
       const setDetection = async (on) => {
-        const row = await rowState();
+        const { row, flat } = await rowState();
         if (!row) return null;
         const now = row.checked === 'true';
-        if (now !== on)
-          await t.menuPath('tools', 'tools.preferences', 'tools.preferences.linkDetection');
+        if (now !== on) {
+          if (flat) await t.menuPath('tools', 'tools.preferences.linkDetection');
+          else await t.menuPath('tools', 'tools.preferences', 'tools.preferences.linkDetection');
+        }
         await t.sleep(200);
-        return (await rowState())?.checked === 'true';
+        return (await rowState()).row?.checked === 'true';
       };
       const typeInto = async (id) => {
         const made = await placeText(id, '', { x: 200, y: 440, w: 900, h: 80 });

@@ -1011,24 +1011,72 @@ test(title('shaders.frame.large-png-lands'), async () => {
   /* the card, the show and the print page draw it: a pixel read finds no plate grey */
   const plateGrey = (hex: string) =>
     /^#(e[0-9a-f]|f[0-9a-f]|d[0-9a-f]){3}$/.test(hex) || /^#([0-9a-f]{2})\1\1$/.test(hex);
+  /* the visible match (B4's F5, the fix round): the show keeps a hidden 60 by 34 copy of the
+     slide in the document ahead of its sheet, so the first match by document order was a copy
+     whose frame img is `visibility: hidden` and the samples read the page's white; the block read
+     is the largest match that is laid out and visible, its frame img included. The plate is
+     compared by its own colour: the `.material` ground is `var(--plate)` over the sheet
+     (rgba(7, 7, 7, 0.035) on the light kit, #f6f6f6 composited), and a god rays frame in the
+     kit's black and white is greys by nature, so "any grey" read a drawn frame as the plate; a
+     frame img that is complete inside the visible block reads as drawn whatever the samples */
+  const toHex = (c: readonly number[]) =>
+    `#${c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`;
   const sampleAt = async (root: string, blockId: string) => {
-    const box = await page.evaluate(
+    const read = await page.evaluate(
       ([sel, id]) => {
-        const el = document.querySelector(
-          sel
-            .split(',')
-            .map((s) => `${s.trim()} [data-block="${id}"]`)
-            .join(', '),
-        );
-        const r = el?.getBoundingClientRect();
-        return r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null;
+        const visible = (el: Element) =>
+          el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+        const matches = [
+          ...document.querySelectorAll(
+            sel
+              .split(',')
+              .map((s) => `${s.trim()} [data-block="${id}"]`)
+              .join(', '),
+          ),
+        ].filter((el) => {
+          if (!visible(el)) return false;
+          const img = el.querySelector('img');
+          return img ? visible(img) : true;
+        });
+        const el = matches
+          .map((m) => ({ m, r: m.getBoundingClientRect() }))
+          .sort((a, b) => b.r.width * b.r.height - a.r.width * a.r.height)[0];
+        if (!el) return null;
+        const ground = el.m.querySelector('.material') ?? el.m;
+        const sheet = el.m.closest('.pt-slide, .ts-sheet, .sheet');
+        const toRgb = (s: string) => {
+          const m = /rgba?\(([^)]+)\)/.exec(s);
+          if (!m) return null;
+          const parts = m[1]!.split(',').map((v) => parseFloat(v));
+          return { r: parts[0]!, g: parts[1]!, b: parts[2]!, a: parts.length > 3 ? parts[3]! : 1 };
+        };
+        const over = toRgb(getComputedStyle(ground).backgroundColor);
+        const under = sheet ? toRgb(getComputedStyle(sheet).backgroundColor) : null;
+        const base = under && under.a > 0 ? under : { r: 255, g: 255, b: 255, a: 1 };
+        const plate = over
+          ? [
+              Math.round(over.r * over.a + base.r * (1 - over.a)),
+              Math.round(over.g * over.a + base.g * (1 - over.a)),
+              Math.round(over.b * over.a + base.b * (1 - over.a)),
+            ]
+          : null;
+        const img = el.m.querySelector('img') as HTMLImageElement | null;
+        return {
+          box: { x: el.r.x, y: el.r.y, width: el.r.width, height: el.r.height },
+          matches: matches.length,
+          plate,
+          img:
+            img && img.complete && img.naturalWidth > 0
+              ? (img.currentSrc || img.getAttribute('src') || '').slice(-48)
+              : null,
+        };
       },
       [root, blockId] as const,
     );
-    if (!box || box.width < 4) return null;
+    if (!read || read.box.width < 4) return null;
     const rgb = await sampleClip(
       page,
-      box,
+      read.box,
       [
         [0.5, 0.5],
         [0.25, 0.5],
@@ -1037,10 +1085,17 @@ test(title('shaders.frame.large-png-lands'), async () => {
       0.02,
     );
     if (!rgb) return null;
-    const hexes = rgb.rgb.map(
-      (c) => `#${c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`,
-    );
-    return { hexes, grey: hexes.every((h) => plateGrey(h)) };
+    const hexes = rgb.rgb.map(toHex);
+    const isPlate = (c: readonly number[]) =>
+      read.plate ? rgbDistance(c, read.plate) <= 6 : plateGrey(toHex(c));
+    return {
+      hexes,
+      /* grey: nothing drawn, every sample the plate's colour and no complete frame img */
+      grey: read.img === null && rgb.rgb.every((c) => isPlate(c)),
+      plate: read.plate ? toHex(read.plate) : 'unread',
+      img: read.img,
+      matches: read.matches,
+    };
   };
   await page.keyboard.press('Escape');
   const card = await sampleAt(`[data-control="filmstrip.slide.${own}"]`, made.id);
@@ -1114,7 +1169,7 @@ test(title('shaders.frame.large-png-lands'), async () => {
   const retried = puts.filter((p) => /-> through$/.test(p)).length;
   test.info().annotations.push({
     type: 'frame',
-    description: `${made.how}; the frame ${frame.asset ?? 'none'} after ${ms} ms (${size ? `${size.width} by ${size.height}` : 'unread'}); card ${card ? `${card.hexes.join(' ')} grey ${card.grey}` : 'unread'}, show ${show ? `${show.hexes.join(' ')} grey ${show.grey}` : 'unread'}, print ${printed ? `${printed.hexes.join(' ')} grey ${printed.grey}` : 'unread'}; ${how}; 413 injected ${refused} (${puts.join('; ')}); the second frame ${second.asset ?? 'none'} after ${second.ms} ms; snackbar "${words}"`,
+    description: `${made.how}; the frame ${frame.asset ?? 'none'} after ${ms} ms (${size ? `${size.width} by ${size.height}` : 'unread'}); card ${card ? `${card.hexes.join(' ')} (plate ${card.plate}, img ${card.img ?? 'none'}, ${card.matches} visible) grey ${card.grey}` : 'unread'}, show ${show ? `${show.hexes.join(' ')} (plate ${show.plate}, img ${show.img ?? 'none'}, ${show.matches} visible) grey ${show.grey}` : 'unread'}, print ${printed ? `${printed.hexes.join(' ')} (plate ${printed.plate}, img ${printed.img ?? 'none'}, ${printed.matches} visible) grey ${printed.grey}` : 'unread'}; ${how}; 413 injected ${refused} (${puts.join('; ')}); the second frame ${second.asset ?? 'none'} after ${second.ms} ms; snackbar "${words}"`,
   });
   expect(frame.asset, 'the frame asset exists within 8 s').not.toBeNull();
   expect(card?.grey, 'the filmstrip card draws it').toBe(false);

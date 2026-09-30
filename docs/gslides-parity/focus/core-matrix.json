@@ -1437,10 +1437,11 @@
     {
       "id": "text.autofit.title-wraps",
       "feature": "text",
-      "interaction": "A long title wraps inside the sheet without overlapping the subtitle",
+      "interaction": "A long title fits inside the sheet with no split word and no overlap with the subtitle: it wraps, or steps down the ladder (docs/POLISH.md 2.3 item 21), or both",
       "driver": "probe --core",
       "today": "works",
-      "evidence": "audit-text row 53"
+      "evidence": "audit-text row 53",
+      "note": "The polish fix round 2 (VERIFICATION.md \"Polish round, pass 2\" finding 2): the title placeholder shrinks on overflow since item 21, so a long title may fit on one line at a smaller size; the row reads wrapped or shrunk, never wrapped alone"
     },
     {
       "id": "text.autofit.textbox-grow",
@@ -6922,13 +6923,13 @@
     {
       "id": "logos.replace-image.row",
       "feature": "logos",
-      "interaction": "Right click a picture > Replace image > Logo > Figma; the asset swaps and the box stays",
+      "interaction": "Right click a picture > Replace image > Logo > Figma; the asset swaps and the box keeps its centre and area and refits to the mark's aspect (docs/POLISH.md 2.5 item 37)",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 14 (07-picture-context-menu.png)",
       "setup": "asset.add and block.insert of a picture through the window API",
       "parks": ["format.image.replaceImage.logo"],
-      "note": "Ship one P0; docs/FEATURES.md 4.4 (B6 by request in model.ts; the dialog with the block as its target)"
+      "note": "Ship one P0; docs/FEATURES.md 4.4 (B6 by request in model.ts; the dialog with the block as its target). The polish fix round 2 reads item 37's refit (VERIFICATION.md \"Polish round, pass 2\" finding 6): the row's \"the box stays\" predated it"
     },
     {
       "id": "logos.route.mark-headers",
@@ -7032,7 +7033,7 @@
     {
       "id": "shaders.insert.gallery-thumbnails",
       "feature": "shaders",
-      "interaction": "Insert > Shader opens a grid titled Shader with the black and white sentence under the title; every card has a decoded thumbnail within 2 s; the search narrows to \"metal\" in one row; a category chip narrows the grid; no canvas is mounted in the dialog",
+      "interaction": "Insert > Shader opens a grid titled Shader with one sentence under the title naming the brand kit's colours; every card has a decoded thumbnail within 2 s; the search narrows to \"metal\" in one row; a category chip narrows the grid; no canvas is mounted in the dialog",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 3 (s03-insert-material-dialog.png, s09b-background-material-list.png)",
@@ -7397,12 +7398,12 @@
     {
       "id": "svg.import.url",
       "feature": "svg",
-      "interaction": "Insert > Image > By URL with the origin's /api/logo/mark/figma/default.svg (the fixture upstream on the preview, the live index on production): the picture lands within 8 s as a vector picture whose alt is the file's name",
+      "interaction": "Insert > Image > By URL with the origin's /api/logo/mark/figma/default.svg (the fixture upstream on the preview, the live index on production): the picture lands within 8 s as a vector picture whose asset is named after the file and whose alt text starts empty (docs/POLISH.md 2.5 item 45)",
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "Editor.tsx 3947 to 3961; picture-place.ts 285 to 287",
       "parks": ["intake.svg.url"],
-      "note": "Vector round; docs/VECTOR.md 4.3 (B3)"
+      "note": "Vector round; docs/VECTOR.md 4.3 (B3); the alt rule is the polish round's item 45 (B4 with B6, fix round 2)"
     },
     {
       "id": "svg.render.vector-at-zoom",
@@ -8021,13 +8022,13 @@
     {
       "id": "text.paragraph.toolbar-live",
       "feature": "text",
-      "interaction": "With a session open, Center from the tail: the paragraph's box moves within one frame while the caret stays; 1.5 and Increase indent the same",
+      "interaction": "With a session open, Center from the tail: the paragraph's text moves within one frame while the caret stays; Double and Increase indent the same",
       "driver": "probe --core",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-text item 3",
       "setup": "block.insert of a text box with two lines through the window API",
-      "note": "Polish round; docs/POLISH.md 2.3 item 14; B1"
+      "note": "Polish round; docs/POLISH.md 2.3 item 14; B1. The fix round 2 reads the text nodes' rects and steps Double (1.5 is the sheet's own leading) per B1's R22a"
     },
     {
       "id": "text.list.enter-tab-no-error",
@@ -8101,7 +8102,8 @@
       "today": "broken",
       "severity": 2,
       "evidence": "audit-text item 7",
-      "note": "Polish round; docs/POLISH.md 2.3 item 21; B1"
+      "note": "Polish round; docs/POLISH.md 2.3 item 21; B1",
+      "setup": "slide.new of a title slide of its own through the window API before the words; slide.remove after (the shrink never steps back up, and the heading rows before this one leave the shared title slide down the ladder)"
     },
     {
       "id": "text.title.second-session-survives-reload",
@@ -8138,12 +8140,12 @@
     {
       "id": "text.tail.size-reads-heading",
       "feature": "text",
-      "interaction": "A title session open: the tail's size field reads 88; a subtitle's 32",
+      "interaction": "A title session open: the tail's size field reads the heading's drawn size (88 on a fresh title, 26 for the title slide's subtitle on this sheet)",
       "driver": "probe --core",
       "today": "broken",
       "severity": 1,
       "evidence": "audit-collab item 22",
-      "note": "Polish round; docs/POLISH.md 2.3 item 22; B1"
+      "note": "Polish round; docs/POLISH.md 2.3 item 22; B1. The fix round 2 reads the field against the drawn size (a title that stepped down the ladder reads its step) per B1's R22a"
     },
     {
       "id": "text.polish.highlight-console",
@@ -8235,7 +8237,7 @@
     {
       "id": "diagrams.label.double-click-selects-word",
       "feature": "diagrams",
-      "interaction": "Double click on \"Step 2\" of a process diagram, \" plus\" typed: the label reads \"Step plus\"; a text box keeps the caret at the click point",
+      "interaction": "Double click on \"Step 2\" of a process diagram, \" plus\" typed: the label reads \"Step  plus\" (the typed text in the word's place, the space before it kept); a text box keeps the caret at the click point",
       "driver": "probe --core",
       "today": "broken",
       "severity": 2,
@@ -9025,13 +9027,13 @@
     {
       "id": "present.link.first-paint-show",
       "feature": "present",
-      "interaction": "`/deck/<id>?present=1`: the frame at 150 ms holds the show and no viewer bar; CLS 0",
+      "interaction": "`/deck/<id>?present=1` opened by the deck's owner in a second browser: the frame at 150 ms holds the show and no viewer bar; CLS 0",
       "driver": "core/present.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "audit-collab item 9",
       "setup": "a deck with two slides through the window API before the present address opens",
-      "note": "Polish round; docs/POLISH.md 2.8 item 105; B5"
+      "note": "Polish round; docs/POLISH.md 2.8 item 105; B5. The fix round 2 opens the address from a context carrying the owner's storage (B5's R12): under enforce a stranger meets the access page by item 78"
     },
     {
       "id": "surface.skeleton.matches-editor",

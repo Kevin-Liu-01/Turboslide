@@ -313,11 +313,16 @@ test(title('svg.import.url'), async () => {
   const alt = String(asset?.['alt'] ?? img?.alt ?? '');
   test.info().annotations.push({
     type: 'by url',
-    description: `${switched ? 'with the switch on; ' : ''}${pic.id} in ${Date.now() - t0} ms; img ${img?.src ?? 'none'}; alt "${alt}"`,
+    description: `${switched ? 'with the switch on; ' : ''}${pic.id} in ${Date.now() - t0} ms; img ${img?.src ?? 'none'}; asset "${String(asset?.['id'] ?? '')}"; alt "${alt}"`,
   });
   if (switched) await switchOff();
   expect(await drawsVector(pic.id), 'a vector picture').toBe(true);
-  expect(alt, "the alt is the file's name").toMatch(/default/);
+  /* the polish round's item 45 (docs/POLISH.md 2.5): a picture's description starts empty and the
+     file's name stays the asset's name (its id through `assetIdFor`), so the By URL path sends
+     `alt: ''` as the upload does (B4's F2b); the vector round's read of the alt as the file's name
+     predated it (the verifier's pass 2 finding 13; B4's R5 to B6 in the fix round 2) */
+  expect(String(asset?.['id'] ?? ''), 'the asset is named after the file').toMatch(/default/);
+  expect(alt, 'the description starts empty (docs/POLISH.md 2.5 item 45)').toBe('');
 });
 
 /** The svg picture the render, gesture and copy rows read: the upload's, else one placed as setup. */

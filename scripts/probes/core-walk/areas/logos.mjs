@@ -1264,7 +1264,7 @@ export async function run(t) {
   await t.step(
     'logos.replace-image.row',
     'a picture placed through the window API; right click it; Replace image > Logo; Figma',
-    'the asset swaps and the box stays',
+    "the asset swaps; the box keeps its centre and area and refits to the mark's aspect (docs/POLISH.md 2.5 item 37)",
     async () => {
       await t.clickCard(L);
       await t.clearAll();
@@ -1334,13 +1334,52 @@ export async function run(t) {
         )
         .catch(async () => (await t.objectsOf(L)).find((o) => o.id === id) ?? null);
       const rev1 = (await t.state()).revision;
+      /* docs/POLISH.md 2.5 item 37 (the polish round): the replacing branch keeps the box's
+         centre and area and refits the box to the new picture's aspect, the mechanism the fixed
+         `images.replace.keeps-aspect` reads, so "the box stays" is its centre and its area, and
+         the box's aspect is the mark's (the verifier's pass 2 finding 6: the row's words predated
+         the refit). The mark's aspect is the stage img's natural size, as the logos spec reads it */
+      const natural = await t
+        .pollUntil(
+          () =>
+            page.evaluate((blockId) => {
+              const img = document.querySelector(
+                `.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"] img`,
+              );
+              return img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0
+                ? { w: img.naturalWidth, h: img.naturalHeight }
+                : null;
+            }, id),
+          (n) => n !== null,
+          10_000,
+        )
+        .catch(() => null);
+      const centre = (p) => (p ? { x: p.x + p.w / 2, y: p.y + p.h / 2 } : null);
+      const c0 = centre(before.pos);
+      const c1 = centre(after?.pos ?? null);
+      const centreKept =
+        c0 && c1 ? Math.abs(c1.x - c0.x) <= 2 && Math.abs(c1.y - c0.y) <= 2 : false;
+      const area = (p) => (p ? p.w * p.h : 0);
+      const areaKept =
+        after?.pos && before.pos && area(before.pos) > 0
+          ? Math.abs(area(after.pos) - area(before.pos)) / area(before.pos) <= 0.05
+          : false;
+      const boxAspect = after?.pos && after.pos.h > 0 ? after.pos.w / after.pos.h : null;
+      const markAspect = natural ? natural.w / natural.h : null;
+      const refit =
+        boxAspect !== null && markAspect !== null
+          ? Math.abs(boxAspect - markAspect) / markAspect <= 0.05
+          : false;
+      const r3 = (n) => (n === null ? '?' : Math.round(n * 1000) / 1000);
       await t.clearAll();
       return {
         ok:
           after !== null &&
           after.block.asset !== before.block.asset &&
-          JSON.stringify(after.pos) === JSON.stringify(before.pos),
-        observed: `asset ${before.block.asset} -> ${after?.block?.asset ?? 'unchanged'} (revision ${rev0} -> ${rev1}); box ${t.posStr(before.pos)} -> ${t.posStr(after?.pos)}`,
+          centreKept &&
+          areaKept &&
+          refit,
+        observed: `asset ${before.block.asset} -> ${after?.block?.asset ?? 'unchanged'} (revision ${rev0} -> ${rev1}); box ${t.posStr(before.pos)} -> ${t.posStr(after?.pos)}: centre kept ${centreKept}, area kept ${areaKept}, aspect ${r3(boxAspect)} against the mark's ${natural ? `${natural.w} by ${natural.h} (${r3(markAspect)})` : 'unread'} (refit ${refit})`,
       };
     },
   );

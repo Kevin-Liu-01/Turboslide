@@ -1623,6 +1623,7 @@ export async function run(t) {
     async () => {
       await t.clickCard(T);
       await t.clearAll();
+      const sizeBefore = (await t.runInfo(HEAD))?.font ?? null;
       await t.openRun(HEAD);
       await t.press('End');
       await t.typeHuman(' and the renewal terms for every region we serve this year');
@@ -1636,10 +1637,17 @@ export async function run(t) {
         box && sheet
           ? box.x + box.w <= sheet.x + sheet.w + 1 && box.y + box.h <= sheet.y + sheet.h + 1
           : false;
+      /* the title placeholder shrinks on overflow since the polish round (docs/POLISH.md 2.3
+         item 21, `text-fit.ts` `shrinkMutation`), so a long title fits by wrapping, by stepping
+         down the ladder, or both: the read is that it fits inside the sheet with no split word
+         and no overlap, and that it wrapped or shrank from the size it drew at before the words
+         (the verifier's pass 2 read "lines 1" on a title that had stepped to one line) */
+      const sizeAfter = (await t.runInfo(HEAD))?.font ?? null;
+      const shrank = sizeBefore !== null && sizeAfter !== null && sizeAfter < sizeBefore - 1;
+      const fits = Boolean(facts) && (facts.lines >= 2 || shrank);
       return {
-        ok:
-          Boolean(facts) && facts.lines >= 2 && facts.splits === 0 && facts.overlap === 0 && inside,
-        observed: `lines ${facts?.lines}; split words ${facts?.splits}; overlap with the subtitle ${facts?.overlap} px²; inside the sheet ${inside}`,
+        ok: fits && facts.splits === 0 && facts.overlap === 0 && inside,
+        observed: `lines ${facts?.lines}; font ${sizeBefore} -> ${sizeAfter} px (shrank ${shrank}); split words ${facts?.splits}; overlap with the subtitle ${facts?.overlap} px²; inside the sheet ${inside}`,
       };
     },
   );

@@ -387,7 +387,11 @@ export async function run(t) {
           continue;
         }
         const chip = await t.boxOfSel('.ts-overlay .ts-select-chip');
-        const handles = await t.boxesOf(`.ts-overlay [data-control^="handle.${id}."]`);
+        /* the chip is the Move grip itself (`handle.<id>.move`, Overlay.tsx `HandleButton` with
+           `.ts-select-chip`), so it is left out of the handles it must clear (B1's R22a) */
+        const handles = (await t.boxesOf(`.ts-overlay [data-control^="handle.${id}."]`)).filter(
+          (h) => h.control !== `handle.${id}.move`,
+        );
         const stem = await t.boxOfSel(
           '.ts-overlay .ts-rotate-stem, .ts-overlay .ts-stem, .ts-overlay [class*="stem"]',
         );
@@ -1003,13 +1007,22 @@ export async function run(t) {
         .catch(() => false);
       if (!on) return { ok: false, observed: 'no Check slides panel' };
       await t.sleep(1500);
-      const findings = await page.evaluate(() =>
-        [
-          ...document.querySelectorAll(
-            '[data-control="panel.checkSlides"] .ts-lint-list li, [data-control="panel.checkSlides"] [data-control^="suggestion."], [data-control="panel.checkSlides"] [data-control^="lint."]',
-          ),
-        ].map((el) => (el.textContent ?? '').replace(/\s+/g, ' ').trim()),
-      );
+      const findings = await page.evaluate(() => {
+        /* one finding per list item: the finding's button (`suggestion.<id>`) sits inside its
+           `li` (LintPanel.tsx 84 to 99), so a selector for both counted every finding twice
+           (B1's R22a); the controls are read alone only when the panel draws no list */
+        const root = document.querySelector('[data-control="panel.checkSlides"]');
+        const items = [...(root?.querySelectorAll('.ts-lint-list li') ?? [])];
+        const list =
+          items.length > 0
+            ? items
+            : [
+                ...(root?.querySelectorAll(
+                  '[data-control^="suggestion."], [data-control^="lint."]',
+                ) ?? []),
+              ];
+        return list.map((el) => (el.textContent ?? '').replace(/\s+/g, ' ').trim());
+      });
       if (await t.visible('panel.checkSlides.close'))
         await t.clickControl('panel.checkSlides.close');
       await t.clickCard(S);

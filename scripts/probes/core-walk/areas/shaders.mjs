@@ -465,7 +465,7 @@ export async function run(t) {
   await t.step(
     'shaders.insert.gallery-thumbnails',
     'Insert > Shader; read the title, the sentence and the cards; search "metal"; a category chip',
-    'a grid titled Shader with the black and white sentence; every card decoded within 2 s; the search narrows to one row; a chip narrows; no canvas',
+    "a grid titled Shader with one sentence under the title naming the brand kit's colours; every card decoded within 2 s; the search narrows to one row; a chip narrows; no canvas",
     async () => {
       const o = await openGallery();
       if (!o.open) return o.why;
@@ -480,6 +480,17 @@ export async function run(t) {
           text: (root?.textContent ?? '').replace(/\s+/g, ' ').slice(0, 600),
         };
       });
+      /* the sentence under the title is read as its element (`dialog.shader.sentence`,
+         strings.ts `SHADER_GALLERY.sentence`): item 47 replaced the ship two sentence that named
+         black and white with a true sentence about the swatches, so the two words are the
+         driver's stale read (B4's R6 in the fix round 2) */
+      const sentence = await page.evaluate(() => {
+        const el = document.querySelector('[data-control="dialog.shader.sentence"]');
+        return el && el.getClientRects().length > 0
+          ? (el.textContent ?? '').replace(/\s+/g, ' ').trim()
+          : null;
+      });
+      const sentenceOk = sentence !== null && sentence.length > 0 && /brand kit/i.test(sentence);
       const all = await t
         .pollUntil(cards, (list) => list.length > 0 && list.every((c) => c.thumb), 2000, 100)
         .catch(cards);
@@ -527,8 +538,7 @@ export async function run(t) {
         ok:
           all.length > 0 &&
           /^Shader$/i.test(words.title ?? '') &&
-          /black and white/i.test(words.text) &&
-          /brand kit/i.test(words.text) &&
+          sentenceOk &&
           decoded === all.length &&
           decodedMs <= 2000 &&
           canvases === 0 &&
@@ -539,7 +549,7 @@ export async function run(t) {
           chip !== null &&
           chipped.length > 0 &&
           chipped.length < all.length,
-        observed: `title "${words.title ?? 'none'}"; sentence ${/black and white/i.test(words.text) && /brand kit/i.test(words.text) ? 'drawn' : 'missing'}; ${all.length} cards, ${decoded} with a decoded thumbnail ${decodedMs} ms after the open (${perRow} a row); ${canvases} canvas in the dialog; search ${searchOn ? `"metal" narrows to ${narrowed.length} (${narrowed.map((c) => c.title).join(', ') || 'none'})` : 'field absent'}; chips ${chips.length} (${chip ?? 'none'} narrows to ${chipped.length})${o.switched ? '; with the switch on' : ''}`,
+        observed: `title "${words.title ?? 'none'}"; ${sentence !== null ? `sentence "${sentence}"${sentenceOk ? '' : ' (names no brand kit)'}` : 'sentence missing'}; ${all.length} cards, ${decoded} with a decoded thumbnail ${decodedMs} ms after the open (${perRow} a row); ${canvases} canvas in the dialog; search ${searchOn ? `"metal" narrows to ${narrowed.length} (${narrowed.map((c) => c.title).join(', ') || 'none'})` : 'field absent'}; chips ${chips.length} (${chip ?? 'none'} narrows to ${chipped.length})${o.switched ? '; with the switch on' : ''}`,
       };
     },
   );

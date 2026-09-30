@@ -1,0 +1,139 @@
+{
+  "base": "https://turboslide-gesd8i6h3-kl01s-projects.vercel.app",
+  "label": "fix1",
+  "startedAt": "2026-09-30T12:46:47.371Z",
+  "endedAt": "2026-09-30T12:49:32.342Z",
+  "decks": [
+    "untitled-20260930-u7ip",
+    "untitled-20260930-lsfm",
+    "untitled-20260930-w7pq"
+  ],
+  "readings": [
+    {
+      "scenario": "structural",
+      "name": "two drags agree within 5 s",
+      "expected": "one position in both browsers",
+      "observed": "A {\"x\":203,\"y\":574,\"w\":480,\"h\":120,\"z\":3} B {\"x\":203,\"y\":574,\"w\":480,\"h\":120,\"z\":3} after 3031 ms",
+      "ok": true,
+      "picture": "docs/gslides-parity/polish/build/sync/fix3/fix1/01-structural-a-after-two-drags.png"
+    },
+    {
+      "scenario": "structural",
+      "name": "one slide.new reads two slides",
+      "expected": "2",
+      "observed": "2",
+      "ok": true
+    },
+    {
+      "scenario": "structural",
+      "name": "A holds the write while offline",
+      "expected": "pending > 0 after the release",
+      "observed": "pending 1",
+      "ok": true
+    },
+    {
+      "scenario": "structural",
+      "name": "both browsers show the slide gone",
+      "expected": "gone within 5 s of the delete",
+      "observed": "gone true at 757 ms after the delete",
+      "ok": true
+    },
+    {
+      "scenario": "structural",
+      "name": "the loser's reading after the reconnect",
+      "expected": "one snackbar sentence with no id (docs/POLISH.md item 102); no card for a structural write",
+      "observed": "snackbar \"Your change was not applied. Try again\"; card none; first seen 206 ms after the reconnect",
+      "ok": true,
+      "picture": "docs/gslides-parity/polish/build/sync/fix3/fix1/04-structural-a-loser-reading.png"
+    },
+    {
+      "scenario": "structural",
+      "name": "the sentence leaves on its own",
+      "expected": "no snackbar and no card after 6 s",
+      "observed": "snackbar null; card none",
+      "ok": true,
+      "picture": "docs/gslides-parity/polish/build/sync/fix3/fix1/05-structural-a-6s-later.png"
+    },
+    {
+      "scenario": "structural",
+      "name": "teardown",
+      "expected": "404 at /edit/<id>",
+      "observed": "404",
+      "ok": true
+    },
+    {
+      "scenario": "offline",
+      "name": "the title row reads Offline",
+      "expected": "Offline within 1 s of the cut",
+      "observed": "read at 1 ms",
+      "ok": true,
+      "picture": "docs/gslides-parity/polish/build/sync/fix3/fix1/06-offline-a-cut.png"
+    },
+    {
+      "scenario": "offline",
+      "name": "all four words in both browsers within 10 s",
+      "expected": "A and B read \" ob1 ob2 ob3 oa1\"",
+      "observed": "converged true in 741 ms; A \"Start of the block ob1 ob2 ob3 oa1\"; B \"Start of the block ob1 ob2 ob3 oa1\"",
+      "ok": true,
+      "picture": "docs/gslides-parity/polish/build/sync/fix3/fix1/08-offline-a-converged.png"
+    },
+    {
+      "scenario": "offline",
+      "name": "A's resend carries the offset shifted past B's words",
+      "expected": "the admitted POST's splice offset above the first attempt's (docs/SYNC.md 3.7: the reopen's replay first, then the resend at the caught up base)",
+      "observed": "first attempt at 18 (base 2, no response); admitted POST at 30 (base 5, seqs [6]); 7 ops POSTs on A's wire",
+      "ok": true
+    },
+    {
+      "scenario": "offline",
+      "name": "teardown",
+      "expected": "404 at /edit/<id>",
+      "observed": "404",
+      "ok": true
+    },
+    {
+      "scenario": "reject",
+      "name": "the slide add was refused once",
+      "expected": "1 injected 409",
+      "observed": "1",
+      "ok": true
+    },
+    {
+      "scenario": "reject",
+      "name": "a structural refusal draws no card",
+      "expected": "no card",
+      "observed": "none",
+      "ok": true,
+      "picture": "docs/gslides-parity/polish/build/sync/fix3/fix1/09-reject-structural-snackbar.png"
+    },
+    {
+      "scenario": "reject",
+      "name": "one snackbar sentence with no id and no JSON",
+      "expected": "\"Your new slide was not added. Try again\" and nothing over it",
+      "observed": "at 2.5 s: \"Your new slide was not added. Try again\"; every sentence seen: [\"Your new slide was not added. Try again\"]",
+      "ok": true
+    },
+    {
+      "scenario": "reject",
+      "name": "a refused typed text keeps the card",
+      "expected": "the card with Copy text",
+      "observed": "\"A change was not appliedThe room answered 409Your text refusedCopy textDismiss\"",
+      "ok": true,
+      "picture": "docs/gslides-parity/polish/build/sync/fix3/fix1/10-reject-typed-card.png"
+    },
+    {
+      "scenario": "reject",
+      "name": "the card's top below the toolbar's bottom edge",
+      "expected": "card.top >= toolbar.bottom",
+      "observed": "card top 128 against the toolbar's bottom 112; snackbar \"The room answered 409\"",
+      "ok": true
+    },
+    {
+      "scenario": "reject",
+      "name": "teardown",
+      "expected": "404 at /edit/<id>",
+      "observed": "404",
+      "ok": true
+    }
+  ]
+}

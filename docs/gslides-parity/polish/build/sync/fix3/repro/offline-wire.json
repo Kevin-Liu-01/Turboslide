@@ -1,0 +1,129 @@
+[
+  {
+    "at": 1790772304412,
+    "base": 1,
+    "ops": [
+      "slide.replace",
+      "block.insert"
+    ],
+    "splices": [],
+    "status": 200,
+    "admitted": [
+      2
+    ]
+  },
+  {
+    "at": 1790772309323,
+    "base": 2,
+    "ops": [
+      "text.splice"
+    ],
+    "splices": [
+      {
+        "at": 18,
+        "insert": 4,
+        "remove": 0
+      }
+    ],
+    "status": "no response",
+    "admitted": null
+  },
+  {
+    "at": 1790772309827,
+    "base": 2,
+    "ops": [
+      "text.splice"
+    ],
+    "splices": [
+      {
+        "at": 18,
+        "insert": 4,
+        "remove": 0
+      }
+    ],
+    "status": "no response",
+    "admitted": null
+  },
+  {
+    "at": 1790772310828,
+    "base": 2,
+    "ops": [
+      "text.splice"
+    ],
+    "splices": [
+      {
+        "at": 18,
+        "insert": 4,
+        "remove": 0
+      }
+    ],
+    "status": "no response",
+    "admitted": null
+  },
+  {
+    "at": 1790772312832,
+    "base": 2,
+    "ops": [
+      "text.splice"
+    ],
+    "splices": [
+      {
+        "at": 18,
+        "insert": 4,
+        "remove": 0
+      }
+    ],
+    "status": "no response",
+    "admitted": null
+  },
+  {
+    "at": 1790772316835,
+    "base": 2,
+    "ops": [
+      "text.splice"
+    ],
+    "splices": [
+      {
+        "at": 18,
+        "insert": 4,
+        "remove": 0
+      }
+    ],
+    "status": "no response",
+    "admitted": null
+  },
+  {
+    "at": 1790772324837,
+    "base": 2,
+    "ops": [
+      "text.splice"
+    ],
+    "splices": [
+      {
+        "at": 18,
+        "insert": 4,
+        "remove": 0
+      }
+    ],
+    "status": "no response",
+    "admitted": null
+  },
+  {
+    "at": 1790772325140,
+    "base": 2,
+    "ops": [
+      "text.splice"
+    ],
+    "splices": [
+      {
+        "at": 18,
+        "insert": 4,
+        "remove": 0
+      }
+    ],
+    "status": 200,
+    "admitted": [
+      6
+    ]
+  }
+]

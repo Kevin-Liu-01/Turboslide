@@ -6,10 +6,13 @@ import type { HistoryEntry, HistoryStep } from '@turboslide/agent/window/history
 import { planAcceptedCard, withAssistClear } from './assist-accept';
 import { autoTitleMutations } from './auto-title';
 import type { AutoTitleMemory } from './auto-title';
+import { readAccessWithRetries } from './access-refresh';
+import type { MissingAccessPolicy } from './access-refresh';
 import { awaitAcknowledged } from './ack-wait';
 import { retargetFieldRuns, slideToConvertFor } from './convert-first';
 import { createExportModeGate } from './export-mode';
 import { refusalSentence } from './refusal';
+import { refusedText, refusedWriteSentence, structuralRefusalSentence } from './refused-write';
 import { refusalText } from '@turboslide/chrome/error-text';
 import {
   OWN_WRITE_LANDED_MAX_MS,
@@ -1693,16 +1696,7 @@ export function createEditorController(init: {
 
   const rejectNoticeOf = (rejected: Rejected & { mutations?: Mutation[] }): RejectNotice => {
     const mutations = rejected.mutations ?? [];
-    const text = mutations
-      .map((mutation) => {
-        if (mutation.op === 'text.splice') return mutation.insert;
-        if (mutation.op === 'text.replace') return mutation.text;
-        if (mutation.op === 'block.set' && typeof mutation.value === 'string')
-          return mutation.value;
-        return '';
-      })
-      .filter((row) => row !== '')
-      .join('\n');
+    const text = refusedText(mutations);
     return {
       opId: rejected.opId,
       reason: rejected.reason,
@@ -1716,17 +1710,9 @@ export function createEditorController(init: {
     if (latest().following !== null) publish({ following: null });
   };
 
-  /** The one sentence of a refused change that carried no typed text (item 102), by what it was. */
-  const structuralRefusalSentence = (mutations: ReadonlyArray<Mutation>): string => {
-    const ops = new Set(mutations.map((mutation) => mutation.op));
-    if (ops.has('slide.insert')) return 'Your new slide was not added. Try again';
-    if (ops.has('slide.move')) return 'Your slide was not moved. Try again';
-    if (ops.has('slide.remove')) return 'Your slide was not deleted. Try again';
-    if (ops.has('block.insert')) return 'Your new object was not added. Try again';
-    if (ops.has('block.move')) return 'Your object was not moved. Try again';
-    if (ops.has('block.remove')) return 'Your object was not deleted. Try again';
-    return 'Your change was not applied. Try again';
-  };
+  /* the one sentence of a refused change that carried no typed text (item 102) is
+     refused-write.ts's `structuralRefusalSentence`, the same sentence the write's caller is
+     thrown (`refusedWriteSentence`), so the snackbar shows one sentence however many paths say it */
 
   /**
    * A collaborator's entry changed a Text (SPEC-3 3.5): every open inline session on that run
@@ -1995,11 +1981,18 @@ export function createEditorController(init: {
     inboxCache = { items: current.inbox.items, views };
     return views;
   };
-  /** The caller's standing again after an `access` event (SPEC-3 6.3): the role may have moved. */
-  const refreshAccess = async (): Promise<void> => {
-    const payload = await readEditorDeck({ deckId });
+  /**
+   * The caller's standing again after an `access` event (SPEC-3 6.3): the role may have moved.
+   * A null answer is read again before it is believed (access-refresh.ts: on the blob tier the
+   * read lands on an instance that has not seen a deck one write old or its record, and the
+   * reload it used to trigger at once sent the owner to the You need access page); once the
+   * retries are spent a reader may have lost the deck and the page reloads (`reload`), while a
+   * read right after the deck's own creation keeps the standing it has (`keep`).
+   */
+  const refreshAccess = async (onMissing: MissingAccessPolicy = 'reload'): Promise<void> => {
+    const payload = await readAccessWithRetries(() => readEditorDeck({ deckId }));
     if (payload === null) {
-      window.location.reload();
+      if (onMissing === 'reload') window.location.reload();
       return;
     }
     publish({
@@ -2136,16 +2129,20 @@ export function createEditorController(init: {
         publish({ rejects: [...latest().rejects, notice], error: notice.message ?? null });
       },
       onUnplaceable: (op) => {
-        publish({
-          rejects: [
-            ...latest().rejects,
-            rejectNoticeOf({
-              opId: op.opId,
-              reason: 'stale',
-              ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
-            }),
-          ],
+        const notice = rejectNoticeOf({
+          opId: op.opId,
+          reason: 'stale',
+          ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
         });
+        /* an op the document no longer takes after a remote change (a move of a block whose
+           slide a collaborator deleted first, the loser of docs/SYNC.md 6.1
+           `sync.structural.concurrent`) is refused the way the room refuses it: one snackbar
+           sentence when nothing was typed (docs/POLISH.md item 102), the card for typed text */
+        if (notice.text === '') {
+          say(structuralRefusalSentence(notice.mutations));
+          return;
+        }
+        publish({ rejects: [...latest().rejects, notice] });
       },
       onResync: async (revision, since) => {
         // the reload lands at or above the revision the room named (the focus round, cycle 2):
@@ -2281,10 +2278,12 @@ export function createEditorController(init: {
    * A write the local document refuses (`applyMutations` throws before the room sees it).
    * When the refusal is that the write's slide or block is gone, another browser's Delete slide
    * landed under this gesture and the write is the loser of a structural race: the refusal is
-   * shown as the loser's card with the reducer's sentence and Discard, the way the room's own
-   * reject of the same write is shown (docs/SYNC.md 6.1 `sync.structural.concurrent`: the drag
-   * released after B's delete posted nothing and no card showed; the integrator, ship one). Any
-   * other local refusal (a malformed write through the window API) stays a sentence in `error`.
+   * shown the way the room's own reject of the same write is shown (docs/SYNC.md 6.1
+   * `sync.structural.concurrent`: the drag released after B's delete posted nothing and nothing
+   * showed; the integrator, ship one), which since docs/POLISH.md item 102 is one snackbar
+   * sentence for a write that carried no typed text and the card with Copy text for typed text.
+   * Any other local refusal (a malformed write through the window API) stays a sentence in
+   * `error`.
    */
   let localRefusals = 0;
   const publishLocalRefusal = (error: unknown, mutations: Mutation[]): void => {
@@ -2300,6 +2299,10 @@ export function createEditorController(init: {
       message,
       mutations,
     });
+    if (notice.text === '') {
+      say(structuralRefusalSentence(notice.mutations));
+      return;
+    }
     publish({ rejects: [...latest().rejects, notice], error: message });
   };
 
@@ -2374,12 +2377,15 @@ export function createEditorController(init: {
       const base = latest().serverRevision;
       void applied.settled.then(async (outcome) => {
         if ('rejected' in outcome) {
+          /* the caller is thrown the sentence the seller reads (docs/POLISH.md item 102;
+             refused-write.ts): the chrome's dispatch says it in the snackbar, the same sentence
+             `onReject` said, so a structural refusal reads one sentence and never the room's
+             words ("The room answered 409", a reducer sentence with an id) */
           item.reject(
-            new ConflictError(
-              outcome.rejected.message ??
-                `The change was not accepted (${outcome.rejected.reason})`,
-              { currentRevision: latest().serverRevision, current: latest().document },
-            ),
+            new ConflictError(refusedWriteSentence(outcome.rejected, item.mutations), {
+              currentRevision: latest().serverRevision,
+              current: latest().document,
+            }),
           );
           return;
         }
@@ -2508,8 +2514,9 @@ export function createEditorController(init: {
         // the first write created the deck and its access record (restricted, the creator as the
         // owner; docs/FOCUS.md rank 1, ruling 2): the /new page keeps its draft payload, so the
         // record and the role are read once here and every reader of `snap.access` sees them
-        // without a reload (b6.md R1)
-        void refreshAccess().catch(() => undefined);
+        // without a reload (b6.md R1); a null answer here is the blob tier's lag, never a lost
+        // deck, so the page keeps its standing (access-refresh.ts)
+        void refreshAccess('keep').catch(() => undefined);
       }
       draftInFlight = false;
       replayDraftQueue();
@@ -2589,13 +2596,10 @@ export function createEditorController(init: {
     shaderFrames.afterCommit(mutations);
     return applied.settled.then(async (outcome) => {
       if ('rejected' in outcome) {
-        throw new ConflictError(
-          outcome.rejected.message ?? `The change was not accepted (${outcome.rejected.reason})`,
-          {
-            currentRevision: latest().serverRevision,
-            current: latest().document,
-          },
-        );
+        throw new ConflictError(refusedWriteSentence(outcome.rejected, mutations), {
+          currentRevision: latest().serverRevision,
+          current: latest().document,
+        });
       }
       return {
         revision: await acknowledgedAbove(base),
@@ -3322,8 +3326,9 @@ export function createEditorController(init: {
         payload.room?.seq ?? payload.document.deck.revision,
         payload.room?.tier ?? init.payload.room?.tier ?? 'memory',
       );
-      // the record the server side create wrote, read once (b6.md R1, as after draftCommit)
-      void refreshAccess().catch(() => undefined);
+      // the record the server side create wrote, read once (b6.md R1, as after draftCommit); a
+      // null answer is the lag, the deck was just made (access-refresh.ts)
+      void refreshAccess('keep').catch(() => undefined);
     }
     if (typeof window !== 'undefined') {
       const detail: DeckCreatedDetail = { deckId, revision: payload.document.deck.revision };

@@ -197,6 +197,23 @@ export const UNPLACEABLE_SENTENCE =
 
 /** The reconnect and resend backoff cap (SPEC-3 3.6). */
 export const BACKOFF_MAX_MS = 8000;
+/**
+ * The longest the resend waits for the reopened stream's hello after the browser's `online`
+ * event (docs/SYNC.md 3.7: the reopen's replay lands first, then the resend goes at the caught up
+ * base). A hello normally answers within a second; past this the pending ops post on the base the
+ * tab has and the server transforms them (3.3), so a stream that hangs never holds a write.
+ */
+export const RECONNECT_HOLD_MAX_MS = BACKOFF_MAX_MS;
+/**
+ * How many times an ops POST answered 404 is sent again before the ops return to their author.
+ * On the blob tier the store's head of a deck made seconds ago answers null on another instance
+ * for a while (the class `apps/studio/src/editor/access-refresh.ts` names for the read side; the
+ * polish round's sync fix round 3 read a resend answered 404 on the enforce preview 23 s after
+ * the deck's first write), so the route's 404 is a moment's, not the deck's; a deck deleted
+ * forever answers 404 on every retry and the ops return once these are spent (the ladder's
+ * 500 ms doubling to BACKOFF_MAX_MS: about 15 s).
+ */
+export const NOT_FOUND_RETRY_MAX = 5;
 /** The longest wait a server's `retry-after` or `retry:` is honoured for before the next open. */
 export const REOPEN_WAIT_MAX_MS = 60_000;
 /** At most this many earlier ids ride an open's `retire` (server/room.ts RETIRE_MAX reads no more). */
@@ -577,6 +594,15 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   /** the reopen ladder of the stream: 500 ms doubling to BACKOFF_MAX_MS, reset by a hello */
   let streamBackoff = 0;
   let reopenTimer: unknown;
+  /**
+   * The resend's hold after the browser's `online` event (docs/SYNC.md 3.7; the polish round's
+   * sync fix round 3): the stream reopens at once and the pending ops wait for its hello, so the
+   * replay of what landed while the browser was off transforms them before they go and the
+   * resend carries the shifted offset at the caught up base. Released by the hello, by a reopen
+   * that failed (the ops post while the stream waits for a slot, C3-F1) and by the cap.
+   */
+  let holdingForHello = false;
+  let holdTimer: unknown;
   /** the wait for the stream to fill a gap under a buffered entry (GAP_REOPEN_MS) */
   let gapTimer: unknown;
   /** the ops of the POST in flight, which a hello leaves in flight (their answer settles them) */
@@ -599,6 +625,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let flushAt = Number.POSITIVE_INFINITY;
   let posting: Promise<void> | null = null;
   let backoff = 0;
+  /** the ops POSTs answered 404 in a row (NOT_FOUND_RETRY_MAX), reset by an answer that is not one */
+  let notFoundRetries = 0;
   let stopped = false;
   /**
    * The POSTs of this client on the blob tier whose commit may reach this tab as a store echo
@@ -1048,6 +1076,30 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   };
 
   /**
+   * The resend waits for the reopened stream's hello (docs/SYNC.md 3.7): armed by the browser's
+   * `online` event while the stream is down, released by the hello (onEvent), by a reopen that
+   * failed (reopenStream) or by RECONNECT_HOLD_MAX_MS, whichever comes first.
+   */
+  const holdForHello = (): void => {
+    if (holdingForHello) return;
+    holdingForHello = true;
+    caughtUp = false;
+    if (holdTimer !== undefined) timers.clearTimeout(holdTimer);
+    holdTimer = timers.setTimeout(() => {
+      holdTimer = undefined;
+      releaseHold();
+    }, RECONNECT_HOLD_MAX_MS);
+  };
+  const releaseHold = (): void => {
+    if (!holdingForHello) return;
+    holdingForHello = false;
+    if (holdTimer !== undefined) timers.clearTimeout(holdTimer);
+    holdTimer = undefined;
+    caughtUp = true;
+    if (pending.some((op) => !op.inflight)) scheduleFlush('now');
+  };
+
+  /**
    * An entry at the position. A record's echo (the batch was applied from its entries, or the
    * echo itself was), an applied sibling, or an op of this tab's acknowledged already repeats
    * nothing and settles what it still names (`settleBehind`); another sibling of the batch the
@@ -1244,6 +1296,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         tier = event.tier;
         roster = event.clients;
         helloSeq = event.seq;
+        // the hold of the online event ends here: the hello names the head, and the flush below
+        // waits for the replay when the position is behind it
+        if (holdingForHello) {
+          holdingForHello = false;
+          if (holdTimer !== undefined) timers.clearTimeout(holdTimer);
+          holdTimer = undefined;
+        }
         // caught up when this client's position already reaches the head; otherwise the flush
         // waits for the replay to drain (finding 33), which noteCaughtUp arms
         caughtUp = seq >= helloSeq;
@@ -1461,6 +1520,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       resending = false;
       if (response.ok) {
         backoff = 0;
+        notFoundRetries = 0;
         // what landed under the admitted entries first, so they drain at once (C3S-F8); an
         // entry the stream delivered meanwhile is a duplicate `take` drops. The POST's record
         // leaves the echo list after the entries were taken, so an echo of this commit that
@@ -1541,7 +1601,21 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         reopenStream({ message: 'the client binding lapsed' });
         return;
       }
-      // a refusal that will not change on a retry (a forbidden write): the ops return to the author
+      if (response.status === 404 && notFoundRetries < NOT_FOUND_RETRY_MAX) {
+        // the deck is unknown to the instance that answered (the blob tier's head of a fresh
+        // deck, NOT_FOUND_RETRY_MAX): the ops stay pending and go again after a backoff, to
+        // another instance or a later moment, the way a 5xx is resent; the record stays for the
+        // echo. Before this the ops returned to the author at once and the word went to the card
+        resending = true;
+        notFoundRetries += 1;
+        emitStatus();
+        backoff = Math.min(BACKOFF_MAX_MS, backoff === 0 ? 500 : backoff * 2);
+        timers.setTimeout(() => void flush(), backoff);
+        return;
+      }
+      // a refusal that will not change on a retry (a forbidden write, a deck gone for good): the
+      // ops return to the author
+      notFoundRetries = 0;
       if (record !== null) posted = posted.filter((row) => row !== record);
       for (const op of batch) {
         pending = pending.filter((row) => row !== op);
@@ -1632,6 +1706,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     stream = null;
     connected = false;
     streamDown = true;
+    // an open the online event started did not answer with a hello: the pending ops post on
+    // the base the tab has while the ladder waits (C3-F1), and the server transforms them
+    releaseHold();
     if (stopped) {
       emitStatus();
       return;
@@ -1784,6 +1861,22 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   const onBrowserOnline = (): void => {
     offline = false;
     emitStatus();
+    if (stopped) return;
+    // the reconnect's order is docs/SYNC.md 3.7's: the stream reopens at once (not on the
+    // ladder's wait) and its replay lands first, then the resend goes at the caught up base with
+    // the pending ops transformed past what landed while the browser was off. A flush at once
+    // here sent the resend on the old base with the original offset and left the transform to
+    // the server (the row sync.block.offline-replay-converges read the same offset on the first
+    // attempt and on the admitted POST, twice on the enforce preview of 2026-09-30)
+    if (!connected) {
+      if (reopenTimer !== undefined) timers.clearTimeout(reopenTimer);
+      reopenTimer = undefined;
+      stream?.close();
+      stream = null;
+      holdForHello();
+      openStream();
+      return;
+    }
     scheduleFlush('now');
   };
   const client: RoomClient = {
@@ -1809,6 +1902,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       if (heartbeatTimer !== undefined) timers.clearTimeout(heartbeatTimer);
       if (reopenTimer !== undefined) timers.clearTimeout(reopenTimer);
       if (gapTimer !== undefined) timers.clearTimeout(gapTimer);
+      if (holdTimer !== undefined) timers.clearTimeout(holdTimer);
+      holdTimer = undefined;
+      holdingForHello = false;
       // the leave goes first (a `pagehide` gives it no time to wait on a POST in flight; the
       // browser transport sends it with keepalive), then the POST in flight is awaited. The
       // binding gates it, not the stream: a tab closed while its stream was down leaves too

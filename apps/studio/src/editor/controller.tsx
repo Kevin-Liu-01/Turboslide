@@ -164,6 +164,8 @@ import {
   participantOf,
   replaceRosterRow,
 } from './identity-index';
+import type { MeAnswerFacts } from './own-identity';
+import { rowReflects } from './own-identity';
 import type { Entry, RoomEvent, RosterEntry } from '@turboslide/realtime/channel';
 import {
   clearPendingMirror,
@@ -747,6 +749,8 @@ export type EditorController = {
   ) => Promise<{ revision: number; slideIds: string[]; sentence: string }>;
   /** re-posts this tab's presence now, so a typed display name reaches the other browsers' chips ahead of the heartbeat (b1.md R18) */
   refreshPresence: () => void;
+  /** the answer of Change name or Change avatar the editor wrote back (docs/PEOPLE.md 3.11), so describe().state.account reads what the own chip draws until the room's own row carries it */
+  noteOwnAnswer: (facts: MeAnswerFacts) => void;
   setActiveSlide: (slideId: string) => void;
   select: (selection: Selection | null) => void;
   /** one Write: applied locally now, sent through the room; resolves when the room admitted it */
@@ -4102,12 +4106,22 @@ export function createEditorController(init: {
    * of the stream refreshes, so a share write based on `state.access.revision` never meets a
    * stale record (comments.spec.ts, share.spec.ts).
    */
+  /* the answer of Change name or Change avatar the editor wrote back (docs/PEOPLE.md 3.11), held
+     until the room's own row carries it (own-identity.ts rowReflects): on the blob tier the row
+     lags the answer for the room's 5 s identity cache and the own chip follows the answer, so the
+     state reads the answer too or the two disagree in that window (the integrator's preview
+     readings of people.mark-renderers-agree) */
+  let ownAnswer: MeAnswerFacts | null = null;
   const stateOf = (): Record<string, unknown> => {
     const record = snapshot.access.record;
     /* the caller's mark as the own chip draws it (build/b5.md R1; the row
-       people.mark-renderers-agree): the roster's own row when the room holds one (self set, the
-       picture URL on it), else the payload's own identity */
-    const ownMark = participants().self?.mark ?? identity?.mark;
+       people.mark-renderers-agree): the last answer while the room's own row lags it, else the
+       roster's own row when the room holds one (self set, the picture URL on it), else the
+       payload's own identity */
+    const ownRow = participants().self;
+    if (ownAnswer !== null && rowReflects(ownAnswer, ownRow)) ownAnswer = null;
+    const ownMark = ownAnswer?.mark ?? ownRow?.mark ?? identity?.mark;
+    const ownName = ownAnswer?.name ?? identity?.name;
     return {
       deckId,
       // the revision a caller reads is the one a base check enforces (SPEC-3 3.10; VERIFICATION-3
@@ -4203,8 +4217,8 @@ export function createEditorController(init: {
       account: {
         principalId: identity?.principalId ?? null,
         label: identity?.label ?? author.name,
-        ...(identity?.name !== undefined ? { name: identity.name } : {}),
-        trust: identity?.trust ?? 'guest',
+        ...(ownName !== undefined ? { name: ownName } : {}),
+        trust: ownAnswer?.trust ?? identity?.trust ?? 'guest',
         signedIn: identity?.kind === 'account',
         signInAvailable: init.payload.auth?.signIn ?? false,
         ...(ownMark === undefined ? {} : { mark: ownMark }),
@@ -4391,6 +4405,9 @@ export function createEditorController(init: {
     acceptAssist,
     refreshPresence() {
       room?.refreshPresence();
+    },
+    noteOwnAnswer(facts) {
+      ownAnswer = facts;
     },
     setActiveSlide(slideId) {
       if (slideId === snapshot.activeSlide) return;

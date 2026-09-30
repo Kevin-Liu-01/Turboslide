@@ -871,6 +871,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     const facts = meAnswerFacts(answer);
     setMe({ facts, rosterKey: rosterKeyOf(ownRowRef.current) });
     if (facts.avatar !== undefined) setChosenAvatar(facts.avatar);
+    /* the window API's state reads the answer too until the room's own row carries it */
+    controller.noteOwnAnswer(facts);
     controller.refreshPresence();
     return answer;
   };
@@ -955,12 +957,30 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
      roster, threads and versions and read here on every snapshot), with the payload's map under
      the roster rows and the caller as the fallback should the controller answer none */
   const payloadIdentities = payload.identities;
-  const identities = shellIdentitiesOf(
+  const merged = shellIdentitiesOf(
     controller.identities(),
     payloadIdentities,
     rosterRows,
     principal,
   );
+  /* the caller's row of the merged map reads the answer's overlay too (ownPrincipalOf), so the
+     version rows and the comment rows draw what the own chip draws while the room's own row lags
+     the answer (own-identity.ts rowReflects); the row's own mark keeps its self flag */
+  const ownView = merged[principal.principalId];
+  const identities =
+    ownView === undefined
+      ? merged
+      : {
+          ...merged,
+          [principal.principalId]: {
+            ...ownView,
+            ...(principal.name !== undefined ? { name: principal.name } : {}),
+            trust: principal.trust,
+            ...(principal.mark !== undefined
+              ? { mark: { ...principal.mark, self: ownView.mark?.self ?? false } }
+              : {}),
+          },
+        };
   /* a person of the access record as the payload resolved them (name, trust, mark, the email a
      sharer may see), else the view built from the id alone */
   const personOf = (principalId: string, fallback: IdentityView): IdentityView =>

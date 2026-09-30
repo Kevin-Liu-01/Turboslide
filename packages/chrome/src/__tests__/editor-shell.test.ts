@@ -1334,12 +1334,15 @@ describe('the Insert menu', () => {
       type: 'shape',
       shape: 'polyline',
     });
-    expect(drawToolBlock({ kind: 'wordArt', text: 'Hi' }, 'w')).toMatchObject({
+    /* the regular weight (docs/POLISH.md 2.4 item 34): the tail's B reads unpressed at the insert */
+    const wordArt = drawToolBlock({ kind: 'wordArt', text: 'Hi' }, 'w');
+    expect(wordArt).toMatchObject({
       type: 'text',
       text: 'Hi',
       outline: { color: 'ink', width: 1.5 },
-      typography: { size: 88, weight: 500 },
+      typography: { size: 88, align: 'center' },
     });
+    expect((wordArt as { typography?: { weight?: number } }).typography?.weight).toBeUndefined();
   });
 
   it('on a freeform slide the block carries a position box; a table takes 960 by 320 (SPEC 7.3)', () => {
@@ -1929,5 +1932,55 @@ describe('the round two plans (SPEC-2 sections 3, 4, 6)', () => {
     expect(tailKindOf(styled, { blockId: 's', blockIds: ['s', 'u'] })).toBe('group');
     expect(tailKindOf(styled, { blockId: 's', blockIds: ['s', 't'] })).toBe('shape');
     expect(tailKindOf(styled, { blockId: 'pic' })).toBe('image');
+  });
+});
+
+describe("word art's Bold (docs/POLISH.md 2.4 item 34; the polish round's fix round)", () => {
+  const wordArt: Block = {
+    id: 'wa',
+    type: 'text',
+    text: 'Big words',
+    typography: { size: 88, align: 'center' },
+    outline: { color: 'ink', width: 1.5 },
+    pos: { x: 320, y: 390, w: 960, h: 120 },
+  };
+  const slide: Slide = {
+    ...FREEFORM_SLIDE,
+    id: 'wa-slide',
+    slots: { main: [wordArt] },
+  } as Slide;
+  const doc: DeckDocument = {
+    ...document,
+    slides: { ...document.slides, 'wa-slide': slide },
+  };
+  const at = (selection: EditorSelection): ActionFacts => ({
+    ...facts('wa-slide', selection),
+    document: doc,
+  });
+  const bold = itemById('format.text.bold');
+
+  it('selected as an object, Bold marks every run bold (the one mechanism of item 12), never the block weight', () => {
+    const plan = menuActionPlan(bold, at({ blockId: 'wa' }));
+    expect(plan).toMatchObject({
+      action: 'slide.update',
+      input: {
+        mutations: [
+          {
+            op: 'text.mark',
+            blockId: 'wa',
+            range: [0, 9],
+            edit: { kind: 'marks', set: { b: true } },
+          },
+        ],
+      },
+    });
+  });
+
+  it('a range selected inside its session takes the run mark over the range', () => {
+    const plan = menuActionPlan(bold, at({ blockId: 'wa', text: true, range: [0, 3] }));
+    expect(plan).toMatchObject({
+      action: 'slide.update',
+      input: { mutations: [{ op: 'text.mark', blockId: 'wa', range: [0, 3] }] },
+    });
   });
 });

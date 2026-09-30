@@ -1707,13 +1707,17 @@ const PATH_POINTS: Readonly<Record<'curve' | 'polyline' | 'scribble', [number, n
   ],
 };
 
-/** Word art's block (SPEC-2 0.14, 6.2): 88 px at weight 500 with a 1.5 px ink outline. */
+/**
+ * Word art's block (SPEC-2 0.14, 6.2): 88 px with a 1.5 px ink outline, centred, at the regular
+ * weight as the Editor's own bar inserts it (docs/POLISH.md 2.4 item 34: the tail's B reads
+ * unpressed at the insert and one press bolds the letters).
+ */
 export function wordArtBlock(id: BlockId, text: string): Block {
   return {
     id,
     type: 'text',
     text,
-    typography: { size: 88, weight: 500, align: 'center' },
+    typography: { size: 88, align: 'center' },
     outline: { color: 'ink', width: 1.5 },
   };
 }
@@ -2910,7 +2914,10 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
         return tableMarksPlan(facts, target as TableBlock, { mark: 'b' }, 'Bold');
       /* the polish round (docs/POLISH.md 2.3 item 12; audit-text item 1): Bold is the inline
          bold run, as Cmd+B writes it, over the selected range or the whole text of a block
-         selected by one click; the block's weight 500 override read as nothing bold */
+         selected by one click; the block's weight 500 override read as nothing bold. Word art
+         takes the same mark (item 34): its letters draw at 700 inside the outlined paragraph,
+         while a block weight over 500 is the grammar's type/weight-cap finding (DECK-GRAMMAR.md:20)
+         and 500 is not bold */
       return boldPlan(facts, target, 'Bold');
     }
     case 'format.text.italic':

@@ -57,7 +57,7 @@ export function checkType(ctx: LintContext): Finding[] {
               path: `${ref.path}${typography.path}/weight`,
               text: `weight ${typography.weight}`,
               measured: { fontWeight: typography.weight },
-              proposal: `Weight ${typography.weight} on a ${block.type} block; display weight is capped at 500 outside the type specimen (DECK-GRAMMAR.md:20). The fix sets 500.`,
+              proposal: `Weight ${typography.weight} on a ${block.type} block; display weight is capped at 500 outside the type specimen. The fix sets 500.`,
               fix: [
                 {
                   op: 'block.set',
@@ -78,7 +78,7 @@ export function checkType(ctx: LintContext): Finding[] {
               path: `${ref.path}${typography.path}/size`,
               text: `${typography.size} px`,
               measured: { fontSize: typography.size, nearest },
-              proposal: `Size ${typography.size} px is off the type ladder (${TYPE_LADDER.join(', ')}; head:59-65); the fix snaps it to ${nearest}.`,
+              proposal: `Size ${typography.size} px is off the type ladder; the fix snaps it to ${nearest}. The ladder is ${TYPE_LADDER.join(', ')}.`,
               fix: [
                 {
                   op: 'block.set',
@@ -107,8 +107,7 @@ export function checkType(ctx: LintContext): Finding[] {
               ...base,
               path: `${ref.path}/css`,
               text: heavy.map((m) => m[0]).join('; '),
-              proposal:
-                'Display weight is capped at 500 (DECK-GRAMMAR.md:20); set the weight to 500.',
+              proposal: 'Display weight is capped at 500; set the weight to 500.',
               fix: [
                 {
                   op: 'block.set',
@@ -138,7 +137,7 @@ export function checkType(ctx: LintContext): Finding[] {
               ...base,
               path: `${ref.path}/css`,
               text: `font-size ${[...new Set(sizes)].join(', ')} px`,
-              proposal: `Use a ladder size (${TYPE_LADDER.join(', ')}); the nearest is applied by the fix.`,
+              proposal: `Use a ladder size; the fix applies the nearest. The ladder is ${TYPE_LADDER.join(', ')}.`,
               fix: [
                 {
                   op: 'block.set',
@@ -163,7 +162,7 @@ export function checkType(ctx: LintContext): Finding[] {
                   ...base,
                   path: `${ref.path}/data/texts/${i}/size`,
                   text: t.text,
-                  proposal: `Diagram text is 20 px (ink-2), 26 px (lab) or 18 px (sm); ${t.size} px is under the minimum (head:157-160).`,
+                  proposal: `Diagram text is 20 px for ink-2, 26 px for lab or 18 px for sm; ${t.size} px is under the minimum.`,
                 }),
               );
             }
@@ -180,7 +179,7 @@ export function checkType(ctx: LintContext): Finding[] {
                 ...base,
                 path: `${ref.path}/svg`,
                 text: heavy.map((m) => m[0]).join('; '),
-                proposal: 'Display weight is capped at 500 (DECK-GRAMMAR.md:20).',
+                proposal: 'Display weight is capped at 500.',
               }),
             );
           }
@@ -210,7 +209,7 @@ function checkSvgLabels(
         blockId,
         path,
         text: `font-size ${[...small].join(', ')} px`,
-        proposal: `Raise diagram labels to at least ${SVG_LABEL_MIN} px (head:157-160).`,
+        proposal: `Raise diagram labels to at least ${SVG_LABEL_MIN} px.`,
       }),
     );
   }

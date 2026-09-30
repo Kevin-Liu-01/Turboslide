@@ -229,6 +229,10 @@ function renderContent(el: HTMLElement, content: TipContent): void {
   }
   el.appendChild(head);
   if (content.doc !== undefined && content.doc !== '') {
+    /* a space between the head and the sentence, so the plate's text and its accessible
+       description read "Column seam 2 Drag to resize the column", not "Column seam 2Drag" (the
+       walk's tooltip reads match the name at a word boundary); the span draws on its own line */
+    el.appendChild(document.createTextNode(' '));
     const doc = document.createElement('span');
     doc.className = 'pt-tip-doc';
     doc.textContent = content.doc;

@@ -53,7 +53,8 @@ export function checkIcons(ctx: LintContext): Finding[] {
               blockId: block.id,
               path: `${path}/name`,
               text: icon.name,
-              proposal: `"${icon.name}" is not in the sprite; pick a sprite icon or add the Heroicon with the theme's add-icon script (report 03 section 11 item 12).`,
+              /* report 03 section 11 item 12 */
+              proposal: `"${icon.name}" is not in the sprite; pick a sprite icon or add the Heroicon with the theme's add-icon script.`,
             }),
           );
         }
@@ -74,7 +75,7 @@ export function checkIcons(ctx: LintContext): Finding[] {
               blockId: block.id,
               path,
               text: unknownNames.join(', '),
-              proposal: `${unknownNames.map((n) => `"${n}"`).join(', ')} not in the sprite (report 03 section 11 item 12).`,
+              proposal: `${unknownNames.map((n) => `"${n}"`).join(', ')} ${unknownNames.length === 1 ? 'is' : 'are'} not in the sprite.`,
             }),
           );
         }
@@ -98,7 +99,7 @@ export function checkIcons(ctx: LintContext): Finding[] {
                 path,
                 text: placement.join('; '),
                 proposal:
-                  'An icon sits in a key cell or at the start of a plain row at 20 or 24 px (16 for the external glyph), never inside a sentence (DECK-GRAMMAR.md:40).',
+                  'An icon sits in a key cell or at the start of a plain row at 20 or 24 px, 16 for the external glyph, never inside a sentence.',
               }),
             );
           }

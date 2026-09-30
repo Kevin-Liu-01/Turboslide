@@ -24,7 +24,7 @@ export function checkRows(ctx: LintContext): Finding[] {
             path: `${ref.path}/key`,
             text: String(ref.block.key),
             measured: { key: ref.block.key, snap },
-            proposal: `Snap the key column to ${snap} px (the set is ${ROWS_KEY_SNAP.join(', ')}).`,
+            proposal: `Snap the key column to ${snap} px; the set is ${ROWS_KEY_SNAP.join(', ')}.`,
             fix: [
               {
                 op: 'block.set',

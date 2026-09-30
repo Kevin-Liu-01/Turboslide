@@ -151,7 +151,8 @@ function checkBlockDithers(ctx: LintContext, slide: Slide, out: Finding[]): void
             litInBand: clear.litInBand,
             nearestLitPx: clear.nearestLitPx,
           },
-          proposal: `The files of ${row.asset.id} were measured against the plate at ${clear.plate.join(', ')}, not this slide's ${row.plate.join(', ')}; \`turboslide picture materialize ${slide.id}\` measures them again.`,
+          /* the id stays in `text` (item 55) */
+          proposal: `The picture's files were measured against the plate at ${clear.plate.join(', ')}, not this slide's ${row.plate.join(', ')}; run turboslide picture materialize on this slide to measure them again.`,
           severity: 1,
         }),
       );
@@ -195,7 +196,7 @@ export function checkPictures(ctx: LintContext): Finding[] {
             text: asset.id,
             measured: { litFraction: lit },
             proposal:
-              'One twin is an empty sheet; retone or recrop so both twins carry the picture (OPENERS.md:251). Run `turboslide asset dither <id> --from-recorded` to measure the twins.',
+              'One twin is an empty sheet; retone or recrop so both twins carry the picture. Run `turboslide asset dither <id> --from-recorded` to measure the twins.',
           }),
         );
       }
@@ -212,7 +213,8 @@ export function checkPictures(ctx: LintContext): Finding[] {
             path: '/picture/asset',
             text: picture.id,
             box: plate,
-            proposal: `No plate metrics are recorded for ${picture.id}; run \`turboslide asset dither ${picture.id} --from-recorded --plate ${side}\` to measure the lit cells under the plate (OPENERS.md:105, 176).`,
+            /* OPENERS.md:105, 176 */
+            proposal: `No plate metrics are recorded for this picture; run turboslide asset dither on it with --from-recorded --plate ${side} to measure the lit cells under the plate.`,
             severity: 1,
           }),
         );
@@ -227,7 +229,7 @@ export function checkPictures(ctx: LintContext): Finding[] {
               litInBand: clear.litInBand,
               nearestLitPx: clear.nearestLitPx,
             },
-            proposal: `The recorded metrics of ${picture.id} were measured against the plate at ${clear.plate.join(', ')}, not this slide's ${plate.join(', ')}; run \`turboslide asset dither ${picture.id} --from-recorded --plate ${side}\`.`,
+            proposal: `This picture's recorded metrics were measured against the plate at ${clear.plate.join(', ')}, not this slide's ${plate.join(', ')}; run turboslide asset dither on it with --from-recorded --plate ${side}.`,
             severity: 1,
           }),
         );
@@ -268,15 +270,14 @@ export function checkPictures(ctx: LintContext): Finding[] {
         ctx.finding('picture/mood-placement', a.id, {
           text: `${a.id} then ${b.id}`,
           proposal:
-            'Move the mood slide earlier so at least one content slide separates it from the next opener (OPENERS.md:137).',
+            'Move the mood slide earlier so at least one content slide separates it from the next opener.',
         }),
       );
     } else if (a.kind === 'mood' && b.kind === 'mood') {
       out.push(
         ctx.finding('picture/mood-placement', a.id, {
           text: `${a.id} then ${b.id}`,
-          proposal:
-            'Two mood slides are adjacent; separate them with a content slide (OPENERS.md:137).',
+          proposal: 'Two mood slides are adjacent; separate them with a content slide.',
         }),
       );
     } else if (a.kind === 'opener' && b.kind === 'mood') {
@@ -284,7 +285,7 @@ export function checkPictures(ctx: LintContext): Finding[] {
         ctx.finding('picture/mood-placement', b.id, {
           text: `${a.id} then ${b.id}`,
           proposal:
-            'A mood slide follows a dense content slide, not the opener; move it after the first content slide of the section (OPENERS.md:137).',
+            'A mood slide follows a dense content slide, not the opener; move it after the first content slide of the section.',
         }),
       );
     }

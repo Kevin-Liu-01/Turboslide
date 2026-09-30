@@ -99,10 +99,10 @@ describe('selectionMarks', () => {
   });
 });
 
-describe('selectedRunSize (docs/POLISH.md 2.3 item 16; the polish round\'s fix round)', () => {
+describe("selectedRunSize (docs/POLISH.md 2.3 item 16; the polish round's fix round)", () => {
   const sized: Block = { id: 'z', type: 'text', text: '[Acme]{z:22} renews in Q3' };
 
-  it('reads the size mark of the selected range before the block\'s size', () => {
+  it("reads the size mark of the selected range before the block's size", () => {
     expect(selectedRunSize(sized, { blockId: 'z', text: true, range: [0, 4] })).toBe(22);
   });
 

@@ -201,7 +201,10 @@ describe('lintStatic', () => {
     const palette = onSlide.find((f) => f.rule === 'color/off-palette');
     expect(palette).toMatchObject({ severity: 2, blockId: 'b1', path: '/slots/main/2/fill' });
     expect(palette?.evidence.text).toBe('#ff0000');
-    expect(palette?.proposal).toContain('"b1"');
+    /* the sentence names no id and no parenthesis (docs/POLISH.md 2.6 item 55); the block is the
+       finding's blockId */
+    expect(palette?.proposal).toContain('custom color');
+    expect(palette?.proposal).not.toMatch(/[()]|"b1"/);
     const ladder = onSlide.find((f) => f.rule === 'type/ladder');
     expect(ladder?.fix).toEqual([
       {

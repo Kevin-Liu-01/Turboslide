@@ -42,7 +42,7 @@ export function checkDia(ctx: LintContext): Finding[] {
               ...base,
               path: `${ref.path}/fit`,
               measured: { viewBoxWidth: block.fit.viewBox[2], slotWidth },
-              proposal: `Set fit to "slot" so one unit is one sheet pixel (the slot is ${slotWidth} px wide).`,
+              proposal: `Set fit to "slot" so one unit is one sheet pixel; the slot is ${slotWidth} px wide.`,
               fix: [
                 {
                   op: 'block.set',
@@ -123,8 +123,7 @@ function checkDeclared(
         blockId,
         path: `${path}/data/lines`,
         text: offenders.join('; '),
-        proposal:
-          'Put 1 px strokes on the half pixel so they render as one crisp pixel (report 03 section 5.11).',
+        proposal: 'Put 1 px strokes on the half pixel so they render as one crisp pixel.',
         fix: fixes,
       }),
     );
@@ -141,7 +140,8 @@ function checkDeclared(
           text: t.text,
           measured: { clearance: Math.round(nearest * 10) / 10 },
           box: box.map(Math.round) as [number, number, number, number],
-          proposal: `Move the label at least ${LABEL_CLEARANCE_PX} px clear of the nearest stroke (DECK-GRAMMAR.md:45).`,
+          /* DECK-GRAMMAR.md:45 */
+          proposal: `Move the label at least ${LABEL_CLEARANCE_PX} px clear of the nearest stroke.`,
         }),
       );
     }
@@ -175,7 +175,7 @@ function checkRaw(
         path,
         text: [...new Set(faults)].join('; '),
         proposal:
-          'Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).',
+          'Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate.',
       }),
     );
   }
@@ -197,7 +197,8 @@ function checkRaw(
         blockId,
         path,
         text: integer.slice(0, 8).join('; '),
-        proposal: 'Put 1 px strokes on the half pixel (report 03 section 5.11).',
+        /* report 03 section 5.11 */
+        proposal: 'Put 1 px strokes on the half pixel.',
       }),
     );
   }

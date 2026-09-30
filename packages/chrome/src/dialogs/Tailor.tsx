@@ -278,7 +278,12 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
          finding 14). Undo reads the editor's history when it is pressed. The same sentence is
          said again once the pass is acknowledged, so it is the one left on screen, and a refusal
          replaces it */
-      const result = TAILOR.result(name, hasName ? places : 0, hasName ? slides : 0, skipped.length);
+      const result = TAILOR.result(
+        name,
+        hasName ? places : 0,
+        hasName ? slides : 0,
+        skipped.length,
+      );
       const sayResult = () => {
         const undo = input.history?.undo;
         say(result, undo === undefined ? undefined : { label: TAILOR.undo, run: () => undo() });

@@ -247,7 +247,8 @@ export function checkCopy(ctx: LintContext): Finding[] {
           out.push(
             ctx.finding('copy/token-first', slide.id, {
               ...base,
-              proposal: `Start the heading with a noun; "${first}" is a product token (DECK-GRAMMAR.md:22).`,
+              /* DECK-GRAMMAR.md:22 */
+              proposal: `Start the heading with a noun; "${first}" is a product token.`,
             }),
           );
         }
@@ -274,7 +275,7 @@ export function checkCopy(ctx: LintContext): Finding[] {
             out.push(
               ctx.finding('copy/sentence-case', slide.id, {
                 ...base,
-                proposal: `Sentence case: lowercase ${offenders.map((w) => `"${w}"`).join(', ')} unless it is a proper noun (add it to the list).`,
+                proposal: `Sentence case: lowercase ${offenders.map((w) => `"${w}"`).join(', ')} unless it is a proper noun; a proper noun goes on the list.`,
                 fix: setText(hit, fixed),
               }),
             );
@@ -295,8 +296,7 @@ export function checkCopy(ctx: LintContext): Finding[] {
         out.push(
           ctx.finding('copy/contrast-pair', slide.id, {
             ...base,
-            proposal:
-              'Candidate "X, not Y" pair; state the fact and drop the contrast (DECK-GRAMMAR.md:23).',
+            proposal: 'Candidate "X, not Y" pair; state the fact and drop the contrast.',
           }),
         );
       }
@@ -331,8 +331,7 @@ export function checkCopy(ctx: LintContext): Finding[] {
             blockId: a.block.id,
             path: a.path,
             text: plain,
-            proposal:
-              'Remove the eyebrow label above the heading; the heading carries the name (DECK-GRAMMAR.md:23).',
+            proposal: 'Remove the eyebrow label above the heading; the heading carries the name.',
           }),
         );
       }

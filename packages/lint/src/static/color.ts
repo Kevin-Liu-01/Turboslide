@@ -101,7 +101,8 @@ export function checkColor(ctx: LintContext): Finding[] {
             blockId: block.id,
             path: `${ref.path}/${field}`,
             text: value,
-            proposal: `Block "${block.id}" sets ${field} to ${value}, a custom color that stays the same in both themes; a palette token (${COLOR_TOKENS.join(', ')}) follows the theme (DECK-GRAMMAR.md:28; docs/freeform.md).`,
+            /* DECK-GRAMMAR.md:28; docs/freeform.md; the id stays in the finding's block (item 55) */
+            proposal: `The ${field} ${value} is a custom color that stays the same in both themes; a palette token follows the theme: ${COLOR_TOKENS.join(', ')}.`,
           }),
         );
       }
@@ -126,7 +127,8 @@ export function checkColor(ctx: LintContext): Finding[] {
                     blockId: block.id,
                     path: ref.path,
                     text: `${value} at ${start}:${start + run.t.length}`,
-                    proposal: `The text "${run.t}" is coloured ${value}, a custom colour that stays the same in both themes; a palette token (${COLOR_TOKENS.join(', ')}) follows the theme (gslides-parity SPEC-2 2.2.5).`,
+                    /* gslides-parity SPEC-2 2.2.5; US spelling (item 73) */
+                    proposal: `The text "${run.t}" is colored ${value}, a custom color that stays the same in both themes; a palette token follows the theme: ${COLOR_TOKENS.join(', ')}.`,
                   }),
                 );
               } else if (field === 'color' && SEMANTIC_TOKENS.has(value)) {
@@ -136,7 +138,8 @@ export function checkColor(ctx: LintContext): Finding[] {
                     path: ref.path,
                     text: `${value} at ${start}:${start + run.t.length}`,
                     severity: 1,
-                    proposal: `The text "${run.t}" is coloured ${value}, one of the four semantic hues, which the grammar keeps for icons (DECK-GRAMMAR.md:30); the ink, ink-2 or titanium tokens colour text.`,
+                    /* DECK-GRAMMAR.md:30 */
+                    proposal: `The text "${run.t}" is colored ${value}, one of the four semantic hues, which the grammar keeps for icons; the ink, ink-2 or titanium tokens color text.`,
                   }),
                 );
               }
@@ -168,7 +171,7 @@ export function checkColor(ctx: LintContext): Finding[] {
               path: source.path,
               text: others.join(', '),
               proposal:
-                'Use the tokens (--paper, --ink, --ink-2, --titanium, --hair, --hair-soft, --plate, --cross, --edge) instead of a literal (DECK-GRAMMAR.md:28).',
+                'Use a token instead of a literal: --paper, --ink, --ink-2, --titanium, --hair, --hair-soft, --plate, --cross, --edge.',
             }),
           );
         }
@@ -190,7 +193,7 @@ export function checkColor(ctx: LintContext): Finding[] {
               path: source.path,
               text: semanticHits.join(', '),
               proposal:
-                'Semantic hues appear only on icons through the ok, warn, no and info classes (DECK-GRAMMAR.md:30).',
+                'Semantic hues appear only on icons through the ok, warn, no and info classes.',
             }),
           );
         }

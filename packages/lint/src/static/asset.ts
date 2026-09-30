@@ -49,7 +49,7 @@ export function checkAssets(ctx: LintContext): Finding[] {
               path: `${ref.path}/border`,
               text: asset.id,
               proposal:
-                'A screenshot without a dark twin keeps its 1 px hair border so it reads as a plate on the dark ground (DECK-GRAMMAR.md:56).',
+                'A screenshot without a dark twin keeps its 1 px hair border so it reads as a plate on the dark ground.',
               fix: [
                 {
                   op: 'block.set',
@@ -81,7 +81,8 @@ export function checkAssets(ctx: LintContext): Finding[] {
               path: `${ref.path}/frame`,
               text: asset.id,
               proposal:
-                'A picture without a dark twin keeps a 1 px frame so it reads as a plate on the dark ground (DECK-GRAMMAR.md:56).',
+                /* DECK-GRAMMAR.md:56; the sentence reads plain (docs/POLISH.md 2.6 item 55) */
+                'A picture without a dark twin keeps a 1 px frame so it reads as a plate on the dark ground.',
               fix: [
                 {
                   op: 'block.set',
@@ -169,7 +170,9 @@ export function checkAssets(ctx: LintContext): Finding[] {
         out.push(
           ctx.finding('asset/license-missing', slideId, {
             text: asset.id,
-            proposal: `Record the license of ${asset.id} (source.license) with the origin and the artist: \`turboslide asset add\` takes --license, --artist and --share-alike (report 06 section 4 item 9).`,
+            /* report 06 section 4 item 9; the id stays in `text` (item 55: no id in the sentence) */
+            proposal:
+              "Record this photo's license with its origin and artist; turboslide asset add takes --license, --artist and --share-alike.",
           }),
         );
       }
@@ -179,7 +182,8 @@ export function checkAssets(ctx: LintContext): Finding[] {
       out.push(
         ctx.finding('asset/license-missing', slideId, {
           text: asset.id,
-          proposal: `${asset.id} is a mood photograph with no provenance record; set source to { kind: 'photo', origin, artist, license, shareAlike } (report 06 section 4 item 9).`,
+          proposal:
+            'This mood photograph has no provenance record; set its source to a photo record with the origin, the artist, the license and share alike.',
         }),
       );
     }

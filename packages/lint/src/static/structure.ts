@@ -58,7 +58,8 @@ export function checkStructure(ctx: LintContext): Finding[] {
             blockId: block.id,
             path: ref.path,
             text: block.note,
-            proposal: `Express the block in the grammar (${block.note}); until then it exports as a raster (report 05 section 6.1).`,
+            /* report 05 section 6.1 */
+            proposal: `Express the block in the grammar; until then it exports as a raster. Its note reads: ${block.note}.`,
           }),
         );
         // html/sanitize (gslides-parity SPEC-3 8.4): a block the sanitizer has not stamped. The
@@ -112,7 +113,7 @@ export function checkStructure(ctx: LintContext): Finding[] {
               blockId: block.id,
               path: `${ref.path}/html`,
               proposal:
-                'A scale marker is authored in the escape markup; use a scales block so the marker derives from the value (DECK-GRAMMAR.md:61).',
+                'A scale marker is authored in the escape markup; use a scales block so the marker derives from the value.',
             }),
           );
         }
@@ -172,7 +173,7 @@ export function checkStructure(ctx: LintContext): Finding[] {
             ctx.finding('opener/sentence-lists-section', slide.id, {
               path: '/plate/blocks',
               text: unmentioned.join('; '),
-              proposal: `The sentence should name each family of the section in order; not mentioned: ${unmentioned.join(', ')} (OPENERS.md:44).`,
+              proposal: `The sentence should name each family of the section in order; not mentioned: ${unmentioned.join(', ')}.`,
             }),
           );
         }
@@ -192,7 +193,7 @@ export function checkStructure(ctx: LintContext): Finding[] {
       ctx.finding('numbers/contradiction', first.slideId, {
         blockId: first.blockId,
         text: summary,
-        proposal: `The same noun carries different numerals across slides: ${summary}. Confirm the right one (for the accuracy judge).`,
+        proposal: `The same noun carries different numerals across slides: ${summary}. Confirm the right one; the accuracy judge reads it.`,
       }),
     );
   }
@@ -235,7 +236,7 @@ function collectNumerals(
         blockId,
         path,
         text: hardCoded.join('; '),
-        proposal: `${hardCoded.map((h) => `"${h}"`).join(' and ')} equal the deck's counts; derive them from the manifest instead of typing them (report 06 section 4 item 2).`,
+        proposal: `${hardCoded.map((h) => `"${h}"`).join(' and ')} equal the deck's counts; derive them from the manifest instead of typing them.`,
       }),
     );
   }

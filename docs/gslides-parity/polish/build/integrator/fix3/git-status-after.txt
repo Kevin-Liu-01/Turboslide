@@ -1,0 +1,11 @@
+# git status --porcelain -uall after the fixes and before the fixer's commit, 2026-09-30T12:33:04Z; HEAD 223570e3 Turboslide polish round: the second ship attempt's 
+ M .prettierignore
+ M docs/POLISH.md
+ M docs/gslides-parity/polish/build/integrator.md
+ M scripts/audit-allow.json
+?? docs/gslides-parity/polish/build/integrator/fix3/audit-after.txt
+?? docs/gslides-parity/polish/build/integrator/fix3/audit-before.txt
+?? docs/gslides-parity/polish/build/integrator/fix3/git-status-after.txt
+?? docs/gslides-parity/polish/build/integrator/fix3/git-status-before.txt
+
+# no path under decks/, .turboslide/, .vercel/ or .github/: 0 such paths

@@ -84,3 +84,17 @@ docs/gslides-parity/objects/build/*/**/*.json
 docs/gslides-parity/objects/build/*/**/*-core-matrix.md
 docs/gslides-parity/objects/build/*/**/*-core-walk.md
 docs/gslides-parity/objects/build/*/walk-matrix.md
+# The polish round (the integrator, fix round 3; build/integrator.md "Polish round fix round 3"): the audits' run JSON, drive
+# facts and the served page under their evidence folders (audit-*/), the lanes' run JSON and walk ledgers under theirs
+# (build/b1/ to build/b7/, build/integrator/), the verifier's facts under verify/ (the audits' folders, pass2/, pass3/) and the
+# finish's gate ledgers beside the run JSON under focus/verification/ (polish-*-core-matrix.md, polish-*-core-walk.md,
+# written by core-gate.mjs and editor-walk-probe.mjs); the notes beside them (the audit-*.md reports, build/*.md,
+# VERIFICATION.md) stay under the formatter
+docs/gslides-parity/polish/audit-*/**/*.json
+docs/gslides-parity/polish/audit-*/**/*.html
+docs/gslides-parity/polish/build/*/**/*.json
+docs/gslides-parity/polish/build/*/**/*-matrix.md
+docs/gslides-parity/polish/build/*/**/*-core-walk.md
+docs/gslides-parity/polish/verify/**/*.json
+docs/gslides-parity/focus/verification/polish-*-core-matrix.md
+docs/gslides-parity/focus/verification/polish-*-core-walk.md

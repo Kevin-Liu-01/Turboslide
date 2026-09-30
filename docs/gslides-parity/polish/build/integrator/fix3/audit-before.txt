@@ -1,0 +1,5 @@
+# node scripts/check.mjs --audit, before the fix, 2026-09-30T12:25:53Z, tree abebef47 plus the fifteen uncommitted files
+check audit: 2 advisory(ies) at high or above, 0 accepted in scripts/audit-allow.json, 2 open, 0 acceptance(s) expired
+check audit: FAIL GHSA-qhr7-859c-m2p7 brace-expansion high: brace-expansion: DoS via uncontrolled recursion on nested brace groups causing stack exhaustion
+check audit: FAIL GHSA-6j4f-fj2g-mc7p brace-expansion high: brace-expansion: DoS via uncontrolled recursion in parseCommaParts causing stack exhaustion
+exit 1

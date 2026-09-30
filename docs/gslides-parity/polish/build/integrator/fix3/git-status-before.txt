@@ -1,0 +1,28 @@
+# git status --porcelain -uall, before the fix, 2026-09-30T12:25:54Z
+ M docs/gslides-parity/focus/VERIFICATION.md
+?? decks/untitled-20260930-x21v/assets/mood-earth-dark.jpg
+?? decks/untitled-20260930-x21v/assets/mood-earth-light.jpg
+?? decks/untitled-20260930-x21v/assets/opener-brand-dark.jpg
+?? decks/untitled-20260930-x21v/assets/opener-brand-light.jpg
+?? decks/untitled-20260930-x21v/assets/opener-closing-dark.jpg
+?? decks/untitled-20260930-x21v/assets/opener-closing-light.jpg
+?? decks/untitled-20260930-x21v/assets/opener-prototemplate-dark.jpg
+?? decks/untitled-20260930-x21v/assets/opener-prototemplate-light.jpg
+?? decks/untitled-20260930-x21v/deck.json
+?? decks/untitled-20260930-x21v/slides/title.json
+?? decks/untitled-20260930-x21v/versions/1.json
+?? docs/gslides-parity/focus/verification/polish-finish-preview-rerun-areas-core-gate.json
+?? docs/gslides-parity/focus/verification/polish-finish-preview-rerun-areas-core-walk.md
+?? docs/gslides-parity/focus/verification/polish-finish-preview-rerun-areas.json
+?? docs/gslides-parity/focus/verification/polish-finish-preview-rerun-specs-core-gate.json
+?? docs/gslides-parity/focus/verification/polish-finish-preview-rerun-specs-core-matrix.md
+?? docs/gslides-parity/focus/verification/polish-finish-preview-rerun-specs.json
+?? docs/gslides-parity/focus/verification/polish-finish-preview-run1-core-gate.json
+?? docs/gslides-parity/focus/verification/polish-finish-preview-run1-core-matrix.md
+?? docs/gslides-parity/focus/verification/polish-finish-preview-run1-core-walk.md
+?? docs/gslides-parity/focus/verification/polish-finish-preview-run1-cost-probe.json
+?? docs/gslides-parity/focus/verification/polish-finish-preview-run1.json
+?? docs/gslides-parity/polish/build/integrator/fix3/audit-before.txt
+?? docs/gslides-parity/polish/build/integrator/fix3/git-status-before.txt
+?? docs/gslides-parity/polish/build/ship-2.md
+?? docs/gslides-parity/polish/verify/pass3/ (57 files)

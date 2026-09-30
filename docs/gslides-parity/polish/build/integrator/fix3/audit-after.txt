@@ -1,0 +1,3 @@
+# node scripts/check.mjs --audit, after the fix, 2026-09-30T12:29:17Z, scripts/audit-allow.json with the two entries (expires 2026-10-30)
+check audit: 2 advisory(ies) at high or above, 2 accepted in scripts/audit-allow.json, 0 open, 0 acceptance(s) expired
+exit 0

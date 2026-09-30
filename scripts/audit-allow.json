@@ -1,4 +1,27 @@
 {
-  "$comment": "Accepted advisories for scripts/check.mjs --audit (gslides-parity SPEC-3 8.10, 16.1 step 28): pnpm audit --prod --audit-level=high fails the step on any high or critical advisory whose GitHub id is not listed here, and on a listed one whose expiry has passed. Each entry names the advisory, the package, why it is accepted (the reachable code path, or the absence of one) and the date the acceptance ends; the integrator's merge notes record the day it was added. Empty on 2026-09-13: the merge 1 catalog (sharp 0.35.4, the pptxgenjs image-size override) left the audit clean (docs/gslides-parity/build-3/integrator.md section 3).",
-  "accepted": []
+  "$comment": "Accepted advisories for scripts/check.mjs --audit (gslides-parity SPEC-3 8.10, 16.1 step 28): pnpm audit --prod --audit-level=high fails the step on any high or critical advisory whose GitHub id is not listed here, and on a listed one whose expiry has passed. Each entry names the advisory, the package, why it is accepted (the reachable code path, or the absence of one) and the date the acceptance ends; the integrator's merge notes record the day it was added. Empty on 2026-09-13: the merge 1 catalog (sharp 0.35.4, the pptxgenjs image-size override) left the audit clean (docs/gslides-parity/build-3/integrator.md section 3). Two entries on 2026-09-30 (the polish round's fix round 3, the integrator): brace-expansion 5.0.9 through eslint's minimatch, reachable from the lint alone; each entry carries the reading.",
+  "accepted": [
+    {
+      "id": "GHSA-qhr7-859c-m2p7",
+      "package": "brace-expansion",
+      "version": "5.0.9",
+      "title": "brace-expansion: DoS via uncontrolled recursion on nested brace groups causing stack exhaustion",
+      "patched": ">=5.0.11",
+      "reason": "No runtime path. The tree's one copy, brace-expansion 5.0.9 (pnpm-lock.yaml), is resolved by minimatch 10.2.6 alone, and every one of the audit's 59 paths starts at tooling/eslint-config and runs through @tanstack/eslint-config, eslint 10.10.0 or its plugins into minimatch; the config package lists @tanstack/eslint-config under dependencies, which is why pnpm audit --prod walks it, while the root lists @turboslide/eslint-config under devDependencies. No app or package of the workspace links minimatch or brace-expansion (pnpm's isolated node_modules), and no built bundle carries the package: apps/studio/dist and apps/cli/dist read none, and the one match under apps/studio/.output is playwright-core's own vendored copy inside its utilsBundle.js, outside the lockfile's resolution and outside what the audit reads, serving the route globs packages/headless and packages/materials write themselves (**/* and <capture origin>/**). The recursion runs in eslint over the repository's own glob patterns on a developer's machine and in the lint step, never on the server, in the browser or in the CLI, and never over a seller's string. The close is the catalog's brace-expansion at 5.0.11 or later (a pnpm override or the eslint stack's own bump) through pnpm install, which AGENTS.md keeps outside a lane's rules: Kevin's or the next round's integrator's at its merge.",
+      "added": "2026-09-30",
+      "addedBy": "the polish round's fix round 3, the integrator (docs/gslides-parity/polish/build/integrator.md, Polish round fix round 3; check step 28 read the two advisories new on 2026-09-30, the registry's since pass 1 read the step ok on 2026-09-28)",
+      "expires": "2026-10-30"
+    },
+    {
+      "id": "GHSA-6j4f-fj2g-mc7p",
+      "package": "brace-expansion",
+      "version": "5.0.9",
+      "title": "brace-expansion: DoS via uncontrolled recursion in parseCommaParts causing stack exhaustion",
+      "patched": ">=5.0.10",
+      "reason": "No runtime path. The tree's one copy, brace-expansion 5.0.9 (pnpm-lock.yaml), is resolved by minimatch 10.2.6 alone, and every one of the audit's 59 paths starts at tooling/eslint-config and runs through @tanstack/eslint-config, eslint 10.10.0 or its plugins into minimatch; the config package lists @tanstack/eslint-config under dependencies, which is why pnpm audit --prod walks it, while the root lists @turboslide/eslint-config under devDependencies. No app or package of the workspace links minimatch or brace-expansion (pnpm's isolated node_modules), and no built bundle carries the package: apps/studio/dist and apps/cli/dist read none, and the one match under apps/studio/.output is playwright-core's own vendored copy inside its utilsBundle.js, outside the lockfile's resolution and outside what the audit reads, serving the route globs packages/headless and packages/materials write themselves (**/* and <capture origin>/**). The recursion runs in eslint over the repository's own glob patterns on a developer's machine and in the lint step, never on the server, in the browser or in the CLI, and never over a seller's string. The close is the catalog's brace-expansion at 5.0.11 or later (a pnpm override or the eslint stack's own bump) through pnpm install, which AGENTS.md keeps outside a lane's rules: Kevin's or the next round's integrator's at its merge.",
+      "added": "2026-09-30",
+      "addedBy": "the polish round's fix round 3, the integrator (docs/gslides-parity/polish/build/integrator.md, Polish round fix round 3; check step 28 read the two advisories new on 2026-09-30, the registry's since pass 1 read the step ok on 2026-09-28)",
+      "expires": "2026-10-30"
+    }
+  ]
 }

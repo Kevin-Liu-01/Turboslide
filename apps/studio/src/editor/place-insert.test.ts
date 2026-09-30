@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import type { Block } from '@turboslide/schema/blocks';
 import type { Slide } from '@turboslide/schema/deck';
 import { tableBoxHeight } from '@turboslide/schema/blocks/table';
+import { toCanvas } from '@turboslide/schema/canvas';
+import { canvasObjects } from '@turboslide/schema/deck';
 import { CONTENT_BOX, SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 
 import {
@@ -366,5 +368,82 @@ describe('placeInsert, the polish round', () => {
     const placed = placeInsert(low, 'table', [960, tableBoxHeight(1)]);
     expect(placed.how).toBe('cascade');
     expect(placed.pos.h).toBe(tableBoxHeight(1));
+  });
+});
+
+describe('placeInsert on a slide.new Title and body slide (the polish round fix round, finding 29)', () => {
+  /*
+   * The walk's rows insert on a `slide.new` split slide whose title was typed through the
+   * product: the slide is not a canvas yet, so the insert converts it in the same write and the
+   * title and the body prompt gain their boxes beside the table. The placement reads the
+   * converted slide (controller.tsx block.insert: withCanvas, then placeInsert), so the table
+   * lands under the title at the body's top whatever its rows; the converted title is the first
+   * positioned object of the stack, the table the last (a reader of "the first new positioned
+   * object" after the insert meets the title, not the table).
+   */
+  /** The slide layouts.ts `split` makes (Title and body): a heading across the head, one body paragraph at measure 56. */
+  const splitSlide = (title: string): Slide => ({
+    schemaVersion: 1,
+    id: 's',
+    kind: 'content',
+    layout: { type: 'split', gap: 56, head: 'single', body: { align: 'center' } },
+    slots: {
+      head: [{ id: 'h', type: 'heading', level: 'h2', text: title, autofit: 'shrink' }],
+      body: [{ id: 'p1', type: 'paragraph', text: '', measure: 56 }],
+    },
+  });
+  /* the stage's measure of the split slide at 1600 by 900: the title across the content box's
+     top, the body prompt under it (the audit's 137,129 1326x48 and 137,400 1326x66) */
+  const boxes = {
+    blocks: { h: [CX, CY, CW, 48] as const, p1: [CX, 400, CW, 66] as const },
+    prompted: ['p1'],
+  };
+  const converted = (title: string) => {
+    const out = toCanvas(splitSlide(title), {
+      blocks: { h: [...boxes.blocks.h], p1: [...boxes.blocks.p1] },
+      prompted: boxes.prompted,
+    });
+    if (out === null) throw new Error('a split slide converts');
+    return out.slide;
+  };
+
+  it('lands 1 by 1, 1 by 2, 3 by 3 and 12 by 4 under the typed title, at the body top, at their rows’ floor', () => {
+    const slide = converted('Pipeline');
+    for (const rows of [1, 2, 3, 4]) {
+      const placed = placeInsert(slide, 'table', [960, tableBoxHeight(rows)]);
+      expect(placed.how).toBe('free');
+      expect(placed.pos.y).toBe(CY + 48 + INSERT_GAP);
+      expect(placed.pos.h).toBe(tableBoxHeight(rows));
+      expect(placed.shrunk).toBe(false);
+    }
+  });
+
+  it('lands at the same top under an untyped title: the prompt keeps the title’s place', () => {
+    const slide = converted('');
+    const placed = placeInsert(slide, 'table', [960, tableBoxHeight(1)]);
+    expect(placed.pos.y).toBe(CY + 48 + INSERT_GAP);
+    expect(bodyRect(slide)).toEqual(bodyRect(converted('Pipeline')));
+  });
+
+  it('converts the title as the first positioned object, so the table is never the first new object of the write', () => {
+    const slide = converted('Pipeline');
+    const objects = canvasObjects(slide);
+    expect(objects[0]?.type).toBe('heading');
+    expect(objects[0]?.pos).toMatchObject({ x: CX, y: CY, w: CW, h: 48 });
+    expect(objects.map((block) => block.type)).toEqual(['heading', 'paragraph']);
+    /* the insert appends the table after them (blocks.insert with no `after`) */
+    const placed = placeInsert(slide, 'table', [960, tableBoxHeight(1)]);
+    const withTable = {
+      ...slide,
+      slots: { ...slide.slots, main: [...objects, table('t', { ...placed.pos, z: 2 })] },
+    };
+    expect(canvasObjects(withTable).map((block) => block.type)).toEqual([
+      'heading',
+      'paragraph',
+      'table',
+    ]);
+    expect(canvasObjects(withTable).find((block) => block.type === 'table')?.pos?.y).toBe(
+      CY + 48 + INSERT_GAP,
+    );
   });
 });

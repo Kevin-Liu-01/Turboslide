@@ -1,0 +1,718 @@
+{
+  "base": "https://www.turboslide.com",
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T17:06:39.656Z",
+  "ms": 550789,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 549725,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/gate-production-areas-rerun/core-walk.json",
+    "deckId": "untitled-20260930-kvva",
+    "steps": 81
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "chrome",
+      "surface",
+      "shaders",
+      "assist"
+    ],
+    "costRows": null
+  },
+  "rows": 56,
+  "passed": 50,
+  "failed": 3,
+  "notDriven": 2,
+  "manual": [],
+  "measured": [],
+  "noStep": [
+    "surface.cleanup"
+  ],
+  "local": [],
+  "commit": "c9a870b6",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-09-30",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "surface.menus.open-close-escape": "passed",
+    "chrome.split.one-box": "passed",
+    "chrome.split.hover-no-inversion": "passed",
+    "chrome.split.click-show": "passed",
+    "chrome.split.chevron-menu-aligned": "passed",
+    "chrome.split.enter-chevron": "passed",
+    "chrome.split.enter-label": "passed",
+    "chrome.split.space-both": "passed",
+    "chrome.split.arrow-down-label": "passed",
+    "chrome.split.tab-order": "passed",
+    "chrome.split.aria": "passed",
+    "chrome.split.collapse-900": "passed",
+    "chrome.separators.once": "passed",
+    "chrome.separators.toolbar-dividers": "passed",
+    "chrome.cluster.gaps-heights": "passed",
+    "chrome.comments-glyph.toggle": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "chrome.bottom-bar.removed": "passed",
+    "chrome.menu.no-tooltip-with-submenu": "passed",
+    "chrome.menu.escape-focus-stage": "passed",
+    "chrome.presence.tooltip": "passed",
+    "chrome.contrast.titanium-light": "passed",
+    "chrome.disabled.token-both-appearances": "passed",
+    "chrome.field.boundary-3-1": "failed",
+    "chrome.hover.ground": "passed",
+    "chrome.floating.edge-frame": "passed",
+    "chrome.focus.one-ring-rule": "passed",
+    "chrome.filmstrip.one-ring": "passed",
+    "chrome.tooltip.none-on-focus-in-menus": "passed",
+    "chrome.menu.plate-fits-labels": "passed",
+    "chrome.menu.no-mnemonics-mac": "passed",
+    "chrome.select.one-rule": "passed",
+    "chrome.check.draws-check": "passed",
+    "chrome.toolbar.bold-follows-selection": "passed",
+    "menus.icons.insert-rows": "passed",
+    "menus.icons.format-rows": "passed",
+    "menus.icons.one-family": "passed",
+    "assist.entry.title-row": "passed",
+    "assist.panel.first-line-and-cards": "passed",
+    "assist.tailor.dialog-one-undo": "passed",
+    "assist.tailor.agent-deck-tailor": "passed",
+    "assist.outside-write.snackbar": "passed",
+    "assist.finder.terms": "passed",
+    "assist.finder.ask-row": "passed",
+    "assist.agent.propose-accept": "passed",
+    "shaders.insert.gallery-thumbnails": "passed",
+    "shaders.insert.selected-free-rectangle": "passed",
+    "shaders.insert.words": "passed",
+    "shaders.panel.slider-live-undo": "passed",
+    "shaders.panel.preset-tiles": "failed",
+    "shaders.panel.control-sentences": "passed",
+    "shaders.panel.kit-colours": "passed",
+    "shaders.panel.one-home": "passed",
+    "shaders.background.place-answers": "failed",
+    "shaders.perf.one-context": "passed",
+    "shaders.background.add-to-theme": "not driven",
+    "shaders.frame.scrubber-capture": "not driven",
+    "shaders.view.play-setting": "passed",
+    "shaders.insert.gallery-hover-live": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "surface.cleanup",
+        "feature": "surface",
+        "result": "not driven"
+      },
+      {
+        "id": "chrome.field.boundary-3-1",
+        "feature": "chrome",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.panel.preset-tiles",
+        "feature": "shaders",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "shaders.panel.preset-tiles",
+      "parks": [
+        "formatOptions.shader.preset"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "parks": [
+        "dialog.background.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "parks": [
+        "dialog.background.shader.addToTheme"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "parks": [
+        "formatOptions.shader.frame.scrubber",
+        "formatOptions.shader.frame.capture"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "surface.cleanup",
+      "feature": "surface",
+      "result": "not driven"
+    },
+    {
+      "id": "chrome.field.boundary-3-1",
+      "feature": "chrome",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "surface.menus.open-close-escape",
+      "feature": "surface",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.cleanup",
+      "feature": "surface",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "no step",
+      "reason": "no driver recorded this row"
+    },
+    {
+      "id": "chrome.split.one-box",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.hover-no-inversion",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.click-show",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.chevron-menu-aligned",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.enter-chevron",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.enter-label",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.space-both",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.arrow-down-label",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.tab-order",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.aria",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.collapse-900",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.separators.once",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.separators.toolbar-dividers",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.cluster.gaps-heights",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.comments-glyph.toggle",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.bottom-bar.removed",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menu.no-tooltip-with-submenu",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menu.escape-focus-stage",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.presence.tooltip",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.contrast.titanium-light",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.disabled.token-both-appearances",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.field.boundary-3-1",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "read the zoom field on hover, the size field, the Share dialog's fields and the /decks search field, both appearances: light: zoom 10.88, size 1.21, shareSelect 3.11, shareInput 3.11; dark: zoom 10.59, size 1.22, shareSelect 3.95, shareInput 3.95; /decks search 3.11"
+    },
+    {
+      "id": "chrome.hover.ground",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.floating.edge-frame",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.focus.one-ring-rule",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.filmstrip.one-ring",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.tooltip.none-on-focus-in-menus",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menu.plate-fits-labels",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menu.no-mnemonics-mac",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.select.one-rule",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.check.draws-check",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.toolbar.bold-follows-selection",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.entry.title-row",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.panel.first-line-and-cards",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.tailor.dialog-one-undo",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.tailor.agent-deck-tailor",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.outside-write.snackbar",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.finder.terms",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.finder.ask-row",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.agent.propose-accept",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.gallery-thumbnails",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.selected-free-rectangle",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.words",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.slider-live-undo",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.preset-tiles",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "read the Preset row's tiles; click a tile that is not pressed: 10 tiles (\"Paper on ink\", \"Ink on paper\", \"Primary\", \"Accent\", \"Captions\", \"Hints\", \"Diamond\" pressed, \"Sphere\", \"Chrome\", \"Noir\") against 10 presets of paper:liquid-metal; labels not in sentence case: none; click on formatOptions.shader.preset.chrome: preset diamond -> chrome (revision 17), canvas mean luminance moved 151.9, 93 percent of pixels changed after 521 ms"
+    },
+    {
+      "id": "shaders.panel.control-sentences",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.kit-colours",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.one-home",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Slide > Change background on the body slide; Shader; a tile; Place; read the ground, the button and the dialog: chose Liquid metal; Place dialog.background.shader.place; the ground changed after 15033 ms (covering picture background, asset liquid-metal); the button read \"Placing, 12 s\" with the seconds"
+    },
+    {
+      "id": "shaders.perf.one-context",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: dialog.background.shader.addToTheme (docs/PRODUCT.md 7.1, B1 (dialogs/Background.tsx)); no Add to theme row beside the Shader row (P1, FEATURES.md 5.2 item 1)"
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.shader.frame.scrubber (docs/PRODUCT.md 7.1, B5 (inspector/shader.tsx)); no Frame scrubber in the Shader section (P1, FEATURES.md 5.2 item 3)"
+    },
+    {
+      "id": "shaders.view.play-setting",
+      "feature": "view",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.gallery-hover-live",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

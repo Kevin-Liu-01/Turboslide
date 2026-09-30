@@ -204,7 +204,8 @@
   font-weight: 500;
 }
 
-.ts-versions.is-history .ts-version-more {
+.ts-versions.is-history .ts-version-more,
+.ts-versions.is-history .ts-version-restore {
   width: 28px;
   padding: 0;
 }
@@ -304,11 +305,15 @@
   outline-offset: -1px;
 }
 
-/* the meta line wraps instead of clipping (item 91: the tail read "cur…") */
+/* the meta reads on one line (the polish round's fix round 2; VERIFICATION.md "Polish round, pass
+   2" finding 18: it wrapped to three lines at 320 px beside the Restore button). Item 91's wrap
+   answered a tail that read "cur…"; the words are shorter now (a named row's meta carries its time
+   and author, the count stays on the rows every edit writes), so they fit beside Restore, and a
+   long author name ends in an ellipsis inside its own 140 px */
 .ts-versions.is-history .ts-version-meta {
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* the marks strip: a fixed 70 px for four 16 px marks at 2 px gaps and the +N */

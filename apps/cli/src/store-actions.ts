@@ -37,7 +37,7 @@ import {
 } from '@turboslide/render/dither-key';
 import type { Autofit, Block, Shadow, ShapeBlock } from '@turboslide/schema/blocks';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
-import { applyGuides, toCanvas } from '@turboslide/schema/canvas';
+import { CONVERSION_IDS, applyGuides, toCanvas } from '@turboslide/schema/canvas';
 import type { GuidesInput } from '@turboslide/schema/canvas';
 import { blockAssetRefs, blockTextPaths } from '@turboslide/schema/catalog';
 import type { Color } from '@turboslide/schema/color';
@@ -114,6 +114,7 @@ import {
   snapToGrid,
 } from '@turboslide/schema/freeform';
 import type { Author, BlockSlot, Lease, Mutation, Version } from '@turboslide/schema/mutations';
+import { slideFieldOf, slideFieldPath } from '@turboslide/schema/mutations';
 import { getAt, jsonEqual } from '@turboslide/schema/pointer';
 import type { Position } from '@turboslide/schema/position';
 import { applyMutations } from '@turboslide/schema/reduce';
@@ -2774,23 +2775,89 @@ export async function textStyle(
   return { ...result, text: textAt(requireBlock(result.slide, input.blockId), input.path) };
 }
 
+/**
+ * The block a text action names, converted first when it is a fixed kind's field object (docs/
+ * RETURN.md 2.14 item 1; SPEC-2 1.6; VERIFICATION.md "Polish round, pass 2" finding 8). The cover
+ * title's `heading` and `lead` and a statement's `big` are slide fields the renderer draws under
+ * fixed ids, not blocks, so `text.list`, `text.indent` and `text.case` on them answered `No block
+ * "heading" on slide "title"` and the tail's Bulleted list was refused on the placeholder (docs/
+ * POLISH.md 2.3 item 18, the row text.tail.heading-takes-list-indent). The slide converts to a
+ * canvas through the measured `slide.replace` of `withCanvas`, in front of the action's own
+ * mutations, so one revision and one undo step hold both, as the Align rows and the editor's
+ * format writes do. The field's block on the canvas is read by its own id when the conversion kept
+ * it free, else by the grammar record's slot (a title's main slot lists the mark, the heading and
+ * the lead in that order; a statement's the big line), the reading the reducer's `deckTitleSource`
+ * makes. A block that exists converts nothing; an id that is neither a block nor a field of the
+ * kind is the RangeError as before. A text pointer that named the field (`/heading`) becomes the
+ * block's (`/text`).
+ */
+type FieldTarget = {
+  prefix: Mutation[];
+  slide: Slide;
+  blockId: string;
+  path: (path: string) => string;
+};
+async function fieldTarget(
+  deps: StoreActionDeps,
+  current: DeckDocument,
+  slide: Slide,
+  blockId: string,
+): Promise<FieldTarget> {
+  const same = (path: string) => path;
+  if (slideBlocks(slide).some(({ block }) => block.id === blockId))
+    return { prefix: [], slide, blockId, path: same };
+  if (
+    isCanvasSlide(slide) ||
+    !(CONVERSION_IDS[slide.kind] as ReadonlyArray<string>).includes(blockId)
+  )
+    requireBlock(slide, blockId);
+  const canvas = await withCanvas(deps, current, slide);
+  const converted = canvas.slide;
+  const main = (converted.kind === 'content' ? converted.grammar?.slots?.main : undefined) ?? [];
+  const bySlot =
+    slide.kind === 'title'
+      ? blockId === 'mark'
+        ? main[0]
+        : blockId === 'heading'
+          ? main[1]
+          : main[2]
+      : slide.kind === 'statement'
+        ? main[0]
+        : undefined;
+  const id = slideBlocks(converted).some(({ block }) => block.id === blockId)
+    ? blockId
+    : (bySlot ?? blockId);
+  requireBlock(converted, id);
+  const field = slideFieldOf(slide, blockId);
+  const fieldPath = field === null ? null : slideFieldPath(field);
+  return {
+    prefix: canvas.prefix,
+    slide: converted,
+    blockId: id,
+    path: (path) => (fieldPath !== null && path === fieldPath ? '/text' : path),
+  };
+}
+
 export async function textCase(
   deps: StoreActionDeps,
   ctx: WriteContext,
   input: TextCaseInput,
 ): Promise<SlideResult & { text: string }> {
   const current = (await deps.store.read()).document;
-  const slide = requireSlide(current, input.slideId);
-  const text = textAt(requireBlock(slide, input.blockId), input.path);
-  const next = caseRange(text, input.range, input.mode);
-  const result = await commitOrCurrent(
+  const target = await fieldTarget(
     deps,
-    ctx,
-    input,
     current,
-    replaceWhole(input.slideId, input.blockId, input.path, text, next),
+    requireSlide(current, input.slideId),
+    input.blockId,
   );
-  return { ...result, text: textAt(requireBlock(result.slide, input.blockId), input.path) };
+  const path = target.path(input.path);
+  const text = textAt(requireBlock(target.slide, target.blockId), path);
+  const next = caseRange(text, input.range, input.mode);
+  const result = await commitOrCurrent(deps, ctx, input, current, [
+    ...target.prefix,
+    ...replaceWhole(input.slideId, target.blockId, path, text, next),
+  ]);
+  return { ...result, text: textAt(requireBlock(result.slide, target.blockId), path) };
 }
 
 export async function textInsert(
@@ -2822,12 +2889,21 @@ function numberPresetOf(preset: string | undefined): NumberPreset {
     : 'digit-alpha-roman';
 }
 
-/** A paragraph or text box as a list block, one item per paragraph (the round one Bulleted list). */
+/**
+ * A paragraph, heading or text box as a list block, one item per paragraph (the round one Bulleted
+ * list; a heading since the polish round's fix round 2, so the cover title takes a list once the
+ * slide has converted, docs/POLISH.md 2.3 item 18).
+ */
 function listBlockFrom(block: Block): Block {
   if (block.type === 'plain') return block;
-  if (block.type !== 'paragraph' && block.type !== 'text' && block.type !== 'box')
+  if (
+    block.type !== 'paragraph' &&
+    block.type !== 'text' &&
+    block.type !== 'box' &&
+    block.type !== 'heading'
+  )
     throw new TypeError(
-      `Block "${block.id}" is a ${block.type}; List options work on a list, a paragraph or a text box`,
+      `Block "${block.id}" is a ${block.type}; List options work on a list, a paragraph, a heading or a text box`,
     );
   const items = splitParagraphs(block.text ?? '')
     .filter((paragraph) => paragraph.trim() !== '')
@@ -2846,9 +2922,15 @@ export async function textList(
   input: TextListInput,
 ): Promise<SlideResult> {
   const current = (await deps.store.read()).document;
-  const slide = requireSlide(current, input.slideId);
-  const source = requireBlock(slide, input.blockId);
-  const mutations: Mutation[] = [];
+  const target = await fieldTarget(
+    deps,
+    current,
+    requireSlide(current, input.slideId),
+    input.blockId,
+  );
+  const slide = target.slide;
+  const source = requireBlock(slide, target.blockId);
+  const mutations: Mutation[] = [...target.prefix];
   let list = listBlockFrom(source);
   if (list !== source) {
     // the paragraph becomes a list in place: the block is replaced by removing and inserting it
@@ -2989,9 +3071,17 @@ export async function textIndent(
   input: TextIndentInput,
 ): Promise<SlideResult> {
   const current = (await deps.store.read()).document;
-  const slide = requireSlide(current, input.slideId);
+  let slide = requireSlide(current, input.slideId);
   const mutations: Mutation[] = [];
-  for (const blockId of input.blockIds) {
+  const blockIds: string[] = [];
+  /* a field object of a fixed kind converts the slide first, once for the write (fieldTarget) */
+  for (const named of input.blockIds) {
+    const target = await fieldTarget(deps, current, slide, named);
+    mutations.push(...target.prefix);
+    slide = target.slide;
+    blockIds.push(target.blockId);
+  }
+  for (const blockId of blockIds) {
     const block = requireBlock(slide, blockId);
     // a list steps its items' levels (SPEC-2 0.22)
     if (block.type === 'plain' && (input.items !== undefined || input.by !== undefined)) {

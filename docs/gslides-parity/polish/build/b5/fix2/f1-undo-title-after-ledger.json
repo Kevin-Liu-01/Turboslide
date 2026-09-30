@@ -1,0 +1,282 @@
+{
+  "base": "http://localhost:4445",
+  "tag": "after",
+  "startedAt": "2026-09-30T03:22:27.740Z",
+  "rounds": [
+    {
+      "round": 1,
+      "typedMs": 1856,
+      "maxGapMs": 104,
+      "revision1AtMs": 307,
+      "landedAfterLastKey": false,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Qua"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "deckId": "untitled-20260930-owit"
+    },
+    {
+      "round": 2,
+      "typedMs": 1821,
+      "maxGapMs": 100,
+      "revision1AtMs": 1891,
+      "landedAfterLastKey": true,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly review: Q3 2026"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "deckId": "untitled-20260930-uur3"
+    },
+    {
+      "round": 3,
+      "typedMs": 1917,
+      "maxGapMs": 100,
+      "revision1AtMs": 2001,
+      "landedAfterLastKey": true,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly review: Q3 2026"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "deckId": "untitled-20260930-ugj6"
+    },
+    {
+      "round": 4,
+      "typedMs": 1819,
+      "maxGapMs": 100,
+      "revision1AtMs": 1373,
+      "landedAfterLastKey": false,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly review:"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "deckId": "untitled-20260930-2wdp"
+    },
+    {
+      "round": 5,
+      "typedMs": 1800,
+      "maxGapMs": 102,
+      "revision1AtMs": 1841,
+      "landedAfterLastKey": true,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly review: Q3 2026"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "deckId": "untitled-20260930-x642"
+    },
+    {
+      "round": 6,
+      "typedMs": 2015,
+      "maxGapMs": 109,
+      "revision1AtMs": 815,
+      "landedAfterLastKey": false,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "deckId": "untitled-20260930-osbs"
+    },
+    {
+      "round": 7,
+      "typedMs": 2005,
+      "maxGapMs": 114,
+      "revision1AtMs": 399,
+      "landedAfterLastKey": false,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quar"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "deckId": "untitled-20260930-kwy6"
+    },
+    {
+      "round": 8,
+      "typedMs": 1847,
+      "maxGapMs": 115,
+      "revision1AtMs": 234,
+      "landedAfterLastKey": false,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Qu"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "deckId": "untitled-20260930-dr36"
+    },
+    {
+      "round": 9,
+      "typedMs": 1980,
+      "maxGapMs": 105,
+      "revision1AtMs": 1387,
+      "landedAfterLastKey": false,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly review:"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "deckId": "untitled-20260930-goaq"
+    },
+    {
+      "round": 10,
+      "typedMs": 1900,
+      "maxGapMs": 103,
+      "revision1AtMs": 143,
+      "landedAfterLastKey": false,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Q"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "",
+        "dom": "Click to add title"
+      },
+      "undoStepsToPrompt": 1,
+      "wholeSessionUndone": true,
+      "deckId": "untitled-20260930-l0ql"
+    }
+  ],
+  "summary": {
+    "rounds": 10,
+    "wholeSessionUndone": 10,
+    "oneStep": 10
+  }
+}

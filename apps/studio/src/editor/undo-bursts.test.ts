@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import type { Mutation } from '@turboslide/schema/mutations';
 
-import { stepBursts } from './undo-bursts';
-import type { Burst } from './undo-bursts';
+import { stepBursts, typingGroupAfter, typingGroupFor } from './undo-bursts';
+import type { Burst, TypingGroup } from './undo-bursts';
 
 const splice = (at: number, insert: string): Mutation => ({
   op: 'text.splice',
@@ -78,5 +78,43 @@ describe('stepBursts (the undo of a typing group, burst by burst; s2.md S2-R3)',
     const copy = stepBursts([], untouched, 'forward', r.transformSince);
     expect(copy).toEqual(untouched);
     expect(copy).not.toBe(untouched);
+  });
+});
+
+describe('typingGroupFor (the typing group by keystroke clock; VERIFICATION.md "Polish round, pass 2" finding 3)', () => {
+  const KEY = 'title/heading/heading';
+  const WINDOW = 400;
+  it('joins the group when the first key of this burst fell inside the window after the last key of the group, whatever the commits’ own clocks', () => {
+    /* the group's last keystroke at 700; the draft's first write landed at 800 and the room's write
+       of this burst commits at 2100 after 1.3 s of continuous typing: the keystroke gap is 110 ms */
+    const last: TypingGroup = { entryId: 3, key: KEY, at: 700 };
+    expect(typingGroupFor(last, KEY, { first: 810, last: 2000 }, 2100, WINDOW)).toBe(3);
+  });
+  it('starts a new entry after a pause over the window, and for another Text or a write that is no burst', () => {
+    const last: TypingGroup = { entryId: 3, key: KEY, at: 700 };
+    expect(typingGroupFor(last, KEY, { first: 1200, last: 1500 }, 1600, WINDOW)).toBeNull();
+    expect(
+      typingGroupFor(last, 'title/lead/lead', { first: 810, last: 900 }, 1000, WINDOW),
+    ).toBeNull();
+    expect(typingGroupFor(last, null, { first: 810, last: 900 }, 1000, WINDOW)).toBeNull();
+    expect(typingGroupFor(null, KEY, { first: 810, last: 900 }, 1000, WINDOW)).toBeNull();
+  });
+  it('reads the burst’s own clock when no keystroke fell since the last burst (a paste, a toggle, an agent’s write)', () => {
+    const last: TypingGroup = { entryId: 3, key: KEY, at: 700 };
+    expect(typingGroupFor(last, KEY, { first: null, last: 0 }, 1000, WINDOW)).toBe(3);
+    expect(typingGroupFor(last, KEY, { first: null, last: 0 }, 1100, WINDOW)).toBeNull();
+  });
+  it('clocks the group after a burst at its last keystroke, else at the commit, and keys it by the Text', () => {
+    expect(typingGroupAfter(5, KEY, { first: 810, last: 2000 }, 2100)).toEqual({
+      entryId: 5,
+      key: KEY,
+      at: 2000,
+    });
+    expect(typingGroupAfter(5, KEY, { first: null, last: 0 }, 2100)).toEqual({
+      entryId: 5,
+      key: KEY,
+      at: 2100,
+    });
+    expect(typingGroupAfter(5, null, { first: 810, last: 2000 }, 2100)).toBeNull();
   });
 });

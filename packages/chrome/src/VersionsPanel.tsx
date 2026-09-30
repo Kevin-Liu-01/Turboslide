@@ -331,24 +331,30 @@ export function VersionsPanel({
                   : formatWhen(version.createdAt)}
             </button>
           )}
+          {/* one line (the fix round 2, finding 18): a named row reads its time and author, since
+              its name is the line above and the word "named" said nothing; the rows every edit
+              writes read the author and the count; the current row says so */}
           <span className="ts-version-meta">
             {version.note !== '' ? `${formatWhen(version.createdAt)} · ` : ''}
             <span className="ts-version-author" data-author-word={authorWord(identity)}>
               {authorWord(identity)}
               {trust !== null && authorWord(identity) !== 'You' ? ` · ${trust}` : ''}
             </span>
-            {' · '}
-            {version.mutations.length === 0
-              ? 'named'
-              : PANELS.versionHistory.changes(version.mutations.length)}
+            {version.note === '' && version.mutations.length > 0
+              ? ` · ${PANELS.versionHistory.changes(version.mutations.length)}`
+              : ''}
             {current ? ' · current' : ''}
           </span>
         </span>
+        {/* Restore as a glyph square with its sentence in the tooltip (the fix round 2, finding 18):
+            the text button "Restore this version" took 240 of the panel's 320 px, so the name and
+            the meta beside it read "Before th…" and "Sep 29, 08…"; Google's rows draw no restore
+            control at all (its menu holds it), so the square is the smaller step */}
         {!current ? (
           <ToolButton
-            label={PANELS.versionHistory.restore}
+            icon="arrow-uturn-left"
             title={PANELS.versionHistory.restore}
-            doc="Brings the presentation back to this version; Undo returns"
+            doc="Brings the presentation back to this version. Undo returns"
             ariaLabel={`${PANELS.versionHistory.restore} ${version.note !== '' ? version.note : formatWhen(version.createdAt)}`}
             className="ts-version-restore"
             control={`versionHistory.${version.n}.restore`}

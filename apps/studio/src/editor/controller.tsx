@@ -22,8 +22,8 @@ import { placeInsert, wantsPlacement } from './place-insert';
 import { SELECT_OBJECTS_EVENT, keepsPlace, originOf } from './select-after-write';
 import type { SelectObjectsDetail, StudioActionContext } from './select-after-write';
 import { typingKeyOf } from './typing-key';
-import { stepBursts } from './undo-bursts';
-import type { Burst } from './undo-bursts';
+import { stepBursts, typingGroupAfter, typingGroupFor } from './undo-bursts';
+import type { Burst, KeyClock, TypingGroup } from './undo-bursts';
 import { windowActionIds } from '@turboslide/agent/window/registry';
 import {
   blockAdjust,
@@ -1317,8 +1317,63 @@ export function createEditorController(init: {
   let ownAnsweredRevision = 0;
   /** True for a document that holds the tab's own server side write while it settles (B4's R16). */
   let ownWriteMatch: ((document: DeckDocument) => boolean) | null = null;
-  /* the typing group (SPEC 7.2.15): consecutive bursts on one Text inside 400 ms are one Cmd Z */
-  let lastTyping: { entryId: number; key: string; at: number } | null = null;
+  /* the typing group (SPEC 7.2.15): keystrokes on one Text inside 400 ms are one Cmd Z. The group
+     is measured between keystrokes (undo-bursts.ts typingGroupFor): the last group's last key and
+     this burst's first key, read from the document's keydown into `keyClock`. Before the polish
+     round's fix round 2 the clocks compared were the bursts' commits, and a burst is written 100 ms
+     after the keys pause, so a title typed without a pause split into two Cmd+Z steps whenever one
+     key gap over 100 ms fell mid word: the first burst (the draft's first write) and the rest
+     (VERIFICATION.md "Polish round, pass 2" finding 3; docs/gslides-parity/polish/build/b5.md
+     "Polish round fix round 2"). Every write path records through `recordEdit` (the draft's first
+     write, a burst queued during its flight, a write through the room), so the group holds across
+     the draft's first landing. */
+  let lastTyping: TypingGroup | null = null;
+  const keyClock: KeyClock = { first: null, last: 0 };
+  /* a burst is written about 100 ms after its last key; a key clock older than this at the commit
+     belongs to no burst (a key in a dialog's field, a shortcut letter) and the commit's own clock
+     stands in, as before the fix round */
+  const KEY_CLOCK_STALE_MS = 1000;
+  /**
+   * The history's entry for an edit this tab made: a typing burst joins the open typing group
+   * when it names the same Text and its first keystroke fell inside TEXT_UNDO_GROUP_MS of the
+   * group's last one (typingGroupFor), else it starts an entry of its own; the group stays open
+   * only while it is the newest entry, so any other write between two bursts closes it. Returns
+   * the entry (joined or new) and whether it was joined; the caller records the clocks
+   * (`revisionOf`, `clockOf`, `burstsOf`) its transport knows.
+   */
+  const recordEdit = (
+    mutations: Mutation[],
+    inverse: Mutation[],
+    label: string,
+  ): { entry: HistoryEntry; joined: boolean } => {
+    const key = typingKeyOf(mutations);
+    const nowMs = Date.now();
+    const keys: KeyClock =
+      keyClock.first !== null && nowMs - keyClock.last <= KEY_CLOCK_STALE_MS
+        ? { ...keyClock }
+        : { first: null, last: 0 };
+    if (key !== null) keyClock.first = null;
+    const groupId = typingGroupFor(lastTyping, key, keys, nowMs, TEXT_UNDO_GROUP_MS);
+    const entries = history.entries();
+    const newest = entries[entries.length - 1];
+    if (groupId !== null && newest !== undefined && newest.id === groupId) {
+      newest.mutations.push(...mutations);
+      newest.inverse.unshift(...inverse);
+      lastTyping = typingGroupAfter(newest.id, key, keys, nowMs);
+      return { entry: newest, joined: true };
+    }
+    const entry = history.push({ mutations, inverse, label });
+    lastTyping = typingGroupAfter(entry.id, key, keys, nowMs);
+    return { entry, joined: false };
+  };
+  /** One burst's clocks for `burstsOf`: appended to the entry's list, or the list's first when none is kept yet. */
+  const recordBurst = (entryId: number, burst: Burst): void => {
+    const list = burstsOf.get(entryId);
+    if (list === undefined) {
+      burstsOf.set(entryId, [burst]);
+      if (!clockOf.has(entryId)) clockOf.set(entryId, burst.at);
+    } else list.push(burst);
+  };
   let versionsTimer: ReturnType<typeof setTimeout> | undefined;
   const identity = init.payload.identity;
   const pendingStore = pendingStoreFor();
@@ -2140,6 +2195,7 @@ export function createEditorController(init: {
           history.clear();
           clockOf.clear();
           burstsOf.clear();
+          lastTyping = null;
           showExternal({ revision: fresh });
         }
         publish({
@@ -2211,8 +2267,10 @@ export function createEditorController(init: {
     mutations: Mutation[];
     label: string;
     kind: 'edit' | 'undo' | 'redo';
-    /** the history entry the write made, for the room clock an undo transforms from */
+    /** the history entry the write made or joined, for the room clock an undo transforms from */
     entryId: number | null;
+    /** how many mutations the write's inverse holds, for the entry's burst record */
+    inverseCount: number;
     resolve: (committed: Committed) => void;
     reject: (error: Error) => void;
   };
@@ -2259,14 +2317,24 @@ export function createEditorController(init: {
     }
     let entryId: number | null = null;
     if (kind === 'edit') {
-      const entry = history.push({ mutations, inverse: result.inverse, label });
-      revisionOf.set(entry.id, latest().serverRevision);
+      /* a burst typed during the flight joins the typing group the first write opened (SPEC
+         7.2.15; recordEdit), so one Cmd+Z takes the whole title back */
+      const { entry, joined } = recordEdit(mutations, result.inverse, label);
+      if (!joined) revisionOf.set(entry.id, latest().serverRevision);
       entryId = entry.id;
     }
     setDocument(result.document, changedBy(mutations));
     publish({ pending: snapshot.pending + 1 });
     return new Promise<Committed>((resolve, reject) => {
-      draftQueue.push({ mutations, label, kind, entryId, resolve, reject });
+      draftQueue.push({
+        mutations,
+        label,
+        kind,
+        entryId,
+        inverseCount: result.inverse.length,
+        resolve,
+        reject,
+      });
     });
   };
 
@@ -2294,7 +2362,14 @@ export function createEditorController(init: {
         item.reject(error instanceof Error ? error : new TypeError(String(error)));
         continue;
       }
-      if (item.entryId !== null) clockOf.set(item.entryId, applied.at);
+      /* the replayed burst's own clock joins its entry's list (undo-bursts.ts), after the first
+         write's clock the landing recorded; an entry of its own takes this clock as its first */
+      if (item.entryId !== null)
+        recordBurst(item.entryId, {
+          at: applied.at,
+          forward: item.mutations.length,
+          inverse: item.inverseCount,
+        });
       setDocument(applied.document, changedBy(item.mutations));
       const base = latest().serverRevision;
       void applied.settled.then(async (outcome) => {
@@ -2372,10 +2447,18 @@ export function createEditorController(init: {
       publish({ error: error.message });
       return Promise.reject(error);
     }
+    /* the first write opens the typing group when it is a burst (SPEC 7.2.15; recordEdit): the
+       bursts typed during its flight and after the room attaches join it */
+    let draftEntry: HistoryEntry | null = null;
     if (kind === 'edit') {
-      const entry = history.push({ mutations, inverse: result.inverse, label });
-      revisionOf.set(entry.id, result.document.deck.revision);
+      const { entry, joined } = recordEdit(mutations, result.inverse, label);
+      if (!joined) revisionOf.set(entry.id, result.document.deck.revision);
+      draftEntry = entry;
     }
+    const draftBurst: Omit<Burst, 'at'> = {
+      forward: mutations.length,
+      inverse: result.inverse.length,
+    };
     setDocument(result.document, changedBy(mutations));
     /* a draft's own commit schedules its shader stills too; the frame write waits for the draft
        chain, so the deck exists by the time it goes up (docs/FEATURES.md 5.5) */
@@ -2412,15 +2495,16 @@ export function createEditorController(init: {
         error: null,
       });
       warmHomeCard();
+      /* the first write is in the room's base (the server's document at this clock), so its
+         inverse is transformed past what lands after the attach and nothing before it (undo-bursts.ts);
+         the bursts queued during the flight append their own clocks at the replay below */
+      const attachAt = answer.seq ?? answer.revision;
+      if (draftEntry !== null) recordBurst(draftEntry.id, { at: attachAt, ...draftBurst });
       if (room === null && answer.document !== undefined) {
         // the server's document is the room's base; the writes queued during the flight are
         // folded back on top of it through the room in the same tick, so nothing is drawn twice
         setDocument(answer.document, 'all');
-        attachRoom(
-          answer.document,
-          answer.seq ?? answer.revision,
-          init.payload.room?.tier ?? 'memory',
-        );
+        attachRoom(answer.document, attachAt, init.payload.room?.tier ?? 'memory');
         // the first write created the deck and its access record (restricted, the creator as the
         // owner; docs/FOCUS.md rank 1, ruling 2): the /new page keeps its draft payload, so the
         // record and the role are read once here and every reader of `snap.access` sees them
@@ -2477,31 +2561,13 @@ export function createEditorController(init: {
       return Promise.reject(error instanceof Error ? error : new TypeError(String(error)));
     }
     if (kind === 'edit') {
-      const key = typingKeyOf(mutations);
-      const nowMs = Date.now();
-      const group =
-        key !== null &&
-        lastTyping !== null &&
-        lastTyping.key === key &&
-        nowMs - lastTyping.at < TEXT_UNDO_GROUP_MS
-          ? history.entries().find((entry) => entry.id === lastTyping?.entryId)
-          : undefined;
-      if (group !== undefined && history.entries()[history.entries().length - 1] === group) {
-        group.mutations.push(...mutations);
-        group.inverse.unshift(...applied.inverse);
-        burstsOf
-          .get(group.id)
-          ?.push({ at: applied.at, forward: mutations.length, inverse: applied.inverse.length });
-        if (lastTyping !== null) lastTyping.at = nowMs;
-      } else {
-        const entry = history.push({ mutations, inverse: applied.inverse, label });
-        revisionOf.set(entry.id, latest().serverRevision);
-        clockOf.set(entry.id, applied.at);
-        burstsOf.set(entry.id, [
-          { at: applied.at, forward: mutations.length, inverse: applied.inverse.length },
-        ]);
-        lastTyping = key === null ? null : { entryId: entry.id, key, at: nowMs };
-      }
+      const { entry, joined } = recordEdit(mutations, applied.inverse, label);
+      if (!joined) revisionOf.set(entry.id, latest().serverRevision);
+      recordBurst(entry.id, {
+        at: applied.at,
+        forward: mutations.length,
+        inverse: applied.inverse.length,
+      });
       if (
         identity !== undefined &&
         identity.trust === 'label' &&
@@ -2552,10 +2618,27 @@ export function createEditorController(init: {
     pointerHeld = false;
     if (namePromptDue && !inlineActive && !promptedName) openNamePrompt();
   };
+  /* the keystroke clock of the typing group (SPEC 7.2.15; undo-bursts.ts KeyClock): the printable
+     keys, Backspace, Delete and Enter with no shortcut modifier, read at the document so the first
+     key of a session (the letter that opens it, AMENDMENTS.md A1 rule 4) is read too */
+  const onKeyStroke = (event: KeyboardEvent): void => {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (
+      event.key.length !== 1 &&
+      event.key !== 'Backspace' &&
+      event.key !== 'Delete' &&
+      event.key !== 'Enter'
+    )
+      return;
+    const now = Date.now();
+    if (keyClock.first === null) keyClock.first = now;
+    keyClock.last = now;
+  };
   if (typeof document !== 'undefined') {
     document.addEventListener('pointerdown', onPointerHeld, true);
     document.addEventListener('pointerup', onPointerFree, true);
     document.addEventListener('pointercancel', onPointerFree, true);
+    document.addEventListener('keydown', onKeyStroke, true);
   }
   const openNamePrompt = (): void => {
     promptedName = true;
@@ -2632,9 +2715,19 @@ export function createEditorController(init: {
        SYNC.md 3.4) and is not a write against the field object that converts the slide to a
        canvas first (convert-first.ts): the reducer writes the field in place, so the cover keeps
        its kind under typing and converts on the first format write alone, as before */
+    /* a write that carries its own conversion (the store's withCanvas: a measured slide.replace in
+       front of the rest, the way text.list on the cover's heading travels since the polish round's
+       fix round 2) converts nothing twice: the slides the list itself replaces are read past */
+    const replaced = new Set(
+      mutations.flatMap((mutation) => (mutation.op === 'slide.replace' ? [mutation.slideId] : [])),
+    );
     const convert = slideToConvertFor(
       snapshot.document,
-      mutations.filter((mutation) => !isSlideFieldTextRun(snapshot.document, mutation)),
+      mutations.filter(
+        (mutation) =>
+          !('slideId' in mutation && replaced.has(mutation.slideId)) &&
+          !isSlideFieldTextRun(snapshot.document, mutation),
+      ),
     );
     if (convert !== null) return convertThenCommit(convert, mutations, label);
     return commitAs(withAutoTitle(mutations), label, 'edit');

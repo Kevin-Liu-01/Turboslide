@@ -1,0 +1,120 @@
+{
+  "base": "http://localhost:4445",
+  "tag": "after",
+  "startedAt": "2026-09-30T03:34:58.413Z",
+  "widths": {
+    "1280": [
+      {
+        "version": "6",
+        "pick": "Sep 29, 08:35 PM",
+        "meta": "You · current",
+        "lines": 1,
+        "clipped": false,
+        "width": 223,
+        "restore": false
+      },
+      {
+        "version": "5",
+        "pick": "Before the customer copy",
+        "meta": "Sep 29, 08:35 PM · You",
+        "lines": 1,
+        "clipped": false,
+        "width": 195,
+        "restore": true
+      },
+      {
+        "version": "4",
+        "pick": "08:35 PM",
+        "meta": "You",
+        "lines": 1,
+        "clipped": false,
+        "width": 182,
+        "restore": true
+      },
+      {
+        "version": "3",
+        "pick": "08:35 PM",
+        "meta": "You",
+        "lines": 1,
+        "clipped": false,
+        "width": 182,
+        "restore": true
+      },
+      {
+        "version": "2",
+        "pick": "08:35 PM",
+        "meta": "You",
+        "lines": 1,
+        "clipped": false,
+        "width": 182,
+        "restore": true
+      },
+      {
+        "version": "1",
+        "pick": "08:35 PM",
+        "meta": "You · 1 change",
+        "lines": 1,
+        "clipped": false,
+        "width": 182,
+        "restore": true
+      }
+    ],
+    "1440": [
+      {
+        "version": "6",
+        "pick": "Sep 29, 08:35 PM",
+        "meta": "You · current",
+        "lines": 1,
+        "clipped": false,
+        "width": 223,
+        "restore": false
+      },
+      {
+        "version": "5",
+        "pick": "Before the customer copy",
+        "meta": "Sep 29, 08:35 PM · You",
+        "lines": 1,
+        "clipped": false,
+        "width": 195,
+        "restore": true
+      },
+      {
+        "version": "4",
+        "pick": "08:35 PM",
+        "meta": "You",
+        "lines": 1,
+        "clipped": false,
+        "width": 182,
+        "restore": true
+      },
+      {
+        "version": "3",
+        "pick": "08:35 PM",
+        "meta": "You",
+        "lines": 1,
+        "clipped": false,
+        "width": 182,
+        "restore": true
+      },
+      {
+        "version": "2",
+        "pick": "08:35 PM",
+        "meta": "You",
+        "lines": 1,
+        "clipped": false,
+        "width": 182,
+        "restore": true
+      },
+      {
+        "version": "1",
+        "pick": "08:35 PM",
+        "meta": "You · 1 change",
+        "lines": 1,
+        "clipped": false,
+        "width": 182,
+        "restore": true
+      }
+    ]
+  },
+  "deckId": "untitled-20260930-xr5s"
+}

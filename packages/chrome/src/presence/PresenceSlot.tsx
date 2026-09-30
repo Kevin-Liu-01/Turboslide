@@ -20,19 +20,48 @@ import { canFollow, chipTipOf, slideNumberOf, slotChips, viewerFactsOf } from '.
  * people are present. Four 24 px slots for others in roster order with 4 px gaps, the 32 by 24
  * `+N` chip drawn empty with its border until a fifth person joins, an 8 px gap, a hair rule, a
  * 7 px gap and the own chip with a 1 px ink border. A chip appears and leaves by opacity; a
- * click on a chip opens the roster menu at the chip, whose row for that person offers Follow
- * (4.4), Stop while they are followed, or Go to slide where Follow is refused; the `+N` chip
- * opens the same roster (4.5); the own chip opens the own chip's menu (7.5). The row's width
- * never changes when a person joins or leaves. The slot itself carries a tooltip naming who is
- * in the presentation now (docs/PRODUCT.md section 2 rank 30; audit-seller 32).
+ * click on a chip jumps once to the slide that person has open (Go to slide, the click Google
+ * Slides gives the avatar; the row collab.roster.go-to-slide); the people button (`+N` once a
+ * fifth person joins) opens the roster (4.5), whose row for each person offers Follow (4.4), Stop
+ * while they are followed, or Go to slide where Follow is refused; the own chip opens the own
+ * chip's menu (7.5). The row's width never changes when a person joins or leaves. The slot itself
+ * carries a tooltip naming who is in the presentation now (docs/PRODUCT.md section 2 rank 30;
+ * audit-seller 32).
  *
  * The polish round (docs/POLISH.md item 104; the row collab.follow.anonymous-editor): before it a
  * chip's click followed the person at once and a second click stopped, with no word on screen,
  * and the roster row's click toggled the same state, so a seller who clicked a chip to see who it
  * was started following, and a click on the roster row after a chip click stopped a follow just
- * started (the verifier read A following B's move in one of two runs). The chip now opens the
- * roster with the person's row, where the word Follow or Stop says what the click does.
+ * started (the verifier read A following B's move in one of two runs). The fix round made the
+ * chip open the roster at the chip, and the jump moved into the roster's row with it, so the
+ * chip's click no longer jumped (VERIFICATION.md "Polish round, pass 2" finding 5, the row red on
+ * both tiers). Since the fix round 2 the chip's click is the jump and nothing else, and Follow
+ * lives in the roster alone, where its word says what the click does.
  */
+
+/**
+ * The slot's tooltip props, held to the slot itself: the tooltip system schedules the anchor of
+ * every `data-tip` element a mouse event reaches (Tooltip.tsx scheduleTooltip, no containment), so
+ * the group's handlers, reached by the bubble from a chip, cancelled the chip's pending tip and
+ * showed the slot's sentence over every chip (read in the fix round 2's hand drive: the mouse on
+ * B's chip read "Collaborators. Who is in this presentation now" and never the person's name and
+ * slide). A mouse event whose target sits inside a nested anchor is left to that anchor.
+ */
+function slotTipProps(others: number): ReturnType<typeof tipProps> {
+  const props = tipProps(presenceSlotTip(others));
+  const own = (event: { target: EventTarget | null; currentTarget: HTMLElement }): boolean =>
+    !(event.target instanceof Element) ||
+    event.target.closest('[data-tip]') === event.currentTarget;
+  return {
+    ...props,
+    onMouseEnter: (event) => {
+      if (own(event)) props.onMouseEnter(event);
+    },
+    onMouseMove: (event) => {
+      if (own(event)) props.onMouseMove(event);
+    },
+  };
+}
 
 /** The slot's tooltip (rank 30): the name and one sentence, with the count while others are present. */
 export function presenceSlotTip(others: number): { name: string; doc: string } {
@@ -76,8 +105,8 @@ export function PresenceSlot() {
     else if (input.editor?.followClient) input.editor.followClient(participant.clientId);
     else goTo(participant);
   };
-  /* a chip's click opens the roster at the chip; a second click on the same chip closes it */
-  const openRosterAt = (chip: HTMLElement) => setRoster((open) => (open === chip ? null : chip));
+  /* the Follow word is drawn in the roster while its parked row is present (docs/FOCUS.md 3.1) */
+  const followOffered = isPresent(itemById('title.presence.follow'), shell.menuContext);
   const goTo = (participant: PresenceParticipant) => {
     if (presence.onGoTo) presence.onGoTo(participant.clientId);
     else if (input.editor?.goToClient) input.editor.goToClient(participant.clientId);
@@ -92,7 +121,7 @@ export function PresenceSlot() {
       data-count={presence.others.length}
       role="group"
       aria-label={PRESENCE.collaborators}
-      {...tipProps(presenceSlotTip(presence.others.length))}
+      {...slotTipProps(presence.others.length)}
     >
       {Array.from({ length: 4 }, (_slot, i) => {
         const participant = shown[i];
@@ -102,7 +131,7 @@ export function PresenceSlot() {
           );
         const n = slideNumberOf(input.document, participant.slideId);
         const following = presence.following === participant.clientId;
-        const follows = canFollow(participant, input.capabilities);
+        const follows = followOffered && canFollow(participant, input.capabilities);
         return (
           <button
             key={participant.clientId}
@@ -110,22 +139,22 @@ export function PresenceSlot() {
             className={cn('ts-presence-slot', 'ts-presence-chip', following && 'is-following')}
             data-control={`presence.chip.${participant.clientId}`}
             data-client={participant.clientId}
-            data-menu-item={follows ? 'title.presence.follow' : 'title.presence.goTo'}
+            data-menu-item="title.presence.goTo"
             data-following={following ? '' : undefined}
-            aria-haspopup="menu"
-            aria-expanded={roster !== null && roster.dataset.client === participant.clientId}
-            onClick={(event) => openRosterAt(event.currentTarget)}
+            aria-label={
+              n === null ? (participant.name ?? participant.label) : PRESENCE.goToSlide(n)
+            }
+            onClick={() => goTo(participant)}
             {...tipProps({
               name: following
                 ? PRESENCE.following(participant.name ?? participant.label)
                 : chipTipOf(participant, viewer, n),
-              doc: follows
-                ? following
-                  ? 'Opens the list, where Stop ends the follow'
-                  : 'Opens the list, where Follow moves with this person'
-                : n === null
+              doc:
+                n === null
                   ? 'This person has no slide open'
-                  : `Opens the list, where ${PRESENCE.goToSlide(n)} jumps once`,
+                  : follows
+                    ? 'Jumps to the slide this person has open. Follow is in the list'
+                    : 'Jumps to the slide this person has open',
             })}
           >
             <IdentityChip

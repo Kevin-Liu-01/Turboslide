@@ -1,0 +1,102 @@
+{
+  "base": "http://localhost:4445",
+  "tag": "pause",
+  "startedAt": "2026-09-30T03:30:48.602Z",
+  "rounds": [
+    {
+      "round": 1,
+      "typedMs": 2473,
+      "maxGapMs": 610,
+      "revision1AtMs": 803,
+      "landedAfterLastKey": false,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "Quarterly",
+        "dom": "Quarterly"
+      },
+      "undoStepsToPrompt": 2,
+      "wholeSessionUndone": false,
+      "afterRedo": "Quarterly review: Q3 2026",
+      "redoRestoresTitle": true,
+      "deckId": "untitled-20260930-u7xs"
+    },
+    {
+      "round": 2,
+      "typedMs": 2422,
+      "maxGapMs": 607,
+      "revision1AtMs": 882,
+      "landedAfterLastKey": false,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "Quarterly",
+        "dom": "Quarterly"
+      },
+      "undoStepsToPrompt": 2,
+      "wholeSessionUndone": false,
+      "afterRedo": "Quarterly review: Q3 2026",
+      "redoRestoresTitle": true,
+      "deckId": "untitled-20260930-36m0"
+    },
+    {
+      "round": 3,
+      "typedMs": 2558,
+      "maxGapMs": 613,
+      "revision1AtMs": 886,
+      "landedAfterLastKey": false,
+      "beforeUndo": {
+        "kind": "title",
+        "text": "Quarterly review: Q3 2026",
+        "dom": "Quarterly review: Q3 2026"
+      },
+      "writes": [
+        {
+          "n": 1,
+          "ops": "text.splice",
+          "inserts": "Quarterly"
+        }
+      ],
+      "afterOneUndo": {
+        "kind": "title",
+        "text": "Quarterly",
+        "dom": "Quarterly"
+      },
+      "undoStepsToPrompt": 2,
+      "wholeSessionUndone": false,
+      "afterRedo": "Quarterly review: Q3 2026",
+      "redoRestoresTitle": true,
+      "deckId": "untitled-20260930-z1vl"
+    }
+  ],
+  "summary": {
+    "rounds": 3,
+    "wholeSessionUndone": 0,
+    "oneStep": 0,
+    "twoSteps": 3,
+    "redoRestores": 3,
+    "pauseMs": 600
+  }
+}

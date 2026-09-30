@@ -212,21 +212,27 @@ describe('the title row slots', () => {
     expect(presence.querySelectorAll('.ts-presence-chip')).toHaveLength(4);
     expect(presence.querySelector('[data-control="presence.more"]')?.textContent).toBe('+16');
     expect(presence.getAttribute('data-count')).toBe('20');
-    /* an anonymous editor with a slide open can be followed (docs/POLISH.md item 104): the
-       chip's click opens the roster at the chip, whose row for the person offers Follow; nothing
-       follows until the row is clicked (the chip's silent toggle was the jank of the polish
-       round's verifier) */
+    /* the chip's click is the one time jump to the person's slide (the row collab.roster.go-to-slide,
+       Google's avatar click): it opens no menu and follows nobody (the chip's silent follow toggle
+       was the jank of the polish round's verifier; the roster at the chip of the fix round moved
+       the jump away, VERIFICATION.md "Polish round, pass 2" finding 5) */
     const chip = presence.querySelector('[data-control="presence.chip.c1"]')!;
+    expect(chip.getAttribute('data-menu-item')).toBe('title.presence.goTo');
+    expect(chip.getAttribute('aria-haspopup')).toBeNull();
     fireEvent.click(chip);
+    expect(onGoTo).toHaveBeenCalledWith('c1');
     expect(onFollow).not.toHaveBeenCalled();
-    expect(chip.getAttribute('aria-expanded')).toBe('true');
-    const atChip = document.getElementById('ts-menu-roster')!;
-    expect(atChip.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
+    expect(document.getElementById('ts-menu-roster')).toBeNull();
+    /* an anonymous editor with a slide open can be followed (docs/POLISH.md item 104): the roster
+       the people button opens offers Follow on the person's row, and nothing follows until that
+       row is clicked */
+    fireEvent.click(presence.querySelector('[data-control="presence.more"]')!);
+    const list = document.getElementById('ts-menu-roster')!;
+    expect(list.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
       PRESENCE.follow,
     );
-    fireEvent.click(atChip.querySelector('[data-control="presence.roster.c1"]')!);
+    fireEvent.click(list.querySelector('[data-control="presence.roster.c1"]')!);
     expect(onFollow).toHaveBeenCalledWith('c1');
-    expect(onGoTo).not.toHaveBeenCalled();
     expect(document.getElementById('ts-menu-roster')).toBeNull();
     fireEvent.click(presence.querySelector('[data-control="presence.more"]')!);
     const roster = document.getElementById('ts-menu-roster')!;
@@ -267,12 +273,16 @@ describe('the title row slots', () => {
         shell={shellState()}
       />,
     );
+    /* the chip's click jumps and follows nobody; the roster's row is where Follow is (the fix round 2) */
     const chip = container.querySelector('[data-control="presence.chip.c1"]')!;
-    expect(chip.getAttribute('data-menu-item')).toBe('title.presence.follow');
+    expect(chip.getAttribute('data-menu-item')).toBe('title.presence.goTo');
+    expect(chip.getAttribute('data-tip-doc') ?? chip.getAttribute('data-tip')).toBeTruthy();
     fireEvent.click(chip);
     expect(onFollow).not.toHaveBeenCalled();
-    const atChip = document.getElementById('ts-menu-roster')!;
-    fireEvent.click(atChip.querySelector('[data-control="presence.roster.c1"]')!);
+    expect(document.getElementById('ts-menu-roster')).toBeNull();
+    fireEvent.click(container.querySelector('[data-control="presence.more"]')!);
+    const roster = document.getElementById('ts-menu-roster')!;
+    fireEvent.click(roster.querySelector('[data-control="presence.roster.c1"]')!);
     expect(onFollow).toHaveBeenCalledWith('c1');
     rerender(
       <Harness

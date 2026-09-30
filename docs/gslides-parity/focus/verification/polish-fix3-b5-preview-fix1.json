@@ -1,0 +1,188 @@
+{
+  "base": "https://turboslide-gqcrv5p9r-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "no bearer",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T13:03:08.472Z",
+  "ms": 769923,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 769922,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/polish/b5fix3/gate-fix1/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "share.name-prompt.never-mid-drag",
+      "decks.recent.keeps-new-deck",
+      "decks.trash.restore",
+      "decks.trash.delete-forever-button",
+      "share.dialog.open",
+      "share.dialog.more-row",
+      "export.zip.bundle",
+      "export.print.opens",
+      "decks.trash.button-heights"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 9,
+  "passed": 5,
+  "failed": 4,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "commit": "88f5a368",
+  "origin": "https://turboslide-gqcrv5p9r-kl01s-projects.vercel.app",
+  "date": "2026-09-30",
+  "results": {
+    "share.dialog.more-row": "passed",
+    "decks.trash.restore": "failed",
+    "decks.trash.delete-forever-button": "passed",
+    "decks.trash.button-heights": "failed",
+    "decks.recent.keeps-new-deck": "passed",
+    "export.zip.bundle": "passed",
+    "export.print.opens": "passed",
+    "share.dialog.open": "failed",
+    "share.name-prompt.never-mid-drag": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.trash.restore",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "share.dialog.open",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "decks.trash.button-heights",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "share.name-prompt.never-mid-drag",
+        "feature": "share",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "decks.trash.restore",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "share.dialog.open",
+      "feature": "share",
+      "result": "failed"
+    },
+    {
+      "id": "decks.trash.button-heights",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "share.name-prompt.never-mid-drag",
+      "feature": "share",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.trash.restore",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "decks.trash.delete-forever-button",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.open",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "export.zip.bundle",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.more-row",
+      "feature": "share",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.button-heights",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded."
+    },
+    {
+      "id": "decks.recent.keeps-new-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.opens",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.name-prompt.never-mid-drag",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: every scratch deck is trashed, deleted forever and answers 404"
+    }
+  ]
+}

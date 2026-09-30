@@ -637,8 +637,17 @@ async function peopleRound(t) {
             'not driven: the panel lists no window row (two records within 15 minutes by one author, unnamed)',
         };
       }
-      /* the expanded window: its rule and its rows' marks */
-      await t.clickControl(facts.firstControl);
+      /* the expanded window: its rule and its rows' marks. The newest window opens expanded on its
+         own since the polish round (VersionsPanel.tsx `windowRow`, `newest`), so the row expands
+         the first window only when it is folded and folds it again only when it was (the ship
+         step's third attempt: the merged tree read "no list" after a click that folded it) */
+      const wasExpanded = await page.evaluate(
+        (control) =>
+          document.querySelector(`[data-control="${control}"]`)?.getAttribute('aria-expanded') ===
+          'true',
+        facts.firstControl,
+      );
+      if (!wasExpanded) await t.clickControl(facts.firstControl);
       await page
         .locator('.ts-versions-list.is-window')
         .first()
@@ -658,7 +667,7 @@ async function peopleRound(t) {
           .map((el) => Math.round((el.getBoundingClientRect().left - pr.left) * 10) / 10);
         return { rule, borderLeft: `${cs.borderLeftWidth} ${cs.borderLeftColor}`, marks };
       });
-      await t.clickControl(facts.firstControl).catch(() => undefined);
+      if (!wasExpanded) await t.clickControl(facts.firstControl).catch(() => undefined);
       await closeHistory();
       const near = (a, b, tol) => a !== null && b !== null && Math.abs(a - b) <= tol;
       /* 16 px from the panel's content edge, x 17 from its outer edge with the 1 px border
@@ -677,7 +686,7 @@ async function peopleRound(t) {
       const more = facts.moreSize === '11px';
       return {
         ok: column && level && rule && marks && oneAuthorColumn !== false && more,
-        observed: `panel ${facts.panelWidth} px; ${facts.windows} window rows (the first by ${facts.authorsOfFirst} author(s)); first mark at x ${facts.chipLeft}, standalone marks at x ${facts.standaloneChipLeft}, day heading at x ${facts.headingLeft}; expanded rule at x ${expanded?.rule ?? 'none'} (${expanded?.borderLeft ?? 'no list'}), its marks at x ${expanded?.marks.join(', ') || 'none'}; one author window's text at x ${facts.oneAuthorBody ?? 'no such window'} against the standalone text at x ${facts.standaloneBody}; +N reads ${facts.moreSize} through a probe element`,
+        observed: `panel ${facts.panelWidth} px; ${facts.windows} window rows (the first by ${facts.authorsOfFirst} author(s), ${wasExpanded ? 'open on its own' : 'folded, expanded by the row'}); first mark at x ${facts.chipLeft}, standalone marks at x ${facts.standaloneChipLeft}, day heading at x ${facts.headingLeft}; expanded rule at x ${expanded?.rule ?? 'none'} (${expanded?.borderLeft ?? 'no list'}), its marks at x ${expanded?.marks.join(', ') || 'none'}; one author window's text at x ${facts.oneAuthorBody ?? 'no such window'} against the standalone text at x ${facts.standaloneBody}; +N reads ${facts.moreSize} through a probe element`,
       };
     },
   );

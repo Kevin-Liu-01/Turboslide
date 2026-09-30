@@ -289,7 +289,7 @@ describe('the trust word, the badge, the tooltip sentence and the own identity (
     );
   });
 
-  it('reads one own identity: the account when signed in, else the roster self, else the payload', () => {
+  it('reads one own identity: the account when signed in, else the account principal naming a real id, else the roster self', () => {
     const payload = {
       principalId: 'anon_p',
       label: 'Iron 200',
@@ -300,12 +300,19 @@ describe('the trust word, the badge, the tooltip sentence and the own identity (
     expect(meOf({ account: { principal: verified, signedIn: true }, presence: { self } })).toBe(
       verified,
     );
+    /* the editor builds the anonymous principal from the roster's own row under the last answer
+       (docs/PEOPLE.md 3.11), so it is the fresher reading and the own chip follows the answer */
     expect(meOf({ account: { principal: payload, signedIn: false }, presence: { self } })).toBe(
-      self,
+      payload,
     );
     expect(
       meOf({ account: { principal: payload, signedIn: false }, presence: { others: [] } as never }),
     ).toBe(payload);
+    /* the author fallback names no principal: the roster row stands in */
+    const fallback = { ...payload, principalId: 'studio' };
+    expect(meOf({ account: { principal: fallback, signedIn: false }, presence: { self } })).toBe(
+      self,
+    );
     expect(meOf({ presence: { self } })).toBe(self);
     expect(meOf({})).toBeNull();
   });

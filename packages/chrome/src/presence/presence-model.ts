@@ -149,7 +149,15 @@ export function meOf(input: {
   presence?: Pick<EditorPresence, 'self'> | undefined;
 }): IdentityView | null {
   if (input.account?.signedIn === true) return input.account.principal;
-  return input.presence?.self ?? input.account?.principal ?? null;
+  /* an anonymous person too reads `account.principal` when it names a real principal: the editor
+     builds it from the roster's own row under the last answer of Change name or Change avatar
+     (docs/PEOPLE.md 3.11; own-identity.ts), so the own chip and the two heads change with the
+     answer and not with the room's 5 s identity cache, which on the blob tier left the chip on the
+     old name for 3 to 5 s (the integrator's preview readings of people.own-chip-follows-name and
+     -avatar); the roster row stands in when the payload named nobody */
+  const principal = input.account?.principal;
+  if (principal !== undefined && /^(anon_|usr_)/.test(principal.principalId)) return principal;
+  return input.presence?.self ?? principal ?? null;
 }
 
 /** The role word of a roster row (4.5): the role, or "by link" for a person admitted by a link. */

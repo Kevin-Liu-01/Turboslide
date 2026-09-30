@@ -1,0 +1,445 @@
+{
+  "base": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-29T14:03:02.738Z",
+  "scenarios": [
+    {
+      "name": "31 new deck and B joins",
+      "at": "2026-09-29T14:03:14.548Z",
+      "ok": true,
+      "ms": 11550,
+      "deck": "untitled-20260929-sldj",
+      "aSeesBMs": 254
+    },
+    {
+      "name": "32 slide added by A then B within 300 ms",
+      "at": "2026-09-29T14:03:30.641Z",
+      "ok": true,
+      "ms": 16092,
+      "attempts": [
+        {
+          "attempt": 1,
+          "gapMs": 300,
+          "before": 1,
+          "afterA": 3,
+          "afterB": 3,
+          "cardA": 0,
+          "cardB": 0,
+          "order": [
+            "title",
+            "split-1-efe6",
+            "split-1-68bd"
+          ]
+        },
+        {
+          "attempt": 2,
+          "gapMs": 150,
+          "before": 3,
+          "afterA": 5,
+          "afterB": 5,
+          "cardA": 0,
+          "cardB": 0,
+          "order": [
+            "title",
+            "split-1-efe6",
+            "split-2-efe6",
+            "split-1-68bd",
+            "split-2-68bd"
+          ]
+        },
+        {
+          "attempt": 3,
+          "gapMs": 60,
+          "before": 5,
+          "afterA": 7,
+          "afterB": 7,
+          "cardA": 0,
+          "cardB": 0,
+          "order": [
+            "title",
+            "split-1-efe6",
+            "split-2-efe6",
+            "split-3-efe6",
+            "split-1-68bd",
+            "split-2-68bd",
+            "split-3-68bd"
+          ]
+        }
+      ],
+      "refusedTab": null
+    },
+    {
+      "name": "33 with the card standing: A moves while the refused tab resizes",
+      "at": "2026-09-29T14:03:38.658Z",
+      "ok": true,
+      "ms": 8017,
+      "refusedTab": null,
+      "before": {
+        "x": 1100,
+        "y": 820,
+        "w": 480,
+        "h": 120,
+        "z": 3
+      },
+      "after": {
+        "a": {
+          "x": 674,
+          "y": 533,
+          "w": 679,
+          "h": 205,
+          "z": 3
+        },
+        "b": {
+          "x": 674,
+          "y": 533,
+          "w": 679,
+          "h": 205,
+          "z": 3
+        }
+      },
+      "converged": true,
+      "bothChangesKept": true,
+      "convergedMs": 609,
+      "refusedTabOps": [
+        200
+      ],
+      "refusedTabSync": {
+        "seq": 10,
+        "revision": 10,
+        "pending": 0,
+        "retained": 0,
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "offline": false,
+        "storeDegraded": false,
+        "streamDown": false
+      },
+      "refusedTabRejects": 0,
+      "refusedTabWords": "All changes saved"
+    },
+    {
+      "name": "34 the refused tab types, then dismisses",
+      "at": "2026-09-29T14:03:51.583Z",
+      "ok": false,
+      "ms": 12925,
+      "error": "TimeoutError: locator.waitFor: Timeout 8000ms exceeded. | Call log:"
+    }
+  ],
+  "pages": {
+    "A": {
+      "consoleErrors": [
+        {
+          "at": "2026-09-29T14:03:55.245Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.258Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.261Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.265Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.301Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.307Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.309Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.313Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.315Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.321Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.324Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.324Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.324Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.324Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.327Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.328Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.331Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.331Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.332Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.336Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.339Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.353Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.355Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.360Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.373Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.382Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.382Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.392Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.396Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.420Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.429Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:55.554Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.201Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.214Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.214Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.214Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.214Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.214Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.215Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.215Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.215Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.222Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.225Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.230Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.232Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.232Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.233Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.235Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.238Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.241Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.251Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.252Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.253Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.259Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.259Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T14:03:57.271Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        }
+      ],
+      "failedOrErrorResponses": [],
+      "functionRequests": 23,
+      "byPath": {
+        "GET /new": 1,
+        "POST /api/x/csp/report": 3,
+        "GET /_serverFn/<x>": 4,
+        "POST /_serverFn/<x>": 10,
+        "POST /api/decks/<id>/ops": 5
+      },
+      "ops": [
+        {
+          "at": 1790690595229,
+          "status": 200,
+          "ms": 575
+        },
+        {
+          "at": 1790690600711,
+          "status": 200,
+          "ms": 529
+        },
+        {
+          "at": 1790690606023,
+          "status": 200,
+          "ms": 512
+        },
+        {
+          "at": 1790690611895,
+          "status": 200,
+          "ms": 453
+        },
+        {
+          "at": 1790690614844,
+          "status": 200,
+          "ms": 411
+        }
+      ]
+    },
+    "B": {
+      "consoleErrors": [],
+      "failedOrErrorResponses": [],
+      "functionRequests": 17,
+      "byPath": {
+        "GET /edit/<id>": 1,
+        "POST /api/x/csp/report": 2,
+        "GET /_serverFn/<x>": 2,
+        "POST /_serverFn/<x>": 7,
+        "POST /api/decks/<id>/ops": 5
+      },
+      "ops": [
+        {
+          "at": 1790690596509,
+          "status": 200,
+          "ms": 1436
+        },
+        {
+          "at": 1790690601983,
+          "status": 200,
+          "ms": 1567
+        },
+        {
+          "at": 1790690607424,
+          "status": 200,
+          "ms": 1777
+        },
+        {
+          "at": 1790690616991,
+          "status": 200,
+          "ms": 513
+        },
+        {
+          "at": 1790690620523,
+          "status": 200,
+          "ms": 1188
+        }
+      ]
+    }
+  },
+  "teardown": {
+    "deckId": "untitled-20260929-sldj",
+    "steps": [
+      "File > Move to trash ok",
+      "Delete forever ok (attempt 1)"
+    ],
+    "final": {
+      "edit": 404,
+      "deck": 404
+    }
+  },
+  "endedAt": "2026-09-29T14:03:58.906Z"
+}

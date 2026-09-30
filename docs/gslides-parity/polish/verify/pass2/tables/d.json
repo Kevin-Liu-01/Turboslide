@@ -1,0 +1,117 @@
+[
+  {
+    "n": 1,
+    "step": "deck",
+    "at": "2026-09-29T22:14:14.438Z",
+    "id": "untitled-20260929-1r5o",
+    "titleSlide": "title",
+    "url": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app/edit/untitled-20260929-1r5o"
+  },
+  {
+    "n": 2,
+    "step": "insert 1x2",
+    "at": "2026-09-29T22:14:24.341Z",
+    "words": "1 x 2",
+    "s1": "d-01-grid-1x2-hover.png",
+    "s2": "d-02-grid-1x2-after-click.png",
+    "rev0": 2,
+    "rev1": 3,
+    "rev2": 3,
+    "fresh": [
+      "heading:h {\"x\":137,\"y\":129,\"w\":1326,\"h\":49,\"z\":0}",
+      "paragraph:p1 {\"x\":137,\"y\":494.6875,\"w\":767.578125,\"h\":33,\"z\":1}",
+      "table:table {\"x\":320,\"y\":218,\"w\":960,\"h\":109,\"z\":2}"
+    ],
+    "save": "All changes saved",
+    "menusOpen": 0,
+    "toasts": []
+  },
+  {
+    "n": 3,
+    "step": "selected",
+    "at": "2026-09-29T22:14:25.182Z",
+    "chip": "Table",
+    "shot": "d-03-selected-1x2.png"
+  },
+  {
+    "n": 4,
+    "step": "after Delete key",
+    "at": "2026-09-29T22:14:26.123Z",
+    "objects": [
+      "heading:h",
+      "paragraph:p1"
+    ],
+    "save": "All changes saved",
+    "shot": "d-04-after-delete.png",
+    "active": "BODY."
+  },
+  {
+    "n": 5,
+    "step": "insert 1x3",
+    "at": "2026-09-29T22:14:33.832Z",
+    "words": "1 x 3",
+    "s1": "d-05-grid-1x3-hover.png",
+    "s2": "d-06-grid-1x3-after-click.png",
+    "rev0": 4,
+    "rev1": 5,
+    "rev2": 5,
+    "fresh": [
+      "chart:chart {\"x\":320,\"y\":218,\"w\":960,\"h\":540,\"z\":2}"
+    ],
+    "save": "All changes saved",
+    "menusOpen": 0,
+    "toasts": []
+  },
+  {
+    "n": 6,
+    "step": "objects",
+    "at": "2026-09-29T22:14:33.833Z",
+    "objects": [
+      "heading:h",
+      "paragraph:p1",
+      "chart:chart"
+    ]
+  },
+  {
+    "n": 7,
+    "step": "insert 2x2",
+    "at": "2026-09-29T22:14:41.540Z",
+    "words": "2 x 2",
+    "s1": "d-07-grid-2x2-hover.png",
+    "s2": "d-08-grid-2x2-after-click.png",
+    "rev0": 5,
+    "rev1": 6,
+    "rev2": 6,
+    "fresh": [
+      "table:table {\"x\":360,\"y\":258,\"w\":960,\"h\":109,\"z\":3}"
+    ],
+    "save": "All changes saved",
+    "menusOpen": 0,
+    "toasts": []
+  },
+  {
+    "n": 8,
+    "step": "objects",
+    "at": "2026-09-29T22:14:41.541Z",
+    "objects": [
+      "heading:h",
+      "paragraph:p1",
+      "chart:chart",
+      "table:table"
+    ]
+  },
+  {
+    "n": 9,
+    "step": "console",
+    "at": "2026-09-29T22:14:41.541Z",
+    "errors": []
+  },
+  {
+    "n": 10,
+    "step": "teardown",
+    "at": "2026-09-29T22:14:53.659Z",
+    "trashed": true,
+    "deleted": true,
+    "status404": 404
+  }
+]

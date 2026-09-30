@@ -1,0 +1,91 @@
+## nav
+
+Turboslide
+Documentation
+GitHub
+Light
+Dark
+New Presentation
+
+## hero
+
+Build the pitch, present it and send the link
+
+Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.
+
+New Presentation
+Open the Example Deck
+
+## canvas
+
+Everything on a slide moves
+
+Drag, resize and rotate any object. The first drag turns the slide into a canvas. Undo puts the layout back.
+
+## menus
+
+The menus are Google's
+
+File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help are in Google's order. The shortcuts are Google's too. So are the right click menus.
+
+## present
+
+Present from the browser
+
+Slideshow starts on the current slide. Presenter view opens in a second window with the timer, the notes and the next slide. A present link opens the show for anyone.
+
+Editor
+Timer
+Next slide
+Notes
+Presenter view
+Show
+S
+present link
+
+## export
+
+Export to PDF and PowerPoint
+
+File > Download writes a PDF or a PowerPoint file. The PowerPoint file matches the screen pixel for pixel.
+
+The worst page mismatch on the 170 page example export is 0.003 percent.
+
+Slide
+pitch.pdf
+pitch.pptx
+
+## agents
+
+Agents run the same actions
+
+Every editor action is a command. Agents run the same 192 actions over the CLI, MCP and HTTP.
+
+pnpm exec turboslide slide new --layout split --deck decks/pitch --json
+Read the agent documentation
+CLI
+MCP
+HTTP
+The page
+192 actions
+Deck
+
+## licence
+
+Free under the MIT licence
+
+Run it from a checkout or deploy it to Vercel. The code is on GitHub.
+
+GitHub
+
+## footer
+
+Turboslide
+New presentation
+Your presentations
+Documentation
+GitHub
+Licence
+Third party notices
+
+Turboslide is General Translation's slides editor. Google Slides is a product of Google LLC.

@@ -1,0 +1,736 @@
+{
+  "base": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+  "deck": "untitled-20260929-q1uc",
+  "startedAt": "2026-09-29T13:55:04.424Z",
+  "seconds": 241,
+  "viewport": "1440x900 at 2x, then 1280x800 at 2x",
+  "rows": [
+    {
+      "n": 1,
+      "step": "open /new and type the title",
+      "expected": "the editor is ready, revision 1, /edit/<id>",
+      "observed": "deck untitled-20260929-q1uc, revision 1, /edit/untitled-20260929-q1uc",
+      "ok": true,
+      "at": 4.8
+    },
+    {
+      "n": 2,
+      "step": "second slide with a title and a long body naming Acme",
+      "expected": "slide 2 holds the paragraph",
+      "observed": "slide split-1; paragraph stored true",
+      "ok": true,
+      "at": 29
+    },
+    {
+      "n": 3,
+      "step": "third slide: Pricing for Acme, internal",
+      "expected": "slide 3 holds the title",
+      "observed": "slide split-1-2eba; stored true",
+      "ok": true,
+      "at": 34
+    },
+    {
+      "n": 4,
+      "step": "read the title row at 1440",
+      "expected": "Assist between the presence chips and the comments glyph",
+      "observed": "controls row@0(1440x44) home@10(32x32) presence@847(184x32) assist.slot@1039(83x32) assist@1039(83x32) comments.slot@1129(32x32) comments@1129(32x32) sidePanel.slot@1169(32x32) sidePanel@1169(32x32); assist label \"Assist\"",
+      "ok": true,
+      "at": 34.6
+    },
+    {
+      "n": 5,
+      "step": "Cmd+J opens the panel",
+      "expected": "the panel with the first line, the slide label and three starters",
+      "observed": "open true; panel 320x788; first line 82 px tall: \"Your slide text, including this restricted presentation’s, goes to the model provider under General Translation’s account. Nothing is written to your slides until you accept\"; slide \"Slide 2: Our renewal proposal covers the three regions your team asked about,...\"; starters \"Tailor for a customerReplace the customer name, swap the logo and skip slides, a\", \"Make it shorterAsks for a shorter reading of this slide’s text; you read the cha\", \"Write speaker notesAsks for a talk track for this slide, under 120 words\"; prompt placeholder \"Ask the assistant\"; send disabled true",
+      "ok": true,
+      "at": 42.4
+    },
+    {
+      "n": 6,
+      "step": "hover a starter and the Send button for their tooltips",
+      "expected": "a tooltip with the name, a sentence and the key",
+      "observed": "starter tooltip \"Make it shorterAsks for a shorter reading of this slide’s text; you read the change before it lands\"; send tooltip \"Make it shorterAsks for a shorter reading of this slide’s text; you read the change before it lands\"",
+      "ok": true,
+      "at": 44.2
+    },
+    {
+      "n": 7,
+      "step": "Make it shorter on production",
+      "expected": "a card within 20 s, or the sentence the deployment gives",
+      "observed": "6492 ms; busy shown true; off \"null\"; error \"null\"; sentence []; cards 1; starters left 3; prompt present true",
+      "ok": true,
+      "at": 51
+    },
+    {
+      "n": 8,
+      "step": "the panel after the answer: can the seller still ask",
+      "expected": "the starters and the composer remain",
+      "observed": "starters 0, composer true, off \"null\"; after close and reopen: starters 3, composer true, off \"null\"",
+      "ok": false,
+      "at": 64.1
+    },
+    {
+      "n": 9,
+      "step": "type \"add a video\" and Enter",
+      "expected": "the fallback sentence, no card, no write",
+      "observed": "off \"null\"; error \"null\"; sentence [\"I can make this slide shorter or write its speaker notes. Tailor for a customer is under Tools\"]; cards 0; revision 5 -> 5; ask rows 1",
+      "ok": true,
+      "at": 71.7
+    },
+    {
+      "n": 10,
+      "step": "Write speaker notes",
+      "expected": "a card or the sentence",
+      "observed": "off \"null\"; error \"null\"; sentence []; cards 1",
+      "ok": true,
+      "at": 85.1
+    },
+    {
+      "n": 11,
+      "step": "the Tailor starter opens the dialog",
+      "expected": "Tools > Tailor for a customer as a dialog, the From field focused",
+      "observed": "dialog open true; focused dialog.tailor.from; panel still open behind true",
+      "ok": true,
+      "at": 88
+    },
+    {
+      "n": 12,
+      "step": "Tools menu read",
+      "expected": "Tailor, Assist and Check slides beside each other",
+      "observed": "tools.preferences.linkDetection[true]:\"Link detection\"; tools.accessibilitySettings.collaboratorAnnouncements[false]:\"Turn on collaborator announcements\"; tools.tailor:\"Tailor for a customer\"; tools.assist:\"Assist\"; tools.checkSlides:\"Check slides\"; tools.advancedTools[false]:\"Advanced tools\"",
+      "ok": true,
+      "at": 89.4
+    },
+    {
+      "n": 13,
+      "step": "Tools > Assist opens the panel",
+      "expected": "the panel opens",
+      "observed": "open true; title button aria-pressed true",
+      "ok": true,
+      "at": 91.3
+    },
+    {
+      "n": 14,
+      "step": "Tools > Tailor: the empty dialog",
+      "expected": "the lead, Replace, With, Logo, Slides to skip, Apply disabled",
+      "observed": "dialog 520x563; Apply disabled true tooltip \"Ask the assistantEnterEnter sends; Shift Enter starts a new line\"; Use this logo on every slide disabled false; skip rows \"\", \"\", \"\"; words \"Tailor for a customerRename the customer, swap the pictures named after the old one and skip the slides they should not see, as one changeReplaceWithLogoReplace the pictures named after the old customerSlides to skip1. Acme pricing review, Q3 20262. Our renewal proposal covers the three regions your team asked about,...3. Pricing for Acme, internalCancelApplyType a customer name, choose a logo or \"",
+      "ok": true,
+      "at": 96.3
+    },
+    {
+      "n": 15,
+      "step": "type Acme in Replace",
+      "expected": "the count reads 4 places on 3 slides, once",
+      "observed": "count control \"3 places on 3 slides\"; hints [\"3 places on 3 slides\"] (the count drawn 1 times); deck: Acme 3 on the slides' text, title \"Acme pricing review, Q3 2026\"",
+      "ok": true,
+      "at": 97.5
+    },
+    {
+      "n": 16,
+      "step": "type Globex in With, tick the pricing slide, Apply",
+      "expected": "one write, the snackbar with Undo, every Acme reads Globex, the slide skipped",
+      "observed": "Find the logo slot false; snackbar \"\" action \"null\"; Acme 3 -> 0; Globex -> 3; skipped [\"split-1-2eba\"] (cards split-1-2eba); revision 5 -> 5; deck title \"Globex pricing review, Q3 2026\"; dialog closed true",
+      "ok": false,
+      "at": 100.9
+    },
+    {
+      "n": 17,
+      "step": "Cmd+Z after Tailor",
+      "expected": "one undo restores every Acme and unskips the slide",
+      "observed": "Acme 3; Globex 0; skipped []; revision 6; title \"Acme pricing review, Q3 2026\"",
+      "ok": true,
+      "at": 102.8
+    },
+    {
+      "n": 18,
+      "step": "Tailor with To = Figma: the Find the logo slot",
+      "expected": "a Find the Figma logo button with the mark pair",
+      "observed": "Find slot drawn true; button \"Find the Figma logo\"; the file chooser after the tick true",
+      "ok": true,
+      "at": 108.2
+    },
+    {
+      "n": 19,
+      "step": "POST text.replaceAll with the bearer while the editor is open",
+      "expected": "the snackbar names the change with Undo within 10 s; Undo reverts",
+      "observed": "not driven: no bearer in the environment",
+      "ok": null,
+      "at": 109.2
+    },
+    {
+      "n": 20,
+      "step": "POST deck.tailor with the bearer",
+      "expected": "one revision, the snackbar with Undo",
+      "observed": "not driven: no bearer",
+      "ok": null,
+      "at": 109.2
+    },
+    {
+      "n": 21,
+      "step": "POST assist.propose with the bearer",
+      "expected": "a card, or the deployment sentence as one refusal shape",
+      "observed": "not driven: no bearer",
+      "ok": null,
+      "at": 109.2
+    },
+    {
+      "n": 22,
+      "step": "Search the menus: \"hide slide\"",
+      "expected": "Skip slide first",
+      "observed": "1 rows: palette.menu:slide.skipSlide:\"Skip slideSlideA skipped slide stays in the filmstrip and leaves the slideshow and the downloads\"",
+      "ok": true,
+      "at": 111.8
+    },
+    {
+      "n": 23,
+      "step": "Search the menus: \"rename the customer\"",
+      "expected": "Find and replace and Tailor for a customer",
+      "observed": "2 rows: palette.menu:edit.findReplace:\"Find and replaceCmd Shift HEdit\" | palette.menu:tools.tailor:\"Tailor for a customerToolsReplaces the customer name everywhere, swaps the pictures named after the \"",
+      "ok": true,
+      "at": 115
+    },
+    {
+      "n": 24,
+      "step": "Search the menus: \"logo\"",
+      "expected": "Replace image among the rows",
+      "observed": "8 rows: palette.menu:insert.logo:\"LogoInsertA company logo from thesvg.org, or your own\" | palette.menu:insert.image.logo:\"LogoInsert › ImageA company logo from thesvg.org, or your own\" | palette.menu:format.image.replaceImage.logo:\"LogoFormat › Image › Replace imageA company logo from thesvg.org in the same box\" | palette.menu:slide.editTheme:\"Edit themeSlideThe colors, faces, logo, footer, slide numbers and frame of this presentation\" | palette.menu:tools.tailor:\"Tailor for a customerToolsReplaces the customer name everywhere, swaps the pictures named after the \" | palette.menu:insert.image.upload:\"Upload from computerInsert › ImagePictures up to 25 MB\" | palette.menu:format.image.useOnEverySlide:\"Use on every slideFormat › ImageMakes this picture the logo on the title slide and in the footer of \" | palette.menu:format.image.replaceImage.upload:\"Upload from computerFormat › Image › Replace image\"",
+      "ok": true,
+      "at": 117.2
+    },
+    {
+      "n": 25,
+      "step": "Search the menus: \"speaker notes\"",
+      "expected": "the notes rows and the assistant",
+      "observed": "4 rows: palette.menu:view.showSpeakerNotes:\"Show speaker notesView\" | palette.menu:tools.assist:\"AssistToolsTailor the deck for a customer, ask for a shorter slide or for speaker notes; nothing cha\" | palette.menu:title.assist:\"AssistCmd JTitle rowTailor the deck for a customer, ask for a shorter slide or for speaker notes; no\" | palette.menu:file.download.options:\"Download optionsFile › DownloadThe file type and the modes, Include skipped slides and Include speak\"",
+      "ok": true,
+      "at": 120
+    },
+    {
+      "n": 26,
+      "step": "Search the menus with a phrase that matches nothing, Enter",
+      "expected": "the Ask the assistant row; Enter opens the panel with the phrase in the box",
+      "observed": "rows palette.finder.assist.ask:\"Ask the assistant: zebra stripes on the coverOpens Assist with these words in the box; nothing chang\"; panel open true; prompt \"zebra stripes on the cover\"; after Enter: off \"null\", sentence [\"I can make this slide shorter or write its speaker notes. Tailor for a customer is under Tools\"], error \"null\"",
+      "ok": true,
+      "at": 130.9
+    },
+    {
+      "n": 27,
+      "step": "Tools > Advanced tools on",
+      "expected": "the title row draws the bell; the Tools menu grows",
+      "observed": "switch on true; bell drawn true; Tools rows tools.spelling, tools.notificationSettings, tools.preferences.linkDetection, tools.accessibilitySettings.collaboratorAnnouncements, tools.activityDashboard, tools.tailor, tools.assist, tools.checkSlides, tools.advancedTools, tools.advanced",
+      "ok": true,
+      "at": 134.2
+    },
+    {
+      "n": 28,
+      "step": "File > New submenu with the switch on",
+      "expected": "Presentation and From template gallery",
+      "observed": "submenu file.new, file.new.presentation, file.new.templateGallery; opened in new tab /decks/templates; cards templates.card.gt-brand, templates.card.core-spec-template-mumbg9pa, templates.card.blank; words \"Turboslide Template galleryStart a presentation from a template. The copy is yours to edit, and the template stays as it is.Recent presentationsYour organisationTemplates saved on this Turboslide. Open a presentation and choose File > Save as template to add one.BrandThis section covers the company,\"",
+      "ok": true,
+      "at": 139.1
+    },
+    {
+      "n": 29,
+      "step": "File > Save as template",
+      "expected": "the dialog with the name prefilled, a sentence, the cover; Save lists it in the gallery",
+      "observed": "prefilled name \"Acme pricing review, Q3 2026\"; lead \"Save as template3 slides from Acme pricing review, Q3 2026NameSentenceOne sentence the gallery card shows; \"Saved from\" \"; Save answered in 353 ms; snackbar \"\" action \"null\"; template.list has no polish audit template (3 templates: blank, gt-brand, core-spec-template-mumbg9pa)",
+      "ok": false,
+      "at": 147.4
+    },
+    {
+      "n": 30,
+      "step": "the gallery lists the saved template; rename it and delete it from the card menu",
+      "expected": "the card under Your organisation; Rename in place; Delete after a confirm",
+      "observed": "no template was saved",
+      "ok": null,
+      "at": 149.3
+    },
+    {
+      "n": 31,
+      "step": "back in the editor: the bell opens Notifications",
+      "expected": "Nothing new, Mark all read, a settings link; a second click closes it",
+      "observed": "open true (aria-pressed true); words \"NotificationsMark all readNothing newNotification settings\"; Mark all read disabled true; closed on the second click false (aria-pressed true)",
+      "ok": false,
+      "at": 157.3
+    },
+    {
+      "n": 32,
+      "step": "Notification settings: None, Save, reopen, reload",
+      "expected": "the reopened dialog and the reloaded page read None",
+      "observed": "words \"Notification settingsCommentsAll commentsComments for youNoneCommenters can see the activityCancelSave\"; level forYou -> picked none; Save closed true in 562 ms; reopened forYou; after a reload forYou",
+      "ok": false,
+      "at": 166.2
+    },
+    {
+      "n": 33,
+      "step": "Extensions > Agent access",
+      "expected": "the MCP and API addresses, push and pull, the token sentence",
+      "observed": "values [\"https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/mcp?deck=untitled-20260929-q1uc\",\"https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/api/actions\",\"turboslide deck push untitled-20260929-q1uc --to https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app --token <TURBOSLIDE_TOKEN>\",\"turboslide deck pull untitled-20260929-q1uc --from https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app --token <TURBOSLIDE_TOKEN>\"]; words \"Agent accessAn assistant reads and edits this presentation through these addresses and commands.MCP addresshttps://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/mcp?deck=untitled-20260929-q1ucCopyAPI addresshttps://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/api/actionsCopyPushturboslide deck pu\"",
+      "ok": true,
+      "at": 168.6
+    },
+    {
+      "n": 34,
+      "step": "Tools > Advanced > Run an action",
+      "expected": "the palette of actions by name",
+      "observed": "182 palette rows; first [\"Deck infodeck.infoTitle, theme, sections with slide ids and titles, counts (the \",\"New deckdeck.createCreates a deck under decks/ from a template of the index (tem\",\"Rename deckdeck.renameSets the deck title, the name the sidebar head, the toolba\",\"Set a deck fielddeck.setWrites one field of the deck manifest by JSON pointer (/\"]",
+      "ok": true,
+      "at": 172.1
+    },
+    {
+      "n": 35,
+      "step": "Tools > Advanced tools off",
+      "expected": "the default view is back",
+      "observed": "off true; bell drawn false",
+      "ok": true,
+      "at": 173.6
+    },
+    {
+      "n": 36,
+      "step": "Tools > Preferences submenu and Link detection",
+      "expected": "one row, Link detection, checked; off stops a typed address becoming a link",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "ok": false,
+      "at": 204.8
+    },
+    {
+      "n": 37,
+      "step": "View > Appearance: Dark, then the panel and the dialog in dark",
+      "expected": "the chrome turns dark; the panel and Tailor read on ink",
+      "observed": "rows view.appearance[null], view.appearance.light[true], view.appearance.dark[false], view.appearance.match[false]; dark {\"root\":\"dark\",\"viewer\":null,\"stage\":null}; light {\"root\":\"light\",\"viewer\":null,\"stage\":null}; match {\"root\":\"light\",\"viewer\":null,\"stage\":null}",
+      "ok": true,
+      "at": 216.6
+    },
+    {
+      "n": 38,
+      "step": "Slide > Change theme: the Brand kit panel and its Appearance section",
+      "expected": "the panel with the appearance tiles",
+      "observed": "panel {\"id\":\"panel.brand\",\"words\":\"Brand kitAppearanceAcme pricing review, Q3 2026Click to add subtitleLightAcme pricing review, Q3 2026Click to add subtitleDarkLogoReplaceRemoveUse the default logoOn the title slideAbove the titleTop leftTop rightBottom leftBottom rightHiddenIn the footerTop leftTop rightBottom leftBottom rightHiddenShown on the title slide and in the corner of every slideColorsLightDarkTextBackgroundCaptionsHints\"}; controls panel.brand, panel.brand.close, panel.brand.appearance.light, themes.gt.light, panel.brand.appearance.dark, themes.gt.dark, panel.brand.logo.preview, panel.brand.logo.replace, panel.brand.logo.remove, panel.brand.logo.default, panel.brand.logo.position, panel.brand.footer.position, panel.brand.color.appearance.light, panel.brand.color.appearance.dark, panel.brand.color.text.swatch, panel.brand.color.text.hex, panel.brand.color.background.swatch, panel.brand.color.background.hex, panel.brand.color.caption.swatch, panel.brand.color.caption.hex, panel.brand.color.hint.swatch, panel.brand.color.hint.hex, panel.brand.color.primary.swatch, panel.brand.color.primary.hex, panel.brand.color.accent.swatch, panel.brand.color.accent.hex, panel.brand.font.display, panel.brand.font.text, panel.brand.footer.logo, panel.brand.footer.text, panel.brand.counter.show, panel.brand.counter.format, panel.brand.counter.skipTitle, panel.brand.frame.rails, panel.brand.frame.rules, panel.brand.frame.crosses, panel.brand.lexicon, panel.brand.reset; after the dark tile {\"root\":\"dark\",\"viewer\":null,\"stage\":null}",
+      "ok": true,
+      "at": 221.7
+    },
+    {
+      "n": 39,
+      "step": "a view link: the assistant for a viewer",
+      "expected": "the panel disabled with the sentence",
+      "observed": "no view link: {\"error\":\"Error: page.evaluate: Error: the access record is at revision 0, not 9; re-read and retry\\n    at Object.deserialize (https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/assets/index-CH2U",
+      "ok": null,
+      "at": 221.9
+    },
+    {
+      "n": 40,
+      "step": "1280 by 800: the title row and the panel",
+      "expected": "the Assist word stays; the panel keeps its width",
+      "observed": "title controls row@0(1280) home@10(26) presence@687(184) assist.slot@879(83) assist@879(83) comments.slot@969(32) comments@969(32) sidePanel.slot@1009(32) sidePanel@1009(32); panel 320x688; sheet 648x365",
+      "ok": true,
+      "at": 224.3
+    },
+    {
+      "n": 41,
+      "step": "1280 by 800: Tailor, the gallery and the inbox",
+      "expected": "each fits without a horizontal scroll",
+      "observed": "Tailor 520x570; gallery horizontal overflow -15 px",
+      "ok": true,
+      "at": 232.9
+    },
+    {
+      "n": 42,
+      "step": "templates left on the deployment",
+      "expected": "none of this run",
+      "observed": "blank, gt-brand, core-spec-template-mumbg9pa, polish-audit-njhk",
+      "ok": false,
+      "at": 234.8
+    },
+    {
+      "n": 43,
+      "step": "File > Move to trash",
+      "expected": "the deck moves to the trash and the page returns to /decks",
+      "observed": "/decks",
+      "ok": true,
+      "at": 237.4
+    },
+    {
+      "n": 44,
+      "step": "Delete forever, then GET /edit/<id> and /deck/<id>",
+      "expected": "404 and 404",
+      "observed": "200 and 404",
+      "ok": false,
+      "at": 241.1
+    }
+  ],
+  "facts": {
+    "titleRow": [
+      {
+        "id": "title.row",
+        "label": "Acme pricing review, Q3 2026Last edit just now by Pewter 206Saving…AssistSlidesh",
+        "x": 0,
+        "y": 0,
+        "w": 1440,
+        "h": 44,
+        "disabled": false
+      },
+      {
+        "id": "title.home",
+        "label": "Turboslide home",
+        "x": 10,
+        "y": 6,
+        "w": 32,
+        "h": 32,
+        "disabled": false
+      },
+      {
+        "id": "title.presence",
+        "label": "Collaborators",
+        "x": 847,
+        "y": 6,
+        "w": 184,
+        "h": 32,
+        "disabled": false
+      },
+      {
+        "id": "title.assist.slot",
+        "label": "Assist",
+        "x": 1039,
+        "y": 6,
+        "w": 83,
+        "h": 32,
+        "disabled": false
+      },
+      {
+        "id": "title.assist",
+        "label": "Assist",
+        "x": 1039,
+        "y": 6,
+        "w": 83,
+        "h": 32,
+        "disabled": false
+      },
+      {
+        "id": "title.comments.slot",
+        "label": "",
+        "x": 1129,
+        "y": 6,
+        "w": 32,
+        "h": 32,
+        "disabled": false
+      },
+      {
+        "id": "title.comments",
+        "label": "Show all comments",
+        "x": 1129,
+        "y": 6,
+        "w": 32,
+        "h": 32,
+        "disabled": false
+      },
+      {
+        "id": "title.sidePanel.slot",
+        "label": "",
+        "x": 1169,
+        "y": 6,
+        "w": 32,
+        "h": 32,
+        "disabled": false
+      },
+      {
+        "id": "title.sidePanel",
+        "label": "Show side panel",
+        "x": 1169,
+        "y": 6,
+        "w": 32,
+        "h": 32,
+        "disabled": false
+      },
+      {
+        "id": "share.open",
+        "label": "Share",
+        "x": 1350,
+        "y": 6,
+        "w": 78,
+        "h": 32,
+        "disabled": false
+      }
+    ],
+    "panel": {
+      "open": true,
+      "firstLine": "Your slide text, including this restricted presentation’s, goes to the model provider under General Translation’s account. Nothing is written to your slides until you accept",
+      "slide": "Slide 2: Our renewal proposal covers the three regions your team asked about,...",
+      "starters": [
+        {
+          "id": "panel.assist.starter.tailor",
+          "label": "Tailor for a customerReplace the customer name, swap the logo and skip slides, a",
+          "x": 1121,
+          "y": 543,
+          "w": 315,
+          "h": 73,
+          "disabled": false
+        },
+        {
+          "id": "panel.assist.starter.shorter",
+          "label": "Make it shorterAsks for a shorter reading of this slide’s text; you read the cha",
+          "x": 1121,
+          "y": 616,
+          "w": 315,
+          "h": 73,
+          "disabled": false
+        },
+        {
+          "id": "panel.assist.starter.notes",
+          "label": "Write speaker notesAsks for a talk track for this slide, under 120 words",
+          "x": 1121,
+          "y": 690,
+          "w": 315,
+          "h": 73,
+          "disabled": false
+        }
+      ],
+      "off": null,
+      "viewer": null,
+      "error": null,
+      "busy": null,
+      "sentence": [],
+      "cards": [],
+      "prompt": "",
+      "promptDisabled": null,
+      "sendDisabled": ""
+    },
+    "shorter": {
+      "open": true,
+      "firstLine": "Your slide text, including this restricted presentation’s, goes to the model provider under General Translation’s account. Nothing is written to your slides until you accept",
+      "slide": "Slide 2: Our renewal proposal covers the three regions your team asked about,...",
+      "starters": [
+        {
+          "id": "panel.assist.starter.tailor",
+          "label": "Tailor for a customerReplace the customer name, swap the logo and skip slides, a",
+          "x": 1121,
+          "y": 510,
+          "w": 315,
+          "h": 73,
+          "disabled": false
+        },
+        {
+          "id": "panel.assist.starter.shorter",
+          "label": "Make it shorterAsks for a shorter reading of this slide’s text; you read the cha",
+          "x": 1121,
+          "y": 583,
+          "w": 315,
+          "h": 73,
+          "disabled": true
+        },
+        {
+          "id": "panel.assist.starter.notes",
+          "label": "Write speaker notesAsks for a talk track for this slide, under 120 words",
+          "x": 1121,
+          "y": 656,
+          "w": 315,
+          "h": 73,
+          "disabled": true
+        }
+      ],
+      "off": null,
+      "viewer": null,
+      "error": null,
+      "busy": null,
+      "sentence": [],
+      "cards": [
+        "Slide 2: the text is 48 words shorterSlide 2: Our renewal proposal covers the three regions your team asked about,...Our renewal proposal covers the three regions your team asked about, adds the two n"
+      ],
+      "prompt": "",
+      "promptDisabled": null,
+      "sendDisabled": "",
+      "ms": 6492
+    },
+    "toolsMenu": [
+      {
+        "id": "tools.preferences.linkDetection",
+        "label": "Link detection",
+        "disabled": false,
+        "checked": "true"
+      },
+      {
+        "id": "tools.accessibilitySettings.collaboratorAnnouncements",
+        "label": "Turn on collaborator announcements",
+        "disabled": false,
+        "checked": "false"
+      },
+      {
+        "id": "tools.tailor",
+        "label": "Tailor for a customer",
+        "disabled": false,
+        "checked": null
+      },
+      {
+        "id": "tools.assist",
+        "label": "Assist",
+        "disabled": false,
+        "checked": null
+      },
+      {
+        "id": "tools.checkSlides",
+        "label": "Check slides",
+        "disabled": false,
+        "checked": null
+      },
+      {
+        "id": "tools.advancedTools",
+        "label": "Advanced tools",
+        "disabled": false,
+        "checked": "false"
+      }
+    ],
+    "tailorEmpty": {
+      "words": "Tailor for a customerRename the customer, swap the pictures named after the old one and skip the slides they should not see, as one changeReplaceWithLogoReplace the pictures named after the old customerSlides to skip1. Acme pricing review, Q3 20262. Our renewal proposal covers the three regions your team asked about,...3. Pricing for Acme, internalCancelApplyType a customer name, choose a logo or tick a slide first",
+      "applyDisabled": "",
+      "everyDisabled": null,
+      "skipRows": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "tailorBefore": {
+      "acme": 3,
+      "globex": 0,
+      "skipped": [],
+      "title": "Acme pricing review, Q3 2026",
+      "revision": 5
+    },
+    "tailorAfter": {
+      "acme": 0,
+      "globex": 3,
+      "skipped": [
+        "split-1-2eba"
+      ],
+      "title": "Globex pricing review, Q3 2026",
+      "revision": 5
+    },
+    "gallery": {
+      "cards": [
+        {
+          "id": "templates.card.gt-brand",
+          "label": "BrandThis section covers the company, its values, its voice, the name, and the m",
+          "x": 177,
+          "y": 268,
+          "w": 253,
+          "h": 248,
+          "disabled": false
+        },
+        {
+          "id": "templates.card.gt-brand.open",
+          "label": "General Translation brand deck",
+          "x": 178,
+          "y": 269,
+          "w": 251,
+          "h": 141,
+          "disabled": false
+        },
+        {
+          "id": "templates.card.gt-brand.name",
+          "label": "General Translation brand deck",
+          "x": 190,
+          "y": 420,
+          "w": 191,
+          "h": 26,
+          "disabled": false
+        },
+        {
+          "id": "templates.card.gt-brand.menu",
+          "label": "⋮",
+          "x": 389,
+          "y": 420,
+          "w": 32,
+          "h": 32,
+          "disabled": false
+        },
+        {
+          "id": "templates.card.core-spec-template-mumbg9pa",
+          "label": ".ts-sheet:not([data-theme-base]):not([data-theme='dark']) { --blue: #0b3d91; --a",
+          "x": 450,
+          "y": 268,
+          "w": 253,
+          "h": 248,
+          "disabled": false
+        },
+        {
+          "id": "templates.card.core-spec-template-mumbg9pa.open",
+          "label": "Core spec template mumbg9pa",
+          "x": 451,
+          "y": 269,
+          "w": 251,
+          "h": 141,
+          "disabled": false
+        },
+        {
+          "id": "templates.card.core-spec-template-mumbg9pa.name",
+          "label": "Core spec template mumbg9pa",
+          "x": 463,
+          "y": 420,
+          "w": 191,
+          "h": 26,
+          "disabled": false
+        },
+        {
+          "id": "templates.card.core-spec-template-mumbg9pa.menu",
+          "label": "⋮",
+          "x": 662,
+          "y": 420,
+          "w": 32,
+          "h": 32,
+          "disabled": false
+        },
+        {
+          "id": "templates.card.blank",
+          "label": "Click to add titleClick to add subtitleUsed for new presentationsBlank1 slideOne",
+          "x": 177,
+          "y": 616,
+          "w": 253,
+          "h": 248,
+          "disabled": false
+        },
+        {
+          "id": "templates.card.blank.default",
+          "label": "Used for new presentations",
+          "x": 186,
+          "y": 625,
+          "w": 162,
+          "h": 20,
+          "disabled": false
+        },
+        {
+          "id": "templates.card.blank.open",
+          "label": "Blank",
+          "x": 178,
+          "y": 617,
+          "w": 251,
+          "h": 141,
+          "disabled": false
+        },
+        {
+          "id": "templates.card.blank.name",
+          "label": "Blank",
+          "x": 190,
+          "y": 769,
+          "w": 191,
+          "h": 26,
+          "disabled": false
+        }
+      ],
+      "words": "Turboslide Template galleryStart a presentation from a template. The copy is yours to edit, and the template stays as it is.Recent presentationsYour organisationTemplates saved on this Turboslide. Open a presentation and choose File > Save as template to add one.BrandThis section covers the company, its values, its voice, the name, and the mark.Material: Event Horizon, a Prototemplate directionGeneral Translation brand deck85 slides⋮The General Translation brand deck as a template: 85 slides in "
+    },
+    "agentAccess": [
+      "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/mcp?deck=untitled-20260929-q1uc",
+      "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/api/actions",
+      "turboslide deck push untitled-20260929-q1uc --to https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app --token <TURBOSLIDE_TOKEN>",
+      "turboslide deck pull untitled-20260929-q1uc --from https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app --token <TURBOSLIDE_TOKEN>"
+    ],
+    "brandKitTheme": {
+      "root": "dark",
+      "viewer": null,
+      "stage": null
+    }
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 503 ()",
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

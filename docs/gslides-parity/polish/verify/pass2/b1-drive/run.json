@@ -1,0 +1,127 @@
+{
+  "started": "2026-09-29T21:31:01.019Z",
+  "base": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+  "deck": "untitled-20260929-0a4r",
+  "rows": [
+    {
+      "n": 1,
+      "name": "new-deck",
+      "expected": "open /new; the editor is ready with a title slide; a blank slide added",
+      "observed": "deck untitled-20260929-0a4r; blank slide blank-1",
+      "ok": true,
+      "shot": null,
+      "ms": 3726
+    },
+    {
+      "n": 2,
+      "name": "size-run-plus",
+      "expected": "\"Acme\" selected in a 20 px box; the tail's \"+\" twice, then \"−\": the field reads the run's size at each step",
+      "observed": "selected \"Acme\"; field 20 -> + 22 -> + 24 -> − 22; marks after one plus [\"font-size:22px\"], after two [\"font-size:24px\"]; stored {\"id\":\"fx-size\",\"pos\":{\"x\":200,\"y\":160,\"w\":900,\"h\":80},\"type\":\"text\",\"text\":\"[Acme]{z:22} renews in Q3\",\"typography\":{\"size\":20}}; clip 02-after-16-plus-twice-minus-2x.png",
+      "ok": true,
+      "shot": "01-after-16-plus-once.png",
+      "ms": 6057
+    },
+    {
+      "n": 3,
+      "name": "paragraph-live",
+      "expected": "a two line box; the session open with the caret in line 1; Center, Double and 1.5 from the tail plates, Increase indent: the text nodes move within two frames while the session stays",
+      "observed": "Center: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 33px, align start -> center, block h 47 -> 47; Double: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 44px, align center -> center, block h 47 -> 62; Increase indent: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 33px, align center -> center, block h 47 -> 47; 1.5 from the tail: line-height 33px (the sheet's own leading is 1.5, so nothing moves), session kept true, stored leading 1.5 true; pictures 03-after-14-center-live.png, 04-after-14-double-live.png",
+      "ok": true,
+      "shot": "04-after-14-double-live.png",
+      "ms": 8032
+    },
+    {
+      "n": 4,
+      "name": "diagram-word",
+      "expected": "Insert > Diagram > Process; one click on the group, a double click on \"2\" of \"Step 2\", \" plus\" typed, Escape",
+      "observed": "member step-2 (shape, group process); selected \"2\" after the double click; label \"Step  plus\"; clip 05-after-30-word-selected-2x.png",
+      "ok": true,
+      "shot": "06-after-30-label-typed.png",
+      "ms": 8849
+    },
+    {
+      "n": 5,
+      "name": "assist-starters",
+      "expected": "Assist opened; Make it shorter with the fixture; the starters and the composer read after the answer",
+      "observed": "starters before 3, after the answer 3 (below the log true); composer true; cards 0",
+      "ok": true,
+      "shot": "07-after-113-starters-after-answer.png",
+      "ms": 32846
+    },
+    {
+      "n": 6,
+      "name": "tailor-snackbar",
+      "expected": "Tools > Tailor, From Acme, To Globex, Apply: the dialog closes and the snackbar with the count and Undo is on screen within 300 ms; Undo restores Acme",
+      "observed": "count \"1 place on 1 slide\"; dialog closed after 384 ms; snackbar \"Tailored for Globex: 1 place on 1 slideUndo\" with \"Undo\" read at 388 ms; after the ack \"Tailored for Globex: 1 place on 1 slideUndo\"; Globex written true; Cmd+Z restores Acme true",
+      "ok": true,
+      "shot": "08-after-116-apply-snackbar.png",
+      "ms": 6361
+    },
+    {
+      "n": 7,
+      "name": "check-slides-plain",
+      "expected": "a picture and an empty 3 by 3 table on a slide of its own; Tools > Check slides: no finding carries an id, a parenthesis or SPEC",
+      "observed": "4 findings: \"A picture without a dark twin keeps a 1 px frame so it reads as a plate on the dark ground.Fix\" | \"The table has 9 empty cells; type into them or remove the rows.\" | \"In native mode an image exports as a 2x raster.\" | \"This slide is arranged by hand; Apply layout re-flows it\"; plain true",
+      "ok": true,
+      "shot": "09-after-55-check-slides.png",
+      "ms": 8663
+    },
+    {
+      "n": 8,
+      "name": "table-plus-sentence",
+      "expected": "a typed 3 by 3 table selected: the tail's \"−\" then \"+\" back to 20; at 20 \"+\" reads aria-disabled with the sentence as data-tip-doc and in the hovered plate",
+      "observed": "at 20: \"+\" aria-disabled true, data-tip-doc \"A table's text is 20 px at most\", hovered plate \"Increase font sizeCmd Shift > A table's text is 20 px at most\"; \"−\" -> 18 (\"+\" aria-disabled null); \"+\" -> 20 (aria-disabled true, data-tip-doc \"A table's text is 20 px at most\"); snackbar \"\"",
+      "ok": true,
+      "shot": "10-after-05-table-plus-tip-2x.png",
+      "ms": 6351
+    },
+    {
+      "n": 9,
+      "name": "table-resize-stops",
+      "expected": "the 3 by 3 table selected; the se handle dragged 260 px right: the right edge stops at the content box's edge (1463)",
+      "observed": "after the drag: x 320 w 1143 (right edge 1463 against 1463); Cmd+Z: w 960",
+      "ok": true,
+      "shot": "11-after-11-se-drag-stops.png",
+      "ms": 4162
+    },
+    {
+      "n": 10,
+      "name": "heading-list",
+      "expected": "the title placeholder selected by one click; Bulleted list from the tail",
+      "observed": "Bulleted list disabled null; written false; snackbar \"Bulleted list: No block \"heading\" on slide \"title\"\"",
+      "ok": false,
+      "shot": "12-after-18-heading-list.png",
+      "ms": 3416
+    },
+    {
+      "n": 11,
+      "name": "list-tab-nests",
+      "expected": "a text box reading One; Bulleted list from the tail; End, Enter, \"Two\", Tab, Enter, \"Three\", Escape: the second item at level 2",
+      "observed": "items [\"One@1\",\"Two@2\",\"Three@1\"]; live indent after Tab [\"0/1\",\"36px/2\"]; error over the stage none",
+      "ok": true,
+      "shot": "13-after-15-tab-nested.png",
+      "ms": 6565
+    },
+    {
+      "n": 12,
+      "name": "wordart-bold-arming",
+      "expected": "Insert > Word art \"Big words\" Enter; the chip and B read; B pressed once and again; then the word art selected and Insert > Line > Elbow connector armed",
+      "observed": "chip \"Word art\"; B pressed at insert false; weight 400 -> 700 after one press (pressed true; stored text *Big words*) -> 400 after the second; ring before arming drawn, after arming the elbow tool gone, chip gone; 15-after-34-elbow-armed.png",
+      "ok": true,
+      "shot": "14-after-34-wordart-bold.png",
+      "ms": 12695
+    }
+  ],
+  "consoleErrors": [],
+  "facts": {
+    "paragraphLive": [
+      "Center: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 33px, align start -> center, block h 47 -> 47",
+      "Double: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 44px, align center -> center, block h 47 -> 62",
+      "Increase indent: moved within two frames true (after 400 ms true), session kept true, line-height 33px -> 33px, align center -> center, block h 47 -> 47"
+    ],
+    "diagramMember": {
+      "type": "shape",
+      "group": "process"
+    }
+  }
+}

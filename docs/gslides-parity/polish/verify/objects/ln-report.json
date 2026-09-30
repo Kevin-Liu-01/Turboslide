@@ -1,0 +1,1057 @@
+{
+ "base": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+ "theme": "light",
+ "viewport": {
+  "width": 1440,
+  "height": 900
+ },
+ "startedAt": "2026-09-29T13:31:48.559Z",
+ "steps": [
+  {
+   "step": "setup: rectangle A and rectangle B by a click each",
+   "ms": 6518,
+   "observed": "A shape 200,600 240x160; B shape-2 1000,600 240x160",
+   "shot": "ln-01-two-rectangles.png"
+  },
+  {
+   "step": "Insert > Line submenu",
+   "ms": 1362,
+   "observed": "rows menu.insert.line.line, menu.insert.line.arrow, menu.insert.line.elbowConnector, menu.insert.line.curvedConnector",
+   "shot": "ln-02-insert-line-submenu.png"
+  },
+  {
+   "step": "Line by a drag from (200,200) to (600,320), watched",
+   "ms": 4707,
+   "observed": "shape-3 {\"shape\":\"line\",\"connect\":null,\"start\":null,\"end\":null,\"orientation\":\"diagonal-down\",\"pos\":{\"x\":200,\"y\":200,\"w\":400,\"h\":120,\"z\":3},\"drawn\":{\"heads\":0,\"dataHeads\":null,\"paths\":[\"0.5,0.5-399.5,119.5\",\"M0.5,0.5 L399.5,119.5\"]},\"chip\":null,\"handles\":[],\"stroke\":\"rgb(7, 7, 7) 1px dash none\"}; first frame with the line down; readouts 33 × 10 | 67 × 20",
+   "shot": "ln-03-line-drawn.png",
+   "frames": [
+    {
+     "tag": "before",
+     "id": null,
+     "free": null,
+     "marquee": null,
+     "readout": null,
+     "shot": "ln-draw-line-00-before.png"
+    },
+    {
+     "tag": "down",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 320,
+      "h": 8
+     },
+     "marquee": null,
+     "readout": null,
+     "shot": "ln-draw-line-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 33,
+      "h": 10
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 33.3,
+      "h": 10
+     },
+     "readout": "33 × 10",
+     "shot": "ln-draw-line-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 67,
+      "h": 20
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 66.7,
+      "h": 20
+     },
+     "readout": "67 × 20",
+     "shot": "ln-draw-line-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 100,
+      "h": 30
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 100,
+      "h": 30
+     },
+     "readout": "100 × 30",
+     "shot": "ln-draw-line-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 133,
+      "h": 40
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 133.3,
+      "h": 40
+     },
+     "readout": "133 × 40",
+     "shot": "ln-draw-line-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 167,
+      "h": 50
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 166.7,
+      "h": 50
+     },
+     "readout": "167 × 50",
+     "shot": "ln-draw-line-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 200,
+      "h": 60
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 200,
+      "h": 60
+     },
+     "readout": "200 × 60",
+     "shot": "ln-draw-line-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 233,
+      "h": 70
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 233.3,
+      "h": 70
+     },
+     "readout": "233 × 70",
+     "shot": "ln-draw-line-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 267,
+      "h": 80
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 266.7,
+      "h": 80
+     },
+     "readout": "267 × 80",
+     "shot": "ln-draw-line-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 300,
+      "h": 90
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 300,
+      "h": 90
+     },
+     "readout": "300 × 90",
+     "shot": "ln-draw-line-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 333,
+      "h": 100
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 333.3,
+      "h": 100
+     },
+     "readout": "333 × 100",
+     "shot": "ln-draw-line-11-step10.png"
+    },
+    {
+     "tag": "step11",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 367,
+      "h": 110
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 366.7,
+      "h": 110
+     },
+     "readout": "367 × 110",
+     "shot": "ln-draw-line-12-step11.png"
+    },
+    {
+     "tag": "step12",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 120
+     },
+     "marquee": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 120
+     },
+     "readout": "400 × 120",
+     "shot": "ln-draw-line-13-step12.png"
+    },
+    {
+     "tag": "up+40",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 120
+     },
+     "marquee": null,
+     "readout": null,
+     "shot": "ln-draw-line-14-up+40.png"
+    },
+    {
+     "tag": "up+400",
+     "id": "shape-3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 120
+     },
+     "marquee": null,
+     "readout": null,
+     "shot": "ln-draw-line-15-up+400.png"
+    }
+   ]
+  },
+  {
+   "step": "Arrow by a drag from (800,200) to (1300,300)",
+   "ms": 4165,
+   "observed": "shape-4 {\"shape\":\"arrow\",\"connect\":null,\"start\":null,\"end\":null,\"orientation\":\"diagonal-down\",\"pos\":{\"x\":800,\"y\":200,\"w\":500,\"h\":100,\"z\":4},\"drawn\":{\"heads\":1,\"dataHeads\":null,\"paths\":[\"0.5,0.5-491.653,97.943\",\"M0.5,0.5 L499.5,99.5\"]},\"chip\":null,\"handles\":[],\"stroke\":\"rgb(7, 7, 7) 1px dash none\"}",
+   "shot": "ln-04-arrow-drawn.png"
+  },
+  {
+   "step": "select the line: chip, handles, tail",
+   "ms": 462,
+   "observed": "chip Line; handles handle.shape-3.move, handle.shape-3.start, handle.shape-3.end; tail toolbar.lineColor, toolbar.lineWeight, toolbar.lineDash, toolbar.lineStart, toolbar.lineEnd, toolbar.end",
+   "shot": "ln-05-line-selected.png",
+   "page": "ln-06-line-selected-page.png"
+  },
+  {
+   "step": "the line end handle dragged by +0,+160; the other end holds",
+   "ms": 2135,
+   "observed": "pos 200,200 400x120 -> 200,200 400x280; orientation diagonal-down -> diagonal-down; readouts ",
+   "shot": "ln-07-line-end-dragged.png",
+   "frames": [
+    {
+     "tag": "before",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 120
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-00-before.png"
+    },
+    {
+     "tag": "down",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 120
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 136
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 152
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 168
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 184
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 200
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 216
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 232
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 248
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 264
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 280
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-11-step10.png"
+    },
+    {
+     "tag": "up+0",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 280
+     },
+     "ring": null,
+     "readout": null,
+     "shot": null
+    },
+    {
+     "tag": "up+40",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 280
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-13-up+40.png"
+    },
+    {
+     "tag": "up+120",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 280
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-14-up+120.png"
+    },
+    {
+     "tag": "up+400",
+     "free": {
+      "x": 200,
+      "y": 200,
+      "w": 400,
+      "h": 280
+     },
+     "ring": null,
+     "readout": null,
+     "shot": "ln-line-end-drag-15-up+400.png"
+    }
+   ]
+  },
+  {
+   "step": "line tail: Line color red, weight, dash, Line end arrow",
+   "ms": 8029,
+   "observed": "colour options toolbar.lineColor.menu, toolbar.lineColor.kit.text, toolbar.lineColor.kit.background, toolbar.lineColor.kit.caption, toolbar.lineColor.kit.hint, toolbar.lineColor.kit.primary, toolbar.lineColor.kit.accent, toolbar.lineColor.ink, toolbar.lineColor.paper, toolbar.lineColor.ink-2, toolbar.lineColor.titanium, toolbar.lineColor.hair, toolbar.lineColor.hair-soft, toolbar.lineColor.plate, toolbar.lineColor.edge, toolbar.lineColor.green, toolbar.lineColor.amber, toolbar.lineColor.red, toolbar.lineColor.blue, toolbar.lineColor.accent, toolbar.lineColor.none, toolbar.lineColor.hex picked toolbar.lineColor.red; weight options  picked null; dash options toolbar.lineDash.plate, toolbar.lineDash.list, toolbar.lineDash.pick.solid, toolbar.lineDash.pick.dot, toolbar.lineDash.pick.dash, toolbar.lineDash.pick.dashDot, toolbar.lineDash.pick.longDash, toolbar.lineDash.pick.longDashDot picked toolbar.lineDash.pick.dash; end options toolbar.lineEnd.plate, toolbar.lineEnd.plate, toolbar.lineEnd.grid, toolbar.lineEnd.pick.none, toolbar.lineEnd.pick.fillArrow, toolbar.lineEnd.pick.stealth, toolbar.lineEnd.pick.fillCircle, toolbar.lineEnd.pick.fillSquare, toolbar.lineEnd.pick.fillDiamond, toolbar.lineEnd.pick.openArrow, toolbar.lineEnd.pick.openCircle, toolbar.lineEnd.pick.openSquare, toolbar.lineEnd.pick.openDiamond picked toolbar.lineEnd.pick.fillArrow; now {\"stroke\":\"rgb(229, 72, 77) 1px dash 4px, 3px\",\"start\":null,\"end\":null,\"drawn\":{\"heads\":0,\"dataHeads\":null,\"paths\":[\"0.5,0.5-391.369,273.815\",\"M0,0 L-10,-5 L-10,5 Z\",\"M0.5,0.5 L399.5,279.5\"]}}",
+   "shotC": "ln-08-line-colour-plate-after.png",
+   "shot": "ln-09-line-tail-applied.png"
+  },
+  {
+   "step": "Elbow connector dragged from A right site to B left site, watched",
+   "ms": 5069,
+   "observed": "sites on hover 8; shape-5 {\"shape\":\"elbow\",\"connect\":{\"start\":{\"block\":\"shape\",\"site\":3},\"end\":{\"block\":\"shape-2\",\"site\":1}},\"start\":null,\"end\":null,\"orientation\":\"horizontal\",\"pos\":{\"x\":440,\"y\":680,\"w\":560,\"h\":1,\"z\":5},\"drawn\":{\"heads\":0,\"dataHeads\":null,\"paths\":[\"M0.5,0.5 H280.5 V0.5 H560.5\",\"M0.5,0.5 H280.5 V0.5 H560.5\"]},\"chip\":null,\"handles\":[],\"stroke\":\"rgb(7, 7, 7) 1px dash none\"}",
+   "shotSites": "ln-10-elbow-armed-sites-on-a.png",
+   "shot": "ln-11-elbow-connected.png",
+   "frames": [
+    {
+     "tag": "before",
+     "id": null,
+     "free": null,
+     "readout": null,
+     "shot": "ln-draw-elbow-00-before.png"
+    },
+    {
+     "tag": "down",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 320,
+      "h": 8
+     },
+     "readout": null,
+     "shot": "ln-draw-elbow-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 47,
+      "h": 1
+     },
+     "readout": "47 × 1",
+     "shot": "ln-draw-elbow-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 93,
+      "h": 1
+     },
+     "readout": "93 × 1",
+     "shot": "ln-draw-elbow-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 140,
+      "h": 1
+     },
+     "readout": "140 × 1",
+     "shot": "ln-draw-elbow-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 187,
+      "h": 1
+     },
+     "readout": "187 × 1",
+     "shot": "ln-draw-elbow-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 233,
+      "h": 1
+     },
+     "readout": "233 × 1",
+     "shot": "ln-draw-elbow-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 280,
+      "h": 1
+     },
+     "readout": "280 × 1",
+     "shot": "ln-draw-elbow-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 327,
+      "h": 1
+     },
+     "readout": "327 × 1",
+     "shot": "ln-draw-elbow-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 373,
+      "h": 1
+     },
+     "readout": "373 × 1",
+     "shot": "ln-draw-elbow-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 420,
+      "h": 1
+     },
+     "readout": "420 × 1",
+     "shot": "ln-draw-elbow-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 467,
+      "h": 1
+     },
+     "readout": "467 × 1",
+     "shot": "ln-draw-elbow-11-step10.png"
+    },
+    {
+     "tag": "step11",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 513,
+      "h": 1
+     },
+     "readout": "513 × 1",
+     "shot": "ln-draw-elbow-12-step11.png"
+    },
+    {
+     "tag": "step12",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 560,
+      "h": 1
+     },
+     "readout": "560 × 1",
+     "shot": "ln-draw-elbow-13-step12.png"
+    },
+    {
+     "tag": "up+40",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 560,
+      "h": 1
+     },
+     "readout": null,
+     "shot": "ln-draw-elbow-14-up+40.png"
+    },
+    {
+     "tag": "up+400",
+     "id": "shape-5",
+     "free": {
+      "x": 440,
+      "y": 680,
+      "w": 560,
+      "h": 1
+     },
+     "readout": null,
+     "shot": "ln-draw-elbow-15-up+400.png"
+    }
+   ]
+  },
+  {
+   "step": "Curved connector dragged from A bottom site to B top site",
+   "ms": 3480,
+   "observed": "shape-6 {\"shape\":\"curved\",\"connect\":{\"start\":{\"block\":\"shape\",\"site\":2},\"end\":{\"block\":\"shape-2\",\"site\":0}},\"start\":null,\"end\":null,\"orientation\":\"diagonal-up\",\"pos\":{\"x\":320,\"y\":600,\"w\":800,\"h\":160,\"z\":6},\"drawn\":{\"heads\":0,\"dataHeads\":null,\"paths\":[\"M0.5,159.5 C0.5,80.5 799.5,80.5 799.5,0.5\",\"M0.5,159.5 C0.5,80.5 799.5,80.5 799.5,0.5\"]},\"chip\":null,\"handles\":[],\"stroke\":\"rgb(7, 7, 7) 1px dash none\"}",
+   "shot": "ln-12-curved-connected.png"
+  },
+  {
+   "step": "select the elbow connector: chip and handles",
+   "ms": 410,
+   "observed": "chip Curved connector; handles handle.shape-6.move, handle.shape-6.start, handle.shape-6.end",
+   "shot": "ln-13-elbow-selected.png"
+  },
+  {
+   "step": "move B from inside by +150,+100 in 12 steps; the connectors watched",
+   "ms": 2506,
+   "observed": "B -> 1150,700 240x160; elbow pos 440,680 560x1 -> 440,680 710x100 connect {\"start\":{\"block\":\"shape\",\"site\":3},\"end\":{\"block\":\"shape-2\",\"site\":1}}; curved pos 320,700 950x60 connect {\"start\":{\"block\":\"shape\",\"site\":2},\"end\":{\"block\":\"shape-2\",\"site\":0}}; frames with the elbow still at its start box during the 12 steps: 1",
+   "shot": "ln-14-b-moved.png",
+   "frames": [
+    {
+     "tag": "before",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 560,
+      "h": 1
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 560,
+      "h": 1
+     },
+     "shot": "ln-move-b-00-before.png"
+    },
+    {
+     "tag": "down",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 560,
+      "h": 1
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 560,
+      "h": 1
+     },
+     "shot": "ln-move-b-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 560,
+      "h": 1
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 560,
+      "h": 1
+     },
+     "shot": "ln-move-b-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 585,
+      "h": 11
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 585,
+      "h": 11
+     },
+     "shot": "ln-move-b-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 598,
+      "h": 25
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 598,
+      "h": 25
+     },
+     "shot": "ln-move-b-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 610,
+      "h": 33
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 610,
+      "h": 33
+     },
+     "shot": "ln-move-b-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 620,
+      "h": 42
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 620,
+      "h": 42
+     },
+     "shot": "ln-move-b-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 635,
+      "h": 50
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 635,
+      "h": 50
+     },
+     "shot": "ln-move-b-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 648,
+      "h": 58
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 648,
+      "h": 58
+     },
+     "shot": "ln-move-b-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 660,
+      "h": 67
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 660,
+      "h": 67
+     },
+     "shot": "ln-move-b-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 673,
+      "h": 80
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 673,
+      "h": 80
+     },
+     "shot": "ln-move-b-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 680,
+      "h": 84
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 680,
+      "h": 84
+     },
+     "shot": "ln-move-b-11-step10.png"
+    },
+    {
+     "tag": "step11",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 698,
+      "h": 91
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 698,
+      "h": 91
+     },
+     "shot": "ln-move-b-12-step11.png"
+    },
+    {
+     "tag": "step12",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 710,
+      "h": 100
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 710,
+      "h": 100
+     },
+     "shot": "ln-move-b-13-step12.png"
+    },
+    {
+     "tag": "up+0",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 710,
+      "h": 100
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 710,
+      "h": 100
+     },
+     "shot": null
+    },
+    {
+     "tag": "up+40",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 710,
+      "h": 100
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 710,
+      "h": 100
+     },
+     "shot": "ln-move-b-15-up+40.png"
+    },
+    {
+     "tag": "up+120",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 710,
+      "h": 100
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 710,
+      "h": 100
+     },
+     "shot": "ln-move-b-16-up+120.png"
+    },
+    {
+     "tag": "up+400",
+     "connector": {
+      "x": 440,
+      "y": 680,
+      "w": 710,
+      "h": 100
+     },
+     "shape": {
+      "x": 440,
+      "y": 680,
+      "w": 710,
+      "h": 100
+     },
+     "shot": "ln-move-b-17-up+400.png"
+    }
+   ]
+  },
+  {
+   "step": "move A from inside by -60,+140",
+   "ms": 1381,
+   "observed": "elbow 377,780 773x40 connect {\"start\":{\"block\":\"shape\",\"site\":3},\"end\":{\"block\":\"shape-2\",\"site\":1}}; curved 257,700 1013x200 connect {\"start\":{\"block\":\"shape\",\"site\":2},\"end\":{\"block\":\"shape-2\",\"site\":0}}",
+   "shot": "ln-15-a-moved.png"
+  },
+  {
+   "step": "resize B by its se handle by +120,+80; the connectors follow",
+   "ms": 1620,
+   "observed": "elbow 377,816 773x8 connect {\"start\":{\"block\":\"shape\",\"site\":3},\"end\":{\"block\":\"shape-2\",\"site\":1}}",
+   "shot": "ln-16-b-resized.png"
+  },
+  {
+   "step": "right click on the arrow",
+   "ms": 938,
+   "observed": "chip Arrow; rows menu.edit.cut, menu.edit.copy, menu.edit.paste, menu.edit.delete, menu.edit.duplicate, menu.arrange.order, menu.arrange.rotate, menu.arrange.centerOnPage, menu.arrange.align, menu.arrange.distribute, menu.arrange.group, menu.arrange.ungroup, menu.insert.link, menu.format.formatOptions, menu.format.bordersLines.lineStart, menu.format.bordersLines.lineEnd, menu.format.altText, menu.insert.comment",
+   "shot": "ln-17-context-arrow.png"
+  },
+  {
+   "step": "Format > Borders & lines on the arrow: Line start arrow",
+   "ms": 2644,
+   "observed": "picks ; picked null; start null end null drawn {\"heads\":1,\"dataHeads\":null,\"paths\":[\"0.5,0.5-491.653,97.943\",\"M0.5,0.5 L499.5,99.5\"]}",
+   "shot": "ln-18-borders-lines-line-start.png",
+   "shotAfter": "ln-19-arrow-both-heads.png"
+  },
+  {
+   "step": "whole slide with everything",
+   "ms": 98,
+   "observed": "6 objects",
+   "shot": "ln-20-lines-all.png",
+   "page": "ln-21-lines-all-page.png"
+  }
+ ],
+ "consoleErrors": [],
+ "finishedAt": "2026-09-29T13:32:44.394Z",
+ "deckId": "untitled-20260929-tfg1",
+ "destroyed": {
+  "trashed": true,
+  "status": 404
+ }
+}

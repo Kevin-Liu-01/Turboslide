@@ -1,0 +1,120 @@
+{
+  "base": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+  "deck": null,
+  "startedAt": "2026-09-29T13:59:05.723Z",
+  "seconds": 321,
+  "rows": [
+    {
+      "n": 1,
+      "step": "open /new and type the title",
+      "expected": "the editor is ready, revision 1, /edit/<id>",
+      "observed": "error: page.waitForFunction: Timeout 90000ms exceeded.",
+      "ok": false,
+      "at": 90.6
+    },
+    {
+      "n": 2,
+      "step": "second and third slides",
+      "expected": "slide 2 with the paragraph; slide 3 Pricing for Acme",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "ok": false,
+      "at": 124.8
+    },
+    {
+      "n": 3,
+      "step": "POST text.replaceAll with the bearer: the snackbar sequence over 12 s",
+      "expected": "one snackbar naming the change with Undo within 10 s",
+      "observed": "error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'studio')",
+      "ok": false,
+      "at": 124.9
+    },
+    {
+      "n": 4,
+      "step": "the outside write: Undo from the snackbar",
+      "expected": "Undo reverts the agent write",
+      "observed": "error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'studio')",
+      "ok": false,
+      "at": 125.1
+    },
+    {
+      "n": 5,
+      "step": "POST deck.tailor with the bearer: the snackbar",
+      "expected": "the snackbar names the tailor with Undo",
+      "observed": "error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'studio')",
+      "ok": false,
+      "at": 125.2
+    },
+    {
+      "n": 6,
+      "step": "Tools > Tailor: Apply, the dialog sampled every 300 ms until it closes",
+      "expected": "the dialog closes at once, or shows its busy state without a false count",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "ok": false,
+      "at": 159.9
+    },
+    {
+      "n": 7,
+      "step": "Search the menus with a phrase that matches nothing; Enter; click the box; Enter",
+      "expected": "the panel with the phrase; the ask sends; the deployment sentence comes back",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "ok": false,
+      "at": 194.5
+    },
+    {
+      "n": 8,
+      "step": "Search the menus, Escape: what stays on screen",
+      "expected": "no tooltip stays after the palette closes",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "ok": false,
+      "at": 229.2
+    },
+    {
+      "n": 9,
+      "step": "Tools > Preferences > Link detection off; type an address in the body",
+      "expected": "no link is made while the setting is off; the paragraph stays",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "ok": false,
+      "at": 259.8
+    },
+    {
+      "n": 10,
+      "step": "Link detection on; type another address",
+      "expected": "the address becomes a link",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "ok": false,
+      "at": 290
+    },
+    {
+      "n": 11,
+      "step": "a view link: the assistant for a viewer",
+      "expected": "the panel disabled with the sentence",
+      "observed": "no view link (record revision 0): {\"error\":\"Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'studio')\\n    at eval (eval at evaluate (:311:30), <anonymous>:1:32)\\n    at UtilityScript.evaluate (<anonymous",
+      "ok": null,
+      "at": 290.1
+    },
+    {
+      "n": 12,
+      "step": "File > Save as template on production, measured",
+      "expected": "the dialog closes with a snackbar; the gallery lists the card",
+      "observed": "error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'studio')",
+      "ok": false,
+      "at": 290.6
+    },
+    {
+      "n": 13,
+      "step": "the gallery: the card, Rename, Delete, each measured",
+      "expected": "the card within seconds; the rename and the delete take effect",
+      "observed": "error: page.waitForSelector: Timeout 30000ms exceeded.",
+      "ok": false,
+      "at": 321
+    }
+  ],
+  "facts": {},
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 403 ()",
+    "Provider's accounts list is empty.",
+    "[GSI_LOGGER]: FedCM get() rejects with NetworkError: Error retrieving a token.",
+    "Failed to load resource: the server responded with a status of 429 ()",
+    "Not signed in with the identity provider."
+  ]
+}

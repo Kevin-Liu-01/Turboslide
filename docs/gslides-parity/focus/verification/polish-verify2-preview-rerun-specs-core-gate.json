@@ -1,0 +1,566 @@
+{
+  "base": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "no bearer",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T01:44:56.840Z",
+  "ms": 2095459,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 2095452,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/verify2/gate-preview-rerun/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.recent.drops-trashed",
+      "decks.recent.keeps-new-deck",
+      "decks.card.rename-everywhere",
+      "decks.thumbnail.never-502",
+      "decks.home.load-budget",
+      "decks.card.download",
+      "export.download.named-after-title",
+      "export.picture.progress-and-capture",
+      "export.refusal.sentence-and-retry",
+      "share.dialog.open",
+      "share.name-prompt.first-share",
+      "share.name-prompt.never-mid-drag",
+      "view.live-pointers.second-browser",
+      "inbox.notification-arrives",
+      "brand.surfaces.viewer-and-show",
+      "sync.structural.concurrent",
+      "sync.block.offline-replay-converges",
+      "sync.reject.sentence-below-toolbar",
+      "shaders.frame.reuse-and-prune",
+      "shaders.perf.editor-frame",
+      "present.bar.no-dead-control",
+      "collab.roster.go-to-slide",
+      "svg.import.url",
+      "templates.card.rename-and-delete"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 24,
+  "passed": 7,
+  "failed": 17,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "shaders.perf.editor-frame",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "longest animation frame 50.9 ms over 5 s with one shader on the stage (465 animation frames; rAF gaps; 1 canvas; renderer ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver))",
+        "longest animation frame 50.9 ms over 5 s with one shader on the stage (465 animation frames; rAF gaps; 1 canvas; renderer ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver))"
+      ]
+    },
+    {
+      "id": "decks.home.load-budget",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "first byte 35 ms (budget 150)",
+        "LCP 448 ms on img[hero-dark] (budget 500, the hero picture or the h1)",
+        "ready 371 ms (budget 500)",
+        "images before the first scroll 261883 B (budget 300000)",
+        "images after a full scroll 261883 B (budget 800000)",
+        "document 15232 B (budget 60000)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 1229403 B (reported against 600000)",
+        "first byte 35 ms (budget 150)",
+        "LCP 448 ms on img[hero-dark] (budget 500, the hero picture or the h1)",
+        "ready 371 ms (budget 500)",
+        "images before the first scroll 261883 B (budget 300000)",
+        "images after a full scroll 261883 B (budget 800000)",
+        "document 15232 B (budget 60000)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 1229403 B (reported against 600000)"
+      ]
+    }
+  ],
+  "noStep": [],
+  "commit": "5d3d7748",
+  "origin": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+  "date": "2026-09-30",
+  "results": {
+    "templates.card.rename-and-delete": "failed",
+    "decks.card.download": "failed",
+    "decks.recent.drops-trashed": "passed",
+    "decks.home.load-budget": "passed",
+    "decks.recent.keeps-new-deck": "failed",
+    "decks.card.rename-everywhere": "failed",
+    "decks.thumbnail.never-502": "failed",
+    "export.download.named-after-title": "passed",
+    "export.refusal.sentence-and-retry": "failed",
+    "export.picture.progress-and-capture": "passed",
+    "present.bar.no-dead-control": "failed",
+    "shaders.frame.reuse-and-prune": "passed",
+    "shaders.perf.editor-frame": "passed",
+    "share.dialog.open": "failed",
+    "collab.roster.go-to-slide": "failed",
+    "view.live-pointers.second-browser": "failed",
+    "inbox.notification-arrives": "failed",
+    "share.name-prompt.first-share": "failed",
+    "brand.surfaces.viewer-and-show": "passed",
+    "share.name-prompt.never-mid-drag": "failed",
+    "svg.import.url": "failed",
+    "sync.structural.concurrent": "failed",
+    "sync.block.offline-replay-converges": "failed",
+    "sync.reject.sentence-below-toolbar": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.card.download",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "share.dialog.open",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "collab.roster.go-to-slide",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.name-prompt.first-share",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "sync.structural.concurrent",
+        "feature": "sync",
+        "result": "failed"
+      },
+      {
+        "id": "sync.block.offline-replay-converges",
+        "feature": "sync",
+        "result": "failed"
+      },
+      {
+        "id": "svg.import.url",
+        "feature": "svg",
+        "result": "failed"
+      },
+      {
+        "id": "decks.recent.keeps-new-deck",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.card.rename-everywhere",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "export.refusal.sentence-and-retry",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "present.bar.no-dead-control",
+        "feature": "present",
+        "result": "failed"
+      },
+      {
+        "id": "sync.reject.sentence-below-toolbar",
+        "feature": "sync",
+        "result": "failed"
+      },
+      {
+        "id": "share.name-prompt.never-mid-drag",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "decks.thumbnail.never-502",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [
+    "inbox"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": [
+        "view.livePointers.mine",
+        "view.livePointers.collaborators"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "collab.roster.go-to-slide",
+      "parks": [
+        "title.presence.goTo"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "templates.card.rename-and-delete",
+      "parks": [
+        "templates.card.menu"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "svg.import.url",
+      "parks": [
+        "intake.svg.url"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "decks.card.download",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "share.dialog.open",
+      "feature": "share",
+      "result": "failed"
+    },
+    {
+      "id": "share.name-prompt.first-share",
+      "feature": "share",
+      "result": "failed"
+    },
+    {
+      "id": "sync.structural.concurrent",
+      "feature": "sync",
+      "result": "failed"
+    },
+    {
+      "id": "sync.block.offline-replay-converges",
+      "feature": "sync",
+      "result": "failed"
+    },
+    {
+      "id": "decks.recent.keeps-new-deck",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "decks.card.rename-everywhere",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "result": "failed"
+    },
+    {
+      "id": "present.bar.no-dead-control",
+      "feature": "present",
+      "result": "failed"
+    },
+    {
+      "id": "sync.reject.sentence-below-toolbar",
+      "feature": "sync",
+      "result": "failed"
+    },
+    {
+      "id": "share.name-prompt.never-mid-drag",
+      "feature": "share",
+      "result": "failed"
+    },
+    {
+      "id": "decks.thumbnail.never-502",
+      "feature": "decks",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.card.download",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: the card menu mints the bundle ticket and starts the download (the server functions answered: 200 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"id\",\"title\",\"slides\",\"sections\",\"revision\",\"createdAt\",\"updatedAt\",\"appearance\",\"firstSlide\"],\"v\":[{\"t\":1,\"s\":\"un"
+    },
+    {
+      "id": "share.dialog.open",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "view.live-pointers.second-browser",
+      "feature": "view",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the second browser's pointer is drawn on the first within 10 s"
+    },
+    {
+      "id": "inbox.notification-arrives",
+      "feature": "inbox",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the first browser's bell shows a count of 1 within 10 s"
+    },
+    {
+      "id": "collab.roster.go-to-slide",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: Go to slide jumps (the owner's record read split-1-dc12 after 5 ms, so a miss is the chip's click)"
+    },
+    {
+      "id": "share.name-prompt.first-share",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the name shows on the presence chip in the second browser within 35 s"
+    },
+    {
+      "id": "decks.recent.drops-trashed",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "templates.card.rename-and-delete",
+      "feature": "templates",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the card reads the new name"
+    },
+    {
+      "id": "export.download.named-after-title",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.surfaces.viewer-and-show",
+      "feature": "brand",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.structural.concurrent",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the loser's reject card is shown"
+    },
+    {
+      "id": "sync.block.offline-replay-converges",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: A's resend carries the offset shifted past B's words"
+    },
+    {
+      "id": "shaders.frame.reuse-and-prune",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.perf.editor-frame",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.import.url",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the alt is the file's name"
+    },
+    {
+      "id": "decks.recent.keeps-new-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: File > Open lists it"
+    },
+    {
+      "id": "decks.card.rename-everywhere",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: after two 429s no file"
+    },
+    {
+      "id": "export.picture.progress-and-capture",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.bar.no-dead-control",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: every control's click changes the state"
+    },
+    {
+      "id": "sync.reject.sentence-below-toolbar",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: one snackbar sentence"
+    },
+    {
+      "id": "share.name-prompt.never-mid-drag",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: never over the sheet"
+    },
+    {
+      "id": "decks.thumbnail.never-502",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 150000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

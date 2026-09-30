@@ -1,0 +1,108 @@
+{
+ "base": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+ "theme": "light",
+ "viewport": {
+  "width": 1440,
+  "height": 900
+ },
+ "startedAt": "2026-09-29T13:35:55.336Z",
+ "steps": [
+  {
+   "step": "paste svg markup (text/plain with the XML prolog) on the stage",
+   "ms": 1942,
+   "observed": "shot within 1229 ms; type shot 680,370 240x160 asset pasted; drawn {\"free\":{\"x\":680,\"y\":370,\"w\":240,\"h\":160},\"img\":{\"box\":{\"x\":680,\"y\":370,\"w\":240,\"h\":160},\"src\":\"https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-8…\",\"natural\":[240,160],\"objectFit\":\"contain\",\"svgSrc\":true},\"inlineSvg\":null,\"chip\":\"Image\",\"handles\":[\"handle.shot.move\",\"handle.shot.resize.nw\",\"handle.shot.resize.n\",\"handle.shot.resize.ne\",\"handle.shot.resize.e\",\"handle.shot.resize.se\",\"handle.shot.resize.s\",\"handle.shot.resize.sw\",\"handle.shot.resize.w\",\"handle.shot.rotate\"],\"k\":0.705}; snack ",
+   "shot": "sv-01-svg-pasted.png",
+   "page": "sv-02-svg-pasted-page.png"
+  },
+  {
+   "step": "Insert > Image > Upload from computer with mark.svg",
+   "ms": 4111,
+   "observed": "shot-2 within 1374 ms; type shot 269,370 240x160; drawn {\"free\":{\"x\":269,\"y\":370,\"w\":240,\"h\":160},\"img\":{\"box\":{\"x\":269,\"y\":370,\"w\":240,\"h\":160},\"src\":\"https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-8…\",\"natural\":[240,160],\"objectFit\":\"contain\",\"svgSrc\":true},\"inlineSvg\":null,\"chip\":\"Image\",\"handles\":[\"handle.shot-2.move\",\"handle.shot-2.resize.nw\",\"handle.shot-2.resize.n\",\"handle.shot-2.resize.ne\",\"handle.shot-2.resize.e\",\"handle.shot-2.resize.se\",\"handle.shot-2.resize.s\",\"handle.shot-2.resize.sw\",\"handle.shot-2.resize.w\",\"handle.shot-2.rotate\"],\"k\":0.705}; snack ",
+   "shot": "sv-03-svg-uploaded.png",
+   "page": "sv-04-svg-uploaded-page.png"
+  },
+  {
+   "step": "select the svg picture: chip, handles, tail",
+   "ms": 668,
+   "observed": "chip Image; handles 10; tail toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash, toolbar.cropImage, toolbar.replaceImage, toolbar.imageOptions, toolbar.resetImage, toolbar.formatOptions",
+   "shot": "sv-05-svg-selected.png",
+   "page": "sv-06-svg-selected-page.png"
+  },
+  {
+   "step": "move the uploaded picture to the left half; Shift resize by the se handle",
+   "ms": 3520,
+   "observed": "280,370 240x160 -> 280,370 540x360 aspect 1.500 -> 1.500; drawn {\"box\":{\"x\":280,\"y\":370,\"w\":540,\"h\":360},\"src\":\"https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-8…\",\"natural\":[240,160],\"objectFit\":\"contain\",\"svgSrc\":true}",
+   "shot": "sv-07-svg-shift-resized.png"
+  },
+  {
+   "step": "zoom box typed to 400",
+   "ms": 2288,
+   "observed": "zoom state 4; box 400%; sheet k 4.000 (6400 px wide); img {\"box\":{\"x\":280,\"y\":370,\"w\":540,\"h\":360},\"src\":\"https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-8…\",\"natural\":[240,160],\"objectFit\":\"contain\",\"svgSrc\":true} in viewport {\"x\":72.82499694824219,\"y\":300.20623779296875,\"w\":67.16250610351562,\"h\":44.7750244140625}",
+   "shot": "sv-08-zoom-400-page.png",
+   "clip": "sv-09-zoom-400-picture.png"
+  },
+  {
+   "step": "at 400: scroll the stage to the picture and look",
+   "ms": 95,
+   "observed": "img in viewport {\"x\":72.82499694824219,\"y\":300.20623779296875,\"w\":67.16250610351562,\"h\":44.7750244140625}; scroller {\"cls\":\"pt-stagewrap\",\"scrollLeft\":0,\"scrollTop\":0,\"scrollWidth\":3792,\"clientWidth\":1184}",
+   "shot": "sv-10-zoom-400-scrolled.png",
+   "clip": "sv-11-zoom-400-picture-scrolled.png"
+  },
+  {
+   "step": "View > Zoom > Fit",
+   "ms": 2821,
+   "observed": "box Fit",
+   "shot": "sv-12-fit-again.png"
+  },
+  {
+   "step": "paste the html form (Figma copies as text/html too)",
+   "ms": 2104,
+   "observed": "shot-3 type shot 1092,370 240x160",
+   "shot": "sv-13-svg-html-pasted.png"
+  },
+  {
+   "step": "Format > Image submenu on the svg picture",
+   "ms": 1909,
+   "observed": "rows menu.format.image.cropImage, menu.format.image.maskImage, menu.format.image.replaceImage, menu.format.image.addCaption, menu.format.image.resetImage, menu.format.image.useOnEverySlide, menu.format.image.imageOptions",
+   "shot": "sv-14-format-image-svg.png"
+  }
+ ],
+ "consoleErrors": [
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/pasted.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/pasted.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projec",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/pasted.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/pasted.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projec",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/pasted.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/pasted.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projec",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/pasted.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/pasted.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projec",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/pasted.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/pasted.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projec",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/mark.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/mark.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projects.v",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/mark.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/mark.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projects.v",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/mark.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/mark.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projects.v",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/mark.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/mark.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projects.v",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/mark.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/mark.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projects.v",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/mark.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/mark.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projects.v",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/mark.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/mark.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projects.v",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/mark.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/mark.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projects.v",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/mark.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/mark.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projects.v",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/untitled-20260929-88x9/assets/mark.svg' (redirected from 'https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/decks/untitled-20260929-88x9/assets/mark.svg') from origin 'https://turboslide-rdwe1x0ub-kl01s-projects.v",
+  "Failed to load resource: net::ERR_FAILED"
+ ],
+ "finishedAt": "2026-09-29T13:36:24.640Z",
+ "deckId": "untitled-20260929-88x9",
+ "destroyed": {
+  "trashed": true,
+  "status": 404
+ }
+}

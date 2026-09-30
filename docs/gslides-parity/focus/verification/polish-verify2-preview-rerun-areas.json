@@ -1,0 +1,454 @@
+{
+  "base": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "no bearer",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T01:44:56.840Z",
+  "ms": 390731,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 390724,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/verify2/gate-preview-rerun2/core-walk.json",
+    "deckId": "untitled-20260930-txyr",
+    "steps": 44
+  },
+  "specs": null,
+  "cost": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "polish-media",
+      "shaders"
+    ],
+    "costRows": null
+  },
+  "rows": 21,
+  "passed": 10,
+  "failed": 8,
+  "notDriven": 3,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "commit": "5d3d7748",
+  "origin": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+  "date": "2026-09-30",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "failed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "failed",
+    "decks.file.details": "passed",
+    "shaders.insert.gallery-thumbnails": "failed",
+    "shaders.insert.selected-free-rectangle": "failed",
+    "shaders.insert.words": "passed",
+    "shaders.panel.slider-live-undo": "passed",
+    "shaders.panel.preset-tiles": "failed",
+    "shaders.panel.control-sentences": "passed",
+    "shaders.panel.kit-colours": "failed",
+    "shaders.panel.one-home": "failed",
+    "shaders.background.place-answers": "failed",
+    "shaders.perf.one-context": "failed",
+    "shaders.background.add-to-theme": "not driven",
+    "shaders.frame.scrubber-capture": "not driven",
+    "shaders.view.play-setting": "passed",
+    "shaders.insert.gallery-hover-live": "passed",
+    "images.panel.seller-words": "passed",
+    "images.panel.drop-shadow": "passed",
+    "images.mask.picker-fits-panel": "passed",
+    "images.caption.grows-box": "not driven",
+    "images.border.color-draws-at-once": "passed",
+    "images.alt.focused-empty": "failed",
+    "images.crop.dims-outside": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "shaders.insert.gallery-thumbnails",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.insert.selected-free-rectangle",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.panel.preset-tiles",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.panel.kit-colours",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.panel.one-home",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.perf.one-context",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "images.caption.grows-box",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.alt.focused-empty",
+        "feature": "images",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "shaders.insert.gallery-thumbnails",
+      "parks": [
+        "insert.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.insert.selected-free-rectangle",
+      "parks": [
+        "insert.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.panel.preset-tiles",
+      "parks": [
+        "formatOptions.shader.preset"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.panel.kit-colours",
+      "parks": [
+        "formatOptions.shader.color"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.panel.one-home",
+      "parks": [
+        "formatOptions.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "parks": [
+        "dialog.background.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.perf.one-context",
+      "parks": [
+        "insert.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "parks": [
+        "dialog.background.shader.addToTheme"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "parks": [
+        "formatOptions.shader.frame.scrubber",
+        "formatOptions.shader.frame.capture"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "images.caption.grows-box",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.alt.focused-empty",
+      "feature": "images",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "shaders.insert.gallery-thumbnails",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Insert > Shader; read the title, the sentence and the cards; search \"metal\"; a category chip: title \"Shader\"; sentence missing; 17 cards, 17 with a decoded thumbnail 4 ms after the open (2 a row); 0 canvas in the dialog; search \"metal\" narrows to 1 (Liquid metal); chips 6 (dialog.shader.category.metal narrows to 1)"
+    },
+    {
+      "id": "shaders.insert.selected-free-rectangle",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Insert > Shader; click Liquid metal on the Title slide: Liquid metal inserted material at 309,129 1154x642 (paper:liquid-metal, preset diamond); move handle true; resize handles 8; rotate true; ring true; chip \"Shader\"; session false; caret false; overlaps heading heading, paragraph lead of 3; kind title -> content (recorded)"
+    },
+    {
+      "id": "shaders.insert.words",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.slider-live-undo",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.preset-tiles",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "read the Preset row's tiles; click a tile that is not pressed: 10 tiles (\"Paper on ink\", \"Ink on paper\", \"Primary\", \"Accent\", \"Captions\", \"Hints\", \"Diamond\" pressed, \"Sphere\", \"Chrome\", \"Noir\") against 10 presets of paper:liquid-metal; labels not in sentence case: none; click on formatOptions.shader.preset.chrome: preset diamond -> chrome (revision 14), canvas mean luminance moved 154.8, 98 percent of pixels changed after 599 ms"
+    },
+    {
+      "id": "shaders.panel.control-sentences",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.kit-colours",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "read the Colors row's swatches; brand.set /colors/<appearance>/primary '#0b3d91'; read the shader and its frame: the Primary swatch clicked (revision 14 -> 14); swatches text, background, caption, hint, primary, accent, custom (6 of the six roles); the sheet renders light (deck.info and the chrome read light); brand.set /colors/light/primary ok; frame frame-38c506f945e74a7e (key sha256:38c50) -> frame-ae6a4f66aad5db1e (key sha256:ae6a4, backend client) 15139 ms after the write; the new picture decoded 63 ms later; the block's mean colour moved 80.7"
+    },
+    {
+      "id": "shaders.panel.one-home",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Tools > Advanced tools; Tools > Pictures and materials with the shader selected; the Background dialog's options link: Pictures and materials sections Pictures and materials, Pictures1; the Background dialog's link absent (ground not placed by the place row)"
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Slide > Change background on the body slide; Shader; a tile; Place; read the ground, the button and the dialog: chose Liquid metal; Place dialog.background.shader.place; no ground and no sentence after 65496 ms; the button read \"Placing, 10 s\" with the seconds"
+    },
+    {
+      "id": "shaders.perf.one-context",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "a second shader block placed through the window API; select each in turn and count the canvases: error: window API block.insert did not answer within 60 s"
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: dialog.background.shader.addToTheme (docs/PRODUCT.md 7.1, B1 (dialogs/Background.tsx)); no Add to theme row beside the Shader row (P1, FEATURES.md 5.2 item 1)"
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.shader.frame.scrubber (docs/PRODUCT.md 7.1, B5 (inspector/shader.tsx)); no Frame scrubber in the Shader section (P1, FEATURES.md 5.2 item 3)"
+    },
+    {
+      "id": "shaders.view.play-setting",
+      "feature": "view",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.gallery-hover-live",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.panel.seller-words",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.panel.drop-shadow",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.mask.picker-fits-panel",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.caption.grows-box",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not on this build: format.image.addCaption (docs/PRODUCT.md 7.1, B4); the picture's menu lists edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.rotate, arrange.centerOnPage, arrange.align, format.image.replaceImage, format.image.cropImage, format.image.maskImage, format.image.resetImage, format.image.imageOptions, format.formatOptions, format.altText, insert.comment"
+    },
+    {
+      "id": "images.border.color-draws-at-once",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.alt.focused-empty",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Alt text from the picture's right click menu: description field true; focus on body; value \"core walk picture\" (the setup's declared alt, not a file name) (docs/POLISH.md 2.5 item 45, B4 with B1's Editor.tsx hunk)"
+    },
+    {
+      "id": "images.crop.dims-outside",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

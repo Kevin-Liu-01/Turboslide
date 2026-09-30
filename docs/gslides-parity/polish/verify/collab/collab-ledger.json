@@ -1,0 +1,724 @@
+{
+  "base": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-29T13:54:22.734Z",
+  "scenarios": [
+    {
+      "name": "01 new deck from /new",
+      "at": "2026-09-29T13:54:37.352Z",
+      "ok": true,
+      "ms": 14003,
+      "deck": "untitled-20260929-jxjj",
+      "wordsBefore": "",
+      "wordsSeen": [
+        {
+          "at": 1,
+          "words": ""
+        },
+        {
+          "at": 1727,
+          "words": "Saving…"
+        },
+        {
+          "at": 3859,
+          "words": "All changes saved"
+        }
+      ],
+      "wordsAfter": [
+        {
+          "at": 0,
+          "words": "All changes saved"
+        }
+      ],
+      "connectedMs": 3,
+      "revisionMs": 2,
+      "url": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/edit/<id>",
+      "sync": {
+        "seq": 1,
+        "revision": 1,
+        "pending": 0,
+        "retained": 0,
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "offline": false,
+        "storeDegraded": false,
+        "streamDown": false
+      }
+    },
+    {
+      "name": "02 B joins",
+      "at": "2026-09-29T13:54:44.495Z",
+      "ok": true,
+      "ms": 7143,
+      "readyMs": 668,
+      "connectedMs": 507,
+      "prompt": false,
+      "aSeesBMs": 4817,
+      "bSeesAMs": 2,
+      "chipOnA": true,
+      "chipOnB": true,
+      "rowsA": [
+        {
+          "name": "Chrome 728",
+          "role": "owner",
+          "kind": "human",
+          "trust": "label",
+          "slideId": "title"
+        }
+      ],
+      "chipTip": "Chrome 728 · slide 1",
+      "more": {
+        "empty": false,
+        "opacity": "1",
+        "pe": "auto",
+        "text": ""
+      },
+      "tierA": "blob",
+      "tierB": "blob"
+    },
+    {
+      "name": "04 concurrent title round 1",
+      "at": "2026-09-29T13:54:52.013Z",
+      "ok": true,
+      "ms": 7518,
+      "bothWithinMs": 2796,
+      "settledMs": 3578,
+      "final": {
+        "a": "Polish collab audit alpha bravo",
+        "b": "Polish collab audit alpha bravo",
+        "aStage": "Polish collab audit alpha bravo",
+        "bStage": "Polish collab audit alpha bravo"
+      },
+      "same": true,
+      "saveWordsA": [
+        {
+          "at": 1,
+          "words": "All changes saved"
+        },
+        {
+          "at": 509,
+          "words": "Saving…"
+        },
+        {
+          "at": 3361,
+          "words": "All changes saved"
+        }
+      ]
+    },
+    {
+      "name": "04 concurrent title round 2",
+      "at": "2026-09-29T13:55:02.958Z",
+      "ok": true,
+      "ms": 10945,
+      "bothWithinMs": "not within 8160",
+      "settledMs": 8848,
+      "final": {
+        "a": "",
+        "b": "",
+        "aStage": "Polish collab audit alpha bravo delta",
+        "bStage": "Polish collab audit alpha bravo delta"
+      },
+      "same": true,
+      "saveWordsA": [
+        {
+          "at": 0,
+          "words": "All changes saved"
+        }
+      ]
+    },
+    {
+      "name": "04 concurrent title round 3",
+      "at": "2026-09-29T13:55:14.032Z",
+      "ok": true,
+      "ms": 11073,
+      "bothWithinMs": "not within 8159",
+      "settledMs": 8992,
+      "final": {
+        "a": "",
+        "b": "",
+        "aStage": "Polish collab audit alpha bravo delta echo foxtrot",
+        "bStage": "Polish collab audit alpha bravo delta echo foxtrot"
+      },
+      "same": true,
+      "saveWordsA": [
+        {
+          "at": 2,
+          "words": "All changes saved"
+        },
+        {
+          "at": 508,
+          "words": "Saving…"
+        },
+        {
+          "at": 1830,
+          "words": "All changes saved"
+        }
+      ]
+    },
+    {
+      "name": "05 slide added by each",
+      "at": "2026-09-29T13:55:17.679Z",
+      "ok": true,
+      "ms": 3647,
+      "before": 1,
+      "afterA": 3,
+      "afterB": 3,
+      "sameOrder": true,
+      "aBothMs": 1764,
+      "bBothMs": 1,
+      "currentA": "title-1-96bd",
+      "currentB": "title-1-edce",
+      "order": [
+        "title",
+        "title-1-edce",
+        "title-1-96bd"
+      ],
+      "elapsed": 3644
+    },
+    {
+      "name": "06 move by A while B resizes",
+      "at": "2026-09-29T13:56:04.693Z",
+      "ok": false,
+      "ms": 47014,
+      "error": "TimeoutError: locator.boundingBox: Timeout 30000ms exceeded. | Call log:"
+    },
+    {
+      "name": "07 roster and Go to slide",
+      "at": "2026-09-29T13:56:19.350Z",
+      "ok": true,
+      "ms": 14657,
+      "rosterRecordMs": "not within 12163",
+      "moreTakesPointer": true,
+      "rowsInRoster": 1,
+      "rowText": "CChrome 728owner · slide 1Go to slide 1",
+      "escapeClosed": true,
+      "jumpedMs": 2,
+      "currentA": "title-1-96bd",
+      "expected": "title-1-96bd"
+    },
+    {
+      "name": "08 chip go to and follow",
+      "at": "2026-09-29T13:56:27.924Z",
+      "ok": true,
+      "ms": 8574,
+      "chipMenuItem": "title.presence.follow",
+      "ariaPressed": "false",
+      "tip": "Chrome 728 · slide 2",
+      "jumpedMs": 2,
+      "following": "5d23037ec098c4bf745185ca16b6edce",
+      "followingPlate": 1,
+      "aFollowedNextMove": false,
+      "participant": {
+        "kind": "human",
+        "role": "owner",
+        "trust": "label",
+        "name": "Chrome 728"
+      },
+      "capabilities": null
+    },
+    {
+      "name": "09 viewer C live updates",
+      "at": "2026-09-29T13:58:06.690Z",
+      "ok": true,
+      "ms": 98766,
+      "linkShape": "/s/<token>",
+      "landedMs": 31061,
+      "landedOn": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app/edit/<id>",
+      "cInAChipsMs": "not within 12139",
+      "othersInA": [
+        {
+          "kind": "human",
+          "role": "owner",
+          "name": "Chrome 728"
+        },
+        {
+          "kind": "human",
+          "role": "viewer",
+          "name": "Steel 752"
+        }
+      ],
+      "rounds": [
+        {
+          "word": "cone",
+          "cSawMs": "not within 15842"
+        },
+        {
+          "word": "ctwo",
+          "cSawMs": "not within 15800"
+        },
+        {
+          "word": "cthree",
+          "cSawMs": "not within 15996"
+        }
+      ],
+      "cRole": "viewer",
+      "cMode": "link",
+      "cViewOnlyWord": true,
+      "cEditFloorLiveMs": 2331
+    },
+    {
+      "name": "10 A offline 20 s",
+      "at": "2026-09-29T13:59:03.310Z",
+      "ok": true,
+      "ms": 56620,
+      "wordsWhileOffline": "Offline. Changes will save when you reconnect",
+      "syncWhileOffline": {
+        "offline": true,
+        "connected": false,
+        "pending": 1,
+        "streamDown": true
+      },
+      "savedAgainMs": 4409,
+      "allFourMs": "not within 30166",
+      "headings": {
+        "a": "",
+        "b": ""
+      },
+      "saveWordsA": [
+        {
+          "at": 1,
+          "words": "All changes saved"
+        },
+        {
+          "at": 153,
+          "words": "Offline. Changes will save when you reconnect"
+        },
+        {
+          "at": 20213,
+          "words": "Saving…"
+        },
+        {
+          "at": 24609,
+          "words": "All changes saved"
+        }
+      ],
+      "saveWordsB": [
+        {
+          "at": 1,
+          "words": "All changes saved"
+        },
+        {
+          "at": 4525,
+          "words": "Saving…"
+        },
+        {
+          "at": 6638,
+          "words": "All changes saved"
+        }
+      ],
+      "reconnectAfterMs": 35709
+    },
+    {
+      "name": "11 thirty writes then reload",
+      "at": "2026-09-29T13:59:25.493Z",
+      "ok": false,
+      "ms": 22183,
+      "error": "TimeoutError: locator.waitFor: Timeout 20000ms exceeded. | Call log:"
+    },
+    {
+      "name": "12 B leaves",
+      "at": "2026-09-29T13:59:26.659Z",
+      "ok": true,
+      "ms": 1166,
+      "chipGoneMs": 13,
+      "othersLeft": 2
+    }
+  ],
+  "pages": {
+    "A": {
+      "consoleErrors": [
+        {
+          "at": "2026-09-29T13:58:07.965Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:08.662Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:08.967Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:10.970Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.119Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.214Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.328Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.462Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.480Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.984Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:13.665Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:13.986Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:14.972Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:15.988Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:18.666Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:19.991Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:22.975Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:23.668Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:25.464Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:27.466Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:59:39.462Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.487Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.488Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.494Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.518Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.524Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.524Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.529Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.529Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.532Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.535Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.536Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.542Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.544Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.548Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.552Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.552Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.552Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.556Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.576Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.577Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.592Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.662Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:59:39.710Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        }
+      ],
+      "warnings": 0,
+      "failedOrErrorResponses": [
+        {
+          "at": "2026-09-29T13:58:07.464Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_ABORTED"
+        },
+        {
+          "at": "2026-09-29T13:58:07.965Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:08.662Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:08.967Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:10.970Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.119Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.214Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.328Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.462Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.480Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/ops",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:12.984Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/ops",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:13.665Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:13.986Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/ops",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:14.972Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:15.988Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/ops",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:18.666Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:19.991Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/ops",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:22.975Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:23.668Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:25.464Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T13:58:27.466Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        }
+      ],
+      "functionRequests": 49,
+      "minutes": 4.8,
+      "functionRequestsPerMinute": 10.3,
+      "byPath": {
+        "GET /new": 2,
+        "POST /api/x/csp/report": 4,
+        "GET /_serverFn/<x>": 7,
+        "POST /_serverFn/<x>": 25,
+        "POST /api/decks/<id>/ops": 11
+      },
+      "staticRequests": 90
+    },
+    "C": {
+      "consoleErrors": [
+        {
+          "at": "2026-09-29T13:56:30.149Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T13:56:30.447Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        }
+      ],
+      "warnings": 0,
+      "failedOrErrorResponses": [
+        {
+          "at": "2026-09-29T13:56:30.140Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/edit/<id>",
+          "method": "GET",
+          "status": 404
+        },
+        {
+          "at": "2026-09-29T13:56:30.447Z",
+          "host": "turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+          "path": "/api/access/<id>",
+          "method": "GET",
+          "status": 404
+        }
+      ],
+      "functionRequests": 18,
+      "minutes": 2.9,
+      "functionRequestsPerMinute": 6.2,
+      "byPath": {
+        "GET /s/<token>": 1,
+        "GET /edit/<id>": 2,
+        "POST /api/x/csp/report": 3,
+        "GET /api/access/<id>": 1,
+        "GET /_serverFn/<x>": 3,
+        "POST /_serverFn/<x>": 8
+      },
+      "staticRequests": 73
+    }
+  },
+  "teardown": {
+    "deckId": "untitled-20260929-jxjj",
+    "steps": [
+      "File > Move to trash failed: TimeoutError: locator.click: Timeout 8000ms exceeded.",
+      "deck.trash failed: Error: page.evaluate: RangeError: This presentation is in the trash, so \"deck.trash\" is refused; Restore it from the banner or with deck.restore first.",
+      "Delete forever ok (attempt 1)"
+    ],
+    "final": {
+      "edit": 404,
+      "deck": 404
+    }
+  },
+  "endedAt": "2026-09-29T13:59:40.690Z"
+}

@@ -1,0 +1,279 @@
+{
+  "base": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-29T14:04:38.716Z",
+  "steps": [
+    {
+      "step": "after 40 by duplicate (window API)",
+      "facts": {
+        "slideId": "title-2-2-2-2-2-2-4",
+        "cardsInDom": 40,
+        "scrollTop": 1899,
+        "scrollHeight": 5082,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 120,
+        "visibleCards": [
+          "title-2-2-2-2-2-2-4",
+          "title-2-4",
+          "title-2-2-4",
+          "title-2-2-2-3",
+          "title-2-2-2-2-3",
+          "title-2-3-2",
+          "title-2-2-3-2"
+        ],
+        "ringed": [
+          "title-2-2-2-2-2-2-4"
+        ],
+        "listClass": "ts-film pt-scroll"
+      },
+      "shot": "film-01-after-duplicates.png"
+    },
+    {
+      "step": "Slide > Duplicate slide on slide 1",
+      "facts": {
+        "slideId": "title-2-7",
+        "cardsInDom": 41,
+        "scrollTop": 0,
+        "scrollHeight": 5208,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 252,
+        "visibleCards": [
+          "title",
+          "title-2-7",
+          "title-2",
+          "title-2-2",
+          "title-2-2-2",
+          "title-2-3",
+          "title-2-2-3"
+        ],
+        "ringed": [
+          "title-2-7"
+        ],
+        "listClass": "ts-film pt-scroll"
+      },
+      "shot": "film-02-after-menu-duplicate.png"
+    },
+    {
+      "step": "card 35 scrolled into view, before the click",
+      "facts": {
+        "slideId": "title-2-7",
+        "cardsInDom": 41,
+        "scrollTop": 3967,
+        "scrollHeight": 5208,
+        "clientHeight": 788,
+        "currentInView": false,
+        "currentTop": -3715,
+        "visibleCards": [
+          "title-2-2-2-2-2-3",
+          "title-2-2-2-2-2-2-3",
+          "title-2-4-2",
+          "title-2-2-4-2",
+          "title-2-2-2-3-2",
+          "title-2-2-2-2-3-2",
+          "title-2-3-2-2-2"
+        ],
+        "ringed": [
+          "title-2-7"
+        ],
+        "listClass": "ts-film pt-scroll"
+      },
+      "shot": "film-03-scrolled-to-35.png"
+    },
+    {
+      "step": "after the click on card 35",
+      "facts": {
+        "slideId": "title-2-2-4-2",
+        "cardsInDom": 41,
+        "scrollTop": 3967,
+        "scrollHeight": 5208,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 449,
+        "visibleCards": [
+          "title-2-2-2-2-2-3",
+          "title-2-2-2-2-2-2-3",
+          "title-2-4-2",
+          "title-2-2-4-2",
+          "title-2-2-2-3-2",
+          "title-2-2-2-2-3-2",
+          "title-2-3-2-2-2"
+        ],
+        "ringed": [
+          "title-2-2-4-2"
+        ],
+        "listClass": "ts-film pt-scroll"
+      },
+      "shot": "film-04-after-click-35.png"
+    },
+    {
+      "step": "2.5 s later",
+      "facts": {
+        "slideId": "title-2-2-4-2",
+        "cardsInDom": 41,
+        "scrollTop": 3967,
+        "scrollHeight": 5208,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 449,
+        "visibleCards": [
+          "title-2-2-2-2-2-3",
+          "title-2-2-2-2-2-2-3",
+          "title-2-4-2",
+          "title-2-2-4-2",
+          "title-2-2-2-3-2",
+          "title-2-2-2-2-3-2",
+          "title-2-3-2-2-2"
+        ],
+        "ringed": [
+          "title-2-2-4-2"
+        ],
+        "listClass": "ts-film pt-scroll"
+      },
+      "shot": "film-05-after-click-35-later.png"
+    },
+    {
+      "step": "mouse moved to the stage",
+      "facts": {
+        "slideId": "title-2-2-4-2",
+        "cardsInDom": 41,
+        "scrollTop": 3967,
+        "scrollHeight": 5208,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 449,
+        "visibleCards": [
+          "title-2-2-2-2-2-3",
+          "title-2-2-2-2-2-2-3",
+          "title-2-4-2",
+          "title-2-2-4-2",
+          "title-2-2-2-3-2",
+          "title-2-2-2-2-3-2",
+          "title-2-3-2-2-2"
+        ],
+        "ringed": [
+          "title-2-2-4-2"
+        ],
+        "listClass": "ts-film pt-scroll"
+      },
+      "shot": "film-06-mouse-on-stage.png"
+    },
+    {
+      "step": "ArrowDown three times",
+      "facts": {
+        "slideId": "title-2-3-2-2-2",
+        "cardsInDom": 41,
+        "scrollTop": 4017,
+        "scrollHeight": 5208,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 778,
+        "visibleCards": [
+          "title-2-2-2-2-2-3",
+          "title-2-2-2-2-2-2-3",
+          "title-2-4-2",
+          "title-2-2-4-2",
+          "title-2-2-2-3-2",
+          "title-2-2-2-2-3-2",
+          "title-2-3-2-2-2"
+        ],
+        "ringed": [
+          "title-2-3-2-2-2"
+        ],
+        "listClass": "ts-film pt-scroll"
+      },
+      "shot": "film-07-arrow-down-3.png"
+    },
+    {
+      "step": "End key",
+      "facts": {
+        "slideId": "title-2-2-2-2-2-2-2-2-2",
+        "cardsInDom": 41,
+        "scrollTop": 4396,
+        "scrollHeight": 5208,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 778,
+        "visibleCards": [
+          "title-2-2-4-2",
+          "title-2-2-2-3-2",
+          "title-2-2-2-2-3-2",
+          "title-2-3-2-2-2",
+          "title-2-2-3-2-2-2",
+          "title-2-2-2-2-2-2-2-2",
+          "title-2-2-2-2-2-2-2-2-2"
+        ],
+        "ringed": [
+          "title-2-2-2-2-2-2-2-2-2"
+        ],
+        "listClass": "ts-film pt-scroll"
+      },
+      "shot": "film-08-end.png"
+    },
+    {
+      "step": "Home key",
+      "facts": {
+        "slideId": "title",
+        "cardsInDom": 41,
+        "scrollTop": 279,
+        "scrollHeight": 5208,
+        "clientHeight": 788,
+        "currentInView": false,
+        "currentTop": -153,
+        "visibleCards": [
+          "title-2",
+          "title-2-2",
+          "title-2-2-2",
+          "title-2-3",
+          "title-2-2-3",
+          "title-2-2-2-2",
+          "title-2-2-2-2-2"
+        ],
+        "ringed": [
+          "title"
+        ],
+        "listClass": "ts-film pt-scroll"
+      },
+      "shot": "film-09-home.png"
+    },
+    {
+      "step": "after reload",
+      "before": "title",
+      "facts": {
+        "slideId": "title",
+        "cardsInDom": 41,
+        "scrollTop": 0,
+        "scrollHeight": 5208,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 126,
+        "visibleCards": [
+          "title",
+          "title-2-7",
+          "title-2",
+          "title-2-2",
+          "title-2-2-2",
+          "title-2-3",
+          "title-2-2-3"
+        ],
+        "ringed": [
+          "title"
+        ],
+        "listClass": "ts-film pt-scroll"
+      },
+      "shot": "film-10-after-reload.png"
+    }
+  ],
+  "consoleErrors": [],
+  "teardown": {
+    "deckId": "untitled-20260929-se9g",
+    "steps": [
+      "File > Move to trash ok",
+      "Delete forever ok (attempt 1)"
+    ],
+    "final": {
+      "edit": 404,
+      "deck": 404
+    }
+  }
+}

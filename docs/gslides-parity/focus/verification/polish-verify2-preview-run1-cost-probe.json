@@ -1,0 +1,420 @@
+{
+  "base": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-30T01:23:45.600Z",
+  "endedAt": "2026-09-30T01:42:57.589Z",
+  "minutes": 3,
+  "tier": "blob",
+  "instances": [],
+  "rows": [
+    {
+      "id": "sync.pull.no-listing",
+      "result": "not driven",
+      "reason": "no bearer for sync.status on https://turboslide-pqodnqfj9-kl01s-projects.vercel.app (TURBOSLIDE_TOKEN or the hosts.json row): the store half is not driven",
+      "measures": [
+        "commits 10 (at least 10), landed in A true"
+      ],
+      "counts": {
+        "minutes": 0.75,
+        "functionRequests": 84,
+        "functionPerMinute": 111.57,
+        "polls": 4,
+        "failedRequests": 0,
+        "commits": 10,
+        "opsPosts": 10,
+        "opsAnswered200": 10,
+        "landed": true,
+        "settle": {
+          "settled": true,
+          "ms": 2175,
+          "samples": 1,
+          "first": null,
+          "last": null,
+          "own": 1
+        },
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 0
+        },
+        "ownMax": 6,
+        "instances": 0
+      },
+      "ceilings": {
+        "listVersions": 0,
+        "commits": 10
+      },
+      "where": "no-bearer",
+      "instances": [],
+      "settle": {
+        "settled": true,
+        "ms": 2175,
+        "samples": 1
+      },
+      "tier": "blob",
+      "deck": "untitled-20260930-udf6",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/verify2/gate-preview/cost-probe/sync.pull.no-listing.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.editor-idle.calls",
+      "result": "not driven",
+      "reason": "no bearer for sync.status on https://turboslide-pqodnqfj9-kl01s-projects.vercel.app (TURBOSLIDE_TOKEN or the hosts.json row): the store half is not driven",
+      "measures": [
+        "function requests 9.66 a minute (ceiling 12; 29 in 3 min)"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 29,
+        "functionPerMinute": 9.66,
+        "polls": 9,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": null,
+        "settle": {
+          "settled": true,
+          "ms": 2184,
+          "samples": 1,
+          "first": null,
+          "last": null,
+          "own": 1
+        },
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 0
+        },
+        "ownMax": 3,
+        "instances": 0
+      },
+      "ceilings": {
+        "functionPerMinute": 12,
+        "simplePerMinute": 40,
+        "advancedPerMinute": 11
+      },
+      "where": "no-bearer",
+      "instances": [],
+      "settle": {
+        "settled": true,
+        "ms": 2184,
+        "samples": 1
+      },
+      "tier": "blob",
+      "deck": "untitled-20260930-amcl",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/verify2/gate-preview/cost-probe/cost.editor-idle.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.editor-hidden.calls",
+      "result": "not driven",
+      "reason": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached",
+      "measures": [
+        "function requests 9.66 a minute and 9 session poll(s) were read from the tab that stayed visible"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 29,
+        "functionPerMinute": 9.66,
+        "polls": 9,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached",
+        "settle": {
+          "settled": true,
+          "ms": 2181,
+          "samples": 1,
+          "first": null,
+          "last": null,
+          "own": 1
+        },
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 0
+        },
+        "ownMax": 3,
+        "instances": 0
+      },
+      "ceilings": {
+        "functionPerMinute": 8,
+        "polls": 0
+      },
+      "where": "no-bearer",
+      "instances": [],
+      "settle": {
+        "settled": true,
+        "ms": 2181,
+        "samples": 1
+      },
+      "tier": "blob",
+      "deck": "untitled-20260930-dedu",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/verify2/gate-preview/cost-probe/cost.editor-hidden.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.editor-editing.calls",
+      "result": "not driven",
+      "reason": "no bearer for sync.status on https://turboslide-pqodnqfj9-kl01s-projects.vercel.app (TURBOSLIDE_TOKEN or the hosts.json row): the store half is not driven",
+      "measures": [
+        "function requests 69.62 a minute (ceiling 75; 209 in 3 min)"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 209,
+        "functionPerMinute": 69.62,
+        "polls": 9,
+        "failedRequests": 0,
+        "connected": true,
+        "notDriven": null,
+        "settle": {
+          "settled": true,
+          "ms": 2227,
+          "samples": 1,
+          "first": null,
+          "last": null,
+          "own": 1
+        },
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 0
+        },
+        "ownMax": 3,
+        "instances": 0
+      },
+      "ceilings": {
+        "functionPerMinute": 75,
+        "simplePerMinute": 140,
+        "advancedPerMinute": 85
+      },
+      "where": "no-bearer",
+      "instances": [],
+      "settle": {
+        "settled": true,
+        "ms": 2227,
+        "samples": 1
+      },
+      "tier": "blob",
+      "deck": "untitled-20260930-tg3y",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/verify2/gate-preview/cost-probe/cost.editor-editing.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.two-tabs-idle.calls",
+      "result": "not driven",
+      "reason": "no bearer for sync.status on https://turboslide-pqodnqfj9-kl01s-projects.vercel.app (TURBOSLIDE_TOKEN or the hosts.json row): the store half is not driven",
+      "measures": [],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 58,
+        "functionPerMinute": 19.32,
+        "polls": 18,
+        "failedRequests": 0,
+        "connected": true,
+        "mutual": true,
+        "settle": {
+          "settled": true,
+          "ms": 2158,
+          "samples": 1,
+          "first": null,
+          "last": null,
+          "own": 1
+        },
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 0
+        },
+        "ownMax": 3,
+        "instances": 0
+      },
+      "ceilings": {
+        "list": 0,
+        "advancedPerMinute": 30
+      },
+      "where": "no-bearer",
+      "instances": [],
+      "settle": {
+        "settled": true,
+        "ms": 2158,
+        "samples": 1
+      },
+      "tier": "blob",
+      "deck": "untitled-20260930-xp5v",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/verify2/gate-preview/cost-probe/cost.two-tabs-idle.calls.json",
+      "exit": 0
+    },
+    {
+      "id": "cost.show.calls",
+      "result": "not driven",
+      "reason": "no bearer for sync.status on https://turboslide-pqodnqfj9-kl01s-projects.vercel.app (TURBOSLIDE_TOKEN or the hosts.json row): the store half is not driven",
+      "measures": [
+        "function requests 0 in the window (ceiling 0)"
+      ],
+      "counts": {
+        "minutes": 3,
+        "functionRequests": 0,
+        "functionPerMinute": 0,
+        "polls": 0,
+        "failedRequests": 0,
+        "settle": {
+          "settled": true,
+          "ms": 2168,
+          "samples": 1,
+          "first": null,
+          "last": null,
+          "own": 1
+        },
+        "functionRequestsBeforeWindow": 0,
+        "store": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0
+        },
+        "firstSampleStore": {
+          "simple": 0,
+          "advanced": 0,
+          "head": 0,
+          "get": 0,
+          "put": 0,
+          "list": 0,
+          "del": 0,
+          "own": 0
+        },
+        "ownMax": 3,
+        "instances": 0
+      },
+      "ceilings": {
+        "functionRequests": 0,
+        "storeCalls": 0
+      },
+      "where": "no-bearer",
+      "instances": [],
+      "settle": {
+        "settled": true,
+        "ms": 2168,
+        "samples": 1
+      },
+      "tier": "blob",
+      "deck": "untitled-20260930-5kxc",
+      "teardown": {
+        "trashed": "File > Move to trash",
+        "removed": "Delete forever on /decks/trash",
+        "edit": 404,
+        "deck": 404,
+        "gone": true
+      },
+      "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/verify2/gate-preview/cost-probe/cost.show.calls.json",
+      "exit": 0
+    }
+  ],
+  "exitCode": 0
+}

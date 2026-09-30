@@ -1,0 +1,3199 @@
+{
+ "base": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+ "theme": "light",
+ "viewport": {
+  "width": 1440,
+  "height": 900
+ },
+ "startedAt": "2026-09-29T13:29:21.509Z",
+ "steps": [
+  {
+   "step": "setup: a blank slide",
+   "ms": 61,
+   "observed": "slide blank-1",
+   "shot": "sh-01-blank-slide-page.png"
+  },
+  {
+   "step": "Insert > Shape submenu",
+   "ms": 1324,
+   "observed": "rows menu.insert.shape.shapes.rectangle, menu.insert.shape.shapes.rounded, menu.insert.shape.shapes.ellipse, menu.insert.shape.gallery, menu.insert.shape.arrows, menu.insert.shape.callouts, menu.insert.shape.equation",
+   "shot": "sh-02-insert-shape-submenu.png"
+  },
+  {
+   "step": "Insert > Shape > shapes grid",
+   "ms": 2446,
+   "observed": "99 tiles; first rect, roundRect, snip1Rect, snip2SameRect, snip2DiagRect, snipRoundRect, round1Rect, round2SameRect; plate {\"x\":592,\"y\":261,\"w\":344,\"h\":554}",
+   "shot": "sh-03-grid-shapes.png",
+   "clip": "sh-04-grid-shapes-zoom.png"
+  },
+  {
+   "step": "Insert > Shape > arrows grid",
+   "ms": 2396,
+   "observed": "26 tiles; first rightArrow, leftArrow, upArrow, downArrow, leftRightArrow, upDownArrow, quadArrow, leftRightUpArrow; plate {\"x\":592,\"y\":289,\"w\":344,\"h\":176}",
+   "shot": "sh-05-grid-arrows.png",
+   "clip": "sh-06-grid-arrows-zoom.png"
+  },
+  {
+   "step": "Insert > Shape > callouts grid",
+   "ms": 2345,
+   "observed": "4 tiles; first wedgeRectCallout, wedgeRoundRectCallout, wedgeEllipseCallout, cloudCallout; plate {\"x\":592,\"y\":317,\"w\":344,\"h\":50}",
+   "shot": "sh-07-grid-callouts.png",
+   "clip": "sh-08-grid-callouts-zoom.png"
+  },
+  {
+   "step": "Insert > Shape > equation grid",
+   "ms": 2463,
+   "observed": "6 tiles; first mathPlus, mathMinus, mathMultiply, mathDivide, mathEqual, mathNotEqual; plate {\"x\":592,\"y\":345,\"w\":344,\"h\":50}",
+   "shot": "sh-09-grid-equation.png",
+   "clip": "sh-10-grid-equation-zoom.png"
+  },
+  {
+   "step": "gallery: hexagon by drag",
+   "ms": 5892,
+   "observed": "shape pos 120,120 320x220; free {\"x\":120,\"y\":120,\"w\":320,\"h\":220} shape null adjust null els 1 first path fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px chip null handles 0; first frame with the shape: down (of 16); readouts 27 × 18 | 53 × 37 | 80 × 55",
+   "shot": "sh-11-placed-hexagon.png",
+   "frames": [
+    {
+     "tag": "before",
+     "id": null,
+     "free": null,
+     "marquee": null,
+     "readout": null,
+     "frees": 0,
+     "shot": "sh-draw-hexagon-00-before.png"
+    },
+    {
+     "tag": "down",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 240,
+      "h": 160
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 239,
+      "h": 159
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 1,
+     "shot": "sh-draw-hexagon-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 27,
+      "h": 18
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 26,
+      "h": 17
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 26.7,
+      "h": 18.3
+     },
+     "readout": "27 × 18",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 53,
+      "h": 37
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 52,
+      "h": 36
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 53.3,
+      "h": 36.7
+     },
+     "readout": "53 × 37",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 80,
+      "h": 55
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 79,
+      "h": 54
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 80,
+      "h": 55
+     },
+     "readout": "80 × 55",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 107,
+      "h": 73
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 106,
+      "h": 72
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 106.6,
+      "h": 73.3
+     },
+     "readout": "107 × 73",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 133,
+      "h": 92
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 132,
+      "h": 91
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 133.3,
+      "h": 91.7
+     },
+     "readout": "133 × 92",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 160,
+      "h": 110
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 159,
+      "h": 109
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 160,
+      "h": 110
+     },
+     "readout": "160 × 110",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 187,
+      "h": 128
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 186,
+      "h": 127
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 186.7,
+      "h": 128.3
+     },
+     "readout": "187 × 128",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 213,
+      "h": 147
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 212,
+      "h": 146
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 213.3,
+      "h": 146.7
+     },
+     "readout": "213 × 147",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 240,
+      "h": 165
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 239,
+      "h": 164
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 240,
+      "h": 165
+     },
+     "readout": "240 × 165",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 267,
+      "h": 183
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 266,
+      "h": 182
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 266.6,
+      "h": 183.3
+     },
+     "readout": "267 × 183",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-11-step10.png"
+    },
+    {
+     "tag": "step11",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 293,
+      "h": 202
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 292,
+      "h": 201
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 293.3,
+      "h": 201.7
+     },
+     "readout": "293 × 202",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-12-step11.png"
+    },
+    {
+     "tag": "step12",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 320,
+      "h": 220
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 319,
+      "h": 219
+     },
+     "marquee": {
+      "x": 120,
+      "y": 120,
+      "w": 320,
+      "h": 220
+     },
+     "readout": "320 × 220",
+     "frees": 1,
+     "shot": "sh-draw-hexagon-13-step12.png"
+    },
+    {
+     "tag": "up+40",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 320,
+      "h": 220
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 319,
+      "h": 219
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 1,
+     "shot": "sh-draw-hexagon-14-up+40.png"
+    },
+    {
+     "tag": "up+400",
+     "id": "shape",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 320,
+      "h": 220
+     },
+     "el": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 319,
+      "h": 219
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 1,
+     "shot": "sh-draw-hexagon-15-up+400.png"
+    }
+   ],
+   "facts": {
+    "free": {
+     "x": 120,
+     "y": 120,
+     "w": 320,
+     "h": 220
+    },
+    "freeTransform": "",
+    "inner": {
+     "x": 120,
+     "y": 120,
+     "w": 320,
+     "h": 220
+    },
+    "svg": {
+     "x": 120,
+     "y": 120,
+     "w": 320,
+     "h": 220
+    },
+    "shape": null,
+    "adjust": null,
+    "elements": 1,
+    "first": {
+     "tag": "path",
+     "fill": "rgba(7, 7, 7, 0.035)",
+     "stroke": "rgb(7, 7, 7)",
+     "strokeWidth": "1px",
+     "dash": "none",
+     "d": "M0,109.5 L55,0 H264.5 L319,109.5 L264.5,219 H55 Z",
+     "bbox": {
+      "x": 120.5,
+      "y": 120.5,
+      "w": 319,
+      "h": 219
+     }
+    },
+    "text": {
+     "sample": "",
+     "box": {
+      "x": 165,
+      "y": 150.9,
+      "w": 230,
+      "h": 158.1
+     },
+     "fontSize": "22px",
+     "color": "rgb(7, 7, 7)",
+     "align": "center"
+    },
+    "texts": [],
+    "ring": null,
+    "chip": null,
+    "handles": [],
+    "sites": 0
+   }
+  },
+  {
+   "step": "gallery: star5 by drag",
+   "ms": 5935,
+   "observed": "shape-2 pos 520,120 300x300; free {\"x\":520,\"y\":120,\"w\":300,\"h\":300} shape null adjust null els 1 first path fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px chip null handles 0; first frame with the shape: down (of 16); readouts 25 × 25 | 50 × 50 | 75 × 75",
+   "shot": "sh-12-placed-star5.png",
+   "frames": [
+    {
+     "tag": "before",
+     "id": null,
+     "free": null,
+     "marquee": null,
+     "readout": null,
+     "frees": 1,
+     "shot": "sh-draw-star5-00-before.png"
+    },
+    {
+     "tag": "down",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 240,
+      "h": 160
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 239,
+      "h": 159
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 2,
+     "shot": "sh-draw-star5-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 25,
+      "h": 25
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 24,
+      "h": 24
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 25,
+      "h": 25
+     },
+     "readout": "25 × 25",
+     "frees": 2,
+     "shot": "sh-draw-star5-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 50,
+      "h": 50
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 49,
+      "h": 49
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 50,
+      "h": 50
+     },
+     "readout": "50 × 50",
+     "frees": 2,
+     "shot": "sh-draw-star5-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 75,
+      "h": 75
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 74,
+      "h": 74
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 75,
+      "h": 75
+     },
+     "readout": "75 × 75",
+     "frees": 2,
+     "shot": "sh-draw-star5-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 100,
+      "h": 100
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 99,
+      "h": 99
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 100,
+      "h": 100
+     },
+     "readout": "100 × 100",
+     "frees": 2,
+     "shot": "sh-draw-star5-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 125,
+      "h": 125
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 124,
+      "h": 124
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 125,
+      "h": 125
+     },
+     "readout": "125 × 125",
+     "frees": 2,
+     "shot": "sh-draw-star5-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 150,
+      "h": 150
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 149,
+      "h": 149
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 150,
+      "h": 150
+     },
+     "readout": "150 × 150",
+     "frees": 2,
+     "shot": "sh-draw-star5-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 175,
+      "h": 175
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 174,
+      "h": 174
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 175,
+      "h": 175
+     },
+     "readout": "175 × 175",
+     "frees": 2,
+     "shot": "sh-draw-star5-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 200,
+      "h": 200
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 199,
+      "h": 199
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 200,
+      "h": 200
+     },
+     "readout": "200 × 200",
+     "frees": 2,
+     "shot": "sh-draw-star5-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 225,
+      "h": 225
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 224,
+      "h": 224
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 225,
+      "h": 225
+     },
+     "readout": "225 × 225",
+     "frees": 2,
+     "shot": "sh-draw-star5-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 250,
+      "h": 250
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 249,
+      "h": 249
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 250,
+      "h": 250
+     },
+     "readout": "250 × 250",
+     "frees": 2,
+     "shot": "sh-draw-star5-11-step10.png"
+    },
+    {
+     "tag": "step11",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 275,
+      "h": 275
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 274,
+      "h": 274
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 275,
+      "h": 275
+     },
+     "readout": "275 × 275",
+     "frees": 2,
+     "shot": "sh-draw-star5-12-step11.png"
+    },
+    {
+     "tag": "step12",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 300,
+      "h": 300
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 299,
+      "h": 299
+     },
+     "marquee": {
+      "x": 520,
+      "y": 120,
+      "w": 300,
+      "h": 300
+     },
+     "readout": "300 × 300",
+     "frees": 2,
+     "shot": "sh-draw-star5-13-step12.png"
+    },
+    {
+     "tag": "up+40",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 300,
+      "h": 300
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 299,
+      "h": 299
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 2,
+     "shot": "sh-draw-star5-14-up+40.png"
+    },
+    {
+     "tag": "up+400",
+     "id": "shape-2",
+     "free": {
+      "x": 520,
+      "y": 120,
+      "w": 300,
+      "h": 300
+     },
+     "el": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 299,
+      "h": 299
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 2,
+     "shot": "sh-draw-star5-15-up+400.png"
+    }
+   ],
+   "facts": {
+    "free": {
+     "x": 520,
+     "y": 120,
+     "w": 300,
+     "h": 300
+    },
+    "freeTransform": "",
+    "inner": {
+     "x": 520,
+     "y": 120,
+     "w": 300,
+     "h": 300
+    },
+    "svg": {
+     "x": 520,
+     "y": 120,
+     "w": 300,
+     "h": 300
+    },
+    "shape": null,
+    "adjust": null,
+    "elements": 1,
+    "first": {
+     "tag": "path",
+     "fill": "rgba(7, 7, 7, 0.035)",
+     "stroke": "rgb(7, 7, 7)",
+     "strokeWidth": "1px",
+     "dash": "none",
+     "d": "M0,114 H114 L149.5,0 L185,114 H299 L206.5,185 L242",
+     "bbox": {
+      "x": 520.5,
+      "y": 120.5,
+      "w": 299,
+      "h": 299
+     }
+    },
+    "text": {
+     "sample": "",
+     "box": {
+      "x": 612.7,
+      "y": 234.6,
+      "w": 114.6,
+      "h": 114.6
+     },
+     "fontSize": "22px",
+     "color": "rgb(7, 7, 7)",
+     "align": "center"
+    },
+    "texts": [],
+    "ring": null,
+    "chip": null,
+    "handles": [],
+    "sites": 0
+   }
+  },
+  {
+   "step": "gallery: pie by click",
+   "ms": 4107,
+   "observed": "shape-3 pos 900,140 240x160; free {\"x\":900,\"y\":140,\"w\":240,\"h\":160} shape null adjust null els 1 first path fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px chip null handles 0",
+   "shot": "sh-13-placed-pie.png",
+   "frames": null,
+   "facts": {
+    "free": {
+     "x": 900,
+     "y": 140,
+     "w": 240,
+     "h": 160
+    },
+    "freeTransform": "",
+    "inner": {
+     "x": 900,
+     "y": 140,
+     "w": 240,
+     "h": 160
+    },
+    "svg": {
+     "x": 900,
+     "y": 140,
+     "w": 240,
+     "h": 160
+    },
+    "shape": null,
+    "adjust": null,
+    "elements": 1,
+    "first": {
+     "tag": "path",
+     "fill": "rgba(7, 7, 7, 0.035)",
+     "stroke": "rgb(7, 7, 7)",
+     "strokeWidth": "1px",
+     "dash": "none",
+     "d": "M239,79.5 A119.5,79.5 0 1 1 119.5,0 V79.5 Z",
+     "bbox": {
+      "x": 900.5,
+      "y": 140.5,
+      "w": 239,
+      "h": 159
+     }
+    },
+    "text": {
+     "sample": "",
+     "box": {
+      "x": 900,
+      "y": 140,
+      "w": 240,
+      "h": 160
+     },
+     "fontSize": "22px",
+     "color": "rgb(7, 7, 7)",
+     "align": "center"
+    },
+    "texts": [],
+    "ring": null,
+    "chip": null,
+    "handles": [],
+    "sites": 0
+   }
+  },
+  {
+   "step": "gallery: can by click",
+   "ms": 3882,
+   "observed": "shape-4 pos 1200,140 240x160; free {\"x\":1200,\"y\":140,\"w\":240,\"h\":160} shape null adjust null els 4 first path fill rgba(7, 7, 7, 0.035) stroke none 1px chip null handles 0",
+   "shot": "sh-14-placed-can.png",
+   "frames": null,
+   "facts": {
+    "free": {
+     "x": 1200,
+     "y": 140,
+     "w": 240,
+     "h": 160
+    },
+    "freeTransform": "",
+    "inner": {
+     "x": 1200,
+     "y": 140,
+     "w": 240,
+     "h": 160
+    },
+    "svg": {
+     "x": 1200,
+     "y": 140,
+     "w": 240,
+     "h": 160
+    },
+    "shape": null,
+    "adjust": null,
+    "elements": 4,
+    "first": {
+     "tag": "path",
+     "fill": "rgba(7, 7, 7, 0.035)",
+     "stroke": "none",
+     "strokeWidth": "1px",
+     "dash": "none",
+     "d": "M0,20 A119.5,20 0 0 0 239,20 V139 A119.5,20 0 0 1 ",
+     "bbox": {
+      "x": 1200.5,
+      "y": 160.5,
+      "w": 239,
+      "h": 139
+     }
+    },
+    "text": {
+     "sample": "",
+     "box": {
+      "x": 1200,
+      "y": 180,
+      "w": 240,
+      "h": 100
+     },
+     "fontSize": "22px",
+     "color": "rgb(7, 7, 7)",
+     "align": "center"
+    },
+    "texts": [],
+    "ring": null,
+    "chip": null,
+    "handles": [],
+    "sites": 0
+   }
+  },
+  {
+   "step": "gallery: flowChartDocument by drag",
+   "ms": 5842,
+   "observed": "shape-5 pos 120,520 340x120; free {\"x\":120,\"y\":520,\"w\":340,\"h\":120} shape null adjust null els 1 first path fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px chip null handles 0; first frame with the shape: down (of 16); readouts 28 × 10 | 57 × 20 | 85 × 30",
+   "shot": "sh-15-placed-flowChartDocument.png",
+   "frames": [
+    {
+     "tag": "before",
+     "id": null,
+     "free": null,
+     "marquee": null,
+     "readout": null,
+     "frees": 4,
+     "shot": "sh-draw-flowChartDocument-00-before.png"
+    },
+    {
+     "tag": "down",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 240,
+      "h": 160
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 239,
+      "h": 156.9
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 28,
+      "h": 10
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 27,
+      "h": 8.9
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 28.3,
+      "h": 10
+     },
+     "readout": "28 × 10",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 57,
+      "h": 20
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 56,
+      "h": 18.6
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 56.6,
+      "h": 20
+     },
+     "readout": "57 × 20",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 85,
+      "h": 30
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 84,
+      "h": 28.6
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 85,
+      "h": 30
+     },
+     "readout": "85 × 30",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 113,
+      "h": 40
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 112,
+      "h": 38.5
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 113.3,
+      "h": 40
+     },
+     "readout": "113 × 40",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 142,
+      "h": 50
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 141,
+      "h": 48.6
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 141.7,
+      "h": 50
+     },
+     "readout": "142 × 50",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 170,
+      "h": 60
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 169,
+      "h": 58.3
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 170,
+      "h": 60
+     },
+     "readout": "170 × 60",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 198,
+      "h": 70
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 197,
+      "h": 68.2
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 198.3,
+      "h": 70
+     },
+     "readout": "198 × 70",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 227,
+      "h": 80
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 226,
+      "h": 78.1
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 226.7,
+      "h": 80
+     },
+     "readout": "227 × 80",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 255,
+      "h": 90
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 254,
+      "h": 87.8
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 255,
+      "h": 90
+     },
+     "readout": "255 × 90",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 283,
+      "h": 100
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 282,
+      "h": 97.7
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 283.3,
+      "h": 100
+     },
+     "readout": "283 × 100",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-11-step10.png"
+    },
+    {
+     "tag": "step11",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 312,
+      "h": 110
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 311,
+      "h": 107.6
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 311.7,
+      "h": 110
+     },
+     "readout": "312 × 110",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-12-step11.png"
+    },
+    {
+     "tag": "step12",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 340,
+      "h": 120
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 339,
+      "h": 117.5
+     },
+     "marquee": {
+      "x": 120,
+      "y": 520,
+      "w": 340,
+      "h": 120
+     },
+     "readout": "340 × 120",
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-13-step12.png"
+    },
+    {
+     "tag": "up+40",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 340,
+      "h": 120
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 339,
+      "h": 117.5
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-14-up+40.png"
+    },
+    {
+     "tag": "up+400",
+     "id": "shape-5",
+     "free": {
+      "x": 120,
+      "y": 520,
+      "w": 340,
+      "h": 120
+     },
+     "el": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 339,
+      "h": 117.5
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 5,
+     "shot": "sh-draw-flowChartDocument-15-up+400.png"
+    }
+   ],
+   "facts": {
+    "free": {
+     "x": 120,
+     "y": 520,
+     "w": 340,
+     "h": 120
+    },
+    "freeTransform": "",
+    "inner": {
+     "x": 120,
+     "y": 520,
+     "w": 340,
+     "h": 120
+    },
+    "svg": {
+     "x": 120,
+     "y": 520,
+     "w": 340,
+     "h": 120
+    },
+    "shape": null,
+    "adjust": null,
+    "elements": 1,
+    "first": {
+     "tag": "path",
+     "fill": "rgba(7, 7, 7, 0.035)",
+     "stroke": "rgb(7, 7, 7)",
+     "strokeWidth": "1px",
+     "dash": "none",
+     "d": "M0,0 H339 V95.5 C169.5,95.5 169.5,132 0,111 Z",
+     "bbox": {
+      "x": 120.5,
+      "y": 520.5,
+      "w": 339,
+      "h": 117.5
+     }
+    },
+    "text": {
+     "sample": "",
+     "box": {
+      "x": 120,
+      "y": 520,
+      "w": 340,
+      "h": 96.2
+     },
+     "fontSize": "22px",
+     "color": "rgb(7, 7, 7)",
+     "align": "center"
+    },
+    "texts": [],
+    "ring": null,
+    "chip": null,
+    "handles": [],
+    "sites": 0
+   }
+  },
+  {
+   "step": "arrows: rightArrow by click",
+   "ms": 4311,
+   "observed": "shape-6 pos 560,560 240x160; free {\"x\":560,\"y\":560,\"w\":240,\"h\":160} shape null adjust null els 1 first path fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px chip null handles 0",
+   "shot": "sh-16-placed-rightArrow.png",
+   "frames": null,
+   "facts": {
+    "free": {
+     "x": 560,
+     "y": 560,
+     "w": 240,
+     "h": 160
+    },
+    "freeTransform": "",
+    "inner": {
+     "x": 560,
+     "y": 560,
+     "w": 240,
+     "h": 160
+    },
+    "svg": {
+     "x": 560,
+     "y": 560,
+     "w": 240,
+     "h": 160
+    },
+    "shape": null,
+    "adjust": null,
+    "elements": 1,
+    "first": {
+     "tag": "path",
+     "fill": "rgba(7, 7, 7, 0.035)",
+     "stroke": "rgb(7, 7, 7)",
+     "strokeWidth": "1px",
+     "dash": "none",
+     "d": "M0,40 H159.5 V0 L239,79.5 L159.5,159 V119.5 H0 Z",
+     "bbox": {
+      "x": 560.5,
+      "y": 560.5,
+      "w": 239,
+      "h": 159
+     }
+    },
+    "text": {
+     "sample": "",
+     "box": {
+      "x": 560,
+      "y": 600,
+      "w": 200,
+      "h": 80
+     },
+     "fontSize": "22px",
+     "color": "rgb(7, 7, 7)",
+     "align": "center"
+    },
+    "texts": [],
+    "ring": null,
+    "chip": null,
+    "handles": [],
+    "sites": 0
+   }
+  },
+  {
+   "step": "arrows: curvedRightArrow by drag",
+   "ms": 5758,
+   "observed": "shape-7 pos 880,500 240x240; free {\"x\":880,\"y\":500,\"w\":240,\"h\":240} shape null adjust null els 4 first path fill rgba(7, 7, 7, 0.035) stroke none 1px chip null handles 0; first frame with the shape: down (of 16); readouts 20 × 20 | 40 × 40 | 60 × 60",
+   "shot": "sh-17-placed-curvedRightArrow.png",
+   "frames": [
+    {
+     "tag": "before",
+     "id": null,
+     "free": null,
+     "marquee": null,
+     "readout": null,
+     "frees": 6,
+     "shot": "sh-draw-curvedRightArrow-00-before.png"
+    },
+    {
+     "tag": "down",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 240,
+      "h": 160
+     },
+     "el": {
+      "x": 880.5,
+      "y": 550,
+      "w": 239,
+      "h": 109
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 20,
+      "h": 20
+     },
+     "el": {
+      "x": 880.5,
+      "y": 506.5,
+      "w": 19,
+      "h": 13
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 20,
+      "h": 20
+     },
+     "readout": "20 × 20",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 40,
+      "h": 40
+     },
+     "el": {
+      "x": 880.5,
+      "y": 512.5,
+      "w": 39,
+      "h": 26.5
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 40,
+      "h": 40
+     },
+     "readout": "40 × 40",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 60,
+      "h": 60
+     },
+     "el": {
+      "x": 880.5,
+      "y": 519,
+      "w": 59,
+      "h": 40
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 60,
+      "h": 60
+     },
+     "readout": "60 × 60",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 80,
+      "h": 80
+     },
+     "el": {
+      "x": 880.5,
+      "y": 525,
+      "w": 79,
+      "h": 53.5
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 80,
+      "h": 80
+     },
+     "readout": "80 × 80",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 100,
+      "h": 100
+     },
+     "el": {
+      "x": 880.5,
+      "y": 531.5,
+      "w": 99,
+      "h": 67
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 100,
+      "h": 100
+     },
+     "readout": "100 × 100",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 120,
+      "h": 120
+     },
+     "el": {
+      "x": 880.5,
+      "y": 537.5,
+      "w": 119,
+      "h": 81
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 120,
+      "h": 120
+     },
+     "readout": "120 × 120",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 140,
+      "h": 140
+     },
+     "el": {
+      "x": 880.5,
+      "y": 544,
+      "w": 139,
+      "h": 94
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 140,
+      "h": 140
+     },
+     "readout": "140 × 140",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 160,
+      "h": 160
+     },
+     "el": {
+      "x": 880.5,
+      "y": 550,
+      "w": 159,
+      "h": 108
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 160,
+      "h": 160
+     },
+     "readout": "160 × 160",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 180,
+      "h": 180
+     },
+     "el": {
+      "x": 880.5,
+      "y": 556.5,
+      "w": 179,
+      "h": 121
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 180,
+      "h": 180
+     },
+     "readout": "180 × 180",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 200,
+      "h": 200
+     },
+     "el": {
+      "x": 880.5,
+      "y": 562.5,
+      "w": 199,
+      "h": 135
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 200,
+      "h": 200
+     },
+     "readout": "200 × 200",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-11-step10.png"
+    },
+    {
+     "tag": "step11",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 220,
+      "h": 220
+     },
+     "el": {
+      "x": 880.5,
+      "y": 569,
+      "w": 219,
+      "h": 148.5
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 220,
+      "h": 220
+     },
+     "readout": "220 × 220",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-12-step11.png"
+    },
+    {
+     "tag": "step12",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 240,
+      "h": 240
+     },
+     "el": {
+      "x": 880.5,
+      "y": 575,
+      "w": 239,
+      "h": 162
+     },
+     "marquee": {
+      "x": 880,
+      "y": 500,
+      "w": 240,
+      "h": 240
+     },
+     "readout": "240 × 240",
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-13-step12.png"
+    },
+    {
+     "tag": "up+40",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 240,
+      "h": 240
+     },
+     "el": {
+      "x": 880.5,
+      "y": 575,
+      "w": 239,
+      "h": 162
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-14-up+40.png"
+    },
+    {
+     "tag": "up+400",
+     "id": "shape-7",
+     "free": {
+      "x": 880,
+      "y": 500,
+      "w": 240,
+      "h": 240
+     },
+     "el": {
+      "x": 880.5,
+      "y": 575,
+      "w": 239,
+      "h": 162
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 7,
+     "shot": "sh-draw-curvedRightArrow-15-up+400.png"
+    }
+   ],
+   "facts": {
+    "free": {
+     "x": 880,
+     "y": 500,
+     "w": 240,
+     "h": 240
+    },
+    "freeTransform": "",
+    "inner": {
+     "x": 880,
+     "y": 500,
+     "w": 240,
+     "h": 240
+    },
+    "svg": {
+     "x": 880,
+     "y": 500,
+     "w": 240,
+     "h": 240
+    },
+    "shape": null,
+    "adjust": null,
+    "elements": 4,
+    "first": {
+     "tag": "path",
+     "fill": "rgba(7, 7, 7, 0.035)",
+     "stroke": "none",
+     "strokeWidth": "1px",
+     "dash": "none",
+     "d": "M0,74.5 A239,74.5 0 0 0 179,147 L179.5,117 L239,17",
+     "bbox": {
+      "x": 880.5,
+      "y": 575,
+      "w": 239,
+      "h": 162
+     }
+    },
+    "text": {
+     "sample": "",
+     "box": {
+      "x": 880,
+      "y": 500,
+      "w": 240,
+      "h": 240
+     },
+     "fontSize": "22px",
+     "color": "rgb(7, 7, 7)",
+     "align": "center"
+    },
+    "texts": [],
+    "ring": null,
+    "chip": null,
+    "handles": [],
+    "sites": 0
+   }
+  },
+  {
+   "step": "arrows: leftRightArrow by click",
+   "ms": 3872,
+   "observed": "shape-8 pos 1200,560 240x160; free {\"x\":1200,\"y\":560,\"w\":240,\"h\":160} shape null adjust null els 1 first path fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px chip null handles 0",
+   "shot": "sh-18-placed-leftRightArrow.png",
+   "frames": null,
+   "facts": {
+    "free": {
+     "x": 1200,
+     "y": 560,
+     "w": 240,
+     "h": 160
+    },
+    "freeTransform": "",
+    "inner": {
+     "x": 1200,
+     "y": 560,
+     "w": 240,
+     "h": 160
+    },
+    "svg": {
+     "x": 1200,
+     "y": 560,
+     "w": 240,
+     "h": 160
+    },
+    "shape": null,
+    "adjust": null,
+    "elements": 1,
+    "first": {
+     "tag": "path",
+     "fill": "rgba(7, 7, 7, 0.035)",
+     "stroke": "rgb(7, 7, 7)",
+     "strokeWidth": "1px",
+     "dash": "none",
+     "d": "M0,79.5 L79.5,0 V40 H159.5 V0 L239,79.5 L159.5,159",
+     "bbox": {
+      "x": 1200.5,
+      "y": 560.5,
+      "w": 239,
+      "h": 159
+     }
+    },
+    "text": {
+     "sample": "",
+     "box": {
+      "x": 1240,
+      "y": 600,
+      "w": 160,
+      "h": 80
+     },
+     "fontSize": "22px",
+     "color": "rgb(7, 7, 7)",
+     "align": "center"
+    },
+    "texts": [],
+    "ring": null,
+    "chip": null,
+    "handles": [],
+    "sites": 0
+   }
+  },
+  {
+   "step": "callouts: wedgeRectCallout by click",
+   "ms": 3745,
+   "observed": "shape-9 pos 120,720 240x160; free {\"x\":120,\"y\":720,\"w\":240,\"h\":160} shape null adjust null els 1 first path fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px chip null handles 0",
+   "shot": "sh-19-placed-wedgeRectCallout.png",
+   "frames": null,
+   "facts": {
+    "free": {
+     "x": 120,
+     "y": 720,
+     "w": 240,
+     "h": 160
+    },
+    "freeTransform": "",
+    "inner": {
+     "x": 120,
+     "y": 720,
+     "w": 240,
+     "h": 160
+    },
+    "svg": {
+     "x": 120,
+     "y": 720,
+     "w": 240,
+     "h": 160
+    },
+    "shape": null,
+    "adjust": null,
+    "elements": 1,
+    "first": {
+     "tag": "path",
+     "fill": "rgba(7, 7, 7, 0.035)",
+     "stroke": "rgb(7, 7, 7)",
+     "strokeWidth": "1px",
+     "dash": "none",
+     "d": "M0,0 H40 H40 H99.5 H239 V93 H239 V132.5 V159 H99.5",
+     "bbox": {
+      "x": 120.5,
+      "y": 720.5,
+      "w": 239,
+      "h": 179
+     }
+    },
+    "text": {
+     "sample": "",
+     "box": {
+      "x": 120,
+      "y": 720,
+      "w": 240,
+      "h": 160
+     },
+     "fontSize": "22px",
+     "color": "rgb(7, 7, 7)",
+     "align": "center"
+    },
+    "texts": [],
+    "ring": null,
+    "chip": null,
+    "handles": [],
+    "sites": 0
+   }
+  },
+  {
+   "step": "callouts: cloudCallout by drag",
+   "ms": 5597,
+   "observed": "shape-10 pos 560,700 300x160; free {\"x\":560,\"y\":700,\"w\":300,\"h\":160} shape null adjust null els 5 first path fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px chip null handles 0; first frame with the shape: down (of 16); readouts 25 × 13 | 50 × 27 | 75 × 40",
+   "shot": "sh-20-placed-cloudCallout.png",
+   "frames": [
+    {
+     "tag": "before",
+     "id": null,
+     "free": null,
+     "marquee": null,
+     "readout": null,
+     "frees": 9,
+     "shot": "sh-draw-cloudCallout-00-before.png"
+    },
+    {
+     "tag": "down",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 240,
+      "h": 160
+     },
+     "el": {
+      "x": 560.7,
+      "y": 700.5,
+      "w": 238.7,
+      "h": 159.5
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 25,
+      "h": 13
+     },
+     "el": {
+      "x": 559.5,
+      "y": 699.4,
+      "w": 25,
+      "h": 13
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 25,
+      "h": 13.3
+     },
+     "readout": "25 × 13",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 50,
+      "h": 27
+     },
+     "el": {
+      "x": 558.9,
+      "y": 700.6,
+      "w": 50.4,
+      "h": 26.4
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 50,
+      "h": 26.7
+     },
+     "readout": "50 × 27",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 75,
+      "h": 40
+     },
+     "el": {
+      "x": 560.7,
+      "y": 700.5,
+      "w": 73.6,
+      "h": 39.6
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 75,
+      "h": 40
+     },
+     "readout": "75 × 40",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 100,
+      "h": 53
+     },
+     "el": {
+      "x": 559.2,
+      "y": 700.4,
+      "w": 100.9,
+      "h": 52.3
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 100,
+      "h": 53.3
+     },
+     "readout": "100 × 53",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 125,
+      "h": 67
+     },
+     "el": {
+      "x": 559.7,
+      "y": 700.8,
+      "w": 125,
+      "h": 65.5
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 125,
+      "h": 66.7
+     },
+     "readout": "125 × 67",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 150,
+      "h": 80
+     },
+     "el": {
+      "x": 561.4,
+      "y": 700.7,
+      "w": 147.4,
+      "h": 79
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 150,
+      "h": 80
+     },
+     "readout": "150 × 80",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 175,
+      "h": 93
+     },
+     "el": {
+      "x": 559.7,
+      "y": 700.7,
+      "w": 175.3,
+      "h": 92.2
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 175,
+      "h": 93.3
+     },
+     "readout": "175 × 93",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 200,
+      "h": 107
+     },
+     "el": {
+      "x": 560,
+      "y": 700.7,
+      "w": 199.4,
+      "h": 106.3
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 200,
+      "h": 106.6
+     },
+     "readout": "200 × 107",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 225,
+      "h": 120
+     },
+     "el": {
+      "x": 560.7,
+      "y": 700.9,
+      "w": 223.8,
+      "h": 118.9
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 225,
+      "h": 120
+     },
+     "readout": "225 × 120",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 250,
+      "h": 133
+     },
+     "el": {
+      "x": 560.1,
+      "y": 700.8,
+      "w": 250.2,
+      "h": 131.9
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 250,
+      "h": 133.3
+     },
+     "readout": "250 × 133",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-11-step10.png"
+    },
+    {
+     "tag": "step11",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 275,
+      "h": 147
+     },
+     "el": {
+      "x": 559.7,
+      "y": 701,
+      "w": 275.2,
+      "h": 145.5
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 275,
+      "h": 146.7
+     },
+     "readout": "275 × 147",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-12-step11.png"
+    },
+    {
+     "tag": "step12",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 300,
+      "h": 160
+     },
+     "el": {
+      "x": 560.8,
+      "y": 700.7,
+      "w": 298.5,
+      "h": 159.7
+     },
+     "marquee": {
+      "x": 560,
+      "y": 700,
+      "w": 300,
+      "h": 160
+     },
+     "readout": "300 × 160",
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-13-step12.png"
+    },
+    {
+     "tag": "up+40",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 300,
+      "h": 160
+     },
+     "el": {
+      "x": 560.8,
+      "y": 700.7,
+      "w": 298.5,
+      "h": 159.7
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-14-up+40.png"
+    },
+    {
+     "tag": "up+400",
+     "id": "shape-10",
+     "free": {
+      "x": 560,
+      "y": 700,
+      "w": 300,
+      "h": 160
+     },
+     "el": {
+      "x": 560.8,
+      "y": 700.7,
+      "w": 298.5,
+      "h": 159.7
+     },
+     "marquee": null,
+     "readout": null,
+     "frees": 10,
+     "shot": "sh-draw-cloudCallout-15-up+400.png"
+    }
+   ],
+   "facts": {
+    "free": {
+     "x": 560,
+     "y": 700,
+     "w": 300,
+     "h": 160
+    },
+    "freeTransform": "",
+    "inner": {
+     "x": 560,
+     "y": 700,
+     "w": 300,
+     "h": 160
+    },
+    "svg": {
+     "x": 560,
+     "y": 700,
+     "w": 300,
+     "h": 160
+    },
+    "shape": null,
+    "adjust": null,
+    "elements": 5,
+    "first": {
+     "tag": "path",
+     "fill": "rgba(7, 7, 7, 0.035)",
+     "stroke": "rgb(7, 7, 7)",
+     "strokeWidth": "1px",
+     "dash": "none",
+     "d": "M27,53 A46.5,34 0 0 1 97,19 A37,26.5 0 0 1 155.5,1",
+     "bbox": {
+      "x": 560.8,
+      "y": 700.7,
+      "w": 298.5,
+      "h": 159.7
+     }
+    },
+    "text": {
+     "sample": "",
+     "box": {
+      "x": 601.3,
+      "y": 724.2,
+      "w": 196,
+      "h": 104.2
+     },
+     "fontSize": "22px",
+     "color": "rgb(7, 7, 7)",
+     "align": "center"
+    },
+    "texts": [],
+    "ring": null,
+    "chip": null,
+    "handles": [],
+    "sites": 0
+   }
+  },
+  {
+   "step": "equation: mathPlus by click",
+   "ms": 4187,
+   "observed": "shape-11 pos 1200,760 240x160; free {\"x\":1200,\"y\":760,\"w\":240,\"h\":160} shape null adjust null els 1 first path fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px chip null handles 0",
+   "shot": "sh-21-placed-mathPlus.png",
+   "frames": null,
+   "facts": {
+    "free": {
+     "x": 1200,
+     "y": 760,
+     "w": 240,
+     "h": 160
+    },
+    "freeTransform": "",
+    "inner": {
+     "x": 1200,
+     "y": 760,
+     "w": 240,
+     "h": 160
+    },
+    "svg": {
+     "x": 1200,
+     "y": 760,
+     "w": 240,
+     "h": 160
+    },
+    "shape": null,
+    "adjust": null,
+    "elements": 1,
+    "first": {
+     "tag": "path",
+     "fill": "rgba(7, 7, 7, 0.035)",
+     "stroke": "rgb(7, 7, 7)",
+     "strokeWidth": "1px",
+     "dash": "none",
+     "d": "M31.5,61 H101 V21 H138 V61 H207.5 V98 H138 V138 H1",
+     "bbox": {
+      "x": 1232,
+      "y": 781.5,
+      "w": 176,
+      "h": 117
+     }
+    },
+    "text": {
+     "sample": "",
+     "box": {
+      "x": 1231.8,
+      "y": 821.2,
+      "w": 176.4,
+      "h": 37.6
+     },
+     "fontSize": "22px",
+     "color": "rgb(7, 7, 7)",
+     "align": "center"
+    },
+    "texts": [],
+    "ring": null,
+    "chip": null,
+    "handles": [],
+    "sites": 0
+   }
+  },
+  {
+   "step": "all eleven placed",
+   "ms": 116,
+   "observed": "hexagon:shape star5:shape-2 pie:shape-3 can:shape-4 flowChartDocument:shape-5 rightArrow:shape-6 curvedRightArrow:shape-7 leftRightArrow:shape-8 wedgeRectCallout:shape-9 cloudCallout:shape-10 mathPlus:shape-11",
+   "shot": "sh-22-all-placed.png",
+   "page": "sh-23-all-placed-page.png"
+  },
+  {
+   "step": "star5: adjust controls",
+   "ms": 3553,
+   "observed": "adjust handles on the shape: none; panel true; shape fields formatOptions.shape.change, formatOptions.shape.adjust.0, formatOptions.shape.adjust.1, formatOptions.shape.adjust.2; sections formatOptions.section.size, formatOptions.section.position, formatOptions.section.textFitting, formatOptions.section.text, formatOptions.section.colour, formatOptions.section.shadow, formatOptions.section.shape, formatOptions.section.altText; adjust written {\"before\":null,\"after\":[30000,105146,110557]}",
+   "shotSel": "sh-24-selected-star5.png",
+   "shotPanel": "sh-25-format-options-star5.png",
+   "shotAfter": "sh-26-adjusted-star5.png",
+   "handles": [
+    "handle.shape-2.move",
+    "handle.shape-2.resize.nw",
+    "handle.shape-2.resize.n",
+    "handle.shape-2.resize.ne",
+    "handle.shape-2.resize.e",
+    "handle.shape-2.resize.se",
+    "handle.shape-2.resize.s",
+    "handle.shape-2.resize.sw",
+    "handle.shape-2.resize.w",
+    "handle.shape-2.rotate"
+   ]
+  },
+  {
+   "step": "rightArrow: adjust controls",
+   "ms": 3461,
+   "observed": "adjust handles on the shape: none; panel true; shape fields formatOptions.shape.change, formatOptions.shape.adjust.0, formatOptions.shape.adjust.1; sections formatOptions.section.size, formatOptions.section.position, formatOptions.section.textFitting, formatOptions.section.text, formatOptions.section.colour, formatOptions.section.shadow, formatOptions.section.shape, formatOptions.section.altText; adjust written {\"before\":null,\"after\":[60000,50000]}",
+   "shotSel": "sh-27-selected-rightArrow.png",
+   "shotPanel": "sh-28-format-options-rightArrow.png",
+   "shotAfter": "sh-29-adjusted-rightArrow.png",
+   "handles": [
+    "handle.shape-6.move",
+    "handle.shape-6.resize.nw",
+    "handle.shape-6.resize.n",
+    "handle.shape-6.resize.ne",
+    "handle.shape-6.resize.e",
+    "handle.shape-6.resize.se",
+    "handle.shape-6.resize.s",
+    "handle.shape-6.resize.sw",
+    "handle.shape-6.resize.w",
+    "handle.shape-6.rotate"
+   ]
+  },
+  {
+   "step": "wedgeRectCallout: adjust controls",
+   "ms": 3539,
+   "observed": "adjust handles on the shape: none; panel true; shape fields formatOptions.shape.change, formatOptions.shape.adjust.0, formatOptions.shape.adjust.1; sections formatOptions.section.size, formatOptions.section.position, formatOptions.section.textFitting, formatOptions.section.text, formatOptions.section.colour, formatOptions.section.shadow, formatOptions.section.shape, formatOptions.section.altText; adjust written {\"before\":null,\"after\":[60000,62500]}",
+   "shotSel": "sh-30-selected-wedgeRectCallout.png",
+   "shotPanel": "sh-31-format-options-wedgeRectCallout.png",
+   "shotAfter": "sh-32-adjusted-wedgeRectCallout.png",
+   "handles": [
+    "handle.shape-9.move",
+    "handle.shape-9.resize.nw",
+    "handle.shape-9.resize.n",
+    "handle.shape-9.resize.ne",
+    "handle.shape-9.resize.e",
+    "handle.shape-9.resize.se",
+    "handle.shape-9.resize.s",
+    "handle.shape-9.resize.sw",
+    "handle.shape-9.resize.w",
+    "handle.shape-9.rotate"
+   ]
+  },
+  {
+   "step": "hexagon: se handle resize watched",
+   "ms": 2766,
+   "observed": "120,120 320x220 -> 120,120 480x320; frames where the shape lags the ring by more than 2 px: none; free {\"x\":120,\"y\":120,\"w\":480,\"h\":320} shape null adjust null els 1 first path fill rgba(7, 7, 7, 0.035) stroke rgb(7, 7, 7) 1px chip Shape handles 10",
+   "frames": [
+    {
+     "tag": "before",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 320,
+      "h": 220
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 320,
+      "h": 220
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 320,
+      "h": 220
+     },
+     "readout": null,
+     "shot": "sh-resize-hexagon-se-00-before.png"
+    },
+    {
+     "tag": "down",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 320,
+      "h": 220
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 320,
+      "h": 220
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 320,
+      "h": 220
+     },
+     "readout": null,
+     "shot": "sh-resize-hexagon-se-01-down.png"
+    },
+    {
+     "tag": "step1",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 333,
+      "h": 228
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 333,
+      "h": 228
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 333,
+      "h": 228
+     },
+     "readout": "333 × 228",
+     "shot": "sh-resize-hexagon-se-02-step1.png"
+    },
+    {
+     "tag": "step2",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 347,
+      "h": 237
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 347,
+      "h": 237
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 347,
+      "h": 237
+     },
+     "readout": "347 × 237",
+     "shot": "sh-resize-hexagon-se-03-step2.png"
+    },
+    {
+     "tag": "step3",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 360,
+      "h": 245
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 360,
+      "h": 245
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 360,
+      "h": 245
+     },
+     "readout": "360 × 245",
+     "shot": "sh-resize-hexagon-se-04-step3.png"
+    },
+    {
+     "tag": "step4",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 373,
+      "h": 253
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 373,
+      "h": 253
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 373,
+      "h": 253
+     },
+     "readout": "373 × 253",
+     "shot": "sh-resize-hexagon-se-05-step4.png"
+    },
+    {
+     "tag": "step5",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 387,
+      "h": 262
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 387,
+      "h": 262
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 387,
+      "h": 262
+     },
+     "readout": "387 × 262",
+     "shot": "sh-resize-hexagon-se-06-step5.png"
+    },
+    {
+     "tag": "step6",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 400,
+      "h": 270
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 400,
+      "h": 270
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 400,
+      "h": 270
+     },
+     "readout": "400 × 270",
+     "shot": "sh-resize-hexagon-se-07-step6.png"
+    },
+    {
+     "tag": "step7",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 413,
+      "h": 278
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 413,
+      "h": 278
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 413,
+      "h": 278
+     },
+     "readout": "413 × 278",
+     "shot": "sh-resize-hexagon-se-08-step7.png"
+    },
+    {
+     "tag": "step8",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 427,
+      "h": 287
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 427,
+      "h": 287
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 427,
+      "h": 287
+     },
+     "readout": "427 × 287",
+     "shot": "sh-resize-hexagon-se-09-step8.png"
+    },
+    {
+     "tag": "step9",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 440,
+      "h": 300
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 440,
+      "h": 300
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 440,
+      "h": 300
+     },
+     "readout": "440 × 300",
+     "shot": "sh-resize-hexagon-se-10-step9.png"
+    },
+    {
+     "tag": "step10",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 453,
+      "h": 300
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 453,
+      "h": 300
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 453,
+      "h": 300
+     },
+     "readout": "453 × 300",
+     "shot": "sh-resize-hexagon-se-11-step10.png"
+    },
+    {
+     "tag": "step11",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 467,
+      "h": 312
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 467,
+      "h": 312
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 467,
+      "h": 312
+     },
+     "readout": "467 × 312",
+     "shot": "sh-resize-hexagon-se-12-step11.png"
+    },
+    {
+     "tag": "step12",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "readout": "480 × 320",
+     "shot": "sh-resize-hexagon-se-13-step12.png"
+    },
+    {
+     "tag": "up+0",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "readout": null,
+     "shot": null
+    },
+    {
+     "tag": "up+40",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "readout": null,
+     "shot": "sh-resize-hexagon-se-15-up+40.png"
+    },
+    {
+     "tag": "up+120",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "readout": null,
+     "shot": "sh-resize-hexagon-se-16-up+120.png"
+    },
+    {
+     "tag": "up+400",
+     "free": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "svg": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "ring": {
+      "x": 120,
+      "y": 120,
+      "w": 480,
+      "h": 320
+     },
+     "readout": null,
+     "shot": "sh-resize-hexagon-se-17-up+400.png"
+    }
+   ],
+   "shot": "sh-33-hexagon-resized.png"
+  },
+  {
+   "step": "hexagon: Shift resize keeps the aspect",
+   "ms": 2435,
+   "observed": "120,120 480x320 -> 120,120 560x373; aspect 1.500 -> 1.501",
+   "shot": "sh-34-hexagon-shift-resized.png"
+  },
+  {
+   "step": "hexagon: Alt resize about the centre",
+   "ms": 2588,
+   "observed": "120,120 480x320 -> 60.5,120 599x320; centre x 360 -> 360",
+   "shot": "sh-35-hexagon-alt-resized.png"
+  },
+  {
+   "step": "hexagon: rotate by the handle to 35 degrees",
+   "ms": 2785,
+   "observed": "handle handle.shape.rotate; rotate 0 -> 35; during: readout \"35°\" ring {\"x\":71.6,\"y\":11.3,\"w\":576.7,\"h\":537.4}; after: ring {\"x\":71.6,\"y\":11.3,\"w\":576.7,\"h\":537.4} free {\"x\":71.6,\"y\":11.3,\"w\":576.7,\"h\":537.4} transform rotate(35deg); reselected ring {\"x\":71.6,\"y\":11.3,\"w\":576.7,\"h\":537.4} chip Shape",
+   "shotBefore": "sh-36-hexagon-before-rotate.png",
+   "shot": "sh-37-hexagon-rotated.png",
+   "shotRe": "sh-38-hexagon-rotated-reselected.png"
+  },
+  {
+   "step": "hexagon: Cmd+Z undoes the rotation",
+   "ms": 908,
+   "observed": "rotate 0",
+   "shot": "sh-39-hexagon-rotation-undone.png"
+  },
+  {
+   "step": "hexagon: label typed by enter",
+   "ms": 2268,
+   "observed": "session true; stored text \"Label one\"; drawn {\"sample\":\"Label one\",\"box\":{\"x\":186.7,\"y\":164.4,\"w\":346.7,\"h\":231.1},\"fontSize\":\"22px\",\"color\":\"rgb(7, 7, 7)\",\"align\":\"center\"}; text centre offset {\"dx\":0,\"dy\":-0.1}",
+   "shotOpen": "sh-40-label-open-hexagon.png",
+   "shotTyped": "sh-41-label-typed-hexagon.png",
+   "shot": "sh-42-label-done-hexagon.png"
+  },
+  {
+   "step": "wedgeRectCallout: label typed by dblclick",
+   "ms": 2882,
+   "observed": "session true; stored text \"Callout text\"; drawn {\"sample\":\"Callout text\",\"box\":{\"x\":120,\"y\":720,\"w\":240,\"h\":160},\"fontSize\":\"22px\",\"color\":\"rgb(7, 7, 7)\",\"align\":\"center\"}; text centre offset {\"dx\":0,\"dy\":0}",
+   "shotOpen": "sh-43-label-open-wedgeRectCallout.png",
+   "shotTyped": "sh-44-label-typed-wedgeRectCallout.png",
+   "shot": "sh-45-label-done-wedgeRectCallout.png"
+  },
+  {
+   "step": "rightArrow: label typed by enter",
+   "ms": 1780,
+   "observed": "session true; stored text \"Go\"; drawn {\"sample\":\"Go\",\"box\":{\"x\":560,\"y\":592,\"w\":192,\"h\":96},\"fontSize\":\"22px\",\"color\":\"rgb(7, 7, 7)\",\"align\":\"center\"}; text centre offset {\"dx\":-24,\"dy\":0}",
+   "shotOpen": "sh-46-label-open-rightArrow.png",
+   "shotTyped": "sh-47-label-typed-rightArrow.png",
+   "shot": "sh-48-label-done-rightArrow.png"
+  },
+  {
+   "step": "hexagon: the tail with a shape selected",
+   "ms": 593,
+   "observed": "tail controls toolbar.head, toolbar.search, toolbar.newSlide.split, toolbar.newSlide, toolbar.undo, toolbar.redo, toolbar.print, toolbar.paintFormat, toolbar.zoom, toolbar.tail, toolbar.changeShape, toolbar.fillColor, toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash, toolbar.font, toolbar.fontSize, toolbar.bold, toolbar.italic, toolbar.underline, toolbar.textColor, toolbar.highlightColor, toolbar.insertLink, toolbar.insertComment, toolbar.align, toolbar.spacing, toolbar.formatOptions, toolbar.more, toolbar.end, toolbar.pointer, toolbar.hideMenus",
+   "shot": "sh-49-tail-shape.png"
+  },
+  {
+   "step": "hexagon: Fill color plate",
+   "ms": 1947,
+   "observed": "toolbar.fillColor; options toolbar.fillColor.menu, toolbar.fillColor.kit.text, toolbar.fillColor.kit.background, toolbar.fillColor.kit.caption, toolbar.fillColor.kit.hint, toolbar.fillColor.kit.primary, toolbar.fillColor.kit.accent, toolbar.fillColor.ink, toolbar.fillColor.paper, toolbar.fillColor.ink-2, toolbar.fillColor.titanium, toolbar.fillColor.hair, toolbar.fillColor.hair-soft, toolbar.fillColor.plate, toolbar.fillColor.edge, toolbar.fillColor.green, toolbar.fillColor.amber, toolbar.fillColor.red, toolbar.fillColor.blue, toolbar.fillColor.accent, toolbar.fillColor.none, toolbar.fillColor.hex; picked toolbar.fillColor.kit.primary; stored fill \"blue\"; drawn fill rgb(47, 92, 224)",
+   "shot": "sh-50-fill-plate.png",
+   "shotAfter": "sh-51-fill-applied.png"
+  },
+  {
+   "step": "hexagon: Border color, weight and dash",
+   "ms": 4539,
+   "observed": "colour options toolbar.borderColor.menu, toolbar.borderColor.kit.text, toolbar.borderColor.kit.background, toolbar.borderColor.kit.caption, toolbar.borderColor.kit.hint, toolbar.borderColor.kit.primary, toolbar.borderColor.kit.accent, toolbar.borderColor.ink, toolbar.borderColor.paper, toolbar.borderColor.ink-2, toolbar.borderColor.titanium, toolbar.borderColor.hair, toolbar.borderColor.hair-soft, toolbar.borderColor.plate, toolbar.borderColor.edge, toolbar.borderColor.green, toolbar.borderColor.amber, toolbar.borderColor.red, toolbar.borderColor.blue, toolbar.borderColor.accent, toolbar.borderColor.none, toolbar.borderColor.hex picked toolbar.borderColor.red; weight options  picked null; dash options toolbar.borderDash.plate, toolbar.borderDash.list, toolbar.borderDash.pick.solid, toolbar.borderDash.pick.dot, toolbar.borderDash.pick.dash, toolbar.borderDash.pick.dashDot, toolbar.borderDash.pick.longDash, toolbar.borderDash.pick.longDashDot picked toolbar.borderDash.pick.dash; stored stroke \"red\" weight null dash \"dash\"; drawn stroke rgb(229, 72, 77) 1px dash 4px, 3px",
+   "shotC": "sh-52-border-colour.png",
+   "shotW": "sh-53-border-weight.png",
+   "shotD": "sh-54-border-dash.png"
+  },
+  {
+   "step": "can: drag from inside moves it",
+   "ms": 1455,
+   "observed": "1200,140 240x160 -> 1320,200 240x160 (asked +120,+60)",
+   "shot": "sh-55-can-moved.png"
+  },
+  {
+   "step": "can: Cmd+D then Delete then Cmd+Z",
+   "ms": 3540,
+   "observed": "objects 11 -> 12 after Cmd+D -> 11 after Delete -> 12 after Cmd+Z",
+   "shotDup": "sh-56-can-duplicated.png",
+   "shot": "sh-57-can-delete-undone.png"
+  },
+  {
+   "step": "named rows: Rectangle by click, Rounded rectangle by drag, Ellipse by drag",
+   "ms": 11403,
+   "observed": "shape 160,160 240x160; shape-2 520,160 380x260 first frame with the shape down; shape-3 1000,160 400x300; fills rgba(7, 7, 7, 0.035) | rgba(7, 7, 7, 0.035) | rgba(7, 7, 7, 0.035); strokes rgb(7, 7, 7) 1px | rgb(7, 7, 7) 1px | rgb(7, 7, 7) 1px",
+   "shot": "sh-58-named-rows-placed.png",
+   "ids": [
+    "shape",
+    "shape-2",
+    "shape-3"
+   ]
+  },
+  {
+   "step": "toolbar Shape button dropdown",
+   "ms": 1367,
+   "observed": "clicked toolbar.insertShape.arrow; rows toolbar.insertShape.arrow; menu rows menu.insert.shape.shapes.rectangle, menu.insert.shape.shapes.rounded, menu.insert.shape.shapes.ellipse, menu.insert.shape.gallery, menu.insert.shape.arrows, menu.insert.shape.callouts, menu.insert.shape.equation",
+   "shot": "sh-59-toolbar-shape-dropdown.png"
+  },
+  {
+   "step": "Change shape from the tail on the ellipse",
+   "ms": 2209,
+   "observed": "135 tiles; picked toolbar.changeShape.pick.octagon; now data-shape null",
+   "shot": "sh-60-change-shape-plate.png",
+   "shotAfter": "sh-61-change-shape-applied.png"
+  },
+  {
+   "step": "right click on a shape",
+   "ms": 818,
+   "observed": "rows menu.edit.cut, menu.edit.copy, menu.edit.paste, menu.edit.delete, menu.edit.duplicate, menu.arrange.order, menu.arrange.rotate, menu.arrange.centerOnPage, menu.arrange.align, menu.arrange.distribute, menu.arrange.group, menu.arrange.ungroup, menu.insert.link, menu.format.textFitting, menu.format.formatOptions, menu.format.changeShape, menu.format.altText, menu.insert.comment",
+   "shot": "sh-62-context-shape.png"
+  },
+  {
+   "step": "reload: the shapes and their paint hold",
+   "ms": 2656,
+   "observed": "hexagon after reload: free {\"x\":120,\"y\":120,\"w\":480,\"h\":320} shape null adjust null els 1 first path fill rgb(47, 92, 224) stroke rgb(229, 72, 77) 1px chip null handles 0; text \"Label one\"",
+   "shot": "sh-63-after-reload-slide-1.png"
+  }
+ ],
+ "consoleErrors": [],
+ "finishedAt": "2026-09-29T13:31:47.916Z",
+ "deckId": "untitled-20260929-s3hp",
+ "destroyed": {
+  "trashed": true,
+  "status": 404
+ }
+}

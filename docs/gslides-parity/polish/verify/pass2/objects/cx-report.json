@@ -1,0 +1,192 @@
+{
+ "base": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+ "theme": "light",
+ "viewport": {
+  "width": 1440,
+  "height": 900
+ },
+ "startedAt": "2026-09-29T22:33:50.505Z",
+ "steps": [
+  {
+   "step": "three shapes: rectangle, ellipse, hexagon",
+   "ms": 9747,
+   "observed": "{\"rect\":\"shape\",\"ellipse\":\"shape-2\",\"hexagon\":\"shape-3\"}",
+   "shot": "cx-01-three-shapes.png"
+  },
+  {
+   "step": "an elbow connector from the rectangle to the hexagon",
+   "ms": 3766,
+   "observed": "shape-4 connect {\"start\":{\"block\":\"shape\",\"site\":3},\"end\":{\"block\":\"shape-3\",\"site\":3}}",
+   "shot": "cx-02-elbow.png"
+  },
+  {
+   "step": "a column chart, moved to the bottom left and shrunk",
+   "ms": 5539,
+   "observed": "chart 120,484 640x360",
+   "shot": "cx-03-chart-placed.png"
+  },
+  {
+   "step": "word art \"Q3 plan\" at the top right",
+   "ms": 6988,
+   "observed": "text 1180,80 420x120",
+   "shot": "cx-04-wordart-placed.png"
+  },
+  {
+   "step": "a three step process diagram at the bottom right",
+   "ms": 7636,
+   "observed": "5 members, chip Group, se handle.step-1.resize.se",
+   "shot": "cx-05-diagram-placed.png"
+  },
+  {
+   "step": "an svg pasted as markup",
+   "ms": 4552,
+   "observed": "shot 700,560 200x120",
+   "shot": "cx-06-svg-placed.png"
+  },
+  {
+   "step": "the composed slide",
+   "ms": 232,
+   "observed": "12 objects",
+   "shot": "cx-07-composed.png",
+   "page": "cx-08-composed-page.png"
+  },
+  {
+   "step": "Arrange menu with three shapes selected",
+   "ms": 2914,
+   "observed": "chip 3 objects; rows menu.arrange.order, menu.arrange.align, menu.arrange.distribute, menu.arrange.centerOnPage, menu.arrange.rotate, menu.arrange.group, menu.arrange.ungroup, menu.arrange.regroup",
+   "shot": "cx-09-arrange-menu.png",
+   "shotAlign": "cx-10-arrange-align-submenu.png"
+  },
+  {
+   "step": "Arrange > Align > align-top on the three, then Cmd+Z",
+   "ms": 4625,
+   "observed": "120,140 240x160 -> 120,120 240x160 | 460,200 240x160 -> 460,120 240x160 | 820,120 240x160 -> 820,120 240x160; Cmd+Z restores true",
+   "shot": "cx-11-align-top.png"
+  },
+  {
+   "step": "Arrange > Align > align-left on the three, then Cmd+Z",
+   "ms": 4657,
+   "observed": "120,140 240x160 -> 120,140 240x160 | 460,200 240x160 -> 120,200 240x160 | 820,120 240x160 -> 120,120 240x160; Cmd+Z restores true",
+   "shot": "cx-12-align-left.png"
+  },
+  {
+   "step": "Arrange > Align > align-middle on the three, then Cmd+Z",
+   "ms": 4983,
+   "observed": "120,140 240x160 -> 120,160 240x160 | 460,200 240x160 -> 460,160 240x160 | 820,120 240x160 -> 820,160 240x160; Cmd+Z restores true",
+   "shot": "cx-13-align-middle.png"
+  },
+  {
+   "step": "Arrange > Distribute > Horizontally on the three",
+   "ms": 3841,
+   "observed": "120,140 240x160 -> 120,140 240x160 | 460,200 240x160 -> 470,200 240x160 | 820,120 240x160 -> 820,120 240x160; gaps 110, 110",
+   "shot": "cx-14-distribute-h.png"
+  },
+  {
+   "step": "Arrange > Order > Send to back on the hexagon, Bring to front",
+   "ms": 5173,
+   "observed": "z 3 -> 0 -> 11",
+   "shotBack": "cx-15-order-send-to-back.png",
+   "shot": "cx-16-order-bring-to-front.png"
+  },
+  {
+   "step": "Group the rectangle and the ellipse (Cmd+Option+G); chip; move both; Ungroup",
+   "ms": 4984,
+   "observed": "chip 2 objects -> Group; group group; moved rect 120,140 240x160 -> 120,200 240x160, ellipse 470,200 240x160 -> 470,260 240x160; after Ungroup group null chip 2 objects",
+   "shotGroup": "cx-17-grouped.png",
+   "shotMoved": "cx-18-group-moved.png",
+   "shot": "cx-19-ungrouped.png"
+  },
+  {
+   "step": "Arrange > Rotate > Flip horizontally on the elbow; Rotate clockwise 90 on the hexagon",
+   "ms": 5676,
+   "observed": "elbow after flip 360,200 460x80 flip \"h\"; hexagon after rotate 820,120 240x160 r90; ring {\"x\":860,\"y\":80,\"w\":160,\"h\":240} transform rotate(90deg)",
+   "shotFlip": "cx-20-elbow-flipped.png",
+   "shot": "cx-21-hexagon-rotated-90.png"
+  },
+  {
+   "step": "Format > Borders & lines > Line start on the elbow (hovered)",
+   "ms": 13901,
+   "observed": "picks ; picked null; lineStart undefined lineEnd undefined",
+   "shot": "cx-22-borders-lines-line-start.png",
+   "shotAfter": "cx-23-elbow-line-start.png"
+  },
+  {
+   "step": "the line weight dropdown on the elbow",
+   "ms": 24440,
+   "observed": "error: locator.boundingBox: Timeout 20000ms exceeded.",
+   "error": true,
+   "shot": "cx-24-the-line-weight-dropdown-on-the-elbow-error.png"
+  },
+  {
+   "step": "the final slide before the exports",
+   "ms": 552,
+   "observed": "12 objects",
+   "shot": "cx-25-final-slide.png",
+   "page": "cx-26-final-slide-page.png"
+  },
+  {
+   "step": "the same slide at 1280 by 800 (a second window)",
+   "ms": 60658,
+   "observed": "error: page.waitForFunction: Timeout 60000ms exceeded.",
+   "error": true,
+   "shot": "cx-27-the-same-slide-at-1280-by-800-a-second-window--error.png"
+  },
+  {
+   "step": "File > Download > PDF Document",
+   "ms": 8855,
+   "observed": "untitled-20260929-t1u7.pdf 114425 bytes in 8145 ms; pages 2; rendered cx-pdf-page2",
+   "shot": "cx-28-after-pdf-download.png",
+   "download": {
+    "file": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/polish/objects/downloads/untitled-20260929-t1u7.pdf",
+    "name": "untitled-20260929-t1u7.pdf",
+    "bytes": 114425,
+    "ms": 8145
+   }
+  },
+  {
+   "step": "File > Download > Download options > PowerPoint (flatten)",
+   "ms": 18295,
+   "observed": "untitled-20260929-t1u7.pptx 82840 bytes in 14605 ms; progress null; report []; {\"parts\":[\"ppt/media/\",\"ppt/media/image-1-1.png\",\"ppt/media/image-1002-1.png\",\"ppt/media/image-2-1.png\",\"ppt/slides/slide1.xml\",\"ppt/slides/slide2.xml\"],\"prst\":[\"rect\",\"rect\",\"rect\",\"rect\",\"rect\",\"rect\",\"rect\"],\"chart\":false,\"svgBlip\":false,\"pic\":1,\"sp\":6,\"cxn\":0,\"grp\":1,\"texts\":[\"Slide 2\",\"Step 1\",\"Step 2\",\"Step 3\",\"Q3 plan\",\"02 / 02\"]}",
+   "shotDialog": "cx-29-pptx-dialog-flatten.png",
+   "shotDone": "cx-30-pptx-done-flatten.png",
+   "download": {
+    "file": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/polish/objects/downloads/untitled-20260929-t1u7.pptx",
+    "name": "untitled-20260929-t1u7.pptx",
+    "bytes": 82840,
+    "ms": 14605
+   }
+  },
+  {
+   "step": "File > Download > Download options > PowerPoint (native)",
+   "ms": 9492,
+   "observed": "untitled-20260929-t1u7 (editable).pptx 51468 bytes in 5959 ms; progress null; report []; {\"parts\":[\"ppt/charts/\",\"ppt/charts/_rels/\",\"ppt/charts/_rels/chart1.xml.rels\",\"ppt/charts/chart1.xml\",\"ppt/media/\",\"ppt/media/image-1-1.png\",\"ppt/media/image-1002-1.png\",\"ppt/media/image-2-1.png\",\"ppt/media/ts-blank-1-shot-1.svg\",\"ppt/slides/slide1.xml\",\"ppt/slides/slide2.xml\"],\"prst\":[\"rect\",\"ellipse\",\"roundRect\",\"roundRect\",\"roundRect\",\"line\",\"line\",\"rect\",\"hexagon\",\"bentConnector3\",\"rect\",\"rect\",\"rect\"],\"chart\":true,\"svgBlip\":true,\"pic\":1,\"sp\":9,\"cxn\":3,\"grp\":1,\"texts\":[\"Slide 2\",\"Step 1\",\"Step 2\",\"Step 3\",\"Q3 plan\",\"02 / 02\"]}",
+   "shotDialog": "cx-31-pptx-dialog-native.png",
+   "shotDone": "cx-32-pptx-done-native.png",
+   "download": {
+    "file": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/polish/objects/downloads/untitled-20260929-t1u7 (editable).pptx",
+    "name": "untitled-20260929-t1u7 (editable).pptx",
+    "bytes": 51468,
+    "ms": 5959
+   }
+  },
+  {
+   "step": "File > Download > SVG of the current slide",
+   "ms": 1338,
+   "observed": "no svg row; rows menu.file.download.pptx, menu.file.download.pdf, menu.file.download.jpg, menu.file.download.png, menu.file.download.html, menu.file.download.zip, menu.file.download.options",
+   "shot": "cx-33-download-submenu.png"
+  },
+  {
+   "step": "Slideshow of the composed slide",
+   "ms": 2897,
+   "observed": "present true",
+   "shot": "cx-34-slideshow.png"
+  }
+ ],
+ "consoleErrors": [],
+ "finishedAt": "2026-09-29T22:37:39.038Z",
+ "deckId": "untitled-20260929-t1u7",
+ "destroyed": {
+  "trashed": true,
+  "status": 404
+ }
+}

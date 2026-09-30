@@ -1,0 +1,852 @@
+{
+  "base": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "no bearer",
+    "reset": false
+  },
+  "startedAt": "2026-09-29T14:14:28.466Z",
+  "ms": 953485,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 953483,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/verify/gate-preview-polish-areas/core-walk.json",
+    "deckId": "untitled-20260929-vjf1",
+    "steps": 89
+  },
+  "specs": null,
+  "cost": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "polish-tables",
+      "polish-text",
+      "polish-objects",
+      "polish-media",
+      "polish-chrome"
+    ],
+    "costRows": null
+  },
+  "rows": 61,
+  "passed": 43,
+  "failed": 17,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "commit": "e5875418",
+  "origin": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+  "date": "2026-09-29",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "failed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "failed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "tables.cells.no-prompt": "passed",
+    "tables.rows.ring-follows-typing": "passed",
+    "tables.cell.click-moves-caret": "passed",
+    "tables.tail.size-step-ladder": "failed",
+    "tables.insert.box-never-shorter-than-rows": "failed",
+    "tables.heads.keys-act-on-range": "passed",
+    "tables.insert.one-placement-rule": "failed",
+    "tables.edge.stays-inside-sheet": "passed",
+    "tables.range.align-cells-only": "passed",
+    "tables.context.object-menu-on-frame": "passed",
+    "tables.polish.seams-snap-grid": "failed",
+    "text.bold.toolbar-marks-run": "failed",
+    "slides.layout.blank-empty": "passed",
+    "text.paragraph.toolbar-live": "failed",
+    "text.list.enter-tab-no-error": "failed",
+    "text.size.run-and-typed-value": "passed",
+    "text.marks.whole-block-from-menu": "passed",
+    "text.tail.heading-takes-list-indent": "failed",
+    "text.heading.enter-keeps-session": "passed",
+    "text.link.chip-on-click": "passed",
+    "text.title.shrink-on-overflow": "failed",
+    "text.link.popover-anchored": "passed",
+    "text.link.detection-setting": "failed",
+    "text.tail.size-reads-heading": "failed",
+    "text.polish.highlight-console": "passed",
+    "lines.hit.stroke-only": "passed",
+    "shapes.geometry.cloud-callout-closed": "passed",
+    "charts.grid.every-series-in-view": "passed",
+    "chrome.format-options.fields-by-kind": "passed",
+    "lines.move.detaches": "passed",
+    "lines.select.handles-no-ring": "passed",
+    "arrange.select.no-browser-highlight": "passed",
+    "diagrams.label.double-click-selects-word": "failed",
+    "lines.connector.perpendicular-at-sites": "failed",
+    "wordart.bar.closes": "passed",
+    "wordart.polish.chip-weight-arming": "failed",
+    "images.panel.seller-words": "passed",
+    "images.panel.drop-shadow": "passed",
+    "images.mask.picker-fits-panel": "passed",
+    "images.caption.grows-box": "not driven",
+    "images.border.color-draws-at-once": "passed",
+    "images.alt.focused-empty": "failed",
+    "images.crop.dims-outside": "passed",
+    "chrome.plate.fits-viewport": "passed",
+    "formatting.spacing.table-cells": "passed",
+    "help.check-slides.plain-sentence": "failed",
+    "slides.background.picture-grid": "passed",
+    "menus.rows.icon-on-every-row": "passed",
+    "chrome.snackbar.refusal-sentence": "passed",
+    "chrome.handles.tooltip-words": "passed",
+    "chrome.tooltips.only-on-hover": "passed",
+    "chrome.chip.above-ring": "failed",
+    "chrome.dialog.no-loading-jump": "passed",
+    "chrome.dialog.focus-return-and-trap": "passed",
+    "comments.insert.needs-selection": "passed",
+    "chrome.context.escape-closes-submenu": "passed",
+    "formatting.border-weight.menu-opens": "passed",
+    "chrome.toolbar.select-glyph": "passed",
+    "chrome.words.one-spelling": "passed",
+    "chrome.menus.structure-sweep": "passed",
+    "slides.filmstrip.follows-every-move": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "tables.tail.size-step-ladder",
+        "feature": "tables",
+        "result": "failed"
+      },
+      {
+        "id": "tables.insert.box-never-shorter-than-rows",
+        "feature": "tables",
+        "result": "failed"
+      },
+      {
+        "id": "tables.insert.one-placement-rule",
+        "feature": "tables",
+        "result": "failed"
+      },
+      {
+        "id": "tables.polish.seams-snap-grid",
+        "feature": "tables",
+        "result": "failed"
+      },
+      {
+        "id": "text.bold.toolbar-marks-run",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.paragraph.toolbar-live",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.list.enter-tab-no-error",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.tail.heading-takes-list-indent",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.title.shrink-on-overflow",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.link.detection-setting",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "text.tail.size-reads-heading",
+        "feature": "text",
+        "result": "failed"
+      },
+      {
+        "id": "diagrams.label.double-click-selects-word",
+        "feature": "diagrams",
+        "result": "failed"
+      },
+      {
+        "id": "lines.connector.perpendicular-at-sites",
+        "feature": "lines",
+        "result": "failed"
+      },
+      {
+        "id": "wordart.polish.chip-weight-arming",
+        "feature": "wordart",
+        "result": "failed"
+      },
+      {
+        "id": "images.caption.grows-box",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.alt.focused-empty",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "help.check-slides.plain-sentence",
+        "feature": "help",
+        "result": "failed"
+      },
+      {
+        "id": "chrome.chip.above-ring",
+        "feature": "chrome",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [
+    "lines",
+    "tables",
+    "diagrams",
+    "wordart"
+  ],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "text.bold.toolbar-marks-run",
+      "feature": "text",
+      "result": "failed"
+    },
+    {
+      "id": "text.paragraph.toolbar-live",
+      "feature": "text",
+      "result": "failed"
+    },
+    {
+      "id": "text.list.enter-tab-no-error",
+      "feature": "text",
+      "result": "failed"
+    },
+    {
+      "id": "text.tail.heading-takes-list-indent",
+      "feature": "text",
+      "result": "failed"
+    },
+    {
+      "id": "text.title.shrink-on-overflow",
+      "feature": "text",
+      "result": "failed"
+    },
+    {
+      "id": "text.link.detection-setting",
+      "feature": "text",
+      "result": "failed"
+    },
+    {
+      "id": "text.tail.size-reads-heading",
+      "feature": "text",
+      "result": "failed"
+    },
+    {
+      "id": "images.caption.grows-box",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.alt.focused-empty",
+      "feature": "images",
+      "result": "failed"
+    },
+    {
+      "id": "help.check-slides.plain-sentence",
+      "feature": "help",
+      "result": "failed"
+    },
+    {
+      "id": "chrome.chip.above-ring",
+      "feature": "chrome",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "tables.cells.no-prompt",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.rows.ring-follows-typing",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.click-moves-caret",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.tail.size-step-ladder",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "a typed 3 by 3 table; the header row selected as a range by a drag; the tail's \"−\" twice, then \"+\" until 20: range true; field 20 -> 18 -> 17 (stored size 17); back at 20; \"+\" aria-disabled true \"Increase font size\"; snackbar none (docs/POLISH.md 2.2 item 5, B1's ToolbarTail.tsx by B2's request)"
+    },
+    {
+      "id": "tables.insert.box-never-shorter-than-rows",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Insert > Table, the 12 by 4 cell, on the Title and body slide under its title; the grid's size words read: h 137,129 1326x48.4; rows drawn null px (fits false); top at 218 false; size words \"12 x 4\" (docs/POLISH.md 2.2 item 6, B2)"
+    },
+    {
+      "id": "tables.heads.keys-act-on-range",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.insert.one-placement-rule",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Insert > Table 1 by 1, then 1 by 2, then 3 by 3 on the Title and body slide; Cmd+Z after each: 1x1: y 129 (not 218); 1x2: y 129 (not 218); 3x3: y 129 (not 218) (docs/POLISH.md 2.2 item 8, B2)"
+    },
+    {
+      "id": "tables.edge.stays-inside-sheet",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.range.align-cells-only",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.context.object-menu-on-frame",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.polish.seams-snap-grid",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "a 3 by 3 table selected; the pointer at the second column seam's middle, its tooltip read, a 12 step drag right; the se handle dragged 160 px right; Insert > Table with the pointer moved 30 px left inside the grid's first column: seam handle.pt-seams.column.1: tooltip \"Column seam 2Drag to resize the column; the next column takes the difference. Left and Right step 1 px, Shift 10 px.\", widths [null,null,null] -> [320,380,260] (written true); se drag by 260: 320,420 1224x163 (right edge 1544 against 1463); grid plate after 30 px left: plate true, chart submenu false (docs/POLISH.md 2.2 item 11, B2 with B1's hunks)"
+    },
+    {
+      "id": "text.bold.toolbar-marks-run",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\"Acme\" selected in a text box; the tail's Bold; Cmd+Z; Format > Text > Bold; then the box selected by one click and Bold: tail: selected \"Acme\", mark true at 700, rest 400, stored \"*Acme* renews in Q3\"; menu: mark true at 700, rest 400, stored \"*Acme* renews in Q3\"; whole box: weight 400, stored \"*Acme renews in Q3*\" (bold true) (docs/POLISH.md 2.3 item 12, B1)"
+    },
+    {
+      "id": "slides.layout.blank-empty",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.paragraph.toolbar-live",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "a two line text box; a session open with the caret in line 1; Center from the tail, then 1.5, then Increase indent: Center: moved within a frame false (after 400 ms false), caret kept true; 1.5: moved within a frame false (after 400 ms false), caret kept true; Increase indent: moved within a frame true (after 400 ms true), caret kept true (docs/POLISH.md 2.3 item 14, B1)"
+    },
+    {
+      "id": "text.list.enter-tab-no-error",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "a text box reading One; Bulleted list from the tail; the session opened at the end; Enter, \"Two\", Tab, Enter, \"Three\"; Escape; Cmd+Z until the box is back: listed true; items [\"One\",\"Two\",\"Three\"] (second nested false); error over the stage none; console 0; restored by Cmd+Z true (docs/POLISH.md 2.3 item 15, B1)"
+    },
+    {
+      "id": "text.size.run-and-typed-value",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.marks.whole-block-from-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.tail.heading-takes-list-indent",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "the title placeholder selected by one click; Bulleted list, Increase indent and Paint format from the tail; every disabled tail button read: disabled tail buttons 3 (toolbar.redo: \"Redo\"; toolbar.font: \"Font\"; toolbar.clearFormatting: \"Clear formatting\"); Bulleted list: not written snackbar \"Bulleted list: No block \"heading\" on slide \"title-1-198a\"\"; Increase indent: written snackbar \"Bulleted list: No block \"heading\" on slide \"title-1-198a\"\"; Paint format: armed false snackbar \"Select a block with a look to copy first\" (docs/POLISH.md 2.3 item 18, B1)"
+    },
+    {
+      "id": "text.heading.enter-keeps-session",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.chip-on-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.shrink-on-overflow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "the title selected and twelve words typed over it; Escape: font 44 -> 44 px over 1 lines; ring height 110 -> 110 sheet px (kept true); text inside the sheet true (k 0.7) (docs/POLISH.md 2.3 item 21, B1)"
+    },
+    {
+      "id": "text.link.popover-anchored",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.detection-setting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Tools > Preferences > Link detection off, \"See www.example.com now\" typed into an empty box; on, typed again into another: error: locator.boundingBox: Timeout 30000ms exceeded."
+    },
+    {
+      "id": "text.tail.size-reads-heading",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "a title session open; the size field read; a subtitle session; the field read: title field \"44\"; subtitle field \"26\" (docs/POLISH.md 2.3 item 22, B1)"
+    },
+    {
+      "id": "text.polish.highlight-console",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.hit.stroke-only",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.cloud-callout-closed",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.grid.every-series-in-view",
+      "feature": "charts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.format-options.fields-by-kind",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.move.detaches",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.select.handles-no-ring",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.no-browser-highlight",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "diagrams.label.double-click-selects-word",
+      "feature": "diagrams",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Insert > Diagram > Process; a double click on \"Step 2\" of the diagram, \" plus\" typed; a text box double clicked at a point, typed: double click selected \"\"; the label reads \"Step  plus2\"; the text box after a double click on \"caret\" and \"X\" typed reads \"Keep the Xcaret here\" (docs/POLISH.md 2.4 item 30, B1's Selection.tsx by B3's request; question 5)"
+    },
+    {
+      "id": "lines.connector.perpendicular-at-sites",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "A above B; a curved connector from A's bottom site to B's top site; an elbow the same; A rotated 90 degrees: curved: leaves 1.1 and arrives 1.1 degrees from vertical; elbow: leaves 0 and arrives 0 degrees from vertical; elbow after A's rotation (rotated): arrives 90 degrees from vertical (docs/POLISH.md 2.4 item 33, B3)"
+    },
+    {
+      "id": "wordart.bar.closes",
+      "feature": "wordart",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "wordart.polish.chip-weight-arming",
+      "feature": "wordart",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Insert > Word art with \"Big words\" typed and Enter; the chip and the tail's B read; B pressed once; Insert > Line > Elbow connector armed: chip \"Word art\"; B pressed at insert false; weight 400 -> 400 after one press (bolder false); ring before arming drawn, after arming the elbow tool ring still drawn, chip \"Word art\" (docs/POLISH.md 2.4 item 34, B3 with B1's Editor.tsx hunks)"
+    },
+    {
+      "id": "images.panel.seller-words",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.panel.drop-shadow",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.mask.picker-fits-panel",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.caption.grows-box",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not on this build: format.image.addCaption (docs/PRODUCT.md 7.1, B4); the picture's menu lists edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.rotate, arrange.centerOnPage, arrange.align, format.image.replaceImage, format.image.cropImage, format.image.maskImage, format.image.resetImage, format.image.imageOptions, format.formatOptions, format.altText, insert.comment"
+    },
+    {
+      "id": "images.border.color-draws-at-once",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.alt.focused-empty",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Alt text from the picture's right click menu: description field true; focus on body; value \"core walk picture\" (the setup's declared alt, not a file name) (docs/POLISH.md 2.5 item 45, B4 with B1's Editor.tsx hunk)"
+    },
+    {
+      "id": "images.crop.dims-outside",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.plate.fits-viewport",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "formatting.spacing.table-cells",
+      "feature": "formatting",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.check-slides.plain-sentence",
+      "feature": "help",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "an empty 3 by 3 table on a slide of its own; Tools > Check slides: 4 findings; about empty cells 2 (\"The table has 9 empty cells; type into them or remove the rows.\"); parenthesis or SPEC false (docs/POLISH.md 2.6 item 55, B1)"
+    },
+    {
+      "id": "slides.background.picture-grid",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "menus.rows.icon-on-every-row",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.snackbar.refusal-sentence",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.handles.tooltip-words",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.tooltips.only-on-hover",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.chip.above-ring",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "a 120 px picture and a 60 px picture selected in turn: pc-small: chip 1130,519.5 50.2x18, over move; pc-small-2: chip 1242.8,505.4 50.2x18, over move (docs/POLISH.md 2.6 item 62, B1's Overlay.tsx by B4's request)"
+    },
+    {
+      "id": "chrome.dialog.no-loading-jump",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.dialog.focus-return-and-trap",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.insert.needs-selection",
+      "feature": "comments",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.context.escape-closes-submenu",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "formatting.border-weight.menu-opens",
+      "feature": "formatting",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.toolbar.select-glyph",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.words.one-spelling",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.structure-sweep",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.filmstrip.follows-every-move",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

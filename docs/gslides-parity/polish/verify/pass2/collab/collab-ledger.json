@@ -1,0 +1,778 @@
+{
+  "base": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-29T22:00:10.669Z",
+  "scenarios": [
+    {
+      "name": "01 new deck from /new",
+      "at": "2026-09-29T22:00:25.495Z",
+      "ok": true,
+      "ms": 14194,
+      "deck": "untitled-20260929-yg5e",
+      "wordsBefore": "",
+      "wordsSeen": [
+        {
+          "at": 2,
+          "words": ""
+        },
+        {
+          "at": 1485,
+          "words": "Saving…"
+        },
+        {
+          "at": 4663,
+          "words": "All changes saved"
+        }
+      ],
+      "wordsAfter": [
+        {
+          "at": 1,
+          "words": "All changes saved"
+        }
+      ],
+      "connectedMs": 3,
+      "revisionMs": 2,
+      "url": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app/edit/<id>",
+      "sync": {
+        "seq": 1,
+        "revision": 1,
+        "pending": 0,
+        "retained": 0,
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "offline": false,
+        "storeDegraded": false,
+        "streamDown": false
+      }
+    },
+    {
+      "name": "02 B joins",
+      "at": "2026-09-29T22:00:39.072Z",
+      "ok": true,
+      "ms": 13577,
+      "readyMs": 1271,
+      "connectedMs": 761,
+      "prompt": false,
+      "aSeesBMs": 10377,
+      "bSeesAMs": 2,
+      "chipOnA": true,
+      "chipOnB": true,
+      "rowsA": [
+        {
+          "name": "Gesso 360",
+          "role": "owner",
+          "kind": "human",
+          "trust": "label",
+          "slideId": "title"
+        }
+      ],
+      "chipTip": "Gesso 360 · slide 1",
+      "more": {
+        "empty": false,
+        "opacity": "1",
+        "pe": "auto",
+        "text": ""
+      },
+      "tierA": "blob",
+      "tierB": "blob"
+    },
+    {
+      "name": "04 concurrent title round 1",
+      "at": "2026-09-29T22:00:47.008Z",
+      "ok": true,
+      "ms": 7936,
+      "bothWithinMs": 5072,
+      "settledMs": 5838,
+      "final": {
+        "a": "Polish collab audit alpha bravo",
+        "b": "Polish collab audit alpha bravo",
+        "aStage": "Polish collab audit alpha bravo",
+        "bStage": "Polish collab audit alpha bravo"
+      },
+      "same": true,
+      "saveWordsA": [
+        {
+          "at": 0,
+          "words": "All changes saved"
+        },
+        {
+          "at": 508,
+          "words": "Saving…"
+        },
+        {
+          "at": 3353,
+          "words": "All changes saved"
+        }
+      ]
+    },
+    {
+      "name": "04 concurrent title round 2",
+      "at": "2026-09-29T22:00:57.990Z",
+      "ok": true,
+      "ms": 10982,
+      "bothWithinMs": "not within 8138",
+      "settledMs": 8908,
+      "final": {
+        "a": "",
+        "b": "",
+        "aStage": "Polish collab audit alpha bravo delta",
+        "bStage": "Polish collab audit alpha bravo delta"
+      },
+      "same": true,
+      "saveWordsA": [
+        {
+          "at": 0,
+          "words": "All changes saved"
+        },
+        {
+          "at": 707,
+          "words": "Saving…"
+        },
+        {
+          "at": 2229,
+          "words": "All changes saved"
+        }
+      ]
+    },
+    {
+      "name": "04 concurrent title round 3",
+      "at": "2026-09-29T22:01:09.036Z",
+      "ok": true,
+      "ms": 11046,
+      "bothWithinMs": "not within 8120",
+      "settledMs": 8960,
+      "final": {
+        "a": "",
+        "b": "",
+        "aStage": "Polish collab audit alpha bravo delta echo foxtrot",
+        "bStage": "Polish collab audit alpha bravo delta echo foxtrot"
+      },
+      "same": true,
+      "saveWordsA": [
+        {
+          "at": 0,
+          "words": "All changes saved"
+        },
+        {
+          "at": 407,
+          "words": "Saving…"
+        },
+        {
+          "at": 2232,
+          "words": "All changes saved"
+        }
+      ]
+    },
+    {
+      "name": "05 slide added by each",
+      "at": "2026-09-29T22:01:15.196Z",
+      "ok": true,
+      "ms": 6160,
+      "before": 1,
+      "afterA": 3,
+      "afterB": 3,
+      "sameOrder": true,
+      "aBothMs": 4280,
+      "bBothMs": 1,
+      "currentA": "title-1-5903",
+      "currentB": "title-1-866f",
+      "order": [
+        "title",
+        "title-1-866f",
+        "title-1-5903"
+      ],
+      "elapsed": 6158
+    },
+    {
+      "name": "06 move by A while B resizes",
+      "at": "2026-09-29T22:01:31.203Z",
+      "ok": true,
+      "ms": 16007,
+      "blockSeenByBMs": 2,
+      "before": {
+        "x": 200,
+        "y": 420,
+        "w": 480,
+        "h": 120,
+        "z": 3
+      },
+      "after": {
+        "a": {
+          "x": 200,
+          "y": 420,
+          "w": 677,
+          "h": 205,
+          "z": 3
+        },
+        "b": {
+          "x": 200,
+          "y": 420,
+          "w": 677,
+          "h": 205,
+          "z": 3
+        }
+      },
+      "converged": true,
+      "bothChangesKept": false,
+      "convergedMs": "not within 10005",
+      "elapsed": 12764
+    },
+    {
+      "name": "07 roster and Go to slide",
+      "at": "2026-09-29T22:01:35.218Z",
+      "ok": true,
+      "ms": 4015,
+      "rosterRecordMs": 1520,
+      "moreTakesPointer": true,
+      "rowsInRoster": 1,
+      "rowText": "GGesso 360owner · slide 3Go to slide 3",
+      "escapeClosed": true,
+      "jumpedMs": 1,
+      "currentA": "title-1-5903",
+      "expected": "title-1-5903"
+    },
+    {
+      "name": "08 chip go to and follow",
+      "at": "2026-09-29T22:01:47.335Z",
+      "ok": true,
+      "ms": 12117,
+      "chipMenuItem": "title.presence.follow",
+      "ariaPressed": null,
+      "tip": "Gesso 360 · slide 2",
+      "jumpedMs": "not within 8110",
+      "following": null,
+      "followingPlate": 0,
+      "aFollowedNextMove": true,
+      "participant": {
+        "kind": "human",
+        "role": "owner",
+        "trust": "label",
+        "name": "Gesso 360"
+      },
+      "capabilities": null
+    },
+    {
+      "name": "09 viewer C live updates",
+      "at": "2026-09-29T22:01:59.363Z",
+      "ok": true,
+      "ms": 12028,
+      "linkShape": "/s/<token>",
+      "landedMs": 1354,
+      "landedOn": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app/edit/<id>",
+      "cInAChipsMs": 1514,
+      "othersInA": [
+        {
+          "kind": "human",
+          "role": "owner",
+          "name": "Gesso 360"
+        },
+        {
+          "kind": "human",
+          "role": "viewer",
+          "name": "Basalt 932"
+        },
+        {
+          "kind": "human",
+          "role": "viewer",
+          "name": "Basalt 932"
+        }
+      ],
+      "rounds": [
+        {
+          "word": "cone",
+          "cSawMs": 1208
+        },
+        {
+          "word": "ctwo",
+          "cSawMs": 1267
+        },
+        {
+          "word": "cthree",
+          "cSawMs": 1331
+        }
+      ],
+      "cRole": "viewer",
+      "cMode": "link",
+      "cViewOnlyWord": true,
+      "cEditFloorLiveMs": 1308
+    },
+    {
+      "name": "10 A offline 20 s",
+      "at": "2026-09-29T22:02:57.585Z",
+      "ok": true,
+      "ms": 58222,
+      "wordsWhileOffline": "Offline. Changes will save when you reconnect",
+      "syncWhileOffline": {
+        "offline": true,
+        "connected": false,
+        "pending": 1,
+        "streamDown": true
+      },
+      "savedAgainMs": 3940,
+      "allFourMs": "not within 30260",
+      "headings": {
+        "a": "",
+        "b": ""
+      },
+      "saveWordsA": [
+        {
+          "at": 1,
+          "words": "All changes saved"
+        },
+        {
+          "at": 153,
+          "words": "Offline. Changes will save when you reconnect"
+        },
+        {
+          "at": 20158,
+          "words": "Saving…"
+        },
+        {
+          "at": 23946,
+          "words": "All changes saved"
+        }
+      ],
+      "saveWordsB": [
+        {
+          "at": 1,
+          "words": "All changes saved"
+        },
+        {
+          "at": 4220,
+          "words": "Saving…"
+        },
+        {
+          "at": 4823,
+          "words": "All changes saved"
+        }
+      ],
+      "reconnectAfterMs": 35347
+    },
+    {
+      "name": "11 thirty writes then reload",
+      "at": "2026-09-29T22:03:19.145Z",
+      "ok": false,
+      "ms": 21559,
+      "error": "TimeoutError: locator.waitFor: Timeout 20000ms exceeded. | Call log:"
+    },
+    {
+      "name": "12 B leaves",
+      "at": "2026-09-29T22:03:49.096Z",
+      "ok": true,
+      "ms": 29951,
+      "chipGoneMs": 28776,
+      "othersLeft": 1
+    }
+  ],
+  "pages": {
+    "A": {
+      "consoleErrors": [
+        {
+          "at": "2026-09-29T22:02:02.668Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:03.670Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:05.671Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:06.721Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:06.828Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:06.884Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:06.969Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:07.061Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:07.126Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:07.627Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:08.629Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:09.674Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:10.631Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:11.886Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:12.985Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:14.633Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:14.989Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:16.886Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:16.990Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:17.676Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:18.991Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:20.992Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:21.887Z",
+          "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:04:01.081Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.097Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.105Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.113Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.123Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.129Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.151Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.152Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.153Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.156Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.156Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.156Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.159Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.159Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.230Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.230Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.232Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.233Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.233Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.233Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.234Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.234Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.234Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.235Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:01.453Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        },
+        {
+          "at": "2026-09-29T22:04:03.197Z",
+          "text": "Failed to load resource: the server responded with a status of 404 ()"
+        }
+      ],
+      "warnings": 0,
+      "failedOrErrorResponses": [
+        {
+          "at": "2026-09-29T22:02:02.168Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_ABORTED"
+        },
+        {
+          "at": "2026-09-29T22:02:02.668Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:03.670Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:05.671Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:06.721Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:06.828Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:06.884Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:06.969Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:07.061Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:07.126Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/ops",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:07.627Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/ops",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:08.629Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/ops",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:09.674Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:10.631Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/ops",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:11.886Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:12.985Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:14.633Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/ops",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:14.989Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:16.886Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:16.990Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:17.676Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/stream",
+          "method": "GET",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:18.991Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:20.992Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "at": "2026-09-29T22:02:21.887Z",
+          "host": "turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+          "path": "/api/decks/<id>/presence",
+          "method": "POST",
+          "why": "net::ERR_INTERNET_DISCONNECTED"
+        }
+      ],
+      "functionRequests": 43,
+      "minutes": 3.5,
+      "functionRequestsPerMinute": 12.2,
+      "byPath": {
+        "GET /new": 2,
+        "GET /_serverFn/<x>": 7,
+        "POST /_serverFn/<x>": 22,
+        "POST /api/decks/<id>/ops": 12
+      },
+      "staticRequests": 86
+    },
+    "C": {
+      "consoleErrors": [],
+      "warnings": 0,
+      "failedOrErrorResponses": [],
+      "functionRequests": 22,
+      "minutes": 1.8,
+      "functionRequestsPerMinute": 12.1,
+      "byPath": {
+        "GET /s/<token>": 1,
+        "GET /edit/<id>": 2,
+        "GET /_serverFn/<x>": 6,
+        "POST /_serverFn/<x>": 13
+      },
+      "staticRequests": 90
+    }
+  },
+  "teardown": {
+    "deckId": "untitled-20260929-yg5e",
+    "steps": [
+      "File > Move to trash failed: TimeoutError: locator.click: Timeout 8000ms exceeded.",
+      "deck.trash failed: Error: page.evaluate: RangeError: This presentation is in the trash, so \"deck.trash\" is refused; Restore it from the banner or with deck.restore first.",
+      "Delete forever ok (attempt 1)"
+    ],
+    "final": {
+      "edit": 404,
+      "deck": 404
+    }
+  },
+  "endedAt": "2026-09-29T22:04:03.331Z"
+}

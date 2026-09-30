@@ -1,0 +1,203 @@
+{
+  "base": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-29T22:23:18.072Z",
+  "steps": [
+    {
+      "step": "csp reports",
+      "reports": []
+    },
+    {
+      "step": "last edit click opens the panel",
+      "opened": true,
+      "box": {
+        "x": 256.640625,
+        "y": 5.5,
+        "width": 32,
+        "height": 32
+      },
+      "words": "Last edit just now by Helium 763"
+    },
+    {
+      "step": "last edit words click opens the panel",
+      "openedWords": true,
+      "wbox": {
+        "x": 288.640625,
+        "y": 15.25,
+        "width": 197.6875,
+        "height": 12.5
+      }
+    },
+    {
+      "step": "versions panel default",
+      "facts": {
+        "windows": [
+          {
+            "id": "versionHistory.window.w4",
+            "expanded": "true"
+          }
+        ],
+        "picks": [
+          "versionHistory.4.pick",
+          "versionHistory.3.pick",
+          "versionHistory.2.pick",
+          "versionHistory.1.pick"
+        ],
+        "restores": [
+          "versionHistory.3.restore",
+          "versionHistory.2.restore",
+          "versionHistory.1.restore"
+        ],
+        "text": "Version historyOnly show named versionsName this versionTodayH703:23 PM to 03:24 PMYou · 0 changes▾H703:24 PMYou · named · currentH703:24 PMYou · namedRestore this versionH703:23 PMYou · namedRestore this versionH703:23 PMYou · namedRestore this version"
+      }
+    },
+    {
+      "step": "End key",
+      "facts": {
+        "slideId": "title-2-2-2-2-2-2-2-2-2",
+        "cardsInDom": 40,
+        "scrollTop": 4269,
+        "scrollHeight": 5082,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 666,
+        "currentHeight": 114,
+        "activeEl": "filmstrip.slide.title-2-2-2-2-2-2-2-2-2",
+        "trace": [
+          [
+            5,
+            0
+          ],
+          [
+            7,
+            4269
+          ]
+        ]
+      }
+    },
+    {
+      "step": "Home key",
+      "facts": {
+        "slideId": "title",
+        "cardsInDom": 40,
+        "scrollTop": 6,
+        "scrollHeight": 5082,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 8,
+        "currentHeight": 114,
+        "activeEl": "filmstrip.slide.title",
+        "trace": [
+          [
+            5,
+            0
+          ],
+          [
+            7,
+            4269
+          ],
+          [
+            915,
+            4269
+          ],
+          [
+            923,
+            6
+          ]
+        ]
+      },
+      "shot": "b5fix-03-home.png"
+    },
+    {
+      "step": "End key (after mouse on stage)",
+      "facts": {
+        "slideId": "title-2-2-2-2-2-2-2-2-2",
+        "cardsInDom": 40,
+        "scrollTop": 4269,
+        "scrollHeight": 5082,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 666,
+        "currentHeight": 114,
+        "activeEl": "filmstrip.slide.title-2-2-2-2-2-2-2-2-2",
+        "trace": [
+          [
+            3420,
+            6
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            3423,
+            4269
+          ],
+          [
+            8,
+            4269
+          ]
+        ]
+      }
+    },
+    {
+      "step": "Home key (after mouse on stage)",
+      "facts": {
+        "slideId": "title",
+        "cardsInDom": 40,
+        "scrollTop": 6,
+        "scrollHeight": 5082,
+        "clientHeight": 788,
+        "currentInView": true,
+        "currentTop": 8,
+        "currentHeight": 114,
+        "activeEl": "filmstrip.slide.title",
+        "trace": [
+          [
+            3420,
+            6
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            3423,
+            4269
+          ],
+          [
+            8,
+            4269
+          ],
+          [
+            4330,
+            4269
+          ],
+          [
+            916,
+            4269
+          ],
+          [
+            4332,
+            6
+          ],
+          [
+            918,
+            6
+          ]
+        ]
+      },
+      "shot": "b5fix-04-home-2.png"
+    }
+  ],
+  "teardown": {
+    "deckId": "untitled-20260929-nuj2",
+    "steps": [
+      "File > Move to trash ok",
+      "Delete forever ok (attempt 1)"
+    ],
+    "final": {
+      "edit": 404,
+      "deck": 404
+    }
+  }
+}

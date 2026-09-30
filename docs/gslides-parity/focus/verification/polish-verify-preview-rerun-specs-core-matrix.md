@@ -1,0 +1,36 @@
+# Core gate matrix
+
+Base https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app, started 2026-09-29T13:55:16.609Z, 1152 s. 18 rows judged: 11 passed, 7 failed, 0 not driven (0 of them manual, the checklist's: none), 0 no step. Measurement rows (PRODUCT.md 8.2, recorded and never holding the ship; the cost rows of SYNC.md 6.1 among them, which hold it over their ceiling on the preview): none judged. Cost rows over their ceiling in this run: none. Verdict failed with the committed parked list inbox, templates and the parked rows arrange.group.tail-text-controls, logos.kit.find-a-logo, logos.picker.variants, shaders.background.add-to-theme, shaders.background.place-answers, shaders.frame.scrubber-capture, shaders.library.glyph-engines-render, svg.copy.markup, tables.bar.row-column-buttons, versions.show-changes-marks, view.live-pointers.second-browser; retries 0 configured, 0 test(s) retried; exit 1. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): none; rows whose own controls a ship would keep parked: none; rows of an unparkable feature blocking the ship: share.name-prompt.first-share, sync.serial.order-and-latency, sync.structural.concurrent, sync.block.offline-replay-converges, present.link.first-paint-show, collab.presence.join-within-2s, decks.thumbnail.never-502.
+
+| Row                                   | Feature  | Driver               | Today      | Result | Reason                                                                                                                                                        |
+| ------------------------------------- | -------- | -------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `share.copy-view-link`                | share    | core/share.spec.ts   | works      | passed |                                                                                                                                                               |
+| `share.view-link-lands-viewer`        | share    | core/share.spec.ts   | works      | passed |                                                                                                                                                               |
+| `share.view-link-cannot-edit`         | share    | core/share.spec.ts   | broken     | passed |                                                                                                                                                               |
+| `share.present-link-excludes-skipped` | share    | core/share.spec.ts   | not driven | passed |                                                                                                                                                               |
+| `share.copy-present-link`             | share    | core/share.spec.ts   | works      | passed |                                                                                                                                                               |
+| `comments.toolbar-and-menu-routes`    | comments | core/present.spec.ts | not driven | passed |                                                                                                                                                               |
+| `share.dialog.one-link`               | share    | core/share.spec.ts   | broken     | passed |                                                                                                                                                               |
+| `share.name-prompt.first-share`       | share    | core/share.spec.ts   | not driven | failed | Error: the name shows on the presence chip in the second browser within 35 s                                                                                  |
+| `export.download.progress-per-slide`  | export   | core/export.spec.ts  | broken     | passed |                                                                                                                                                               |
+| `sync.serial.order-and-latency`       | sync     | core/sync.spec.ts    | works      | failed | Error: a01 once in A                                                                                                                                          |
+| `sync.structural.concurrent`          | sync     | core/sync.spec.ts    | not driven | failed | Error: both browsers show one position within 5000 ms on the blob tier (A {"x":423,"y":400,"w":480,"h":120,"z":3}, B {"x":203,"y":574,"w":480,"h":120,"z":3}) |
+| `sync.block.offline-replay-converges` | sync     | core/sync.spec.ts    | works      | failed | Error: A's resend carries the offset shifted past B's words                                                                                                   |
+| `sync.reload.same-document`           | sync     | core/sync.spec.ts    | works      | passed |                                                                                                                                                               |
+| `shapes.geometry.export.raster-modes` | shapes   | core/export.spec.ts  | not driven | passed |                                                                                                                                                               |
+| `svg.export.pdf-vector`               | svg      | core/export.spec.ts  | not driven | passed |                                                                                                                                                               |
+| `present.link.first-paint-show`       | present  | core/present.spec.ts | broken     | failed | TimeoutError: locator.waitFor: Timeout 30000ms exceeded.                                                                                                      |
+| `collab.presence.join-within-2s`      | share    | core/share.spec.ts   | broken     | failed | Error: B's chip within 2 s of the join                                                                                                                        |
+| `decks.thumbnail.never-502`           | decks    | core/decks.spec.ts   | broken     | failed | [31mTest timeout of 150000ms exceeded.[39m                                                                                                                    |
+
+## Not driven rows, by id and reason
+
+## Failed rows, by id and reason
+
+- `share.name-prompt.first-share`: Error: the name shows on the presence chip in the second browser within 35 s
+- `sync.serial.order-and-latency`: Error: a01 once in A
+- `sync.structural.concurrent`: Error: both browsers show one position within 5000 ms on the blob tier (A {"x":423,"y":400,"w":480,"h":120,"z":3}, B {"x":203,"y":574,"w":480,"h":120,"z":3})
+- `sync.block.offline-replay-converges`: Error: A's resend carries the offset shifted past B's words
+- `present.link.first-paint-show`: TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+- `collab.presence.join-within-2s`: Error: B's chip within 2 s of the join
+- `decks.thumbnail.never-502`: [31mTest timeout of 150000ms exceeded.[39m

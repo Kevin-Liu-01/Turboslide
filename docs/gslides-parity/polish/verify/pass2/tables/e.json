@@ -1,0 +1,475 @@
+[
+  {
+    "n": 1,
+    "step": "new deck",
+    "at": "2026-09-29T22:11:32.424Z",
+    "id": "untitled-20260929-lvfb",
+    "url": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app/edit/untitled-20260929-lvfb"
+  },
+  {
+    "n": 2,
+    "step": "insert 3x3 and type the header",
+    "at": "2026-09-29T22:11:40.838Z",
+    "id": "table",
+    "cells": [
+      [
+        "Region",
+        "Q2",
+        "Q3"
+      ],
+      [
+        "North",
+        "1,240",
+        "1,380"
+      ],
+      [
+        "",
+        "",
+        ""
+      ]
+    ],
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "shot": "e-01-typed-header.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 114.9
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 114.91497802734375
+    },
+    "cellRing": null,
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1
+    ]
+  },
+  {
+    "n": 3,
+    "step": "range over the header on the selected table, Bold, Center, size plus, colour",
+    "at": "2026-09-29T22:11:49.134Z",
+    "chip": "Table",
+    "rangeRing": {
+      "x": 509.6,
+      "y": 311.4,
+      "w": 676.8,
+      "h": 37.4
+    },
+    "s0": "e-02-header-range.png",
+    "afterBold": [
+      "*Region*",
+      "*Q2*",
+      "*Q3*"
+    ],
+    "s1": "e-03-header-range-bold.png",
+    "align": {
+      "pick": "menu.toolbar.align.format.alignIndent.center",
+      "options": [
+        "menu.toolbar.align.format.alignIndent.left",
+        "menu.toolbar.align.format.alignIndent.center",
+        "menu.toolbar.align.format.alignIndent.right",
+        "menu.toolbar.align.format.alignIndent.justified",
+        "menu.toolbar.align.valign-top",
+        "menu.toolbar.align.valign-middle",
+        "menu.toolbar.align.valign-bottom"
+      ]
+    },
+    "afterAlign": [
+      {},
+      {},
+      {}
+    ],
+    "s2": "e-04-header-range-center.png",
+    "sizeFacts": {
+      "before": "20",
+      "after": "20",
+      "cells": [
+        "*Region*",
+        "*Q2*",
+        "*Q3*"
+      ]
+    },
+    "s3": "e-05-header-range-size-plus.png",
+    "colour": {
+      "pick": "toolbar.textColor.kit.primary",
+      "options": [
+        "toolbar.textColor.menu",
+        "toolbar.textColor.kit.text",
+        "toolbar.textColor.kit.background",
+        "toolbar.textColor.kit.caption",
+        "toolbar.textColor.kit.hint",
+        "toolbar.textColor.kit.primary",
+        "toolbar.textColor.kit.accent",
+        "toolbar.textColor.ink",
+        "toolbar.textColor.paper",
+        "toolbar.textColor.ink-2",
+        "toolbar.textColor.titanium",
+        "toolbar.textColor.hair",
+        "toolbar.textColor.hair-soft",
+        "toolbar.textColor.plate",
+        "toolbar.textColor.edge",
+        "toolbar.textColor.green",
+        "toolbar.textColor.amber",
+        "toolbar.textColor.red",
+        "toolbar.textColor.blue",
+        "toolbar.textColor.accent"
+      ]
+    },
+    "cells": [
+      "*[Region]{c:blue}*",
+      "*[Q2]{c:blue}*",
+      "*[Q3]{c:blue}*"
+    ],
+    "s4": "e-06-header-range-colour.png"
+  },
+  {
+    "n": 4,
+    "step": "column seam 0 dragged right by 90 on the selected table",
+    "at": "2026-09-29T22:11:52.761Z",
+    "seam": {
+      "x": 730.7,
+      "y": 310.7,
+      "w": 9,
+      "h": 114.9
+    },
+    "mid": {
+      "readout": "448 px",
+      "shot": "e-07-column-seam-during.png"
+    },
+    "widthsBefore": [
+      {},
+      {},
+      {}
+    ],
+    "widthsAfter": [
+      {
+        "width": 448
+      },
+      {
+        "width": 192
+      },
+      {
+        "width": 320
+      }
+    ],
+    "shot": "e-08-column-seam-after.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 114.9
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 114.91497802734375
+    },
+    "cellRing": null,
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      38.1,
+      38.1,
+      38.1
+    ]
+  },
+  {
+    "n": 5,
+    "step": "row seam 1 dragged down by 40",
+    "at": "2026-09-29T22:11:55.225Z",
+    "seam": {
+      "x": 509.6,
+      "y": 382.3,
+      "w": 676.8,
+      "h": 9
+    },
+    "mid": {
+      "readout": "111 px",
+      "shot": "e-09-row-seam-during.png",
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 155.1
+      },
+      "rowH": [
+        38.1,
+        78.3,
+        38.1
+      ]
+    },
+    "heightsBefore": [
+      null,
+      null,
+      null
+    ],
+    "heightsAfter": [
+      54,
+      111,
+      54
+    ],
+    "posBefore": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 163,
+      "z": 2
+    },
+    "posAfter": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 220,
+      "z": 2
+    },
+    "shot": "e-10-row-seam-after.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 155.1
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 155.0999755859375
+    },
+    "cellRing": null,
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      38.1,
+      78.3,
+      38.1
+    ]
+  },
+  {
+    "n": 6,
+    "step": "last row seam dragged down by 60",
+    "at": "2026-09-29T22:11:56.797Z",
+    "mid": {
+      "readout": "139 px",
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 215
+      },
+      "rowH": [
+        38.1,
+        78.3,
+        98
+      ]
+    },
+    "heightsAfter": [
+      54,
+      111,
+      139
+    ],
+    "posBefore": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 220,
+      "z": 2
+    },
+    "posAfter": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 305,
+      "z": 2
+    },
+    "shot": "e-11-last-row-seam-after.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 215
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 215.02496337890625
+    },
+    "cellRing": null,
+    "rangeRing": null,
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      38.1,
+      78.3,
+      98
+    ]
+  },
+  {
+    "n": 7,
+    "step": "Distribute rows from the row head menu",
+    "at": "2026-09-29T22:11:58.479Z",
+    "heights": [
+      null,
+      null,
+      null
+    ],
+    "pos": {
+      "x": 320,
+      "y": 218,
+      "w": 960,
+      "h": 305,
+      "z": 2
+    },
+    "shot": "e-12-distribute-rows.png",
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 215
+    },
+    "table": {
+      "x": 509.5999755859375,
+      "y": 310.69000244140625,
+      "w": 676.7999267578125,
+      "h": 215.02496337890625
+    },
+    "cellRing": null,
+    "rangeRing": {
+      "x": 509.6,
+      "y": 382.8,
+      "w": 676.8,
+      "h": 70.7
+    },
+    "chip": "Table",
+    "editing": false,
+    "rowH": [
+      71.4,
+      71.4,
+      71.4
+    ]
+  },
+  {
+    "n": 8,
+    "step": "column seam 1 dragged left by 60 with cell 1,1 open",
+    "at": "2026-09-29T22:12:00.667Z",
+    "editingBefore": true,
+    "mid": {
+      "readout": "107 px",
+      "editing": false
+    },
+    "editingAfter": true,
+    "session": {
+      "row": 1,
+      "column": 1,
+      "run": "table/rows/1/cells/1"
+    },
+    "widthsBefore": [
+      {
+        "width": 448
+      },
+      {
+        "width": 192
+      },
+      {
+        "width": 320
+      }
+    ],
+    "widthsAfter": [
+      {
+        "width": 448
+      },
+      {
+        "width": 107
+      },
+      {
+        "width": 405
+      }
+    ],
+    "shot": "e-13-column-seam-with-cell-open.png"
+  },
+  {
+    "n": 9,
+    "step": "right click the column head 2; then click the row head 1 and press Delete",
+    "at": "2026-09-29T22:12:04.126Z",
+    "menuRows": [
+      "Insert column left",
+      "Insert column right",
+      "Delete column",
+      "Distribute columns"
+    ],
+    "s1": "e-14-column-head-menu.png",
+    "rowRange": {
+      "x": 509.6,
+      "y": 382.8,
+      "w": 676.8,
+      "h": 70.7
+    },
+    "cellsBefore": [
+      "North",
+      "1,240",
+      "1,380"
+    ],
+    "tableStillThere": true,
+    "cellsAfter": [
+      "",
+      "",
+      ""
+    ],
+    "shot": "e-15-row-range-delete-key.png"
+  },
+  {
+    "n": 10,
+    "step": "insert 20x20",
+    "at": "2026-09-29T22:12:07.980Z",
+    "words": "20 x 20, 11 rows fit the slide",
+    "id": "table-2",
+    "pos": {
+      "x": 320,
+      "y": 563,
+      "w": 960,
+      "h": 1081,
+      "z": 3
+    },
+    "cellW": 33.84002685546875,
+    "rowH": 38.07000732421875,
+    "shot": "e-16-20x20-inserted.png",
+    "promptLast": {
+      "text": null,
+      "lines": 0,
+      "rowH": 38.07000732421875
+    },
+    "shot2": "e-17-20x20-hover-last.png"
+  },
+  {
+    "n": 11,
+    "step": "console errors",
+    "at": "2026-09-29T22:12:07.980Z",
+    "count": 0,
+    "first": []
+  },
+  {
+    "n": 12,
+    "step": "teardown",
+    "at": "2026-09-29T22:12:27.423Z",
+    "trashed": true,
+    "deleted": true,
+    "status404": 404
+  }
+]

@@ -1,0 +1,9 @@
+hero-dark: The Turboslide editor with the example deck open on its Blue Marble slide.
+hero-light: The Turboslide editor with the example deck open on its Blue Marble slide.
+canvas-dark: A picture selected on a slide with its ring, its eight handles and the rotation readout.
+canvas-light: A picture selected on a slide with its ring, its eight handles and the rotation readout.
+menus-dark: The menu bar with the Insert menu open.
+menus-light: The menu bar with the Insert menu open.
+svg: The editor, presenter view and a phone with the show, joined by the S key and a present link.
+svg: A slide with an arrow to two files, pitch.pdf and pitch.pptx.
+svg: One table of 192 actions, reached from the CLI, MCP, HTTP and the page, out to a deck.

@@ -1,0 +1,284 @@
+{
+  "base": "http://localhost:4449",
+  "defaultTemplate": null,
+  "startedAt": "2026-09-30T01:19:35.572Z",
+  "ms": 331083,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 331054,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/verify2/gate-4449-rerun/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.card.rename-enter",
+      "sync.reload.same-document",
+      "collab.presence.join-within-2s",
+      "shaders.perf.editor-frame",
+      "sync.block.concurrent-same-offset-order",
+      "sync.recovered.no-plate-for-held-writes",
+      "share.dialog.restricted-and-more",
+      "images.picture.no-plate",
+      "svg.import.url",
+      "logos.index.refresh-fixture",
+      "collab.roster.go-to-slide"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 11,
+  "passed": 8,
+  "failed": 3,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "shaders.perf.editor-frame",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "longest animation frame 109.4 ms over 5 s with one shader on the stage (172 animation frames; rAF gaps; 1 canvas; renderer ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver))",
+        "longest animation frame 109.4 ms over 5 s with one shader on the stage (172 animation frames; rAF gaps; 1 canvas; renderer ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver))"
+      ]
+    }
+  ],
+  "noStep": [],
+  "commit": "5d3d7748",
+  "origin": "http://localhost:4449",
+  "date": "2026-09-30",
+  "results": {
+    "decks.card.rename-enter": "passed",
+    "images.picture.no-plate": "passed",
+    "logos.index.refresh-fixture": "failed",
+    "shaders.perf.editor-frame": "passed",
+    "collab.roster.go-to-slide": "failed",
+    "share.dialog.restricted-and-more": "passed",
+    "collab.presence.join-within-2s": "passed",
+    "svg.import.url": "failed",
+    "sync.block.concurrent-same-offset-order": "passed",
+    "sync.reload.same-document": "passed",
+    "sync.recovered.no-plate-for-held-writes": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "collab.roster.go-to-slide",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "logos.index.refresh-fixture",
+        "feature": "logos",
+        "result": "failed"
+      },
+      {
+        "id": "svg.import.url",
+        "feature": "svg",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "collab.roster.go-to-slide",
+      "parks": [
+        "title.presence.goTo"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "logos.index.refresh-fixture",
+      "parks": [
+        "insert.logo"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "svg.import.url",
+      "parks": [
+        "intake.svg.url"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.card.rename-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.roster.go-to-slide",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: Go to slide jumps (the owner's record read split-1-3f64 after 7 ms, so a miss is the chip's click)"
+    },
+    {
+      "id": "sync.block.concurrent-same-offset-order",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.reload.same-document",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.index.refresh-fixture",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "TypeError: Cannot read properties of undefined (reading 'slice')"
+    },
+    {
+      "id": "shaders.perf.editor-frame",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.import.url",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the alt is the file's name"
+    },
+    {
+      "id": "images.picture.no-plate",
+      "feature": "images",
+      "driver": "core/logos.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.restricted-and-more",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.recovered.no-plate-for-held-writes",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.presence.join-within-2s",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "base": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-29T22:25:16.528Z",
+  "steps": [],
+  "teardown": {
+    "deckId": "untitled-20260929-1bh1",
+    "steps": [
+      "File > Move to trash ok",
+      "Delete forever ok (attempt 1)"
+    ],
+    "final": {
+      "edit": 404,
+      "deck": 404
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "base": "https://turboslide-rdwe1x0ub-kl01s-projects.vercel.app",
+  "deck": null,
+  "startedAt": "2026-09-29T14:04:27.366Z",
+  "seconds": 211,
+  "rows": [
+    {
+      "n": 1,
+      "step": "open /new, the title, a second slide with a body paragraph",
+      "expected": "ready",
+      "observed": "error: page.waitForFunction: Timeout 90000ms exceeded.",
+      "ok": false,
+      "at": 90.4
+    },
+    {
+      "n": 2,
+      "step": "Link detection off: open the body session (verified), End, space, type an address and a space",
+      "expected": "no link while the setting is off",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "ok": false,
+      "at": 121.1
+    },
+    {
+      "n": 3,
+      "step": "Link detection on: the same typing with another address",
+      "expected": "the address becomes a link",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "ok": false,
+      "at": 151.3
+    },
+    {
+      "n": 4,
+      "step": "a view link: the assistant for a viewer",
+      "expected": "the panel disabled with the sentence",
+      "observed": "no view link (record revision 0): {\"error\":\"Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'studio')\\n    at eval (eval at evaluate (:311:30), <anonymous>:1:32)\\n    at UtilityScript.evaluate (<anonymous",
+      "ok": null,
+      "at": 211.5
+    }
+  ],
+  "facts": {},
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 403 ()",
+    "Provider's accounts list is empty.",
+    "[GSI_LOGGER]: FedCM get() rejects with NetworkError: Error retrieving a token.",
+    "Failed to load resource: the server responded with a status of 429 ()"
+  ]
+}

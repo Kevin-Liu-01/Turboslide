@@ -36,6 +36,7 @@ import {
   resolveDither,
 } from '@turboslide/render/dither-key';
 import type { Autofit, Block, Shadow, ShapeBlock } from '@turboslide/schema/blocks';
+import { plainBlockSchema } from '@turboslide/schema/blocks';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
 import { CONVERSION_IDS, applyGuides, toCanvas } from '@turboslide/schema/canvas';
 import type { GuidesInput } from '@turboslide/schema/canvas';
@@ -95,6 +96,7 @@ import {
 import type { ShapeKind } from '@turboslide/schema/blocks';
 import type { Dash, LineEnd, LineKind } from '@turboslide/schema/shapes';
 import { isLineKind } from '@turboslide/schema/shapes';
+import type { Typography } from '@turboslide/schema/typography';
 import { INDENT_STEP_PX, ladderStepDown } from '@turboslide/schema/typography';
 import { walkBlocks } from '@turboslide/schema/validate';
 import type {
@@ -2890,9 +2892,48 @@ function numberPresetOf(preset: string | undefined): NumberPreset {
 }
 
 /**
+ * The look a heading level draws with (packages/theme/src/tokens.ts `heading`; the schema's help on
+ * `level`: h1 88 px, h2 44 px, big 72 px, title 44 px), as the typography record a list made of the
+ * heading carries: Google keeps the title's size when Bulleted list is pressed on it and adds the
+ * bullet (VERIFICATION.md "Polish round, pass 3" finding 2: the 88 px cover title became a 20 px
+ * list). Every value is on the ladder of typography.ts.
+ */
+export const HEADING_LEVEL_TYPOGRAPHY: Readonly<
+  Record<'h1' | 'h2' | 'big' | 'title', Readonly<Typography>>
+> = {
+  h1: { size: 88, weight: 500, tracking: -0.025, leading: 1.02 },
+  h2: { size: 44, weight: 500, tracking: -0.025, leading: 1.1 },
+  big: { size: 72, weight: 500, tracking: -0.025, leading: 1.06 },
+  title: { size: 44, weight: 500, tracking: -0.025, leading: 1.1 },
+};
+
+/**
+ * The typography a list made of `block` carries: a heading's level look under the block's own
+ * record (a field font, an align), a paragraph's or a text box's own record alone; nothing when
+ * the block has none. The record is written only where the plain block's schema admits a
+ * `typography` key (the polish round's fix round 3 asks the integrator for the field on
+ * `plainBlockSchema` and its reading in the render, build/b5.md); until then the list keeps the
+ * schema's own size and the write stays valid, so Bulleted list on a title is never refused.
+ */
+export function listTypographyOf(block: Block): Typography | undefined {
+  const own = 'typography' in block && block.typography !== undefined ? block.typography : {};
+  const level = block.type === 'heading' ? HEADING_LEVEL_TYPOGRAPHY[block.level] : undefined;
+  const merged: Typography = { ...(level ?? {}), ...own };
+  if (Object.keys(merged).length === 0) return undefined;
+  const probe = plainBlockSchema.safeParse({
+    id: block.id,
+    type: 'plain',
+    items: [{ text: 'a' }],
+    typography: merged,
+  });
+  return probe.success ? merged : undefined;
+}
+
+/**
  * A paragraph, heading or text box as a list block, one item per paragraph (the round one Bulleted
  * list; a heading since the polish round's fix round 2, so the cover title takes a list once the
- * slide has converted, docs/POLISH.md 2.3 item 18).
+ * slide has converted, docs/POLISH.md 2.3 item 18). A heading's list keeps the heading's look
+ * (`listTypographyOf`): the level's size, weight, tracking and leading under the field's own.
  */
 function listBlockFrom(block: Block): Block {
   if (block.type === 'plain') return block;
@@ -2908,12 +2949,14 @@ function listBlockFrom(block: Block): Block {
   const items = splitParagraphs(block.text ?? '')
     .filter((paragraph) => paragraph.trim() !== '')
     .map((paragraph) => ({ text: paragraph }));
+  const typography = listTypographyOf(block);
   return {
     id: block.id,
     type: 'plain',
     items: items.length > 0 ? items : [{ text: '' }],
     ...(block.pos !== undefined ? { pos: block.pos } : {}),
-  };
+    ...(typography === undefined ? {} : { typography }),
+  } as Block;
 }
 
 export async function textList(

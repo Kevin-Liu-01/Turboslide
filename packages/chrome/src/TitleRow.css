@@ -483,3 +483,89 @@
 .ts-title-assist[aria-pressed='true'] {
   color: var(--pt-ink);
 }
+
+/* ---- the name prompt as a plate in the row (docs/POLISH.md 2.8 item 103) ----
+   The route's prompt on the first write or at the join sits in the right cluster before the
+   collaborators, 32 px inside the 44 px row: never over the sheet, never over the toolbar. The
+   question is the field's placeholder; the field narrows when the row does. */
+.ts-title-name-plate {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  height: var(--pt-ctl-h, 32px);
+  margin: 0;
+  padding: 0 4px 0 12px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 8px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+}
+
+.ts-title-name-plate-field {
+  box-sizing: border-box;
+  width: 200px;
+  height: 24px;
+  padding: 0 4px;
+  border: 0;
+  border-bottom: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: none;
+  font: 13px/1 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-title-name-plate-field:focus-visible {
+  outline: none;
+  border-bottom-color: var(--pt-ink);
+}
+
+.ts-title-name-plate-field[aria-invalid='true'] {
+  border-bottom-color: var(--pt-ink);
+}
+
+.ts-title-name-plate-continue {
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 6px;
+}
+
+.ts-title-name-plate-close {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font: 16px/1 var(--pt-text);
+  color: var(--pt-ink-2);
+}
+
+/* the server's refusal sentence (reserved, already in use, the shape rule) hangs under the plate
+   in its own small plate, so the row keeps its height and the sentence is read where the field
+   is; empty it takes no room */
+.ts-title-name-plate {
+  position: relative;
+}
+
+.ts-title-name-plate-error {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 3;
+  display: none;
+  padding: 4px 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 6px;
+  background: var(--pt-paper);
+  font: 12px/1.2 var(--pt-text);
+  color: var(--pt-ink);
+  white-space: nowrap;
+}
+
+.ts-title-name-plate-error:not(:empty) {
+  display: block;
+}
+
+@media (max-width: 1180px) {
+  .ts-title-name-plate-field {
+    width: 150px;
+  }
+}

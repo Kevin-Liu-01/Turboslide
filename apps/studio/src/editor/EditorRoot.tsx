@@ -135,6 +135,27 @@ import { SessionBridge, ShellBridge, isPrerendering, whenShown } from './shell-b
    loads it (gslides-parity SPEC-4 0.44) */
 import '../routes/edit.$deckId.css';
 
+/** How long one listing of the store stands in for the next one (EditorRoot listDecks). */
+export const DECK_LIST_TTL_MS = 20_000;
+let deckListCache: { at: number; rows: Promise<Awaited<ReturnType<typeof listDecks>>> } | null =
+  null;
+/**
+ * The store's listing, one in flight at a time and reused for DECK_LIST_TTL_MS: the File menu's
+ * open warms it and the Open and Import slides dialogs read the same promise, so a dialog opened
+ * seconds after the menu has its rows at once. A listing that fails is not kept.
+ */
+function listDecksCached(): Promise<Awaited<ReturnType<typeof listDecks>>> {
+  const now = Date.now();
+  if (deckListCache !== null && now - deckListCache.at < DECK_LIST_TTL_MS)
+    return deckListCache.rows;
+  const rows = listDecks();
+  deckListCache = { at: now, rows };
+  rows.catch(() => {
+    if (deckListCache?.rows === rows) deckListCache = null;
+  });
+  return rows;
+}
+
 // The editor page, moved verbatim from routes/edit.$deckId.tsx in the round four split
 // (gslides-parity SPEC-4 0.44; PP 7 row 1). The route imports EditorRoot inside its component so
 // the editor's graph leaves the entry; the controller is ./controller.tsx (B4's from merge 1)
@@ -1570,9 +1591,13 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     },
     /* the store's listing with this browser's own decks folded in above it (docs/POLISH.md item
        75): a deck made a moment ago is in File > Open and Import slides before the blob tier's
-       listing holds it; the mirror's facts stand in for the head's */
+       listing holds it; the mirror's facts stand in for the head's. The listing is one call per
+       DECK_LIST_TTL_MS, shared by the File menu's warm up (EditorShell.tsx) and the dialog that
+       opens after it, so the rows land with the dialog instead of the listing's seconds later
+       (the blob tier lists the whole store: 7.8 s on the polish round's fix round 3 preview,
+       past the 8 s the row decks.recent.keeps-new-deck gives the dialog) */
     listDecks: async () => {
-      const listed = await listDecks();
+      const listed = await listDecksCached();
       const ids = new Set(listed.map((row) => row.id));
       const mine = readRecent()
         .filter((entry) => !ids.has(entry.id))

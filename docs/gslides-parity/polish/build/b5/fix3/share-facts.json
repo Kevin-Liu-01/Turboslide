@@ -1,0 +1,1235 @@
+{
+  "base": "https://turboslide-b6mbkpi52-kl01s-projects.vercel.app",
+  "cmd": "share",
+  "at": "2026-09-30T12:46:23.979Z",
+  "events": [
+    {
+      "ms": 8147,
+      "kind": "A document",
+      "text": "200 /new"
+    },
+    {
+      "ms": 8171,
+      "kind": "A navigated",
+      "text": "/new"
+    },
+    {
+      "ms": 8382,
+      "kind": "A navigated",
+      "text": "/new"
+    },
+    {
+      "ms": 8577,
+      "kind": "A serverFn",
+      "text": "200 3a277a5ce011222ea489e0c17331532988d22783 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"url\",\"tokenRequired\",\"store\",\"persistent\",\"hosted\"],\"v\":[{"
+    },
+    {
+      "ms": 8687,
+      "kind": "A serverFn",
+      "text": "200 2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebc {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"id\\\\\\\":\\\\\\\"9784ad44-f51a-4156-b022-c7a1fd4ee365\\\\\\\",\\\\\\\"deckId\\\\\\\""
+    },
+    {
+      "ms": 8717,
+      "kind": "A serverFn",
+      "text": "200 8f65781f136b1e8f43ea006e3e520a1eeaac1ca2 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"downloads\",\"worker\",\"sync\",\"batchSize\"],\"v\":[{\"t\":2,\"s\":2}"
+    },
+    {
+      "ms": 8823,
+      "kind": "A serverFn",
+      "text": "200 bf5e8df0252e4b3589308a538d455995a3bd4436 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}"
+    },
+    {
+      "ms": 28926,
+      "kind": "A serverFn",
+      "text": "200 bf5e8df0252e4b3589308a538d455995a3bd4436 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}"
+    },
+    {
+      "ms": 38548,
+      "kind": "A navigated",
+      "text": "/new#s/blank-1"
+    },
+    {
+      "ms": 40848,
+      "kind": "A navigated",
+      "text": "/edit/untitled-20260930-37f9#s/blank-1"
+    },
+    {
+      "ms": 40854,
+      "kind": "A serverFn",
+      "text": "200 a98ce57408eb7d0bf930866f8f2af33ca7a11106 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"ok\\\\\\\":true,\\\\\\\"revision\\\\\\\":1,\\\\\\\"entry\\\\\\\":{\\\\\\\"n\\\\\\\":1,\\\\\\\"revi"
+    },
+    {
+      "ms": 41022,
+      "kind": "A serverFn",
+      "text": "200 4b2ac650b153ab2366846644f273767c3546e07d {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"level\\\\\\\":\\\\\\\"forYou\\\\\\\",\\\\\\\"email\\\\\\\":true,\\\\\\\"ac"
+    },
+    {
+      "ms": 41025,
+      "kind": "A serverFn",
+      "text": "200 5f3e5dc3ba365a4443ff58752ea519cf00371c39 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"revision\",\"ready\",\"failed\",\"rendered\",\"cached\",\"ms\",\"queue"
+    },
+    {
+      "ms": 41312,
+      "kind": "A serverFn",
+      "text": "200 4b2ac650b153ab2366846644f273767c3546e07d {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"notifications\\\\\\\":[],\\\\\\\"unread\\\\\\\":0},\\\\\\\"created"
+    },
+    {
+      "ms": 41502,
+      "kind": "A serverFn",
+      "text": "200 4b2ac650b153ab2366846644f273767c3546e07d {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"threads\\\\\\\":[],\\\\\\\"commentsRevision\\\\\\\":0,\\\\\\\"tota"
+    },
+    {
+      "ms": 41627,
+      "kind": "A serverFn",
+      "text": "200 376e57a10847f57ca5b048a11bf99aedeb957826 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20260930-37f9\\\\\\\",\\\\\\\"document\\\\\\\":{\\\\\\\"de"
+    },
+    {
+      "ms": 41933,
+      "kind": "A serverFn",
+      "text": "200 4b2ac650b153ab2366846644f273767c3546e07d {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"threads\\\\\\\":[],\\\\\\\"commentsRevision\\\\\\\":0,\\\\\\\"tota"
+    },
+    {
+      "ms": 42059,
+      "kind": "deck",
+      "text": "untitled-20260930-37f9"
+    },
+    {
+      "ms": 42121,
+      "kind": "A serverFn",
+      "text": "200 f1dbc072a6faae7799da60ec0e8e2053ba49c9cc {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[{\\\\\\\"n\\\\\\\":1,\\\\\\\"revision\\\\\\\":1,\\\\\\\"author\\\\\\\":{\\\\\\\"kind\\\\\\\":\\\\\\\"human"
+    },
+    {
+      "ms": 42644,
+      "kind": "A serverFn",
+      "text": "200 4b2ac650b153ab2366846644f273767c3546e07d {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"record\\\\\\\":{\\\\\\\"schemaVersion\\\\\\\":1,\\\\\\\"deckId\\\\\\\""
+    },
+    {
+      "ms": 43222,
+      "kind": "access",
+      "text": "link viewer set through the window API"
+    },
+    {
+      "ms": 43222,
+      "kind": "A serverFn",
+      "text": "200 4b2ac650b153ab2366846644f273767c3546e07d {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"record\\\\\\\":{\\\\\\\"schemaVersion\\\\\\\":1,\\\\\\\"deckId\\\\\\\""
+    },
+    {
+      "ms": 43708,
+      "kind": "A serverFn",
+      "text": "200 376e57a10847f57ca5b048a11bf99aedeb957826 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20260930-37f9\\\\\\\",\\\\\\\"document\\\\\\\":{\\\\\\\"de"
+    },
+    {
+      "ms": 44046,
+      "kind": "A serverFn",
+      "text": "200 4b2ac650b153ab2366846644f273767c3546e07d {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"threads\\\\\\\":[],\\\\\\\"commentsRevision\\\\\\\":0,\\\\\\\"tota"
+    },
+    {
+      "ms": 46908,
+      "kind": "share dialog 1",
+      "text": "{\"height\":447,\"more\":true,\"rows\":false,\"view\":false,\"viewCopy\":false,\"emails\":false,\"settings\":false,\"address\":\"\"}"
+    },
+    {
+      "ms": 48099,
+      "kind": "copy",
+      "text": "clicked the View row copy"
+    },
+    {
+      "ms": 48101,
+      "kind": "clipboard",
+      "text": "evaluate failed: Error: page.evaluate: NotAllowedError: Failed to execute 'readText' on 'Clipboar after 343 ms; url /edit/untitled-20260930-37f9#s/blank-1"
+    },
+    {
+      "ms": 48421,
+      "kind": "A serverFn",
+      "text": "200 4b2ac650b153ab2366846644f273767c3546e07d {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"record\\\\\\\":{\\\\\\\"schemaVersion\\\\\\\":1,\\\\\\\"deckId\\\\\\\""
+    },
+    {
+      "ms": 49015,
+      "kind": "A serverFn",
+      "text": "200 bf5e8df0252e4b3589308a538d455995a3bd4436 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}"
+    },
+    {
+      "ms": 54192,
+      "kind": "after 6 s",
+      "text": "url /edit/untitled-20260930-37f9#s/blank-1; dialog open true"
+    },
+    {
+      "ms": 58004,
+      "kind": "share dialog 2",
+      "text": "{\"height\":447,\"more\":true,\"rows\":false,\"view\":false,\"viewCopy\":false,\"emails\":false,\"settings\":false,\"address\":\"\"}"
+    },
+    {
+      "ms": 59269,
+      "kind": "copy",
+      "text": "clicked the View row copy"
+    },
+    {
+      "ms": 59270,
+      "kind": "clipboard",
+      "text": "evaluate failed: Error: page.evaluate: NotAllowedError: Failed to execute 'readText' on 'Clipboar after 382 ms; url /edit/untitled-20260930-37f9#s/blank-1"
+    },
+    {
+      "ms": 65363,
+      "kind": "after 6 s",
+      "text": "url /edit/untitled-20260930-37f9#s/blank-1; dialog open true"
+    },
+    {
+      "ms": 66583,
+      "kind": "A document",
+      "text": "200 /edit/untitled-20260930-37f9"
+    },
+    {
+      "ms": 66588,
+      "kind": "A navigated",
+      "text": "/edit/untitled-20260930-37f9"
+    },
+    {
+      "ms": 66706,
+      "kind": "A navigated",
+      "text": "/edit/untitled-20260930-37f9"
+    },
+    {
+      "ms": 66849,
+      "kind": "A serverFn",
+      "text": "200 8f65781f136b1e8f43ea006e3e520a1eeaac1ca2 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"downloads\",\"worker\",\"sync\",\"batchSize\"],\"v\":[{\"t\":2,\"s\":2}"
+    },
+    {
+      "ms": 66850,
+      "kind": "A serverFn",
+      "text": "200 3a277a5ce011222ea489e0c17331532988d22783 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"url\",\"tokenRequired\",\"store\",\"persistent\",\"hosted\"],\"v\":[{"
+    },
+    {
+      "ms": 66857,
+      "kind": "A serverFn",
+      "text": "200 2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebc {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"id\\\\\\\":\\\\\\\"752bff6c-0da9-41c9-8d6a-f59e84d8df98\\\\\\\",\\\\\\\"deckId\\\\\\\""
+    },
+    {
+      "ms": 66900,
+      "kind": "A serverFn",
+      "text": "200 a16a067d6227c519aae942076546b3a98fb7c600 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"held\"],\"v\":[{\"t\":9,\"i\":2,\"a\":[],\"o\":0}]},\"o\":0},{\"t\":2,\"s\""
+    },
+    {
+      "ms": 66958,
+      "kind": "A serverFn",
+      "text": "200 bf5e8df0252e4b3589308a538d455995a3bd4436 {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}"
+    },
+    {
+      "ms": 66963,
+      "kind": "A serverFn",
+      "text": "200 4b2ac650b153ab2366846644f273767c3546e07d {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"threads\\\\\\\":[],\\\\\\\"commentsRevision\\\\\\\":0,\\\\\\\"tota"
+    },
+    {
+      "ms": 66972,
+      "kind": "A serverFn",
+      "text": "200 4b2ac650b153ab2366846644f273767c3546e07d {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"level\\\\\\\":\\\\\\\"forYou\\\\\\\",\\\\\\\"email\\\\\\\":true,\\\\\\\"ac"
+    },
+    {
+      "ms": 67366,
+      "kind": "A serverFn",
+      "text": "200 4b2ac650b153ab2366846644f273767c3546e07d {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"notifications\\\\\\\":[],\\\\\\\"unread\\\\\\\":0},\\\\\\\"created"
+    },
+    {
+      "ms": 70962,
+      "kind": "A document",
+      "text": "200 /decks"
+    },
+    {
+      "ms": 70971,
+      "kind": "A navigated",
+      "text": "/decks"
+    },
+    {
+      "ms": 71060,
+      "kind": "A navigated",
+      "text": "/decks"
+    },
+    {
+      "ms": 71169,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-365o&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71169,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71197,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-uo23&theme=light&w=320&r=0"
+    },
+    {
+      "ms": 71197,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71208,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-2x5z&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71208,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71208,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260929-fmci&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71208,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71209,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260929-mqm8&theme=light&w=320&r=3"
+    },
+    {
+      "ms": 71209,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71209,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-8qzh&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71209,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71212,
+      "kind": "A api",
+      "text": "404 /api/render/blank-1?deck=untitled-20260930-lrla&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 71212,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71213,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-nmeg&theme=light&w=320&r=3"
+    },
+    {
+      "ms": 71213,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71214,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-9h69&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71214,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71214,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260928-1f8e&theme=light&w=320&r=7"
+    },
+    {
+      "ms": 71214,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71217,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260929-uaaa&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 71217,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71219,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-s16e&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71219,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71220,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-s0ne&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71220,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71220,
+      "kind": "A api",
+      "text": "404 /api/render/title-1-451c?deck=untitled-20260930-u5bq&theme=light&w=320&r=73"
+    },
+    {
+      "ms": 71220,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71223,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-3mve&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71223,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71224,
+      "kind": "A api",
+      "text": "404 /api/render/opener-brand?deck=gt-brand-mun553is&theme=dark&w=320&r=0"
+    },
+    {
+      "ms": 71224,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71224,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260929-xik4&theme=light&w=320&r=29"
+    },
+    {
+      "ms": 71224,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71227,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=northwind-renewal-v2-without-notes&theme=light&w=320&r=0"
+    },
+    {
+      "ms": 71227,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71227,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260929-vhes&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71227,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71229,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-soyc&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71229,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71232,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-iwl0&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71232,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71234,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-voay&theme=light&w=320&r=19"
+    },
+    {
+      "ms": 71234,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71239,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260929-74gk&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 71239,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71243,
+      "kind": "A api",
+      "text": "404 /api/render/blank-2-dfcf?deck=untitled-20260930-unh1&theme=light&w=320&r=12"
+    },
+    {
+      "ms": 71243,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71246,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260928-qafj&theme=light&w=320&r=13"
+    },
+    {
+      "ms": 71246,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71246,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-k49d&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 71246,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71248,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260929-p0xe&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71248,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71251,
+      "kind": "A api",
+      "text": "404 /api/render/opener-brand?deck=gt-brand-muhzzd29&theme=dark&w=320&r=0"
+    },
+    {
+      "ms": 71251,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71253,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260928-6ejg&theme=light&w=320&r=9"
+    },
+    {
+      "ms": 71253,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71253,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-dv9q&theme=light&w=320&r=3"
+    },
+    {
+      "ms": 71253,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71254,
+      "kind": "A api",
+      "text": "404 /api/render/opener-brand?deck=gt-brand-muhfvs5y&theme=dark&w=320&r=0"
+    },
+    {
+      "ms": 71254,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71257,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=import-bundle-source-muhxn9yj&theme=light&w=320&r=0"
+    },
+    {
+      "ms": 71257,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71259,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260929-cwgw&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71259,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71260,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=import-source-20260925-bb06&theme=light&w=320&r=0"
+    },
+    {
+      "ms": 71260,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71260,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-lnif&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71260,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71263,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-gxxl&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71263,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71269,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-vknt&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 71269,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71271,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=import-bundle-source-muhfx12u&theme=light&w=320&r=0"
+    },
+    {
+      "ms": 71271,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71271,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-0l80&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71271,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71273,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-3gb4&theme=light&w=320&r=20"
+    },
+    {
+      "ms": 71273,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71276,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260929-1ekj&theme=light&w=320&r=3"
+    },
+    {
+      "ms": 71276,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71277,
+      "kind": "A api",
+      "text": "404 /api/render/blank-4-7848?deck=untitled-20260929-0a4r&theme=light&w=320&r=33"
+    },
+    {
+      "ms": 71277,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71287,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-1ijz&theme=light&w=320&r=7"
+    },
+    {
+      "ms": 71287,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71293,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-pc8u&theme=light&w=320&r=8"
+    },
+    {
+      "ms": 71293,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71295,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-0v1w&theme=light&w=320&r=5"
+    },
+    {
+      "ms": 71295,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71325,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-w5ql&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 71325,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71341,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260929-be6m&theme=light&w=320&r=4"
+    },
+    {
+      "ms": 71341,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71343,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-8gdt&theme=light&w=320&r=10"
+    },
+    {
+      "ms": 71343,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71405,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-eqb5&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 71405,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71516,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=import-bundle-source-mui012xf&theme=light&w=320&r=0"
+    },
+    {
+      "ms": 71516,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 71634,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-i7a7&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 71634,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 72872,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260920-mjns&theme=dark&w=320&r=1"
+    },
+    {
+      "ms": 72872,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 72879,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-7dfe&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 72879,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 72937,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-odj3&theme=light&w=320&r=7"
+    },
+    {
+      "ms": 72937,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 73074,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-r29j&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 73074,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 73085,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-v8t9&theme=light&w=320&r=17"
+    },
+    {
+      "ms": 73089,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 73096,
+      "kind": "A api",
+      "text": "404 /api/render/blank-1?deck=untitled-20260930-pqmm&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 73096,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 73138,
+      "kind": "A api",
+      "text": "404 /api/render/opener-brand?deck=gt-brand-muhxljke&theme=dark&w=320&r=0"
+    },
+    {
+      "ms": 73138,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 73141,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-g84v&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 73141,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 73163,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-layr&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 73163,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 73175,
+      "kind": "A api",
+      "text": "404 /api/render/blank-1-2883?deck=untitled-20260930-yd15&theme=light&w=320&r=5"
+    },
+    {
+      "ms": 73175,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 73187,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-gg1v&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 73187,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 73209,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-baqv&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 73209,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 84776,
+      "kind": "A document",
+      "text": "200 /decks/trash"
+    },
+    {
+      "ms": 84785,
+      "kind": "A navigated",
+      "text": "/decks/trash"
+    },
+    {
+      "ms": 84869,
+      "kind": "A navigated",
+      "text": "/decks/trash"
+    },
+    {
+      "ms": 84998,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260918-q39a&theme=dark&w=320&r=1"
+    },
+    {
+      "ms": 84998,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 84998,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-hy4y&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 84998,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 84999,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260914-ah39&theme=dark&w=320&r=8"
+    },
+    {
+      "ms": 84999,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85006,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260917-yi3w&theme=dark&w=320&r=11"
+    },
+    {
+      "ms": 85006,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85011,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-37w2&theme=dark&w=320&r=1033"
+    },
+    {
+      "ms": 85011,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85013,
+      "kind": "A api",
+      "text": "404 /api/render/opener-brand?deck=gt-brand-muh90ro7&theme=dark&w=320&r=0"
+    },
+    {
+      "ms": 85013,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85033,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260915-xmu5&theme=dark&w=320&r=15"
+    },
+    {
+      "ms": 85033,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85041,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-50av&theme=light&w=320&r=3"
+    },
+    {
+      "ms": 85041,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85049,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260917-g5n0&theme=dark&w=320&r=3"
+    },
+    {
+      "ms": 85049,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85051,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260917-te3y&theme=dark&w=320&r=1"
+    },
+    {
+      "ms": 85051,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85057,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260916-kpuf&theme=dark&w=320&r=5"
+    },
+    {
+      "ms": 85057,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85060,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-rvg2&theme=light&w=320&r=13"
+    },
+    {
+      "ms": 85060,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85061,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260915-7ki1&theme=dark&w=320&r=150"
+    },
+    {
+      "ms": 85061,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85065,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-yd2k&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 85065,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85067,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260930-9wyv&theme=light&w=320&r=1"
+    },
+    {
+      "ms": 85067,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85072,
+      "kind": "A api",
+      "text": "404 /api/render/opener-brand?deck=general-translation-brand-deck-muie3l7ssv7x&theme=dark&w=320&r=3"
+    },
+    {
+      "ms": 85072,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85074,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260917-4p7f&theme=dark&w=320&r=12"
+    },
+    {
+      "ms": 85074,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85075,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260915-84sh&theme=dark&w=320&r=15"
+    },
+    {
+      "ms": 85075,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85075,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260916-g581&theme=dark&w=320&r=5"
+    },
+    {
+      "ms": 85075,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85089,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-1rfz&theme=light&w=320&r=8"
+    },
+    {
+      "ms": 85089,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85093,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260917-b6oe&theme=dark&w=320&r=15"
+    },
+    {
+      "ms": 85093,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85100,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260925-pzxe&theme=light&w=320&r=13"
+    },
+    {
+      "ms": 85100,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85104,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260917-ofey&theme=dark&w=320&r=1"
+    },
+    {
+      "ms": 85104,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85109,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260929-kv0o&theme=light&w=320&r=3"
+    },
+    {
+      "ms": 85109,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85112,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-zh66&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 85112,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85112,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260917-6zyv&theme=dark&w=320&r=4"
+    },
+    {
+      "ms": 85112,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85125,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260917-r7zj&theme=dark&w=320&r=8"
+    },
+    {
+      "ms": 85126,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85231,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260917-n4rk&theme=dark&w=320&r=4"
+    },
+    {
+      "ms": 85231,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85257,
+      "kind": "A api",
+      "text": "404 /api/render/title?deck=untitled-20260926-dmrh&theme=light&w=320&r=2"
+    },
+    {
+      "ms": 85258,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 85726,
+      "kind": "A api",
+      "text": "404 /api/render/opener-brand?deck=gt-brand-muh90ro7&theme=dark&w=320&r=0&retry=1"
+    },
+    {
+      "ms": 85726,
+      "kind": "A console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "ms": 86888,
+      "kind": "A serverFn",
+      "text": "200 4f13088ac1edd359f3b5c064e03aa8d3a84df1de {\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":10,\"i\":1,\"p\":{\"k\":[\"id\",\"removed\"],\"v\":[{\"t\":1,\"s\":\"untitled-20260930-37f9\"},{"
+    }
+  ],
+  "reads": [
+    {
+      "round": 1,
+      "geometry": {
+        "height": 447,
+        "more": true,
+        "rows": false,
+        "view": false,
+        "viewCopy": false,
+        "emails": false,
+        "settings": false,
+        "address": ""
+      },
+      "clipboard": "evaluate failed: Error: page.evaluate: NotAllowedError: Failed to execute 'readText' on 'Clipboar",
+      "url": "https://turboslide-b6mbkpi52-kl01s-projects.vercel.app/edit/untitled-20260930-37f9#s/blank-1"
+    },
+    {
+      "round": 2,
+      "geometry": {
+        "height": 447,
+        "more": true,
+        "rows": false,
+        "view": false,
+        "viewCopy": false,
+        "emails": false,
+        "settings": false,
+        "address": ""
+      },
+      "clipboard": "evaluate failed: Error: page.evaluate: NotAllowedError: Failed to execute 'readText' on 'Clipboar",
+      "url": "https://turboslide-b6mbkpi52-kl01s-projects.vercel.app/edit/untitled-20260930-37f9#s/blank-1"
+    }
+  ],
+  "consoleErrors": [],
+  "trash": {
+    "trashed": true,
+    "deleted": true,
+    "status": 404
+  }
+}

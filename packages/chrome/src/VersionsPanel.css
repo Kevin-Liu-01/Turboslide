@@ -341,8 +341,13 @@
   font-size: 11px;
 }
 
+/* the expanded window's rows hang off a hairline 24 px inside the panel, the marks' column, and
+   never off the panel's own edge: the list sat at x 1 beside the panel's border-left, two lines
+   side by side for the window's height (the chrome lint's editorPanel audit, check step 18;
+   VERIFICATION.md "Polish round, pass 3" finding 1; PEOPLE.md 3.2 writes the same rule) */
 .ts-versions-list.is-window {
-  padding-left: 12px;
+  margin-left: 24px;
+  padding-left: 0;
   border-left: 1px solid var(--pt-hair-soft);
   margin-bottom: 4px;
 }

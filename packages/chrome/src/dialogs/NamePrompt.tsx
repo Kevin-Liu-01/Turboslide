@@ -37,13 +37,17 @@ export type NamePromptDialogProps = {
 /** The title of the prompt the first Share raises (rank 4). */
 export const SHARE_NAME_PROMPT_TITLE = 'Your name, shown to collaborators';
 
-export function NamePromptDialog({ modal = false, title, onDone }: NamePromptDialogProps = {}) {
+/**
+ * The prompt's state and writes, shared by the dialog and the title row's plate: the field opens
+ * empty unless the person chose a name (docs/POLISH.md 2.6 item 63; audit-chrome item 10 read
+ * "studio", the write path's default author, filled in and selected on a fresh browser): a
+ * prefilled value the route hands over, else the principal's chosen name, never the generated
+ * label or the default author, with "Your name" as the placeholder. `close(named)` tells the
+ * route the prompt is done and hands `onDone` the outcome, else closes the shell's dialog.
+ */
+function useNamePrompt(onDone: ((named: boolean) => void) | undefined) {
   const shell = useEditorShell();
   const account = shell.input.account;
-  /* the field opens empty unless the person chose a name (docs/POLISH.md 2.6 item 63; audit-chrome
-     item 10 read "studio", the write path's default author, filled in and selected on a fresh
-     browser): a prefilled value the route hands over, else the principal's chosen name, never the
-     generated label or the default author, with "Your name" as the placeholder */
   const prefilled = account?.namePrompt?.prefilled ?? account?.principal.name ?? '';
   const [name, setName] = useState(prefilled);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +79,110 @@ export function NamePromptDialog({ modal = false, title, onDone }: NamePromptDia
     doc: 'Up to 40 letters or digits; Enter keeps it',
     key: 'Enter',
   });
+
+  return { shell, account, name, setName, error, setError, busy, close, submit, tip };
+}
+
+/**
+ * The prompt as a plate in the title row (docs/POLISH.md 2.8 item 103; the row
+ * `share.name-prompt.never-mid-drag`): what the route opens on the first write, or at the join,
+ * when nobody asked for it. It sits in the row's right cluster before the collaborators, 32 px
+ * tall inside the 44 px row, so it is never over the sheet and never over the toolbar: the
+ * floating card at the bottom right it replaces stood over the stage while the seller worked
+ * (the polish round's collaboration audit, item 6). It takes no focus of its own: a person typing
+ * keeps the caret, and a click in the field brings the caret here. Enter keeps the name, the
+ * cross keeps the generated label. The question is the field's placeholder, so the plate stays
+ * about 340 px wide and the deck's name beside it keeps its room at 1440 (a label before the field
+ * cut the title to one letter in the fix round 3's first read). The controls carry the dialog's
+ * ids, so a driver reads one prompt whichever surface it has (`dialog.namePrompt`, `.name`,
+ * `.continue`, `.close`, `.error`).
+ */
+export function NamePromptPlate() {
+  const { shell, account, name, setName, error, setError, busy, close, submit, tip } =
+    useNamePrompt(undefined);
+  return (
+    <form
+      className="ts-title-name-plate"
+      data-control="dialog.namePrompt"
+      role="group"
+      aria-label={ACCOUNT.namePrompt.title}
+      onSubmit={(event) => {
+        event.preventDefault();
+        submit();
+      }}
+    >
+      <input
+        type="text"
+        className="ts-title-name-plate-field"
+        value={name}
+        maxLength={80}
+        placeholder={ACCOUNT.namePrompt.title}
+        aria-label={ACCOUNT.namePrompt.name}
+        aria-invalid={error !== null ? true : undefined}
+        data-control="dialog.namePrompt.name"
+        autoComplete="nickname"
+        spellCheck={false}
+        {...tip}
+        onFocus={(event) => {
+          tip.onFocus(event);
+          event.currentTarget.select();
+        }}
+        onChange={(event) => {
+          setName(event.target.value);
+          setError(null);
+        }}
+      />
+      <button
+        type="submit"
+        className="pt-ib is-solid ts-title-name-plate-continue"
+        data-control="dialog.namePrompt.continue"
+        disabled={busy || name.trim() === ''}
+        {...tipProps({
+          name: ACCOUNT.namePrompt.continue,
+          doc: 'Keeps this name on your edits and comments in this presentation',
+          key: 'Enter',
+        })}
+      >
+        <span className="pt-lb">{ACCOUNT.namePrompt.continue}</span>
+      </button>
+      {account?.signInAvailable === true ? (
+        <button
+          type="button"
+          className="ts-name-prompt-signin"
+          data-control="dialog.namePrompt.signIn"
+          onClick={() => {
+            account.onNamePrompt?.(false);
+            shell.openDialog('signIn');
+          }}
+          {...tipProps({ name: ACCOUNT.namePrompt.signIn, doc: 'Keep your name across browsers' })}
+        >
+          {ACCOUNT.namePrompt.signIn}
+        </button>
+      ) : null}
+      <button
+        type="button"
+        className="pt-ib is-quiet ts-title-name-plate-close"
+        data-control="dialog.namePrompt.close"
+        aria-label="Not now"
+        onClick={() => close(false)}
+        {...tipProps({ name: 'Not now', doc: 'Keeps the generated label for now', key: 'Esc' })}
+      >
+        <span aria-hidden="true">×</span>
+      </button>
+      <span
+        className="ts-title-name-plate-error"
+        role="alert"
+        data-control="dialog.namePrompt.error"
+      >
+        {error ?? ''}
+      </span>
+    </form>
+  );
+}
+
+export function NamePromptDialog({ modal = false, title, onDone }: NamePromptDialogProps = {}) {
+  const { shell, account, name, setName, error, setError, busy, close, submit, tip } =
+    useNamePrompt(onDone);
 
   return (
     <Dialog

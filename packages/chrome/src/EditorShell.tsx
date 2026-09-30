@@ -382,6 +382,15 @@ export function EditorShell({
   const [dialog, setDialog] = useState<DialogRequest | null>(null);
   const [layoutGrid, setLayoutGrid] = useState<LayoutGridRequest | null>(null);
   const [menuOpen, setMenuOpen] = useState<MenuId | null>(null);
+  /* the File menu's open warms the store's listing the Open and Import slides dialogs draw
+     (EditorRoot listDecks keeps the one call for a while; docs/POLISH.md item 75): the rows are
+     there when the dialog opens instead of the listing's seconds later */
+  const listDecksRef = useRef(input.listDecks);
+  listDecksRef.current = input.listDecks;
+  useEffect(() => {
+    if (menuOpen !== 'file') return;
+    void listDecksRef.current?.().catch(() => undefined);
+  }, [menuOpen]);
   /* a menu opening is the intent to open a dialog: the lazy modules load now, once (SPEC-4 0.44) */
   const dialogsPreloaded = useRef(false);
   useEffect(() => {
@@ -479,10 +488,11 @@ export function EditorShell({
   }, [mode, stageRef]);
 
   /* the name prompt fires when the route says so (SPEC-3 0.18): never on open, on the first write.
-     It is a floating card beside the dialog slot, not the shell's dialog, so the keys, the menu bar
-     and the caret of the person typing stay live while it waits (VERIFICATION-3 finding 8); a real
-     dialog covers it while open */
-  const namePromptOpen = input.account?.namePrompt?.open === true;
+     It is the title row's plate (TitleRow.tsx, NamePrompt.tsx NamePromptPlate; docs/POLISH.md 2.8
+     item 103), not the shell's dialog, so the keys, the menu bar and the caret of the person typing
+     stay live while it waits (VERIFICATION-3 finding 8) and nothing stands over the sheet; a real
+     dialog covers it while open. The floating card at the bottom right it replaced stood over the
+     stage (the polish round's collaboration audit, item 6) */
 
   /* `comment.link`'s target and the route's open thread: the card follows it */
   const routeThread = input.comments?.openThreadId ?? null;
@@ -2483,7 +2493,6 @@ export function EditorShell({
       {layoutPlate}
       {anchoredNode}
       <Suspense fallback={null}>{dialogNode}</Suspense>
-      {namePromptOpen && dialog === null ? <NamePromptDialog /> : null}
       <ToolFinder
         open={toolFinderOpen}
         document={input.document}

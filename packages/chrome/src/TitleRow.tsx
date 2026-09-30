@@ -10,6 +10,7 @@ import { tooltipKey } from './menus/keys';
 import { isPresent, itemById } from './menus/model';
 import type { MenuItem } from './menus/model';
 import { TITLE_ROW } from './menus/strings';
+import { NamePromptPlate } from './dialogs/NamePrompt';
 import { nameOf } from './presence/IdentityChip';
 import { PresenceSlot } from './presence/PresenceSlot';
 import { ToolButton } from './ToolButton';
@@ -527,6 +528,12 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
         <SaveState />
       </div>
       <div className="ts-title-r">
+        {/* the name prompt the route opens on the first write or at the join sits here as a plate
+            (docs/POLISH.md 2.8 item 103): inside the row, never over the sheet; a dialog a person
+            opened covers it while open, the way the floating card was covered */}
+        {shell.input.account?.namePrompt?.open === true && shell.dialog === null ? (
+          <NamePromptPlate />
+        ) : null}
         {/* SPEC-3 0.43: five fixed slots from the first paint, left to right */}
         <PresenceSlot />
         {/* the Assist button (docs/PRODUCT.md 6.1): the sparkle glyph with the word, a toggle of the

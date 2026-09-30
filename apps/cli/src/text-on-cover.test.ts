@@ -13,6 +13,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import type { ActionContext } from '@turboslide/agent/dispatch';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
+import { plainBlockSchema } from '@turboslide/schema/blocks';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
 import type { DeckStore } from '@turboslide/store/store';
@@ -20,7 +21,13 @@ import { openFileStore } from '@turboslide/store/file-store';
 import { createDeck } from '@turboslide/store/templates';
 
 import { lintLists } from './deps/theme.ts';
-import { textCase, textIndent, textList } from './store-actions.ts';
+import {
+  HEADING_LEVEL_TYPOGRAPHY,
+  listTypographyOf,
+  textCase,
+  textIndent,
+  textList,
+} from './store-actions.ts';
 import type { StoreActionDeps } from './store-actions.ts';
 
 const REPO_DECKS = join(import.meta.dirname, '..', '..', '..', 'decks');
@@ -89,6 +96,20 @@ describe('the text actions on the cover title (the field object converts first)'
       'Quarterly review',
     ]);
     expect(block?.type === 'plain' ? block.marker : undefined).toBe('bullet');
+    /* the list keeps the heading's look (VERIFICATION.md "Polish round, pass 3" finding 2: the
+       88 px title became a 20 px list): the level's size, weight, tracking and leading ride on the
+       list block once the plain block's schema admits a `typography` key (the fix round 3's
+       request to the integrator, build/b5.md); until it does the block carries none and the write
+       stays valid, which this reads through the schema itself so the test says which it is */
+    const admits = plainBlockSchema.safeParse({
+      id: 'probe',
+      type: 'plain',
+      items: [{ text: 'a' }],
+      typography: HEADING_LEVEL_TYPOGRAPHY.h1,
+    }).success;
+    const carried = (block as { typography?: Record<string, unknown> }).typography;
+    if (admits) expect(carried).toEqual(HEADING_LEVEL_TYPOGRAPHY.h1);
+    else expect(carried, 'no typography until the plain block schema admits it').toBeUndefined();
     /* one write: its inverse takes the list and the conversion back together */
     const log = await store.records();
     const last = log[log.length - 1];
@@ -127,6 +148,38 @@ describe('the text actions on the cover title (the field object converts first)'
       mutations: last!.inverse,
     });
     expect((await document()).slides['title']?.kind).toBe('title');
+  });
+
+  test('listTypographyOf reads the level look under the field font and nothing for a paragraph without one', () => {
+    const h1 = listTypographyOf({ id: 'h', type: 'heading', level: 'h1', text: 'Plan' });
+    const withFace = listTypographyOf({
+      id: 'h',
+      type: 'heading',
+      level: 'h2',
+      text: 'Plan',
+      typography: { size: 58, align: 'center' },
+    });
+    const plain = listTypographyOf({ id: 'p', type: 'paragraph', text: 'Body' });
+    const admits = plainBlockSchema.safeParse({
+      id: 'probe',
+      type: 'plain',
+      items: [{ text: 'a' }],
+      typography: HEADING_LEVEL_TYPOGRAPHY.h1,
+    }).success;
+    if (admits) {
+      expect(h1).toEqual({ size: 88, weight: 500, tracking: -0.025, leading: 1.02 });
+      expect(withFace).toEqual({
+        size: 58,
+        weight: 500,
+        tracking: -0.025,
+        leading: 1.1,
+        align: 'center',
+      });
+    } else {
+      expect(h1).toBeUndefined();
+      expect(withFace).toBeUndefined();
+    }
+    expect(plain).toBeUndefined();
   });
 
   test('text.case on the heading with the field pointer converts the cover and writes the block text', async () => {

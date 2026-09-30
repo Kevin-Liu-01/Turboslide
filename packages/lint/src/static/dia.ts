@@ -42,7 +42,7 @@ export function checkDia(ctx: LintContext): Finding[] {
               ...base,
               path: `${ref.path}/fit`,
               measured: { viewBoxWidth: block.fit.viewBox[2], slotWidth },
-              proposal: `Set fit to "slot" so one unit is one sheet pixel; the slot is ${slotWidth} px wide.`,
+              proposal: `Set fit to "slot" so one unit is one sheet pixel. The slot is ${slotWidth} px wide.`,
               fix: [
                 {
                   op: 'block.set',

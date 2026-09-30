@@ -1,0 +1,44 @@
+{
+  "started": "2026-09-30T03:47:10.161Z",
+  "base": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+  "tag": "before",
+  "deck": "untitled-20260930-yd15",
+  "rows": [
+    {
+      "n": 1,
+      "name": "new-deck",
+      "expected": "open /new; the editor is ready with a title slide; a blank slide added",
+      "observed": "deck untitled-20260930-yd15; blank slide blank-1",
+      "ok": true,
+      "shot": null,
+      "ms": 4046
+    },
+    {
+      "n": 2,
+      "name": "tip-after-dialog-cancel",
+      "expected": "Tools > Tailor from the menu; a word typed in From; Cancel clicked: the focus returns to the Tools button and no plate is drawn",
+      "observed": "after Cancel: focus on menubar.tools; plate \"Tools menuCtrl Option T\" at 347,77",
+      "ok": false,
+      "shot": "01-before-61-cancel-toolbar.png",
+      "ms": 4640
+    },
+    {
+      "n": 3,
+      "name": "tip-seam-under-pointer",
+      "expected": "a typed 3 by 4 table selected (four rows, so the right edge \"+\" sits on row seam 2); the \"+\" hovered and clicked: a column is added and the seam that lands under the resting pointer draws no plate; the pointer moves 12 px along the seam and its plate draws",
+      "observed": "plate on the \"+\" \"Add a column A column at the right edge, as wide as the last one; the table grows by it\"; columns 3 -> 4; under the resting pointer after the click: handle.fx-table.row.1; plate after the click \"Row seam 2 Drag to resize the row; the rows below move and the table grows. Up and Down step 1 px, Shift 10 px.\"; after a 12 px move along the seam \"Column seam 3 Drag to resize the column; the next column takes the difference. Left and Right step 1 px, Shift 10 px.\"; 03-before-61-edge-plus-moved-2x.png",
+      "ok": false,
+      "shot": "02-before-61-edge-plus-clicked-2x.png",
+      "ms": 6990
+    }
+  ],
+  "consoleErrors": [],
+  "facts": {
+    "seamUnderPointer": {
+      "tipOnPlus": "Add a column A column at the right edge, as wide as the last one; the table grows by it",
+      "under": "handle.fx-table.row.1",
+      "tipAfterClick": "Row seam 2 Drag to resize the row; the rows below move and the table grows. Up and Down step 1 px, Shift 10 px.",
+      "tipAfterMove": "Column seam 3 Drag to resize the column; the next column takes the difference. Left and Right step 1 px, Shift 10 px."
+    }
+  }
+}

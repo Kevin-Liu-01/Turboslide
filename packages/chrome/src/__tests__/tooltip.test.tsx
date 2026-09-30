@@ -8,6 +8,7 @@ import {
   TIP_ID,
   Tooltip,
   hideTooltip,
+  hideTooltipUntilInput,
   resetTooltipTiming,
   isKeyLike,
   shownTooltipAnchor,
@@ -17,9 +18,23 @@ import {
 
 // The Tooltip primitive (Kevin, 2026-09-11: "have good tooltips in all control surfaces"): the
 // name, the sentence and the key from a title-like string; shown after 350 ms of hover and at
-// once on keyboard focus; one layer at a time; hidden on Escape and when the pointer leaves.
+// once on keyboard focus; one layer at a time; hidden on Escape and when the pointer leaves. Since
+// the polish round (docs/POLISH.md 2.6 item 61) a tooltip shows only where a person asked: a
+// mouseenter counts when the pointer's own movement is the newest input, a focus when a
+// navigation key is.
 function layer(): HTMLElement | null {
   return document.getElementById(TIP_ID);
+}
+
+/* the pointer moves to a new point: the document listener records it */
+function moveTo(x: number, y: number, target: Element = document.body): void {
+  fireEvent.mouseMove(target, { clientX: x, clientY: y });
+}
+
+/* the focus a Tab gives: the key first, then the focus, as the browser does */
+function tabTo(el: HTMLElement): void {
+  fireEvent.keyDown(document.body, { key: 'Tab' });
+  fireEvent.focus(el);
 }
 
 beforeEach(() => {
@@ -75,7 +90,7 @@ describe('Tooltip', () => {
     const button = screen.getByRole('button', { name: 'Twin' });
     expect(button.getAttribute('data-tip')).toBe('Twin');
     expect(button.hasAttribute('title')).toBe(false);
-    fireEvent.mouseMove(document.body);
+    moveTo(10, 10);
     fireEvent.mouseEnter(button);
     expect(layer()).toBeNull();
     act(() => {
@@ -101,7 +116,7 @@ describe('Tooltip', () => {
   it('shows at once on keyboard focus and not on the focus a press gives', () => {
     render(<ToolButton title="Keyboard shortcuts (?)" onClick={() => undefined} />);
     const button = screen.getByRole('button', { name: 'Keyboard shortcuts' });
-    fireEvent.focus(button);
+    tabTo(button);
     expect(layer()?.hidden).toBe(false);
     expect(shownTooltipAnchor()).toBe(button);
     fireEvent.blur(button);
@@ -110,6 +125,15 @@ describe('Tooltip', () => {
     fireEvent.mouseDown(button);
     fireEvent.focus(button);
     expect(layer()?.hidden).toBe(true);
+    /* a focus a script gives long after the press, with no key since, shows nothing either */
+    act(() => {
+      vi.advanceTimersByTime(2_000);
+    });
+    fireEvent.focus(button);
+    expect(layer()?.hidden).toBe(true);
+    /* a Tab after the press is the person's again */
+    tabTo(button);
+    expect(layer()?.hidden).toBe(false);
   });
 
   it('keeps one tooltip at a time: a second anchor replaces the first', () => {
@@ -121,14 +145,14 @@ describe('Tooltip', () => {
     );
     const first = screen.getByRole('button', { name: 'First' });
     const second = screen.getByRole('button', { name: 'Second' });
-    fireEvent.mouseMove(document.body);
+    moveTo(10, 10);
     fireEvent.mouseEnter(first);
     act(() => {
       vi.advanceTimersByTime(TIP_DELAY_MS);
     });
     expect(shownTooltipAnchor()).toBe(first);
     /* while one is up the next shows at once */
-    fireEvent.mouseMove(document.body);
+    moveTo(60, 10);
     fireEvent.mouseEnter(second);
     expect(shownTooltipAnchor()).toBe(second);
     expect(document.querySelectorAll('[role="tooltip"]')).toHaveLength(1);
@@ -145,6 +169,7 @@ describe('Tooltip', () => {
     );
     const button = screen.getByRole('button');
     /* no movement for a while: the enter is a control moving under the pointer */
+    moveTo(10, 10);
     act(() => {
       vi.advanceTimersByTime(2_000);
     });
@@ -154,7 +179,7 @@ describe('Tooltip', () => {
     });
     expect(shownTooltipAnchor()).toBeNull();
     /* the pointer's own movement over the control schedules it */
-    fireEvent.mouseMove(button);
+    moveTo(12, 12, button);
     act(() => {
       vi.advanceTimersByTime(TIP_DELAY_MS + 50);
     });
@@ -164,17 +189,90 @@ describe('Tooltip', () => {
     fireEvent.keyDown(document.body, { key: 'Escape' });
     fireEvent.focus(button);
     expect(shownTooltipAnchor()).toBeNull();
-    act(() => {
-      vi.advanceTimersByTime(1_000);
-    });
-    fireEvent.focus(button);
+    tabTo(button);
     expect(shownTooltipAnchor()).toBe(button);
+  });
+
+  it('shows no tip for a control that lands under the pointer after a click, until the pointer moves to a new point (item 61: the edge "+" moves a seam under the pointer)', () => {
+    render(
+      <>
+        <button type="button">Add column</button>
+        <Tooltip content={{ name: 'Row seam 2', doc: 'Drag to resize the row.' }}>
+          <button type="button">Seam</button>
+        </Tooltip>
+      </>,
+    );
+    const plus = screen.getByRole('button', { name: 'Add column' });
+    const seam = screen.getByRole('button', { name: 'Seam' });
+    /* the pointer arrives on the "+" and clicks it; the seam re-renders under the pointer */
+    moveTo(40, 40, plus);
+    fireEvent.mouseDown(plus);
+    fireEvent.mouseUp(plus);
+    fireEvent.mouseEnter(seam);
+    act(() => {
+      vi.advanceTimersByTime(TIP_DELAY_MS + 50);
+    });
+    expect(shownTooltipAnchor()).toBeNull();
+    /* the browser's own mousemove at the same point after the layout change is not a movement */
+    moveTo(40, 40, seam);
+    act(() => {
+      vi.advanceTimersByTime(TIP_DELAY_MS + 50);
+    });
+    expect(shownTooltipAnchor()).toBeNull();
+    /* the person moves the pointer: the seam's plate draws */
+    moveTo(41, 46, seam);
+    act(() => {
+      vi.advanceTimersByTime(TIP_DELAY_MS + 50);
+    });
+    expect(shownTooltipAnchor()).toBe(seam);
+    expect(layer()?.textContent).toBe('Row seam 2 Drag to resize the row.');
+  });
+
+  it('hides until the next input when a menu opens or a dialog closes, and shows nothing on the focus the close returns (item 61: the menubar plate after a dialog closed on a click)', () => {
+    render(
+      <>
+        <ToolButton title="Format menu (Ctrl Option O)" onClick={() => undefined} />
+        <button type="button">Done</button>
+      </>,
+    );
+    const format = screen.getByRole('button', { name: 'Format menu' });
+    const done = screen.getByRole('button', { name: 'Done' });
+    moveTo(20, 20, format);
+    fireEvent.mouseEnter(format);
+    act(() => {
+      vi.advanceTimersByTime(TIP_DELAY_MS);
+    });
+    expect(shownTooltipAnchor()).toBe(format);
+    /* a menu opens: the plate hides and the focus the menu returns later shows nothing */
+    hideTooltipUntilInput();
+    expect(layer()?.hidden).toBe(true);
+    fireEvent.focus(format);
+    expect(shownTooltipAnchor()).toBeNull();
+    /* a Tab after it is the person's: the plate shows */
+    tabTo(format);
+    expect(shownTooltipAnchor()).toBe(format);
+    hideTooltip();
+    /* a dialog closed by a click on Done returns the focus to the menubar button a while later
+       (the close may wait on a write): the press is the newest input, so no plate */
+    fireEvent.mouseDown(done);
+    fireEvent.mouseUp(done);
+    act(() => {
+      vi.advanceTimersByTime(1_200);
+    });
+    fireEvent.focus(format);
+    expect(shownTooltipAnchor()).toBeNull();
+    /* the control under the resting pointer after the close shows nothing either */
+    fireEvent.mouseEnter(format);
+    act(() => {
+      vi.advanceTimersByTime(TIP_DELAY_MS + 50);
+    });
+    expect(shownTooltipAnchor()).toBeNull();
   });
 
   it('hides on Escape', () => {
     render(<ToolButton title="Help (?)" onClick={() => undefined} />);
     const button = screen.getByRole('button', { name: 'Help' });
-    fireEvent.focus(button);
+    tabTo(button);
     expect(layer()?.hidden).toBe(false);
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(layer()?.hidden).toBe(true);
@@ -183,7 +281,7 @@ describe('Tooltip', () => {
   it('cancels a pending hover when the pointer leaves before the delay', () => {
     render(<ToolButton title="Copy link" onClick={() => undefined} />);
     const button = screen.getByRole('button', { name: 'Copy link' });
-    fireEvent.mouseMove(document.body);
+    moveTo(10, 10);
     fireEvent.mouseEnter(button);
     fireEvent.mouseLeave(button);
     act(() => {
@@ -207,7 +305,7 @@ describe('Tooltip', () => {
     });
     try {
       render(<ToolButton title="Theme (D)" onClick={() => undefined} />);
-      fireEvent.focus(screen.getByRole('button', { name: 'Theme' }));
+      tabTo(screen.getByRole('button', { name: 'Theme' }));
       expect(layer()?.dataset.motion).toBe('none');
     } finally {
       window.matchMedia = original;

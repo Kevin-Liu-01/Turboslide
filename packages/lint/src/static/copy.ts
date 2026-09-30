@@ -115,7 +115,7 @@ function checkEmptyPlaceholders(ctx: LintContext, slide: Slide): Finding[] {
     out.push(
       ctx.finding('copy/empty-placeholder', slide.id, {
         path: empty.path,
-        proposal: `${where} has an empty ${empty.what}; type the copy or remove the placeholder.`,
+        proposal: `${where} has an empty ${empty.what}. Type the copy or remove the placeholder.`,
       }),
     );
   }
@@ -133,8 +133,8 @@ function checkEmptyPlaceholders(ctx: LintContext, slide: Slide): Finding[] {
              docs/POLISH.md 2.6 item 55 words it: "The table has 9 empty cells" */
           proposal:
             count === 1
-              ? 'The table has an empty cell; type into it or remove the row.'
-              : `The table has ${count} empty cells; type into them or remove the rows.`,
+              ? 'The table has an empty cell. Type into it or remove the row.'
+              : `The table has ${count} empty cells. Type into them or remove the rows.`,
         }),
       );
       continue;
@@ -144,7 +144,7 @@ function checkEmptyPlaceholders(ctx: LintContext, slide: Slide): Finding[] {
         ctx.finding('copy/empty-placeholder', slide.id, {
           blockId: ref.block.id,
           path: `${ref.path}${empty.path}`,
-          proposal: `${where} has an empty ${empty.what}; type the copy or remove the placeholder.`,
+          proposal: `${where} has an empty ${empty.what}. Type the copy or remove the placeholder.`,
         }),
       );
     }
@@ -234,7 +234,7 @@ export function checkCopy(ctx: LintContext): Finding[] {
           out.push(
             ctx.finding('copy/heading-period', slide.id, {
               ...base,
-              proposal: 'Remove the trailing period; headings and keys are names.',
+              proposal: 'Remove the trailing period. Headings and keys are names.',
               fix: setText(hit, hit.text.replace(/\.\s*$/, '')),
             }),
           );
@@ -256,7 +256,7 @@ export function checkCopy(ctx: LintContext): Finding[] {
           out.push(
             ctx.finding('copy/heading-is-name', slide.id, {
               ...base,
-              proposal: 'Use the product name in the heading; the domain belongs in the body.',
+              proposal: 'Use the product name in the heading. The domain belongs in the body.',
             }),
           );
         }
@@ -275,7 +275,7 @@ export function checkCopy(ctx: LintContext): Finding[] {
             out.push(
               ctx.finding('copy/sentence-case', slide.id, {
                 ...base,
-                proposal: `Sentence case: lowercase ${offenders.map((w) => `"${w}"`).join(', ')} unless it is a proper noun; a proper noun goes on the list.`,
+                proposal: `Sentence case: lowercase ${offenders.map((w) => `"${w}"`).join(', ')} unless it is a proper noun. A proper noun goes on the list.`,
                 fix: setText(hit, fixed),
               }),
             );
@@ -296,7 +296,7 @@ export function checkCopy(ctx: LintContext): Finding[] {
         out.push(
           ctx.finding('copy/contrast-pair', slide.id, {
             ...base,
-            proposal: 'Candidate "X, not Y" pair; state the fact and drop the contrast.',
+            proposal: 'Candidate "X, not Y" pair. State the fact and drop the contrast.',
           }),
         );
       }
@@ -331,7 +331,7 @@ export function checkCopy(ctx: LintContext): Finding[] {
             blockId: a.block.id,
             path: a.path,
             text: plain,
-            proposal: 'Remove the eyebrow label above the heading; the heading carries the name.',
+            proposal: 'Remove the eyebrow label above the heading. The heading carries the name.',
           }),
         );
       }

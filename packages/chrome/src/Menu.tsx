@@ -22,7 +22,7 @@ import {
 } from './menus/model.ts';
 import { openRoster } from './presence/roster-hook';
 import { noteMenuRowActivated } from './Dialog';
-import { hideTooltip, sentence, tipProps } from './Tooltip';
+import { hideTooltip, hideTooltipUntilInput, sentence, tipProps } from './Tooltip';
 
 import './Menu.css';
 
@@ -338,6 +338,9 @@ function MenuList({
   /* the first enabled row takes focus on open when asked; a pointer opened submenu leaves focus
      on its parent row */
   useMountEffect(() => {
+    /* a menu opening closes the plate of the control that opened it, and the row or control
+       that lands under the resting pointer draws none until the pointer moves (item 61) */
+    hideTooltipUntilInput();
     if (autoFocus) {
       const first = enabled[0];
       if (first !== undefined) setFocusId(first.id);

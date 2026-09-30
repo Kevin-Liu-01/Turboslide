@@ -57,7 +57,7 @@ export function checkType(ctx: LintContext): Finding[] {
               path: `${ref.path}${typography.path}/weight`,
               text: `weight ${typography.weight}`,
               measured: { fontWeight: typography.weight },
-              proposal: `Weight ${typography.weight} on a ${block.type} block; display weight is capped at 500 outside the type specimen. The fix sets 500.`,
+              proposal: `Weight ${typography.weight} on a ${block.type} block. Display weight is capped at 500 outside the type specimen. The fix sets 500.`,
               fix: [
                 {
                   op: 'block.set',
@@ -78,7 +78,7 @@ export function checkType(ctx: LintContext): Finding[] {
               path: `${ref.path}${typography.path}/size`,
               text: `${typography.size} px`,
               measured: { fontSize: typography.size, nearest },
-              proposal: `Size ${typography.size} px is off the type ladder; the fix snaps it to ${nearest}. The ladder is ${TYPE_LADDER.join(', ')}.`,
+              proposal: `Size ${typography.size} px is off the type ladder. The fix snaps it to ${nearest}. The ladder is ${TYPE_LADDER.join(', ')}.`,
               fix: [
                 {
                   op: 'block.set',
@@ -107,7 +107,7 @@ export function checkType(ctx: LintContext): Finding[] {
               ...base,
               path: `${ref.path}/css`,
               text: heavy.map((m) => m[0]).join('; '),
-              proposal: 'Display weight is capped at 500; set the weight to 500.',
+              proposal: 'Display weight is capped at 500. Set the weight to 500.',
               fix: [
                 {
                   op: 'block.set',
@@ -137,7 +137,7 @@ export function checkType(ctx: LintContext): Finding[] {
               ...base,
               path: `${ref.path}/css`,
               text: `font-size ${[...new Set(sizes)].join(', ')} px`,
-              proposal: `Use a ladder size; the fix applies the nearest. The ladder is ${TYPE_LADDER.join(', ')}.`,
+              proposal: `Use a ladder size. The fix applies the nearest. The ladder is ${TYPE_LADDER.join(', ')}.`,
               fix: [
                 {
                   op: 'block.set',

@@ -239,9 +239,9 @@ export function handleDoc(handle: Handle): string {
       /* the layout's column seam, or a table's (docs/RETURN.md 2.4 fix 5; table-seam.ts carries the
          block); a table's row seam is the same kind on the y axis (docs/OBJECTS.md 3.3 item 4) */
       if (handle.blockId !== undefined && handle.axis === 'y')
-        return 'Drag to resize the row; the rows below move and the table grows. Up and Down step 1 px, Shift 10 px.';
+        return 'Drag to resize the row. The rows below move and the table grows. Up and Down step 1 px, Shift 10 px.';
       return handle.blockId !== undefined
-        ? 'Drag to resize the column; the next column takes the difference. Left and Right step 1 px, Shift 10 px.'
+        ? 'Drag to resize the column. The next column takes the difference. Left and Right step 1 px, Shift 10 px.'
         : 'Drag to set the column ratio: snaps to 4/8, 5/7 and 1/1, then 10 px steps. Left and Right step it.';
     case 'plate-width':
       return 'Drag the plate edge: snaps to the plate widths. Left and Right step it.';
@@ -258,19 +258,19 @@ export function handleDoc(handle: Handle): string {
     case 'scale-marker':
       return 'Drag along the bar: an integer from 0 to 100. Left and Right step 1, Shift 10.';
     case 'dia-label':
-      return 'Alt-drag to move the label on the half-pixel grid; the ring shows its 12 px clearance. Arrows step 1 unit, Shift 10.';
+      return 'Alt-drag to move the label on the half-pixel grid. The ring shows its 12 px clearance. Arrows step 1 unit, Shift 10.';
     case 'dia-marker':
       return 'Alt-drag to move the marker on the half-pixel grid. Arrows step 1 unit, Shift 10.';
     case 'block-move':
       return `Drag the chip or the block to reorder it within its slot or into another slot. ${modKey()}Up and ${modKey()}Down move it one step, and with Shift to the first or the last place in its slot.`;
     case 'free-move':
-      return `Drag the frame or the chip anywhere: snaps to other objects, the slide's edges and center and the guides; Shift keeps one axis, ${modKey()}drag skips the snaps, Option drag drops a copy. Arrows nudge 1 px, Shift 10 px. ${modKey()}Up and ${modKey()}Down change the order.`;
+      return `Drag the frame or the chip anywhere: snaps to other objects, the slide's edges and center and the guides. Shift keeps one axis, ${modKey()}drag skips the snaps, Option drag drops a copy. Arrows nudge 1 px, Shift 10 px. ${modKey()}Up and ${modKey()}Down change the order.`;
     case 'free-resize':
-      return `Drag the ${RESIZE_NAMES[handle.dir ?? ''] ?? 'edge'} to resize; Shift keeps the aspect ratio, Option resizes from the center. Arrows step 1 px, Shift 10 px.`;
+      return `Drag the ${RESIZE_NAMES[handle.dir ?? ''] ?? 'edge'} to resize. Shift keeps the aspect ratio, Option resizes from the center. Arrows step 1 px, Shift 10 px.`;
     case 'free-rotate':
-      return 'Drag to rotate about the center; Shift snaps to 15 degrees. Left and Right turn 1 degree, Shift 15.';
+      return 'Drag to rotate about the center. Shift snaps to 15 degrees. Left and Right turn 1 degree, Shift 15.';
     case 'line-end':
-      return 'Drag the end of the line; it snaps to a connection site of the shape under it and follows that shape from then on. Shift keeps 45 degree steps.';
+      return 'Drag the end of the line. It snaps to a connection site of the shape under it and follows that shape from then on. Shift keeps 45 degree steps.';
     case 'crop-edge':
       return `Drag the ${RESIZE_NAMES[handle.dir ?? ''] ?? 'edge'} of the crop. Press Enter to finish.`;
   }

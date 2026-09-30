@@ -1,0 +1,103 @@
+{
+  "started": "2026-09-30T04:10:56.296Z",
+  "base": "http://localhost:4441",
+  "tag": "after",
+  "deck": "untitled-20260930-hcmx",
+  "rows": [
+    {
+      "n": 1,
+      "name": "new-deck",
+      "expected": "open /new; the editor is ready with a title slide; a blank slide added",
+      "observed": "deck untitled-20260930-hcmx; blank slide blank-1",
+      "ok": true,
+      "shot": null,
+      "ms": 4891
+    },
+    {
+      "n": 2,
+      "name": "tip-after-dialog-apply",
+      "expected": "Tools > Tailor from the menu; From Acme, To Globex, Apply clicked: the dialog closes, the focus returns to the Tools button and no plate is drawn over the toolbar",
+      "observed": "after Apply: focus on menubar.tools; plate none",
+      "ok": true,
+      "shot": "01-after-116-apply-toolbar.png",
+      "ms": 8405
+    },
+    {
+      "n": 3,
+      "name": "tip-after-dialog-cancel",
+      "expected": "Tools > Tailor from the menu; a word typed in From; Cancel clicked: the focus returns to the Tools button and no plate is drawn",
+      "observed": "after Cancel: focus on menubar.tools; plate none",
+      "ok": true,
+      "shot": "02-after-61-cancel-toolbar.png",
+      "ms": 4927
+    },
+    {
+      "n": 4,
+      "name": "tip-seam-under-pointer",
+      "expected": "a typed 3 by 4 table selected (four rows, so the right edge \"+\" sits on row seam 2); the \"+\" hovered and clicked: a column is added and the seam that lands under the resting pointer draws no plate; the pointer moves 12 px along the seam and its plate draws",
+      "observed": "plate on the \"+\" \"Add a column A column at the right edge, as wide as the last one. The table grows by it.\"; columns 3 -> 4; under the resting pointer after the click: handle.fx-table.row.1; plate after the click none; after a 12 px move along the seam \"Column seam 3 Drag to resize the column. The next column takes the difference. Left and Right step 1 px, Shift 10 px.\"; 04-after-61-edge-plus-moved-2x.png",
+      "ok": true,
+      "shot": "03-after-61-edge-plus-clicked-2x.png",
+      "ms": 10306
+    },
+    {
+      "n": 5,
+      "name": "seam-tooltip-words",
+      "expected": "the table selected; the first row seam hovered: its plate reads the row sentence with no semicolon",
+      "observed": "handle.fx-table.row.1: plate \"Row seam 2 Drag to resize the row. The rows below move and the table grows. Up and Down step 1 px, Shift 10 px.\"; semicolon false",
+      "ok": true,
+      "shot": "05-after-16-row-seam-tip-2x.png",
+      "ms": 3723
+    },
+    {
+      "n": 6,
+      "name": "check-slides-sentences",
+      "expected": "a picture and an empty 3 by 3 table on a blank slide; Tools > Check slides: no finding carries a semicolon, a parenthesis or SPEC",
+      "observed": "4 findings: \"A picture without a dark twin keeps a 1 px frame so it reads as a plate on the dark ground.Fix\" | \"The table has 9 empty cells. Type into them or remove the rows.\" | \"In native mode an image exports as a 2x raster.\" | \"This slide is arranged by hand. Apply layout re-flows it.\"; with a semicolon 0; plain true",
+      "ok": true,
+      "shot": "06-after-16-check-slides.png",
+      "ms": 11360
+    },
+    {
+      "n": 7,
+      "name": "tip-hover-and-tab",
+      "expected": "the pointer moves onto Undo: its plate draws after the delay; Escape, then Tab from the sheet until a chrome control has the focus: its plate draws at once",
+      "observed": "hover on Undo: plate \"UndoCmd Z\"; Tab landed on menubar.tools: plate \"Tools menuCtrl Option T\"; 08-after-61-tab-focus.png",
+      "ok": true,
+      "shot": "07-after-61-hover-undo-2x.png",
+      "ms": 3471
+    }
+  ],
+  "consoleErrors": [
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4441/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 311657",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4441/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unl7908-19e26a rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4441/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unl7908-19e26a rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4441/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unl7908-19e26a rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4441/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unl7908-19e26a rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4441/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: sweep (routine): removed 2",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4441/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 311545",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4441/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unl7wd2-690b08 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4441/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unl7wd2-690b08 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4441/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unl7wd2-690b08 rend",
+    "console: %c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4441/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unl7wd2-690b08 rend"
+  ],
+  "facts": {
+    "seamUnderPointer": {
+      "tipOnPlus": "Add a column A column at the right edge, as wide as the last one. The table grows by it.",
+      "under": "handle.fx-table.row.1",
+      "tipAfterClick": null,
+      "tipAfterMove": "Column seam 3 Drag to resize the column. The next column takes the difference. Left and Right step 1 px, Shift 10 px."
+    },
+    "checkSlides": [
+      "A picture without a dark twin keeps a 1 px frame so it reads as a plate on the dark ground.Fix",
+      "The table has 9 empty cells. Type into them or remove the rows.",
+      "In native mode an image exports as a 2x raster.",
+      "This slide is arranged by hand. Apply layout re-flows it."
+    ],
+    "hoverAndTab": {
+      "hovered": "UndoCmd Z",
+      "control": "menubar.tools",
+      "focused": "Tools menuCtrl Option T"
+    }
+  }
+}

@@ -8,7 +8,7 @@ import { useEffect, useId, useRef } from 'react';
 import { Icon } from './icons';
 import { cn } from './lib/cn';
 import { useMountEffect } from './lib/useMountEffect';
-import { tipProps } from './Tooltip';
+import { hideTooltipUntilInput, tipProps } from './Tooltip';
 
 import './Dialog.css';
 
@@ -188,8 +188,13 @@ export function Dialog({
   /* focus the first field or button on open; on close, back to the opener (a floating card
      leaves focus where it is, and returns it only if it took it) */
   useMountEffect(() => {
+    /* a plate over the opener leaves as the card opens, and the focus the close returns to the
+       opener draws none (docs/POLISH.md 2.6 item 61: the "Format menu" plate over the toolbar
+       after a dialog closed on a click) */
+    hideTooltipUntilInput();
     if (!modal) {
       return () => {
+        hideTooltipUntilInput();
         focusReturnTarget(opener.current, openerRow.current)?.focus();
       };
     }
@@ -204,6 +209,7 @@ export function Dialog({
       if (first instanceof HTMLInputElement && first.dataset.select === 'all') first.select();
     }
     return () => {
+      hideTooltipUntilInput();
       focusReturnTarget(opener.current, openerRow.current)?.focus();
     };
   });

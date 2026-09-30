@@ -214,7 +214,7 @@ describe('the shared strings of SPEC 12', () => {
     expect(GUIDES.showRuler).toBe('Show ruler');
     expect(GUIDES.hideRuler).toBe('Hide ruler');
     expect(GUIDES.deleteGuide).toBe('Delete guide');
-    expect(CHECKS.arrangedByHand).toBe('This slide is arranged by hand; Apply layout re-flows it');
+    expect(CHECKS.arrangedByHand).toBe('This slide is arranged by hand. Apply layout re-flows it.');
     expect(PICKERS.tableGrid.size(4, 3)).toBe('4 x 3');
     expect(PICKERS.tableGrid.cell(4, 3)).toBe('4 columns by 3 rows');
     expect(PICKERS.tableGrid.cell(1, 1)).toBe('1 column by 1 row');

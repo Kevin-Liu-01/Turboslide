@@ -1,0 +1,91 @@
+{
+  "started": "2026-09-30T03:42:01.692Z",
+  "base": "https://turboslide-pqodnqfj9-kl01s-projects.vercel.app",
+  "tag": "before",
+  "deck": "untitled-20260930-unh1",
+  "rows": [
+    {
+      "n": 1,
+      "name": "new-deck",
+      "expected": "open /new; the editor is ready with a title slide; a blank slide added",
+      "observed": "deck untitled-20260930-unh1; blank slide blank-1",
+      "ok": true,
+      "shot": null,
+      "ms": 9374
+    },
+    {
+      "n": 2,
+      "name": "tip-after-dialog-apply",
+      "expected": "Tools > Tailor from the menu; From Acme, To Globex, Apply clicked: the dialog closes, the focus returns to the Tools button and no plate is drawn over the toolbar",
+      "observed": "after Apply: focus on menubar.tools; plate \"Tools menuCtrl Option T\" at 347,77",
+      "ok": false,
+      "shot": "01-before-116-apply-toolbar.png",
+      "ms": 10348
+    },
+    {
+      "n": 3,
+      "name": "tip-after-dialog-cancel",
+      "expected": "Slide > Change background from the menu; Cancel clicked: the focus returns to the Slide button and no plate is drawn",
+      "observed": "error: locator.boundingBox: Timeout 30000ms exceeded.",
+      "ok": false,
+      "shot": "02-tip-after-dialog-cancel-failed.png",
+      "ms": 32616
+    },
+    {
+      "n": 4,
+      "name": "tip-seam-under-pointer",
+      "expected": "a typed 3 by 3 table selected; the right edge \"+\" hovered and clicked: a column is added and the seam that lands under the pointer draws no plate; the pointer moves 10 px and the plate of the control under it draws",
+      "observed": "plate on the \"+\" \"Add a column A column at the right edge, as wide as the last one; the table grows by it\"; columns 3 -> 4; under the resting pointer after the click: null; plate after the click none; after a 10 px move none; 04-before-61-edge-plus-moved-2x.png",
+      "ok": false,
+      "shot": "03-before-61-edge-plus-clicked-2x.png",
+      "ms": 7530
+    },
+    {
+      "n": 5,
+      "name": "seam-tooltip-words",
+      "expected": "the table selected; the first row seam hovered: its plate reads the row sentence with no semicolon",
+      "observed": "handle.fx-table.row.1: plate \"Row seam 2 Drag to resize the row; the rows below move and the table grows. Up and Down step 1 px, Shift 10 px.\"; semicolon true",
+      "ok": false,
+      "shot": "05-before-16-row-seam-tip-2x.png",
+      "ms": 3578
+    },
+    {
+      "n": 6,
+      "name": "check-slides-sentences",
+      "expected": "a picture and an empty 3 by 3 table on a blank slide; Tools > Check slides: no finding carries a semicolon, a parenthesis or SPEC",
+      "observed": "4 findings: \"A picture without a dark twin keeps a 1 px frame so it reads as a plate on the dark ground.Fix\" | \"The table has 9 empty cells; type into them or remove the rows.\" | \"In native mode an image exports as a 2x raster.\" | \"This slide is arranged by hand; Apply layout re-flows it\"; with a semicolon 2; plain true",
+      "ok": false,
+      "shot": "06-before-16-check-slides.png",
+      "ms": 8604
+    },
+    {
+      "n": 7,
+      "name": "tip-hover-and-tab",
+      "expected": "the pointer moves onto Undo: its plate draws after the delay; Escape, then Tab from the sheet until a chrome control has the focus: its plate draws at once",
+      "observed": "hover on Undo: plate \"UndoCmd Z\"; Tab landed on menubar.tools: plate none; 08-before-61-tab-focus.png",
+      "ok": false,
+      "shot": "07-before-61-hover-undo-2x.png",
+      "ms": 3398
+    }
+  ],
+  "consoleErrors": [],
+  "facts": {
+    "seamUnderPointer": {
+      "tipOnPlus": "Add a column A column at the right edge, as wide as the last one; the table grows by it",
+      "under": null,
+      "tipAfterClick": null,
+      "tipAfterMove": null
+    },
+    "checkSlides": [
+      "A picture without a dark twin keeps a 1 px frame so it reads as a plate on the dark ground.Fix",
+      "The table has 9 empty cells; type into them or remove the rows.",
+      "In native mode an image exports as a 2x raster.",
+      "This slide is arranged by hand; Apply layout re-flows it"
+    ],
+    "hoverAndTab": {
+      "hovered": "UndoCmd Z",
+      "control": "menubar.tools",
+      "focused": null
+    }
+  }
+}

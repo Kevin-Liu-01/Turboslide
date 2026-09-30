@@ -20,11 +20,11 @@ import {
 import type { BlockRef, LintContext } from '../context.ts';
 
 /** The sentence layout/freeform carries (SPEC-2 1.4, 0.76). */
-export const FREEFORM_SENTENCE = 'This slide is arranged by hand; Apply layout re-flows it';
+export const FREEFORM_SENTENCE = 'This slide is arranged by hand. Apply layout re-flows it.';
 /** The two sentences of freeform/off-sheet (SPEC-2 0.96). */
 export const OFF_SHEET_OUTSIDE =
-  'This object is outside the slide and will not show. Move it onto the slide or delete it';
-export const OFF_SHEET_CROSSING = "Part of this object is past the slide's edge and will not show";
+  'This object is outside the slide and will not show. Move it onto the slide or delete it.';
+export const OFF_SHEET_CROSSING = "Part of this object is past the slide's edge and will not show.";
 
 /** Block types whose box carries text the reader must see whole. */
 export const TEXT_CARRIERS: ReadonlySet<Block['type']> = new Set<Block['type']>([

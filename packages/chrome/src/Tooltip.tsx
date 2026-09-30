@@ -22,6 +22,18 @@ import './Tooltip.css';
  * card under them; hover alone shows a tooltip there. The toolbar and the title row keep their
  * focus tooltips, where a keyboard user needs the name.
  *
+ * A tooltip is shown only where a person asked for it (docs/POLISH.md 2.6 item 61). The manager
+ * records the last input of each kind anywhere in the document: the pointer's last movement and
+ * its last movement to a new point, the last press, the last navigation key and the last return
+ * (Escape, Enter, or a menu opening or a dialog closing, which call `hideTooltipUntilInput`). A
+ * mouseenter shows a tooltip only when the pointer moved recently and its last movement to a new
+ * point is newer than every press, key and return: a control that moved under a resting pointer
+ * (a menu closed over the toolbar, the edge "+" of a table moved a seam under the pointer) shows
+ * nothing until the pointer moves again, and a mousemove at the pointer's last point (the
+ * browser's own after a layout change) does not arm it. A focus shows a tooltip unless a press or
+ * a return is newer than the last navigation key: the focus a click gives and the focus a dialog
+ * or a menu returns to its opener show nothing; a Tab or an arrow shows the name at once.
+ *
  * Contract for every control surface: the anchor carries `data-tip` (the name), which
  * scripts/tooltip-audit.mjs reads to find interactive elements that have none; the anchor also
  * carries `aria-describedby="pt-tip"` while its tooltip is up. New in Turboslide (no Prototemplate
@@ -51,9 +63,6 @@ export const TIP_ID = 'pt-tip';
 /** The plate stays this far inside the viewport. */
 const VIEWPORT_MARGIN = 8;
 
-/** A press on the anchor within this window keeps the focus that follows it from showing the tip. */
-const PRESS_GRACE_MS = 400;
-
 /**
  * A pointer that entered a control without moving within this window is a resting pointer: the
  * control moved under it (a menu closed, a panel opened), and no tip shows until it moves
@@ -61,13 +70,6 @@ const PRESS_GRACE_MS = 400;
  * resting pointer when the Insert menu closed and stayed through the upload).
  */
 const REST_MS = 500;
-
-/**
- * A focus that lands within this window after Escape or Enter is a return of focus (the palette
- * or a dialog closed), not keyboard navigation, so it shows no tip (item 61; audit-assist item 13:
- * "Search the menus" stayed after the palette closed).
- */
-const RETURN_GRACE_MS = 600;
 
 /** Inside these surfaces a tooltip shows on hover alone, never on keyboard focus (3.1.1). */
 export const QUIET_FOCUS_SURFACES = '.ts-menu, .ts-context-menu, [role="dialog"]';
@@ -153,44 +155,100 @@ let layer: HTMLDivElement | null = null;
 let shown: Shown | null = null;
 let pending: { anchor: HTMLElement; timer: number } | null = null;
 let listening = false;
-/* the anchor last pressed by the pointer and when, so the focus a click gives shows no tip */
-let pressed: { anchor: HTMLElement; at: number } | null = null;
-/* when the pointer last moved anywhere, so a mouseenter under a resting pointer shows no tip */
-let lastMoveAt = -Infinity;
-/* when Escape or Enter was last pressed anywhere, so a focus returned by a close shows no tip */
-let lastReturnKeyAt = -Infinity;
 let watching = false;
 
-/** The always on document listeners that record the pointer's last move and the last dismiss key. */
+/* The last input of each kind anywhere in the document (item 61), ordered by one counter (two
+   inputs in the same millisecond keep their order, which a clock would not give them). A
+   mouseenter shows a tooltip only when the pointer's own movement to a new point is the newest of
+   them and the pointer moved recently; a focus unless a press or a return is newer than the last
+   navigation key. */
+let inputSeq = 0;
+function nextInput(): number {
+  inputSeq += 1;
+  return inputSeq;
+}
+/* when the pointer last moved at all, for the rest window */
+let lastMoveAt = -Infinity;
+/* the pointer's last point and the input at which it last reached a new one: a mousemove at the
+   same point is the browser's own after a layout change (a seam re-drawn under the pointer), not
+   the person's */
+let lastPoint: { x: number; y: number } | null = null;
+let lastNewPointSeq = 0;
+/* the last mousedown anywhere: the focus a click gives, and a control that lands under the
+   pointer after a click (the edge "+" moves a seam under it), show no tip */
+let lastPressSeq = 0;
+/* the last key other than Escape and Enter: Tab and the arrows move the focus by hand */
+let lastNavKeySeq = 0;
+/* the last return: Escape or Enter (the palette or a dialog closed), or a menu opening or a
+   dialog closing through hideTooltipUntilInput; a focus or an enter after it shows nothing */
+let lastReturnSeq = 0;
+
+/** The always on document listeners that record the last input of each kind. */
 function watch(): void {
   if (watching || typeof document === 'undefined') return;
   watching = true;
   document.addEventListener(
     'mousemove',
-    () => {
+    (event) => {
       lastMoveAt = Date.now();
+      if (lastPoint !== null && lastPoint.x === event.clientX && lastPoint.y === event.clientY)
+        return;
+      lastPoint = { x: event.clientX, y: event.clientY };
+      lastNewPointSeq = nextInput();
+    },
+    { capture: true, passive: true },
+  );
+  document.addEventListener(
+    'mousedown',
+    () => {
+      lastPressSeq = nextInput();
     },
     { capture: true, passive: true },
   );
   document.addEventListener(
     'keydown',
     (event) => {
-      if (event.key === 'Escape' || event.key === 'Enter') lastReturnKeyAt = Date.now();
+      if (event.key === 'Escape' || event.key === 'Enter') lastReturnSeq = nextInput();
+      else lastNavKeySeq = nextInput();
     },
     true,
   );
 }
 
-/** Forgets the last pointer move and the last dismiss key, for tests that share the module between cases. */
+/** Forgets the recorded inputs, for tests that share the module between cases. */
 export function resetTooltipTiming(): void {
   lastMoveAt = -Infinity;
-  lastReturnKeyAt = -Infinity;
-  pressed = null;
+  lastPoint = null;
+  lastNewPointSeq = 0;
+  lastPressSeq = 0;
+  lastNavKeySeq = 0;
+  lastReturnSeq = 0;
 }
 
-/** True while the pointer moved recently: a mouseenter is the pointer's own, not a control moving under it. */
-function pointerMoving(): boolean {
-  return Date.now() - lastMoveAt <= REST_MS;
+/**
+ * True when a mouseenter or a mousemove on a control is the pointer's own arrival: the pointer
+ * moved within the rest window, and its last movement to a new point is newer than every press,
+ * key and return. False for a control that moved under a resting pointer, or that landed under
+ * it after a click or a key while only the browser's own mousemove followed.
+ */
+function pointerArrived(): boolean {
+  if (Date.now() - lastMoveAt > REST_MS) return false;
+  return (
+    lastNewPointSeq > lastPressSeq &&
+    lastNewPointSeq > lastNavKeySeq &&
+    lastNewPointSeq > lastReturnSeq
+  );
+}
+
+/**
+ * True when a focus on a control may show its tooltip: no press and no return is newer than the
+ * last navigation key. The focus a click gives (the press is newer) and the focus a close returns
+ * (the return is newer) show no tooltip; a Tab or an arrow, or a focus with no input recorded at
+ * all, shows it. The engine's :focus-visible is not consulted because a synthetic focus (a test, a
+ * script) has none.
+ */
+function keyboardFocus(): boolean {
+  return lastPressSeq <= lastNavKeySeq && lastReturnSeq <= lastNavKeySeq;
 }
 
 function reducedMotion(): boolean {
@@ -341,6 +399,18 @@ export function hideTooltip(anchor?: HTMLElement): void {
 }
 
 /**
+ * Hides the tooltip and shows none until the person's next input: the surface under the pointer
+ * or the focus is about to change without them (a menu opens, a dialog closes and returns the
+ * focus to its opener), so the mouseenter and the focus that follow are not theirs (item 61: the
+ * "Format menu" plate over the toolbar after a dialog closed on a click). The next pointer
+ * movement to a new point or the next navigation key arms the tooltip again.
+ */
+export function hideTooltipUntilInput(): void {
+  hideTooltip();
+  lastReturnSeq = nextInput();
+}
+
+/**
  * Shows after the hover delay, or at once while another tooltip is already up (one at a time:
  * the reader is walking a toolbar and the second plate should not make them wait again).
  */
@@ -380,20 +450,6 @@ export type TipAnchorProps = {
 };
 
 /**
- * True when the focus came from the keyboard: no pointer press on the anchor inside the grace
- * window. A click fires mousedown before focus, so the press is what tells the two apart; the
- * engine's :focus-visible is not consulted because a synthetic focus (a test, a script) has none.
- */
-function keyboardFocus(anchor: HTMLElement): boolean {
-  if (Date.now() - lastReturnKeyAt < RETURN_GRACE_MS) return false;
-  return !(
-    pressed !== null &&
-    pressed.anchor === anchor &&
-    Date.now() - pressed.at < PRESS_GRACE_MS
-  );
-}
-
-/**
  * The handlers and the `data-tip` mark for one control. Not a hook: the manager holds the state,
  * so a component may call it conditionally and spread the result on any element. A component
  * with handlers of its own for the same events calls both (`mergeHandlers` below does it for the
@@ -404,24 +460,22 @@ export function tipProps(input: TipInput, label?: string): TipAnchorProps {
   watch();
   return {
     'data-tip': content.name,
-    /* a tip after the pointer's own arrival; a control that moved under a resting pointer waits
-       for the next movement over it (item 61) */
+    /* a tip after the pointer's own arrival; a control that moved under a resting pointer, or
+       landed under it after a click or a key, waits for the next movement over it (item 61) */
     onMouseEnter: (event) => {
-      if (pointerMoving()) scheduleTooltip(event.currentTarget, content);
+      if (pointerArrived()) scheduleTooltip(event.currentTarget, content);
     },
     onMouseMove: (event) => {
       const anchor = event.currentTarget;
       if (shown?.anchor === anchor || pending?.anchor === anchor) return;
-      scheduleTooltip(anchor, content);
+      if (pointerArrived()) scheduleTooltip(anchor, content);
     },
     onMouseLeave: (event) => hideTooltip(event.currentTarget),
-    onMouseDown: (event) => {
-      pressed = { anchor: event.currentTarget, at: Date.now() };
-      hideTooltip();
-    },
+    /* the document listener above records the press; the plate hides at once */
+    onMouseDown: () => hideTooltip(),
     onFocus: (event) => {
       if (quietOnFocus(event.currentTarget)) return;
-      if (keyboardFocus(event.currentTarget)) showTooltip(event.currentTarget, content);
+      if (keyboardFocus()) showTooltip(event.currentTarget, content);
     },
     onBlur: (event) => hideTooltip(event.currentTarget),
     onKeyDown: (event) => {

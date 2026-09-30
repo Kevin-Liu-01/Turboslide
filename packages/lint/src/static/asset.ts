@@ -172,7 +172,7 @@ export function checkAssets(ctx: LintContext): Finding[] {
             text: asset.id,
             /* report 06 section 4 item 9; the id stays in `text` (item 55: no id in the sentence) */
             proposal:
-              "Record this photo's license with its origin and artist; turboslide asset add takes --license, --artist and --share-alike.",
+              "Record this photo's license with its origin and artist. The command turboslide asset add takes --license, --artist and --share-alike.",
           }),
         );
       }
@@ -183,7 +183,7 @@ export function checkAssets(ctx: LintContext): Finding[] {
         ctx.finding('asset/license-missing', slideId, {
           text: asset.id,
           proposal:
-            'This mood photograph has no provenance record; set its source to a photo record with the origin, the artist, the license and share alike.',
+            'This mood photograph has no provenance record. Set its source to a photo record with the origin, the artist, the license and share alike.',
         }),
       );
     }

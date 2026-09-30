@@ -620,9 +620,9 @@ export const CANVAS = {
   headerRow: 'Header row',
   headerRowDoc: 'The first row at display weight with a rule under it',
   addColumn: 'Add a column',
-  addColumnDoc: 'A column at the right edge, as wide as the last one; the table grows by it',
+  addColumnDoc: 'A column at the right edge, as wide as the last one. The table grows by it.',
   addRow: 'Add a row',
-  addRowDoc: 'A row under the last one; the table grows by it',
+  addRowDoc: 'A row under the last one. The table grows by it.',
   tableFullColumns: 'A table has at most 20 columns',
   tableFullRows: 'A table has at most 20 rows',
 } as const;
@@ -649,10 +649,10 @@ export const GUIDES = {
  * default view words test holds the sentences here.
  */
 export const CHECKS = {
-  arrangedByHand: 'This slide is arranged by hand; Apply layout re-flows it',
+  arrangedByHand: 'This slide is arranged by hand. Apply layout re-flows it.',
   offSheet:
-    'This object is outside the slide and will not show. Move it onto the slide or delete it',
-  pastEdge: "Part of this object is past the slide's edge and will not show",
+    'This object is outside the slide and will not show. Move it onto the slide or delete it.',
+  pastEdge: "Part of this object is past the slide's edge and will not show.",
 } as const;
 
 /** Format options words of round two (SPEC-2 section 5, 10). */

@@ -54,7 +54,7 @@ export function checkIcons(ctx: LintContext): Finding[] {
               path: `${path}/name`,
               text: icon.name,
               /* report 03 section 11 item 12 */
-              proposal: `"${icon.name}" is not in the sprite; pick a sprite icon or add the Heroicon with the theme's add-icon script.`,
+              proposal: `"${icon.name}" is not in the sprite. Pick a sprite icon or add the Heroicon with the theme's add-icon script.`,
             }),
           );
         }

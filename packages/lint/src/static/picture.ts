@@ -117,7 +117,7 @@ function checkBlockDithers(ctx: LintContext, slide: Slide, out: Finding[]): void
           text: `${row.asset.id} ${key12}`,
           measured: { litFraction: lit },
           proposal:
-            'One theme of the dithered picture is an empty sheet; move the ink point, the paper point or the midtones so both themes carry the picture, then write the files again with `turboslide picture materialize`.',
+            'One theme of the dithered picture is an empty sheet. Move the ink point, the paper point or the midtones so both themes carry the picture, then write the files again with `turboslide picture materialize`.',
         }),
       );
     }
@@ -170,8 +170,8 @@ function checkBlockDithers(ctx: LintContext, slide: Slide, out: Finding[]): void
           },
           proposal:
             clear.litUnder > 0
-              ? `${clear.litUnder} lit cell(s) sit under the plate; move the picture, change the ink and paper points, or move the plate to the other side.`
-              : `${clear.litInBand} lit cell(s) sit within 30 px of the plate; move the picture so the plate stands on solid ground.`,
+              ? `${clear.litUnder} lit cell(s) sit under the plate. Move the picture, change the ink and paper points, or move the plate to the other side.`
+              : `${clear.litInBand} lit cell(s) sit within 30 px of the plate. Move the picture so the plate stands on solid ground.`,
         }),
       );
     }
@@ -196,7 +196,7 @@ export function checkPictures(ctx: LintContext): Finding[] {
             text: asset.id,
             measured: { litFraction: lit },
             proposal:
-              'One twin is an empty sheet; retone or recrop so both twins carry the picture. Run `turboslide asset dither <id> --from-recorded` to measure the twins.',
+              'One twin is an empty sheet. Retone or recrop so both twins carry the picture. Run `turboslide asset dither <id> --from-recorded` to measure the twins.',
           }),
         );
       }
@@ -214,7 +214,7 @@ export function checkPictures(ctx: LintContext): Finding[] {
             text: picture.id,
             box: plate,
             /* OPENERS.md:105, 176 */
-            proposal: `No plate metrics are recorded for this picture; run turboslide asset dither on it with --from-recorded --plate ${side} to measure the lit cells under the plate.`,
+            proposal: `No plate metrics are recorded for this picture. Run turboslide asset dither on it with --from-recorded --plate ${side} to measure the lit cells under the plate.`,
             severity: 1,
           }),
         );
@@ -249,10 +249,10 @@ export function checkPictures(ctx: LintContext): Finding[] {
               nearestLitPx: clear.nearestLitPx,
             },
             proposal: mood
-              ? `${clear.litUnder} lit cell(s) sit under the mood plate and ${clear.litInBand} within 30 px of it; the plate is opaque, so this is allowed (OPENERS.md, Mood slide), listed for the art direction judge.`
+              ? `${clear.litUnder} lit cell(s) sit under the mood plate and ${clear.litInBand} within 30 px of it. The plate is opaque, so this is allowed (OPENERS.md, Mood slide), listed for the art direction judge.`
               : clear.litUnder > 0
-                ? `${clear.litUnder} lit cell(s) sit under the plate; move or retone the picture, or move the plate to the other side (OPENERS.md:105, 176).`
-                : `${clear.litInBand} lit cell(s) sit within 30 px of the plate; shift the crop so the plate stands on solid ground (OPENERS.md:105, 176).`,
+                ? `${clear.litUnder} lit cell(s) sit under the plate. Move or retone the picture, or move the plate to the other side (OPENERS.md:105, 176).`
+                : `${clear.litInBand} lit cell(s) sit within 30 px of the plate. Shift the crop so the plate stands on solid ground (OPENERS.md:105, 176).`,
             ...(mood ? { severity: 1 } : {}),
           }),
         );
@@ -277,7 +277,7 @@ export function checkPictures(ctx: LintContext): Finding[] {
       out.push(
         ctx.finding('picture/mood-placement', a.id, {
           text: `${a.id} then ${b.id}`,
-          proposal: 'Two mood slides are adjacent; separate them with a content slide.',
+          proposal: 'Two mood slides are adjacent. Separate them with a content slide.',
         }),
       );
     } else if (a.kind === 'opener' && b.kind === 'mood') {
@@ -285,7 +285,7 @@ export function checkPictures(ctx: LintContext): Finding[] {
         ctx.finding('picture/mood-placement', b.id, {
           text: `${a.id} then ${b.id}`,
           proposal:
-            'A mood slide follows a dense content slide, not the opener; move it after the first content slide of the section.',
+            'A mood slide follows a dense content slide, not the opener. Move it after the first content slide of the section.',
         }),
       );
     }

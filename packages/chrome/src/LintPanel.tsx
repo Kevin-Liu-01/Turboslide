@@ -165,7 +165,7 @@ export function LintPanel({
                 onClick={() => onSelectBlock?.(finding.blockId)}
                 {...tipProps({
                   name: finding.rule,
-                  doc: `${finding.proposal} Severity ${finding.severity}, ${SEVERITY_WORD[finding.severity]}; ${finding.blockId ? `click selects block ${finding.blockId}` : 'a slide-level finding'}.`,
+                  doc: `${finding.proposal} Severity ${finding.severity}, ${SEVERITY_WORD[finding.severity]}. ${finding.blockId ? `A click selects block ${finding.blockId}` : 'A slide-level finding'}.`,
                 })}
               >
                 <span className="ts-lint-sev" aria-label={SEVERITY_WORD[finding.severity]}>

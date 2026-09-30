@@ -59,7 +59,7 @@ export function checkStructure(ctx: LintContext): Finding[] {
             path: ref.path,
             text: block.note,
             /* report 05 section 6.1 */
-            proposal: `Express the block in the grammar; until then it exports as a raster. Its note reads: ${block.note}.`,
+            proposal: `Express the block in the grammar. Until then it exports as a raster. Its note reads: ${block.note}.`,
           }),
         );
         // html/sanitize (gslides-parity SPEC-3 8.4): a block the sanitizer has not stamped. The
@@ -99,10 +99,10 @@ export function checkStructure(ctx: LintContext): Finding[] {
             ctx.finding('html/sanitize', slide.id, {
               blockId: block.id,
               path: `${ref.path}/htmlSanitized`,
-              text: `${markup.changed ? 'markup changed' : 'markup unchanged'}; ${css.dropped.length} CSS declaration(s) dropped${markup.parsed ? '' : '; pattern pass only until the parser loads'}`,
+              text: `${markup.changed ? 'markup changed' : 'markup unchanged'}, ${css.dropped.length} CSS declaration${css.dropped.length === 1 ? '' : 's'} dropped${markup.parsed ? '' : ', pattern pass only until the parser loads'}`,
               measured: { droppedCss: css.dropped.length, markupChanged: markup.changed ? 1 : 0 },
               proposal:
-                'This HTML block has not passed the sanitizer. `turboslide fix --rule html/sanitize` writes the cleaned HTML and CSS and records that they passed; the next edit of the block repeats the check with the parser.',
+                'This HTML block has not passed the sanitizer. `turboslide fix --rule html/sanitize` writes the cleaned HTML and CSS and records that they passed. The next edit of the block repeats the check with the parser.',
               fix,
             }),
           );
@@ -113,7 +113,7 @@ export function checkStructure(ctx: LintContext): Finding[] {
               blockId: block.id,
               path: `${ref.path}/html`,
               proposal:
-                'A scale marker is authored in the escape markup; use a scales block so the marker derives from the value.',
+                'A scale marker is authored in the escape markup. Use a scales block so the marker derives from the value.',
             }),
           );
         }
@@ -173,7 +173,7 @@ export function checkStructure(ctx: LintContext): Finding[] {
             ctx.finding('opener/sentence-lists-section', slide.id, {
               path: '/plate/blocks',
               text: unmentioned.join('; '),
-              proposal: `The sentence should name each family of the section in order; not mentioned: ${unmentioned.join(', ')}.`,
+              proposal: `The sentence should name each family of the section in order. Not mentioned: ${unmentioned.join(', ')}.`,
             }),
           );
         }
@@ -193,7 +193,7 @@ export function checkStructure(ctx: LintContext): Finding[] {
       ctx.finding('numbers/contradiction', first.slideId, {
         blockId: first.blockId,
         text: summary,
-        proposal: `The same noun carries different numerals across slides: ${summary}. Confirm the right one; the accuracy judge reads it.`,
+        proposal: `The same noun carries different numerals across slides: ${summary}. Confirm the right one. The accuracy judge reads it.`,
       }),
     );
   }
@@ -236,7 +236,7 @@ function collectNumerals(
         blockId,
         path,
         text: hardCoded.join('; '),
-        proposal: `${hardCoded.map((h) => `"${h}"`).join(' and ')} equal the deck's counts; derive them from the manifest instead of typing them.`,
+        proposal: `${hardCoded.map((h) => `"${h}"`).join(' and ')} equal the deck's counts. Derive them from the manifest instead of typing them.`,
       }),
     );
   }

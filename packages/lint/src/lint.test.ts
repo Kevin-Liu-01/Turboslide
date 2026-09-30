@@ -186,13 +186,13 @@ describe('lintStatic', () => {
     expect(crossing).toMatchObject({ path: '/slots/main/3/pos' });
     expect(crossing?.evidence.box).toEqual([1500, 800, 200, 8]);
     expect(crossing?.proposal).toBe(
-      "Part of this object is past the slide's edge and will not show",
+      "Part of this object is past the slide's edge and will not show.",
     );
     expect(off.find((f) => f.blockId === 's2')?.proposal).toBe(
-      'This object is outside the slide and will not show. Move it onto the slide or delete it',
+      'This object is outside the slide and will not show. Move it onto the slide or delete it.',
     );
     expect(onSlide.find((f) => f.rule === 'layout/freeform')?.proposal).toBe(
-      'This slide is arranged by hand; Apply layout re-flows it',
+      'This slide is arranged by hand. Apply layout re-flows it.',
     );
     const overlap = onSlide.find((f) => f.rule === 'freeform/overlap');
     expect(overlap).toMatchObject({ severity: 1, blockId: 't1' });
@@ -242,7 +242,7 @@ describe('lintStatic', () => {
     // that holds a mark block; no freeform, copy or colour rule fires because the slide converted
     expect(onCanvas.map((f) => f.rule)).toEqual(['export/non-native', 'layout/freeform']);
     expect(onCanvas.find((f) => f.rule === 'layout/freeform')?.proposal).toBe(
-      'This slide is arranged by hand; Apply layout re-flows it',
+      'This slide is arranged by hand. Apply layout re-flows it.',
     );
   });
 
@@ -321,7 +321,7 @@ describe('lintStatic', () => {
     });
     expect(title?.proposal).toMatch(/^Slide 5 has an empty title/);
     expect(cell).toMatchObject({ blockId: 'grid', path: '/slots/main/1/rows/1/cells/0' });
-    expect(cell?.proposal).toBe('The table has an empty cell; type into it or remove the row.');
+    expect(cell?.proposal).toBe('The table has an empty cell. Type into it or remove the row.');
     /* the polish round (docs/POLISH.md 2.6 item 55): one finding per table with the count, no
        parenthesis and no specification cited in any sentence a seller reads */
     for (const finding of empty) expect(finding.proposal).not.toMatch(/\(|SPEC/);
@@ -380,7 +380,7 @@ describe('lintStatic', () => {
     }).filter((f) => f.rule === 'copy/empty-placeholder');
     expect(grid).toHaveLength(1);
     expect(grid[0]?.proposal).toBe(
-      'The table has 9 empty cells; type into them or remove the rows.',
+      'The table has 9 empty cells. Type into them or remove the rows.',
     );
     expect(grid[0]?.path).toBe('/slots/main/0/rows/0/cells/0');
   });

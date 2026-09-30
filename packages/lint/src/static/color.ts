@@ -102,7 +102,7 @@ export function checkColor(ctx: LintContext): Finding[] {
             path: `${ref.path}/${field}`,
             text: value,
             /* DECK-GRAMMAR.md:28; docs/freeform.md; the id stays in the finding's block (item 55) */
-            proposal: `The ${field} ${value} is a custom color that stays the same in both themes; a palette token follows the theme: ${COLOR_TOKENS.join(', ')}.`,
+            proposal: `The ${field} ${value} is a custom color that stays the same in both themes. A palette token follows the theme: ${COLOR_TOKENS.join(', ')}.`,
           }),
         );
       }
@@ -128,7 +128,7 @@ export function checkColor(ctx: LintContext): Finding[] {
                     path: ref.path,
                     text: `${value} at ${start}:${start + run.t.length}`,
                     /* gslides-parity SPEC-2 2.2.5; US spelling (item 73) */
-                    proposal: `The text "${run.t}" is colored ${value}, a custom color that stays the same in both themes; a palette token follows the theme: ${COLOR_TOKENS.join(', ')}.`,
+                    proposal: `The text "${run.t}" is colored ${value}, a custom color that stays the same in both themes. A palette token follows the theme: ${COLOR_TOKENS.join(', ')}.`,
                   }),
                 );
               } else if (field === 'color' && SEMANTIC_TOKENS.has(value)) {
@@ -139,7 +139,7 @@ export function checkColor(ctx: LintContext): Finding[] {
                     text: `${value} at ${start}:${start + run.t.length}`,
                     severity: 1,
                     /* DECK-GRAMMAR.md:30 */
-                    proposal: `The text "${run.t}" is colored ${value}, one of the four semantic hues, which the grammar keeps for icons; the ink, ink-2 or titanium tokens color text.`,
+                    proposal: `The text "${run.t}" is colored ${value}, one of the four semantic hues, which the grammar keeps for icons. The ink, ink-2 or titanium tokens color text.`,
                   }),
                 );
               }

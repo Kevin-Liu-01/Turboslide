@@ -662,7 +662,7 @@ test(title('assist.panel.words-and-layout'), async () => {
         /Claude|Anthropic|model|provider|Nothing is written/i.test(el.textContent ?? ''),
       )
       .map((el) => ({
-        text: (el.textContent ?? '').trim().slice(0, 80),
+        text: (el.textContent ?? '').trim(),
         top: el.getBoundingClientRect().top,
       }));
     const promptBox = box(prompt);
@@ -691,7 +691,7 @@ test(title('assist.panel.words-and-layout'), async () => {
   await closePanel();
   test.info().annotations.push({
     type: 'panel',
-    description: `mode ${mode}; provider lines ${facts.providerLines.map((l) => `"${l.text}" at ${Math.round(l.top)}`).join(' | ') || 'none'} (prompt at ${facts.promptTop}); placeholder "${facts.placeholder}" clipped ${facts.placeholderClipped}; slide label "${facts.slideText}" over ${facts.slideLines} line(s) ellipsis ${facts.slideEllipsis}; focus after the Ask row ${focusedAfterAsk}; starter glyphs ${facts.glyphs}; starters to composer ${facts.gap} px`,
+    description: `mode ${mode}; provider lines ${facts.providerLines.map((l) => `"${l.text.slice(0, 120)}" at ${Math.round(l.top)}`).join(' | ') || 'none'} (prompt at ${facts.promptTop}); placeholder "${facts.placeholder}" clipped ${facts.placeholderClipped}; slide label "${facts.slideText}" over ${facts.slideLines} line(s) ellipsis ${facts.slideEllipsis}; focus after the Ask row ${focusedAfterAsk}; starter glyphs ${facts.glyphs}; starters to composer ${facts.gap} px`,
   });
   if (mode !== 'model')
     test.skip(
@@ -703,7 +703,12 @@ test(title('assist.panel.words-and-layout'), async () => {
     'no provider words above the composer',
   ).toEqual([]);
   expect(
-    facts.providerLines.some((l) => /Nothing is written until you accept/.test(l.text)),
+    /* assist-strings.ts firstLine: "Nothing is written to your slides until you accept" (a
+       restricted deck's line says where the text goes first, then the same sentence); the
+       ship's run of record read the line cut at 80 characters twice (the polish fix round 3, B6) */
+    facts.providerLines.some((l) =>
+      /Nothing is written( to your slides)? until you accept/.test(l.text),
+    ),
     'one line under the composer',
   ).toBe(true);
   expect(facts.placeholder, 'the placeholder').toBe('Ask the assistant');
@@ -771,13 +776,16 @@ test(title('assist.polish.agent-sweep'), async () => {
       .waitFor({ timeout: 8000 })
       .catch(() => undefined);
     await page.waitForTimeout(500);
+    /* the palette's groups are `.pt-search-group[data-group]` with an h4 label (Palette.tsx;
+       palette-data.ts: `actions` is "Actions"); Run an action opens it on that group alone
+       (EditorShell.tsx setPaletteGroups). The ship's run of record read no head through the
+       older selectors twice (the polish fix round 3, B6) */
     paletteSection = await page.evaluate(() => {
       const palette = document.querySelector('[data-control="palette"]');
-      const heads = [
-        ...(palette?.querySelectorAll('h2, h3, .ts-palette-head, [data-section]') ?? []),
-      ].map((el) => (el.textContent ?? el.getAttribute('data-section') ?? '').trim());
-      const first = heads[0] ?? null;
-      return first;
+      const group = palette?.querySelector('.pt-search-group[data-group]') ?? null;
+      if (!group) return null;
+      const label = group.querySelector('h4');
+      return `${group.getAttribute('data-group') ?? ''}: ${(label?.childNodes[0]?.textContent ?? label?.textContent ?? '').trim()}`;
     });
     await page.keyboard.press('Escape');
   }

@@ -694,10 +694,18 @@ test(title('svg.render.picture-gestures'), async () => {
   const disabled = (await crop.getAttribute('aria-disabled').catch(() => null)) === 'true';
   await crop.hover().catch(() => undefined);
   await page.waitForTimeout(700);
-  const tip = await page.evaluate(
-    () => document.querySelector('.pt-tip')?.textContent?.trim() ?? null,
-  );
-  const words = `${tip ?? ''} ${(await crop.getAttribute('title').catch(() => null)) ?? ''} ${(await crop.getAttribute('aria-description').catch(() => null)) ?? ''}`;
+  /* a disabled row draws no plate (docs/POLISH.md 2.6 item 61), so the one `.pt-tip` layer on
+     the page is read only while the row anchors it (`aria-describedby`, Tooltip.tsx); the words
+     of record are the row's own attributes and, below, the toolbar Crop button's doc, which
+     carries the disabled reason (ToolbarHead.tsx). The ship's run of record read the rotate
+     handle's plate, left on the page from the gesture before, twice (the polish fix round 3, B6) */
+  const tip = await page.evaluate(() => {
+    const row = document.querySelector('[data-control="menu.format.image.cropImage"]');
+    const plate = document.querySelector('.pt-tip');
+    const anchored = row?.getAttribute('aria-describedby') === 'pt-tip';
+    return anchored ? (plate?.textContent?.trim() ?? null) : null;
+  });
+  const rowWords = `${tip ?? ''} ${(await crop.getAttribute('data-tip-doc').catch(() => null)) ?? ''} ${(await crop.getAttribute('data-tip').catch(() => null)) ?? ''} ${(await crop.getAttribute('title').catch(() => null)) ?? ''} ${(await crop.getAttribute('aria-description').catch(() => null)) ?? ''}`;
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
   /* the two Escapes close the menu and drop the selection, and the picture tail with its Crop
@@ -728,6 +736,12 @@ test(title('svg.render.picture-gestures'), async () => {
     toolbarWords = await snackbarText(page);
     await page.keyboard.press('Escape');
   }
+  /* the toolbar's Crop button carries the disabled reason as its doc (ToolbarTail.tsx
+     `cropRefused`, ToolbarHead.tsx: `data-tip-doc`) */
+  const toolbarDoc = await ctl(page, 'toolbar.cropImage')
+    .getAttribute('data-tip-doc', { timeout: 3000 })
+    .catch(() => null);
+  const words = `${rowWords} ${toolbarDoc ?? ''}`;
   const sentence = /An SVG picture cannot be cropped\. Resize it instead/;
   results['crop disabled'] =
     disabled && (sentence.test(words) || sentence.test(toolbarWords ?? ''));

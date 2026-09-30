@@ -22,6 +22,7 @@ import {
   invoke,
   menuPath,
   newDeck,
+  objectsOf,
   openEditor,
   openShaderSection,
   ownerContext,
@@ -1238,10 +1239,18 @@ test(title('shaders.gallery.words-and-head'), async () => {
         const head = shaderSection?.querySelector(
           '.ts-shader-head, .ts-fo-shader-head, .ts-panel-section-body > .ts-fo-row:first-child',
         );
-        const name = head?.querySelector('b, strong, .ts-shader-name, .ts-fo-shader-name');
-        const change = shaderSection?.querySelector(
-          'button:not([data-control*="preset"]):not([data-control*="color"])',
+        /* the head's name is `.ts-shader-title` in the name row (inspector/shader.tsx Head;
+           `.ts-shader-name` is the gallery's one line name) and Change is the row's PanelButton
+           `formatOptions.shader.change`; the ship's run of record read no name through the older
+           selectors twice (the polish fix round 3, B6) */
+        const name = head?.querySelector(
+          '.ts-shader-title, b, strong, .ts-shader-name, .ts-fo-shader-name',
         );
+        const change =
+          shaderSection?.querySelector('[data-control="formatOptions.shader.change"]') ??
+          shaderSection?.querySelector(
+            'button:not([data-control*="preset"]):not([data-control*="color"])',
+          );
         const changeBtn =
           [...(shaderSection?.querySelectorAll('button') ?? [])].find((b) =>
             /^Change$/.test((b.textContent ?? '').trim()),
@@ -1303,15 +1312,20 @@ test(title('shaders.gallery.words-and-head'), async () => {
 test(title('shaders.insert.free-rectangle'), async () => {
   test.setTimeout(240_000);
   await openEditor(page, deck);
+  /* an empty slide: Blank applied through the layout plate, which drops the placeholders
+     (docs/POLISH.md 2.3 item 13, `slides.layout.blank-empty`). A `slide.set` of `/layout` alone
+     left the fresh slide's title and body prompts, which count for a material (B4's R4 in
+     place-insert.ts: a shader covers a prompt), so the ship's run of record read the strip
+     between them, 137,218 1326 by 237, twice on both slides (the polish fix round 3, B6) */
   const empty = await addSlide(page);
-  const s = await settled(page);
-  await invoke(page, 'slide.set', {
-    slideId: empty,
-    path: '/layout',
-    value: 'blank',
-    baseRevision: s.revision,
-  }).catch(() => undefined);
+  await clickCard(page, empty);
+  await page.keyboard.press('Escape');
+  await ctl(page, 'toolbar.layout').click();
+  await ctl(page, 'layout.apply.plate').waitFor({ timeout: 8000 });
+  await ctl(page, 'layout.apply.blank').click();
+  await expect(ctl(page, 'layout.apply.plate')).toHaveCount(0, { timeout: 8000 });
   await settled(page);
+  const emptyObjects = (await objectsOf(page, empty)).length;
   const onEmpty = await ensureShader(page, empty);
   const under = await addSlide(page);
   const run = await headingRun(page);
@@ -1322,14 +1336,30 @@ test(title('shaders.insert.free-rectangle'), async () => {
     b['pos'] as { x: number; y: number; w: number; h: number };
   const a = pos(onEmpty.block);
   const b = pos(underTitle.block);
+  /* under a title the free rectangle: the box sits under the head band, meets no other object of
+     the slide (the typed title and the body prompt, converted to canvas by the insert) and holds
+     the helper's 240 by 135 minimum (place-insert.ts) */
+  const others = (await objectsOf(page, under)).filter((o) => o.id !== underTitle.id);
+  const meets = others.filter(
+    (o) =>
+      o.pos.x < b.x + b.w &&
+      o.pos.x + o.pos.w > b.x &&
+      o.pos.y < b.y + b.h &&
+      o.pos.y + o.pos.h > b.y,
+  );
   test.info().annotations.push({
     type: 'placement',
-    description: `empty slide (${onEmpty.how}): ${JSON.stringify(a)}; under a title (${underTitle.how}): ${JSON.stringify(b)}`,
+    description: `empty slide (${emptyObjects} objects before; ${onEmpty.how}): ${JSON.stringify(a)}; under a title (${underTitle.how}): ${JSON.stringify(b)} beside ${others.map((o) => `${o.type} ${o.pos.x},${o.pos.y} ${o.pos.w}x${o.pos.h}`).join(', ') || 'nothing'}`,
   });
   expect(onEmpty.how, 'the insert went through the product').toMatch(/Insert > Shader/);
+  expect(emptyObjects, 'the Blank slide holds nothing').toBe(0);
   expect([a.x, a.y, a.w, a.h], 'the content box on an empty slide').toEqual([137, 129, 1326, 642]);
   expect(b.y, 'under a title the free rectangle').toBeGreaterThan(129);
-  expect(b.h, 'the free rectangle, not the 480 by 272 default').toBeGreaterThan(272);
+  expect(
+    meets.map((o) => o.id),
+    'the free rectangle meets no other object',
+  ).toEqual([]);
+  expect(b.w >= 240 && b.h >= 135, 'the free rectangle holds the 240 by 135 minimum').toBe(true);
 });
 
 coverage(import.meta.filename, [

@@ -4624,11 +4624,12 @@
     {
       "id": "export.zip.bundle",
       "feature": "export",
-      "interaction": "File > Download > Turboslide bundle arrives within 30 s with deck.json and the snackbar names it",
+      "interaction": "File > Download > Turboslide bundle arrives within 30 s with deck.json and the snackbar reads \"Saved <name>\" with the file's name (docs/POLISH.md 2.7 item 86)",
       "driver": "core/export.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 30",
-      "parks": ["file.download.zip"]
+      "parks": ["file.download.zip"],
+      "note": "The polish fix round 3 (B6): the ship's run of record read \"Saved <id>.zip\" twice against the row's older \"names the bundle\"; the read follows item 86's one sentence"
     },
     {
       "id": "export.html.web-page",
@@ -4901,11 +4902,12 @@
     {
       "id": "decks.trash.button-heights",
       "feature": "decks",
-      "interaction": "Restore and Delete forever are 32 px; Delete forever is in ink with its glyph; Empty trash is the page's one solid button",
+      "interaction": "Restore and Delete forever are 32 px; Delete forever is in ink with its glyph; no button on the page carries `is-solid` (Empty trash is a text button like the rest, docs/POLISH.md 2.7 item 97)",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "evidence": "audit-interface 21",
-      "severity": 1
+      "severity": 1,
+      "note": "The polish fix round 3 (B6): the ship's run of record read `solid []` twice; item 97 dropped `is-solid` from Empty trash (`decks.trash.empty-not-primary` reads it) and the read follows it"
     },
     {
       "id": "decks.trash.confirm-dialog-chrome",
@@ -6797,7 +6799,7 @@
       "today": "broken",
       "severity": 3,
       "evidence": "build/field-fonts.md 1 (Kevin, 2026-09-28: \"i cant even change fonts anymore\"; on production at 877eb690 the Font control reads aria-disabled on the cover's title and subtitle, FontPicker.tsx FontField with takesFamily(undefined) false)",
-      "note": "The field fonts hotfix (build/field-fonts.md 2): a fixed kind's text field carries a typography record of its own on the slide (slide.set /typography/<field>, one revision, one Undo), drawn inline by the render and counted by the used family walk; the PDF and PowerPoint halves read the export route in one request each"
+      "note": "The field fonts hotfix (build/field-fonts.md 2): a fixed kind's text field carries a typography record of its own on the slide (slide.set /typography/<field>, one revision, one Undo), drawn inline by the render and counted by the used family walk; the PDF and PowerPoint halves read the export route in one request each. The polish fix round 3 (B6): on a preview without the bearer the two export halves cannot be read and the row is not driven with the reason once every driven half reads right; the ship's run of record read them \"no bearer\" and called the row failed twice"
     },
     {
       "id": "logos.insert.row",
@@ -6832,12 +6834,12 @@
     {
       "id": "logos.picker.your-brand",
       "feature": "logos",
-      "interaction": "On GT's deployment the dialog's first group Your brand lists the default kit's logo before any search; a click inserts it at the logo size without a search; a deck with a role: 'logo' asset lists it there too",
+      "interaction": "On GT's deployment the dialog's first group Your brand lists the default kit's logo before any search; a click inserts it at the logo size without a search; a deck with a role: 'logo' asset lists it under Recent (docs/POLISH.md 2.5 item 46), never under Your brand",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 15",
       "parks": ["dialog.logo.group.brand"],
-      "note": "Ship one P0; docs/FEATURES.md 4.3 (B1 the group, B6 the model); on a tmp store with no deployment kit the group lists the deck's role logo assets alone and the row says so"
+      "note": "Ship one P0; docs/FEATURES.md 4.3 (B1 the group, B6 the model); on a tmp store with no deployment kit the group lists the deck's role logo assets alone and the row says so. The polish fix round 3 (B6): the ship's run of record read the asset tile under Recent against the older rule \"under Your brand\" twice; the read follows item 46"
     },
     {
       "id": "logos.picker.empty-state",
@@ -6852,12 +6854,12 @@
     {
       "id": "logos.picker.recents",
       "feature": "logos",
-      "interaction": "After two inserts the Recent group lists them first; a new browser context lists none",
+      "interaction": "After two inserts the Recent group lists them first among its marks (the deck's role logo assets list there too, docs/POLISH.md 2.5 item 46); a new browser context lists none",
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 17",
       "parks": ["dialog.logo.group.recent"],
-      "note": "Ship one P0; docs/FEATURES.md 4.3 (B1: localStorage per browser, question 6 of section 9)"
+      "note": "Ship one P0; docs/FEATURES.md 4.3 (B1: localStorage per browser, question 6 of section 9). The polish fix round 3 (B6): the ship's run of record read the two asset tiles beside the two marks twice; the read follows item 46"
     },
     {
       "id": "logos.picker.licence-words",
@@ -7433,7 +7435,7 @@
       "today": "not driven",
       "evidence": "4.4; AMENDMENTS.md A1",
       "parks": ["intake.svg.upload", "intake.svg.paste", "intake.svg.drop", "intake.svg.url"],
-      "note": "Vector round; docs/VECTOR.md 4.4 (B3; B1 the crop sentence)"
+      "note": "Vector round; docs/VECTOR.md 4.4 (B3; B1 the crop sentence). The polish fix round 3 (B6): the crop sentence is read from the row's own attributes and the toolbar Crop button's doc, never from the page's one tooltip plate unless the row anchors it; the ship's run of record read the rotate handle's plate twice"
     },
     {
       "id": "svg.copy.markup",
@@ -8247,13 +8249,13 @@
     {
       "id": "diagrams.label.double-click-selects-word",
       "feature": "diagrams",
-      "interaction": "Double click on \"Step 2\" of a process diagram, \" plus\" typed: the label reads \"Step  plus\" (the typed text in the word's place, the space before it kept); a text box keeps the caret at the click point",
+      "interaction": "Double click on \"Step 2\" of a process diagram, \" plus\" typed: the label reads \"Step  plus\" (the typed text in the word's place, the space before it kept; the session may store that space as U+00A0, drawn the same); a text box keeps the caret at the click point (question 5's default)",
       "driver": "probe --core",
       "today": "broken",
       "severity": 2,
       "evidence": "audit-objects item 12",
       "setup": "block.insert of a text box through the window API; the process diagram is placed through Insert > Diagram (the panel, Step count 3), since the diagram block form is the panel's own",
-      "note": "Polish round; docs/POLISH.md 2.4 item 30; B1's `Selection.tsx` by B3's request; question 5"
+      "note": "Polish round; docs/POLISH.md 2.4 item 30; B1's `Selection.tsx` by B3's request; question 5. The polish fix round 3 (B6): the ship's run of record read the kept space stored as U+00A0 twice; the read normalizes it and reads the text box's caret by where the X lands"
     },
     {
       "id": "charts.labels.fit-slot",
@@ -8427,12 +8429,12 @@
     {
       "id": "logos.dialog.sentence-case-whole-names",
       "feature": "logos",
-      "interaction": "The dialog's group heads read \"Your brand\", \"Results\" and \"Recent\"; the kit's tile title is whole; an inserted customer logo lists under Recent; the preselected tile carries `is-active`",
+      "interaction": "The dialog's group heads read \"Your brand\", \"Results\" and \"Recent\"; the kit's tile title is whole; an inserted customer logo lists under Recent; the preselected result carries `is-active` once a query has results",
       "driver": "core/logos.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "audit-media item 16; audit-chrome item 41",
-      "note": "Polish round; docs/POLISH.md 2.5 item 46; B4"
+      "note": "Polish round; docs/POLISH.md 2.5 item 46; B4. The polish fix round 3 (B6): the preselected tile is the first result (Logo.tsx), so the ring is read with results on screen; the ship's run of record read 0 at the open twice"
     },
     {
       "id": "shaders.gallery.words-and-head",
@@ -8442,17 +8444,17 @@
       "today": "broken",
       "severity": 2,
       "evidence": "audit-media items 17, 18; audit-chrome item 43",
-      "note": "Polish round; docs/POLISH.md 2.5 item 47; B4"
+      "note": "Polish round; docs/POLISH.md 2.5 item 47; B4. The polish fix round 3 (B6): the head's name is `.ts-shader-title` and Change is `formatOptions.shader.change` (inspector/shader.tsx); the ship's run of record read no name through the older selectors twice"
     },
     {
       "id": "shaders.insert.free-rectangle",
       "feature": "shaders",
-      "interaction": "A shader inserted on an empty slide: `pos` is the content box 137,129 1326 by 642; under a title, the free rectangle",
+      "interaction": "A shader inserted on an empty slide (Blank applied through the layout plate): `pos` is the content box 137,129 1326 by 642; under a typed title on a Title and body slide, the free rectangle between the title and the body prompt (the prompts count for a material), meeting no other object and holding 240 by 135",
       "driver": "core/shaders.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "audit-media item 19",
-      "note": "Polish round; docs/POLISH.md 2.5 item 48; B4 with B1's `editor-shell.ts` hunk by request"
+      "note": "Polish round; docs/POLISH.md 2.5 item 48; B4 with B1's `editor-shell.ts` hunk by request. The polish fix round 3 (B6): a `slide.set` of `/layout` alone left the prompts, so the ship's run of record read the strip between them on both slides twice; the empty slide is made through the plate and the under a title read follows place-insert.ts"
     },
     {
       "id": "brand.panel.words-match-sheet",
@@ -8807,12 +8809,12 @@
     {
       "id": "export.print.opens",
       "feature": "export",
-      "interaction": "File > Print settings and preview on a deck five writes old: the pages draw within 5 s with no error card; the checked box shows a tick; Download as PDF stays enabled after one file",
+      "interaction": "File > Print settings and preview on a deck five writes old: the pages draw within 5 s with no error card; the checked box is the chrome's DialogCheck (a tick drawn in an ink box, the native control clipped away); Download as PDF stays enabled after one file",
       "driver": "core/export.spec.ts",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-chrome item 8; audit-pages item 39",
-      "note": "Polish round; docs/POLISH.md 2.7 item 83; B5"
+      "note": "Polish round; docs/POLISH.md 2.7 item 83; B5. The polish fix round 3 (B6): the ship's run of record read the clipped native input as a drawn control twice; the read checks the box and reads the drawing"
     },
     {
       "id": "decks.card.title-ellipsis",
@@ -8907,12 +8909,12 @@
     {
       "id": "present.bar.no-dead-control",
       "feature": "present",
-      "interaction": "The show's bar: every control's click changes the state; no captions control",
+      "interaction": "The show's bar: every control's click changes the state (Previous read from the second slide, since it has nowhere to go on the first, as in Google's show); no captions control",
       "driver": "core/present.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "audit-pages item 22",
-      "note": "Polish round; docs/POLISH.md 2.7 item 93; B5"
+      "note": "Polish round; docs/POLISH.md 2.7 item 93; B5. The polish fix round 3 (B6): the ship's run of record read Previous on the first slide twice and called it dead"
     },
     {
       "id": "present.laser.visible",
@@ -9152,12 +9154,12 @@
     {
       "id": "assist.panel.words-and-layout",
       "feature": "assist",
-      "interaction": "The panel: the provider line under the composer alone, the placeholder inside its box, the slide label one line, the textarea focused after the Ask row, no glyph on the starters, the starters' bottom within 16 px of the composer",
+      "interaction": "The panel: the provider line under the composer alone (\"Nothing is written to your slides until you accept\"; a restricted deck's line says where the text goes first), the placeholder inside its box, the slide label one line, the textarea focused after the Ask row, no glyph on the starters, the starters' bottom within 16 px of the composer",
       "driver": "core/assist.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "audit-assist items 8, 9, 16, 17, 23, 33",
-      "note": "Polish round; docs/POLISH.md 2.9 item 118; B1"
+      "note": "Polish round; docs/POLISH.md 2.9 item 118; B1. The polish fix round 3 (B6): the ship's run of record read the line cut at 80 characters twice"
     },
     {
       "id": "assist.polish.agent-sweep",
@@ -9167,7 +9169,7 @@
       "today": "broken",
       "severity": 1,
       "evidence": "audit-assist items 24 to 32",
-      "note": "Polish round; docs/POLISH.md 2.9 item 120; B5 with the integrator's `model.ts` rows"
+      "note": "Polish round; docs/POLISH.md 2.9 item 120; B5 with the integrator's `model.ts` rows. The polish fix round 3 (B6): the palette's group is `.pt-search-group[data-group]` with an h4 label (Palette.tsx); the ship's run of record read no head through the older selectors twice"
     },
     {
       "id": "decks.home.pictures-three-widths",

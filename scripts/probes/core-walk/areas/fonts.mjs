@@ -1321,7 +1321,7 @@ async function fieldFace(t, h) {
       );
       const exportsOk =
         pptx.noBearer || pdf.noBearer ? null : named?.length === 3 && embedded?.length === 3;
-      const ok =
+      const drivenOk =
         titleStored === 'fraunces' &&
         /fraunces/i.test(titleDrawn ?? '') &&
         revAfter === revBefore + 1 &&
@@ -1336,9 +1336,18 @@ async function fieldFace(t, h) {
         /manrope/i.test(leadAfterReload ?? '') &&
         inShow &&
         /fraunces/i.test(showFamilies.heading ?? '') &&
-        /manrope/i.test(showFamilies.lead ?? '') &&
-        exportsOk === true;
-      return { ok, observed: parts.join('; ') };
+        /manrope/i.test(showFamilies.lead ?? '');
+      /* the two export halves read the export route with the bearer, which a preview has none
+         of (the bearer lives on production alone): with every driven half right the row is not
+         driven there, with the reason, and a driven half wrong fails it. The ship's run of record
+         read the driven halves right and the exports "no bearer" twice and called the row failed
+         (the polish fix round 3, B6) */
+      if (exportsOk === null && drivenOk)
+        return {
+          ok: null,
+          observed: `the PDF and Editable text PowerPoint halves need the bearer (no bearer for this origin); the driven halves read right: ${parts.join('; ')}`,
+        };
+      return { ok: drivenOk && exportsOk === true, observed: parts.join('; ') };
     },
   );
 }

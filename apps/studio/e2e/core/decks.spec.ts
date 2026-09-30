@@ -1501,7 +1501,11 @@ test(title('decks.trash.button-heights'), async () => {
   expect(facts.remove, 'Delete forever is 32 px').toBe(32);
   expect(facts.removeColor, 'Delete forever is in ink').toBe(ink);
   expect(facts.removeGlyph, 'with its glyph').toBe(true);
-  expect(facts.solid, "Empty trash is the page's one solid button").toEqual(['trash.empty']);
+  /* docs/POLISH.md 2.7 item 97: Empty trash is a text button like Restore and Delete forever
+     (`is-solid` dropped by B5; `decks.trash.empty-not-primary` reads the same control), so the
+     page draws no solid button. The ship's run of record read `solid []` twice against the row's
+     older words (the polish fix round 3, B6) */
+  expect(facts.solid, 'no solid button on the trash page (item 97)').toEqual([]);
 });
 
 test(title('decks.trash.confirm-dialog-chrome'), async () => {

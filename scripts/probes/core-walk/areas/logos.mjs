@@ -580,8 +580,13 @@ export async function run(t) {
       if (!o2.open) return o2.why;
       const second = await tiles();
       const brand = second.filter((x) => x.group === 'brand');
-      const assetTile =
-        brand.find((x) => x.id === `asset.${added?.id ?? 'brand-mark-asset'}`) ?? null;
+      /* docs/POLISH.md 2.5 item 46: Your brand holds the kit's logo alone and a deck's role logo
+         assets list under Recent, so the asset tile is read there (any group but brand); the
+         ship's run of record read the tile under Recent and the older rule "under Your brand"
+         twice (the polish fix round 3, B6) */
+      const assetId = `asset.${added?.id ?? 'brand-mark-asset'}`;
+      const assetTile = second.find((x) => x.id === assetId) ?? null;
+      const assetInBrand = brand.some((x) => x.id === assetId);
       const groupShown = await t.visible('dialog.logo.group.brand');
       let obj = null;
       if (brand.length > 0) {
@@ -593,8 +598,14 @@ export async function run(t) {
       } else await closeLogo();
       const sized = obj ? obj.pos.h <= SYMBOL_HEIGHT + 1 || obj.pos.w <= WORDMARK_WIDTH + 1 : false;
       return {
-        ok: groupShown && brand.length > 0 && assetTile !== null && obj !== null && sized,
-        observed: `Your brand before the asset: ${brandBefore.map((x) => x.id).join(', ') || 'no tile'} (a tmp store has no deployment kit logo); asset.add role logo ${added?.error ? `refused: ${added.error}` : `ok (${added?.id})`}; after: ${brand.map((x) => x.id).join(', ') || 'no tile'} (group drawn ${groupShown}); the click inserted ${obj ? `${obj.type} ${obj.id} ${t.posStr(obj.pos)} (logo size ${sized})` : 'nothing'}`,
+        ok:
+          groupShown &&
+          brand.length > 0 &&
+          assetTile !== null &&
+          !assetInBrand &&
+          obj !== null &&
+          sized,
+        observed: `Your brand before the asset: ${brandBefore.map((x) => x.id).join(', ') || 'no tile'} (a tmp store has no deployment kit logo); asset.add role logo ${added?.error ? `refused: ${added.error}` : `ok (${added?.id})`}; after: Your brand ${brand.map((x) => x.id).join(', ') || 'no tile'} (group drawn ${groupShown}), the asset tile ${assetTile ? `under ${assetTile.group}` : 'not listed'} (item 46: under Recent, never Your brand); the click inserted ${obj ? `${obj.type} ${obj.id} ${t.posStr(obj.pos)} (logo size ${sized})` : 'nothing'}`,
       };
     },
   );

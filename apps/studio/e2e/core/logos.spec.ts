@@ -294,7 +294,12 @@ test(title('logos.picker.recents'), async () => {
     type: 'recent',
     description: `recent tiles ${recent.join(', ') || 'none'}; the first group drawn ${firstGroup ?? 'none'}`,
   });
-  expect(recent.slice(0, 2).sort(), 'the Recent group lists the two inserts').toEqual([
+  /* docs/POLISH.md 2.5 item 46: the deck's role logo assets list under Recent too (the two
+     inserts wrote `asset.figma` and `asset.vercel`), so the two inserts are read among the
+     group's marks; the ship's run of record read the four tiles against the two twice (the
+     polish fix round 3, B6) */
+  const recentMarks = recent.filter((slug) => !slug.startsWith('asset.'));
+  expect(recentMarks.slice(0, 2).sort(), 'the Recent group lists the two inserts').toEqual([
     'figma',
     'vercel',
   ]);
@@ -1357,13 +1362,21 @@ test(title('logos.dialog.sentence-case-whole-names'), async () => {
   const customerInBrand = brand ? brand.titles.some((t) => t && /vercel/i.test(t.text)) : false;
   const customerInRecent = recent ? recent.titles.some((t) => t && /vercel/i.test(t.text)) : false;
   const cut = brand ? brand.titles.filter((t) => t && (t.clipped || /…$/.test(t.text))) : [];
-  const active = groups.groups.reduce((n, g) => n + g.active, 0);
+  const activeAtOpen = groups.groups.reduce((n, g) => n + g.active, 0);
+  /* the preselected tile is the first result (Logo.tsx `active`; docs/FEATURES.md 4.3: Enter
+     inserts it), so the ring is read with results on screen; at the open no query has results
+     and no tile is preselected. The ship's run of record read 0 at the open twice (the polish
+     fix round 3, B6) */
+  const withResults = await searchInDialog(page, 'stripe');
+  await page.waitForTimeout(300);
+  const afterSearch = await dialogGroups(page);
+  const activeResults = afterSearch.groups.find((g) => g.id === 'results')?.active ?? 0;
   await page.keyboard.press('Escape');
   await expect(ctl(page, 'dialog.logo')).toHaveCount(0, { timeout: 5000 });
   if (opened.switched) await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
   test.info().annotations.push({
     type: 'words',
-    description: `heads ${heads.map((h) => `"${h}"`).join(', ')}; Your brand titles ${brand ? brand.titles.map((t) => (t ? `"${t.text}"${t.clipped ? ' (cut)' : ''}` : 'none')).join(', ') : 'no group'}; the customer logo under Recent ${customerInRecent}, under Your brand ${customerInBrand}; is-active tiles ${active}`,
+    description: `heads ${heads.map((h) => `"${h}"`).join(', ')}; Your brand titles ${brand ? brand.titles.map((t) => (t ? `"${t.text}"${t.clipped ? ' (cut)' : ''}` : 'none')).join(', ') : 'no group'}; the customer logo under Recent ${customerInRecent}, under Your brand ${customerInBrand}; is-active tiles ${activeAtOpen} at the open, ${activeResults} among ${withResults.length} stripe results`,
   });
   expect(shouting, 'sentence case group labels').toEqual([]);
   expect(
@@ -1373,7 +1386,8 @@ test(title('logos.dialog.sentence-case-whole-names'), async () => {
   expect(cut, "the kit's tile title is whole").toEqual([]);
   expect(customerInBrand, 'an inserted customer logo does not join Your brand').toBe(false);
   if (results.length > 0) expect(customerInRecent, 'it lists under Recent').toBe(true);
-  expect(active, 'the preselected tile carries is-active').toBeGreaterThanOrEqual(1);
+  expect(withResults.length, 'stripe has results to preselect from').toBeGreaterThan(0);
+  expect(activeResults, 'the preselected result carries is-active').toBeGreaterThanOrEqual(1);
 });
 
 coverage(import.meta.filename, [

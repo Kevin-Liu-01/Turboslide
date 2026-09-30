@@ -1043,6 +1043,14 @@ test(title('present.bar.no-dead-control'), async () => {
     });
   for (const b of buttons.filter((x) => !/captions/i.test(x.control))) {
     if (b.control === 'present.exit') continue;
+    /* Previous on the first slide has nowhere to go, in Google's show too, so its click is read
+       from the second slide (ArrowRight first); the ship's run of record read it on the first
+       slide twice and called it dead (the polish fix round 3, B6) */
+    const fromSecond = b.control === 'present.previous';
+    if (fromSecond) {
+      await page.keyboard.press('ArrowRight');
+      await page.waitForTimeout(400);
+    }
     const before = await stateOf();
     await page.mouse.move(700, 450);
     await page.mouse.move(720, 460);
@@ -1053,7 +1061,9 @@ test(title('present.bar.no-dead-control'), async () => {
     await page.waitForTimeout(500);
     const after = await stateOf();
     const changed = JSON.stringify(before) !== JSON.stringify(after);
-    facts.push(`${b.control}: ${changed ? 'changed the state' : 'changed nothing'}`);
+    facts.push(
+      `${b.control}${fromSecond ? ' (from the second slide)' : ''}: ${changed ? 'changed the state' : 'changed nothing'}`,
+    );
     if (!changed) dead.push(b.control);
     /* put the show back: the list and the options closed, the laser off, full screen left */
     await page.keyboard.press('Escape').catch(() => undefined);

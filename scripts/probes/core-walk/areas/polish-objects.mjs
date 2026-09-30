@@ -689,32 +689,44 @@ export async function run(t) {
       });
       let caretOk = false;
       let caretText = null;
+      let caretSel = null;
       if (box) {
         await t.clearAll();
         const brun = (await t.runsOfBlock('po-caret'))[0];
         const bw = await t.wordRect(brun, 2);
         await t.dblclickAt(bw.x + 2, bw.y + bw.h / 2);
         await t.sleep(300);
-        const sel = await t.selectionText();
+        caretSel = await t.selectionText();
         await t.typeHuman('X');
         await t.sleep(200);
         await t.press('Escape');
         await t.settled();
         caretText = (await t.blockOf(slide, 'po-caret'))?.block?.text ?? null;
+        /* A1 rule 3 (question 5's default): a text box takes the caret at the double click
+           point, 2 px into "caret", so the X lands at that word's start or after its first
+           letter and no letter goes; a selected word would have been replaced instead */
+        const at = typeof caretText === 'string' ? caretText.indexOf('X') : -1;
         caretOk =
-          sel === 'caret'
-            ? /Keep the X here/.test(caretText ?? '')
-            : /X/.test(caretText ?? '') && /the/.test(caretText ?? '');
+          typeof caretText === 'string' &&
+          caretText.replace('X', '') === 'Keep the caret here' &&
+          at >= 'Keep the '.length &&
+          at <= 'Keep the c'.length;
       }
       await t.clickCard(S);
       /* the typed " plus" lands in the selected word's place, so the stored label is "Step" +
          the space kept + " plus", two spaces, as Google keeps it; the stage collapses the pair to
          one and B1's hand read saw "Step plus" (the verifier's pass 2 finding 9: the walk's one
-         space was the read's, not the product's) */
-      const ok = selected.trim() === '2' && label === 'Step  plus' && caretOk;
+         space was the read's, not the product's). The session stores the kept space as U+00A0
+         (the contenteditable's device for a space beside another; InlineText.tsx trims one at
+         either end and keeps one inside), which the stage draws as the same space, so the read
+         normalizes it. The ship's run of record read "Step  plus" twice against the two
+         plain spaces (the polish fix round 3, B6) */
+      const drawnLabel = typeof label === 'string' ? label.replace(/ /g, ' ') : label;
+      const nbsp = typeof label === 'string' && / /.test(label);
+      const ok = selected.trim() === '2' && drawnLabel === 'Step  plus' && caretOk;
       return {
         ok,
-        observed: `double click selected "${selected}"; the label reads "${label}"; the text box after a double click on "caret" and "X" typed reads "${caretText}"${ok ? '' : ` (docs/POLISH.md 2.4 item 30, B1's Selection.tsx by ${LANE}'s request; question 5)`}`,
+        observed: `double click selected "${selected}"; the label reads "${drawnLabel}"${nbsp ? ' (the kept space stored as U+00A0)' : ''}; the text box after a double click 2 px into "caret" (selection "${caretSel}") and "X" typed reads "${caretText}"${ok ? '' : ` (docs/POLISH.md 2.4 item 30, B1's Selection.tsx by ${LANE}'s request; question 5)`}`,
       };
     },
   );

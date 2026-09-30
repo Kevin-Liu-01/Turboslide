@@ -56,7 +56,15 @@ export function renderMaterial(block: BlockOf<'material'>, ctx: BlockContext): s
   return el(
     'figure',
     rootAttrs(block, ctx, {
-      className: classes('material-fig', block.captionSize === 15 && 'cap-15'),
+      /* the caption's track and its gap draw only with a caption (block-css.ts `.free >
+         .material-fig`): a free figure with none kept a 12 px gap before an empty track, so the
+         frame drew 12 px short of the box (the polish round's ship step, third attempt, B5's R27:
+         the PDF's image 3200 by 544 for a 1326 by 237 box) */
+      className: classes(
+        'material-fig',
+        block.captionSize === 15 && 'cap-15',
+        Boolean(block.caption) && 'has-caption',
+      ),
       'data-recipe': JSON.stringify(recipe),
       'data-live': ctx.live ? '1' : undefined,
     }),

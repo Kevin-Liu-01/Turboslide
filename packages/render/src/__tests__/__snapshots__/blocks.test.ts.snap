@@ -600,7 +600,7 @@ exports[`block catalog > renders markSizes (sizes) in light 1`] = `
 
 exports[`block catalog > renders material (mat) in dark 1`] = `
 {
-  "html": "<figure class="material-fig" data-block="mat" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;uniforms&quot;:{&quot;u_scale&quot;:0.5},&quot;anchor&quot;:5500,&quot;twoTone&quot;:true,&quot;plate&quot;:&quot;lower-left&quot;}"><div class="material" role="img" aria-label="A liquid metal diamond, dithered" data-raster="material" data-rid="mat:1"><img class="material-frame" src="assets/opener-brand-dark.jpg" data-light="assets/opener-brand-light.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"></div><figcaption data-run="mat/caption">The liquid metal diamond, frozen at 5.5 s.</figcaption></figure>",
+  "html": "<figure class="material-fig has-caption" data-block="mat" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;uniforms&quot;:{&quot;u_scale&quot;:0.5},&quot;anchor&quot;:5500,&quot;twoTone&quot;:true,&quot;plate&quot;:&quot;lower-left&quot;}"><div class="material" role="img" aria-label="A liquid metal diamond, dithered" data-raster="material" data-rid="mat:1"><img class="material-frame" src="assets/opener-brand-dark.jpg" data-light="assets/opener-brand-light.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"></div><figcaption data-run="mat/caption">The liquid metal diamond, frozen at 5.5 s.</figcaption></figure>",
   "rasters": [
     {
       "alpha": false,
@@ -614,7 +614,7 @@ exports[`block catalog > renders material (mat) in dark 1`] = `
 
 exports[`block catalog > renders material (mat) in light 1`] = `
 {
-  "html": "<figure class="material-fig" data-block="mat" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;uniforms&quot;:{&quot;u_scale&quot;:0.5},&quot;anchor&quot;:5500,&quot;twoTone&quot;:true,&quot;plate&quot;:&quot;lower-left&quot;}"><div class="material" role="img" aria-label="A liquid metal diamond, dithered" data-raster="material" data-rid="mat:1"><img class="material-frame" src="assets/opener-brand-light.jpg" data-dark="assets/opener-brand-dark.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"></div><figcaption data-run="mat/caption">The liquid metal diamond, frozen at 5.5 s.</figcaption></figure>",
+  "html": "<figure class="material-fig has-caption" data-block="mat" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;uniforms&quot;:{&quot;u_scale&quot;:0.5},&quot;anchor&quot;:5500,&quot;twoTone&quot;:true,&quot;plate&quot;:&quot;lower-left&quot;}"><div class="material" role="img" aria-label="A liquid metal diamond, dithered" data-raster="material" data-rid="mat:1"><img class="material-frame" src="assets/opener-brand-light.jpg" data-dark="assets/opener-brand-dark.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"></div><figcaption data-run="mat/caption">The liquid metal diamond, frozen at 5.5 s.</figcaption></figure>",
   "rasters": [
     {
       "alpha": false,

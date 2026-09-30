@@ -216,7 +216,12 @@ export const BLOCK_CSS = `
 .ts-sheet .free > .ts-chips { inset: 0; z-index: 1; }
 /* a material object and a picture object over a material take the object's box, not 16:9 (0.105) */
 .ts-sheet .free > .material-fig, .ts-sheet .free > .material { width: 100%; height: 100%; aspect-ratio: auto; }
-.ts-sheet .free > .material-fig { grid-template-rows: 1fr auto; }
+/* the caption's track and its 12 px gap only with a caption: a grid's gutter stands between two
+   explicit tracks whether or not the second holds anything, so a free figure with no caption drew
+   its frame 12 px short of the box (the ship step's third attempt, B5's R27: the PDF's image
+   3200 by 544 for a 1326 by 237 box, the frame cropped to the shorter box) */
+.ts-sheet .free > .material-fig { grid-template-rows: 1fr; gap: 0; }
+.ts-sheet .free > .material-fig.has-caption { grid-template-rows: 1fr auto; gap: 12px; }
 .ts-sheet .free > .material-fig > .material { aspect-ratio: auto; height: 100%; min-height: 0; }
 /* the plate scoped declarations of the picture kinds repeated on a converted plate's children
    (block-css.ts .opener-plate and .mood-plate above), so a plate child renders the same as an

@@ -1925,6 +1925,27 @@ export function EditorShell({
     input.presence?.following === undefined || input.presence.following === null
       ? undefined
       : input.presence.others.find((each) => each.clientId === input.presence?.following);
+  /* a press on the stage or the filmstrip stops the follow (gslides-parity SPEC-3 4.4;
+     docs/POLISH.md item 104: "your own edit or click stops it"): the roster row and the plate's Stop
+     are the words, this is the gesture. Own writes stop it in the controller; a click that writes
+     nothing (the sheet's ground, a card) stopped nothing before, so the followed person's next
+     move took the stage back from under the seller. The listener runs in the capture phase on the
+     document so the stage's own handlers never swallow it, and only while following */
+  const following = followed !== undefined;
+  const onUnfollowRef = useRef(input.presence?.onUnfollow);
+  onUnfollowRef.current = input.presence?.onUnfollow;
+  useEffect(() => {
+    if (!following || typeof document === 'undefined') return undefined;
+    const stop = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest('[data-control="presence.following"]')) return;
+      if (target.closest('[data-editor-main], [data-control="filmstrip"]'))
+        onUnfollowRef.current?.();
+    };
+    document.addEventListener('pointerdown', stop, true);
+    return () => document.removeEventListener('pointerdown', stop, true);
+  }, [following]);
 
   const panelNode = (() => {
     switch (panel) {

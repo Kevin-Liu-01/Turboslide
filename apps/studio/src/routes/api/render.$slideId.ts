@@ -176,7 +176,9 @@ export const Route = createFileRoute('/api/render/$slideId')({
               width,
               r: isThumbStamp(r) ? r : null,
             };
-            const thumb = await getThumbnail(request_);
+            /* a card's request (a stamp named) whose deck holds no capture on the blob tier
+               answers 204 and renders behind the response (docs/POLISH.md items 90 and 111) */
+            const thumb = await getThumbnail(request_, { renderBehind: request_.r !== null });
             return thumbResponse(thumb, request_, { revisionInUrl: request_.r !== null });
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);

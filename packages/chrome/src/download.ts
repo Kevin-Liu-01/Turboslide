@@ -167,7 +167,11 @@ function windowIo(): PageDownloadIo {
  * refused (a quota, a spent token, a missing bearer), so the caller's snackbar names the refusal.
  * When the page's request itself fails (the network, or a redirect the fetch may not read) the
  * browser's own anchor download stands in and the answer is null, as it is for an address on
- * another origin. `name` is the file name when the server sends none.
+ * another origin. `name` is the file name the caller wants: the one name rule of docs/POLISH.md
+ * item 86 names every file after the title, so a name the caller passes wins over the server's
+ * `content-disposition` (the render route names a picture `<deck id>-<slide id>.jpg`, the
+ * polish round's verifier read that id name on the JPEG and the PNG); without one the server's
+ * header names the file, then the address, then "download".
  */
 export async function downloadFromPage(
   url: string,
@@ -190,11 +194,10 @@ export async function downloadFromPage(
     throw new Error(refusalSentence(response.status, body));
   }
   const blob = await response.blob();
-  const name = attachmentName(
-    response.headers.get('content-disposition'),
-    url,
-    options.name ?? 'download',
-  );
+  const name =
+    options.name !== undefined && options.name !== ''
+      ? options.name
+      : attachmentName(response.headers.get('content-disposition'), url, 'download');
   const href = io.objectUrl(blob);
   clickDownloadAnchor(href, name, io.doc);
   setTimeout(() => io.revoke(href), REVOKE_MS);

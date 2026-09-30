@@ -167,6 +167,7 @@
 .ts-title-clock-words {
   color: var(--pt-titanium);
   font-size: 12.5px;
+  cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

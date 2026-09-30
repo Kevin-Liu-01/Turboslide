@@ -203,7 +203,12 @@ export function buildCsp(options: CspOptions): string {
   const embed = options.pathname !== undefined && isEmbedPath(options.pathname);
   const directives = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${options.nonce}' 'strict-dynamic'`,
+    /* 'wasm-unsafe-eval' admits WebAssembly.instantiate alone, never a JavaScript eval: the
+       dither worker (apps/studio/src/workers/dither.worker.ts) compiles the native crate's wasm
+       on every page the router builds it for, and without the keyword every page posted a
+       script-src report for it (docs/POLISH.md item 112; the polish round's verifier read two to
+       four reports per page) */
+    `script-src 'self' 'nonce-${options.nonce}' 'strict-dynamic' 'wasm-unsafe-eval'`,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob:${store}`,
     "font-src 'self' data:",

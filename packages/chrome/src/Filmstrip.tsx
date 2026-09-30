@@ -44,6 +44,17 @@ export function scrollBehavior(): ScrollBehavior {
   }
 }
 /**
+ * After a follow's scroll, when the row is read again and placed once more if it sits outside
+ * the box: an instant jump settles within a frame or two, a smooth move needs its animation to
+ * end first.
+ */
+export const FOLLOW_SETTLE_MS: Readonly<Record<ScrollBehavior, ReadonlyArray<number>>> = {
+  auto: [60, 250, 600],
+  smooth: [450, 900],
+  instant: [60, 250, 600],
+};
+
+/**
  * A stable ref callback for the current row: React calls it when the row
  * mounts or when a row becomes current, never on an unrelated render, so
  * the list scrolls only when the current row changes. Scrolls the list
@@ -52,36 +63,81 @@ export function scrollBehavior(): ScrollBehavior {
  * of it. The first follow after landing is the deep link's: a row out of
  * view is centered in the list; every later selection moves the minimum
  * distance.
+ *
+ * The polish round (docs/POLISH.md item 107; the row slides.filmstrip.follows-every-move): a
+ * move farther than the list's own height (End, Home, a deep click, a duplicate far away) is an
+ * instant jump, not a smooth scroll: Chromium animated a 4,000 px smooth scroll for a second, a
+ * Home pressed inside that second moved nothing, and a target read once before the jump landed
+ * short when the list's layout moved under the animation (the verifier's Home left card 1 above
+ * the fold at scrollTop 279; this round's trace read End landing at 391 of 4,935). After every
+ * scroll the row is read again from the live layout at the settle times and placed once more
+ * while it sits outside the box, so the follow converges on what the list holds now and never
+ * on what it held when the key was pressed. A settle pass acts only for the row that is still
+ * current.
  */
 export function makeFollow(listRef: RefObject<HTMLElement | null>, ready: RefObject<boolean>) {
   let landed = false;
-  return (el: HTMLElement | null) => {
-    const list = listRef.current;
-    if (!el || !list || !ready.current) return;
+  let current: HTMLElement | null = null;
+  let timers: number[] = [];
+  const clearTimers = () => {
+    for (const id of timers) window.clearTimeout(id);
+    timers = [];
+  };
+  /** The row's box in the list's scroll coordinates and whether it sits inside the visible box. */
+  const measure = (el: HTMLElement, list: HTMLElement) => {
     const head = el.closest('.pt-grp')?.querySelector<HTMLElement>('.pt-grp-head');
     const headH = head ? head.offsetHeight : 0;
     const top = el.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop;
     const bottom = top + el.offsetHeight;
     const above = top - headH < list.scrollTop;
     const below = bottom > list.scrollTop + list.clientHeight;
+    return { headH, top, bottom, above, below };
+  };
+  /** Places the row inside the box by the minimum distance; false when it already is. */
+  const place = (el: HTMLElement, list: HTMLElement, behavior: ScrollBehavior): boolean => {
+    const { headH, top, bottom, above, below } = measure(el, list);
+    if (!above && !below) return false;
+    if (above) list.scrollTo({ top: Math.max(0, top - headH - FOLLOW_MARGIN), behavior });
+    else list.scrollTo({ top: bottom - list.clientHeight + FOLLOW_MARGIN, behavior });
+    return true;
+  };
+  /** The settle passes: the row read again at each time, placed instantly while it is outside. */
+  const settle = (el: HTMLElement, behavior: ScrollBehavior) => {
+    clearTimers();
+    if (typeof window === 'undefined') return;
+    for (const wait of FOLLOW_SETTLE_MS[behavior] ?? FOLLOW_SETTLE_MS.auto) {
+      const id = window.setTimeout(() => {
+        const list = listRef.current;
+        if (el !== current || !el.isConnected || !list) return;
+        place(el, list, 'auto');
+      }, wait);
+      timers.push(id);
+    }
+  };
+  return (el: HTMLElement | null) => {
+    const list = listRef.current;
+    if (!el || !list || !ready.current) return;
+    current = el;
     const first = !landed;
     landed = true;
-    if (!above && !below) return;
+    const { top, above, below } = measure(el, list);
+    if (!above && !below) {
+      clearTimers();
+      return;
+    }
     if (first) {
       list.scrollTo({
         top: Math.max(0, top - (list.clientHeight - el.offsetHeight) / 2),
         behavior: 'auto',
       });
+      settle(el, 'auto');
       return;
     }
-    if (above) {
-      list.scrollTo({ top: Math.max(0, top - headH - FOLLOW_MARGIN), behavior: scrollBehavior() });
-    } else {
-      list.scrollTo({
-        top: bottom - list.clientHeight + FOLLOW_MARGIN,
-        behavior: scrollBehavior(),
-      });
-    }
+    /* a jump farther than the box is instant; a nudge inside it keeps the smooth motion */
+    const distance = Math.abs(top - list.scrollTop);
+    const behavior: ScrollBehavior = distance > list.clientHeight ? 'auto' : scrollBehavior();
+    place(el, list, behavior);
+    settle(el, behavior);
   };
 }
 

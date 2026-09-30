@@ -639,9 +639,14 @@ function HomePage() {
     setBusyDownload(card.id);
     snackbar.show(DOWNLOAD_WORDS.preparing('pptx'));
     try {
-      const name = fileNameOf(card.title, card.id, 'pptx');
-      const url = await exportPowerPoint(card.id);
-      const saved = await downloadFromPage(url, { name });
+      /* the run is one appearance, the deck's own, so the file carries the title alone and no
+         appearance tag (the polish round's verifier read "<title> (light).pptx" from a two
+         appearance run beside a snackbar naming "<title>.pptx"); the snackbar names the file the
+         browser saves: the stored copy's own name on a deployment, where the download is the
+         browser's anchor and the page cannot rename it, the title's name on a checkout */
+      const file = await exportPowerPoint(card.id, card.appearance);
+      const name = file.name ?? fileNameOf(card.title, card.id, 'pptx');
+      const saved = await downloadFromPage(file.url, { name });
       snackbar.show(DOWNLOAD_WORDS.saved(saved?.name ?? name));
     } catch (error) {
       snackbar.show(exportRefusal('pptx', error));
@@ -1485,15 +1490,26 @@ function RenameField({
   );
 }
 
-/** How long the card waits before asking for a failed capture again, per try (3.6: within 10 s). */
-export const THUMB_RETRY_MS: ReadonlyArray<number> = [3000, 6000];
+/**
+ * How many times one card asks the render route for its capture in one page life: the first ask
+ * when the browser loads the lazy image, and one more each time the card comes back into view
+ * after a failed ask, up to this count. There is no timed retry (docs/POLISH.md items 90 and
+ * 111): the polish round's verifier read the listing asking `/api/render/<slide>` 243 times in
+ * 14 s for 98 cards on the blob tier, every card that answered 404 or 204 asking again after 3 s,
+ * after 6 s and once more on viewport entry, and the load took 10 s with 46 to 77 console errors.
+ * A capture that is not there is the plate; the next view asks once more.
+ */
+export const THUMB_ASKS_PER_VIEW_MAX = 3;
 
 /**
- * A card's thumbnail (docs/PRODUCT.md 3.6): the render route's capture of slide 1, and until it
- * lands a plate in the deck's paper with the title in its ink (decks.css). A capture that fails is
- * asked for again after 3 s and after 6 more, because a fresh deck's first render is on its way for
- * the first seconds (the render worker's capture on save, B7's `thumbs.ts`); after that the plate
- * stands. Exported for the trash page.
+ * A card's thumbnail (docs/PRODUCT.md 3.6): the render route's capture of slide 1, and under it
+ * from the first paint a plate in the deck's paper with the title in its ink (decks.css), so a
+ * card is never a grey box. One ask per view (docs/POLISH.md items 90 and 111): the browser asks
+ * once when the lazy image nears the viewport; a failed ask leaves the plate standing, and the
+ * card asks once more only when it leaves the viewport and comes back (a new view), at most
+ * THUMB_ASKS_PER_VIEW_MAX times in the page's life. A fresh deck's capture on save lands behind
+ * the stream's close (server/card-thumb.ts), so the seller's next view of the list draws it.
+ * Exported for the trash page.
  */
 export function Thumb({
   card,
@@ -1505,34 +1521,28 @@ export function Thumb({
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  /* a card that entered the viewport after its retries stopped asks once more (item 90) */
-  const askedInView = useRef(false);
+  /* the card left the viewport after its failed ask: the next entry is a new view */
+  const wasOut = useRef(false);
   const box = useRef<HTMLSpanElement>(null);
   const base = cardThumbUrl(card);
   const url = base === null ? null : attempt === 0 ? base : `${base}&retry=${attempt}`;
-  useEffect(() => {
-    if (!failed) return undefined;
-    const wait = THUMB_RETRY_MS[attempt];
-    if (wait === undefined) return undefined;
-    const timer = window.setTimeout(() => {
-      setFailed(false);
-      setAttempt((n) => n + 1);
-    }, wait);
-    return () => window.clearTimeout(timer);
-  }, [failed, attempt]);
   useEffect(() => {
     const el = box.current;
     if (
       !failed ||
       el === null ||
-      askedInView.current ||
+      attempt + 1 >= THUMB_ASKS_PER_VIEW_MAX ||
       typeof IntersectionObserver === 'undefined'
     )
       return undefined;
-    if (THUMB_RETRY_MS[attempt] !== undefined) return undefined;
+    wasOut.current = false;
     const observer = new IntersectionObserver((entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      askedInView.current = true;
+      const inView = entries.some((entry) => entry.isIntersecting);
+      if (!inView) {
+        wasOut.current = true;
+        return;
+      }
+      if (!wasOut.current) return;
       observer.disconnect();
       setFailed(false);
       setAttempt((n) => n + 1);
@@ -1551,7 +1561,7 @@ export function Thumb({
       aria-hidden="true"
     >
       {/* the title plate stands under the capture from the first paint (item 90): a card is never
-          a grey box while its picture loads or after its retries stop */}
+          a grey box while its picture loads or after a failed ask */}
       <span className="ts-hm-card-plate">{card.title}</span>
       {capture ? (
         <img
@@ -1700,19 +1710,29 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * The stored address of a PowerPoint file of the deck: `export.run` with the Perfect mode in the
- * deck's own appearance, through the same server functions the editor's row and the print route
- * use (a sync export on a deployment, a job on a checkout). The address answers the file as an
- * attachment; `downloadFromPage` saves it under the title.
+ * The stored address of a PowerPoint file of the deck, and the name the store serves it under:
+ * `export.run` with the Perfect mode in the deck's own appearance (one theme, so the name is the
+ * title with no appearance tag, docs/POLISH.md items 85 and 86), through the same server
+ * functions the editor's row and the print route use (a sync export on a deployment, a job on a
+ * checkout). The address answers the file as an attachment; `downloadFromPage` saves it under
+ * the title.
  */
-async function exportPowerPoint(deckId: string): Promise<string> {
-  const input = { format: 'pptx' as const, mode: 'flatten' as const, verify: false };
+async function exportPowerPoint(
+  deckId: string,
+  appearance: 'light' | 'dark',
+): Promise<{ url: string; name: string | null }> {
+  const input = {
+    format: 'pptx' as const,
+    mode: 'flatten' as const,
+    theme: [appearance],
+    verify: false,
+  };
   const caps = await exportCapabilities();
   if (caps.sync) {
     const answer = await syncExport({ deckId, input });
     const file = answer.files.find((each) => each.name.endsWith('.pptx'));
     if (file?.url === undefined || file.url === null) throw new Error('no PowerPoint file');
-    return downloadAddress(file.url);
+    return { url: downloadAddress(file.url), name: file.name };
   }
   const job = await startExport({ deckId, input });
   for (;;) {
@@ -1721,7 +1741,7 @@ async function exportPowerPoint(deckId: string): Promise<string> {
     if (poll.status === 'done') {
       const file = poll.downloads?.find((each) => each.name.endsWith('.pptx'));
       if (file === undefined) throw new Error('no PowerPoint file');
-      return downloadAddress(file.url);
+      return { url: downloadAddress(file.url), name: file.name };
     }
     await sleep(EXPORT_POLL_MS);
   }

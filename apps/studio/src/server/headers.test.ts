@@ -353,7 +353,7 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
       reportUri: CSP_REPORT_PATH,
       env: {},
     });
-    expect(csp).toContain("script-src 'self' 'nonce-n0nce' 'strict-dynamic'");
+    expect(csp).toContain("script-src 'self' 'nonce-n0nce' 'strict-dynamic' 'wasm-unsafe-eval'");
     expect(csp).toContain("worker-src 'self' blob:");
     expect(csp).toContain("img-src 'self' data: blob: https://abc.public.blob.vercel-storage.com");
     expect(csp).toContain(

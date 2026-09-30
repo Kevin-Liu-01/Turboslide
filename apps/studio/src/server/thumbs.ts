@@ -123,8 +123,12 @@ export type ThumbRequest = {
 };
 
 export type ThumbResult = {
-  /** `bytes` carries the PNG; `stored` names the Blob URL the route redirects to */
-  kind: 'bytes' | 'stored';
+  /**
+   * `bytes` carries the PNG; `stored` names the Blob URL the route redirects to; `pending` is a
+   * capture nothing holds yet whose render runs behind the response (the route answers 204 and
+   * the card keeps its plate, docs/POLISH.md items 90 and 111)
+   */
+  kind: 'bytes' | 'stored' | 'pending';
   /** the PNG bytes, on their own ArrayBuffer so they can be a Response body */
   png?: Uint8Array<ArrayBuffer>;
   /** the Blob URL of a stored answer */
@@ -379,7 +383,19 @@ async function renderThumb(
  */
 export async function getThumbnail(
   request: ThumbRequest,
-  options: { blob?: BlobClient | null; access?: 'public' | 'private' } = {},
+  options: {
+    blob?: BlobClient | null;
+    access?: 'public' | 'private';
+    /**
+     * On the blob tier, a request that names a stamp (`r`, the home cards) and finds nothing
+     * stored for the slide answers `pending` and renders behind the response instead of running
+     * Chromium inside the request (docs/POLISH.md items 90 and 111): a listing of cards whose
+     * decks never had a capture queued one render per card per load, and the cards stayed plates
+     * while the renders ran. The next view of the card reads the stored copy. A request without a
+     * stamp (the Import slides dialog's pictures) and a checkout with no store render now.
+     */
+    renderBehind?: boolean;
+  } = {},
 ): Promise<ThumbResult> {
   assertSlug('deckId', request.deckId);
   assertSlug('slideId', request.slideId);
@@ -566,7 +582,22 @@ export async function getThumbnail(
     }
   }
 
-  // 4. the render, now
+  // 4. the render: behind the response for a card on the blob tier, now otherwise
+  if (options.renderBehind === true && named !== null && blob !== null) {
+    afterResponse(
+      renderThumb(request, current, blob),
+      `render ${request.deckId}/${request.slideId}@${request.width}`,
+    );
+    return {
+      kind: 'pending',
+      stamp,
+      current,
+      revision,
+      cached: false,
+      source: 'render',
+      fresh: false,
+    };
+  }
   const rendered = await renderThumb(request, stamp, blob);
   return {
     kind: 'bytes',
@@ -619,6 +650,18 @@ export function thumbResponse(
   options: { revisionInUrl: boolean },
 ): Response {
   const headers = thumbHeaders(result, request, options);
+  if (result.kind === 'pending') {
+    /* the capture is rendering behind this response: nothing to draw yet, never a 502 (item
+       111); the card keeps its plate and the next view asks again */
+    return new Response(null, {
+      status: 204,
+      headers: {
+        ...headers,
+        'cache-control': 'private, no-store',
+        'x-turboslide-thumb': 'pending',
+      },
+    });
+  }
   if (result.kind === 'stored' && result.url !== undefined) {
     return new Response(null, { status: 302, headers: { ...headers, location: result.url } });
   }

@@ -309,8 +309,15 @@ function LastEdit() {
         onClick={() => shell.runItem(item)}
       />
       {/* the words beside the clock from 1280 px up (docs/POLISH.md item 92): a seller read
-          them in the tooltip alone */}
-      <span className="ts-title-clock-words" data-control="deck.lastEdit.words" aria-hidden="true">
+          them in the tooltip alone. A click on the words opens Version history as the clock does
+          (Google's "Last edit was 2 minutes ago" is the link): the polish round's fix round read
+          a click on the words opening nothing */}
+      <span
+        className="ts-title-clock-words"
+        data-control="deck.lastEdit.words"
+        aria-hidden="true"
+        onClick={() => shell.runItem(item)}
+      >
         {ago === null ? '' : words}
       </span>
       <i className="ts-title-dot" aria-hidden="true" />

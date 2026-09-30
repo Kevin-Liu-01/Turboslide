@@ -1,3 +1,6 @@
+/* first, before any module that parses with zod: the browser's jitless flag (packages/schema/src/
+   errors.ts; docs/POLISH.md item 112, the CSP reports zod's JIT posted on every page) */
+import '@turboslide/schema/errors';
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import { HeadContent, Link, Scripts, createRootRoute, useRouter } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';

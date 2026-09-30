@@ -120,7 +120,7 @@ describe('clickDownloadAnchor', () => {
 });
 
 describe('downloadFromPage', () => {
-  it('fetches a same origin address with the page credentials and saves its bytes under the server name', async () => {
+  it('fetches a same origin address with the page credentials and saves its bytes under the caller name, over the server name (item 86)', async () => {
     vi.useFakeTimers();
     const clicks = recordClicks();
     const calls: Array<{ url: string; credentials: RequestCredentials | undefined }> = [];
@@ -142,13 +142,29 @@ describe('downloadFromPage', () => {
     expect(calls).toEqual([
       { url: '/api/render/title?deck=acme&g=grant', credentials: 'same-origin' },
     ]);
-    expect(saved).toEqual({ name: 'acme-title.png', bytes: 4, type: 'image/png' });
+    expect(saved).toEqual({ name: 'acme.png', bytes: 4, type: 'image/png' });
     expect(clicks).toEqual([
-      { href: `blob:${ORIGIN}/4-image/png`, download: 'acme-title.png', rel: 'noopener' },
+      { href: `blob:${ORIGIN}/4-image/png`, download: 'acme.png', rel: 'noopener' },
     ]);
     expect(fakes.revoked).toEqual([]);
     vi.runAllTimers();
     expect(fakes.revoked).toEqual([`blob:${ORIGIN}/4-image/png`]);
+  });
+
+  it('saves under the server name when the caller passes none', async () => {
+    const clicks = recordClicks();
+    const fetchImpl: typeof fetch = async () =>
+      new Response(new Uint8Array([0x89, 0x50, 0x4e, 0x47]), {
+        status: 200,
+        headers: {
+          'content-type': 'image/png',
+          'content-disposition': 'attachment; filename="acme-title.png"',
+        },
+      });
+    const fakes = io(fetchImpl);
+    const saved = await downloadFromPage('/api/render/title?deck=acme&g=grant', { io: fakes.io });
+    expect(saved?.name).toBe('acme-title.png');
+    expect(clicks[0]?.download).toBe('acme-title.png');
   });
 
   it('names the file from the caller when the server sends no disposition and the address has no extension', async () => {

@@ -20,10 +20,18 @@ import { canFollow, chipTipOf, slideNumberOf, slotChips, viewerFactsOf } from '.
  * people are present. Four 24 px slots for others in roster order with 4 px gaps, the 32 by 24
  * `+N` chip drawn empty with its border until a fifth person joins, an 8 px gap, a hair rule, a
  * 7 px gap and the own chip with a 1 px ink border. A chip appears and leaves by opacity; a
- * click follows the person (4.4) or, where Follow is refused, jumps once to their slide; the
- * `+N` chip opens the roster menu (4.5); the own chip opens the own chip's menu (7.5). The row's
- * width never changes when a person joins or leaves. The slot itself carries a tooltip naming
- * who is in the presentation now (docs/PRODUCT.md section 2 rank 30; audit-seller 32).
+ * click on a chip opens the roster menu at the chip, whose row for that person offers Follow
+ * (4.4), Stop while they are followed, or Go to slide where Follow is refused; the `+N` chip
+ * opens the same roster (4.5); the own chip opens the own chip's menu (7.5). The row's width
+ * never changes when a person joins or leaves. The slot itself carries a tooltip naming who is
+ * in the presentation now (docs/PRODUCT.md section 2 rank 30; audit-seller 32).
+ *
+ * The polish round (docs/POLISH.md item 104; the row collab.follow.anonymous-editor): before it a
+ * chip's click followed the person at once and a second click stopped, with no word on screen,
+ * and the roster row's click toggled the same state, so a seller who clicked a chip to see who it
+ * was started following, and a click on the roster row after a chip click stopped a follow just
+ * started (the verifier read A following B's move in one of two runs). The chip now opens the
+ * roster with the person's row, where the word Follow or Stop says what the click does.
  */
 
 /** The slot's tooltip (rank 30): the name and one sentence, with the count while others are present. */
@@ -60,12 +68,16 @@ export function PresenceSlot() {
   const meRef = useRef<HTMLButtonElement>(null);
   const item = itemById('title.presence');
 
+  /* the roster row's action: Stop while the person is followed (the row reads Stop), Follow
+     otherwise; the one time jump where Follow is refused */
   const follow = (participant: PresenceParticipant) => {
     if (presence.following === participant.clientId) presence.onUnfollow?.();
     else if (presence.onFollow) presence.onFollow(participant.clientId);
     else if (input.editor?.followClient) input.editor.followClient(participant.clientId);
     else goTo(participant);
   };
+  /* a chip's click opens the roster at the chip; a second click on the same chip closes it */
+  const openRosterAt = (chip: HTMLElement) => setRoster((open) => (open === chip ? null : chip));
   const goTo = (participant: PresenceParticipant) => {
     if (presence.onGoTo) presence.onGoTo(participant.clientId);
     else if (input.editor?.goToClient) input.editor.goToClient(participant.clientId);
@@ -99,17 +111,21 @@ export function PresenceSlot() {
             data-control={`presence.chip.${participant.clientId}`}
             data-client={participant.clientId}
             data-menu-item={follows ? 'title.presence.follow' : 'title.presence.goTo'}
-            aria-pressed={follows ? following : undefined}
-            onClick={() => (follows ? follow(participant) : goTo(participant))}
+            data-following={following ? '' : undefined}
+            aria-haspopup="menu"
+            aria-expanded={roster !== null && roster.dataset.client === participant.clientId}
+            onClick={(event) => openRosterAt(event.currentTarget)}
             {...tipProps({
               name: following
                 ? PRESENCE.following(participant.name ?? participant.label)
                 : chipTipOf(participant, viewer, n),
               doc: follows
-                ? 'Click to follow; click again to stop'
+                ? following
+                  ? 'Opens the list, where Stop ends the follow'
+                  : 'Opens the list, where Follow moves with this person'
                 : n === null
                   ? 'This person has no slide open'
-                  : PRESENCE.goToSlide(n),
+                  : `Opens the list, where ${PRESENCE.goToSlide(n)} jumps once`,
             })}
           >
             <IdentityChip
@@ -201,7 +217,7 @@ export function PresenceSlot() {
             setAccount(meRef.current);
           }}
           onClose={() => setRoster(null)}
-          returnFocusTo={moreRef.current}
+          returnFocusTo={roster}
         />
       ) : null}
       {account !== null && self !== null ? (

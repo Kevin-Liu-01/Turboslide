@@ -213,10 +213,21 @@ describe('the title row slots', () => {
     expect(presence.querySelector('[data-control="presence.more"]')?.textContent).toBe('+16');
     expect(presence.getAttribute('data-count')).toBe('20');
     /* an anonymous editor with a slide open can be followed (docs/POLISH.md item 104): the
-       chip's click follows; the one time jump is the roster row's while the Follow row is parked */
-    fireEvent.click(presence.querySelector('[data-control="presence.chip.c1"]')!);
+       chip's click opens the roster at the chip, whose row for the person offers Follow; nothing
+       follows until the row is clicked (the chip's silent toggle was the jank of the polish
+       round's verifier) */
+    const chip = presence.querySelector('[data-control="presence.chip.c1"]')!;
+    fireEvent.click(chip);
+    expect(onFollow).not.toHaveBeenCalled();
+    expect(chip.getAttribute('aria-expanded')).toBe('true');
+    const atChip = document.getElementById('ts-menu-roster')!;
+    expect(atChip.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
+      PRESENCE.follow,
+    );
+    fireEvent.click(atChip.querySelector('[data-control="presence.roster.c1"]')!);
     expect(onFollow).toHaveBeenCalledWith('c1');
     expect(onGoTo).not.toHaveBeenCalled();
+    expect(document.getElementById('ts-menu-roster')).toBeNull();
     fireEvent.click(presence.querySelector('[data-control="presence.more"]')!);
     const roster = document.getElementById('ts-menu-roster')!;
     expect(roster.getAttribute('role')).toBe('menu');
@@ -247,6 +258,9 @@ describe('the title row slots', () => {
     });
     const onFollow = vi.fn();
     const onUnfollow = vi.fn();
+    /* the Follow row is parked until its matrix row passes (docs/POLISH.md item 104): the switch
+       on draws it, as the run of record does with the control unparked */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container, rerender } = render(
       <Harness
         input={input({ presence: { others: [maya], onFollow, onUnfollow } })}
@@ -256,6 +270,9 @@ describe('the title row slots', () => {
     const chip = container.querySelector('[data-control="presence.chip.c1"]')!;
     expect(chip.getAttribute('data-menu-item')).toBe('title.presence.follow');
     fireEvent.click(chip);
+    expect(onFollow).not.toHaveBeenCalled();
+    const atChip = document.getElementById('ts-menu-roster')!;
+    fireEvent.click(atChip.querySelector('[data-control="presence.roster.c1"]')!);
     expect(onFollow).toHaveBeenCalledWith('c1');
     rerender(
       <Harness

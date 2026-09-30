@@ -182,7 +182,11 @@ export function VersionsPanel({
   const [namedOnly, setNamedOnly] = useState(false);
   const [more, setMore] = useState<{ version: Version; anchor: HTMLElement } | null>(null);
   const [naming, setNaming] = useState<{ version: Version; value: string } | null>(null);
+  /* the windows the seller opened, and the ones the seller folded: the newest window is open by
+     default (docs/POLISH.md item 91; the polish round's verifier read a collapsed group with a
+     chevron where Google shows the versions open), the older ones fold until clicked */
   const [open, setOpen] = useState<Set<string>>(new Set());
+  const [closed, setClosed] = useState<Set<string>>(new Set());
   const [namingCurrent, setNamingCurrent] = useState<string | null>(null);
   const rows = [...versions].reverse();
   const listRef = useRef<HTMLDivElement>(null);
@@ -236,13 +240,20 @@ export function VersionsPanel({
     key: 'Enter',
   });
 
-  const toggleWindow = (key: string) =>
+  const toggleWindow = (key: string, expanded: boolean) => {
     setOpen((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
+      if (expanded) next.delete(key);
       else next.add(key);
       return next;
     });
+    setClosed((prev) => {
+      const next = new Set(prev);
+      if (expanded) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  };
 
   const versionRow = (version: Version, inWindow: boolean) => {
     const current = version.revision === revision;
@@ -363,10 +374,10 @@ export function VersionsPanel({
     );
   };
 
-  const windowRow = (window: VersionWindow) => {
+  const windowRow = (window: VersionWindow, newest: boolean) => {
     const single = window.versions.length === 1 || window.named;
     if (single) return window.versions.map((version) => versionRow(version, false));
-    const expanded = open.has(window.key);
+    const expanded = closed.has(window.key) ? false : newest || open.has(window.key);
     const marks = window.authors.slice(0, MARKS_PER_WINDOW);
     const more = window.authors.length - marks.length;
     return (
@@ -380,7 +391,7 @@ export function VersionsPanel({
           className="ts-version-window-row"
           aria-expanded={expanded}
           data-control={`versionHistory.window.${window.key}`}
-          onClick={() => toggleWindow(window.key)}
+          onClick={() => toggleWindow(window.key, expanded)}
           {...tipProps({
             name: windowTime(window.from, window.to),
             doc: `${window.versions.length} versions by ${window.authors.length === 1 ? 'one person' : `${window.authors.length} people`}; click to list them`,
@@ -497,11 +508,13 @@ export function VersionsPanel({
             {namedOnly ? 'No named versions yet' : 'No versions yet'}
           </p>
         ) : null}
-        {days.map((day) => (
+        {days.map((day, dayIndex) => (
           <section key={day.day} className="ts-versions-day" aria-label={day.day}>
             <h3 className="ts-versions-day-head">{day.day}</h3>
             <ul className="ts-versions-list">
-              {day.windows.flatMap((window) => windowRow(window))}
+              {day.windows.flatMap((window, windowIndex) =>
+                windowRow(window, dayIndex === 0 && windowIndex === 0),
+              )}
             </ul>
           </section>
         ))}

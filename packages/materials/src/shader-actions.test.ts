@@ -355,9 +355,9 @@ describe('shader.insert, shader.set and shader.frame on a file store', () => {
     const back = await frameBytesAsPng(webp);
     expect(pngSize(back)).toEqual([3200, 1814]);
     expect(await frameBytesAsPng(png)).toBe(png);
-    await expect(frameBytesAsPng(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]))).rejects.toThrow(
-      'a shader frame is a PNG or a WebP',
-    );
+    await expect(
+      frameBytesAsPng(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])),
+    ).rejects.toThrow('a shader frame is a PNG or a WebP');
     // the write: the twin is a PNG file named as before, the asset's size the frame's
     const written = await shaderFrame(deps, ctx, {
       baseRevision: current.deck.revision,

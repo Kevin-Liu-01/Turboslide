@@ -94,6 +94,35 @@ export function ownPrincipalOf(
   return out;
 }
 
+/**
+ * Whether the room's own row carries what the last answer said (the name; the mark's variant,
+ * letters, seed or picture), so the answer's overlay can go. The overlay held "until the row's
+ * key moved" before: on the blob tier the own row's mark moves on presence ticks that carry no
+ * identity change (each instance grants its own hue slot), so the overlay dropped within a second
+ * and the own chip fell back to the stale row for up to the room's 5 s identity cache (the
+ * integrator's preview readings of people.own-chip-follows-name and -avatar, docs/PEOPLE.md 3.11).
+ */
+export function rowReflects(
+  facts: MeAnswerFacts,
+  row: PresenceParticipant | null | undefined,
+): boolean {
+  if (row === null || row === undefined) return false;
+  if (facts.name !== undefined && row.name !== facts.name) return false;
+  if (facts.mark !== undefined) {
+    const mark = row.mark;
+    if (mark === undefined) return false;
+    if (mark.variant !== facts.mark.variant) return false;
+    if ((mark.initials ?? '') !== (facts.mark.initials ?? '')) return false;
+    if (
+      (facts.mark.variant === 'glyph' || facts.mark.variant === 'dither') &&
+      mark.glyphSeed !== facts.mark.glyphSeed
+    )
+      return false;
+    if (facts.mark.variant === 'picture' && mark.pictureUrl !== facts.mark.pictureUrl) return false;
+  }
+  return true;
+}
+
 /** The 64 px picture URL of the caller (4.4): the choice's file, else the mark's. */
 export function ownPictureUrlOf(
   avatar: AvatarChoiceView | null | undefined,

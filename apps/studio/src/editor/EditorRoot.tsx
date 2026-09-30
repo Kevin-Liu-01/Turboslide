@@ -125,6 +125,7 @@ import {
   ownPictureUrlOf,
   ownPrincipalOf,
   rosterKeyOf,
+  rowReflects,
   shellIdentitiesOf,
 } from './own-identity';
 import type { MeAnswerFacts } from './own-identity';
@@ -832,8 +833,11 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     ...identityView(payload.identity, author),
     ...(payload.identity?.mark !== undefined ? { mark: payload.identity.mark } : {}),
   };
-  const rosterKey = rosterKeyOf(ownRow);
-  const overlay = me !== null && me.rosterKey === rosterKey ? me.facts : null;
+  /* the answer's overlay stands until the room's own row carries what the answer said (the
+     name, the mark), not until the row's key moves: on the blob tier the row's mark moves on
+     presence ticks with no identity change (own-identity.ts rowReflects says how the chip fell
+     back to the stale row) */
+  const overlay = me !== null && !rowReflects(me.facts, ownRow) ? me.facts : null;
   const principal = ownPrincipalOf(payloadIdentity, ownRow, overlay);
   const avatarChoice: AvatarChoiceView | undefined =
     (chosenAvatar !== undefined ? chosenAvatar : payload.identity?.avatar) ?? undefined;
@@ -921,8 +925,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   };
   /* the room's own row moved past the state the answer overlaid: the room is the source again */
   useEffect(() => {
-    if (me !== null && me.rosterKey !== rosterKey) setMe(null);
-  }, [me, rosterKey]);
+    if (me !== null && rowReflects(me.facts, ownRow)) setMe(null);
+  }, [me, ownRow]);
   /* the resolved identities of the stored surfaces (docs/PEOPLE.md 3.8, 3.10, 3.17; build/b3.md
      R2, R3): the payload's map for the Share dialog's people; for the version rows and the
      roster the controller's merged and disambiguated map (controller.identities(), cached per

@@ -7,6 +7,7 @@ import {
   meAnswerFacts,
   ownPictureUrlOf,
   ownPrincipalOf,
+  rowReflects,
   rosterKeyOf,
   shellIdentitiesOf,
   viewOfRow,
@@ -185,5 +186,67 @@ describe('shellIdentitiesOf', () => {
     expect('clientId' in out[other.principalId]!).toBe(false);
     expect(out[payload.principalId]).toEqual(payload);
     expect(out['anon_22222222-2222-4222-8222-222222222222']?.name).toBe('Ada');
+  });
+});
+
+describe('rowReflects (the answer overlay on the blob tier)', () => {
+  const row = (facts: Partial<PresenceParticipant>): PresenceParticipant =>
+    ({
+      principalId: 'anon_1',
+      label: 'Pumice 685',
+      trust: 'label',
+      kind: 'anonymous',
+      clientId: 'c1',
+      role: 'owner',
+      hue: 1,
+      pointer: null,
+      following: null,
+      presenting: false,
+      idle: false,
+      lastSeenAt: '2026-09-30T02:00:00.000Z',
+      ...facts,
+    }) as unknown as PresenceParticipant;
+  const glyph = {
+    variant: 'glyph',
+    initials: '',
+    glyphSeed: 7,
+    density: 2,
+  } as unknown as IdentityView['mark'];
+
+  it('holds the name overlay until the row carries the name, whatever else on the row moved', () => {
+    expect(rowReflects({ name: 'Probe Person' }, row({}))).toBe(false);
+    expect(rowReflects({ name: 'Probe Person' }, row({ hue: 3, lastSeenAt: 'later' }))).toBe(false);
+    expect(rowReflects({ name: 'Probe Person' }, row({ name: 'Probe Person' }))).toBe(true);
+    expect(rowReflects({ name: 'Probe Person' }, null)).toBe(false);
+  });
+
+  it('holds the mark overlay until the row draws the same variant, letters and seed', () => {
+    const initials = {
+      variant: 'initials',
+      initials: 'PP',
+      density: 1,
+    } as unknown as IdentityView['mark'];
+    expect(rowReflects({ mark: glyph }, row({ mark: initials }))).toBe(false);
+    expect(
+      rowReflects(
+        { mark: glyph },
+        row({ mark: { ...glyph, glyphSeed: 9 } as IdentityView['mark'] }),
+      ),
+    ).toBe(false);
+    expect(
+      rowReflects(
+        { mark: glyph },
+        row({
+          mark: { ...glyph, hue: { slot: 4, hex: '#000' } } as unknown as IdentityView['mark'],
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      rowReflects(
+        { mark: initials },
+        row({ mark: { ...initials, initials: 'PQ' } as IdentityView['mark'] }),
+      ),
+    ).toBe(false);
+    expect(rowReflects({}, row({}))).toBe(true);
   });
 });

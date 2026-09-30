@@ -22,6 +22,14 @@ import { deckAppearance, isCanvasSlide, slideBlocks } from '@turboslide/schema/d
 import type { Mutation } from '@turboslide/schema/mutations';
 import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 import { MATERIAL_ANCHORS } from '@turboslide/schema/blocks/material';
+import { ACTIONS } from '@turboslide/schema/actions';
+import { shaderPaletteOfDeck } from '@turboslide/materials/presets';
+import {
+  FRAME_UPLOAD_ABOVE_BYTES,
+  bytesToBase64,
+  captureBackgroundFrame,
+  clientCanCapture,
+} from '@turboslide/viewer/shader-frame';
 
 import { Dialog, DialogCheck, DialogField } from '../Dialog';
 import { BACKGROUND_PICTURE_POS, insertBlockPlan, factsOf } from '../editor-shell';
@@ -76,6 +84,57 @@ import '../inspector/dither.css';
 
 /** The Shader section of Format options (5.3, B5's `inspector/shader.tsx`); the id joins `FormatSectionId` with B5's format-sections.ts change. */
 const SHADER_SECTION: FormatSectionId | 'shader' = 'shader';
+
+/** The frame Place sends with its write: the client's own pixels as base64 and its renderer string. */
+export type BackgroundFrame = { bytes: string; renderer: string };
+
+/**
+ * True when the action table takes the client's frame on `slide.setBackgroundMaterial` (the field
+ * `frame` of packages/schema/src/actions.ts, the integrator's hunk of the polish round's fix
+ * round 2); until it lands the hosted render is Place's one path, so a build with the older table
+ * never sends a field the schema refuses.
+ */
+function schemaTakesFrame(): boolean {
+  const input = ACTIONS['slide.setBackgroundMaterial']?.input as
+    { shape?: Record<string, unknown> } | undefined;
+  return input?.shape !== undefined && 'frame' in input.shape;
+}
+
+/**
+ * Place's client pixel path (docs/FEATURES.md 5.5; the polish round's fix round 2 for
+ * `shaders.background.place-answers`): the ground's frame drawn in this browser's WebGL at the
+ * sheet's aspect, the same path a block's frame takes, so the function stores the bytes instead
+ * of launching Chromium (the walk's Place waited 17 s and then past 65 s for the hosted render).
+ * The three seams are one object so a test replaces them: whether the table takes the field,
+ * whether this browser draws, and the capture itself.
+ */
+export const backgroundCapture = {
+  takesFrame: schemaTakesFrame,
+  canCapture: clientCanCapture,
+  capture: captureBackgroundFrame,
+};
+
+/**
+ * The frame for Place, or null when the hosted render is the path: the table without the field, a
+ * browser without WebGL, a capture that fails, or bytes still over the function's cap as a WebP.
+ */
+export async function backgroundFrameFor(
+  recipe: { materialId: string; preset?: string; anchor: number },
+  deck: Parameters<typeof shaderPaletteOfDeck>[0],
+): Promise<BackgroundFrame | null> {
+  if (!backgroundCapture.takesFrame() || !backgroundCapture.canCapture()) return null;
+  try {
+    const drawn = await backgroundCapture.capture(recipe, shaderPaletteOfDeck(deck), {
+      maxBytes: FRAME_UPLOAD_ABOVE_BYTES,
+    });
+    if (drawn.bytes.length > FRAME_UPLOAD_ABOVE_BYTES) return null;
+    return { bytes: bytesToBase64(drawn.bytes), renderer: drawn.renderer };
+  } catch (error: unknown) {
+    /* the hosted render is the path; the reason stays in the console (the frame capturer's rule) */
+    console.warn('background frame', error);
+    return null;
+  }
+}
 export function BackgroundDialog() {
   const shell = useEditorShell();
   const { input, settings } = shell;
@@ -352,7 +411,10 @@ export function BackgroundDialog() {
   /**
    * Place: `slide.setBackgroundMaterial` at the catalog's default anchor, one call (10.6, 10.8).
    * The button reads "Placing" with the seconds while the frame renders (5.5; the walk's Place ran
-   * 93 s, audit-shaders 1), and a rejection reads as one sentence, never a log.
+   * 93 s, audit-shaders 1), and a rejection reads as one sentence, never a log. When the table
+   * takes the client's frame and this browser draws, the frame is captured here first and travels
+   * inside the write (`backgroundFrameFor`), so the function launches no browser; otherwise the
+   * write is dispatched at once and the hosted render draws it, as before.
    */
   const place = () => {
     if (slide === undefined || shader === null || placing) return;
@@ -369,20 +431,26 @@ export function BackgroundDialog() {
       window.clearInterval(placingTimer.current);
       placingTimer.current = 0;
     };
-    input
-      .dispatch('slide.setBackgroundMaterial', {
+    const recipe = {
+      materialId: shader.entry.id,
+      ...(shader.preset !== undefined ? { preset: shader.preset.name } : {}),
+      anchor: MATERIAL_ANCHORS[1],
+    };
+    const write = (frame: BackgroundFrame | null) =>
+      input.dispatch('slide.setBackgroundMaterial', {
         slideIds: [slide.id],
-        materialId: shader.entry.id,
-        ...(shader.preset !== undefined ? { preset: shader.preset.name } : {}),
-        anchor: MATERIAL_ANCHORS[1],
+        ...recipe,
         ...(shaderDither
           ? {
               dither:
                 rememberedPreset === 'neutral' ? DITHER_TOGGLE_VALUE : DITHER_PHOTOGRAPH_VALUE,
             }
           : {}),
+        ...(frame === null ? {} : { frame }),
         baseRevision: input.revision,
-      })
+      });
+    const clientPath = backgroundCapture.takesFrame() && backgroundCapture.canCapture();
+    (clientPath ? backgroundFrameFor(recipe, input.document.deck).then(write) : write(null))
       .then(() => {
         stop();
         shell.closeDialog();

@@ -705,6 +705,16 @@ function BlockSection({
   };
   const set = (path: string, value: unknown) =>
     commitMutations(shaderSetMutations(deck, write.slideId, block, path, value));
+  /* a preset pick reaches the live mount at once (the polish round's fix round 2, the row
+     `shaders.panel.preset-tiles`: the canvas changed 514 to 750 ms after the click against the
+     500 ms bound, the time of the body's re-render and the mount's remount with a shader compile):
+     the preset's resolved uniforms go to the live handle the way a held slider's do, and the write
+     follows; the remount the write brings draws the same pixels */
+  const pickPreset = (name: string) => {
+    const base = presetBase(entry, name);
+    if (base !== null) previewShaderUniforms(block.id, base);
+    set('/preset', name);
+  };
 
   /* a held slider: the stage's live mount takes the draft, nothing is written (5.3) */
   const preview = (name: MaterialControlName, value: number) => {
@@ -776,12 +786,7 @@ function BlockSection({
       <Head entry={entry} stale={stale} busy={busy} parked={parked} onChange={onChange} />
 
       {parked(`${ID}.preset`) ? null : (
-        <PresetTiles
-          entry={entry}
-          current={block.preset}
-          disabled={busy}
-          onPick={(name) => set('/preset', name)}
-        />
+        <PresetTiles entry={entry} current={block.preset} disabled={busy} onPick={pickPreset} />
       )}
 
       {parked(`${ID}.color`) ? null : (
@@ -789,7 +794,7 @@ function BlockSection({
           palette={palette}
           ground={ground}
           disabled={busy}
-          onPick={(role) => set('/preset', palettePresetOfRole(role))}
+          onPick={(role) => pickPreset(palettePresetOfRole(role))}
           onCustom={applyCustom}
         />
       )}

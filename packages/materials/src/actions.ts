@@ -752,6 +752,13 @@ export async function slideSetBackgroundPicture(
   return { revision: committed.revision, assetId, slides, findings: [] };
 }
 
+/**
+ * The frame a client drew for a shader ground (the polish round's fix round 2, the row
+ * `shaders.background.place-answers`): the PNG, or the WebP the editor sends for a PNG over the
+ * function's cap, as base64, and the WebGL renderer string of the client that drew it.
+ */
+export type BackgroundFrameInput = { bytes: string; renderer?: string };
+
 export type SetBackgroundMaterialInput = Rev & {
   slideIds: string[];
   materialId: string;
@@ -759,6 +766,8 @@ export type SetBackgroundMaterialInput = Rev & {
   uniforms?: MaterialUniforms;
   anchor?: number;
   dither?: PictureDither;
+  /** The client's own frame; with it no browser launches in the function (`placeClientBackgroundFrame`). */
+  frame?: BackgroundFrameInput;
 };
 
 /** The catalog's default anchor (SPEC-3 10.6: 5,500 ms). */
@@ -775,6 +784,7 @@ export async function slideSetBackgroundMaterial(
   input: SetBackgroundMaterialInput,
 ): Promise<SetBackgroundOutput> {
   const anchor = input.anchor ?? DEFAULT_MATERIAL_ANCHOR;
+  if (input.frame !== undefined) return placeClientBackgroundFrame(deps, ctx, input, anchor);
   const id = slugify(
     `bg-${input.materialId.replace(/^paper:/, '')}${input.preset !== undefined ? `-${input.preset}` : ''}-${anchor}`,
   );
@@ -795,6 +805,98 @@ export async function slideSetBackgroundMaterial(
     baseRevision: revision,
     slideIds: input.slideIds,
     assetId: asset.id,
+    ...(input.dither !== undefined ? { dither: input.dither } : {}),
+  });
+}
+
+/** The block a shader ground's frame is keyed by: a covering box at the sheet's aspect (viewer shader-frame.ts `backgroundFrameBlock`). */
+export function backgroundFrameBlockOf(
+  input: Pick<SetBackgroundMaterialInput, 'materialId' | 'preset' | 'uniforms'>,
+  anchor: number,
+  entry: MaterialEntry,
+): MaterialBlock {
+  const preset =
+    input.preset === undefined ? undefined : entry.presets.find((p) => p.name === input.preset);
+  const which = preset === undefined ? '' : ` in the ${preset.label.toLowerCase()} preset`;
+  return {
+    id: 'background',
+    type: 'material',
+    materialId: input.materialId,
+    ...(input.preset !== undefined ? { preset: input.preset } : {}),
+    ...(input.uniforms !== undefined ? { uniforms: input.uniforms } : {}),
+    anchor,
+    pos: { x: 0, y: 0, w: SHEET_WIDTH, h: SHEET_HEIGHT, z: 0 },
+    alt: `The ${entry.label.toLowerCase()} shader${which}, behind the slide`,
+  };
+}
+
+/**
+ * Change background > Shader > Place with the frame the editor drew (docs/FEATURES.md 5.5's client
+ * pixel path; the polish round's fix round 2 for `shaders.background.place-answers`: the hosted
+ * render in the function's Chromium answered after 17 s on the run of record and not within 65 s
+ * on its rerun). The bytes are checked as a frame of the sheet's aspect (3200 by 1800), stored
+ * under the key derived id the block frames use (5.5's storage rule, so a repeated recipe reuses
+ * the file and two clients resolve to one asset), recorded with the record `shader.frame` writes
+ * (`frameAssetOf`, backend `client`, the preset under `ext` for the Shader section's ground read),
+ * and the covering picture lands through `slideSetBackgroundPicture` as before. No browser
+ * launches in the function on this path.
+ */
+export async function placeClientBackgroundFrame(
+  deps: AssetActionDeps,
+  ctx: AssetWriteContext,
+  input: SetBackgroundMaterialInput,
+  anchor: number,
+): Promise<SetBackgroundOutput> {
+  const frame = input.frame;
+  if (frame === undefined) throw new TypeError('slide.setBackgroundMaterial: no frame to place');
+  const current = (await deps.store.read()).document;
+  const palette = shaderPaletteOfDeck(current.deck);
+  const entry = entryWithPalette(requireMaterial(input.materialId), palette);
+  const block = backgroundFrameBlockOf(input, anchor, entry);
+  const frameKey = frameKeyOf(block, palette);
+  const png = await frameBytesAsPng(new Uint8Array(Buffer.from(frame.bytes, 'base64')));
+  const size = pngSize(png);
+  const wanted = frameSizeFor(materialAspectOf(block));
+  if (size[0] !== wanted[0] || size[1] !== wanted[1])
+    throw new RangeError(
+      `a shader ground's frame is ${wanted[0]} by ${wanted[1]} (docs/FEATURES.md 5.5); got ${size[0]} by ${size[1]}`,
+    );
+  const assetId = frameAssetId(frameKey);
+  const relative = `assets/${assetId}@2x.png`;
+  let put: { relative: string; existed: boolean };
+  try {
+    put = await deps.store.putAsset(relative, png, 'image/png');
+  } catch (error) {
+    // the first writer's file stands for a repeated key (commitFrame's rule; docs/FEATURES.md 5.5)
+    if (!(error instanceof AssetExistsError) && !isBlobExistsError(error)) throw error;
+    put = { relative, existed: true };
+  }
+  const asset: Asset = {
+    ...frameAssetOf(
+      entry,
+      block,
+      palette,
+      frameKey,
+      size,
+      put.relative,
+      'client',
+      frame.renderer ?? 'client',
+    ),
+    ...(input.preset !== undefined ? { ext: { preset: input.preset } } : {}),
+  };
+  const held = current.deck.assets[assetId];
+  let baseRevision = input.baseRevision;
+  if (held === undefined || sortedJson(held) !== sortedJson(asset)) {
+    const committed = await commitAssets(deps, ctx, baseRevision, [asset]);
+    baseRevision = committed.revision;
+  }
+  deps.log?.(
+    `background frame: ${assetId} ${size[0]} by ${size[1]} client${put.existed ? ' (existed)' : ''}`,
+  );
+  return slideSetBackgroundPicture(deps, ctx, {
+    baseRevision,
+    slideIds: input.slideIds,
+    assetId,
     ...(input.dither !== undefined ? { dither: input.dither } : {}),
   });
 }

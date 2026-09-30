@@ -20,6 +20,22 @@ import { hideTooltip } from '../Tooltip';
 // uniforms, a preset change clearing both, and a parked control not drawn while the switch is
 // off and drawn with it on (the B5 surface of parked-controls.test.ts's todo).
 
+/* the live mount's preview seam (viewer MaterialMount.tsx): a preset pick pushes the preset's
+   uniforms to the block's live handle before the write, so the canvas changes at once */
+const previewed = vi.fn<(blockId: string, uniforms: Record<string, unknown>) => boolean>(
+  () => true,
+);
+vi.mock('@turboslide/viewer/MaterialMount', async () => {
+  const actual = await vi.importActual<typeof import('@turboslide/viewer/MaterialMount')>(
+    '@turboslide/viewer/MaterialMount',
+  );
+  return {
+    ...actual,
+    previewShaderUniforms: (blockId: string, uniforms: Record<string, unknown>) =>
+      previewed(blockId, uniforms),
+  };
+});
+
 vi.mock('../parked-controls', async () => {
   const actual = await vi.importActual<typeof import('../parked-controls')>('../parked-controls');
   return {
@@ -140,6 +156,7 @@ describe('the Shader section', () => {
       '[data-control="formatOptions.shader.preset.sphere"]',
     );
     if (sphere === null) throw new Error('no tile');
+    previewed.mockClear();
     fireEvent.click(sphere);
     expect(dispatch).toHaveBeenCalledTimes(2);
     const preset = (
@@ -147,17 +164,34 @@ describe('the Shader section', () => {
     ).mutations;
     expect(preset.map((m) => m.path)).toEqual(['/preset']);
     expect(preset[0]?.value).toBe('sphere');
+    /* the pick reached the live mount first, with the sphere preset's resolved uniforms (the
+       polish round's fix round 2, shaders.panel.preset-tiles) */
+    expect(previewed).toHaveBeenCalledTimes(1);
+    expect(previewed.mock.calls[0]?.[0]).toBe('shader');
+    const pushed = previewed.mock.calls[0]?.[1] ?? {};
+    expect(Object.keys(pushed).length).toBeGreaterThan(0);
+    expect(pushed).not.toEqual(
+      (() => {
+        const seen = previewed.mock.calls[0]?.[1];
+        return seen === undefined ? {} : { ...seen, u_repetition: 'not the same' };
+      })(),
+    );
+    expect(previewed.mock.invocationCallOrder[0]).toBeLessThan(
+      dispatch.mock.invocationCallOrder[1] ?? Infinity,
+    );
 
     // a kit swatch writes the role's palette preset
     const primary = container.querySelector<HTMLButtonElement>(
       '[data-control="formatOptions.shader.color.primary"]',
     );
     if (primary === null) throw new Error('no swatch');
+    previewed.mockClear();
     fireEvent.click(primary);
     const colour = (
       dispatch.mock.calls[2]?.[1] as { mutations: { path: string; value?: unknown }[] }
     ).mutations;
     expect(colour[0]).toMatchObject({ path: '/preset', value: 'brand-blue' });
+    expect(previewed).toHaveBeenCalledTimes(1);
   });
 
   it('hides a parked control while the switch is off and draws it with the switch on', () => {

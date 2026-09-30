@@ -7,7 +7,12 @@
 // driven in the browser by core/shaders.spec.ts; here the capture is a fake.
 import { describe, expect, it } from 'vitest';
 
-import { frameAssetId, frameKeyOf } from '@turboslide/materials/recipe-key';
+import {
+  frameAssetId,
+  frameKeyOf,
+  frameSizeFor,
+  materialAspectOf,
+} from '@turboslide/materials/recipe-key';
 import type { Asset } from '@turboslide/schema/assets';
 import type { Block } from '@turboslide/schema/blocks';
 import type { MaterialBlock } from '@turboslide/schema/blocks/material';
@@ -16,7 +21,10 @@ import { freeformDocument } from '@turboslide/schema/fixtures';
 import type { Mutation } from '@turboslide/schema/mutations';
 
 import {
+  CONFLICT_RESCHEDULES,
+  backgroundFrameBlock,
   bytesToBase64,
+  conflictWait,
   createShaderFrameCapturer,
   materialBlocksOf,
   shaderBlocksTouched,
@@ -192,7 +200,7 @@ describe('the capturer', () => {
     capturer.dispose();
   });
 
-  it('drops the write on a conflict when the block’s key moved on, and retries once otherwise', async () => {
+  it('drops the write on a conflict when the block’s key moved on, and schedules it again after the rest with the pixels kept while the key stands', async () => {
     let doc = documentWith([shader('shader')]);
     const c = clock();
     const outcomes: ShaderFrameWriteOutcome[] = [
@@ -200,19 +208,23 @@ describe('the capturer', () => {
       { ok: true, revision: 3 },
     ];
     const writes: ShaderFrameWrite[] = [];
+    let drawn = 0;
     const capturer = createShaderFrameCapturer({
       document: () => doc,
       write: async (input) => {
         writes.push(input);
         return outcomes.shift() ?? { ok: true, revision: 4 };
       },
-      capture: async (target, palette) => ({
-        bytes: new Uint8Array([7]),
-        width: 3200,
-        height: 1814,
-        renderer: 'r',
-        frameKey: frameKeyOf(target, palette),
-      }),
+      capture: async (target, palette) => {
+        drawn += 1;
+        return {
+          bytes: new Uint8Array([7]),
+          width: 3200,
+          height: 1814,
+          renderer: 'r',
+          frameKey: frameKeyOf(target, palette),
+        };
+      },
       canCapture: () => true,
       now: c.now,
       setTimer: c.setTimer,
@@ -220,8 +232,15 @@ describe('the capturer', () => {
     });
     capturer.schedule(SLIDE, 'shader');
     await c.advance(800);
-    // the block held its key: the write went once more and landed
+    // the block held its key: the head is behind this tab's commit, so the write waits one rest
+    expect(writes).toHaveLength(1);
+    expect(capturer.pending()).toEqual([`${SLIDE}#shader`]);
+    await c.advance(800);
+    // the write went once more with the same pixels, drawn once, and landed
     expect(writes).toHaveLength(2);
+    expect(drawn).toBe(1);
+    expect(writes[1]?.bytes).toBe(writes[0]?.bytes);
+    expect(capturer.pending()).toEqual([]);
 
     // the block moved on before the retry: the write is dropped
     const moved = shader('shader', { anchor: 7000 });
@@ -250,9 +269,60 @@ describe('the capturer', () => {
     const before = writes.length;
     capturer2.schedule(SLIDE, 'shader');
     await c.advance(800);
+    await c.advance(800);
     expect(writes.length).toBe(before + 2);
+    expect(capturer2.pending()).toEqual([]);
     capturer.dispose();
     capturer2.dispose();
+  });
+
+  it('reports one sentence when the head keeps an older recipe through every rescheduled write, and draws the frame once', async () => {
+    const doc = documentWith([shader('shader')]);
+    const c = clock();
+    const errors: unknown[] = [];
+    let writes = 0;
+    let drawn = 0;
+    const capturer = createShaderFrameCapturer({
+      document: () => doc,
+      write: async () => {
+        writes += 1;
+        return { ok: false, conflict: true };
+      },
+      capture: async (target, palette) => {
+        drawn += 1;
+        return {
+          bytes: new Uint8Array([7]),
+          width: 3200,
+          height: 1814,
+          renderer: 'r',
+          frameKey: frameKeyOf(target, palette),
+        };
+      },
+      canCapture: () => true,
+      onError: (error) => errors.push(error),
+      now: c.now,
+      setTimer: c.setTimer,
+      clearTimer: c.clearTimer,
+    });
+    capturer.schedule(SLIDE, 'shader');
+    await c.advance(800);
+    expect(writes).toBe(1);
+    /* the waits double from the rest: 0.8, 1.6, 3.2, 6.4 and 12.8 s; the last miss throws and the
+       catch's one more attempt writes at once, so the count steps from five to seven there */
+    for (let i = 1; i <= CONFLICT_RESCHEDULES; i += 1) {
+      await c.advance(conflictWait(800, i) - 1);
+      expect(writes).toBe(i);
+      await c.advance(1);
+      expect(writes).toBe(i < CONFLICT_RESCHEDULES ? i + 1 : CONFLICT_RESCHEDULES + 2);
+    }
+    await c.advance(800);
+    // the first write, CONFLICT_RESCHEDULES more after their waits, then the catch's one more attempt
+    expect(writes).toBe(CONFLICT_RESCHEDULES + 2);
+    expect(drawn).toBe(1);
+    expect(errors).toHaveLength(1);
+    expect(String(errors[0])).toContain('older recipe');
+    expect(capturer.pending()).toEqual([]);
+    capturer.dispose();
   });
 
   it('asks the hosted job when the client cannot draw', async () => {
@@ -394,7 +464,8 @@ describe('the capturer', () => {
     await c.advance(800);
     await c.advance(0);
     expect(puts).toBe(2);
-    expect(captures).toEqual(['shader', 'shader']);
+    /* the pixels of the key are drawn once; the second attempt puts them again */
+    expect(captures).toEqual(['shader']);
     expect(errors).toHaveLength(1);
     expect(capturer.pending()).toEqual([]);
     capturer.dispose();
@@ -540,5 +611,33 @@ describe('the capturer', () => {
     expect(hosted).toEqual(['shader']);
     expect(none).toEqual([]);
     capturer3.dispose();
+  });
+});
+
+describe('a shader ground’s frame (Change background > Shader > Place)', () => {
+  it('is keyed and sized by a covering block at the sheet’s aspect, so the client’s frame and the hosted job’s share one key and one size', () => {
+    const block = backgroundFrameBlock({
+      materialId: 'paper:liquid-metal',
+      preset: 'diamond',
+      anchor: 5500,
+    });
+    expect(block.pos).toEqual({ x: 0, y: 0, w: 1600, h: 900, z: 0 });
+    expect(frameSizeFor(materialAspectOf(block))).toEqual([3200, 1800]);
+    expect(frameKeyOf(block)).toBe(
+      frameKeyOf({
+        materialId: 'paper:liquid-metal',
+        preset: 'diamond',
+        anchor: 5500,
+        pos: { x: 0, y: 0, w: 1600, h: 900, z: -3 },
+      }),
+    );
+    /* the recipe's absent fields stay absent, so the key reads the catalog's defaults as the block's would */
+    expect(backgroundFrameBlock({ materialId: 'paper:gem-smoke' })).toEqual({
+      materialId: 'paper:gem-smoke',
+      pos: { x: 0, y: 0, w: 1600, h: 900, z: 0 },
+    });
+    expect(frameKeyOf(backgroundFrameBlock({ materialId: 'paper:gem-smoke' }))).not.toBe(
+      frameKeyOf(backgroundFrameBlock({ materialId: 'paper:gem-smoke', preset: 'fire' })),
+    );
   });
 });

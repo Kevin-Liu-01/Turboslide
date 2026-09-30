@@ -8,7 +8,9 @@ import type { Block, PictureBlock } from '@turboslide/schema/blocks';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { workedDocument } from '@turboslide/schema/fixtures';
 
-import { BackgroundDialog } from '../dialogs/Background';
+import { FRAME_UPLOAD_ABOVE_BYTES } from '@turboslide/viewer/shader-frame';
+
+import { BackgroundDialog, backgroundCapture } from '../dialogs/Background';
 import { SHADER_GALLERY } from '../dialogs/ShaderGallery';
 import { DEFAULT_SETTINGS, buildMenuContext } from '../editor-shell';
 import type { ShellSettings } from '../editor-shell';
@@ -254,6 +256,121 @@ describe('the Background dialog’s Shader row', () => {
     fireEvent.click(control('dialog.background.shader.place') as HTMLElement);
     await flush();
     expect(control('dialog.background.error')?.textContent).toBe('The frame took too long');
+  });
+
+  it('Place draws the frame in this browser first when the table takes it, and the write carries the bytes and the renderer (the polish round’s fix round 2)', async () => {
+    const seams = { ...backgroundCapture };
+    const drawn = {
+      bytes: new Uint8Array([1, 2, 3, 4]),
+      type: 'image/png' as const,
+      width: 3200,
+      height: 1800,
+      renderer: 'ANGLE (Apple, test)',
+      frameKey: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+    };
+    let release: () => void = () => {};
+    const capture = vi.fn(
+      () =>
+        new Promise<typeof drawn>((resolve) => {
+          release = () => resolve(drawn);
+        }),
+    );
+    backgroundCapture.takesFrame = () => true;
+    backgroundCapture.canCapture = () => true;
+    backgroundCapture.capture = capture;
+    try {
+      const dispatch = vi.fn(() => Promise.resolve({ revision: 10 }));
+      const closeDialog = vi.fn();
+      render(
+        <Host input={input(dispatch, canvasDocument(null))} shell={{ closeDialog }}>
+          <BackgroundDialog />
+        </Host>,
+      );
+      fireEvent.click(control('dialog.background.shader') as HTMLElement);
+      fireEvent.click(control('dialog.shader.tile.paper:liquid-metal') as HTMLElement);
+      const place = control('dialog.background.shader.place') as HTMLButtonElement;
+      fireEvent.click(place);
+      /* the button reads Placing through the capture too, and the write waits for the frame */
+      expect(place.textContent).toBe('Placing');
+      expect(place.disabled).toBe(true);
+      expect(capture).toHaveBeenCalledTimes(1);
+      expect(capture).toHaveBeenLastCalledWith(
+        { materialId: 'paper:liquid-metal', preset: 'diamond', anchor: 5500 },
+        expect.objectContaining({ background: expect.any(String), text: expect.any(String) }),
+        { maxBytes: FRAME_UPLOAD_ABOVE_BYTES },
+      );
+      expect(dispatch).not.toHaveBeenCalled();
+      await act(async () => {
+        release();
+        await Promise.resolve();
+      });
+      await flush();
+      expect(dispatch).toHaveBeenCalledTimes(1);
+      expect(dispatch).toHaveBeenLastCalledWith('slide.setBackgroundMaterial', {
+        slideIds: ['cv'],
+        materialId: 'paper:liquid-metal',
+        preset: 'diamond',
+        anchor: 5500,
+        frame: { bytes: 'AQIDBA==', renderer: 'ANGLE (Apple, test)' },
+        baseRevision: 9,
+      });
+      expect(closeDialog).toHaveBeenCalledTimes(1);
+    } finally {
+      Object.assign(backgroundCapture, seams);
+    }
+  });
+
+  it('a capture that fails, or a frame still over the cap, hands Place to the hosted render without the field', async () => {
+    const seams = { ...backgroundCapture };
+    backgroundCapture.takesFrame = () => true;
+    backgroundCapture.canCapture = () => true;
+    try {
+      backgroundCapture.capture = vi.fn(() => Promise.reject(new Error('no WebGL context')));
+      const dispatch = vi.fn(() => Promise.resolve({ revision: 10 }));
+      render(
+        <Host input={input(dispatch, canvasDocument(null))}>
+          <BackgroundDialog />
+        </Host>,
+      );
+      fireEvent.click(control('dialog.background.shader') as HTMLElement);
+      fireEvent.click(control('dialog.shader.tile.paper:liquid-metal') as HTMLElement);
+      fireEvent.click(control('dialog.background.shader.place') as HTMLElement);
+      await flush();
+      expect(dispatch).toHaveBeenCalledTimes(1);
+      expect(dispatch).toHaveBeenLastCalledWith('slide.setBackgroundMaterial', {
+        slideIds: ['cv'],
+        materialId: 'paper:liquid-metal',
+        preset: 'diamond',
+        anchor: 5500,
+        baseRevision: 9,
+      });
+      cleanup();
+      /* bytes over the cap even as a WebP: the hosted job draws them inside the function */
+      backgroundCapture.capture = vi.fn(() =>
+        Promise.resolve({
+          bytes: new Uint8Array(FRAME_UPLOAD_ABOVE_BYTES + 1),
+          type: 'image/webp' as const,
+          width: 3200,
+          height: 1800,
+          renderer: 'webgl2',
+          frameKey: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+        }),
+      );
+      const second = vi.fn(() => Promise.resolve({ revision: 10 }));
+      render(
+        <Host input={input(second, canvasDocument(null))}>
+          <BackgroundDialog />
+        </Host>,
+      );
+      fireEvent.click(control('dialog.background.shader') as HTMLElement);
+      fireEvent.click(control('dialog.shader.tile.paper:liquid-metal') as HTMLElement);
+      fireEvent.click(control('dialog.background.shader.place') as HTMLElement);
+      await flush();
+      expect(second).toHaveBeenCalledTimes(1);
+      expect((second.mock.calls[0] as unknown[])[1]).not.toHaveProperty('frame');
+    } finally {
+      Object.assign(backgroundCapture, seams);
+    }
   });
 
   it('a covering shader reads by its words and Shader options opens Format options at the Shader section', () => {

@@ -29,10 +29,11 @@ import {
   materialAspectOf,
 } from '@turboslide/materials/recipe-key';
 import type { FrameKeyBlock } from '@turboslide/materials/recipe-key';
-import type { MaterialBlock } from '@turboslide/schema/blocks/material';
+import type { MaterialBlock, MaterialUniforms } from '@turboslide/schema/blocks/material';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
 import type { Mutation } from '@turboslide/schema/mutations';
+import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 
 import { loadMaterialMount } from './MaterialMount';
 
@@ -228,6 +229,45 @@ export async function captureShaderFrame(
   }
 }
 
+/** The recipe of a shader ground (Change background > Shader): what `slide.setBackgroundMaterial` takes. */
+export type BackgroundShaderRecipe = {
+  materialId: string;
+  preset?: string;
+  uniforms?: MaterialUniforms;
+  anchor?: number;
+};
+
+/**
+ * The block a shader ground's frame is keyed and sized by (docs/FEATURES.md 5.5; docs/POLISH.md
+ * section 2.5, the polish round's fix round 2 for `shaders.background.place-answers`): a covering
+ * box at the sheet's own aspect, so `frameSizeFor(materialAspectOf(block))` reads 3200 by 1800
+ * and `frameKeyOf` hashes the same recipe the hosted job would render. Pure; the capture below
+ * draws it in this browser.
+ */
+export function backgroundFrameBlock(recipe: BackgroundShaderRecipe): FrameKeyBlock {
+  return {
+    materialId: recipe.materialId,
+    ...(recipe.preset !== undefined ? { preset: recipe.preset } : {}),
+    ...(recipe.uniforms !== undefined ? { uniforms: recipe.uniforms } : {}),
+    ...(recipe.anchor !== undefined ? { anchor: recipe.anchor } : {}),
+    pos: { x: 0, y: 0, w: SHEET_WIDTH, h: SHEET_HEIGHT, z: 0 },
+  };
+}
+
+/**
+ * The frame of a shader ground drawn in this browser, the same pixel path as a block's frame
+ * (`captureShaderFrame`), so Change background > Shader > Place sends the bytes with its one write
+ * and the function stores them instead of launching Chromium (the walk's Place waited 17 s on the
+ * run of record and past 65 s on its rerun for the hosted render; the verifier's pass 2 finding 14).
+ */
+export function captureBackgroundFrame(
+  recipe: BackgroundShaderRecipe,
+  palette: ShaderPalette,
+  options: CaptureOptions = {},
+): Promise<ShaderFrameCapture> {
+  return captureShaderFrame(backgroundFrameBlock(recipe), palette, options);
+}
+
 // ---------------------------------------------------------------------------------------------
 // The capturer: what schedules a frame, when, and how the write goes up
 
@@ -403,7 +443,34 @@ export const SHADER_FRAME_FAILED_SENTENCE =
  * no frame is ever sent through a body it cannot fit. A failed capture, put or write is tried once
  * more, and when the second attempt fails too `onError` is called once with the error, so the
  * editor shows one sentence (`SHADER_FRAME_FAILED_SENTENCE`) and never one per attempt.
+ *
+ * The head behind the tab's own recipe commit (the polish round's fix round 2, the rows
+ * `shaders.panel.kit-colours` and `shaders.panel.preset-tiles`; read on the memory tier under a
+ * one minute load of 19 to 21: three writes of three after a preset click, a swatch click and a
+ * kit colour write answered "the block's recipe moved on since the frame was drawn", the frame
+ * was drawn a second time for the same key and the tab showed the sentence, while the frame
+ * reached the document 32 s later). The write's 409 names two cases the capturer tells apart by
+ * the tab's own block: a key that moved on drops the write; a key that stands means the head has
+ * not taken this tab's commit yet (the acknowledgement's time, seconds on the blob tier), so the
+ * write is scheduled again after the rest, up to `CONFLICT_RESCHEDULES` times, with the frame
+ * already drawn kept under its key (`drawn`) so the same pixels are never drawn twice; the last
+ * miss is reported once. A frame under its key is drawn once per capturer, however many attempts
+ * its write takes.
  */
+/**
+ * How many times a write that met a head still behind this tab's own recipe commit is scheduled
+ * again before the one sentence. The waits double from the rest (0.8, 1.6, 3.2, 6.4 and 12.8 s,
+ * `conflictWait`): the blob tier's acknowledgement is 1 to 4 s, and the memory tier's head takes
+ * a tab's own commit at its checkpoint, read at 7 s under load and once at 32 s, so the five waits
+ * reach past both with five writes of the frame and not thirty.
+ */
+export const CONFLICT_RESCHEDULES = 5;
+
+/** The wait before the next write after `misses` conflicts with the tab's own key unchanged: the rest, doubled per miss. */
+export function conflictWait(delay: number, misses: number): number {
+  return delay * 2 ** Math.max(0, misses - 1);
+}
+
 export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrameCapturer {
   const delay = deps.delayMs ?? FRAME_DEBOUNCE_MS;
   const setTimer = deps.setTimer ?? ((run, ms) => setTimeout(run, ms));
@@ -412,6 +479,13 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
   const canCapture = deps.canCapture ?? clientCanCapture;
   const timers = new Map<string, unknown>();
   const capturing = new Set<string>();
+  /* the frames drawn and not yet stored, by frame key: a write tried again reuses the pixels */
+  const drawn = new Map<string, ShaderFrameCapture>();
+  /* the writes of a frame key that met a head behind the tab's own commit; the count stands
+     through the last attempt, so the catch's one more try ends the cycle instead of restarting it */
+  const behind = new Map<string, number>();
+  /* the frame key each block last drew, so a block that moved on drops its older key's entries */
+  const lastKey = new Map<string, string>();
   let disposed = false;
   let chain: Promise<void> = Promise.resolve();
 
@@ -425,20 +499,45 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
     return block !== undefined && block.type === 'material' ? block : null;
   };
 
-  const run = async (slideId: string, blockId: string, retry: boolean): Promise<void> => {
+  const run = async (slideId: string, blockId: string): Promise<void> => {
     if (disposed) return;
+    const key = keyOf(slideId, blockId);
     const document = deps.document();
     const block = blockOf(slideId, blockId);
-    if (block === null) return;
+    const dropOlder = (keep: string | null) => {
+      const previous = lastKey.get(key);
+      if (previous !== undefined && previous !== keep) {
+        drawn.delete(previous);
+        behind.delete(previous);
+      }
+      if (keep === null) lastKey.delete(key);
+      else lastKey.set(key, keep);
+    };
+    if (block === null) {
+      dropOlder(null);
+      return;
+    }
     const palette = shaderPaletteOfDeck(document.deck);
-    if (!frameIsStale(block, document.deck.assets, palette)) return;
+    if (!frameIsStale(block, document.deck.assets, palette)) {
+      dropOlder(null);
+      return;
+    }
     if (!canCapture()) {
       await deps.captureHosted?.(slideId, blockId);
       return;
     }
     const cap = deps.uploadAbove ?? FRAME_UPLOAD_ABOVE_BYTES;
-    const frame = await capture(block, palette, { maxBytes: cap });
+    const wanted = frameKeyOf(block, palette);
+    dropOlder(wanted);
+    // the pixels of a key are drawn once: a write tried again, after a conflict or a failed put, reuses them
+    const frame = drawn.get(wanted) ?? (await capture(block, palette, { maxBytes: cap }));
     if (disposed) return;
+    drawn.set(frame.frameKey, frame);
+    const forget = () => {
+      drawn.delete(frame.frameKey);
+      behind.delete(frame.frameKey);
+      lastKey.delete(key);
+    };
     const input: ShaderFrameWrite = {
       slideId,
       blockId,
@@ -451,6 +550,7 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
     else if (png && deps.upload !== undefined) input.upload = await deps.upload(frame.bytes);
     else {
       // no path for these bytes on this page: the hosted job draws and stores the frame in the function
+      forget();
       if (deps.captureHosted === undefined)
         throw new Error(
           `the frame is ${frame.bytes.length} bytes, over the function's cap, and the page has no upload path`,
@@ -459,13 +559,30 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
       return;
     }
     const outcome = await deps.write(input);
-    if (outcome.ok) return;
+    if (outcome.ok) {
+      forget();
+      return;
+    }
     if (!outcome.conflict) throw outcome.error;
-    // the 409 rule: the head moved; the block gone or re keyed drops the write, else once more
+    // the 409 rule: the block gone or re keyed drops the write
     const again = blockOf(slideId, blockId);
-    if (again === null) return;
-    if (frameKeyOf(again, shaderPaletteOfDeck(deps.document().deck)) !== frame.frameKey) return;
-    if (retry) await run(slideId, blockId, false);
+    if (
+      again === null ||
+      frameKeyOf(again, shaderPaletteOfDeck(deps.document().deck)) !== frame.frameKey
+    ) {
+      forget();
+      return;
+    }
+    // the key stands: the head has not taken this tab's own commit yet; the write goes again after
+    // the rest, with the pixels kept, and the last miss is the one sentence (the count stays on
+    // the key, so the catch's one more attempt is the last write and not a new cycle)
+    const misses = (behind.get(frame.frameKey) ?? 0) + 1;
+    behind.set(frame.frameKey, misses);
+    if (misses > CONFLICT_RESCHEDULES)
+      throw new Error(
+        `the head kept an older recipe of the block through ${misses} writes of its frame`,
+      );
+    schedule(slideId, blockId, conflictWait(delay, misses));
   };
 
   const fire = (slideId: string, blockId: string) => {
@@ -473,12 +590,12 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
     timers.delete(key);
     capturing.add(key);
     chain = chain
-      .then(() => run(slideId, blockId, true))
+      .then(() => run(slideId, blockId))
       .catch(async () => {
         // one more attempt after a failed capture, put or write; then the one sentence
         if (disposed) return;
         try {
-          await run(slideId, blockId, true);
+          await run(slideId, blockId);
         } catch (error: unknown) {
           deps.onError?.(error);
         }
@@ -486,14 +603,14 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
       .finally(() => capturing.delete(key));
   };
 
-  const schedule = (slideId: string, blockId: string) => {
+  const schedule = (slideId: string, blockId: string, wait: number = delay) => {
     if (disposed) return;
     const key = keyOf(slideId, blockId);
     const held = timers.get(key);
     if (held !== undefined) clearTimer(held);
     timers.set(
       key,
-      setTimer(() => fire(slideId, blockId), delay),
+      setTimer(() => fire(slideId, blockId), wait),
     );
   };
 
@@ -502,7 +619,7 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
       for (const { slideId, blockId } of shaderBlocksTouched(deps.document(), mutations))
         schedule(slideId, blockId);
     },
-    schedule,
+    schedule: (slideId, blockId) => schedule(slideId, blockId),
     scheduleStale: () => {
       const document = deps.document();
       const palette = shaderPaletteOfDeck(document.deck);
@@ -514,6 +631,9 @@ export function createShaderFrameCapturer(deps: ShaderCapturerDeps): ShaderFrame
       disposed = true;
       for (const id of timers.values()) clearTimer(id);
       timers.clear();
+      drawn.clear();
+      behind.clear();
+      lastKey.clear();
     },
   };
 }

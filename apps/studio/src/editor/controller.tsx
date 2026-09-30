@@ -13,6 +13,7 @@ import { retargetFieldRuns, slideToConvertFor } from './convert-first';
 import { createExportModeGate } from './export-mode';
 import { refusalSentence } from './refusal';
 import { refusedText, refusedWriteSentence, structuralRefusalSentence } from './refused-write';
+import { serialChain } from './serial-chain';
 import { refusalText } from '@turboslide/chrome/error-text';
 import {
   OWN_WRITE_LANDED_MAX_MS,
@@ -2832,7 +2833,13 @@ export function createEditorController(init: {
     );
   };
 
-  const undo = async (): Promise<void> => {
+  /* undo and redo run one at a time (serial-chain.ts): the filmstrip's snackbar Undo after a
+     delete of several slides calls undo once per slide in one synchronous loop, and a fast double
+     Cmd+Z does the same; side by side, the second popped the next entry and stepped its inverse
+     against the first's write still in flight, read nothing left and said "already changed", so
+     one slide of two came back (slides.delete.two-selected-key-undo on the memory tier) */
+  const undoRedoChain = serialChain();
+  const undoOnce = async (): Promise<void> => {
     const entry = history.undo();
     if (!entry) return;
     lastTyping = null;
@@ -2847,8 +2854,9 @@ export function createEditorController(init: {
       say(`Undo failed: ${errorMessage(error)}`);
     }
   };
+  const undo = (): Promise<void> => undoRedoChain(undoOnce);
 
-  const redo = async (): Promise<void> => {
+  const redoOnce = async (): Promise<void> => {
     const entry = history.redo();
     if (!entry) return;
     const forward = stepMutations(entry, entry.mutations, 'forward');
@@ -2865,8 +2873,10 @@ export function createEditorController(init: {
       say(`Redo failed: ${errorMessage(error)}`);
     }
   };
+  const redo = (): Promise<void> => undoRedoChain(redoOnce);
 
-  const undoTo = async (id: number): Promise<void> => {
+  const undoTo = (id: number): Promise<void> => undoRedoChain(() => undoToOnce(id));
+  const undoToOnce = async (id: number): Promise<void> => {
     const entries = history.undoTo(id);
     for (const entry of entries) {
       try {

@@ -1924,8 +1924,20 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
       expect(facts.initials).toBe(initial);
       expect(facts.label ?? '').not.toContain(NAME_A);
       expect(tip?.name ?? '').toMatch(new RegExp(`^${word} · slide \\d+$`));
-      if (initialsRows !== null)
-        expect(facts.rows.join('/'), "a plate that is not A's").not.toBe(initialsRows.join('/'));
+      /* the plate is not A's: it is keyed by the role word (docs/PEOPLE.md 3.27, default 6), so
+         its letters are the role's and never A's; its Bayer field is two bits of a hash and may
+         coincide with A's initials field one time in four (the ninth local run of the
+         integrator), so the letters and the field are read together */
+      if (initialsRows !== null) {
+        const aInitials = NAME_A.split(/\s+/)
+          .map((w) => w[0] ?? '')
+          .join('')
+          .toUpperCase();
+        expect(
+          facts.rows.join('/') === initialsRows.join('/') && facts.initials === aInitials,
+          "a plate that is not A's",
+        ).toBe(false);
+      }
       /* the switch on: A's name and picture */
       await setNamesSwitch(A, true);
       await openEditor(C, deck);

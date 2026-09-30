@@ -779,7 +779,10 @@ export async function run(t) {
       const httpRefused =
         http.noBearer === true
           ? null
-          : http.status >= 400 && /Sign in to upload a picture/.test(httpText ?? '');
+          : /* the bearer is an agent principal on a deployment (the bootstrap admin), refused as
+               "Not signed in" before the quota; the localhost holder reads the upload sentence
+               (the integrator's preview run of the people round) */
+            http.status >= 400 && /Sign in to upload a picture|Not signed in/.test(httpText ?? '');
       const variantAfter = await ownVariant();
       await t.advancedBack('the anonymous picture row');
       const sentenceOk =

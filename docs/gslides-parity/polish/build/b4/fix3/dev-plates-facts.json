@@ -1,0 +1,276 @@
+{
+  "base": "http://localhost:4444",
+  "startedAt": "2026-09-30T12:33:35.101Z",
+  "load": "3.01 2.71 3.04",
+  "deck": "untitled-20260930-pp3a",
+  "slide": "blank-1",
+  "beforePlace": {
+    "chips": [],
+    "wordmark": [
+      {
+        "cls": "wordmark",
+        "box": {
+          "x": 72,
+          "y": 864,
+          "w": 28,
+          "h": 18
+        },
+        "z": "auto",
+        "position": "absolute",
+        "display": "block",
+        "inset": "864px 1500px 18px 72px",
+        "bg": "none",
+        "bgPos": "0% 0%",
+        "bgSize": "auto",
+        "text": "",
+        "parent": "div.ts-stage.stage z=auto"
+      }
+    ],
+    "counter": [
+      {
+        "cls": "counter",
+        "box": {
+          "x": 1481,
+          "y": 862,
+          "w": 47,
+          "h": 16
+        },
+        "z": "auto",
+        "position": "absolute",
+        "display": "block",
+        "inset": "862px 72px 22px 1480.78px",
+        "bg": "none",
+        "bgPos": "0% 0%",
+        "bgSize": "auto",
+        "text": "01 / 02",
+        "parent": "div.ts-stage.stage z=auto"
+      }
+    ],
+    "footer": [],
+    "slideIsolation": "isolate",
+    "frameBeforeSlide": true,
+    "cloneChips": 0,
+    "cloneCount": 2
+  },
+  "beforePlaceMeans": {
+    "chipLeft": {
+      "r": 237,
+      "g": 238,
+      "b": 239,
+      "white": true,
+      "dark": false
+    },
+    "chipRight": {
+      "r": 247,
+      "g": 248,
+      "b": 248,
+      "white": true,
+      "dark": false
+    },
+    "mark": {
+      "r": 210,
+      "g": 212,
+      "b": 216,
+      "white": false,
+      "dark": false
+    },
+    "counter": {
+      "r": 239,
+      "g": 240,
+      "b": 241,
+      "white": true,
+      "dark": false
+    }
+  },
+  "choose": "Liquid metal, Diamond",
+  "placeMs": 1460,
+  "placing": "Placing",
+  "alert": null,
+  "covering": {
+    "id": "background",
+    "type": "picture",
+    "asset": "liquid-metal",
+    "pos": {
+      "x": 0,
+      "y": 0,
+      "w": 1600,
+      "h": 900,
+      "z": -1
+    }
+  },
+  "asset": {
+    "id": "liquid-metal",
+    "role": "frame",
+    "backend": "angle-metal",
+    "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "size": [
+      3200,
+      1800
+    ],
+    "ext": null
+  },
+  "afterPlace": {
+    "chips": [
+      {
+        "cls": "ts-chips",
+        "box": {
+          "x": 0,
+          "y": 0,
+          "w": 1600,
+          "h": 900
+        },
+        "z": "1",
+        "position": "absolute",
+        "display": "block",
+        "inset": "0px",
+        "bg": "linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255)), linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255))",
+        "bgPos": "66px 858px, 1474px 856px",
+        "bgSize": "40px 30px, 60px 28px",
+        "text": "",
+        "parent": "div.free z=1"
+      }
+    ],
+    "wordmark": [
+      {
+        "cls": "wordmark",
+        "box": {
+          "x": 72,
+          "y": 864,
+          "w": 28,
+          "h": 18
+        },
+        "z": "auto",
+        "position": "absolute",
+        "display": "block",
+        "inset": "864px 1500px 18px 72px",
+        "bg": "none",
+        "bgPos": "0% 0%",
+        "bgSize": "auto",
+        "text": "",
+        "parent": "div.ts-stage.stage z=auto"
+      }
+    ],
+    "counter": [
+      {
+        "cls": "counter",
+        "box": {
+          "x": 1481,
+          "y": 862,
+          "w": 47,
+          "h": 16
+        },
+        "z": "auto",
+        "position": "absolute",
+        "display": "block",
+        "inset": "862px 72px 22px 1480.78px",
+        "bg": "none",
+        "bgPos": "0% 0%",
+        "bgSize": "auto",
+        "text": "01 / 02",
+        "parent": "div.ts-stage.stage z=auto"
+      }
+    ],
+    "footer": [],
+    "slideIsolation": "isolate",
+    "frameBeforeSlide": true,
+    "cloneChips": 1,
+    "cloneCount": 2
+  },
+  "afterPlaceMeans": {
+    "chipLeft": {
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "white": true,
+      "dark": false
+    },
+    "chipRight": {
+      "r": 254,
+      "g": 254,
+      "b": 254,
+      "white": true,
+      "dark": false
+    },
+    "mark": {
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "white": true,
+      "dark": false
+    },
+    "counter": {
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "white": true,
+      "dark": false
+    },
+    "control": {
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "white": false,
+      "dark": true
+    }
+  },
+  "chipsHiddenMeans": {
+    "chipLeft": {
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "white": false,
+      "dark": true
+    },
+    "chipRight": {
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "white": false,
+      "dark": true
+    }
+  },
+  "assetSrc": "http://localhost:4444/...",
+  "assetPng": {
+    "status": 200,
+    "bytes": 350337,
+    "width": 3200,
+    "height": 1800,
+    "format": "png",
+    "chipLeft": {
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "white": false,
+      "dark": true
+    },
+    "chipRight": {
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "white": false,
+      "dark": true
+    },
+    "control": {
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "white": false,
+      "dark": true
+    }
+  },
+  "cardCornerMean": {
+    "r": 255,
+    "g": 255,
+    "b": 255,
+    "white": true,
+    "dark": false
+  },
+  "consoleErrors": [],
+  "finishedAt": "2026-09-30T12:34:18.258Z",
+  "loadEnd": "3.83 2.98 3.12",
+  "trash": {
+    "trashed": true,
+    "deleted": true,
+    "status": 404
+  }
+}

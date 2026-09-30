@@ -23,8 +23,17 @@ export const BLOCK_CSS = `
 
 /* ---- full-picture kinds: opener, mood, closing (s01:3-11, s06:3-12, s85:3-13) ---- */
 .ts-sheet .slide.opener .opener-img, .ts-sheet .slide.mood .mood-img { position: absolute; inset: -57px; z-index: -1; width: 1600px; height: 900px; object-fit: cover; display: block; }
-/* the two paper chips under the wordmark and the counter, emitted only with chrome (OPENERS.md:47) */
-.ts-sheet .ts-chips { position: absolute; inset: -57px; z-index: -1; pointer-events: none; background: linear-gradient(var(--paper), var(--paper)) 66px 858px / 40px 30px no-repeat, linear-gradient(var(--paper), var(--paper)) 1474px 856px / 60px 28px no-repeat; }
+/* the two paper chips under the wordmark and the counter, emitted only with chrome (OPENERS.md:47); a chip
+   draws only under a seat the frame draws on the slide (slide.ts chipsHtml: is-left under the band's logo at
+   the bottom left, is-right under the counter or a logo at the bottom right), so a slide whose footer logo is
+   off or whose Slide numbers are off carries no blank plate (the polish round's fix round 3, B4) */
+.ts-sheet .ts-chips { position: absolute; inset: -57px; z-index: -1; pointer-events: none; background-repeat: no-repeat; }
+.ts-sheet .ts-chips.is-left { background-image: linear-gradient(var(--paper), var(--paper)); background-position: 66px 858px; background-size: 40px 30px; }
+.ts-sheet .ts-chips.is-right { background-image: linear-gradient(var(--paper), var(--paper)); background-position: 1474px 856px; background-size: 60px 28px; }
+.ts-sheet .ts-chips.is-left.is-right { background-image: linear-gradient(var(--paper), var(--paper)), linear-gradient(var(--paper), var(--paper)); background-position: 66px 858px, 1474px 856px; background-size: 40px 30px, 60px 28px; }
+/* a clone (the filmstrip cards, the grid tiles, the book pages; viewer LiveClone.tsx) draws the edge grid without
+   the wordmark and the counter, so it draws no chips either (SPEC 5.2: thumbnails and book pages get no chips) */
+.ts-sheet.is-clone .ts-chips { display: none; }
 .ts-sheet .opener-plate { position: absolute; left: 0; bottom: 0; width: fit-content; max-width: 740px; padding: 22px 26px 20px; background: var(--paper); color: var(--ink); }
 .ts-sheet .opener-plate .big { color: var(--ink); }
 .ts-sheet .opener-plate p { margin-top: 14px; max-width: 56ch; color: var(--ink); }

@@ -1,0 +1,279 @@
+{
+  "base": "https://turboslide-la4qb4vqm-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-30T12:49:21.391Z",
+  "load": "3.60 2.91 2.84",
+  "steps": [
+    {
+      "label": "placed, GT band, Slide numbers on",
+      "at": "2026-09-30T12:50:21.426Z",
+      "dom": {
+        "chips": [
+          {
+            "cls": "ts-chips is-left is-right",
+            "bg": "linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255)), linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255))",
+            "pos": "66px 858px, 1474px 856px"
+          }
+        ],
+        "wordmark": [
+          {
+            "cls": "wordmark",
+            "text": "",
+            "z": "2",
+            "pe": "none",
+            "display": "block"
+          }
+        ],
+        "counter": [
+          {
+            "cls": "counter",
+            "text": "01 / 02",
+            "z": "2",
+            "pe": "none",
+            "display": "block"
+          }
+        ],
+        "cloneChips": [
+          "none"
+        ]
+      },
+      "chipLeft": {
+        "r": 237,
+        "g": 237,
+        "b": 239,
+        "nonWhite": 16.1,
+        "dark": 0
+      },
+      "chipRight": {
+        "r": 246,
+        "g": 247,
+        "b": 247,
+        "nonWhite": 7.7,
+        "dark": 0
+      },
+      "mark": {
+        "r": 210,
+        "g": 212,
+        "b": 216,
+        "nonWhite": 39.7,
+        "dark": 0
+      },
+      "counter": {
+        "r": 238,
+        "g": 239,
+        "b": 240,
+        "nonWhite": 14.3,
+        "dark": 0
+      },
+      "cardCorner": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "nonWhite": 0,
+        "dark": 0
+      }
+    },
+    {
+      "label": "Slide numbers off",
+      "at": "2026-09-30T12:50:22.551Z",
+      "dom": {
+        "chips": [
+          {
+            "cls": "ts-chips is-left",
+            "bg": "linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255))",
+            "pos": "66px 858px"
+          }
+        ],
+        "wordmark": [
+          {
+            "cls": "wordmark",
+            "text": "",
+            "z": "2",
+            "pe": "none",
+            "display": "block"
+          }
+        ],
+        "counter": [],
+        "cloneChips": [
+          "none"
+        ]
+      },
+      "chipLeft": {
+        "r": 237,
+        "g": 237,
+        "b": 239,
+        "nonWhite": 16.1,
+        "dark": 0
+      },
+      "chipRight": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "mark": {
+        "r": 210,
+        "g": 212,
+        "b": 216,
+        "nonWhite": 39.7,
+        "dark": 0
+      },
+      "counter": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "cardCorner": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "nonWhite": 0,
+        "dark": 0
+      }
+    },
+    {
+      "label": "footer logo none, Slide numbers off",
+      "at": "2026-09-30T12:50:23.817Z",
+      "dom": {
+        "chips": [],
+        "wordmark": [],
+        "counter": [],
+        "cloneChips": []
+      },
+      "chipLeft": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "chipRight": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "mark": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "counter": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "cardCorner": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "nonWhite": 0,
+        "dark": 0
+      }
+    },
+    {
+      "label": "after Cmd+Z twice",
+      "at": "2026-09-30T12:50:27.160Z",
+      "dom": {
+        "chips": [
+          {
+            "cls": "ts-chips is-left is-right",
+            "bg": "linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255)), linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255))",
+            "pos": "66px 858px, 1474px 856px"
+          }
+        ],
+        "wordmark": [
+          {
+            "cls": "wordmark",
+            "text": "",
+            "z": "2",
+            "pe": "none",
+            "display": "block"
+          }
+        ],
+        "counter": [
+          {
+            "cls": "counter",
+            "text": "01 / 02",
+            "z": "2",
+            "pe": "none",
+            "display": "block"
+          }
+        ],
+        "cloneChips": [
+          "none"
+        ]
+      },
+      "chipLeft": {
+        "r": 237,
+        "g": 237,
+        "b": 239,
+        "nonWhite": 16.1,
+        "dark": 0
+      },
+      "chipRight": {
+        "r": 246,
+        "g": 247,
+        "b": 247,
+        "nonWhite": 7.7,
+        "dark": 0
+      },
+      "mark": {
+        "r": 210,
+        "g": 212,
+        "b": 216,
+        "nonWhite": 39.7,
+        "dark": 0
+      },
+      "counter": {
+        "r": 238,
+        "g": 239,
+        "b": 240,
+        "nonWhite": 14.3,
+        "dark": 0
+      },
+      "cardCorner": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "nonWhite": 0,
+        "dark": 0
+      }
+    }
+  ],
+  "deck": "untitled-20260930-wu3v",
+  "slide": "blank-1",
+  "choose": "Liquid metal, Diamond",
+  "placeMs": 14629,
+  "placing": "Placing, 11 s",
+  "alert": null,
+  "covering": {
+    "id": "background",
+    "type": "picture",
+    "asset": "liquid-metal"
+  },
+  "asset": {
+    "id": "liquid-metal",
+    "backend": "swiftshader",
+    "renderer": "chrome-headless-shell 147.0.7727.0, SwiftShader, Google",
+    "size": [
+      3200,
+      1800
+    ]
+  },
+  "consoleErrors": [],
+  "finishedAt": "2026-09-30T12:50:27.252Z",
+  "loadEnd": "2.74 2.77 2.79",
+  "trash": {
+    "trashed": true,
+    "deleted": true,
+    "status": 404
+  }
+}

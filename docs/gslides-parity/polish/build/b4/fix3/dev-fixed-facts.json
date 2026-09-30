@@ -1,0 +1,279 @@
+{
+  "base": "http://localhost:4444",
+  "startedAt": "2026-09-30T12:44:57.438Z",
+  "load": "3.24 2.67 2.78",
+  "steps": [
+    {
+      "label": "placed, GT band, Slide numbers on",
+      "at": "2026-09-30T12:45:38.423Z",
+      "dom": {
+        "chips": [
+          {
+            "cls": "ts-chips is-left is-right",
+            "bg": "linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255)), linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255))",
+            "pos": "66px 858px, 1474px 856px"
+          }
+        ],
+        "wordmark": [
+          {
+            "cls": "wordmark",
+            "text": "",
+            "z": "2",
+            "pe": "none",
+            "display": "block"
+          }
+        ],
+        "counter": [
+          {
+            "cls": "counter",
+            "text": "01 / 02",
+            "z": "2",
+            "pe": "none",
+            "display": "block"
+          }
+        ],
+        "cloneChips": [
+          "none"
+        ]
+      },
+      "chipLeft": {
+        "r": 237,
+        "g": 237,
+        "b": 239,
+        "nonWhite": 16.1,
+        "dark": 0
+      },
+      "chipRight": {
+        "r": 246,
+        "g": 247,
+        "b": 247,
+        "nonWhite": 7.7,
+        "dark": 0
+      },
+      "mark": {
+        "r": 210,
+        "g": 212,
+        "b": 216,
+        "nonWhite": 39.7,
+        "dark": 0
+      },
+      "counter": {
+        "r": 238,
+        "g": 239,
+        "b": 240,
+        "nonWhite": 14.3,
+        "dark": 0
+      },
+      "cardCorner": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "nonWhite": 0,
+        "dark": 0
+      }
+    },
+    {
+      "label": "Slide numbers off",
+      "at": "2026-09-30T12:45:41.088Z",
+      "dom": {
+        "chips": [
+          {
+            "cls": "ts-chips is-left",
+            "bg": "linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255))",
+            "pos": "66px 858px"
+          }
+        ],
+        "wordmark": [
+          {
+            "cls": "wordmark",
+            "text": "",
+            "z": "2",
+            "pe": "none",
+            "display": "block"
+          }
+        ],
+        "counter": [],
+        "cloneChips": [
+          "none"
+        ]
+      },
+      "chipLeft": {
+        "r": 237,
+        "g": 237,
+        "b": 239,
+        "nonWhite": 16.1,
+        "dark": 0
+      },
+      "chipRight": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "mark": {
+        "r": 210,
+        "g": 212,
+        "b": 216,
+        "nonWhite": 39.7,
+        "dark": 0
+      },
+      "counter": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "cardCorner": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "nonWhite": 0,
+        "dark": 0
+      }
+    },
+    {
+      "label": "footer logo none, Slide numbers off",
+      "at": "2026-09-30T12:45:43.723Z",
+      "dom": {
+        "chips": [],
+        "wordmark": [],
+        "counter": [],
+        "cloneChips": []
+      },
+      "chipLeft": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "chipRight": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "mark": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "counter": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "nonWhite": 100,
+        "dark": 100
+      },
+      "cardCorner": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "nonWhite": 0,
+        "dark": 0
+      }
+    },
+    {
+      "label": "after Cmd+Z twice",
+      "at": "2026-09-30T12:45:46.360Z",
+      "dom": {
+        "chips": [
+          {
+            "cls": "ts-chips is-left is-right",
+            "bg": "linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255)), linear-gradient(rgb(255, 255, 255), rgb(255, 255, 255))",
+            "pos": "66px 858px, 1474px 856px"
+          }
+        ],
+        "wordmark": [
+          {
+            "cls": "wordmark",
+            "text": "",
+            "z": "2",
+            "pe": "none",
+            "display": "block"
+          }
+        ],
+        "counter": [
+          {
+            "cls": "counter",
+            "text": "01 / 02",
+            "z": "2",
+            "pe": "none",
+            "display": "block"
+          }
+        ],
+        "cloneChips": [
+          "none"
+        ]
+      },
+      "chipLeft": {
+        "r": 237,
+        "g": 237,
+        "b": 239,
+        "nonWhite": 16.1,
+        "dark": 0
+      },
+      "chipRight": {
+        "r": 246,
+        "g": 247,
+        "b": 247,
+        "nonWhite": 7.7,
+        "dark": 0
+      },
+      "mark": {
+        "r": 210,
+        "g": 212,
+        "b": 216,
+        "nonWhite": 39.7,
+        "dark": 0
+      },
+      "counter": {
+        "r": 238,
+        "g": 239,
+        "b": 240,
+        "nonWhite": 14.3,
+        "dark": 0
+      },
+      "cardCorner": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "nonWhite": 0,
+        "dark": 0
+      }
+    }
+  ],
+  "deck": "untitled-20260930-6ko6",
+  "slide": "blank-1",
+  "choose": "Liquid metal, Diamond",
+  "placeMs": 1441,
+  "placing": "Placing",
+  "alert": null,
+  "covering": {
+    "id": "background",
+    "type": "picture",
+    "asset": "liquid-metal"
+  },
+  "asset": {
+    "id": "liquid-metal",
+    "backend": "angle-metal",
+    "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "size": [
+      3200,
+      1800
+    ]
+  },
+  "consoleErrors": [],
+  "finishedAt": "2026-09-30T12:45:46.456Z",
+  "loadEnd": "3.23 2.71 2.79",
+  "trash": {
+    "trashed": true,
+    "deleted": true,
+    "status": 404
+  }
+}

@@ -129,10 +129,18 @@
   bottom: 51px;
 }
 
+/* the counter, the wordmark and the kit's footer text paint over every object on every slide
+   (gslides-parity SPEC-2 0.98): the slide is a stacking context (stage.css isolation: isolate) and
+   on the editor stage and in the show the viewer's Frame draws them before the slide, so without a
+   z-index a covering picture object and its chips painted over them and the chips read as blank
+   plates (the polish round's fix round 3, B4's R1). z-index 2 is the frame's own (.frame below);
+   pointer-events none keeps a click on their boxes landing on the object under them, as the rails do. */
 .ts-sheet .counter {
   position: absolute;
   right: 72px;
   bottom: 22px;
+  z-index: 2;
+  pointer-events: none;
   font-family: var(--display);
   font-size: 13px;
   letter-spacing: 0.02em;
@@ -144,6 +152,8 @@
   left: 72px;
   bottom: 18px;
   height: 18px;
+  z-index: 2;
+  pointer-events: none;
   color: var(--titanium);
 }
 .ts-sheet .wordmark svg {
@@ -222,6 +232,8 @@
   left: 200px;
   right: 200px;
   bottom: 19px;
+  z-index: 2;
+  pointer-events: none;
   text-align: center;
   font-family: var(--text);
   font-size: 13px;

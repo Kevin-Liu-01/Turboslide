@@ -1099,12 +1099,14 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           role: 'plate',
         });
       });
-      const chips: Box[] = slide.querySelector('.ts-chips')
-        ? [
-            [66, 858, 40, 30],
-            [1474, 856, 60, 28],
-          ]
-        : [];
+      /* one chip per seat the frame draws on the slide (render/slide.ts chipsHtml: is-left under
+         the band's logo at the bottom left, is-right under the counter or a logo at the bottom right;
+         B4's fix round 3 R3), so a slide with one seat exports one chip and a slide with none exports none */
+      const chipsEl = slide.querySelector('.ts-chips');
+      const chips: Box[] = [
+        ...(chipsEl?.classList.contains('is-left') ? [[66, 858, 40, 30] as Box] : []),
+        ...(chipsEl?.classList.contains('is-right') ? [[1474, 856, 60, 28] as Box] : []),
+      ];
 
       // The picture.
       const img = slide.querySelector<HTMLImageElement>('img.opener-img, img.mood-img');

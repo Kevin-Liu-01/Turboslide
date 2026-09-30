@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseCss } from './css.ts';
+import { declarationsOf, parseCss } from './css.ts';
 import { SHEET_ROOT_CLASS, sheetCss, sheetRootAttributes, stageCss, themeCss } from './theme.ts';
 
 describe('the theme CSS', () => {
@@ -11,6 +11,22 @@ describe('the theme CSS', () => {
     expect(
       selectors.some((selector) => selector.includes(':root') || selector.includes('#stage')),
     ).toBe(false);
+  });
+
+  it('keeps the wordmark, the counter and the kit footer over every object on every slide', () => {
+    /* gslides-parity SPEC-2 0.98; the polish round's fix round 3 (B4's R1): the slide is a stacking
+       context and the viewer's Frame draws the band before the slide, so the band carries the frame's
+       own level (z-index 2) and lets a click through to the object under it */
+    const rules = parseCss(sheetCss());
+    for (const selector of [
+      '.ts-sheet .wordmark',
+      '.ts-sheet .counter',
+      '.ts-sheet .ts-kit-footer',
+    ]) {
+      const declarations = declarationsOf(rules, selector);
+      expect(declarations['z-index'], selector).toBe('2');
+      expect(declarations['pointer-events'], selector).toBe('none');
+    }
   });
 
   it('keeps the element selectors of head.html so imported escape blocks render unchanged', () => {

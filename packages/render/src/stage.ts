@@ -13,7 +13,9 @@
 import { assetTwin, assetVector } from '@turboslide/schema/assets';
 import type { BrandKit, CounterFormat, SlotPosition } from '@turboslide/schema/brand';
 import type { Deck } from '@turboslide/schema/deck';
-import { deckCounterFormat } from '@turboslide/schema/deck';
+import { deckCounter, deckCounterFormat } from '@turboslide/schema/deck';
+import type { Slide } from '@turboslide/schema/deck';
+import { slideKindOf } from '@turboslide/schema/canvas';
 import type { Theme } from '@turboslide/schema/render';
 import { el, escapeAttr, escapeText } from './html.ts';
 
@@ -46,6 +48,21 @@ export function counterText(n: number, total: number, format: CounterFormat = 'n
     default:
       return `${pad(n)} / ${pad(total)}`;
   }
+}
+
+/**
+ * Whether the counter is drawn on a slide (Insert > Slide numbers: on, off, skip title slides,
+ * and the slide's own word; gslides-parity SPEC 7.2.4): the on or off half of deck.ts
+ * `slideCounter`, read by the paper chips of a full-picture slide (slide.ts `chipsHtml`) so the
+ * right chip draws only under a counter that is drawn. The two read the same rules in the same
+ * order; the count itself is `slideCounter`'s.
+ */
+export function counterShownOn(deck: Deck, slide: Slide): boolean {
+  if (slide.counter === 'off') return false;
+  if (slide.counter === 'on') return true;
+  const mode = deckCounter(deck);
+  if (mode === 'off') return false;
+  return !(mode === 'skip-title' && slideKindOf(slide) === 'title');
 }
 
 /** The footer's logo slot as one value every surface draws the same way. */

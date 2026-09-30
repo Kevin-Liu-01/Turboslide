@@ -26,6 +26,7 @@ import type { SlotPosition } from '@turboslide/schema/brand';
 import type { FontSrc } from './fonts.ts';
 import { deckFontsCss, routeFontSrc } from './fonts.ts';
 import { THEME_CSS_CLASS, themeCss } from './theme-css.ts';
+import { counterShownOn, frameBandOf } from './stage.ts';
 
 export type RenderOptions = {
   theme: Theme;
@@ -172,6 +173,30 @@ function assetSizeResolver(deck: Deck): (path: string) => [number, number] | und
 }
 
 /**
+ * The two paper chips of a full-picture slide (OPENERS.md:47; SPEC-2 0.75): the seats of the
+ * wordmark at the bottom left and the counter at the bottom right over the photograph. A chip
+ * draws only under a seat the frame draws on this slide (the polish round's fix round 3, B4: a
+ * shader ground on a deck whose footer logo is off, or whose Slide numbers are off, showed two
+ * blank paper rectangles at the corners): the left chip under the band's logo at the bottom
+ * left, the right chip under the counter, or under the band's logo at the bottom right. The
+ * band is the deck's (stage.ts `frameBandOf`; a picture logo counts as drawn at its corner),
+ * the counter is the option's text when the caller passes one, else the deck's Slide numbers for
+ * this slide (`counterShownOn`). Nothing when neither seat is drawn. The classes pick the chip
+ * rules of block-css.ts; the frame's own z-index there keeps the seats over the chips.
+ */
+function chipsHtml(deck: Deck, slide: Slide, options: RenderOptions): string {
+  const band = frameBandOf(deck, options.theme);
+  const logoAt = (corner: SlotPosition): boolean =>
+    band.logo.kind !== 'none' && band.logo.position === corner;
+  const counter =
+    options.counter !== undefined ? options.counter !== '' : counterShownOn(deck, slide);
+  const left = logoAt('bottom-left');
+  const right = counter || logoAt('bottom-right');
+  if (!left && !right) return '';
+  return `<div class="${classes('ts-chips', left && 'is-left', right && 'is-right')}" aria-hidden="true"></div>`;
+}
+
+/**
  * The canvas title's mark slot: the first block of the record's main slot and the kit's mark
  * record, so `renderMark` draws the kit's picture there as `titleMarkSlot` did before the
  * conversion (the features round's fix round, F1; build/b6.md R15). Undefined on every other slide.
@@ -280,7 +305,8 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
           ? `<svg class="mark" aria-hidden="true"><use href="#gt-mark"/></svg>`
           : '';
       const plate = renderPlate(slide.plate, ctx, mark);
-      const chips = options.chrome ? '<div class="ts-chips" aria-hidden="true"></div>' : '';
+      // the seats' chips over the photograph, each only under a seat the frame draws (chipsHtml)
+      const chips = options.chrome ? chipsHtml(deck, slide, options) : '';
       html = el(
         'section',
         { class: classes('slide', kindClass, scopeClass, active), ...common },
@@ -371,7 +397,13 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
       html = el(
         'section',
         { class: classes('slide', scopeClass, active), ...common },
-        scopedCss + bg + el('div', { class: 'in' }, renderLayout(slide, ctx)),
+        scopedCss +
+          bg +
+          el(
+            'div',
+            { class: 'in' },
+            renderLayout(slide, ctx, options.chrome ? chipsHtml(deck, slide, options) : ''),
+          ),
       );
       slots = slotBoxesAsRecord(slide.layout);
       break;
@@ -470,7 +502,7 @@ function renderPlate(plate: Plate, ctx: BlockContext, before: string): string {
   );
 }
 
-function renderLayout(slide: ContentSlide, ctx: BlockContext): string {
+function renderLayout(slide: ContentSlide, ctx: BlockContext, chips: string = ''): string {
   const layout = slide.layout;
   const slot = (name: SlotName): Block[] => slide.slots[name] ?? [];
   switch (layout.type) {
@@ -565,7 +597,7 @@ function renderLayout(slide: ContentSlide, ctx: BlockContext): string {
         renderBlocks(slot('main'), { ...ctx, slotWidth: 1326 }),
       );
     case 'freeform':
-      return renderFreeform(slot('main'), ctx);
+      return renderFreeform(slot('main'), ctx, chips);
   }
 }
 
@@ -578,7 +610,7 @@ function renderLayout(slide: ContentSlide, ctx: BlockContext): string {
  * so its coordinates are sheet coordinates as written. The block renders with the box's width and
  * height as its slot.
  */
-function renderFreeform(blocks: Block[], ctx: BlockContext): string {
+function renderFreeform(blocks: Block[], ctx: BlockContext, chips: string = ''): string {
   const inside: string[] = [];
   const outside: string[] = [];
   const [contentX, contentY] = CONTENT;
@@ -596,10 +628,11 @@ function renderFreeform(blocks: Block[], ctx: BlockContext): string {
     );
     // the two paper chips of a picture kind (OPENERS.md:47) inside the wrapper of a picture
     // object that covers the sheet at the bottom of the stack, after the image, so they cover
-    // the photograph and nothing else (SPEC-2 1.4, 0.75, 0.98)
-    const chips =
+    // the photograph and nothing else (SPEC-2 1.4, 0.75, 0.98); the markup is the slide's
+    // (chipsHtml: a chip per seat the frame draws, empty when it draws neither)
+    const chipsHere =
       ctx.chrome === true && order === 0 && block.type === 'picture' && coversSheet(pos)
-        ? '<div class="ts-chips" aria-hidden="true"></div>'
+        ? chips
         : '';
     const html = el(
       'div',
@@ -610,7 +643,7 @@ function renderFreeform(blocks: Block[], ctx: BlockContext): string {
         ...freeDataAttrs(pos),
         'aria-label': block.alt,
       },
-      renderBlock(block, { ...ctx, slotWidth: pos.w, slotHeight: pos.h }) + chips,
+      renderBlock(block, { ...ctx, slotWidth: pos.w, slotHeight: pos.h }) + chipsHere,
     );
     (inContent ? inside : outside).push(html);
   });

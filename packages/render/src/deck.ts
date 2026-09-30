@@ -6,11 +6,16 @@ import { escapeText } from './html.ts';
 import { RENDER_SURFACE_SCRIPT } from './runtime.ts';
 import { renderSlide, slideMap, slideOrder } from './slide.ts';
 import type { RenderOptions, RenderedSlide } from './slide.ts';
-import { bandAssetResolver, counterText, frameBandOf, renderStage } from './stage.ts';
+import {
+  bandAssetResolver,
+  counterShownOn,
+  counterText,
+  frameBandOf,
+  renderStage,
+} from './stage.ts';
 import type { SlideId } from '@turboslide/schema/ids';
-import { slideKindOf } from '@turboslide/schema/canvas';
 import type { Deck, Slide } from '@turboslide/schema/deck';
-import { deckCounter, deckCounterFormat } from '@turboslide/schema/deck';
+import { deckCounterFormat } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
 
 /**
@@ -61,20 +66,13 @@ export type RenderedDeck = {
  * slide, or when the slide is not in the play list (a skipped slide rendered for the editor).
  */
 export function slideCounter(deck: Deck, slide: Slide, n: number, total: number): string {
-  if (n < 1 || total < 1) return '';
-  /* the slide's own word first (Slide numbers > Apply to selected, SPEC 7.2.4; docs/RETURN.md
-     section 5 slides.numbers.apply): on numbers it under an off deck, off blanks it under an on one */
-  if (slide.counter === 'off') return '';
+  /* the on or off half lives once, in stage.ts `counterShownOn` (the slide's own word first, then
+     the kit's or the deck default's mode, skip-title on the kind a cover answers to; B4's fix
+     round 3 R2): the paper chips of a full-picture slide read the same function, so a counter
+     drawn has its chip and a counter hidden has none */
+  if (n < 1 || total < 1 || !counterShownOn(deck, slide)) return '';
   /* the kit's format (docs/PRODUCT.md 4.1 Slide numbers): `01 / 85`, `01` or `Slide 1` */
-  const format = deckCounterFormat(deck);
-  if (slide.counter === 'on') return counterText(n, total, format);
-  const mode = deckCounter(deck);
-  if (mode === 'off') return '';
-  /* the cover by the kind it answers to (schema/canvas.ts `slideKindOf`): a title whose words
-     wrapped is a canvas with `grammar.kind` title, and Skip title slides skips it the same
-     (VERIFICATION.md "Polish round, pass 2" finding 1) */
-  if (mode === 'skip-title' && slideKindOf(slide) === 'title') return '';
-  return counterText(n, total, format);
+  return counterText(n, total, deckCounterFormat(deck));
 }
 
 /**

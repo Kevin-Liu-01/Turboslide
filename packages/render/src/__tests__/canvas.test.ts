@@ -129,7 +129,7 @@ describe.skipIf(!gtReady)(
       const html = renderSlide(deck, converted.slide, options('light')).html;
       // the picture object first in paint order on the sheet layer, the chips after the image
       expect(html).toMatch(
-        /<div class="free" data-free="picture" style="left:0px;top:0px;width:1600px;height:900px;z-index:1"><div class="picture" data-block="picture" data-type="picture"><img class="picture-img"[^>]*><\/div><div class="ts-chips" aria-hidden="true"><\/div><\/div>/,
+        /<div class="free" data-free="picture" style="left:0px;top:0px;width:1600px;height:900px;z-index:1"><div class="picture" data-block="picture" data-type="picture"><img class="picture-img"[^>]*><\/div><div class="ts-chips is-left is-right" aria-hidden="true"><\/div><\/div>/,
       );
       // no chips at the slide level: the object holds them
       expect(html.match(/ts-chips/g)?.length).toBe(1);

@@ -839,8 +839,30 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
      back to the stale row) */
   const overlay = me !== null && !rowReflects(me.facts, ownRow) ? me.facts : null;
   const principal = ownPrincipalOf(payloadIdentity, ownRow, overlay);
+  /* the builder starts from the choice (docs/PEOPLE.md 3.11): the last answer's, else the room's
+     own row's variant when it differs from the payload's (after a reload within the room's 5 s
+     identity cache the payload carries the old choice on the blob tier while the row already draws
+     the new mark; the integrator's preview readings of people.own-chip-follows-avatar), else the
+     payload's; the row carries no salt, so a rerolled glyph or dither starts from its first */
+  const payloadAvatar: AvatarChoiceView | undefined = payload.identity?.avatar ?? undefined;
+  const rowMark = ownRow?.mark;
+  const rowAvatar: AvatarChoiceView | undefined =
+    rowMark !== undefined &&
+    rowMark.variant !== 'agent' &&
+    payloadAvatar !== undefined &&
+    rowMark.variant !== payloadAvatar.variant
+      ? {
+          variant: rowMark.variant,
+          ...(rowMark.variant === 'initials' && rowMark.initials
+            ? { initials: rowMark.initials }
+            : {}),
+          ...(rowMark.variant === 'picture' && rowMark.pictureUrl
+            ? { url: rowMark.pictureUrl }
+            : {}),
+        }
+      : undefined;
   const avatarChoice: AvatarChoiceView | undefined =
-    (chosenAvatar !== undefined ? chosenAvatar : payload.identity?.avatar) ?? undefined;
+    chosenAvatar !== undefined ? (chosenAvatar ?? undefined) : (rowAvatar ?? payloadAvatar);
   const pictureUrl = ownPictureUrlOf(avatarChoice, principal.mark);
   /* the answer of a write is the newest fact: written back into the account and the room asked
      to re-read the identity, so the own chip changes with no reload and the other browsers'

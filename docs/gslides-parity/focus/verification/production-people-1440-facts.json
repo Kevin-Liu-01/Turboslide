@@ -1,0 +1,2206 @@
+{
+  "base": "https://www.turboslide.com",
+  "tag": "production",
+  "width": 1440,
+  "accounts": false,
+  "signinFirst": false,
+  "startedAt": "2026-09-30T17:21:20.493Z",
+  "uptime": "10:21  up 6 days, 18 mins, 2 users, load averages: 8.52 8.03 6.43",
+  "deck.id": "untitled-20260930-cjb9",
+  "account.A.boot": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+      "trust": "label",
+      "label": "Chromium 203",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": {
+      "principalId": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+      "trust": "label",
+      "label": "Chromium 203",
+      "name": null,
+      "markVariant": "initials"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "namePrompt.firstEdit": true,
+  "shot.namePrompt.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-name-prompt-A-light.png",
+  "shot.namePrompt.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-name-prompt-A-dark.png",
+  "ownChip.A.afterContinue": {
+    "ms": 917,
+    "chip": {
+      "holder": "title.account",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  },
+  "account.A.afterName": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+      "trust": "label",
+      "label": "Chromium 203",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": {
+      "principalId": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+      "trust": "guest",
+      "label": "Ada Lovelace",
+      "name": null,
+      "markVariant": "initials"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "ownChip.A.afterName": [
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "builder.A.open": {
+    "tabs": [
+      {
+        "id": "dialog.avatarBuilder.tab.initials",
+        "selected": "true"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.glyph",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.dither",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.picture",
+        "selected": "false"
+      }
+    ],
+    "panel": "dialog.avatarBuilder.panel.initials",
+    "cap": null,
+    "privacy": null,
+    "cache": null,
+    "error": "",
+    "applyDisabled": false,
+    "cropLoaded": null,
+    "cropSentence": null,
+    "signInSentence": null,
+    "previewSizes": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "shot.builder.strip.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-builder-strip-A-light.png",
+  "shot.builder.strip.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-builder-strip-A-dark.png",
+  "builder.A.picture": {
+    "tabs": [
+      {
+        "id": "dialog.avatarBuilder.tab.initials",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.glyph",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.dither",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.picture",
+        "selected": "true"
+      }
+    ],
+    "panel": "dialog.avatarBuilder.panel.picture",
+    "cap": null,
+    "privacy": null,
+    "cache": null,
+    "error": "",
+    "applyDisabled": true,
+    "cropLoaded": null,
+    "cropSentence": null,
+    "signInSentence": "Sign in to upload a picture",
+    "previewSizes": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "shot.builder.picture.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-builder-picture-A-light.png",
+  "shot.builder.picture.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-builder-picture-A-dark.png",
+  "share.get.A": {
+    "revision": 0,
+    "owner": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52"
+  },
+  "link": "minted",
+  "account.B.boot": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_50ce3041-33bf-4cc7-9e9a-7dd2d5d870f5",
+      "trust": "label",
+      "label": "Clay 741",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": null,
+    "access": {
+      "role": "editor",
+      "via": "link"
+    }
+  },
+  "slot.A.light": [
+    {
+      "holder": "presence.chip.cf31199166fcbdb30277fdd816d95ac2",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 13,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.slot.A.light": [
+    {
+      "holder": "presence.chip.cf31199166fcbdb30277fdd816d95ac2",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "title.account",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgb(7, 7, 7)"
+    }
+  ],
+  "shot.slot.A.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-slot-A-light.png",
+  "shot.zoom.own.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-zoom-own-chip-A-light.png",
+  "shot.zoom.other.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-zoom-other-chip-A-light.png",
+  "tooltip.A.light": {
+    "name": "Clay 741 · slide 1",
+    "text": "Clay 741 · slide 1Not signed in. A generated label for this browser. Go to slide 1"
+  },
+  "shot.tooltip.A.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-tooltip-A-light.png",
+  "tooltip.own.A.light": {
+    "name": "Ada Lovelace (you)",
+    "text": "Ada Lovelace (you)Your name and avatar; nothing else asks for an account"
+  },
+  "slot.A.dark": [
+    {
+      "holder": "presence.chip.cf31199166fcbdb30277fdd816d95ac2",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 13,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.slot.A.dark": [
+    {
+      "holder": "presence.chip.cf31199166fcbdb30277fdd816d95ac2",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "title.account",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgb(242, 242, 240)"
+    }
+  ],
+  "shot.slot.A.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-slot-A-dark.png",
+  "shot.zoom.own.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-zoom-own-chip-A-dark.png",
+  "shot.zoom.other.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-zoom-other-chip-A-dark.png",
+  "tooltip.A.dark": {
+    "name": "Clay 741 · slide 1",
+    "text": "Clay 741 · slide 1Not signed in. A generated label for this browser. Go to slide 1"
+  },
+  "shot.tooltip.A.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-tooltip-A-dark.png",
+  "tooltip.own.A.dark": {
+    "name": "Ada Lovelace (you)",
+    "text": "Ada Lovelace (you)Your name and avatar; nothing else asks for an account"
+  },
+  "slot.B.light": [
+    {
+      "holder": "presence.chip.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "C",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.slot.B.light": [
+    {
+      "holder": "presence.chip.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "title.account",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgb(7, 7, 7)"
+    }
+  ],
+  "shot.slot.B.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-slot-B-light.png",
+  "tooltip.B.light": {
+    "name": "Ada Lovelace · guest · slide 1",
+    "text": "Ada Lovelace · guest · slide 1Not signed in. This name was typed, not verified. Go to slide 1"
+  },
+  "shot.tooltip.B.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-tooltip-B-light.png",
+  "slot.B.dark": [
+    {
+      "holder": "presence.chip.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "C",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.slot.B.dark": [
+    {
+      "holder": "presence.chip.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "title.account",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgb(242, 242, 240)"
+    }
+  ],
+  "shot.slot.B.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-slot-B-dark.png",
+  "tooltip.B.dark": {
+    "name": "Ada Lovelace · guest · slide 1",
+    "text": "Ada Lovelace · guest · slide 1Not signed in. This name was typed, not verified. Go to slide 1"
+  },
+  "shot.tooltip.B.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-tooltip-B-dark.png",
+  "flag.A.light": {
+    "caret": "rgb(47, 92, 224)",
+    "flagText": "CClay",
+    "flagBackground": "rgb(7, 7, 7)",
+    "flagChip": "Clay 741",
+    "flagChipSize": "14",
+    "flagBadge": null,
+    "chipHue": "1",
+    "stripe": "rgb(47, 92, 224)"
+  },
+  "shot.flag.A.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-caret-flag-A-light.png",
+  "flag.A.dark": {
+    "caret": "rgb(47, 92, 224)",
+    "flagText": "CClay",
+    "flagBackground": "rgb(242, 242, 240)",
+    "flagChip": "Clay 741",
+    "flagChipSize": "14",
+    "flagBadge": null,
+    "chipHue": "1",
+    "stripe": "rgb(47, 92, 224)"
+  },
+  "shot.flag.A.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-caret-flag-A-dark.png",
+  "flag.drawn": true,
+  "namePrompt.B.afterFlagEdit": true,
+  "shot.namePrompt.B.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-name-prompt-B-light.png",
+  "shot.namePrompt.B.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-name-prompt-B-dark.png",
+  "namePrompt.B.dismiss": {
+    "scrim": false,
+    "dialogs": [
+      "dialog.namePrompt",
+      "dialog.namePrompt.close",
+      "dialog.namePrompt.name",
+      "dialog.namePrompt.error",
+      "dialog.namePrompt.continue"
+    ]
+  },
+  "namePrompt.B.dismiss.closed": {
+    "after": 1
+  },
+  "roster.A.light": [
+    {
+      "control": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "name": "Ada Lovelace (you) · guest",
+      "meta": "slide 1",
+      "chip": "Ada Lovelace, guest",
+      "variant": "initials",
+      "initials": "AL",
+      "picture": null,
+      "badge": null,
+      "title": null
+    },
+    {
+      "control": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "name": "Clay 741",
+      "meta": "editor · slide 1",
+      "chip": "Clay 741",
+      "variant": "initials",
+      "initials": "C",
+      "picture": null,
+      "badge": null,
+      "title": null
+    }
+  ],
+  "rosterChips.A.light": [
+    {
+      "holder": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 13,
+      "initials": "C",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.roster.A.light": [
+    {
+      "holder": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgb(7, 7, 7)"
+    },
+    {
+      "holder": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.roster.A.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-roster-A-light.png",
+  "roster.A.dark": [
+    {
+      "control": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "name": "Ada Lovelace (you) · guest",
+      "meta": "slide 1",
+      "chip": "Ada Lovelace, guest",
+      "variant": "initials",
+      "initials": "AL",
+      "picture": null,
+      "badge": null,
+      "title": null
+    },
+    {
+      "control": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "name": "Clay 741",
+      "meta": "editor · slide 1",
+      "chip": "Clay 741",
+      "variant": "initials",
+      "initials": "C",
+      "picture": null,
+      "badge": null,
+      "title": null
+    }
+  ],
+  "rosterChips.A.dark": [
+    {
+      "holder": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 13,
+      "initials": "C",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.roster.A.dark": [
+    {
+      "holder": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgb(242, 242, 240)"
+    },
+    {
+      "holder": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.roster.A.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-roster-A-dark.png",
+  "roster.B.light": [
+    {
+      "control": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "name": "Clay 741 (you)",
+      "meta": "slide 1",
+      "chip": "Clay 741",
+      "variant": "initials",
+      "initials": "C",
+      "picture": null,
+      "badge": null,
+      "title": null
+    },
+    {
+      "control": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "name": "Ada Lovelace · guest",
+      "meta": "owner · slide 1",
+      "chip": "Ada Lovelace, guest",
+      "variant": "initials",
+      "initials": "AL",
+      "picture": null,
+      "badge": null,
+      "title": null
+    }
+  ],
+  "rosterChips.B.light": [
+    {
+      "holder": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 13,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.roster.B.light": [
+    {
+      "holder": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgb(7, 7, 7)"
+    },
+    {
+      "holder": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.roster.B.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-roster-B-light.png",
+  "roster.B.dark": [
+    {
+      "control": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "name": "Clay 741 (you)",
+      "meta": "slide 1",
+      "chip": "Clay 741",
+      "variant": "initials",
+      "initials": "C",
+      "picture": null,
+      "badge": null,
+      "title": null
+    },
+    {
+      "control": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "name": "Ada Lovelace · guest",
+      "meta": "owner · slide 1",
+      "chip": "Ada Lovelace, guest",
+      "variant": "initials",
+      "initials": "AL",
+      "picture": null,
+      "badge": null,
+      "title": null
+    }
+  ],
+  "rosterChips.B.dark": [
+    {
+      "holder": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 13,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.roster.B.dark": [
+    {
+      "holder": "presence.roster.cf31199166fcbdb30277fdd816d95ac2",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgb(242, 242, 240)"
+    },
+    {
+      "holder": "presence.roster.f1b9ba21a0f6619ad2e55b936a14ab64",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.roster.B.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-roster-B-dark.png",
+  "accountMenu.A.light": {
+    "name": "Ada Lovelace",
+    "sentence": "Not signed in",
+    "chip": "Ada Lovelace, guest",
+    "badge": null,
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.forget"
+    ]
+  },
+  "accountChips.A.light": [
+    {
+      "holder": "account.sentence",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "shot.account.A.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-account-menu-A-light.png",
+  "accountMenu.A.dark": {
+    "name": "Ada Lovelace",
+    "sentence": "Not signed in",
+    "chip": "Ada Lovelace, guest",
+    "badge": null,
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.forget"
+    ]
+  },
+  "accountChips.A.dark": [
+    {
+      "holder": "account.sentence",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "shot.account.A.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-account-menu-A-dark.png",
+  "versions.A.light": {
+    "panelWidth": 320,
+    "rows": [
+      {
+        "author": "anon_50ce3041-33bf-4cc7-9e9a-7dd2d5d870f5",
+        "inWindow": true,
+        "current": true,
+        "word": "Clay 741",
+        "meta": "Clay 741 · named · current",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": null,
+        "badge": null
+      },
+      {
+        "author": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      },
+      {
+        "author": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      },
+      {
+        "author": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      },
+      {
+        "author": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · 1 change",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      }
+    ],
+    "windows": [
+      {
+        "text": "CAL10:21 AM to 10:22 AMClay 741, You · 1 change▾",
+        "firstMarkX": 17,
+        "textX": 59,
+        "marksWidth": 34,
+        "more": null,
+        "moreFont": null,
+        "hoverBackground": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px",
+      "paddingLeft": "0px"
+    },
+    "dayHeadX": 17
+  },
+  "versionChips.A.light": [
+    {
+      "holder": "versionHistory.window.w5",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 5,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 5,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.versions.A.light": [
+    {
+      "holder": "versionHistory.window.w5",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.versions.A.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-versions-A-light.png",
+  "versions.windowHover.A.light": "rgba(7, 7, 7, 0.06)",
+  "versions.hovered.A.light": {
+    "restore": "flex",
+    "metaClipped": false,
+    "meta": "You · named"
+  },
+  "shot.versionsHover.A.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-versions-hover-A-light.png",
+  "versionsMore.A.light": [
+    {
+      "id": "version.restore",
+      "text": "Restore this version"
+    },
+    {
+      "id": "version.name",
+      "text": "Name this version"
+    },
+    {
+      "id": "version.copy",
+      "text": "Make a copy"
+    }
+  ],
+  "shot.versionsMore.A.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-versions-more-A-light.png",
+  "versions.A.dark": {
+    "panelWidth": 320,
+    "rows": [
+      {
+        "author": "anon_50ce3041-33bf-4cc7-9e9a-7dd2d5d870f5",
+        "inWindow": true,
+        "current": true,
+        "word": "Clay 741",
+        "meta": "Clay 741 · named · current",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": null,
+        "badge": null
+      },
+      {
+        "author": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      },
+      {
+        "author": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      },
+      {
+        "author": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      },
+      {
+        "author": "anon_3e05df53-76b2-4644-ad8b-81880d53ce52",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · 1 change",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      }
+    ],
+    "windows": [
+      {
+        "text": "CAL10:21 AM to 10:22 AMClay 741, You · 1 change▾",
+        "firstMarkX": 17,
+        "textX": 59,
+        "marksWidth": 34,
+        "more": null,
+        "moreFont": null,
+        "hoverBackground": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px",
+      "paddingLeft": "0px"
+    },
+    "dayHeadX": 17
+  },
+  "versionChips.A.dark": [
+    {
+      "holder": "versionHistory.window.w5",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 5,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 5,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.versions.A.dark": [
+    {
+      "holder": "versionHistory.window.w5",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.versions.A.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-versions-A-dark.png",
+  "versions.windowHover.A.dark": "rgba(242, 242, 240, 0.08)",
+  "versions.hovered.A.dark": {
+    "restore": "flex",
+    "metaClipped": false,
+    "meta": "You · named"
+  },
+  "shot.versionsHover.A.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-versions-hover-A-dark.png",
+  "versionsMore.A.dark": [
+    {
+      "id": "version.restore",
+      "text": "Restore this version"
+    },
+    {
+      "id": "version.name",
+      "text": "Name this version"
+    },
+    {
+      "id": "version.copy",
+      "text": "Make a copy"
+    }
+  ],
+  "shot.versionsMore.A.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-versions-more-A-dark.png",
+  "commentCard.A.light": null,
+  "commentCard.A.dark": null,
+  "marker.B.light": {
+    "count": 1,
+    "plate": {
+      "text": "AL1",
+      "chip": "Ada Lovelace, guest",
+      "plate": true
+    }
+  },
+  "shot.marker.B.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-comment-marker-B-light.png",
+  "commentsPanel.B.light": [
+    {
+      "text": "ALAda Lovelaceguestslide 1Can you check the title on this slide?now",
+      "chip": "Ada Lovelace, guest",
+      "badge": null
+    }
+  ],
+  "commentsPanelChips.B.light": [
+    {
+      "holder": "panel.comments.open.01m3snf7715kr9qm0a890xnejk",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.commentsPanel.B.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-comments-panel-B-light.png",
+  "commentCard.B.light": {
+    "name": "Ada Lovelace",
+    "trust": "guest",
+    "badge": null,
+    "chip": "Ada Lovelace, guest",
+    "title": null
+  },
+  "commentCardChips.B.light": [
+    {
+      "holder": "comment.card.first",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.commentCard.B.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-comment-card-B-light.png",
+  "marker.B.dark": {
+    "count": 1,
+    "plate": {
+      "text": "AL1",
+      "chip": "Ada Lovelace, guest",
+      "plate": true
+    }
+  },
+  "shot.marker.B.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-comment-marker-B-dark.png",
+  "commentsPanel.B.dark": [
+    {
+      "text": "ALAda Lovelaceguestslide 1Can you check the title on this slide?now",
+      "chip": "Ada Lovelace, guest",
+      "badge": null
+    }
+  ],
+  "commentsPanelChips.B.dark": [
+    {
+      "holder": "panel.comments.open.01m3snf7715kr9qm0a890xnejk",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.commentsPanel.B.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-comments-panel-B-dark.png",
+  "commentCard.B.dark": {
+    "name": "Ada Lovelace",
+    "trust": "guest",
+    "badge": null,
+    "chip": "Ada Lovelace, guest",
+    "title": null
+  },
+  "commentCardChips.B.dark": [
+    {
+      "holder": "comment.card.first",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.commentCard.B.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-comment-card-B-dark.png",
+  "share.step.A.light": "start",
+  "share.open.A.light": {
+    "shown": true,
+    "attempts": 1,
+    "late": null,
+    "ms": 795
+  },
+  "share.band.A.light": {
+    "present": false,
+    "dialogs": 1,
+    "focus": "dialog.share.mode"
+  },
+  "share.A.light": [
+    {
+      "control": "dialog.share.owner",
+      "name": "You",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": null,
+      "chip": "Chromium 203",
+      "variant": "initials",
+      "picture": null
+    }
+  ],
+  "shareChips.A.light": [
+    {
+      "holder": "dialog.share.owner",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.share.A.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-share-A-light.png",
+  "share.step.A.dark": "start",
+  "share.open.A.dark": {
+    "shown": true,
+    "attempts": 1,
+    "late": null,
+    "ms": 24
+  },
+  "share.band.A.dark": {
+    "present": false,
+    "dialogs": 1,
+    "focus": "dialog.share.mode"
+  },
+  "share.A.dark": [
+    {
+      "control": "dialog.share.owner",
+      "name": "You",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": null,
+      "chip": "Chromium 203",
+      "variant": "initials",
+      "picture": null
+    }
+  ],
+  "shareChips.A.dark": [
+    {
+      "holder": "dialog.share.owner",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.share.A.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-share-A-dark.png",
+  "share.step.B.light": "start",
+  "share.open.B.light": {
+    "shown": true,
+    "attempts": 1,
+    "late": null,
+    "ms": 798
+  },
+  "share.band.B.light": {
+    "present": true,
+    "firstInBody": true,
+    "words": "Your name, shown to collaboratorsSkipContinue",
+    "field": "Clay 741",
+    "skip": true,
+    "continueDisabled": false,
+    "signIn": false,
+    "error": "",
+    "frame": "rgba(7, 7, 7, 0.18)",
+    "focus": "dialog.namePrompt.name",
+    "dialogs": 1
+  },
+  "shot.share.band.B.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-share-band-B-light.png",
+  "share.band.skip.B.light": {
+    "gone": true,
+    "ms": 21,
+    "dialogStill": true,
+    "focus": "dialog.share.done"
+  },
+  "share.B.light": [
+    {
+      "control": "dialog.share.owner",
+      "name": "Ada Lovelace · guest",
+      "title": null,
+      "email": null,
+      "trust": " · guest",
+      "badge": null,
+      "chip": "Ada Lovelace, guest",
+      "variant": "initials",
+      "picture": null
+    }
+  ],
+  "shareChips.B.light": [
+    {
+      "holder": "dialog.share.owner",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.share.B.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-share-B-light.png",
+  "share.step.B.dark": "start",
+  "share.open.B.dark": {
+    "shown": true,
+    "attempts": 1,
+    "late": null,
+    "ms": 19
+  },
+  "share.band.B.dark": {
+    "present": false,
+    "dialogs": 1,
+    "focus": "dialog.share.mode"
+  },
+  "share.B.dark": [
+    {
+      "control": "dialog.share.owner",
+      "name": "Ada Lovelace · guest",
+      "title": null,
+      "email": null,
+      "trust": " · guest",
+      "badge": null,
+      "chip": "Ada Lovelace, guest",
+      "variant": "initials",
+      "picture": null
+    }
+  ],
+  "shareChips.B.dark": [
+    {
+      "holder": "dialog.share.owner",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.share.B.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-share-B-dark.png",
+  "profile.A.light": "no Sessions row (anonymous): the Profile head is an account surface",
+  "profile.A.dark": "no Sessions row (anonymous): the Profile head is an account surface",
+  "filmstripChips.A": [
+    {
+      "holder": "filmstrip.slide.title",
+      "ariaLabel": "Clay 741",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 5,
+      "initials": "C",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.filmstrip.A": [
+    {
+      "holder": "filmstrip.slide.title",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.filmstrip.A.light": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-filmstrip-marks-A-light.png",
+  "shot.filmstrip.A.dark": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/pictures/people-production-1440-filmstrip-marks-A-dark.png",
+  "uptime.end": "10:23  up 6 days, 20 mins, 2 users, load averages: 5.81 7.20 6.35",
+  "endedAt": "2026-09-30T17:23:46.489Z",
+  "deck.teardown": {
+    "deckId": "untitled-20260930-cjb9",
+    "trashed": "deck.trash ok at 8",
+    "removed": "deck.remove ok at 8",
+    "after": "still answers"
+  }
+}

@@ -557,7 +557,32 @@ export async function resolvePrincipalId(principalId: string): Promise<ResolvedI
   const record = await principalStore()
     .get(principalId)
     .catch(() => null);
-  return resolveIdentity(principalId, record);
+  /* the name and the choice typed on another instance ride the principal's deck index (b1.md
+     R17; docs/PEOPLE.md 3.13), read here the way requestIdentity reads them for the request's
+     own principal: the blob tier's principal store is a file store per instance, so a departed
+     guest's comment read on another instance drew the label without this (the integrator's
+     preview run, people.comment-departed-guest) */
+  const carried =
+    record !== null && record.name !== undefined ? record : await carriedFacts(principalId, record);
+  return resolveIdentity(principalId, carried);
+}
+
+/** The record with the name and the non picture choice the deck index carries, when it carries any. */
+async function carriedFacts(
+  principalId: string,
+  record: PrincipalRecord | null,
+): Promise<PrincipalRecord | null> {
+  const [name, avatar] = await Promise.all([
+    displayNameFromIndex(principalId).catch(() => undefined),
+    avatarChoiceFromIndex(principalId).catch(() => undefined),
+  ]);
+  if (name === undefined && avatar === undefined) return record;
+  const base = record ?? newPrincipalRecord(principalId, new Date());
+  return {
+    ...base,
+    ...(name !== undefined ? { name } : {}),
+    ...(avatar !== undefined && base.avatar.variant !== 'picture' ? { avatar } : {}),
+  };
 }
 
 /**

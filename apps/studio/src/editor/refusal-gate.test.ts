@@ -1,8 +1,10 @@
 // The refusal card's gate (docs/FEATURES.md 2.2 rank 8; the integrator of ship one): a write the
 // room refused as invalid with no typed text and every named object still on the document came
 // from a chrome control and is said once in the snackbar; a stale write, a notice carrying text,
-// and a write whose slide or block is gone (the loser of a structural race, docs/SYNC.md; the row
-// sync.structural.concurrent reads A's reject card) keep the card and its Copy text.
+// and a write whose slide or block is gone (the loser of a structural race, docs/SYNC.md) keep the
+// card and its Copy text. Since docs/POLISH.md item 102 the controller says a structural refusal
+// as one snackbar sentence before the notice reaches the gate (editor/refused-write.ts), so the
+// row sync.structural.concurrent reads that sentence and this gate meets typed notices alone.
 import { describe, expect, it } from 'vitest';
 
 import { workedDocument } from '@turboslide/schema/fixtures';

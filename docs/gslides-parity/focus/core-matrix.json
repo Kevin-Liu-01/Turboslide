@@ -275,7 +275,8 @@
       "interaction": "Restore on the trash card; the card leaves the trash and the deck is listed on /decks",
       "driver": "core/decks.spec.ts",
       "today": "works",
-      "evidence": "audit-decks row 50"
+      "evidence": "audit-decks row 50",
+      "note": "The polish round ship step, third attempt (the integrator for B6): the row trashes the deck itself when the trash lists no card, so a narrowed run reads it (B5's R25; the once rerun ran it without decks.trash.listed-after-move)"
     },
     {
       "id": "decks.trash.lists-after-restore",
@@ -371,10 +372,11 @@
     {
       "id": "decks.card.download",
       "feature": "decks",
-      "interaction": "Card menu > Download starts the bundle download within 30 s",
+      "interaction": "Card menu > Download starts the PowerPoint download within 30 s: a PK file named .pptx (docs/POLISH.md 2.7 item 85; the bundle is File > Download > Turboslide bundle, export.zip.bundle)",
       "driver": "core/decks.spec.ts",
       "today": "works",
-      "evidence": "audit-decks row 41"
+      "evidence": "audit-decks row 41",
+      "note": "The polish round ship step, third attempt (the integrator for B6): since item 85 the card's Download is the PowerPoint; the second ship attempt read no bundle ticket twice through the older mechanism (B5's R21)"
     },
     {
       "id": "slides.new.toolbar",
@@ -2774,7 +2776,8 @@
       "interaction": "Share in the title row on a deck opened to Anyone with the link (docs/POLISH.md 2.7 item 95: a new deck starts Restricted) opens the dialog with the View, Present and Edit links",
       "driver": "core/share.spec.ts",
       "today": "works",
-      "evidence": "audit-present row 17"
+      "evidence": "audit-present row 17",
+      "note": "The polish round ship step, third attempt (the integrator for B6): the row's own bound is 150 s (three Copy link rows each with a 15 s clipboard poll ran out the 60 s default twice in the second ship attempt while the dialog opened in 3.7 s by hand, B5's R24)"
     },
     {
       "id": "share.copy-view-link",
@@ -4564,7 +4567,8 @@
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 19",
-      "parks": ["file.open"]
+      "parks": ["file.open"],
+      "note": "The polish round ship step, third attempt (the integrator for B6): the bundle uploaded is File > Download > Turboslide bundle from the deck's editor (bundleBytes), since item 85 made the card's Download the PowerPoint, a PK file with no manifest.json, which the second ship attempt uploaded twice (B5's R21)"
     },
     {
       "id": "decks.file.import-slides-deck",
@@ -4583,7 +4587,7 @@
       "today": "works",
       "evidence": "audit-surface row 21",
       "parks": ["file.importSlides"],
-      "note": "Since the product round the row uploads a bundle of its own copy of the deck (File > Make a copy through the card menu), so the upload's name is fresh and never the one the row before it removed (ship.md section 10 item 3, R2-F6); the copy leaves with the row. The listing of the upload waits up to 65 s where the row reads it (PRODUCT.md 8.2)."
+      "note": "Since the product round the row uploads a bundle of its own copy of the deck (File > Make a copy through the card menu), so the upload's name is fresh and never the one the row before it removed (ship.md section 10 item 3, R2-F6); the copy leaves with the row. The listing of the upload waits up to 65 s where the row reads it (PRODUCT.md 8.2).. The polish round ship step, third attempt (the integrator for B6): the copy's bundle is File > Download > Turboslide bundle from its editor (bundleBytes; B5's R21)"
     },
     {
       "id": "decks.file.details",
@@ -4824,7 +4828,8 @@
       "interaction": "The first Share on a browser with no name asks \"Your name, shown to collaborators\"; the name shows on the presence chip in a second browser within 5 s",
       "driver": "core/share.spec.ts",
       "today": "not driven",
-      "evidence": "audit-seller 4"
+      "evidence": "audit-seller 4",
+      "note": "The polish round ship step, third attempt (the integrator for B6): the owner opens the deck to Anyone with the link through the window API before the guest's first open (item 78; the guest was a stranger on a Restricted deck twice in the second ship attempt, B5's R23); the name prompt on the first Share is read as before"
     },
     {
       "id": "share.dialog.co-edit-from-copied-link",
@@ -5964,12 +5969,12 @@
     {
       "id": "sync.structural.concurrent",
       "feature": "sync",
-      "interaction": "A and B each drag one block (pos.set on the same block) within 200 ms; both browsers show one position within 3 s on the memory tier and 5 s on the blob tier (the block row's split: two drags each make up to two commits, which the blob tier spaces a second apart on one instance and delivers by the 2 s pulse tick). Then A moves a block while B deletes its slide within 200 ms; the loser reads the reducer's sentence in its reject card and both browsers show the slide gone within 5 s",
+      "interaction": "A and B each drag one block (pos.set on the same block) within 200 ms; both browsers show one position within 3 s on the memory tier and 5 s on the blob tier (the block row's split: two drags each make up to two commits, which the blob tier spaces a second apart on one instance and delivers by the 2 s pulse tick). Then A moves a block while B deletes its slide within 200 ms; the loser reads one snackbar sentence with no id (docs/POLISH.md item 102) and both browsers show the slide gone within 5 s",
       "driver": "core/sync.spec.ts",
       "today": "not driven",
-      "evidence": "invariant 2; transform.ts 348 passes non text ops through; room.ts reanchor 1134",
+      "evidence": "invariant 2; transform.ts 348 passes non text ops through; room.ts reanchor 1134; item 102",
       "setup": "block.insert of the dragged blocks and slide.new of the slide B deletes",
-      "note": "B1; falsifies invariant 2 outside text (judge-correctness addition 2). Objects round fix round (the verifier's pass 1 finding 8): three slides read for two after one slide.new is the blob tier's admission class (a write acknowledged late, resent and admitted a second time by an instance behind the store; docs/SYNC.md 3.2), which the driver names in its reason."
+      "note": "B1; falsifies invariant 2 outside text (judge-correctness addition 2). Objects round fix round (the verifier's pass 1 finding 8): three slides read for two after one slide.new is the blob tier's admission class (a write acknowledged late, resent and admitted a second time by an instance behind the store; docs/SYNC.md 3.2), which the driver names in its reason.. The polish round ship step, third attempt (the integrator for B6): the loser's structural refusal is one snackbar sentence and never a card (item 102; the sync owner's fix round 3 R1, the sentence read 206 ms after the reconnect on the enforce preview); the older read of A's reject card was red twice in the second ship attempt"
     },
     {
       "id": "sync.block.offline-replay-converges",
@@ -8799,12 +8804,12 @@
     {
       "id": "export.refusal.sentence-and-retry",
       "feature": "export",
-      "interaction": "A blob put answering 429 once through `page.route`: the PowerPoint arrives; twice: the snackbar reads \"The PowerPoint could not be made. Try again in a minute\" and no \"Vercel\"",
+      "interaction": "The export call's answer refused through `page.route` with the store's own words in its body: no file, and the dialog and the snackbar read \"The PowerPoint could not be made. Try again in a minute\" and never \"Vercel\"; the plain export before it arrives; the blob put's retry on a 429 is the function's and apps/studio/src/server/download.test.ts judges it",
       "driver": "core/export.spec.ts",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-pages item 9",
-      "note": "Polish round; docs/POLISH.md 2.7 item 82; B5"
+      "note": "Polish round; docs/POLISH.md 2.7 item 82; B5. The polish round ship step, third attempt (the integrator for B6): the put runs inside the syncExport server function, so a page.route on the blob host meets no PUT on any tier (the second ship attempt read \"0 injected\" twice, B5's R26); the row drives the sentence half of item 82 through the export call's answer and names the unit test for the retry half"
     },
     {
       "id": "export.print.opens",
@@ -9108,7 +9113,7 @@
       "today": "broken",
       "severity": 2,
       "evidence": "audit-collab item 2; audit-chrome item 24",
-      "note": "Polish round; docs/POLISH.md 2.8 item 111; B5"
+      "note": "Polish round; docs/POLISH.md 2.8 item 111; B5. The polish round ship step, third attempt (the integrator for B6): the fresh context carries the owner's cookies (a new deck is Restricted, item 78; under enforce a stranger's context met the access page twice in the second ship attempt, B5's R22); the cold /decks and the 60 s idle stay the row's reading"
     },
     {
       "id": "collab.polish.session-sweep",

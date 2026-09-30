@@ -764,6 +764,13 @@ export type EditorShellInput = {
   export?: EditorExport;
   /** deck.list, for Open and Import slides; the dispatcher's `deck.list` when absent */
   listDecks?: () => Promise<ReadonlyArray<DeckHeadRow>>;
+  /**
+   * This browser's own decks (the Recent mirror, docs/POLISH.md item 75), drawn by Open and
+   * Import slides the moment they open, before `listDecks` answers; the listing replaces them
+   * when it lands, with any of them it does not hold folded in above it. Absent: the dialogs wait
+   * for the listing as before (B5's R29 to B1, landed by the ship step's third attempt).
+   */
+  recentDecks?: () => ReadonlyArray<DeckHeadRow>;
   /** another deck's slides, for Import slides step 2 */
   readDeck?: (deckId: string) => Promise<SourceDeckSlides>;
   /** the Upload tab of Open and Import slides: a Turboslide bundle (.zip) */

@@ -10,6 +10,7 @@ import { cn } from '../lib/cn';
 import { DIALOGS, IMPORT_PPTX } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 import { formatWhen } from '../VersionsPanel';
+import { recentRowsOf, withRecent } from './recent-rows';
 
 import './upload.css';
 
@@ -61,7 +62,12 @@ export function ImportSlidesDialog() {
   const shell = useEditorShell();
   const { input } = shell;
   const [tab, setTab] = useState<'presentations' | 'upload'>('presentations');
-  const [decks, setDecks] = useState<ReadonlyArray<DeckHeadRow> | null>(null);
+  /* this browser's own decks first (docs/POLISH.md item 75), never the deck imported into; the
+     store's listing replaces them when it lands and the list is marked busy until then */
+  const [decks, setDecks] = useState<ReadonlyArray<DeckHeadRow> | null>(() =>
+    recentRowsOf(input.recentDecks, input.deckId),
+  );
+  const [listing, setListing] = useState(true);
   const [source, setSource] = useState<SourceDeckSlides | null>(null);
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
   /** the tile of the last plain click, the start of a Shift click's range */
@@ -104,15 +110,14 @@ export function ImportSlidesDialog() {
     let live = true;
     list()
       .then((rows) => {
-        if (live)
-          setDecks(
-            rows
-              .filter((row) => row.id !== input.deckId)
-              .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1)),
-          );
+        if (!live) return;
+        setDecks(withRecent(rows, input.recentDecks, input.deckId));
+        setListing(false);
       })
       .catch((err: unknown) => {
-        if (live) setError(err instanceof Error ? err.message : String(err));
+        if (!live) return;
+        setError(err instanceof Error ? err.message : String(err));
+        setListing(false);
       });
     return () => {
       live = false;
@@ -227,6 +232,7 @@ export function ImportSlidesDialog() {
                   className="ts-dialog-list"
                   role="listbox"
                   aria-label={DIALOGS.importSlides.presentations}
+                  aria-busy={listing ? 'true' : undefined}
                 >
                   {decks.map((deck) => (
                     <li key={deck.id}>

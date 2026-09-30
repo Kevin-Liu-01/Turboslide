@@ -308,6 +308,11 @@ async function landingOf(browser: import('@playwright/test').Browser, url: strin
 }
 
 test(title('share.dialog.open'), async () => {
+  /* the row's own bound: the open, the access write, the dialog and three Copy link rows, each
+     with a 15 s clipboard poll on a preview whose clipboard lags (copyRow), ran out the 60 s
+     default twice in the polish round's run of record while the dialog itself opened in 3.7 s by
+     hand (B5's R24 to B6, landed by the ship step's third attempt) */
+  test.setTimeout(150_000);
   await openEditor(page, deck);
   await linkAccess(page, deck);
   await openShare();
@@ -1522,6 +1527,11 @@ test(title('share.name-prompt.first-share'), async ({ browser }) => {
   const guest = await otherContext(browser);
   try {
     const own = await newDeck(fresh.page, freshScratch, 'Name prompt deck');
+    /* a new deck is Restricted (docs/POLISH.md item 78), so the guest below is a stranger on it
+       under enforce and its editor never came up on the polish round's enforce preview (six opens
+       over 126 s, twice; B5's R23 to B6, landed by the ship step's third attempt): the owner opens
+       the deck to Anyone with the link first, through the window API, which asks no name */
+    await linkAccess(fresh.page, own, 'viewer');
     await ctl(fresh.page, 'share.open').click();
     const prompt = ctl(fresh.page, 'dialog.namePrompt');
     const shown = await prompt

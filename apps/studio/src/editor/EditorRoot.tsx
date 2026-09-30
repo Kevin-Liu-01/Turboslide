@@ -17,6 +17,7 @@ import type {
   EditorAccess,
   EditorAccount,
   EditorClipboard,
+  DeckHeadRow,
   EditorComments,
   EditorInbox,
   EditorMode,
@@ -144,6 +145,24 @@ let deckListCache: { at: number; rows: Promise<Awaited<ReturnType<typeof listDec
  * open warms it and the Open and Import slides dialogs read the same promise, so a dialog opened
  * seconds after the menu has its rows at once. A listing that fails is not kept.
  */
+/**
+ * This browser's Recent mirror as the dialogs' rows (docs/POLISH.md item 75): the mirror's facts
+ * stand in for the head's (one section when the slide count is known, the open's time as the
+ * update's), so a deck made a moment ago is in File > Open and Import slides before the blob
+ * tier's listing holds it.
+ */
+function recentDeckRows(): DeckHeadRow[] {
+  return readRecent().map((entry) => ({
+    id: entry.id,
+    title: entry.title,
+    slides: entry.slides ?? 0,
+    sections: entry.slides === undefined ? 0 : 1,
+    revision: entry.revision,
+    updatedAt: entry.at,
+    createdAt: entry.at,
+  }));
+}
+
 function listDecksCached(): Promise<Awaited<ReturnType<typeof listDecks>>> {
   const now = Date.now();
   if (deckListCache !== null && now - deckListCache.at < DECK_LIST_TTL_MS)
@@ -1599,19 +1618,12 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     listDecks: async () => {
       const listed = await listDecksCached();
       const ids = new Set(listed.map((row) => row.id));
-      const mine = readRecent()
-        .filter((entry) => !ids.has(entry.id))
-        .map((entry) => ({
-          id: entry.id,
-          title: entry.title,
-          slides: entry.slides ?? 0,
-          sections: entry.slides === undefined ? 0 : 1,
-          revision: entry.revision,
-          updatedAt: entry.at,
-          createdAt: entry.at,
-        }));
+      const mine = recentDeckRows().filter((row) => !ids.has(row.id));
       return [...mine, ...listed];
     },
+    /* the mirror's rows at the dialog's open, before the listing lands (item 75; B5's R29): the
+       dialogs draw them at once and fold them in above the listing after */
+    recentDecks: recentDeckRows,
     readDeck: async (id) => {
       const read = await readSourceDeckSlides({ deckId: id });
       if (read === null) throw new RangeError(`No presentation named ${id}`);
@@ -2221,7 +2233,10 @@ const CONTROL_REFUSED = 'The change could not be applied to this object';
  * object the seller can see and the snackbar's sentence is enough. A stale write, a locked deck,
  * every notice carrying text, and a write whose slide or block is gone (the loser of a structural
  * race, docs/SYNC.md: a collaborator deleted the slide under the move) keep the card and its Copy
- * text; `sync.structural.concurrent` reads that card (the integrator, ship one).
+ * text. Since docs/POLISH.md item 102 the controller's `onReject` says a structural refusal as one
+ * snackbar sentence (editor/refused-write.ts) before the notice reaches `rejects`, so this gate
+ * meets typed notices alone and `sync.structural.concurrent` reads the sentence, not a card (the
+ * sync owner's fix round 3, R2).
  */
 export function isControlRefusal(
   notice: Pick<RejectNotice, 'reason' | 'text' | 'mutations' | 'message'>,

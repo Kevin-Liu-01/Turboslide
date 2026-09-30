@@ -933,28 +933,42 @@ test(title('sync.structural.concurrent'), async ({ browser }) => {
       .toBe(true)
       .then(() => true)
       .catch(() => false);
-    const card = A.locator('.ts-conflict');
     /* the reconnect, the resend and the refusal: the memory tier answers within a second or two,
-       the blob tier within its pulse */
-    const cardShown = await card
-      .first()
-      .waitFor({ timeout: 15_000 })
+       the blob tier within its pulse. The loser reads one snackbar sentence (docs/POLISH.md item
+       102: a structural refusal is one sentence with no id and no JSON; the card stays for typed
+       text), never a card: the sync fix round 3 read the sentence 206 ms after the reconnect on
+       the enforce preview of 2026-09-30 (the ship step's third attempt landed the sync owner's R1) */
+    const snack = A.locator('.ts-snackbar.is-on');
+    let sentence = '';
+    const sentenceShown = await expect
+      .poll(
+        async () => {
+          sentence = (
+            (await snack
+              .first()
+              .textContent()
+              .catch(() => '')) ?? ''
+          )
+            .replace(/\s+/g, ' ')
+            .trim();
+          return sentence;
+        },
+        { timeout: 15_000 },
+      )
+      .toMatch(/not moved|not resized|not applied|Try again/i)
       .then(() => true)
       .catch(() => false);
-    const sentence = cardShown
-      ? ((await card.first().textContent()) ?? '').replace(/\s+/g, ' ').trim()
-      : '';
+    const cardShown = (await A.locator('.ts-conflict').count()) > 0;
     test.info().annotations.push({
       type: 'measure',
-      description: `slide gone in both within 5 s ${gone} (${Date.now() - deleteAt} ms); A's reject card ${cardShown ? `"${sentence.slice(0, 160)}"` : 'none'}`,
+      description: `slide gone in both within 5 s ${gone} (${Date.now() - deleteAt} ms); A's snackbar ${sentenceShown ? `"${sentence.slice(0, 160)}"` : 'none'}; card ${cardShown ? 'shown' : 'none'}`,
     });
     expect(gone, 'both browsers show the slide gone within 5 s').toBe(true);
-    expect(cardShown, "the loser's reject card is shown").toBe(true);
-    expect(sentence.length, "the card carries the reducer's sentence").toBeGreaterThan(0);
-    if ((await ctl(A, 'conflict.discard').count()) > 0)
-      await ctl(A, 'conflict.discard')
-        .click()
-        .catch(() => undefined);
+    expect(sentenceShown, 'the loser reads one snackbar sentence (docs/POLISH.md item 102)').toBe(
+      true,
+    );
+    expect(sentence, 'no id and no JSON in the sentence').not.toMatch(/split-|\{|"/);
+    expect(cardShown, 'no card for a structural refusal').toBe(false);
   } finally {
     await cleanUp();
   }

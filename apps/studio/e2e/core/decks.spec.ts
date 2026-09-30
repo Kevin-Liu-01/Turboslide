@@ -394,52 +394,21 @@ test(title('decks.list.gt-brand-deck'), async () => {
 test(title('decks.card.download'), async () => {
   test.setTimeout(90_000);
   await gotoDecks();
-  /* the row's Download mints a ticket and clicks a one time anchor for
-     /api/decks/<id>/bundle?t=<ticket> (routes/decks.index.tsx triggerDownload). On production
-     and on localhost the browser's download arrives and its bytes are read. A preview behind
-     Vercel Authentication answers that navigation with the SSO redirect: a download the browser
-     starts from an anchor carries neither Playwright's extraHTTPHeaders nor a page.route header
-     (VERIFICATION.md F13, the b4 repro download-route), so there the URL the page's own click
-     started is read from the request and fetched with the OIDC header through the API context. */
-  /* the ticket the row minted, read from the server function's own answer (a navigation that
-     becomes a download emits no request or response event in Playwright) */
-  const bundleUrl = new RegExp(`/api/decks/${deck}/bundle\\?[^"\\\\\\s]+`);
-  const answers = serverFnAnswers(page);
-  const ticket = page
-    .waitForResponse(
-      async (r) =>
-        r.url().includes('/_serverFn/') && bundleUrl.test(await r.text().catch(() => '')),
-      { timeout: 30_000 },
-    )
-    .then(async (r) => (await r.text()).match(bundleUrl)?.[0] ?? null)
-    .catch(() => null);
-  const t = Date.now();
-  const started = page.waitForEvent('download', { timeout: 30_000 }).catch(() => null);
-  await cardMenuRow(deck, /^Download$/);
-  const url = await ticket;
-  expect(
-    url,
-    `the card menu mints the bundle ticket and starts the download (the server functions answered: ${answers.stop()})`,
-  ).not.toBeNull();
-  expect(Date.now() - t).toBeLessThan(30_000);
-  const arrived = await Promise.race([
-    started,
-    new Promise<null>((resolve) => setTimeout(() => resolve(null), OIDC ? 8000 : 30_000)),
-  ]);
-  if (arrived) {
-    const { readFileSync } = await import('node:fs');
-    const bytes = readFileSync(await arrived.path());
-    expect(bytes.subarray(0, 2).toString('latin1')).toBe('PK');
-    return;
-  }
-  expect(OIDC, 'the download arrives where no authentication wall stands').toBeTruthy();
-  const res = await page.request.get(url!, { headers: extraHTTPHeaders });
-  expect(res.status()).toBe(200);
-  const bytes = await res.body();
-  expect(bytes.subarray(0, 2).toString('latin1')).toBe('PK');
-  /* the wall answered the browser's own download navigation with its login page; back to the list */
-  if (!page.url().startsWith(new URL(page.url()).origin) || /vercel\.com/.test(page.url()))
-    await gotoDecks();
+  /* the card's Download is the PowerPoint since docs/POLISH.md item 85 (routes/decks.index.tsx:
+     the same export path as File > Download, saved from the page's own fetch, so a preview behind
+     Vercel Authentication answers it too); the bundle is File > Download > Turboslide bundle
+     (`bundleBytes`, `export.zip.bundle`). The row reads the file the card gives within 30 s: a
+     PK file named `.pptx`; `decks.card.download-powerpoint` reads its name and the snackbar. The
+     polish round's run of record read no bundle ticket twice through the older mechanism (B5's
+     R21, landed by the ship step's third attempt). */
+  const file = await download(page, () => cardMenuRow(deck, /^Download$/), 30_000);
+  test.info().annotations.push({
+    type: 'download',
+    description: `${file.name} (${file.bytes.length} B) in ${file.ms} ms`,
+  });
+  expect(file.ms, 'within 30 s').toBeLessThan(30_000);
+  expect(file.bytes.subarray(0, 2).toString('latin1'), 'a PK file').toBe('PK');
+  expect(file.name, 'the PowerPoint').toMatch(/\.pptx$/);
 });
 
 test(title('decks.file.make-a-copy'), async () => {
@@ -537,65 +506,26 @@ async function switchOff(p: Page): Promise<void> {
   if ((await state(p)).settings?.['advancedTools'] === true)
     await menuPath(p, 'tools', 'tools.advancedTools');
 }
-/**
- * Records every server function answer a page receives while a row mints a ticket, so a ticket
- * that never comes is named by what the server said (a quota refusal, `authorizeExport` in
- * server/download.ts, answers the function's error and not the bundle address; VERIFICATION.md
- * R2-F10 read "the bundle ticket" null once in a run that shared one identity between two files
- * and could not say why). `stop()` returns the answers and detaches the listener.
- */
-function serverFnAnswers(p: Page): { stop: () => string } {
-  const answers: string[] = [];
-  const onResponse = (r: import('@playwright/test').Response) => {
-    if (!r.url().includes('/_serverFn/')) return;
-    void r
-      .text()
-      .then((text) => {
-        answers.push(`${r.status()} ${text.replace(/\s+/g, ' ').slice(0, 240)}`);
-      })
-      .catch(() => undefined);
-  };
-  p.on('response', onResponse);
-  return {
-    stop: () => {
-      p.off('response', onResponse);
-      return answers.length > 0 ? answers.join(' | ') : 'no server function answered';
-    },
-  };
-}
 
-/** The deck's bundle, downloaded from the card menu (the product's own transfer file). */
+/**
+ * The deck's bundle (the product's own transfer file), downloaded from the deck's editor through
+ * File > Download > Turboslide bundle, the way `export.zip.bundle` reads it. Since docs/POLISH.md
+ * item 85 the card's Download is the PowerPoint, a PK file with no `manifest.json`, which the
+ * upload rows read as "Not a deck bundle" twice in the polish round's run of record (B5's R21 to
+ * B6, landed by the ship step's third attempt). The bundle row sits behind Advanced tools on
+ * some builds; `reachMenuRow` switches it on and the caller's row switches it back.
+ */
 async function bundleBytes(p: Page, id: string): Promise<Buffer> {
-  await gotoDecks(p);
-  const started = p.waitForEvent('download', { timeout: 30_000 }).catch(() => null);
-  const bundleUrl = new RegExp(`/api/decks/${id}/bundle\\?[^"\\\\\\s]+`);
-  const answers = serverFnAnswers(p);
-  const ticket = p
-    .waitForResponse(
-      async (r) =>
-        r.url().includes('/_serverFn/') && bundleUrl.test(await r.text().catch(() => '')),
-      { timeout: 30_000 },
-    )
-    .then(async (r) => (await r.text()).match(bundleUrl)?.[0] ?? null)
-    .catch(() => null);
-  await cardMenuRow(id, /^Download$/, p);
-  const arrived = await Promise.race([
-    started,
-    new Promise<null>((resolve) => setTimeout(() => resolve(null), OIDC ? 8000 : 30_000)),
-  ]);
-  if (arrived) {
-    answers.stop();
-    const { readFileSync } = await import('node:fs');
-    return readFileSync(await arrived.path());
-  }
-  const url = await ticket;
-  expect(
-    url,
-    `the bundle ticket (the server functions answered: ${answers.stop()})`,
-  ).not.toBeNull();
-  const res = await p.request.get(url!, { headers: extraHTTPHeaders });
-  expect(res.status()).toBe(200);
-  return res.body();
+  await openEditor(p, id);
+  const switched = await reachMenuRow(p, 'file', 'file.download', 'file.download.zip');
+  const zip = await download(
+    p,
+    () => menuPath(p, 'file', 'file.download', 'file.download.zip'),
+    60_000,
+  );
+  expect(zip.bytes.subarray(0, 2).toString('latin1'), 'a zip').toBe('PK');
+  if (switched) await switchOff(p);
+  return zip.bytes;
 }
 
 /** The decks the two upload rows made, by the route's answer; each leaves at the end of its row. */
@@ -1057,7 +987,15 @@ async function restoreFromTrash(id: string): Promise<void> {
 
 test(title('decks.trash.restore'), async () => {
   test.setTimeout(90_000);
+  /* a narrowed run (`--rows`) runs this row without `decks.trash.listed-after-move`, which is what
+     puts the deck in the trash (the polish round's once rerun read the restore's click waiting to
+     the bound; B5's R25 to B6, landed by the ship step's third attempt): the row trashes the deck
+     itself when the trash lists no card, the way `decks.trash.delete-forever-button` does */
   await gotoTrash();
+  if ((await ctl(page, `trash.card.${deck}`).count()) === 0) {
+    await trashFromEditor(deck);
+    await gotoTrash();
+  }
   await restoreFromTrash(deck);
   await gotoDecks();
   /* a presentation this browser opened sits in the Opened on this device row and leaves the
@@ -2824,9 +2762,15 @@ test(title('decks.trash.empty-not-primary'), async () => {
 
 test(title('decks.thumbnail.never-502'), async ({ browser }) => {
   test.setTimeout(150_000);
+  /* the fresh context is the owner's browser once more (the file's cookies copied in): a new deck
+     is Restricted (docs/POLISH.md item 78), so a stranger's context met the access page on the
+     enforce preview and never the editor (the polish round's run of record, twice; B5's R22 to
+     B6, landed by the ship step's third attempt). The cold `/decks` and the 60 s idle are the
+     row's own reading; the context is fresh for its cache, not for its identity. */
   const fresh = await browser.newContext({
     extraHTTPHeaders,
     viewport: { width: 1440, height: 900 },
+    storageState: await context.storageState(),
   });
   const p = await fresh.newPage();
   const bad: string[] = [];

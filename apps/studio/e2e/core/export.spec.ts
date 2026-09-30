@@ -3151,73 +3151,69 @@ test(title('export.details.seller-card'), async () => {
 
 test(title('export.refusal.sentence-and-retry'), async () => {
   test.setTimeout(240_000);
-  const base = (process.env['PLAYWRIGHT_BASE_URL'] ?? '').replace(/\/$/, '');
-  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(base))
-    test.skip(
-      true,
-      "not driven on the tmp store: the blob put's 429 cannot be injected on a localhost base (docs/POLISH.md 2.7 item 82; apps/studio/src/server/download.test.ts judges the retry); drive it on the enforce preview",
-    );
+  /* docs/POLISH.md item 82 has two halves. The retry is the function's: the export's blob put
+     runs inside the syncExport server function (server/export-sync.ts putWithOneRetry,
+     server/download.ts), never in the page, so a `page.route` on the blob host meets no PUT on
+     any tier (the polish round's run of record read "0 injected" twice; B5's R26 to B6, landed by
+     the ship step's third attempt); apps/studio/src/server/download.test.ts judges the retry and
+     its wait. The sentence is the page's: the export call's answer is refused here with the
+     store's own words in its body, and the dialog and the snackbar must read the one sentence of
+     item 82 and never the store's name. First the plain export, so the row reads the PowerPoint
+     arriving on this build before it reads the refusal. */
   const { page, deck } = await plainDeck(2);
   await openEditor(page, deck);
-  const blob = /public\.blob\.vercel-storage\.com|blob\.vercel-storage\.com/;
-  let seen = 0;
-  const answerOnce = async (route: import('@playwright/test').Route) => {
-    if (route.request().method() === 'PUT' && seen === 0) {
-      seen += 1;
-      return route.fulfill({
-        status: 429,
-        contentType: 'application/json',
-        body: JSON.stringify({ error: 'Too many requests please lower the number of requests' }),
-      });
-    }
-    return route.continue();
+  const startExport = async () => {
+    await menuPath(page, 'file', 'file.download', 'file.download.pptx');
+    const ok = ctl(page, 'dialog.download.ok');
+    if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
   };
-  await page.route(blob, answerOnce);
-  const once = await download(
-    page,
-    async () => {
-      await menuPath(page, 'file', 'file.download', 'file.download.pptx');
-      const ok = ctl(page, 'dialog.download.ok');
-      if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
-    },
-    90_000,
-  ).catch((error: unknown) => ({ error: error instanceof Error ? error.message : String(error) }));
-  await page.unroute(blob);
+  const arrived = await download(page, startExport, 120_000).catch((error: unknown) => ({
+    error: error instanceof Error ? error.message : String(error),
+  }));
   await closeDialogs(page).catch(() => undefined);
-  let twice = 0;
-  await page.route(blob, async (route) => {
-    if (route.request().method() === 'PUT' && twice < 2) {
-      twice += 1;
+  /* the export call: a server function POST whose payload carries the deck and the format (the
+     ids in the address are the build's, so the request is matched by its body) */
+  let refusedCalls = 0;
+  const isExportCall = (route: import('@playwright/test').Route) => {
+    const request = route.request();
+    if (request.method() !== 'POST' || !request.url().includes('/_serverFn/')) return false;
+    const body = request.postData() ?? '';
+    return body.includes(deck) && /"format"\s*:\s*"pptx"/.test(body);
+  };
+  const upstream = 'Vercel Blob: Too many requests please lower the number of requests';
+  await page.route(
+    (url) => url.pathname.includes('/_serverFn/'),
+    async (route) => {
+      if (!isExportCall(route)) return route.continue();
+      refusedCalls += 1;
       return route.fulfill({
-        status: 429,
+        status: 500,
         contentType: 'application/json',
-        body: JSON.stringify({ error: 'Too many requests please lower the number of requests' }),
+        body: JSON.stringify({ error: { message: upstream }, message: upstream }),
       });
-    }
-    return route.continue();
-  });
-  const refused = await download(
-    page,
-    async () => {
-      await menuPath(page, 'file', 'file.download', 'file.download.pptx');
-      const ok = ctl(page, 'dialog.download.ok');
-      if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
     },
-    60_000,
-  ).catch((error: unknown) => ({ error: error instanceof Error ? error.message : String(error) }));
-  await page.unroute(blob);
-  const words = await snackbarText(page);
+  );
+  const refused = await download(page, startExport, 60_000).catch((error: unknown) => ({
+    error: error instanceof Error ? error.message : String(error),
+  }));
+  const dialogWords = await page
+    .locator('[data-control="dialog.download.pptx"]')
+    .first()
+    .textContent()
+    .catch(() => null);
+  const snackbar = await snackbarText(page);
+  const words = `${dialogWords ?? ''} | ${snackbar ?? ''}`.replace(/\s+/g, ' ').trim();
+  await page.unroute((url) => url.pathname.includes('/_serverFn/')).catch(() => undefined);
   await closeDialogs(page).catch(() => undefined);
   test.info().annotations.push({
-    type: '429',
-    description: `one 429 (${seen} injected): ${'name' in once ? `${once.name} arrived` : once.error}; two 429s (${twice} injected): ${'name' in refused ? `${refused.name} arrived` : refused.error}; snackbar "${words}"`,
+    type: 'refusal',
+    description: `plain export: ${'name' in arrived ? `${arrived.name} arrived in ${arrived.ms} ms` : arrived.error}; export call refused ${refusedCalls} time(s) with the store's words: ${'name' in refused ? `${refused.name} arrived` : refused.error}; the dialog and the snackbar read "${words.slice(0, 240)}"`,
   });
-  expect('name' in once, 'after one 429 the PowerPoint arrives').toBe(true);
-  expect('name' in refused, 'after two 429s no file').toBe(false);
-  expect(words ?? '', 'the sentence').toMatch(
-    /The PowerPoint could not be made\. Try again in a minute/,
-  );
-  expect(words ?? '', 'no Vercel').not.toMatch(/Vercel/);
+  expect('name' in arrived, 'the PowerPoint arrives with no fault').toBe(true);
+  expect(refusedCalls, 'the export call was refused').toBeGreaterThan(0);
+  expect('name' in refused, 'no file after the refusal').toBe(false);
+  expect(words, 'the sentence').toMatch(/The PowerPoint could not be made\. Try again in a minute/);
+  expect(words, 'no Vercel').not.toMatch(/Vercel/);
 });
 
 test(title('export.print.opens'), async () => {

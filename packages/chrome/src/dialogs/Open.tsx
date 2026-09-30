@@ -8,6 +8,7 @@ import { cn } from '../lib/cn';
 import { DIALOGS, IMPORT_PPTX } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 import { formatWhen } from '../VersionsPanel';
+import { recentRowsOf, withRecent } from './recent-rows';
 
 import './upload.css';
 
@@ -21,7 +22,12 @@ export function OpenDialog() {
   const { input } = shell;
   const [tab, setTab] = useState<'presentations' | 'upload'>('presentations');
   const [query, setQuery] = useState('');
-  const [decks, setDecks] = useState<ReadonlyArray<DeckHeadRow> | null>(null);
+  /* this browser's own decks first (docs/POLISH.md item 75): the mirror's rows draw the moment
+     the dialog opens; the store's listing replaces them when it lands and is marked busy until then */
+  const [decks, setDecks] = useState<ReadonlyArray<DeckHeadRow> | null>(() =>
+    recentRowsOf(input.recentDecks),
+  );
+  const [listing, setListing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -48,11 +54,13 @@ export function OpenDialog() {
     list()
       .then((rows) => {
         if (!live) return;
-        const sorted = [...rows].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
-        setDecks(sorted);
+        setDecks(withRecent(rows, input.recentDecks));
+        setListing(false);
       })
       .catch((err: unknown) => {
-        if (live) setError(err instanceof Error ? err.message : String(err));
+        if (!live) return;
+        setError(err instanceof Error ? err.message : String(err));
+        setListing(false);
       });
     return () => {
       live = false;
@@ -149,7 +157,12 @@ export function OpenDialog() {
             <p className="ts-dialog-empty">No presentations match</p>
           ) : null}
           {rows.length > 0 ? (
-            <ul className="ts-dialog-list" role="listbox" aria-label={DIALOGS.open.presentations}>
+            <ul
+              className="ts-dialog-list"
+              role="listbox"
+              aria-label={DIALOGS.open.presentations}
+              aria-busy={listing ? 'true' : undefined}
+            >
               {rows.map((deck) => (
                 <li key={deck.id}>
                   <button

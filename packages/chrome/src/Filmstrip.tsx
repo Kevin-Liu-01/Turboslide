@@ -1,6 +1,7 @@
 import type { CSSProperties, DragEvent, KeyboardEvent, MouseEvent, RefObject } from 'react';
 import { Fragment, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { applyLayout, appliedLabel } from '@turboslide/schema/apply-layout';
+import { slideKindOf } from '@turboslide/schema/canvas';
 import type { Slide } from '@turboslide/schema/deck';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { derivedLayout, isLayoutId } from '@turboslide/schema/layouts';
@@ -701,7 +702,16 @@ export function Filmstrip({
   const newSlide = (afterId: string) => {
     const item = items.get(afterId);
     const facts = item ? factsOf(item) : undefined;
-    const layout = newSlideLayout(facts ?? { template: undefined, kind: 'content' });
+    /* the New slide rule reads the kind the slide answers to (schema/canvas.ts `slideKindOf`): a
+       cover whose title wrapped is a canvas on the title template with `grammar.kind` title, and
+       its own template would make a second title slide (VERIFICATION.md "Polish round, pass 2"
+       finding 1); the card's facts keep the record's kind for the picture frame and the drop rule */
+    const record = edit.document?.slides[afterId];
+    const layout = newSlideLayout(
+      record !== undefined && facts !== undefined
+        ? { template: facts.template, kind: slideKindOf(record) }
+        : (facts ?? { template: undefined, kind: 'content' }),
+    );
     void dispatch('slide.new', { layout, after: afterId }).catch(() => undefined);
   };
 

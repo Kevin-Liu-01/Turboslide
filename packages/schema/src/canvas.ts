@@ -424,6 +424,22 @@ export function grammarRecordOf(slide: Slide): GrammarRecord | null {
   };
 }
 
+/**
+ * The kind a slide answers to under the rules that find the cover, a section header or a
+ * statement by kind: its own kind, or for a canvas the kind its grammar record says it was made
+ * from (`toCanvas` keeps it; the legacy `ext.grammar` record reads as content). A cover whose
+ * title wrapped is a canvas with `kind` content and `grammar.kind` title (the placeholder shrink's
+ * converting write, docs/POLISH.md 2.3 item 21), and New slide's Title and body rule and the
+ * counter's Skip title slides read it here and not through `kind`, the way the reducer's
+ * `deckTitleSource` reads the deck's title (VERIFICATION.md "Polish round, pass 2" finding 1).
+ * A content slide on a grammar layout answers its own kind whatever record it carries: Apply
+ * layout re-flowed it and it counts and inherits like any other.
+ */
+export function slideKindOf(slide: Slide): Slide['kind'] {
+  if (!isCanvasSlide(slide)) return slide.kind;
+  return grammarRecordOf(slide)?.kind ?? slide.kind;
+}
+
 /** The Text a text carrying block holds, or the empty Text. */
 function textOf(block: Block | undefined): string {
   if (block === undefined) return '';

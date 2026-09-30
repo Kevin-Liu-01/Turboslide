@@ -29,6 +29,7 @@ import {
   resizeBox,
   resizeKindOf,
   rotatedBoxCorners,
+  slideKindOf,
   toCanvas,
 } from './canvas.ts';
 import type { CanvasBoxes, ResizeBox, ResizeHandle } from './canvas.ts';
@@ -741,5 +742,38 @@ describe('resizeBox', () => {
     expect(resizeBox('e', { dx: 25 / 0.25, dy: 0 }, {}, 0, 'text', box)).toEqual(
       resizeBox('e', { dx: 400 / 4, dy: 0 }, {}, 0, 'text', box),
     );
+  });
+});
+
+describe('slideKindOf', () => {
+  it('answers a grammar slide its own kind and a canvas the kind its record says it was made from (VERIFICATION.md "Polish round, pass 2" finding 1)', () => {
+    expect(slideKindOf(TITLE)).toBe('title');
+    expect(slideKindOf(THESIS)).toBe('statement');
+    expect(slideKindOf(OPENER_BRAND)).toBe('opener');
+    expect(slideKindOf(CONTENT_RULE)).toBe('content');
+    /* the cover whose title wrapped: kind content, template title, grammar.kind title */
+    const cover = toCanvas(TITLE, boxesFor(TITLE))!.slide;
+    expect(cover.kind).toBe('content');
+    expect(cover.template).toBe('title');
+    expect(slideKindOf(cover)).toBe('title');
+    expect(slideKindOf(toCanvas(THESIS, boxesFor(THESIS))!.slide)).toBe('statement');
+    expect(slideKindOf(toCanvas(OPENER_BRAND, boxesFor(OPENER_BRAND))!.slide)).toBe('opener');
+    expect(slideKindOf(toCanvas(CONTENT_RULE, boxesFor(CONTENT_RULE))!.slide)).toBe('content');
+  });
+
+  it('reads the legacy ext.grammar record as content and a grammar layout by its own kind whatever record it carries', () => {
+    const { grammar: _grammar, ...bare } = toCanvas(CONTENT_RULE, boxesFor(CONTENT_RULE))!.slide;
+    const legacy: Slide = {
+      ...bare,
+      ext: { grammar: { layout: { type: 'stack' }, slots: { main: ['h'] }, boxes: {} } },
+    };
+    expect(slideKindOf(legacy)).toBe('content');
+    /* a re-flowed cover on a stack layout is a content slide again: it counts and inherits */
+    const reflowed: Slide = {
+      ...CONTENT_RULE,
+      template: 'split',
+      grammar: { kind: 'title', boxes: {} },
+    };
+    expect(slideKindOf(reflowed)).toBe('content');
   });
 });

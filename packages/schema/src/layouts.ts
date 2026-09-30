@@ -93,7 +93,10 @@ export type PromptContext = {
  * slide's lead and for the head paragraph beside the title of a two column head (Title, subtitle
  * and body, Tile grid, Detail grid, Status board; docs/PRODUCT.md section 2 rank 2, so two boxes
  * on one slide never read the same); "Click to add a number" for the Big number heading; "Add a
- * caption" for an empty caption; "Click to add text" for everything else.
+ * caption" for an empty caption; "Click to add text" for everything else. The cover converted to
+ * a canvas keeps its words: its lead is a paragraph with the `lead` role on the title template
+ * (schema/canvas.ts `toCanvas`), and it prompts "Click to add subtitle" as the field did
+ * (VERIFICATION.md "Polish round, pass 2" finding 1's mechanism, the prompt's site).
  */
 export function promptFor(context: PromptContext): string {
   const { slide, block, path } = context;
@@ -103,6 +106,13 @@ export function promptFor(context: PromptContext): string {
     return PROMPTS.text;
   }
   if (block.type === 'paragraph' && path === '/text' && isHeadParagraph(slide, block.id))
+    return PROMPTS.subtitle;
+  if (
+    block.type === 'paragraph' &&
+    path === '/text' &&
+    block.role === 'lead' &&
+    slide.template === 'title'
+  )
     return PROMPTS.subtitle;
   if (block.type === 'heading') {
     if (block.level === 'big' && slide.template === 'big-number') return PROMPTS.number;

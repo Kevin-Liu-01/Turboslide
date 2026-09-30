@@ -336,6 +336,27 @@ describe('promptFor', () => {
     expect(promptFor({ slide: { kind: 'content' }, block: p, path: '/text' })).toBe(PROMPTS.text);
   });
 
+  it('keeps the subtitle word on the lead of a cover converted to a canvas (VERIFICATION.md "Polish round, pass 2" finding 1)', () => {
+    /* schema/canvas.ts toCanvas: the cover's lead becomes a paragraph with the lead role on the
+       title template, and the renderer passes the kind and the template alone */
+    const lead = { id: 'lead', type: 'paragraph' as const, role: 'lead' as const, text: '' };
+    const cover = { kind: 'content' as const, template: 'title' as const };
+    expect(promptFor({ slide: cover, block: lead, path: '/text' })).toBe(PROMPTS.subtitle);
+    const heading = { id: 'heading', type: 'heading' as const, level: 'h1' as const, text: '' };
+    expect(promptFor({ slide: cover, block: heading, path: '/text' })).toBe(PROMPTS.title);
+    /* a lead paragraph anywhere else, and a plain paragraph on the title template, read as text */
+    expect(
+      promptFor({ slide: { kind: 'content', template: 'split' }, block: lead, path: '/text' }),
+    ).toBe(PROMPTS.text);
+    expect(
+      promptFor({
+        slide: cover,
+        block: { id: 'p', type: 'paragraph' as const, text: '' },
+        path: '/text',
+      }),
+    ).toBe(PROMPTS.text);
+  });
+
   it('prompts the head paragraph of a two column head with the subtitle word (docs/PRODUCT.md rank 2)', () => {
     const p1 = { id: 'p1', type: 'paragraph' as const, text: '' };
     // the renderer passes the kind and the template alone

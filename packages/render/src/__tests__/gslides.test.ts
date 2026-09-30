@@ -290,6 +290,46 @@ describe('the counter modes and the play list (SPEC 7.2.1, 7.2.4)', () => {
     expect(rendered[0]?.rendered.html).toContain('data-counter=""');
   });
 
+  it('skips a cover converted to a canvas under skip-title the way it skips the grammar title slide (VERIFICATION.md "Polish round, pass 2" finding 1)', () => {
+    /* the cover whose title wrapped (schema/canvas.ts toCanvas): kind content, template title,
+       grammar.kind title, the heading a block at /text */
+    const cover = contentSlide(
+      'cover',
+      { type: 'freeform' },
+      {
+        main: [
+          {
+            id: 'heading',
+            type: 'heading',
+            level: 'h1',
+            text: 'Onboarding plan for Acme in ninety days',
+            pos: { x: 137, y: 421, w: 901, h: 90, z: 1 },
+          },
+        ],
+      },
+      { template: 'title', grammar: { kind: 'title', boxes: {} } },
+    );
+    const skipTitle: Deck = { ...base, defaults: { counter: 'skip-title' } };
+    expect(slideCounter(skipTitle, cover, 1, 4)).toBe('');
+    expect(slideCounter(base, cover, 1, 4)).toBe('01 / 04');
+    /* the slide's own word still wins, and a content canvas that was never a cover counts */
+    expect(slideCounter(skipTitle, { ...cover, counter: 'on' }, 1, 4)).toBe('01 / 04');
+    const canvas = contentSlide(
+      'canvas',
+      { type: 'freeform' },
+      { main: [] },
+      { template: 'blank' },
+    );
+    expect(slideCounter(skipTitle, canvas, 2, 4)).toBe('02 / 04');
+    const rendered = renderSlides(
+      { ...skipTitle, sections: [{ id: 's', name: 'S', slideIds: ['cover', 'a'] }] },
+      [cover, a],
+      options,
+    );
+    expect(rendered[0]?.rendered.html).toContain('data-counter=""');
+    expect(rendered[1]?.rendered.html).toContain('data-counter="02 / 02"');
+  });
+
   it("reads the slide's own counter word first (Slide numbers > Apply to selected, SPEC 7.2.4; docs/RETURN.md slides.numbers.apply)", () => {
     const off: Deck = { ...base, defaults: { counter: 'off' } };
     const skipTitle: Deck = { ...base, defaults: { counter: 'skip-title' } };

@@ -2,7 +2,8 @@
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { workedDocument } from '@turboslide/schema/fixtures';
+import { slideKindOf, toCanvas } from '@turboslide/schema/canvas';
+import { TITLE, workedDocument } from '@turboslide/schema/fixtures';
 import { createClipboardStore } from '@turboslide/viewer/clipboard';
 
 import type { EditorDispatch } from '../dispatch';
@@ -457,5 +458,22 @@ describe('the drag order (SPEC 4.1)', () => {
     expect(newSlideLayout({ template: 'opener', kind: 'opener' })).toBe('split');
     expect(newSlideLayout({ template: 'big-number', kind: 'content' })).toBe('big-number');
     expect(newSlideLayout({ template: undefined, kind: 'content' })).toBe('split');
+  });
+
+  it('New slide after a cover converted to a canvas reads the kind it answers to and is Title and body (VERIFICATION.md "Polish round, pass 2" finding 1)', () => {
+    /* the filmstrip's newSlide hands newSlideLayout the record's template with slideKindOf's kind:
+       a cover whose title wrapped is a canvas on the title template with grammar.kind title, and
+       its own kind (content) with that template would make a second title slide */
+    const converted = toCanvas(TITLE, {
+      blocks: { heading: [137, 421, 901, 90], lead: [137, 537, 901, 76] },
+      mark: [137, 289, 132, 84],
+      prompted: [],
+    });
+    expect(converted).not.toBeNull();
+    if (converted === null) return;
+    expect(converted.slide.kind).toBe('content');
+    expect(converted.slide.template).toBe('title');
+    expect(newSlideLayout({ template: 'title', kind: converted.slide.kind })).toBe('title');
+    expect(newSlideLayout({ template: 'title', kind: slideKindOf(converted.slide) })).toBe('split');
   });
 });

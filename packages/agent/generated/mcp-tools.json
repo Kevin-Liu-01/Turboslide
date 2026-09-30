@@ -43890,6 +43890,24 @@
           ],
           "additionalProperties": false
         },
+        "frame": {
+          "description": "The frame the editor drew in its own WebGL at the sheet’s aspect (3200 by 1800); with it no browser launches in the function and the bytes are stored under the key derived id the block frames use",
+          "type": "object",
+          "properties": {
+            "bytes": {
+              "type": "string",
+              "description": "The PNG, or the WebP the editor sends for a PNG over the function's cap, as base64"
+            },
+            "renderer": {
+              "description": "The WebGL renderer string of the client",
+              "type": "string"
+            }
+          },
+          "required": [
+            "bytes"
+          ],
+          "additionalProperties": false
+        },
         "baseRevision": {
           "type": "integer",
           "minimum": 0,
@@ -88214,7 +88232,7 @@
     {
       "name": "deck_set_slide_background_material",
       "action": "slide.setBackgroundMaterial",
-      "description": "Captures a shader material at an anchor and places the frozen frame as a covering picture object at the back of each named slide with an optional dither, in one call; server side.",
+      "description": "Captures a shader material at an anchor and places the frozen frame as a covering picture object at the back of each named slide with an optional dither, in one call, or stores the frame the client sends with `frame` without a render; server side.",
       "inputSchema": {
         "$id": "#/$defs/SlideSetBackgroundMaterialInput",
         "type": "object",
@@ -88504,6 +88522,24 @@
             },
             "required": [
               "pattern"
+            ],
+            "additionalProperties": false
+          },
+          "frame": {
+            "description": "The frame the editor drew in its own WebGL at the sheet’s aspect (3200 by 1800); with it no browser launches in the function and the bytes are stored under the key derived id the block frames use",
+            "type": "object",
+            "properties": {
+              "bytes": {
+                "type": "string",
+                "description": "The PNG, or the WebP the editor sends for a PNG over the function's cap, as base64"
+              },
+              "renderer": {
+                "description": "The WebGL renderer string of the client",
+                "type": "string"
+              }
+            },
+            "required": [
+              "bytes"
             ],
             "additionalProperties": false
           },

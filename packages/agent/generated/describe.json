@@ -1641,7 +1641,7 @@
     },
     "slide.setBackgroundMaterial": {
       "label": "Background material",
-      "doc": "Captures a shader material at an anchor and places the frozen frame as a covering picture object at the back of each named slide with an optional dither, in one call; server side.",
+      "doc": "Captures a shader material at an anchor and places the frozen frame as a covering picture object at the back of each named slide with an optional dither, in one call, or stores the frame the client sends with `frame` without a render; server side.",
       "mutates": true,
       "milestone": "GS3",
       "group": "slide"

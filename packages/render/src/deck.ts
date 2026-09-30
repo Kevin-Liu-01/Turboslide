@@ -8,6 +8,7 @@ import { renderSlide, slideMap, slideOrder } from './slide.ts';
 import type { RenderOptions, RenderedSlide } from './slide.ts';
 import { bandAssetResolver, counterText, frameBandOf, renderStage } from './stage.ts';
 import type { SlideId } from '@turboslide/schema/ids';
+import { slideKindOf } from '@turboslide/schema/canvas';
 import type { Deck, Slide } from '@turboslide/schema/deck';
 import { deckCounter, deckCounterFormat } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
@@ -69,7 +70,10 @@ export function slideCounter(deck: Deck, slide: Slide, n: number, total: number)
   if (slide.counter === 'on') return counterText(n, total, format);
   const mode = deckCounter(deck);
   if (mode === 'off') return '';
-  if (mode === 'skip-title' && slide.kind === 'title') return '';
+  /* the cover by the kind it answers to (schema/canvas.ts `slideKindOf`): a title whose words
+     wrapped is a canvas with `grammar.kind` title, and Skip title slides skips it the same
+     (VERIFICATION.md "Polish round, pass 2" finding 1) */
+  if (mode === 'skip-title' && slideKindOf(slide) === 'title') return '';
   return counterText(n, total, format);
 }
 

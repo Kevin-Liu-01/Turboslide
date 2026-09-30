@@ -1,0 +1,42 @@
+{
+  "tag": "after2",
+  "base": "http://localhost:4448",
+  "title": "Onboarding plan for Acme in ninety days with the partner desk and every regional lead",
+  "at": "2026-09-30T04:03:58.292Z",
+  "deck": "untitled-20260930-6tle",
+  "cover": {
+    "id": "title",
+    "kind": "content",
+    "grammarKind": "title",
+    "template": "title",
+    "linesWhileTyping": 2,
+    "fontWhileTyping": 44,
+    "stored": "Onboarding plan for Acme in ninety days with the partner desk and every regional lead"
+  },
+  "newSlide": {
+    "id": "split-1-4d8b",
+    "kind": "content",
+    "template": "split",
+    "prompts": [
+      "Click to add title",
+      "Click to add text"
+    ]
+  },
+  "counter": {
+    "storedKit": {
+      "show": true,
+      "skipTitle": true
+    },
+    "storedDefault": null,
+    "onCover": "",
+    "onNewSlide": "02 / 02",
+    "inShowFromCover": "",
+    "inShowSecond": "02 / 02"
+  },
+  "ok": {
+    "coverConverted": true,
+    "newSlideIsTitleAndBody": true,
+    "coverCounterEmpty": true,
+    "showCoverCounterEmpty": true
+  }
+}

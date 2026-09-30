@@ -56,6 +56,7 @@ import {
   zoomStepFrom,
 } from '../editor-shell';
 import { MENUS, allItems, itemById } from '../menus/model';
+import { toCanvas } from '@turboslide/schema/canvas';
 
 // The editor shell's pure helpers (gslides-parity SPEC 2, 3, 7.5, 10.2): the menu context from
 // the editor's facts, the toolbar tail of a selection, the action input a menu item dispatches,
@@ -543,6 +544,38 @@ describe('menuActionPlan', () => {
     if (!('refused' in remembered) && !('refused' in inherited)) {
       expect(remembered.input.layout).toBe(inherited.input.layout);
       expect(remembered.input.layout).not.toBe('big-number');
+    }
+  });
+
+  it('New slide after a cover converted to a canvas is Title and body too, never a second title slide (VERIFICATION.md "Polish round, pass 2" finding 1)', () => {
+    const title = Object.values(document.slides).find((slide) => slide.kind === 'title');
+    expect(title).toBeDefined();
+    if (title === undefined) return;
+    /* the cover whose title wrapped: the placeholder shrink's write converts it (kind content,
+       template title, grammar.kind title) and its template alone would read as the title layout */
+    const converted = toCanvas(title, {
+      blocks: { heading: [137, 421, 901, 90], lead: [137, 537, 901, 76] },
+      mark: [137, 289, 132, 84],
+      prompted: [],
+    });
+    expect(converted).not.toBeNull();
+    if (converted === null) return;
+    expect(converted.slide.kind).toBe('content');
+    expect(converted.slide.template).toBe('title');
+    const withCover: DeckDocument = {
+      ...document,
+      slides: { ...document.slides, [title.id]: converted.slide },
+    };
+    for (const id of ['insert.newSlide', 'slide.newSlide'] as const) {
+      const plan = menuActionPlan(
+        itemById(id),
+        facts(title.id, undefined, { document: withCover }),
+      );
+      expect('refused' in plan).toBe(false);
+      if ('refused' in plan) return;
+      expect(plan.action).toBe('slide.new');
+      expect(plan.input.layout).toBe('split');
+      expect(plan.input.after).toBe(title.id);
     }
   });
 

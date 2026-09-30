@@ -15,6 +15,7 @@ import { emptyChart } from '@turboslide/schema/blocks/chart';
 import type { ChartKind } from '@turboslide/schema/blocks/chart';
 import { TABLE_SIZES, emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
 import type { TableBlock, TableCommand } from '@turboslide/schema/blocks/table';
+import { slideKindOf } from '@turboslide/schema/canvas';
 import { CATALOG, blockTextPaths } from '@turboslide/schema/catalog';
 import type { Color } from '@turboslide/schema/color';
 import type { Deck, DeckDocument, DeckGuides, Slide } from '@turboslide/schema/deck';
@@ -2587,9 +2588,16 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
       /* the product round (docs/PRODUCT.md section 2 rank 2; research 07 rule 12): after the
          title slide New slide is Title and body, after any other slide it inherits the current
          slide's layout; the arrow's last pick (`facts.lastLayout`) rings the arrow's plate and
-         no longer takes precedence here (build/b3.md R2) */
+         no longer takes precedence here (build/b3.md R2). The title slide is read by the kind it
+         answers to (schema/canvas.ts `slideKindOf`): a cover whose title wrapped is a canvas on
+         the title template with `grammar.kind` title, and `derivedLayout` alone would make a
+         second title slide after it (VERIFICATION.md "Polish round, pass 2" finding 1) */
       const layout: LayoutId =
-        slide === undefined ? 'split' : slide.kind === 'title' ? 'split' : derivedLayout(slide);
+        slide === undefined
+          ? 'split'
+          : slideKindOf(slide) === 'title'
+            ? 'split'
+            : derivedLayout(slide);
       return {
         action: 'slide.new',
         input: {

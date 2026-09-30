@@ -5715,7 +5715,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'slide.setBackgroundMaterial': action({
     id: 'slide.setBackgroundMaterial',
     label: 'Background material',
-    doc: 'Captures a shader material at an anchor and places the frozen frame as a covering picture object at the back of each named slide with an optional dither, in one call; server side.',
+    doc: 'Captures a shader material at an anchor and places the frozen frame as a covering picture object at the back of each named slide with an optional dither, in one call, or stores the frame the client sends with `frame` without a render; server side.',
     group: 'slide',
     mutates: true,
     transports: A,
@@ -5731,6 +5731,22 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .optional()
         .describe('The frame time in ms; the catalog default unless set'),
       dither: pictureDitherSchema.optional(),
+      /* the polish round's fix round 2 (build/b4.md R1; the row shaders.background.place-answers):
+         the editor's own WebGL frame, so the function launches no browser for the ground; the
+         handler is packages/materials/src/actions.ts `placeClientBackgroundFrame` */
+      frame: z
+        .strictObject({
+          bytes: z
+            .string()
+            .describe(
+              "The PNG, or the WebP the editor sends for a PNG over the function's cap, as base64",
+            ),
+          renderer: z.string().optional().describe('The WebGL renderer string of the client'),
+        })
+        .optional()
+        .describe(
+          'The frame the editor drew in its own WebGL at the sheet’s aspect (3200 by 1800); with it no browser launches in the function and the bytes are stored under the key derived id the block frames use',
+        ),
       baseRevision,
     }),
     output: z.strictObject({

@@ -1,0 +1,878 @@
+{
+  "base": "https://turboslide-emiobcraf-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T06:38:56.672Z",
+  "ms": 490785,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 489977,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/verifier/gate-p7-arrange-rerun2/core-walk.json",
+    "deckId": "untitled-20260930-dlt1",
+    "steps": 102
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "arrange"
+    ],
+    "costRows": null
+  },
+  "rows": 80,
+  "passed": 79,
+  "failed": 0,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e5dd8584",
+  "origin": "https://turboslide-emiobcraf-kl01s-projects.vercel.app",
+  "date": "2026-09-30",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "arrange.select.click": "passed",
+    "arrange.select.shift-add": "passed",
+    "arrange.multi.drag-inside-moves-all": "passed",
+    "arrange.select.shift-remove": "passed",
+    "arrange.select.marquee": "passed",
+    "arrange.select.marquee-partial": "passed",
+    "arrange.select.click-away": "passed",
+    "arrange.select.cmd-a": "passed",
+    "arrange.select.escape": "passed",
+    "arrange.order.bring-to-front": "passed",
+    "arrange.order.send-to-back": "passed",
+    "arrange.order.bring-forward": "passed",
+    "arrange.order.send-backward": "passed",
+    "arrange.order.keys": "passed",
+    "arrange.align.left": "passed",
+    "arrange.align.center": "passed",
+    "arrange.align.right": "passed",
+    "arrange.align.top": "passed",
+    "arrange.align.middle": "passed",
+    "arrange.align.bottom": "passed",
+    "arrange.align.single-to-slide": "passed",
+    "arrange.center.horizontal": "passed",
+    "arrange.center.vertical": "passed",
+    "arrange.undo.toolbar-on-arrange": "passed",
+    "arrange.undo.menu-on-arrange": "passed",
+    "arrange.clipboard.copy-paste": "passed",
+    "arrange.clipboard.delete": "passed",
+    "arrange.clipboard.undo-redo-delete": "passed",
+    "arrange.clipboard.cut-paste-undo": "passed",
+    "arrange.clipboard.menu-copy-paste": "passed",
+    "arrange.clipboard.paste-after-new-slide-button": "passed",
+    "arrange.clipboard.paste-with-filmstrip-focus": "passed",
+    "arrange.clipboard.paste-keeps-position": "passed",
+    "arrange.duplicate.cmd-d": "passed",
+    "arrange.duplicate.menu-selects-copy": "passed",
+    "arrange.duplicate.nothing-selected": "passed",
+    "arrange.redo.after-undone-duplicate": "passed",
+    "arrange.keys.backspace-empty-selection": "passed",
+    "arrange.nudge.arrows": "passed",
+    "arrange.nudge.shift": "passed",
+    "arrange.nudge.undo": "passed",
+    "arrange.zoom.box-reads": "passed",
+    "arrange.zoom.menu-in": "passed",
+    "arrange.zoom.cmd-minus": "passed",
+    "arrange.zoom.cmd-plus": "passed",
+    "arrange.zoom.fit": "passed",
+    "arrange.zoom.type-percent": "passed",
+    "arrange.zoom.arrow-menu": "passed",
+    "arrange.zoom.cmd-0": "passed",
+    "arrange.zoom.menu-out": "passed",
+    "arrange.readout.fit": "passed",
+    "arrange.readout.200": "passed",
+    "arrange.selection-colour.light": "passed",
+    "arrange.selection-colour.dark": "passed",
+    "arrange.escape.text-then-selection": "passed",
+    "arrange.zoom.menu-presets": "passed",
+    "arrange.toolbar.select": "passed",
+    "arrange.distribute.horizontal": "passed",
+    "arrange.distribute.vertical": "passed",
+    "arrange.distribute.needs-three": "passed",
+    "arrange.rotate.quarter-turns": "passed",
+    "arrange.rotate.flips-menu": "passed",
+    "arrange.group.chords": "passed",
+    "arrange.group.menu-regroup": "passed",
+    "arrange.group.context-rows": "passed",
+    "arrange.context.rotate-distribute": "passed",
+    "arrange.ruler.show-hide": "passed",
+    "arrange.guides.from-ruler": "passed",
+    "arrange.guides.show-toggle": "passed",
+    "arrange.guides.add-vertical-horizontal": "passed",
+    "arrange.guides.drag": "passed",
+    "arrange.snap.guides-on-off": "passed",
+    "arrange.snap.grid-toggle": "passed",
+    "arrange.snap.grid-effect": "passed",
+    "arrange.guides.context": "passed",
+    "arrange.guides.clear": "passed",
+    "arrange.select-none.menu": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "arrange.insert.selected-after-menu": "passed",
+    "arrange.insert.free-rectangle": "passed",
+    "arrange.group.tail-text-controls": "not driven"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "arrange.group.tail-text-controls",
+      "parks": [
+        "toolbar.group.text"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "arrange.select.click",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.shift-add",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.multi.drag-inside-moves-all",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.shift-remove",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.marquee",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.marquee-partial",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.click-away",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.cmd-a",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.escape",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.order.bring-to-front",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.order.send-to-back",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.order.bring-forward",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.order.send-backward",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.order.keys",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.left",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.center",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.right",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.top",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.middle",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.bottom",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.single-to-slide",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.center.horizontal",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.center.vertical",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.undo.toolbar-on-arrange",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.undo.menu-on-arrange",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.copy-paste",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.delete",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.undo-redo-delete",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.cut-paste-undo",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.menu-copy-paste",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.paste-after-new-slide-button",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.paste-with-filmstrip-focus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.paste-keeps-position",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.duplicate.cmd-d",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.duplicate.menu-selects-copy",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.duplicate.nothing-selected",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.redo.after-undone-duplicate",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.keys.backspace-empty-selection",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.nudge.arrows",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.nudge.shift",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.nudge.undo",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.box-reads",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.menu-in",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.cmd-minus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.cmd-plus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.fit",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.type-percent",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.arrow-menu",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.cmd-0",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.menu-out",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.readout.fit",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.readout.200",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.selection-colour.light",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.selection-colour.dark",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.escape.text-then-selection",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.menu-presets",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.toolbar.select",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.distribute.horizontal",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.distribute.vertical",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.distribute.needs-three",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.rotate.quarter-turns",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.rotate.flips-menu",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.group.chords",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.group.menu-regroup",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.group.context-rows",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.context.rotate-distribute",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.ruler.show-hide",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.from-ruler",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.show-toggle",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.add-vertical-horizontal",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.drag",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.snap.guides-on-off",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.snap.grid-toggle",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.snap.grid-effect",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.context",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.clear",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select-none.menu",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.insert.selected-after-menu",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.insert.free-rectangle",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.group.tail-text-controls",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: toolbar.group.text (docs/PRODUCT.md 7.1, B3); chip \"Group\"; the group tail lists toolbar.fillColor, toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash, toolbar.formatOptions and none of the text controls (P1, FEATURES.md 2.3 item 6)"
+    }
+  ]
+}

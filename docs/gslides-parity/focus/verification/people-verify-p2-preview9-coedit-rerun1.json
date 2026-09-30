@@ -1,0 +1,154 @@
+{
+  "base": "https://turboslide-fky0ykdsm-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T09:01:41.729Z",
+  "ms": 67436,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 67144,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/verifier2/gate-p9-coedit-rerun1/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "share.dialog.co-edit-from-copied-link"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 1,
+  "passed": 0,
+  "failed": 1,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e5dd8584",
+  "origin": "https://turboslide-fky0ykdsm-kl01s-projects.vercel.app",
+  "date": "2026-09-30",
+  "results": {
+    "share.dialog.co-edit-from-copied-link": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "share.dialog.co-edit-from-copied-link",
+        "feature": "share",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "share.dialog.co-edit-from-copied-link",
+      "feature": "share",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "share.dialog.co-edit-from-copied-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the copied address opens"
+    }
+  ]
+}

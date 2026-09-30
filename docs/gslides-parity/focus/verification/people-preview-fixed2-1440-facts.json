@@ -1,0 +1,289 @@
+{
+  "base": "https://turboslide-fky0ykdsm-kl01s-projects.vercel.app",
+  "tag": "preview-fixed2",
+  "width": 1440,
+  "accounts": false,
+  "signinFirst": false,
+  "startedAt": "2026-09-30T09:22:16.293Z",
+  "uptime": "2:22  up 5 days, 16:19, 2 users, load averages: 44.29 42.37 37.21",
+  "deck.id": "untitled-20260930-wnl3",
+  "account.A.boot": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_e049ba56-0be3-4940-826c-7827d5c3f5f6",
+      "trust": "label",
+      "label": "Zinc 321",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": {
+      "principalId": "anon_e049ba56-0be3-4940-826c-7827d5c3f5f6",
+      "trust": "label",
+      "label": "Zinc 321",
+      "name": null,
+      "markVariant": "initials"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "namePrompt.firstEdit": true,
+  "shot.namePrompt.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed2-1440-name-prompt-A-light.png",
+  "shot.namePrompt.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed2-1440-name-prompt-A-dark.png",
+  "ownChip.A.afterContinue": {
+    "ms": 628,
+    "chip": {
+      "holder": "title.account",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  },
+  "account.A.afterName": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_e049ba56-0be3-4940-826c-7827d5c3f5f6",
+      "trust": "guest",
+      "label": "Zinc 321",
+      "name": "Ada Lovelace",
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": {
+      "principalId": "anon_e049ba56-0be3-4940-826c-7827d5c3f5f6",
+      "trust": "label",
+      "label": "Zinc 321",
+      "name": null,
+      "markVariant": "initials"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "ownChip.A.afterName": [
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "share.get.A": {
+    "revision": 0,
+    "owner": "anon_e049ba56-0be3-4940-826c-7827d5c3f5f6"
+  },
+  "link": "minted",
+  "account.B.boot": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_2accd22e-f47e-4cb1-a15b-982a8c24ecc9",
+      "trust": "label",
+      "label": "Iron 863",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": null,
+    "access": {
+      "role": "editor",
+      "via": "link"
+    }
+  },
+  "avatarReload.chip.before": {
+    "variant": "initials",
+    "cells": 25,
+    "ariaLabel": "Ada Lovelace, guest"
+  },
+  "avatarReload.chip.afterApply": {
+    "ms": 736,
+    "chip": {
+      "variant": "glyph",
+      "cells": 13,
+      "ariaLabel": "Ada Lovelace"
+    },
+    "dialogOpen": false
+  },
+  "avatarReload.chip.atBoot": {
+    "msAfterReload": 743,
+    "chip": {
+      "variant": "glyph",
+      "cells": 13,
+      "ariaLabel": "Ada Lovelace, guest"
+    }
+  },
+  "avatarReload.chip.afterReload": {
+    "msAfterReload": 745,
+    "chip": {
+      "variant": "glyph",
+      "cells": 13,
+      "ariaLabel": "Ada Lovelace, guest"
+    },
+    "sameCellsAsApplied": true
+  },
+  "avatarReload.instance": null,
+  "avatarReload.builder.tabs": [
+    {
+      "id": "dialog.avatarBuilder.tab.initials",
+      "selected": "false"
+    },
+    {
+      "id": "dialog.avatarBuilder.tab.glyph",
+      "selected": "true"
+    },
+    {
+      "id": "dialog.avatarBuilder.tab.dither",
+      "selected": "false"
+    },
+    {
+      "id": "dialog.avatarBuilder.tab.picture",
+      "selected": "false"
+    }
+  ],
+  "shot.avatarReload.builder.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed2-1440-avatar-reload-builder-A-light.png",
+  "shot.avatarReload.builder.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed2-1440-avatar-reload-builder-A-dark.png",
+  "avatarReload.closeBuilder": {
+    "scrim": true,
+    "dialogs": [
+      "dialog.avatarBuilder",
+      "dialog.avatarBuilder.close",
+      "dialog.avatarBuilder.tab.initials",
+      "dialog.avatarBuilder.tab.glyph",
+      "dialog.avatarBuilder.tab.dither",
+      "dialog.avatarBuilder.tab.picture",
+      "dialog.avatarBuilder.strip",
+      "dialog.avatarBuilder.panel.glyph",
+      "dialog.avatarBuilder.another",
+      "dialog.avatarBuilder.error",
+      "dialog.avatarBuilder.cancel",
+      "dialog.avatarBuilder.apply"
+    ]
+  },
+  "avatarReload.closeBuilder.closed": {
+    "after": 1
+  },
+  "avatarReload.roster.ownRow": {
+    "chip": {
+      "variant": "glyph",
+      "cells": 13,
+      "ariaLabel": "Ada Lovelace, guest"
+    },
+    "row": {
+      "variant": "glyph",
+      "cells": 13,
+      "ariaLabel": "Ada Lovelace, guest"
+    },
+    "equal": true
+  },
+  "shot.avatarReload.slot.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed2-1440-avatar-reload-slot-A-light.png",
+  "shot.avatarReload.slot.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed2-1440-avatar-reload-slot-A-dark.png",
+  "departed.setName.B": {
+    "ok": true,
+    "name": "Noor Verifier",
+    "trust": "guest"
+  },
+  "departed.comment.B": {
+    "threadId": "01m3rt0ppz4der8xqfgmyqnr2x",
+    "count": 1,
+    "ownChip": {
+      "ariaLabel": "Iron 863",
+      "cells": 50,
+      "initials": "I"
+    }
+  },
+  "departed.B.closed": "2026-09-30T09:23:32.765Z",
+  "departed.panel.A.first": {
+    "msAfterReload": 752,
+    "boot": 732,
+    "rows": []
+  },
+  "departed.panel.A.named": {
+    "msAfterReload": 10844,
+    "found": false,
+    "rows": [
+      {
+        "control": "panel.comments.open.01m3rt0ppz4der8xqfgmyqnr2x",
+        "text": "IIron 863slide 1A note from the departed guestnow",
+        "chip": "Iron 863",
+        "cells": 50
+      }
+    ]
+  },
+  "shot.departed.panel.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed2-1440-departed-panel-A-light.png",
+  "departed.card.A.light": {
+    "name": "Iron 863",
+    "trust": null,
+    "badge": null,
+    "chip": "Iron 863",
+    "cells": 50
+  },
+  "shot.departed.card.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed2-1440-departed-card-A-light.png",
+  "shot.departed.panel.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed2-1440-departed-panel-A-dark.png",
+  "departed.card.A.dark": {
+    "name": "Iron 863",
+    "trust": null,
+    "badge": null,
+    "chip": "Iron 863",
+    "cells": 50
+  },
+  "shot.departed.card.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed2-1440-departed-card-A-dark.png",
+  "uptime.end": "2:23  up 5 days, 16:20, 2 users, load averages: 43.04 44.88 38.84",
+  "endedAt": "2026-09-30T09:23:48.044Z",
+  "deck.teardown": {
+    "deckId": "untitled-20260930-wnl3",
+    "trashed": "deck.trash ok at 6",
+    "removed": "deck.remove ok at 6",
+    "after": "still answers"
+  }
+}

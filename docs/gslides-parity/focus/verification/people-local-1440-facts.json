@@ -1,0 +1,458 @@
+{
+  "base": "http://localhost:4467",
+  "tag": "local",
+  "width": 1440,
+  "accounts": true,
+  "signinFirst": false,
+  "startedAt": "2026-09-30T09:07:59.262Z",
+  "uptime": "2:07  up 5 days, 16:04, 2 users, load averages: 60.45 39.27 23.35",
+  "deck.id": "untitled-20260930-ptw6",
+  "account.A.boot": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_0ae96315-df4c-4074-b476-2bfe167a8acf",
+      "trust": "label",
+      "label": "Bronze 640",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": {
+      "principalId": "anon_0ae96315-df4c-4074-b476-2bfe167a8acf",
+      "trust": "label",
+      "label": "Bronze 640",
+      "name": null,
+      "markVariant": "initials"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "namePrompt.firstEdit": true,
+  "shot.namePrompt.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-local-1440-name-prompt-A-light.png",
+  "shot.namePrompt.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-local-1440-name-prompt-A-dark.png",
+  "ownChip.A.afterContinue": {
+    "ms": 320,
+    "chip": {
+      "holder": "title.account",
+      "ariaLabel": "Ada Verifier, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "6",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 38,
+      "initials": "AV",
+      "badgeAfter": null
+    }
+  },
+  "account.A.afterName": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_0ae96315-df4c-4074-b476-2bfe167a8acf",
+      "trust": "label",
+      "label": "Bronze 640",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": {
+      "principalId": "anon_0ae96315-df4c-4074-b476-2bfe167a8acf",
+      "trust": "guest",
+      "label": "Ada Verifier",
+      "name": null,
+      "markVariant": "initials"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "ownChip.A.afterName": [
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Verifier, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "6",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 38,
+      "initials": "AV",
+      "badgeAfter": null
+    }
+  ],
+  "emailA": "people-verifier-1790759286474@example.test",
+  "signIn.A.afterDeck": 200,
+  "account.A.afterSignIn": {
+    "account": {
+      "signedIn": true,
+      "principalId": "usr_w0MFlABJDGSlJnnZ716bUne8heWTClqQ",
+      "trust": "verified",
+      "label": "Nickel 879",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": null,
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "ownChip.A.afterSignIn": [
+    {
+      "holder": "title.account",
+      "ariaLabel": "Nickel 879, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "24",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "N8",
+      "badgeAfter": null
+    }
+  ],
+  "setName.A.afterSignIn": {
+    "ok": true,
+    "name": "Ada Verifier",
+    "trust": "verified"
+  },
+  "account.A.afterSignInName": {
+    "account": {
+      "signedIn": true,
+      "principalId": "usr_w0MFlABJDGSlJnnZ716bUne8heWTClqQ",
+      "trust": "verified",
+      "label": "Nickel 879",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": {
+      "principalId": "usr_w0MFlABJDGSlJnnZ716bUne8heWTClqQ",
+      "trust": "verified",
+      "label": "Ada Verifier",
+      "name": null,
+      "markVariant": "initials"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "versions.A.afterSignIn": {
+    "panelWidth": 320,
+    "rows": [],
+    "windows": [
+      {
+        "text": "N802:07 AM to 02:08 AMYou · 0 changes▸",
+        "firstMarkX": 17,
+        "textX": 41,
+        "marksWidth": 16,
+        "more": null,
+        "moreFont": null,
+        "hoverBackground": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "nested": null,
+    "dayHeadX": 17
+  },
+  "versionChips.A.afterSignIn": [
+    {
+      "holder": "versionHistory.window.w2",
+      "ariaLabel": "Nickel 879, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "16",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "N8",
+      "badgeAfter": null
+    }
+  ],
+  "builder.A.open": {
+    "tabs": [
+      {
+        "id": "dialog.avatarBuilder.tab.initials",
+        "selected": "true"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.glyph",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.dither",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.picture",
+        "selected": "false"
+      }
+    ],
+    "panel": "dialog.avatarBuilder.panel.initials",
+    "cap": null,
+    "privacy": null,
+    "cache": null,
+    "error": "",
+    "applyDisabled": false,
+    "cropLoaded": null,
+    "cropSentence": null,
+    "signInSentence": null,
+    "previewSizes": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "shot.builder.strip.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-local-1440-builder-strip-A-light.png",
+  "shot.builder.strip.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-local-1440-builder-strip-A-dark.png",
+  "builder.A.picture": {
+    "tabs": [
+      {
+        "id": "dialog.avatarBuilder.tab.initials",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.glyph",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.dither",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.picture",
+        "selected": "true"
+      }
+    ],
+    "panel": "dialog.avatarBuilder.panel.picture",
+    "cap": "Cropped to a square and sent at 256 px, under 512 KB. JPEG, PNG, WebP or GIF",
+    "privacy": "Your picture shows on every presentation you open while signed in, to people invited by email. People who arrive by a link see a role initial instead",
+    "cache": "A replaced or removed picture can stay readable at its old address for up to a year in caches",
+    "error": "",
+    "applyDisabled": true,
+    "cropLoaded": "false",
+    "cropSentence": null,
+    "signInSentence": "Cropped to a square and sent at 256 px, under 512 KB. JPEG, PNG, WebP or GIF",
+    "previewSizes": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "shot.builder.picture.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-local-1440-builder-picture-A-light.png",
+  "shot.builder.picture.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-local-1440-builder-picture-A-dark.png",
+  "capRefusal.A": {
+    "error": "The resized picture is over 512 KB. Choose another picture",
+    "setAvatarRequests": 0,
+    "dialogOpen": true
+  },
+  "shot.capRefusal.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-local-1440-builder-cap-refusal-A-light.png",
+  "shot.capRefusal.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-local-1440-builder-cap-refusal-A-dark.png",
+  "builder.A.loaded": {
+    "tabs": [
+      {
+        "id": "dialog.avatarBuilder.tab.initials",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.glyph",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.dither",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.picture",
+        "selected": "true"
+      }
+    ],
+    "panel": "dialog.avatarBuilder.panel.picture",
+    "cap": "Cropped to a square and sent at 256 px, under 512 KB. JPEG, PNG, WebP or GIF",
+    "privacy": "Your picture shows on every presentation you open while signed in, to people invited by email. People who arrive by a link see a role initial instead",
+    "cache": "A replaced or removed picture can stay readable at its old address for up to a year in caches",
+    "error": "The resized picture is over 512 KB. Choose another picture",
+    "applyDisabled": false,
+    "cropLoaded": "true",
+    "cropSentence": "Drag to crop",
+    "signInSentence": "Drag to crop",
+    "previewSizes": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "shot.builder.loaded.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-local-1440-builder-picture-loaded-A-light.png",
+  "shot.builder.loaded.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-local-1440-builder-picture-loaded-A-dark.png",
+  "upload.A": {
+    "ms": 93,
+    "requestBytes": null,
+    "chip": {
+      "holder": "title.account",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/Di6Vofb3WJNvxtke5m2h9Q/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/Di6Vofb3WJNvxtke5m2h9Q/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/Di6Vofb3WJNvxtke5m2h9Q/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    "grammar": true,
+    "key": "Di6Vofb3WJNvxtke5m2h9Q"
+  },
+  "account.A.afterUpload": {
+    "account": {
+      "signedIn": true,
+      "principalId": "usr_w0MFlABJDGSlJnnZ716bUne8heWTClqQ",
+      "trust": "verified",
+      "label": "Nickel 879",
+      "name": null,
+      "email": null,
+      "markVariant": "picture",
+      "pictureUrl": "/api/avatar/u/Di6Vofb3WJNvxtke5m2h9Q/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp"
+    },
+    "self": {
+      "principalId": "usr_w0MFlABJDGSlJnnZ716bUne8heWTClqQ",
+      "trust": "verified",
+      "label": "Ada Verifier",
+      "name": null,
+      "markVariant": "picture"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "share.get.A": {
+    "error": "Error: page.evaluate: Error: This presentation is not available to you, or does not exist.\n    at Object.deserialize (http://localhost:4467/assets/index-6zK__a8y.js:12:26131)\n    at Bo (http://localhost:4467/assets/index-6zK__a8y.js:12:19299)\n    at Qo (http://localhost:4467/assets/index-6zK__a8y.js:12:21170)\n    at So (http://localhost:4467/assets/index-6zK__a8y.js:12:16640)\n    at To (http://localhost:4467/assets/index-6zK__a8y.js:12:16992)\n    at Eo (http://localhost:4467/assets/index-6zK__a8y.js:12:17095)\n    at Qo (http://localhost:4467/assets/index-6zK__a8y.js:12:20844)\n    at $o (http://localhost:4467/assets/index-6zK__a8y.js:12:21537)\n    at es (http://localhost:4467/assets/index-6zK__a8y.js:12:21617)\n    at Us (http://localhost:4467/assets/index-6zK__a8y.js:12:32087)"
+  },
+  "link": {
+    "error": "Error: page.evaluate: TypeError: share.setGeneralAccess: invalid input at /baseRevision: Invalid input: expected number, received undefined\n    at Object.dispatch (http://localhost:4467/assets/SlideList-DuFPL7k6.js:1:1435)\n    at Wt (http://localhost:4467/assets/EditorRoot-irRkryXf.js:26:34262)\n    at Object.<anonymous> (http://localhost:4467/assets/SlideList-DuFPL7k6.js:1:2052)\n    at dt (http://localhost:4467/assets/SlideList-DuFPL7k6.js:1:8236)\n    at Object.invoke (http://localhost:4467/assets/SlideList-DuFPL7k6.js:1:10181)\n    at eval (eval at evaluate (:311:30), <anonymous>:1:38)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+  },
+  "error": "page.evaluate: Error: This presentation is not available to you, or does not exist.\n    at Object.deserialize (http://localhost:4467/assets/index-6zK__a8y.js:12:26131)\n    at Bo (http://localhost:4467/assets/index-6zK__a8y.js:12:19299)\n    at Qo (http://localhost:4467/assets/index-6zK__a8y.js:12:21170)\n    at So (http://localhost:4467/assets/index-6zK__a8y.js:12:16640)\n    at To (http://localhost:4467/assets/index-6zK__a8y.js:12:16992)\n    at Eo (http://localhost:4467/assets/index-6zK__a8y.js:12:17095)\n    at Qo (http://localhost:4467/assets/index-6zK__a8y.js:12:20844)\n    at $o (http://localhost:4467/assets/index-6zK__a8y.js:12:21537)\n    at es (http://localhost:4467/assets/index-6zK__a8y.js:12:21617)\n    at Us (http://localhost:4467/assets/index-6zK__a8y.js:12:32087)\npage.evaluate: Error: This presentation is not available to you, or does not exist.\n    at Object.deserialize (http://localhost:4467/assets/index-6zK__a8y.js:12:26131)\n    at Bo (http://localhost:4467/assets/index-6zK__a8y.js:12:19299)\n    at Qo (http://localhost:4467/assets/index-6zK__a8y.js:12:21170)\n    at So (http://localhost:4467/assets/index-6zK__a8y.js:12:16640)\n    at To (http://localhost:4467/assets/index-6zK__a8y.js:12:16992)\n    at Eo (http://localhost:4467/assets/index-6zK__a8y.js:12:17095)\n    at Qo (http://localhost:4467/assets/index-6zK__a8y.js:12:20844)\n    at $o (http://localhost:4467/assets/index-6zK__a8y.js:12:21537)\n    at es (http://localhost:4467/assets/index-6zK__a8y.js:12:21617)\n    at Us (http://localhost:4467/assets/index-6zK__a8y.js:12:32087)\n    at invoke (/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/verify/verify.mjs:72:8)\n    at namesSwitch (/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/verify/verify.mjs:518:23)\n    at /Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/verify/verify.mjs:805:46",
+  "deck.teardown": {
+    "deckId": "untitled-20260930-ptw6",
+    "trashed": "deck.trash ok at 2",
+    "removed": "deck.remove ok at 2",
+    "after": "still answers"
+  }
+}

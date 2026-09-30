@@ -1,0 +1,279 @@
+{
+  "base": "https://turboslide-fky0ykdsm-kl01s-projects.vercel.app",
+  "tag": "preview-fixed",
+  "width": 1440,
+  "accounts": false,
+  "signinFirst": false,
+  "startedAt": "2026-09-30T09:16:21.980Z",
+  "uptime": "2:16  up 5 days, 16:13, 2 users, load averages: 33.95 45.50 35.34",
+  "deck.id": "untitled-20260930-d154",
+  "account.A.boot": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_707218a6-4897-49e7-8e28-6125c2a4a20a",
+      "trust": "label",
+      "label": "Tin 962",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": null,
+    "access": {
+      "role": null,
+      "via": null
+    }
+  },
+  "namePrompt.firstEdit": true,
+  "shot.namePrompt.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed-1440-name-prompt-A-light.png",
+  "shot.namePrompt.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed-1440-name-prompt-A-dark.png",
+  "ownChip.A.afterContinue": {
+    "ms": 1230,
+    "chip": {
+      "holder": "title.account",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 50,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  },
+  "account.A.afterName": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_707218a6-4897-49e7-8e28-6125c2a4a20a",
+      "trust": "guest",
+      "label": "Tin 962",
+      "name": "Ada Lovelace",
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": {
+      "principalId": "anon_707218a6-4897-49e7-8e28-6125c2a4a20a",
+      "trust": "label",
+      "label": "Tin 962",
+      "name": null,
+      "markVariant": "initials"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "ownChip.A.afterName": [
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 50,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "share.get.A": {
+    "revision": 0,
+    "owner": "anon_707218a6-4897-49e7-8e28-6125c2a4a20a"
+  },
+  "link": "minted",
+  "account.B.boot": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_2c4328d1-e66e-45f5-bbe2-c0ad648407f1",
+      "trust": "label",
+      "label": "Zinc 158",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": null,
+    "access": {
+      "role": "editor",
+      "via": "link"
+    }
+  },
+  "avatarReload.chip.before": {
+    "variant": "initials",
+    "cells": 50,
+    "ariaLabel": "Ada Lovelace, guest"
+  },
+  "avatarReload.chip.afterApply": {
+    "ms": 431,
+    "chip": {
+      "variant": "glyph",
+      "cells": 39,
+      "ariaLabel": "Ada Lovelace, guest"
+    },
+    "dialogOpen": false
+  },
+  "avatarReload.chip.atBoot": {
+    "msAfterReload": 471,
+    "chip": {
+      "variant": "glyph",
+      "cells": 39,
+      "ariaLabel": "Ada Lovelace, guest"
+    }
+  },
+  "avatarReload.chip.afterReload": {
+    "msAfterReload": 473,
+    "chip": {
+      "variant": "glyph",
+      "cells": 39,
+      "ariaLabel": "Ada Lovelace, guest"
+    },
+    "sameCellsAsApplied": true
+  },
+  "avatarReload.instance": null,
+  "avatarReload.builder.tabs": [
+    {
+      "id": "dialog.avatarBuilder.tab.initials",
+      "selected": "false"
+    },
+    {
+      "id": "dialog.avatarBuilder.tab.glyph",
+      "selected": "true"
+    },
+    {
+      "id": "dialog.avatarBuilder.tab.dither",
+      "selected": "false"
+    },
+    {
+      "id": "dialog.avatarBuilder.tab.picture",
+      "selected": "false"
+    }
+  ],
+  "shot.avatarReload.builder.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed-1440-avatar-reload-builder-A-light.png",
+  "shot.avatarReload.builder.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed-1440-avatar-reload-builder-A-dark.png",
+  "avatarReload.closeBuilder": {
+    "scrim": true,
+    "dialogs": [
+      "dialog.avatarBuilder",
+      "dialog.avatarBuilder.close",
+      "dialog.avatarBuilder.tab.initials",
+      "dialog.avatarBuilder.tab.glyph",
+      "dialog.avatarBuilder.tab.dither",
+      "dialog.avatarBuilder.tab.picture",
+      "dialog.avatarBuilder.strip",
+      "dialog.avatarBuilder.panel.glyph",
+      "dialog.avatarBuilder.another",
+      "dialog.avatarBuilder.error",
+      "dialog.avatarBuilder.cancel",
+      "dialog.avatarBuilder.apply"
+    ]
+  },
+  "avatarReload.closeBuilder.closed": {
+    "after": 1
+  },
+  "avatarReload.roster.ownRow": {
+    "chip": {
+      "variant": "glyph",
+      "cells": 39,
+      "ariaLabel": "Ada Lovelace, guest"
+    },
+    "row": null,
+    "equal": null
+  },
+  "shot.avatarReload.slot.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed-1440-avatar-reload-slot-A-light.png",
+  "shot.avatarReload.slot.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed-1440-avatar-reload-slot-A-dark.png",
+  "departed.setName.B": {
+    "ok": true,
+    "name": "Noor Verifier",
+    "trust": "guest"
+  },
+  "departed.comment.B": {
+    "threadId": "01m3rsp07n6h2gk42efy620r55",
+    "count": 1,
+    "ownChip": {
+      "ariaLabel": "Zinc 158",
+      "cells": 25,
+      "initials": "Z"
+    }
+  },
+  "departed.B.closed": "2026-09-30T09:17:41.685Z",
+  "departed.panel.A.first": {
+    "msAfterReload": 563,
+    "boot": 541,
+    "rows": []
+  },
+  "departed.panel.A.named": {
+    "msAfterReload": 10657,
+    "found": false,
+    "rows": [
+      {
+        "control": "panel.comments.open.01m3rsp07n6h2gk42efy620r55",
+        "text": "ZZinc 158slide 1A note from the departed guestnow",
+        "chip": "Zinc 158",
+        "cells": 25
+      }
+    ]
+  },
+  "shot.departed.panel.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed-1440-departed-panel-A-light.png",
+  "departed.card.A.light": {
+    "name": "Zinc 158",
+    "trust": null,
+    "badge": null,
+    "chip": "Zinc 158",
+    "cells": 25
+  },
+  "shot.departed.card.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed-1440-departed-card-A-light.png",
+  "shot.departed.panel.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed-1440-departed-panel-A-dark.png",
+  "departed.card.A.dark": {
+    "name": "Zinc 158",
+    "trust": null,
+    "badge": null,
+    "chip": "Zinc 158",
+    "cells": 25
+  },
+  "shot.departed.card.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-preview-fixed-1440-departed-card-A-dark.png",
+  "uptime.end": "2:17  up 5 days, 16:14, 2 users, load averages: 38.51 43.60 35.67",
+  "endedAt": "2026-09-30T09:17:56.809Z",
+  "deck.teardown": {
+    "deckId": "untitled-20260930-d154",
+    "trashed": "deck.trash ok at 6",
+    "removed": "deck.remove ok at 6",
+    "after": "still answers"
+  }
+}

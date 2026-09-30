@@ -1,0 +1,69 @@
+{
+  "base": "https://turboslide-dskh0tez5-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T08:29:37.888Z",
+  "ms": 40132,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 39145,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/b1-fix-gate/preview-4/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "people.comment-departed-guest"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 1,
+  "passed": 1,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e5dd8584",
+  "origin": "https://turboslide-dskh0tez5-kl01s-projects.vercel.app",
+  "date": "2026-09-30",
+  "results": {
+    "people.comment-departed-guest": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "people.comment-departed-guest",
+      "feature": "comments",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

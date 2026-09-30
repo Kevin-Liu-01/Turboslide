@@ -1,0 +1,220 @@
+{
+  "base": "https://turboslide-emiobcraf-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T06:59:51.419Z",
+  "ms": 156046,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 155554,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/verifier/gate-p7-people-rerun2/core-walk.json",
+    "deckId": "untitled-20260930-pg3d",
+    "steps": 22
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "people"
+    ],
+    "costRows": null
+  },
+  "rows": 5,
+  "passed": 3,
+  "failed": 1,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e5dd8584",
+  "origin": "https://turboslide-emiobcraf-kl01s-projects.vercel.app",
+  "date": "2026-09-30",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "failed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "people.chip-plate-size": "not driven",
+    "people.mark-renderers-agree": "passed",
+    "people.own-chip-follows-name": "passed",
+    "people.own-chip-follows-avatar": "failed",
+    "people.avatar-anonymous-refused": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "people.chip-plate-size",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.own-chip-follows-avatar",
+        "feature": "share",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "people.own-chip-follows-avatar",
+      "parks": [
+        "title.account.changeAvatar"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "people.chip-plate-size",
+      "feature": "share",
+      "result": "not driven"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "people.chip-plate-size",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no live chip could be read with the switch off (the roster’s own row is title.presence.me); 5 chips: title row title.account 24px initials self: field 20x20 at 2/2/2/2, border 1px rgb(7, 7, 7); account head account.sentence 24px initials self: field 20x20 at 2/2/2/2, border 1px rgb(7, 7, 7); builder strip 24 dialog.avatarBuilder.strip 24px ? self: field 20x20 at 2/2/2/2, border 1px rgb(7, 7, 7); version row 16 versionHistory.window.w10 16px initials: field 12x12 at 2/2/2/2, border 1px rgba(7, 7, 7, 0.62); comments panel row panel.comments.open.01m3rhx07hbjx9wzptk1twx15f 24px initials: field 20x20 at 2/2/2/2, border 1px rgba(7, 7, 7, 0.62); --pt-edge light rgba(7, 7, 7, 0.62), dark rgba(242, 242, 240, 0.55) (theme light -> dark -> light); dark borders 16px rgba(242, 242, 240, 0.55), 16px rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "id": "people.mark-renderers-agree",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.own-chip-follows-name",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.own-chip-follows-avatar",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Change avatar > Glyph > Apply; read the own chip’s data-variant; reload; read again within 10 s; reopen the builder; read the roster’s own row against the own chip: via title.account; variant glyph -> glyph 703 ms after Apply, initials 10048 ms after the reload; Glyph tab aria-selected false; roster own row (the opener’s DOM click) cells equal the own chip true (22 and 22 rects)"
+    },
+    {
+      "id": "people.avatar-anonymous-refused",
+      "feature": "share",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

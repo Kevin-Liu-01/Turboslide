@@ -1605,6 +1605,9 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
     try {
       await C.goto(viewerLink);
       await C.waitForURL(new RegExp(`/(edit|deck)/${deck}`), { timeout: 90_000 });
+      /* a viewer link lands on the reader page (/deck/<id>), which carries no Share control; the
+         dialog the row reads is the editor chrome's, which a viewer opens read only */
+      if (!/\/edit\//.test(C.url())) await C.goto(`/edit/${deck}`);
       await waitEditor(C);
       expect(
         await ctl(C, 'share.open').count(),
